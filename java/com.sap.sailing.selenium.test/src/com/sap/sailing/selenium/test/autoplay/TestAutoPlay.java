@@ -51,8 +51,8 @@ public class TestAutoPlay extends AbstractSeleniumTest {
     @Override
     @Before
     public void setUp() {
-        super.setUp();
         clearState(getContextRoot());
+        super.setUp();
     }
 
     private void initTrackingForBmwCupRace(AdminConsolePage adminConsole) {
@@ -63,7 +63,7 @@ public class TestAutoPlay extends AbstractSeleniumTest {
                 String.format(BMW_RACE, 1));
 
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
+        tracTracEvents.addConnectionAndListTrackableRaces(BMW_CUP_JSON_URL);
         RegattaDescriptor bmwCupDescriptor = new RegattaDescriptor(BMW_CUP_EVENT, BMW_CUP_BOAT_CLASS);
         tracTracEvents.setReggataForTracking(bmwCupDescriptor);
         tracTracEvents.setTrackSettings(true, false, false);

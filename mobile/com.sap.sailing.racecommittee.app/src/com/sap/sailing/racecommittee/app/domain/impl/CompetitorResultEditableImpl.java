@@ -8,22 +8,42 @@ import com.sap.sse.common.TimePoint;
 
 public class CompetitorResultEditableImpl implements CompetitorResult {
     private static final long serialVersionUID = 3928498127285186791L;
-    
+
     private Serializable mCompetitorId;
-    private String mCompetitorDisplayName;
     private int mOneBasedRank;
     private MaxPointsReason mMaxPointsReason;
     private Double mScore;
     private TimePoint mFinishingTime;
     private String mComment;
     private MergeState mMergeState;
+    private String mCompetitorName;
+    private String mCompetitorShortName;
+    private String mBoatName;
+    private String mBoatSailId;
 
     private boolean mDirty;
     private boolean mChecked;
 
     public CompetitorResultEditableImpl(CompetitorResult result) {
         mCompetitorId = result.getCompetitorId();
-        mCompetitorDisplayName = result.getCompetitorDisplayName();
+        mCompetitorName = result.getName();
+        mCompetitorShortName = result.getShortName();
+        mBoatName = result.getBoatName();
+        mBoatSailId = result.getBoatSailId();
+        mOneBasedRank = result.getOneBasedRank();
+        mMaxPointsReason = result.getMaxPointsReason();
+        mScore = result.getScore();
+        mFinishingTime = result.getFinishingTime();
+        mComment = result.getComment();
+        mMergeState = result.getMergeState();
+    }
+
+    public void setValue(CompetitorResult result) {
+        mCompetitorId = result.getCompetitorId();
+        mCompetitorName = result.getName();
+        mCompetitorShortName = result.getShortName();
+        mBoatName = result.getBoatName();
+        mBoatSailId = result.getBoatSailId();
         mOneBasedRank = result.getOneBasedRank();
         mMaxPointsReason = result.getMaxPointsReason();
         mScore = result.getScore();
@@ -42,12 +62,39 @@ public class CompetitorResultEditableImpl implements CompetitorResult {
     }
 
     @Override
-    public String getCompetitorDisplayName() {
-        return mCompetitorDisplayName;
+    public String getName() {
+        return mCompetitorName;
     }
 
-    public void setCompetitorDisplayName(String competitorDisplayName) {
-        mCompetitorDisplayName = competitorDisplayName;
+    public void setName(String name) {
+        mCompetitorName = name;
+    }
+
+    @Override
+    public String getShortName() {
+        return mCompetitorShortName;
+    }
+
+    public void setShortName(String shortName) {
+        mCompetitorShortName = shortName;
+    }
+
+    @Override
+    public String getBoatName() {
+        return mBoatName;
+    }
+
+    public void setBoatName(String name) {
+        mBoatName = name;
+    }
+
+    @Override
+    public String getBoatSailId() {
+        return mBoatSailId;
+    }
+
+    public void setBoatSailId(String id) {
+        mBoatSailId = id;
     }
 
     @Override
@@ -110,24 +157,13 @@ public class CompetitorResultEditableImpl implements CompetitorResult {
     public void setChecked(boolean checked) {
         mChecked = checked;
     }
-    
+
     public MergeState getMergeState() {
         return mMergeState == null ? MergeState.OK : mMergeState; // default for having de-serialized an old version
     }
 
     public void setMergeState(MergeState mergeState) {
         this.mMergeState = mergeState;
-    }
-
-    public void setValue(CompetitorResult result) {
-        mCompetitorId = result.getCompetitorId();
-        mCompetitorDisplayName = result.getCompetitorDisplayName();
-        mOneBasedRank = result.getOneBasedRank();
-        mMaxPointsReason = result.getMaxPointsReason();
-        mScore = result.getScore();
-        mFinishingTime = result.getFinishingTime();
-        mComment = result.getComment();
-        mMergeState = result.getMergeState();
     }
 
     @Override
@@ -143,7 +179,11 @@ public class CompetitorResultEditableImpl implements CompetitorResult {
             return false;
         if (mCompetitorId != null ? !mCompetitorId.equals(that.mCompetitorId) : that.mCompetitorId != null)
             return false;
-        if (mCompetitorDisplayName != null ? !mCompetitorDisplayName.equals(that.mCompetitorDisplayName) : that.mCompetitorDisplayName != null)
+        if (mCompetitorName != null ? !mCompetitorName.equals(that.mCompetitorName) : that.mCompetitorName != null)
+            return false;
+        if (mBoatName != null ? !mBoatName.equals(that.mBoatName) : that.mBoatName != null)
+            return false;
+        if (mBoatSailId != null ? !mBoatSailId.equals(that.mBoatSailId) : that.mBoatSailId != null)
             return false;
         if (mMaxPointsReason != that.mMaxPointsReason)
             return false;
@@ -158,7 +198,9 @@ public class CompetitorResultEditableImpl implements CompetitorResult {
     @Override
     public int hashCode() {
         int result = mCompetitorId != null ? mCompetitorId.hashCode() : 0;
-        result = 31 * result + (mCompetitorDisplayName != null ? mCompetitorDisplayName.hashCode() : 0);
+        result = 31 * result + (mCompetitorName != null ? mCompetitorName.hashCode() : 0);
+        result = 31 * result + (mBoatName != null ? mBoatName.hashCode() : 0);
+        result = 31 * result + (mBoatSailId != null ? mBoatSailId.hashCode() : 0);
         result = 31 * result + mOneBasedRank;
         result = 31 * result + (mMaxPointsReason != null ? mMaxPointsReason.hashCode() : 0);
         result = 31 * result + (mScore != null ? mScore.hashCode() : 0);

@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.sap.sailing.android.shared.ui.fragments.BaseFragment;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.EulaHelper;
 import com.sap.sailing.android.shared.util.LicenseHelper;
@@ -21,7 +22,7 @@ import com.sap.sailing.android.tracking.app.R;
 import de.psdev.licensesdialog.LicensesDialog;
 import de.psdev.licensesdialog.model.Notices;
 
-public class AboutFragment extends com.sap.sailing.android.ui.fragments.BaseFragment {
+public class AboutFragment extends BaseFragment {
 
     public static AboutFragment newInstance() {
         AboutFragment fragment = new AboutFragment();
@@ -32,7 +33,8 @@ public class AboutFragment extends com.sap.sailing.android.ui.fragments.BaseFrag
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_about, container, false);
         setLink((TextView) view.findViewById(R.id.about_partnership));
         view.findViewById(R.id.license_button).setOnClickListener(new View.OnClickListener() {
@@ -62,7 +64,6 @@ public class AboutFragment extends com.sap.sailing.android.ui.fragments.BaseFrag
         notices.addNotice(licenseHelper.getDialogNotice(getActivity()));
         LicensesDialog.Builder builder = new LicensesDialog.Builder(getActivity());
         builder.setTitle(getString(R.string.license_information));
-        builder.setThemeResourceId(R.style.AppTheme_AlertDialog);
         builder.setNotices(notices);
         builder.build().show();
     }
@@ -80,7 +81,8 @@ public class AboutFragment extends com.sap.sailing.android.ui.fragments.BaseFrag
             }
         };
 
-        spannableString.setSpan(clickableSpan, message.indexOf(url), message.indexOf(url) + url.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannableString.setSpan(clickableSpan, message.indexOf(url), message.indexOf(url) + url.length(),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         textView.setText(spannableString);
         textView.setMovementMethod(LinkMovementMethod.getInstance());
     }

@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.shiro.authz.UnauthorizedException;
+
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.TextMetrics;
@@ -62,13 +64,18 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
     private int raceLeg = 0;
     private long requestedSimulationVersion = 0;
     private Canvas simulationLegend;
+    private final Runnable disableRaceSimulator;
     
-    public RaceSimulationOverlay(MapWidget map, int zIndex, RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService, StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor, CoordinateSystem coordinateSystem) {
+    public RaceSimulationOverlay(MapWidget map, int zIndex, RegattaAndRaceIdentifier raceIdentifier,
+            SailingServiceAsync sailingService, StringMessages stringMessages,
+            AsyncActionsExecutor asyncActionsExecutor, CoordinateSystem coordinateSystem,
+            Runnable disableRaceSimulator) {
         super(map, zIndex, coordinateSystem);
         this.raceIdentifier = raceIdentifier;
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.asyncActionsExecutor = asyncActionsExecutor;
+        this.disableRaceSimulator = disableRaceSimulator;
         this.colors = new ColorPaletteGenerator();
         this.pathNameFormatter = new PathNameFormatter(stringMessages);
     }
@@ -336,9 +343,11 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                 new MarkedAsyncCallback<>(new AsyncCallback<SimulatorResultsDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        // TODO: add corresponding message to string-messages
-                        // Notification.error(stringMessages.errorFetchingWindStreamletData(caught.getMessage()));
-                        Notification.notify(GET_SIMULATION_CATEGORY, NotificationType.WARNING);
+                        Notification.notify(stringMessages.errorFetchingSimulationData(caught.getMessage()),
+                                NotificationType.ERROR);
+                        if (caught instanceof UnauthorizedException) {
+                            disableRaceSimulator.run();
+                        }
                     }
 
                     @Override

@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.racelogtracking.test.impl;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -36,6 +36,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.fixtracker.FixLoaderAndTracker;
 import com.sap.sailing.domain.racelogtracking.test.AbstractGPSFixStoreTest;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
@@ -66,7 +67,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     }
     
     @Rule
-    public Timeout TrackedRaceLoadsFixesTestTimeout = new Timeout(3 * 60 * 1000);
+    public Timeout TrackedRaceLoadsFixesTestTimeout = Timeout.millis(3 * 60 * 1000);
 
     @Test
     public void doesRaceLoadOnlyBetweenStartAndEndOfTracking() throws TransformationException,
@@ -189,7 +190,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
                 }
 
                 @Override
-                public void gpsFixReceived(GPSFixMoving fix, Competitor item, boolean firstFixInTrack) {
+                public void gpsFixReceived(GPSFixMoving fix, Competitor item, boolean firstFixInTrack, AddResult addedOrReplaced) {
                     fixInsertionCount[0]++;
                 }
 

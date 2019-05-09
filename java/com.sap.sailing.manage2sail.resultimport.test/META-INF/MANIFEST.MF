@@ -8,7 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.sap.sailing.domain.common,
  com.sap.sailing.domain.leaderboard,
  com.sap.sailing.domain.persistence,
- com.sap.sailing.server,
+ com.sap.sailing.server.interfaces,
  com.sap.sailing.server.impl,
  com.sap.sailing.xrr.schema,
  org.osgi.framework;version="1.5.0"

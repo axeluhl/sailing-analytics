@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardBase;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -22,7 +23,9 @@ import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCache;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
@@ -34,6 +37,9 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 /**
  * A leaderboard is used to display the results of one or more {@link TrackedRace races}. It manages the competitors'
@@ -583,14 +589,6 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher();
 
     /**
-     * Looks through all {@link #getRaceColumns() race columns} and their {@link RaceColumn#getFleets() fleets} and checks
-     * if {@code trackedRace} is {@link RaceColumn#getTrackedRace(Fleet) linked} to that combination. If such a slot is found
-     * that "slot" is returned by a pair specifying the non-{@code null} {@link RaceColumn} and {@code Fleet} pair. Otherwise,
-     * {@code null} is returned.
-     */
-    Pair<RaceColumn, Fleet> getRaceColumnAndFleet(TrackedRace trackedRace);
-
-    /**
      * Gets the ("dominant") boat class for this leaderboard. For a {@link RegattaLeaderboard} this is the {@link Regatta}'s boat class.
      * For a {@link FlexibleLeaderboard} the implementation is more complex because no fixed boat class is set for the leaderboard. There,
      * the boat class will be determined based on the most frequently occurring boat class when iterating across the competitors.
@@ -619,6 +617,41 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
             result = points >= (competitorCount - 0.05);
         } else {
             result = points <= 1.05;
+        }
+        return result;
+    }
+
+    @Override
+    default QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(getName());
+    }
+
+    static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String name) {
+        return new TypeRelativeObjectIdentifier(name);
+    }
+
+    static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(RegattaName regattaName) {
+        return new TypeRelativeObjectIdentifier(regattaName.getRegattaName());
+    }
+
+    @Override
+    default HasPermissions getType() {
+        return SecuredDomainType.LEADERBOARD;
+    }
+    
+    default boolean isPartOfEvent(EventBase event) {
+        boolean result = false;
+        if (getDefaultCourseArea() != null) {
+            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                if(courseArea.equals(getDefaultCourseArea())) {
+                    result = true;
+                    break;
+                }
+            }
         }
         return result;
     }

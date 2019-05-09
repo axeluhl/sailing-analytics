@@ -30,6 +30,7 @@ import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdenti
 import com.sap.sailing.expeditionconnector.persistence.ExpeditionSensorDeviceIdentifierImpl;
 import com.sap.sailing.expeditionconnector.persistence.MongoObjectFactory;
 import com.sap.sailing.expeditionconnector.persistence.PersistenceFactory;
+import com.sap.sse.security.SecurityService;
 
 public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegistry {
     private static Logger logger = Logger.getLogger(ExpeditionTrackerFactory.class.getName());
@@ -140,7 +141,7 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
     
     @Override
     public WindTracker createWindTracker(DynamicTrackedRegatta trackedRegatta, RaceDefinition race,
-            boolean correctByDeclination) throws SocketException {
+            boolean correctByDeclination, SecurityService optionalSecurityService) throws SocketException {
         WindTracker result = getExistingWindTracker(race);
         if (result == null) {
             DynamicTrackedRace trackedRace = trackedRegatta.getTrackedRace(race);
@@ -212,7 +213,7 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
                 devicesPerBoatId.containsKey(deviceConfiguration.getExpeditionBoatId()) &&
                 !devicesPerBoatId.get(deviceConfiguration.getExpeditionBoatId()).equals(deviceConfiguration)) {
             throw new IllegalStateException("Trying to create an ambiguous Expedition Boat ID mapping: established is "+
-                    devicesPerBoatId.get(deviceConfiguration.getExpeditionBoatId())+
+                            devicesPerBoatId.get(deviceConfiguration.getExpeditionBoatId()) +
                     " and boat ID #"+deviceConfiguration.getExpeditionBoatId()+" therefore cannot be mapped to "+deviceConfiguration+
                     " at the same time.");
         }

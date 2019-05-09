@@ -8,15 +8,16 @@ import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
@@ -50,9 +51,9 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
     public static Competitor createCompetitor(String competitorName, Serializable id) {
         return new CompetitorImpl(id, competitorName, "KYC", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                         new PersonImpl(competitorName, new NationalityImpl("GER"),
-                        /* dateOfBirth */ null, "This is famous "+competitorName)),
+                        /* dateOfBirth */ new Date(), "This is famous "+competitorName)),
                         new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                        /* dateOfBirth */null, "This is Rigo, the coach")),
+                        /* dateOfBirth */new Date(), "This is Rigo, the coach")),
                         /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     }
 
@@ -73,13 +74,11 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
     }
     
     private void dropCompetitorAndBoatsCollection() {
-        DB db = getMongoService().getDB();
-        DBCollection competitorCollection = db.getCollection(CollectionNames.COMPETITORS.name());
-        competitorCollection.setWriteConcern(WriteConcern.SAFE); // ensure that the drop() has happened
-        competitorCollection.drop();
-        DBCollection boatsCollection = db.getCollection(CollectionNames.BOATS.name());
-        boatsCollection.setWriteConcern(WriteConcern.SAFE); // ensure that the drop() has happened
-        boatsCollection.drop();
+        MongoDatabase db = getMongoService().getDB();
+        MongoCollection<org.bson.Document> competitorCollection = db.getCollection(CollectionNames.COMPETITORS.name());
+        competitorCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).drop();
+        MongoCollection<org.bson.Document> boatsCollection = db.getCollection(CollectionNames.BOATS.name());
+        boatsCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).drop(); // ensure that the drop() has happened
     }
     
     @Test
@@ -106,6 +105,7 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
         assertEquals(flagImageURI1, loadedCompetitor.getFlagImage());
         assertEquals(competitorName1, loadedCompetitor.getName());
         assertEquals(competitorShortName1, loadedCompetitor.getShortName());
+        assertEquals(c.getTeam().getCoach().getDateOfBirth(), loadedCompetitor.getTeam().getCoach().getDateOfBirth());
         
         loadedCompetitor.setName(competitorName2);
         loadedCompetitor.setShortName(competitorShortName2);

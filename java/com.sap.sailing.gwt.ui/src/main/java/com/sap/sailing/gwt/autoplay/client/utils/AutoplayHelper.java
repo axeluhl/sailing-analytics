@@ -115,7 +115,7 @@ public class AutoplayHelper {
     public static StrippedLeaderboardDTO getSelectedLeaderboard(EventDTO event, String leaderBoardName) {
         for (LeaderboardGroupDTO leaderboardGroup : event.getLeaderboardGroups()) {
             for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {
-                if (leaderboard.name.equals(leaderBoardName)) {
+                if (leaderboard.getName().equals(leaderBoardName)) {
                     return leaderboard;
                 }
             }

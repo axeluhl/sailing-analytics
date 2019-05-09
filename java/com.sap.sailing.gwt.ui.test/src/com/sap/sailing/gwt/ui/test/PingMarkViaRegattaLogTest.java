@@ -12,6 +12,8 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
+import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -20,7 +22,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 
 public class PingMarkViaRegattaLogTest {
     private SailingServiceImplMock sailingService;
@@ -35,12 +37,12 @@ public class PingMarkViaRegattaLogTest {
     }
     
     @Test
-    public void testPinging() throws DoesNotHaveRegattaLogException {
-        service.getMongoObjectFactory().getDatabase().dropDatabase();
+    public void testPinging() throws DoesNotHaveRegattaLogException, NotFoundException {
+        service.getMongoObjectFactory().getDatabase().drop();
         Series series = new SeriesImpl("series", false, /* isFleetsCanRunInParallel */ true, Collections.singletonList(fleet),
                 Collections.singletonList(columnName), service);
         Regatta regatta = service.createRegatta(RegattaImpl.getDefaultName("regatta", "Laser"), "Laser", 
-                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, 
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, /* registrationLinkSecret */ null, /*startDate*/ null, /*endDate*/ null, 
                 UUID.randomUUID(), Collections.<Series>singletonList(series),
                 false, new HighPoint(), UUID.randomUUID(), /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, RankingMetricsFactory.getRankingMetricConstructor(RankingMetrics.ONE_DESIGN));

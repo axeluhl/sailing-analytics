@@ -23,7 +23,7 @@ if [[ ! -d "$JAVA_HOME" ]]; then
 fi
 # disable AWT requiring X11 and the correct DISPLAY variable setting; failing to do so
 # can result in trouble generating QR codes in the back-end
-ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Djava.awt.headless=true -Xms$MEMORY"
+ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Djava.awt.headless=true -Xms$MEMORY -Dosgi.debug=$PWD/configuration/debug.properties"
 PLATFORM=`uname`
 SED_ARGS="-i"
 if [[ $PLATFORM == "Darwin" ]]; then
@@ -69,7 +69,8 @@ sed $SED_ARGS "s/127.0.0.1:[0-9][0-9][0-9][0-9]\//127.0.0.1:$SERVER_PORT\//g" ./
 
 # Inject information for system
 HEAD_DATE=$(date "+%Y%m%d%H%M")
-sed $SED_ARGS "s/System:.*$/ System: $MONGO_URI:$MONGODB_HOST:$MONGODB_PORT\/$MONGODB_NAME-$EXPEDITION_PORT-$REPLICATION_HOST:$REPLICATION_PORT\/$REPLICATION_CHANNEL Started: $HEAD_DATE/g" ./configuration/jetty/version.txt
+MONGODB_URI_FOR_SED=$( echo "$MONGODB_URI" | sed -e 's/^mongodb:\/\///' -e 's/^[^:]*:[^@]*@//' -e 's/\//\\\//g' -e 's/&/\\&/g' )
+sed $SED_ARGS "s/System:.*$/ System: $MONGODB_URI_FOR_SED:$MONGODB_HOST:$MONGODB_PORT\/$MONGODB_NAME-$EXPEDITION_PORT-$REPLICATION_HOST:$REPLICATION_PORT\/$REPLICATION_CHANNEL Started: $HEAD_DATE/g" ./configuration/jetty/version.txt
 
 # Apply app parameters from env.sh
 if [ "$MONGODB_URI" = "" ]; then
@@ -100,7 +101,7 @@ if [ -n "$MAIL_SMTP_PASSWORD" ]; then
 fi
 
 # Apply parameters for automatic replication start
-REPLICATION_PARAMETERS="-Dreplicate.on.start=$REPLICATE_ON_START -Dreplicate.master.servlet.host=$REPLICATE_MASTER_SERVLET_HOST -Dreplicate.master.servlet.port=$REPLICATE_MASTER_SERVLET_PORT -Dreplicate.master.queue.host=$REPLICATE_MASTER_QUEUE_HOST -Dreplicate.master.queue.port=$REPLICATE_MASTER_QUEUE_PORT -Dreplicate.master.exchange.name=$REPLICATE_MASTER_EXCHANGE_NAME"
+REPLICATION_PARAMETERS="-Dreplicate.on.start=$REPLICATE_ON_START -Dreplicate.master.servlet.host=$REPLICATE_MASTER_SERVLET_HOST -Dreplicate.master.servlet.port=$REPLICATE_MASTER_SERVLET_PORT -Dreplicate.master.queue.host=$REPLICATE_MASTER_QUEUE_HOST -Dreplicate.master.queue.port=$REPLICATE_MASTER_QUEUE_PORT -Dreplicate.master.exchange.name=$REPLICATE_MASTER_EXCHANGE_NAME -Dreplicate.master.username=$REPLICATE_MASTER_USERNAME -Dreplicate.master.password=$REPLICATE_MASTER_PASSWORD -Dreplicate.master.bearer_token=$REPLICATE_MASTER_BEARER_TOKEN"
 
 if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
     nohup $JAVA_BINARY -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir="$PWD/tmp" -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Dosgi.shell.telnet.port=$TELNET_PORT -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.4.0.v20161219-1356.jar -configuration ./ -clean 2>/dev/null >/dev/null &
@@ -142,7 +143,7 @@ if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
         if [[ $SERVER_PORT == "" ]] || [[ $SERVER_ACTIVE == "" ]]; then
             echo "Something went wrong with startup. Please check the logs..."
             if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
-                echo "Startup of java server failed - check the logs ($SERVER_ACTIVE)\n\n$NETSTAT\n$PROCESS_INFO" | mail -r simon.marcel.pamies@sap.com -s "Server $INSTANCE_ID startup failed!" $SERVER_STARTUP_NOTIFY
+                echo "Startup of java server $SERVER_NAME on $INSTANCE_ID failed - check the logs ($SERVER_ACTIVE)\n\n$NETSTAT\n$PROCESS_INFO" | mail -s "Server $INSTANCE_ID startup failed!" $SERVER_STARTUP_NOTIFY
             fi
             exit
         fi
@@ -152,9 +153,9 @@ if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
 
     if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
         if [[ ! -z "$ON_AMAZON" ]]; then
-            echo "Go to http://$INSTANCE_DNS:$SERVER_PORT to reach your instance!" | mail -s "Server $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
+            echo "Go to http://$INSTANCE_DNS:$SERVER_PORT to reach your instance!" | mail -s "Server $SERVER_NAME on $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
         else
-            echo "OK" | mail -s "Server $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
+            echo "OK" | mail -s "Server $SERVER_NAME on $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
         fi
     fi
 elif [[ $PARAM == "debug" ]]; then

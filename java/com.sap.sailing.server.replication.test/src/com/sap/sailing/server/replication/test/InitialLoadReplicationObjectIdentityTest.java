@@ -40,6 +40,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
@@ -65,8 +66,8 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
@@ -78,7 +79,7 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.impl.ReplicationReceiver;
+import com.sap.sse.replication.impl.ReplicationReceiverImpl;
 import com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp.ReplicationServiceTestImpl;
 
 public class InitialLoadReplicationObjectIdentityTest extends AbstractServerReplicationTest {
@@ -125,9 +126,11 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         final String baseEventName = "Kiel Week 2012";
         final String boatClassName = "49er";
         final Iterable<Series> series = Collections.emptyList();
-        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, 
-                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), series,
-                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true,
+        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName),
+                boatClassName, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, UUID.randomUUID(), series,
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
+                /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric.CONSTRUCTOR);
         assertNotNull(master.getRegatta(masterRegatta.getRegattaIdentifier()));
         assertTrue(master.getAllRegattas().iterator().hasNext());
@@ -193,7 +196,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         /* fire up replication */
         performReplicationSetup();
         ReplicationMasterDescriptor the_master = replicationDescriptorPair.getB(); /* master descriptor */
-        ReplicationReceiver replicator = replicationDescriptorPair.getA()
+        ReplicationReceiverImpl replicator = replicationDescriptorPair.getA()
                 .startToReplicateFromButDontYetFetchInitialLoad(the_master, /* startReplicatorSuspended */true);
         replicationDescriptorPair.getA().initialLoad();
         replicator.setSuspended(false);

@@ -12,6 +12,7 @@ import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParameters;
@@ -133,22 +134,26 @@ public class SwissTimingReplayConnectivityParameters extends AbstractRaceTrackin
 
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, final WindStore windStore,
-            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds) throws Exception {
+            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver,
+            long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler) throws Exception {
         SwissTimingReplayToDomainAdapter listener = new SwissTimingReplayToDomainAdapter(/* regatta */ null, raceName,
                 raceID, domainFactory.getBaseDomainFactory().getOrCreateBoatClass(boatClassName), domainFactory,
                 trackedRegattaRegistry, useInternalMarkPassingAlgorithm, raceLogResolver, raceLogStore,
-                regattaLogStore, l->new SwissTimingReplayRaceTracker(windStore, l, this));
+                regattaLogStore, l->new SwissTimingReplayRaceTracker(windStore, l, this),
+                raceTrackingHandler);
         replayService.loadRaceData(link, listener);
         return listener.getTracker();
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
-            WindStore windStore, RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds) throws Exception {
+            WindStore windStore, RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver,
+            long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler) throws Exception {
         SwissTimingReplayToDomainAdapter listener = new SwissTimingReplayToDomainAdapter(regatta, raceName,
                 raceID, domainFactory.getBaseDomainFactory().getOrCreateBoatClass(boatClassName),
                 domainFactory, trackedRegattaRegistry, useInternalMarkPassingAlgorithm, raceLogResolver,
-                raceLogStore, regattaLogStore, l->new SwissTimingReplayRaceTracker(windStore, l, this));
+                raceLogStore, regattaLogStore, l->new SwissTimingReplayRaceTracker(windStore, l, this),
+                raceTrackingHandler);
         replayService.loadRaceData(link, listener);
         return listener.getTracker();
     }
@@ -189,5 +194,10 @@ public class SwissTimingReplayConnectivityParameters extends AbstractRaceTrackin
 
     public String getLink() {
         return link;
+    }
+    
+    @Override
+    public String toString() {
+        return getClass().getSimpleName()+" for "+raceName+"/"+raceID+", link: "+link+", boatClassName: "+boatClassName;
     }
 }

@@ -6,6 +6,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 
 public interface MediaService extends RemoteService {
 
@@ -13,7 +14,7 @@ public interface MediaService extends RemoteService {
 
     Iterable<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
 
-    Iterable<MediaTrack> getAllMediaTracks();
+    Iterable<MediaTrackWithSecurityDTO> getAllMediaTracks();
 
     String addMediaTrack(MediaTrack mediaTrack);
 

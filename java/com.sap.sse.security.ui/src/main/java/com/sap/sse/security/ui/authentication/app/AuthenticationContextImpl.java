@@ -2,8 +2,13 @@ package com.sap.sse.security.ui.authentication.app;
 
 import java.util.ArrayList;
 
-import com.sap.sse.security.ui.shared.AccountDTO;
-import com.sap.sse.security.ui.shared.UserDTO;
+import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.dto.AccountDTO;
+import com.sap.sse.security.shared.dto.RoleWithSecurityDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.shared.dto.WildcardPermissionWithSecurityDTO;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Default implementation of {@link AuthenticationContext}.
@@ -12,14 +17,10 @@ public class AuthenticationContextImpl implements AuthenticationContext {
 
     private final UserDTO currentUser;
     private final static UserDTO ANONYMOUS = new UserDTO("Anonymous", "", "", "", null, false, new ArrayList<AccountDTO>(),
-            new ArrayList<String>(), new ArrayList<String>());
-
-    /**
-     * Creating an {@link AuthenticationContextImpl} containing an anonymous {@link UserDTO} object.
-     */
-    public AuthenticationContextImpl() {
-        this.currentUser = ANONYMOUS;
-    }
+            new ArrayList<RoleWithSecurityDTO>(), /* default tenant */ null,
+            new ArrayList<WildcardPermissionWithSecurityDTO>(),
+            /* groups */ null);
+    private final UserService userService;
 
     /**
      * Creating an {@link AuthenticationContextImpl} containing the given {@link UserDTO} object.
@@ -27,7 +28,8 @@ public class AuthenticationContextImpl implements AuthenticationContext {
      * @param currentUser
      *            the current {@link UserDTO user} object
      */
-    public AuthenticationContextImpl(UserDTO currentUser) {
+    public AuthenticationContextImpl(UserDTO currentUser, UserService userService) {
+        this.userService = userService;
         if (currentUser == null) {
             this.currentUser = ANONYMOUS;
         } else {
@@ -65,5 +67,9 @@ public class AuthenticationContextImpl implements AuthenticationContext {
             return email;
         }
         return currentUser.getName();
+    }
+    
+    public boolean hasPermission(SecuredDTO securedDTO, Action action) {
+        return userService.hasPermission(securedDTO, action);
     }
 }

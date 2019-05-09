@@ -34,8 +34,8 @@ import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
@@ -58,7 +58,7 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
     @Before
     public void setUp() throws FileNotFoundException, UnknownHostException {
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;
-        mongoDBService.getDB().dropDatabase();
+        mongoDBService.getDB().drop();
     }
     
     /**

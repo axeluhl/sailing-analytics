@@ -42,17 +42,14 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.SortingOrder;
+import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
-import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleTableResources;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.FlagImageRenderer;
@@ -64,7 +61,11 @@ import com.sap.sailing.gwt.ui.leaderboard.CompetitorColumnBase;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFetcher;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
+import com.sap.sse.common.InvertibleComparator;
+import com.sap.sse.common.SortingOrder;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.InvertibleComparatorAdapter;
+import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -133,12 +134,23 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
             super(new TextCell(), SortingOrder.ASCENDING, EditableLeaderboardPanel.this);
         }
 
+        /**
+         * Depending on the {@link LeaderboardDTO LeaderboardDTO's}
+         * {@link AbstractLeaderboardDTO#canBoatsOfCompetitorsChangePerRace canBoatsOfCompetitorsChangePerRace} flag
+         * there is a different precedence of showing either the sail ID (no changing boats) or the competitor short
+         * name (changing boats). This method handles the resolution of the text to show for a competitor in this column.
+         */
+        private String getRealTextToShow(CompetitorDTO competitor) {
+            boolean preferSailId = !getLeaderboard().canBoatsOfCompetitorsChangePerRace;
+            return competitor.getShortInfo(preferSailId);
+        }
+
         @Override
         public InvertibleComparator<CompetitorDTO> getComparator() {
             return new InvertibleComparatorAdapter<CompetitorDTO>() {
                 @Override
                 public int compare(CompetitorDTO o1, CompetitorDTO o2) {
-                    return Collator.getInstance().compare(o1.getShortInfo(), o2.getShortInfo());
+                    return Collator.getInstance().compare(getRealTextToShow(o1), getRealTextToShow(o2));
                 }
             };
         }
@@ -161,7 +173,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 sb.append(FlagImageRenderer.image(flagImageResource.getSafeUri().asString()));
                 sb.appendHtmlConstant("&nbsp;");
             }
-            sb.appendEscaped(object.getShortInfo());
+            sb.appendEscaped(getRealTextToShow(object));
         }
 
         @Override

@@ -209,6 +209,7 @@ public class SettingsTest extends AbstractSeleniumTest {
                 DetailCheckboxInfo.SPEED_OVER_GROUND_AT_RACE_START, // start analysis mode
                 DetailCheckboxInfo.SPEED_OVER_GROUND_WHEN_STARTING, // start analysis mode
                 DetailCheckboxInfo.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_STARTING, // start analysis mode
+                DetailCheckboxInfo.TIME_BETWEEN_RACE_START_AND_COMPETITOR_START,
                 DetailCheckboxInfo.START_TACK, // start analysis mode
 
                 DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN,
@@ -340,7 +341,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         TrackedRaceDescriptor trackedRace = new TrackedRaceDescriptor(BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
                 String.format(BMW_RACE, 1));
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
+        tracTracEvents.addConnectionAndListTrackableRaces(BMW_CUP_JSON_URL);
         RegattaDescriptor bmwCupDescriptor = new RegattaDescriptor(BMW_CUP_EVENT, BMW_CUP_BOAT_CLASS);
         tracTracEvents.setReggataForTracking(bmwCupDescriptor);
         tracTracEvents.setTrackSettings(true, false, false);

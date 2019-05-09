@@ -177,7 +177,7 @@
     <string name="set_course_layout">Set the course layout</string>
     <string name="loading_failure">Load failure</string>
     <string name="wind_unknown">(click to set wind)</string>
-    <string name="wind_info">%2$s / %1$s kts</string>
+    <string name="wind_info">%2$s / %1$f kts</string>
     <string name="login">Login</string>
     <string name="please_select_a_login_type">Please select a login type.</string>
     <string name="race_list_filter_show_all">Show all</string>
@@ -224,7 +224,6 @@
     <string name="preference_wakelock_summary">Force the screen to stay awake. Caution: Uses more battery.</string>
     <string name="preference_offline_header">Offline Mode</string>
     <string name="preference_offline_summary">Disables the connection to a server and uses static data</string>
-    <string name="preference_theme_header">Theme</string>
     <string name="preference_allow_demo_header">Allow login as Viewer</string>
     <string name="preference_allow_demo_summary">If set, you are allowed to log in as Viewer. No race changes will be send back to the server.</string>
     <string name="options_menu_info">Expert Information</string>
@@ -548,6 +547,7 @@
 
     <string name="competitor_list">Results</string>
     <string name="sort_by_boat">by Sail Number</string>
+    <string name="sort_by_short_name">by Short Name</string>
     <string name="sort_by_name">by Competitor Name</string>
     <string name="sort_by_start">by Position to Start Line</string>
     <string name="sort_by_goal">by Tracked Position</string>

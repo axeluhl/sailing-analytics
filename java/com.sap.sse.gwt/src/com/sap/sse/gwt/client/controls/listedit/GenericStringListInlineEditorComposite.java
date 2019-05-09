@@ -1,7 +1,5 @@
 package com.sap.sse.gwt.client.controls.listedit;
 
-import java.util.List;
-
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
@@ -21,7 +19,7 @@ import com.sap.sse.gwt.client.StringMessages;
  */
 public abstract class GenericStringListInlineEditorComposite<ValueType> extends GenericStringListEditorComposite<ValueType> {
     public GenericStringListInlineEditorComposite(Iterable<ValueType> initialValues, StringMessages stringMessages,
-            ImageResource removeImage, List<String> suggestValues, int textBoxSize) {
+            ImageResource removeImage, Iterable<String> suggestValues, int textBoxSize) {
         super(initialValues, new ExpandedUi<ValueType>(stringMessages, removeImage, suggestValues, textBoxSize));
     }
 
@@ -36,8 +34,7 @@ public abstract class GenericStringListInlineEditorComposite<ValueType> extends 
             this(stringMessages, removeImage, suggestValues, /* placeholderTextForAddTextbox */ null, textBoxSize);
         }
         
-        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, Iterable<String> suggestValues,
-                String placeholderTextForAddTextbox, int textBoxSize) {
+        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, Iterable<String> suggestValues, String placeholderTextForAddTextbox, int textBoxSize) {
             super(stringMessages, removeImage, suggestValues, placeholderTextForAddTextbox);
             this.textBoxSize = textBoxSize;
         }

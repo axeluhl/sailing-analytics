@@ -73,15 +73,7 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
 
         @Override
         protected String getCollapsedValueText(Iterable<ValueType> value) {
-            StringBuilder valuesText = new StringBuilder();
-            for (int i = 0; i < Util.size(value); i++) {
-                if (i > 0) {
-                    valuesText.append(',');
-                }
-                valuesText.append(Util.get(value, i));
-            }
-            String condensedValue = valuesText.toString();
-            return condensedValue;
+            return String.join(",", Util.map(value, v->v.toString()));
         }
     }
 

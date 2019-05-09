@@ -35,9 +35,10 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
+                android:gravity="right|end"
                 android:orientation="horizontal"
-                android:paddingBottom="4dp"
-                android:paddingTop="4dp">
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp">
 
                 <ImageView
                     android:id="@+id/warning_sign"
@@ -73,8 +74,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_toLeftOf="@id/penalty_layout"
-                android:layout_toRightOf="@id/vessel_id"
+                android:layout_toLeftOf="@+id/penalty_layout"
+                android:layout_toRightOf="@+id/vessel_id"
                 android:padding="5dp"
                 android:singleLine="true"
                 android:textAppearance="?attr/textSmall"

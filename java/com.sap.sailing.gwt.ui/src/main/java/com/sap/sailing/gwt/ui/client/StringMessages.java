@@ -11,6 +11,7 @@ import com.sap.sse.gwt.client.DefaultRule_1_0n;
 
 @DefaultLocale("en")
 public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
+        com.sap.sse.security.ui.client.i18n.StringMessages,
         com.sap.sse.gwt.adminconsole.StringMessages, CommonStringMessages {
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
     
@@ -31,6 +32,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String map();
     String race();
     String races();
+    String racesAndTracking();
     String tracked();
     String time();
     String playSpeed();
@@ -150,6 +152,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showEstimatedWind();
     String timing();
     String raceDetailsToShow();
+    String tracking();
     String legDetailsToShow();
     String columnMoveUp();
     String columnMoveDown();
@@ -229,6 +232,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pairingLists();
     String pairingListCreationInfo();
     String setCompetitors();
+    String setBoatChangeFactor();
     String seriesHint();
     String amountOfFlightRepeats();
     String insertIntoRegatta();
@@ -245,6 +249,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String numberOfFleets();
     String numberOfCompetitors();
     String quality();
+    String boatAssignmentQuality();
+    String boatChanges();
     String pairingListTemplate();
     String printHint();
     String blockedApplyButton();
@@ -489,7 +495,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String actionAddEvent();
     String publicationUrl();
     String suppress();
-    String isPublic();
+    String isListedOnHomepage();
     String unsuppress();
     String suppressedCompetitors();
     String pleaseSelectASeries();
@@ -1137,6 +1143,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String leaderboardsExceptFromSelectedGroup();
     String availableLeaderboardGroups();
     String leaderboardGroupsOfSelectedEvent();
+    String doYouReallyWantToRemoveLeaderboardGroup(String leaderboardGroupName);
     String doYouReallyWantToRemoveLeaderboardGroups();
     String doYouReallyWantToRemoveNonVisibleLeaderboardGroups(String leaderboardGroupNames);
     String addRaces();
@@ -1190,9 +1197,24 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String setTimeToNow();
     String useStartTimeInference();
     String controlTrackingFromStartAndFinishTimes();
-    String canBoatsOfCompetitorsChangePerRace();    
+    String canBoatsOfCompetitorsChangePerRace();
     String canBoatsChange();
     String canNotRegisterBoats();
+    String competitorRegistrationType();
+    String competitorRegistrationTypeShort();
+    String registrationLink();
+    String registrationLinkConfig();
+    String registrationLinkDialog();
+    String registrationLinkDialogQrcode();
+    String registrationLinkDialogQrcodeExplain();
+    String registrationLinkSecret();
+    String registrationLinkSecretExplain();
+    String registrationLinkSecretGenerate();
+    String registrationLinkUrl();
+    String registrationLinkUrlCopy();
+    String registrationLinkUrlExplain();
+    String registrationLinkShare();
+    String explainRegistrationLinkDialog();
     String numberOfQueueMessagesSent();
     String totalSize();
     String averageMessageSize();
@@ -1237,6 +1259,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String enterCourseName();
     String scoringSchemeHighPointFirstGetsTenOrEightDescription();
     String userManagement();
+    String userGroupManagement();
     String regattaStructureImport();
     String filteredBy();
     String editSeries();
@@ -1262,6 +1285,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String successfullyCreatedRegattas();
     String errorTryingToRegisterRacesForTracking(String raceNames, String message);
     String errorDeterminingPolarAvailability(String raceName, String message);
+    String selectedDetailType();
+    String errorLoadingAvailableDetailTypes();
+    String tailColor();
     String fileStorage();
     String active();
     String scoringSchemeHighPointEssOverallDescription();
@@ -1578,7 +1604,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String info();
     String windFixes();
     String twoXMark();
-    String pagerStateInfo(int start , int end, int size, @Select boolean exact);
     String currentHeelInDegree();
     String currentHeelInDegreeTooltip();
     String currentPitchInDegree();
@@ -1965,6 +1990,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorCreatingPairingList(String message);
     String unexpectedErrorDuringFileImport();
     String couldNotDownload(String url);
+    String roles();
     String sliceRace();
     String slicingARaceWasSuccessful();
     String enterNameForSlicedRace();
@@ -2104,13 +2130,21 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String swissTimingUpdatePassword();
     String allowResizing();
     String resizeSuccessfull();
-    String resizeUnsuccessfull();
+    String resizeUnsuccessful(String cause);
     String automaticResizeNeedsStorageService();
-    String qrCodeTitle(String competitorName, String leaderName);
+    String qrCodeBoatInviteTitle(String boatDisplayName, String leaderboardName);
+    String qrCodeMarkInviteTitle(String markName, String leaderboardName);
+    String qrCodeCompetitorInviteTitle(String competitorName, String leaderboardName);
+    String qrCodeTitle(String leaderboardName);
     String qrCodeSubtitle(String eventName, String eventLocationAndVenue);
+    String qrCodeTitleOpenRegatta(String regattaName);
+    String qrCodeUnsecureServerRedirect(String hostName);
+    String qrCodeUnsecureServerRedirectTitle(String hostName);
     String qrCodeInfoMessage();
     String qrCodeErrorMessage();
     String qrCodeTitleBouy(String leaderboardName);
+    String soundOff();
+    String turnOffAllSoundChannels();
     String tag();
     String tagButtons();
     String tagPanel();
@@ -2192,6 +2226,39 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String noStatisticsFoundForCompetitors();
     String sailorProfileRemoveMessage();
     String showInDataMining();
-
     String confirmDeletion();
+    String priorityMustBeANonNegativeNumber();
+    String selfServiceServer();
+    String publicServer();
+    String updatedServerSetupError();
+    String updatedServerSetup();
+    String useExistingUserGroup();
+    String useNewUserGroup();
+    String currentGroupOwner();
+    String migrateCompetitors();
+    String migrateBoats();
+    String migrateHierarchyToGroupOwner();
+    String serverIsPublicButTenantIsNot();
+    String serverIsPublicButTenantIsNotAndCouldBeChanged();
+    String copyMembersAndRoles();
+    String invalidSecret();
+    String warningSailInsightVersion();
+    String invalidState();
+    String doYouReallyWantToRemoveDeviceConfiguration(String name);
+    String errorFetchingSimulationData(String message);
+    String addTracTracConnection();
+    String editTracTracConnection();
+    String filterTracTracConnections();
+    String creatorName();
+    String editSwissTimingAchivedConnection();
+    String addSwissTimingAchivedConnection();
+    String filterSwissTimingAchivedConnections();
+
+    String editSwissTimingConnections();
+
+    String filterSwissTimingConnections();
+
+    String updateURL();
+
+    String addSwissTimingConnection();
 }

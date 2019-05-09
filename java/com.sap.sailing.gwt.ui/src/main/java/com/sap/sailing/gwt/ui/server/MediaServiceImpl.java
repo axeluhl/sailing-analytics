@@ -19,6 +19,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,14 +43,18 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.Permission.Mode;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.media.mp4.MP4MediaParser;
 import com.sap.sailing.media.mp4.MP4ParserFakeFile;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.security.Action;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.ui.server.SecurityDTOUtil;
 
 public class MediaServiceImpl extends RemoteServiceServlet implements MediaService {
     private String YOUTUBE_V3_API_KEY = "AIzaSyBzCJ9cxb9_PPzuYfrHIEdSRtR631b64Xs";
@@ -86,63 +92,77 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     }
 
     @Override
-    public Iterable<MediaTrack> getAllMediaTracks() {
-        return racingEventService().getAllMediaTracks();
+    public Iterable<MediaTrackWithSecurityDTO> getAllMediaTracks() {
+        Collection<MediaTrackWithSecurityDTO> result = new ArrayList<>();
+        for (MediaTrack mediaTrack : racingEventService().getAllMediaTracks()) {
+            MediaTrackWithSecurityDTO securedMediaTrack = new MediaTrackWithSecurityDTO(mediaTrack);
+            SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), securedMediaTrack,
+                    mediaTrack.getIdentifier());
+            result.add(securedMediaTrack);
+        }
+        return result;
     }
     
-    private void ensureUserCanManageMedia() {
-        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_MEDIA.getStringPermissionForObjects(Mode.UPDATE));
-    }
-
     @Override
     public String addMediaTrack(MediaTrack mediaTrack) {
-        ensureUserCanManageMedia();
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.MEDIA_TRACK.getStringPermission(DefaultActions.CREATE));
         if (mediaTrack.dbId != null) {
             throw new IllegalStateException("Property dbId must not be null for newly created media track.");
         }
         racingEventService().mediaTrackAdded(mediaTrack);
+        SecurityService securityService = racingEventService().getSecurityService();
+        securityService.setDefaultOwnershipIfNotSet(mediaTrack.getIdentifier());
         return mediaTrack.dbId;
     }
 
     @Override
     public void deleteMediaTrack(MediaTrack mediaTrack) {
-        ensureUserCanManageMedia();
-        racingEventService().mediaTrackDeleted(mediaTrack);
+        racingEventService().getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(
+                mediaTrack, new Action() {
+
+                    @Override
+                    public void run() throws Exception {
+                        racingEventService().mediaTrackDeleted(mediaTrack);
+                    }
+                });
     }
 
     @Override
     public void updateTitle(MediaTrack mediaTrack) {
-        ensureUserCanManageMedia();
+        ensureUserCanUpdateMediaTrack(mediaTrack);
         racingEventService().mediaTrackTitleChanged(mediaTrack);
     }
 
     @Override
     public void updateUrl(MediaTrack mediaTrack) {
-        ensureUserCanManageMedia();
+        ensureUserCanUpdateMediaTrack(mediaTrack);
         racingEventService().mediaTrackUrlChanged(mediaTrack);
     }
 
     @Override
     public void updateStartTime(MediaTrack mediaTrack) {
-        ensureUserCanManageMedia();
+        ensureUserCanUpdateMediaTrack(mediaTrack);
         racingEventService().mediaTrackStartTimeChanged(mediaTrack);
     }
 
     @Override
     public void updateDuration(MediaTrack mediaTrack) {
-        ensureUserCanManageMedia();
+        ensureUserCanUpdateMediaTrack(mediaTrack);
         racingEventService().mediaTrackDurationChanged(mediaTrack);
+    }
+
+    private void ensureUserCanUpdateMediaTrack(MediaTrack mediaTrack) {
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.MEDIA_TRACK.getStringPermissionForObject(DefaultActions.UPDATE, mediaTrack));
     }
 
     @Override
     public void updateRace(MediaTrack mediaTrack) {
-        ensureUserCanManageMedia();
+        ensureUserCanUpdateMediaTrack(mediaTrack);
         racingEventService().mediaTrackAssignedRacesChanged(mediaTrack);
     }
 
     @Override
     public VideoMetadataDTO checkMetadata(String url) {
-        ensureUserCanManageMedia();
         VideoMetadataDTO response = null;
         try {
             URL input = new URL(url);
@@ -204,7 +224,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
         connection.setRequestProperty("Range", range);
         try (final InputStream inStream = connection.getInputStream()) {
             try (final DataInputStream dataInStream = new DataInputStream(inStream)) {
-                dataInStream.readFully(store);
+            dataInStream.readFully(store);
             }
         } finally {
             connection.disconnect();
@@ -218,7 +238,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
         try {
             try (final ReadableByteChannel rbc = Channels.newChannel(input.openStream())) {
                 try (final FileOutputStream fos = new FileOutputStream(tmp)) {
-                    fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+                fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
                     try (final MP4ParserFakeFile inputFile = new MP4ParserFakeFile(tmp)) {
                         Files.delete(tmp.toPath());
                         result = checkMetadata(inputFile);
@@ -238,16 +258,15 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
 
     @Override
     public VideoMetadataDTO checkMetadata(byte[] start, byte[] end, Long skipped) {
-        ensureUserCanManageMedia();
         VideoMetadataDTO result;
         try (MP4ParserFakeFile input = new MP4ParserFakeFile(start, end, skipped)) {
             result = checkMetadata(input);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Error in video analysis ", e);
             result = new VideoMetadataDTO(true, null, false, null, e.getMessage());
-        }
+                }
         return result;
-    }
+            }
 
     private VideoMetadataDTO checkMetadata(MP4ParserFakeFile input)
             throws ParserConfigurationException, SAXException, IOException {
@@ -275,7 +294,6 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
 
     @Override
     public VideoMetadataDTO checkYoutubeMetadata(String videoId) throws UnsupportedEncodingException {
-        ensureUserCanManageMedia();
         boolean canDownload = false;
         String message = "";
         Duration duration = null;
@@ -298,9 +316,9 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
                     final JSONArray dataArray = jsonAnswer.getJSONArray("items");
                     if (dataArray.length() > 0) {
                         final JSONObject item = dataArray.getJSONObject(0);
-                        message = item.getJSONObject("snippet").getString("title");
-                        String rawDuration = item.getJSONObject("contentDetails").getString("duration");
-                        duration = new MillisecondsDurationImpl(java.time.Duration.parse(rawDuration).toMillis());
+                    message = item.getJSONObject("snippet").getString("title");
+                    String rawDuration = item.getJSONObject("contentDetails").getString("duration");
+                    duration = new MillisecondsDurationImpl(java.time.Duration.parse(rawDuration).toMillis());
                     }
                     canDownload = true;
                 } catch (JSONException e) {

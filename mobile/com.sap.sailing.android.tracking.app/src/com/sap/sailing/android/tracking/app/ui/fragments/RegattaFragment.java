@@ -1,11 +1,5 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.concurrent.TimeUnit;
-
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -17,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,6 +33,12 @@ import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 public class RegattaFragment extends BaseFragment implements OnClickListener {
 
@@ -77,7 +78,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
         TextView addPhotoText = (TextView) view.findViewById(R.id.add_photo_text);
         addPhotoText.setOnClickListener(this);
-        
+
         return view;
     }
 
@@ -211,20 +212,19 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
      * Ask user if he wants to take a new picture or select an existing one.
      */
     public void showChooseExistingPictureOrTakeNewPhotoAlert() {
-        AlertDialog dialog = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog)
-            .setTitle(R.string.add_photo_select)
-            .setMessage(R.string.do_you_want_to_choose_existing_img_or_take_a_new_one)
-            .setPositiveButton(R.string.existing_image, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    pickExistingImage();
-                }
-            }).setNegativeButton(R.string.take_photo, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    showTakePhotoActivity();
-                }
-            })
-            .create();
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.add_photo_select)
+                .setMessage(R.string.do_you_want_to_choose_existing_img_or_take_a_new_one)
+                .setPositiveButton(R.string.existing_image, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        pickExistingImage();
+                    }
+                }).setNegativeButton(R.string.take_photo, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        showTakePhotoActivity();
+                    }
+                }).create();
         dialog.show();
     }
 
@@ -236,8 +236,10 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
     private void showTakePhotoActivity() {
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
         File photoFile = ((RegattaActivity) getActivity()).getImageFile(CAMERA_TEMP_FILE);
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
+        Uri file = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", photoFile);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, file);
         startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
     }
 
@@ -301,8 +303,8 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
         int scale = 1;
         if (options.outHeight > IMAGE_MAX_SIZE || options.outWidth > IMAGE_MAX_SIZE) {
-            scale = (int) Math
-                .pow(2, (int) Math.ceil(Math.log(IMAGE_MAX_SIZE / (double) Math.max(options.outHeight, options.outWidth)) / Math.log(0.5)));
+            scale = (int) Math.pow(2, (int) Math.ceil(
+                    Math.log(IMAGE_MAX_SIZE / (double) Math.max(options.outHeight, options.outWidth)) / Math.log(0.5)));
         }
 
         BitmapFactory.Options options2 = new BitmapFactory.Options();

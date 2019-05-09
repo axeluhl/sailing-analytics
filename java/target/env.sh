@@ -7,7 +7,9 @@
 # of this file as there could be overwritten ones!
 # *******************************************************
 
-SERVER_NAME=MASTER
+if [ -z $SERVER_NAME ]; then
+  SERVER_NAME=MASTER
+fi
 
 # This is a default heap size only; the boot script of an instance (see
 # configuration/sailing) will add a MEMORY assignment to this file in the
@@ -22,12 +24,18 @@ MEMORY="6000m"
 
 # Message Queue hostname where to
 # send messages for replicas (this server is master)
-REPLICATION_HOST=localhost
+if [ -z $REPLICATION_HOST ]; then
+  REPLICATION_HOST=localhost
+fi
 # For the port, use 0 for the RabbitMQ default or a specific port that your RabbitMQ server is listening on
-REPLICATION_PORT=0
+if [ -z $REPLICATION_PORT ]; then
+  REPLICATION_PORT=0
+fi
 # The name of the message queuing fan-out exchange that this server will use in its role as replication master.
 # Make sure this is unique so that no other master is writing to this exchange at any time.
-REPLICATION_CHANNEL=sapsailinganalytics-master
+if [ -z $REPLICATION_CHANNEL ]; then
+  REPLICATION_CHANNEL=sapsailinganalytics-master
+fi
 
 if [ -z $TELNET_PORT ]; then
   TELNET_PORT=14888
@@ -75,6 +83,16 @@ fi
 #
 # REPLICATE_MASTER_EXCHANGE_NAME=
 
+# Credentials for replication access to the master server
+# Make sure, the user is granted the permission SERVER:REPLICATE:<server-name>
+# Credentials can be provided either as a combination of username and password,
+# or alternatively as a single bearer token that was obtained, e.g., through
+#   curl -d "username=myuser&password=mysecretpassword" "https://master-server.sapsailing.com/security/api/restsecurity/access_token" | jq .access_token
+# 
+# REPLICATE_MASTER_USERNAME=
+# REPLICATE_MASTER_PASSWORD=
+# REPLICATE_MASTER_BEARER_TOKEN=
+
 # Automatic build and test configuration
 DEPLOY_TO=server
 BUILD_BEFORE_START=False
@@ -85,11 +103,13 @@ CODE_DIRECTORY=code
 
 # Specify an email adress that should be notified
 # whenever a build or install has been completed
-BUILD_COMPLETE_NOTIFY=
+#
+# BUILD_COMPLETE_NOTIFY=
 
 # Specify an email address that should be notified
 # whenever the server has been started
-SERVER_STARTUP_NOTIFY=
+#
+# SERVER_STARTUP_NOTIFY=
 
 # Specify filename that is usually located at
 # http://release.sapsailing.com/ that should
@@ -107,28 +127,40 @@ if [[ ! -d $JAVA_HOME ]] && [[ -f "/usr/libexec/java_home" ]]; then
     JAVA_HOME=`/usr/libexec/java_home`
 fi
 JAVA_BINARY="$JAVA_HOME/bin/java"
-JAVA_VERSION=$("$JAVA_BINARY" -version 2>&1 | sed 's/^.* version "\(.*\)\.\(.*\)\..*".*$/\1.\2/; 1q')
-export JAVA_11_ARGS="-Dosgi.java.profile=file://`pwd`/JavaSE-11.profile --add-modules=ALL-SYSTEM -Djavax.xml.bind.JAXBContextFactory=com.sun.xml.bind.v2.ContextFactory -XX:ThreadPriorityPolicy=1 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Xlog:gc+ergo*=trace:file=logs/gc_ergo.log:time:filecount=10,filesize=100000 -Xlog:gc*:file=logs/gc.log:time:filecount=10,filesize=100000"
-echo JAVA_11_ARGS is $JAVA_11_ARGS
-export JAVA_8_ARGS="-XX:ThreadPriorityPolicy=2 -XX:+UseG1GC -XX:+PrintAdaptiveSizePolicy -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M"
-echo JAVA_8_ARGS is $JAVA_8_ARGS
+JAVA_VERSION_OUTPUT=$("$JAVA_BINARY" -version 2>&1)
+JAVA_VERSION=$(echo "$JAVA_VERSION_OUTPUT" | sed 's/^.* version "\(.*\)\.\(.*\)\..*".*$/\1.\2/; 1q')
+export JAVA_11_LOGGING_ARGS="-Xlog:gc+ergo*=trace:file=logs/gc_ergo.log:time:filecount=10,filesize=100000 -Xlog:gc*:file=logs/gc.log:time:filecount=10,filesize=100000"
+export JAVA_11_ARGS="-Dosgi.java.profile=file://`pwd`/JavaSE-11.profile --add-modules=ALL-SYSTEM -Djavax.xml.bind.JAXBContextFactory=com.sun.xml.bind.v2.ContextFactory -XX:ThreadPriorityPolicy=1 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC ${JAVA_11_LOGGING_ARGS}"
+export JAVA_8_LOGGING_ARGS="-XX:+PrintAdaptiveSizePolicy -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M"
 echo JAVA_VERSION detected: $JAVA_VERSION
 if echo $JAVA_VERSION | grep -q "^11\."; then
   echo Java 11 detected
-  echo JAVA_11_ARGS are $JAVA_11_ARGS
   JAVA_VERSION_SPECIFIC_ARGS=$JAVA_11_ARGS
 else
   echo Java other than 11 detected
-  echo JAVA_8_ARGS are $JAVA_8_ARGS
+  # options for use with SAP JVM only:
+  if echo "$JAVA_VERSION_OUTPUT" | grep -q "SAP Java"; then
+    ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -XX:+GCHistory -XX:GCHistoryFilename=logs/sapjvm_gc@PID.prf"
+    BUILD=$( echo "$JAVA_VERSION_OUTPUT" | grep "(build [^ ]*)" )
+    MAJOR=$( echo "$BUILD" | sed -e 's/^.*(build \([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)).*$/\1/' )
+    MINOR=$( echo "$BUILD" | sed -e 's/^.*(build \([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)).*$/\2/' )
+    UPDATE=$( echo "$BUILD" | sed -e 's/^.*(build \([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)).*$/\3/' )
+    echo "SAP JVM $MAJOR $MINOR $UPDATE detected"
+    if [ $MAJOR -ge 8 -a $MINOR -ge 1 -a $UPDATE -ge 45 ]; then
+      echo "Update 8.1.045 or later; using Java11 GC logging options"
+      LOGGING_ARGS="$JAVA_11_LOGGING_ARGS"
+    else 
+      echo "Update before 8.1.045; using Java8 GC logging options"
+      LOGGING_ARGS="$JAVA_8_LOGGING_ARGS"
+    fi
+  else
+    # non-SAP JVM 8
+    export LOGGING_ARGS="$JAVA_8_LOGGING_ARGS"
+  fi
+  export JAVA_8_ARGS="-XX:ThreadPriorityPolicy=2 -XX:+UseG1GC ${LOGGING_ARGS}"
   JAVA_VERSION_SPECIFIC_ARGS=$JAVA_8_ARGS
 fi
-echo JAVA_VERSION_SPECIFIC_ARGS are: $JAVA_VERSION_SPECIFIC_ARGS
 ADDITIONAL_JAVA_ARGS="$JAVA_VERSION_SPECIFIC_ARGS $ADDITIONAL_JAVA_ARGS -Dpersistentcompetitors.clear=false -Drestore.tracked.races=true -XX:MaxGCPauseMillis=500"
-# options for use with SAP JVM only:
-if "$JAVA_BINARY" -version 2>&1 | grep -q "SAP Java"; then
-  echo SAP JVM detected
-  ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -XX:+GCHistory -XX:GCHistoryFilename=logs/sapjvm_gc@PID.prf"
-fi
 echo ADDITIONAL_JAVA_ARGS=${ADDITIONAL_JAVA_ARGS}
 ON_AMAZON=`command -v ec2-metadata`
 

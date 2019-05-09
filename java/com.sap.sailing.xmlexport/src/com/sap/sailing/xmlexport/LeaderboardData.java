@@ -51,7 +51,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -61,6 +61,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.SecurityService;
 
 /**
  * Exports all data from a leaderboard into XML format.
@@ -81,14 +82,15 @@ public class LeaderboardData extends ExportAction {
     private static final String VERY_STRONG_WIND_DESCRIPTION = "Very Strong";
     
     private final Map<RaceColumn, List<Competitor>> raceColumnToCompetitors;
-    
-    public LeaderboardData(HttpServletRequest req, HttpServletResponse res, RacingEventService service) {
-        super(req, res, service);
+
+    public LeaderboardData(HttpServletRequest req, HttpServletResponse res, RacingEventService service,
+            final SecurityService securityService) {
+        super(req, res, service, securityService);
         this.raceColumnToCompetitors = new HashMap<>();
     }
     
-    public LeaderboardData(Leaderboard leaderboard) {
-        super(leaderboard);
+    public LeaderboardData(Leaderboard leaderboard, SecurityService securityService) {
+        super(leaderboard, securityService);
         this.raceColumnToCompetitors = new HashMap<>();
     }
 
@@ -1031,6 +1033,7 @@ public class LeaderboardData extends ExportAction {
     
     public void perform() throws Exception {
         final Leaderboard leaderboard = getLeaderboard();
+        securityService.checkCurrentUserReadPermission(leaderboard);
         TimePoint timeSpent = MillisecondsTimePoint.now();
         log.info("Starting XML export of " + leaderboard.getName());
         Util.Pair<Double, Vector<String>> leaderboardConfidenceAndErrorMessages = checkData(leaderboard);
@@ -1050,6 +1053,9 @@ public class LeaderboardData extends ExportAction {
             for (Fleet fleet : raceColumn.getFleets()) {
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 if (trackedRace != null) {
+                    if (!securityService.hasCurrentUserReadPermission(trackedRace)) {
+                        continue;
+                    }
                     sameDayGroupIndex += getSameDayGroupIndex(raceColumn.getTrackedRace(fleet), raceBefore);
                 }
                 TimePoint timeSpentForRace = MillisecondsTimePoint.now();

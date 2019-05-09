@@ -1,8 +1,8 @@
 package com.sap.sailing.dashboards.gwt.client.widgets.startanalysis;
 
 import com.google.gwt.resources.client.ImageResource;
-import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapStyle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapStyle;
 
 /**
  * @author Alexander Ries (D062114)

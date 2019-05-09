@@ -25,6 +25,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -70,19 +71,23 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
     private final boolean useInternalMarkPassingAlgorithm;
     private final RaceLogResolver raceLogResolver;
     private final LeaderboardGroupResolver leaderboardGroupResolver;
+
+    private final RaceTrackingHandler raceTrackingHandler;
     
     public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
             IRace tractracRace, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, Simulator simulator,
             URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword,
             IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm,
-            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds) {
+            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler) {
         super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber, timeoutInMilliseconds);
         this.tractracRace = tractracRace;
         this.raceLogResolver = raceLogResolver;
         this.leaderboardGroupResolver = leaderboardGroupResolver;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.delayToLiveInMillis = delayToLiveInMillis;
+        this.raceTrackingHandler = raceTrackingHandler;
         if (simulator == null) {
             this.windStore = windStore;
         } else {
@@ -176,7 +181,8 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
                     getTrackedRegatta(), tractracRace.getId(), tractracRace.getName(),
                     dominantBoatClass, competitorAndBoats, course, sidelines, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, tracTracUpdateURI,
-                    getTracTracEvent().getId(), tracTracUsername, tracTracPassword, useInternalMarkPassingAlgorithm, raceLogResolver, tr->updateRaceTimes(tractracRace, tr), tractracRace);
+                    getTracTracEvent().getId(), tracTracUsername, tracTracPassword, useInternalMarkPassingAlgorithm, raceLogResolver, tr->updateRaceTimes(tractracRace, tr), tractracRace,
+                    raceTrackingHandler);
             addAllMarksFromCourseArea(trackedRace);
             if (getSimulator() != null) {
                 getSimulator().setTrackedRace(trackedRace);
@@ -253,12 +259,12 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
 
     private DynamicTrackedRace createTrackedRace(RaceDefinition race, Iterable<Sideline> sidelines,
             Consumer<DynamicTrackedRace> runAfterCreatingTrackedRace) {
-        DynamicTrackedRace trackedRace = getTrackedRegatta().createTrackedRace(race, sidelines, windStore,
+        DynamicTrackedRace trackedRace = raceTrackingHandler.createTrackedRace(getTrackedRegatta(), race, sidelines, windStore,
                 delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass()
                         .getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate, useInternalMarkPassingAlgorithm, raceLogResolver,
-                /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());
+                /* ThreadLocalTransporter not needed because the RaceTracker is not active on a replica */ Optional.empty());
         if (runAfterCreatingTrackedRace != null) {
             runAfterCreatingTrackedRace.accept(trackedRace);
         }

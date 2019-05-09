@@ -1,7 +1,14 @@
 package com.sap.sailing.domain.common.dto;
 
+import java.io.Serializable;
+
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
 
 /**
  * Equality and hash code are based on the index pointing into a previous leaderboard's competitors list.
@@ -9,7 +16,7 @@ import com.sap.sse.common.Duration;
  * @author Axel Uhl (d043530)
  * 
  */
-public class PreviousCompetitorDTOImpl implements CompetitorDTO {
+public class PreviousCompetitorDTOImpl extends NamedSecuredObjectDTO implements CompetitorDTO {
     private static final long serialVersionUID = 8820028699103040805L;
     private int indexInPreviousCompetitorList;
 
@@ -52,6 +59,12 @@ public class PreviousCompetitorDTOImpl implements CompetitorDTO {
         throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
                 " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
     }
+    
+    @Override
+    public String getShortInfo(boolean preferSailId) {
+        throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
+    }
 
     @Override
     public String getTwoLetterIsoCountryCode() {
@@ -85,6 +98,12 @@ public class PreviousCompetitorDTOImpl implements CompetitorDTO {
 
     @Override
     public String getIdAsString() {
+        throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
+    }
+
+    @Override
+    public Serializable getId() {
         throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
                 " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
     }
@@ -153,4 +172,19 @@ public class PreviousCompetitorDTOImpl implements CompetitorDTO {
         throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
                 " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
     }
+    
+    @Override
+    public HasPermissions getType() {
+        return SecuredDomainType.COMPETITOR;
+    }
+    
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return new TypeRelativeObjectIdentifier(getId().toString());
+    }
+
 }

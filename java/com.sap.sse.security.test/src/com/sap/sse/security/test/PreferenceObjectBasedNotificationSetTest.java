@@ -5,24 +5,31 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.mongodb.DB;
 import com.mongodb.MongoException;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sse.common.Util;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.PreferenceObjectBasedNotificationSet;
-import com.sap.sse.security.User;
-import com.sap.sse.security.UserStore;
+import com.sap.sse.security.interfaces.UserImpl;
+import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class PreferenceObjectBasedNotificationSetTest {
     
@@ -32,6 +39,7 @@ public class PreferenceObjectBasedNotificationSetTest {
 
     private UserStoreImpl store;
     
+    private static final String serverName = "dummyServer";
     private static final String user1 = "me";
     private static final String user2 = "somebody_else";
     private static final String mail = "anonymous@sapsailing.com";
@@ -44,14 +52,14 @@ public class PreferenceObjectBasedNotificationSetTest {
     private static final HashSet<String> allValues = values(A, B, C);
 
     @Before
-    public void setUp() throws UnknownHostException, MongoException {
+    public void setUp() throws UnknownHostException, MongoException, UserGroupManagementException, UserManagementException {
         final MongoDBConfiguration dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
         final MongoDBService service = dbConfiguration.getService();
-        DB db = service.getDB();
+        MongoDatabase db = service.getDB();
         db.getCollection(CollectionNames.USERS.name()).drop();
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
-        store = new UserStoreImpl();
+        store = new UserStoreImpl("TestDefaultTenant");
     }
     
     @Test
@@ -169,7 +177,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     @Test
-    public void userMappingTest() throws UserManagementException {
+    public void userMappingTest() throws UserManagementException, UserGroupManagementException {
         createUserWithVerifiedEmail(user1, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
@@ -182,7 +190,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     @Test
-    public void userWithNonVerifiedEmailIsSkippedTest() throws UserManagementException {
+    public void userWithNonVerifiedEmailIsSkippedTest() throws UserManagementException, UserGroupManagementException {
         store.createUser(user1, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
@@ -195,7 +203,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     @Test
-    public void userMappingWithTwoUsersTest() throws UserManagementException {
+    public void userMappingWithTwoUsersTest() throws UserManagementException, UserGroupManagementException {
         createUserWithVerifiedEmail(user1, mail);
         createUserWithVerifiedEmail(user2, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
@@ -213,7 +221,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     @Test
-    public void userMappingWithOneExistingAndOneUnknownUserTest() throws UserManagementException {
+    public void userMappingWithOneExistingAndOneUnknownUserTest() throws UserManagementException, UserGroupManagementException {
         createUserWithVerifiedEmail(user1, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
@@ -229,7 +237,7 @@ public class PreferenceObjectBasedNotificationSetTest {
      * There was a bug that caused the preferences not to be removed when a user was deleted.
      */
     @Test
-    public void deleteUserWithMappingTest() throws UserManagementException {
+    public void deleteUserWithMappingTest() throws UserManagementException, UserGroupManagementException {
         store.createUser(user1, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
@@ -241,7 +249,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     @Test
-    public void removePreferenceConverterTest() throws UserManagementException {
+    public void removePreferenceConverterTest() throws UserManagementException, UserGroupManagementException {
         store.createUser(user1, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
@@ -256,13 +264,17 @@ public class PreferenceObjectBasedNotificationSetTest {
         return new HashSet<>(Arrays.asList(values));
     }
     
-    private static HashSet<User> users(User... values) {
+    private static Set<User> users(User... values) {
         return new HashSet<>(Arrays.asList(values));
     }
     
-    private void createUserWithVerifiedEmail(String username, String email) throws UserManagementException {
+    private void createUserWithVerifiedEmail(String username, String email) throws UserManagementException, UserGroupManagementException {
+        UserGroup defaultTenantForSingleServer = store.createUserGroup(UUID.randomUUID(), username + "-tenant");
+        Map<String, UserGroup> defaultTenantForServer = new ConcurrentHashMap<>();
+        defaultTenantForServer.put(serverName, defaultTenantForSingleServer);
         store.createUser(username, email);
-        store.updateUser(new User(username, email, null, null, null, true, null, null, Collections.emptySet()));
+        store.updateUser(new UserImpl(username, email, null, null, null, true, null, null, defaultTenantForServer,
+                Collections.emptySet(), /* userGroupProvider */ null));
     }
     
     private static class PreferenceObjectBasedNotificationSetImpl extends PreferenceObjectBasedNotificationSet<HashSet<String>, String> {

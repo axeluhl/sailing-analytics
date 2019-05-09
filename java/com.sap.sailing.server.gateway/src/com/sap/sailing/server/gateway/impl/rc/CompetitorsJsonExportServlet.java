@@ -6,6 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -13,9 +14,10 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
+import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 public class CompetitorsJsonExportServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 4510175441769759252L;
@@ -46,6 +48,9 @@ public class CompetitorsJsonExportServlet extends AbstractJsonHttpServlet {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "No such leaderboard found.");
             return;
         }
+        SecurityUtils.getSubject()
+                .checkPermission(leaderboard.getIdentifier().getStringPermission(DefaultActions.READ));
+
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         if (raceColumn == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "No such race column found.");

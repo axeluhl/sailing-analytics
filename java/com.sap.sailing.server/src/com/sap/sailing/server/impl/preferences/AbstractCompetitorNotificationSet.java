@@ -10,7 +10,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreference;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
 import com.sap.sse.security.PreferenceObjectBasedNotificationSet;
-import com.sap.sse.security.UserStore;
+import com.sap.sse.security.interfaces.UserStore;
 
 /**
  * {@link PreferenceObjectBasedNotificationSet} for associations of {@link Competitor} to a set of users to notify about

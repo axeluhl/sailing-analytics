@@ -51,7 +51,8 @@ public class ManagedRaceImpl implements ManagedRace {
      *            "virtual" one that holds a non-discardable carry-forward result. In this case, the second Race Column,
      *            which is the first "non-virtual" one, receives index 0.
      */
-    private ManagedRaceImpl(ManagedRaceIdentifier identifier, double factor, Double explicitFactor, int zeroBasedIndexInFleet) {
+    private ManagedRaceImpl(ManagedRaceIdentifier identifier, double factor, Double explicitFactor,
+            int zeroBasedIndexInFleet) {
         this.identifier = identifier;
         this.competitorsAndBoats = new HashMap<>();
         this.courseOnServer = null;
@@ -65,7 +66,8 @@ public class ManagedRaceImpl implements ManagedRace {
         this.state = state;
     }
 
-    public ManagedRaceImpl(ManagedRaceIdentifier identifier, ManagedRaceCalculator calculator, double factor, Double explicitFactor, int zeroBasedIndexInFleet) {
+    public ManagedRaceImpl(ManagedRaceIdentifier identifier, ManagedRaceCalculator calculator, double factor,
+            Double explicitFactor, int zeroBasedIndexInFleet) {
         this(identifier, factor, explicitFactor, zeroBasedIndexInFleet);
         this.calculator = calculator;
     }
@@ -225,7 +227,7 @@ public class ManagedRaceImpl implements ManagedRace {
         } else {
             // we deal with an incompatible server that doesn't know about this field yet;
             // try to compute from the surrounding race group:
-            int i=0;
+            int i = 0;
             for (final RaceCell cell : getSeries().getRaceRow(getFleet()).getCells()) {
                 if (cell.getName().equals(getRaceColumnName())) {
                     result = i;

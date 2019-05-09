@@ -5,6 +5,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -72,8 +73,12 @@ public interface SensorFixStore {
      *            the device to store the fix for. Must not be <code>null</code>.
      * @param fix
      *            The fix to store. Must not be <code>null</code>.
+     * @return An {@link Iterable} with {@link RegattaAndRaceIdentifier}s is returned that will contain races with new
+     *         maneuvers which were not available at the last time the given device stored a fix. The {@link Iterable}
+     *         returned can be empty but is never {@code null}. It can also contain multiple identifiers if the device
+     *         mapping is currently ambiguous.
      */
-    <FixT extends Timed> void storeFixes(DeviceIdentifier device, Iterable<FixT> fixes);
+    <FixT extends Timed> Iterable<RegattaAndRaceIdentifier> storeFixes(DeviceIdentifier device, Iterable<FixT> fixes);
 
     /**
      * Listeners are notified, whenever a {@link GPSFix} submitted by the {@code device}

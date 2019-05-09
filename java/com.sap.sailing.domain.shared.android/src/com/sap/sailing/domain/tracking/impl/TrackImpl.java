@@ -5,14 +5,15 @@ import java.io.ObjectOutputStream;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NavigableSet;
+import java.util.function.Function;
 
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.FixAcceptancePredicate;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Function;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.scalablevalue.ScalableValue;
 import com.sap.sse.concurrent.LockUtil;
@@ -208,8 +209,7 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         lockForRead();
         try {
             final NavigableSet<FixType> tailSet = getInternalFixes().tailSet(getDummyFix(timePoint), /* inclusive */ true);
-            for (final Iterator<FixType> i=tailSet.iterator(); i.hasNext(); ) {
-                final FixType next = i.next();
+            for (final FixType next : tailSet) {
                 if (fixAcceptancePredicate == null || fixAcceptancePredicate.isAcceptFix(next)) {
                     return next;
                 }
@@ -318,15 +318,15 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
             if (fixPair.getB() == null) {
                 result = null;
             } else {
-                result = converter.get(fixPair.getB()).divide(1);
+                result = converter.apply(fixPair.getB()).divide(1);
             }
         } else {
             if (fixPair.getB() == null || fixPair.getA() == fixPair.getB()) {
-                result = converter.get(fixPair.getA()).divide(1);
+                result = converter.apply(fixPair.getA()).divide(1);
             } else {
                 result = timeBasedAverage(timePoint,
-                        converter.get(fixPair.getA()), fixPair.getA().getTimePoint(),
-                        converter.get(fixPair.getB()), fixPair.getB().getTimePoint());
+                        converter.apply(fixPair.getA()), fixPair.getA().getTimePoint(),
+                        converter.apply(fixPair.getB()), fixPair.getB().getTimePoint());
             }
         }
         return result;
@@ -400,7 +400,8 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     protected boolean add(FixType fix, boolean replace) {
         lockForWrite();
         try {
-            return addWithoutLocking(fix, replace);
+            final AddResult addResult =  addWithoutLocking(fix, replace);
+            return addResult == AddResult.ADDED || addResult == AddResult.REPLACED;
         } finally {
             unlockAfterWrite();
         }
@@ -414,14 +415,14 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
      *            comparator used for the {@link #fixes} set. By default this is a comparator only comparing the
      *            fixes' time stamps. Subclasses may use different comparator implementations.
      */
-    protected boolean addWithoutLocking(FixType fix, boolean replace) {
-        final boolean result;
+    protected AddResult addWithoutLocking(FixType fix, boolean replace) {
+        final AddResult result;
         final boolean added = getInternalRawFixes().add(fix);
         if (!added && replace) {
             getInternalRawFixes().remove(fix);
-            result = getInternalRawFixes().add(fix);
+            result = getInternalRawFixes().add(fix) ? AddResult.REPLACED : AddResult.NOT_ADDED;
         } else {
-            result = added;
+            result = added ? AddResult.ADDED : AddResult.NOT_ADDED;
         }
         return result;
     }

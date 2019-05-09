@@ -3,7 +3,10 @@ package com.sap.sailing.expeditionconnector;
 import java.io.Serializable;
 import java.util.UUID;
 
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.impl.NamedImpl;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 public class ExpeditionDeviceConfiguration extends NamedImpl implements Serializable {
     private static final long serialVersionUID = -7819154195403387909L;
@@ -71,5 +74,21 @@ public class ExpeditionDeviceConfiguration extends NamedImpl implements Serializ
     public String toString() {
         return "ExpeditionDeviceConfiguration [deviceUuid=" + deviceUuid + ", expeditionBoatId=" + expeditionBoatId
                 + ", getName()=" + getName() + "]";
+    }
+
+    /**
+     * Get TypeRelativeObjectIdentifer. Needs a parameter for the servername passed as a String parameter.
+     * 
+     */
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String serverName) {
+        return getTypeRelativeObjectIdentifier(serverName, getName());
+    }
+    
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String serverName, String name) {
+        return new TypeRelativeObjectIdentifier(serverName, name);
+    }
+
+    public HasPermissions getType() {
+        return SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION;
     }
 }

@@ -7,6 +7,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.MultiTimeRange;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 
 public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements TimeRange {
@@ -108,6 +109,11 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
     @Override
     public boolean includes(TimePoint timePoint) {
         return from().compareTo(timePoint) <= 0 && to().compareTo(timePoint) > 0;
+    }
+
+    @Override
+    public boolean includes(Timed timed) {
+        return timed == null ? false : includes(timed.getTimePoint());
     }
 
     @Override

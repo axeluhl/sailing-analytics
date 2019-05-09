@@ -25,6 +25,7 @@ import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.impl.TracTracAdapterFactoryImpl;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
@@ -76,7 +77,8 @@ public class RaceTrackerTest {
                 EmptyRegattaLogStore.INSTANCE, /* timeoutInMilliseconds */60000, tracTracUsername, tracTracPassword,
                 TracTracConnectionConstants.ONLINE_STATUS, TracTracConnectionConstants.ONLINE_VISIBILITY,
                 /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false,
-                /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
+                new DefaultRaceTrackingHandler());
         logger.info("Calling raceHandle.getRaces()");
         RaceDefinition race = raceHandle.getRace(); // wait for RaceDefinition to be completely wired in Regatta
         logger.info("Obtained race: "+race);
@@ -135,7 +137,8 @@ public class RaceTrackerTest {
                         EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, /* timeoutInMilliseconds */60000,
                         tracTracUsername, tracTracPassword, TracTracConnectionConstants.ONLINE_STATUS,
                         TracTracConnectionConstants.ONLINE_VISIBILITY, /* trackWind */ false,
-                        /* correctWindDirectionByMagneticDeclination */ false, /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                        /* correctWindDirectionByMagneticDeclination */ false, /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
+                        new DefaultRaceTrackingHandler());
         TrackedRegatta newTrackedRegatta = myRaceHandle.getTrackedRegatta();
         assertNotSame(oldTrackedRegatta, newTrackedRegatta);
         TrackedRace newTrackedRace = getTrackedRace(newTrackedRegatta);
@@ -164,7 +167,8 @@ public class RaceTrackerTest {
                         EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, /* timeoutInMilliseconds */60000,
                         tracTracUsername, tracTracPassword, TracTracConnectionConstants.ONLINE_STATUS,
                         TracTracConnectionConstants.ONLINE_VISIBILITY, /* trackWind */ false,
-                        /* correctWindDirectionByMagneticDeclination */ false, /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                        /* correctWindDirectionByMagneticDeclination */ false, /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
+                        new DefaultRaceTrackingHandler());
         TrackedRegatta newTrackedEvent = myRaceHandle.getTrackedRegatta();
         TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
         // expecting a new tracked race to be created when starting over with tracking

@@ -16,6 +16,7 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.IconResources;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -25,7 +26,6 @@ import com.sap.sse.security.ui.client.component.AbstractUserDialog.UserData;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.shared.oauthlogin.OAuthLogin;
 import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class LoginPanel extends HorizontalPanel implements UserStatusEventHandler {
     public final UserManagementServiceAsync userManagementService;
@@ -80,7 +80,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
                     public void ok(final UserData userData) {
                         userManagementService.createSimpleUser(userData.getUsername(), userData.getEmail(), userData.getPassword(),
                                 /* fullName */ null, /* company */ null, LocaleInfo.getCurrentLocale().getLocaleName(),
-                                EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
+                                        EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
                                 new MarkedAsyncCallback<UserDTO>(new AsyncCallback<UserDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {

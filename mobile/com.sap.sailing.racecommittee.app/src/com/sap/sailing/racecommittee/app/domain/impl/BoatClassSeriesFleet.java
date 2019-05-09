@@ -14,7 +14,7 @@ public class BoatClassSeriesFleet {
     private int seriesOrder;
     private int fleetOrder;
     private Fleet fleet;
-    
+
     private static BoatClass getBoatClassForRace(ManagedRace managedRace) {
         if (managedRace.getRaceGroup().getBoatClass() == null) {
             return new BoatClassImpl(managedRace.getRaceGroup().getName(), false);
@@ -53,7 +53,7 @@ public class BoatClassSeriesFleet {
     public String getSeriesName() {
         return series.getName();
     }
-    
+
     public int getSeriesOrder() {
         return seriesOrder;
     }
@@ -69,10 +69,9 @@ public class BoatClassSeriesFleet {
     public Fleet getFleet() {
         return fleet;
     }
-    
 
     private final static String DEFAULT = "Default";
-    
+
     public String getDisplayName() {
         String result = getBoatClass().getName();
         if (!getSeries().getName().equals(DEFAULT)) {

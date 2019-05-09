@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
@@ -32,13 +33,13 @@ import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.util.ThreadLocalTransporter;
 
 public class TestDeadlockInRegattaListener {
     @Rule
-    public Timeout globalTimeout = new Timeout(5000); // fail after 1s
+    public Timeout globalTimeout = Timeout.millis(5000); // fail after 1s
 
     @Test
     public void testDeadlockInRegattaListener() throws InterruptedException, BrokenBarrierException, MalformedURLException, IOException {
@@ -50,10 +51,11 @@ public class TestDeadlockInRegattaListener {
         final String regattaName = "Test Regatta";
         final RegattaImpl regatta = new RegattaImpl(
                 /* raceLogStore */ null, EmptyRegattaLogStore.INSTANCE, regattaName,
-                new BoatClassImpl("49er", true), /* can boats change */ false, /* startDate */ null, /* endDate */ null,
+                new BoatClassImpl("49er", true), /* can boats change */ false, CompetitorRegistrationType.CLOSED,
+                /* startDate */ null, /* endDate */ null,
                 /* trackedRegattaRegistry */ null, new LowPoint(), UUID.randomUUID(),
                 /* courseArea */ null, /* controlTrackingFromStartAndFinishTimes */ true,
-                OneDesignRankingMetric::new);
+                OneDesignRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString());
         DynamicTrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta) {
             private static final long serialVersionUID = -3599667964201700780L;
 

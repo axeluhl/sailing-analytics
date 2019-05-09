@@ -3,10 +3,11 @@ package com.sap.sailing.domain.persistence;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.mongodb.DB;
 import com.mongodb.DBObject;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
@@ -17,7 +18,6 @@ import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.SailingServerConfiguration;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -160,11 +160,11 @@ public interface MongoObjectFactory {
 
     void removeBoat(Boat boat);
 
-    DB getDatabase();
+    MongoDatabase getDatabase();
 
-    void storeDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration);
+    void storeDeviceConfiguration(DeviceConfiguration configuration);
 
-    void removeDeviceConfiguration(DeviceConfigurationMatcher matcher);
+    void removeDeviceConfiguration(UUID id);
     
     void removeRaceLog(RaceLogIdentifier identifier);
     

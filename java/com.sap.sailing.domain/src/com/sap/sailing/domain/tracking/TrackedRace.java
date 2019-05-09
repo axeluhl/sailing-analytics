@@ -24,7 +24,6 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -42,6 +41,7 @@ import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
@@ -62,6 +62,10 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -78,7 +82,8 @@ import com.sap.sse.common.Util.Pair;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomainFactory> {
+public interface TrackedRace
+        extends Serializable, IsManagedByCache<SharedDomainFactory>, WithQualifiedObjectIdentifier {
     final Duration START_TRACKING_THIS_MUCH_BEFORE_RACE_START = Duration.ONE_MINUTE.times(5);
     final Duration STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH = Duration.ONE_SECOND.times(30);
 
@@ -569,10 +574,17 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     Wind getDirectionFromStartToNextMark(TimePoint at);
 
     /**
-     * Uses a {@link DouglasPeucker Douglas-Peucker} algorithm to approximate this track's fixes starting at time
-     * <code>from</code> until time point <code>to</code> such that the maximum distance between the track's fixes and
-     * the approximation is at most <code>maxDistance</code>. The approximation's fixes are original fixes from
-     * the competitor's {@link GPSFixTrack track}.
+     * Traverses the competitor's {@link GPSFixTrack track} between {@code from} and {@code to} (both inclusive) and
+     * returns those fixes where significant changes in the course over ground (COG) are observed, indicating a possibly
+     * relevant maneuver. The {@link SpeedWithBearing#getBearing() COG} change is calculated over a time window the size
+     * of the typical maneuver duration, but at least covering two fixes in order to also cover the case of low sampling
+     * rates. If in any such window the COG change exceeds the threshold, the window is extended as far as the COG
+     * change grows, then from the extended window the fix with the highest COG change to its successor is returned. The
+     * next window analysis will start after the end of the current window, avoiding duplicates in the result.
+     * <p>
+     * 
+     * If the precondition that the {@code competitor} must be {@link RaceDefinition#getCompetitors() part of} the
+     * {@link #getRace() race} isn't met, a {@code NullPointerException} will result.
      */
     Iterable<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to);
 
@@ -1126,4 +1138,37 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode,
             WindLegTypeAndLegBearingCache cache);
 
+    /**
+     * Obtains a quick, rough summary of the wind conditions during this race, based on a few wind samples at the
+     * beginning, in the middle and at the end of the race. This is summarized in a min and max wind speed as well
+     * as a single average wind direction.
+     */
+    WindSummary getWindSummary();
+    
+    @Override
+    default QualifiedObjectIdentifier getIdentifier() {
+        return getIdentifier(getRaceIdentifier());
+    }
+    
+    public static QualifiedObjectIdentifier getIdentifier(RegattaAndRaceIdentifier regattaAndRaceId) {
+        return getSecuredDomainType().getQualifiedObjectIdentifier(regattaAndRaceId.getTypeRelativeObjectIdentifier());
+    }
+
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getRaceIdentifier().getTypeRelativeObjectIdentifier();
+    }
+
+    @Override
+    default String getName() {
+        return getRaceIdentifier().getRaceName() + "@" + getRaceIdentifier().getRegattaName();
+    }
+
+    @Override
+    default HasPermissions getType() {
+        return getSecuredDomainType();
+    }
+    
+    public static HasPermissions getSecuredDomainType() {
+        return SecuredDomainType.TRACKED_RACE;
+    }
 }

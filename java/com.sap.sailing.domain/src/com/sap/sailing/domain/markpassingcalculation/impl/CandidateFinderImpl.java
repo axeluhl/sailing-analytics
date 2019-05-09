@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -580,7 +581,17 @@ public class CandidateFinderImpl implements CandidateFinder {
                             // case we can quickly obtain the next "firstFixAfter" by simply calling next() on the iterator.
                             firstFixAfterIterator = track.getFixesIterator(t, /* inclusive */ false);
                         }
-                        if (firstFixAfterIterator.hasNext()) {
+                        boolean firstFixAfterIteratorHasNext;
+                        try {
+                            firstFixAfterIteratorHasNext = firstFixAfterIterator.hasNext();
+                        } catch (ConcurrentModificationException e) {
+                            // the iterator may have been obtained in a previous look execution, and another
+                            // fix may have been added to the track; let's obtain the iterator again. We're
+                            // under the track's read lock here:
+                            firstFixAfterIterator = track.getFixesIterator(t, /* inclusive */ false);
+                            firstFixAfterIteratorHasNext = firstFixAfterIterator.hasNext();
+                        }
+                        if (firstFixAfterIteratorHasNext) {
                             fixAfter = firstFixAfterIterator.next();
                         } else {
                             fixAfter = null;
@@ -599,9 +610,14 @@ public class CandidateFinderImpl implements CandidateFinder {
                 }
             }
         }
+        // affectedFixes now contains all fixes whose "candidate status" may have changed due to the fix insertion
         lastIterationFix = null;
         lastIterationAfterFix = null;
         firstFixAfterIterator = null;
+        // for all affected fixes check whether they are a distance candidate now; this requires checking left and right
+        // of all affected fixes. Note the difference with the left/right-looking above: there, it was used to determine
+        // all fixes whose candidate status may have changed. Here we look left/right for each affected fix to ultimately
+        // determine whether or not they are a candidate.
         for (GPSFixMoving fix : affectedFixes) {
             Position p = null;
             GPSFixMoving fixBefore;
@@ -620,7 +636,17 @@ public class CandidateFinderImpl implements CandidateFinder {
                     // case we can quickly obtain the next "firstFixAfter" by simply calling next() on the iterator.
                     firstFixAfterIterator = track.getFixesIterator(timePoint, /* inclusive */ false);
                 }
-                if (firstFixAfterIterator.hasNext()) {
+                boolean firstFixAfterIteratorHasNext;
+                try {
+                    firstFixAfterIteratorHasNext = firstFixAfterIterator.hasNext();
+                } catch (ConcurrentModificationException e) {
+                    // the iterator may have been obtained in a previous look execution, and another
+                    // fix may have been added to the track; let's obtain the iterator again. We're
+                    // under the track's read lock here:
+                    firstFixAfterIterator = track.getFixesIterator(timePoint, /* inclusive */ false);
+                    firstFixAfterIteratorHasNext = firstFixAfterIterator.hasNext();
+                }
+                if (firstFixAfterIteratorHasNext) {
                     fixAfter = firstFixAfterIterator.next();
                 } else {
                     fixAfter = null;
@@ -632,7 +658,7 @@ public class CandidateFinderImpl implements CandidateFinder {
             }
             if (fixBefore != null && fixAfter != null) {
                 TimePoint t = null;
-                Map<Waypoint, List<Distance>> fixDistances = getDistances(c, fix);
+                Map<Waypoint, List<Distance>> fixDistances = getDistances(c, fix); // TODO bug4831 consider interpolating between fixBefore/fix/fixAfter to handle small sampling rates better
                 Map<Waypoint, List<Distance>> fixDistancesBefore = getDistances(c, fixBefore);
                 Map<Waypoint, List<Distance>> fixDistancesAfter = getDistances(c, fixAfter);
                 for (Waypoint w : waypoints) {
@@ -664,7 +690,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                                     t = fix.getTimePoint();
                                     final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(race, t);
                                     p = fix.getPosition();
-                                    Double newProbability = getDistanceBasedProbability(w, t, dis, markPositionCache);
+                                    Double newProbability = getDistanceBasedProbability(w, t, dis, markPositionCache, race.getBoatOfCompetitor(c).getBoatClass().getHullLength());
                                     if (newProbability != null) {
                                         // FIXME why not generate the candidate here where we have all information at hand?
                                         final double newOnCorrectSideOfWaypointPenalty = getSidePenalty(w, p, t, portMark, markPositionCache);
@@ -818,14 +844,14 @@ public class CandidateFinderImpl implements CandidateFinder {
                             if (xte == 0) {
                                 newCandidates.put(Arrays.asList(fix, fix), createCandidate(c, 0, 0, t, t, w, true));
                             } else {
-                                if (fixAfter != null && xtesAfter != null && !xtesAfter.get(w).isEmpty()) {
+                                if (fixAfter != null && xtesAfter != null && xtesAfter.get(w) != null && !xtesAfter.get(w).isEmpty()) {
                                     Double xteAfter = xtesAfter.get(w).get(0).getMeters();
                                     if (xteAfter != null && xte < 0 != xteAfter <= 0) {
                                         newCandidates.put(Arrays.asList(fix, fixAfter),
                                                 createCandidate(c, xte, xteAfter, t, tAfter, w, true));
                                     }
                                 }
-                                if (fixBefore != null && !xtesBefore.get(w).isEmpty()) {
+                                if (fixBefore != null && xtesBefore.get(w) != null && !xtesBefore.get(w).isEmpty()) {
                                     Double xteBefore = xtesBefore.get(w).get(0).getMeters();
                                     if (xte < 0 != xteBefore <= 0) {
                                         newCandidates.put(Arrays.asList(fixBefore, fix),
@@ -892,6 +918,11 @@ public class CandidateFinderImpl implements CandidateFinder {
     }
 
     /**
+     * Returns a non-{@code null} mapping from the waypoints currently in the course, telling the {@code fix}'s
+     * cross-track error for each waypoint. There may be "excess" entries from older waypoints that have already
+     * been removed from the course which may be reflected only by a later call to {@link #invalidateAfterCourseChange(int)}.
+     * See also bug 5021.
+     * 
      * @return if for a waypoint the mark positions are known, the resulting map will contain a non-empty list that for
      *         each way of passing the waypoint (e.g., for a gate the competitor can round the left or the right mark) the
      *         cross track error of the {@code fix} to the virtual line that must be crossed is contained; if the mark
@@ -899,15 +930,18 @@ public class CandidateFinderImpl implements CandidateFinder {
      */
     private Map<Waypoint, List<Distance>> getXTE(Competitor c, GPSFix fix) {
         Map<Waypoint, List<Distance>> result = xteCache.get(c).get(fix);
-        if (result == null) {
-            result = new HashMap<>();
-            Position p = fix.getPosition();
-            TimePoint t = fix.getTimePoint();
+        Course course = race.getRace().getCourse();
+        course.lockForRead();
+        try {
+            if (result == null) {
+                result = new HashMap<>();
+                xteCache.get(c).put(fix, result);
+            }
+            final Position p = fix.getPosition();
+            final TimePoint t = fix.getTimePoint();
             final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(race, t);
-            Course course = race.getRace().getCourse();
-            course.lockForRead();
-            try {
-                for (Waypoint w : course.getWaypoints()) {
+            for (Waypoint w : course.getWaypoints()) {
+                if (!result.containsKey(w)) { // bug5021: calculate in case waypoint was added since last call
                     List<Distance> distances = new ArrayList<>();
                     result.put(w, distances);
                     for (Util.Pair<Position, Bearing> crossingInfo : getCrossingInformation(w, t, markPositionCache)) {
@@ -916,10 +950,9 @@ public class CandidateFinderImpl implements CandidateFinder {
                         }
                     }
                 }
-            } finally {
-                course.unlockAfterRead();
             }
-            xteCache.get(c).put(fix, result);
+        } finally {
+            course.unlockAfterRead();
         }
         return result;
     }
@@ -939,7 +972,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         final Distance d = portMark ? distances.get(0) : distances.get(1);
         final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(race, t);
         final double sidePenalty = getSidePenalty(w, p, t, portMark, markPositionCache);
-        final Double distanceBasedProbability = getDistanceBasedProbability(w, t, d, markPositionCache);
+        final Double distanceBasedProbability = getDistanceBasedProbability(w, t, d, markPositionCache, race.getBoatOfCompetitor(c).getBoatClass().getHullLength());
         double probability = distanceBasedProbability == null ? sidePenalty : distanceBasedProbability * sidePenalty;
         final Double passesInTheRightDirectionProbability = passesInTheRightDirection(w, xte1, xte2, portMark);
         // null would mean "unknown"; no penalty for those cases
@@ -1274,9 +1307,10 @@ public class CandidateFinderImpl implements CandidateFinder {
      * @return a probability based on the distance to <code>w</code>; for single marks the average leg lengths before
      *         and after the waypoint {@code w} is also taken into account; for two-mark waypoints such as gates and
      *         lines it seems fair to assume that the length of the adjacent legs should not play a role in how accurate
-     *         the competitor needs to pass the waypoint.
+     *         the competitor needs to pass the waypoint. Here, the hull length is taken into account, assuming that the distance
+     *         from the waypoint will be influenced by the size of the boat, specifically in "traffic."
      */
-    private Double getDistanceBasedProbability(Waypoint w, TimePoint t, Distance distance, MarkPositionAtTimePointCache markPositionCache) {
+    private Double getDistanceBasedProbability(Waypoint w, TimePoint t, Distance distance, MarkPositionAtTimePointCache markPositionCache, Distance hullLength) {
         assert t.equals(markPositionCache.getTimePoint());
         assert race == markPositionCache.getTrackedRace();
         assert distance.getMeters() >= 0;
@@ -1284,15 +1318,16 @@ public class CandidateFinderImpl implements CandidateFinder {
         if (Util.size(w.getControlPoint().getMarks())>1) {
             result = 1 / (STRICTNESS_OF_DISTANCE_BASED_PROBABILITY/* Raising this will make it stricter */
                     // for a two-mark control point such as a gate or a line only consider the relation of
-                    // the distance to 150x the typical HDOP error; 
-                    * Math.abs(Math.max(0.0, distance.divide(GPSFix.TYPICAL_HDOP.scale(150)))) + 1);
+                    // the distance to 150x the boat length after taking off 2xHDOP and two boat lengths 
+                    * Math.abs(Math.max(0.0, distance.add(GPSFix.TYPICAL_HDOP.add(hullLength).scale(-2)).
+                            divide(hullLength.scale(150)))) + 1);
         } else {
             Distance legLength = getAverageLengthOfAdjacentLegs(t, w, markPositionCache);
             if (legLength != null) {
                 result = 1 / (STRICTNESS_OF_DISTANCE_BASED_PROBABILITY/* Raising this will make it stricter */
                         // reduce distance by 2x the typical HDOP, accounting for the possibility that some distance from the mark
                         // may have been caused by inaccurate GPS tracking
-                        * Math.abs(Math.max(0.0, distance.add(GPSFix.TYPICAL_HDOP.scale(-2)).divide(legLength))) + 1);
+                        * Math.abs(Math.max(0.0, distance.add(GPSFix.TYPICAL_HDOP.add(hullLength).scale(-2)).divide(legLength))) + 1);
             } else {
                 result = null;
             }
