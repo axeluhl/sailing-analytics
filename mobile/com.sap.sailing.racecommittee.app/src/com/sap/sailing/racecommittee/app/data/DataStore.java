@@ -66,9 +66,9 @@ public interface DataStore {
 
     void addMark(Mark mark);
 
-    CourseBase getLastPublishedCourseDesign();
+    CourseBase getLastPublishedCourseDesign(RaceGroup raceGroup);
 
-    void setLastPublishedCourseDesign(CourseBase courseData);
+    void setLastPublishedCourseDesign(RaceGroup raceGroup, CourseBase courseData);
 
     Set<RaceGroup> getRaceGroups();
 
