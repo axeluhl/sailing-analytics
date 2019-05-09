@@ -11,6 +11,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -24,6 +25,7 @@ import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.xmlexport.LeaderboardData;
 import com.sap.sse.common.impl.DegreeBearingImpl;
+import com.sap.sse.security.SecurityService;
 
 public class XMLExportTest extends OnlineTracTracBasedTest {
     
@@ -60,7 +62,9 @@ public class XMLExportTest extends OnlineTracTracBasedTest {
         FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("ESS 2014 Nice", new ThresholdBasedResultDiscardingRuleImpl(new int[] {0}), new HighPointFirstGets10LastBreaksTie(), 
                 null);
         leaderboard.addRace(getTrackedRace(), "R1", false);
-        LeaderboardData leaderboardData = new LeaderboardData(leaderboard, new SecurityServiceMock());
+        SecurityService securityService = Mockito.mock(SecurityService.class);
+        Mockito.when(securityService.hasCurrentUserReadPermission(Mockito.any())).thenReturn(true);
+        LeaderboardData leaderboardData = new LeaderboardData(leaderboard, securityService);
         try {
             leaderboardData.perform();
         } catch (Exception e) {

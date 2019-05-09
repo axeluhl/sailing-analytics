@@ -1194,7 +1194,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 return result;
             });
         }
-        CompetitorAndBoatJsonSerializer serializer = CompetitorAndBoatJsonSerializer.create();
+        CompetitorAndBoatJsonSerializer serializer = CompetitorAndBoatJsonSerializer.create(/* serializeNonPublicCompetitorFields */ false);
         JSONArray result = new JSONArray();
         for (final Competitor c : competitors) {
             Boat boat = trackedRace.getBoatOfCompetitor(c);

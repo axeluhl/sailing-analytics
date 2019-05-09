@@ -40,6 +40,7 @@ public class UserGroupRoleDefinitionPanel extends Composite
     private final SingleSelectionModel<UserGroupDTO> userGroupSelectionModel;
     private final SuggestBox suggestRole;
     private final UserGroupRoleResources userGroupRoleResources = GWT.create(UserGroupRoleResources.class);
+    private final RoleDefinitionSuggestOracle oracle;
 
     public UserGroupRoleDefinitionPanel(final UserService userService, final StringMessages stringMessages,
             Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter,
@@ -49,8 +50,9 @@ public class UserGroupRoleDefinitionPanel extends Composite
         this.userGroupSelectionModel = userGroupSelectionModel;
         final VerticalPanel mainPanel = new VerticalPanel();
 
+        oracle = new RoleDefinitionSuggestOracle(userService.getUserManagementService(), stringMessages);
         suggestRole = new SuggestBox(
-                new RoleDefinitionSuggestOracle(userService.getUserManagementService(), stringMessages));
+                oracle);
         userGroupRoleResources.css().ensureInjected();
         suggestRole.addStyleName(userGroupRoleResources.css().roleDefinitionSuggest());
         suggestRole.getElement().setPropertyString("placeholder", stringMessages.enterRoleName());
@@ -93,6 +95,10 @@ public class UserGroupRoleDefinitionPanel extends Composite
             ((RoleDefinitionSuggestOracle) suggestRole.getSuggestOracle())
                     .resetAndRemoveExistingRoles(selectedObject.getRoleDefinitionMap().keySet());
         }
+    }
+
+    public void refreshSuggest() {
+        oracle.refresh();
     }
 
     /** Creates the button bar with add/remove/refresh buttons and the SuggestBox. */
