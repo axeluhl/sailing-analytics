@@ -10,13 +10,13 @@ import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 
 public interface MediaService extends RemoteService {
 
-    Iterable<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
+    Iterable<MediaTrackWithSecurityDTO> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
 
-    Iterable<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
+    Iterable<MediaTrackWithSecurityDTO> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
 
     Iterable<MediaTrackWithSecurityDTO> getAllMediaTracks();
 
-    String addMediaTrack(MediaTrack mediaTrack);
+    MediaTrackWithSecurityDTO addMediaTrack(MediaTrack mediaTrack);
 
     void deleteMediaTrack(MediaTrack mediaTrack);
 
