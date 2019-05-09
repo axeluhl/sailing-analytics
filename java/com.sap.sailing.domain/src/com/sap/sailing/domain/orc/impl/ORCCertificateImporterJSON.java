@@ -152,19 +152,24 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
                 JSONObject allowances = (JSONObject) object.get("Allowances");
                 for (Object aKey : allowances.keySet()) {
                     JSONArray array = (JSONArray) allowances.get(aKey);
+                    
+                    System.out.println(aKey);
 
                     if (((String) aKey).equals("BeatAngle")) {
                         for (int i = 0; i < array.size(); i++) {
                             beatAngles.put(new KnotSpeedImpl(twsDistances[i]),
                                     new DegreeBearingImpl(((Number) array.get(i)).doubleValue()));
                         }
-                        break;
-                    } else if (((String) aKey).equals("GybeAngle")) {
+                        continue;
+                        //break is WRONG HERE! beak get's out of the higher switch!!!
+                    }
+                    
+                    if (((String) aKey).equals("GybeAngle")) {
                         for (int i = 0; i < array.size(); i++) {
                             gybeAngles.put(new KnotSpeedImpl(twsDistances[i]),
                                     new DegreeBearingImpl(((Number) array.get(i)).doubleValue()));
                         }
-                        break;
+                        continue;
                     }
 
                     Map<Speed, Duration> twsMap = new HashMap<>();

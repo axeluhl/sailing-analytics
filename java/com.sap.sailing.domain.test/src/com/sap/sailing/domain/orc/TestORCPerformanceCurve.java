@@ -46,6 +46,7 @@ public class TestORCPerformanceCurve {
         ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) importer.getCertificate("GER 5549")
                 .getPerformanceCurve();
 
+        assertNotNull(course);
         assertNotNull(performanceCurve);
         assertNotNull(performanceCurve.getLagrangeInterpolationPerTrueWindSpeed(new KnotSpeedImpl(6)));
     }
@@ -54,8 +55,11 @@ public class TestORCPerformanceCurve {
     public void testConstructedCourse() throws IOException, ParseException {
         ORCCertificateImporter importer = new ORCCertificateImporterJSON(
                 new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
-        ORCPerformanceCurve performanceCurve = importer.getCertificate("GER 5549").getPerformanceCurve();
+        ORCCertificate certificate = importer.getCertificate("GER 5549");
+        ORCPerformanceCurve performanceCurve = certificate.getPerformanceCurve();
 
+        assertNotNull(certificate);
+        assertNotNull(course);
         assertNotNull(performanceCurve);
     }
 

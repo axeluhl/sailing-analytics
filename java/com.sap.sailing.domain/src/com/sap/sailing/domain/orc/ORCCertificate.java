@@ -44,7 +44,10 @@ public class ORCCertificate {
 
         if ((String) getValue("C_Type") == "INTL") {
             initializePerformanceCurve();
+        } else {
+            initializePerformanceCurve();
         }
+        
     }
 
     private void initializePerformanceCurve() {
@@ -69,7 +72,7 @@ public class ORCCertificate {
 
         for (Speed tws : map.keySet()) {
             map.get(tws).put(beatAngles.get(tws), predefinedCourses.get("Beat").get(tws));
-            map.get(tws).put(gybeAngles.get(tws), predefinedCourses.get("Gybe").get(tws));
+            map.get(tws).put(gybeAngles.get(tws), predefinedCourses.get("Run").get(tws));
         }
 
         performanceCurve = new ORCPerformanceCurveImpl(map, beatAngles, gybeAngles);

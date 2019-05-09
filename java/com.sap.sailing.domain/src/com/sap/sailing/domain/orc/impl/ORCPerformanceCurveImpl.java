@@ -109,7 +109,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         return Collections.unmodifiableMap(writeableLagrange);
     }
 
-    PolynomialFunctionLagrangeForm getLagrangeInterpolationPerTrueWindSpeed(Speed trueWindSpeed) {
+    public PolynomialFunctionLagrangeForm getLagrangeInterpolationPerTrueWindSpeed(Speed trueWindSpeed) {
         return lagrangePolynomialsPerTrueWindSpeed.getOrDefault(trueWindSpeed, null);
     }
 
