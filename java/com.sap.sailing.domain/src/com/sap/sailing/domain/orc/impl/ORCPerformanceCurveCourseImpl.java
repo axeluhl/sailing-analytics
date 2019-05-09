@@ -11,11 +11,11 @@ public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse 
 
     private List<ORCPerformanceCurveLeg> legs;
     private Distance totalLength;
-    
+
     public ORCPerformanceCurveCourseImpl(List<ORCPerformanceCurveLeg> legs) {
         this.legs = legs;
         totalLength = new NauticalMileDistance(0);
-        
+
         for (ORCPerformanceCurveLeg leg : legs) {
             totalLength = new NauticalMileDistance(totalLength.getNauticalMiles() + leg.getLength().getNauticalMiles());
         }
@@ -36,4 +36,4 @@ public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse 
         return legs;
     }
 
-}       
+}

@@ -27,7 +27,7 @@ public class ORCCertificate {
     private Map<String, Map<Speed, Duration>> predefinedCourses;
     private Map<Speed, Bearing> beatAngles;
     private Map<Speed, Bearing> gybeAngles;
-    private ORCPerformanceCurveImpl performanceCurve;
+    private ORCPerformanceCurve performanceCurve;
 
     public ORCCertificate(Map<String, String> general, Map<String, Number> hull, Map<String, Number> sails,
             Map<String, Number> scoring, Map<String, Map<Speed, Duration>> twaCourses,
@@ -94,5 +94,9 @@ public class ORCCertificate {
         }
 
         return result;
+    }
+    
+    ORCPerformanceCurve getPerformanceCurve() {
+        return performanceCurve;
     }
 }

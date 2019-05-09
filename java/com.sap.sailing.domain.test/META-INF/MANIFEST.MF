@@ -33,5 +33,6 @@ Require-Bundle: com.sap.sailing.domain,
  org.mongodb.mongo-java-driver;bundle-version="3.6.4"
 Export-Package: com.sap.sailing.domain.test,
  com.sap.sailing.domain.test.mock
-Import-Package: org.osgi.util.tracker
+Import-Package: org.apache.commons.math.analysis.polynomials;version="2.1.0",
+ org.osgi.util.tracker
 Automatic-Module-Name: com.sap.sailing.domain.test

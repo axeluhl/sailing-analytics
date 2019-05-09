@@ -1,13 +1,21 @@
 package com.sap.sailing.domain.orc;
 
+import static org.junit.Assert.assertNotNull;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
+import org.apache.commons.math.analysis.polynomials.PolynomialFunctionLagrangeForm;
+import org.json.simple.parser.ParseException;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
+import com.sap.sailing.domain.orc.impl.ORCCertificateImporterJSON;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveCourseImpl;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveImpl;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveLegImpl;
@@ -17,7 +25,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 public class TestORCPerformanceCurve {
 
     private static ORCPerformanceCurveCourse course = null;
-    
+
     @BeforeClass
     public static void initialize() {
         List<ORCPerformanceCurveLeg> legs = new ArrayList<>();
@@ -29,11 +37,26 @@ public class TestORCPerformanceCurve {
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.17), new DegreeBearingImpl(180)));
         course = new ORCPerformanceCurveCourseImpl(legs);
     }
-    
+
     @Test
-    public void testLagrangeInterpolation() {
-        //TODO Moqutio? Or use just a normal Certificate from Import?
-        //ORCPerformanceCurve = new ORCPerformanceCurveImpl(twaAllowances, beatAngles, gybeAngles);
+    public void testLagrangeInterpolation() throws IOException, ParseException {
+        // Moqutio? Or use just a normal Certificate from Import?
+        ORCCertificateImporter importer = new ORCCertificateImporterJSON(
+                new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
+        ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) importer.getCertificate("GER 5549")
+                .getPerformanceCurve();
+
+        assertNotNull(performanceCurve);
+        assertNotNull(performanceCurve.getLagrangeInterpolationPerTrueWindSpeed(new KnotSpeedImpl(6)));
     }
-    
+
+    @Test
+    public void testConstructedCourse() throws IOException, ParseException {
+        ORCCertificateImporter importer = new ORCCertificateImporterJSON(
+                new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
+        ORCPerformanceCurve performanceCurve = importer.getCertificate("GER 5549").getPerformanceCurve();
+
+        assertNotNull(performanceCurve);
+    }
+
 }
