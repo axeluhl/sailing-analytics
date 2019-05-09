@@ -116,21 +116,36 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         for (ORCPerformanceCurveLeg leg : course.getLegs()) {
             allowancesPerLeg.put(leg, createAllowancePerLeg(leg));
         }
-        
+
+        for (Speed tws : ALLOWANCES_SPEED_DELTAS) {
+            Duration allowancePerTws = new MillisecondsDurationImpl(0);
+            
+            //for ()
+        }
         
         return result;
     }
     
     Map<Speed, Duration> createAllowancePerLeg(ORCPerformanceCurveLeg leg) throws FunctionEvaluationException {
         Map<Speed, Duration> result = new HashMap<>();
-        Bearing twa = leg.getTwa(); 
+        Double twa = leg.getTwa().getDegrees(); 
         
         for (Entry<Speed, PolynomialFunctionLagrangeForm> entry : lagrangePolynomialsPerTrueWindSpeed.entrySet()) {
-            result.put(entry.getKey(), Duration.ONE_SECOND.times(entry.getValue().value(twa.getDegrees())) );
-        }
-        
-        for (Speed tws : ALLOWANCES_SPEED_DELTAS) {
-            //TODO Go on here.
+          //TODO Case switching on TWA (0. TWA = 0; 1. TWA < Beat; 2. Beat < TWA < Gybe; 3. Gybe < TWA)
+            if (twa < beatAngles.get(entry.getKey()).getDegrees()) {
+                // Case 0&1
+                //result.put(entry.getKey(), Duration.ONE_SECOND.times(beatAngles.get(entry.getKey()) * leg.getLength().getNauticalMiles()));
+                // Need Beat Angle Allowances for different TWS, maybe Constructor and Structure need to be changed, to get direct access? What will be nicer?
+                // result will be: beatVMG * distance / cos(TWA)
+            }
+            else if (twa > gybeAngles.get(entry.getKey()).getDegrees()) {
+                // Case 3
+                // result will be: runVMG * distance / cos(TWA)
+            }
+            else {
+                // Case 2
+                result.put(entry.getKey(), Duration.ONE_SECOND.times(entry.getValue().value(twa) * leg.getLength().getNauticalMiles()));
+            }
         }
         
         return result;
