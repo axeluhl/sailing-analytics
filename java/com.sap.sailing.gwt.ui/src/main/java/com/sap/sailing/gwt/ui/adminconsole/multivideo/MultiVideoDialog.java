@@ -43,6 +43,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -339,10 +340,10 @@ public class MultiVideoDialog extends DialogBox {
                 MediaTrack mediaTrack = new MediaTrack(remoteFile.url, remoteFile.url,
                         remoteFile.startTime.plus(offsetTimeInMS), remoteFile.duration, remoteFile.mime,
                         selectedCandidates);
-                mediaService.addMediaTrack(mediaTrack, new AsyncCallback<String>() {
+                mediaService.addMediaTrack(mediaTrack, new AsyncCallback<MediaTrackWithSecurityDTO>() {
 
                     @Override
-                    public void onSuccess(String result) {
+                    public void onSuccess(MediaTrackWithSecurityDTO result) {
                         remoteFile.status = EStatus.DONE;
                         remoteFile.isWorking = false;
                         updateUI();
