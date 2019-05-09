@@ -1,5 +1,6 @@
 package com.sap.sse.util.impl;
 
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -24,30 +25,51 @@ public class ThreadPoolAwareFutureTask<V> extends FutureTask<V> implements Knows
     private static final Logger logger = Logger.getLogger(ThreadPoolAwareFutureTask.class.getName());
     private final KnowsExecutorAndTracingGet<V> getHelper = new KnowsExecutorAndTracingGetImpl<V>();
     private final Object callableOrRunnableIfLoggingFine;
+    private final Object delegate; // either a Callable or a Runnable whose type may or may not conform to the KnowsExecutor interface
     
     public ThreadPoolAwareFutureTask(ThreadPoolExecutor executor, Callable<V> callable) {
         super(callable);
+        delegate = callable;
         if (logger.isLoggable(Level.FINE)) {
             callableOrRunnableIfLoggingFine = callable;
         } else {
             callableOrRunnableIfLoggingFine = null;
         }
-        getHelper.setExecutorThisTaskIsScheduledFor(executor);
+        setExecutorThisTaskIsScheduledFor(executor);
     }
 
     public ThreadPoolAwareFutureTask(ThreadPoolExecutor executor, Runnable runnable, V result) {
         super(runnable, result);
+        delegate = runnable;
         if (logger.isLoggable(Level.FINE)) {
             callableOrRunnableIfLoggingFine = runnable;
         } else {
             callableOrRunnableIfLoggingFine = null;
         }
-        getHelper.setExecutorThisTaskIsScheduledFor(executor);
+        setExecutorThisTaskIsScheduledFor(executor);
+    }
+    
+    @Override
+    public void run() {
+        getHelper.setInheritableThreadLocalValues();
+        try {
+            super.run();
+        } finally {
+            getHelper.removeInheritableThreadLocalValues();
+        }
     }
     
     @Override
     public void setExecutorThisTaskIsScheduledFor(ThreadPoolExecutor executorThisTaskIsScheduledFor) {
+        if (delegate instanceof KnowsExecutor) {
+            ((KnowsExecutor) delegate).setExecutorThisTaskIsScheduledFor(executorThisTaskIsScheduledFor);
+        }
         this.getHelper.setExecutorThisTaskIsScheduledFor(executorThisTaskIsScheduledFor);
+    }
+
+    @Override
+    public Map<InheritableThreadLocal<Object>, Object> getThreadLocalValuesToInherit() {
+        return getHelper.getThreadLocalValuesToInherit();
     }
 
     @Override
