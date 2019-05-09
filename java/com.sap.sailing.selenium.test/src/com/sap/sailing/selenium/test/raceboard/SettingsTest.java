@@ -161,7 +161,6 @@ public class SettingsTest extends AbstractSeleniumTest {
         leaderboardSettingsPanelPO.selectDetailsAndDeselectOther(detailsToSelect);
         leaderboardSettingsPanelPO.setRefreshInterval(1);
         leaderboardSettingsDialog.pressOk(false, false);
-
         mapSettings = raceboard.openMapSettings();
         // verify default mode settings override custom user settings
         Assert.assertTrue(mapSettings.isWindUp());
@@ -171,12 +170,9 @@ public class SettingsTest extends AbstractSeleniumTest {
         Assert.assertFalse(mapSettings.isTransparentHoverlines());
         mapSettings.setWindUp(false);
         mapSettings.setTransparentHoverlines(false);
-        
         mapSettings.pressOk(false, false);
-
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
                 String.format(BMW_RACE, 1), "WINNING_LANES");
-
         leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
         leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
         selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
@@ -185,39 +181,31 @@ public class SettingsTest extends AbstractSeleniumTest {
         Assert.assertArrayEquals(detailsToSelect, selectedDetails);
         // verify that document settings are able to override custom user settings by a system default value
         Assert.assertEquals(1, leaderboardSettingsPanelPO.getRefreshInterval());
-
         leaderboardSettingsDialog.pressCancel();
-
         mapSettings = raceboard.openMapSettings();
         // Verify that mode settings are overridden by document settings
         Assert.assertFalse(mapSettings.isWindUp());
         // Verify custom user settings are independent for modes
         Assert.assertFalse(mapSettings.isTransparentHoverlines());
-
-        //FIXME uncomment when START_ANALYSIS mode can be handled by remote CI server
-         // verify that custom document settings override mode settings of other modes
+        // verify that custom document settings override mode settings of other modes
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
                 String.format(BMW_RACE, 1), "START_ANALYSIS");
         leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
         leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
         selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
-
         detailsToSelect = new DetailCheckboxInfo[] { DetailCheckboxInfo.RACE_GAP_TO_LEADER, // start analysis mode
                 DetailCheckboxInfo.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_START, // start analysis mode
                 DetailCheckboxInfo.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START, // start analysis mode
                 DetailCheckboxInfo.DISTANCE_TO_START_AT_RACE_START, // start analysis mode
+                DetailCheckboxInfo.TIME_BETWEEN_RACE_START_AND_COMPETITOR_START, // start analysis mode
                 DetailCheckboxInfo.SPEED_OVER_GROUND_AT_RACE_START, // start analysis mode
                 DetailCheckboxInfo.SPEED_OVER_GROUND_WHEN_STARTING, // start analysis mode
                 DetailCheckboxInfo.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_STARTING, // start analysis mode
-                DetailCheckboxInfo.TIME_BETWEEN_RACE_START_AND_COMPETITOR_START,
                 DetailCheckboxInfo.START_TACK, // start analysis mode
-
                 DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN,
-
                 DetailCheckboxInfo.TACK, DetailCheckboxInfo.JIBE, DetailCheckboxInfo.PENALTY_CIRCLE };
         Assert.assertArrayEquals(detailsToSelect, selectedDetails);
         leaderboardSettingsDialog.pressCancel();
-
         mapSettings = raceboard.openMapSettings();
         Assert.assertTrue(mapSettings.isWindUp());
     }
