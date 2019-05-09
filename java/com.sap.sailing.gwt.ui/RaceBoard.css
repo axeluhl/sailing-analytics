@@ -97,6 +97,13 @@ table {
 	padding-left: 45px;
 }
 
+.MapMetricLegend {
+	pointer-events: none;
+}
+.MapMetricLegendParentDiv {
+	padding-top: 65px;
+}
+
 .MapSimulationLegend {
 	pointer-events: all;
 }

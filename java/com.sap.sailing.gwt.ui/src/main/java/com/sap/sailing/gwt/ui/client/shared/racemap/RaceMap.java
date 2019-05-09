@@ -129,6 +129,7 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
+import com.sap.sailing.gwt.ui.shared.racemap.DetailTypeMetricOverlay;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
 import com.sap.sailing.gwt.ui.shared.racemap.RaceSimulationOverlay;
@@ -394,6 +395,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     private RaceSimulationOverlay simulationOverlay;
     private WindStreamletsRaceboardOverlay streamletOverlay;
+    private DetailTypeMetricOverlay metricOverlay;
     
     private final boolean isSimulationEnabled;
     
@@ -925,6 +927,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     simulationOverlay.addToMap();
                     showSimulationOverlay(settings.isShowSimulationOverlay());
                 }
+                metricOverlay = new DetailTypeMetricOverlay(getMap(), 0, coordinateSystem, stringMessages);
+                metricOverlay.setVisible(false);
+                metricOverlay.addToMap();
                 if (showHeaderPanel) {
                     createHeaderPanel(map);
                 }
@@ -2509,7 +2514,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     (int) Math.abs(lastFix.degreesBoatToTheWind) + " " + stringMessages.degreesShort()));
         }
 
-        vPanel.add(createInfoWindowLabelWithWidget(stringMessages.selectedDetailType(), createDetailTypeDropwdown(competitorDTO)));
+        vPanel.add(createInfoWindowLabelWithWidget(stringMessages.selectedDetailType(), createDetailTypeDropdown(competitorDTO)));
 
         if (raceIdentifier != null) {
             RegattaAndRaceIdentifier race = raceIdentifier;
@@ -2545,7 +2550,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return vPanel;
     }
 
-    private ListBox createDetailTypeDropwdown(CompetitorDTO competitor) {
+    private ListBox createDetailTypeDropdown(CompetitorDTO competitor) {
         ListBox lb = new ListBox();
         lb.addItem(stringMessages.none(), "none");
         if (sortedAvailableDetailTypes != null) {
@@ -2565,8 +2570,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 DetailType previous = selectedDetailType;
                 if (value == null || value.equals("none")) {
                     selectedDetailType = null;
+                    metricOverlay.setVisible(false);
                 } else {
                     selectedDetailType = DetailType.valueOfString(value);
+                    metricOverlay.setVisible(true);
                     if (!competitorSelection.isSelected(competitor)) {
                         competitorSelection.setSelected(competitor, true);
                     }
@@ -3076,6 +3083,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     @Override
     public void onColorMappingChanged() {
+        metricOverlay.updateLegend(fixesAndTails.getDetailValueBoundaries(), tailColorMapper, selectedDetailType);
         for (CompetitorDTO competitor : competitorSelection.getSelectedCompetitors()) {
             ColorlineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
             fixesAndTails.getTail(competitor).setOptions(options);
@@ -3153,7 +3161,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     protected void setTailVisualizer() {
-        ValueRangeFlexibleBoundaries boundaries = new ValueRangeFlexibleBoundaries(0, 10, 0.15, 1);
+        ValueRangeFlexibleBoundaries boundaries = new ValueRangeFlexibleBoundaries(0, 10, 0.15, 0.5);
         createTailColorMapper(boundaries);
         fixesAndTails.setDetailValueBoundaries(boundaries);
     }
