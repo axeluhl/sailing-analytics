@@ -2,19 +2,15 @@ package com.sap.sailing.domain.orc;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.math.FunctionEvaluationException;
-import org.apache.commons.math.analysis.polynomials.PolynomialFunctionLagrangeForm;
 import org.json.simple.parser.ParseException;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -24,7 +20,6 @@ import com.sap.sailing.domain.orc.impl.ORCCertificateImporterJSON;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveCourseImpl;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveImpl;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveLegImpl;
-import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.impl.DegreeBearingImpl;

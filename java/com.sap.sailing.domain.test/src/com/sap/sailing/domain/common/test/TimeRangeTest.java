@@ -2,10 +2,11 @@ package com.sap.sailing.domain.common.test;
 
 import static com.sap.sailing.domain.common.test.TimeTestHelpers.create;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.sap.sse.common.MultiTimeRange;
@@ -14,8 +15,6 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
-
-import org.junit.Assert;
 
 public class TimeRangeTest {
     private void liesWithin(long fromOuter, long toOuter, long fromInner, long toInner) {

@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.test;
 
+import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.Assert.assertThat;
 
 import java.io.File;
@@ -12,7 +13,6 @@ import java.text.ParseException;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
-import static org.hamcrest.number.OrderingComparison.greaterThan;
 import org.junit.Before;
 import org.junit.Test;
 
