@@ -12,22 +12,13 @@ import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.analysis.polynomials.PolynomialFunctionLagrangeForm;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.orc.ORCPerformanceCurve;
 import com.sap.sailing.domain.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.orc.ORCPerformanceCurveLeg;
-import com.sap.sailing.domain.ranking.ORCPerformanceCurveRankingMetric;
-import com.sap.sailing.domain.tracking.TrackedLeg;
-import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Bearing;
-import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
-import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 /**
  * For a {@link Competitor} describes at which wind speeds and angles to the wind the boat is assumed to go at which
