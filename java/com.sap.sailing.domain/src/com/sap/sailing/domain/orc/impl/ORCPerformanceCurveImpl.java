@@ -109,10 +109,6 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         return Collections.unmodifiableMap(writeableLagrange);
     }
 
-    public PolynomialFunctionLagrangeForm getLagrangeInterpolationPerTrueWindSpeed(Speed trueWindSpeed) {
-        return lagrangePolynomialsPerTrueWindSpeed.getOrDefault(trueWindSpeed, null);
-    }
-
     Map<Speed, Duration> createAllowancesPerCourse(ORCPerformanceCurveCourse course) throws FunctionEvaluationException {
         Map<Speed, Duration> result = new HashMap<>();
         Map<ORCPerformanceCurveLeg, Map<Speed, Duration>> allowancesPerLeg = new HashMap<>();
@@ -176,6 +172,15 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     public Duration getCalculatedTime() {
         // TODO Auto-generated method stub
         return null;
+    }
+    
+    // public accessibility needed for tests, not part of the ORCPerformanceCurve contract
+    public PolynomialFunctionLagrangeForm getLagrangeInterpolationPerTrueWindSpeed(Speed trueWindSpeed) {
+        return lagrangePolynomialsPerTrueWindSpeed.getOrDefault(trueWindSpeed, null);
+    }
+    // public accessibility needed for tests, not part of the ORCPerformanceCurve contract
+    public Duration getDurationPerNauticalMileAtTrueWindAngleAndSpeed(Speed trueWindSpeed, Bearing trueWindAngle) {
+        return durationPerNauticalMileAtTrueWindAngleAndSpeed.getOrDefault(trueWindSpeed, null).getOrDefault(trueWindAngle, null);
     }
 
 }

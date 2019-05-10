@@ -79,24 +79,28 @@ public class ORCCertificate {
         performanceCurve.hashCode(); // Only to resolve "Warning"
     }
 
-    public String getValue(String key) {
-        String result = null;
-
+    public Object getValue(String key) {
+        Object result = null;
+        
         if (general.containsKey(key)) {
             result = general.get(key);
         } else if (hull.containsKey(key)) {
-            result = hull.get(key).toString();
+            result = hull.get(key);
         } else if (sails.containsKey(key)) {
-            result = sails.get(key).toString();
+            result = sails.get(key);
         } else if (scoring.containsKey(key)) {
-            result = scoring.get(key).toString();
+            result = scoring.get(key);
         } else if (twaCourses.containsKey(key)) {
-            result = twaCourses.get(key).toString();
+            result = twaCourses.get(key);
         } else if (predefinedCourses.containsKey(key)) {
-            result = predefinedCourses.get(key).toString();
+            result = predefinedCourses.get(key);
         }
-
+        
         return result;
+    }
+    
+    public String getValueString(String key) {
+        return getValue(key).toString();
     }
     
     ORCPerformanceCurve getPerformanceCurve() {

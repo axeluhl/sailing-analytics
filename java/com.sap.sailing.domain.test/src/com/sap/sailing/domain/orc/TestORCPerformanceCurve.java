@@ -1,12 +1,16 @@
 package com.sap.sailing.domain.orc;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.analysis.polynomials.PolynomialFunctionLagrangeForm;
 import org.json.simple.parser.ParseException;
 import org.junit.Before;
@@ -39,16 +43,18 @@ public class TestORCPerformanceCurve {
     }
 
     @Test
-    public void testLagrangeInterpolation() throws IOException, ParseException {
+    public void testLagrangeInterpolation() throws IOException, ParseException, FunctionEvaluationException {
         // Moqutio? Or use just a normal Certificate from Import?
         ORCCertificateImporter importer = new ORCCertificateImporterJSON(
                 new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
-        ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) importer.getCertificate("GER 5549")
-                .getPerformanceCurve();
+        ORCCertificate certificate = importer.getCertificate("GER 5549");
+        ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve();
+        Double value = performanceCurve.getDurationPerNauticalMileAtTrueWindAngleAndSpeed(new KnotSpeedImpl(6), new DegreeBearingImpl(60)).asSeconds();
 
         assertNotNull(course);
         assertNotNull(performanceCurve);
         assertNotNull(performanceCurve.getLagrangeInterpolationPerTrueWindSpeed(new KnotSpeedImpl(6)));
+        assertEquals(value, performanceCurve.getLagrangeInterpolationPerTrueWindSpeed(new KnotSpeedImpl(6)).value(60), 0.0000000000001);
     }
 
     @Test

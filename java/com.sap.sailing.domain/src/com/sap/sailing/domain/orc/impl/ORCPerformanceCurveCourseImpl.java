@@ -29,6 +29,7 @@ public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse 
     @Override
     public Distance getTotalLength() {
         return totalLength;
+        
     }
 
     @Override

@@ -153,8 +153,6 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
                 for (Object aKey : allowances.keySet()) {
                     JSONArray array = (JSONArray) allowances.get(aKey);
                     
-                    System.out.println(aKey);
-
                     if (((String) aKey).equals("BeatAngle")) {
                         for (int i = 0; i < array.size(); i++) {
                             beatAngles.put(new KnotSpeedImpl(twsDistances[i]),

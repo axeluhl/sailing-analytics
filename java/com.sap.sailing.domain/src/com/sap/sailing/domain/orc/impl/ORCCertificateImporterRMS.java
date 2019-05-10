@@ -29,6 +29,9 @@ import java.util.regex.Pattern;
  * @author Axel Uhl (d043530)
  *
  */
+
+// TODO Is not implementing ORCCertificateImporter interface. Important to do, if further usage with performance curve is intended.
+
 public class ORCCertificateImporterRMS {
     private static final String NAME_OF_LAST_LEFT_ALIGNED_COLUMN_HEADER = "HH:MM:SS";
     

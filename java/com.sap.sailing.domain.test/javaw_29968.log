@@ -1,0 +1,9 @@
+---
+VM version: Mar 13 2019 12:07:48 - 81_REL - optU - windows amd64 - 6 - bas2:314669 (mixed mode)
+
+Time:2019-05-1010:45:27
+Pid: 29968
+Hostname: WDFN34219543A
+current dir: C:\Users\i505543\Git\SAPSailing\java\com.sap.sailing.domain.test
+---
+   :    [25792] 10:45:27 ***ERROR (:0): Java assert: Assertion in org.junit.Assert.fail(Assert.java:86)
