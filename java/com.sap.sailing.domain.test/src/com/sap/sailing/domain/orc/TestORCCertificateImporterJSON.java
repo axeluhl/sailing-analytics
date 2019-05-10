@@ -27,7 +27,7 @@ public class TestORCCertificateImporterJSON {
         
         ORCCertificate milan = importer.getCertificate(" ger 7323");
         assertNotNull(milan);
-        assertEquals("19.812", milan.getValue("LOA"));
+        assertEquals("19.812", milan.getValueString("LOA"));
     }
     
     @Test
@@ -36,7 +36,7 @@ public class TestORCCertificateImporterJSON {
         
         ORCCertificate swan = importer.getCertificate(" GER 5335");
         assertNotNull(swan);
-        assertEquals("NAUTOR", swan.getValue("Builder"));
+        assertEquals("NAUTOR", swan.getValueString("Builder"));
         
         ORCCertificate empty = importer.getCertificate("GBR 007");
         //assertEquals(new HashMap<>());

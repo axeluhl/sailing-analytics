@@ -109,7 +109,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         return Collections.unmodifiableMap(writeableLagrange);
     }
 
-    Map<Speed, Duration> createAllowancesPerCourse(ORCPerformanceCurveCourse course) throws FunctionEvaluationException {
+    public Map<Speed, Duration> createAllowancesPerCourse(ORCPerformanceCurveCourse course) throws FunctionEvaluationException {
         Map<Speed, Duration> result = new HashMap<>();
         Map<ORCPerformanceCurveLeg, Map<Speed, Duration>> allowancesPerLeg = new HashMap<>();
         
@@ -121,7 +121,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             Double allowancePerTws = 0.0;
             
             for (Entry<ORCPerformanceCurveLeg, Map<Speed, Duration>> entry : allowancesPerLeg.entrySet()) {
-                allowancePerTws += entry.getValue().get(tws).asSeconds();
+                allowancePerTws += Math.abs(entry.getValue().get(tws).asSeconds());
             }
             
             result.put(tws, Duration.ONE_SECOND.times(allowancePerTws));
@@ -134,7 +134,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         return result;
     }
 
-    Map<Speed, Duration> createAllowancePerLeg(ORCPerformanceCurveLeg leg) throws FunctionEvaluationException {
+    private Map<Speed, Duration> createAllowancePerLeg(ORCPerformanceCurveLeg leg) throws FunctionEvaluationException {
         Map<Speed, Duration> result = new HashMap<>();
         Double twa = leg.getTwa().getDegrees();
 
