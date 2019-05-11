@@ -201,7 +201,8 @@ public class StationarySequenceBasedFilter {
             removeCandidate(removedCandidate, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
         }
         updateFilteredCandidates(candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
-        assert isCandidatesConsistent();
+        final boolean assertion = isCandidatesConsistent();
+        assert assertion;
         return new Pair<>(candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
     }
 
@@ -234,7 +235,11 @@ public class StationarySequenceBasedFilter {
      */
     private void addCandidate(Candidate newCandidate,
             Set<Candidate> candidatesEffectivelyAdded, Set<Candidate> candidatesEffectivelyRemoved) {
-        assert !candidates.contains(newCandidate) && isCandidatesConsistent();
+        if (candidates.contains(newCandidate)) {
+            logger.severe("Candidates "+candidates+" already contain "+newCandidate+" which is to be added.");
+        }
+        final boolean assertion = !candidates.contains(newCandidate) && isCandidatesConsistent();
+        assert assertion;
         if (newCandidate == startProxyCandidate) {
             candidatesEffectivelyAdded.add(newCandidate);
             candidatesEffectivelyRemoved.remove(newCandidate);
@@ -343,7 +348,8 @@ public class StationarySequenceBasedFilter {
         } else {
             addedToSequence = true;
         }
-        assert containsNoEmptyOrSingleCandidateStationarySequence() && isCandidatesConsistent();
+        final boolean assertion = containsNoEmptyOrSingleCandidateStationarySequence() && isCandidatesConsistent();
+        assert assertion;
         return addedToSequence;
     }
     
@@ -374,7 +380,8 @@ public class StationarySequenceBasedFilter {
                 }
             }
         }
-        assert containsNoEmptyOrSingleCandidateStationarySequence() && isCandidatesConsistent();
+        final boolean assertion = containsNoEmptyOrSingleCandidateStationarySequence() && isCandidatesConsistent();
+        assert assertion;
     }
     
     private StationarySequence tryToConstructStationarySequence(Candidate start, Candidate end) {
@@ -417,7 +424,11 @@ public class StationarySequenceBasedFilter {
             candidatesEffectivelyRemoved.add(removedCandidate);
             candidatesEffectivelyAdded.remove(removedCandidate);
         } else {
-            assert candidates.contains(removedCandidate) && isCandidatesConsistent();
+            if (!candidates.contains(removedCandidate)) {
+                logger.severe("Candidates "+candidates+" does not contain "+removedCandidate+" which is to be removed.");
+            }
+            final boolean assertion = candidates.contains(removedCandidate) && isCandidatesConsistent();
+            assert assertion;
             candidates.remove(removedCandidate);
             final StationarySequence searchDummySequence = createStationarySequence(removedCandidate);
             final StationarySequence latestStationarySequenceStartingAtOrBeforeRemovedCandidate =
@@ -459,6 +470,7 @@ public class StationarySequenceBasedFilter {
     private boolean containsNoEmptyOrSingleCandidateStationarySequence() {
         for (final StationarySequence ss : stationarySequences) {
             if (ss.size() < 2) {
+                logger.severe("Found stationary sequence "+ss+" with less than two candidates in it.");
                 return false;
             }
         }
@@ -504,7 +516,8 @@ public class StationarySequenceBasedFilter {
      */
     Pair<Iterable<Candidate>, Iterable<Candidate>> updateFixes(Iterable<GPSFixMoving> newFixes,
             Iterable<GPSFixMoving> fixesReplacingExistingOnes) {
-        assert isCandidatesConsistent();
+        final boolean assertion = isCandidatesConsistent();
+        assert assertion;
         final Set<Candidate> candidatesEffectivelyAdded = new HashSet<>();
         final Set<Candidate> candidatesEffectivelyRemoved = new HashSet<>();
         if (newFixes != null) {
@@ -562,7 +575,7 @@ public class StationarySequenceBasedFilter {
             }
         }
         updateFilteredCandidates(candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
-        assert containsNoEmptyOrSingleCandidateStationarySequence() && isCandidatesConsistent();
+        assert containsNoEmptyOrSingleCandidateStationarySequence() && assertion;
         return new Pair<>(candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
     }
 
