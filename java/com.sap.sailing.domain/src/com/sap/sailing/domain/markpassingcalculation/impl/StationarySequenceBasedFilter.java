@@ -56,11 +56,6 @@ import com.sap.sse.common.Util.Pair;
  * {@link StationarySequence#getFirst() first candidate} of the next sequence.
  * <p>
  * 
- * The sequences are non-overlapping but may touch each other, meaning that a preceding sequence's
- * {@link StationarySequence#getLast() last} candidate is the same as the following sequence's
- * {@link StationarySequence#getFirst() first} candidate.
- * <p>
- * 
  * All sequences, candidates and the track belong to the same {@link Competitor}.
  * <p>
  * 
@@ -263,7 +258,8 @@ public class StationarySequenceBasedFilter {
 
     /**
      * Checks whether the union of all candidates of all stationary sequences from {@link #stationarySequences} is
-     * contained in {@link #candidates}.
+     * contained in {@link #candidates}, and whether adjacent stationary sequences are truly disjoint, not even
+     * overlapping by a single candidate considered equal by definition of {@link #candidateComparator}.
      */
     private boolean isCandidatesConsistent() {
         final TreeSet<Candidate> union = new TreeSet<>(candidateComparator);
@@ -428,19 +424,12 @@ public class StationarySequenceBasedFilter {
                     stationarySequences.floor(searchDummySequence);
             final boolean addToEffectivelyRemoved;
             if (latestStationarySequenceStartingAtOrBeforeRemovedCandidate != null) {
-                // If removedCandidate is at the beginning of the sequence (having a time point equal to that of the sequence's
-                // first element) then it may also be at the end of the previous sequence (having a time point equal to the previous
-                // sequence's last element).
-                // Being at the beginning of latestStationarySequenceStartingAtOrBeforeRemovedCandidate will make is be considered
-                // effectively removed. This is consistent in case it is also at the end of the previous sequence where it
-                // will then also be removed and be considered effectively removed.
+                // Adjacent sequences are disjoint. If we find the candidate, even at the beginning of a sequence,
+                // there is no need to check the previous sequence for that candidate.
                 final StationarySequence previousSequence;
-                if (!removedCandidate.getTimePoint().after(latestStationarySequenceStartingAtOrBeforeRemovedCandidate.getFirst().getTimePoint())
-                        && (previousSequence=stationarySequences.lower(searchDummySequence)) != null
-                        && previousSequence.contains(removedCandidate)) {
-                    assert removedCandidate.getTimePoint().equals(previousSequence.getLast().getTimePoint());
-                    previousSequence.remove(removedCandidate, candidatesEffectivelyAdded, candidatesEffectivelyRemoved,
-                            /* StationarySequence set to update */ stationarySequences);
+                if (candidateComparator.compare(removedCandidate, latestStationarySequenceStartingAtOrBeforeRemovedCandidate.getFirst()) == 0
+                        && (previousSequence=stationarySequences.lower(searchDummySequence)) != null) {
+                    assert !previousSequence.contains(removedCandidate); // it was in the floored sequence; it must not be in any prior sequence
                 }
                 if (candidateComparator.compare(latestStationarySequenceStartingAtOrBeforeRemovedCandidate.getLast(), removedCandidate) >= 0) {
                     // within the sequence; remove:

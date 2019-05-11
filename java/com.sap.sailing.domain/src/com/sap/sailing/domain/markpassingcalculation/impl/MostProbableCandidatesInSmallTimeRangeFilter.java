@@ -135,7 +135,13 @@ public class MostProbableCandidatesInSmallTimeRangeFilter {
         for (final SortedSet<Candidate> contiguousCandidateSequence : disjointSequencesAffectedByNewAndRemovedCandidates) {
             findNewAndRemovedCandidates(contiguousCandidateSequence, candidatesAddedToFiltered, candidatesRemovedFromFiltered);
         }
+        // assert that candidatesAddedToFiltered contains only net new candidates not yet in filteredCandidates:
+        assert !new HashSet<>(candidatesAddedToFiltered).removeAll(filteredCandidates);
         filteredCandidates.addAll(candidatesAddedToFiltered);
+        // assert that candidatesRemovedFromFiltered contains only candidates still in filteredCandidates:
+        assert !new HashSet<>(candidatesRemovedFromFiltered).retainAll(filteredCandidates);
+        // also assert that candidatesAddedToFiltered and candidatesRemovedFromFiltered are disjoint:
+        assert !new HashSet<>(candidatesAddedToFiltered).removeAll(candidatesRemovedFromFiltered);
         filteredCandidates.removeAll(candidatesRemovedFromFiltered);
         return new Pair<>(candidatesAddedToFiltered, candidatesRemovedFromFiltered);
     }
