@@ -232,6 +232,21 @@ public class Util {
             return result;
         }
     }
+    
+    /**
+     * If {@code iter} {@link Iterator#hasNext has a next element}, that element is returned. Otherwise, {@code null} is
+     * the result of this method. If a next element exists, the attempt to fetch it may, as usual, throw a
+     * {@link ConcurrentModificationException}.
+     */
+    public static <T> T nextOrNull(Iterator<T> iter) {
+        final T result;
+        if (iter.hasNext()) {
+            result = iter.next();
+        } else {
+            result = null;
+        }
+        return result;
+    }
 
     public static <T> int indexOf(Iterable<? extends T> i, T t) {
         int result;

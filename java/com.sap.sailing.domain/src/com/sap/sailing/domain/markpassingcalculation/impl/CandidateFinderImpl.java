@@ -589,20 +589,14 @@ public class CandidateFinderImpl implements CandidateFinder {
                             // case we can quickly obtain the next "firstFixAfter" by simply calling next() on the iterator.
                             firstFixAfterIterator = track.getFixesIterator(t, /* inclusive */ false);
                         }
-                        boolean firstFixAfterIteratorHasNext;
                         try {
-                            firstFixAfterIteratorHasNext = firstFixAfterIterator.hasNext();
+                            fixAfter = Util.nextOrNull(firstFixAfterIterator);
                         } catch (ConcurrentModificationException e) {
                             // the iterator may have been obtained in a previous look execution, and another
                             // fix may have been added to the track; let's obtain the iterator again. We're
                             // under the track's read lock here:
                             firstFixAfterIterator = track.getFixesIterator(t, /* inclusive */ false);
-                            firstFixAfterIteratorHasNext = firstFixAfterIterator.hasNext();
-                        }
-                        if (firstFixAfterIteratorHasNext) {
-                            fixAfter = firstFixAfterIterator.next();
-                        } else {
-                            fixAfter = null;
+                            fixAfter = Util.nextOrNull(firstFixAfterIterator);
                         }
                         lastIterationFix = fix;
                         lastIterationAfterFix = fixAfter;
@@ -644,20 +638,14 @@ public class CandidateFinderImpl implements CandidateFinder {
                     // case we can quickly obtain the next "firstFixAfter" by simply calling next() on the iterator.
                     firstFixAfterIterator = track.getFixesIterator(timePoint, /* inclusive */ false);
                 }
-                boolean firstFixAfterIteratorHasNext;
                 try {
-                    firstFixAfterIteratorHasNext = firstFixAfterIterator.hasNext();
+                    fixAfter = Util.nextOrNull(firstFixAfterIterator);
                 } catch (ConcurrentModificationException e) {
                     // the iterator may have been obtained in a previous look execution, and another
                     // fix may have been added to the track; let's obtain the iterator again. We're
                     // under the track's read lock here:
                     firstFixAfterIterator = track.getFixesIterator(timePoint, /* inclusive */ false);
-                    firstFixAfterIteratorHasNext = firstFixAfterIterator.hasNext();
-                }
-                if (firstFixAfterIteratorHasNext) {
-                    fixAfter = firstFixAfterIterator.next();
-                } else {
-                    fixAfter = null;
+                    fixAfter = Util.nextOrNull(firstFixAfterIterator);
                 }
                 lastIterationFix = fix;
                 lastIterationAfterFix = fixAfter;
