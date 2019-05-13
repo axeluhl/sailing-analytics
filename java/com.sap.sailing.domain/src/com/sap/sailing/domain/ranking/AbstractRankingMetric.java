@@ -335,6 +335,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                         competitor, competitorFarthestAhead, timePoint, cache);
                 final Duration totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead = predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead == null ? null
                         : actualRaceDuration.plus(predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead);
+                // TODO bug4839: special case: the competitor farthest ahead has already passed the finish line; in this case, compute the time to the finish, or if the competitor in question already has a finish line mark passing, use the total time sailed
                 final Duration calculatedEstimatedTimeWhenReachingCompetitorFarthestAhead = totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead == null ? null
                         : getCalculatedTime(
                                 competitor,
@@ -442,7 +443,9 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                 getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legWho.getTrackedLeg().getLeg().getFrom()) <=
                 getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legTo.getTrackedLeg().getLeg().getFrom());
         final Duration result;
-        if (legWho == null || legTo == null || !legWho.hasStartedLeg(timePoint) || !legTo.hasStartedLeg(timePoint)) {
+        if (legWho == null || legTo == null ||
+                !(legWho.hasStartedLeg(timePoint) || legWho.hasFinishedLeg(timePoint)) ||
+                !(legTo.hasStartedLeg(timePoint) || legTo.hasFinishedLeg(timePoint))) {
             result = null;
         } else {
             final Competitor who = legWho.getCompetitor();
@@ -520,8 +523,8 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      */
     protected Duration getPredictedDurationToEndOfLegOrTo(TimePoint timePoint, final TrackedLegOfCompetitor legWho, final TrackedLegOfCompetitor legTo,
             WindLegTypeAndLegBearingCache cache) {
-        assert legWho.hasStartedLeg(timePoint);
-        assert legTo.hasStartedLeg(timePoint);
+        assert legWho.hasStartedLeg(timePoint) || legWho.hasFinishedLeg(timePoint);
+        assert legTo.hasStartedLeg(timePoint) || legTo.hasFinishedLeg(timePoint);
         final Duration toEndOfLegOrTo;
         if (legTo.hasFinishedLeg(timePoint)) {
             // calculate actual time it takes who to reach the end of the leg starting at timePoint:
