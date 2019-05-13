@@ -1209,32 +1209,12 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         Duration result = null;
         for (TrackedRace trackedRace : getTrackedRaces()) {
             if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
-                NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
-                if (!markPassings.isEmpty()) {
-                    TimePoint from = trackedRace.getStartOfRace(); // start counting at race start, not when the competitor passed the line
-                    if (from != null && !timePoint.before(from)) { // but only if the race started after timePoint
-                        TimePoint to;
-                        if (timePoint.after(markPassings.last().getTimePoint())
-                                && markPassings.last().getWaypoint() == trackedRace.getRace().getCourse()
-                                        .getLastWaypoint()) {
-                            // stop counting when competitor finished the race
-                            to = markPassings.last().getTimePoint();
-                        } else {
-                            if (trackedRace.getEndOfTracking() != null
-                                    && timePoint.after(trackedRace.getEndOfTracking())) {
-                                    result = null; // race not finished until end of tracking; no reasonable value can be
-                                    // computed for competitor
-                                    break;
-                            } else {
-                                to = timePoint;
-                            }
-                        }
-                        Duration timeSpent = from.until(to);
-                        if (result == null) {
-                            result = timeSpent;
-                        } else {
-                            result=result.plus(timeSpent);
-                        }
+                final Duration timeSpent = trackedRace.getTimeSailedSinceRaceStart(competitor, timePoint);
+                if (timeSpent != null) {
+                    if (result == null) {
+                        result = timeSpent;
+                    } else {
+                        result=result.plus(timeSpent);
                     }
                 }
             }

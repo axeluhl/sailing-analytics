@@ -3030,12 +3030,13 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     }
 
     /**
-     * To be expandable, a race column needs to have one or more tracked races associated and needs to have at least
-     * some GPS data available. Wind data is not required for expandability because several metrics can reasonably be
-     * determined even without reliable wind information.
+     * To be expandable, a race column needs to have one or more tracked races associated. No GPS data is required
+     * (anymore) because there are some interesting columns that may be fed solely based on the Race Log contents, such
+     * as finishing times and start times, resulting in time sailed and calculated times. Wind data is not required for
+     * expandability either because several metrics can reasonably be determined even without reliable wind information.
      */
     private boolean shallExpandRaceColumn(RaceColumnDTO raceColumnDTO) {
-        return showRaceDetails && raceColumnDTO.hasTrackedRaces() && raceColumnDTO.hasGPSData();
+        return showRaceDetails && raceColumnDTO.hasTrackedRaces();
     }
 
     private void removeUnusedRaceColumns(LeaderboardDTO leaderboard) {
