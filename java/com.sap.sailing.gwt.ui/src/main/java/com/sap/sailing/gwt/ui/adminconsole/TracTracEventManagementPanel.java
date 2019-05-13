@@ -97,15 +97,11 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     protected Widget createContent() {
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setWidth("100%");
-
         CaptionPanel connectionsPanel = createConnectionsPanel();
         mainPanel.add(connectionsPanel);
-
         HorizontalPanel racesPanel = createRacesPanel();
         racesPanel.setWidth("100%");
-
         mainPanel.add(racesPanel);
-        
         return mainPanel;
     }
     
@@ -472,25 +468,23 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                         List<TracTracRaceRecordDTO> races = TracTracEventManagementPanel.this.raceList.getList();
                         races.clear();
                         races.addAll(TracTracEventManagementPanel.this.availableTracTracRaces);
-                        
                         TracTracEventManagementPanel.this.racesFilterablePanel.getTextBox().setText("");
                         TracTracEventManagementPanel.this.racesTable.setPageSize(races.size());
                         loadingMessageLabel.setText("");
-                        
                         // store a successful configuration in the database for later retrieval
-                                    sailingService.updateTracTracConfiguration(updatedConnection,
-                                            new MarkedAsyncCallback<Void>(
-                                        new AsyncCallback<Void>() {
-                                            @Override
-                                            public void onFailure(Throwable caught) {
-                                                reportError("Exception trying to store configuration in DB: "  + caught.getMessage());
-                                            }
-                
-                                            @Override
-                                            public void onSuccess(Void voidResult) {
-                                                connectionsTable.refreshTracTracConnectionList();
-                                            }
-                                        }));
+                        sailingService.updateTracTracConfiguration(updatedConnection,
+                                new MarkedAsyncCallback<Void>(
+                            new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    reportError("Exception trying to store configuration in DB: "  + caught.getMessage());
+                                }
+    
+                                @Override
+                                public void onSuccess(Void voidResult) {
+                                    connectionsTable.refreshTracTracConnectionList();
+                                }
+                            }));
                     }
                 }));
         }
