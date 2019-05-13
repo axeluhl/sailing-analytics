@@ -5,6 +5,7 @@ import static com.sap.sse.security.ui.client.component.AccessControlledActionsCo
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -168,6 +169,15 @@ public class TracTracConnectionTableWrapper extends
     }
 
     public void refreshTracTracConnectionList() {
+        refreshTracTracConnectionList(/* selectWhenDone */ null);
+    }
+    
+    /**
+     * @param selectEntityWhenDone
+     *            if not {@code null}, select an entity in the table that the {@link EntityIdentityComparator} considers
+     *            the same entity if present
+     */
+    public void refreshTracTracConnectionList(final TracTracConfigurationWithSecurityDTO selectEntityWhenDone) {
         sailingServiceAsync
                 .getPreviousTracTracConfigurations(new AsyncCallback<List<TracTracConfigurationWithSecurityDTO>>() {
                     @Override
@@ -180,6 +190,16 @@ public class TracTracConnectionTableWrapper extends
                     @Override
                     public void onSuccess(List<TracTracConfigurationWithSecurityDTO> result) {
                         filterField.updateAll(result);
+                        if (selectEntityWhenDone != null) {
+                            Scheduler.get().scheduleDeferred(()->{
+                                for (final TracTracConfigurationWithSecurityDTO oneResult : result) {
+                                    if (getSelectionModel().getEntityIdentityComparator().representSameEntity(oneResult, selectEntityWhenDone)) {
+                                        getSelectionModel().setSelected(oneResult, true);
+                                        break;
+                                    }
+                                }
+                            });
+                        }
                     }
                 });
     }

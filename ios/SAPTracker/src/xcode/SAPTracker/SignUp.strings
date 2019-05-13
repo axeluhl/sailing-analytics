@@ -6,30 +6,30 @@
   Copyright © 2017 com.sap.sailing. All rights reserved.
 */
 
-// MARK: - Common
+/* MARK: - Common */
 
 "Common.Email" = "E-Mail";
 "Common.Password" = "Passwort";
 "Common.Server" = "Server";
 "Common.UserName" = "Benutzername";
 
-// MARK: - ForgotPasswordView
+/* MARK: - ForgotPasswordView */
 
 "ForgotPasswordView.Title" = "Passwort vergessen";
 "ForgotPasswordView.InfoLabel.Text" = "Benutzernamen oder E-Mail Adresse angeben";
 "ForgotPasswordView.ResetPasswordButton.Title" = "Passwort zurücksetzen";
 
-// MARK: - LoginView
+/* MARK: - LoginView */
 
 "LoginView.Title" = "Anmelden";
 "LoginView.ForgotPasswordButton.Title" = "Passwort vergessen";
 "LoginView.LoginButton.Title" = "Anmelden";
 
-// MARK: - SignUpControllerError
+/* MARK: - SignUpControllerError */
 
 "SignUpControllerError.LoginFailed" = "Anmeldung fehlgeschlagen. Zugangsdaten überprüfen.";
 
-// MARK: - SignUpView
+/* MARK: - SignUpView */
 
 "SignUpView.Title" = "Registrieren";
 "SignUpView.InfoLabel.Text" = "Herzlich Willkommen.";
@@ -40,7 +40,7 @@
 "SignUpView.RepeatPasswordTextField.Placeholder" = "Wiederholen Sie das Passwort";
 "SignUpView.SignUpButton.Title" = "Registrieren";
 
-// MARK: - SignUpViewError
+/* MARK: - SignUpViewError */
 
 "SignUpViewError.UserNameIsToShort" = "Bitte einen Benutzername mit mindestens 3 Zeichen eingeben.";
 "SignUpViewError.PasswordIsToShort" = "Bitte ein Passwort mit mindestens 5 Zeichen eingeben.";
