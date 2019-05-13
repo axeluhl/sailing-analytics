@@ -126,7 +126,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         tableAndConfigurationPanel.add(buttonPanel);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> connectionsTable.refreshTracTracConnectionList());
         Button addCreateAction = buttonPanel.addCreateAction(stringMessages.addTracTracConnection(),
-                () -> new EditTracTracConnectionDialog(new TracTracConfigurationWithSecurityDTO(),
+                () -> new EditTracTracConnectionDialog(new TracTracConfigurationWithSecurityDTO(
+                        userService.getCurrentUser() == null ? null : userService.getCurrentUser().getName()),
                         new DialogCallback<TracTracConfigurationWithSecurityDTO>() {
                             @Override
                             public void ok(TracTracConfigurationWithSecurityDTO editedConnection) {
@@ -144,7 +145,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
                                             @Override
                                             public void onSuccess(Void voidResult) {
-                                                connectionsTable.refreshTracTracConnectionList();
+                                                connectionsTable.refreshTracTracConnectionList(/* selectWhenDone */ editedConnection);
                                             }
                                         }));
                             }
@@ -185,7 +186,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         });
         return connectionsPanel;
     }
-
+    
     protected HorizontalPanel createRacesPanel() {
         HorizontalPanel racesPanel = new HorizontalPanel();
         CaptionPanel trackableRacesPanel = createTrackableRacesPanel();
