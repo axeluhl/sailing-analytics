@@ -139,6 +139,7 @@ public class TracTracConnectionTableWrapper extends
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.getName());
                 strings.add(t.getCreatorName());
+                strings.add(t.getJsonUrl());
                 return strings;
             }
 
