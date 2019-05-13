@@ -370,9 +370,11 @@ public class CandidateFinderImpl implements CandidateFinder {
     }
 
     /**
-     * determines the candidates that are new and those that have been removed, keyed by the competitors; the
-     * {@link Pair#getA() first} element of each value pair has the candidates that are new, the {@link Pair#getB()
-     * second} element has those that have been removed.
+     * For all waypoints starting at {@code zeroBasedIndexOfWaypointChanged-1} in the current course removes all
+     * candidates for all competitors and starts from scratch to determine the candidates for the waypoints starting at
+     * {@code zeroBasedIndexOfWaypointChanged-1}. The current and the removed candidates are returned, keyed by the
+     * competitors; the {@link Pair#getA() first} element of each value pair has the candidates that are new, the
+     * {@link Pair#getB() second} element has those that have been removed.
      */
     private Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> invalidateAfterCourseChange(int zeroBasedIndexOfWaypointChanged) {
         ConcurrentMap<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> result = new ConcurrentHashMap<>();
@@ -393,6 +395,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                     changedWaypoints.add(w);
                 }
             }
+            logger.finer(()->"Changed waypoints: "+changedWaypoints);
             final Set<Callable<Void>> tasks = new HashSet<>();
             final Thread executingThread = Thread.currentThread(); // most likely the MarkPassingCalculator.Listen thread
             for (Competitor c : race.getRace().getCompetitors()) {
@@ -419,10 +422,9 @@ public class CandidateFinderImpl implements CandidateFinder {
                     }
                 });
             }
-            executor.invokeAll(tasks);
-        } catch (InterruptedException e) {
-            logger.log(Level.SEVERE, "Problem trying to update competitor candidate sets after waypoints starting at zero-based index "+
-                    zeroBasedIndexOfWaypointChanged+" have changed", e);
+            ThreadPoolUtil.INSTANCE.invokeAllAndLogExceptions(executor, Level.SEVERE,
+                    "Problem trying to update competitor candidate sets after waypoints starting at zero-based index "+
+                            zeroBasedIndexOfWaypointChanged+" have changed: %s", tasks);
         } finally {
             course.unlockAfterRead();
         }
@@ -431,9 +433,10 @@ public class CandidateFinderImpl implements CandidateFinder {
     }
 
     /**
-     * determines the candidates that are new and those that have been removed, keyed by the competitors; the
-     * {@link Pair#getA() first} element of each value pair has the candidates that are new, the {@link Pair#getB()
-     * second} element has those that have been removed.
+     * After a course change, described by the waypoints added ({@code addedWaypoints}) and the waypoints removed
+     * ({@code removedWaypoints}), determines the candidates that are new and those that have been removed, keyed by the
+     * competitors; the {@link Pair#getA() first} element of each value pair has the candidates that are new, the
+     * {@link Pair#getB() second} element has those that have been removed.
      */
     @Override
     public Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> updateWaypoints(
@@ -449,6 +452,11 @@ public class CandidateFinderImpl implements CandidateFinder {
         return newAndUpdatedCandidates;
     }
 
+    /**
+     * For all {@code waypoints} removed, removes the {@link #passingInstructions} entry and clears all
+     * {@link #xteCandidates} and {@link #distanceCandidates} for all competitors. The candidates cleared this
+     * way are returned, keyed by the {@link Competitor} to which they belonged.
+     */
     private Map<Competitor, List<Candidate>> removeWaypoints(Iterable<Waypoint> waypoints) {
         Map<Competitor, List<Candidate>> result = new HashMap<>();
         for (Competitor c : race.getRace().getCompetitors()) {
@@ -581,20 +589,14 @@ public class CandidateFinderImpl implements CandidateFinder {
                             // case we can quickly obtain the next "firstFixAfter" by simply calling next() on the iterator.
                             firstFixAfterIterator = track.getFixesIterator(t, /* inclusive */ false);
                         }
-                        boolean firstFixAfterIteratorHasNext;
                         try {
-                            firstFixAfterIteratorHasNext = firstFixAfterIterator.hasNext();
+                            fixAfter = Util.nextOrNull(firstFixAfterIterator);
                         } catch (ConcurrentModificationException e) {
                             // the iterator may have been obtained in a previous look execution, and another
                             // fix may have been added to the track; let's obtain the iterator again. We're
                             // under the track's read lock here:
                             firstFixAfterIterator = track.getFixesIterator(t, /* inclusive */ false);
-                            firstFixAfterIteratorHasNext = firstFixAfterIterator.hasNext();
-                        }
-                        if (firstFixAfterIteratorHasNext) {
-                            fixAfter = firstFixAfterIterator.next();
-                        } else {
-                            fixAfter = null;
+                            fixAfter = Util.nextOrNull(firstFixAfterIterator);
                         }
                         lastIterationFix = fix;
                         lastIterationAfterFix = fixAfter;
@@ -636,20 +638,14 @@ public class CandidateFinderImpl implements CandidateFinder {
                     // case we can quickly obtain the next "firstFixAfter" by simply calling next() on the iterator.
                     firstFixAfterIterator = track.getFixesIterator(timePoint, /* inclusive */ false);
                 }
-                boolean firstFixAfterIteratorHasNext;
                 try {
-                    firstFixAfterIteratorHasNext = firstFixAfterIterator.hasNext();
+                    fixAfter = Util.nextOrNull(firstFixAfterIterator);
                 } catch (ConcurrentModificationException e) {
                     // the iterator may have been obtained in a previous look execution, and another
                     // fix may have been added to the track; let's obtain the iterator again. We're
                     // under the track's read lock here:
                     firstFixAfterIterator = track.getFixesIterator(timePoint, /* inclusive */ false);
-                    firstFixAfterIteratorHasNext = firstFixAfterIterator.hasNext();
-                }
-                if (firstFixAfterIteratorHasNext) {
-                    fixAfter = firstFixAfterIterator.next();
-                } else {
-                    fixAfter = null;
+                    fixAfter = Util.nextOrNull(firstFixAfterIterator);
                 }
                 lastIterationFix = fix;
                 lastIterationAfterFix = fixAfter;
@@ -726,7 +722,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                                     t, probability, startProbabilityBasedOnOtherCompetitors, w, onCorrectSideOfWaypoint, distance);
                             getDistanceCandidates(c, w).put(fix, newCan);
                             result.getA().add(newCan);
-                            logger.finest("Added distance candidate " + newCan.toString() + "for " + c);
+                            logger.finest("Added distance candidate " + newCan.toString() + " for " + c);
                         } else if (wasCan && !isCan) {
                             getDistanceCandidates(c, w).remove(fix);
                             result.getB().add(oldCan);
@@ -735,7 +731,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                                     t, probability, startProbabilityBasedOnOtherCompetitors, w, onCorrectSideOfWaypoint, distance);
                             getDistanceCandidates(c, w).put(fix, newCan);
                             result.getA().add(newCan);
-                            logger.finest("Added distance candidate " + newCan.toString() + "for " + c);
+                            logger.finest("Added distance candidate " + newCan.toString() + " for " + c);
                             result.getB().add(oldCan);
                         }
                     }
@@ -844,14 +840,14 @@ public class CandidateFinderImpl implements CandidateFinder {
                             if (xte == 0) {
                                 newCandidates.put(Arrays.asList(fix, fix), createCandidate(c, 0, 0, t, t, w, true));
                             } else {
-                                if (fixAfter != null && xtesAfter != null && !xtesAfter.get(w).isEmpty()) {
+                                if (fixAfter != null && xtesAfter != null && xtesAfter.get(w) != null && !xtesAfter.get(w).isEmpty()) {
                                     Double xteAfter = xtesAfter.get(w).get(0).getMeters();
                                     if (xteAfter != null && xte < 0 != xteAfter <= 0) {
                                         newCandidates.put(Arrays.asList(fix, fixAfter),
                                                 createCandidate(c, xte, xteAfter, t, tAfter, w, true));
                                     }
                                 }
-                                if (fixBefore != null && !xtesBefore.get(w).isEmpty()) {
+                                if (fixBefore != null && xtesBefore.get(w) != null && !xtesBefore.get(w).isEmpty()) {
                                     Double xteBefore = xtesBefore.get(w).get(0).getMeters();
                                     if (xte < 0 != xteBefore <= 0) {
                                         newCandidates.put(Arrays.asList(fixBefore, fix),
@@ -894,14 +890,14 @@ public class CandidateFinderImpl implements CandidateFinder {
                                     waypointCandidates.remove(canFixes);
                                     if (newCan.getProbability() > penaltyForSkipping) {
                                         result.getA().add(newCan);
-                                        logger.finest("Added XTE " + newCan.toString() + "for " + c);
+                                        logger.finest("Added XTE " + newCan.toString() + " for " + c);
                                         waypointCandidates.put(canFixes, newCan);
                                     }
                                 }
                             } else {
                                 if (newCan.getProbability() > penaltyForSkipping) {
                                     result.getA().add(newCan);
-                                    logger.finest("Added XTE " + newCan.toString() + "for " + c);
+                                    logger.finest("Added XTE " + newCan.toString() + " for " + c);
                                     waypointCandidates.put(canFixes, newCan);
                                 }
                             }
@@ -918,6 +914,11 @@ public class CandidateFinderImpl implements CandidateFinder {
     }
 
     /**
+     * Returns a non-{@code null} mapping from the waypoints currently in the course, telling the {@code fix}'s
+     * cross-track error for each waypoint. There may be "excess" entries from older waypoints that have already
+     * been removed from the course which may be reflected only by a later call to {@link #invalidateAfterCourseChange(int)}.
+     * See also bug 5021.
+     * 
      * @return if for a waypoint the mark positions are known, the resulting map will contain a non-empty list that for
      *         each way of passing the waypoint (e.g., for a gate the competitor can round the left or the right mark) the
      *         cross track error of the {@code fix} to the virtual line that must be crossed is contained; if the mark
@@ -925,15 +926,18 @@ public class CandidateFinderImpl implements CandidateFinder {
      */
     private Map<Waypoint, List<Distance>> getXTE(Competitor c, GPSFix fix) {
         Map<Waypoint, List<Distance>> result = xteCache.get(c).get(fix);
-        if (result == null) {
-            result = new HashMap<>();
-            Position p = fix.getPosition();
-            TimePoint t = fix.getTimePoint();
+        Course course = race.getRace().getCourse();
+        course.lockForRead();
+        try {
+            if (result == null) {
+                result = new HashMap<>();
+                xteCache.get(c).put(fix, result);
+            }
+            final Position p = fix.getPosition();
+            final TimePoint t = fix.getTimePoint();
             final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(race, t);
-            Course course = race.getRace().getCourse();
-            course.lockForRead();
-            try {
-                for (Waypoint w : course.getWaypoints()) {
+            for (Waypoint w : course.getWaypoints()) {
+                if (!result.containsKey(w)) { // bug5021: calculate in case waypoint was added since last call
                     List<Distance> distances = new ArrayList<>();
                     result.put(w, distances);
                     for (Util.Pair<Position, Bearing> crossingInfo : getCrossingInformation(w, t, markPositionCache)) {
@@ -942,10 +946,9 @@ public class CandidateFinderImpl implements CandidateFinder {
                         }
                     }
                 }
-            } finally {
-                course.unlockAfterRead();
             }
-            xteCache.get(c).put(fix, result);
+        } finally {
+            course.unlockAfterRead();
         }
         return result;
     }

@@ -618,7 +618,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
 
                     @Override
                     public void ok(final MediaTrack mediaTrack) {
-                        mediaService.addMediaTrack(mediaTrack, new AsyncCallback<String>() {
+                        mediaService.addMediaTrack(mediaTrack, new AsyncCallback<MediaTrackWithSecurityDTO>() {
 
                             @Override
                             public void onFailure(Throwable t) {
@@ -626,8 +626,8 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
                             }
 
                             @Override
-                            public void onSuccess(String dbId) {
-                                mediaTrack.dbId = dbId;
+                            public void onSuccess(MediaTrackWithSecurityDTO mediaTrackWithSecurity) {
+                                mediaTrack.dbId = mediaTrackWithSecurity.dbId;
                                 loadMediaTracks();
 
                             }

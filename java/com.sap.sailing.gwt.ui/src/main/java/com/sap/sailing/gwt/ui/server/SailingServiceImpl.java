@@ -7611,15 +7611,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         for (CompetitorDTO c : competitorDtos) {
             competitors.add(getCompetitor(c));
         }
-        MailInvitationType type = MailInvitationType
-                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.SailInsight1.name()));
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         Regatta regatta = getService().getRegattaByName(leaderboardName);
         getSecurityService().checkCurrentUserUpdatePermission(regatta);
         getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, regatta,
                 serverUrlWithoutTrailingSlash,
-                competitors, iOSAppUrl, androidAppUrl, getLocale(localeInfoName), type);
+                competitors, iOSAppUrl, androidAppUrl, getLocale(localeInfoName), getMailType());
     }
     
     @Override
