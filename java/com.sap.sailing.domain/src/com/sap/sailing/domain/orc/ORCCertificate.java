@@ -17,8 +17,13 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
  * @author Daniel Lisunkin (I505543)
  *
  */
+
+// TODO Improve public API in regards of semantic connection with real ORC Certificate (paper)
+// TODO COMMENTS!
+
 public class ORCCertificate {
 
+    private static final String BEAT = "Beat";
     private Map<String, String> general;
     private Map<String, Number> hull;
     private Map<String, Number> sails;
@@ -29,20 +34,31 @@ public class ORCCertificate {
     private Map<Speed, Bearing> gybeAngles;
     private ORCPerformanceCurve performanceCurve;
 
+    /**
+     * 
+     * @param general
+     * @param hull
+     * @param sails
+     * @param scoring
+     * @param allowancesByTwa
+     * @param predefinedCourses
+     * @param beatAngles
+     * @param gybeAngles
+     */
     public ORCCertificate(Map<String, String> general, Map<String, Number> hull, Map<String, Number> sails,
-            Map<String, Number> scoring, Map<String, Map<Speed, Duration>> twaCourses,
+            Map<String, Number> scoring, Map<String, Map<Speed, Duration>> allowancesByTwa,
             Map<String, Map<Speed, Duration>> predefinedCourses, Map<Speed, Bearing> beatAngles,
             Map<Speed, Bearing> gybeAngles) {
         this.general = general;
         this.hull = hull;
         this.sails = sails;
         this.scoring = scoring;
-        this.twaCourses = twaCourses;
+        this.twaCourses = allowancesByTwa;
         this.predefinedCourses = predefinedCourses;
         this.beatAngles = beatAngles;
         this.gybeAngles = gybeAngles;
 
-        if ((String) getValue("C_Type") == "INTL") {
+        if (((String) getValue("C_Type")).equals("INTL")) {
             initializePerformanceCurve();
         } else {
             initializePerformanceCurve();
@@ -52,7 +68,7 @@ public class ORCCertificate {
 
     private void initializePerformanceCurve() {
         Map<Speed, Map<Bearing, Duration>> map = new HashMap<>();
-
+        // TODO Get Speed Deltas from RMS, create SubBug in Bugzilla, extract Deltas as static final variable
         map.put(new KnotSpeedImpl( 6), new HashMap<Bearing, Duration>());
         map.put(new KnotSpeedImpl( 8), new HashMap<Bearing, Duration>());
         map.put(new KnotSpeedImpl(10), new HashMap<Bearing, Duration>());
@@ -60,7 +76,6 @@ public class ORCCertificate {
         map.put(new KnotSpeedImpl(14), new HashMap<Bearing, Duration>());
         map.put(new KnotSpeedImpl(16), new HashMap<Bearing, Duration>());
         map.put(new KnotSpeedImpl(20), new HashMap<Bearing, Duration>());
-
         for (String keyTWA : twaCourses.keySet()) {
             int twa = Integer.parseInt(keyTWA.substring(1));
 
@@ -68,20 +83,17 @@ public class ORCCertificate {
                 map.get(keyTWS).put(new DegreeBearingImpl(twa), twaCourses.get(keyTWA).get(keyTWS));
             }
         }
-        ;
-
         for (Speed tws : map.keySet()) {
-            map.get(tws).put(beatAngles.get(tws), predefinedCourses.get("Beat").get(tws));
+            // TODO Define constant "Beat"/"Run" as static final literals 
+            map.get(tws).put(beatAngles.get(tws), predefinedCourses.get(BEAT).get(tws));
             map.get(tws).put(gybeAngles.get(tws), predefinedCourses.get("Run").get(tws));
         }
-
         performanceCurve = new ORCPerformanceCurveImpl(map, beatAngles, gybeAngles);
         performanceCurve.hashCode(); // Only to resolve "Warning"
     }
 
     public Object getValue(String key) {
         Object result = null;
-        
         if (general.containsKey(key)) {
             result = general.get(key);
         } else if (hull.containsKey(key)) {
@@ -95,7 +107,6 @@ public class ORCCertificate {
         } else if (predefinedCourses.containsKey(key)) {
             result = predefinedCourses.get(key);
         }
-        
         return result;
     }
     

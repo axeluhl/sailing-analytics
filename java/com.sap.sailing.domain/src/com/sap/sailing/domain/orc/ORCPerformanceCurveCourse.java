@@ -6,10 +6,15 @@ import com.sap.sse.common.Distance;
 
 public interface ORCPerformanceCurveCourse {
 
-    ORCPerformanceCurveLeg getLeg(int i);
+    //TODO Return unmodifiable List/Collection something...
+    Iterable<ORCPerformanceCurveLeg> getLegs();
     
-    List<ORCPerformanceCurveLeg> getLegs();
-    
-    Distance getTotalLength();
+    default Distance getTotalLength() {
+        Distance result = Distance.NULL;
+        for (ORCPerformanceCurveLeg leg : getLegs()) {
+            result = result.add(leg.getLength());
+        }
+        return result;
+    }
     
 }

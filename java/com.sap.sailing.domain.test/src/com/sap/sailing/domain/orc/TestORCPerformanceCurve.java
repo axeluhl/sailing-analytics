@@ -71,7 +71,7 @@ public class TestORCPerformanceCurve {
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.0), new DegreeBearingImpl(120)));
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.0), new DegreeBearingImpl(180)));
         ORCPerformanceCurveCourse simpleCourse = new ORCPerformanceCurveCourseImpl(legs);
-        Map<Speed, Duration> allowancesPerCourse = performanceCurve.createAllowancesPerCourse(course);
+        Map<Speed, Duration> allowancesPerCourse = performanceCurve.createAllowancesPerCourse(simpleCourse);
         
         assertNotNull(course);
         assertNotNull(performanceCurve);
@@ -86,7 +86,8 @@ public class TestORCPerformanceCurve {
         assertEquals(404.3, allowancesPerCourse.get(new KnotSpeedImpl(20)).asSeconds(), 0.1);
     }
 
-    //@Test
+    
+    @Test
     public void testComplexConstructedCourse() throws FunctionEvaluationException {
         ORCCertificate certificate = importer.getCertificate("GER 5549");
         ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve();

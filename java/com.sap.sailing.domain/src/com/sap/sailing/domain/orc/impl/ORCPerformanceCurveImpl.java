@@ -42,7 +42,7 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurve {
     private static final long serialVersionUID = 4113356173492168453L;
 
-    public static final Speed[] ALLOWANCES_SPEED_DELTAS = { new KnotSpeedImpl( 6),
+    public static final Speed[] ALLOWANCES_TRUE_WIND_SPEEDS = { new KnotSpeedImpl( 6),
                                                             new KnotSpeedImpl( 8),
                                                             new KnotSpeedImpl(10),
                                                             new KnotSpeedImpl(12),
@@ -50,6 +50,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
                                                             new KnotSpeedImpl(16),
                                                             new KnotSpeedImpl(20) };
 
+    //TODO COMMENT for key
     private final Map<Speed, Map<Bearing, Duration>> durationPerNauticalMileAtTrueWindAngleAndSpeed;
 
     /**
@@ -117,7 +118,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             allowancesPerLeg.put(leg, createAllowancePerLeg(leg));
         }
 
-        for (Speed tws : ALLOWANCES_SPEED_DELTAS) {
+        for (Speed tws : ALLOWANCES_TRUE_WIND_SPEEDS) {
             Double allowancePerTws = 0.0;
             
             for (Entry<ORCPerformanceCurveLeg, Map<Speed, Duration>> entry : allowancesPerLeg.entrySet()) {
@@ -142,15 +143,18 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             // Case switching on TWA (0. TWA = 0; 1. TWA < Beat; 2. Beat < TWA < Gybe; 3. Gybe < TWA)
             if (twa < beatAngles.get(entry.getKey()).getDegrees()) {
                 // Case 0&1
-                // Need Beat Angle Allowances for different TWS, maybe Constructor and Structure need to be changed, to get direct access? What will be nicer?
+                // Need Beat Angle Allowances for different TWS, maybe Constructor and Structure need to be changed, to
+                // get direct access? What will be nicer?
                 // result will be: beatVMG * distance / cos(TWA)
-                result.put(entry.getKey(), Duration.ONE_SECOND
-                        .times(entry.getValue().value(beatAngles.get(entry.getKey()).getDegrees()) * Math.cos(twa)));
+                result.put(entry.getKey(),
+                        Duration.ONE_SECOND.times(entry.getValue().value(beatAngles.get(entry.getKey()).getDegrees())
+                                * leg.getLength().getNauticalMiles() * Math.cos(Math.toRadians(twa))));
             } else if (twa > gybeAngles.get(entry.getKey()).getDegrees()) {
                 // Case 3
                 // result will be: runVMG * distance / cos(TWA)
-                result.put(entry.getKey(), Duration.ONE_SECOND
-                        .times(entry.getValue().value(gybeAngles.get(entry.getKey()).getDegrees()) * Math.cos(twa)));
+                result.put(entry.getKey(),
+                        Duration.ONE_SECOND.times(entry.getValue().value(gybeAngles.get(entry.getKey()).getDegrees())
+                                * leg.getLength().getNauticalMiles() * Math.cos(Math.toRadians(twa))));
             } else {
                 // Case 2
                 // result is given through the laGrange Interpolation, between the Beat and Gybe Angles
