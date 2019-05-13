@@ -537,7 +537,12 @@ public class StationarySequenceBasedFilter {
         }
         if (fixesReplacingExistingOnes != null) {
             for (final GPSFixMoving fixReplacingExistingOne : fixesReplacingExistingOnes) {
-                assert Util.contains(newFixes, fixesReplacingExistingOnes);
+                final boolean assertion2 = Util.contains(newFixes, fixReplacingExistingOne);
+                if (!assertion2) {
+                    logger.severe("Expected "+fixesReplacingExistingOnes+" to be part of the "+Util.size(newFixes)+
+                            " new fixes, but it wasn't");
+                }
+                assert assertion2;
                 final Candidate dummyCandidateForReplacementFix = StationarySequence.createDummyCandidate(fixReplacingExistingOne.getTimePoint());
                 final StationarySequence dummyStationarySequenceForFix = createStationarySequence(dummyCandidateForReplacementFix);
                 final StationarySequence lastSequenceStartingAtOrBeforeFix = stationarySequences.floor(dummyStationarySequenceForFix);
