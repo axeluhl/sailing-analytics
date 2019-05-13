@@ -97,7 +97,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         return Collections.unmodifiableMap(writeableLagrange);
     }
 
-    public Map<Speed, Duration> createAllowancesPerCourse(ORCPerformanceCurveCourse course) throws FunctionEvaluationException {
+    public Map<Speed, Duration> createAllowancesPerCourse() throws FunctionEvaluationException {
         Map<Speed, Duration> result = new HashMap<>();
         Map<ORCPerformanceCurveLeg, Map<Speed, Duration>> allowancesPerLeg = new HashMap<>();
         

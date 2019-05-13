@@ -18,11 +18,11 @@ public interface ORCCertificateImporter {
      * returns {@link null}.
      **/
     //TODO Better input specification on identification of certificate.
-    ORCCertificateImpl getCertificate(String sailnumber);
+    ORCCertificate getCertificate(String sailnumber);
 
     /**
      * Returns a map of ORCCertificate objects to a given array of sail numbers.
      **/
-    Map<String, ORCCertificateImpl> getCertificates(String[] sailnumbers);
+    Map<String, ORCCertificate> getCertificates(String[] sailnumbers);
 
 }

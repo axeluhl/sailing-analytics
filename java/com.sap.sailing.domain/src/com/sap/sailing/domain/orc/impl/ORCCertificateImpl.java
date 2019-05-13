@@ -60,9 +60,9 @@ public class ORCCertificateImpl implements ORCCertificate {
     private Map<String, Number> scoring;
     private Map<String, Map<Speed, Duration>> twaCourses;
     private Map<String, Map<Speed, Duration>> predefinedCourses;
+    private final Map<Speed, Map<Bearing, Duration>> timeAllowancesPerTrueWindSpeedAndAngle;
     private final Map<Speed, Bearing> beatAngles;
     private final Map<Speed, Bearing> gybeAngles;
-    private ORCPerformanceCurve performanceCurve;
 
     /**
      * 
@@ -87,8 +87,29 @@ public class ORCCertificateImpl implements ORCCertificate {
         this.predefinedCourses = predefinedCourses;
         this.beatAngles = beatAngles;
         this.gybeAngles = gybeAngles;
+        this.timeAllowancesPerTrueWindSpeedAndAngle = initializeTimeAllowances();
     }
 
+    private Map<Speed, Map<Bearing, Duration>> initializeTimeAllowances() {
+        Map<Speed, Map<Bearing, Duration>> result = new HashMap<>();
+        for (Speed tws : ALLOWANCES_TRUE_WIND_SPEEDS) {
+            result.put(tws, new HashMap<Bearing, Duration>());
+        }
+        for (String keyTWA : twaCourses.keySet()) {
+            int twa = Integer.parseInt(keyTWA.substring(1));
+
+            for (Speed keyTWS : twaCourses.get(keyTWA).keySet()) {
+                result.get(keyTWS).put(new DegreeBearingImpl(twa), twaCourses.get(keyTWA).get(keyTWS));
+            }
+        }
+        for (Speed tws : result.keySet()) {
+            result.get(tws).put(beatAngles.get(tws), predefinedCourses.get(BEAT).get(tws));
+            result.get(tws).put(gybeAngles.get(tws), predefinedCourses.get(RUN).get(tws));
+        }
+        
+        return result;
+    }
+    
     public Object getValue(String key) {
         Object result = null;
         if (general.containsKey(key)) {
@@ -113,26 +134,6 @@ public class ORCCertificateImpl implements ORCCertificate {
     
     @Override
     public ORCPerformanceCurve getPerformanceCurve(ORCPerformanceCurveCourse course) {
-        Map<Speed, Map<Bearing, Duration>> twaAllowances = new HashMap<>();
-        twaAllowances.put(new KnotSpeedImpl( 6), new HashMap<Bearing, Duration>());
-        twaAllowances.put(new KnotSpeedImpl( 8), new HashMap<Bearing, Duration>());
-        twaAllowances.put(new KnotSpeedImpl(10), new HashMap<Bearing, Duration>());
-        twaAllowances.put(new KnotSpeedImpl(12), new HashMap<Bearing, Duration>());
-        twaAllowances.put(new KnotSpeedImpl(14), new HashMap<Bearing, Duration>());
-        twaAllowances.put(new KnotSpeedImpl(16), new HashMap<Bearing, Duration>());
-        twaAllowances.put(new KnotSpeedImpl(20), new HashMap<Bearing, Duration>());
-        for (String keyTWA : twaCourses.keySet()) {
-            int twa = Integer.parseInt(keyTWA.substring(1));
-
-            for (Speed keyTWS : twaCourses.get(keyTWA).keySet()) {
-                twaAllowances.get(keyTWS).put(new DegreeBearingImpl(twa), twaCourses.get(keyTWA).get(keyTWS));
-            }
-        }
-        for (Speed tws : twaAllowances.keySet()) {
-            twaAllowances.get(tws).put(beatAngles.get(tws), predefinedCourses.get(BEAT).get(tws));
-            twaAllowances.get(tws).put(gybeAngles.get(tws), predefinedCourses.get(RUN).get(tws));
-        }
-        
-        return new ORCPerformanceCurveImpl(twaAllowances, beatAngles, gybeAngles, course);
+        return new ORCPerformanceCurveImpl(timeAllowancesPerTrueWindSpeedAndAngle, beatAngles, gybeAngles, course);
     }
 }

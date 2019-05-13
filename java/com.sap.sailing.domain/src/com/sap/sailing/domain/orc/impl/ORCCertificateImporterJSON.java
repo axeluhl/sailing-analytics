@@ -12,21 +12,21 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.orc.ORCCertificate;
 import com.sap.sailing.domain.orc.ORCCertificateImporter;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
-
 /**
- * Represents a file in format {@code .json} which is a simple ASCII file format. The {@code .json} file contains an array of maps,
- * each map representing one measurement certificate. The maps have the specific measurement values accessible with a 
- * {@link String} for each boat.
+ * Represents a file in format {@code .json} which is a simple ASCII file format. The {@code .json} file contains an
+ * array of maps, each map representing one measurement certificate. The maps have the specific measurement values
+ * accessible with a {@link String} for each boat.
  * <p>
  * 
- * The result of successfully parsing a {@code .json} file is a map keyed by the sailing number,
- * with values being equal-sized maps from the key names to the {@link String} values.
+ * The result of successfully parsing a {@code .json} file is a map keyed by the sailing number, with values being
+ * equal-sized maps from the key names to the {@link String} values.
  * 
  * @author Daniel Lisunkin (i505543)
  *
@@ -37,7 +37,8 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
     private final int[] twsDistances = new int[] { 6, 8, 10, 12, 14, 16, 20 };
 
     /**
-     * Receives an {@link InputStream} from different possible sources (web, local file, ...) and does parse the {@code .json} file.
+     * Receives an {@link InputStream} from different possible sources (web, local file, ...) and does parse the
+     * {@code .json} file.
      * 
      * @param in
      * @throws IOException
@@ -64,11 +65,15 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
     }
 
     /**
-     * Returns an {@link ORCCertificateImpl} object for a given {@link String} key. If there is no map value for the given key, the method returns {@link null}.
+     * Returns an {@link ORCCertificateImpl} object for a given {@link String} key. If there is no map value for the
+     * given key, the method returns {@link null}.
      */
     @Override
-    public ORCCertificateImpl getCertificate(String sailnumber) {
+    public ORCCertificate getCertificate(String sailnumber) {
+        return firstStepOfParse(sailnumber);
+    }
 
+    private ORCCertificate firstStepOfParse(String sailnumber) {
         String searchString = sailnumber.replaceAll(" ", "").toUpperCase();
 
         JSONObject object = (JSONObject) data.get(searchString);
@@ -151,16 +156,15 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
                 JSONObject allowances = (JSONObject) object.get("Allowances");
                 for (Object aKey : allowances.keySet()) {
                     JSONArray array = (JSONArray) allowances.get(aKey);
-                    
+
                     if (((String) aKey).equals("BeatAngle")) {
                         for (int i = 0; i < array.size(); i++) {
                             beatAngles.put(new KnotSpeedImpl(twsDistances[i]),
                                     new DegreeBearingImpl(((Number) array.get(i)).doubleValue()));
                         }
                         continue;
-                        //break is WRONG HERE! beak get's out of the higher switch!!!
                     }
-                    
+
                     if (((String) aKey).equals("GybeAngle")) {
                         for (int i = 0; i < array.size(); i++) {
                             gybeAngles.put(new KnotSpeedImpl(twsDistances[i]),
@@ -199,25 +203,26 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
             }
         }
 
-        return new ORCCertificateImpl(general, hull, sails, scoring, twaCourses, predefinedCourses, beatAngles, gybeAngles);
+        return new ORCCertificateImpl(general, hull, sails, scoring, twaCourses, predefinedCourses, beatAngles,
+                gybeAngles);
+    }
+
+    private void secondStepOfParse() {
     }
 
     /**
-     * Returns a {@link Map} of {@link ORCCertificateImpl} keyed by the {@link String} sailnumbers, which were given as an input inside an array.
+     * Returns a {@link Map} of {@link ORCCertificateImpl} keyed by the {@link String} sailnumbers, which were given as
+     * an input inside an array.
      */
     @Override
-    public Map<String, ORCCertificateImpl> getCertificates(String[] sailnumbers) {
-        Map<String, ORCCertificateImpl> result = new HashMap<>();
+    public Map<String, ORCCertificate> getCertificates(String[] sailnumbers) {
+        Map<String, ORCCertificate> result = new HashMap<>();
 
         for (String sailnumber : sailnumbers) {
             result.put(sailnumber, getCertificate(sailnumber));
         }
 
         return result;
-    }
-
-    public Map<String, Object> getData() {
-        return data;
     }
 
 }
