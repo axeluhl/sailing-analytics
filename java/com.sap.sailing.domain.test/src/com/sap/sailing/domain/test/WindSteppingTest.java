@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.test;
 
 import org.junit.Assert;
-
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.WindSpeedStepping;

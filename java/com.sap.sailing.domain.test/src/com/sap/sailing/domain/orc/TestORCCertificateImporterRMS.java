@@ -1,5 +1,9 @@
 package com.sap.sailing.domain.orc;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -9,10 +13,6 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.orc.impl.ORCCertificateImporterRMS;
 import com.sap.sailing.domain.orc.impl.ORCCertificateImporterRMS.ORCCertificateValues;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
 
 public class TestORCCertificateImporterRMS {
     private static final String RESOURCES = "resources/orc/";
