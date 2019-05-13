@@ -12,7 +12,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
-import com.sap.sailing.domain.orc.ORCCertificate;
 import com.sap.sailing.domain.orc.ORCCertificateImporter;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
@@ -65,10 +64,10 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
     }
 
     /**
-     * Returns an {@link ORCCertificate} object for a given {@link String} key. If there is no map value for the given key, the method returns {@link null}.
+     * Returns an {@link ORCCertificateImpl} object for a given {@link String} key. If there is no map value for the given key, the method returns {@link null}.
      */
     @Override
-    public ORCCertificate getCertificate(String sailnumber) {
+    public ORCCertificateImpl getCertificate(String sailnumber) {
 
         String searchString = sailnumber.replaceAll(" ", "").toUpperCase();
 
@@ -200,15 +199,15 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
             }
         }
 
-        return new ORCCertificate(general, hull, sails, scoring, twaCourses, predefinedCourses, beatAngles, gybeAngles);
+        return new ORCCertificateImpl(general, hull, sails, scoring, twaCourses, predefinedCourses, beatAngles, gybeAngles);
     }
 
     /**
-     * Returns a {@link Map} of {@link ORCCertificate} keyed by the {@link String} sailnumbers, which were given as an input inside an array.
+     * Returns a {@link Map} of {@link ORCCertificateImpl} keyed by the {@link String} sailnumbers, which were given as an input inside an array.
      */
     @Override
-    public Map<String, ORCCertificate> getCertificates(String[] sailnumbers) {
-        Map<String, ORCCertificate> result = new HashMap<>();
+    public Map<String, ORCCertificateImpl> getCertificates(String[] sailnumbers) {
+        Map<String, ORCCertificateImpl> result = new HashMap<>();
 
         for (String sailnumber : sailnumbers) {
             result.put(sailnumber, getCertificate(sailnumber));

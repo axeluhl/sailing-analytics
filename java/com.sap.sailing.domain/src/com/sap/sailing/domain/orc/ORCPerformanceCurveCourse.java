@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.orc;
 
-import java.util.List;
-
 import com.sap.sse.common.Distance;
 
 public interface ORCPerformanceCurveCourse {
@@ -17,4 +15,5 @@ public interface ORCPerformanceCurveCourse {
         return result;
     }
     
+    ORCPerformanceCurveCourse subcourse(int lastFinishedLeg, float perCentOfCurrentLeg);
 }

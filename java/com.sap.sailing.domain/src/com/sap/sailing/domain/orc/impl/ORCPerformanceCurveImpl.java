@@ -12,7 +12,6 @@ import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.analysis.polynomials.PolynomialFunctionLagrangeForm;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.orc.ORCPerformanceCurve;
 import com.sap.sailing.domain.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.orc.ORCPerformanceCurveLeg;
@@ -32,14 +31,6 @@ import com.sap.sse.common.Speed;
  */
 public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurve {
     private static final long serialVersionUID = 4113356173492168453L;
-
-    public static final Speed[] ALLOWANCES_TRUE_WIND_SPEEDS = { new KnotSpeedImpl( 6),
-                                                            new KnotSpeedImpl( 8),
-                                                            new KnotSpeedImpl(10),
-                                                            new KnotSpeedImpl(12),
-                                                            new KnotSpeedImpl(14),
-                                                            new KnotSpeedImpl(16),
-                                                            new KnotSpeedImpl(20) };
 
     //TODO COMMENT for key
     private final Map<Speed, Map<Bearing, Duration>> durationPerNauticalMileAtTrueWindAngleAndSpeed;
@@ -62,6 +53,11 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      * {@link #durationPerNauticalMileAtTrueWindAngleAndSpeed}.
      */
     private transient Map<Speed, PolynomialFunctionLagrangeForm> lagrangePolynomialsPerTrueWindSpeed;
+    
+    /*
+     * 
+     */
+    private final ORCPerformanceCurveCourse course;
 
     /**
      * Accepts the simplified polar data, one "column" for each of the defined true wind speeds, where each column is a
@@ -69,11 +65,11 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      * boat is assumed to need at that true wind speed/angle for one nautical mile.
      */
     public ORCPerformanceCurveImpl(Map<Speed, Map<Bearing, Duration>> twaAllowances, Map<Speed, Bearing> beatAngles,
-            Map<Speed, Bearing> gybeAngles) {
-        Map<Speed, Map<Bearing, Duration>> map = twaAllowances;
-        durationPerNauticalMileAtTrueWindAngleAndSpeed = Collections.unmodifiableMap(map);
+            Map<Speed, Bearing> gybeAngles, ORCPerformanceCurveCourse course) {
+        durationPerNauticalMileAtTrueWindAngleAndSpeed = Collections.unmodifiableMap(twaAllowances);
         this.beatAngles = Collections.unmodifiableMap(beatAngles);
         this.gybeAngles = Collections.unmodifiableMap(gybeAngles);
+        this.course = course;
         lagrangePolynomialsPerTrueWindSpeed = createLagrangePolynomials();
     }
 
@@ -109,7 +105,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             allowancesPerLeg.put(leg, createAllowancePerLeg(leg));
         }
 
-        for (Speed tws : ALLOWANCES_TRUE_WIND_SPEEDS) {
+        for (Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
             Double allowancePerTws = 0.0;
             
             for (Entry<ORCPerformanceCurveLeg, Map<Speed, Duration>> entry : allowancesPerLeg.entrySet()) {
@@ -173,6 +169,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     public PolynomialFunctionLagrangeForm getLagrangeInterpolationPerTrueWindSpeed(Speed trueWindSpeed) {
         return lagrangePolynomialsPerTrueWindSpeed.getOrDefault(trueWindSpeed, null);
     }
+    
     // public accessibility needed for tests, not part of the ORCPerformanceCurve contract
     public Duration getDurationPerNauticalMileAtTrueWindAngleAndSpeed(Speed trueWindSpeed, Bearing trueWindAngle) {
         return durationPerNauticalMileAtTrueWindAngleAndSpeed.getOrDefault(trueWindSpeed, null).getOrDefault(trueWindAngle, null);

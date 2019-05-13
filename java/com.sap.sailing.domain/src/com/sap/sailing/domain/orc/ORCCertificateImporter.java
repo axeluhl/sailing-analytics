@@ -2,6 +2,8 @@ package com.sap.sailing.domain.orc;
 
 import java.util.Map;
 
+import com.sap.sailing.domain.orc.impl.ORCCertificateImpl;
+
 /**
  * Extracts ORC-Certificates from different sources and different formats. Returns ORC-Certificate objects for given
  * identification (sail number).
@@ -16,11 +18,11 @@ public interface ORCCertificateImporter {
      * returns {@link null}.
      **/
     //TODO Better input specification on identification of certificate.
-    ORCCertificate getCertificate(String sailnumber);
+    ORCCertificateImpl getCertificate(String sailnumber);
 
     /**
      * Returns a map of ORCCertificate objects to a given array of sail numbers.
      **/
-    Map<String, ORCCertificate> getCertificates(String[] sailnumbers);
+    Map<String, ORCCertificateImpl> getCertificates(String[] sailnumbers);
 
 }

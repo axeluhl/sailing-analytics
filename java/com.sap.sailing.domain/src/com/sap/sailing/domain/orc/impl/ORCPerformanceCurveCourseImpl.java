@@ -21,7 +21,6 @@ public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse 
         }
     }
 
-    @Override
     public ORCPerformanceCurveLeg getLeg(int i) {
         return legs.get(i);
     }
@@ -35,6 +34,12 @@ public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse 
     @Override
     public List<ORCPerformanceCurveLeg> getLegs() {
         return legs;
+    }
+
+    @Override
+    public ORCPerformanceCurveCourse subcourse(int lastFinishedLeg, float perCentOfCurrentLeg) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
