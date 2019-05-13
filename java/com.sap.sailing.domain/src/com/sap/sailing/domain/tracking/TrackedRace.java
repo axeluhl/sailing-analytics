@@ -1000,6 +1000,16 @@ public interface TrackedRace
     TargetTimeInfo getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException, NoWindException;
 
     /**
+     * Determine the time sailed for the {@code competitor} at {@code timePoint} in this race. This ignores whether or not
+     * the race has recorded a start mark passing for the {@code competitor}. If no finish mark passing is found either, the
+     * duration between the {@link #getStartOfRace() race start time} and {@code timePoint} is returned; otherwise the duration
+     * between the {@link #getStartOfRace() race start time} and the time when the {@code competitor} finished the race.
+     */
+    default Duration getTimeSailedSinceRaceStart(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    /**
      * Calculates the estimated distance it takes a competitor to sail the race, from start to finish.
      * 
      * @param timepoint

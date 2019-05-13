@@ -1265,7 +1265,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             result.put(DetailType.RACE_CURRENT_LEG, new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_CURRENT_LEG,
                     new CurrentLeg(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_TIME_TRAVELED,
-                    new TimeTraveledRaceColumn(getLeaderboardPanel(), this, stringMessages, LEG_COLUMN_HEADER_STYLE,
+                    new TimeTraveledRaceColumnInSeconds(getLeaderboardPanel(), this, stringMessages, LEG_COLUMN_HEADER_STYLE,
                             LEG_COLUMN_STYLE, LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE));
             result.put(DetailType.RACE_CALCULATED_TIME_TRAVELED,
                     new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_CALCULATED_TIME_TRAVELED,

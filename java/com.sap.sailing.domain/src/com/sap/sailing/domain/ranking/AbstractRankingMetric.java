@@ -263,7 +263,8 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      * The time from the {@link TrackedRace#getStartOfRace() race start} until <code>timePoint</code> or until
      * the point in time when <code>competitor</code> passed the finish mark, whichever comes first.
      */
-    protected Duration getActualTimeSinceStartOfRace(Competitor competitor, TimePoint timePoint) {
+    @Override
+    public Duration getActualTimeSinceStartOfRace(Competitor competitor, TimePoint timePoint) {
         final Duration result;
         final TimePoint startOfRace = getTrackedRace().getStartOfRace();
         if (startOfRace == null) {
