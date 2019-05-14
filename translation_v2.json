@@ -18,6 +18,23 @@
             }
          ]
       },
+      {  
+         "collectionName":"DataMiningGwtUi",
+         "folders":[  
+            {  
+               "startingFolderPath":"java/com.sap.sse.datamining.ui/java/com/sap/sse/datamining/ui/client",
+               "sourceFilters":[  
+                  "**/StringMessages*.properties"
+               ],
+               "excludedSourceFilters":[
+               	"**/*_zh.properties"
+               	],
+               "xlfFolderPath":"/XLF/[fullPath]/[targetFile]",
+	       "targetFolderPath":".",
+	       "pseudoLocFolderPath":"."
+            }
+         ]
+      },
       {
          "collectionName":"RacelogTracking",
          "folders":[  
@@ -85,7 +102,7 @@
          "collectionName":"FileStorage",
          "folders":[  
             {  
-               "startingFolderPath":"java/com.sap.sse.gwt/src/com/sap/sse/gwt/client/controls/filestorage",
+               "startingFolderPath":"java/com.sap.sse.gwt/src/com/sap/sse/gwt/client",
                "sourceFilters":[  
                   "**/StringMessages*.properties"
                ],
