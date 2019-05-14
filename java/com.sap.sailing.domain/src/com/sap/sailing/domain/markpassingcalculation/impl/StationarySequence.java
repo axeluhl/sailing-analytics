@@ -38,9 +38,9 @@ public class StationarySequence {
      * If we identify several consecutive candidates that all lie in a bounding box with a {@link Bounds#getDiameter()
      * diameter} less than or equal to this distance, only the first and the last of those candidates pass the filter.
      */
-    private static final Distance CANDIDATE_FILTER_DISTANCE = new MeterDistance(30);
+    public static final Distance CANDIDATE_FILTER_DISTANCE = new MeterDistance(30);
 
-    private static final Duration CANDIDATE_FILTER_TIME_WINDOW = Duration.ONE_SECOND.times(10);
+    public static final Duration CANDIDATE_FILTER_TIME_WINDOW = Duration.ONE_SECOND.times(10);
     
     private final NavigableSet<Candidate> candidates;
 
@@ -55,7 +55,7 @@ public class StationarySequence {
      * first} and {@link #getLast() last} element at the same time. Therefore, the track segment spanned by the
      * resulting sequence is empty which trivially fulfills the bounding box criterion.
      */
-    StationarySequence(Candidate seed, Comparator<Candidate> candidateComparator, GPSFixTrack<Competitor, GPSFixMoving> track) {
+    public StationarySequence(Candidate seed, Comparator<Candidate> candidateComparator, GPSFixTrack<Competitor, GPSFixMoving> track) {
         this.candidates = new TreeSet<>(candidateComparator);
         this.candidateComparator = candidateComparator;
         this.track = track;
@@ -75,7 +75,7 @@ public class StationarySequence {
      * {@code candidatesEffectivelyRemoved}; {@code true} is returned in this case, indicating that the sequence
      * has been extended successfully.
      */
-    boolean tryToExtendAfterLast(Candidate candidateAfterSequence,
+    public boolean tryToExtendAfterLast(Candidate candidateAfterSequence,
             Set<Candidate> candidatesEffectivelyAdded, Set<Candidate> candidatesEffectivelyRemoved) {
         Bounds bounds = computeExtendedBoundsForFixesBetweenCandidates(getLast(), candidateAfterSequence);
         if (bounds != null) {
@@ -141,7 +141,7 @@ public class StationarySequence {
      *            method maintains the set referenced by this parameter accordingly, assuming that the position in the
      *            set may change, or, if this sequence runs empty, it has to be removed from the set altogether.
      */
-    boolean tryToExtendBeforeFirst(Candidate candidateBeforeSequence,
+    public boolean tryToExtendBeforeFirst(Candidate candidateBeforeSequence,
             Set<Candidate> candidatesEffectivelyAdded, Set<Candidate> candidatesEffectivelyRemoved,
             NavigableSet<StationarySequence> stationarySequenceSetToUpdate) {
         Bounds bounds = computeExtendedBoundsForFixesBetweenCandidates(candidateBeforeSequence, getFirst());
@@ -218,7 +218,7 @@ public class StationarySequence {
         return candidatesNoLongerPassingFilter;
     }
 
-    Iterable<Candidate> getValidCandidates() {
+    public Iterable<Candidate> getValidCandidates() {
         return ()->candidates.stream().filter(c->isCloseEnoughToSequenceBorder(c)).iterator();
     }
     
@@ -227,11 +227,11 @@ public class StationarySequence {
                 candidate.getTimePoint().until(getLast().getTimePoint()).abs().compareTo(CANDIDATE_FILTER_TIME_WINDOW) < 0;
     }
     
-    int size() {
+    public int size() {
         return candidates.size();
     }
     
-    boolean isEmpty() {
+    public boolean isEmpty() {
         return candidates.isEmpty();
     }
     
@@ -365,8 +365,9 @@ public class StationarySequence {
      *         no split took place, or the split didn't leave more than one candidate for a second sequence}; the new
      *         sequence created by a split otherwise.
      */
-    StationarySequence tryToAddFix(GPSFixMoving newFix, Set<Candidate> candidatesEffectivelyAdded,
-            Set<Candidate> candidatesEffectivelyRemoved, NavigableSet<StationarySequence> stationarySequenceSetToUpdate) {
+    public StationarySequence tryToAddFix(GPSFixMoving newFix, Set<Candidate> candidatesEffectivelyAdded,
+            Set<Candidate> candidatesEffectivelyRemoved, NavigableSet<StationarySequence> stationarySequenceSetToUpdate,
+            boolean isReplacement) {
         assert !newFix.getTimePoint().before(getFirst().getTimePoint());
         assert !newFix.getTimePoint().after(getLast().getTimePoint());
         final Bounds newBounds = boundingBoxOfTrackSpanningCandidates.extend(newFix.getPosition());
@@ -374,6 +375,12 @@ public class StationarySequence {
         if (newBounds.getDiameter().compareTo(CANDIDATE_FILTER_DISTANCE) < 0) {
             boundingBoxOfTrackSpanningCandidates = newBounds; // ...and we're done
             tailSequence = null;
+            if (isReplacement) {
+                // the fix could have replaced another one, and the bounding box may shrink now;
+                // later additions may unnecessarily split, so we should be kind and refresh the bounding
+                // box in this case:
+                refreshBoundingBox();
+            }
         } else {
             // split:
             final Set<Candidate> oldValidCandidates = new TreeSet<>(candidateComparator);
@@ -413,7 +420,7 @@ public class StationarySequence {
             }
             final Set<Candidate> candidatesAdded = new TreeSet<>(candidateComparator);
             candidatesAdded.addAll(newValidCandidates);
-            candidatesAdded.removeAll(newValidCandidates);
+            candidatesAdded.removeAll(newValidCandidates); // FIXME ???
             final Set<Candidate> candidatesRemoved = new TreeSet<>(candidateComparator);
             candidatesRemoved.addAll(oldValidCandidates);
             candidatesRemoved.removeAll(newValidCandidates);
@@ -484,7 +491,7 @@ public class StationarySequence {
         return new CandidateImpl(/* one-based index of waypoint */ 1, timePoint, /* probability */ 0, /* waypoint */ null);
     }
 
-    Iterable<Candidate> getAllCandidates() {
+    public Iterable<Candidate> getAllCandidates() {
         return Collections.unmodifiableCollection(candidates);
     }
 
