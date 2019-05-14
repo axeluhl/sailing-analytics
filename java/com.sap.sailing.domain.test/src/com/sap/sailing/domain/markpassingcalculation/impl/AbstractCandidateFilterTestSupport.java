@@ -55,8 +55,12 @@ public class AbstractCandidateFilterTestSupport {
         competitorCandidates.add(c10);
     }
 
-    protected void assertContains(Iterable<Candidate> candidates, Candidate... candidatesExpected) {
+    protected void assertContainsExactly(Iterable<Candidate> candidates, Candidate... candidatesExpected) {
         assertEquals(candidatesExpected.length, Util.size(candidates));
+        assertContains(candidates, candidatesExpected);
+    }
+    
+    protected void assertContains(Iterable<Candidate> candidates, Candidate...candidatesExpected) {
         for (final Candidate candidateExpected : candidatesExpected) {
             assertTrue(Util.contains(candidates, candidateExpected));
         }

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.markpassingcalculation.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
@@ -24,6 +25,7 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class StationarySequenceBasedFilterTest extends AbstractCandidateFilterTestSupport {
@@ -63,7 +65,12 @@ public class StationarySequenceBasedFilterTest extends AbstractCandidateFilterTe
     @Test
     public void basicStationarySequenceTest() {
         assertEquals(10, stationarySequence.size());
-        assertContains(stationarySequence.getAllCandidates(), c1, c2, c3, c4, c5, c6, c7, c8, c9, c10);
+        assertContainsExactly(stationarySequence.getAllCandidates(), c1, c2, c3, c4, c5, c6, c7, c8, c9, c10);
+        final Iterable<Candidate> validCandidates = stationarySequence.getValidCandidates();
+        assertContains(validCandidates, c1, c10); // at least the first and the last are expected to be contained
+        // but those in the middle, particularly with the gap between c5 and c6, are not expected to be contained
+        assertFalse(Util.contains(validCandidates, c5));
+        assertFalse(Util.contains(validCandidates, c6));
     }
 
     @Test
@@ -86,8 +93,12 @@ public class StationarySequenceBasedFilterTest extends AbstractCandidateFilterTe
                 /* stationarySequenceSetToUpdate */ null, /* isReplacement */ false);
         // assertions:
         assertEquals(2, stationarySequence.size());
-        assertContains(stationarySequence.getAllCandidates(), c1, c2);
+        assertContainsExactly(stationarySequence.getAllCandidates(), c1, c2);
+        assertContainsExactly(stationarySequence.getValidCandidates(), c1, c2);
+        assertContainsExactly(candidatesEffectivelyRemoved, c3, c4, c5, c6, c7, c8, c9, c10);
+        assertTrue(candidatesEffectivelyAdded.isEmpty());
         assertEquals(8, splitResult.size());
-        assertContains(splitResult.getAllCandidates(), c3, c4, c5, c6, c7, c8, c9, c10);
+        assertContainsExactly(splitResult.getAllCandidates(), c3, c4, c5, c6, c7, c8, c9, c10);
+        assertContains(splitResult.getValidCandidates(), c3, c10);
     }
 }

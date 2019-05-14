@@ -20,19 +20,19 @@ public class MostProbableCandidatesInSmallTimeRangeFilterTest extends AbstractCa
     @Test
     public void testGetTimeWiseContiguousDistanceCandidates() {
         final NavigableSet<Candidate> result = filter.getTimeWiseContiguousDistanceCandidates(competitorCandidates, c3, /* includeStartFrom */ true);
-        assertContains(result, c1, c2, c3, c4, c5);
+        assertContainsExactly(result, c1, c2, c3, c4, c5);
     }
     
     @Test
     public void testGetTimeWiseContiguousDistanceCandidatesOnRightBorder() {
         final NavigableSet<Candidate> result = filter.getTimeWiseContiguousDistanceCandidates(competitorCandidates, c5, /* includeStartFrom */ true);
-        assertContains(result, c1, c2, c3, c4, c5);
+        assertContainsExactly(result, c1, c2, c3, c4, c5);
     }
     
     @Test
     public void testGetTimeWiseContiguousDistanceCandidatesOnLeftBorder() {
         final NavigableSet<Candidate> result = filter.getTimeWiseContiguousDistanceCandidates(competitorCandidates, c6, /* includeStartFrom */ true);
-        assertContains(result, c6, c7, c8, c9, c10);
+        assertContainsExactly(result, c6, c7, c8, c9, c10);
     }
     
     @Test
@@ -40,7 +40,7 @@ public class MostProbableCandidatesInSmallTimeRangeFilterTest extends AbstractCa
         final Candidate middleOfGap = candidate(c5.getTimePoint().plus(c5.getTimePoint().until(c6.getTimePoint()).divide(2)), "gap");
         final NavigableSet<Candidate> result = filter.getTimeWiseContiguousDistanceCandidates(competitorCandidates, middleOfGap,
                 /* includeStartFrom */ true);
-        assertContains(result, c1, c2, c3, c4, c5, middleOfGap, c6, c7, c8, c9, c10);
+        assertContainsExactly(result, c1, c2, c3, c4, c5, middleOfGap, c6, c7, c8, c9, c10);
     }
     
     @Test
@@ -48,7 +48,7 @@ public class MostProbableCandidatesInSmallTimeRangeFilterTest extends AbstractCa
         final Candidate middleOfGap = candidate(c5.getTimePoint().plus(c5.getTimePoint().until(c6.getTimePoint()).divide(2)), "gap");
         final NavigableSet<Candidate> result = filter.getTimeWiseContiguousDistanceCandidates(competitorCandidates, middleOfGap,
                 /* includeStartFrom */ false);
-        assertContains(result, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10);
+        assertContainsExactly(result, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10);
     }
     
     @Test
@@ -57,7 +57,7 @@ public class MostProbableCandidatesInSmallTimeRangeFilterTest extends AbstractCa
         competitorCandidates.add(middleOfGap);
         final NavigableSet<Candidate> result = filter.getTimeWiseContiguousDistanceCandidates(competitorCandidates, middleOfGap,
                 /* includeStartFrom */ true);
-        assertContains(result, c1, c2, c3, c4, c5, middleOfGap, c6, c7, c8, c9, c10);
+        assertContainsExactly(result, c1, c2, c3, c4, c5, middleOfGap, c6, c7, c8, c9, c10);
     }
     
     @Test
@@ -67,6 +67,6 @@ public class MostProbableCandidatesInSmallTimeRangeFilterTest extends AbstractCa
         final Candidate middleOfGap = candidate(c5.getTimePoint().plus(c5.getTimePoint().until(c6.getTimePoint()).divide(2)), "gap");
         final NavigableSet<Candidate> result = filter.getTimeWiseContiguousDistanceCandidates(competitorCandidates, middleOfGap,
                 /* includeStartFrom */ true);
-        assertContains(result, middleOfGap);
+        assertContainsExactly(result, middleOfGap);
     }
 }
