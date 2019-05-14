@@ -3,6 +3,7 @@ package com.sap.sailing.domain.orc.impl;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.input.BOMInputStream;
@@ -15,6 +16,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.orc.ORCCertificate;
 import com.sap.sailing.domain.orc.ORCCertificateImporter;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.impl.DegreeBearingImpl;
@@ -60,7 +62,7 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
         JSONArray dataArray = (JSONArray) parsedJson.get("rms");
         for (int i = 0; i < dataArray.size(); i++) {
             JSONObject object = (JSONObject) dataArray.get(i);
-            result.put(((String) object.get("SailNo")).replaceAll(" ", ""), object);
+            result.put(((String) object.get("SailNo")).replaceAll(" ", "").toUpperCase(), object);
         }
 
         data = result;
@@ -72,8 +74,80 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
      */
     @Override
     public ORCCertificate getCertificate(String sailnumber) {
-        // TODO Auto-generated method stub
-        return null;
+        String boatclass;
+        Distance length;
+        Duration gph;
+        Map<Speed, Map<Bearing, Duration>> timeAllowancesPerTrueWindSpeedAndAngle;
+        Map<Speed, Bearing> beatAngles;
+        Map<Speed, Bearing> gybeAngles;
+        String searchString = sailnumber.replaceAll(" ", "").toUpperCase();
+        JSONObject object = (JSONObject) data.get(searchString);
+        if (object == null) {
+            return null;
+        }
+        for (Entry<Object, Object> entry : object.entrySet()) {
+            switch ((String) entry.getKey()) {
+                case "LOA":
+                    break;
+                case "Class":
+                    break;
+                case "GPH":    
+                    break;
+                case "Allowances":
+                    JSONObject allowances = (JSONObject) object.get("Allowances");
+                    for (Object aKey : allowances.keySet()) {
+                        JSONArray array = (JSONArray) allowances.get(aKey);
+    
+                        if (((String) aKey).equals("BeatAngle")) {
+                            for (int i = 0; i < array.size(); i++) {
+                                beatAngles.put(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i],
+                                        new DegreeBearingImpl(((Number) array.get(i)).doubleValue()));
+                            }
+                            continue;
+                        }
+    
+                        if (((String) aKey).equals("GybeAngle")) {
+                            for (int i = 0; i < array.size(); i++) {
+                                gybeAngles.put(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i],
+                                        new DegreeBearingImpl(((Number) array.get(i)).doubleValue()));
+                            }
+                            continue;
+                        }
+    
+                        Map<Speed, Duration> twsMap = new HashMap<>();
+                        for (int i = 0; i < array.size(); i++) {
+                            twsMap.put(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i],
+                                    Duration.ONE_SECOND.times(((Number) array.get(i)).doubleValue()));
+                        }
+    
+                        switch ((String) aKey) {
+                            case "R52":
+                            case "R60":
+                            case "R75":
+                            case "R90":
+                            case "R110":
+                            case "R120":
+                            case "R135":
+                            case "R150":
+                                twaCourses.put((String) aKey, twsMap);
+                                break;
+                            case BEAT:
+                            case RUN:
+                                break;
+                            default:
+                                predefinedCourses.put((String) aKey, twsMap);
+                            }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        } 
+        
+        
+        
+        
+        return new ORCCertificateImpl(searchString, boatclass, length, gph, timeAllowancesPerTrueWindSpeedAndAngle, beatAngles, gybeAngles);
     }
 
     /**

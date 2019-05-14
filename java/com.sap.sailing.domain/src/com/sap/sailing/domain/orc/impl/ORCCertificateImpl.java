@@ -56,19 +56,20 @@ public class ORCCertificateImpl implements ORCCertificate {
     private final String sailnumber;
     private final String boatclass;
     private final Distance lengthOverAll;
-    
+    private final Duration gph;
     private final Map<Speed, Map<Bearing, Duration>> timeAllowancesPerTrueWindSpeedAndAngle;
     private final Map<Speed, Bearing> beatAngles;
     private final Map<Speed, Bearing> gybeAngles;
 
 
-    public ORCCertificateImpl(String sailnumber, String boatclass, Distance length,
+    public ORCCertificateImpl(String sailnumber, String boatclass, Distance length, Duration gph,
             Map<Speed, Map<Bearing, Duration>> timeAllowancesPerTrueWindSpeedAndAngle, Map<Speed, Bearing> beatAngles,
             Map<Speed, Bearing> gybeAngles) {
         super();
         this.sailnumber = sailnumber;
         this.boatclass = boatclass;
         this.lengthOverAll = length;
+        this.gph = gph;
         this.timeAllowancesPerTrueWindSpeedAndAngle = timeAllowancesPerTrueWindSpeedAndAngle;
         this.beatAngles = beatAngles;
         this.gybeAngles = gybeAngles;
