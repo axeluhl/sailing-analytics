@@ -3,6 +3,7 @@ package com.sap.sailing.domain.markpassingcalculation.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.NavigableSet;
 import java.util.TreeSet;
@@ -56,13 +57,15 @@ public class AbstractCandidateFilterTestSupport {
     }
 
     protected void assertContainsExactly(Iterable<Candidate> candidates, Candidate... candidatesExpected) {
-        assertEquals(candidatesExpected.length, Util.size(candidates));
+        assertEquals(""+candidates+"'s size does not match that of "+Arrays.toString(candidatesExpected)+"; ",
+                candidatesExpected.length, Util.size(candidates));
         assertContains(candidates, candidatesExpected);
     }
     
     protected void assertContains(Iterable<Candidate> candidates, Candidate...candidatesExpected) {
         for (final Candidate candidateExpected : candidatesExpected) {
-            assertTrue(Util.contains(candidates, candidateExpected));
+            assertTrue("Expected "+candidateExpected+" to be in "+candidates+" but it wasn't; ",
+                    Util.contains(candidates, candidateExpected));
         }
     }
 

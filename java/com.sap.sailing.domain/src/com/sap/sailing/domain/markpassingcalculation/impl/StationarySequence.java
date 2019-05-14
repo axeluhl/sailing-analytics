@@ -420,7 +420,7 @@ public class StationarySequence {
             }
             final Set<Candidate> candidatesAdded = new TreeSet<>(candidateComparator);
             candidatesAdded.addAll(newValidCandidates);
-            candidatesAdded.removeAll(newValidCandidates); // FIXME ???
+            candidatesAdded.removeAll(oldValidCandidates);
             final Set<Candidate> candidatesRemoved = new TreeSet<>(candidateComparator);
             candidatesRemoved.addAll(oldValidCandidates);
             candidatesRemoved.removeAll(newValidCandidates);

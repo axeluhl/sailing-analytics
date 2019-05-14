@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
+import java.util.NavigableSet;
 import java.util.TreeSet;
 
 import org.junit.Before;
@@ -76,6 +77,8 @@ public class StationarySequenceBasedFilterTest extends AbstractCandidateFilterTe
     @Test
     public void testAddingOutlierFix() {
         // additional set-up:
+        NavigableSet<Candidate> originalValidCandidates = new TreeSet<>(candidateComparator);
+        Util.addAll(stationarySequence.getValidCandidates(), originalValidCandidates);
         final GPSFixMoving fixAtC2 = track.getFirstFixAtOrAfter(c2.getTimePoint());
         final GPSFixMoving fixAfterFixAtC2 = track.getFirstFixAfter(fixAtC2.getTimePoint());
         assertNotSame(fixAtC2, fixAfterFixAtC2);
@@ -95,10 +98,25 @@ public class StationarySequenceBasedFilterTest extends AbstractCandidateFilterTe
         assertEquals(2, stationarySequence.size());
         assertContainsExactly(stationarySequence.getAllCandidates(), c1, c2);
         assertContainsExactly(stationarySequence.getValidCandidates(), c1, c2);
-        assertContainsExactly(candidatesEffectivelyRemoved, c3, c4, c5, c6, c7, c8, c9, c10);
-        assertTrue(candidatesEffectivelyAdded.isEmpty());
         assertEquals(8, splitResult.size());
         assertContainsExactly(splitResult.getAllCandidates(), c3, c4, c5, c6, c7, c8, c9, c10);
         assertContains(splitResult.getValidCandidates(), c3, c10);
+        NavigableSet<Candidate> validCandidates = new TreeSet<>(candidateComparator);
+        Util.addAll(stationarySequence.getValidCandidates(), validCandidates);
+        Util.addAll(splitResult.getValidCandidates(), validCandidates);
+        assertCorrectDiff(originalValidCandidates, validCandidates, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+    }
+
+    private void assertCorrectDiff(NavigableSet<Candidate> originalValidCandidates,
+            NavigableSet<Candidate> validCandidates, TreeSet<Candidate> candidatesEffectivelyAdded,
+            TreeSet<Candidate> candidatesEffectivelyRemoved) {
+        NavigableSet<Candidate> newValidCandidates = new TreeSet<>(candidateComparator);
+        newValidCandidates.addAll(validCandidates);
+        newValidCandidates.removeAll(originalValidCandidates);
+        assertContainsExactly(candidatesEffectivelyAdded, newValidCandidates.toArray(new Candidate[0]));
+        NavigableSet<Candidate> removedValidCandidates = new TreeSet<>(candidateComparator);
+        removedValidCandidates.addAll(originalValidCandidates);
+        removedValidCandidates.removeAll(validCandidates);
+        assertContainsExactly(candidatesEffectivelyRemoved, removedValidCandidates.toArray(new Candidate[0]));
     }
 }
