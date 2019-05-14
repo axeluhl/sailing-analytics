@@ -526,7 +526,10 @@ public class StationarySequenceBasedFilter {
                         StationarySequence.createDummyCandidate(newFix.getTimePoint())));
                 if (lastSequenceStartingAtOrBeforeFix != null && !lastSequenceStartingAtOrBeforeFix.getLast().getTimePoint().before(newFix.getTimePoint())) {
                     // fix falls into the existing StationarySequence; update its bounding box:
-                    final StationarySequence splitResult = lastSequenceStartingAtOrBeforeFix.tryToAddFix(newFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved, /* StationarySequence set to update */ stationarySequences);
+                    final StationarySequence splitResult = lastSequenceStartingAtOrBeforeFix.tryToAddFix(
+                            newFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved,
+                            /* StationarySequence set to update */ stationarySequences,
+                            /* was replacement */ fixesReplacingExistingOnes != null && Util.contains(fixesReplacingExistingOnes, newFix));
                     assert !stationarySequences.contains(lastSequenceStartingAtOrBeforeFix) || lastSequenceStartingAtOrBeforeFix.size() > 1;
                     if (splitResult != null) {
                         assert splitResult.size() > 1;
