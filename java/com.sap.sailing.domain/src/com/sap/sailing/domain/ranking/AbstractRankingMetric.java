@@ -269,7 +269,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
     public Duration getActualTimeSinceStartOfRace(Competitor competitor, TimePoint timePoint) {
         final Duration result;
         final TimePoint startOfRace = getTrackedRace().getStartOfRace();
-        if (startOfRace == null) {
+        if (startOfRace == null || timePoint.before(startOfRace)) {
             result = null;
         } else {
             final Waypoint finish = getTrackedRace().getRace().getCourse().getLastWaypoint();
