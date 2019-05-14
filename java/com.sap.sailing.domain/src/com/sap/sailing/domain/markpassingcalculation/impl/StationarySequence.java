@@ -457,19 +457,20 @@ public class StationarySequence {
 
     /**
      * If this sequence contains a {@link Candidate} that matches the {@code timePoint} exactly, that candidate is
-     * returned. Otherwise, a dummy candidate is created that has the {@code timePoint} provided.<p>
+     * returned. Otherwise, a dummy candidate is created that has the {@code timePoint} provided.
+     * <p>
      * 
-     * Note that depending on the {@link #candidateComparator} used, two candidates are not necessarily considered
-     * equal only because they have equal time points.
+     * Note that depending on the {@link #candidateComparator} used, two candidates are not necessarily considered equal
+     * only because they have equal time points.
      */
     private Candidate getCandidateMatchingTimePointOrCreateDummy(TimePoint timePoint) {
         final Candidate dummy = new CandidateImpl(/* one-based index of waypoint */ 1, timePoint, /* probability */ 0, /* waypoint */ null);
         final Candidate floorCandidate = candidates.floor(dummy);
         final Candidate ceilingCandidate = candidates.ceiling(dummy);
         final Candidate result;
-        if (floorCandidate.getTimePoint().equals(timePoint)) {
+        if (floorCandidate != null && floorCandidate.getTimePoint().equals(timePoint)) {
             result = floorCandidate;
-        } else if (ceilingCandidate.getTimePoint().equals(timePoint)) {
+        } else if (ceilingCandidate != null && ceilingCandidate.getTimePoint().equals(timePoint)) {
             result = ceilingCandidate;
         } else {
             result = dummy;
