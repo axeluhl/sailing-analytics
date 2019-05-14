@@ -2,7 +2,6 @@ package com.sap.sailing.domain.orc;
 
 import java.util.Map;
 
-import com.sap.sailing.domain.orc.impl.ORCCertificateImpl;
 
 /**
  * Extracts ORC-Certificates from different sources and different formats. Returns ORC-Certificate objects for given

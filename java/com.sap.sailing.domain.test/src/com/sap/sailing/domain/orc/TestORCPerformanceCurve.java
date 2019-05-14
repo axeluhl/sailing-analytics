@@ -17,7 +17,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.orc.impl.ORCCertificateImpl;
-import com.sap.sailing.domain.orc.impl.ORCCertificateImporterJSON;
+import com.sap.sailing.domain.orc.impl.ORCCertificateImporterJSONComplex;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveCourseImpl;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveImpl;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveLegImpl;
@@ -40,7 +40,7 @@ public class TestORCPerformanceCurve {
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.03), new DegreeBearingImpl(165)));
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.17), new DegreeBearingImpl(180)));
         course = new ORCPerformanceCurveCourseImpl(legs);
-        importer = new ORCCertificateImporterJSON(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
+        importer = new ORCCertificateImporterJSONComplex(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
     }
 
     /*

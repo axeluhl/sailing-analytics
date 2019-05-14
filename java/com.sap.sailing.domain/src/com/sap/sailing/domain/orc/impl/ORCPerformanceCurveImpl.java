@@ -160,7 +160,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     }
 
     @Override
-    public Duration getCalculatedTime() {
+    public Duration getCalculatedTime(ORCPerformanceCurve referenceBoat) {
         // TODO Auto-generated method stub
         return null;
     }
