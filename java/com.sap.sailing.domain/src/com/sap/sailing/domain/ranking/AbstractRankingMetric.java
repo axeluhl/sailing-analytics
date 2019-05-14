@@ -335,7 +335,6 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                         competitor, competitorFarthestAhead, timePoint, cache);
                 final Duration totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead = predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead == null ? null
                         : actualRaceDuration.plus(predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead);
-                // TODO bug4839: special case: the competitor farthest ahead has already passed the finish line; in this case, compute the time to the finish, or if the competitor in question already has a finish line mark passing, use the total time sailed
                 final Duration calculatedEstimatedTimeWhenReachingCompetitorFarthestAhead = totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead == null ? null
                         : getCalculatedTime(
                                 competitor,
@@ -504,18 +503,17 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      * For the situation at <code>timePoint</code>, determines how long in real, uncorrected time <code>who</code> lags
      * behind <code>to</code> in the leg identified by <code>legWho</code>. If both are still sailing in the leg at
      * <code>timePoint</code>, this is the time <code>who</code> needs with constant average VMG to reach
-     * <code>to</code>'s position at <code>timePoint</code>. If only <code>to</code> has already finished the leg and no
-     * mark passing time is known yet for <code>who</code> for the end of the leg then <code>who</code> is projected to
-     * the end of the leg using her average VMG on the leg, and the difference between <code>who</code>'s projected and
-     * <code>to</code>'s actual mark passing times is returned.
-     * <p>
-     * 
-     * If leg finish mark passings are available for both, <code>who</code> and <code>to</code>, the difference between
-     * them is returned.
+     * <code>to</code>'s position at <code>timePoint</code>. If only <code>to</code> has already finished the leg at
+     * {@code timePoint} then <code>who</code> is projected to the end of the leg using her average VMG on the leg, and
+     * the difference between <code>who</code>'s projected and <code>to</code>'s actual mark passing times is returned.
+     * Note that in this latter case it doesn't matter whether {@code who} already has a mark passing for the end of the
+     * leg or not; the idea is to not "rewrite history" by letting the mark passing have an impact on the rankings prior
+     * to the mark passing.
      * <p>
      * 
      * The result may be a negative duration in case <code>who</code> reached the position in question before
-     * <code>timePoint</code>.<p>
+     * <code>timePoint</code>.
+     * <p>
      * 
      * Precondition: <code>who</code> and <code>to</code> have both started sailing the leg at <code>timePoint</code>
      * and <code>to</code> has sailed a greater or equal windward distance compared to <code>who</code>. If not, the
@@ -537,9 +535,8 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                         getWindwardDistanceTraveled(legWho.getCompetitor(), legWho.hasFinishedLeg(timePoint)?legWho.getFinishTime():timePoint, cache)) >= 0;
                 // estimate who's leg finishing time by extrapolating with the average VMG (if available) or the current VMG
                 // (if no average VMG can currently be computed, e.g., because the time point is exactly at the leg start)
-                final Position windwardPositionToReachInWhosCurrentLeg =
-                                getTrackedRace().getApproximatePosition(legWho.getLeg().getTo(), timePoint);
-                toEndOfLegOrTo = getDurationToReach(windwardPositionToReachInWhosCurrentLeg, timePoint, legWho, cache);
+                final Position positionOfEndOfLeg = getTrackedRace().getApproximatePosition(legWho.getLeg().getTo(), timePoint);
+                toEndOfLegOrTo = getDurationToReach(positionOfEndOfLeg, timePoint, legWho, cache);
             }
         } else {
             // competitor "to" is still in same leg; project "who" to "to"'s position using VMG
