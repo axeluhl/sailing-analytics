@@ -494,9 +494,6 @@ public class StationarySequenceBasedFilter {
      * sequence is started, adding all remaining candidates. Any sequence resulting from such a split and having only
      * one candidate left is removed. The candidates immediately left and right of the split now pass the filter and
      * therefore are added to the {@link #allEdges graph}.</li>
-     * FIXME if the fix replaces another one within a sequence, the bounding box may need to shrink. Otherwise, later
-     * additions that expand the bounding box seemingly beyond thresholds may fail to re-evaluate all fixes of the
-     * sequence. A simple fix may be to re-evaluate the bounding box entirely upon replacements.
      * <li>A GPS fix was added outside any stationary sequence. Nothing changes because no bounding box would get
      * smaller by a new fix added.</li>
      * <li>A GPS fix <em>replaces</em> an existing one outside of any stationary sequence. In this case it is possible
