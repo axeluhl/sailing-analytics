@@ -1062,7 +1062,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
             return;
         }
         //setup filter value to name from params
-        groupsFilterablePanel.getTextBox().setValue(nameLeaderBoardGroup);
+        groupsFilterablePanel.search(nameLeaderBoardGroup);
 
         //deselect all leaderboard groups except one which name is from params
         for (LeaderboardGroupDTO leaderboardGroupDTO : availableLeaderboardGroups) {
