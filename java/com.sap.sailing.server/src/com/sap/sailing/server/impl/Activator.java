@@ -139,10 +139,6 @@ public class Activator implements BundleActivator {
                 };
             }.start();
         }
-        windEstimationFactoryServiceTrack = new ServiceTracker<WindEstimationFactoryService, WindEstimationFactoryService>(context,
-                WindEstimationFactoryService.class, new WindEstimationFactoryServiceTrackerCustomizer(context, racingEventService));
-        windEstimationFactoryServiceTrack.open();
-
     }
 
     /**
@@ -241,27 +237,21 @@ public class Activator implements BundleActivator {
                 serviceFinderFactory, trackedRegattaListener, notificationService,
                 trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker);
         notificationService.setRacingEventService(racingEventService);
-
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,
                 new MasterDataImportClassLoaderServiceTrackerCustomizer(context, racingEventService));
         masterDataImportClassLoaderServiceTracker.open();
-
         polarDataServiceTracker = new ServiceTracker<PolarDataService, PolarDataService>(context,
                 PolarDataService.class,
                 new PolarDataServiceTrackerCustomizer(context, racingEventService));
         polarDataServiceTracker.open();
-
         windEstimationFactoryServiceTrack = new ServiceTracker<WindEstimationFactoryService, WindEstimationFactoryService>(context,
                 WindEstimationFactoryService.class, new WindEstimationFactoryServiceTrackerCustomizer(context, racingEventService));
         windEstimationFactoryServiceTrack.open();
-
         // register the racing service in the OSGi registry
         racingEventService.setBundleContext(context);
-        context.registerService(MongoObjectFactory.class, racingEventService.getMongoObjectFactory(),
-                /* properties */ null);
-        context.registerService(DomainObjectFactory.class, racingEventService.getDomainObjectFactory(),
-                /* properties */ null);
+        context.registerService(MongoObjectFactory.class, racingEventService.getMongoObjectFactory(), /* properties */ null);
+        context.registerService(DomainObjectFactory.class, racingEventService.getDomainObjectFactory(), /* properties */ null);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
         replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name,
                 racingEventService.getId().toString());
@@ -307,7 +297,6 @@ public class Activator implements BundleActivator {
         mbs.registerMBean(mbean, mBeanName);
         logger.log(Level.INFO, "Started " + context.getBundle().getSymbolicName()
                 + ". Character encoding: " + Charset.defaultCharset());
-
         // do initial setup/migration logic
         racingEventService.ensureOwnerships();
     }
@@ -375,9 +364,8 @@ public class Activator implements BundleActivator {
     
     private class WindEstimationFactoryServiceTrackerCustomizer
             implements ServiceTrackerCustomizer<WindEstimationFactoryService, WindEstimationFactoryService> {
-
         private final BundleContext context;
-        private RacingEventServiceImpl racingEventService;
+        private final RacingEventServiceImpl racingEventService;
 
         public WindEstimationFactoryServiceTrackerCustomizer(BundleContext context,
                 RacingEventServiceImpl racingEventService) {
