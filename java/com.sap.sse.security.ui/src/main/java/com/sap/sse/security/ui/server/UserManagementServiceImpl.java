@@ -525,15 +525,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public void updateSimpleUserPassword(final String username, String oldPassword, String passwordResetSecret, String newPassword) throws UserManagementException {
         final User user = getSecurityService().getUserByName(username);
-        getSecurityService().checkCurrentUserUpdatePermission(user);
-        if (getSecurityService().hasCurrentUserOneOfExplicitPermissions(user, UserActions.FORCE_OVERWRITE_PASSWORD)) {
-            // e.g. admin is allowed to update the password without knowing the old password and/or secret
-            getSecurityService().updateSimpleUserPassword(username, newPassword);
-            sendPasswordChangedMailAsync(username);
-        } else if (// someone knew a username and the correct password for that user
+        // Is, e.g., admin is allowed to update the password without knowing the old password and/or secret?
+        if (getSecurityService().hasCurrentUserOneOfExplicitPermissions(user, UserActions.FORCE_OVERWRITE_PASSWORD)
+        || // someone knew a username and the correct password for that user
         (oldPassword != null && getSecurityService().checkPassword(username, oldPassword))
-            // someone provided the correct password reset secret for the correct username
-         || (passwordResetSecret != null && getSecurityService().checkPasswordResetSecret(username, passwordResetSecret))) {
+        || // someone provided the correct password reset secret for the correct username
+        (passwordResetSecret != null && getSecurityService().checkPasswordResetSecret(username, passwordResetSecret))) {
             getSecurityService().updateSimpleUserPassword(username, newPassword);
             sendPasswordChangedMailAsync(username);
         } else {
@@ -881,6 +878,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
                         @Override
                         public void run() throws Exception {
+                            final QualifiedObjectIdentifier qualifiedObjectAssociationIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
+                                    .getQualifiedObjectIdentifier(associationTypeIdentifier);
+                            getSecurityService().addToAccessControlList(qualifiedObjectAssociationIdentifier,
+                                    null, DefaultActions.READ.name());
+
                             getSecurityService().addRoleForUser(user, role);
                             logger.info(message);
                         }
@@ -1026,6 +1028,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
                         @Override
                         public void run() throws Exception {
+                            final QualifiedObjectIdentifier qualifiedObjectAssociationIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                                    .getQualifiedObjectIdentifier(associationTypeIdentifier);
+                            getSecurityService().addToAccessControlList(qualifiedObjectAssociationIdentifier,
+                                    null, DefaultActions.READ.name());
                             getSecurityService().addPermissionForUser(username, permission);
                             logger.info(message);
                         }

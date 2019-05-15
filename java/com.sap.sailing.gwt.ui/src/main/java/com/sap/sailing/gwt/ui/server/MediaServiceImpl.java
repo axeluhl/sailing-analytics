@@ -82,13 +82,29 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     }
 
     @Override
-    public Iterable<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
-        return racingEventService().getMediaTracksForRace(regattaAndRaceIdentifier);
+    public Iterable<MediaTrackWithSecurityDTO> getMediaTracksForRace(
+            RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
+        Collection<MediaTrackWithSecurityDTO> mediaTracks = new ArrayList<>();
+        for (MediaTrack mediaTrack : racingEventService().getMediaTracksForRace(regattaAndRaceIdentifier)) {
+            MediaTrackWithSecurityDTO securedMediaTrack = new MediaTrackWithSecurityDTO(mediaTrack);
+            SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), securedMediaTrack,
+                    mediaTrack.getIdentifier());
+            mediaTracks.add(securedMediaTrack);
+        }
+        return mediaTracks;
     }
 
     @Override
-    public Iterable<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
-        return racingEventService().getMediaTracksInTimeRange(regattaAndRaceIdentifier);
+    public Iterable<MediaTrackWithSecurityDTO> getMediaTracksInTimeRange(
+            RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
+        Collection<MediaTrackWithSecurityDTO> mediaTracks = new ArrayList<>();
+        for (MediaTrack mediaTrack : racingEventService().getMediaTracksInTimeRange(regattaAndRaceIdentifier)) {
+            MediaTrackWithSecurityDTO securedMediaTrack = new MediaTrackWithSecurityDTO(mediaTrack);
+            SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), securedMediaTrack,
+                    mediaTrack.getIdentifier());
+            mediaTracks.add(securedMediaTrack);
+        }
+        return mediaTracks;
     }
 
     @Override
@@ -104,7 +120,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     }
     
     @Override
-    public String addMediaTrack(MediaTrack mediaTrack) {
+    public MediaTrackWithSecurityDTO addMediaTrack(MediaTrack mediaTrack) {
         SecurityUtils.getSubject().checkPermission(SecuredDomainType.MEDIA_TRACK.getStringPermission(DefaultActions.CREATE));
         if (mediaTrack.dbId != null) {
             throw new IllegalStateException("Property dbId must not be null for newly created media track.");
@@ -112,7 +128,10 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
         racingEventService().mediaTrackAdded(mediaTrack);
         SecurityService securityService = racingEventService().getSecurityService();
         securityService.setDefaultOwnershipIfNotSet(mediaTrack.getIdentifier());
-        return mediaTrack.dbId;
+        MediaTrackWithSecurityDTO mediaTrackWithSecurity = new MediaTrackWithSecurityDTO(mediaTrack);
+        SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), mediaTrackWithSecurity,
+                mediaTrackWithSecurity.getIdentifier());
+        return mediaTrackWithSecurity;
     }
 
     @Override

@@ -44,6 +44,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
     private final UserTableWrapper<RefreshableMultiSelectionModel<UserDTO>, TR> userList;
     private final RefreshableMultiSelectionModel<UserDTO> userSelectionModel;
     private final TextBox userNameTextbox;
+    private final UserRoleDefinitionPanel userRoleDefinitionPanel;
 
     public UserManagementPanel(final UserService userService, final StringMessages stringMessages,
             ErrorReporter errorReporter, TR tableResources) {
@@ -134,7 +135,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         final HorizontalPanel detailsPanel = new HorizontalPanel();
 
         // add details panel for user roles
-        final UserRoleDefinitionPanel userRoleDefinitionPanel = new UserRoleDefinitionPanel(userService, stringMessages,
+        userRoleDefinitionPanel = new UserRoleDefinitionPanel(userService, stringMessages,
                 errorReporter,
                 tableResources, userList.getSelectionModel(), () -> updateUsers());
         detailsPanel.add(userRoleDefinitionPanel);
@@ -178,6 +179,10 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                 errorReporter.reportError(caught.getMessage());
             }
         });
+    }
+
+    public void refreshSuggests() {
+        userRoleDefinitionPanel.refreshSuggest();
     }
 
     public void updateUsers() {

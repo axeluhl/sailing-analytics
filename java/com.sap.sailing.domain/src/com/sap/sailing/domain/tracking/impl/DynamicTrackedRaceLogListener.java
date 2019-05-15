@@ -47,7 +47,7 @@ import com.sap.sse.common.Util.Triple;
  * Listens for changes on a {@link RaceLog} and forwards the relevant ones to a {@link TrackedRace}. Examples: start time changes;
  * fixed mark passings changes; course design changes; wind fixes entered by the race committee.<p>
  * 
- * For each {@link RaceLog} {@link #addTo(RaceLog) attached}, a {@link ReadonlyRaceState} is constructed that is used to observe
+ * For each {@link RaceLog} {@link #beforeAttaching(RaceLog) attached}, a {@link ReadonlyRaceState} is constructed that is used to observe
  * some properties in an easier to use form than observing the {@link RaceLog}s directly. For example, the {@link ReadonlyRaceState}
  * can tell the {@link ReadonlyRaceState#getFinishedTime() finished time} and it is possible to receive change notifications for
  * this value.
@@ -74,7 +74,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         raceCommitteeWindSource = new WindSourceImpl(WindSourceType.RACECOMMITTEE);
     }
 
-    public void addTo(RaceLog raceLog) {
+    public void beforeAttaching(RaceLog raceLog) {
         if (raceLog == null) {
             logger.severe("Trying to add " + this + " as listener to a null race log for tracked race " + trackedRace.getRace());
         } else {
@@ -87,10 +87,13 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
                     trackedRace.setFinishedTime(state.getFinishedTime());
                 }
             });
-            trackedRace.invalidateStartTime();
-            trackedRace.invalidateEndTime();
-            analyze(raceLog);
         }
+    }
+
+    public void afterAttaching(RaceLog raceLog) {
+        trackedRace.invalidateStartTime();
+        trackedRace.invalidateEndTime();
+        analyze(raceLog);
     }
 
     /**
@@ -139,7 +142,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         }
     }
 
-    public void removeFrom(RaceLog raceLog) {
+    public void beforeDetaching(RaceLog raceLog) {
         // Gets called whenever a RaceColumn was already linked to a TrackedRace on linkage.
         // Maybe we need to reset the status of the old race somehow? There might be no new
         // TrackedRace to be linked...
@@ -147,13 +150,19 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         // TODO:
         // ??? trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0));
         if (raceLog != null) {
-            trackedRace.invalidateStartTime();
-            removeAllWindFixesFromWindTrack(raceLog);
             raceLog.removeListener(this);
             raceLogs.remove(raceLog);
             if (markPassingUpdateListener != null) {
                 removeMarkPassingEvents();
             }
+        }
+    }
+
+
+    public void afterDetaching(RaceLog raceLog) {
+        if (raceLog != null) {
+            trackedRace.invalidateStartTime();
+            removeAllWindFixesFromWindTrack(raceLog);
             trackedRace.updateMarkPassingsAfterRaceLogChanges();
         }
     }
@@ -356,5 +365,4 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
             trackedRace.invalidateEndTime();
         }
     }
-
 }

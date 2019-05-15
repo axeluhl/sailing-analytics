@@ -155,6 +155,14 @@ public interface RankingMetric extends Serializable {
     Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
     /**
+     * Determine the time sailed for the {@code competitor} at {@code timePoint} in this race. This ignores whether or not
+     * the race has recorded a start mark passing for the {@code competitor}. If no finish mark passing is found either, the
+     * duration between the {@link #getStartOfRace() race start time} and {@code timePoint} is returned; otherwise the duration
+     * between the {@link #getStartOfRace() race start time} and the time when the {@code competitor} finished the race.
+     */
+    Duration getActualTimeSinceStartOfRace(Competitor competitor, TimePoint timePoint);
+
+    /**
      * How much time did the <code>competitor</code> spend in the {@link TrackedRace#getRace() race} described by
      * <code>trackedRace</code> at <code>timePoint</code>, corrected by the handicapping rules defined by this ranking
      * metric? If the competitor hasn't started the race yet at <code>timePoint</code>, <code>null</code> is returned.

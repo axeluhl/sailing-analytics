@@ -64,11 +64,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     SecurityManager getSecurityManager();
 
     /**
-     * Return the ownership information for the object identified by {@code idOfOwnedObject}. If there is no
-     * ownership information for that object and there is a default tenant available, create a default {@link Ownership}
-     * information that lists the default tenant as the tenant owner for the object in question; no user owner is
-     * specified. If no default tenant is available and no ownership information for the object with the ID specified
-     * is found, {@code null} is returned.
+     * Return the ownership information for the object identified by {@code idOfOwnedObject}. If there is no ownership
+     * information for that object {@code null} is returned.
      */
     OwnershipAnnotation getOwnership(QualifiedObjectIdentifier idOfOwnedObject);
     

@@ -120,11 +120,8 @@ public class MarkPassingCalculator {
                     return null;
                 });
             }
-            try {
-                executor.invokeAll(tasks);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "Error trying to compute initial set of mark passings for race "+race.getRace().getName(), e);
-            }
+            ThreadPoolUtil.INSTANCE.invokeAllAndLogExceptions(executor, Level.SEVERE,
+                    "Error trying to compute initial set of mark passings for race "+race.getRace().getName()+": %s", tasks);
             if (listener != null) {
                 synchronized (MarkPassingCalculator.this) {
                     if (listenerThread == null) {
@@ -290,9 +287,14 @@ public class MarkPassingCalculator {
                         // haven't processed them yet with the CandidateFinder or CandidateChooser.
                         if (!finished && !suspended) {
                             if (smallestChangedWaypointIndex.value != -1) {
+                                logger.finer("Handling course change; smallesChangedWaypointIndex=="+smallestChangedWaypointIndex.value+
+                                        "; waypoints added: "+addedWaypoints+"; waypoints removed: "+removedWaypoints);
                                 // there was a course change; finder and chooser need to be updated in this regard;
                                 // do this before the other changes such as new / replaced position fixes are considered:
                                 final Course course = race.getRace().getCourse();
+                                logger.finer(()->"Handling course change; smallestChangedWaypointIndex=="+smallestChangedWaypointIndex.value+
+                                        "; waypoints added: "+addedWaypoints+"; waypoints removed: "+removedWaypoints+
+                                        "; current course: "+course);
                                 final Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> candidateDeltas;
                                 // obtain the course's read lock so that the finder creates the candidate deltas under the
                                 // premise of the same course as the chooser updates its end proxy node's index; they have
@@ -311,11 +313,19 @@ public class MarkPassingCalculator {
                                 for (Entry<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> entry : candidateDeltas.entrySet()) {
                                     tasks.add(()->{
                                         Util.Pair<List<Candidate>, List<Candidate>> pair = entry.getValue();
-                                        chooser.calculateMarkPassDeltas(entry.getKey(), pair.getA(), pair.getB());
-                                        return null;
+                                        try {
+                                            chooser.calculateMarkPassDeltas(entry.getKey(), pair.getA(), pair.getB());
+                                            return null;
+                                        } catch (Exception e) {
+                                            logger.log(Level.SEVERE, "Exception trying to calculate mark passing deltas for competitor "+entry.getKey(), e);
+                                            throw e;
+                                        }
                                     });
                                 }
-                                executor.invokeAll(tasks);
+                                logger.finer(()->"Calculating mark passing deltas after course change in executor");
+                                ThreadPoolUtil.INSTANCE.invokeAllAndLogExceptions(executor, Level.SEVERE,
+                                        "Error calculating mark passing deltas after course change in executor: %s", tasks);
+                                logger.finer(()->"Done calculating mark passing deltas after course change");
                             }
                             updateManuallySetMarkPassings(fixedMarkPassings, removedFixedMarkPassings, suppressedMarkPassings, unsuppressedMarkPassings);
                             computeMarkPasses(competitorFixes, competitorFixesThatReplacedExistingOnes, markFixes);
@@ -412,11 +422,8 @@ public class MarkPassingCalculator {
                     }
                 });
             }
-            try {
-                executor.invokeAll(tasks);
-            } catch (InterruptedException e) {
-                logger.log(Level.INFO, "mark passing calculation interrupted", e);
-            }
+            ThreadPoolUtil.INSTANCE.invokeAllAndLogExceptions(executor, Level.INFO,
+                    "Error during mark passing calculation: %s", tasks);
         }
 
         private class ComputeMarkPassings implements Runnable {

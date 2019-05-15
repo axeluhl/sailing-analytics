@@ -1090,8 +1090,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     
     @Override
     public void attachRaceLog(RaceLog raceLog) {
-        logListener.addTo(raceLog);
+        logListener.beforeAttaching(raceLog);
         super.attachRaceLog(raceLog);
+        logListener.afterAttaching(raceLog);
         getRaceState(raceLog).addChangedListener(raceStateBasedStartTimeChangedListener);
     }
     
@@ -1099,9 +1100,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public RaceLog detachRaceLog(Serializable identifier) {
         final RaceLog attachedRaceLog = attachedRaceLogs.get(identifier);
         if (attachedRaceLog != null) {
-            logListener.removeFrom(attachedRaceLog);
+            logListener.beforeDetaching(attachedRaceLog);
         }
         final RaceLog raceLogDetached = super.detachRaceLog(identifier);
+        if (attachedRaceLog != null) {
+            logListener.afterDetaching(attachedRaceLog);
+        }
         assert raceLogDetached == attachedRaceLog;
         synchronized (raceStates) {
             final ReadonlyRaceState raceState = raceStates.remove(attachedRaceLog);

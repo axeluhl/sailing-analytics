@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LegIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -19,11 +20,15 @@ public class GetRaceMapDataAction extends AbstractGetMapRelatedDataAction<RaceMa
     private final byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID;
     private Date timeForEstimation;
     private boolean targetEstimationRequired;
+    private final DetailType detailType;
+    private final String leaderboardName;
+    private final String leaderboardGroupName;
     
     public GetRaceMapDataAction(SailingServiceAsync sailingService, Map<String, CompetitorDTO> competitorsByIdAsString,
             RegattaAndRaceIdentifier raceIdentifier, Date date, Map<CompetitorDTO, Date> from,
             Map<CompetitorDTO, Date> to, boolean extrapolate, LegIdentifier simulationLegIdentifier,
-            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID, Date timeForEstimation, boolean targetEstimationRequired) {
+            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID, Date timeForEstimation,
+            boolean targetEstimationRequired, DetailType detailType, String leaderboardName, String leaderboardGroupName) {
         super(sailingService, raceIdentifier, from, to, extrapolate);
         this.competitorsByIdAsString = competitorsByIdAsString;
         this.timeForEstimation = timeForEstimation;
@@ -31,6 +36,9 @@ public class GetRaceMapDataAction extends AbstractGetMapRelatedDataAction<RaceMa
         this.date = date;
         this.simulationLegIdentifier = simulationLegIdentifier;
         this.md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID = md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID;
+        this.detailType = detailType;
+        this.leaderboardName = leaderboardName;
+        this.leaderboardGroupName = leaderboardGroupName;
     }
     
     @Override
@@ -43,8 +51,9 @@ public class GetRaceMapDataAction extends AbstractGetMapRelatedDataAction<RaceMa
         for (Map.Entry<CompetitorDTO, Date> toEntry : getTo().entrySet()) {
             toByCompetitorIdAsString.put(toEntry.getKey().getIdAsString(), toEntry.getValue());
         }
-        getSailingService().getRaceMapData(getRaceIdentifier(), date, fromByCompetitorIdAsString, toByCompetitorIdAsString,
-                isExtrapolate(), simulationLegIdentifier, md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,timeForEstimation,targetEstimationRequired,
+        getSailingService().getRaceMapData(getRaceIdentifier(), date, fromByCompetitorIdAsString, toByCompetitorIdAsString, isExtrapolate(), simulationLegIdentifier,
+                md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,timeForEstimation,targetEstimationRequired, detailType,
+                leaderboardName, leaderboardGroupName,
                 new AsyncCallback<CompactRaceMapDataDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {

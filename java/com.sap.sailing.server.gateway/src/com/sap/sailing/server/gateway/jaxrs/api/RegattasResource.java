@@ -101,7 +101,6 @@ import com.sap.sailing.server.gateway.serialization.impl.AbstractTrackedRaceData
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorTrackWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompleteManeuverCurveWithEstimationDataJsonSerializer;
@@ -283,7 +282,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             NationalityJsonSerializer nationalityJsonSerializer = new NationalityJsonSerializer();
             BoatJsonSerializer boatJsonSerializer = new BoatJsonSerializer(new BoatClassJsonSerializer());
             CompetitorJsonSerializer competitorJsonSerializer = new CompetitorJsonSerializer(new TeamJsonSerializer(
-                    new PersonJsonSerializer(nationalityJsonSerializer)), boatJsonSerializer);
+                    new PersonJsonSerializer(nationalityJsonSerializer)), boatJsonSerializer, /* serializeNonPublicFields */ false);
             JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(null, competitorJsonSerializer, boatJsonSerializer, getSecurityService());
             JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
             String json = serializedRegatta.toJSONString();
@@ -313,8 +312,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
             } else {
-                CompetitorAndBoatJsonSerializer competitorAndBoatJsonSerializer = CompetitorAndBoatJsonSerializer.create();
-                JsonSerializer<RaceDefinition> raceEntriesSerializer = new RaceEntriesJsonSerializer(competitorAndBoatJsonSerializer, getSecurityService());
+                JsonSerializer<RaceDefinition> raceEntriesSerializer = new RaceEntriesJsonSerializer(getSecurityService());
                 JSONObject serializedRaceEntries = raceEntriesSerializer.serialize(race);
                 String json = serializedRaceEntries.toJSONString();
                 response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();

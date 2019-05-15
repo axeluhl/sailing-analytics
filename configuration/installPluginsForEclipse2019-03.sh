@@ -45,6 +45,9 @@ installPlugins http://download.eclipse.org/releases/2019-03 org.eclipse.mat.feat
 echo "Installing SAP JVM Tools (profiler) ..."
 installPlugins https://tools.hana.ondemand.com/oxygen com.sap.jvm.profiling.feature.group
 
+echo "Installing UMLet ..."
+installPlugins https://www.umlet.com/umlet_latest/repository/ umlet-eclipse-feature.feature.group
+
 echo "Installing javax.xml.bind for news feed polling (see https://stackoverflow.com/questions/52528693/eclipse-internal-error-polling-news-feeds)..."
 installPlugins http://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository javax.xml.bind
 

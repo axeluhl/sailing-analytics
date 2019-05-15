@@ -976,36 +976,32 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         }
         TimePoint stableBearingAnalysisUntil = maneuverStart == null ? maneuverMainCurveDetails.getTimePointBefore()
                 : maneuverStart.getExtensionTimePoint();
-        Speed lowestSpeed = maneuverStart == null ? null : maneuverStart.getLowestSpeedWithinExtensionArea();
-        Speed highestSpeed = maneuverStart == null ? null : maneuverStart.getHighestSpeedWithinExtensionArea();
-        double courseChangeSinceManeuverMainCurveInDegrees = maneuverStart == null ? 0
-                : maneuverStart.getCourseChangeInDegreesWithinExtensionArea();
         stepsToAnalyze = getSpeedWithBearingStepsWithinTimeRange(stepsToAnalyze, earliestTimePointForSpeedTrendAnalysis,
                 stableBearingAnalysisUntil);
         ManeuverCurveBoundaryExtension stableBearingExtension = findStableBearingWithMaxAbsCourseChangeSpeed(
                 stepsToAnalyze, true, MAX_TURNING_RATE_IN_DEG_PER_SECOND_FOR_STABLE_COURSE_ANALYSIS);
-        if (stableBearingExtension != null
-                && !isCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, stableBearingExtension)) {
-            maneuverStart = stableBearingExtension;
-            courseChangeSinceManeuverMainCurveInDegrees += stableBearingExtension
-                    .getCourseChangeInDegreesWithinExtensionArea();
-            if (lowestSpeed == null
-                    || lowestSpeed.compareTo(stableBearingExtension.getLowestSpeedWithinExtensionArea()) > 0) {
-                lowestSpeed = stableBearingExtension.getLowestSpeedWithinExtensionArea();
-            }
-            if (highestSpeed == null
-                    || highestSpeed.compareTo(stableBearingExtension.getHighestSpeedWithinExtensionArea()) < 0) {
-                highestSpeed = stableBearingExtension.getHighestSpeedWithinExtensionArea();
-            }
+        ManeuverCurveBoundaryExtension mergedExtension = extendManeuverCurveBoundaryExtension(maneuverStart, stableBearingExtension);
+        if (!isCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, mergedExtension)) {
+            maneuverStart = mergedExtension;
         }
         return maneuverStart != null
-                ? new ManeuverCurveBoundaryExtension(maneuverStart.getExtensionTimePoint(),
-                        maneuverStart.getSpeedWithBearingAtExtensionTimePoint(),
-                        courseChangeSinceManeuverMainCurveInDegrees
-                                + maneuverStart.getCourseChangeInDegreesWithinExtensionArea(),
-                        lowestSpeed, highestSpeed)
+                ? maneuverStart
                 : new ManeuverCurveBoundaryExtension(maneuverMainCurveDetails.getTimePointBefore(),
                         maneuverMainCurveDetails.getSpeedWithBearingBefore(), 0, null, null);
+    }
+    
+    private ManeuverCurveBoundaryExtension extendManeuverCurveBoundaryExtension(ManeuverCurveBoundaryExtension previousExtension, ManeuverCurveBoundaryExtension newExtension) {
+        if (previousExtension == null) {
+            return newExtension;
+        }
+        if (newExtension == null) {
+            return previousExtension;
+        }
+        Speed lowestSpeed = previousExtension.getLowestSpeedWithinExtensionArea().compareTo(newExtension.getLowestSpeedWithinExtensionArea()) > 0 ? newExtension.getLowestSpeedWithinExtensionArea() : previousExtension.getLowestSpeedWithinExtensionArea();
+        Speed highestSpeed = previousExtension.getHighestSpeedWithinExtensionArea().compareTo(newExtension.getHighestSpeedWithinExtensionArea()) < 0 ? newExtension.getHighestSpeedWithinExtensionArea() : previousExtension.getHighestSpeedWithinExtensionArea();
+        double courseChangeInDegrees = previousExtension.getCourseChangeInDegreesWithinExtensionArea() + newExtension.getCourseChangeInDegreesWithinExtensionArea();
+        ManeuverCurveBoundaryExtension mergedExtension = new ManeuverCurveBoundaryExtension(newExtension.getExtensionTimePoint(), newExtension.getSpeedWithBearingAtExtensionTimePoint(), courseChangeInDegrees, lowestSpeed, highestSpeed);
+        return mergedExtension;
     }
 
     private boolean isCourseChangeLimitExceededForCurveExtension(
@@ -1065,32 +1061,16 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         }
         TimePoint stableBearingAnalysisFrom = maneuverEnd == null ? maneuverMainCurveDetails.getTimePointAfter()
                 : maneuverEnd.getExtensionTimePoint();
-        Speed lowestSpeed = maneuverEnd == null ? null : maneuverEnd.getLowestSpeedWithinExtensionArea();
-        Speed highestSpeed = maneuverEnd == null ? null : maneuverEnd.getHighestSpeedWithinExtensionArea();
-        double courseChangeSinceManeuverMainCurveInDegrees = maneuverEnd == null ? 0
-                : maneuverEnd.getCourseChangeInDegreesWithinExtensionArea();
         stepsToAnalyze = getSpeedWithBearingStepsWithinTimeRange(stepsToAnalyze, stableBearingAnalysisFrom,
                 latestTimePointForSpeedTrendAnalysis);
         ManeuverCurveBoundaryExtension stableBearingExtension = findStableBearingWithMaxAbsCourseChangeSpeed(
                 stepsToAnalyze, false, MAX_TURNING_RATE_IN_DEG_PER_SECOND_FOR_STABLE_COURSE_ANALYSIS);
-        if (stableBearingExtension != null
-                && !isCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, stableBearingExtension)) {
-            maneuverEnd = stableBearingExtension;
-            courseChangeSinceManeuverMainCurveInDegrees += stableBearingExtension
-                    .getCourseChangeInDegreesWithinExtensionArea();
-            if (lowestSpeed == null
-                    || lowestSpeed.compareTo(stableBearingExtension.getLowestSpeedWithinExtensionArea()) > 0) {
-                lowestSpeed = stableBearingExtension.getLowestSpeedWithinExtensionArea();
-            }
-            if (highestSpeed == null
-                    || highestSpeed.compareTo(stableBearingExtension.getHighestSpeedWithinExtensionArea()) < 0) {
-                highestSpeed = stableBearingExtension.getHighestSpeedWithinExtensionArea();
-            }
+        ManeuverCurveBoundaryExtension mergedExtension = extendManeuverCurveBoundaryExtension(maneuverEnd, stableBearingExtension);
+        if(!isCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, mergedExtension)) {
+            maneuverEnd = mergedExtension;
         }
         return maneuverEnd != null
-                ? new ManeuverCurveBoundaryExtension(maneuverEnd.getExtensionTimePoint(),
-                        maneuverEnd.getSpeedWithBearingAtExtensionTimePoint(),
-                        courseChangeSinceManeuverMainCurveInDegrees, lowestSpeed, highestSpeed)
+                ? maneuverEnd
                 : new ManeuverCurveBoundaryExtension(maneuverMainCurveDetails.getTimePointAfter(),
                         maneuverMainCurveDetails.getSpeedWithBearingAfter(), 0, null, null);
     }
