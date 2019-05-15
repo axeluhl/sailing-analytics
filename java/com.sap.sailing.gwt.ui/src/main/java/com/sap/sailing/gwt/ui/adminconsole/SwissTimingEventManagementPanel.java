@@ -80,13 +80,13 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         connectionsTable = new SwissTimingConnectionTableWrapper(userService, sailingService, stringConstants,
                 errorReporter, true, tableResources, () -> {
                 });
-        verticalPanel.add(connectionsTable);
         connectionsTable.refreshSwissTimingConnectionList();
 
         // Add button panel
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,
                 SecuredDomainType.TRACKED_RACE);
         verticalPanel.add(buttonPanel);
+        verticalPanel.add(connectionsTable);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(),
                 () -> connectionsTable.refreshSwissTimingConnectionList());
         // Add SwissTiming Connection
