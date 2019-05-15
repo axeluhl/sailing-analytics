@@ -14,11 +14,13 @@ import javax.ws.rs.core.Response;
 
 import org.apache.shiro.SecurityUtils;
 
-import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.Permission.Mode;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.windestimation.integration.ExportedModels;
 import com.sap.sailing.windestimation.integration.WindEstimationModelsUpdateOperation;
 import com.sap.sailing.windestimation.jaxrs.AbstractWindEstimationDataResource;
+import com.sap.sse.ServerInfo;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 /**
  * Resource which manages wind estimation model metadata. Data export and import are supported.
@@ -41,7 +43,8 @@ public class WindEstimationDataResource extends AbstractWindEstimationDataResour
     @POST
     @Produces("text/plain")
     public Response postInternalModelData(InputStream inputStream) throws Exception {
-        SecurityUtils.getSubject().checkPermission(Permission.WIND_ESTIMATION_MODELS.getStringPermission(Mode.UPDATE));
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.WIND_ESTIMATION_MODELS.getStringPermissionForTypeRelativeIdentifier(
+                DefaultActions.UPDATE, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         ObjectInputStream ois = getWindEstimationFactoryServiceImpl()
                 .createObjectInputStreamResolvingAgainstCache(inputStream);
         ExportedModels exportedModels = (ExportedModels) ois.readObject();

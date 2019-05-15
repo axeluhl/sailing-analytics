@@ -14,9 +14,9 @@ import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.mvp.ClientFactory;
 
 /**
- * Reusable implementation of {@link EditSailorProfileDetailsView.Presenter} which handles the sailor profiles. It only require
- * an appropriate client factory which implements {@link ClientFactoryWithDispatch}, {@link ErrorAndBusyClientFactory}
- * and {@link ClientFactory}.
+ * Reusable implementation of {@link EditSailorProfileDetailsView.Presenter} which handles the sailor profiles. It only
+ * require an appropriate client factory which implements {@link ClientFactoryWithDispatch},
+ * {@link ErrorAndBusyClientFactory} and {@link ClientFactory}.
  * 
  * @param <C>
  *            the provided client factory type

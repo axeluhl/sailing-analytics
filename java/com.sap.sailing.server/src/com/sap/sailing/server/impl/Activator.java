@@ -1,6 +1,7 @@
 package com.sap.sailing.server.impl;
 
 import java.lang.management.ManagementFactory;
+import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.util.Dictionary;
 import java.util.HashSet;
@@ -9,7 +10,11 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
 import org.osgi.framework.BundleActivator;
@@ -23,6 +28,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
@@ -43,6 +49,7 @@ import com.sap.sailing.server.impl.preferences.model.SailorProfilePreferences;
 import com.sap.sailing.server.impl.preferences.model.StoredDataMiningQueryPreferences;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.notification.impl.SailingNotificationServiceImpl;
+import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCacheImpl;
 import com.sap.sse.MasterDataImportClassLoaderService;
@@ -53,7 +60,12 @@ import com.sap.sse.mail.queue.MailQueue;
 import com.sap.sse.mail.queue.impl.ExecutorMailQueue;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sse.replication.Replicable;
-import com.sap.sse.security.PreferenceConverter;
+import com.sap.sse.security.SecurityInitializationCustomizer;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.interfaces.PreferenceConverter;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.HasPermissionsProvider;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -94,6 +106,8 @@ public class Activator implements BundleActivator {
     private SailingNotificationServiceImpl notificationService;
 
     private ServiceTracker<MailService, MailService> mailServiceTracker;
+
+    private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
     
     public Activator() {
         clearPersistentCompetitors = Boolean
@@ -107,81 +121,24 @@ public class Activator implements BundleActivator {
 
     public void start(BundleContext context) throws Exception {
         Activator.context = context;
-
         extenderBundleTracker = new ExtenderBundleTracker(context);
         extenderBundleTracker.open();
-
         mailServiceTracker = ServiceTrackerFactory.createAndOpen(context, MailService.class);
-        mailQueue = new ExecutorMailQueue(mailServiceTracker);
-        notificationService = new SailingNotificationServiceImpl(context, mailQueue);
-
-        trackedRegattaListener = new OSGiBasedTrackedRegattaListener(context);
-        
-        final TrackedRaceStatisticsCache trackedRaceStatisticsCache = new TrackedRaceStatisticsCacheImpl();
-        registrations.add(context.registerService(TrackedRaceStatisticsCache.class.getName(), trackedRaceStatisticsCache, null));
-        registrations.add(context.registerService(TrackedRegattaListener.class.getName(), trackedRaceStatisticsCache, null));
-
-        // At this point the OSGi resolver is used as device type service finder.
-        // In the case that we are not in an OSGi context (e.g. running a JUnit test instead),
-        // this code block is not run, and the test case can inject some other type of finder
-        // instead.
-        serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
-
-        racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors, serviceFinderFactory,
-                trackedRegattaListener, notificationService, trackedRaceStatisticsCache, restoreTrackedRaces);
-        notificationService.setRacingEventService(racingEventService);
-
-        masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
-                context, MasterDataImportClassLoaderService.class,
-                new MasterDataImportClassLoaderServiceTrackerCustomizer(context, racingEventService));
-        masterDataImportClassLoaderServiceTracker.open();
-
-        polarDataServiceTracker = new ServiceTracker<PolarDataService, PolarDataService>(context,
-                PolarDataService.class, new PolarDataServiceTrackerCustomizer(context, racingEventService));
-        polarDataServiceTracker.open();
-        
-        windEstimationFactoryServiceTrack = new ServiceTracker<WindEstimationFactoryService, WindEstimationFactoryService>(context,
-                WindEstimationFactoryService.class, new WindEstimationFactoryServiceTrackerCustomizer(context, racingEventService));
-        windEstimationFactoryServiceTrack.open();
-
-        // register the racing service in the OSGi registry
-        racingEventService.setBundleContext(context);
-        context.registerService(MongoObjectFactory.class, racingEventService.getMongoObjectFactory(), /* properties */ null);
-        context.registerService(DomainObjectFactory.class, racingEventService.getDomainObjectFactory(), /* properties */ null);
-        final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
-        replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, racingEventService.getId().toString());
-        context.registerService(Replicable.class, racingEventService, replicableServiceProperties);
-        context.registerService(RacingEventService.class, racingEventService, null);
-        context.registerService(RaceLogResolver.class, racingEventService, null);
-        context.registerService(ClearStateTestSupport.class, racingEventService, null);
-        context.registerService(SensorFixStoreSupplier.class, racingEventService, null);
-        context.registerService(WindFinderReviewedSpotsCollectionIdProvider.class, racingEventService, null);
-        Dictionary<String, String> properties = new Hashtable<String, String>();
-        final GPSFixMongoHandlerImpl gpsFixMongoHandler = new GPSFixMongoHandlerImpl(
-                racingEventService.getMongoObjectFactory(), racingEventService.getDomainObjectFactory());
-        properties.put(TypeBasedServiceFinder.TYPE, GPSFixImpl.class.getName());
-        registrations.add(context.registerService(FixMongoHandler.class, gpsFixMongoHandler, properties));
-        // legacy type name; some DBs may still contain fixes marked with this old package name:
-        properties.put(TypeBasedServiceFinder.TYPE, "com.sap.sailing.domain.tracking.impl.GPSFixImpl");
-        registrations.add(context.registerService(FixMongoHandler.class, gpsFixMongoHandler, properties));
-        final GPSFixMovingMongoHandlerImpl gpsFixMovingMongoHandler = new GPSFixMovingMongoHandlerImpl(
-                racingEventService.getMongoObjectFactory(), racingEventService.getDomainObjectFactory());
-        properties.put(TypeBasedServiceFinder.TYPE, GPSFixMovingImpl.class.getName());
-        registrations.add(context.registerService(FixMongoHandler.class, gpsFixMovingMongoHandler, properties));
-        // legacy type name; some DBs may still contain fixes marked with this old package name:
-        properties.put(TypeBasedServiceFinder.TYPE, "com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl");
-        registrations.add(context.registerService(FixMongoHandler.class, gpsFixMovingMongoHandler, properties));
-        properties.put(TypeBasedServiceFinder.TYPE, DoubleVectorFixImpl.class.getName());
-        registrations.add(context.registerService(FixMongoHandler.class, new DoubleVectorFixMongoHandlerImpl(
-                racingEventService.getMongoObjectFactory(), racingEventService.getDomainObjectFactory()), properties));
-        registerPreferenceConvertersForUserStore(context);
-        // Add an MBean for the service to the JMX bean server:
-        RacingEventServiceMXBean mbean = new RacingEventServiceMXBeanImpl(racingEventService);
-        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-        mBeanName = new ObjectName("com.sap.sailing:type=RacingEventService");
-        mbs.registerMBean(mbean, mBeanName);
-        logger.log(Level.INFO, "Started " + context.getBundle().getSymbolicName() + ". Character encoding: "
-                + Charset.defaultCharset());
+        securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
+        if (securityServiceTracker != null) {
+            new Thread("Racingevent wait for securityservice for migration thread") {
+                public void run() {
+                    try {
+                        // only continue once we have the service, as some of the services require it to start properly
+                        securityServiceTracker.waitForService(0);
+                        internalStartBundle(context);
+                    } catch (InterruptedException | MalformedObjectNameException | InstanceAlreadyExistsException
+                            | MBeanRegistrationException | NotCompliantMBeanException | MalformedURLException e) {
+                        logger.log(Level.SEVERE, "Could not start RacingEvent service properly", e);
+                    }
+                };
+            }.start();
+        }
     }
 
     /**
@@ -234,8 +191,114 @@ public class Activator implements BundleActivator {
         notificationService.stop();
         mailQueue.stop();
         mailServiceTracker.close();
+        securityServiceTracker.close();
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         mbs.unregisterMBean(mBeanName);
+    }
+
+    private void internalStartBundle(BundleContext context) throws MalformedURLException, MalformedObjectNameException,
+            InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException {
+        mailQueue = new ExecutorMailQueue(mailServiceTracker);
+        notificationService = new SailingNotificationServiceImpl(context, mailQueue);
+
+        trackedRegattaListener = new OSGiBasedTrackedRegattaListener(context);
+
+        registrations.add(context.registerService(HasPermissionsProvider.class,
+                (HasPermissionsProvider) SecuredDomainType::getAllInstances, null));
+        
+        registrations.add(context.registerService(SecurityInitializationCustomizer.class,
+                (SecurityInitializationCustomizer) securityService -> {
+                    final RoleDefinition sailingViewerRoleDefinition = securityService.getOrCreateRoleDefinitionFromPrototype(SailingViewerRole.getInstance());
+                    if (securityService.isInitialOrMigration()) {
+                        
+                        // The server is initially set to be public by adding sailing_viewer role to the server group
+                        // with forAll=true
+                        securityService.putRoleDefinitionToUserGroup(securityService.getDefaultTenant(),
+                                sailingViewerRoleDefinition, true);
+                        
+                        // sailing_viewer role is publicly readable
+                        securityService.addToAccessControlList(sailingViewerRoleDefinition.getIdentifier(), null, DefaultActions.READ.name());
+                    }
+                }, null));
+
+        final TrackedRaceStatisticsCache trackedRaceStatisticsCache = new TrackedRaceStatisticsCacheImpl();
+        registrations.add(context.registerService(TrackedRaceStatisticsCache.class.getName(),
+                trackedRaceStatisticsCache, null));
+        registrations.add(context.registerService(TrackedRegattaListener.class.getName(),
+                trackedRaceStatisticsCache, null));
+
+        // At this point the OSGi resolver is used as device type service finder.
+        // In the case that we are not in an OSGi context (e.g. running a JUnit test instead),
+        // this code block is not run, and the test case can inject some other type of finder
+        // instead.
+        serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
+
+        racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors,
+                serviceFinderFactory, trackedRegattaListener, notificationService,
+                trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker);
+        notificationService.setRacingEventService(racingEventService);
+        masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
+                context, MasterDataImportClassLoaderService.class,
+                new MasterDataImportClassLoaderServiceTrackerCustomizer(context, racingEventService));
+        masterDataImportClassLoaderServiceTracker.open();
+        polarDataServiceTracker = new ServiceTracker<PolarDataService, PolarDataService>(context,
+                PolarDataService.class,
+                new PolarDataServiceTrackerCustomizer(context, racingEventService));
+        polarDataServiceTracker.open();
+        windEstimationFactoryServiceTrack = new ServiceTracker<WindEstimationFactoryService, WindEstimationFactoryService>(context,
+                WindEstimationFactoryService.class, new WindEstimationFactoryServiceTrackerCustomizer(context, racingEventService));
+        windEstimationFactoryServiceTrack.open();
+        // register the racing service in the OSGi registry
+        racingEventService.setBundleContext(context);
+        context.registerService(MongoObjectFactory.class, racingEventService.getMongoObjectFactory(), /* properties */ null);
+        context.registerService(DomainObjectFactory.class, racingEventService.getDomainObjectFactory(), /* properties */ null);
+        final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
+        replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name,
+                racingEventService.getId().toString());
+        context.registerService(Replicable.class, racingEventService, replicableServiceProperties);
+        context.registerService(RacingEventService.class, racingEventService, null);
+        context.registerService(RaceLogResolver.class, racingEventService, null);
+        context.registerService(ClearStateTestSupport.class, racingEventService, null);
+        context.registerService(SensorFixStoreSupplier.class, racingEventService, null);
+        context.registerService(WindFinderReviewedSpotsCollectionIdProvider.class, racingEventService,
+                null);
+        Dictionary<String, String> properties = new Hashtable<String, String>();
+        final GPSFixMongoHandlerImpl gpsFixMongoHandler = new GPSFixMongoHandlerImpl(
+                racingEventService.getMongoObjectFactory(),
+                racingEventService.getDomainObjectFactory());
+        properties.put(TypeBasedServiceFinder.TYPE, GPSFixImpl.class.getName());
+        registrations
+                .add(context.registerService(FixMongoHandler.class, gpsFixMongoHandler, properties));
+        // legacy type name; some DBs may still contain fixes marked with this old package name:
+        properties.put(TypeBasedServiceFinder.TYPE, "com.sap.sailing.domain.tracking.impl.GPSFixImpl");
+        registrations
+                .add(context.registerService(FixMongoHandler.class, gpsFixMongoHandler, properties));
+        final GPSFixMovingMongoHandlerImpl gpsFixMovingMongoHandler = new GPSFixMovingMongoHandlerImpl(
+                racingEventService.getMongoObjectFactory(),
+                racingEventService.getDomainObjectFactory());
+        properties.put(TypeBasedServiceFinder.TYPE, GPSFixMovingImpl.class.getName());
+        registrations.add(
+                context.registerService(FixMongoHandler.class, gpsFixMovingMongoHandler, properties));
+        // legacy type name; some DBs may still contain fixes marked with this old package name:
+        properties.put(TypeBasedServiceFinder.TYPE,
+                "com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl");
+        registrations.add(
+                context.registerService(FixMongoHandler.class, gpsFixMovingMongoHandler, properties));
+        properties.put(TypeBasedServiceFinder.TYPE, DoubleVectorFixImpl.class.getName());
+        registrations.add(context.registerService(FixMongoHandler.class,
+                new DoubleVectorFixMongoHandlerImpl(racingEventService.getMongoObjectFactory(),
+                        racingEventService.getDomainObjectFactory()),
+                properties));
+        registerPreferenceConvertersForUserStore(context);
+        // Add an MBean for the service to the JMX bean server:
+        RacingEventServiceMXBean mbean = new RacingEventServiceMXBeanImpl(racingEventService);
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        mBeanName = new ObjectName("com.sap.sailing:type=RacingEventService");
+        mbs.registerMBean(mbean, mBeanName);
+        logger.log(Level.INFO, "Started " + context.getBundle().getSymbolicName()
+                + ". Character encoding: " + Charset.defaultCharset());
+        // do initial setup/migration logic
+        racingEventService.ensureOwnerships();
     }
 
     private class MasterDataImportClassLoaderServiceTrackerCustomizer implements
@@ -301,9 +364,8 @@ public class Activator implements BundleActivator {
     
     private class WindEstimationFactoryServiceTrackerCustomizer
             implements ServiceTrackerCustomizer<WindEstimationFactoryService, WindEstimationFactoryService> {
-
         private final BundleContext context;
-        private RacingEventServiceImpl racingEventService;
+        private final RacingEventServiceImpl racingEventService;
 
         public WindEstimationFactoryServiceTrackerCustomizer(BundleContext context,
                 RacingEventServiceImpl racingEventService) {

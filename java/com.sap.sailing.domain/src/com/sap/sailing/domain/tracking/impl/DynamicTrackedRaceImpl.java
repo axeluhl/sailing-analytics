@@ -217,16 +217,22 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     @Override
-    public void recordFix(Competitor competitor, GPSFixMoving fix, boolean onlyWhenInTrackingTimesInterval) {
+    public boolean recordFix(Competitor competitor, GPSFixMoving fix, boolean onlyWhenInTrackingTimesInterval) {
+        final boolean result;
         if (!onlyWhenInTrackingTimesInterval || isWithinStartAndEndOfTracking(fix.getTimePoint())) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             if (track != null) {
                 if (logger != null && logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
                     logger.finest(""+competitor.getName() + ": " + fix);
                 }
-                track.addGPSFix(fix); // the track notifies this tracked race which in turn notifies its listeners
+                result = track.addGPSFix(fix); // the track notifies this tracked race which in turn notifies its listeners
+            } else {
+                result = false;
             }
+        } else {
+            result = false;
         }
+        return result;
     }
 
     @Override
@@ -1084,8 +1090,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     
     @Override
     public void attachRaceLog(RaceLog raceLog) {
-        logListener.addTo(raceLog);
+        logListener.beforeAttaching(raceLog);
         super.attachRaceLog(raceLog);
+        logListener.afterAttaching(raceLog);
         getRaceState(raceLog).addChangedListener(raceStateBasedStartTimeChangedListener);
     }
     
@@ -1093,9 +1100,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public RaceLog detachRaceLog(Serializable identifier) {
         final RaceLog attachedRaceLog = attachedRaceLogs.get(identifier);
         if (attachedRaceLog != null) {
-            logListener.removeFrom(attachedRaceLog);
+            logListener.beforeDetaching(attachedRaceLog);
         }
         final RaceLog raceLogDetached = super.detachRaceLog(identifier);
+        if (attachedRaceLog != null) {
+            logListener.afterDetaching(attachedRaceLog);
+        }
         assert raceLogDetached == attachedRaceLog;
         synchronized (raceStates) {
             final ReadonlyRaceState raceState = raceStates.remove(attachedRaceLog);

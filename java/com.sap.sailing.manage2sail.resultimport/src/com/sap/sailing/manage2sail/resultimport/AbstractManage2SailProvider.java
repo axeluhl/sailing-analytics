@@ -7,6 +7,8 @@ import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 
 public abstract class AbstractManage2SailProvider implements ResultUrlProvider {
+    private static final long serialVersionUID = 2275835750471711783L;
+
     public static final String NAME = "Manage2Sail XRR Result Importer";
 
     private final ParserFactory parserFactory;

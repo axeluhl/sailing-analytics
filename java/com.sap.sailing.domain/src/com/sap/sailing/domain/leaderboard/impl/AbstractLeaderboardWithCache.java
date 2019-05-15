@@ -118,13 +118,14 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         private final Distance averageAbsoluteCrossTrackError;
         private final Distance averageSignedCrossTrackError;
         private final Duration gapToLeaderInOwnTime;
+        private final Duration timeSailedSinceRaceStart;
         private final Duration correctedTime;
         private final Duration correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead;
 
         public RaceDetails(List<LegEntryDTO> legDetails, Distance windwardDistanceToCompetitorFarthestAhead,
                 Distance averageAbsoluteCrossTrackError, Distance averageSignedCrossTrackError,
-                Duration gapToLeaderInOwnTime, Duration correctedTime,
-                Duration correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead) {
+                Duration gapToLeaderInOwnTime, Duration timeSailedSinceRaceStart,
+                Duration correctedTime, Duration correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead) {
             super();
             this.legDetails = legDetails;
             this.windwardDistanceToCompetitorFarthestAhead = windwardDistanceToCompetitorFarthestAhead;
@@ -132,6 +133,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             this.averageSignedCrossTrackError = averageSignedCrossTrackError;
             this.gapToLeaderInOwnTime = gapToLeaderInOwnTime;
             this.correctedTime = correctedTime;
+            this.timeSailedSinceRaceStart = timeSailedSinceRaceStart;
             this.correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead = correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead;
         }
         public List<LegEntryDTO> getLegDetails() {
@@ -149,18 +151,14 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         public Duration getGapToLeaderInOwnTime() {
             return gapToLeaderInOwnTime;
         }
+        public Duration getTimeSailedSinceRaceStart() {
+            return timeSailedSinceRaceStart;
+        }
         public Duration getCorrectedTime() {
             return correctedTime;
         }
         public Duration getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead() {
             return correctedTimeAtEstimatedArrivalAtCompetitorFarthestAhead;
-        }
-    }
-
-    private static class UUIDGenerator implements LeaderboardDTO.UUIDGenerator {
-        @Override
-        public String generateRandomUUID() {
-            return UUID.randomUUID().toString();
         }
     }
 
@@ -365,11 +363,11 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 : this.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(), 
                 this.getScoreCorrection() == null ? null : this.getScoreCorrection().getComment(),
                 this.getScoringScheme() == null ? null : this.getScoringScheme().getType(), this
-                        .getScoringScheme().isHigherBetter(), new UUIDGenerator(), addOverallDetails,
+                        .getScoringScheme().isHigherBetter(), () -> UUID.randomUUID().toString(), addOverallDetails,
                         boatClass==null?null:new BoatClassDTO(boatClass.getName(), boatClass.getDisplayName(), boatClass.getHullLength(), boatClass.getHullBeam()));
         result.type = getLeaderboardType();
         result.competitors = new ArrayList<>();
-        result.name = this.getName();
+        result.setName(this.getName());
         result.displayName = this.getDisplayName();
         result.competitorDisplayNames = new HashMap<>();
         boolean isLeaderboardThatHasRegattaLike = this instanceof LeaderboardThatHasRegattaLike;
@@ -523,7 +521,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             if (result.canBoatsOfCompetitorsChangePerRace == false && !row.fieldsByRaceColumnName.isEmpty()) {
                 // find a raceColumn where a boat is available
                 for (LeaderboardEntryDTO leaderboardEntry : row.fieldsByRaceColumnName.values()) {
-                    if (leaderboardEntry.boat != null) {
+                    if (leaderboardEntry != null && leaderboardEntry.boat != null) {
                         row.boat = leaderboardEntry.boat;
                         break;
                     }
@@ -541,7 +539,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         for (RaceColumn raceColumn : getRaceColumns()) {
             // reuse calculations already done earlier
             LeaderboardEntryDTO entry = row.fieldsByRaceColumnName.get(raceColumn.getName());
-            if (entry.netPoints != null) {
+            if (entry != null && entry.netPoints != null) {
                 if (entry.reasonForMaxPoints.equals(MaxPointsReason.NONE)
                         || !Util.contains(Arrays.asList(MAX_POINTS_REASONS_THAT_IDENTIFY_NON_FINISHED_RACES),
                                 entry.reasonForMaxPoints)) {
@@ -625,6 +623,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                         : raceDetails.getAverageAbsoluteCrossTrackError().getMeters();
                 entryDTO.averageSignedCrossTrackErrorInMeters = raceDetails.getAverageSignedCrossTrackError() == null ? null
                         : raceDetails.getAverageSignedCrossTrackError().getMeters();
+                entryDTO.timeSailedSinceRaceStart = raceDetails.getTimeSailedSinceRaceStart();
                 entryDTO.calculatedTime = raceDetails.getCorrectedTime();
                 entryDTO.calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead = raceDetails.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead();
                 entryDTO.gapToLeaderInOwnTime = raceDetails.getGapToLeaderInOwnTime();
@@ -881,6 +880,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             final CompetitorRankingInfo competitorRankingInfo = rankingInfo.getCompetitorRankingInfo().apply(competitor);
             return new RaceDetails(legDetails, windwardDistanceToCompetitorFarthestAhead, averageAbsoluteCrossTrackError, averageSignedCrossTrackError,
                     trackedRace.getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, competitor, cache),
+                    trackedRace.getTimeSailedSinceRaceStart(competitor, timePoint),
                     trackedRace.getRankingMetric().getCorrectedTime(competitor, timePoint),
                     competitorRankingInfo == null ? null : competitorRankingInfo.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead());
         } finally {
@@ -1209,32 +1209,12 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         Duration result = null;
         for (TrackedRace trackedRace : getTrackedRaces()) {
             if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
-                NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
-                if (!markPassings.isEmpty()) {
-                    TimePoint from = trackedRace.getStartOfRace(); // start counting at race start, not when the competitor passed the line
-                    if (from != null && !timePoint.before(from)) { // but only if the race started after timePoint
-                        TimePoint to;
-                        if (timePoint.after(markPassings.last().getTimePoint())
-                                && markPassings.last().getWaypoint() == trackedRace.getRace().getCourse()
-                                        .getLastWaypoint()) {
-                            // stop counting when competitor finished the race
-                            to = markPassings.last().getTimePoint();
-                        } else {
-                            if (trackedRace.getEndOfTracking() != null
-                                    && timePoint.after(trackedRace.getEndOfTracking())) {
-                                    result = null; // race not finished until end of tracking; no reasonable value can be
-                                    // computed for competitor
-                                    break;
-                            } else {
-                                to = timePoint;
-                            }
-                        }
-                        Duration timeSpent = from.until(to);
-                        if (result == null) {
-                            result = timeSpent;
-                        } else {
-                            result=result.plus(timeSpent);
-                        }
+                final Duration timeSpent = trackedRace.getTimeSailedSinceRaceStart(competitor, timePoint);
+                if (timeSpent != null) {
+                    if (result == null) {
+                        result = timeSpent;
+                    } else {
+                        result=result.plus(timeSpent);
                     }
                 }
             }

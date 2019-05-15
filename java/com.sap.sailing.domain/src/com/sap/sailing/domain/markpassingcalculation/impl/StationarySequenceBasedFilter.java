@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bounds;
@@ -35,10 +36,13 @@ import com.sap.sse.common.Util.Pair;
  * 
  * The filter is created empty. It keeps track of all stationary sequences found so far and sorts them by time. The
  * algorithm guarantees that after a call to {@link #updateCandidates(Iterable, Iterable)} as well as after a call to
- * {@link #addFix} each stationary sequence has at least two candidates in them which passed the first filter state, and
- * no stationary sequence can be extended to the next candidate following it or any previous candidate preceding it
- * because the track leading there would extend the stationary sequence's bounding box beyond limits, and no two
- * adjacent candidates that are not part of the same {@link StationarySequence} can be joined into a valid such sequence.
+ * {@link #addFix} each stationary sequence has at least two candidates in them which passed the first filter state. No
+ * stationary sequence can be extended to the next candidate following it or any previous candidate preceding it because
+ * the track leading there would extend the stationary sequence's bounding box beyond limits, or the candidate outside
+ * the sequence already belongs to an adjacent sequence. No two adjacent candidates that are not part of any
+ * {@link StationarySequence} can be joined into a valid sequence.
+ * <p>
+ * 
  * Furthermore, all {@link StationarySequence}s maintain their invariant, in particular that the track leading from
  * their {@link StationarySequence#getFirst() first} to their {@link StationarySequence#getLast() last} candidate
  * remains within a bounding box whose {@link Bounds#getDiameter() diameter} remains below the threshold. Calling
@@ -47,9 +51,9 @@ import com.sap.sse.common.Util.Pair;
  * {@link #updateCandidates(Iterable, Iterable)} as having been removed and that currently pass this filter.
  * <p>
  * 
- * The sequences are non-overlapping but may touch each other, meaning that a preceding sequence's
- * {@link StationarySequence#getLast() last} candidate is the same as the following sequence's
- * {@link StationarySequence#getFirst() first} candidate.
+ * Two adjacent {@link StationarySequence}s must not overlap. The {@link StationarySequence#getLast() last candidate} of
+ * a sequence must be truly less---according to the {@link #candidateComparator}---than the
+ * {@link StationarySequence#getFirst() first candidate} of the next sequence.
  * <p>
  * 
  * All sequences, candidates and the track belong to the same {@link Competitor}.
@@ -73,9 +77,17 @@ import com.sap.sse.common.Util.Pair;
  *
  */
 public class StationarySequenceBasedFilter {
+    private static final Logger logger = Logger.getLogger(StationarySequenceBasedFilter.class.getName());
+    
     /**
      * Set of sequences managed here; ordered by their {@link StationarySequence#getFirst() first} candidate,
-     * based on the candidate comparator passed to the constructor.
+     * based on the candidate comparator passed to the constructor. This implies that {@link StationarySequence} objects
+     * added to this set must not be empty when adding and must not be empty when removing them. Furthermore,
+     * before a {@link StationarySequence} changes its first element, e.g., by inserting a new first element before
+     * the one that used to be the first, or by removing the first element (in particular when removing a single
+     * candidate, turning the {@link StationarySequence} empty) it must be removed before the change and re-added
+     * afterwards again if not empty. For this, a {@link StationarySequence} knows the set in which is has been
+     * inserted and manages its position in the set, based on changes to its first element.
      */
     private final NavigableSet<StationarySequence> stationarySequences;
     
@@ -189,6 +201,8 @@ public class StationarySequenceBasedFilter {
             removeCandidate(removedCandidate, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
         }
         updateFilteredCandidates(candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+        final boolean assertion = isCandidatesConsistent();
+        assert assertion;
         return new Pair<>(candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
     }
 
@@ -211,7 +225,7 @@ public class StationarySequenceBasedFilter {
      * be extended up to the new candidate, try to construct a new {@link StationarySequence} from the new candidate to
      * the neighbor (new candidate and neighbor will still pass the filter if such a sequence can be validly constructed
      * as they are the only two candidates in the new sequence for now). (Note: It is not possible that a single
-     * {@link StationarySequence} can be constructed spanning between the two neighbors because it it were possible then
+     * {@link StationarySequence} can be constructed spanning between the two neighbors because if it were possible then
      * this would have had to have happened before as it does not depend on the appearance of the new candidate.)</li>
      * <li>The candidate falls into an existing stationary sequence (at or after first and at or before last candidate
      * in sequence). In this case the set of fixes on the track considered within the sequence hasn't changed. The
@@ -221,7 +235,11 @@ public class StationarySequenceBasedFilter {
      */
     private void addCandidate(Candidate newCandidate,
             Set<Candidate> candidatesEffectivelyAdded, Set<Candidate> candidatesEffectivelyRemoved) {
-        assert !candidates.contains(newCandidate);
+        if (candidates.contains(newCandidate)) {
+            logger.severe("Candidates "+candidates+" already contain "+newCandidate+" which is to be added.");
+        }
+        final boolean assertion = !candidates.contains(newCandidate) && isCandidatesConsistent();
+        assert assertion;
         if (newCandidate == startProxyCandidate) {
             candidatesEffectivelyAdded.add(newCandidate);
             candidatesEffectivelyRemoved.remove(newCandidate);
@@ -230,18 +248,69 @@ public class StationarySequenceBasedFilter {
             candidatesEffectivelyRemoved.remove(newCandidate);
         } else {
             candidates.add(newCandidate);
-            lookLeft(newCandidate, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
-            lookRight(newCandidate, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+            // First try adding the new candidate to a sequence starting at or before newCandidate.
+            // This could either succeed by adding it to an existing sequence, or by creating a new
+            // sequence with newCandidate and its immediate predecessor candidate that so far was
+            // not part of a sequence. If this was successful, don't even try to extend any later sequence
+            // towards newCandidate. But it newCandidate could not be added to a sequence looking into the past ("left"),
+            // try our luck by looking into the future ("right").
+            if (!lookLeft(newCandidate, candidatesEffectivelyAdded, candidatesEffectivelyRemoved)) {
+                lookRight(newCandidate, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+            }
         }
+        assert isCandidatesConsistent();
     }
 
-    private void lookLeft(Candidate newCandidate, Set<Candidate> candidatesEffectivelyAdded,
+    /**
+     * Checks whether the union of all candidates of all stationary sequences from {@link #stationarySequences} is
+     * contained in {@link #candidates}, and whether adjacent stationary sequences are truly disjoint, not even
+     * overlapping by a single candidate considered equal by definition of {@link #candidateComparator}.
+     */
+    private boolean isCandidatesConsistent() {
+        final TreeSet<Candidate> union = new TreeSet<>(candidateComparator);
+        Candidate lastCandidateInPreviousSequence = null;
+        boolean overlappingTimePointFound = false;
+        for (final StationarySequence stationarySequence : stationarySequences) {
+            if (lastCandidateInPreviousSequence != null &&
+                    candidateComparator.compare(lastCandidateInPreviousSequence, stationarySequence.getFirst()) >= 0) {
+                overlappingTimePointFound = true;
+                logger.severe("Last candidate "+lastCandidateInPreviousSequence+
+                        " in sequence overlaps with first element in next sequence "+stationarySequence);
+            }
+            lastCandidateInPreviousSequence = stationarySequence.getLast();
+            Util.addAll(stationarySequence.getAllCandidates(), union);
+        }
+        final boolean allSequenceCandidatesInCandidates = candidates.containsAll(union);
+        if (!allSequenceCandidatesInCandidates) {
+            union.removeAll(candidates);
+            logger.severe("Candidates "+union+" from sequences missing from full candidates collection");
+        }
+        return allSequenceCandidatesInCandidates && !overlappingTimePointFound;
+    }
+
+    /**
+     * Searches the latest {@link StationarySequence} in {@link #stationarySequences} that starts at or before
+     * {@code newCandidate}. If the {@code newCandidate} is within that sequence's time range, it's simply
+     * {@link StationarySequence#addWithin(Candidate, Set, Set) added}. Otherwise, it has to be later than the current
+     * end of that sequence, so {@link StationarySequence#tryToExtendAfterLast(Candidate, Set, Set) extending} the
+     * sequence is tried.
+     * <p>
+     * 
+     * If extending the sequence before the {@code newCandidate} does not work because it would exceed the sequence's
+     * bounding box diameter threshold, an attempt is made to join the {@code newCandidate} with its predecessor
+     * candidate from {@link #candidates} into a new {@link StationarySequence}.
+     * 
+     * @return {@code true} in case the {@code newCandidate} was added to a {@link StationarySequence}, either a new one
+     *         because the preceding sequence could not be extended, or as an extension of the preceding sequence.
+     */
+    private boolean lookLeft(Candidate newCandidate, Set<Candidate> candidatesEffectivelyAdded,
             Set<Candidate> candidatesEffectivelyRemoved) {
+        final boolean addedToSequence;
         final StationarySequence latestStationarySequenceStartingAtOrBeforeNewCandidate =
                                             stationarySequences.floor(createStationarySequence(newCandidate));
         final boolean createNewSequenceFromLowerToNew;
         if (latestStationarySequenceStartingAtOrBeforeNewCandidate != null) {
-            if (latestStationarySequenceStartingAtOrBeforeNewCandidate.getLast().getTimePoint().before(newCandidate.getTimePoint())) {
+            if (candidateComparator.compare(latestStationarySequenceStartingAtOrBeforeNewCandidate.getLast(), newCandidate) < 0) {
                 // earlier sequence ends before newCandidate; try to extend, and if extending doesn't work,
                 // request a new sequence to be constructed:
                 createNewSequenceFromLowerToNew = !latestStationarySequenceStartingAtOrBeforeNewCandidate.tryToExtendAfterLast(
@@ -260,15 +329,28 @@ public class StationarySequenceBasedFilter {
             candidatesEffectivelyRemoved.remove(newCandidate);
             // neighbour's stationary sequence can't be extended to newCandidate or there was no earlier stationary sequence,
             // look for an earlier candidate and try to create a new stationary sequence; no candidate from the new
-            // sequence will be eliminated by this filter for now as they form the sequence's boundaries.
+            // sequence will be eliminated by this filter for now as they form the sequence's boundaries. Construct such
+            // a sequence only if the "lower" candidate is not already part of the previous sequence, because sequences
+            // must not share candidates.
             final Candidate lower = candidates.lower(newCandidate);
-            if (lower != null) {
+            if (lower != null && (latestStationarySequenceStartingAtOrBeforeNewCandidate == null ||
+                    candidateComparator.compare(latestStationarySequenceStartingAtOrBeforeNewCandidate.getLast(), lower) < 0)) {
                 final StationarySequence newSequence = tryToConstructStationarySequence(lower, newCandidate);
                 if (newSequence != null) {
+                    addedToSequence = true;
                     stationarySequences.add(newSequence);
+                } else {
+                    addedToSequence = false;
                 }
+            } else {
+                addedToSequence = false;
             }
+        } else {
+            addedToSequence = true;
         }
+        final boolean assertion = containsNoEmptyOrSingleCandidateStationarySequence() && isCandidatesConsistent();
+        assert assertion;
+        return addedToSequence;
     }
     
     /**
@@ -281,20 +363,25 @@ public class StationarySequenceBasedFilter {
                                             stationarySequences.higher(createStationarySequence(newCandidate));
         if (earliestStationarySequenceStartingAfterNewCandidate == null
                 || !earliestStationarySequenceStartingAfterNewCandidate.tryToExtendBeforeFirst(newCandidate,
-                        candidatesEffectivelyAdded, candidatesEffectivelyRemoved)) {
+                        candidatesEffectivelyAdded, candidatesEffectivelyRemoved, /* StationarySequence set to update */ stationarySequences)) {
             // no later sequence found, or extending it backwards to newCandidate wasn't validly possible;
             // request a new sequence to be constructed; newCandidate will pass the filter as it's one of
             // only two candidates in the new sequence.
             candidatesEffectivelyAdded.add(newCandidate);
             candidatesEffectivelyRemoved.remove(newCandidate);
             final Candidate higher = candidates.higher(newCandidate);
-            if (higher != null) {
+            // Construct such a sequence only if the "higher" candidate is not already part of the next sequence, because sequences
+            // must not share candidates.
+            if (higher != null && (earliestStationarySequenceStartingAfterNewCandidate == null ||
+                    candidateComparator.compare(higher, earliestStationarySequenceStartingAfterNewCandidate.getFirst()) < 0)) {
                 final StationarySequence newSequence = tryToConstructStationarySequence(newCandidate, higher);
                 if (newSequence != null) {
                     stationarySequences.add(newSequence);
                 }
             }
         }
+        final boolean assertion = containsNoEmptyOrSingleCandidateStationarySequence() && isCandidatesConsistent();
+        assert assertion;
     }
     
     private StationarySequence tryToConstructStationarySequence(Candidate start, Candidate end) {
@@ -337,16 +424,32 @@ public class StationarySequenceBasedFilter {
             candidatesEffectivelyRemoved.add(removedCandidate);
             candidatesEffectivelyAdded.remove(removedCandidate);
         } else {
-            assert candidates.contains(removedCandidate);
+            if (!candidates.contains(removedCandidate)) {
+                logger.severe("Candidates "+candidates+" does not contain "+removedCandidate+" which is to be removed.");
+            }
+            final boolean assertion = candidates.contains(removedCandidate) && isCandidatesConsistent();
+            assert assertion;
+            candidates.remove(removedCandidate);
+            final StationarySequence searchDummySequence = createStationarySequence(removedCandidate);
             final StationarySequence latestStationarySequenceStartingAtOrBeforeRemovedCandidate =
-                    stationarySequences.floor(createStationarySequence(removedCandidate));
+                    stationarySequences.floor(searchDummySequence);
             final boolean addToEffectivelyRemoved;
             if (latestStationarySequenceStartingAtOrBeforeRemovedCandidate != null) {
-                if (!latestStationarySequenceStartingAtOrBeforeRemovedCandidate.getLast().getTimePoint()
-                        .before(removedCandidate.getTimePoint())) {
+                // Adjacent sequences are disjoint. If we find the candidate, even at the beginning of a sequence,
+                // there is no need to check the previous sequence for that candidate.
+                final StationarySequence previousSequence;
+                if (candidateComparator.compare(removedCandidate, latestStationarySequenceStartingAtOrBeforeRemovedCandidate.getFirst()) == 0
+                        && (previousSequence=stationarySequences.lower(searchDummySequence)) != null) {
+                    assert !previousSequence.contains(removedCandidate); // it was in the floored sequence; it must not be in any prior sequence
+                }
+                if (candidateComparator.compare(latestStationarySequenceStartingAtOrBeforeRemovedCandidate.getLast(), removedCandidate) >= 0) {
                     // within the sequence; remove:
                     latestStationarySequenceStartingAtOrBeforeRemovedCandidate.remove(removedCandidate,
-                            candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+                            candidatesEffectivelyAdded, candidatesEffectivelyRemoved,
+                            /* StationarySequence set to update */ stationarySequences);
+                    assert !stationarySequences.contains(latestStationarySequenceStartingAtOrBeforeRemovedCandidate) ||
+                        latestStationarySequenceStartingAtOrBeforeRemovedCandidate.size() > 1;
+                    assert isCandidatesConsistent();
                     addToEffectivelyRemoved = false; // already taken care of by the remove call above
                 } else {
                     // candidate not in any sequence
@@ -361,8 +464,19 @@ public class StationarySequenceBasedFilter {
                 candidatesEffectivelyAdded.remove(removedCandidate);
             }
         }
+        assert containsNoEmptyOrSingleCandidateStationarySequence() && isCandidatesConsistent();
     }
 
+    private boolean containsNoEmptyOrSingleCandidateStationarySequence() {
+        for (final StationarySequence ss : stationarySequences) {
+            if (ss.size() < 2) {
+                logger.severe("Found stationary sequence "+ss+" with less than two candidates in it.");
+                return false;
+            }
+        }
+        return true;
+    }
+    
     /**
      * Informs this filter that for its competitor a new position fix was added or replaced. All necessary updates to
      * the stationary sequences managed by this filter are carried out, and the changes that this has to the result of
@@ -402,6 +516,8 @@ public class StationarySequenceBasedFilter {
      */
     Pair<Iterable<Candidate>, Iterable<Candidate>> updateFixes(Iterable<GPSFixMoving> newFixes,
             Iterable<GPSFixMoving> fixesReplacingExistingOnes) {
+        final boolean assertion = isCandidatesConsistent();
+        assert assertion;
         final Set<Candidate> candidatesEffectivelyAdded = new HashSet<>();
         final Set<Candidate> candidatesEffectivelyRemoved = new HashSet<>();
         if (newFixes != null) {
@@ -410,11 +526,13 @@ public class StationarySequenceBasedFilter {
                         StationarySequence.createDummyCandidate(newFix.getTimePoint())));
                 if (lastSequenceStartingAtOrBeforeFix != null && !lastSequenceStartingAtOrBeforeFix.getLast().getTimePoint().before(newFix.getTimePoint())) {
                     // fix falls into the existing StationarySequence; update its bounding box:
-                    final StationarySequence splitResult = lastSequenceStartingAtOrBeforeFix.tryToAddFix(newFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
-                    if (Util.size(lastSequenceStartingAtOrBeforeFix.getAllCandidates()) <= 1) {
-                        stationarySequences.remove(lastSequenceStartingAtOrBeforeFix);
-                    }
+                    final StationarySequence splitResult = lastSequenceStartingAtOrBeforeFix.tryToAddFix(
+                            newFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved,
+                            /* StationarySequence set to update */ stationarySequences,
+                            /* was replacement */ fixesReplacingExistingOnes != null && Util.contains(fixesReplacingExistingOnes, newFix));
+                    assert !stationarySequences.contains(lastSequenceStartingAtOrBeforeFix) || lastSequenceStartingAtOrBeforeFix.size() > 1;
                     if (splitResult != null) {
+                        assert splitResult.size() > 1;
                         stationarySequences.add(splitResult);
                     }
                 }
@@ -422,33 +540,46 @@ public class StationarySequenceBasedFilter {
         }
         if (fixesReplacingExistingOnes != null) {
             for (final GPSFixMoving fixReplacingExistingOne : fixesReplacingExistingOnes) {
-                assert Util.contains(newFixes, fixesReplacingExistingOnes);
+                final boolean assertion2 = Util.contains(newFixes, fixReplacingExistingOne);
+                if (!assertion2) {
+                    logger.severe("Expected "+fixesReplacingExistingOnes+" to be part of the "+Util.size(newFixes)+
+                            " new fixes, but it wasn't");
+                }
+                assert assertion2;
                 final Candidate dummyCandidateForReplacementFix = StationarySequence.createDummyCandidate(fixReplacingExistingOne.getTimePoint());
                 final StationarySequence dummyStationarySequenceForFix = createStationarySequence(dummyCandidateForReplacementFix);
                 final StationarySequence lastSequenceStartingAtOrBeforeFix = stationarySequences.floor(dummyStationarySequenceForFix);
-                final boolean fixIsInStationarySequence = !lastSequenceStartingAtOrBeforeFix.getLast().getTimePoint().before(fixReplacingExistingOne.getTimePoint());
+                final boolean fixIsInStationarySequence = lastSequenceStartingAtOrBeforeFix != null &&
+                        !lastSequenceStartingAtOrBeforeFix.getLast().getTimePoint().before(fixReplacingExistingOne.getTimePoint());
                 if (!fixIsInStationarySequence) {
-                    final StationarySequence lastSequenceEndingBeforeFix = // null in case fix is within a stationary sequence
-                            lastSequenceStartingAtOrBeforeFix != null && fixIsInStationarySequence ? null : lastSequenceStartingAtOrBeforeFix;
+                    final StationarySequence lastSequenceEndingBeforeFix = lastSequenceStartingAtOrBeforeFix; // null in case there is no sequence coming before the fix
                     final Candidate lastCandidateBeforeReplacementFix = candidates.lower(dummyCandidateForReplacementFix);
-                    if (lastCandidateBeforeReplacementFix != null) {
+                    if (lastCandidateBeforeReplacementFix != null) { // no need to try to extend a later sequence to "the left" if there is nothing
                         final Candidate firstCandidateAfterReplacementFix = candidates.higher(dummyCandidateForReplacementFix);
-                        if (firstCandidateAfterReplacementFix != null) {
-                            // the fix is between two candidates, so we may try to extend or create a stationary sequence:
-                            if (lastCandidateBeforeReplacementFix == lastSequenceEndingBeforeFix.getLast()) {
-                                // previous candidate is end of a sequence; try to extend
-                                lastSequenceEndingBeforeFix.tryToExtendAfterLast(firstCandidateAfterReplacementFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+                        if (firstCandidateAfterReplacementFix != null) { // no need to try to extend an earlier sequence to "the right" if there is nothing
+                            // the fix is between two candidates, so we may try to extend or create a stationary sequence if not the next
+                            // candidate is already part of a sequence. We don't merge sequences as of now, and sequences must be disjoint regarding
+                            // their set of candidates.
+                            final StationarySequence firstSequenceStartingAfterFix = stationarySequences.higher(dummyStationarySequenceForFix);
+                            final boolean lookRight;
+                            final boolean previousCandidateIsLastInSequence = lastSequenceEndingBeforeFix != null && lastCandidateBeforeReplacementFix == lastSequenceEndingBeforeFix.getLast();
+                            final boolean nextCandidateIsFirstInSequence = firstSequenceStartingAfterFix != null && firstCandidateAfterReplacementFix == firstSequenceStartingAfterFix.getFirst();
+                            if (previousCandidateIsLastInSequence && !nextCandidateIsFirstInSequence) {
+                                // previous candidate is end of a sequence and next one is not part of a sequence; try to extend previous sequence to "the right":
+                                lookRight = !lastSequenceEndingBeforeFix.tryToExtendAfterLast(firstCandidateAfterReplacementFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
                             } else {
-                                final StationarySequence firstSequenceStartingAfterFix = stationarySequences.higher(dummyStationarySequenceForFix);
-                                if (firstCandidateAfterReplacementFix == firstSequenceStartingAfterFix.getFirst()) {
-                                    // next candidate is start of a sequence; try to extend
-                                    firstSequenceStartingAfterFix.tryToExtendBeforeFirst(lastCandidateBeforeReplacementFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
-                                } else {
-                                    // none of the adjacent candidates is part of a sequence; try to create a new one:
-                                    final StationarySequence newSequence = createStationarySequence(lastCandidateBeforeReplacementFix);
-                                    if (newSequence.tryToExtendAfterLast(firstCandidateAfterReplacementFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved)) {
-                                        stationarySequences.add(newSequence);
-                                    }
+                                lookRight = true;
+                            }
+                            if (lookRight && nextCandidateIsFirstInSequence && !previousCandidateIsLastInSequence) {
+                                // next candidate is start of a sequence and previous candidate is not part of a sequence; try to extend next sequence to "the left":
+                                firstSequenceStartingAfterFix.tryToExtendBeforeFirst(lastCandidateBeforeReplacementFix,
+                                        candidatesEffectivelyAdded, candidatesEffectivelyRemoved,
+                                        /* StationarySequence set to update */ stationarySequences);
+                            } else if (!previousCandidateIsLastInSequence && !nextCandidateIsFirstInSequence) {
+                                // none of the adjacent candidates is part of a sequence; try to create a new one:
+                                final StationarySequence newSequence = createStationarySequence(lastCandidateBeforeReplacementFix);
+                                if (newSequence.tryToExtendAfterLast(firstCandidateAfterReplacementFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved)) {
+                                    stationarySequences.add(newSequence);
                                 }
                             }
                         }
@@ -457,6 +588,7 @@ public class StationarySequenceBasedFilter {
             }
         }
         updateFilteredCandidates(candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+        assert containsNoEmptyOrSingleCandidateStationarySequence() && assertion;
         return new Pair<>(candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
     }
 

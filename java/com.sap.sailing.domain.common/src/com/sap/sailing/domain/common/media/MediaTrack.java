@@ -6,10 +6,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.media.MediaSubType;
 import com.sap.sse.common.media.MimeType;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
  * The {@link #hashCode()} and {@link #equals(Object)} methods are based solely on the {@link #dbId} field.
@@ -21,7 +26,7 @@ import com.sap.sse.common.media.MimeType;
  * @author Jens Rommel (D047974)
  * 
  */
-public class MediaTrack implements Serializable {
+public class MediaTrack implements Serializable, WithQualifiedObjectIdentifier {
 
     private static final long serialVersionUID = 1L;
 
@@ -157,5 +162,28 @@ public class MediaTrack implements Serializable {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public String getName() {
+        return title;
+    }
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    @Override
+    public HasPermissions getType() {
+        return SecuredDomainType.MEDIA_TRACK;
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(dbId);
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String dbId) {
+        return new TypeRelativeObjectIdentifier(dbId);
     }
 }

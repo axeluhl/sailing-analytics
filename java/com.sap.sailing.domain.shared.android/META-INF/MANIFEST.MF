@@ -4,7 +4,7 @@ Bundle-Name: com.sap.sailing.domain.shared.android
 Bundle-SymbolicName: com.sap.sailing.domain.shared.android
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.sap.sailing.domain.common,
  com.sap.sse.common,
  com.sap.sse.shared.android,
@@ -55,3 +55,4 @@ Export-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.tracking,
  com.sap.sailing.domain.tracking.impl
 Automatic-Module-Name: com.sap.sailing.domain.shared.android
+Import-Package: com.sap.sse.security.shared

@@ -134,6 +134,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
             }
         });
         extractionFunctionSuggestBox.getElement().setPropertyString("placeholder", getDataMiningStringMessages().searchAvailableStatistics());
+        extractionFunctionSuggestBox.ensureDebugId("ExtractionFunctionSuggestBox");
         extractionFunctionSuggestBox.setLimit(Integer.MAX_VALUE);
         extractionFunctionSuggestBox.addStyleName(StatisticProviderElementStyle);
         extractionFunctionSuggestBox.setWidth("100%");

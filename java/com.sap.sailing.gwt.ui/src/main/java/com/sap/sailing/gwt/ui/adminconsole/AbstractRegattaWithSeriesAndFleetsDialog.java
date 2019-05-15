@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -8,18 +9,26 @@ import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
+import com.sap.sailing.gwt.ui.common.client.RandomString;
 import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
@@ -42,6 +51,7 @@ import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
  */
 public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEntryDialogWithDateTimeBox<T> {
 
+    protected final SailingServiceAsync sailingService; 
     protected StringMessages stringMessages;
     private final RegattaDTO regatta;
 
@@ -55,13 +65,19 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     protected final DoubleBox buoyZoneRadiusInHullLengthsDoubleBox;
     protected final ListEditorComposite<SeriesDTO> seriesEditor;
     private final ListBox rankingMetricListBox;
+    protected final ListBox competitorRegistrationTypeListBox;
 
     protected final List<EventDTO> existingEvents;
     private EventDTO defaultEvent;
+    private RegistrationLinkWithQRCode registrationLinkWithQRCode;
 
-    public AbstractRegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, List<EventDTO> existingEvents, EventDTO correspondingEvent, 
-            String title, String okButton, StringMessages stringMessages, Validator<T> validator, DialogCallback<T> callback) {
+    protected final CaptionPanel secretPanel;
+
+    public AbstractRegattaWithSeriesAndFleetsDialog(final SailingServiceAsync sailingService, RegattaDTO regatta,
+            Iterable<SeriesDTO> series, List<EventDTO> existingEvents, EventDTO correspondingEvent, String title,
+            String okButton, StringMessages stringMessages, Validator<T> validator, DialogCallback<T> callback) {
         super(title, null, okButton, stringMessages.cancel(), validator, callback);
+        this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.regatta = regatta;
         this.defaultEvent = correspondingEvent;
@@ -103,6 +119,79 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         courseAreaListBox.setEnabled(false);
         this.seriesEditor = createSeriesEditor(series);
         setupEventAndCourseAreaListBoxes(stringMessages);
+
+        competitorRegistrationTypeListBox = createListBox(false);
+        competitorRegistrationTypeListBox.ensureDebugId("CompetitorRegistrationTypeListBox");
+        EnumSet.allOf(CompetitorRegistrationType.class).forEach(t->competitorRegistrationTypeListBox.addItem(t.getLabel(stringMessages), t.name()));
+        competitorRegistrationTypeListBox.setSelectedIndex(regatta.competitorRegistrationType.ordinal());
+
+
+        // Registration Link
+        registrationLinkWithQRCode = new RegistrationLinkWithQRCode();
+        if (regatta.registrationLinkSecret == null) {
+            final String secret = RandomString.createRandomSecret(20);
+            registrationLinkWithQRCode.setSecret(secret);
+            regatta.registrationLinkSecret = secret;
+        } else {
+            registrationLinkWithQRCode.setSecret(regatta.registrationLinkSecret);
+        }
+
+        // secret panel
+        final TextBox secretTextBox = createTextBox(regatta.registrationLinkSecret, 30);
+        secretPanel = new CaptionPanel(stringMessages.registrationLinkSecret());
+        createSecretPanel(stringMessages, secretPanel, secretTextBox);
+    }
+
+    private void createSecretPanel(final StringMessages stringMessages, final CaptionPanel secretPanel,
+            final TextBox secretTextBox) {
+        final VerticalPanel secretPanelContent = new VerticalPanel();
+        secretPanel.add(secretPanelContent);
+
+        // explain Label with description of secret
+        final Label secretExplainLabel = new Label(stringMessages.registrationLinkSecretExplain());
+        secretPanelContent.add(secretExplainLabel);
+        secretExplainLabel.setWordWrap(true);
+
+        // Label
+        Label secretLabel = new Label(stringMessages.registrationLinkSecret() + ":");
+
+        // Textbox
+        secretTextBox.ensureDebugId("SecretTextBox");
+        secretTextBox.addChangeHandler(e -> validateSecret(stringMessages, secretTextBox));
+
+        // Generate-Button
+        final Button generateSecretButton = new Button(stringMessages.registrationLinkSecretGenerate(),
+                new ClickHandler() {
+
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        final String randomString = RandomString.createRandomSecret(20);
+                        registrationLinkWithQRCode.setSecret(randomString);
+                        secretTextBox.setText(randomString);
+                        validateSecret(stringMessages, secretTextBox);
+                    }
+                });
+        generateSecretButton.ensureDebugId("GenerateSecretButton");
+
+        // add all to grid
+        final Grid secretPanelFormGrid = new Grid(1, 3);
+        secretPanelFormGrid.setWidget(0, 0, secretLabel);
+        secretPanelFormGrid.setWidget(0, 1, secretTextBox);
+        secretPanelFormGrid.setWidget(0, 2, generateSecretButton);
+
+        secretPanelContent.add(secretPanelFormGrid);
+    }
+
+    private void validateSecret(final StringMessages stringMessages, final TextBox secretTextBox) {
+        if (secretTextBox.getText() == null || secretTextBox.getText().equals("")) {
+            getStatusLabel().setText(stringMessages.invalidSecret());
+            getStatusLabel().setStyleName("errorLabel");
+            getOkButton().setEnabled(false);
+        }
+        else {
+            getOkButton().setEnabled(true);
+        }
+        registrationLinkWithQRCode.setSecret(secretTextBox.getText());
     }
 
     /**
@@ -146,7 +235,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(9, 2);
+        Grid formGrid = new Grid(11, 2);
         panel.add(formGrid);
 
         formGrid.setWidget(0, 0, new Label(stringMessages.timeZone() + ":"));
@@ -167,6 +256,10 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         formGrid.setWidget(7, 1, controlTrackingFromStartAndFinishTimesCheckBox);
         formGrid.setWidget(8, 0, new Label(stringMessages.buoyZoneRadiusInHullLengths() + ":"));
         formGrid.setWidget(8, 1, buoyZoneRadiusInHullLengthsDoubleBox);
+        formGrid.setWidget(9, 0, new Label(stringMessages.competitorRegistrationType() + ":"));
+        formGrid.setWidget(9, 1, competitorRegistrationTypeListBox);
+
+        panel.add(secretPanel);
         setupAdditionalWidgetsOnPanel(panel, formGrid);
         return panel;
     }
@@ -294,6 +387,8 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         result.buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengthsDoubleBox.getValue();
         setCourseAreaInRegatta(result);
         result.series = getSeriesEditor().getValue();
+        result.competitorRegistrationType = CompetitorRegistrationType.valueOf(competitorRegistrationTypeListBox.getSelectedValue());
+        result.registrationLinkSecret = registrationLinkWithQRCode.getSecret();
         return result;
     }
 

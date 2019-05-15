@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import com.google.gwt.cell.client.Cell;
-import com.sap.sailing.domain.common.SortingOrder;
-import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
+import com.sap.sse.common.SortingOrder;
+import com.sap.sse.gwt.client.celltable.AbstractSortableColumnWithMinMax;
 
 /**
  * A sortable column whose elements can be compared for a minimum and maximum value whose magnitudes can

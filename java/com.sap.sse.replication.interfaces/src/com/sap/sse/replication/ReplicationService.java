@@ -98,7 +98,9 @@ public interface ReplicationService {
 
     Iterable<Replicable<?, ?>> getAllReplicables();
 
-    ReplicationMasterDescriptor createReplicationMasterDescriptor(String messagingHostname, String hostname, String exchangeName, int servletPort, int jmsPort, String jmsQueueName, Iterable<Replicable<?, ?>> replicables);
+    ReplicationMasterDescriptor createReplicationMasterDescriptor(String messagingHostname, String hostname,
+            String exchangeName, int servletPort, int jmsPort, String jmsQueueName, String bearerToken,
+            Iterable<Replicable<?, ?>> replicables);
 
     /**
      * @return a replication receiver that is responsible for receiving replicated operations from a message queue and

@@ -21,6 +21,8 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 /**
  * 
@@ -43,12 +45,13 @@ public class CompetitorTrackWithEstimationDataJsonSerializer extends AbstractTra
     private final BoatClassJsonSerializer boatClassJsonSerializer;
     private final CompetitorTrackElementsJsonSerializer elementsJsonSerializer;
     private final PolarDataService polarDataService;
+    private final SecurityService securityService;
     private final Integer startBeforeStartLineInSeconds;
     private final Integer endBeforeStartLineInSeconds;
     private final Integer startAfterFinishLineInSeconds;
     private final Integer endAfterFinishLineInSeconds;
 
-    public CompetitorTrackWithEstimationDataJsonSerializer(PolarDataService polarDataService,
+    public CompetitorTrackWithEstimationDataJsonSerializer(PolarDataService polarDataService, SecurityService securityService,
             BoatClassJsonSerializer boatClassJsonSerializer,
             CompetitorTrackElementsJsonSerializer elementsJsonSerializer, Integer startBeforeStartLineInSeconds,
             Integer endBeforeStartLineInSeconds, Integer startAfterFinishLineInSeconds,
@@ -60,6 +63,7 @@ public class CompetitorTrackWithEstimationDataJsonSerializer extends AbstractTra
         this.endBeforeStartLineInSeconds = endBeforeStartLineInSeconds;
         this.startAfterFinishLineInSeconds = startAfterFinishLineInSeconds;
         this.endAfterFinishLineInSeconds = endAfterFinishLineInSeconds;
+        this.securityService = securityService;
     }
 
     @Override
@@ -79,54 +83,58 @@ public class CompetitorTrackWithEstimationDataJsonSerializer extends AbstractTra
         result.put(WIND_QUALITY, windQuality);
         result.put(BYCOMPETITOR, byCompetitorJson);
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-            ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(trackedRace, competitor);
-            TrackTimeInfo trackTimeInfo = maneuverDetector.getTrackTimeInfo();
-            if (trackTimeInfo != null) {
-                TimePoint from = null;
-                TimePoint to = null;
-                if (startBeforeStartLineInSeconds != null) {
-                    from = trackTimeInfo.getTrackStartTimePoint()
-                            .minus(new MillisecondsDurationImpl(startBeforeStartLineInSeconds * 1000L));
-                } else if (startAfterFinishLineInSeconds != null) {
-                    from = trackTimeInfo.getTrackEndTimePoint()
-                            .plus(new MillisecondsDurationImpl(startAfterFinishLineInSeconds * 1000L));
-                } else {
-                    from = trackTimeInfo.getTrackStartTimePoint();
+            if (securityService.hasCurrentUserOneOfExplicitPermissions(competitor,
+                    SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
+                ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(trackedRace, competitor);
+                TrackTimeInfo trackTimeInfo = maneuverDetector.getTrackTimeInfo();
+                if (trackTimeInfo != null) {
+                    TimePoint from = null;
+                    TimePoint to = null;
+                    if (startBeforeStartLineInSeconds != null) {
+                        from = trackTimeInfo.getTrackStartTimePoint()
+                                .minus(new MillisecondsDurationImpl(startBeforeStartLineInSeconds * 1000L));
+                    } else if (startAfterFinishLineInSeconds != null) {
+                        from = trackTimeInfo.getTrackEndTimePoint()
+                                .plus(new MillisecondsDurationImpl(startAfterFinishLineInSeconds * 1000L));
+                    } else {
+                        from = trackTimeInfo.getTrackStartTimePoint();
+                    }
+                    if (endAfterFinishLineInSeconds != null) {
+                        to = trackTimeInfo.getTrackEndTimePoint()
+                                .plus(new MillisecondsDurationImpl(endAfterFinishLineInSeconds * 1000L));
+                    } else if (endBeforeStartLineInSeconds != null) {
+                        to = trackTimeInfo.getTrackStartTimePoint()
+                                .minus(new MillisecondsDurationImpl(endBeforeStartLineInSeconds * 1000L));
+                    } else {
+                        to = trackTimeInfo.getTrackEndTimePoint();
+                    }
+                    final JSONObject forCompetitorJson = new JSONObject();
+                    byCompetitorJson.add(forCompetitorJson);
+                    forCompetitorJson.put(COMPETITOR_NAME, competitor.getName());
+                    forCompetitorJson.put(BOAT_CLASS, boatClassJsonSerializer
+                            .serialize(trackedRace.getRace().getBoatOfCompetitor(competitor).getBoatClass()));
+                    forCompetitorJson.put(FIXES_COUNT_FOR_POLARS, getFixesCountForPolars(trackedRace, competitor));
+                    Duration averageIntervalBetweenFixes = trackedRace.getTrack(competitor)
+                            .getAverageIntervalBetweenFixes();
+                    forCompetitorJson.put(AVG_INTERVAL_BETWEEN_FIXES_IN_SECONDS,
+                            averageIntervalBetweenFixes == null ? 0 : averageIntervalBetweenFixes.asSeconds());
+                    GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+                    Double distanceTravelledInMeters = null;
+                    if (trackTimeInfo.getTrackStartTimePoint() != null
+                            && trackTimeInfo.getTrackEndTimePoint() != null) {
+                        distanceTravelledInMeters = track.getDistanceTraveled(trackTimeInfo.getTrackStartTimePoint(),
+                                trackTimeInfo.getTrackEndTimePoint()).getMeters();
+                    }
+                    forCompetitorJson.put(DISTANCE_TRAVELLED_IN_METERS, distanceTravelledInMeters);
+                    forCompetitorJson.put(START_TIME_POINT, trackTimeInfo.getTrackStartTimePoint() == null ? null
+                            : trackTimeInfo.getTrackStartTimePoint().asMillis());
+                    forCompetitorJson.put(END_TIME_POINT, trackTimeInfo.getTrackEndTimePoint() == null ? null
+                            : trackTimeInfo.getTrackEndTimePoint().asMillis());
+                    forCompetitorJson.put(MARK_PASSINGS_COUNT, getMarkPassingsCount(trackedRace, competitor));
+                    forCompetitorJson.put(WAYPOINTS_COUNT, getWaypointsCount(trackedRace));
+                    forCompetitorJson.put(ELEMENTS,
+                            elementsJsonSerializer.serialize(trackedRace, competitor, from, to, trackTimeInfo));
                 }
-                if (endAfterFinishLineInSeconds != null) {
-                    to = trackTimeInfo.getTrackEndTimePoint()
-                            .plus(new MillisecondsDurationImpl(endAfterFinishLineInSeconds * 1000L));
-                } else if (endBeforeStartLineInSeconds != null) {
-                    to = trackTimeInfo.getTrackStartTimePoint()
-                            .minus(new MillisecondsDurationImpl(endBeforeStartLineInSeconds * 1000L));
-                } else {
-                    to = trackTimeInfo.getTrackEndTimePoint();
-                }
-                final JSONObject forCompetitorJson = new JSONObject();
-                byCompetitorJson.add(forCompetitorJson);
-                forCompetitorJson.put(COMPETITOR_NAME, competitor.getName());
-                forCompetitorJson.put(BOAT_CLASS, boatClassJsonSerializer
-                        .serialize(trackedRace.getRace().getBoatOfCompetitor(competitor).getBoatClass()));
-                forCompetitorJson.put(FIXES_COUNT_FOR_POLARS, getFixesCountForPolars(trackedRace, competitor));
-                Duration averageIntervalBetweenFixes = trackedRace.getTrack(competitor)
-                        .getAverageIntervalBetweenFixes();
-                forCompetitorJson.put(AVG_INTERVAL_BETWEEN_FIXES_IN_SECONDS,
-                        averageIntervalBetweenFixes == null ? 0 : averageIntervalBetweenFixes.asSeconds());
-                GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-                Double distanceTravelledInMeters = null;
-                if (trackTimeInfo.getTrackStartTimePoint() != null && trackTimeInfo.getTrackEndTimePoint() != null) {
-                    distanceTravelledInMeters = track.getDistanceTraveled(trackTimeInfo.getTrackStartTimePoint(),
-                            trackTimeInfo.getTrackEndTimePoint()).getMeters();
-                }
-                forCompetitorJson.put(DISTANCE_TRAVELLED_IN_METERS, distanceTravelledInMeters);
-                forCompetitorJson.put(START_TIME_POINT, trackTimeInfo.getTrackStartTimePoint() == null ? null
-                        : trackTimeInfo.getTrackStartTimePoint().asMillis());
-                forCompetitorJson.put(END_TIME_POINT, trackTimeInfo.getTrackEndTimePoint() == null ? null
-                        : trackTimeInfo.getTrackEndTimePoint().asMillis());
-                forCompetitorJson.put(MARK_PASSINGS_COUNT, getMarkPassingsCount(trackedRace, competitor));
-                forCompetitorJson.put(WAYPOINTS_COUNT, getWaypointsCount(trackedRace));
-                forCompetitorJson.put(ELEMENTS,
-                        elementsJsonSerializer.serialize(trackedRace, competitor, from, to, trackTimeInfo));
             }
         }
         return result;

@@ -1,6 +1,10 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
+import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -35,8 +39,10 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -54,6 +60,14 @@ import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
+import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
+import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public abstract class AbstractTrackedRacesListComposite extends AbstractCompositeComponent<TrackedRacesSettings> implements
         RegattasDisplayer {
@@ -85,6 +99,8 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
     private ListBox listBoxRegattas;
 
+    protected final UserService userService;
+
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
         public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
@@ -95,13 +111,14 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
     public AbstractTrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
             final SailingServiceAsync sailingService,
             final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher,
-            final StringMessages stringMessages, boolean hasMultiSelection) {
+            final StringMessages stringMessages, boolean hasMultiSelection, UserService userService) {
         super(parent, context);
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
         this.multiSelection = hasMultiSelection;
         this.stringMessages = stringMessages;
+        this.userService = userService;
     }
 
     public void setRegattaFilterValue(String regattaName) {
@@ -395,6 +412,63 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         raceTable.addColumn(hasGPSDataColumn, stringMessages.gpsData());
         raceTable.addColumn(raceStatusColumn, stringMessages.status());
         raceTable.addColumn(raceLiveDelayColumn, stringMessages.delayInSeconds());
+
+        SecuredDTOOwnerColumn.configureOwnerColumns(raceTable, columnSortHandler, stringMessages);
+
+        final HasPermissions type = SecuredDomainType.TRACKED_RACE;
+        final AccessControlledActionsColumn<RaceDTO, RegattaConfigImagesBarCell> actionsColumn = create(
+                new RegattaConfigImagesBarCell(stringMessages), userService);
+        final DialogConfig<RaceDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
+                race -> regattaRefresher.fillRegattas(), stringMessages);
+        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
+
+        final EditACLDialog.DialogConfig<RaceDTO> configACL = EditACLDialog.create(
+                userService.getUserManagementService(), type, regatta -> regattaRefresher.fillRegattas(),
+                stringMessages);
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
+                configACL::openDialog);
+
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_DELETE, DefaultActions.DELETE,
+                this::removeAndUntrackRace);
+
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_STOP_TRACKING, DefaultActions.UPDATE,
+                this::stopTrackingRace);
+
+        raceTable.addColumn(actionsColumn, stringMessages.actions());
+    }
+
+    private void removeAndUntrackRace(final RaceDTO race) {
+        final RegattaNameAndRaceName name = (RegattaNameAndRaceName) race.getRaceIdentifier();
+        sailingService.removeAndUntrackRaces(Arrays.asList(name),
+                new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages
+                                .errorRemovingRace(name != null ? name.toString() : "<null>", caught.getMessage()));
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        regattaRefresher.fillRegattas();
+                    }
+                }));
+    }
+
+    void stopTrackingRace(final RaceDTO race) {
+        final RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
+        sailingService.stopTrackingRaces(Arrays.asList(raceIdentifier),
+                new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.errorStoppingRaceTracking(
+                                raceIdentifier != null ? raceIdentifier.toString() : "<null>", caught.getMessage()));
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        regattaRefresher.fillRegattas();
+                    }
+                }));
     }
 
     @Override

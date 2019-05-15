@@ -1,7 +1,9 @@
 package com.sap.sailing.racecommittee.app.utils;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
@@ -10,10 +12,9 @@ import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils.URLDeco
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.widget.Toast;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.util.UUID;
 
 public class QRHelper {
     private static final String TAG = QRHelper.class.getName();
@@ -43,19 +44,19 @@ public class QRHelper {
                     });
 
             String identifier = connectionConfiguration.getDeviceIdentifier();
+            UUID uuid = connectionConfiguration.getUuid();
             URL apkUrl = UrlHelper.tryConvertToURL(connectionConfiguration.getApkUrl());
             String accessToken = connectionConfiguration.getAccessToken();
 
             if (apkUrl != null) {
                 String serverUrl = UrlHelper.getServerUrl(apkUrl);
-
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putString(mContext.getString(R.string.preference_identifier_key), identifier);
+                editor.putString(mContext.getString(R.string.preference_config_uuid_key), uuid==null?null:uuid.toString());
                 editor.putString(mContext.getString(R.string.preference_server_url_key), serverUrl);
                 editor.putString(mContext.getString(R.string.preference_access_token_key), accessToken);
                 editor.apply();
-
                 new AutoUpdater(mContext).checkForUpdate(false);
                 return true;
             } else {

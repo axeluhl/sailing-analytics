@@ -14,14 +14,14 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.media.MediaSynchAdapter.EditFlag;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class MediaSynchControl implements EditFlag {
 
@@ -63,10 +63,10 @@ public class MediaSynchControl implements EditFlag {
         this.mediaService = mediaService;
         this.mediaSynchAdapter = mediaSynchAdapter;
         this.errorReporter = errorReporter;
+        this.userservice = userservice;
         MediaTrack videoTrack = this.mediaSynchAdapter.getMediaTrack();
         backupVideoTrack = new MediaTrack(videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.duration,
                 videoTrack.mimeType, videoTrack.assignedRaces);
-        this.userservice = userservice;
         mainPanel = new FlowPanel();
         mainPanel.addStyleName("main-panel");
         editPanel = new FlowPanel();
@@ -247,19 +247,17 @@ public class MediaSynchControl implements EditFlag {
         }
         mediaSynchAdapter.setControlsVisible(showEditUI);
         previewButton.setEnabled(showEditUI);
-        boolean hasRightToEdit = hasRightToEdit();
-        editButton.setEnabled(hasRightToEdit && !showEditUI);
-        mainPanel.getElement().getStyle().setDisplay(showEditUI && hasRightToEdit ? Display.BLOCK : Display.NONE);
+        MediaTrackWithSecurityDTO videoTrack = mediaSynchAdapter.getMediaTrack();
+        editButton.setEnabled(hasRightToEdit(videoTrack) && !showEditUI);
+        mainPanel.getElement().getStyle()
+                .setDisplay(showEditUI && hasRightToEdit(videoTrack) ? Display.BLOCK : Display.NONE);
         boolean isDirty = isDirty();
         saveButton.setEnabled(showEditUI || isDirty);
         discardButton.setEnabled(showEditUI || isDirty);
     }
 
-    private boolean hasRightToEdit() {
-        UserDTO currentUser = userservice.getCurrentUser();
-        return currentUser != null
-                && currentUser.hasPermission(Permission.MANAGE_MEDIA.getStringPermission(),
-                        SailingPermissionsForRoleProvider.INSTANCE);
+    private boolean hasRightToEdit(MediaTrackWithSecurityDTO video) {
+        return userservice.hasPermission(video, DefaultActions.UPDATE);
     }
 
     private boolean isDirty() {

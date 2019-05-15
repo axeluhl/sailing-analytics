@@ -751,13 +751,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     @Override
                     public List<Maneuver> computeCacheUpdate(Competitor competitor, EmptyUpdateInterval updateInterval)
                             throws NoWindException {
-                        Duration averageIntervalBetweenRawFixes = getTrack(competitor)
-                                .getAverageIntervalBetweenRawFixes();
+                        Duration averageIntervalBetweenRawFixes = getTrack(competitor).getAverageIntervalBetweenRawFixes();
                         if (averageIntervalBetweenRawFixes != null) {
                             ManeuverDetector maneuverDetector;
                             if (averageIntervalBetweenRawFixes.asSeconds() >= 30) {
-                                maneuverDetector = new LowGPSSamplingRateManeuverDetectorImpl(TrackedRaceImpl.this,
-                                        competitor);
+                                maneuverDetector = new LowGPSSamplingRateManeuverDetectorImpl(TrackedRaceImpl.this, competitor);
                             } else {
                                 maneuverDetector = maneuverDetectorPerCompetitorCache.getValue(competitor);
                             }
@@ -2788,8 +2786,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return result;
     }
 
-    
-
     /**
      * Fetches the boat class-specific parameter
      */
@@ -3588,6 +3584,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return new TargetTimeInfoImpl(legTargetTimes);
     }
     
+    @Override
+    public Duration getTimeSailedSinceRaceStart(Competitor competitor, TimePoint timePoint) {
+        return getRankingMetric().getActualTimeSinceStartOfRace(competitor, timePoint);
+    }
+
     @Override
     public Distance getEstimatedDistanceToComplete(final TimePoint timepoint)
             throws NotEnoughDataHasBeenAddedException, NoWindException {

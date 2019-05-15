@@ -35,6 +35,8 @@ public class GPSFixDTOWithSpeedWindTackAndLegType extends GPSFixDTO implements I
      */
     public Double degreesBoatToTheWind;
     
+    public Double detailValue;
+    
     public GPSFixDTOWithSpeedWindTackAndLegType() {}
 
     public GPSFixDTOWithSpeedWindTackAndLegType(Date timepoint, Position position, SpeedWithBearingDTO speedWithBearing, WindDTO wind,
@@ -42,6 +44,13 @@ public class GPSFixDTOWithSpeedWindTackAndLegType extends GPSFixDTO implements I
         this(timepoint, position, speedWithBearing, (speedWithBearing != null && wind != null) ?
                 new DegreeBearingImpl(speedWithBearing.bearingInDegrees).getDifferenceTo(
                         new DegreeBearingImpl(wind.dampenedTrueWindFromDeg)).getDegrees() : null, tack, legType, extrapolated);
+    }
+    
+    public GPSFixDTOWithSpeedWindTackAndLegType(Date timepoint, Position position, SpeedWithBearingDTO speedWithBearing, WindDTO wind,
+            Tack tack, LegType legType, boolean extrapolated, Double detailValue) {
+        this(timepoint, position, speedWithBearing, (speedWithBearing != null && wind != null) ?
+                new DegreeBearingImpl(speedWithBearing.bearingInDegrees).getDifferenceTo(
+                        new DegreeBearingImpl(wind.dampenedTrueWindFromDeg)).getDegrees() : null, tack, legType, extrapolated, detailValue);
     }
 
     public GPSFixDTOWithSpeedWindTackAndLegType(Date timepoint, Position position, SpeedWithBearingDTO speedWithBearing, Double degreesBoatToTheWind,
@@ -54,5 +63,19 @@ public class GPSFixDTOWithSpeedWindTackAndLegType extends GPSFixDTO implements I
         this.legType = legType;
         this.extrapolated = extrapolated;
         this.degreesBoatToTheWind = degreesBoatToTheWind;
+        this.detailValue = null;
+    }
+    
+    public GPSFixDTOWithSpeedWindTackAndLegType(Date timepoint, Position position, SpeedWithBearingDTO speedWithBearing, Double degreesBoatToTheWind,
+            Tack tack, LegType legType, boolean extrapolated, Double detailValue) {
+        super(timepoint, position);
+        this.timepoint = timepoint;
+        this.position = position;
+        this.speedWithBearing = speedWithBearing;
+        this.tack = tack;
+        this.legType = legType;
+        this.extrapolated = extrapolated;
+        this.degreesBoatToTheWind = degreesBoatToTheWind;
+        this.detailValue = detailValue;
     }
 }

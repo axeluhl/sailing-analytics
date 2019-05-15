@@ -63,4 +63,9 @@ public class StringListEditorComposite extends GenericStringListEditorComposite<
     protected String toString(String value) {
         return value;
     }
+
+    public void setEnabled(final boolean enabled) {
+        // is always of type CollapsedUi (see constructor)
+        ((CollapsedUi) activeUi).setEnabled(enabled);
+    }
 }

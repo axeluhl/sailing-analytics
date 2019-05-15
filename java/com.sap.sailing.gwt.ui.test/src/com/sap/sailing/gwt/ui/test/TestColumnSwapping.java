@@ -84,7 +84,8 @@ public class TestColumnSwapping {
         assertNotNull("Sailingservice != NULL", sailingService);
         int td[] = { 5, 8 };
         sailingService.removeLeaderboard(TEST_LEADERBOARD_NAME);
-        sailingService.createFlexibleLeaderboard(TEST_LEADERBOARD_NAME, null, td, ScoringSchemeType.LOW_POINT, null);
+        sailingService.createFlexibleLeaderboard(TEST_LEADERBOARD_NAME, null, td,
+                ScoringSchemeType.LOW_POINT, null);
         for (int i = 0; i < races.length; i++)
             sailingService.addColumnToLeaderboard(races[i], TEST_LEADERBOARD_NAME, isMedalRace[i]);
         sailingService.moveLeaderboardColumnDown(TEST_LEADERBOARD_NAME, races[0]);

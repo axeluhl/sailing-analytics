@@ -41,6 +41,7 @@ import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
@@ -62,6 +63,10 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -78,7 +83,8 @@ import com.sap.sse.common.Util.Pair;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomainFactory> {
+public interface TrackedRace
+        extends Serializable, IsManagedByCache<SharedDomainFactory>, WithQualifiedObjectIdentifier {
     final Duration START_TRACKING_THIS_MUCH_BEFORE_RACE_START = Duration.ONE_MINUTE.times(5);
     final Duration STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH = Duration.ONE_SECOND.times(30);
 
@@ -995,6 +1001,18 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     TargetTimeInfo getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException, NoWindException;
 
     /**
+     * Determine the time sailed for the {@code competitor} at {@code timePoint} in this race. This ignores whether or
+     * not the race has recorded a start mark passing for the {@code competitor}. If no finish mark passing is found
+     * either, the duration between the {@link #getStartOfRace() race start time} and {@code timePoint} is returned;
+     * otherwise the duration between the {@link #getStartOfRace() race start time} and the time when the
+     * {@code competitor} finished the race. If there is no mark passing for {@code competitor} for the last waypoint or
+     * no {@link TrackedRace#getStartOfRace()} is known, {@code null} is returned.
+     */
+    default Duration getTimeSailedSinceRaceStart(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    /**
      * Calculates the estimated distance it takes a competitor to sail the race, from start to finish.
      * 
      * @param timepoint
@@ -1160,4 +1178,31 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * as a single average wind direction.
      */
     WindSummary getWindSummary();
+    
+    @Override
+    default QualifiedObjectIdentifier getIdentifier() {
+        return getIdentifier(getRaceIdentifier());
+    }
+    
+    public static QualifiedObjectIdentifier getIdentifier(RegattaAndRaceIdentifier regattaAndRaceId) {
+        return getSecuredDomainType().getQualifiedObjectIdentifier(regattaAndRaceId.getTypeRelativeObjectIdentifier());
+    }
+
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getRaceIdentifier().getTypeRelativeObjectIdentifier();
+    }
+
+    @Override
+    default String getName() {
+        return getRaceIdentifier().getRaceName() + "@" + getRaceIdentifier().getRegattaName();
+    }
+
+    @Override
+    default HasPermissions getType() {
+        return getSecuredDomainType();
+    }
+    
+    public static HasPermissions getSecuredDomainType() {
+        return SecuredDomainType.TRACKED_RACE;
+    }
 }

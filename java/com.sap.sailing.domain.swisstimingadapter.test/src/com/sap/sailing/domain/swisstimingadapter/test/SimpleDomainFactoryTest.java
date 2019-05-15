@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.Test;
 
@@ -15,6 +16,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
@@ -29,6 +31,7 @@ import com.sap.sailing.domain.swisstimingadapter.impl.CourseImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.MarkImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.RaceImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.StartListImpl;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sse.common.Util;
 
@@ -100,7 +103,7 @@ public class SimpleDomainFactoryTest {
             public Iterable<Mark> getMarks() {
                 return Collections.emptyList();
             }
-        });
+        }, new DefaultRaceTrackingHandler());
         assertNotNull(raceDefinition.getBoatClass());
         assertEquals("UNKNOWN", raceDefinition.getBoatClass().getName());
     }
@@ -109,9 +112,10 @@ public class SimpleDomainFactoryTest {
     public void testCourseConfigForMark() throws PatchFailedException {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, "TestEvent",
-                /* boatClass */ null, /* canBoatsOfCompetitorsChangePerRace */ true, 
+                /* boatClass */ null, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /*startDate*/ null, /*endDate*/ null, new RacingEventServiceImpl(),
-                com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null);
+                com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
+                "123", null, /* registrationLinkSecret */ UUID.randomUUID().toString());
         Race race = new RaceImpl("1234", "R1", "Race 1234");
         Iterable<Competitor> competitors = Collections.emptyList();
         StartList startList = new StartListImpl("1234", competitors);
@@ -119,7 +123,8 @@ public class SimpleDomainFactoryTest {
         Mark mark2 = new MarkImpl("M1", 0, Arrays.asList("D3", "D4"), /* markType */ null);
         List<Mark> marks = Arrays.asList(mark1, mark2);
         Course course = new CourseImpl("1234", marks);
-        RaceDefinition raceDefinition = domainFactory.createRaceDefinition(regatta, race, startList, course);
+        RaceDefinition raceDefinition = domainFactory.createRaceDefinition(regatta, race, startList, course,
+                new DefaultRaceTrackingHandler());
         ArrayList<Waypoint> waypoints1 = new ArrayList<Waypoint>();
         for (Waypoint waypoint : raceDefinition.getCourse().getWaypoints()) {
             waypoints1.add(waypoint);
@@ -136,9 +141,10 @@ public class SimpleDomainFactoryTest {
     public void testCourseConfigForGate() throws PatchFailedException {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
-                "TestEvent", /* boatClass */ null, /* canBoatsOfCompetitorsChangePerRace */ true, 
+                "TestEvent", /* boatClass */ null, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /*startDate*/ null, /*endDate*/ null, new RacingEventServiceImpl(),
-                com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null);
+                com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
+                "123", null, /* registrationLinkSecret */ UUID.randomUUID().toString());
         Race race = new RaceImpl("1234", "R1", "Race 1234");
         Iterable<Competitor> competitors = Collections.emptyList();
         StartList startList = new StartListImpl("1234", competitors);
@@ -146,7 +152,8 @@ public class SimpleDomainFactoryTest {
         Mark mark2 = new MarkImpl("M1", 0, Arrays.asList("D3", "D4"), /* markType */ null);
         List<Mark> marks = Arrays.asList(mark1, mark2);
         Course course = new CourseImpl("1234", marks);
-        RaceDefinition raceDefinition = domainFactory.createRaceDefinition(regatta, race, startList, course);
+        RaceDefinition raceDefinition = domainFactory.createRaceDefinition(regatta, race, startList, course,
+                new DefaultRaceTrackingHandler());
         assertEquals(2, Util.size(raceDefinition.getCourse().getWaypoints()));
         ArrayList<Waypoint> waypoints1 = new ArrayList<Waypoint>();
         for (Waypoint waypoint : raceDefinition.getCourse().getWaypoints()) {

@@ -19,8 +19,9 @@ Require-Bundle:
 Import-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.abstractlog.regatta.events,
  com.sap.sailing.domain.abstractlog.regatta.events.impl,
- com.sap.sailing.domain.racelogtracking,
  com.sap.sailing.domain.common.sensordata,
+ com.sap.sailing.domain.racelogtracking,
+ com.sap.sse.security.shared,
  org.osgi.framework;version="1.7.0"
 Bundle-Activator: com.sap.sailing.server.trackfiles.impl.Activator
 Automatic-Module-Name: com.sap.sailing.server.trackfiles

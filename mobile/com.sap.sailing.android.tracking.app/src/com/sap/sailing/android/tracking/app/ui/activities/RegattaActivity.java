@@ -49,6 +49,7 @@ import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorCheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,10 +59,15 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
+
+import static com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants.URL_LEADERBOARD_NAME;
+import static com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants.URL_LEADERBOARD_NAME_FOR_SECRET;
+import static com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants.URL_SECRET;
 
 public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
         implements RegattaFragment.FragmentWatcher, UploadResponseHandler {
@@ -264,18 +270,17 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
     }
 
     private URL getTeamImageApiUrl(String competitorId) throws MalformedURLException {
-        URL url = new URL(checkinUrl.urlString);
-        StringBuilder sb = new StringBuilder();
-
-        sb.append(url.getProtocol());
-        sb.append("://");
-        sb.append(url.getHost());
-        sb.append(":");
-        // get given port by check-in url or standard http(s) protocol port by defaultPort
-        sb.append((url.getPort() == -1) ? url.getDefaultPort() : url.getPort());
-        sb.append(prefs.getServerCompetitorTeamPath(competitorId));
-
-        return new URL(sb.toString());
+        Uri uri = Uri.parse(checkinUrl.urlString);
+        Uri.Builder builder = new Uri.Builder()
+                .scheme(uri.getScheme())
+                .authority(uri.getAuthority())
+                .appendEncodedPath(prefs.getServerCompetitorTeamPath(competitorId));
+        String secret = uri.getQueryParameter(URL_SECRET);
+        if (secret != null) {
+            builder.appendQueryParameter(URL_SECRET, secret);
+            builder.appendQueryParameter(URL_LEADERBOARD_NAME_FOR_SECRET, uri.getQueryParameter(URL_LEADERBOARD_NAME));
+        }
+        return new URL(builder.build().toString());
     }
 
     public void askServerAboutTeamImageUrl(final ImageView imageView) {
@@ -372,9 +377,21 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
         if (BuildConfig.DEBUG) {
             ExLog.i(this, TAG, "Sending imageFile to server: " + imageFile);
         }
-        final String uploadURLStr = event.server
-                + prefs.getServerUploadTeamImagePath().replace("{competitor_id}", competitor.id);
-        new UploadTeamImageTask(this, imageFile, this).execute(uploadURLStr);
+        try {
+            Uri uri = Uri.parse(checkinUrl.urlString);
+            Uri.Builder builder = new Uri.Builder()
+                    .scheme(uri.getScheme())
+                    .authority(uri.getAuthority())
+                    .appendEncodedPath(prefs.getServerUploadTeamImagePath(competitor.id));
+            String secret = uri.getQueryParameter(URL_SECRET);
+            if (secret != null) {
+                builder.appendQueryParameter(URL_SECRET, secret);
+                builder.appendQueryParameter(URL_LEADERBOARD_NAME_FOR_SECRET, uri.getQueryParameter(URL_LEADERBOARD_NAME));
+            }
+            new UploadTeamImageTask(this, imageFile, this).execute(builder.build().toString());
+        } catch (UnsupportedEncodingException e) {
+            ExLog.e(this, TAG, "Failed to encode competitor ID: " + e.getMessage());
+        }
     }
 
     /**
@@ -473,9 +490,11 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
         showProgressDialog(R.string.please_wait, R.string.checking_out);
         JSONObject checkoutData = new JSONObject();
         try {
-            checkoutData.put("competitorId", competitor.id);
-            checkoutData.put("deviceUuid", UniqueDeviceUuid.getUniqueId(this));
-            checkoutData.put("toMillis", System.currentTimeMillis());
+            String secret = Uri.parse(checkinUrl.urlString).getQueryParameter(DeviceMappingConstants.URL_SECRET);
+            checkoutData.putOpt(DeviceMappingConstants.JSON_REGISTER_SECRET, secret);
+            checkoutData.put(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING, competitor.id);
+            checkoutData.put(DeviceMappingConstants.JSON_DEVICE_UUID, UniqueDeviceUuid.getUniqueId(this));
+            checkoutData.put(DeviceMappingConstants.JSON_TO_MILLIS, System.currentTimeMillis());
         } catch (JSONException e) {
             showErrorPopup(R.string.error, R.string.error_could_not_complete_operation_on_server_try_again);
             ExLog.e(this, TAG, "Error populating checkout-data: " + e.getMessage());

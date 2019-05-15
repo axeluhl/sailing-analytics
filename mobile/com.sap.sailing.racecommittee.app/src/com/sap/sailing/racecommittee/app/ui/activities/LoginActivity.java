@@ -36,8 +36,6 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationIdentifierImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.BuildConfig;
@@ -402,13 +400,10 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     private void setupDataManager() {
         showProgressSpinner();
-
-        DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(
-                AppPreferences.on(getApplicationContext()).getDeviceIdentifier());
-
-        LoaderCallbacks<?> configurationLoader = dataManager.createConfigurationLoader(identifier,
-                new LoadClient<DeviceConfiguration>() {
-
+        String deviceConfigurationName = AppPreferences.on(getApplicationContext()).getDeviceConfigurationName();
+        UUID deviceConfigurationUuid = AppPreferences.on(getApplicationContext()).getDeviceConfigurationUuid();
+        LoaderCallbacks<?> configurationLoader = dataManager.createConfigurationLoader(deviceConfigurationName,
+                deviceConfigurationUuid, new LoadClient<DeviceConfiguration>() {
                     @Override
                     public void onLoadFailed(Exception reason) {
                         dismissProgressSpinner();

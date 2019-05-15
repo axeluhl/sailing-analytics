@@ -18,6 +18,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.ranking.RankingMetric;
@@ -34,8 +35,10 @@ public class SerializeRankingMetricTest extends AbstractSerializationTest {
         final BoatClass _49er = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
         final TrackedRace trackedRace = new DynamicTrackedRaceImpl(new DynamicTrackedRegattaImpl(
                 new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, "Regatta", /* boatClass */ _49er,
-                        /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */ null, /* endDate */ null,
-                        /* trackedRegattaRegistry */ null, new LowPoint(), UUID.randomUUID(), /* courseArea */ null)),
+                        /* canBoatsOfCompetitorsChangePerRace */ true,  CompetitorRegistrationType.CLOSED,
+                        /* startDate */ null, /* endDate */ null,
+                        /* trackedRegattaRegistry */ null, new LowPoint(), UUID.randomUUID(), /* courseArea */ null,
+                        /* registrationLinkSecret */ UUID.randomUUID().toString())),
                 new RaceDefinitionImpl("Race", new CourseImpl("Course", Collections.<Waypoint>emptyList()) , 
                         /* boatClass */ _49er, Collections.<Competitor,Boat>emptyMap()),
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0l, 0l, 0l,

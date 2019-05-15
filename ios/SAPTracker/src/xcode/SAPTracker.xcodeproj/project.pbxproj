@@ -374,7 +374,6 @@
 		C89C5FD01D06CF46002AAAD2 /* TrackingViewModeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FCF1D06CF46002AAAD2 /* TrackingViewModeCell.swift */; };
 		C8A4400B1C18153600DF70A0 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = C8A4400A1C18153600DF70A0 /* Settings.bundle */; };
 		C8B3B9BC1F39E64400B3B6BA /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8B3B9BB1F39E64400B3B6BA /* Keychain.swift */; };
-		C8B3B9C01F3C3B4400B3B6BA /* SignUp.strings in Resources */ = {isa = PBXBuildFile; fileRef = C8B3B9BF1F3C3B4400B3B6BA /* SignUp.strings */; };
 		C8B3B9C21F3C6B3900B3B6BA /* SignUpTranslation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8B3B9C11F3C6B3900B3B6BA /* SignUpTranslation.swift */; };
 		C8BBAC791C52649E004CA551 /* LicenseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BBAC781C52649E004CA551 /* LicenseViewController.swift */; };
 		C8BFCCC41D51C53500FC1A27 /* TeamData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BFCCC31D51C53500FC1A27 /* TeamData.swift */; };
@@ -818,7 +817,6 @@
 		C89C5FCF1D06CF46002AAAD2 /* TrackingViewModeCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewModeCell.swift; sourceTree = "<group>"; };
 		C8A4400A1C18153600DF70A0 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		C8B3B9BB1F39E64400B3B6BA /* Keychain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
-		C8B3B9BF1F3C3B4400B3B6BA /* SignUp.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = SignUp.strings; sourceTree = "<group>"; };
 		C8B3B9C11F3C6B3900B3B6BA /* SignUpTranslation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpTranslation.swift; sourceTree = "<group>"; };
 		C8BBAC781C52649E004CA551 /* LicenseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LicenseViewController.swift; sourceTree = "<group>"; };
 		C8BFCCC31D51C53500FC1A27 /* TeamData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TeamData.swift; sourceTree = "<group>"; };
@@ -1292,7 +1290,6 @@
 				9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */,
 				C8D5E81C1D479FA800DA0D61 /* Main.storyboard */,
 				C85DB8241F30B680009559CE /* SignUp.storyboard */,
-				C8B3B9BF1F3C3B4400B3B6BA /* SignUp.strings */,
 				9E95C3D51C723AB30016632B /* Constants.swift */,
 				7FD9D3021A1236080058FEAD /* Extensions.swift */,
 				C8B3B9C11F3C6B3900B3B6BA /* SignUpTranslation.swift */,
@@ -1826,7 +1823,6 @@
 				7F14A1681A13B9A6001C1ECB /* GA.png in Resources */,
 				7F14A10C1A13B9A6001C1ECB /* _british-antarctic-territory.png in Resources */,
 				7F14A1771A13B9A6001C1ECB /* GW.png in Resources */,
-				C8B3B9C01F3C3B4400B3B6BA /* SignUp.strings in Resources */,
 				7F14A1811A13B9A6001C1ECB /* IE.png in Resources */,
 				7F14A14D1A13B9A6001C1ECB /* CR.png in Resources */,
 				7F14A1991A13B9A6001C1ECB /* LB.png in Resources */,

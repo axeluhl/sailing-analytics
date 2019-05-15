@@ -59,10 +59,12 @@ public class GetSearchResultsAction implements SailingAction<ListResult<SearchRe
     private <T extends LeaderboardSearchResultBase> ListResult<SearchResultDTO> getListResult(Result<T> result,
             URL baseUrl, boolean isOnRemoteServer) {
         ListResult<SearchResultDTO> resultList = new ListResult<>();
-        for (T hit : result.getHits()) {
-            // TODO: for now filter all results where we no event is defined
-            if (hit.getEvents() != null && !Util.isEmpty(hit.getEvents())) {
-                resultList.addValue(new SearchResultDTO(hit, baseUrl, isOnRemoteServer));
+        if (result != null) {
+            for (T hit : result.getHits()) {
+                // TODO: for now filter all results where we no event is defined
+                if (hit.getEvents() != null && !Util.isEmpty(hit.getEvents())) {
+                    resultList.addValue(new SearchResultDTO(hit, baseUrl, isOnRemoteServer));
+                }
             }
         }
         return resultList;

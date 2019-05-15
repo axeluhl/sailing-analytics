@@ -17,6 +17,59 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+************* TracAPI 3.12.1 ***************
+********************************************
+This is a final version. It fixes bugs in the implementation and it adds a some features.
+It keeps the backward compatibility.
+
+It keeps the backward compatibility:
+
+Release date: 10/05/2019
+Build number: c547c9b
+
+ 1) Features
+
+ - When a race is loaded from a file, the percentage of loaded data was inaccurate
+ and to fix this issue the MTB reader has been reimplemented. Now the reading time
+ is faster (Requested by André Borud, 07/05/2019)
+
+ 2) Bugs
+
+
+********************************************
+************* TracAPI 3.12.0 ***************
+********************************************
+This is a final version. It changes the enumerate RaceStatusType,
+breaking the backward compatibility:
+
+ - The new RaceStatusTypes requested by Swiss Timing are:
+    - NONE (NONE)
+    - START (STR_SEQ)
+    - RACING (RAC)
+    - FINISHED (FSHD)
+    - ABANDONED (ABDN)
+    - FINAL (FINAL)
+    - GENERAL_RECALL (GNR_REC)
+    - POSTPONED (PSP)
+ - TracAPI establishes equivalences with the old and the new statuses:
+    - PENDING -> NONE
+    - START_PHASE -> START
+    - RUNNING -> RACING
+    - CANCELLED -> ABANDONED
+    - UNSCHEDULED -> NONE
+    - PRESCHEDULED -> NONE
+    - SCHEDULED -> NONE
+    - FINISHING -> RACING
+
+Release date: 27/03/2019
+Build number: f52717c06bb047a747030e3ea450e15b609edf73
+
+ 1) Features
+
+ - Updating the list of race statuses (Requested by Radek Masnika, 01/03/2019)
+
+
+********************************************
 ************* TracAPI 3.11.1 ***************
 ********************************************
 This is a final version.It fixes bugs in the implementation.

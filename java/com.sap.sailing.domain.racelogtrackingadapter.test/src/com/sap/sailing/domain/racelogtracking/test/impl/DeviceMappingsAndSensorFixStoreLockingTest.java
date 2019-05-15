@@ -47,7 +47,9 @@ public class DeviceMappingsAndSensorFixStoreLockingTest extends AbstractGPSFixSt
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-                store.addListener((device, fix) -> {}, deviceIdentifier);
+                store.addListener((device, fix) -> {
+                    return null;
+                }, deviceIdentifier);
             }
 
             @Override
@@ -66,6 +68,7 @@ public class DeviceMappingsAndSensorFixStoreLockingTest extends AbstractGPSFixSt
                 throw new RuntimeException(e);
             }
             mappings.forEachMappingOfDeviceIncludingTimePoint(device, new MillisecondsTimePoint(1), (mapping) ->{});
+            return null;
         }, device);
         
         new Thread() {

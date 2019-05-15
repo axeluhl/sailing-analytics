@@ -33,7 +33,9 @@
 	</tr>
 	<tr>
 		<td>Optional parameters:</td>
-		<td>None</td>
+		<td>
+secret: The regatta registration link secret can be included as an alternative to a bearertoken, if it is equal to the one stored in the regatta associated to the leaderboard, the caller will be permitted ignoring all normal permission checks
+		</td>
 	</tr>
 	<tr>
 		<td>Request method:</td>
@@ -58,6 +60,7 @@
 {
     "markId" : "af855a56-9726-4a9c-a77e-da955bd289bg",
     "deviceUuid" : "af855a56-9726-4a9c-a77e-da955bd289bf",
+    "secret" : "0257p9;aso8ry;hfdee",
     "toMillis" : 1415624564719
 }
             </code></pre>

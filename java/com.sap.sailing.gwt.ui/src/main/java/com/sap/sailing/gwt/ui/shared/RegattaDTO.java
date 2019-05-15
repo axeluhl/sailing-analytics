@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -13,14 +14,19 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 
-public class RegattaDTO extends NamedDTO {
+public class RegattaDTO extends NamedSecuredObjectDTO implements SecuredDTO {
     private static final long serialVersionUID = -4594784946348402759L;
     /**
      * May be <code>null</code> in case the boat class is not known
@@ -37,8 +43,10 @@ public class RegattaDTO extends NamedDTO {
     public boolean useStartTimeInference = true;
     public boolean controlTrackingFromStartAndFinishTimes = false;
     public boolean canBoatsOfCompetitorsChangePerRace = false;
+    public CompetitorRegistrationType competitorRegistrationType = CompetitorRegistrationType.CLOSED;
     public RankingMetrics rankingMetricType;
     public Double buoyZoneRadiusInHullLengths;
+    public String registrationLinkSecret;
     
     public RegattaDTO() {}
     
@@ -70,7 +78,9 @@ public class RegattaDTO extends NamedDTO {
         this.useStartTimeInference = other.useStartTimeInference;
         this.controlTrackingFromStartAndFinishTimes = other.controlTrackingFromStartAndFinishTimes;
         this.canBoatsOfCompetitorsChangePerRace = other.canBoatsOfCompetitorsChangePerRace;
+        this.competitorRegistrationType = other.competitorRegistrationType;
         this.buoyZoneRadiusInHullLengths = other.buoyZoneRadiusInHullLengths;
+        this.registrationLinkSecret = other.registrationLinkSecret;
     }
     
     public Pair<SeriesDTO, FleetDTO> getSeriesAndFleet(RegattaAndRaceIdentifier raceIdentifier) {
@@ -160,4 +170,19 @@ public class RegattaDTO extends NamedDTO {
             return false;
         return true;
     }
+    
+    @Override
+    public HasPermissions getType() {
+        return SecuredDomainType.REGATTA;
+    }
+    
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return new TypeRelativeObjectIdentifier(getName());
+    }
+
 }

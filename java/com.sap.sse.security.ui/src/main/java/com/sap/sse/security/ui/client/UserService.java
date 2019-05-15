@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
@@ -11,19 +12,34 @@ import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.StorageEvent;
 import com.sap.sse.gwt.client.StorageEvent.Handler;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
 import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * Encapsulates the current user, remembered as a {@link UserDTO} object. The current user is determined by a call to
@@ -76,10 +92,18 @@ public class UserService {
 
     private final String id;
 
+    private UserDTO anonymousUser;
+    
+    private ServerInfoDTO serverInfo;
+    
+    private final Set<HasPermissions> allKnownHasPermissions;
+
     public UserService(UserManagementServiceAsync userManagementService) {
         this.id = ""+(System.currentTimeMillis() * Random.nextInt()); // something pretty random
         this.userManagementService = userManagementService;
         handlers = new HashSet<>();
+        allKnownHasPermissions = new HashSet<>();
+        Util.addAll(SecuredSecurityTypes.getAllInstances(), allKnownHasPermissions);
         registerStorageEventHandler();
         updateUser(/* notifyOtherInstances */ false);
     }
@@ -121,10 +145,10 @@ public class UserService {
      *            if <code>true</code>, other instances of this class will be notified about the result of the call
      */
     public void updateUser(final boolean notifyOtherInstances) {
-        userManagementService.getCurrentUser(new MarkedAsyncCallback<UserDTO>(
-                new AsyncCallback<UserDTO>() {
+        userManagementService.getCurrentUser(
+                new MarkedAsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>>(new AsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>>() {
             @Override
-            public void onSuccess(UserDTO result) {
+                    public void onSuccess(Triple<UserDTO, UserDTO, ServerInfoDTO> result) {
                 setCurrentUser(result, notifyOtherInstances);
             }
 
@@ -162,17 +186,17 @@ public class UserService {
         final String authProviderName = ClientUtils.getAuthProviderNameFromCookie();
         logger.info("Verifying " + authProviderName + " user ...");
         userManagementService.verifySocialUser(ClientUtils.getCredential(),
-                new MarkedAsyncCallback<UserDTO>(new AsyncCallback<UserDTO>() {
+                new MarkedAsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>>(new AsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 callback.onFailure(caught);
             }
 
             @Override
-            public void onSuccess(UserDTO result) {
+                    public void onSuccess(Triple<UserDTO, UserDTO, ServerInfoDTO> result) {
                 setCurrentUser(result, /* notifyOtherInstances */ true);
-                logger.info(authProviderName + " user '" + result.getName() + "' is verified!\n");
-                callback.onSuccess(result);
+                        logger.info(authProviderName + " user '" + result.getA().getName() + "' is verified!\n");
+                        callback.onSuccess(result.getA());
             }
         }));
     }
@@ -202,16 +226,22 @@ public class UserService {
         return currentUser;
     }
 
-    private void setCurrentUser(UserDTO result, final boolean notifyOtherInstances) {
-        if (result != null) {
+    private void setCurrentUser(Triple<UserDTO, UserDTO, ServerInfoDTO> resultAndAnomynous, final boolean notifyOtherInstances) {
+        if (resultAndAnomynous.getA() == null) {
+            currentUser = null;
+        } else {
             // we remember that a user was authenticated to suppress the hint for some time
             setUserLoginHintToStorage();
+            currentUser = resultAndAnomynous.getA();
         }
-        currentUser = result;
-        preAuthenticated = (!userInitiallyLoaded && result != null);
+        anonymousUser = resultAndAnomynous.getB();
+        serverInfo = resultAndAnomynous.getC();
+
+        preAuthenticated = (!userInitiallyLoaded && currentUser != null);
         userInitiallyLoaded = true;
-        logger.info("User changed to " + (result == null ? "No User" : (result.getName() + " roles: "
-                + result.getRoles())));
+        logger.info("User changed to "
+                + (currentUser == null ? "No User" : (currentUser.getName() + " roles: " + currentUser.getRoles())));
+        logger.info("User anonymous changed to " + anonymousUser.getName() + " roles: " + anonymousUser.getRoles());
         notifyUserStatusEventHandlers(preAuthenticated);
         if (notifyOtherInstances) {
             fireUserUpdateEvent();
@@ -229,6 +259,16 @@ public class UserService {
         }
     }
 
+    public void executeWithServerInfo(Consumer<ServerInfoDTO> consumer) {
+        this.addUserStatusEventHandler(new UserStatusEventHandler() {
+            @Override
+            public void onUserStatusChange(UserDTO u, boolean p) {
+                consumer.accept(getServerInfo());
+                removeUserStatusEventHandler(this);
+            }
+        }, true);
+    }
+
     public void removeUserStatusEventHandler(UserStatusEventHandler handler) {
         handlers.remove(handler);
     }
@@ -242,7 +282,7 @@ public class UserService {
     public UserManagementServiceAsync getUserManagementService() {
         return userManagementService;
     }
-
+    
     /**
      * Loads the {@link #getCurrentUser() current user}'s preference with the given {@link String key} from server.
      * The preferences are passed to the {@link AsyncCallback} as serialized in {@link String}.
@@ -351,4 +391,121 @@ public class UserService {
             storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(MillisecondsTimePoint.now().asMillis()));
         }
     }
+    
+    /**
+     * Checks whether the user has the permission to the given action for the given object.
+     */
+    public boolean hasPermission(SecuredDTO securedDTO, Action action) {
+        if (securedDTO == null) {
+            return false;
+        }
+        return PermissionChecker.isPermitted(securedDTO.getIdentifier().getPermission(action), currentUser,
+                anonymousUser, securedDTO.getOwnership(), securedDTO.getAccessControlList());
+    }
+
+    /**
+     * Checks whether the user has the permission to the given action for the ServerInfoDTO.
+     */
+    public boolean hasServerPermission(Action action) {
+        return hasPermission(this.serverInfo, action);
+    }
+    
+    /**
+     * Checks whether the user has the permission to the given action for the ServerInfoDTO.
+     */
+    public boolean hasAnyServerPermission(Action... actions) {
+        boolean hasAnyPermission = false;
+        for (Action action : actions) {
+            if (hasCurrentUserAnyPermission(this.serverInfo.getIdentifier().getPermission(action), this.serverInfo.getOwnership())) {
+                hasAnyPermission = true;
+                break;
+            }
+        }
+        return hasAnyPermission;
+    }
+
+    public boolean hasPermission(WildcardPermission permission, OwnershipDTO ownership) {
+        return hasPermission(permission, ownership, /* acl */ null);
+    }
+    
+    public boolean hasPermission(WildcardPermission permission, OwnershipDTO ownership, AccessControlListDTO acl) {
+        if (anonymousUser == null) {
+            return false;
+        }
+        return PermissionChecker.isPermitted(permission, currentUser, anonymousUser, ownership, acl);
+    }
+
+    /**
+     * Checks whether the user has permission to {@link DefaultActions#CREATE create} an object of the logical type
+     * specified, assuming that it will be created with this user as the {@link Ownership#getUserOwner() user owner} and
+     * this user's {@link #getDefaultTenant() default group} as the {@link Ownership#getTenantOwner() group owner}.
+     */
+    public boolean hasCreatePermission(HasPermissions logicalSecuredObjectType) {
+        if (currentUser == null) {
+            return false;
+        }
+        return hasPermission(logicalSecuredObjectType.getPermission(DefaultActions.CREATE),
+                new OwnershipDTO(currentUser == null ? null : currentUser.asStrippedUser(), getCurrentTenant()));
+    }
+
+    public StrippedUserGroupDTO getCurrentTenant() {
+        return currentUser == null ? null : currentUser.getDefaultTenant();
+    }
+
+    public String getCurrentTenantName() {
+        final StrippedUserGroupDTO defaultTenant = getCurrentTenant();
+        return defaultTenant == null ? null : defaultTenant.getName();
+    }
+
+    public UserDTO getAnonymousUser() {
+        return anonymousUser;
+    }
+    
+    public void addKnownHasPermissions(Iterable<HasPermissions> hasPermissions) {
+        Util.addAll(hasPermissions, allKnownHasPermissions);
+    }
+    
+    public boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, OwnershipDTO ownership) {
+        return PermissionChecker.checkMetaPermission(permissionToCheck, allKnownHasPermissions, getCurrentUser(),
+                anonymousUser, ownership);
+    }
+
+    public boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck, OwnershipDTO ownership) {
+        return PermissionChecker.hasUserAnyPermission(permissionToCheck, allKnownHasPermissions, getCurrentUser(),
+                anonymousUser, ownership);
+    }
+    
+    public Iterable<HasPermissions> getAllKnownPermissions() {
+        return allKnownHasPermissions;
+    }
+
+    public boolean hasCurrentUserPermissionToCreateObjectOfTypeWithoutServerCreateObjectPermissionCheck(
+            HasPermissions type) {
+        final WildcardPermission createPermission = type.getPermission(DefaultActions.CREATE);
+        final OwnershipDTO ownershipOfNewlyCreatedObject = new OwnershipDTO(
+                currentUser == null ? null : currentUser.asStrippedUser(), getCurrentTenant());
+        return this.hasCurrentUserAnyPermission(createPermission, ownershipOfNewlyCreatedObject);
+    }
+
+    public boolean hasCurrentUserPermissionToCreateObjectOfType(HasPermissions type) {
+        if (!hasServerPermission(ServerActions.CREATE_OBJECT)) {
+            return false;
+        }
+        return hasCurrentUserPermissionToCreateObjectOfTypeWithoutServerCreateObjectPermissionCheck(type);
+    }
+    
+    public boolean hasCurrentUserPermissionToDeleteAnyObjectOfType(HasPermissions type) {
+        final WildcardPermission createPermission = type.getPermission(DefaultActions.DELETE);
+        return this.hasCurrentUserAnyPermission(createPermission, null);
+    }
+    
+    public boolean hasCurrentUserPermissionToUpdateAnyObjectOfType(HasPermissions type) {
+        final WildcardPermission createPermission = type.getPermission(DefaultActions.UPDATE);
+        return this.hasCurrentUserAnyPermission(createPermission, null);
+    }
+    
+    public ServerInfoDTO getServerInfo() {
+        return serverInfo;
+    }
+
 }
