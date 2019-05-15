@@ -110,6 +110,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                                             @Override
                                             public void onSuccess(Void voidResult) {
                                                 connectionsTable.refreshSwissTimingConnectionList();
+                                                connectionsTable.getFilterField().search(editedConnection.getJsonUrl());
                                             }
                                         }));
                             }

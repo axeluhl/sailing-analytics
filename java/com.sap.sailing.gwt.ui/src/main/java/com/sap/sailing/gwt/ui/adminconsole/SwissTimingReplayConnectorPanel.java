@@ -270,6 +270,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                                             @Override
                                             public void onSuccess(Void voidResult) {
                                                 connectionsTable.refreshConnectionList();
+                                                connectionsTable.getFilterField().search(editedConnection.getJsonUrl());
                                             }
                                         }));
                             }
