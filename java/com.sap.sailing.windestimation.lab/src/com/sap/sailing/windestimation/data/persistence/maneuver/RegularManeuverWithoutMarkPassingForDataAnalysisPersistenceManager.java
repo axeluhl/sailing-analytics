@@ -35,9 +35,4 @@ public class RegularManeuverWithoutMarkPassingForDataAnalysisPersistenceManager
                 getOutPipelineStage()
         });
     }
-
-    protected Document getOutPipelineStage() {
-        return Document.parse("{$out: '" + COLLECTION_NAME + "'}");
-    }
-
 }
