@@ -50,7 +50,6 @@ public class OverallTimeTraveledColumn extends ExpandableSortableColumn<String> 
             LeaderboardPanel<?> leaderboardPanel, StringMessages stringConstants, String detailHeaderStyle,
             String detailColumnStyle) {
         Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new HashMap<>();
-
         result.put(DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS,
                 new TotalTimeColumn(DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, new TotalTimeSailedUpwindInSeconds(),
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
@@ -60,7 +59,6 @@ public class OverallTimeTraveledColumn extends ExpandableSortableColumn<String> 
         result.put(DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS,
                 new TotalTimeColumn(DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS, new TotalTimeSailedReachingInSeconds(),
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-
         return result;
     }
     

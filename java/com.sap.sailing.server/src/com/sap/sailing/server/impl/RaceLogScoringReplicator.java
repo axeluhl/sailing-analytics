@@ -16,7 +16,9 @@ import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.impl.RaceColumnListenerWithDefaultAction;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.server.interfaces.RacingEventService;
@@ -176,8 +178,17 @@ public class RaceLogScoringReplicator implements RaceColumnListenerWithDefaultAc
                 // let scoring scheme calculate the penalty score dynamically
                 scoreByRaceCommittee = null;
             } else {
-                scoreByRaceCommittee = leaderboard.getScoringScheme().getScoreForRank(leaderboard, raceColumn, competitor,
-                    oneBasedRankByRaceCommittee, ()->numberOfCompetitorsInRace, leaderboard.getNumberOfCompetitorsInLeaderboardFetcher(), timePoint);
+                // Check whether it's a non-one-design regatta. In that case, "rank by race committee" just means finish line
+                // crossing order, but that's not relevant for the actual *ranking* in a handicapped regatta. Corrected/calculated
+                // times are. Therefore, for handicap regattas, don't ask the scoring scheme to map the finishing order
+                // to a score.
+                if (leaderboard instanceof RegattaLeaderboard &&
+                        ((RegattaLeaderboard) leaderboard).getRegatta().getRankingMetricType() != RankingMetrics.ONE_DESIGN) {
+                    scoreByRaceCommittee = null;
+                } else {
+                    scoreByRaceCommittee = leaderboard.getScoringScheme().getScoreForRank(leaderboard, raceColumn, competitor,
+                        oneBasedRankByRaceCommittee, ()->numberOfCompetitorsInRace, leaderboard.getNumberOfCompetitorsInLeaderboardFetcher(), timePoint);
+                }
             }
         } else {
             scoreByRaceCommittee = optionalExplicitScore;

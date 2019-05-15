@@ -526,7 +526,10 @@ public class StationarySequenceBasedFilter {
                         StationarySequence.createDummyCandidate(newFix.getTimePoint())));
                 if (lastSequenceStartingAtOrBeforeFix != null && !lastSequenceStartingAtOrBeforeFix.getLast().getTimePoint().before(newFix.getTimePoint())) {
                     // fix falls into the existing StationarySequence; update its bounding box:
-                    final StationarySequence splitResult = lastSequenceStartingAtOrBeforeFix.tryToAddFix(newFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved, /* StationarySequence set to update */ stationarySequences);
+                    final StationarySequence splitResult = lastSequenceStartingAtOrBeforeFix.tryToAddFix(
+                            newFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved,
+                            /* StationarySequence set to update */ stationarySequences,
+                            /* was replacement */ fixesReplacingExistingOnes != null && Util.contains(fixesReplacingExistingOnes, newFix));
                     assert !stationarySequences.contains(lastSequenceStartingAtOrBeforeFix) || lastSequenceStartingAtOrBeforeFix.size() > 1;
                     if (splitResult != null) {
                         assert splitResult.size() > 1;
@@ -549,29 +552,34 @@ public class StationarySequenceBasedFilter {
                 final boolean fixIsInStationarySequence = lastSequenceStartingAtOrBeforeFix != null &&
                         !lastSequenceStartingAtOrBeforeFix.getLast().getTimePoint().before(fixReplacingExistingOne.getTimePoint());
                 if (!fixIsInStationarySequence) {
-                    final StationarySequence lastSequenceEndingBeforeFix = // null in case fix is within a stationary sequence
-                            lastSequenceStartingAtOrBeforeFix != null && fixIsInStationarySequence ? null : lastSequenceStartingAtOrBeforeFix;
+                    final StationarySequence lastSequenceEndingBeforeFix = lastSequenceStartingAtOrBeforeFix; // null in case there is no sequence coming before the fix
                     final Candidate lastCandidateBeforeReplacementFix = candidates.lower(dummyCandidateForReplacementFix);
-                    if (lastCandidateBeforeReplacementFix != null) {
+                    if (lastCandidateBeforeReplacementFix != null) { // no need to try to extend a later sequence to "the left" if there is nothing
                         final Candidate firstCandidateAfterReplacementFix = candidates.higher(dummyCandidateForReplacementFix);
-                        if (firstCandidateAfterReplacementFix != null) {
-                            // the fix is between two candidates, so we may try to extend or create a stationary sequence:
-                            if (lastCandidateBeforeReplacementFix == lastSequenceEndingBeforeFix.getLast()) {
-                                // previous candidate is end of a sequence; try to extend
-                                lastSequenceEndingBeforeFix.tryToExtendAfterLast(firstCandidateAfterReplacementFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+                        if (firstCandidateAfterReplacementFix != null) { // no need to try to extend an earlier sequence to "the right" if there is nothing
+                            // the fix is between two candidates, so we may try to extend or create a stationary sequence if not the next
+                            // candidate is already part of a sequence. We don't merge sequences as of now, and sequences must be disjoint regarding
+                            // their set of candidates.
+                            final StationarySequence firstSequenceStartingAfterFix = stationarySequences.higher(dummyStationarySequenceForFix);
+                            final boolean lookRight;
+                            final boolean previousCandidateIsLastInSequence = lastSequenceEndingBeforeFix != null && lastCandidateBeforeReplacementFix == lastSequenceEndingBeforeFix.getLast();
+                            final boolean nextCandidateIsFirstInSequence = firstSequenceStartingAfterFix != null && firstCandidateAfterReplacementFix == firstSequenceStartingAfterFix.getFirst();
+                            if (previousCandidateIsLastInSequence && !nextCandidateIsFirstInSequence) {
+                                // previous candidate is end of a sequence and next one is not part of a sequence; try to extend previous sequence to "the right":
+                                lookRight = !lastSequenceEndingBeforeFix.tryToExtendAfterLast(firstCandidateAfterReplacementFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
                             } else {
-                                final StationarySequence firstSequenceStartingAfterFix = stationarySequences.higher(dummyStationarySequenceForFix);
-                                if (firstCandidateAfterReplacementFix == firstSequenceStartingAfterFix.getFirst()) {
-                                    // next candidate is start of a sequence; try to extend
-                                    firstSequenceStartingAfterFix.tryToExtendBeforeFirst(lastCandidateBeforeReplacementFix,
-                                            candidatesEffectivelyAdded, candidatesEffectivelyRemoved,
-                                            /* StationarySequence set to update */ stationarySequences);
-                                } else {
-                                    // none of the adjacent candidates is part of a sequence; try to create a new one:
-                                    final StationarySequence newSequence = createStationarySequence(lastCandidateBeforeReplacementFix);
-                                    if (newSequence.tryToExtendAfterLast(firstCandidateAfterReplacementFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved)) {
-                                        stationarySequences.add(newSequence);
-                                    }
+                                lookRight = true;
+                            }
+                            if (lookRight && nextCandidateIsFirstInSequence && !previousCandidateIsLastInSequence) {
+                                // next candidate is start of a sequence and previous candidate is not part of a sequence; try to extend next sequence to "the left":
+                                firstSequenceStartingAfterFix.tryToExtendBeforeFirst(lastCandidateBeforeReplacementFix,
+                                        candidatesEffectivelyAdded, candidatesEffectivelyRemoved,
+                                        /* StationarySequence set to update */ stationarySequences);
+                            } else if (!previousCandidateIsLastInSequence && !nextCandidateIsFirstInSequence) {
+                                // none of the adjacent candidates is part of a sequence; try to create a new one:
+                                final StationarySequence newSequence = createStationarySequence(lastCandidateBeforeReplacementFix);
+                                if (newSequence.tryToExtendAfterLast(firstCandidateAfterReplacementFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved)) {
+                                    stationarySequences.add(newSequence);
                                 }
                             }
                         }

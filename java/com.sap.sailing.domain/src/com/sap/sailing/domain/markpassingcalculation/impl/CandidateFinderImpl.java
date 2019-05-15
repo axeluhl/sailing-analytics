@@ -799,10 +799,11 @@ public class CandidateFinderImpl implements CandidateFinder {
                             // case we can quickly obtain the next "firstFixAfter" by simply calling next() on the iterator.
                             firstFixAfterIterator = track.getFixesIterator(t, /* inclusive */ false);
                         }
-                        if (firstFixAfterIterator.hasNext()) {
-                            fixAfter = firstFixAfterIterator.next();
-                        } else {
-                            fixAfter = null;
+                        try {
+                            fixAfter = Util.nextOrNull(firstFixAfterIterator);
+                        } catch (ConcurrentModificationException e) {
+                            firstFixAfterIterator = track.getFixesIterator(t, /* inclusive */ false);
+                            fixAfter = Util.nextOrNull(firstFixAfterIterator);
                         }
                         lastIterationFix = fix;
                         lastIterationAfterFix = fixAfter;

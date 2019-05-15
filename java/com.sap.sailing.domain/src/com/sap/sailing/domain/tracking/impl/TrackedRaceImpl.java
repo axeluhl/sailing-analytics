@@ -3549,6 +3549,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     @Override
+    public Duration getTimeSailedSinceRaceStart(Competitor competitor, TimePoint timePoint) {
+        return getRankingMetric().getActualTimeSinceStartOfRace(competitor, timePoint);
+    }
+
+    @Override
     public Distance getEstimatedDistanceToComplete(final TimePoint timepoint)
             throws NotEnoughDataHasBeenAddedException, NoWindException {
         if (polarDataService == null) {
