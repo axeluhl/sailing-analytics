@@ -57,7 +57,10 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         final VerticalPanel west = new VerticalPanel();
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER);
         west.add(buttonPanel);
-        buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::updateUsers);
+        userList = new UserTableWrapper<>(userService, additionalPermissions, stringMessages, errorReporter,
+                /* multiSelection */ true, /* enablePager */ true, tableResources);
+        buttonPanel.addUnsecuredAction(stringMessages.refresh(),
+                () -> userList.refreshUserList((Callback<Iterable<UserDTO>, Throwable>) null, false));
         buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.createUser(),
                 () -> new CreateUserDialog(stringMessages, userManagementService, userCreatedHandlers, userService)
                         .show());
@@ -68,8 +71,6 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         userNameTextbox.addKeyUpHandler(
                 e -> editRolesAndPermissionsForUserButton.setEnabled(!userNameTextbox.getText().isEmpty()));
         editRolesAndPermissionsForUserButton.setEnabled(false);
-        userList = new UserTableWrapper<>(userService, additionalPermissions, stringMessages, errorReporter,
-                /* multiSelection */ true, /* enablePager */ true, tableResources);
         userSelectionModel = userList.getSelectionModel();
         final Button deleteButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
                 assert userSelectionModel.getSelectedSet().size() > 0;

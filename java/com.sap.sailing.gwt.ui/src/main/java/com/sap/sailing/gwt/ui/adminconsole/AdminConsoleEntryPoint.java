@@ -104,7 +104,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                 if (Boolean.TRUE.equals(result.isPublic())) {
                     StrippedUserGroupDTO currentTenant = getUserService().getCurrentTenant();
                     StrippedUserGroupDTO serverTenant = result.getServerDefaultTenant();
-                    if (!serverTenant.equals(currentTenant)) {
+                    if (!serverTenant.equals(currentTenant) && getUserService().getCurrentUser() != null) {
                         if (getUserService().getCurrentUser().getUserGroups().contains(serverTenant)) {
                             // The current user is in server tenant group and so his default tenant could be changed.
                             if (Window.confirm(getStringMessages().serverIsPublicButTenantIsNotAndCouldBeChanged())) {
