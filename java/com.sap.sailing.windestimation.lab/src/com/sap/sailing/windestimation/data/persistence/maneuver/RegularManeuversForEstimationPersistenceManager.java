@@ -1,6 +1,13 @@
 package com.sap.sailing.windestimation.data.persistence.maneuver;
 
 import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.List;
+
+import org.bson.Document;
+import org.bson.conversions.Bson;
+
+import com.mongodb.client.MongoCollection;
 
 public class RegularManeuversForEstimationPersistenceManager
         extends AbstractTransformedManeuversForEstimationPersistenceManager {
@@ -17,35 +24,25 @@ public class RegularManeuversForEstimationPersistenceManager
     }
 
     @Override
-    protected String getMongoDbEvalStringForTransformation() {
-        return "{" +
-                "aggregate: '" + ManeuverForEstimationPersistenceManager.COLLECTION_NAME + "',\r\n" +
-                "pipeline: [\r\n" + 
-                "{$match: {\r\n" + 
-                "    $and: [\r\n" + 
-                "                {$or: [\r\n" + 
-                "                                {'category':\r\n" + 
-                "                                        {$eq: 'REGULAR'}\r\n" + 
-                "                },\r\n" + 
-                "                                {'category':\r\n" + 
-                "                                        {$eq: 'MARK_PASSING'}\r\n" + 
-                "                                }\r\n" + 
-                "                        ]},\r\n" + 
-                "        {'deviationTackAngle': {\r\n" + 
-                "            $ne: null\r\n" + 
-                "        }},\r\n" + 
-                "        {'deviationJibeAngle': {\r\n" + 
-                "            $ne: null\r\n" + 
-                "        }},\r\n" + 
-                "        {'clean': {\r\n" + 
-                "            $eq: true\r\n" + 
-                "        }}\r\n" + 
-                "    ]\r\n" + 
-                "}},\r\n" + 
-                "{$out: '" + COLLECTION_NAME + "'}\r\n" + 
-                "],\r\n" +
-                "cursor: {}\r\n" +
-                "}";
+    protected MongoCollection<?> getCollectionForTransformation() throws UnknownHostException {
+        return getDb().getCollection(ManeuverForEstimationPersistenceManager.COLLECTION_NAME);
+    }
+
+    @Override
+    protected List<? extends Bson> getMongoDbAggregationPipelineForTransformation() {
+        return Arrays.asList(new Document[] {
+                Document.parse("{ $match: { $and: ["+
+                "                { $or: [" + 
+                "                        {'category': { $eq: 'REGULAR'}}," + 
+                "                        {'category': { $eq: 'MARK_PASSING'}}" + 
+                "                       ]}," + 
+                "                {'deviationTackAngle': { $ne: null }}," + 
+                "                {'deviationJibeAngle': { $ne: null }}," + 
+                "                {'clean': { $eq: true }}" + 
+                "    ]" + 
+                "}}"),
+                getOutPipelineStage()
+        });
     }
 
 }

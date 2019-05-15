@@ -1,6 +1,13 @@
 package com.sap.sailing.windestimation.data.persistence.maneuver;
 
 import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.List;
+
+import org.bson.Document;
+import org.bson.conversions.Bson;
+
+import com.mongodb.client.MongoCollection;
 
 public class ManeuverForDataAnalysisPersistenceManager
         extends AbstractTransformedManeuversForDataAnalysisPersistenceManager {
@@ -16,37 +23,39 @@ public class ManeuverForDataAnalysisPersistenceManager
         return COLLECTION_NAME;
     }
 
-    //TODO repair if required
     @Override
-    protected String getMongoDbEvalStringForTransformation() {
-        return "{" +
-                "aggregate: '" + RaceWithManeuverForDataAnalysisPersistenceManager.COLLECTION_NAME + "." + AbstractRaceWithEstimationDataPersistenceManager.COMPETITOR_TRACKS_COLLECTION_NAME_EXTENSION + "',\r\n" +
-                "pipeline: [\r\n"
-                + "{$addFields: {\"competitorTracks.elements.regattaName\": '$regattaName'}},\r\n"
-                + "{$addFields: {\"competitorTracks.elements.windQuality\": '$windQuality'}},\r\n"
-                + "{$addFields: {\"competitorTracks.trackId\": {$concat: ['$regattaName', ' - ', '$trackedRaceName']}}},\r\n"
-                + "{$unwind: '$competitorTracks'},\r\n" + "{$addFields: {\r\n"
-                + "    \"competitorTracks.elements.trackId\": {$concat: ['$competitorTracks.trackId', ' # ', '$competitorTracks.competitorName']},\r\n"
-                + "    'competitorTracks.avgTrackSpeedInKnots': {$divide: [\r\n" + "        {$divide:\r\n"
-                + "            ['$competitorTracks.distanceTravelledInMeters',\r\n" + "                {$divide: \r\n"
-                + "                    [ {$subtract: ['$competitorTracks.endUnixTime', '$competitorTracks.startUnixTime']},\r\n"
-                + "                        1000.0\r\n" + "                ]}\r\n" + "            ]\r\n"
-                + "        },\r\n" + "        0.5144444444444\r\n" + "        ]},\r\n"
-                + "    'markPassingsCountMatchesWaypointsCount': {$eq: ['$competitorTracks.markPassingsCount', '$competitorTracks.waypointsCount']},\r\n"
-                + "    'competitorTracks.elements.boatClass': '$competitorTracks.boatClass.name',\r\n"
-                + "    'competitorTracks.elements.fixesCountForPolars': '$competitorTracks.fixesCountForPolars'\r\n"
-                + "}},\r\n" + "{$match: {\r\n" + "    $and: [\r\n"
-                + "        {'competitorTracks.markPassingsCount': {\r\n" + "            $gt: 1\r\n" + "        }},\r\n"
-                + "        {'markPassingsCountMatchesWaypointsCount': {\r\n" + "            $eq: true\r\n"
-                + "        }},\r\n" + "        {'competitorTracks.avgIntervalBetweenFixesInSeconds': {\r\n"
-                + "            $lt: 8\r\n" + "        }},\r\n"
-                + "        {'competitorTracks.avgTrackSpeedInKnots': {\r\n" + "            $gt: 1.0\r\n"
-                + "        }}\r\n" + "    ]\r\n" + "}},\r\n" + "{$project: {\r\n"
-                + "    elements: '$competitorTracks.elements'\r\n" + "}},\r\n" + "{$unwind: '$elements'},\r\n"
-                + "{$replaceRoot: {newRoot : '$elements'}},\r\n" + "{$out: '" + COLLECTION_NAME + "'}\r\n" +
-                "],\r\n" +
-                "cursor: {}\r\n" +
-                "}";
+    protected MongoCollection<?> getCollectionForTransformation() throws UnknownHostException {
+        return getDb().getCollection(new RaceWithManeuverForDataAnalysisPersistenceManager().getCompetitorTracksCollectionName());
     }
 
+    @Override
+    protected List<? extends Bson> getMongoDbAggregationPipelineForTransformation() throws UnknownHostException {
+        return Arrays.asList(new Document[] {
+                Document.parse("{$addFields: {\"competitorTracks.elements.regattaName\": '$regattaName'}}"),
+                Document.parse("{$addFields: {\"competitorTracks.elements.windQuality\": '$windQuality'}}"),
+                Document.parse("{$addFields: {\"competitorTracks.trackId\": {$concat: ['$regattaName', ' - ', '$trackedRaceName']}}}"),
+                Document.parse("{$unwind: '$competitorTracks'}"),
+                Document.parse("{$addFields: {"
+                        + "    \"competitorTracks.elements.trackId\": {$concat: ['$competitorTracks.trackId', ' # ', '$competitorTracks.competitorName']}"
+                        + "    'competitorTracks.avgTrackSpeedInKnots': {$divide: [" + "        {$divide:"
+                        + "            ['$competitorTracks.distanceTravelledInMeters'" + "                {$divide: "
+                        + "                    [ {$subtract: ['$competitorTracks.endUnixTime', '$competitorTracks.startUnixTime']}"
+                        + "                        1000.0" + "                ]}" + "            ]"
+                        + "        }" + "        0.5144444444444" + "        ]}"
+                        + "    'markPassingsCountMatchesWaypointsCount': {$eq: ['$competitorTracks.markPassingsCount', '$competitorTracks.waypointsCount']}"
+                        + "    'competitorTracks.elements.boatClass': '$competitorTracks.boatClass.name'"
+                        + "    'competitorTracks.elements.fixesCountForPolars': '$competitorTracks.fixesCountForPolars'"
+                        + "}}"),
+                Document.parse("{$match: {" + "    $and: ["
+                        + "        {'competitorTracks.markPassingsCount': { $gt: 1 }}"
+                        + "        {'markPassingsCountMatchesWaypointsCount': { $eq: true }}"
+                        + "        {'competitorTracks.avgIntervalBetweenFixesInSeconds': { $lt: 8 }}"
+                        + "        {'competitorTracks.avgTrackSpeedInKnots': { $gt: 1.0 }}"
+                        + "    ]}}"),
+                Document.parse("{$project: { elements: '$competitorTracks.elements' }}"),
+                Document.parse("{$unwind: '$elements'}"),
+                Document.parse("{$replaceRoot: {newRoot : '$elements'}}"),
+                getOutPipelineStage()
+        });
+    }
 }

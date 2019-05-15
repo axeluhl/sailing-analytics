@@ -1,6 +1,13 @@
 package com.sap.sailing.windestimation.data.persistence.maneuver;
 
 import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.List;
+
+import org.bson.Document;
+import org.bson.conversions.Bson;
+
+import com.mongodb.client.MongoCollection;
 
 public class RegularManeuverWithoutMarkPassingForDataAnalysisPersistenceManager
         extends AbstractTransformedManeuversForDataAnalysisPersistenceManager {
@@ -17,17 +24,20 @@ public class RegularManeuverWithoutMarkPassingForDataAnalysisPersistenceManager
     }
 
     @Override
-    protected String getMongoDbEvalStringForTransformation() {
-        return "{" +
-                "aggregate: '" + RegularManeuverWithMarkPassingForDataAnalysisPersistenceManager.COLLECTION_NAME + "',\r\n" +
-                "pipeline: [\r\n" +  
-                "{$match: {\r\n"
-                + "    $and: [\r\n" + "        {'category': {\r\n" + "            $ne: 'MARK_PASSING'\r\n"
-                + "        }}\r\n" + "    ]\r\n" + "}},\r\n"
-                + "{$out: '" + COLLECTION_NAME + "'}\r\n" + 
-                "],\r\n" +
-                "cursor: {}\r\n" +
-                "}";
+    protected MongoCollection<?> getCollectionForTransformation() throws UnknownHostException {
+        return getDb().getCollection(RegularManeuverWithMarkPassingForDataAnalysisPersistenceManager.COLLECTION_NAME);
+    }
+
+    @Override
+    protected List<? extends Bson> getMongoDbAggregationPipelineForTransformation() {
+        return Arrays.asList(new Document[] {
+                Document.parse("{ $match: { $and: [{'category': { $ne: 'MARK_PASSING' }}]}}"),
+                getOutPipelineStage()
+        });
+    }
+
+    protected Document getOutPipelineStage() {
+        return Document.parse("{$out: '" + COLLECTION_NAME + "'}");
     }
 
 }

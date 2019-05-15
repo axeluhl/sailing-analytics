@@ -1,5 +1,6 @@
 package com.sap.sailing.windestimation.model.classifier.maneuver;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -87,7 +88,7 @@ public class ManeuverClassifierTrainer {
     }
 
     private List<LabeledManeuverForEstimation> getSuitableManeuvers(ManeuverClassifierModelContext modelContext)
-            throws JsonDeserializationException, ParseException {
+            throws JsonDeserializationException, ParseException, UnknownHostException {
         String boatClassName = modelContext.getBoatClassName();
         ManeuverFeatures maneuverFeatures = modelContext.getManeuverFeatures();
         Pair<String, ManeuverFeatures> key = new Pair<>(boatClassName, maneuverFeatures);

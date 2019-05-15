@@ -1,6 +1,13 @@
 package com.sap.sailing.windestimation.data.persistence.maneuver;
 
 import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.List;
+
+import org.bson.Document;
+import org.bson.conversions.Bson;
+
+import com.mongodb.client.MongoCollection;
 
 public class ManeuverForEstimationPersistenceManager
         extends AbstractTransformedManeuversForEstimationPersistenceManager {
@@ -17,22 +24,19 @@ public class ManeuverForEstimationPersistenceManager
     }
 
     @Override
-    protected String getMongoDbEvalStringForTransformation() {
-        return "{" +
-                "aggregate: '" + RaceWithManeuverForEstimationPersistenceManager.COLLECTION_NAME + "." + AbstractRaceWithEstimationDataPersistenceManager.COMPETITOR_TRACKS_COLLECTION_NAME_EXTENSION + "',\r\n" +
-                "pipeline: [\r\n" + 
-                "{$match: {\r\n" + 
-                "    'clean': true\r\n" + 
-                "}},\r\n" + 
-                "{$project: {\r\n" + 
-                "    elements: '$elements'\r\n" + 
-                "}},\r\n" + 
-                "{$unwind: '$elements'},\r\n" + 
-                "{$replaceRoot: {newRoot : '$elements'}},\r\n" + 
-                "{$out: '" + COLLECTION_NAME + "'}\r\n" + 
-                "],\r\n" +
-                "cursor: {}\r\n" +
-                "}";
+    protected MongoCollection<?> getCollectionForTransformation() throws UnknownHostException {
+        return getDb().getCollection(new RaceWithManeuverForEstimationPersistenceManager().getCompetitorTracksCollectionName());
+    }
+
+    @Override
+    protected List<? extends Bson> getMongoDbAggregationPipelineForTransformation() {
+        return Arrays.asList(new Document[] {
+                Document.parse("{$match: { 'clean': true }}"),
+                Document.parse("{$project: { elements: '$elements'}}"),
+                Document.parse("{$unwind: '$elements'}"),
+                Document.parse("{$replaceRoot: {newRoot : '$elements'}}"),
+                getOutPipelineStage()
+        });
     }
 
 }

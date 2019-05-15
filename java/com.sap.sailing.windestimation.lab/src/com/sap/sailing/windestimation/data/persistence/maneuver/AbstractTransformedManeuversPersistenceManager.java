@@ -1,9 +1,13 @@
 package com.sap.sailing.windestimation.data.persistence.maneuver;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
+import com.mongodb.client.MongoCollection;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public abstract class AbstractTransformedManeuversPersistenceManager<T> extends AbstractPersistenceManager<T>
@@ -16,9 +20,9 @@ public abstract class AbstractTransformedManeuversPersistenceManager<T> extends 
         this.dependencyOnOtherPersistenceManagers = dependencyToOtherPersistenceManagers;
     }
 
-    protected abstract String getMongoDbEvalStringForTransformation();
+    protected abstract List<? extends Bson> getMongoDbAggregationPipelineForTransformation() throws UnknownHostException;
 
-    public void createIfNotExistsCollectionWithTransformedManeuvers() {
+    public void createIfNotExistsCollectionWithTransformedManeuvers() throws UnknownHostException {
         boolean collectionExists = collectionExists();
         if (!collectionExists || countElements() < 1) {
             if(collectionExists) {
@@ -38,8 +42,22 @@ public abstract class AbstractTransformedManeuversPersistenceManager<T> extends 
             createCollectionWithTransformedManeuvers();
         }
     }
+    
+    /**
+     * The collection to be used in the {@code $out} stage of the aggregation pipeline produced by
+     * {@link #getMongoDbAggregationPipelineForTransformation()}.
+     */
+    abstract protected MongoCollection<?> getCollectionForTransformation() throws UnknownHostException;
 
-    public void createCollectionWithTransformedManeuvers() {
+    /**
+     * Produces a {@code $out} aggregation pipeline step that specifies this manager's {@link #getCollectionName()
+     * collection name}.
+     */
+    protected Document getOutPipelineStage() {
+        return Document.parse("{$out: '" + getCollectionName() + "'}");
+    }
+
+    public void createCollectionWithTransformedManeuvers() throws UnknownHostException {
         for (PersistenceManager<?> persistenceManager : dependencyOnOtherPersistenceManagers) {
             if (!persistenceManager.collectionExists()) {
                 throw new RuntimeException("Collection \"" + persistenceManager.getCollectionName()
@@ -48,7 +66,8 @@ public abstract class AbstractTransformedManeuversPersistenceManager<T> extends 
         }
         dropCollection();
         LoggingUtil.logInfo("Transformation for \"" + getCollectionName() + "\" collection started.");
-        Object result = getDb().runCommand(Document.parse(getMongoDbEvalStringForTransformation()));
+        getDb().getCollection("Humba").aggregate(new ArrayList<Bson>());
+        Object result = getCollectionForTransformation().aggregate(getMongoDbAggregationPipelineForTransformation());
         long numberOfElements = countElements();
         if (numberOfElements < 1) {
             dropCollection();
