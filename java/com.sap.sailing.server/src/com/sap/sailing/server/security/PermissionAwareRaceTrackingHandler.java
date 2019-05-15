@@ -138,6 +138,7 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
                 name, shortName, displayColor, email, flagImageURI,
                 team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
         createOwnershipIfMissing(competitorWithBoat.getIdentifier());
+        createOwnershipIfMissing(competitorWithBoat.getBoat().getIdentifier());
         return competitorWithBoat;
     }
 
