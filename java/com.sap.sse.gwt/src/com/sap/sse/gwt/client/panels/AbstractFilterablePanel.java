@@ -218,6 +218,12 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         });
     }
 
+    public void search(String searchString) {
+        getTextBox().setText(searchString);
+        filterer.setKeywords(Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(searchString));
+        filter();
+    }
+
     public TextBox getTextBox() {
         return textBox;
     }
