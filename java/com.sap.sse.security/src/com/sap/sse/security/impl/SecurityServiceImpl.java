@@ -1701,6 +1701,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    public boolean hasCurrentUserServerPermission(ServerActions action) {
+        return SecurityUtils.getSubject().isPermitted(
+                SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
+                            ServerActions.CREATE_OBJECT, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+    }
+
+    @Override
     public <T> T setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
             TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName, Callable<T> actionWithResult) {
         return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(type, typeIdentifier, securityDisplayName,
