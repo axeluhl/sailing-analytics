@@ -322,7 +322,7 @@ public class StationarySequence {
      * If no estimated position can be obtained, {@code null} is returned.
      */
     private Bounds createNewBounds(Candidate candidate) {
-        final Position estimatedPosition = track.getEstimatedPosition(candidate.getTimePoint(), /* extrapolate */ false);
+        final Position estimatedPosition = track.getEstimatedPosition(candidate.getTimePoint(), /* extrapolate */ true);
         return estimatedPosition == null ? null : new BoundsImpl(estimatedPosition);
     }
 
