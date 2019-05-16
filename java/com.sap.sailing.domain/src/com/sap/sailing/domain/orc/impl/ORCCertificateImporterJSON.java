@@ -91,13 +91,13 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
         for (Entry<Object, Object> entry : object.entrySet()) {
             switch ((String) entry.getKey()) {
                 case "LOA":
-                    length = new MeterDistance((double) entry.getValue());
+                    length = new MeterDistance(((Number) entry.getValue()).doubleValue());
                     break;
                 case "Class":
                     boatclass = (String) entry.getValue();
                     break;
                 case "GPH":    
-                    gph = Duration.ONE_SECOND.times((double) entry.getValue());
+                    gph = Duration.ONE_SECOND.times(((Number) entry.getValue()).doubleValue());
                     break;
                 case "Allowances":
                     JSONObject allowances = (JSONObject) object.get("Allowances");
@@ -139,9 +139,11 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
                                 break;
                             case BEAT:
                             case RUN:
+                                predefinedCourses.put((String) aKey, twsMap);
                                 break;
                             default:
                                 predefinedCourses.put((String) aKey, twsMap);
+                                break;
                             }
                     }
                     break;
