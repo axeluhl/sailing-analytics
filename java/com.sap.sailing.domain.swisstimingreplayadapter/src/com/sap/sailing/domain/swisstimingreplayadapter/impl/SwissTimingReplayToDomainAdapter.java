@@ -305,7 +305,8 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
             short ctPoints_x10_Winner) {
         if (boatType == BoatType.Competitor) {
             Pair<Competitor,Boat> competitorAndBoat = domainFactory.createCompetitorWithoutID(sailNumberOrTrackerID, threeLetterIOCCode.trim(), name.trim(),
-                    currentRaceID, domainFactory.getRaceTypeFromRaceID(currentRaceID).getBoatClass());
+                    currentRaceID, domainFactory.getRaceTypeFromRaceID(currentRaceID).getBoatClass(),
+                    raceTrackingHandler);
             Map<Competitor, Boat> competitorAndBoatsOfCurrentRace = competitorsAndBoatsPerRaceID.get(currentRaceID);
             if (competitorAndBoatsOfCurrentRace == null) {
                 competitorAndBoatsOfCurrentRace = new HashMap<>();
