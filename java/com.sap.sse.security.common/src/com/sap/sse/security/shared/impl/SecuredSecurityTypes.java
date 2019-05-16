@@ -83,6 +83,7 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
         DATA_MINING,
 
         CAN_IMPORT_MASTERDATA,
+        CAN_EXPORT_MASTERDATA,
         /**
          * Secures replication actions on the master side.
          */
