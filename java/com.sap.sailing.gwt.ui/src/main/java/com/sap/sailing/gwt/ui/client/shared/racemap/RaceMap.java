@@ -93,9 +93,9 @@ import com.sap.sailing.gwt.ui.actions.GetPolarAction;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.ClientResources;
-import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
+import com.sap.sailing.gwt.ui.client.DetailTypeComparator;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
@@ -740,28 +740,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     public void onSuccess(Iterable<DetailType> result) {
                         sortedAvailableDetailTypes = new ArrayList<DetailType>();
                         Util.addAll(result, sortedAvailableDetailTypes);
-                        Collections.sort(sortedAvailableDetailTypes, new Comparator<DetailType>() {
-                            @Override
-                            public int compare(DetailType o1, DetailType o2) {
-                                final boolean o1Expedition = o1.isExpeditionType();
-                                final boolean o2Expedition = o2.isExpeditionType();
-                                if ((o1Expedition && o2Expedition) || (!o1Expedition && !o2Expedition)) {
-                                    final String o1Name = DetailTypeFormatter.format(o1);
-                                    final String o2Name = DetailTypeFormatter.format(o2);
-                                    return Collator.getInstance().compare(o1Name, o2Name);
-                                }
-                                if (o1Expedition && !o2Expedition) {
-                                    return 1;
-                                }
-                                if (o2Expedition && !o1Expedition) {
-                                    return -1;
-                                }
-                                return 0;
-                            }
-                        });
-                        sortedAvailableDetailTypes.remove(DetailType.CHART_COURSE_OVER_GROUND_TRUE_DEGREES);
-                        sortedAvailableDetailTypes.remove(DetailType.CHART_BEAT_ANGLE);
                         sortedAvailableDetailTypes.remove(DetailType.LEG_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
+                        Collections.sort(sortedAvailableDetailTypes, new DetailTypeComparator());
                     }
                 });
     }
