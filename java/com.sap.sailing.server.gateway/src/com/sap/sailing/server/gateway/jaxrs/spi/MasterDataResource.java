@@ -24,18 +24,23 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+
+import org.apache.shiro.SecurityUtils;
+
 import javax.ws.rs.core.StreamingOutput;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.impl.CompetitorSerializationCustomizer;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.PublicReadableActions;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 
@@ -130,13 +135,23 @@ public class MasterDataResource extends AbstractSailingServerResource {
         final TopLevelMasterData masterData = new TopLevelMasterData(groupsToExport,
                 events, regattaRaceIds, mediaTracks,
                 getService().getSensorFixStore(), exportWind, raceManagerDeviceConfigurations);
-        final StreamingOutput streamingOutput;
-        if (compress) {
-            streamingOutput = new CompressingStreamingOutput(masterData, competitorIds, startTime);
-        } else {
-            streamingOutput = new NonCompressingStreamingOutput(masterData, competitorIds, startTime);
-        }
-        final ResponseBuilder resp = Response.ok(streamingOutput);
+        final boolean compressValue= compress;
+        final ResponseBuilder resp = CompetitorSerializationCustomizer.doWithCustomizer(c -> {
+            boolean result = false;
+            if (!securityService.hasCurrentUserReadPermission(c)) {
+                SecurityUtils.getSubject().checkPermission(c.getIdentifier().getStringPermission(PublicReadableActions.READ_PUBLIC));
+                result = c.getEmail() != null;
+            }
+            return result;
+        }, () -> {
+            final StreamingOutput streamingOutput;
+            if (compressValue) {
+                streamingOutput = new CompressingStreamingOutput(masterData, competitorIds, startTime);
+            } else {
+                streamingOutput = new NonCompressingStreamingOutput(masterData, competitorIds, startTime);
+            }
+            return Response.ok(streamingOutput);
+        });
         if (compress) {
             resp.header("Content-Encoding", "gzip");
         }
