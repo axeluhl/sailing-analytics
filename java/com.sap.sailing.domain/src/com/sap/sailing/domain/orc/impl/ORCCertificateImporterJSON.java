@@ -81,7 +81,7 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
         Map<Speed, Bearing> beatAngles = new HashMap<>();
         Map<Speed, Bearing> gybeAngles = new HashMap<>();
         Map<Speed, Map<Bearing, Duration>> timeAllowancesPerTrueWindSpeedAndAngle = new HashMap<>();
-        Map<String, Map<Speed, Duration>> twaCourses        = new HashMap<>(); //TODO Rework, no String, directly parsed to the SAPSailing Semantics -> Bearing
+        Map<Bearing, Map<Speed, Duration>> twaCourses       = new HashMap<>(); //TODO Rework, no String, directly parsed to the SAPSailing Semantics -> Bearing
         Map<String, Map<Speed, Duration>> predefinedCourses = new HashMap<>();
         String searchString = sailnumber.replaceAll(" ", "").toUpperCase();
         JSONObject object = (JSONObject) data.get(searchString);
@@ -135,7 +135,7 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
                             case "R120":
                             case "R135":
                             case "R150":
-                                twaCourses.put((String) aKey, twsMap);
+                                twaCourses.put(new DegreeBearingImpl(Integer.parseInt(((String) aKey).substring(1))), twsMap);
                                 break;
                             case BEAT:
                             case RUN:
@@ -155,11 +155,9 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
         for (Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
             timeAllowancesPerTrueWindSpeedAndAngle.put(tws, new HashMap<Bearing, Duration>());
         }
-        for (String keyTWA : twaCourses.keySet()) {
-            int twa = Integer.parseInt(keyTWA.substring(1));
-
+        for (Bearing keyTWA : twaCourses.keySet()) {
             for (Speed keyTWS : twaCourses.get(keyTWA).keySet()) {
-                timeAllowancesPerTrueWindSpeedAndAngle.get(keyTWS).put(new DegreeBearingImpl(twa), twaCourses.get(keyTWA).get(keyTWS));
+                timeAllowancesPerTrueWindSpeedAndAngle.get(keyTWS).put(keyTWA, twaCourses.get(keyTWA).get(keyTWS));
             }
         }
         for (Speed tws : timeAllowancesPerTrueWindSpeedAndAngle.keySet()) {

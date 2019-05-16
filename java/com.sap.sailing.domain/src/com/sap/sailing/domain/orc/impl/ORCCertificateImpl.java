@@ -82,14 +82,19 @@ public class ORCCertificateImpl implements ORCCertificate {
 
     @Override
     public double getGPH() {
-        // TODO Auto-generated method stub
-        return 0;
+        return gph.asSeconds();
     }
 
     @Override
     public Map<Speed, Duration> getWindwardLeewardAllowances() {
-        // TODO Auto-generated method stub
-        return null;
+        Map<Speed, Duration> result = new HashMap<>();
+        for (Speed tws : ALLOWANCES_TRUE_WIND_SPEEDS) {
+            //gets the Allowance for Beat&Run at the given TWS divided by 2
+            Duration allowance = timeAllowancesPerTrueWindSpeedAndAngle.get(tws).get(beatAngles.get(tws))
+                    .plus(timeAllowancesPerTrueWindSpeedAndAngle.get(tws).get(gybeAngles.get(tws))).divide(2);
+            result.put(tws, allowance);
+        }
+        return result;
     }
 
     @Override

@@ -11,8 +11,8 @@ import java.net.URL;
 import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
+import com.sap.sailing.domain.orc.impl.ORCCertificateImpl;
 import com.sap.sailing.domain.orc.impl.ORCCertificateImporterJSON;
-import com.sap.sailing.domain.orc.impl.ORCCertificateImporterJSONComplex;
 
 
 public class TestORCCertificateImporterJSON {
@@ -30,8 +30,12 @@ public class TestORCCertificateImporterJSON {
     @Test
     public void testSimpleOnlineJSONFileRead () throws IOException, ParseException {
         ORCCertificateImporter importer = new ORCCertificateImporterJSON(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
-        ORCCertificate swan = importer.getCertificate(" GER 5335");
+        ORCCertificate swan  = importer.getCertificate(" GER 5335");
+        ORCCertificate moana = importer.getCertificate("ger  55 49 ");
         assertNotNull(swan);
-        //assertEquals("NAUTOR", swan.getValueString("Builder"));
+        assertNotNull(moana);
+        assertEquals(539.1, swan .getGPH(), 0.0000001);
+        assertEquals(490.4, moana.getGPH(), 0.0000001);
+        assertEquals(862.2, swan .getWindwardLeewardAllowances().get(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[0]).asSeconds(), 0.1);
     }
 }
