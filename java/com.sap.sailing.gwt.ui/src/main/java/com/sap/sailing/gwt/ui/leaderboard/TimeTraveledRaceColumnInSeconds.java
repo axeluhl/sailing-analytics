@@ -20,7 +20,7 @@ import com.sap.sse.common.InvertibleComparator;
 import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 import com.sap.sse.gwt.client.celltable.AbstractSortableColumnWithMinMax;
 
-public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> implements HasStringAndDoubleValue<LeaderboardRowDTO> {
+public class TimeTraveledRaceColumnInSeconds extends ExpandableSortableColumn<String> implements HasStringAndDoubleValue<LeaderboardRowDTO> {
     
     private static final DetailType DETAIL_TYPE = DetailType.RACE_TIME_TRAVELED;
 
@@ -31,7 +31,7 @@ public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> imp
     private String headerStyle;
     private MinMaxRenderer<LeaderboardRowDTO> minmaxRenderer;
 
-    public TimeTraveledRaceColumn(LeaderboardPanel<?> leaderboardPanel, RaceNameProvider raceNameProvider, StringMessages stringMessages, String headerStyle, String columnStyle,
+    public TimeTraveledRaceColumnInSeconds(LeaderboardPanel<?> leaderboardPanel, RaceNameProvider raceNameProvider, StringMessages stringMessages, String headerStyle, String columnStyle,
             String detailHeaderStyle, String detailColumnStyle) {
         super(leaderboardPanel, /* expandable */true, new TextCell(), DETAIL_TYPE.getDefaultSortingOrder(), 
                 stringMessages, detailHeaderStyle, detailColumnStyle,
@@ -46,24 +46,17 @@ public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> imp
 
     @Override
     public Double getDoubleValue(LeaderboardRowDTO row) {
-        Long result = null;
+        final Double result;
         LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
-        if (fieldsForRace != null && fieldsForRace.legDetails != null) {
-            for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
-                if (legDetail != null) {
-                    if (legDetail.timeInMilliseconds != null) {
-                        if (result == null) {
-                            result = 0l;
-                        }
-                        result += legDetail.timeInMilliseconds;
-                    }
-                }
-            }
+        if (fieldsForRace != null && fieldsForRace.timeSailedSinceRaceStart != null) {
+            result = fieldsForRace.timeSailedSinceRaceStart.asSeconds();
+        } else {
+            result = null;
         }
-        return result == null ? null : new Long(result / 1000).doubleValue();
+        return result;
     }
 
-    private Double getTimeTraveledFor(LeaderboardRowDTO row, LegType legType) {
+    private Double getTimeTraveledForLegTypeInSeconds(LeaderboardRowDTO row, LegType legType) {
         Long result = null;
         LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
         if (fieldsForRace != null && fieldsForRace.legDetails != null) {
@@ -101,21 +94,21 @@ public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> imp
     private class RaceTimeTraveledUpwindInSeconds implements DataExtractor<Double, LeaderboardRowDTO> {
         @Override
         public Double get(LeaderboardRowDTO row) {
-            return getTimeTraveledFor(row, LegType.UPWIND);
+            return getTimeTraveledForLegTypeInSeconds(row, LegType.UPWIND);
         }
     }
     
     private class RaceTimeTraveledDownwindInSeconds implements DataExtractor<Double, LeaderboardRowDTO> {
         @Override
         public Double get(LeaderboardRowDTO row) {
-            return getTimeTraveledFor(row, LegType.DOWNWIND);
+            return getTimeTraveledForLegTypeInSeconds(row, LegType.DOWNWIND);
         }
     }
     
     private class RaceTimeTraveledReachingInSeconds implements DataExtractor<Double, LeaderboardRowDTO> {
         @Override
         public Double get(LeaderboardRowDTO row) {
-            return getTimeTraveledFor(row, LegType.REACHING);
+            return getTimeTraveledForLegTypeInSeconds(row, LegType.REACHING);
         }
     }
 
