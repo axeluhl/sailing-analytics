@@ -36,6 +36,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 
 @Path("/v1/masterdata/leaderboardgroups")
@@ -50,9 +51,11 @@ public class MasterDataResource extends AbstractSailingServerResource {
             throws UnsupportedEncodingException {
         final SecurityService securityService = getSecurityService();
         User user = securityService.getCurrentUser();
-        if (user == null) {
+
+        if (!securityService.hasCurrentUserServerPermission(ServerActions.CAN_EXPORT_MASTERDATA)) {
             return Response.status(Status.FORBIDDEN).build();
         }
+
         final long startTime = System.currentTimeMillis();
         logger.info("Masterdataexport has started; requesting user: "+user);
         if (compress == null) {
