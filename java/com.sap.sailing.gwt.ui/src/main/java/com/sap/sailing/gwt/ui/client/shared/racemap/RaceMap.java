@@ -2565,6 +2565,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     // Causes an overwrite of what are now wrong detailValues
                     selectedDetailTypeChanged = true;
                     setTailVisualizer();
+                    // Causes the DetailValues to appear to be set to null which will cause selected competitors to
+                    // appear in their competitor color until the new values are processed
+                    fixesAndTails.nullDetailValues();
                     // In case the new values don't make it through this will make the tails visible
                     tailColorMapper.notifyListeners();
                     // Forces update of tail values which subsequently results
