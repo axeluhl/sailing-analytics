@@ -1,7 +1,6 @@
 package com.sap.sailing.windestimation.data.persistence.maneuver;
 
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
@@ -66,15 +65,14 @@ public abstract class AbstractTransformedManeuversPersistenceManager<T> extends 
         }
         dropCollection();
         LoggingUtil.logInfo("Transformation for \"" + getCollectionName() + "\" collection started.");
-        getDb().getCollection("Humba").aggregate(new ArrayList<Bson>());
-        Object result = getCollectionForTransformation().aggregate(getMongoDbAggregationPipelineForTransformation());
+        getCollectionForTransformation().aggregate(getMongoDbAggregationPipelineForTransformation()).toCollection();
         long numberOfElements = countElements();
         if (numberOfElements < 1) {
             dropCollection();
             throw new RuntimeException("Transformation failed. The collection with transformed was empty.");
         }
         LoggingUtil.logInfo("Transformation succeeded. Collection \"" + getCollectionName() + "\" created with "
-                + numberOfElements + " elements.\n" + result);
+                + numberOfElements + " elements.\n");
     }
 
 }
