@@ -195,6 +195,7 @@ public class TracTracConnectionTableWrapper extends
                                 for (final TracTracConfigurationWithSecurityDTO oneResult : result) {
                                     if (getSelectionModel().getEntityIdentityComparator().representSameEntity(oneResult, selectEntityWhenDone)) {
                                         getSelectionModel().setSelected(oneResult, true);
+                                        filterField.search(oneResult.getJsonUrl());
                                         break;
                                     }
                                 }
