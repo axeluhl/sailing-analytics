@@ -464,7 +464,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      */
     private List<DetailType> sortedAvailableDetailTypes;
     /**
-     * The currently selected {@link DetailType}.
+     * The currently selected {@link DetailType}. {@code null} if no {@link DetailType} is selected.
      */
     private DetailType selectedDetailType;
     /**
@@ -1397,6 +1397,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             showBoatsOnMap(newTime, transitionTimeInMillis,
                     /* re-calculate; it could have changed since the asynchronous request was made: */
                     getCompetitorsToShow(), updateTailsOnly);
+            if (detailTypeChanged) {
+                tailColorMapper.notifyListeners();
+            }
             if (!updateTailsOnly) {
                 showCompetitorInfoOnMap(newTime, transitionTimeInMillis,
                         competitorSelection.getSelectedFilteredCompetitors());
@@ -2559,8 +2562,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     }
                 }
                 if (selectedDetailType != previous) {
-                    selectedDetailTypeChanged = true; // Causes an overwrite of what are now wrong detailValues
+                    // Causes an overwrite of what are now wrong detailValues
+                    selectedDetailTypeChanged = true;
                     setTailVisualizer();
+                    // In case the new values don't make it through this will make the tails visible
+                    tailColorMapper.notifyListeners();
+                    // Forces update of tail values which subsequently results
+                    // in another call to tailColorMapper.notifyListeners
                     redraw();
                 }
             }
@@ -3086,9 +3094,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         case SELECTED:
             options.setColorMode(ColorlineMode.POLYCHROMATIC);
             options.setColorProvider(i -> {
-                Double detailValue = fixesAndTails.getDetailValueAt(competitor, i);
-                if (detailValue != null) {
-                    return tailColorMapper.getColor(detailValue);
+                if (selectedDetailType != null) {
+                    Double detailValue = fixesAndTails.getDetailValueAt(competitor, i);
+                    if (detailValue != null) {
+                        return tailColorMapper.getColor(detailValue);
+                    }
                 }
                 return competitorSelection.getColor(competitor, raceIdentifier).getAsHtml();
             });

@@ -103,7 +103,11 @@ public class DetailTypeMetricOverlay extends FullCanvasOverlay {
     public void updateLegend(ValueRangeFlexibleBoundaries valueRange, ColorMapper colorMapper, DetailType detailType) {
         this.valueRange = valueRange;
         this.colorMapper = colorMapper;
-        this.detailTypeAndUnit = DetailTypeFormatter.format(detailType) + " - " + DetailTypeFormatter.getUnit(detailType);
+        if (detailType != null) {
+            this.detailTypeAndUnit = DetailTypeFormatter.format(detailType) + " - " + DetailTypeFormatter.getUnit(detailType);
+        } else {
+            this.detailTypeAndUnit = "";
+        }
         draw();
     }
 
