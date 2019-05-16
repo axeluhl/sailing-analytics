@@ -192,27 +192,6 @@ class SessionViewController: UIViewController {
         navigationController?.popViewController(animated: true)
     }
     
-    fileprivate func showStartTrackingWiFiAlert() {
-        let alertController = UIAlertController(
-            title: "INFO",
-            message: "WIFI IS ON BUT NOT CONNECTED",
-            preferredStyle: .alert
-        )
-        let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .default) { action in
-            if let settingsURL = URL(string: "prefs:root=WIFI") {
-                UIApplication.shared.openURL(settingsURL)
-            }
-        }
-        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { [weak self] action in
-            self?.startTracking()
-        }
-        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
-        alertController.addAction(settingsAction)
-        alertController.addAction(okAction)
-        alertController.addAction(cancelAction)
-        present(alertController, animated: true, completion: nil)
-    }
-    
     fileprivate func showStartTrackingFailureAlert(message: String) {
         let alertController = UIAlertController(
             title: Translation.Common.Warning.String,
@@ -220,8 +199,8 @@ class SessionViewController: UIViewController {
             preferredStyle: .alert
         )
         let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .default) { action in
-            if let locationServiceURL = URL(string: "prefs:root=LOCATION_SERVICES") {
-                UIApplication.shared.openURL(locationServiceURL)
+            if let url = URL(string: UIApplicationOpenSettingsURLString) {
+                UIApplication.shared.openURL(url)
             }
         }
         let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .default, handler: nil)

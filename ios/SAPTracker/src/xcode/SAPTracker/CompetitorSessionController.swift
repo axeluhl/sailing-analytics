@@ -14,13 +14,13 @@ class CompetitorSessionController: SessionController {
     
     func postTeamImageData(
         imageData: Data,
-        competitorID: String,
+        competitorCheckIn: CompetitorCheckIn,
         success: @escaping (_ teamImageURL: String) -> Void,
         failure: @escaping (_ error: Error) -> Void
     ) {
         checkInRequestManager.postTeamImageData(
             imageData: imageData,
-            competitorID: competitorID,
+            competitorCheckIn: competitorCheckIn,
             success: success,
             failure: failure
         )
