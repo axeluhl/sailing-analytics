@@ -26,7 +26,7 @@ class CheckInDataCollector: NSObject {
     fileprivate let checkInRequestManager: CheckInRequestManager
     
     init(checkInData: CheckInData) {
-        checkInRequestManager = CheckInRequestManager(baseURLString: checkInData.serverURL)
+        checkInRequestManager = CheckInRequestManager(baseURLString: checkInData.serverURL, secret: checkInData.secret)
         super.init()
     }
     
@@ -92,7 +92,7 @@ class CheckInDataCollector: NSObject {
         success: @escaping (_ collector: CheckInData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
-        checkInRequestManager.getBoat(boatID: boatID, success: { (boatData) in
+        checkInRequestManager.getBoat(boatID: boatID, leaderboardName: collector.leaderboardName, success: { (boatData) in
             collector.boatData = boatData
             success(collector)
         }) { error in
@@ -108,7 +108,7 @@ class CheckInDataCollector: NSObject {
         success: @escaping (_ collector: CheckInData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
-        checkInRequestManager.getCompetitor(competitorID: competitorID, success: { (competitorData) in
+        checkInRequestManager.getCompetitor(competitorID: competitorID, leaderboardName: collector.leaderboardName, success: { (competitorData) in
             collector.competitorData = competitorData
             self.getCompetitorDataSuccess(
                 collector: collector,
@@ -127,7 +127,7 @@ class CheckInDataCollector: NSObject {
         success: @escaping (_ collector: CheckInData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
-        checkInRequestManager.getTeamImageURL(competitorID: competitorID, result: { (imageURL) in
+        checkInRequestManager.getTeamImageURL(competitorID: competitorID, leaderboardName: collector.leaderboardName, result: { (imageURL) in
             collector.teamImageURL = imageURL
             success(collector)
         })
