@@ -406,6 +406,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         }
         if (newRaceTimesInfo.endOfRace != null) {
             long markerTime = newRaceTimesInfo.endOfRace.getTime();
+            if (newRaceTimesInfo.getFinishedTime() != null && newRaceTimesInfo.getFinishedTime().getTime() > markerTime) {
+                markerTime = newRaceTimesInfo.getFinishedTime().getTime();
+            }
             if (!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
                 timeSlider.addMarker("E", new Double(markerTime));
             }
