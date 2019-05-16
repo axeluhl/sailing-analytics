@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -22,7 +24,8 @@ import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class PersistedManeuverClassifiersScorePrinter {
-
+    private static final Logger logger = Logger.getLogger(PersistedManeuverClassifiersScorePrinter.class.getName());
+    
     private PersistedManeuverClassifiersScorePrinter() {
     }
 
@@ -46,6 +49,7 @@ public class PersistedManeuverClassifiersScorePrinter {
                     allClassifierModels.add(classifierModel);
                 }
             } catch (ModelPersistenceException e) {
+                logger.log(Level.SEVERE, "Exception while loading model", e);
             }
             for (BoatClass boatClass : allBoatClasses) {
                 modelContext = new ManeuverClassifierModelContext(maneuverFeatures, boatClass.getName(),
@@ -57,6 +61,7 @@ public class PersistedManeuverClassifiersScorePrinter {
                         allClassifierModels.add(classifierModel);
                     }
                 } catch (ModelPersistenceException e) {
+                    logger.log(Level.SEVERE, "Exception while loading model", e);
                 }
             }
         }

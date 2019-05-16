@@ -102,7 +102,7 @@ public class SimpleModelsTrainingPart1 {
 
     private static void showInfoAboutDataCleaning(AggregatedSingleDimensionType dimension) {
         JOptionPane.showMessageDialog(null, "Now, clean the data for the " + dimension
-                + " dimension.\nRemove instances from MongoDB collection \"" + dimension.getCollectioName()
+                + " dimension.\nRemove instances from MongoDB collection \"" + dimension.getCollectionName()
                 + "\"\nwhich do not make sense and cause implausible zig zag sections\nwithin \"Zero mean sigma\" curve.\n\nClose the graphical tool, when you are done to resume the model training.");
     }
 

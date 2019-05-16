@@ -27,7 +27,7 @@ public class AggregatedSingleDimensionBasedTwdTransitionPersistenceManager
     public AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(AggregatedSingleDimensionType dimensionType)
             throws UnknownHostException {
         this.dimensionType = dimensionType;
-        this.collectionName = dimensionType.getCollectioName();
+        this.collectionName = dimensionType.getCollectionName();
         BasicDBObject indexes = new BasicDBObject(SingleDimensionBasedTwdTransitionJsonSerializer.DIMENSION_VALUE, 1);
         getCollection().createIndex(indexes);
     }
@@ -79,7 +79,7 @@ public class AggregatedSingleDimensionBasedTwdTransitionPersistenceManager
             this.absolute = absolute;
         }
 
-        public String getCollectioName() {
+        public String getCollectionName() {
             return collectioName;
         }
 
