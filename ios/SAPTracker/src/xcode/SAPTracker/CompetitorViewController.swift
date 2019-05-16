@@ -218,7 +218,7 @@ extension CompetitorViewController: UIImagePickerControllerDelegate {
     
     fileprivate func uploadTeamImageData(imageData: Data!) {
         SVProgressHUD.show()
-        competitorSessionController.postTeamImageData(imageData: imageData, competitorID: competitorCheckIn.competitorID, success: { (teamImageURL) in
+        competitorSessionController.postTeamImageData(imageData: imageData, competitorCheckIn: competitorCheckIn, success: { (teamImageURL) in
             SVProgressHUD.popActivity()
             self.uploadTeamImageDataSuccess(teamImageURL: teamImageURL)
         }) { (error) in

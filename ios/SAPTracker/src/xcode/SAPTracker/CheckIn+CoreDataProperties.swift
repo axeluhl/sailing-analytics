@@ -20,5 +20,6 @@ extension CheckIn {
     @NSManaged var event: Event
     @NSManaged var gpsFixes: NSSet?
     @NSManaged var leaderboard: Leaderboard
+    @NSManaged var secret: String?
 
 }
