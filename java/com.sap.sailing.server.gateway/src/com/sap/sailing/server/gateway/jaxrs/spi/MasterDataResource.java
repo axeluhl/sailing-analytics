@@ -103,8 +103,9 @@ public class MasterDataResource extends AbstractSailingServerResource {
         Set<DeviceConfiguration> raceManagerDeviceConfigurations = new HashSet<>();
         if (exportDeviceConfigs) {
             for (DeviceConfiguration deviceConfig : getAllDeviceConfigs()) {
-                // FIXME here permission check?
-                raceManagerDeviceConfigurations.add(deviceConfig);
+                if (securityService.hasCurrentUserReadPermission(deviceConfig)) {
+                    raceManagerDeviceConfigurations.add(deviceConfig);
+                }
             }
         }
         ArrayList<Event> events = new ArrayList<>();
