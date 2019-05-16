@@ -113,17 +113,14 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         connectionsTable = new TracTracConnectionTableWrapper(userService, sailingService, stringMessages,
                 errorReporter, true, tableResources, () -> {});
         connectionsTable.refreshTracTracConnectionList();
-        connectionsPanel.setContentWidget(tableAndConfigurationPanel);
+
         final Grid grid = new Grid(1, 2);
         grid.setWidget(0, 0, new Label(stringMessages.racesWithHiddenState() + ":"));
         final CheckBox showHiddenRacesCheckbox = new CheckBox(stringMessages.show());
         showHiddenRacesCheckbox.ensureDebugId("ShowHiddenRacesCheckBox");
         grid.setWidget(0, 1, showHiddenRacesCheckbox);
-        tableAndConfigurationPanel.add(connectionsTable);
-        tableAndConfigurationPanel.add(grid);
         // Add TracTrac Connection
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, SecuredDomainType.TRACKED_RACE);
-        tableAndConfigurationPanel.add(buttonPanel);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> connectionsTable.refreshTracTracConnectionList());
         Button addCreateAction = buttonPanel.addCreateAction(stringMessages.addTracTracConnection(),
                 () -> new EditTracTracConnectionDialog(new TracTracConfigurationWithSecurityDTO(
@@ -184,6 +181,13 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             listRacesButton.setEnabled(objectSelected);
             removeButton.setEnabled(objectSelected);
         });
+
+        tableAndConfigurationPanel.add(buttonPanel);
+        tableAndConfigurationPanel.add(grid);
+        tableAndConfigurationPanel.add(connectionsTable);
+
+        connectionsPanel.setContentWidget(tableAndConfigurationPanel);
+
         return connectionsPanel;
     }
     
