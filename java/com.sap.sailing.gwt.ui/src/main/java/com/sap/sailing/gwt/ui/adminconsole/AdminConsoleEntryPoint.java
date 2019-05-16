@@ -385,7 +385,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         masterDataImportPanel.ensureDebugId("MasterDataImport");
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<MasterDataImportPanel>(masterDataImportPanel),
                 getStringMessages().masterDataImportPanel(), SecuredSecurityTypes.SERVER.getPermissionForObject(
-                        SecuredSecurityTypes.ServerActions.IMPORT_MASTER_DATA, serverInfo));
+                        SecuredSecurityTypes.ServerActions.CAN_IMPORT_MASTERDATA, serverInfo));
 
         RemoteServerInstancesManagementPanel remoteServerInstancesManagementPanel = new RemoteServerInstancesManagementPanel(getSailingService(), this, getStringMessages());
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<RemoteServerInstancesManagementPanel>(remoteServerInstancesManagementPanel),
