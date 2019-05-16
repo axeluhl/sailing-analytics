@@ -25,6 +25,7 @@ import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.impl.RaceColumnFactorImpl;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -110,9 +111,9 @@ public class OnlineDataManager extends DataManager {
         }
     }
 
-    public void addMarks(Collection<Mark> marks) {
+    public void addMarks(RaceGroup raceGroup, Collection<Mark> marks) {
         for (Mark mark : marks) {
-            dataStore.addMark(mark);
+            dataStore.addMark(raceGroup, mark);
         }
     }
 
@@ -204,7 +205,7 @@ public class OnlineDataManager extends DataManager {
                 ExLog.i(context, TAG, "Creating marks-OnlineDataLoader " + id);
                 JsonDeserializer<Mark> markDeserializer = new MarkDeserializer(domainFactory);
                 DataParser<Collection<Mark>> parser = new MarksDataParser(markDeserializer);
-                DataHandler<Collection<Mark>> handler = new MarksDataHandler(OnlineDataManager.this);
+                DataHandler<Collection<Mark>> handler = new MarksDataHandler(OnlineDataManager.this, managedRace.getRaceGroup());
 
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
                 // no parameter encoding required here; the UrlHelper.generateUrl call uses Url.Builder which handles

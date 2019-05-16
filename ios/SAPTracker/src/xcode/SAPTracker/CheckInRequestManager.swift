@@ -71,8 +71,10 @@ class CheckInRequestManager: NSObject {
         static let FixesSpeed = "speed"
         static let FixesTimestamp = "timestamp"
         static let FromMillis = "fromMillis"
+        static let LeaderboardName = "leaderboardName"
         static let MarkID = "markId"
         static let PushDeviceID = "pushDeviceId"
+        static let Secret = "secret"
         static let ToMillis = "toMillis"
     }
     
@@ -84,12 +86,14 @@ class CheckInRequestManager: NSObject {
         static let IOS = "iOS"
     }
     
+    private let secret: String?
     let baseURLString: String
     let manager: AFHTTPSessionManager
     let sessionManager: AFURLSessionManager
     
-    init(baseURLString: String = "") {
+    init(baseURLString: String = "", secret: String? = nil) {
         self.baseURLString = baseURLString
+        self.secret = secret
         manager = AFHTTPSessionManager(baseURL: URL(string: baseURLString))
         manager.requestSerializer = AFJSONRequestSerializer() as AFHTTPRequestSerializer
         manager.requestSerializer.timeoutInterval = Application.RequestTimeout
@@ -108,9 +112,15 @@ class CheckInRequestManager: NSObject {
     {
         let encodedEventID = eventID.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         let urlString = "\(basePathString)/events/\(encodedEventID)"
+        let parameter: [String:String]?
+        switch self.secret {
+        case .some(let secret): parameter = [BodyKeys.Secret:secret]
+        case .none: parameter = nil
+        }
+
         manager.get(
             urlString,
-            parameters: nil,
+            parameters: parameter,
             progress: nil,
             success: { (requestOperation, responseObject) in self.getEventSuccess(responseObject: responseObject, success: success) },
             failure: { (requestOperation, error) in self.getEventFailure(error: error, failure: failure) }
@@ -136,9 +146,15 @@ class CheckInRequestManager: NSObject {
     {
         let encodedLeaderboardName = leaderboardName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         let urlString = "\(basePathString)/leaderboards/\(encodedLeaderboardName)"
+        let parameter: [String:String]?
+        switch self.secret {
+        case .some(let secret): parameter = [BodyKeys.Secret:secret]
+        case .none: parameter = nil
+        }
+        
         manager.get(
             urlString,
-            parameters: nil,
+            parameters: parameter,
             progress: nil,
             success: { (requestOperation, responseObject) in self.getLeaderboardSuccess(responseObject: responseObject, success: success) },
             failure: { (requestOperation, error) in self.getLeaderboardFailure(error: error, failure: failure) }
@@ -159,14 +175,21 @@ class CheckInRequestManager: NSObject {
 
     func getBoat(
         boatID: String,
+        leaderboardName: String,
         success: @escaping (_ boatData: BoatData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
         let encodedBoatID = boatID.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlPathAllowed) ?? ""
         let urlString = "\(basePathString)/boats/\(encodedBoatID)"
+        var parameters = [String:String]()
+        parameters[BodyKeys.LeaderboardName] = leaderboardName
+        if let secret = secret {
+            parameters[BodyKeys.Secret] = secret
+        }
+        
         manager.get(
             urlString,
-            parameters: nil,
+            parameters: parameters,
             progress: nil,
             success: { (requestOperation, responseObject) in self.getBoatSuccess(responseObject: responseObject, success: success) },
             failure: { (requestOperation, error) in self.getBoatFailure(error: error, failure: failure) }
@@ -187,14 +210,21 @@ class CheckInRequestManager: NSObject {
     
     func getCompetitor(
         competitorID: String,
+        leaderboardName: String,
         success: @escaping (_ competitorData: CompetitorData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
         let encodedCompetitorID = competitorID.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlPathAllowed) ?? ""
         let urlString = "\(basePathString)/competitors/\(encodedCompetitorID)"
+        var parameters = [String:String]()
+        parameters[BodyKeys.LeaderboardName] = leaderboardName
+        if let secret = secret {
+            parameters[BodyKeys.Secret] = secret
+        }
+        
         manager.get(
             urlString,
-            parameters: nil,
+            parameters: parameters,
             progress: nil,
             success: { (requestOperation, responseObject) in self.getCompetitorSuccess(responseObject: responseObject, success: success) },
             failure: { (requestOperation, error) in self.getCompetitorFailure(error: error, failure: failure) }
@@ -222,9 +252,15 @@ class CheckInRequestManager: NSObject {
         let encodedLeaderboardName = leaderboardName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         let encodedMarkID = markID.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlPathAllowed) ?? ""
         let urlString = "\(basePathString)/leaderboards/\(encodedLeaderboardName)/marks/\(encodedMarkID)"
+        let parameter: [String:String]?
+        switch self.secret {
+        case .some(let secret): parameter = [BodyKeys.Secret:secret]
+        case .none: parameter = nil
+        }
+        
         manager.get(
             urlString,
-            parameters: nil,
+            parameters: parameter,
             progress: nil,
             success: { (requestOperation, responseObject) in self.getMarkSuccess(responseObject: responseObject, success: success) },
             failure: { (requestOperation, error) in self.getMarkFailure(error: error, failure: failure) }
@@ -245,14 +281,20 @@ class CheckInRequestManager: NSObject {
     
     func getTeam(
         competitorID: String,
+        leaderboardName: String,
         success: @escaping (_ teamData: TeamData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
         let encodedCompetitorID = competitorID.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlPathAllowed) ?? ""
         let urlString = "\(basePathString)/competitors/\(encodedCompetitorID)/team"
+        var parameters = [String:String]()
+        parameters[BodyKeys.LeaderboardName] = leaderboardName
+        if let secret = secret {
+            parameters[BodyKeys.Secret] = secret
+        }
         manager.get(
             urlString,
-            parameters: nil,
+            parameters: parameters,
             progress: nil,
             success: { (requestOperation, responseObject) in self.getTeamSuccess(responseObject: responseObject, success: success) },
             failure: { (requestOperation, error) in self.getTeamFailure(error: error, failure: failure) }
@@ -269,9 +311,10 @@ class CheckInRequestManager: NSObject {
         failure(CheckInRequestManagerError.getTeamFailed)
     }
     
-    func getTeamImageURL(competitorID: String, result: @escaping (_ imageURL: String?) -> Void) {
+    func getTeamImageURL(competitorID: String, leaderboardName: String, result: @escaping (_ imageURL: String?) -> Void) {
         getTeam(
             competitorID: competitorID,
+            leaderboardName: leaderboardName,
             success: { (teamData) in result(teamData.imageURL) },
             failure: { (error) in result(nil) } // No image but that's ok
         )
@@ -290,6 +333,9 @@ class CheckInRequestManager: NSObject {
         body[BodyKeys.DeviceUUID] = Preferences.uuid as AnyObject?
         body[BodyKeys.PushDeviceID] = "" as AnyObject?
         body[BodyKeys.FromMillis] = millisSince1970()
+        if let secret = checkInData.secret {
+            body[BodyKeys.Secret] = secret as AnyObject?
+        }
         switch checkInData.type {
         case .boat:
             body[BodyKeys.BoatID] = checkInData.boatData.boatID as AnyObject?
@@ -334,6 +380,9 @@ class CheckInRequestManager: NSObject {
         var body = [String: AnyObject]()
         body[BodyKeys.DeviceUUID] = Preferences.uuid as AnyObject?
         body[BodyKeys.ToMillis] = millisSince1970()
+        if let secret = checkIn.secret {
+            body[BodyKeys.Secret] = secret as AnyObject?
+        }
         if let competitorCheckIn = checkIn as? CompetitorCheckIn {
             body[BodyKeys.CompetitorID] = competitorCheckIn.competitorID as AnyObject?
         } else if let markCheckIn = checkIn as? MarkCheckIn {
@@ -409,15 +458,26 @@ class CheckInRequestManager: NSObject {
     
     func postTeamImageData(
         imageData: Data,
-        competitorID: String,
+        competitorCheckIn: CompetitorCheckIn,
         success: @escaping (_ teamImageURL: String) -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
-        guard let teamImageURL = URL(string: "\(baseURLString)\(basePathString)/competitors/\(competitorID)/team/image") else {
+        let competitorID = competitorCheckIn.competitorID
+        let leaderboardName = competitorCheckIn.leaderboard.name
+        
+        guard var components = URLComponents(string: "\(baseURLString)\(basePathString)/competitors/\(competitorID)/team/image") else {
             failure(CheckInRequestManagerError.teamImageURLIsInvalid)
             return
         }
-        
+        components.queryItems = [URLQueryItem(name: BodyKeys.LeaderboardName, value: leaderboardName)]
+        if let secret = competitorCheckIn.secret {
+            components.queryItems?.append(URLQueryItem(name: BodyKeys.Secret, value: secret))
+        }
+        guard let teamImageURL = components.url else {
+            failure(CheckInRequestManagerError.teamImageURLIsInvalid)
+            return
+        }
+    
         postTeamImageData(
             imageData: imageData,
             teamImageURL: teamImageURL,
