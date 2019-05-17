@@ -189,12 +189,12 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
         private void prepareNext() {
             long nextElementNumber = currentElementNumber + 1;
             if (nextElementNumber <= limit) {
-                if (numberOfElements >= 100 && nextElementNumber % (numberOfElements / 100) == 0) {
-                    LoggingUtil.logInfo("## Loading element " + nextElementNumber + "/" + numberOfElements + " ("
-                            + (nextElementNumber * 100 / numberOfElements) + " %) from " + getCollectionName());
-                }
                 try {
                     if (dbCursor.hasNext()) {
+                        if (numberOfElements >= 100 && nextElementNumber % (numberOfElements / 100) == 0) {
+                            LoggingUtil.logInfo("## Loading element " + nextElementNumber + "/" + numberOfElements + " ("
+                                    + (nextElementNumber * 100 / numberOfElements) + " %) from " + getCollectionName());
+                        }
                         Document nextDbObject = dbCursor.next();
                         this.nextElement = deserializer.deserialize(getJSONObject(nextDbObject));
                         this.currentElementNumber = nextElementNumber;

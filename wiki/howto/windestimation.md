@@ -8,19 +8,26 @@ To complete the training process successfully, you need to make sure that you ha
 
 * A complete onboarding setup for SAP Sailing Analytics development
 * MongoDB (**3.4 or higher!**) is up and running (can be the same MongoDB instance as required in onboarding howto)
-* At least 100 GB free space on the partition, where MongoDB is operating
+* At least 300 GB free space on the partition where MongoDB is operating
 * Installed graphical MongoDB client such as MongoDB Compass (Community version)
 * 16 GB RAM
-* 24+ operating hours of your computer
+* 24+ operating hours of a computer that has a Java 8 VM installed
 
 ## Model training process
 
-1. Run ``com.sap.sailing.windestimation.model.SimpleModelsTrainingPart1`` as a normal Java Application. After this, all the necessary maneuver and wind data will be downloaded, pre-processed and maneuver classifiers get trained.
+1. Run ``com.sap.sailing.windestimation.model.SimpleModelsTrainingPart1`` as a normal Java Application. If you would like to run this outside of your development environment, use "Export as..." in Eclipse, pick the launch configuration for ``SimpleModelsTrainingPart1`` and let the exporter pack all required dependencies into the single executable JAR file that you can send anywhere you would like to execute it and then run ``java -jar SimpleModelsTrainingPar1.jar`` or however you called the JAR file produced by the export. After this, all the necessary maneuver and wind data will be downloaded, pre-processed and maneuver classifiers get trained. You can use the usual MongoDB system properties to configure the database connection, such as ``-Dmongo.dbName=windestimation -Dmongo.port=10202 -Dmongo.host=dbserver.internal.sapsailing.com`` or ``"-Dmongo.uri=mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/windestimation?replicaSet=live&retryWrites=true"``. You have to provide the VM at least 16GB of RAM. Use ``-Xms16g -Xmx16g`` as VM arguments to accomplish this. A full command line could, e.g., look like this:
+```
+  java -Dmongo.dbName=windestimation -Dmongo.port=10202 -Dmongo.host=dbserver.internal.sapsailing.com -Xms16g -Xmx16g -jar SimpleModelsTrainingPart1.jar
+``` If you run this in a "headless" server environment, make sure the Java VM can show a dialog somewhere, e.g., on a VNC server. Example:
+```
+  vncserver -depth 24 -geometry 1600x900 :2
+  export DISPLAY=:2.0
+``` 
 2. Make sure that the launched program does not get terminated by an uncaught exception. Wait until a graphical info dialog shows up which asks you to perform data cleansing for the duration dimension.
    ![Screenshot of graphical info dialog requesting to perform data cleansing for duration dimension](../images/windestimation/dialogRequestingDataCleansingForDurationDimension.jpg "Screenshot of graphical info dialog requesting to perform data cleansing for duration dimension")
-   Press OK. Afterwards, a graphical window must open with two charts. The top chart is an XY-chart where the x-axis represents **seconds** and the y-axis represents various TWD delta-based measures (e.g. standard deviation or mean). Below the XY-chart, a histogram for the data points of the XY-chart is provided. You can zoom-in and zoom-out in each of the charts by mouse dragging. Be aware that currently the zoom level of both charts is not synchronizing.
+   Press OK. Afterwards, a graphical window will open with two charts. The top chart is an XY-chart where the x-axis represents **seconds** and the y-axis represents various TWD delta-based measures (e.g. standard deviation or mean). Below the XY-chart, a histogram for the data points of the XY-chart is provided. You can zoom-in and zoom-out in each of the charts by mouse dragging. Be aware that currently the zoom level of both charts is not synchronizing.
    ![Screenshot of graphical wind data visualization tool for duration dimension](../images/windestimation/aggregatedDurationBasedTwdDeltaTransitionBeforeDataCleansing.jpg "Screenshot of duration-based TWD delta visualization tool before data cleansing")
-3. Open your graphical MongoDB client and connect to the ``windEstimation`` database hosted within your local MongoDB. Open the collection named ``aggregatedDurationTwdTransition``. Within the collection you will see all the instances/data points visualized in the previous step. The attribute used for the x-axis is ``value``. Its corresponding metrics plotted in y-axis are the other attributes. ``std`` represents standard deviation (``Sigma`` curve in XY-chart) and ``std0`` represents standard deviation with zero as mean value (``Zero mean sigma`` curve in XY-chart).
+3. Open your graphical MongoDB client and connect to the MongoDB you configured with the system properties above. Open the collection named ``aggregatedDurationTwdTransition``. Within the collection you will see all the instances/data points visualized in the previous step. The attribute used for the x-axis is ``value``. Its corresponding metrics plotted in y-axis are the other attributes. ``std`` represents standard deviation (``Sigma`` curve in XY-chart) and ``std0`` represents standard deviation with zero as mean value (``Zero mean sigma`` curve in XY-chart).
    ![Screenshot of MongoDB Compass with opened aggregatedDurationTwdTransition collection](../images/windestimation/mongoDbCompassWithOpenedAggregatedDurationTwdTransitionCollection.jpg "Screenshot of MongoDB Compass with opened aggregatedDurationTwdTransition collection")
 4. Delete all the instances within the collection which do not make sense. For this, use the data visualization tool from step 2 to identify such instances. Some of the instances are not representative due to the small number of supporting instances which is visualized in the histogram. Such instances can produce unreasonable bumps in the XY-chart. The desired output of this step is that the curve ``Zero mean sigma`` looks smooth and always growing, e.g. as depicted below:
    ![Screenshot of graphical visualization tool of duration dimension after data cleansing](../images/windestimation/aggregatedDurationBasedTwdDeltaTransitionAfterDataCleansing.jpg "Screenshot of duration-based TWD delta visualization tool after data cleansing")
