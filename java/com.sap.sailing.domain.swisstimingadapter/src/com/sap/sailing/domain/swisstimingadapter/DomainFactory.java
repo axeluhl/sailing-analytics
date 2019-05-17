@@ -46,11 +46,14 @@ public interface DomainFactory {
 
     Nationality getOrCreateNationality(String threeLetterIOCCode);
 
-    Pair<Competitor, Boat> createCompetitorWithoutID(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, String raceId, BoatClass boatClass);
+    Pair<Competitor, Boat> createCompetitorWithoutID(com.sap.sailing.domain.swisstimingadapter.Competitor competitor,
+            String raceId, BoatClass boatClass, RaceTrackingHandler raceTrackingHandler);
 
-    Pair<Competitor, Boat> createCompetitorWithID(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, BoatClass boatClass);
+    Pair<Competitor, Boat> createCompetitorWithID(com.sap.sailing.domain.swisstimingadapter.Competitor competitor,
+            BoatClass boatClass, RaceTrackingHandler raceTrackHandler);
 
-    Pair<Competitor, Boat> createCompetitorWithoutID(String competitorId, String threeLetterIOCCode, String name, String raceId, BoatClass boatClass);
+    Pair<Competitor, Boat> createCompetitorWithoutID(String competitorId, String threeLetterIOCCode, String name,
+            String raceId, BoatClass boatClass, RaceTrackingHandler raceTrackingHandler);
     
     String getCompetitorID(String boatID, RaceType raceType);
 

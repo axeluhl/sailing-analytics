@@ -20,7 +20,7 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 
 #### Automatic Eclipse plugin installation
 
-The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.11.0 "2019-03"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/photonr) by using the script "configuration/installPluginsForEclipse2019-03.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
+The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.11.0 "2019-03"](https://www.eclipse.org/downloads/packages/release/2019-03/r/eclipse-ide-eclipse-committers) by using the script "configuration/installPluginsForEclipse2019-03.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
 
     ./installPluginsForEclipse2019-03.sh "/some/path/on/my/computer/eclipse"
 
@@ -41,6 +41,18 @@ The script will install the following plugins for your convenience:
 * SAP JVM Profiler ([https://tools.hana.ondemand.com](https://tools.hana.ondemand.com))
 * UMLet ([https://www.umlet.com/](https://www.umlet.com/))
 * various updates to preinstalled plugins
+
+#### Tuning the Eclipse Installation
+
+Out of the box, two settings in Eclipse avoid a clean workspace. Go to Window - Preferences and change the following two settings:
+
+* Set the "Missing GWT SDK" warning to "Ignore". See screenshot below.
+
+![](ignore-missing-gwt-sdk-warning.png)
+
+* Set the "Plug-in does not export all packages" warning to "Ignore". See screenshot below.
+
+![](ignore-package-not-exported-warning.png)
 
 #### Further optional but recommended installations
 
@@ -137,7 +149,7 @@ When a file has "wrong line endings" (line endings are different to what is conf
 
 If you are working with a linux-system and you get the error message `error while loading shared libraries: libz.so.1: cannot open shared object file: No such file or directory` try to install  lib32z1 and lib32stdc++6.
 
-####Steps to consider for using other modules
+#### Steps to consider for using other modules
 1. For Eclipse Build
    * MANIFEST.MF , add module names unter dependencies
    * *.gwt.xml , add `<inherits name="-modulename-.-gwt.xml file name-" />`

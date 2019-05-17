@@ -87,12 +87,12 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                 errorReporter, true, tableResources, () -> {
                 });
         connectionsTable.refreshConnectionList();
-        verticalPanel.add(connectionsTable);
 
         // create button UI
         final AccessControlledButtonPanel buttonPanel = createButtonPanel(sailingService, userService, errorReporter,
                 stringMessages);
         verticalPanel.add(buttonPanel);
+        verticalPanel.add(connectionsTable);
 
         // Table
         TextColumn<SwissTimingReplayRaceDTO> regattaNameColumn = new TextColumn<SwissTimingReplayRaceDTO>() {
@@ -270,6 +270,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                                             @Override
                                             public void onSuccess(Void voidResult) {
                                                 connectionsTable.refreshConnectionList();
+                                                connectionsTable.getFilterField().search(editedConnection.getJsonUrl());
                                             }
                                         }));
                             }
