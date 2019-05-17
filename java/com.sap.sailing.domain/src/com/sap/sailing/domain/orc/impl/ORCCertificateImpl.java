@@ -52,6 +52,11 @@ public class ORCCertificateImpl implements ORCCertificate {
     /*
      * 
      */
+    private static final Map<Speed, Map<Bearing, Duration>> perCentOfAllowancesForLongDistancePC = new HashMap<>();
+    
+    /*
+     * 
+     */
     
     private final String sailnumber;
     private final String boatclass;
@@ -105,8 +110,68 @@ public class ORCCertificateImpl implements ORCCertificate {
 
     @Override
     public Map<Speed, Duration> getLongDistanceAllowances() {
-        // TODO Auto-generated method stub
-        return null;
+        Map<Speed, Duration> result = new HashMap<>();
+        
+        Duration allowance6knt = timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[0]).get(beatAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[0])).times(45);
+        allowance6knt = allowance6knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[0]).get(gybeAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[0])).times(55));
+        allowance6knt = allowance6knt.divide(100);
+        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[0], allowance6knt);
+        
+        Duration allowance8knt = timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[1]).get(beatAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[1])).times(40);
+        allowance8knt = allowance8knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[1]).get(ALLOWANCES_TRUE_WIND_ANGLES[1]).times(5));
+        allowance8knt = allowance8knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[1]).get(ALLOWANCES_TRUE_WIND_ANGLES[3]).times(5));
+        allowance8knt = allowance8knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[1]).get(ALLOWANCES_TRUE_WIND_ANGLES[5]).times(5));
+        allowance8knt = allowance8knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[1]).get(ALLOWANCES_TRUE_WIND_ANGLES[7]).times(5));
+        allowance8knt = allowance8knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[1]).get(gybeAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[1])).times(40));
+        allowance8knt = allowance8knt.divide(100);
+        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[1], allowance8knt);
+        
+        Duration allowance10knt = timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[2]).get(beatAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[2])).times(35);
+        allowance10knt = allowance10knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[2]).get(ALLOWANCES_TRUE_WIND_ANGLES[1]).times(10));
+        allowance10knt = allowance10knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[2]).get(ALLOWANCES_TRUE_WIND_ANGLES[3]).times(7.5));
+        allowance10knt = allowance10knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[2]).get(ALLOWANCES_TRUE_WIND_ANGLES[5]).times(10));
+        allowance10knt = allowance10knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[2]).get(ALLOWANCES_TRUE_WIND_ANGLES[7]).times(10));
+        allowance10knt = allowance10knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[2]).get(gybeAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[2])).times(27.5));
+        allowance10knt = allowance10knt.divide(100);
+        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[2], allowance10knt);
+        
+        Duration allowance12knt = timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[3]).get(beatAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[3])).times(30);
+        allowance12knt = allowance12knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[3]).get(ALLOWANCES_TRUE_WIND_ANGLES[1]).times(15));
+        allowance12knt = allowance12knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[3]).get(ALLOWANCES_TRUE_WIND_ANGLES[3]).times(10));
+        allowance12knt = allowance12knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[3]).get(ALLOWANCES_TRUE_WIND_ANGLES[5]).times(15));
+        allowance12knt = allowance12knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[3]).get(ALLOWANCES_TRUE_WIND_ANGLES[7]).times(15));
+        allowance12knt = allowance12knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[3]).get(gybeAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[3])).times(15));
+        allowance12knt = allowance12knt.divide(100);
+        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[3], allowance12knt);
+        
+        Duration allowance14knt = timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[4]).get(beatAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[4])).times(25);
+        allowance14knt = allowance14knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[4]).get(ALLOWANCES_TRUE_WIND_ANGLES[1]).times(17.5));
+        allowance14knt = allowance14knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[4]).get(ALLOWANCES_TRUE_WIND_ANGLES[3]).times(12.5));
+        allowance14knt = allowance14knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[4]).get(ALLOWANCES_TRUE_WIND_ANGLES[5]).times(17.5));
+        allowance14knt = allowance14knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[4]).get(ALLOWANCES_TRUE_WIND_ANGLES[7]).times(15));
+        allowance14knt = allowance14knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[4]).get(gybeAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[4])).times(12.5));
+        allowance14knt = allowance14knt.divide(100);
+        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[4], allowance14knt);
+        
+        Duration allowance16knt = timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[5]).get(beatAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[5])).times(20);
+        allowance16knt = allowance16knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[5]).get(ALLOWANCES_TRUE_WIND_ANGLES[1]).times(20));
+        allowance16knt = allowance16knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[5]).get(ALLOWANCES_TRUE_WIND_ANGLES[3]).times(15));
+        allowance16knt = allowance16knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[5]).get(ALLOWANCES_TRUE_WIND_ANGLES[5]).times(20));
+        allowance16knt = allowance16knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[5]).get(ALLOWANCES_TRUE_WIND_ANGLES[7]).times(15));
+        allowance16knt = allowance16knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[5]).get(gybeAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[5])).times(10));
+        allowance16knt = allowance16knt.divide(100);
+        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[5], allowance16knt);
+        
+        Duration allowance20knt = timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[6]).get(beatAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[6])).times(25);
+        allowance20knt = allowance20knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[6]).get(ALLOWANCES_TRUE_WIND_ANGLES[1]).times(17.5));
+        allowance20knt = allowance20knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[6]).get(ALLOWANCES_TRUE_WIND_ANGLES[3]).times(12.5));
+        allowance20knt = allowance20knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[6]).get(ALLOWANCES_TRUE_WIND_ANGLES[5]).times(17.5));
+        allowance20knt = allowance20knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[6]).get(ALLOWANCES_TRUE_WIND_ANGLES[7]).times(15));
+        allowance20knt = allowance20knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[6]).get(gybeAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[6])).times(12.5));
+        allowance20knt = allowance20knt.divide(100);
+        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[6], allowance20knt);
+        
+        return result;
     }
 
     @Override

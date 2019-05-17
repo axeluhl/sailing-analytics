@@ -37,5 +37,8 @@ public class TestORCCertificateImporterJSON {
         assertEquals(539.1, swan .getGPH(), 0.0000001);
         assertEquals(490.4, moana.getGPH(), 0.0000001);
         assertEquals(862.2, swan .getWindwardLeewardAllowances().get(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[0]).asSeconds(), 0.1);
+        assertEquals(788.2, moana.getWindwardLeewardAllowances().get(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[0]).asSeconds(), 0.1);
+        assertEquals(861.0, swan .getLongDistanceAllowances().get(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[0]).asSeconds(), 0.1);
+        assertEquals(787.2, moana.getLongDistanceAllowances().get(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[0]).asSeconds(), 0.1);
     }
 }
