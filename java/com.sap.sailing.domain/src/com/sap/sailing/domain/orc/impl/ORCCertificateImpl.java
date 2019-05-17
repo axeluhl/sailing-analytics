@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.orc.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.orc.ORCCertificate;
@@ -52,7 +54,67 @@ public class ORCCertificateImpl implements ORCCertificate {
     /*
      * 
      */
-    private static final Map<Speed, Map<Bearing, Duration>> perCentOfAllowancesForLongDistancePC = new HashMap<>();
+    private static final Map<Speed, Map<Bearing, Double>> perCentOfAllowancesForLongDistancePC;
+    static {
+        Map<Speed, Map<Bearing, Double>> result = new HashMap<>();
+        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[0], new HashMap<Bearing, Double>() {{
+            put(new DegreeBearingImpl(0)      , 0.45);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.0);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.0);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.0);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.0);
+            put(new DegreeBearingImpl(180)    , 0.55);
+        }});
+        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[1], new HashMap<Bearing, Double>() {{
+            put(new DegreeBearingImpl(0)      , 0.40);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.05);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.05);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.05);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.05);
+            put(new DegreeBearingImpl(180)    , 0.40);
+        }});
+        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[2], new HashMap<Bearing, Double>() {{
+            put(new DegreeBearingImpl(0)      , 0.35);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.10);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.075);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.10);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.10);
+            put(new DegreeBearingImpl(180)    , 0.275);
+        }});
+        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[3], new HashMap<Bearing, Double>() {{
+            put(new DegreeBearingImpl(0)      , 0.30);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.15);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.10);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.15);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.15);
+            put(new DegreeBearingImpl(180)    , 0.15);
+        }});
+        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[4], new HashMap<Bearing, Double>() {{
+            put(new DegreeBearingImpl(0)      , 0.25);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.175);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.125);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.175);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.15);
+            put(new DegreeBearingImpl(180)    , 0.125);
+        }});
+        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[5], new HashMap<Bearing, Double>() {{
+            put(new DegreeBearingImpl(0)      , 0.20);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.20);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.15);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.20);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.15);
+            put(new DegreeBearingImpl(180)    , 0.10);
+        }});
+        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[6], new HashMap<Bearing, Double>() {{
+            put(new DegreeBearingImpl(0)      , 0.10);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.25);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.20);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.25);
+            put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.10);
+            put(new DegreeBearingImpl(180)    , 0.10);
+        }});
+        perCentOfAllowancesForLongDistancePC = Collections.unmodifiableMap(result);
+    }
     
     /*
      * 
@@ -75,9 +137,9 @@ public class ORCCertificateImpl implements ORCCertificate {
         this.boatclass = boatclass;
         this.lengthOverAll = length;
         this.gph = gph;
-        this.timeAllowancesPerTrueWindSpeedAndAngle = timeAllowancesPerTrueWindSpeedAndAngle;
-        this.beatAngles = beatAngles;
-        this.gybeAngles = gybeAngles;
+        this.timeAllowancesPerTrueWindSpeedAndAngle = Collections.unmodifiableMap(timeAllowancesPerTrueWindSpeedAndAngle);
+        this.beatAngles = Collections.unmodifiableMap(beatAngles);
+        this.gybeAngles = Collections.unmodifiableMap(gybeAngles);
     }
 
     @Override
@@ -108,6 +170,26 @@ public class ORCCertificateImpl implements ORCCertificate {
         return null;
     }
 
+    public Map<Speed, Duration> getLongDistanceAllowancesAlternative() {
+        Map<Speed, Duration> result = new HashMap<>();
+        for (Entry<Speed, Map<Bearing, Double>> twsEntry : perCentOfAllowancesForLongDistancePC.entrySet()) {
+            double allowanceInSec = 0.0;
+            for (Entry<Bearing, Double> twaEntry : twsEntry.getValue().entrySet()) {
+                if(twaEntry.getKey().equals(new DegreeBearingImpl(0))) {
+                    allowanceInSec += twaEntry.getValue() * timeAllowancesPerTrueWindSpeedAndAngle.get(twsEntry.getKey()).get(beatAngles.get(twsEntry.getKey())).asSeconds();
+                }
+                else if (twaEntry.getKey().equals(new DegreeBearingImpl(180))) {
+                    allowanceInSec += twaEntry.getValue() * timeAllowancesPerTrueWindSpeedAndAngle.get(twsEntry.getKey()).get(gybeAngles.get(twsEntry.getKey())).asSeconds();
+                }
+                else {
+                    allowanceInSec += twaEntry.getValue() * timeAllowancesPerTrueWindSpeedAndAngle.get(twsEntry.getKey()).get(twaEntry.getKey()).asSeconds();
+                }
+            }
+            result.put(twsEntry.getKey(), Duration.ONE_SECOND.times(allowanceInSec));
+        }
+        return result;
+    }
+    
     @Override
     public Map<Speed, Duration> getLongDistanceAllowances() {
         Map<Speed, Duration> result = new HashMap<>();
