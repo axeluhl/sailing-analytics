@@ -22,7 +22,11 @@
          "collectionName":"DataMiningGwtUi",
          "folders":[  
             {  
+<<<<<<< HEAD
                "startingFolderPath":"java/com.sap.sse.datamining.ui/src/com/sap/sse/datamining/ui/client",
+=======
+               "startingFolderPath":"java/com.sap.sse.datamining.ui/src/main/java/com/sap/sse/datamining/ui/client",
+>>>>>>> master
                "sourceFilters":[  
                   "**/StringMessages*.properties"
                ],
