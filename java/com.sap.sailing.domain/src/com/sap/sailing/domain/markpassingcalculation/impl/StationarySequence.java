@@ -108,7 +108,7 @@ public class StationarySequence {
         if (bounds != null) {
             track.lockForRead();
             try {
-                final Iterator<GPSFixMoving> iter = track.getFixesIterator(start.getTimePoint(), /* inclusive */ true,
+                final Iterator<GPSFixMoving> iter = track.getRawFixesIterator(start.getTimePoint(), /* inclusive */ true,
                         end.getTimePoint(), /* inclusive */ true);
                 while (iter.hasNext()) {
                     final GPSFixMoving fix = iter.next();

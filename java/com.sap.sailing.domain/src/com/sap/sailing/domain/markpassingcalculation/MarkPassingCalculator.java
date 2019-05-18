@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.markpassingcalculation;
 
+import java.lang.Thread.State;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -507,8 +508,13 @@ public class MarkPassingCalculator {
             queue.add(update);
             // regardless of whether the queue is empty or not, launch the thread if it doesn't run yet and we are not suspended;
             // the queue may have filled up while we were suspended
-            if (!suspended && listenerThread == null) {
-                listenerThread = createAndStartListenerThread();
+            if (!suspended) {
+                if (listenerThread == null) {
+                    listenerThread = createAndStartListenerThread();
+                } else if (listenerThread.getState() == State.TERMINATED) {
+                    logger.severe("Listener thread of MarkPassingCalculator (MPC) for race "+race.getRace().getName()+
+                            " terminated but not null. Why are we still receiving updates? We must have been stopped before!");
+                }
             }
         }
     }
