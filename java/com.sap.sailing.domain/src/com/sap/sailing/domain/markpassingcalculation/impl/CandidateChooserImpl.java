@@ -474,7 +474,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     public void setFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint, TimePoint t) {
         LockUtil.lockForWrite(perCompetitorLocks.get(c));
         try {
-            Candidate fixedCan = new CandidateImpl(zeroBasedIndexOfWaypoint + 1, t, 1, Util.get(race.getRace().getCourse().getWaypoints(), zeroBasedIndexOfWaypoint));
+            Candidate fixedCan = new CandidateForFixedMarkPassingImpl(zeroBasedIndexOfWaypoint + 1, t, 1, Util.get(race.getRace().getCourse().getWaypoints(), zeroBasedIndexOfWaypoint));
             NavigableSet<Candidate> fixed = fixedPassings.get(c);
             if (fixed != null) { // can only set the mark passing if the competitor is still part of this race
                 if (!fixed.add(fixedCan)) {
