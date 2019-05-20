@@ -235,10 +235,11 @@ public class StationarySequenceBasedFilter {
      */
     private void addCandidate(Candidate newCandidate,
             Set<Candidate> candidatesEffectivelyAdded, Set<Candidate> candidatesEffectivelyRemoved) {
-        if (candidates.contains(newCandidate)) {
+        boolean candidatesContainsNewCandidate = candidates.contains(newCandidate);
+        if (candidatesContainsNewCandidate) {
             logger.severe("Candidates "+candidates+" already contain "+newCandidate+" which is to be added.");
         }
-        final boolean assertion = !candidates.contains(newCandidate) && isCandidatesConsistent();
+        final boolean assertion = !candidatesContainsNewCandidate && isCandidatesConsistent();
         assert assertion;
         if (newCandidate == startProxyCandidate) {
             candidatesEffectivelyAdded.add(newCandidate);
@@ -539,13 +540,10 @@ public class StationarySequenceBasedFilter {
             }
         }
         if (fixesReplacingExistingOnes != null) {
+            Set<GPSFixMoving> newFixesHashedForQuickAssertionCheck = new HashSet<>();
+            assert Util.addAll(newFixes, newFixesHashedForQuickAssertionCheck) != null;
             for (final GPSFixMoving fixReplacingExistingOne : fixesReplacingExistingOnes) {
-                final boolean assertion2 = Util.contains(newFixes, fixReplacingExistingOne);
-                if (!assertion2) {
-                    logger.severe("Expected "+fixesReplacingExistingOnes+" to be part of the "+Util.size(newFixes)+
-                            " new fixes, but it wasn't");
-                }
-                assert assertion2;
+                assert newFixesHashedForQuickAssertionCheck.contains(fixReplacingExistingOne);
                 final Candidate dummyCandidateForReplacementFix = StationarySequence.createDummyCandidate(fixReplacingExistingOne.getTimePoint());
                 final StationarySequence dummyStationarySequenceForFix = createStationarySequence(dummyCandidateForReplacementFix);
                 final StationarySequence lastSequenceStartingAtOrBeforeFix = stationarySequences.floor(dummyStationarySequenceForFix);
