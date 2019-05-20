@@ -32,7 +32,6 @@ import com.sap.sailing.windestimation.util.LoggingUtil;
  *
  */
 public class SimpleModelsTrainingPart1 {
-
     private static final int NUMBER_OF_THREADS = 3;
     private static ExecutorService executorService;
 
@@ -114,9 +113,12 @@ public class SimpleModelsTrainingPart1 {
 
     private static void awaitThreadPoolCompletion() throws InterruptedException {
         executorService.shutdown();
-        boolean success = executorService.awaitTermination(24, TimeUnit.HOURS);
+        final long TIMEOUT_IN_HOURS = 48;
+        boolean success = executorService.awaitTermination(TIMEOUT_IN_HOURS, TimeUnit.HOURS);
         if (!success) {
-            new InterruptedException("Thread-pool was terminated after 24 hours waiting time");
+            LoggingUtil.logInfo("Thread-pool was terminated after "+TIMEOUT_IN_HOURS+
+                    " hours waiting time. Launching next step. You may, e.g., be seeing an empty chart in case the process is really still running."+
+                    " In this case, please follow the log and keep refreshing until you see content.");
         }
         Thread.sleep(1000L);
     }
