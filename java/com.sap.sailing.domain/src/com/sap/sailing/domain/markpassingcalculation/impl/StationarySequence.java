@@ -89,7 +89,7 @@ public class StationarySequence {
             // borders of this sequence:
             final TimeRange timeRangeNoLongerPassingFilter = getExtendedEndBorderRange(extendedBy);
             if (timeRangeNoLongerPassingFilter != null) {
-                removeFromFilterResult(timeRangeNoLongerPassingFilter, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+                removeFromFilterResultUnlessFixed(timeRangeNoLongerPassingFilter, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
             }
         }
         return bounds != null;
@@ -108,7 +108,7 @@ public class StationarySequence {
         if (bounds != null) {
             track.lockForRead();
             try {
-                final Iterator<GPSFixMoving> iter = track.getFixesIterator(start.getTimePoint(), /* inclusive */ true,
+                final Iterator<GPSFixMoving> iter = track.getRawFixesIterator(start.getTimePoint(), /* inclusive */ true,
                         end.getTimePoint(), /* inclusive */ true);
                 while (iter.hasNext()) {
                     final GPSFixMoving fix = iter.next();
@@ -158,7 +158,7 @@ public class StationarySequence {
             // borders of this sequence:
             final TimeRange timeRangeNoLongerPassingFilter = getExtendedStartBorderRange(extendedBy);
             if (timeRangeNoLongerPassingFilter != null) {
-                removeFromFilterResult(timeRangeNoLongerPassingFilter, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+                removeFromFilterResultUnlessFixed(timeRangeNoLongerPassingFilter, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
             }
         }
         return bounds != null;
@@ -204,11 +204,15 @@ public class StationarySequence {
         return result;
     }
 
-    private void removeFromFilterResult(final TimeRange timeRangeNoLongerPassingFilter, Set<Candidate> candidatesEffectivelyAdded,
+    private void removeFromFilterResultUnlessFixed(final TimeRange timeRangeNoLongerPassingFilter, Set<Candidate> candidatesEffectivelyAdded,
         Set<Candidate> candidatesEffectivelyRemoved) {
         final SortedSet<Candidate> candidatesNoLongerPassingFilter = getCandidatesInTimeRange(timeRangeNoLongerPassingFilter);
-        candidatesEffectivelyAdded.removeAll(candidatesNoLongerPassingFilter);
-        candidatesEffectivelyRemoved.addAll(candidatesNoLongerPassingFilter);
+        for (final Candidate candidate : candidatesNoLongerPassingFilter) {
+            if (!candidate.isFixed()) {
+                candidatesEffectivelyAdded.removeAll(candidatesNoLongerPassingFilter);
+                candidatesEffectivelyRemoved.addAll(candidatesNoLongerPassingFilter);
+            }
+        }
     }
 
     private SortedSet<Candidate> getCandidatesInTimeRange(final TimeRange timeRange) {
@@ -219,7 +223,16 @@ public class StationarySequence {
     }
 
     public Iterable<Candidate> getValidCandidates() {
-        return ()->candidates.stream().filter(c->isCloseEnoughToSequenceBorder(c)).iterator();
+        return ()->candidates.stream().filter(c->isValidCandidate(c)).iterator();
+    }
+    
+    /**
+     * A candidate that is part of this stationary sequence is considered valid if it is time-wise close
+     * enough to one of the sequence's borders (see {@link #CANDIDATE_FILTER_TIME_WINDOW}) or if it is
+     * a candidate for a {@link Candidate#isFixed() fixed mark passing}.
+     */
+    private boolean isValidCandidate(Candidate c) {
+        return c.isFixed() || isCloseEnoughToSequenceBorder(c);
     }
     
     private boolean isCloseEnoughToSequenceBorder(Candidate candidate) {
@@ -246,7 +259,7 @@ public class StationarySequence {
         assert !candidates.contains(candidate) && !getFirst().getTimePoint().after(candidate.getTimePoint()) &&
                 !getLast().getTimePoint().before(candidate.getTimePoint());
         candidates.add(candidate);
-        if (isCloseEnoughToSequenceBorder(candidate)) {
+        if (isValidCandidate(candidate)) {
             candidatesEffectivelyAdded.add(candidate);
             candidatesEffectivelyRemoved.remove(candidate);
         }
@@ -269,7 +282,7 @@ public class StationarySequence {
     void remove(Candidate candidate, Set<Candidate> candidatesEffectivelyAdded, Set<Candidate> candidatesEffectivelyRemoved,
             NavigableSet<StationarySequence> stationarySequenceSetToUpdate) {
         assert candidates.contains(candidate);
-        final boolean wasValidCandidate = isCloseEnoughToSequenceBorder(candidate);
+        final boolean wasValidCandidate = isValidCandidate(candidate);
         final boolean wasFirst = candidate == getFirst();
         final boolean wasLast = candidate == getLast();
         if (wasFirst || size() == 2) { // if size() == 2 then it will shrink to 1 and this sequence shall be removed
