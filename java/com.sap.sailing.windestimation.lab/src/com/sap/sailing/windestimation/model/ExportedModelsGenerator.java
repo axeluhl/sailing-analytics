@@ -9,22 +9,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.sap.sailing.windestimation.data.persistence.maneuver.RegularManeuversForEstimationPersistenceManager;
 import com.sap.sailing.windestimation.integration.ExportedModels;
-import com.sap.sailing.windestimation.model.store.FileSystemModelStoreImpl;
 import com.sap.sailing.windestimation.model.store.ModelDomainType;
 import com.sap.sailing.windestimation.model.store.ModelStore;
+import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class ExportedModelsGenerator {
-
     private static final File file = new File("windEstimationModels.dat");
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
-        ModelStore modelStore = new FileSystemModelStoreImpl("trained_wind_estimation_models");
-        // RegularManeuversForEstimationPersistenceManager persistenceManager = new
-        // RegularManeuversForEstimationPersistenceManager();
-        // ModelStore modelStore = new MongoDbModelStoreImpl(persistenceManager.getDb());
-        LoggingUtil.logInfo("Generation a single file with all trained models started");
+        RegularManeuversForEstimationPersistenceManager persistenceManager = new RegularManeuversForEstimationPersistenceManager();
+        ModelStore modelStore = new MongoDbModelStoreImpl(persistenceManager.getDb());
+        LoggingUtil.logInfo("Generating a single file with all trained models started");
         ExportedModels exportedModels = new ExportedModels();
         List<ModelDomainType> nonEmptyDomainTypes = new ArrayList<>();
         for (ModelDomainType domainType : ModelDomainType.values()) {
@@ -45,5 +43,4 @@ public class ExportedModelsGenerator {
         LoggingUtil.logInfo("The following domain types were considered: " + nonEmptyDomainTypes);
         LoggingUtil.logInfo("File with all exported models was persisted in: " + file.getAbsolutePath());
     }
-
 }

@@ -8,8 +8,8 @@ To complete the training process successfully, you need to make sure that you ha
 
 * A complete onboarding setup for SAP Sailing Analytics development
 * MongoDB (**3.4 or higher!**) is up and running (can be the same MongoDB instance as required in onboarding howto)
-* At least 300 GB free space on the partition where MongoDB is operating
-* Installed graphical MongoDB client such as MongoDB Compass (Community version)
+* At least 100 GB free space on the partition where MongoDB is operating in case you're using the WiredTiger storage engine (the default for MongoDB 3.4 and upwards), otherwise at least 300GB
+* Installed graphical MongoDB client such as MongoDB Compass (Community version), or you're skilled with the ``mongo`` command line tool
 * 16 GB RAM
 * 24+ operating hours of a computer that has a Java 8 VM installed
 
