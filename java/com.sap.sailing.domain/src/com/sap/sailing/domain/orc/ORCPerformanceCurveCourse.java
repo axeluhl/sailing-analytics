@@ -15,5 +15,6 @@ public interface ORCPerformanceCurveCourse {
         return result;
     }
     
+    // 0 => no legs finished, 1 => 1 leg finished, ... ; not equal to the index of the finished leg in a list
     ORCPerformanceCurveCourse subcourse(int lastFinishedLeg, double perCentOfCurrentLeg);
 }

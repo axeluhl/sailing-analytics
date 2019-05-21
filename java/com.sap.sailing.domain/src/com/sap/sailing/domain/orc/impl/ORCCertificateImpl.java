@@ -2,8 +2,11 @@ package com.sap.sailing.domain.orc.impl;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.orc.ORCCertificate;
@@ -54,72 +57,79 @@ public class ORCCertificateImpl implements ORCCertificate {
     /*
      * 
      */
-    private static final Map<Speed, Map<Bearing, Double>> perCentOfAllowancesForLongDistancePC;
+    public static final Map<Speed, Map<Bearing, Double>> perCentOfAllowancesForLongDistancePC;
     static {
         Map<Speed, Map<Bearing, Double>> result = new HashMap<>();
-        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[0], new HashMap<Bearing, Double>() {{
-            put(new DegreeBearingImpl(0)      , 0.45);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.0);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.0);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.0);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.0);
-            put(new DegreeBearingImpl(180)    , 0.55);
-        }});
-        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[1], new HashMap<Bearing, Double>() {{
-            put(new DegreeBearingImpl(0)      , 0.40);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.05);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.05);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.05);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.05);
-            put(new DegreeBearingImpl(180)    , 0.40);
-        }});
-        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[2], new HashMap<Bearing, Double>() {{
-            put(new DegreeBearingImpl(0)      , 0.35);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.10);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.075);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.10);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.10);
-            put(new DegreeBearingImpl(180)    , 0.275);
-        }});
-        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[3], new HashMap<Bearing, Double>() {{
-            put(new DegreeBearingImpl(0)      , 0.30);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.15);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.10);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.15);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.15);
-            put(new DegreeBearingImpl(180)    , 0.15);
-        }});
-        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[4], new HashMap<Bearing, Double>() {{
-            put(new DegreeBearingImpl(0)      , 0.25);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.175);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.125);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.175);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.15);
-            put(new DegreeBearingImpl(180)    , 0.125);
-        }});
-        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[5], new HashMap<Bearing, Double>() {{
-            put(new DegreeBearingImpl(0)      , 0.20);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.20);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.15);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.20);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.15);
-            put(new DegreeBearingImpl(180)    , 0.10);
-        }});
-        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[6], new HashMap<Bearing, Double>() {{
-            put(new DegreeBearingImpl(0)      , 0.10);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.25);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.20);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.25);
-            put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.10);
-            put(new DegreeBearingImpl(180)    , 0.10);
-        }});
+        Map<Bearing, Double> map6kt = new HashMap<>();
+        Map<Bearing, Double> map8kt = new HashMap<>();
+        Map<Bearing, Double> map10kt = new HashMap<>();
+        Map<Bearing, Double> map12kt = new HashMap<>();
+        Map<Bearing, Double> map14kt = new HashMap<>();
+        Map<Bearing, Double> map16kt = new HashMap<>();
+        Map<Bearing, Double> map20kt = new HashMap<>();
+        
+        map6kt.put(new DegreeBearingImpl(0)      , 0.45);
+        map6kt.put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.0);
+        map6kt.put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.0);
+        map6kt.put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.0);
+        map6kt.put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.0);
+        map6kt.put(new DegreeBearingImpl(180)    , 0.55);
+        
+        map8kt.put(new DegreeBearingImpl(0)      , 0.40);
+        map8kt.put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.05);
+        map8kt.put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.05);
+        map8kt.put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.05);
+        map8kt.put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.05);
+        map8kt.put(new DegreeBearingImpl(180)    , 0.40);
+        
+        map10kt.put(new DegreeBearingImpl(0)      , 0.35);
+        map10kt.put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.10);
+        map10kt.put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.075);
+        map10kt.put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.10);
+        map10kt.put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.10);
+        map10kt.put(new DegreeBearingImpl(180)    , 0.275);
+        
+        map12kt.put(new DegreeBearingImpl(0)      , 0.30);
+        map12kt.put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.15);
+        map12kt.put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.10);
+        map12kt.put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.15);
+        map12kt.put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.15);
+        map12kt.put(new DegreeBearingImpl(180)    , 0.15);
+        
+        map14kt.put(new DegreeBearingImpl(0)      , 0.25);
+        map14kt.put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.175);
+        map14kt.put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.125);
+        map14kt.put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.175);
+        map14kt.put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.15);
+        map14kt.put(new DegreeBearingImpl(180)    , 0.125);
+        
+        map16kt.put(new DegreeBearingImpl(0)      , 0.20);
+        map16kt.put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.20);
+        map16kt.put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.15);
+        map16kt.put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.20);
+        map16kt.put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.15);
+        map16kt.put(new DegreeBearingImpl(180)    , 0.10);
+        
+        map20kt.put(new DegreeBearingImpl(0)      , 0.10);
+        map20kt.put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.25);
+        map20kt.put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.20);
+        map20kt.put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.25);
+        map20kt.put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.10);
+        map20kt.put(new DegreeBearingImpl(180)    , 0.10);
+        
+        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[0], Collections.unmodifiableMap(map6kt));
+        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[1], Collections.unmodifiableMap(map8kt));
+        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[2], Collections.unmodifiableMap(map10kt));
+        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[3], Collections.unmodifiableMap(map12kt));
+        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[4], Collections.unmodifiableMap(map14kt));
+        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[5], Collections.unmodifiableMap(map16kt));
+        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[6], Collections.unmodifiableMap(map20kt));
         perCentOfAllowancesForLongDistancePC = Collections.unmodifiableMap(result);
     }
     
     /*
      * 
      */
-    
     private final String sailnumber;
     private final String boatclass;
     private final Distance lengthOverAll;
@@ -170,7 +180,8 @@ public class ORCCertificateImpl implements ORCCertificate {
         return null;
     }
 
-    public Map<Speed, Duration> getLongDistanceAllowancesAlternative() {
+    @Override
+    public Map<Speed, Duration> getLongDistanceAllowances() {
         Map<Speed, Duration> result = new HashMap<>();
         for (Entry<Speed, Map<Bearing, Double>> twsEntry : perCentOfAllowancesForLongDistancePC.entrySet()) {
             double allowanceInSec = 0.0;
@@ -190,72 +201,6 @@ public class ORCCertificateImpl implements ORCCertificate {
         return result;
     }
     
-    @Override
-    public Map<Speed, Duration> getLongDistanceAllowances() {
-        Map<Speed, Duration> result = new HashMap<>();
-        
-        Duration allowance6knt = timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[0]).get(beatAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[0])).times(45);
-        allowance6knt = allowance6knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[0]).get(gybeAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[0])).times(55));
-        allowance6knt = allowance6knt.divide(100);
-        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[0], allowance6knt);
-        
-        Duration allowance8knt = timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[1]).get(beatAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[1])).times(40);
-        allowance8knt = allowance8knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[1]).get(ALLOWANCES_TRUE_WIND_ANGLES[1]).times(5));
-        allowance8knt = allowance8knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[1]).get(ALLOWANCES_TRUE_WIND_ANGLES[3]).times(5));
-        allowance8knt = allowance8knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[1]).get(ALLOWANCES_TRUE_WIND_ANGLES[5]).times(5));
-        allowance8knt = allowance8knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[1]).get(ALLOWANCES_TRUE_WIND_ANGLES[7]).times(5));
-        allowance8knt = allowance8knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[1]).get(gybeAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[1])).times(40));
-        allowance8knt = allowance8knt.divide(100);
-        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[1], allowance8knt);
-        
-        Duration allowance10knt = timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[2]).get(beatAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[2])).times(35);
-        allowance10knt = allowance10knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[2]).get(ALLOWANCES_TRUE_WIND_ANGLES[1]).times(10));
-        allowance10knt = allowance10knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[2]).get(ALLOWANCES_TRUE_WIND_ANGLES[3]).times(7.5));
-        allowance10knt = allowance10knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[2]).get(ALLOWANCES_TRUE_WIND_ANGLES[5]).times(10));
-        allowance10knt = allowance10knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[2]).get(ALLOWANCES_TRUE_WIND_ANGLES[7]).times(10));
-        allowance10knt = allowance10knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[2]).get(gybeAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[2])).times(27.5));
-        allowance10knt = allowance10knt.divide(100);
-        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[2], allowance10knt);
-        
-        Duration allowance12knt = timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[3]).get(beatAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[3])).times(30);
-        allowance12knt = allowance12knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[3]).get(ALLOWANCES_TRUE_WIND_ANGLES[1]).times(15));
-        allowance12knt = allowance12knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[3]).get(ALLOWANCES_TRUE_WIND_ANGLES[3]).times(10));
-        allowance12knt = allowance12knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[3]).get(ALLOWANCES_TRUE_WIND_ANGLES[5]).times(15));
-        allowance12knt = allowance12knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[3]).get(ALLOWANCES_TRUE_WIND_ANGLES[7]).times(15));
-        allowance12knt = allowance12knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[3]).get(gybeAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[3])).times(15));
-        allowance12knt = allowance12knt.divide(100);
-        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[3], allowance12knt);
-        
-        Duration allowance14knt = timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[4]).get(beatAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[4])).times(25);
-        allowance14knt = allowance14knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[4]).get(ALLOWANCES_TRUE_WIND_ANGLES[1]).times(17.5));
-        allowance14knt = allowance14knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[4]).get(ALLOWANCES_TRUE_WIND_ANGLES[3]).times(12.5));
-        allowance14knt = allowance14knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[4]).get(ALLOWANCES_TRUE_WIND_ANGLES[5]).times(17.5));
-        allowance14knt = allowance14knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[4]).get(ALLOWANCES_TRUE_WIND_ANGLES[7]).times(15));
-        allowance14knt = allowance14knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[4]).get(gybeAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[4])).times(12.5));
-        allowance14knt = allowance14knt.divide(100);
-        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[4], allowance14knt);
-        
-        Duration allowance16knt = timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[5]).get(beatAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[5])).times(20);
-        allowance16knt = allowance16knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[5]).get(ALLOWANCES_TRUE_WIND_ANGLES[1]).times(20));
-        allowance16knt = allowance16knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[5]).get(ALLOWANCES_TRUE_WIND_ANGLES[3]).times(15));
-        allowance16knt = allowance16knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[5]).get(ALLOWANCES_TRUE_WIND_ANGLES[5]).times(20));
-        allowance16knt = allowance16knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[5]).get(ALLOWANCES_TRUE_WIND_ANGLES[7]).times(15));
-        allowance16knt = allowance16knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[5]).get(gybeAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[5])).times(10));
-        allowance16knt = allowance16knt.divide(100);
-        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[5], allowance16knt);
-        
-        Duration allowance20knt = timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[6]).get(beatAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[6])).times(25);
-        allowance20knt = allowance20knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[6]).get(ALLOWANCES_TRUE_WIND_ANGLES[1]).times(17.5));
-        allowance20knt = allowance20knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[6]).get(ALLOWANCES_TRUE_WIND_ANGLES[3]).times(12.5));
-        allowance20knt = allowance20knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[6]).get(ALLOWANCES_TRUE_WIND_ANGLES[5]).times(17.5));
-        allowance20knt = allowance20knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[6]).get(ALLOWANCES_TRUE_WIND_ANGLES[7]).times(15));
-        allowance20knt = allowance20knt.plus(timeAllowancesPerTrueWindSpeedAndAngle.get(ALLOWANCES_TRUE_WIND_SPEEDS[6]).get(gybeAngles.get(ALLOWANCES_TRUE_WIND_SPEEDS[6])).times(12.5));
-        allowance20knt = allowance20knt.divide(100);
-        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[6], allowance20knt);
-        
-        return result;
-    }
-
     @Override
     public Map<Speed, Duration> getNonSpinnakerAllowances() {
         // TODO Auto-generated method stub

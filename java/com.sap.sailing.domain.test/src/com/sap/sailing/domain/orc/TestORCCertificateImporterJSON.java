@@ -19,7 +19,7 @@ public class TestORCCertificateImporterJSON {
     private static final String RESOURCES = "resources/orc/";
     
     @Test
-    public void testSimpleLocalJSONFileRead () throws IOException, ParseException {
+    public void testSimpleLocalJSONFileRead() throws IOException, ParseException {
         File fileGER = new File(RESOURCES + "GER2019.json");
         ORCCertificateImporter importer = new ORCCertificateImporterJSON(new FileInputStream(fileGER));
         ORCCertificate milan = importer.getCertificate(" ger 7323");
@@ -28,7 +28,7 @@ public class TestORCCertificateImporterJSON {
     }
     
     @Test
-    public void testSimpleOnlineJSONFileRead () throws IOException, ParseException {
+    public void testSimpleOnlineJSONFileRead() throws IOException, ParseException {
         ORCCertificateImporter importer = new ORCCertificateImporterJSON(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
         ORCCertificate swan  = importer.getCertificate(" GER 5335");
         ORCCertificate moana = importer.getCertificate("ger  55 49 ");
@@ -40,8 +40,5 @@ public class TestORCCertificateImporterJSON {
         assertEquals(788.2, moana.getWindwardLeewardAllowances().get(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[0]).asSeconds(), 0.1);
         assertEquals(861.0, swan .getLongDistanceAllowances().get(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[0]).asSeconds(), 0.1);
         assertEquals(787.2, moana.getLongDistanceAllowances().get(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[0]).asSeconds(), 0.1);
-        
-        //TEST of new Implementation of ORCCertificateImpl.getLongDistanceAllowances()
-        assertEquals(787.2, ((ORCCertificateImpl) moana).getLongDistanceAllowancesAlternative().get(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[0]).asSeconds(), 0.1);
     }
 }
