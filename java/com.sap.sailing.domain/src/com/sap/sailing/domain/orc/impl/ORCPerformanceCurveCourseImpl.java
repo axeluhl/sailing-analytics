@@ -51,7 +51,7 @@ public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse 
         } else {
             List<ORCPerformanceCurveLeg> resultLegs = new ArrayList<>();
             resultLegs.addAll(legs.subList(0, lastFinishedLeg));
-            resultLegs.add(new ORCPerformanceCurveLegImpl(legs.get(lastFinishedLeg + 1).getLength().scale(perCentOfCurrentLeg), legs.get(lastFinishedLeg + 1).getTwa()));
+            resultLegs.add(new ORCPerformanceCurveLegImpl(legs.get(lastFinishedLeg).getLength().scale(perCentOfCurrentLeg), legs.get(lastFinishedLeg).getTwa()));
             return new ORCPerformanceCurveCourseImpl(resultLegs);
         }
     }

@@ -48,7 +48,34 @@ public class TestORCPerformanceCurveCourse {
     
     @Test
     public void testSubcourseOfComplexCourse () {
+        double accuracy = 0.000000001;
+        List<ORCPerformanceCurveLeg> legs = new ArrayList<>();
+        legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(3.78), new DegreeBearingImpl(0)));
+        legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.45), new DegreeBearingImpl(90)));
+        legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(5), new DegreeBearingImpl(120)));
+        legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(10.23), new DegreeBearingImpl(180)));
+        legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(2.57), new DegreeBearingImpl(0)));
+        ORCPerformanceCurveCourse course = new ORCPerformanceCurveCourseImpl(legs);
         
+     // case 0: no leg finished, 40.0% of current leg
+        ORCPerformanceCurveCourse subcourse0 = course.subcourse(0, 0.4);
+        assertEquals(1.512, subcourse0.getTotalLength().getNauticalMiles(), accuracy);
+        
+        // case 1: first leg finished, 0.0% of current leg
+        ORCPerformanceCurveCourse subcourse1 = course.subcourse(1, 0);
+        assertEquals(3.78, subcourse1.getTotalLength().getNauticalMiles(), accuracy);
+        
+        // case 2: first leg finished, 12.5% of current leg
+        ORCPerformanceCurveCourse subcourse2 = course.subcourse(1, 0.125);
+        assertEquals(3.96125, subcourse2.getTotalLength().getNauticalMiles(), accuracy);
+        
+        // special case: didn't start, equals to no legs finished and 0.0% of current leg
+        ORCPerformanceCurveCourse subcourseSpecial1 = course.subcourse(0, 0);
+        assertEquals(0, subcourseSpecial1.getTotalLength().getNauticalMiles(), accuracy);
+        
+        // special case: number of finished legs is higher then number of actual legs
+        ORCPerformanceCurveCourse subcourseSpecial2 = course.subcourse(10,0);
+        assertEquals(23.03, subcourseSpecial2.getTotalLength().getNauticalMiles(), accuracy);
     }
     
 }
