@@ -143,7 +143,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final MongoDatabase database;
     private final CompetitorWithBoatRefJsonSerializer competitorWithBoatRefSerializer = CompetitorWithBoatRefJsonSerializer.create();
-    private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
+    private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create(/* serialize boat */ true, /* serializeNonPublicCompetitorFields */ true);
     private final BoatJsonSerializer boatSerializer = BoatJsonSerializer.create();
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
     private final TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> raceTrackingConnectivityParamsServiceFinder;
