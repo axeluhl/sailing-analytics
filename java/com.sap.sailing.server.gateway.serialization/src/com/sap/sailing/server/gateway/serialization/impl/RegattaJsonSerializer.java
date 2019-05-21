@@ -17,6 +17,7 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
     public static final String FIELD_START_DATE = "startDate";
     public static final String FIELD_END_DATE = "endDate";
     public static final String FIELD_SCORINGSYSTEM = "scoringSystem";
+    public static final String FIELD_RANKINGMETRIC = "rankingMetric";
     public static final String FIELD_SERIES = "series";
     public static final String FIELD_COMPETITORS = "competitors";
     public static final String FIELD_BOATS = "boats";
@@ -49,6 +50,7 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
         result.put(FIELD_START_DATE, regatta.getStartDate() != null ? regatta.getStartDate().asMillis() : null);
         result.put(FIELD_END_DATE, regatta.getEndDate() != null ? regatta.getEndDate().asMillis() : null);
         result.put(FIELD_SCORINGSYSTEM, regatta.getScoringScheme().getType().name());
+        result.put(FIELD_RANKINGMETRIC, regatta.getRankingMetricType().name());
         result.put(FIELD_BOATCLASS, regatta.getBoatClass() != null ? regatta.getBoatClass().getName() : null);
         result.put(FIELD_COURSE_AREA_ID,
                 regatta.getDefaultCourseArea() != null ? regatta.getDefaultCourseArea().getId().toString() : null);
