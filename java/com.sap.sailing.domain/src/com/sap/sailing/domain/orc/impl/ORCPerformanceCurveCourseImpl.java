@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.orc.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
@@ -13,7 +15,7 @@ public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse 
     private Distance totalLength;
 
     public ORCPerformanceCurveCourseImpl(List<ORCPerformanceCurveLeg> legs) {
-        this.legs = legs;
+        this.legs = Collections.unmodifiableList(legs);
         totalLength = new NauticalMileDistance(0);
 
         for (ORCPerformanceCurveLeg leg : legs) {
@@ -38,8 +40,20 @@ public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse 
 
     @Override
     public ORCPerformanceCurveCourse subcourse(int lastFinishedLeg, float perCentOfCurrentLeg) {
-        // TODO Auto-generated method stub
-        return null;
+        if (lastFinishedLeg == 0) {
+            ORCPerformanceCurveLeg resultLeg = legs.get(0);
+            List<ORCPerformanceCurveLeg> resultLegs = new ArrayList<>();
+            resultLegs.add(new ORCPerformanceCurveLegImpl(resultLeg.getLength().scale(perCentOfCurrentLeg), resultLeg.getTwa()));
+            return new ORCPerformanceCurveCourseImpl(resultLegs);
+        }
+        else if (lastFinishedLeg >= legs.size()) {
+            return this;
+        } else {
+            List<ORCPerformanceCurveLeg> resultLegs = new ArrayList<>();
+            resultLegs.addAll(legs.subList(0, lastFinishedLeg));
+            resultLegs.add(new ORCPerformanceCurveLegImpl(legs.get(lastFinishedLeg + 1).getLength().scale(perCentOfCurrentLeg), legs.get(lastFinishedLeg + 1).getTwa()));
+            return new ORCPerformanceCurveCourseImpl(resultLegs);
+        }
     }
-
+    
 }
