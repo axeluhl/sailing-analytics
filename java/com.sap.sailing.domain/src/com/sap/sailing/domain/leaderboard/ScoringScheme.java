@@ -3,6 +3,8 @@ package com.sap.sailing.domain.leaderboard;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -86,12 +88,19 @@ public interface ScoringScheme extends Serializable {
             TimePoint timePoint, Leaderboard leaderboard);
 
     /**
-     * @param competitor1Scores scores of the first competitor, in the order of race columns in the leaderboard
-     * @param competitor2Scores scores of the second competitor, in the order of race columns in the leaderboard
-     * @param leaderboard TODO
+     * @param competitor1Scores
+     *            scores of the first competitor, in the order of race columns in the leaderboard
+     * @param competitor2Scores
+     *            scores of the second competitor, in the order of race columns in the leaderboard
+     * @param discardedRaceColumnsPerCompetitor
+     *            for each competitor holds the result of {@link Leaderboard#getResultDiscardingRule()
+     *            Leaderborad.getResultDiscardingRule()}{@code .}{@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint)
+     *            getDiscardedRaceColumns(...)}. This accelerates things considerable because we do not have to make this expensive calculation
+     *            for each competitor again.
      */
-    int compareByBetterScore(Competitor o1,
-            List<Util.Pair<RaceColumn, Double>> competitor1Scores, Competitor o2, List<Util.Pair<RaceColumn, Double>> competitor2Scores, boolean nullScoresAreBetter, TimePoint timePoint, Leaderboard leaderboard);
+    int compareByBetterScore(Competitor o1, List<Util.Pair<RaceColumn, Double>> competitor1Scores, Competitor o2,
+            List<Util.Pair<RaceColumn, Double>> competitor2Scores, boolean nullScoresAreBetter, TimePoint timePoint,
+            Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor);
 
     /**
      * In case two competitors scored in different numbers of races, this scoring scheme decides whether this
@@ -103,9 +112,13 @@ public interface ScoringScheme extends Serializable {
     ScoringSchemeType getType();
 
     /**
-     * Usually, when all other sorting criteria end up in a tie, the last race sailed is used to decide.
-     * @param o1 TODO
-     * @param o2 TODO
+     * Usually, when all other sorting criteria end up in a tie, the last race sailed is used to decide, and from there
+     * backwards. This implements Racing Rules of Sailing (RRS) rule A8.2:
+     * <p>
+     * 
+     * <em>"A8.2 If a tie remains between two or more boats, they shall be ranked in order of their scores in the last
+     * race. Any remaining ties shall be broken by using the tied boats’ scores in the next-to-last race and so on until
+     * all ties are broken. These scores shall be used even if some of them are excluded scores."</em>
      */
     int compareByLastRace(List<Util.Pair<RaceColumn, Double>> o1Scores, List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Competitor o1, Competitor o2);
 
