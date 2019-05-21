@@ -57,7 +57,7 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
      */
     public static CompetitorJsonSerializer create(boolean serializeBoat) {
         return new CompetitorJsonSerializer(TeamJsonSerializer.create(), serializeBoat?BoatJsonSerializer.create():null,
-                /* serializeNonPublicFields */ false);
+                /* serializeNonPublicFields */ true);
     }
 
     /**
