@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -121,28 +122,41 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
     }
 
     /**
-     * Assuming both competitors scored in the same number of races, compares the sorted scores.
+     * Assuming both competitors scored in the same number of races, compares the sorted scores based on World Sailing's
+     * Racing Rules of Sailing (RRS) addendum A8.1:<p>
+     * 
+     * <em>"A8.1 If there is a series-score tie between two or more boats, each boat’s race scores shall be listed in
+     * order of best to worst, and at the first point(s) where there is a difference the tie shall be broken in favour
+     * of the boat(s) with the best score(s). No excluded scores shall be used."</em>
      */
     @Override
-    public int compareByBetterScore(Competitor o1, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint, Leaderboard leaderboard) {
-        final Comparator<Double> pureScoreComparator = getScoreComparator(nullScoresAreBetter);
+    public int compareByBetterScore(Competitor o1, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1Scores,
+            Competitor o2, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter,
+            TimePoint timePoint, Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor) {
+        final Comparator<Pair<RaceColumn, Double>> ruleA8_1ScoreComparator = getRuleA8_1ScoreComparator(nullScoresAreBetter);
         // needs to compare net points; therefore, divide the total points by the column factor for comparison:
-        List<Double> o1NetScores = new ArrayList<>();
+        List<Pair<RaceColumn, Double>> o1NetScores = new ArrayList<>();
+        final Set<RaceColumn> o1Discards = discardedRaceColumnsPerCompetitor.get(o1);
         for (com.sap.sse.common.Util.Pair<RaceColumn, Double> o1ColumnAndScore : o1Scores) {
-            o1NetScores.add(o1ColumnAndScore.getB() / getScoreFactor(o1ColumnAndScore.getA()));
+            if (!o1Discards.contains(o1ColumnAndScore.getA())) {
+                o1NetScores.add(new Pair<>(o1ColumnAndScore.getA(), o1ColumnAndScore.getB() / getScoreFactor(o1ColumnAndScore.getA())));
+            }
         }
-        List<Double> o2NetScores = new ArrayList<>();
+        List<Pair<RaceColumn, Double>> o2NetScores = new ArrayList<>();
+        final Set<RaceColumn> o2Discards = discardedRaceColumnsPerCompetitor.get(o2);
         for (com.sap.sse.common.Util.Pair<RaceColumn, Double> o2ColumnAndScore : o2Scores) {
-            o2NetScores.add(o2ColumnAndScore.getB() / getScoreFactor(o2ColumnAndScore.getA()));
+            if (!o2Discards.contains(o2ColumnAndScore.getA())) {
+                o2NetScores.add(new Pair<>(o2ColumnAndScore.getA(), o2ColumnAndScore.getB() / getScoreFactor(o2ColumnAndScore.getA())));
+            }
         }
-        Collections.sort(o1NetScores, pureScoreComparator);
-        Collections.sort(o2NetScores, pureScoreComparator);
+        Collections.sort(o1NetScores, ruleA8_1ScoreComparator);
+        Collections.sort(o2NetScores, ruleA8_1ScoreComparator);
         // now both lists are sorted from best to worst score
-        Iterator<Double> o1Iter = o1NetScores.iterator();
-        Iterator<Double> o2Iter = o2NetScores.iterator();
+        Iterator<Pair<RaceColumn, Double>> o1Iter = o1NetScores.iterator();
+        Iterator<Pair<RaceColumn, Double>> o2Iter = o2NetScores.iterator();
         int result = 0;
         while (result == 0 && o1Iter.hasNext() && o2Iter.hasNext()) {
-            result = pureScoreComparator.compare(o1Iter.next(), o2Iter.next());
+            result = getScoreComparator(nullScoresAreBetter).compare(o1Iter.next().getB(), o2Iter.next().getB());
         }
         if (o1Iter.hasNext() != o2Iter.hasNext()) {
             // if, as may be allowed by some scoring scheme variants, competitors with different numbers of scored races are compared
@@ -150,6 +164,16 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
             result = o1Iter.hasNext() ? -1 : 1;
         }
         return result;
+    }
+
+    /**
+     * Obtains a comparator that compares two non-discarded scores according the rule A8.1, or any
+     * modification thereof (which subclasses can provide by overriding this method). This default implementation
+     * simply uses the {@link #getScoreComparator(boolean) score comparator} to compare the net scores
+     * directly.
+     */
+    protected Comparator<Pair<RaceColumn, Double>> getRuleA8_1ScoreComparator(boolean nullScoresAreBetter) {
+        return (p1, p2)->getScoreComparator(nullScoresAreBetter).compare(p1.getB(), p2.getB());
     }
 
     /**

@@ -3,6 +3,8 @@ package com.sap.sailing.domain.leaderboard;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -86,12 +88,19 @@ public interface ScoringScheme extends Serializable {
             TimePoint timePoint, Leaderboard leaderboard);
 
     /**
-     * @param competitor1Scores scores of the first competitor, in the order of race columns in the leaderboard
-     * @param competitor2Scores scores of the second competitor, in the order of race columns in the leaderboard
-     * @param leaderboard TODO
+     * @param competitor1Scores
+     *            scores of the first competitor, in the order of race columns in the leaderboard
+     * @param competitor2Scores
+     *            scores of the second competitor, in the order of race columns in the leaderboard
+     * @param discardedRaceColumnsPerCompetitor
+     *            for each competitor holds the result of {@link Leaderboard#getResultDiscardingRule()
+     *            Leaderborad.getResultDiscardingRule()}{@code .}{@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint)
+     *            getDiscardedRaceColumns(...)}. This accelerates things considerable because we do not have to make this expensive calculation
+     *            for each competitor again.
      */
-    int compareByBetterScore(Competitor o1,
-            List<Util.Pair<RaceColumn, Double>> competitor1Scores, Competitor o2, List<Util.Pair<RaceColumn, Double>> competitor2Scores, boolean nullScoresAreBetter, TimePoint timePoint, Leaderboard leaderboard);
+    int compareByBetterScore(Competitor o1, List<Util.Pair<RaceColumn, Double>> competitor1Scores, Competitor o2,
+            List<Util.Pair<RaceColumn, Double>> competitor2Scores, boolean nullScoresAreBetter, TimePoint timePoint,
+            Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor);
 
     /**
      * In case two competitors scored in different numbers of races, this scoring scheme decides whether this

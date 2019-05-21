@@ -1263,7 +1263,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2);
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(leaderboard.getNetPoints(c[0], later), leaderboard.getNetPoints(c[1], later), 0.000000001);
-        assertTrue(rankedCompetitors.indexOf(c[0]) < rankedCompetitors.indexOf(c[1])); // based on last race f2
+        assertTrue(rankedCompetitors.indexOf(c[1]) < rankedCompetitors.indexOf(c[0])); // based on last race f2
     }
 
     /**
