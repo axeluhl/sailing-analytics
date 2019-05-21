@@ -7,7 +7,6 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -171,17 +170,12 @@ public class MasterDataResource extends AbstractSailingServerResource {
         }
         
         // Checking permissions after filtering of MediaTracks to be transferred.
-        Collection<MediaTrack> mediaTracksToKeep = new ArrayList<>();
         for (MediaTrack mediaTrack : masterData.getFilteredMediaTracks()) {
             if (!securityService.hasCurrentUserReadPermission(mediaTrack)) {
-                logger.info("No permission to read media track " + mediaTrack.dbId + " -> pruning.");
-            }
-            else {
-                mediaTracksToKeep.add(mediaTrack);
+                throw new AuthorizationException("No permission to read media track " + mediaTrack.dbId);
             }
         }
-        masterData.setFilteredMediaTracks(mediaTracksToKeep);
-
+        
         final boolean compressValue= compress;
         final ResponseBuilder resp = CompetitorSerializationCustomizer
                 .doWithCustomizer(c -> !securityService.hasCurrentUserReadPermission(c) && c.getEmail() != null, () -> {

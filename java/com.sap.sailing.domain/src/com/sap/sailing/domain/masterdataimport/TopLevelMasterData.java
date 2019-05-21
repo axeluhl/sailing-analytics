@@ -317,10 +317,4 @@ public class TopLevelMasterData implements Serializable {
     public Iterable<DeviceConfiguration> getDeviceConfigurations() {
         return deviceConfigurations;
     }
-
-    public void setFilteredMediaTracks(Collection<MediaTrack> mediaTracksToKeep) {
-        this.filteredMediaTracks.clear();
-        this.filteredMediaTracks.addAll(mediaTracksToKeep);
-
-    }
 }
