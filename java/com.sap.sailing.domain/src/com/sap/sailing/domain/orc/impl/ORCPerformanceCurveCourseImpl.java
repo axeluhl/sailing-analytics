@@ -39,7 +39,7 @@ public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse 
     }
 
     @Override
-    public ORCPerformanceCurveCourse subcourse(int lastFinishedLeg, float perCentOfCurrentLeg) {
+    public ORCPerformanceCurveCourse subcourse(int lastFinishedLeg, double perCentOfCurrentLeg) {
         if (lastFinishedLeg == 0) {
             ORCPerformanceCurveLeg resultLeg = legs.get(0);
             List<ORCPerformanceCurveLeg> resultLegs = new ArrayList<>();

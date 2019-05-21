@@ -15,5 +15,5 @@ public interface ORCPerformanceCurveCourse {
         return result;
     }
     
-    ORCPerformanceCurveCourse subcourse(int lastFinishedLeg, float perCentOfCurrentLeg);
+    ORCPerformanceCurveCourse subcourse(int lastFinishedLeg, double perCentOfCurrentLeg);
 }
