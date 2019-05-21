@@ -103,9 +103,13 @@ public interface ScoringScheme extends Serializable {
     ScoringSchemeType getType();
 
     /**
-     * Usually, when all other sorting criteria end up in a tie, the last race sailed is used to decide.
-     * @param o1 TODO
-     * @param o2 TODO
+     * Usually, when all other sorting criteria end up in a tie, the last race sailed is used to decide, and from there
+     * backwards. This implements Racing Rules of Sailing (RRS) rule A8.2:
+     * <p>
+     * 
+     * <em>"A8.2 If a tie remains between two or more boats, they shall be ranked in order of their scores in the last
+     * race. Any remaining ties shall be broken by using the tied boats’ scores in the next-to-last race and so on until
+     * all ties are broken. These scores shall be used even if some of them are excluded scores."</em>
      */
     int compareByLastRace(List<Util.Pair<RaceColumn, Double>> o1Scores, List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Competitor o1, Competitor o2);
 

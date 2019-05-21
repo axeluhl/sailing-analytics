@@ -161,8 +161,18 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
     }
 
     /**
-     * @param o1ScoresIncludingDiscarded scores that include the points for those races that have been discarded (total points)
-     * @param o2ScoresIncludingDiscarded scores that include the points for those races that have been discarded (total points)
+     * Looks backwards starting at the last race until the first score difference is found, including the discarded
+     * scored. This implements Racing Rules of Sailing (RRS) section A8.2:
+     * <p>
+     * 
+     * <em>"A8.2 If a tie remains between two or more boats, they shall be ranked in order of their scores in the last race.
+     * Any remaining ties shall be broken by using the tied boats’ scores in the next-to-last race and so on until all
+     * ties are broken. These scores shall be used even if some of them are excluded scores."</em>
+     * 
+     * @param o1ScoresIncludingDiscarded
+     *            scores that include the points for those races that have been discarded (total points)
+     * @param o2ScoresIncludingDiscarded
+     *            scores that include the points for those races that have been discarded (total points)
      */
     @Override
     public int compareByLastRace(List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1ScoresIncludingDiscarded,

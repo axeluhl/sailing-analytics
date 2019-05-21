@@ -1151,6 +1151,133 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
     }
 
     /**
+     * Tests the {@link LowPointTieBreakBasedOnLastSeriesOnly} scoring scheme's tie breaking rule by setting up a
+     * leaderboard with a qualification and a final series such that the competitors have equal points but different
+     * number of wins in the final series, leading to a different order than it would if sorting by the total number
+     * of wins.
+     */
+    @Test
+    public void testTieBreakWithTieBreakBasedOnLastNonMedalSeriesNoMedal() throws NoWindException {
+        Competitor[] c = createCompetitors(3).toArray(new Competitor[0]);
+        Competitor[] q1 = new Competitor[] { c[1], c[0], c[2] }; // c[0] wins no race in the qualification, c[1] wins two,
+        Competitor[] q2 = new Competitor[] { c[1], c[0], c[2] }; // but that doesn't help c[1] because c[0] wins one in the final
+        Competitor[] f1 = new Competitor[] { c[2], c[0], c[1] }; // where c[1] wins none. The tie is broken in favor of c[0].
+        Competitor[] f2 = new Competitor[] { c[0], c[1], c[2] };
+        Regatta regatta = createRegatta(/* qualifying */2, new String[] { "Default" }, /* final */2, new String[] { "Default" },
+                /* medal */ false, /* medal */ 0, "testTieBreakWithTieBreakBasedOnLastNonMedalSeriesNoMedal",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT_TIE_BREAK_BASED_ON_LAST_SERIES_ONLY));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        createAndAttachTrackedRaces(series.get(0), "Default", /* withScores */ true, q1, q2);
+        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2);
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(leaderboard.getNetPoints(c[0], later), leaderboard.getNetPoints(c[1], later), 0.000000001);
+        assertTrue(leaderboard.getNetPoints(c[0], later) < leaderboard.getNetPoints(c[2], later));
+        assertTrue(rankedCompetitors.indexOf(c[0]) < rankedCompetitors.indexOf(c[1]));
+    }
+
+    /**
+     * Tests the {@link LowPointTieBreakBasedOnLastSeriesOnly} scoring scheme's tie breaking rule by setting up a
+     * leaderboard with a qualification and a final series such that the competitors have equal points but different
+     * number of wins in the final series, leading to a different order than it would if sorting by the total number
+     * of wins.
+     */
+    @Test
+    public void testTieBreakWithTieBreakBasedOnLastNonMedalSeriesNoMedalDecisionByLastRace() throws NoWindException {
+        Competitor[] c = createCompetitors(3).toArray(new Competitor[0]);
+        Competitor[] q1 = new Competitor[] { c[1], c[0], c[2] }; // c[0] and c[1] have equal wins and scores,
+        Competitor[] q2 = new Competitor[] { c[0], c[1], c[2] }; // but c[1] has won the last race
+        Competitor[] f1 = new Competitor[] { c[0], c[1], c[2] };
+        Competitor[] f2 = new Competitor[] { c[1], c[0], c[2] };
+        Regatta regatta = createRegatta(/* qualifying */2, new String[] { "Default" }, /* final */2, new String[] { "Default" },
+                /* medal */ false, /* medal */ 0, "testTieBreakWithTieBreakBasedOnLastNonMedalSeriesNoMedal",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT_TIE_BREAK_BASED_ON_LAST_SERIES_ONLY));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        createAndAttachTrackedRaces(series.get(0), "Default", /* withScores */ true, q1, q2);
+        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2);
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(leaderboard.getNetPoints(c[0], later), leaderboard.getNetPoints(c[1], later), 0.000000001);
+        assertTrue(rankedCompetitors.indexOf(c[0]) < rankedCompetitors.indexOf(c[1])); // based on last race f2
+    }
+
+    /**
+     * Tests the {@link LowPointTieBreakBasedOnLastSeriesOnly} scoring scheme's tie breaking rule by setting up a
+     * leaderboard with a qualification and a final series such that the competitors have equal points, and equal
+     * scores in the final series, but one of them having more wins than the other in the qualification. In this
+     * case, the qualification counts.
+     */
+    @Test
+    public void testTieBreakWithTieBreakBasedOnLastNonMedalSeriesNoMedalDefaultingToQualification() throws NoWindException {
+        Competitor[] c = createCompetitors(3).toArray(new Competitor[0]);
+        Competitor[] q1 = new Competitor[] { c[1], c[0], c[2] }; // c[0] and c[1] have an equal number of wins in the final series and equal total points;
+        Competitor[] q2 = new Competitor[] { c[2], c[0], c[1] }; // tie breaking is expected to then take the wins in the qualification series into account
+        Competitor[] f1 = new Competitor[] { c[0], c[1], c[2] }; // where c[1] has one more than c[0]
+        Competitor[] f2 = new Competitor[] { c[1], c[0], c[2] }; // tie breaking will have to resort to the qualification, finding the win of c[1]
+        Regatta regatta = createRegatta(/* qualifying */2, new String[] { "Default" }, /* final */2, new String[] { "Default" },
+                /* medal */ false, /* medal */ 0, "testTieBreakWithTieBreakBasedOnLastNonMedalSeriesNoMedalDefaultingToQualification",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT_TIE_BREAK_BASED_ON_LAST_SERIES_ONLY));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        createAndAttachTrackedRaces(series.get(0), "Default", /* withScores */ true, q1, q2);
+        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2);
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(leaderboard.getNetPoints(c[0], later), leaderboard.getNetPoints(c[1], later), 0.000000001);
+        assertTrue(rankedCompetitors.indexOf(c[1]) < rankedCompetitors.indexOf(c[0]));
+    }
+
+    /**
+     * Tests the {@link LowPointTieBreakBasedOnLastSeriesOnly} scoring scheme's tie breaking rule by setting up a
+     * leaderboard with a qualification and a final series as well as a medal race such that the competitors have equal
+     * points but different numbers of wins in the final series
+     */
+    @Test
+    public void testTieBreakWithTieBreakBasedOnLastNonMedalSeriesWithMedal() throws NoWindException {
+        Competitor[] c = createCompetitors(3).toArray(new Competitor[0]);
+        Competitor[] q1 = new Competitor[] { c[1], c[0], c[2] }; // c[0] wins no race in the qualification, c[1] wins two,
+        Competitor[] q2 = new Competitor[] { c[1], c[0], c[2] }; // but that doesn't help c[1] because c[0] wins one in the final
+        Competitor[] f1 = new Competitor[] { c[2], c[0], c[1] }; // where c[1] wins none. The tie is broken in favor of c[0].
+        Competitor[] f2 = new Competitor[] { c[0], c[1], c[2] };
+        Competitor[] m = new Competitor[] { c[0], c[1] }; // c[0] and c[1] got promoted to the medal race, both get disqualified; but in f2 c[2] won, so has to win overall due to count-back
+        Regatta regatta = createRegatta(/* qualifying */2, new String[] { "Default" }, /* final */2, new String[] { "Default" },
+                /* medal */ true, /* medal */ 1, "testTieBreakWithTieBreakBasedOnLastNonMedalSeriesWithMedal",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT_TIE_BREAK_BASED_ON_LAST_SERIES_ONLY));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        createAndAttachTrackedRaces(series.get(0), "Default", /* withScores */ true, q1, q2);
+        createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2);
+        TimePoint later = createAndAttachTrackedRaces(series.get(2), "Medal", /* withScores */ true, m);
+        leaderboard.getScoreCorrection().setMaxPointsReason(c[0], series.get(2).getRaceColumns().iterator().next(), MaxPointsReason.DSQ);
+        leaderboard.getScoreCorrection().setMaxPointsReason(c[1], series.get(2).getRaceColumns().iterator().next(), MaxPointsReason.DSQ);
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(leaderboard.getNetPoints(c[0], later), leaderboard.getNetPoints(c[1], later), 0.000000001);
+        assertTrue(rankedCompetitors.indexOf(c[0]) < rankedCompetitors.indexOf(c[1])); // due to more wins in final series
+    }
+
+    /**
+     * Tests the {@link LowPointTieBreakBasedOnLastSeriesOnly} scoring scheme's tie breaking rule by setting up a
+     * leaderboard with a qualification and a final series as well as a medal race such that the competitors have equal
+     * points but different numbers of wins in the final series
+     */
+    @Test
+    public void testTieBreakWithTieBreakBasedOnLastNonMedalSeriesWithMedalDecisionByLastRace() throws NoWindException {
+        Competitor[] c = createCompetitors(3).toArray(new Competitor[0]);
+        Competitor[] q1 = new Competitor[] { c[1], c[0], c[2] }; // c[0] and c[1] have equal wins and scores,
+        Competitor[] q2 = new Competitor[] { c[0], c[1], c[2] }; // but c[1] has won the last race before the medal
+        Competitor[] f1 = new Competitor[] { c[0], c[1], c[2] };
+        Competitor[] f2 = new Competitor[] { c[1], c[0], c[2] };
+        Competitor[] m = new Competitor[] { c[0], c[1] }; // c[0] and c[1] got promoted to the medal race, both get disqualified; but in f2 c[2] won, so has to win overall due to count-back
+        Regatta regatta = createRegatta(/* qualifying */2, new String[] { "Default" }, /* final */2, new String[] { "Default" },
+                /* medal */ true, /* medal */ 1, "testTieBreakWithTieBreakBasedOnLastNonMedalSeriesWithMedal",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT_TIE_BREAK_BASED_ON_LAST_SERIES_ONLY));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        createAndAttachTrackedRaces(series.get(0), "Default", /* withScores */ true, q1, q2);
+        createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2);
+        TimePoint later = createAndAttachTrackedRaces(series.get(2), "Medal", /* withScores */ true, m);
+        leaderboard.getScoreCorrection().setMaxPointsReason(c[0], series.get(2).getRaceColumns().iterator().next(), MaxPointsReason.DSQ);
+        leaderboard.getScoreCorrection().setMaxPointsReason(c[1], series.get(2).getRaceColumns().iterator().next(), MaxPointsReason.DSQ);
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(leaderboard.getNetPoints(c[0], later), leaderboard.getNetPoints(c[1], later), 0.000000001);
+        assertTrue(rankedCompetitors.indexOf(c[1]) < rankedCompetitors.indexOf(c[0])); // due to last non-medal race
+    }
+
+    /**
      * Reported by Clemens Fackeldey:<p>
      * 
      * <pre>
