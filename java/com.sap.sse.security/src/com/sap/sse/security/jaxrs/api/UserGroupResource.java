@@ -2,6 +2,7 @@ package com.sap.sse.security.jaxrs.api;
 
 import java.util.UUID;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -84,6 +85,29 @@ public class UserGroupResource extends AbstractSecurityResource {
                 response = Response.status(Status.INTERNAL_SERVER_ERROR).entity("Could not create user group.").build();
             } else {
                 response = Response.status(Status.CREATED).entity(convertUserGroupToJson(group).toJSONString()).build();
+            }
+        }
+
+        return response;
+    }
+
+    @DELETE
+    @Produces("application/json;charset=UTF-8")
+    public Response deleteUserGroup(@QueryParam("groupName") String groupName) {
+        Response response;
+        final UserGroup usergroup = getService().getUserGroupByName(groupName);
+        if (usergroup == null) {
+            response = Response.status(Status.BAD_REQUEST).entity("Usergroup with this name does not exist.").build();
+        } else {
+            if (getService().hasCurrentUserDeletePermission(usergroup)) {
+                try {
+                    getService().deleteUserGroup(usergroup);
+                    response = Response.status(Status.NO_CONTENT).build();
+                } catch (UserGroupManagementException e) {
+                    response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+                }
+            } else {
+                response = Response.status(Status.UNAUTHORIZED).build();
             }
         }
 
