@@ -111,10 +111,12 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     public Iterable<MediaTrackWithSecurityDTO> getAllMediaTracks() {
         Collection<MediaTrackWithSecurityDTO> result = new ArrayList<>();
         for (MediaTrack mediaTrack : racingEventService().getAllMediaTracks()) {
-            MediaTrackWithSecurityDTO securedMediaTrack = new MediaTrackWithSecurityDTO(mediaTrack);
-            SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), securedMediaTrack,
-                    mediaTrack.getIdentifier());
-            result.add(securedMediaTrack);
+            if (racingEventService().getSecurityService().hasCurrentUserReadPermission(mediaTrack)) {
+                MediaTrackWithSecurityDTO securedMediaTrack = new MediaTrackWithSecurityDTO(mediaTrack);
+                SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), securedMediaTrack,
+                        mediaTrack.getIdentifier());
+                result.add(securedMediaTrack);
+            }
         }
         return result;
     }
