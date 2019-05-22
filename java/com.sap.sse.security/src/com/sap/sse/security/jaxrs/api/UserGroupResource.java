@@ -115,7 +115,7 @@ public class UserGroupResource extends AbstractSecurityResource {
         return response;
     }
 
-    @Path("/add_to_group")
+    @Path("/user")
     @PUT
     @Produces("application/json;charset=UTF-8")
     public Response addUserToUserGroup(@QueryParam("groupName") String groupName,
