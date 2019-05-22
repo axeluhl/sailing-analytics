@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../fontface.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sponsorships Engine Security Webservices API</title>
+</head>
+<body>
+<h1>SAP Sponsorships Engine Security Webservices API</h1>
+<h2>URL: /api/restsecurity/usergroup</h2>
+
+<b>Description:</b>
+<p>The service creates reads, updates or deletes a user groups and cann add and remove users and roles from/to user groups, based on the HTTP method used.</p>
+<br/>
+<table>
+    <tr>
+        <td>Request Method:</td>
+        <td>GET</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>a JSON document of the following format<br>
+            <pre>{ "id": "31333349-caf7-4c03-ad34-f90e07ad5434", "groupname": "My Test Group", "users": [ "admin", "testuser" ], "roles": [ { "role_id": "c42948df-517b-45cb-9fa9-d1e79f18e115", "role_name": "sailing_viewer", "associated": false } ]}</pre>
+        </td>
+    </tr>
+    <tr>
+        <td>Parameter:</td>
+        <td>
+            <div>id</div> Unique ID of the user group.
+            <div>name</div> Unique name of the user group.
+            At least the ID or the name of the group needs to be provided to get detailled information about the user group.
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl "http://admin:admin@127.0.0.1:8888/security/api/restsecurity/usergroup?id=31333349-caf7-4c03-ad34-f90e07ad5434"</code><br>
+                Will provide a JSON document as explained above.</td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td>Request Method:</td>
+        <td>PUT</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>a JSON document of the following format<br>
+            <pre>{ "id": "9201d7cb-969e-4975-8cf1-32972bb2c8ba", "groupname": "My Test Group", "users": [ "admin" ], "roles": [] }</pre>
+        </td>
+    </tr>
+    <tr>
+        <td>Parameter:</td>
+        <td>
+            <div>groupName</div> Unique name of the user group to crerate.
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl -X PUT "http://admin:admin@127.0.0.1:8888/security/api/restsecurity/usergroup?groupName=My Test Group"</code><br>
+                Will provide a JSON document as explained above.</td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td>Request Method:</td>
+        <td>PUT /user</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>Empty body with preferably status code 200</td>
+    </tr>
+    <tr>
+        <td>Parameter:</td>
+        <td>
+            <div>groupName</div> Unique name of the user group to add the user to.
+            <div>username</div> Unique name of the user to add to the user groupe.
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl -X PUT "http://admin:admin@127.0.0.1:8888/security/api/restsecurity/usergroup/user?username=testuser&groupName=My Test Group"</code><br></td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td>Request Method:</td>
+        <td>PUT /role</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>Empty body with preferably status code 200</td>
+    </tr>
+    <tr>
+        <td>Parameter:</td>
+        <td>
+            <div>groupName</div> Unique name of the user group to add the role to.
+            <div>roleId</div> Unique ID of the role to add to the user group.
+            <div>roleAssociated</div> True or false, depending whether the role's permissions are applied regardless of the user performing the access, only requiring the object access to be owned by this group; otherwise, the role's permissions are only granted if the object accessed is owned by this group and the user performing the access belongs to this group.
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl -X PUT "127.0.0.1:8888/security/api/restsecurity/usergroup/role?roleId=29914406-b0fc-43cd-acc7-62a83931f587&groupName=My Test Group&roleAssociated=true"</code><br></td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td>Request Method:</td>
+        <td>DELETE /role</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>Empty body with preferably status code 204</td>
+    </tr>
+    <tr>
+        <td>Parameter:</td>
+        <td>
+            <div>groupName</div> Unique name of the user group to remove the role from.
+            <div>roleId</div> Unique ID of the role to remove from the user group.
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl -X PUT "127.0.0.1:8888/security/api/restsecurity/usergroup/role?roleId=29914406-b0fc-43cd-acc7-62a83931f587&groupName=My Test Group"</code><br></td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td>Request Method:</td>
+        <td>DELETE /user</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>Empty body with preferably status code 204</td>
+    </tr>
+    <tr>
+        <td>Parameter:</td>
+        <td>
+            <div>groupName</div> Unique name of the user group to remove the user from.
+            <div>username</div> Unique name of the user to remove from the user groupe.
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl -X PUT "127.0.0.1:8888/security/api/restsecurity/usergroup/user?username=testuser&groupName=My Test Group"</code><br></td>
+    </tr>
+</table>
+
+<table>
+    <tr>
+        <td>Request Method:</td>
+        <td>DELETE</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>An Empty response with status code 204 in case of success; error-indicating status codes otherwise
+        </td>
+    </tr>
+    <tr>
+        <td>Mandatory parameters:</td>
+        <td>
+            <div>groupName</div> The name of the usergroup to remove.
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl -X DELETE "127.0.0.1:8888/security/api/restsecurity/usergroup?groupName=My Test Group"</code></td>
+    </tr>
+</table>
+</body>
+</html>
