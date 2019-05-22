@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../fontface.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sponsorships Engine Security Webservices API</title>
+</head>
+<body>
+<h1>SAP Sponsorships Engine Security Webservices API</h1>
+<h2>URL: /api/restsecurity/role</h2>
+
+<b>Description:</b>
+<p>The service reads and updates a role and the associated permissions based on the HTTP method used.</p>
+<br/>
+<table>
+    <tr>
+        <td>Request Method:</td>
+        <td>GET</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>a JSON document of the following format<br>
+            <pre>{"permissions": ["BOAT:READ", "COMPETITOR,EVENT:READ"], "id": "29914406-b0fc-43cd-acc7-62a83931f587"}</pre>
+        </td>
+    </tr>
+    <tr>
+        <td>Mandatory parameters:</td>
+        <td>
+            <div>roleId: UUID of the role to get.</div> 
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl -X GET "127.0.0.1:8888/security/api/restsecurity/role?roleId=29914406-b0fc-43cd-acc7-62a83931f587"</code><br>
+                Will provide a JSON document as explained above.</td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td>Request Method:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>An empty response with status code 200 in case of success; error-indicating status codes otherwise</pre>
+    </tr>
+    <tr>
+        <td>Mandatory parameters:</td>
+        <td>
+            <div>roleId: UUID of the role to update.</div>
+            <div>permissions: Set of String permissions, the role's current permissions will be replaced with.</div> 
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl -X POST "127.0.0.1:8888/security/api/restsecurity/role?roleId=29914406-b0fc-43cd-acc7-62a83931f587&permissions=BOAT:READ&permissions=COMPETITOR,EVENT:READ"</code><br>
+    </tr>
+</table>
+</body>
+</html>
