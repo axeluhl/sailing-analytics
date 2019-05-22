@@ -148,4 +148,38 @@ public class UserGroupResource extends AbstractSecurityResource {
         }
         return response;
     }
+
+    @Path("/user")
+    @DELETE
+    @Produces("application/json;charset=UTF-8")
+    public Response deleteUserFromUserGroup(@QueryParam("groupName") String groupName,
+            @QueryParam("username") String username) {
+        final Response response;
+        final UserGroup usergroup = getService().getUserGroupByName(groupName);
+        if (usergroup == null) {
+            response = Response.status(Status.BAD_REQUEST).entity("Usergroup with this name does not exist.").build();
+        } else {
+            final User user = getService().getUserByName(username);
+            if (user == null) {
+                response = Response.status(Status.BAD_REQUEST).entity("User with this name does not exist.").build();
+            } else {
+                if (getService().hasCurrentUserReadPermission(usergroup)) {
+                    if (!Util.contains(usergroup.getUsers(), user)) {
+                        response = Response.status(Status.BAD_REQUEST).entity("User is not in this group.").build();
+                    } else {
+                        if (getService().hasCurrentUserUpdatePermission(usergroup)) {
+                            getService().removeUserFromUserGroup(usergroup, user);
+                            response = Response.ok().build();
+                        } else {
+                            response = Response.status(Status.UNAUTHORIZED).build();
+                        }
+
+                    }
+                } else {
+                    response = Response.status(Status.UNAUTHORIZED).build();
+                }
+            }
+        }
+        return response;
+    }
 }
