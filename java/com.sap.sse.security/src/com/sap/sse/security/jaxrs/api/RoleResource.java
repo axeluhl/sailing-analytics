@@ -55,12 +55,12 @@ public class RoleResource extends AbstractSecurityResource {
 
                 // create permission objects
                 final Set<WildcardPermission> permissions = new HashSet<>();
-                for (String permissionString : permissionStrings) {
+                for (final String permissionString : permissionStrings) {
                     permissions.add(new WildcardPermission(permissionString));
                 }
 
                 // check only those metea-permissions which changed
-                Set<WildcardPermission> addedPermissions = new HashSet<>(roleDefinition.getPermissions());
+                final Set<WildcardPermission> addedPermissions = new HashSet<>(roleDefinition.getPermissions());
                 addedPermissions.removeAll(permissions);
 
                 if (!getService().hasUserAllWildcardPermissionsForAlreadyRealizedQualifications(roleDefinition,
@@ -93,7 +93,7 @@ public class RoleResource extends AbstractSecurityResource {
             final UUID roleUUID = UUID.fromString(roleId);
 
             // get role definition from role id
-            RoleDefinition roleDefinition = getService().getRoleDefinition(roleUUID);
+            final RoleDefinition roleDefinition = getService().getRoleDefinition(roleUUID);
 
             // null check role definition
             if (roleDefinition == null) {
@@ -104,9 +104,9 @@ public class RoleResource extends AbstractSecurityResource {
                 getService().checkCurrentUserReadPermission(roleDefinition);
 
                 // build json result with permissions and id
-                JSONObject jsonResult = new JSONObject();
-                JSONArray jsonPermissions = new JSONArray();
-                for (WildcardPermission permission : roleDefinition.getPermissions()) {
+                final JSONObject jsonResult = new JSONObject();
+                final JSONArray jsonPermissions = new JSONArray();
+                for (final WildcardPermission permission : roleDefinition.getPermissions()) {
                     jsonPermissions.add(permission.toString());
                 }
                 jsonResult.put("permissions", jsonPermissions);
