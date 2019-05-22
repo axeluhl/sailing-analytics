@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -111,6 +112,40 @@ public class UserGroupResource extends AbstractSecurityResource {
             }
         }
 
+        return response;
+    }
+
+    @Path("/add_to_group")
+    @PUT
+    @Produces("application/json;charset=UTF-8")
+    public Response addUserToUserGroup(@QueryParam("groupName") String groupName,
+            @QueryParam("username") String username) {
+        final Response response;
+        final UserGroup usergroup = getService().getUserGroupByName(groupName);
+        if (usergroup == null) {
+            response = Response.status(Status.BAD_REQUEST).entity("Usergroup with this name does not exist.").build();
+        } else {
+            final User user = getService().getUserByName(username);
+            if (user == null) {
+                response = Response.status(Status.BAD_REQUEST).entity("User with this name does not exist.").build();
+            } else {
+                if (getService().hasCurrentUserReadPermission(usergroup)) {
+                    if (Util.contains(usergroup.getUsers(), user)) {
+                        response = Response.status(Status.BAD_REQUEST).entity("User is already in this group.").build();
+                    } else {
+                        if (getService().hasCurrentUserUpdatePermission(usergroup)) {
+                            getService().addUserToUserGroup(usergroup, user);
+                            response = Response.ok().build();
+                        } else {
+                            response = Response.status(Status.UNAUTHORIZED).build();
+                        }
+
+                    }
+                } else {
+                    response = Response.status(Status.UNAUTHORIZED).build();
+                }
+            }
+        }
         return response;
     }
 }
