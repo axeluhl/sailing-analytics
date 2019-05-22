@@ -84,7 +84,7 @@ public class RoleResource extends AbstractSecurityResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response getPermissionsForRole(@Context UriInfo uriInfo, @QueryParam("roleId") String roleId) {
+    public Response getRole(@Context UriInfo uriInfo, @QueryParam("roleId") String roleId) {
 
         Response resp;
         try {
@@ -111,6 +111,7 @@ public class RoleResource extends AbstractSecurityResource {
                 }
                 jsonResult.put("permissions", jsonPermissions);
                 jsonResult.put("id", roleId);
+                jsonResult.put("name", roleDefinition.getName());
                 resp = Response.ok(jsonResult.toJSONString()).build();
             }
         } catch (IllegalArgumentException e) {
