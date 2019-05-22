@@ -1,5 +1,6 @@
 package com.sap.sse.security.jaxrs.api;
 
+import java.util.Map;
 import java.util.UUID;
 
 import javax.ws.rs.DELETE;
@@ -15,6 +16,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
@@ -45,6 +47,7 @@ public class UserGroupResource extends AbstractSecurityResource {
         return response;
     }
 
+    /** Returns a json object with id, groupname, roles and user names (filtered to thouse the current user can see). */
     private JSONObject convertUserGroupToJson(final UserGroup usergroup) {
         final JSONObject jsonResult = new JSONObject();
         jsonResult.put("id", usergroup.getId().toString());
@@ -58,7 +61,19 @@ public class UserGroupResource extends AbstractSecurityResource {
             }
         }
         jsonResult.put("users", jsonUsersInGroup);
-        System.out.println(jsonResult.toJSONString());
+
+        final JSONArray jsonRolesOfGroup = new JSONArray();
+        for (final Map.Entry<RoleDefinition, Boolean> roleDefinition : usergroup.getRoleDefinitionMap().entrySet()) {
+            // filter users
+            if (getService().hasCurrentUserReadPermission(roleDefinition.getKey())) {
+                JSONObject groupJson = new JSONObject();
+                groupJson.put("role_id", roleDefinition.getKey().getId().toString());
+                groupJson.put("role_name", roleDefinition.getKey().getName());
+                groupJson.put("associated", roleDefinition.getValue());
+                jsonRolesOfGroup.add(groupJson);
+            }
+        }
+        jsonResult.put("roles", jsonRolesOfGroup);
         return jsonResult;
     }
 
