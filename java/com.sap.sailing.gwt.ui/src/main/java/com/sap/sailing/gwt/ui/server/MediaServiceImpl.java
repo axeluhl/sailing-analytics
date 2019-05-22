@@ -86,10 +86,12 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
             RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
         Collection<MediaTrackWithSecurityDTO> mediaTracks = new ArrayList<>();
         for (MediaTrack mediaTrack : racingEventService().getMediaTracksForRace(regattaAndRaceIdentifier)) {
-            MediaTrackWithSecurityDTO securedMediaTrack = new MediaTrackWithSecurityDTO(mediaTrack);
-            SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), securedMediaTrack,
-                    mediaTrack.getIdentifier());
-            mediaTracks.add(securedMediaTrack);
+            if (racingEventService().getSecurityService().hasCurrentUserReadPermission(mediaTrack)) {
+                MediaTrackWithSecurityDTO securedMediaTrack = new MediaTrackWithSecurityDTO(mediaTrack);
+                SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), securedMediaTrack,
+                        mediaTrack.getIdentifier());
+                mediaTracks.add(securedMediaTrack);
+            }
         }
         return mediaTracks;
     }
@@ -99,10 +101,12 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
             RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
         Collection<MediaTrackWithSecurityDTO> mediaTracks = new ArrayList<>();
         for (MediaTrack mediaTrack : racingEventService().getMediaTracksInTimeRange(regattaAndRaceIdentifier)) {
-            MediaTrackWithSecurityDTO securedMediaTrack = new MediaTrackWithSecurityDTO(mediaTrack);
-            SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), securedMediaTrack,
-                    mediaTrack.getIdentifier());
-            mediaTracks.add(securedMediaTrack);
+            if (racingEventService().getSecurityService().hasCurrentUserReadPermission(mediaTrack)) {
+                MediaTrackWithSecurityDTO securedMediaTrack = new MediaTrackWithSecurityDTO(mediaTrack);
+                SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), securedMediaTrack,
+                        mediaTrack.getIdentifier());
+                mediaTracks.add(securedMediaTrack);
+            }
         }
         return mediaTracks;
     }
@@ -305,9 +309,11 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     public MediaTrack getMediaTrackByUrl(String url) {
         MediaTrack result = null;
         for (MediaTrack mtrack : racingEventService().getAllMediaTracks()) {
-            if (url.equals(mtrack.url)) {
-                result = mtrack;
-                break;
+            if (racingEventService().getSecurityService().hasCurrentUserReadPermission(mtrack)) {
+                if (url.equals(mtrack.url)) {
+                    result = mtrack;
+                    break;
+                }
             }
         }
         return result;
