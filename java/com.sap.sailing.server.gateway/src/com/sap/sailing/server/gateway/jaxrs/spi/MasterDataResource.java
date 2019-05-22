@@ -176,21 +176,17 @@ public class MasterDataResource extends AbstractSailingServerResource {
             }
         }
         
-        final boolean compressValue= compress;
-        final ResponseBuilder resp = CompetitorSerializationCustomizer
-                .doWithCustomizer(c -> !securityService.hasCurrentUserReadPermission(c) && c.getEmail() != null, () -> {
-            final StreamingOutput streamingOutput;
-            if (compressValue) {
-                streamingOutput = new CompressingStreamingOutput(masterData, competitorIds, startTime);
-            } else {
-                streamingOutput = new NonCompressingStreamingOutput(masterData, competitorIds, startTime);
-            }
-            return Response.ok(streamingOutput);
-        });
+        final StreamingOutput streamingOutput;
+        if (compress) {
+            streamingOutput = new CompressingStreamingOutput(masterData, competitorIds, startTime, securityService);
+        } else {
+            streamingOutput = new NonCompressingStreamingOutput(masterData, competitorIds, startTime, securityService);
+        }
+        ResponseBuilder resp = Response.ok(streamingOutput);
         if (compress) {
             resp.header("Content-Encoding", "gzip");
         }
-        Response builtResponse = resp.build();
+        final Response builtResponse = resp.build();
         long timeToExport = System.currentTimeMillis() - startTime;
         logger.info(String.format("Took %s ms to start masterdataexport-streaming.", timeToExport));
         return builtResponse;
@@ -204,39 +200,50 @@ public class MasterDataResource extends AbstractSailingServerResource {
         private final TopLevelMasterData masterData;
         private final List<Serializable> competitorIds;
         private final long startTime;
+        private final SecurityService securityService;
 
-        protected AbstractStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds, long startTime) {
+        protected AbstractStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds, long startTime, SecurityService securityService) {
             super();
             this.masterData = masterData;
             this.competitorIds = competitorIds;
             this.startTime = startTime;
+            this.securityService = securityService;
         }
         
         protected abstract OutputStream wrapOutputStream(OutputStream outputStream) throws IOException;
 
         @Override
         public void write(OutputStream output) throws IOException, WebApplicationException {
-            ObjectOutputStream objectOutputStream = null;
-            try {
-                OutputStream gzipOrNot = wrapOutputStream(output);
-                OutputStream outputStreamWithByteCounter = new ByteCountOutputStreamDecorator(gzipOrNot);
-                objectOutputStream = new ObjectOutputStream(outputStreamWithByteCounter);
-                masterData.setMasterDataExportFlagOnRaceColumns(true);
-                // Actual start of streaming
-                writeObjects(competitorIds, masterData, objectOutputStream);
-            } finally {
-                objectOutputStream.close();
-                masterData.setMasterDataExportFlagOnRaceColumns(false);
-            }
-            long timeToExport = System.currentTimeMillis() - startTime;
-            logger.info(String.format("Took %s ms to finish masterdataexport", timeToExport));
+            CompetitorSerializationCustomizer
+            .doWithCustomizer(c -> {
+                return !securityService.hasCurrentUserReadPermission(c) && c.getEmail() != null;
+            }, () -> {
+                try {
+                    ObjectOutputStream objectOutputStream = null;
+                    try {
+                        OutputStream gzipOrNot = wrapOutputStream(output);
+                        OutputStream outputStreamWithByteCounter = new ByteCountOutputStreamDecorator(gzipOrNot);
+                        objectOutputStream = new ObjectOutputStream(outputStreamWithByteCounter);
+                        masterData.setMasterDataExportFlagOnRaceColumns(true);
+                        // Actual start of streaming
+                        writeObjects(competitorIds, masterData, objectOutputStream);
+                    } finally {
+                        objectOutputStream.close();
+                        masterData.setMasterDataExportFlagOnRaceColumns(false);
+                    }
+                    long timeToExport = System.currentTimeMillis() - startTime;
+                    logger.info(String.format("Took %s ms to finish masterdataexport", timeToExport));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
     }
     
     private class NonCompressingStreamingOutput extends AbstractStreamingOutput {
         protected NonCompressingStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds,
-                long startTime) {
-            super(masterData, competitorIds, startTime);
+                long startTime, SecurityService securityService) {
+            super(masterData, competitorIds, startTime, securityService);
         }
 
         @Override
@@ -247,8 +254,8 @@ public class MasterDataResource extends AbstractSailingServerResource {
     
     private class CompressingStreamingOutput extends AbstractStreamingOutput {
         protected CompressingStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds,
-                long startTime) {
-            super(masterData, competitorIds, startTime);
+                long startTime, SecurityService securityService) {
+            super(masterData, competitorIds, startTime, securityService);
         }
 
         @Override
