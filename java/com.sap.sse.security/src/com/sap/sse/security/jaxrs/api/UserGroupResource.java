@@ -204,7 +204,7 @@ public class UserGroupResource extends AbstractSecurityResource {
                     } else {
                         if (getService().hasCurrentUserUpdatePermission(usergroup)) {
                             getService().removeUserFromUserGroup(usergroup, user);
-                            response = Response.ok().build();
+                            response = Response.status(Status.NO_CONTENT).build();
                         } else {
                             response = Response.status(Status.UNAUTHORIZED).build();
                         }
