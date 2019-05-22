@@ -236,4 +236,42 @@ public class UserGroupResource extends AbstractSecurityResource {
         }
         return response;
     }
+
+    @Path("/role")
+    @DELETE
+    @Produces("application/json;charset=UTF-8")
+    public Response deleteRoleFromUserGroup(@QueryParam("groupName") String groupName,
+            @QueryParam("roleId") String roleIdString, @QueryParam("roleAssociated") Boolean roleAssociated) {
+        Response response;
+        final UserGroup usergroup = getService().getUserGroupByName(groupName);
+
+        try {
+            final UUID roleId = UUID.fromString(roleIdString);
+            if (usergroup == null) {
+                response = Response.status(Status.BAD_REQUEST).entity("Usergroup with this name does not exist.")
+                        .build();
+            } else {
+                final RoleDefinition role = getService().getRoleDefinition(roleId);
+                if (role == null) {
+                    response = Response.status(Status.BAD_REQUEST).entity("Role with this id does not exist.").build();
+                } else {
+                    if (getService().hasCurrentUserUpdatePermission(usergroup)
+                            && getService().hasCurrentUserReadPermission(role)) {
+                        if (usergroup.getRoleAssociation(role) != null) {
+                            getService().removeRoleDefintionFromUserGroup(usergroup, role);
+                            response = Response.status(Status.NO_CONTENT).build();
+                        } else {
+                            response = Response.status(Status.BAD_REQUEST)
+                                    .entity("Role was already added to the group.").build();
+                        }
+                    } else {
+                        response = Response.status(Status.UNAUTHORIZED).build();
+                    }
+                }
+            }
+        } catch (IllegalArgumentException e) {
+            response = Response.status(Status.BAD_REQUEST).entity("Invalid role id.").build();
+        }
+        return response;
+    }
 }
