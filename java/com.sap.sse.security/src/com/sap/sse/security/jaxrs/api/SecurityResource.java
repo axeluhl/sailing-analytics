@@ -308,7 +308,7 @@ public class SecurityResource extends AbstractSecurityResource {
             final UUID roleUUID = UUID.fromString(roleId);
 
             // get role definition from role id
-            RoleDefinition roleDefinition = getService().getRoleDefinition(roleUUID);
+            final RoleDefinition roleDefinition = getService().getRoleDefinition(roleUUID);
 
             // null check role definition
             if (roleDefinition == null) {
@@ -318,11 +318,13 @@ public class SecurityResource extends AbstractSecurityResource {
                 // check update permission on role
                 getService().checkCurrentUserUpdatePermission(roleDefinition);
 
-                Set<WildcardPermission> permissions = new HashSet<>();
-                for (String permission : permissionStrings) {
-                    permissions.add(new WildcardPermission(permission));
+                // create permission objects
+                final Set<WildcardPermission> permissions = new HashSet<>();
+                for (String permissionString : permissionStrings) {
+                    permissions.add(new WildcardPermission(permissionString));
                 }
 
+                // check only those metea-permissions which changed
                 Set<WildcardPermission> addedPermissions = new HashSet<>(roleDefinition.getPermissions());
                 addedPermissions.removeAll(permissions);
 
@@ -331,6 +333,7 @@ public class SecurityResource extends AbstractSecurityResource {
                     resp = Response.status(Status.UNAUTHORIZED)
                             .entity("Not permitted to grant permissions for role " + roleDefinition.getName()).build();
                 } else {
+                    // update role definitino with new permissions
                     roleDefinition.setPermissions(permissions);
                     getService().updateRoleDefinition(roleDefinition);
                     resp = Response.ok().build();
@@ -366,7 +369,7 @@ public class SecurityResource extends AbstractSecurityResource {
                 // check read permission on role
                 getService().checkCurrentUserReadPermission(roleDefinition);
 
-                // build json result
+                // build json result with permissions and id
                 JSONObject jsonResult = new JSONObject();
                 JSONArray jsonPermissions = new JSONArray();
                 for (WildcardPermission permission : roleDefinition.getPermissions()) {
@@ -421,6 +424,7 @@ public class SecurityResource extends AbstractSecurityResource {
         return Response.ok(response.toJSONString(), MediaType.APPLICATION_JSON_TYPE).build();
     }
 
+    /** Returns the second object if the first is null. */
     private <T> T preferFirstIfNotNullOrElseSecond(T first, T second) {
         final T result;
         if (first != null) {
@@ -431,6 +435,7 @@ public class SecurityResource extends AbstractSecurityResource {
         return result;
     }
 
+    /** Selects the second list if the first list is null or empty. */
     private <T> List<T> preferFirstIfNotEmptyOrElseSecond(List<T> first, List<T> second) {
         final List<T> result;
         if (first != null && !first.isEmpty()) {
