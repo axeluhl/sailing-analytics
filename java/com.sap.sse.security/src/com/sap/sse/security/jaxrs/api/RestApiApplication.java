@@ -11,6 +11,7 @@ public class RestApiApplication extends Application {
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<>();
         classes.add(SecurityResource.class);
+        classes.add(UserGroupResource.class);
         
         // exception mapper
         classes.add(ShiroAuthorizationExceptionTo401ResponseMapper.class);
