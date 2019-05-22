@@ -28,11 +28,32 @@ import com.sun.jersey.api.client.ClientResponse.Status;
 public class UserGroupResource extends AbstractSecurityResource {
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response getUserGroupById(@QueryParam("id") String userGroupId) {
+    public Response getUserGroupById(@QueryParam("id") String userGroupId,
+            @QueryParam("groupname") String userGroupName) {
 
-        final Response response;
-        final UUID groupId = UUID.fromString(userGroupId);
-        final UserGroup usergroup = getService().getUserGroup(groupId);
+        Response response;
+        if (userGroupId != null) {
+            try {
+                final UUID groupId = UUID.fromString(userGroupId);
+                final UserGroup usergroup = getService().getUserGroup(groupId);
+                response = handleExistingUserGroup(usergroup);
+            } catch (IllegalArgumentException e) {
+                response = Response.status(Status.BAD_REQUEST).entity("Invalid group id.").build();
+            }
+        }
+        else if (userGroupName != null) {
+            final UserGroup usergroup = getService().getUserGroupByName(userGroupName);
+            response = handleExistingUserGroup(usergroup);
+        }
+        else {
+            response = Response.status(Status.BAD_REQUEST).entity("Please specify either groupname or id.").build();
+        }
+
+        return response;
+    }
+
+    private Response handleExistingUserGroup(final UserGroup usergroup) {
+        Response response;
         if (usergroup == null) {
             response = Response.status(Status.BAD_REQUEST).entity("Usergroup with this id does not exist.").build();
         } else {
@@ -43,7 +64,6 @@ public class UserGroupResource extends AbstractSecurityResource {
                 response = Response.status(Status.UNAUTHORIZED).build();
             }
         }
-
         return response;
     }
 
