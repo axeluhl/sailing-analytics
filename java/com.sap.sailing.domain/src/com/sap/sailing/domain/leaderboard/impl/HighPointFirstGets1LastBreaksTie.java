@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -55,7 +56,7 @@ public class HighPointFirstGets1LastBreaksTie extends HighPointFirstGetsFixedSco
 
     @Override
     public int compareByBetterScore(Competitor o1, List<Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2,
-            List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint, Leaderboard leaderboard) {
+            List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint, Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor) {
         // Construct a graph in which all competitors with equal points are represented as nodes;
         // edges represent a RaceColumn/Fleet where the "from" node in the edge has won over the "to"
         // node in the edge. This graph will be sorted such that competitors precede those over which
