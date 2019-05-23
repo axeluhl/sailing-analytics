@@ -233,7 +233,7 @@
          "folders":[
            {
 	     "startingFolderPath": "mobile/com.sap.sailing.android.tracking.app/res/**",
-	     "sourceFilters":["strings.xml"],
+	     "sourceFilters":["strings.xml", "strings_fragment.xml"],
 	     "targetFolderPath":"../values-[langCode]",
 		"targetFileNamingConvention":"[filename].[extension]"
            }
@@ -244,7 +244,7 @@
          "folders":[
 	   {
 	     "startingFolderPath": "mobile/com.sap.sailing.android.shared/res/**",
-	     "sourceFilters":["strings.xml"],
+	     "sourceFilters":["strings.xml", "strings_fragment.xml"],
 	     "targetFolderPath":"../values-[langCode]",
 		"targetFileNamingConvention":"[filename].[extension]"
 	   }
