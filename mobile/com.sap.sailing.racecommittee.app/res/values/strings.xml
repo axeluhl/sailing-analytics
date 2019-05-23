@@ -313,7 +313,6 @@
     <string name="flags_course">Course</string>
     <string name="flags_more">Finish</string>
     <string name="flags_postpone">Postpone</string>
-    <string name="flags_dependent_races">of dependent races</string>
     <string name="race_select">Select a Race</string>
 
     <string name="gate_start_pathfinder">Pathfinder</string>
