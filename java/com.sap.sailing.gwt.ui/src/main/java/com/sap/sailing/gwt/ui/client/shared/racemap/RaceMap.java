@@ -2531,6 +2531,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 maneuverMarkersAndLossIndicators.getAndShowManeuvers(race, timeRange);
             }
         }
+
+        // If a metric is shown a click on any competitor / competitors tail will
+        // add them to the selection effectively showing the metric on their tail.
+        if (selectedDetailType != null) {
+            competitorSelection.setSelected(competitorDTO, true);
+        }
         return vPanel;
     }
 
