@@ -3,11 +3,12 @@ package com.sap.sailing.domain.orc.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.analysis.polynomials.PolynomialFunctionLagrangeForm;
 
@@ -163,6 +164,40 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     public Duration getCalculatedTime(ORCPerformanceCurve referenceBoat) {
         // TODO Auto-generated method stub
         return null;
+    }
+    
+    // LAGRANGE TEST BASE because of unusual implementation in ORC Pascal code
+    // public accessibility needed for tests, not part of the ORCPerformanceCurve contract
+    public Duration getLagrangeInterpolationPerTrueWindSpeedAndAngle(Speed trueWindSpeed, Bearing trueWindAngle) throws FunctionEvaluationException, IllegalArgumentException {
+        Bearing[] allowancesTrueWindAnglesWithBeatRun = (Bearing[]) ArrayUtils.addAll(new Bearing[] {beatAngles.get(trueWindSpeed)}, ArrayUtils.addAll(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES, new Bearing[] {gybeAngles.get(trueWindSpeed)}));
+        
+        Bearing[] ALLOWANCES_TRUE_WIND_ANGLES = allowancesTrueWindAnglesWithBeatRun;
+        Arrays.sort(ALLOWANCES_TRUE_WIND_ANGLES);
+        
+        int j = -1;
+        for(int i = 0; i < ALLOWANCES_TRUE_WIND_ANGLES.length; i++) {
+            if(trueWindAngle.compareTo(ALLOWANCES_TRUE_WIND_ANGLES[i]) < 0) {
+                j = i;
+                break;
+            }
+        }
+        
+        if (j < 0) {
+            return null;
+        }
+        
+        int ne = Math.min(j + 1, ALLOWANCES_TRUE_WIND_ANGLES.length - 1);
+        int ns = Math.max(j - 2, 0);
+        
+        double[] xn = new double[ne - ns + 1];
+        double[] yn = new double[ne - ns + 1];
+        
+        for (j = ns; j <= ne; j++) {
+            xn[j-ns] = ALLOWANCES_TRUE_WIND_ANGLES[j].getDegrees();
+            yn[j-ns] = durationPerNauticalMileAtTrueWindAngleAndSpeed.get(trueWindSpeed).get(ALLOWANCES_TRUE_WIND_ANGLES[j]).asSeconds();
+        }
+            
+        return Duration.ONE_SECOND.times(new PolynomialFunctionLagrangeForm(xn, yn).value(trueWindAngle.getDegrees()));
     }
     
     // public accessibility needed for tests, not part of the ORCPerformanceCurve contract
