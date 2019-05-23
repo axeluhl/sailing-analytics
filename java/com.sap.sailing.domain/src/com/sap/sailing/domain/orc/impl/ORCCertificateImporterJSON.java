@@ -1,6 +1,9 @@
 package com.sap.sailing.domain.orc.impl;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,7 +15,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.orc.ORCCertificate;
 import com.sap.sailing.domain.orc.ORCCertificateImporter;
@@ -37,7 +39,6 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 public class ORCCertificateImporterJSON implements ORCCertificateImporter {
 
     private Map<String, Object> data;
-    private static final int[] twsDistances = new int[] { 6, 8, 10, 12, 14, 16, 20 };
     private static final String RUN = "Run";
     private static final String BEAT = "Beat";
 

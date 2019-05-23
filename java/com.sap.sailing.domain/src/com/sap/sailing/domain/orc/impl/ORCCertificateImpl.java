@@ -2,12 +2,10 @@ package com.sap.sailing.domain.orc.impl;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.orc.ORCCertificate;
 import com.sap.sailing.domain.orc.ORCPerformanceCurve;
@@ -205,5 +203,17 @@ public class ORCCertificateImpl implements ORCCertificate {
     public Map<Speed, Duration> getNonSpinnakerAllowances() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    public String getSailnumber() {
+        return sailnumber;
+    }
+
+    public String getBoatclass() {
+        return boatclass;
+    }
+
+    public Distance getLengthOverAll() {
+        return lengthOverAll;
     }
 }

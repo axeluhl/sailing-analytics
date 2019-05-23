@@ -55,7 +55,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      */
     private transient Map<Speed, PolynomialFunctionLagrangeForm> lagrangePolynomialsPerTrueWindSpeed;
     
-    /*
+    /**
      * 
      */
     private final ORCPerformanceCurveCourse course;
@@ -64,6 +64,11 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      * Accepts the simplified polar data, one "column" for each of the defined true wind speeds, where each column is a
      * map from the true wind angle (here expressed as an object of type {@link Bearing}) and the {@link Duration} the
      * boat is assumed to need at that true wind speed/angle for one nautical mile.
+     *     
+     * @param twaAllowances
+     * @param beatAngles
+     * @param gybeAngles
+     * @param course
      */
     public ORCPerformanceCurveImpl(Map<Speed, Map<Bearing, Duration>> twaAllowances, Map<Speed, Bearing> beatAngles,
             Map<Speed, Bearing> gybeAngles, ORCPerformanceCurveCourse course) {
@@ -98,6 +103,11 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         return Collections.unmodifiableMap(writeableLagrange);
     }
 
+    /**
+     * 
+     * @return
+     * @throws FunctionEvaluationException
+     */
     public Map<Speed, Duration> createAllowancesPerCourse() throws FunctionEvaluationException {
         Map<Speed, Duration> result = new HashMap<>();
         Map<ORCPerformanceCurveLeg, Map<Speed, Duration>> allowancesPerLeg = new HashMap<>();
@@ -108,11 +118,9 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
 
         for (Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
             Double allowancePerTws = 0.0;
-            
             for (Entry<ORCPerformanceCurveLeg, Map<Speed, Duration>> entry : allowancesPerLeg.entrySet()) {
                 allowancePerTws += Math.abs(entry.getValue().get(tws).asSeconds());
             }
-            
             result.put(tws, Duration.ONE_SECOND.times(allowancePerTws));
         }
         
@@ -169,35 +177,34 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     // LAGRANGE TEST BASE because of unusual implementation in ORC Pascal code
     // public accessibility needed for tests, not part of the ORCPerformanceCurve contract
     public Duration getLagrangeInterpolationPerTrueWindSpeedAndAngle(Speed trueWindSpeed, Bearing trueWindAngle) throws FunctionEvaluationException, IllegalArgumentException {
+        Duration result;
         Bearing[] allowancesTrueWindAnglesWithBeatRun = (Bearing[]) ArrayUtils.addAll(new Bearing[] {beatAngles.get(trueWindSpeed)}, ArrayUtils.addAll(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES, new Bearing[] {gybeAngles.get(trueWindSpeed)}));
-        
-        Bearing[] ALLOWANCES_TRUE_WIND_ANGLES = allowancesTrueWindAnglesWithBeatRun;
+        Bearing[] ALLOWANCES_TRUE_WIND_ANGLES = allowancesTrueWindAnglesWithBeatRun; //TODO Cleanup, after more information from ORC is available
         Arrays.sort(ALLOWANCES_TRUE_WIND_ANGLES);
         
-        int j = -1;
-        for(int i = 0; i < ALLOWANCES_TRUE_WIND_ANGLES.length; i++) {
-            if(trueWindAngle.compareTo(ALLOWANCES_TRUE_WIND_ANGLES[i]) < 0) {
-                j = i;
+        int i = -1; //after the loop, i equals the next higher available polar data for the given TWA
+        for(int j = 0; j < ALLOWANCES_TRUE_WIND_ANGLES.length; j++) {
+            if(trueWindAngle.compareTo(ALLOWANCES_TRUE_WIND_ANGLES[j]) < 0) {
+                i = j;
                 break;
             }
         }
         
-        if (j < 0) {
-            return null;
+        if (i >= 0) {
+            int upperBound = Math.min(i + 1, ALLOWANCES_TRUE_WIND_ANGLES.length - 1);
+            int lowerBound = Math.max(i - 2, 0);
+            double[] xn = new double[upperBound - lowerBound + 1];
+            double[] yn = new double[upperBound - lowerBound + 1];
+            for (i = lowerBound; i <= upperBound; i++) {
+                xn[i-lowerBound] = ALLOWANCES_TRUE_WIND_ANGLES[i].getDegrees();
+                yn[i-lowerBound] = durationPerNauticalMileAtTrueWindAngleAndSpeed.get(trueWindSpeed).get(ALLOWANCES_TRUE_WIND_ANGLES[i]).asSeconds();
+            }
+            result = Duration.ONE_SECOND.times(new PolynomialFunctionLagrangeForm(xn, yn).value(trueWindAngle.getDegrees()));
+        } else {
+            result = null;
         }
         
-        int ne = Math.min(j + 1, ALLOWANCES_TRUE_WIND_ANGLES.length - 1);
-        int ns = Math.max(j - 2, 0);
-        
-        double[] xn = new double[ne - ns + 1];
-        double[] yn = new double[ne - ns + 1];
-        
-        for (j = ns; j <= ne; j++) {
-            xn[j-ns] = ALLOWANCES_TRUE_WIND_ANGLES[j].getDegrees();
-            yn[j-ns] = durationPerNauticalMileAtTrueWindAngleAndSpeed.get(trueWindSpeed).get(ALLOWANCES_TRUE_WIND_ANGLES[j]).asSeconds();
-        }
-            
-        return Duration.ONE_SECOND.times(new PolynomialFunctionLagrangeForm(xn, yn).value(trueWindAngle.getDegrees()));
+        return result;
     }
     
     // public accessibility needed for tests, not part of the ORCPerformanceCurve contract

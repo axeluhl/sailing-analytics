@@ -45,7 +45,6 @@ public class TestORCPerformanceCurve {
     
     @Test
     public void testLagrangeInterpolation() throws FunctionEvaluationException {
-        // Moqutio? Or use just a normal Certificate from Import?
         Double accuracy = 0.21;
         ORCCertificateImpl certificate = (ORCCertificateImpl) importer.getCertificate("GER 5549");
         ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(course);
@@ -110,27 +109,5 @@ public class TestORCPerformanceCurve {
         assertEquals(430.3, allowancesPerCourse.get(new KnotSpeedImpl(16)).asSeconds(), 0.1);
         assertEquals(404.3, allowancesPerCourse.get(new KnotSpeedImpl(20)).asSeconds(), 0.1);
     }
-
-    /*
-    @Test
-    public void testComplexConstructedCourse() throws FunctionEvaluationException {
-        ORCCertificateImpl certificate = importer.getCertificate("GER 5549");
-        ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve();
-
-        assertNotNull(certificate);
-        assertNotNull(course);
-        assertNotNull(performanceCurve);
-        
-        Map<Speed, Duration> allowancesPerCourse = performanceCurve.createAllowancesPerCourse(course);
-        
-        assertNotNull(allowancesPerCourse);
-        assertEquals(446.8, allowancesPerCourse.get(new KnotSpeedImpl(20)).asSeconds(), 0.1);
-        assertEquals(778.4, allowancesPerCourse.get(new KnotSpeedImpl( 6)).asSeconds(), 0.1);
-        
-        System.out.println(course.getTotalLength().getNauticalMiles());
-        System.out.println(performanceCurve.createAllowancesPerCourse(course));
-    }
-    
-    */
 
 }
