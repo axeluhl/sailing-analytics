@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources xmlns:tools="http://schemas.android.com/tools">
+
+    
+    
+    <string name="options_menu_live">"接続情報"</string>
+    <string name="remove">"削除"</string>
+    <string name="enter_new_item">"新規アイテム入力"</string>
+    <string name="add">"追加"</string>
+    <string name="there_are_no_items_yet_">"アイテムがまだありません。"</string>
+
+    <!-- SystemInformationActivity -->
+    
+    
+    
+    
+    
+    
+    
+    
+
+    <!-- Generic -->
+    
+    <string name="generic_error">"エラー"</string>
+    <string name="about">"情報"</string>
+
+    <!-- Signal quality -->
+    <string name="signal_accuracy_indicator_view_description">"GPS 精度"</string>
+    <string name="poor">"悪い"</string>
+    <string name="good">"良い"</string>
+    <string name="great">"非常に良い"</string>
+    <string name="no_signal">"信号なし"</string>
+    <string name="ok">"OK"</string>
+
+    <!-- Regatta -->
+    <string name="your_regattas">"指定したレガッタ:"</string>
+    <string name="options_refresh">"リフレッシュ"</string>
+
+    <!-- QR Code -->
+    <string name="notify_user_db_operation_failed">"エラー: データベース操作が失敗しました。"</string>
+    <string name="no_qr_code_popup_title">"QR コードがありませんか。"</string>
+    <string name="no_qr_code_popup_message">"QR コードを受信していない場合はレース管理者に問い合わせてください。"</string>
+    <string name="error_play_store_and_scanning_not_available">"PlayStore とスキャンは利用できません。"</string>
+    <string name="scanning_cancelled">"スキャンが取り消されました"</string>
+    <string name="error_scanning_qrcode">"QR コード {result-code} のスキャン中にエラー発生"</string>
+    <string name="notify_user_api_call_failed">"サーバとの接続中にエラーが発生しました。再試行してください。"</string>
+    <string name="please_wait">"お待ちください"</string>
+    <string name="error_invalid_qr_code">"無効な QR コード"</string>
+    
+    
+    
+
+    <!-- Eula -->
+    <string name="eula_title">"EULA"</string>
+    <string name="eula_message">"このアプリを使用することによって、SAP SE エンドユーザライセンス契約を受け入れる確認を行います。この EULA をここで参照してください。"</string>
+    <string name="eula_confirm">"確認"</string>
+    <string name="linked_eula_message_part">"ここ"</string>
+
+    <!-- About this app -->
+    <string name="about_this_app">"このアプリについて"</string>
+    <string name="eula">"EULA"</string>
+    <string name="license_information">"ライセンス情報"</string>
+
+    <!-- HTTP Requests -->
+    
+    
+    
+    
+
+    <!-- Dialog -->
+    <string name="yes">"はい"</string>
+    <string name="no">"いいえ"</string>
+    <string name="warning">"警告"</string>
+    <string name="enable_gps">"GPS がオフになっています。このアプリには GPS 位置が必要です。場所の設定で GPS をオンにしますか。"</string>
+
+    <!-- Message Sending -->
+    <string name="sending_waiting">"現在 %1$d イベントの送信が待機中です。\n前回の送信は %2$s に行われました"</string>
+    <string name="sending_no_waiting">"現在送信を待機中のイベントはありません。"</string>
+
+    <!-- Competitor list footer text -->
+    <string name="footer_text">"詳細を参照:"</string>
+    <string name="footer_text_link">"https://www.sapsailing.com"</string>
+
+    <string name="yesterday">"昨日"</string>
+    <string name="today">"本日"</string>
+    <string name="tomorrow">"明日"</string>
+    
+    
+
+    
+
+</resources>

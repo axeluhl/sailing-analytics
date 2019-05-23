@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><resources>
+
+    
+    
+    
+    
+    <string name="course_type">"Тип курса"</string>
+    <string name="marks">"Отметки"</string>
+    <string name="set_position">"Установить позицию"</string>
+    <string name="set_position_disabled_gps">"Включите GPS для\nустановки позиции"</string>
+    <string name="set_position_no_gps_yet">"Ожидание подключения GPS"</string>
+    <string name="reset_position">"Сбросить позицию"</string>
+    <string name="getting_marks">"Получение гоночных отметок…"</string>
+    <string name="set">"установлено"</string>
+    <string name="unknown">"недоступно"</string>
+    <string name="not_set">"не установлено"</string>
+    <string name="mark_list_accuracy">"(Точность около %1$sm)"</string>
+    <string name="accuracy_detail">"от позиции GPS"</string>
+    <string name="distance_detail">"до старого буя"</string>
+    
+    
+    <string name="accuracy">"Точность GPS"</string>
+    <string name="distance">"Дистанция до старого буя"</string>
+    <string name="position_set">"Позиция установлена"</string>
+    <string name="no_information">"Нет информации"</string>
+    <string name="title_activity_settings">@string/settings</string>
+    <string name="error_message_no_position">"Разместите устройство вблизи отметки и нажмите «Установить позицию», чтобы установить позицию отметки. С помощью индикатора точности решите, достаточно ли хороша отображаемая позиция. Активируйте GPS или дождитесь доступности GPS."</string>
+    <string name="action_settings">@string/settings</string>
+    <string name="settings">"Параметры"</string>
+
+    <string name="server">"Опрос"</string>
+    <string name="server_sync_settings">"Интервал опроса (в секундах)"</string>
+
+    <string name="options_menu_checkout">"Чек-аут"</string>
+    <string name="checkout_warning_message">"ДЕЙСТВИТЕЛЬНО выйти? Для доступа к отметкам потребуется повторный вход с помощью предоставленного QR-кода!"</string>
+
+    <string name="no_marks_message">"Нет отметок"</string>
+
+</resources>

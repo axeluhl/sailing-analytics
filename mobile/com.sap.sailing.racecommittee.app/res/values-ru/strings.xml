@@ -1,0 +1,571 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources xmlns:tools="http://schemas.android.com/tools">
+
+    <string-array name="empty_array" tools:ignore="UnusedResources"/>
+    <string name="empty"/>
+    
+    
+
+    
+    
+    
+    <string name="url_google_geocoder">"http://maps.googleapis.com/maps/api/geocode/json?address="</string>
+    <string name="urlpart_google_geocoder_sensor">"?sensor=true"</string>
+    <string name="running_on_course">"(на курсе %s)"</string>
+    <string name="course_design_number_waypoints">"Курс содержит %d путевых точек"</string>
+    
+    <string name="service_text_no_races">"Ожидание мониторинга гонок…"</string>
+    <string name="service_text_num_races">"Выполняется мониторинг %d гонок."</string>
+    
+    <string name="set_time">"Запустить"</string>
+    <string name="reset_time">"Перезапустить"</string>
+    <string name="choose">"Выбрать"</string>
+    <string name="current_time">"Текущее время"</string>
+    <string name="race_finished_template">"%s финишировало"</string>
+    <string name="race_first_boat_finished">"Финиш первой лодки:"</string>
+    <string name="race_first_finisher">"Первый финиш в %1$s"</string>
+    <string name="race_first_finisher_and_time_limit">"Первый финиш в %1$s, Финиш гонки завершается в %2$s"</string>
+    <string name="race_time_limit">"Финиш гонки завершается в %s"</string>
+    <string name="choose_startmode">"Выберите режим старта для этой гонки"</string>
+    <string name="choose_abort_mode">"Выберите флаги, которые требуется отображать"</string>
+    <string name="choose_abort_flag_mode">"Выберите режим флага отмены"</string>
+    <string name="flags_up">"ВВЕРХ"</string>
+    <string name="flags_down">"ВНИЗ"</string>
+    <string name="ap_or_november">"Выберите флаг отмены"</string>
+    <string name="choose_start_mode_flag">"Выберите флаг режима старта"</string>
+    <string name="abort_starting_phase">"Отменить стартовую фазу"</string>
+    <string name="abort_running_race">"Отменить гонку"</string>
+    <string name="choose_xray_flag_up">"Показать индивидуальный отзыв"</string>
+    <string name="choose_xray_flag_down">"Удалить индивидуальный отзыв"</string>
+    <string name="choose_first_substitute_flag">"Общий отзыв"</string>
+    <string name="confirm_general_recall">"Выполнить общий отзыв?"</string>
+    <string name="confirm">"Подтвердить"</string>
+    <string name="abort">"Отмена"</string>
+    <string name="choose_blue_flag">"Начать фазу финиширования"</string>
+    <string name="flag_ap">"AP"</string>
+    <string name="flag_november">"Ноябрь"</string>
+    <string name="flag_jury">"Жюри"</string>
+    <string name="label_login_events">"Регата"</string>
+    <string name="label_login_course_area">"Область"</string>
+    <string name="label_login_position">"Позиция"</string>
+    <string name="login_type_superuser">"Войти как суперпользователь"</string>
+    <string name="login_type_officer_on_vessel">"Войти как представитель гонки на судне."</string>
+    <string name="login_type_shore_control">"Войти как береговой контроль."</string>
+    <string name="login_type_viewer">"Войти как зритель (демо-режим)."</string>
+    <string name="racelist_unscheduled">"Еще не запланировано"</string>
+    <string name="racelist_prescheduled">"Предварительно запланировано на %s"</string>
+    <string name="racelist_scheduled">"Запланировано на %s"</string>
+    <string name="racelist_startphase">"Старт в %s выполняется"</string>
+    <string name="racelist_running">"Выполняется с %s"</string>
+    <string name="racelist_finishing">"Завершение"</string>
+    <string name="racelist_finished">"Завершено"</string>
+    <string name="racelist_unknown">"Неизвестно"</string>
+    <string name="currentlyLoading">"Сейчас загружается..."</string>
+    <string name="racingview_header">"Гонки в зоне гонки \'%s\'"</string>
+    <string name="running_on_unknown">"(Щелкните, чтобы задать курс)"</string>
+    <string name="updateIndicator">"Обновить индикатор"</string>
+    <string name="reset_race">"Сбросить гонку"</string>
+    <string name="postpone">"Отложить"</string>
+    <string name="race_running_since_template">"%1$s выполняется с %2$s"</string>
+    <string name="race_reset_confirmation_header">"Будет выполнен сброс гонки"</string>
+    <string name="race_reset_confirmation_warning">"При сбросе гонки все ее сохраненные данные удаляются окончательно. Всю информацию о состоянии гонки придется вводить заново. Сохраняется только введенная информация о курсе. Настоятельно рекомендуется не сбрасывать гонку."</string>
+    <string name="race_reset_confirmation_title">"Сбросить гонку?"</string>
+    <string name="race_reset_reset_button">"Сбросить"</string>
+    <string name="race_finished_start_time">"Старт гонки:"</string>
+    <string name="race_finished_end_time">"Финиш гонки:"</string>
+    <string name="race_startphase_countdown_mode_remove">"%1$s пока %2$s удалено"</string>
+    <string name="race_startphase_countdown_mode_display">"%1$s пока %2$s отображается"</string>
+    <string name="race_startphase_countdown_start">"%1$s пока %2$s стартует"</string>
+    <string name="set_pathfinder">"Указатель курса"</string>
+    <string name="set_pathfinder_title">"Выберите указатель курса"</string>
+    <string name="protest_dialog_title">"Время начала протеста"</string>
+    <string name="finished_dialog_title">"Укажите время финиша гонки"</string>
+    <string name="protest_start_time">"Время начала протеста: %s"</string>
+    <string name="protest_duration">"Длительность протеста: %d мин."</string>
+    <string name="protest_end_time">"Время окончания протеста: %s"</string>
+    <string name="protest_duration_dialog_title">"Длительность в минутах"</string>
+    <string name="no_pathfinder_selected">"Указатель курса не выбран"</string>
+    <string name="set_line_opening_time">"Запуск ворот"</string>
+    <string name="no_line_opening_time_selected">"Время не выбрано"</string>
+    <string name="set_gate_line_opening_time_title">"Задайте время запуска ворот"</string>
+    <string name="choose_line_open_min">"мин."</string>
+    <string name="previous_course">"Предыдущий курс"</string>
+    <string name="make_new_course">"Создайте курс"</string>
+    <string name="course_design_assets">"Ресурсы схемы курса"</string>
+    <string name="course_design_dialog_title">"Настройте схему курса"</string>
+    <string name="pick_a_rounding_direction">"Выберите направление округления"</string>
+    <string name="select_penalty_reason">"Выберите причину штрафа"</string>
+
+    <string name="passing_instruction_none">"Нет"</string>
+    <string name="passing_instruction_port">"Порт"</string>
+    <string name="passing_instruction_starboard">"Правый"</string>
+    <string name="passing_instruction_single_unknown">"Одиночный, Неизвестно"</string>
+    <string name="passing_instruction_gate">"Ворота"</string>
+    <string name="passing_instruction_line">"Линия"</string>
+    <string name="passing_instruction_offset">"Сдвиг"</string>
+    <string name="passing_instruction_fixed_bearing">"Фиксированное направление"</string>
+
+    <string name="publish">"Опубликовать"</string>
+    <string name="unpublish">"Отменить публикацию"</string>
+    <string name="take_previous">"Использовать предыдущий курс"</string>
+    <string name="take_previous_short">"Использовать этот"</string>
+    <string name="markImage">"Изображение отметки"</string>
+    <string name="cancel">"Отмена"</string>
+    <string name="retry">"Повторить"</string>
+    <string name="yes">"Да"</string>
+    <string name="no">"Нет"</string>
+    <string name="tracking_list_01">"Список участников"</string>
+    <string name="tracking_list_02">"Список результатов"</string>
+    <string name="availableFinishingCompetitors">"Участники"</string>
+    <string name="choose_blue_flag_finishing">"Завершить гонку"</string>
+    <string name="drag_handle_description">"Перетащите маркер"</string>
+    <string name="options_menu_settings">"Параметры"</string>
+    <string name="results_capturing_title">"Результаты гонки"</string>
+    <string name="results_capturing_view_subject">"Тема сообщения"</string>
+    <string name="results_capturing_view_body">"Текст сообщения"</string>
+    <string name="results_capturing_view_send">"Отправить результаты"</string>
+    <string name="results_capturing_view_add_photo">"Добавить фото"</string>
+    <string name="results_capturing_view_list_header">"Вложенные фото"</string>
+    <string name="results_capturing_view_list_empty">"Фото пока нет"</string>
+    <string name="results_mail_subject">"[Гоночный комитет – %1$s] %2$s"</string>
+    <string name="results_mail_body">"Вложены результаты для гонки \'%s\'.\n\n"</string>
+    <string name="results_mail_body_boat_class">"Класс лодок: %s\n"</string>
+    <string name="results_mail_body_race_group">"Группа гонки: %s\n"</string>
+    <string name="results_mail_body_start">"Время старта: %s\n"</string>
+    <string name="results_mail_body_finish">"Время финиша: %s\n"</string>
+
+    <!-- WIND FRAGMENT -->
+    <string name="wind_direction_degrees">"Направление ветра от (градусы)"</string>
+    <string name="enter_wind_direction">"Направление (от)"</string>
+    <string name="enter_wind_speed">"Скорость (уз)"</string>
+    <string name="enter_wind_gps">"Позиция измерения ветра"</string>
+    <string name="check_all_data">"3. Проверьте все данные"</string>
+    <string name="in_degrees">"в градусах"</string>
+    <string name="in_knots">"в узлах"</string>
+    <string name="wind_speed_direction_not_a_valid_number">"Недопустимое значение скорости или направления. Исправьте значение."</string>
+    <string name="wind_location_or_fields_not_valid">"Не введена геопозиция, скорость ветра или направление. Исправьте значения."</string>
+    <string name="waiting_for_gps">"Ожидание сигнала GPS..."</string>
+    <string name="manual_entry">"Ввод позиции вручную"</string>
+    <string name="found_gps_position">"Позиция по GPS"</string>
+    <string name="set_position_manually">"Добавить позицию вручную"</string>
+    <string name="searchPosition">"Поиск геолокации …"</string>
+    <string name="no_location_found">"Не удалось найти геолокацию по вашему запросу."</string>
+    <string name="store_position">"Использовать эту позицию"</string>
+    <string name="store_wind">"Сохранить ветер"</string>
+
+    <!-- SETTINGS -->
+    <string name="settings_activity_title">"Параметры"</string>
+    <string name="settings_category_general">"Другое"</string>
+    <string name="settings_general_manageareas_header">"Управляемые зоны гонок"</string>
+    <string name="settings_general_language_header">"Выберите язык"</string>
+    <string name="settings_general_language_description">"Выберите язык. Для применения изменений может потребоваться перезапуск приложения."</string>
+    <string name="override_default_start_procedure_type_select_header">"Тип процедуры старта по умолчанию при переопределении"</string>
+    <string name="override_default_start_procedure_type_select_description">"Гонки будут использовать выбранный тип процедуры старта по умолчанию. Этот параметр активен при установленном флажке переопределения."</string>
+    <string name="settings_please_reload">"Чтобы применить изменения, выполните действие ‘Перезагрузить’"</string>
+    <string name="settings_advanced_service_header">"URL веб-сервиса"</string>
+    <string name="settings_advanced_mail_header">"Получатель результатов"</string>
+    <string name="settings_category_polling">"Опрос"</string>
+    <string name="settings_polling_active_header">"Активировать опрос"</string>
+    <string name="settings_polling_active_description">"Активация опроса сервера на наличие изменений."</string>
+    <string name="settings_polling_interval_header">"Интервал опроса (в секундах)"</string>
+    <string name="settings_category_developer">"Параметры разработчика"</string>
+    <string name="compass_view_compass">"Компас"</string>
+    <string name="compass_view_needle">"Стрелка"</string>
+    <string name="racing_course_area_missing">"Не удалось загрузить зону гонок. Вернитесь на страницу входа."</string>
+    <string name="racing_load_success">"Успешно загружено гонок: %d."</string>
+    <string name="generic_load_failure">"Ошибка при загрузке запрошенных данных:\n\n\"%s\"\n\nПовторить попытку?"</string>
+    <string name="set_course_layout">"Настройте схему курса"</string>
+    <string name="loading_failure">"Сбой загрузки"</string>
+    <string name="wind_unknown">"(целкните, чтобы задать ветер)"</string>
+    <string name="wind_info">"%2$s / %1$f уз"</string>
+    <string name="login">"Вход"</string>
+    <string name="please_select_a_login_type">"Выберите тип входа."</string>
+    <string name="race_list_filter_show_all">"Показать все"</string>
+    <string name="race_list_filter_show_active">"Показать активные"</string>
+    <string name="race_reset_time_schedule_race">"Запланировать гонку"</string>
+    <string name="race_reset_time_startmode_starttime">"Выберите режим старта и время старта"</string>
+    <string name="start">"Установить время старта"</string>
+    <string name="nationality">"Гражданство"</string>
+    <string name="number">"Номер"</string>
+    <string name="set_tracking_list">"Задайте список отслеживания"</string>
+    <string name="confirm_tracking_list">@string/publish_button_empty</string>
+    <string name="snap">"Фиксировать"</string>
+    <string name="logout_dialog_title">@string/logout</string>
+    <string name="logout_dialog_message">"Хотите выйти и войти как новый пользователь? Мониторинг всех ваших гонок продолжится."</string>
+    <string name="change_dialog_title">"Изменить регату"</string>
+    <string name="change_dialog_message">"Хотите изменить регату и/или зону? Гонки, мониторинг которых ведется, будут отключены."</string>
+    <string name="logout">"Выйти"</string>
+    <string name="loading_configuration">"Загрузка конфигурации…"</string>
+    <string name="loading_configuration_failed">"Ошибка при загрузке конфигурации."</string>
+    <string name="loading_configuration_not_found">"Удаленные конфигурации для этого устройства не найдены."</string>
+    <string name="loading_configuration_succeded">"Удаленная конфигурация применена."</string>
+    <string name="gate_launch_stops_after">"Запуск ворот прекращается через %dmin"</string>
+    <string name="settings_category_regatta_defaults">"Конфигурация регаты (по умолчанию)"</string>
+    <string name="settings_category_regattas">"Конфигурация регаты (особая)"</string>
+    <string name="settings_category_course_designer">"Конфигурация дизайнера курса"</string>
+    <string name="override_default_course_designer_type_select_header">"Тип дизайнера курса"</string>
+    <string name="settings_course_designer_by_name_course_names_header">"Названия курсов"</string>
+    <string name="preference_racing_procedure_startmode_flags_header">"Флаги режима старта"</string>
+    <string name="preference_racing_procedure_classflag_header">"Флаг класса"</string>
+    <string name="preference_racing_procedure_hasxray_header">"Индивидуальный отзыв"</string>
+    <string name="preference_racing_procedure_hasxray_description">"Активируйте этот параметр, чтобы включить индивидуальный отзыв"</string>
+    <string name="preference_racing_procedure_resultentryenabled_header">"Ввод результата"</string>
+    <string name="preference_racing_procedure_resultentryenabled_description">"Активируйте этот параметр, чтобы включить ввод результатов во время и после финиширования гонки"</string>
+    <string name="preference_racing_procedure_gatestart_haspathfinder_description">"Активируйте этот параметр, чтобы включить выбор указателя курса"</string>
+    <string name="preference_racing_procedure_gatestart_haspathfinder_header">"Указатель курса"</string>
+    <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_description">"Активируйте этот параметр, чтобы включить выбор дополнительного времени"</string>
+    <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_header">"Дополнительное время"</string>
+    <string name="device_identifier">"Имя устройства"</string>
+    <string name="synchronize_connection_settings_header">"Синхронизировать с сервером"</string>
+    <string name="synchronize_connection_settings_description">"При создании конфигурации на сервере щелкните здесь, чтобы синхронизировать настройки приложения и подключения с помощью QR-кода."</string>
+    <string name="update_app_header">"Обновить принудительно"</string>
+    <string name="update_app_description">"Принудительное обновление с сервера. Лучше использовать синхронизацию."</string>
+    <string name="preference_wakelock_header">"Не выключать экран"</string>
+    <string name="preference_wakelock_summary">"Экран остается включенным. Предупреждение: увеличивается потребление энергии."</string>
+    <string name="preference_offline_header">"Режим офлайн"</string>
+    <string name="preference_offline_summary">"Разрывает подключение к серверу и использует статичные данные."</string>
+    <string name="preference_allow_demo_header">"Разрешить вход как зрителю"</string>
+    <string name="preference_allow_demo_summary">"Разрешает вход в качестве зрителя. Изменения гонки не будут отправляться на сервер."</string>
+    <string name="options_menu_info">"Экспертная информация"</string>
+    <string name="options_menu_refresh">"Обновить данные"</string>
+    <string name="auto_update_install">"Установить"</string>
+    <string name="auto_update_install_anyway">"Все равно установить"</string>
+    <string name="gate_launch">"Запуск ворот"</string>
+    <string name="golf_down">"Дополнительное время"</string>
+    <string name="preference_regatta_specific_title">"Конфигурация регаты - %1$s"</string>
+    <string name="preference_regatta_specific_save_title">"Сохранить конфигурацию %1$s"</string>
+    <string name="preference_regatta_specific_save_description">"Показанная конфигурация будет сохранена для всех гонок %1$s."</string>
+    <string name="auto_update">"Автообновление"</string>
+    <string name="auto_update_checking_version">"Проверка версии на сервере…"</string>
+    <string name="auto_update_downloading_version">"Попытка загрузить данные автообновления с %1$s"</string>
+    <string name="auto_update_version_file_url_invalid">"Недействительная ссылка на файл версии."</string>
+    <string name="auto_update_click_install">"Щелкните \'Установить\', чтобы выполнить обновление до версии %1$d."</string>
+    <string name="auto_update_force_install">"Предложенная сервером версия (версия %1$d) уже установлена."</string>
+    <string name="auto_update_with_store">"Текущая версия установлена с %1$s. Загрузка с этого сервера не может быть установлена без удаления текущего приложения."</string>
+    <string name="auto_update_already_up_to_date">"Обновление не требуется."</string>
+    <string name="auto_update_downloading_apk">"Загрузка APK с сервера…"</string>
+    <string name="auto_update_apk_link_invalid">"Недействительная ссылка для загрузки."</string>
+    <string name="auto_update_apk_file_error">"Не удалось создать файл загрузки."</string>
+    <string name="auto_update_error">"Ошибка при попытке автообновления."</string>
+    <string name="auto_update_completed">"Автообновление выполнено"</string>
+    <string name="auto_update_completed_text">"Выполнено автоматическое обновление. Теперь необходимо повторно синхронизировать настройки подключения с сервером."</string>
+    <string name="auto_update_completed_take_me_there">"Перейти"</string>
+    <string name="wind_gps_is_disabled">"Служба GPS, похоже, выключена. Включить ее?"</string>
+    <string name="rrs26_start_mode_changed_to">"Флаг режима старта изменен на %1$s"</string>
+    <string name="preference_there_are_no_regattas">"Нет загруженных регат."</string>
+    <string name="configure_regatta">"Настроить регату %1$s"</string>
+    <string name="race_start_in_5_minutes">"5 минут"</string>
+    <string name="race_start_in_4_minutes">"4 минуты"</string>
+    <string name="race_start_in_2_minutes">"2 минуты"</string>
+    <string name="race_start_in_1_minute">"1 минута"</string>
+    <string name="race_start_time_in">"-%s"</string>
+    <string name="race_start_time_ago">"%s"</string>
+    <string name="race_set_time">"Установить время"</string>
+    <string name="race_reset_course">"Сбросить курс"</string>
+    <string name="no_course_active">"Нет активного курса"</string>
+    <string name="toggle_group_race_mode">"Групповая гонка?"</string>
+    <string name="toggle_group_race_mode_off">"Без групповых гонок"</string>
+    <string name="toggle_group_race_mode_on">"Групповые гонки"</string>
+    <string name="the_selected_time_is_before_the_race_start_">"Выбрано время до старта гонки."</string>
+
+    <string name="confirm_start_time">"Подтвердить время старта"</string>
+    <string name="confirm_start_mode">"Подтвердить режим старта"</string>
+
+    <string name="start_procedure_change">"Изменить процедуру старта"</string>
+    <string name="start_procedure_confirm">"Подтвердить процедуру старта"</string>
+    <string name="start_procedure_line_start">"Линейный старт"</string>
+    <string name="start_procedure_gate_start">"Старт через ворота"</string>
+    <string name="start_procedure_ess">"ESS"</string>
+    <string name="start_procedure_simplified">"Упрощенная"</string>
+    <string name="nav_drawer_open">"Открыть панель навигации"</string>
+    <string name="nav_drawer_close">"Закрыть панель навигации"</string>
+
+    <string name="available_races">"Доступные гонки"</string>
+
+    <string name="race_started">"Стартовало %s"</string>
+    <string name="race_finished">"Финишировало %s"</string>
+    <string name="race_start">"Начать %s"</string>
+    <string name="race_unscheduled">"Планирование отменено"</string>
+
+    <string name="race_show_all">"показать все"</string>
+    <string name="race_show_less">"показать меньше"</string>
+
+    <string name="races_current">"ТЕКУЩИЕ ГОНКИ"</string>
+    <string name="races_all">"ВСЕ ГОНКИ"</string>
+
+    <string name="welcome">"ДОБРО ПОЖАЛОВАТЬ"</string>
+    <string name="change">"Изменить"</string>
+
+    <string name="start_procedure">"Процедура"</string>
+    <string name="start_procedure_more">"Больше"</string>
+    <string name="start_mode">"Режим"</string>
+    <string name="course">"Курс"</string>
+    <string name="wind">"Ветер"</string>
+    <string name="loading_events_succeded">"События загружены."</string>
+
+    <string name="login_text">"Вас приветствует\nSAP Sailing Race Manager"</string>
+    <string name="login_sub_text">"Выберите регату"</string>
+    <string name="login_onboarding_text">"Регистрация"</string>
+    <string name="sign_up">"Зарегистрируйте меня"</string>
+    <string name="wind_display">"dd"</string>
+    <string name="flags_abandon">"Отменить"</string>
+    <string name="flags_recall">"Отозвать"</string>
+    <string name="flags_course">"Курс"</string>
+    <string name="flags_more">"Завершить"</string>
+    <string name="flags_postpone">"Отложить"</string>
+    <string name="flags_dependent_races">"зависимых гонок"</string>
+    <string name="race_select">"Выберите гонку"</string>
+
+    <string name="gate_start_pathfinder">"Указатель курса"</string>
+    <string name="gate_start_nationality">"Гражданство"</string>
+    <string name="gate_start_number">"№"</string>
+    <string name="gate_start_set_pathfinder">"Настройка указателя курса"</string>
+    <string name="gate_start_timing">"Хронометраж"</string>
+    <string name="gate_start_set">"Задать время ворот"</string>
+
+    <string name="time_launch">"Запуск ворот\n(мин.)"</string>
+    <string name="time_golf">"Дополнительно\n(мин.)"</string>
+    <string name="time_total">"Всего\n(мин.)"</string>
+
+    <string name="wind_from">"Источник"</string>
+    <string name="wind_speed">"Скорость"</string>
+    <string name="wind_position">"Позиция"</string>
+    <string name="wind_set_data">"Задать данные о ветре"</string>
+    <string name="wind_set_data_multi">"Задать данные о ветре (несколько)"</string>
+    <string name="wind_off">"Нет датчиков ветра"</string>
+    <string name="wind_on">"Датчики ветра активны"</string>
+    <string name="wind_set_position">"Установить позицию"</string>
+    <string name="wind_enter_position">"Установите свою позицию"</string>
+    <string name="wind_kn">"уз"</string>
+    <string name="wind_address_hint">"Ввести адрес"</string>
+    <string name="wind_sensor">"в %1$s / с %2$.0f° / %3$.1f уз"</string>
+    <string name="wind_panel">"С %1$.0f°\n%2$.1f уз"</string>
+    <string name="wind_no_data">"Нет данных"</string>
+
+    <string name="time_up">"Вверх в #TIME#"</string>
+    <string name="time_down">"Вниз в #TIME#"</string>
+    <string name="time_start">"Начать %s"</string>
+    <string name="time_finish">"Финиш н/д"</string>
+    <string name="time">"#TIME#"</string>
+    <string name="set_signal">"Задать сигнал"</string>
+    <string name="flag_ap_desc">"Отложить предстоящие гонки"</string>
+    <string name="flag_ap_alpha_desc">"Отложить, больше никаких гонок сегодня"</string>
+    <string name="flag_ap_hotel_desc">"Отложить, больше подробности на берегу"</string>
+    <string name="flag_ap_alpha">"AP &amp; Alpha"</string>
+    <string name="flag_ap_hotel">"AP &amp; Hotel"</string>
+    <string name="flag_xray">"Xray"</string>
+    <string name="flag_xray_desc">"Индивидуальный отзыв"</string>
+    <string name="flag_first_subst">"1-Й подч."</string>
+    <string name="flag_first_subst_desc">"Общий отзыв"</string>
+    <string name="flag_blue">"Синий"</string>
+    <string name="flag_blue_desc">"Начать фазу финиширования"</string>
+    <string name="flag_november_desc">"Отменить все начатые гонки"</string>
+    <string name="flag_november_alpha">"November &amp; Alpha"</string>
+    <string name="flag_november_hotel">"November &amp; Hotel"</string>
+    <string name="flag_november_alpha_desc">"Отменить, больше никаких гонок сегодня"</string>
+    <string name="flag_november_hotel_desc">"Отменить, подробности на берегу"</string>
+    <string name="race_reset_confirm">"Сбросить гонку"</string>
+    <string name="race_reset_cancel">"Нет, спасибо"</string>
+    <string name="race_reset_message">"Действительно сбросить эту гонку, включая все выполненные настройки и действия? Восстановить эти данные невозможно."</string>
+    <string name="race_begin_finish_header">"Начать финиш"</string>
+    <string name="race_end_finish_header">"Завершить финиш\n(начать финиш: %s)"</string>
+    <string name="race_begin_finish_current">"Текущее время"</string>
+    <string name="race_begin_finish_custom">"Заданное время"</string>
+    <string name="race_setup_confirm">"Подтвердить настройку"</string>
+
+    <string name="race_summary_title">"Сводка гонки"</string>
+    <string name="race_summary_start">"Старт гонки"</string>
+    <string name="race_summary_finish_begin">"Начать финиш"</string>
+    <string name="race_summary_finish_end">"Завершить финиш"</string>
+    <string name="race_summary_finish_duration">"Длительность финиша"</string>
+    <string name="race_summary_wind_direction">"Среднее направление ветра"</string>
+    <string name="race_summary_wind_direction_value">"с %.0f°"</string>
+    <string name="race_summary_wind_speed">"Средняя скорость ветра"</string>
+    
+    <string name="race_summary_individual_recalls">"Индивидуальные отзывы"</string>
+    
+    <string name="record_voice">"Записать голос"</string>
+    <string name="finishing_started">"Первый на финише в %1$s"</string>
+    <string name="finishing_started_since">"(%s)"</string>
+    <string name="finishing_done">"Сейчас"</string>
+
+    <string name="finished_recording">"Запись"</string>
+    <string name="finished_replay">"Воспроизвести голос"</string>
+    <string name="finished_list">"Завершить список"</string>
+    <string name="finished_photos">"Сделать снимки"</string>
+    <string name="finished_tracking">@string/competitor_list</string>
+    <string name="finished_edit">"Изменить список"</string>
+    <string name="finished_publishing">"Публикация"</string>
+    <string name="finished_submit">"Отправить"</string>
+    <string name="finished_duration">"#TIME# мин."</string>
+
+    <string name="finished_text_01">"Оцените и отправьте эту сводку гонки."</string>
+    <string name="finished_text_02">"Ваша оценка опубликована. Для вступления изменений в силу необходимо отправить их повторно."</string>
+
+    <string name="protest_time">"Время протеста"</string>
+    <string name="protest_time_start">"Начальное время протеста"</string>
+    <string name="protest_time_end">"Конечное время протеста"</string>
+    <string name="degrees">"град."</string>
+
+    <string name="no_camera">"Приложение камеры не найдено"</string>
+    <string name="delete_file_title">"Удалить файл"</string>
+    <string name="delete_file">"Снимок будет удален"</string>
+    <string name="start_time">"Время начала"</string>
+    <string name="start_time_value">"В %1$s в %2$s"</string>
+
+    <!--Extracted locales -->
+    <string name="selected_course_area_lost">"Выбранная зона гонки была потеряна."</string>
+    <string name="no_fitting_race_group_found">"Подходящая группа гонки не найдена."</string>
+    <string name="loading_of_course_area_succeeded">"Данные курса загружены успешно."</string>
+    <string name="scores">"Оценки"</string>
+    <string name="no_text">"Нет текста."</string>
+    <string name="error_picture_callback">"Ошибка при записи файла изображения."</string>
+    <string name="competitor_load_error">"Участники: %s"</string>
+    <string name="error_announced_finish_time">"Заданное время финиша раньше времени первого на финише. Проверьте время."</string>
+    <string name="error_time_before_finish">"Выбрано время до старта гонки."</string>
+    <string name="error_set_wind">"Задать информацию о ветре"</string>
+    <string name="use_previous_course_dialog_title">"Использовать предыдущую схему курса"</string>
+    <string name="use_previous_course_dialog_message">"Использовать ранее опубликованную схему курса?"</string>
+    <string name="please_enter_valid_number">"Введите допустимое число"</string>
+    <string name="please_enter_valid_pathfinder">"Введите допустимый указатель курса"</string>
+    <string name="error_scanning_qr">"Ошибка при сканировании QR-кода (%d)"</string>
+    <string name="error_scanning_qr_malformed">"Некорректный URL"</string>
+    <string name="marks_w_placeholder">"Отметки: %s"</string>
+    <string name="error_no_course_to_copy">"Нет доступного курса для копирования"</string>
+    <string name="error_missing_second_mark">"Для выбранных инструкций по прохождению требуется два буя. Выберите второй буй."</string>
+    <string name="error_missing_passing_instructions">"Путевая точка не имеет инструкций по прохождению. Выберите инструкцию по прохождению длительным нажатием на путевую точку."</string>
+    <string name="error_no_way_point">"Схема курса должна иметь хотя бы одну путевую точку."</string>
+    <string name="start_w_placeholder">"Начать %s"</string>
+    <string name="events_waiting_to_be_sent">"Ожидающих отправки событий: %1$d.\nПоследняя успешная отправка: %2$s."</string>
+    <string name="no_event_to_be_sent">"Нет ожидающих отправки событий."</string>
+    <string name="never">"никогда"</string>
+    <string name="connected_to_wp">"Подключено к: %1$s\n%2$s\nBoundService:%3$s"</string>
+    <string name="theme_changed_title">"Изменение темы"</string>
+    <string name="theme_changed_message">"Изменения темы вступят в силу после перезапуска приложения."</string>
+    <string name="url_refresh_title">"Изменен URL сервера"</string>
+    <string name="app_refresh_message">"Выйдите из текущего события, чтобы загрузить данные с нового сервера."</string>
+    <string name="until_xray_removed">"Будет выполнено удаление XRAY в %s"</string>
+    <string name="send_photos">"Отправить фото"</string>
+    <string name="error_wrong_degree_value_title">"Ошибка"</string>
+    <string name="error_wrong_degree_value_message">"Укажите значение от 0 до 360"</string>
+
+    <string name="author_type_officer_vessel">"Представитель гонки на судне"</string>
+    <string name="author_type_shore_control">"Береговой контроль"</string>
+    <string name="author_viewer">"Демо-режим"</string>
+    <string name="author_type_superuser">"Суперпользователь"</string>
+    <string name="change_proceed">"Продолжить"</string>
+    <string name="change_cancel">"Отмена"</string>
+    <string name="change_message">"Согласно правилам гонки эти данные не могут быть изменены в\nтекущем состоянии гонки. Исправление неверных входных значений возможно."</string>
+    <string name="change_title">"Предупреждение"</string>
+    <string name="send_mail">"Отправить сообщение…"</string>
+    <string name="data_reload_title">"Данные изменены вовне"</string>
+    <string name="data_reload_message">"Данные были перезагружены. Возможна потеря данных."</string>
+    <string name="preference_allow_dependent_races_header">"Относительное время начала (мин.)"</string>
+    <string name="preference_allow_dependent_races_description">"Включить относительное время начала между гонками "</string>
+    <string name="preference_dependent_races_offset_header">"Смещение относительного времени начала по умолчанию (мин.)"</string>
+    <string name="preference_allow_edit_race_factor_header">"Изменение коэффициента гонки"</string>
+    <string name="preference_protest_time_header">"Длительность времени протеста (мин.)"</string>
+    <string name="preference_allow_edit_race_factor_description">"Руководители гонок могут менять коэффициент каждой гонки"</string>
+    <string name="error_finished_time">"Заданное время финиша раньше времени первого на финише. Проверьте время."</string>
+    <string name="error_finishing_time">"Выбрано время до старта гонки."</string>
+    <string name="error_time_in_future">"Задано время в будущем. Проверьте время."</string>
+    <string name="error_wrong_race_state">"Неправильное состояние RaceState (должно быть: %1$s, сейчас: %2$s)"</string>
+    <string name="wind_map_button_show">"Карта ветра"</string>
+    <string name="wind_map_button_hide">"Скрыть"</string>
+    <string name="wind_latitude">"Широта:"</string>
+    <string name="wind_longitude">"Долгота:"</string>
+    <string name="wind_accuracy">"Точность:"</string>
+    <string name="dependent_races_absolute">"Абсолютное время начала"</string>
+    <string name="dependent_races_relative">"Относительное время начала"</string>
+    <string name="dependent_races_prompt">"Выберите гонку"</string>
+    <string name="minutes_after">"Мин. после"</string>
+    <string name="minutes_after_long">"%1$.0f мин. после %2$s"</string>
+    <string name="wind_accuracy_ago">"назад"</string>
+    <string name="gate_time_schedule_long">"%1$d + %2$d = %3$d мин."</string>
+    <string name="gate_time_schedule_short">"%d мин."</string>
+    <string name="not_available">"недоступно"</string>
+    
+    
+    
+    <string name="accuracy_timestamp">"(с %s)"</string>
+    <string name="prev_course">"Предыдущий курс"</string>
+    <string name="layout_course">"Схема курса"</string>
+    <string name="wind_degree">"°"</string>
+    <string name="add_waypoint">"Нажмите плюс, чтобы добавить путевую точку"</string>
+    <string name="unpublished_course">"Неопубликованная схема курса"</string>
+    <string name="reset_state_1">"Создать"</string>
+    <string name="reset_state_2">"Сброс"</string>
+    <string name="reset_message_1">"Очистить список?"</string>
+    <string name="reset_message_2">"Сбросить состояние списка?"</string>
+    
+    <string name="onboarding_scan">"Скан. QR-код"</string>
+    <string name="onboarding_input">"Ручной ввод"</string>
+    <string name="race_group">"Групповые гонки"</string>
+    <string name="wind_select_race">"Выберите гонку"</string>
+    <string name="added_to_result_list">"\'%1$s\' добавлено на позицию %2$d в список результатов"</string>
+    <string name="get_started">"Начало работы"</string>
+    <string name="position">"Позиция"</string>
+    <string name="server_deeplink_message">"Сервер успешно изменен на %1$s."</string>
+    <string name="penalty">"Штраф"</string>
+    <string name="score">"Оценка"</string>
+    <string name="finishing_time">"Время финиширования"</string>
+    <string name="comment">"Комментарий"</string>
+    <string name="get_started_url">"https://www.sapsailing.com/gwt/Home.html?locale=en#SolutionsPlace:navigationTab=RaceCommitteeApp"</string>
+    <string name="user_unauthorized">"Сбой запроса. Пользователь не авторизован."</string>
+    <string name="server_url">"Сервер"</string>
+    <string name="username">"Имя пользователя"</string>
+    <string name="password">"Пароль"</string>
+    <string name="wrong_credentials">"Недопустимое имя пользователя или пароль"</string>
+    <string name="unexpected_error">"Произошла непредвиденная ошибка"</string>
+    <string name="sending_exception_title">"Предупреждение"</string>
+    <string name="sending_exception_message">"Возможно, у вас нет разрешения отправлять данные на сервер. Изменить учетные данные для входа?"</string>
+
+    <string name="preference_heading_with_declination_subtracted_is_enabled">"Вкл."</string>
+    <string name="preference_heading_with_declination_subtracted_is_disabled">"Выкл."</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">"По магнитному"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">"Северу"</string>
+    <string name="preference_heading_with_declination_subtracted_enabled">"Направление"</string>
+    <string name="finishing_date">"Дата финиширования"</string>
+    <string-array name="sort_by_values">
+        <item>"по ид. паруса"</item>
+        <item>"по названию"</item>
+    </string-array>
+
+    <string name="preference_non_public_events_header">"Показать непубличные события"</string>
+    <string name="preference_non_public_events_summary">"Загрузить все события, включая непубличное."</string>
+    <string name="race_factor">"Коэффициент"</string>
+    <string name="options_menu_role">"Изменить регату"</string>
+    <string name="reload_config">"Заново загрузить конфигурацию с сервера"</string>
+    <string name="abort_title">"Прервать гонки"</string>
+    <string name="abort_hint">"Какие из идущих гонок вы хотите прервать?"</string>
+    <string name="abort_dismiss">"Отклонить"</string>
+    
+    <string name="set_column_factor">"Установить коэффициент"</string>
+    <string name="set_factor_error">"Ошибка при установке коэффициента: %s"</string>
+    <string name="sync_to_minute">"Синхр. до минуты"</string>
+    <string name="non_public_changed_title">"Непубличные события"</string>
+
+    <string name="competitor_list">"Результаты"</string>
+    <string name="sort_by_boat">"по номеру на парусе"</string>
+    <string name="sort_by_short_name">"по краткому названию"</string>
+    <string name="sort_by_name">"по имени участника"</string>
+    <string name="sort_by_start">"по позиции у стартовой линии"</string>
+    <string name="sort_by_goal">"по отслеженной позиции"</string>
+
+    <string name="apply_button">"Применить"</string>
+    <string name="publish_button_empty">"Опубликовать"</string>
+    <string name="publish_button_other">"Опубликовать (%d)"</string>
+    <string name="publish_clicked">"Результаты опубликованы"</string>
+    <string name="competitor_count">"%d"</string>
+
+    <string name="refresh_title">"Данные изменены"</string>
+    <string name="refresh_message">"Данные следующих участников изменены. Проверьте:\n\n%s"</string>
+    <string name="refresh_positive">@android:string/ok</string>
+    <string name="hello_call_error_title">"Не удается подключиться к SAP"</string>
+    <string name="hello_call_error_message">"Приложению не удалось установить соединение с SAP Sailing.\nПроверьте наличие устойчивой мобильной связи.\nПовторить попытку?"</string>
+    <string name="hello_call_error_positive">"Повторить"</string>
+    <string name="hello_call_error_negative">"Выйти"</string>
+    <string name="hello_call_error_neutral">"Сменить сервер"</string>
+
+    <string name="competitor_merge_error_message">"Этот участник был изменен с другого устройства, а вы изменили те же данные. Убедитесь, что сейчас эти данные верны."</string>
+
+</resources>

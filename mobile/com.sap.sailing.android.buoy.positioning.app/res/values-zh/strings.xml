@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><resources>
+
+    
+    
+    
+    
+    <string name="course_type">"场地类型"</string>
+    <string name="marks">"标志"</string>
+    <string name="set_position">"设置位置"</string>
+    <string name="set_position_disabled_gps">"启用 GPS\n以设置位置"</string>
+    <string name="set_position_no_gps_yet">"正在等待 GPS 连接"</string>
+    <string name="reset_position">"重置位置"</string>
+    <string name="getting_marks">"正在获取比赛航标…"</string>
+    <string name="set">"设置"</string>
+    <string name="unknown">"不适用"</string>
+    <string name="not_set">"未设置"</string>
+    <string name="mark_list_accuracy">"（准确度约为 %1$sm）"</string>
+    <string name="accuracy_detail">"GPS 位置"</string>
+    <string name="distance_detail">"至原浮标"</string>
+    
+    
+    <string name="accuracy">"GPS 准确度"</string>
+    <string name="distance">"至原浮标的距离"</string>
+    <string name="position_set">"位置已设置"</string>
+    <string name="no_information">"无信息"</string>
+    <string name="title_activity_settings">@string/settings</string>
+    <string name="error_message_no_position">"将设备放置在靠近标志的位置，然后按“设置位置”设置标志位置。使用准确度标识来确定显示的位置是否足够好。请激活 GPS 或等待 GPS 可用。"</string>
+    <string name="action_settings">@string/settings</string>
+    <string name="settings">"设置"</string>
+
+    <string name="server">"轮询"</string>
+    <string name="server_sync_settings">"轮询间隔（秒）"</string>
+
+    <string name="options_menu_checkout">"签退"</string>
+    <string name="checkout_warning_message">"是否确定要注销？您需要使用提供的二维码重新登录才能访问标志！"</string>
+
+    <string name="no_marks_message">"无标志"</string>
+
+</resources>

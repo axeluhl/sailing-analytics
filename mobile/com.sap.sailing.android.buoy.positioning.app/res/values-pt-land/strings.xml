@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources>
+    <string name="accuracy">"Precisão"</string>
+    <string name="distance">"Distância"</string>
+    <string name="accuracy_detail">"de posição de GPS"</string>
+    <string name="distance_detail">"até boia antiga"</string>
+</resources>

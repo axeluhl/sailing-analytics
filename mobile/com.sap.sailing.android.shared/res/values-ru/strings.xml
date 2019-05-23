@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources xmlns:tools="http://schemas.android.com/tools">
+
+    
+    
+    <string name="options_menu_live">"Информация о соединении"</string>
+    <string name="remove">"Удалить"</string>
+    <string name="enter_new_item">"Введите новую позицию"</string>
+    <string name="add">"Добавить"</string>
+    <string name="there_are_no_items_yet_">"Позиций пока нет."</string>
+
+    <!-- SystemInformationActivity -->
+    
+    
+    
+    
+    
+    
+    
+    
+
+    <!-- Generic -->
+    
+    <string name="generic_error">"Ошибка"</string>
+    <string name="about">"Инфо"</string>
+
+    <!-- Signal quality -->
+    <string name="signal_accuracy_indicator_view_description">"Точность GPS"</string>
+    <string name="poor">"низкая"</string>
+    <string name="good">"хорошая"</string>
+    <string name="great">"отличная"</string>
+    <string name="no_signal">"нет сигнала"</string>
+    <string name="ok">"ОК"</string>
+
+    <!-- Regatta -->
+    <string name="your_regattas">"Ваши регаты:"</string>
+    <string name="options_refresh">"Обновить"</string>
+
+    <!-- QR Code -->
+    <string name="notify_user_db_operation_failed">"Ошибка: сбой операции базы данных."</string>
+    <string name="no_qr_code_popup_title">"Нет QR-кода?"</string>
+    <string name="no_qr_code_popup_message">"Если вы не получили QR-код, обратитесь к руководству гонки."</string>
+    <string name="error_play_store_and_scanning_not_available">"PlayStore и сканирование недоступны."</string>
+    <string name="scanning_cancelled">"Сканирование отменено"</string>
+    <string name="error_scanning_qrcode">"Ошибка при сканировании QR-кода {код результата}"</string>
+    <string name="notify_user_api_call_failed">"При обращении к серверу возникла ошибка. Повторите попытку."</string>
+    <string name="please_wait">"Подождите"</string>
+    <string name="error_invalid_qr_code">"Недействительный QR-код"</string>
+    
+    
+    
+
+    <!-- Eula -->
+    <string name="eula_title">"Лицензионное соглашение с конечным пользователем"</string>
+    <string name="eula_message">"Используя настоящее Приложение, вы подтверждаете принятие лицензионного соглашения SAP SE с конечным пользователем. Прочтите текст соглашения здесь."</string>
+    <string name="eula_confirm">"Подтвердить"</string>
+    <string name="linked_eula_message_part">"здесь"</string>
+
+    <!-- About this app -->
+    <string name="about_this_app">"О приложении"</string>
+    <string name="eula">"Лицензионное соглашение с конечным пользователем"</string>
+    <string name="license_information">"Информация о лицензии"</string>
+
+    <!-- HTTP Requests -->
+    
+    
+    
+    
+
+    <!-- Dialog -->
+    <string name="yes">"Да"</string>
+    <string name="no">"Нет"</string>
+    <string name="warning">"Предупреждение"</string>
+    <string name="enable_gps">"Служба GPS выключена. Этому приложению требуются позиции GPS. Включить GPS в настройках геолокации?"</string>
+
+    <!-- Message Sending -->
+    <string name="sending_waiting">"Ожидающих отправки событий: %1$d.\nПоследняя успешная отправка: %2$s"</string>
+    <string name="sending_no_waiting">"Нет ожидающих отправки событий."</string>
+
+    <!-- Competitor list footer text -->
+    <string name="footer_text">"Подробности по адресу"</string>
+    <string name="footer_text_link">"https://www.sapsailing.com"</string>
+
+    <string name="yesterday">"Вчера"</string>
+    <string name="today">"Сегодня"</string>
+    <string name="tomorrow">"Завтра"</string>
+    
+    
+
+    
+
+</resources>

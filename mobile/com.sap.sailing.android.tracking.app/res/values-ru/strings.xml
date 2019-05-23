@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources>
+    
+    
+    
+    <string name="app_name">"SAP Sail InSight"</string>
+    <string name="options_menu_settings">"Параметры"</string>
+    <string name="options_menu_checkout">"Чек-аут"</string>
+    <string name="options_add_team_photo">"Добавить фото группы"</string>
+    <string name="options_replace_team_photo">"Заменить фото группы"</string>
+    <string name="settings_category_other">"Другие параметры"</string>
+    <string name="device_identifier">"Идентификатор устройства"</string>
+    <string name="tracker_started">"Отслеживание успешно начато"</string>
+    <string name="tracker_stopped">"Отслеживание успешно остановлено"</string>
+    <string name="title_activity_regatta">"Регата"</string>
+    <string name="title_activity_leaderboard">"Таблица лидеров"</string>
+    <string name="title_activity_start">"Настроить GPS-трекер"</string>
+    <string name="title_activity_tracking">"Отслеживание"</string>
+    <string name="please_confirm">"Подтвердите"</string>
+    <string name="do_you_really_want_to_stop_tracking">"Действительно остановить отслеживание?"</string>
+    <string name="add_team_photo">"Добавить фото группы"</string>
+    <string name="upload_in_progress">"Загрузка..."</string>
+    <string name="upload_retry">"Ошибка при загрузке.\nНажмите, чтобы повторить."</string>
+    <string name="upload_io_error">"Ошибка при загрузке изображения:"</string>
+    <string name="do_you_want_to_choose_existing_img_or_take_a_new_one">"Использовать существующее изображение или сделать новый снимок?"</string>
+    <string name="existing_image">"Существующее"</string>
+    <string name="take_photo">"Сделать снимок"</string>
+    <string name="add_photo_select">"Фотография"</string>
+    <string name="checking_in">"Чек-ин…"</string>
+    <string name="checking_out">"Чек-аут…"</string>
+    <string name="getting_event">"Получение информации о событии…"</string>
+    <string name="getting_leaderboard">"Получение информации таблицы лидеров…"</string>
+    <string name="getting_competitor">"Получение информации об участнике…"</string>
+    <string name="error">"Ошибка"</string>
+    <string name="error_could_not_complete_operation_on_server_try_again">"Не удалось выполнить операцию на сервере. Повторите попытку."</string>
+    <string name="error_sending_team_image_to_server">"Ошибка: не удалось отправить изображение группы на сервер."</string>
+    <string name="regatta_starts_in">"До старта регаты:"</string>
+    <plurals name="hour">
+        <item quantity="one">"ч."</item>
+        <item quantity="other">"ч."</item>
+    </plurals>
+    <plurals name="minute">
+        <item quantity="one">"мин."</item>
+        <item quantity="other">"мин."</item>
+    </plurals>
+    <plurals name="day">
+        <item quantity="one">"д."</item>
+        <item quantity="other">"дн."</item>
+    </plurals>
+    <string name="please_listen_to_announcements">"Слушайте уведомления"</string>
+    <string name="close">"Закрыть"</string>
+    <string name="thank_you_you_successfully_participated">"Спасибо! Вы успешно приняли участие в регате.\n\nКоманда SAP Sailing Team"</string>
+    <string name="tracking_colon">"Отслеживание:"</string>
+    <string name="regatta_in_progress">"Регата идет."</string>
+    <string name="heading">"Заголовок"</string>
+    <string name="course_over_ground">"Курс относительно грунта"</string>
+    <string name="speed_over_ground">"Скорость относительно грунта"</string>
+    <string name="none">"Нет"</string>
+    <string name="show_leaderboard">"Таблица лидеров"</string>
+    <string name="show_event">"Событие"</string>
+    <string name="error_while_receiving_server_data">"Ошибка при получении данных сервера"</string>
+    <string name="info_already_checked_in_this_qr_code">"Регистрация на данную регату уже выполнена"</string>
+    <string name="warning">"Предупреждение"</string>
+    <string name="enable_gps">"Служба GPS выключена, но для отслеживания требуются позиции GPS. Включить GPS в настройках геолокации?"</string>
+    <string name="gps_turned_off">"Служба GPS выключена. Включите службы геолокации (GPS) в настройках Android, чтобы начать отслеживание."</string>
+    <string name="knots">"%sуз."</string>
+    <string name="preferences">"Предпочтения"</string>
+    
+    
+    
+    
+    
+    <string name="tracking_notification_text">"Сейчас отслеживается %s"</string>
+    <string name="waiting_for_gps">"Ожидание GPS"</string>
+    
+</resources>

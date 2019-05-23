@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources>
+    <string name="accuracy">"准确度"</string>
+    <string name="distance">"距离"</string>
+    <string name="accuracy_detail">"GPS 位置"</string>
+    <string name="distance_detail">"至原浮标"</string>
+</resources>

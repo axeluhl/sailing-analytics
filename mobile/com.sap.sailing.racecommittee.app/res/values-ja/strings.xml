@@ -1,0 +1,571 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources xmlns:tools="http://schemas.android.com/tools">
+
+    <string-array name="empty_array" tools:ignore="UnusedResources"/>
+    <string name="empty"/>
+    
+    
+
+    
+    
+    
+    <string name="url_google_geocoder">"http://maps.googleapis.com/maps/api/geocode/json?address="</string>
+    <string name="urlpart_google_geocoder_sensor">"?sensor=true"</string>
+    <string name="running_on_course">"(コース %s 上)"</string>
+    <string name="course_design_number_waypoints">"コースに %d の変針点があります"</string>
+    
+    <string name="service_text_no_races">"監視するレースを待機中…"</string>
+    <string name="service_text_num_races">"現在 %d レースを監視中"</string>
+    
+    <string name="set_time">"開始"</string>
+    <string name="reset_time">"再実行"</string>
+    <string name="choose">"選択"</string>
+    <string name="current_time">"現在時刻"</string>
+    <string name="race_finished_template">"%s がフィニッシュ"</string>
+    <string name="race_first_boat_finished">"先頭艇のフィニッシュ時刻:"</string>
+    <string name="race_first_finisher">"先頭艇が %1$s にフィニッシュ"</string>
+    <string name="race_first_finisher_and_time_limit">"先頭艇が %1$s にフィニッシュ、レースフィニッシュのタイムリミットは %2$s"</string>
+    <string name="race_time_limit">"レースフィニッシュのタイムリミットは %s"</string>
+    <string name="choose_startmode">"このレースのスタートモードを選択してください"</string>
+    <string name="choose_abort_mode">"表示する信号旗を選択してください"</string>
+    <string name="choose_abort_flag_mode">"中止する信号旗モードを選択してください"</string>
+    <string name="flags_up">"掲揚"</string>
+    <string name="flags_down">"降下"</string>
+    <string name="ap_or_november">"中止する信号旗を選択"</string>
+    <string name="choose_start_mode_flag">"スタート前の信号旗を選択"</string>
+    <string name="abort_starting_phase">"スタートフェーズを中止"</string>
+    <string name="abort_running_race">"レースを中止"</string>
+    <string name="choose_xray_flag_up">"個別リコールを表示"</string>
+    <string name="choose_xray_flag_down">"個別リコールを削除"</string>
+    <string name="choose_first_substitute_flag">"ゼネラルリコール"</string>
+    <string name="confirm_general_recall">"ゼネラルリコールを発しますか"</string>
+    <string name="confirm">"確認"</string>
+    <string name="abort">"中止"</string>
+    <string name="choose_blue_flag">"フィニッシュフェーズを開始"</string>
+    <string name="flag_ap">"回答旗"</string>
+    <string name="flag_november">"N 旗"</string>
+    <string name="flag_jury">"ジュリー"</string>
+    <string name="label_login_events">"レガッタ"</string>
+    <string name="label_login_course_area">"エリア"</string>
+    <string name="label_login_position">"位置"</string>
+    <string name="login_type_superuser">"スーパーユーザとしてログイン"</string>
+    <string name="login_type_officer_on_vessel">"船上の競技役員としてログインします。"</string>
+    <string name="login_type_shore_control">"陸上の管制担当者としてログインします。"</string>
+    <string name="login_type_viewer">"表示専用 (デモモード) ユーザーとしてログインします。"</string>
+    <string name="racelist_unscheduled">"未スケジュール"</string>
+    <string name="racelist_prescheduled">"%s 向け事前スケジュール済"</string>
+    <string name="racelist_scheduled">"%s 向けスケジュール済"</string>
+    <string name="racelist_startphase">"%s でのスタートが進行中"</string>
+    <string name="racelist_running">"%s から航行中"</string>
+    <string name="racelist_finishing">"フィニッシュ中"</string>
+    <string name="racelist_finished">"フィニッシュ済"</string>
+    <string name="racelist_unknown">"不明"</string>
+    <string name="currentlyLoading">"現在ロード中…"</string>
+    <string name="racingview_header">"コースエリア \'%s\' でのレース"</string>
+    <string name="running_on_unknown">"(クリックしてコースを設定)"</string>
+    <string name="updateIndicator">"更新フラグ"</string>
+    <string name="reset_race">"レースリセット"</string>
+    <string name="postpone">"延期"</string>
+    <string name="race_running_since_template">"%1$s が %2$s から航行"</string>
+    <string name="race_reset_confirmation_header">"レースをリセットしようとしています"</string>
+    <string name="race_reset_confirmation_warning">"レースをリセットすると、保存したそのすべてのデータが永続的に削除されます。レースステータスに関する情報をすべて再入力する必要があります。入力されたコース情報のみが保持されます。レースのリセットは行わないことを強くお奨めします。"</string>
+    <string name="race_reset_confirmation_title">"このレースをリセットしますか"</string>
+    <string name="race_reset_reset_button">"リセットする"</string>
+    <string name="race_finished_start_time">"レーススタート時刻:"</string>
+    <string name="race_finished_end_time">"レースフィニッシュ時刻:"</string>
+    <string name="race_startphase_countdown_mode_remove">"%2$s が削除されるまで %1$s"</string>
+    <string name="race_startphase_countdown_mode_display">"%2$s が表示されるまで %1$s"</string>
+    <string name="race_startphase_countdown_start">"%2$s がスタートするまで %1$s"</string>
+    <string name="set_pathfinder">"先導艇"</string>
+    <string name="set_pathfinder_title">"先導艇を選択"</string>
+    <string name="protest_dialog_title">"抗議受付開始時刻"</string>
+    <string name="finished_dialog_title">"レース終了時を時刻として設定"</string>
+    <string name="protest_start_time">"抗議受付開始時刻: %s"</string>
+    <string name="protest_duration">"抗議受付時間: %d 分"</string>
+    <string name="protest_end_time">"抗議締切時刻: %s"</string>
+    <string name="protest_duration_dialog_title">"時間 (分)"</string>
+    <string name="no_pathfinder_selected">"先導艇が選択されていません"</string>
+    <string name="set_line_opening_time">"ゲートボート"</string>
+    <string name="no_line_opening_time_selected">"時間が選択されていません"</string>
+    <string name="set_gate_line_opening_time_title">"ゲートボート時間を設定"</string>
+    <string name="choose_line_open_min">"分"</string>
+    <string name="previous_course">"以前のコース"</string>
+    <string name="make_new_course">"コースを作成"</string>
+    <string name="course_design_assets">"コースデザイン資産"</string>
+    <string name="course_design_dialog_title">"コースデザインを設定"</string>
+    <string name="pick_a_rounding_direction">"回航方向を選択"</string>
+    <string name="select_penalty_reason">"ペナルティー理由を選択"</string>
+
+    <string name="passing_instruction_none">"なし"</string>
+    <string name="passing_instruction_port">"左舷"</string>
+    <string name="passing_instruction_starboard">"右舷"</string>
+    <string name="passing_instruction_single_unknown">"単一、不明"</string>
+    <string name="passing_instruction_gate">"ゲート"</string>
+    <string name="passing_instruction_line">"ライン"</string>
+    <string name="passing_instruction_offset">"オフセット"</string>
+    <string name="passing_instruction_fixed_bearing">"固定方位"</string>
+
+    <string name="publish">"公開"</string>
+    <string name="unpublish">"公開解除"</string>
+    <string name="take_previous">"以前のコースを使用"</string>
+    <string name="take_previous_short">"これを使用"</string>
+    <string name="markImage">"マーク画像"</string>
+    <string name="cancel">"中止"</string>
+    <string name="retry">"再試行"</string>
+    <string name="yes">"はい"</string>
+    <string name="no">"いいえ"</string>
+    <string name="tracking_list_01">"競技者一覧"</string>
+    <string name="tracking_list_02">"結果一覧"</string>
+    <string name="availableFinishingCompetitors">"競技者"</string>
+    <string name="choose_blue_flag_finishing">"レースを終了"</string>
+    <string name="drag_handle_description">"ハンドルをドラッグ"</string>
+    <string name="options_menu_settings">"設定"</string>
+    <string name="results_capturing_title">"レース結果"</string>
+    <string name="results_capturing_view_subject">"メール件名"</string>
+    <string name="results_capturing_view_body">"メール本文"</string>
+    <string name="results_capturing_view_send">"結果送信"</string>
+    <string name="results_capturing_view_add_photo">"写真追加"</string>
+    <string name="results_capturing_view_list_header">"添付写真"</string>
+    <string name="results_capturing_view_list_empty">"写真未指定"</string>
+    <string name="results_mail_subject">"[レース委員会 - %1$s] %2$s"</string>
+    <string name="results_mail_body">"レース \'%s\' の結果が添付されました。\n\n"</string>
+    <string name="results_mail_body_boat_class">"艇種: %s\n"</string>
+    <string name="results_mail_body_race_group">"レースグループ: %s\n"</string>
+    <string name="results_mail_body_start">"スタート時刻: %s\n"</string>
+    <string name="results_mail_body_finish">"フィニッシュ時刻: %s\n"</string>
+
+    <!-- WIND FRAGMENT -->
+    <string name="wind_direction_degrees">"風向 (度)"</string>
+    <string name="enter_wind_direction">"方向 (基準)"</string>
+    <string name="enter_wind_speed">"風速 (knt)"</string>
+    <string name="enter_wind_gps">"風測定位置"</string>
+    <string name="check_all_data">"3. 全データをチェック"</string>
+    <string name="in_degrees">"(度)"</string>
+    <string name="in_knots">"(knt)"</string>
+    <string name="wind_speed_direction_not_a_valid_number">"風速または風向が有効な数値でありません。値を修正してください。"</string>
+    <string name="wind_location_or_fields_not_valid">"入力された場所、風速、または風向が空になっています。値を修正してください。"</string>
+    <string name="waiting_for_gps">"GPS 信号を待機中…"</string>
+    <string name="manual_entry">"マニュアル位置入力"</string>
+    <string name="found_gps_position">"GPS ベースの位置"</string>
+    <string name="set_position_manually">"位置をマニュアルで追加"</string>
+    <string name="searchPosition">"場所検索…"</string>
+    <string name="no_location_found">"クエリに基づいて場所を見つけることができませんでした。"</string>
+    <string name="store_position">"この位置を使用"</string>
+    <string name="store_wind">"風を保存"</string>
+
+    <!-- SETTINGS -->
+    <string name="settings_activity_title">"設定"</string>
+    <string name="settings_category_general">"その他"</string>
+    <string name="settings_general_manageareas_header">"管理されているコースエリア"</string>
+    <string name="settings_general_language_header">"言語選択"</string>
+    <string name="settings_general_language_description">"言語を選択してください。変更を適用するにはアプリを再実行する必要がある場合があります。"</string>
+    <string name="override_default_start_procedure_type_select_header">"上書時のデフォルトスタート手順タイプ"</string>
+    <string name="override_default_start_procedure_type_select_description">"レースは選択されたスタート手順タイプをデフォルトとして使用します。このオプションを有効にするには、上書チェックボックスがオンになっている必要があります。"</string>
+    <string name="settings_please_reload">"\'リロード\' アクションを実行して変更内容を適用してください。"</string>
+    <string name="settings_advanced_service_header">"Web サービス URL"</string>
+    <string name="settings_advanced_mail_header">"結果メール受信者"</string>
+    <string name="settings_category_polling">"ポーリング"</string>
+    <string name="settings_polling_active_header">"ポーリング有効化"</string>
+    <string name="settings_polling_active_description">"有効である場合は、サーバは変更に対してポーリングされます。"</string>
+    <string name="settings_polling_interval_header">"ポーリング間隔 (秒)"</string>
+    <string name="settings_category_developer">"開発者オプション"</string>
+    <string name="compass_view_compass">"コンパス"</string>
+    <string name="compass_view_needle">"針"</string>
+    <string name="racing_course_area_missing">"コースエリアをロードできませんでした。ログインページに戻ってください。"</string>
+    <string name="racing_load_success">"%d レースをロードしました。"</string>
+    <string name="generic_load_failure">"依頼されたデータのロードでエラーが発生しました:\n\n\"%s\"\n\n再試行しますか"</string>
+    <string name="set_course_layout">"コースレイアウトを設定"</string>
+    <string name="loading_failure">"ロードエラー"</string>
+    <string name="wind_unknown">"(クリックして風を設定)"</string>
+    <string name="wind_info">"%2$s / %1$f knt"</string>
+    <string name="login">"ログイン"</string>
+    <string name="please_select_a_login_type">"ログインタイプを選択してください。"</string>
+    <string name="race_list_filter_show_all">"すべて表示"</string>
+    <string name="race_list_filter_show_active">"有効を表示"</string>
+    <string name="race_reset_time_schedule_race">"レースをスケジュール"</string>
+    <string name="race_reset_time_startmode_starttime">"スタートモードとスタート時刻を選択"</string>
+    <string name="start">"スタート時刻を設定"</string>
+    <string name="nationality">"国籍"</string>
+    <string name="number">"番号"</string>
+    <string name="set_tracking_list">"追跡一覧を設定"</string>
+    <string name="confirm_tracking_list">@string/publish_button_empty</string>
+    <string name="snap">"スナップ"</string>
+    <string name="logout_dialog_title">@string/logout</string>
+    <string name="logout_dialog_message">"新規ユーザとしてログアウトとログインを行いますか。指定しているレースはすべて引き続き監視されます。"</string>
+    <string name="change_dialog_title">"レガッタ変更"</string>
+    <string name="change_dialog_message">"レガッタやエリアを変更しますか。現在監視しているレースは接続が切られます。"</string>
+    <string name="logout">"ログアウト"</string>
+    <string name="loading_configuration">"設定をロード中…"</string>
+    <string name="loading_configuration_failed">"設定のロードでエラーが発生しました。"</string>
+    <string name="loading_configuration_not_found">"このデバイスに対するリモート設定が見つかりませんでした。"</string>
+    <string name="loading_configuration_succeded">"リモート設定が適用されました。"</string>
+    <string name="gate_launch_stops_after">"ゲートボートが %d 分後に停止"</string>
+    <string name="settings_category_regatta_defaults">"レガッタ設定 (デフォルト)"</string>
+    <string name="settings_category_regattas">"レガッタ設定 (特定)"</string>
+    <string name="settings_category_course_designer">"コースデザイナー設定"</string>
+    <string name="override_default_course_designer_type_select_header">"コースデザイナータイプ"</string>
+    <string name="settings_course_designer_by_name_course_names_header">"コース名"</string>
+    <string name="preference_racing_procedure_startmode_flags_header">"スタート前の信号旗"</string>
+    <string name="preference_racing_procedure_classflag_header">"クラス旗"</string>
+    <string name="preference_racing_procedure_hasxray_header">"個別リコール"</string>
+    <string name="preference_racing_procedure_hasxray_description">"このオプションを有効にして、個別リコールを有効化"</string>
+    <string name="preference_racing_procedure_resultentryenabled_header">"結果エントリ"</string>
+    <string name="preference_racing_procedure_resultentryenabled_description">"このオプションを有効にして、レースのフィニッシュ中およびフィニッシュ後の結果入力を有効化"</string>
+    <string name="preference_racing_procedure_gatestart_haspathfinder_description">"このオプションを有効にして、先導艇の選択を有効化"</string>
+    <string name="preference_racing_procedure_gatestart_haspathfinder_header">"先導艇"</string>
+    <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_description">"このオプションを有効にして、追加ゴルフダウンタイムの選択を有効化"</string>
+    <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_header">"追加ゴルフダウンタイム"</string>
+    <string name="device_identifier">"デバイス名"</string>
+    <string name="synchronize_connection_settings_header">"サーバとの同期"</string>
+    <string name="synchronize_connection_settings_description">"サーバ上で設定を登録する際は、ここをクリックして QR コードを介してアプリと接続設定の同期を行ってください。"</string>
+    <string name="update_app_header">"更新の強制"</string>
+    <string name="update_app_description">"サーバからの更新を強制します。同期オプションを使用する方が良い考えです。"</string>
+    <string name="preference_wakelock_header">"画面をオンのままにする"</string>
+    <string name="preference_wakelock_summary">"画面をオンのままにします。注意: 電池の減りが速くなります。"</string>
+    <string name="preference_offline_header">"オフラインモード"</string>
+    <string name="preference_offline_summary">"サーバへの接続を無効にし、静的データを使用"</string>
+    <string name="preference_allow_demo_header">"ビューアとしてのログインを許可"</string>
+    <string name="preference_allow_demo_summary">"設定すると、ビューアとしてのログインが可能になります。レースの変更内容はサーバに戻されません。"</string>
+    <string name="options_menu_info">"エキスパート情報"</string>
+    <string name="options_menu_refresh">"データのリフレッシュ"</string>
+    <string name="auto_update_install">"インストール"</string>
+    <string name="auto_update_install_anyway">"インストールする"</string>
+    <string name="gate_launch">"ゲートボート"</string>
+    <string name="golf_down">"ゴルフダウン"</string>
+    <string name="preference_regatta_specific_title">"レガッタ設定 - %1$s"</string>
+    <string name="preference_regatta_specific_save_title">"%1$s 設定を保存"</string>
+    <string name="preference_regatta_specific_save_description">"これにより %1$s のすべてのレースに対して示された設定が保存されます。"</string>
+    <string name="auto_update">"自動更新"</string>
+    <string name="auto_update_checking_version">"サーバのバージョン情報をチェック中…"</string>
+    <string name="auto_update_downloading_version">"%1$s から自動更新情報をダウンロードしようとしています"</string>
+    <string name="auto_update_version_file_url_invalid">"バージョンファイルリンクが有効でありませんでした。"</string>
+    <string name="auto_update_click_install">"\'インストール\' をクリックして、バージョン %1$d への更新を実行します。"</string>
+    <string name="auto_update_force_install">"サーバによって提示されたバージョンがすでにインストールされています (バージョン %1$d)。"</string>
+    <string name="auto_update_with_store">"現在のバージョンは %1$s からインストールされています。サーバからのダウンロードは、現在のアプリをアンインストールしないとインストールができません。"</string>
+    <string name="auto_update_already_up_to_date">"すでに最新になっています。"</string>
+    <string name="auto_update_downloading_apk">"サーバから APK をダウンロード中…"</string>
+    <string name="auto_update_apk_link_invalid">"ダウンロードリンクが有効でありませんでした。"</string>
+    <string name="auto_update_apk_file_error">"ダウンロードファイルを作成できませんでした。"</string>
+    <string name="auto_update_error">"自動更新の試行でエラーが発生しました。"</string>
+    <string name="auto_update_completed">"自動更新が完了"</string>
+    <string name="auto_update_completed_text">"自動更新が完了しました。これでサーバとの接続設定が再同期できるはずです。"</string>
+    <string name="auto_update_completed_take_me_there">"そこに移動する必要があります"</string>
+    <string name="wind_gps_is_disabled">"GPS が無効になっているようです。有効にしますか。"</string>
+    <string name="rrs26_start_mode_changed_to">"スタート前の信号旗が %1$s に変更されました"</string>
+    <string name="preference_there_are_no_regattas">"レガッタがロードされていません。"</string>
+    <string name="configure_regatta">"レガッタ %1$s を設定"</string>
+    <string name="race_start_in_5_minutes">"5 分"</string>
+    <string name="race_start_in_4_minutes">"4 分"</string>
+    <string name="race_start_in_2_minutes">"2 分"</string>
+    <string name="race_start_in_1_minute">"1 分"</string>
+    <string name="race_start_time_in">"-%s"</string>
+    <string name="race_start_time_ago">"%s"</string>
+    <string name="race_set_time">"時刻設定"</string>
+    <string name="race_reset_course">"コースのリセット"</string>
+    <string name="no_course_active">"有効なコースがありません"</string>
+    <string name="toggle_group_race_mode">"グループレースですか"</string>
+    <string name="toggle_group_race_mode_off">"グループレースでない"</string>
+    <string name="toggle_group_race_mode_on">"グループレースである"</string>
+    <string name="the_selected_time_is_before_the_race_start_">"選択した時刻がレーススタートの前になっています。"</string>
+
+    <string name="confirm_start_time">"スタート時刻の確認"</string>
+    <string name="confirm_start_mode">"スタートモードの確認"</string>
+
+    <string name="start_procedure_change">"スタート手順の変更"</string>
+    <string name="start_procedure_confirm">"スタート手順の確認"</string>
+    <string name="start_procedure_line_start">"ラインスタート"</string>
+    <string name="start_procedure_gate_start">"ゲートスタート"</string>
+    <string name="start_procedure_ess">"ESS"</string>
+    <string name="start_procedure_simplified">"簡略化"</string>
+    <string name="nav_drawer_open">"Navigation Drawer を開く"</string>
+    <string name="nav_drawer_close">"Navigation Drawer を閉じる"</string>
+
+    <string name="available_races">"利用可能なレース"</string>
+
+    <string name="race_started">"%s にスタート"</string>
+    <string name="race_finished">"%s にフィニッシュ"</string>
+    <string name="race_start">"%s をスタート"</string>
+    <string name="race_unscheduled">"未スケジュール"</string>
+
+    <string name="race_show_all">"すべて表示"</string>
+    <string name="race_show_less">"表示を減らす"</string>
+
+    <string name="races_current">"現在のレース"</string>
+    <string name="races_all">"全レース"</string>
+
+    <string name="welcome">"ようこそ"</string>
+    <string name="change">"変更"</string>
+
+    <string name="start_procedure">"手順"</string>
+    <string name="start_procedure_more">"その他"</string>
+    <string name="start_mode">"モード"</string>
+    <string name="course">"コース"</string>
+    <string name="wind">"風"</string>
+    <string name="loading_events_succeded">"イベントがロードされました。"</string>
+
+    <string name="login_text">"SAP Sailing Race Manager へ\nようこそ"</string>
+    <string name="login_sub_text">"レガッタを選択してください"</string>
+    <string name="login_onboarding_text">"オンボーディング"</string>
+    <string name="sign_up">"サインアップ"</string>
+    <string name="wind_display">"dd"</string>
+    <string name="flags_abandon">"放棄"</string>
+    <string name="flags_recall">"リコール"</string>
+    <string name="flags_course">"コース"</string>
+    <string name="flags_more">"フィニッシュ"</string>
+    <string name="flags_postpone">"延期"</string>
+    <string name="flags_dependent_races">"/従属レース"</string>
+    <string name="race_select">"レースを選択"</string>
+
+    <string name="gate_start_pathfinder">"先導艇"</string>
+    <string name="gate_start_nationality">"国"</string>
+    <string name="gate_start_number">"番号"</string>
+    <string name="gate_start_set_pathfinder">"先導艇設定"</string>
+    <string name="gate_start_timing">"タイミング"</string>
+    <string name="gate_start_set">"ゲート時間の設定"</string>
+
+    <string name="time_launch">"ゲートボート\n(分)"</string>
+    <string name="time_golf">"ゴルフダウン\n(分)"</string>
+    <string name="time_total">"合計\n(分)"</string>
+
+    <string name="wind_from">"出所"</string>
+    <string name="wind_speed">"速力"</string>
+    <string name="wind_position">"位置"</string>
+    <string name="wind_set_data">"風データ送信"</string>
+    <string name="wind_set_data_multi">"風データ送信 (複数)"</string>
+    <string name="wind_off">"風センサーなし"</string>
+    <string name="wind_on">"風センサーが有効"</string>
+    <string name="wind_set_position">"位置設定"</string>
+    <string name="wind_enter_position">"位置を設定"</string>
+    <string name="wind_kn">"knt"</string>
+    <string name="wind_address_hint">"アドレス入力"</string>
+    <string name="wind_sensor">"%1$s に / %2$.0f° から / %3$.1f knt で"</string>
+    <string name="wind_panel">"%1$.0f° から\n%2$.1f knt で"</string>
+    <string name="wind_no_data">"データなし"</string>
+
+    <string name="time_up">"#TIME# に掲揚"</string>
+    <string name="time_down">"#TIME# に降下"</string>
+    <string name="time_start">"%s をスタート"</string>
+    <string name="time_finish">"フィニッシュが N/A"</string>
+    <string name="time">"#TIME#"</string>
+    <string name="set_signal">"信号設定"</string>
+    <string name="flag_ap_desc">"スタートしていないレースを延期する"</string>
+    <string name="flag_ap_alpha_desc">"スタートしていないレースを延期する。本日はこれ以上レースを行わない"</string>
+    <string name="flag_ap_hotel_desc">"スタートしていないレースを延期する。これ以降の信号は陸上で発する"</string>
+    <string name="flag_ap_alpha">"A 旗の上に回答旗"</string>
+    <string name="flag_ap_hotel">"H 旗の上に回答旗"</string>
+    <string name="flag_xray">"X 旗"</string>
+    <string name="flag_xray_desc">"個別リコール"</string>
+    <string name="flag_first_subst">"第 1 サブ"</string>
+    <string name="flag_first_subst_desc">"ゼネラルリコール"</string>
+    <string name="flag_blue">"青色旗"</string>
+    <string name="flag_blue_desc">"フィニッシュフェーズを開始"</string>
+    <string name="flag_november_desc">"スタートしたすべてのレースを中止する"</string>
+    <string name="flag_november_alpha">"A 旗の上に N 旗"</string>
+    <string name="flag_november_hotel">"H 旗の上に N 旗"</string>
+    <string name="flag_november_alpha_desc">"すべてのレースを中止する。本日はこれ以上レースを行わない"</string>
+    <string name="flag_november_hotel_desc">"すべてのレースを中止する。これ以降の信号は陸上で発する"</string>
+    <string name="race_reset_confirm">"レースリセット"</string>
+    <string name="race_reset_cancel">"不要"</string>
+    <string name="race_reset_message">"行ったすべての設定とアクションを含めこのレースをリセットしますか。これは元に戻すことはできません。"</string>
+    <string name="race_begin_finish_header">"フィニッシュ開始"</string>
+    <string name="race_end_finish_header">"フィニッシュ終了\n(フィニッシュ開始: %s)"</string>
+    <string name="race_begin_finish_current">"現在時刻"</string>
+    <string name="race_begin_finish_custom">"カスタム時刻"</string>
+    <string name="race_setup_confirm">"設定確認"</string>
+
+    <string name="race_summary_title">"レース概要"</string>
+    <string name="race_summary_start">"レーススタート"</string>
+    <string name="race_summary_finish_begin">"フィニッシュ開始"</string>
+    <string name="race_summary_finish_end">"フィニッシュ終了"</string>
+    <string name="race_summary_finish_duration">"フィニッシュ期間"</string>
+    <string name="race_summary_wind_direction">"平均風向"</string>
+    <string name="race_summary_wind_direction_value">"%.0f° から"</string>
+    <string name="race_summary_wind_speed">"平均風速"</string>
+    
+    <string name="race_summary_individual_recalls">"個別リコール"</string>
+    
+    <string name="record_voice">"音声を録音"</string>
+    <string name="finishing_started">"最初のフィニッシュが %1$s"</string>
+    <string name="finishing_started_since">"(%s)"</string>
+    <string name="finishing_done">"ただちにダウン"</string>
+
+    <string name="finished_recording">"録音"</string>
+    <string name="finished_replay">"音声を再生"</string>
+    <string name="finished_list">"フィニッシュ一覧"</string>
+    <string name="finished_photos">"写真撮影"</string>
+    <string name="finished_tracking">@string/competitor_list</string>
+    <string name="finished_edit">"一覧編集"</string>
+    <string name="finished_publishing">"公開"</string>
+    <string name="finished_submit">"送信"</string>
+    <string name="finished_duration">"#TIME# 分"</string>
+
+    <string name="finished_text_01">"このレース概要を評価し、送信してください。"</string>
+    <string name="finished_text_02">"評価が公開されました。変更を有効にするには再送信する必要があります。"</string>
+
+    <string name="protest_time">"抗議受付時間"</string>
+    <string name="protest_time_start">"抗議受付時間の開始"</string>
+    <string name="protest_time_end">"抗議受付時間の締切"</string>
+    <string name="degrees">"度"</string>
+
+    <string name="no_camera">"カメラアプリが見つかりませんでした"</string>
+    <string name="delete_file_title">"ファイル削除"</string>
+    <string name="delete_file">"これにより画像が削除されます"</string>
+    <string name="start_time">"スタート時刻"</string>
+    <string name="start_time_value">"%2$s の %1$s"</string>
+
+    <!--Extracted locales -->
+    <string name="selected_course_area_lost">"選択したコースエリアは失われました。"</string>
+    <string name="no_fitting_race_group_found">"適合するレースグループが見つかりませんでした。"</string>
+    <string name="loading_of_course_area_succeeded">"CourseData のロードに成功しました。"</string>
+    <string name="scores">"スコア"</string>
+    <string name="no_text">"テキストがありません。"</string>
+    <string name="error_picture_callback">"画像ファイルの書込でエラーが発生しました。"</string>
+    <string name="competitor_load_error">"競技者: %s"</string>
+    <string name="error_announced_finish_time">"指定したフィニッシュ時刻が最初の完走艇のフィニッシュ時刻よりも前になっています。時刻を再チェックしてください。"</string>
+    <string name="error_time_before_finish">"選択した時刻がレーススタートの前になっています。"</string>
+    <string name="error_set_wind">"風情報を設定"</string>
+    <string name="use_previous_course_dialog_title">"以前のコースデザインを使用"</string>
+    <string name="use_previous_course_dialog_message">"以前に公開されたコースデザインを使用しますか"</string>
+    <string name="please_enter_valid_number">"有効な数値を入力してください"</string>
+    <string name="please_enter_valid_pathfinder">"有効な先導艇を入力してください"</string>
+    <string name="error_scanning_qr">"QR コードのスキャンでエラー発生 (%d)"</string>
+    <string name="error_scanning_qr_malformed">"URL が異常"</string>
+    <string name="marks_w_placeholder">"マーク: %s"</string>
+    <string name="error_no_course_to_copy">"コピーできるコースがありません"</string>
+    <string name="error_missing_second_mark">"選択した通過指示には 2 つのブイが必要です。2 つ目のブイを選択してください。"</string>
+    <string name="error_missing_passing_instructions">"変針点に通過指示がありません。変針点を長く押して、通過指示を選択してください。"</string>
+    <string name="error_no_way_point">"コースデザインには少なくとも 1 つの変針点が必要です。"</string>
+    <string name="start_w_placeholder">"%s をスタート"</string>
+    <string name="events_waiting_to_be_sent">"現在 %1$d イベントの送信が待機中です。\n前回の送信は %2$s に行われました。"</string>
+    <string name="no_event_to_be_sent">"現在送信を待機中のイベントはありません。"</string>
+    <string name="never">"なし"</string>
+    <string name="connected_to_wp">"接続先: %1$s\n%2$s\nBoundService:%3$s"</string>
+    <string name="theme_changed_title">"テーマ変更"</string>
+    <string name="theme_changed_message">"テーマに加えた変更はアプリが再起動した後に有効になります。"</string>
+    <string name="url_refresh_title">"サーバ URL が変更されました"</string>
+    <string name="app_refresh_message">"現在のイベントからログアウトして、新しいサーバからデータをロードしてください。"</string>
+    <string name="until_xray_removed">"X 旗は %s に降下されます"</string>
+    <string name="send_photos">"写真送信"</string>
+    <string name="error_wrong_degree_value_title">"エラー"</string>
+    <string name="error_wrong_degree_value_message">"0 から 360 までの値を指定してください"</string>
+
+    <string name="author_type_officer_vessel">"船上の競技役員"</string>
+    <string name="author_type_shore_control">"陸上の管制担当者"</string>
+    <string name="author_viewer">"デモモード"</string>
+    <string name="author_type_superuser">"スーパーユーザ"</string>
+    <string name="change_proceed">"続行"</string>
+    <string name="change_cancel">"中止"</string>
+    <string name="change_message">"レース規則によれば、このデータは現在のレースステータスでは変更可能でありません。\nただし、誤った入力を修正するために次に進むことは可能です。"</string>
+    <string name="change_title">"警告"</string>
+    <string name="send_mail">"メール送信…"</string>
+    <string name="data_reload_title">"データが外部で変更されました"</string>
+    <string name="data_reload_message">"データがリロードされました。データが失われた可能性があります。"</string>
+    <string name="preference_allow_dependent_races_header">"相対スタート時間 (分)"</string>
+    <string name="preference_allow_dependent_races_description">"レース間の相対スタート時間を有効化"</string>
+    <string name="preference_dependent_races_offset_header">"デフォルトの相対スタート時間オフセット (分)"</string>
+    <string name="preference_allow_edit_race_factor_header">"レース係数変更"</string>
+    <string name="preference_protest_time_header">"抗議受付時間 (分)"</string>
+    <string name="preference_allow_edit_race_factor_description">"レース運営者はレースごとにレース係数を変更できます"</string>
+    <string name="error_finished_time">"指定したフィニッシュ時刻が先頭艇のフィニッシュ時刻よりも前になっています。時刻を再チェックしてください。"</string>
+    <string name="error_finishing_time">"選択した時刻がレーススタートの前になっています。"</string>
+    <string name="error_time_in_future">"指定した時刻が将来の時刻になっています。時刻を再チェックしてください。"</string>
+    <string name="error_wrong_race_state">"RaceState が正しいステータスになっていません (必須: %1$s - 現状: %2$s)"</string>
+    <string name="wind_map_button_show">"風マップ"</string>
+    <string name="wind_map_button_hide">"非表示"</string>
+    <string name="wind_latitude">"緯度:"</string>
+    <string name="wind_longitude">"経度:"</string>
+    <string name="wind_accuracy">"精度:"</string>
+    <string name="dependent_races_absolute">"絶対スタート時刻"</string>
+    <string name="dependent_races_relative">"相対スタート時間"</string>
+    <string name="dependent_races_prompt">"レースを選択してください"</string>
+    <string name="minutes_after">"分後"</string>
+    <string name="minutes_after_long">"%2$s の %1$.0f 分後"</string>
+    <string name="wind_accuracy_ago">"前"</string>
+    <string name="gate_time_schedule_long">"%1$d + %2$d = %3$d 分"</string>
+    <string name="gate_time_schedule_short">"%d 分"</string>
+    <string name="not_available">"N/A"</string>
+    
+    
+    
+    <string name="accuracy_timestamp">"(%s から)"</string>
+    <string name="prev_course">"以前のコース"</string>
+    <string name="layout_course">"コースレイアウト"</string>
+    <string name="wind_degree">"°"</string>
+    <string name="add_waypoint">"+ を押して変針点を追加"</string>
+    <string name="unpublished_course">"未公開のコースデザイン"</string>
+    <string name="reset_state_1">"新規"</string>
+    <string name="reset_state_2">"リセット"</string>
+    <string name="reset_message_1">"一覧をクリアしますか"</string>
+    <string name="reset_message_2">"最終ステータスにリセットしますか"</string>
+    
+    <string name="onboarding_scan">"QR コードのスキャン"</string>
+    <string name="onboarding_input">"マニュアル入力"</string>
+    <string name="race_group">"グループレース中"</string>
+    <string name="wind_select_race">"レース選択"</string>
+    <string name="added_to_result_list">"位置 %2$d で結果一覧に \'%1$s\' が追加されました"</string>
+    <string name="get_started">"入門"</string>
+    <string name="position">"位置"</string>
+    <string name="server_deeplink_message">"サーバが %1$s に変更されました。"</string>
+    <string name="penalty">"ペナルティー"</string>
+    <string name="score">"スコア"</string>
+    <string name="finishing_time">"フィニッシュ予定時刻"</string>
+    <string name="comment">"コメント"</string>
+    <string name="get_started_url">"https://www.sapsailing.com/gwt/Home.html?locale=en#SolutionsPlace:navigationTab=RaceCommitteeApp"</string>
+    <string name="user_unauthorized">"依頼が失敗しました。ユーザに権限がありません。"</string>
+    <string name="server_url">"サーバ"</string>
+    <string name="username">"ユーザ名"</string>
+    <string name="password">"パスワード"</string>
+    <string name="wrong_credentials">"ユーザ名またはパスワードが無効です"</string>
+    <string name="unexpected_error">"予期しないエラーが発生しました"</string>
+    <string name="sending_exception_title">"警告"</string>
+    <string name="sending_exception_message">"サーバにデータを送信する権限がおそらくありません。ログイン認証情報を変更しますか。"</string>
+
+    <string name="preference_heading_with_declination_subtracted_is_enabled">"オン"</string>
+    <string name="preference_heading_with_declination_subtracted_is_disabled">"オフ"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">"地磁気"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">"磁北基準"</string>
+    <string name="preference_heading_with_declination_subtracted_enabled">"ヘッダ"</string>
+    <string name="finishing_date">"フィニッシュ予定日付"</string>
+    <string-array name="sort_by_values">
+        <item>"セール ID 別"</item>
+        <item>"名前別"</item>
+    </string-array>
+
+    <string name="preference_non_public_events_header">"非公開イベントを表示"</string>
+    <string name="preference_non_public_events_summary">"非公開のものを含めすべてのイベントをロード。"</string>
+    <string name="race_factor">"係数"</string>
+    <string name="options_menu_role">"レガッタ変更"</string>
+    <string name="reload_config">"サーバから設定をリロード"</string>
+    <string name="abort_title">"レースについて"</string>
+    <string name="abort_hint">"中止するのは競技中のどのレースですか。"</string>
+    <string name="abort_dismiss">"破棄"</string>
+    
+    <string name="set_column_factor">"係数設定"</string>
+    <string name="set_factor_error">"係数の設定でエラーが発生: %s"</string>
+    <string name="sync_to_minute">"分単位で同期"</string>
+    <string name="non_public_changed_title">"非公開イベント"</string>
+
+    <string name="competitor_list">"結果"</string>
+    <string name="sort_by_boat">"セール番号別"</string>
+    <string name="sort_by_short_name">"名前 (短) 別"</string>
+    <string name="sort_by_name">"競技者名別"</string>
+    <string name="sort_by_start">"スタートラインまでの位置別"</string>
+    <string name="sort_by_goal">"追跡位置別"</string>
+
+    <string name="apply_button">"適用"</string>
+    <string name="publish_button_empty">"公開"</string>
+    <string name="publish_button_other">"公開 (%d)"</string>
+    <string name="publish_clicked">"結果が公開されました"</string>
+    <string name="competitor_count">"%d"</string>
+
+    <string name="refresh_title">"データが変更されました"</string>
+    <string name="refresh_message">"以下の競技者のデータが変更されました。レビューしてください:\n\n%s"</string>
+    <string name="refresh_positive">@android:string/ok</string>
+    <string name="hello_call_error_title">"SAP に接続できません"</string>
+    <string name="hello_call_error_message">"アプリが SAP Sailing への接続を確立できませんでした。\n安定したモバイル接続があるかどうかを確認してください。\n再試行しますか。"</string>
+    <string name="hello_call_error_positive">"再試行"</string>
+    <string name="hello_call_error_negative">"終了"</string>
+    <string name="hello_call_error_neutral">"サーバ変更"</string>
+
+    <string name="competitor_merge_error_message">"この競技者は別のデバイスから変更されており、自分でも同じデータを変更しています。このデータが現在正しいことを確認してください。"</string>
+
+</resources>

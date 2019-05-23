@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources>
+    
+    
+    
+    <string name="app_name">"SAP Sail InSight"</string>
+    <string name="options_menu_settings">"設定"</string>
+    <string name="options_menu_checkout">"チェックアウト"</string>
+    <string name="options_add_team_photo">"チーム写真追加"</string>
+    <string name="options_replace_team_photo">"チーム写真置換"</string>
+    <string name="settings_category_other">"その他の設定"</string>
+    <string name="device_identifier">"デバイス ID"</string>
+    <string name="tracker_started">"追跡が開始しました"</string>
+    <string name="tracker_stopped">"追跡が停止しました"</string>
+    <string name="title_activity_regatta">"レガッタ"</string>
+    <string name="title_activity_leaderboard">"リーダーボード"</string>
+    <string name="title_activity_start">"GPS トラッカーを設定"</string>
+    <string name="title_activity_tracking">"追跡"</string>
+    <string name="please_confirm">"確認してください"</string>
+    <string name="do_you_really_want_to_stop_tracking">"追跡を停止しますか。"</string>
+    <string name="add_team_photo">"チーム写真追加"</string>
+    <string name="upload_in_progress">"アップロード中…"</string>
+    <string name="upload_retry">"アップロード時にエラー発生。\nタップして再試行してください。"</string>
+    <string name="upload_io_error">"画像のアップロードでエラー発生:"</string>
+    <string name="do_you_want_to_choose_existing_img_or_take_a_new_one">"既存の画像を使用しますか。それとも新たに画像を取得しますか。"</string>
+    <string name="existing_image">"既存"</string>
+    <string name="take_photo">"写真撮影"</string>
+    <string name="add_photo_select">"写真"</string>
+    <string name="checking_in">"チェックイン中…"</string>
+    <string name="checking_out">"チェックアプト中…"</string>
+    <string name="getting_event">"イベント情報取得中…"</string>
+    <string name="getting_leaderboard">"リーダーボード情報取得中…"</string>
+    <string name="getting_competitor">"競技者情報取得中…"</string>
+    <string name="error">"エラー"</string>
+    <string name="error_could_not_complete_operation_on_server_try_again">"サーバ上で操作を完了できませんでした。再試行してください。"</string>
+    <string name="error_sending_team_image_to_server">"エラー: チーム画像をサーバに送信できませんでした。"</string>
+    <string name="regatta_starts_in">"レガッタがスタートするまでの時間:"</string>
+    <plurals name="hour">
+        <item quantity="one">"時"</item>
+        <item quantity="other">"時間"</item>
+    </plurals>
+    <plurals name="minute">
+        <item quantity="one">"分"</item>
+        <item quantity="other">"分"</item>
+    </plurals>
+    <plurals name="day">
+        <item quantity="one">"日"</item>
+        <item quantity="other">"日"</item>
+    </plurals>
+    <string name="please_listen_to_announcements">"アナウンスを聞いてください"</string>
+    <string name="close">"閉じる"</string>
+    <string name="thank_you_you_successfully_participated">"ありがとうございます。レガッタへの参加が正常に行われました。\n\nSAP Sailing Team"</string>
+    <string name="tracking_colon">"追跡:"</string>
+    <string name="regatta_in_progress">"レガッタが進行中です。"</string>
+    <string name="heading">"ヘッダ"</string>
+    <string name="course_over_ground">"対地コース"</string>
+    <string name="speed_over_ground">"対地速力"</string>
+    <string name="none">"なし"</string>
+    <string name="show_leaderboard">"リーダーボード"</string>
+    <string name="show_event">"イベント"</string>
+    <string name="error_while_receiving_server_data">"サーバデータ受信中にエラー発生"</string>
+    <string name="info_already_checked_in_this_qr_code">"このレガッタにすでにチェックインしています"</string>
+    <string name="warning">"警告"</string>
+    <string name="enable_gps">"GPS がオフになっていますが、追跡には GPS 位置が必要です。場所の設定で GPS をオンにしますか。"</string>
+    <string name="gps_turned_off">"GPS がオフになっています。追跡を開始するには、Android の設定で場所サービス (GPS) をオンにしてください。"</string>
+    <string name="knots">"%sKn"</string>
+    <string name="preferences">"優先設定"</string>
+    
+    
+    
+    
+    
+    <string name="tracking_notification_text">"現在 %s を追跡中"</string>
+    <string name="waiting_for_gps">"GPS を待機中"</string>
+    
+</resources>

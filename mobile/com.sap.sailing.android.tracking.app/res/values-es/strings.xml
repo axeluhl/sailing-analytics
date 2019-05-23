@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources>
+    
+    
+    
+    <string name="app_name">"SAP Sail InSight"</string>
+    <string name="options_menu_settings">"Opciones"</string>
+    <string name="options_menu_checkout">"Check out"</string>
+    <string name="options_add_team_photo">"Añadir foto del equipo"</string>
+    <string name="options_replace_team_photo">"Sustituir foro del equipo"</string>
+    <string name="settings_category_other">"Otras opciones"</string>
+    <string name="device_identifier">"Identificador del dispositivo"</string>
+    <string name="tracker_started">"El rastreo se ha iniciado con éxito"</string>
+    <string name="tracker_stopped">"El rastreo se ha detenido con éxito"</string>
+    <string name="title_activity_regatta">"Regata"</string>
+    <string name="title_activity_leaderboard">"Tabla de clasificación"</string>
+    <string name="title_activity_start">"Configurar rastreador del GPS"</string>
+    <string name="title_activity_tracking">"Rastreo"</string>
+    <string name="please_confirm">"Confirme"</string>
+    <string name="do_you_really_want_to_stop_tracking">"¿Seguro que desea eliminar el rastreo?"</string>
+    <string name="add_team_photo">"Añadir foto del equipo"</string>
+    <string name="upload_in_progress">"Cargando..."</string>
+    <string name="upload_retry">"Error durante la carga.\nToque para volver a intentarlo."</string>
+    <string name="upload_io_error">"Error al cargar la imagen:"</string>
+    <string name="do_you_want_to_choose_existing_img_or_take_a_new_one">"¿Desea utilizar una imagen existente o tomar una nueva?"</string>
+    <string name="existing_image">"Existente"</string>
+    <string name="take_photo">"Hacer foto"</string>
+    <string name="add_photo_select">"Foto"</string>
+    <string name="checking_in">"Realizando check in..."</string>
+    <string name="checking_out">"Realizando check out..."</string>
+    <string name="getting_event">"Obteniendo información del evento..."</string>
+    <string name="getting_leaderboard">"Obteniendo información de la tabla de clasificación..."</string>
+    <string name="getting_competitor">"Obteniendo información del competidor..."</string>
+    <string name="error">"Error"</string>
+    <string name="error_could_not_complete_operation_on_server_try_again">"No ha sido posible completar la operación en el servidor. Inténtelo de nuevo."</string>
+    <string name="error_sending_team_image_to_server">"Error: no se ha podido enviar imagen del equipo al servidor."</string>
+    <string name="regatta_starts_in">"La regata comienza en:"</string>
+    <plurals name="hour">
+        <item quantity="one">"Hora"</item>
+        <item quantity="other">"Horas"</item>
+    </plurals>
+    <plurals name="minute">
+        <item quantity="one">"Minuto"</item>
+        <item quantity="other">"Minutos"</item>
+    </plurals>
+    <plurals name="day">
+        <item quantity="one">"Día"</item>
+        <item quantity="other">"Días"</item>
+    </plurals>
+    <string name="please_listen_to_announcements">"Preste atención a los avisos."</string>
+    <string name="close">"Cerrar"</string>
+    <string name="thank_you_you_successfully_participated">"Gracias, ha participado con éxito en la regata.\n\nSu equipo de SAP Sailing"</string>
+    <string name="tracking_colon">"Rastreando:"</string>
+    <string name="regatta_in_progress">"La regata progresa."</string>
+    <string name="heading">"Rumbo"</string>
+    <string name="course_over_ground">"Rumbo sobre fondo"</string>
+    <string name="speed_over_ground">"Velocidad sobre fondo"</string>
+    <string name="none">"Ninguno"</string>
+    <string name="show_leaderboard">"Tabla de clasificación"</string>
+    <string name="show_event">"Evento"</string>
+    <string name="error_while_receiving_server_data">"Error al recibir los datos del servidor"</string>
+    <string name="info_already_checked_in_this_qr_code">"Ya ha realizado el check in en esta regata."</string>
+    <string name="warning">"Advertencia"</string>
+    <string name="enable_gps">"El GPS está desactivado, pero para rastrear se necesitan las posiciones de GPS. ¿Desea activar el GPS en las opciones de ubicación?"</string>
+    <string name="gps_turned_off">"El GPS está desactivado. Active los servicios de ubicación (GPS) en sus opciones de Android para comenzar el rastreo."</string>
+    <string name="knots">"%sKn"</string>
+    <string name="preferences">"Preferencias"</string>
+    
+    
+    
+    
+    
+    <string name="tracking_notification_text">"Actualmente rastreando %s"</string>
+    <string name="waiting_for_gps">"Esperando GPS"</string>
+    
+</resources>

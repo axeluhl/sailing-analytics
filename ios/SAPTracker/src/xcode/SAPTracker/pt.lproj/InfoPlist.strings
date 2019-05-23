@@ -1,0 +1,15 @@
+/* InfoPlist.strings
+    SAPTracker
+  
+    Created by Raimund Wege on 04.11.16.
+    Copyright © 2016 com.sap.sailing. All rights reserved. */
+"NSLocationAlwaysUsageDescription" = "Para rastrear a corrida completa, seu telefone precisa continuar o rastreamento mesmo quando você desativa ou bloqueia a tela, o que ajuda a poupar bateria e evita a paragem acidental do processo de rastreamento.";
+
+"NSLocationWhenInUseUsageDescription" = "Para rastrear a corrida completa, seu telefone precisa continuar o rastreamento mesmo quando você desativa ou bloqueia a tela, o que ajuda a poupar bateria e evita a paragem acidental do processo de rastreamento.";
+
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "Para rastrear a corrida completa, seu telefone precisa continuar o rastreamento mesmo quando você desativa ou bloqueia a tela, o que ajuda a poupar bateria e evita a paragem acidental do processo de rastreamento.";
+
+"NSCameraUsageDescription" = "A câmera é necessária para efetuar um check-in utilizando o código QR.";
+
+"NSPhotoLibraryUsageDescription" = "Para substituir a foto da equipe, o app precisa de acesso à biblioteca de fotos.";
+
