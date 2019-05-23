@@ -98,7 +98,7 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
         double angleTowardStarboard = invertedCourseBefore
                 .getDifferenceTo(maneuver.getSpeedWithBearingAfter().getBearing()).abs().getDegrees();
         angleTowardStarboard -= MIN_BEATING_ANGLE_PLUS_MIN_RUNNING_ANGLE;
-        assert (angleTowardStarboard > 0);
+        assert (angleTowardStarboard > 0); // FIXME bug5050: this breaks for "Jibe Sets", jibing after the mark rounding
         Bearing from;
         if (maneuver.getCourseChangeInDegrees() < 0) {
             from = invertedCourseBefore.add(new DegreeBearingImpl(MIN_BEATING_ANGLE_PLUS_MIN_RUNNING_ANGLE));
@@ -114,7 +114,7 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
         double angleTowardStarboard = invertedCourseAfter
                 .getDifferenceTo(maneuver.getSpeedWithBearingBefore().getBearing()).abs().getDegrees();
         angleTowardStarboard -= MIN_BEATING_ANGLE_PLUS_MIN_RUNNING_ANGLE;
-        assert (angleTowardStarboard > 0);
+        assert (angleTowardStarboard > 0); // FIXME bug5050: this breaks for "Kiwi Drops", tacking after the mark rounding
         Bearing from;
         if (maneuver.getCourseChangeInDegrees() < 0) {
             from = maneuver.getSpeedWithBearingBefore().getBearing();

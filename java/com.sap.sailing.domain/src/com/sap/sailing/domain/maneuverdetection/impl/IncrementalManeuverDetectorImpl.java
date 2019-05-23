@@ -213,7 +213,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                                     maxDurationForDouglasPeuckerFixExtensionInManeuverAnalysisInMillis,
                                     latestRawFixTimePointOfPreviousManeuverDetectionIteration, maneuverSpot))
                     .map(maneuverSpot -> maneuverSpot.getManeuverCurve()).collect(Collectors.toList());
-            if(!filteredManeuverSpots.isEmpty()) {
+            if (!filteredManeuverSpots.isEmpty()) {
                 windEstimationInteraction.newManeuverSpotsDetected(competitor, filteredManeuverSpots, trackTimeInfo);
             }
         }
