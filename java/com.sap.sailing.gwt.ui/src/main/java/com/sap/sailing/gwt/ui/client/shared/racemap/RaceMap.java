@@ -2739,6 +2739,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         }
         // Now update tails for all competitors because selection change may also affect all unselected competitors
+        if (selectedDetailType != null && !selectedDetailTypeChanged) {
+            fixesAndTails.updateDetailValueBoundaries(competitorSelection.getSelectedCompetitors());
+        }
         for (CompetitorDTO oneOfAllCompetitors : competitorSelection.getAllCompetitors()) {
             Colorline tail = fixesAndTails.getTail(oneOfAllCompetitors);
             if (tail != null) {
@@ -2786,6 +2789,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         }
         // Now update tails for all competitors because selection change may also affect all unselected competitors
+        if (selectedDetailType != null && !selectedDetailTypeChanged) {
+            fixesAndTails.updateDetailValueBoundaries(competitorSelection.getSelectedCompetitors());
+        }
         for (CompetitorDTO oneOfAllCompetitors : competitorSelection.getAllCompetitors()) {
             Colorline tail = fixesAndTails.getTail(oneOfAllCompetitors);
             if (tail != null) {
