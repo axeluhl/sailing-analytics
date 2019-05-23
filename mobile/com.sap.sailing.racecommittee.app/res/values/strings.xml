@@ -307,7 +307,6 @@
     <string name="login_sub_text">Please select a regatta</string>
     <string name="login_onboarding_text">Onboarding</string>
     <string name="sign_up">Sign Me Up</string>
-    <string name="wind_display">dd</string>
     <string name="flags_abandon">Abandon</string>
     <string name="flags_recall">Recall</string>
     <string name="flags_course">Course</string>

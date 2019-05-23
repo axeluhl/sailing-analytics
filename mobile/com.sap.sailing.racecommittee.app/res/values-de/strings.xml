@@ -266,7 +266,6 @@
     <string name="race_started">Gestartet %s</string>
     <string name="race_finished">Beendet %s</string>
     <string name="wind">Wind</string>
-    <string name="wind_display">dd</string>
     <string name="flags_abandon">Abbrechen</string>
     <string name="flags_recall">Rückruf</string>
     <string name="flags_course">Kurs</string>
