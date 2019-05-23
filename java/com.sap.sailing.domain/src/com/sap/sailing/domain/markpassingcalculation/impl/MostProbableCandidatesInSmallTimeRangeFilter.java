@@ -102,7 +102,7 @@ public class MostProbableCandidatesInSmallTimeRangeFilter {
         while (!newCandidatesModifiableCopy.isEmpty()) {
             final Candidate nextNewCandidate = newCandidatesModifiableCopy.iterator().next();
             newCandidatesModifiableCopy.remove(nextNewCandidate);
-            final NavigableSet<Candidate> contiguousSequenceForNextNewCandidate = getTimeWiseContiguousDistanceCandidates(competitorCandidates, nextNewCandidate, /* includeStartFrom */ true);
+            final NavigableSet<Candidate> contiguousSequenceForNextNewCandidate = getTimeWiseContiguousCandidates(competitorCandidates, nextNewCandidate, /* includeStartFrom */ true);
             disjointSequencesAffectedByNewAndRemovedCandidates.add(contiguousSequenceForNextNewCandidate);
             // remove the candidate grouped in the sequence from the remaining new candidates to consider
             // because they have been "scooped up" by this sequence already and need no further consideration:
@@ -122,7 +122,7 @@ public class MostProbableCandidatesInSmallTimeRangeFilter {
         while (!removedCandidatesModifiableCopy.isEmpty()) {
             final Candidate nextRemovedCandidate = removedCandidatesModifiableCopy.iterator().next();
             removedCandidatesModifiableCopy.remove(nextRemovedCandidate);
-            final NavigableSet<Candidate> contiguousSequenceForNextRemovedCandidate = getTimeWiseContiguousDistanceCandidates(competitorCandidates, nextRemovedCandidate, /* includeStartFrom */ false);
+            final NavigableSet<Candidate> contiguousSequenceForNextRemovedCandidate = getTimeWiseContiguousCandidates(competitorCandidates, nextRemovedCandidate, /* includeStartFrom */ false);
             removeAllRemovedCandidatesInOrNearSequence(contiguousSequenceForNextRemovedCandidate, removedCandidatesModifiableCopy);
             // If adjacent sequences were added before and after the removed candidate,
             // we need to distinguish whether the gap around the removed candidate was greater
@@ -233,7 +233,7 @@ public class MostProbableCandidatesInSmallTimeRangeFilter {
      * @param includeStartFrom
      *            whether or not to include {@code startFrom} in the resulting set
      */
-    public NavigableSet<Candidate> getTimeWiseContiguousDistanceCandidates(NavigableSet<Candidate> competitorCandidates, Candidate startFrom, boolean includeStartFrom) {
+    public NavigableSet<Candidate> getTimeWiseContiguousCandidates(NavigableSet<Candidate> competitorCandidates, Candidate startFrom, boolean includeStartFrom) {
         final NavigableSet<Candidate> result = new TreeSet<>(candidateComparator);
         if (includeStartFrom) {
             result.add(startFrom);

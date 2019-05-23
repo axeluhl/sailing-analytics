@@ -340,7 +340,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             @Override
             public void updateCompetitor(ICompetitor competitor) {
             	if (!competitor.isNonCompeting()) {
-                    TracTracRaceTrackerImpl.this.domainFactory.updateCompetitor(competitor);
+                    TracTracRaceTrackerImpl.this.domainFactory.updateCompetitor(competitor, raceTrackingHandler);
             	}
             }
             

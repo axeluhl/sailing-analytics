@@ -83,11 +83,12 @@ public interface DomainFactory {
 
     Sideline createSideline(String name, Iterable<TracTracControlPoint> controlPoints);
 
-    com.sap.sailing.domain.base.Boat getOrCreateBoat(Serializable boatId, String boatName, BoatClass boatClass, String sailId, Color boatColor);
+    com.sap.sailing.domain.base.Boat getOrCreateBoat(Serializable boatId, String boatName, BoatClass boatClass,
+            String sailId, Color boatColor, RaceTrackingHandler raceTrackingHandler);
 
     com.sap.sailing.domain.base.Competitor resolveCompetitor(ICompetitor competitor);
 
-    void updateCompetitor(ICompetitor competitor);
+    void updateCompetitor(ICompetitor competitor, RaceTrackingHandler raceTrackingHandler);
     
     /**
      * Looks up or, if not found, creates a {@link Nationality} object and re-uses <code>threeLetterIOCCode</code> also as the
@@ -264,7 +265,7 @@ public interface DomainFactory {
     RaceDefinition getAndWaitForRaceDefinition(UUID raceId, long timeoutInMilliseconds);
 
     Map<Competitor, Boat> getOrCreateCompetitorsAndTheirBoats(DynamicTrackedRegatta trackedRegatta, LeaderboardGroupResolver LeaderboardGroupResolver,
-            IRace race, BoatClass defaultBoatClass);
+            IRace race, BoatClass defaultBoatClass, RaceTrackingHandler raceTrackingHandler);
 
     BoatClass resolveDominantBoatClassOfRace(IRace race);
     

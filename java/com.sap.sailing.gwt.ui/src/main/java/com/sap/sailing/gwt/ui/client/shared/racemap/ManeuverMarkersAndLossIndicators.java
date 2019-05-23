@@ -165,6 +165,7 @@ public class ManeuverMarkersAndLossIndicators {
         Marker marker = Marker.newInstance(options);
         marker.setPosition(latLng);
         marker.setTitle(ManeuverTypeFormatter.format(maneuver.getType(), stringMessages));
+        marker.setZindex(RaceMapOverlaysZIndexes.MANEUVERMARK_ZINDEX);
         marker.addClickHandler(event -> {
             LatLng where = raceMap.getCoordinateSystem().toLatLng(maneuver.getPosition());
             Widget content = getInfoWindowContent(maneuver, competitor);
