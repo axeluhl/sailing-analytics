@@ -406,6 +406,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         }
         if (newRaceTimesInfo.endOfRace != null) {
             long markerTime = newRaceTimesInfo.endOfRace.getTime();
+            // If there is a "blue flag down" event after endOfRace use it instead to show the E marker
             if (newRaceTimesInfo.getFinishedTime() != null && newRaceTimesInfo.getFinishedTime().getTime() > markerTime) {
                 markerTime = newRaceTimesInfo.getFinishedTime().getTime();
             }
