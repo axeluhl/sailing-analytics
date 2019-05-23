@@ -95,14 +95,6 @@ public class FixesAndTails {
      */
     private ValueRangeFlexibleBoundaries detailValueBoundaries;
 
-    /**
-     * Used to determine if the DetailValues in {@link #fixes} are the current values and not from before a
-     * {@link DetailType} change.<br>
-     * Gets set to {@code true} when {@link #updateFixes(Map, Map, TailFactory, long, boolean)} gets called with
-     * {@code detailTypeChanged = true}. Gets set to {@code false} by {@link #nullDetailValues()}.
-     */
-    private boolean detailValuesSet = false;
-
     private final CoordinateSystem coordinateSystem;
 
     public FixesAndTails(CoordinateSystem coordinateSystem) {
@@ -262,7 +254,6 @@ public class FixesAndTails {
             long timeForPositionTransitionMillis, boolean detailTypeChanged) {
         if (detailTypeChanged) {
             resetDetailValueSearch();
-            detailValuesSet = true;
         }
         for (final Map.Entry<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> e : fixesForCompetitors.entrySet()) {
             if (e.getValue() != null && !e.getValue().isEmpty()) {
@@ -856,10 +847,6 @@ public class FixesAndTails {
         detailValueBoundaries = boundaries;
     }
 
-    protected void nullDetailValues() {
-        detailValuesSet = false;
-    }
-
     /**
      * Gets the detail value at a specific index in a competitors tail.
      * @param competitorDTO {@link CompetitorDTO} specifying the competitor.
@@ -868,17 +855,14 @@ public class FixesAndTails {
      * a {@link Double} of the respective value.
      */
     protected Double getDetailValueAt(CompetitorDTO competitorDTO, int index) {
-        if (detailValuesSet) {
-            final Trigger<Integer> firstShownFixForCompetitor = firstShownFix.get(competitorDTO);
-            int indexOfFirstShownFix = (firstShownFixForCompetitor == null || firstShownFixForCompetitor.get() == null) ? -1 : firstShownFixForCompetitor.get();
+        final Trigger<Integer> firstShownFixForCompetitor = firstShownFix.get(competitorDTO);
+        int indexOfFirstShownFix = (firstShownFixForCompetitor == null || firstShownFixForCompetitor.get() == null) ? -1 : firstShownFixForCompetitor.get();
 
-            try {
-                return getFixes(competitorDTO).get(indexOfFirstShownFix + index).detailValue;
-            } catch (IndexOutOfBoundsException e) {
-                return null;
-            }
+        try {
+            return getFixes(competitorDTO).get(indexOfFirstShownFix + index).detailValue;
+        } catch (IndexOutOfBoundsException e) {
+            return null;
         }
-        return null;
     }
 
     /**
@@ -895,7 +879,6 @@ public class FixesAndTails {
         firstShownFix.clear();
         lastShownFix.clear();
         resetDetailValueSearch();
-        nullDetailValues();
     }
 
     /**

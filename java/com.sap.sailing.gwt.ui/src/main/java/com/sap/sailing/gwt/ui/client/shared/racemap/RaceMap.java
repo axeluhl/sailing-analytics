@@ -472,7 +472,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * overwrite its cache with new data and needs to reset its internal {@link ValueRangeFlexibleBoundaries} tracking
      * the {@link DetailType} values.
      * If set to {@code true} {@link #refreshMap(Date, long, boolean)} will pass the information along and set it back
-     * to {@code false}.
+     * to {@code false} by {@link #updateBoatPositions(Date, long, Map, Iterable, Map, boolean, boolean)} once the
+     * first update with the new DetailType values arrives at the client.
      */
     private boolean selectedDetailTypeChanged;
     /**
@@ -1116,7 +1117,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         callGetRaceMapDataForAllOverlappingAndTipsOfNonOverlappingAndGetBoatPositionsForAllOthers(fromAndToAndOverlap,
                 raceIdentifier, newTime, transitionTimeInMillis, competitorsToShow, isRedraw, selectedDetailType,
                 selectedDetailTypeChanged);
-        if (selectedDetailTypeChanged) selectedDetailTypeChanged = false;
         // draw the wind into the map, get the combined wind
         List<String> windSourceTypeNames = new ArrayList<String>();
         windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
@@ -1398,6 +1398,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     /* re-calculate; it could have changed since the asynchronous request was made: */
                     getCompetitorsToShow(), updateTailsOnly);
             if (detailTypeChanged) {
+                selectedDetailTypeChanged = false;
                 tailColorMapper.notifyListeners();
             }
             if (!updateTailsOnly) {
@@ -2565,9 +2566,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     // Causes an overwrite of what are now wrong detailValues
                     selectedDetailTypeChanged = true;
                     setTailVisualizer();
-                    // Causes the DetailValues to appear to be set to null which will cause selected competitors to
-                    // appear in their competitor color until the new values are processed
-                    fixesAndTails.nullDetailValues();
                     // In case the new values don't make it through this will make the tails visible
                     tailColorMapper.notifyListeners();
                     // Forces update of tail values which subsequently results
@@ -3097,7 +3095,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         case SELECTED:
             options.setColorMode(ColorlineMode.POLYCHROMATIC);
             options.setColorProvider(i -> {
-                if (selectedDetailType != null) {
+                // If a DetailType has been selected and we are not currently waiting for the first update with the new values
+                if (selectedDetailType != null && !selectedDetailTypeChanged) {
                     Double detailValue = fixesAndTails.getDetailValueAt(competitor, i);
                     if (detailValue != null) {
                         return tailColorMapper.getColor(detailValue);
