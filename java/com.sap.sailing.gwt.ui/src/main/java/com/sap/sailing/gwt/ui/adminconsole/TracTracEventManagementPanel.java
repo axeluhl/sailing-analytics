@@ -97,15 +97,11 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     protected Widget createContent() {
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setWidth("100%");
-
         CaptionPanel connectionsPanel = createConnectionsPanel();
         mainPanel.add(connectionsPanel);
-
         HorizontalPanel racesPanel = createRacesPanel();
         racesPanel.setWidth("100%");
-
         mainPanel.add(racesPanel);
-        
         return mainPanel;
     }
     
@@ -117,20 +113,18 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         connectionsTable = new TracTracConnectionTableWrapper(userService, sailingService, stringMessages,
                 errorReporter, true, tableResources, () -> {});
         connectionsTable.refreshTracTracConnectionList();
-        connectionsPanel.setContentWidget(tableAndConfigurationPanel);
+
         final Grid grid = new Grid(1, 2);
         grid.setWidget(0, 0, new Label(stringMessages.racesWithHiddenState() + ":"));
         final CheckBox showHiddenRacesCheckbox = new CheckBox(stringMessages.show());
         showHiddenRacesCheckbox.ensureDebugId("ShowHiddenRacesCheckBox");
         grid.setWidget(0, 1, showHiddenRacesCheckbox);
-        tableAndConfigurationPanel.add(connectionsTable);
-        tableAndConfigurationPanel.add(grid);
         // Add TracTrac Connection
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, SecuredDomainType.TRACKED_RACE);
-        tableAndConfigurationPanel.add(buttonPanel);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> connectionsTable.refreshTracTracConnectionList());
         Button addCreateAction = buttonPanel.addCreateAction(stringMessages.addTracTracConnection(),
-                () -> new EditTracTracConnectionDialog(new TracTracConfigurationWithSecurityDTO(),
+                () -> new EditTracTracConnectionDialog(new TracTracConfigurationWithSecurityDTO(
+                        userService.getCurrentUser() == null ? null : userService.getCurrentUser().getName()),
                         new DialogCallback<TracTracConfigurationWithSecurityDTO>() {
                             @Override
                             public void ok(TracTracConfigurationWithSecurityDTO editedConnection) {
@@ -148,7 +142,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
                                             @Override
                                             public void onSuccess(Void voidResult) {
-                                                connectionsTable.refreshTracTracConnectionList();
+                                                connectionsTable.refreshTracTracConnectionList(/* selectWhenDone */ editedConnection);
                                             }
                                         }));
                             }
@@ -187,9 +181,16 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             listRacesButton.setEnabled(objectSelected);
             removeButton.setEnabled(objectSelected);
         });
+
+        tableAndConfigurationPanel.add(buttonPanel);
+        tableAndConfigurationPanel.add(grid);
+        tableAndConfigurationPanel.add(connectionsTable);
+
+        connectionsPanel.setContentWidget(tableAndConfigurationPanel);
+
         return connectionsPanel;
     }
-
+    
     protected HorizontalPanel createRacesPanel() {
         HorizontalPanel racesPanel = new HorizontalPanel();
         CaptionPanel trackableRacesPanel = createTrackableRacesPanel();
@@ -472,25 +473,23 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                         List<TracTracRaceRecordDTO> races = TracTracEventManagementPanel.this.raceList.getList();
                         races.clear();
                         races.addAll(TracTracEventManagementPanel.this.availableTracTracRaces);
-                        
                         TracTracEventManagementPanel.this.racesFilterablePanel.getTextBox().setText("");
                         TracTracEventManagementPanel.this.racesTable.setPageSize(races.size());
                         loadingMessageLabel.setText("");
-                        
                         // store a successful configuration in the database for later retrieval
-                                    sailingService.updateTracTracConfiguration(updatedConnection,
-                                            new MarkedAsyncCallback<Void>(
-                                        new AsyncCallback<Void>() {
-                                            @Override
-                                            public void onFailure(Throwable caught) {
-                                                reportError("Exception trying to store configuration in DB: "  + caught.getMessage());
-                                            }
-                
-                                            @Override
-                                            public void onSuccess(Void voidResult) {
-                                                connectionsTable.refreshTracTracConnectionList();
-                                            }
-                                        }));
+                        sailingService.updateTracTracConfiguration(updatedConnection,
+                                new MarkedAsyncCallback<Void>(
+                            new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    reportError("Exception trying to store configuration in DB: "  + caught.getMessage());
+                                }
+    
+                                @Override
+                                public void onSuccess(Void voidResult) {
+                                    connectionsTable.refreshTracTracConnectionList();
+                                }
+                            }));
                     }
                 }));
         }

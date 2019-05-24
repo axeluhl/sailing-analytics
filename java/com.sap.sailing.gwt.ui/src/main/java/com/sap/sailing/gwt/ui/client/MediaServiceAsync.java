@@ -9,14 +9,14 @@ import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 public interface MediaServiceAsync {
 
     void getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier,
-            AsyncCallback<Iterable<MediaTrack>> callback);
+            AsyncCallback<Iterable<MediaTrackWithSecurityDTO>> callback);
 
     void getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier,
-            AsyncCallback<Iterable<MediaTrack>> callback);
+            AsyncCallback<Iterable<MediaTrackWithSecurityDTO>> callback);
 
     void getAllMediaTracks(AsyncCallback<Iterable<MediaTrackWithSecurityDTO>> asyncCallback);
 
-    void addMediaTrack(MediaTrack mediaTrack, AsyncCallback<String> asyncCallback);
+    void addMediaTrack(MediaTrack mediaTrack, AsyncCallback<MediaTrackWithSecurityDTO> asyncCallback);
 
     void deleteMediaTrack(MediaTrack mediaTrack, AsyncCallback<Void> asyncCallback);
 

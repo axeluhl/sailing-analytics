@@ -176,7 +176,9 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
             logger.log(Level.INFO, "Received course for non-existing race "+tractracRace.getName()+". Creating RaceDefinition.");
             // create race definition and add to event
             BoatClass dominantBoatClass = getDomainFactory().resolveDominantBoatClassOfRace(tractracRace);
-            Map<Competitor, Boat> competitorAndBoats = getDomainFactory().getOrCreateCompetitorsAndTheirBoats(getTrackedRegatta(), leaderboardGroupResolver, tractracRace, dominantBoatClass);
+            Map<Competitor, Boat> competitorAndBoats = getDomainFactory().getOrCreateCompetitorsAndTheirBoats(
+                    getTrackedRegatta(), leaderboardGroupResolver, tractracRace, dominantBoatClass,
+                    raceTrackingHandler);
             trackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
                     getTrackedRegatta(), tractracRace.getId(), tractracRace.getName(),
                     dominantBoatClass, competitorAndBoats, course, sidelines, windStore, delayToLiveInMillis,

@@ -143,7 +143,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final MongoDatabase database;
     private final CompetitorWithBoatRefJsonSerializer competitorWithBoatRefSerializer = CompetitorWithBoatRefJsonSerializer.create();
-    private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
+    private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create(/* serialize boat */ true, /* serializeNonPublicCompetitorFields */ true);
     private final BoatJsonSerializer boatSerializer = BoatJsonSerializer.create();
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
     private final TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> raceTrackingConnectivityParamsServiceFinder;
@@ -1052,7 +1052,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogDenoteForTrackingEvent.class.getSimpleName());
         result.put(FieldNames.RACE_NAME.name(), event.getRaceName());
-        result.put(FieldNames.BOAT_CLASS_NAME.name(), event.getBoatClass().getName());
+        result.put(FieldNames.BOAT_CLASS_NAME.name(), event.getBoatClass()==null?null:event.getBoatClass().getName());
         result.put(FieldNames.RACE_ID.name(), event.getRaceId());
         return result;
     }

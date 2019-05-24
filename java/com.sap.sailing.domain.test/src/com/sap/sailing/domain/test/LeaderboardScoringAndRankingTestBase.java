@@ -38,6 +38,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TimedComparator;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
@@ -97,6 +98,12 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
                     ArrayListNavigableSet<MarkPassing> result = new ArrayListNavigableSet<>(new TimedComparator());
                     result.add(new MarkPassingImpl(lastMarkPassingTimes.get(competitor), finish, competitor));
                     return result;
+                }
+                @Override
+                public Duration getTimeSailedSinceRaceStart(Competitor competitor, TimePoint timePoint) {
+                    final TimePoint timePointOfFinishMarkPassing = getMarkPassings(competitor).last().getTimePoint();
+                    final TimePoint to = timePointOfFinishMarkPassing.before(timePoint) ? timePointOfFinishMarkPassing : timePoint;
+                    return to.before(getStartOfRace()) ? null : getStartOfRace().until(to);
                 }
             };
             trackedRace.getRace().getCourse().addWaypoint(0, start);

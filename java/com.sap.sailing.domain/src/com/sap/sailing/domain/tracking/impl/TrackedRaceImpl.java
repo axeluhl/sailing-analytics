@@ -557,9 +557,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 @Override
                 public void raceRemoved(TrackedRace trackedRace) {
                     if (trackedRace == TrackedRaceImpl.this) {
-                    // stop mark passing calculator when tracked race is removed:
-                    markPassingCalculator.stop();
-                }
+                        // stop mark passing calculator when tracked race is removed:
+                        markPassingCalculator.stop();
+                    }
                 }
             }, /* Not relevant For replication */ Optional.empty(), /* synchronous */ false);
         } else {
@@ -3548,6 +3548,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return new TargetTimeInfoImpl(legTargetTimes);
     }
     
+    @Override
+    public Duration getTimeSailedSinceRaceStart(Competitor competitor, TimePoint timePoint) {
+        return getRankingMetric().getActualTimeSinceStartOfRace(competitor, timePoint);
+    }
+
     @Override
     public Distance getEstimatedDistanceToComplete(final TimePoint timepoint)
             throws NotEnoughDataHasBeenAddedException, NoWindException {
