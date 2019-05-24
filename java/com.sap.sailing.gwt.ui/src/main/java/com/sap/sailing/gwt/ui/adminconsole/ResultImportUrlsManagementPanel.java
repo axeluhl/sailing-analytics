@@ -120,7 +120,7 @@ public class ResultImportUrlsManagementPanel extends FlowPanel {
                 public void onSuccess(List<String> result) {
                     urlListBox.clear();
                     for (String s : result) {
-                        urlListBox.addItem(s);
+                        urlListBox.addItem(s, s);
                     }
                 }
             });
@@ -133,7 +133,7 @@ public class ResultImportUrlsManagementPanel extends FlowPanel {
         Set<String> toRemove = new HashSet<String>();
         for (int i=urlListBox.getItemCount()-1; i>=0; i--) {
             if (urlListBox.isItemSelected(i)) {
-                toRemove.add(urlListBox.getItemText(i));
+                toRemove.add(urlListBox.getValue(i));
                 urlListBox.removeItem(i);
             }
         }
