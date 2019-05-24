@@ -44,8 +44,9 @@ public class CompleteManeuverCurveToManeuverForEstimationConverter {
     public ManeuverForEstimation convertCleanManeuverSpotToManeuverForEstimation(CompleteManeuverCurve maneuver,
             CompleteManeuverCurve previousManeuver, CompleteManeuverCurve nextManeuver, Competitor competitor,
             TrackTimeInfo trackTimeInfo) {
-        if (!maneuverForEstimationTransformer
-                .isManeuverEligibleForAnalysis(maneuver.getMainCurveBoundaries().getDirectionChangeInDegrees())) {
+        if (!maneuverForEstimationTransformer.isManeuverEligibleForAnalysis(
+                maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getDirectionChangeInDegrees(),
+                maneuver.getMainCurveBoundaries().getDirectionChangeInDegrees())) {
             // skip further computation in order to improve performance performance
             return null;
         }

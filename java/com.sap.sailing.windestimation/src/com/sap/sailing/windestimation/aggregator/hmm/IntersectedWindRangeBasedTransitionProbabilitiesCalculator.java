@@ -19,6 +19,12 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
         implements GraphNodeTransitionProbabilitiesCalculator {
 
     private static final double LA_PLACE_TRANSITION_PROBABILITY = 0.001;
+
+    // TODO make the value below boat class specific?
+    /**
+     * Sum of the smallest possible absolute TWA upwind and smallest possible (180 deg - absolute TWA downwind). The
+     * amount is used to limit the possible wind range considering head-up and bear-away maneuvers.
+     */
     protected static final int MIN_BEATING_ANGLE_PLUS_MIN_RUNNING_ANGLE = 40;
     private static final double MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES = 40;
     protected final boolean propagateIntersectedWindRangeOfHeadupAndBearAway;
