@@ -911,13 +911,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String lastFinished();
     String times();
     String dataAmount();
-    String averageCleanedServerTime();
-    String averageCleanedOverallTime();
     String dataMiningBenchmarkResults();
     String serverTime();
-    String cleanedServerTime();
     String overallTime();
-    String cleanedOverallTime();
     String confidenceShouldBeBetween();
     String minDataValuesNeedToBeAtLeastZero();
     String numberOfColumnsAtLeast2();
