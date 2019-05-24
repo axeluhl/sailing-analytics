@@ -84,6 +84,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         lagrangePolynomialsPerTrueWindSpeed = createLagrangePolynomials();
     }
 
+    //TODO Decide if needed or if it can be removed. Depending on the information provided by ORC.
     private Map<Speed, PolynomialFunctionLagrangeForm> createLagrangePolynomials() {
         Map<Speed, PolynomialFunctionLagrangeForm> writeableLagrange = new HashMap<>();
         for (Entry<Speed, Map<Bearing, Duration>> twsAndTwaToDuration : durationPerNauticalMileAtTrueWindAngleAndSpeed
@@ -155,7 +156,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
                 // Case 2
                 // result is given through the laGrange Interpolation, between the Beat and Gybe Angles
                 result.put(entry.getKey(),
-                        Duration.ONE_SECOND.times(entry.getValue().value(twa) * leg.getLength().getNauticalMiles()));
+                        getLagrangeAllowancePerTrueWindSpeedAndAngle(entry.getKey(), leg.getTwa()).times(leg.getLength().getNauticalMiles()));
             }
         }
 
@@ -176,11 +177,11 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     
     // LAGRANGE TEST BASE because of unusual implementation in ORC Pascal code
     // public accessibility needed for tests, not part of the ORCPerformanceCurve contract
-    public Duration getLagrangeInterpolationPerTrueWindSpeedAndAngle(Speed trueWindSpeed, Bearing trueWindAngle) throws FunctionEvaluationException, IllegalArgumentException {
+    public Duration getLagrangeAllowancePerTrueWindSpeedAndAngle(Speed trueWindSpeed, Bearing trueWindAngle) throws FunctionEvaluationException, IllegalArgumentException {
         Duration result;
         Bearing[] allowancesTrueWindAnglesWithBeatRun = (Bearing[]) ArrayUtils.addAll(new Bearing[] {beatAngles.get(trueWindSpeed)}, ArrayUtils.addAll(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES, new Bearing[] {gybeAngles.get(trueWindSpeed)}));
-        Bearing[] ALLOWANCES_TRUE_WIND_ANGLES = allowancesTrueWindAnglesWithBeatRun; //TODO Cleanup, after more information from ORC is available
-        Arrays.sort(ALLOWANCES_TRUE_WIND_ANGLES);
+        Bearing[] ALLOWANCES_TRUE_WIND_ANGLES = ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES; //allowancesTrueWindAnglesWithBeatRun; //TODO Cleanup, after more information from ORC is available
+        //Arrays.sort(ALLOWANCES_TRUE_WIND_ANGLES);
         
         int i = -1; //after the loop, i equals the next higher available polar data for the given TWA
         for(int j = 0; j < ALLOWANCES_TRUE_WIND_ANGLES.length; j++) {
@@ -205,11 +206,6 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         }
         
         return result;
-    }
-    
-    // public accessibility needed for tests, not part of the ORCPerformanceCurve contract
-    public PolynomialFunctionLagrangeForm getLagrangeInterpolationPerTrueWindSpeed(Speed trueWindSpeed) {
-        return lagrangePolynomialsPerTrueWindSpeed.getOrDefault(trueWindSpeed, null);
     }
     
     // public accessibility needed for tests, not part of the ORCPerformanceCurve contract

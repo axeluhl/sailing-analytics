@@ -11,8 +11,11 @@ import java.util.Map;
 
 import org.apache.commons.math.FunctionEvaluationException;
 import org.json.simple.parser.ParseException;
+import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ErrorCollector;
 
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
@@ -30,6 +33,20 @@ public class TestORCPerformanceCurve {
     private static ORCPerformanceCurveCourse course;
     private static ORCCertificateImporter importer;
 
+    @Rule
+    public ErrorCollector collector = new ErrorCollector();
+    
+    public void assertEquals(double a, double b, double accuracy){
+        try{
+            Assert.assertEquals(a, b, accuracy);
+            System.out.println("Expected: " + a + " - Recieved: " + b + " | passed");
+        } catch(AssertionError e){
+            System.out.println("Expected: " + a + " - Recieved: " + b + " | failed");
+
+            collector.addError(e);
+        }
+   }
+    
     @BeforeClass
     public static void initialize() throws IOException, ParseException {
         List<ORCPerformanceCurveLeg> legs = new ArrayList<>();
@@ -52,36 +69,36 @@ public class TestORCPerformanceCurve {
 
         assertNotNull(course);
         assertNotNull(performanceCurve);
-        assertEquals(value, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl( 6),new DegreeBearingImpl(  60)).asSeconds(), 0.000001);
+        assertEquals(value, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl( 6),new DegreeBearingImpl(  60)).asSeconds(), 0.000001);
         
-        assertEquals(492.2, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl( 6),new DegreeBearingImpl(62.5)).asSeconds(), accuracy);
-        assertEquals(425.0, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl( 8),new DegreeBearingImpl(62.5)).asSeconds(), accuracy);
-        assertEquals(403.6, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl(10),new DegreeBearingImpl(62.5)).asSeconds(), accuracy);
-        assertEquals(393.1, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl(12),new DegreeBearingImpl(62.5)).asSeconds(), accuracy);
-        assertEquals(386.7, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl(14),new DegreeBearingImpl(62.5)).asSeconds(), accuracy);
-        assertEquals(382.6, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl(16),new DegreeBearingImpl(62.5)).asSeconds(), accuracy);
-        assertEquals(371.4, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl(20),new DegreeBearingImpl(62.5)).asSeconds(), accuracy);
+        assertEquals(492.2, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl( 6),new DegreeBearingImpl(62.5)).asSeconds(), accuracy);
+        assertEquals(425.0, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl( 8),new DegreeBearingImpl(62.5)).asSeconds(), accuracy);
+        assertEquals(403.6, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(10),new DegreeBearingImpl(62.5)).asSeconds(), accuracy);
+        assertEquals(393.1, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(12),new DegreeBearingImpl(62.5)).asSeconds(), accuracy);
+        assertEquals(386.7, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(14),new DegreeBearingImpl(62.5)).asSeconds(), accuracy);
+        assertEquals(382.6, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(16),new DegreeBearingImpl(62.5)).asSeconds(), accuracy);
+        assertEquals(371.4, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(20),new DegreeBearingImpl(62.5)).asSeconds(), accuracy);
         
-        assertEquals(483.6, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl( 6),new DegreeBearingImpl(98.3)).asSeconds(), accuracy);
-        assertEquals(418.7, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl( 8),new DegreeBearingImpl(98.3)).asSeconds(), accuracy);
-        assertEquals(394.8, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl(10),new DegreeBearingImpl(98.3)).asSeconds(), accuracy);
-        assertEquals(377.9, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl(12),new DegreeBearingImpl(98.3)).asSeconds(), accuracy);
-        assertEquals(360.2, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl(14),new DegreeBearingImpl(98.3)).asSeconds(), accuracy);
-        assertEquals(345.0, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl(16),new DegreeBearingImpl(98.3)).asSeconds(), accuracy);
-        assertEquals(321.7, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl(20),new DegreeBearingImpl(98.3)).asSeconds(), accuracy);
+        assertEquals(483.6, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl( 6),new DegreeBearingImpl(98.3)).asSeconds(), accuracy);
+        assertEquals(418.7, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl( 8),new DegreeBearingImpl(98.3)).asSeconds(), accuracy);
+        assertEquals(394.8, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(10),new DegreeBearingImpl(98.3)).asSeconds(), accuracy);
+        assertEquals(377.9, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(12),new DegreeBearingImpl(98.3)).asSeconds(), accuracy);
+        assertEquals(360.2, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(14),new DegreeBearingImpl(98.3)).asSeconds(), accuracy);
+        assertEquals(345.0, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(16),new DegreeBearingImpl(98.3)).asSeconds(), accuracy);
+        assertEquals(321.7, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(20),new DegreeBearingImpl(98.3)).asSeconds(), accuracy);
         
         //assertEquals(537.3, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl(6), new DegreeBearingImpl(50)).asSeconds(), accuracy);
         
-        /*
-         TESTS of the corner areas of the polars, currently not working
-        assertEquals(588.1, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl( 6),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
-        assertEquals(468.4, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl( 8),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
-        assertEquals(413.8, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl(10),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
-        assertEquals(382.6, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl(12),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
-        assertEquals(355.1, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl(14),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
-        assertEquals(326.4, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl(16),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
-        assertEquals(275.4, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl(20),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
-        */
+        ///*
+        // TESTS of the corner areas of the polars, currently not working
+        assertEquals(588.1, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl( 6),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
+        assertEquals(468.4, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl( 8),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
+        assertEquals(413.8, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(10),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
+        assertEquals(382.6, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(12),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
+        assertEquals(355.1, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(14),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
+        assertEquals(326.4, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(16),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
+        assertEquals(275.4, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(20),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
+        //*/
     }
     
     @Test
@@ -99,8 +116,8 @@ public class TestORCPerformanceCurve {
         
         assertNotNull(course);
         assertNotNull(performanceCurve);
-        assertEquals(498.4, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl(6),new DegreeBearingImpl( 60)).asSeconds(), 0.0000000000001);
-        assertEquals(506  , performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl(6),new DegreeBearingImpl(120)).asSeconds(), 0.0000000000001);
+        assertEquals(498.4, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(6),new DegreeBearingImpl( 60)).asSeconds(), 0.0000000000001);
+        assertEquals(506  , performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(6),new DegreeBearingImpl(120)).asSeconds(), 0.0000000000001);
         assertEquals(654.4, allowancesPerCourse.get(new KnotSpeedImpl( 6)).asSeconds(), 0.1);
         assertEquals(538.6, allowancesPerCourse.get(new KnotSpeedImpl( 8)).asSeconds(), 0.1);
         assertEquals(485.1, allowancesPerCourse.get(new KnotSpeedImpl(10)).asSeconds(), 0.1);
