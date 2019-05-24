@@ -4,6 +4,7 @@ import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange.Combination
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.TwdTransition;
+import com.sap.sailing.windestimation.data.transformer.ManeuverForEstimationTransformer;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -23,7 +24,10 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
     // TODO make the value below boat class specific?
     /**
      * Sum of the smallest possible absolute TWA upwind and smallest possible (180 deg - absolute TWA downwind). The
-     * amount is used to limit the possible wind range considering head-up and bear-away maneuvers.
+     * amount is used to limit the possible wind range considering head-up and bear-away maneuvers. Make sure that the
+     * maximum allowed course change for clean maneuvers (currently 120 deg, see
+     * {@link ManeuverForEstimationTransformer#isManeuverEligibleForAnalysis(double, double)}) plus the value of this
+     * constant does not exceed 180 deg.
      */
     protected static final int MIN_BEATING_ANGLE_PLUS_MIN_RUNNING_ANGLE = 40;
     private static final double MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES = 40;
