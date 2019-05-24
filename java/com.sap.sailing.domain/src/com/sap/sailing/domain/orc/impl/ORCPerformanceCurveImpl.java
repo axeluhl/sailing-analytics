@@ -10,7 +10,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.math.FunctionEvaluationException;
+import org.apache.commons.math.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math.analysis.polynomials.PolynomialFunctionLagrangeForm;
+import org.apache.commons.math.analysis.polynomials.PolynomialSplineFunction;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.orc.ORCPerformanceCurve;
@@ -163,6 +165,22 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         return result;
     }
 
+    private void intializePerformanceCurve() throws FunctionEvaluationException {
+        Map<Speed, Duration> allowances = createAllowancesPerCourse();
+        SplineInterpolator interpolator = new SplineInterpolator();
+        double[] xs = new double[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length];
+        double[] ys = new double[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length];
+        int i = 0;
+        
+        for(Entry<Speed,Duration> entry : allowances.entrySet()) {
+            xs[i] = entry.getKey().getKnots();
+            ys[i] = entry.getValue().asSeconds();
+            i += 1;
+        }
+        
+        PolynomialSplineFunction function = interpolator.interpolate(xs, ys);
+    }
+    
     @Override
     public Speed getImpliedWind() {
         // TODO Auto-generated method stub
