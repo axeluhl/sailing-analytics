@@ -109,7 +109,9 @@ public class ManeuverForEstimationTransformer
     }
 
     public boolean isManeuverClean(ConvertableToManeuverForEstimation maneuver) {
-        return isManeuverBoundariesDataClean(maneuver, true, true)
+        return isManeuverEligibleForAnalysis(maneuver.getCourseChangeInDegrees(),
+                maneuver.getCourseChangeInDegreesWithinTurningSection())
+                && isManeuverBoundariesDataClean(maneuver, true, true)
                 && Math.abs(maneuver.getSpeedWithBearingBefore().getKnots()
                         - maneuver.getSpeedWithBearingAfter().getKnots())
                         * 3 < Math.min(maneuver.getSpeedWithBearingBefore().getKnots(),
@@ -123,8 +125,10 @@ public class ManeuverForEstimationTransformer
         return getManeuverCategory(maneuver.getCourseChangeInDegreesWithinTurningSection(), maneuver.isMarkPassing());
     }
 
-    public boolean isManeuverEligibleForAnalysis(double courseChangeWithinTurningSectionInDegrees) {
-        return getManeuverCategory(courseChangeWithinTurningSectionInDegrees, false) == ManeuverCategory.REGULAR;
+    public boolean isManeuverEligibleForAnalysis(double courseChangeInDegrees,
+            double courseChangeWithinTurningSectionInDegrees) {
+        return getManeuverCategory(courseChangeWithinTurningSectionInDegrees, false) == ManeuverCategory.REGULAR
+                && getManeuverCategory(courseChangeInDegrees, false) == ManeuverCategory.REGULAR;
     }
 
     public ManeuverCategory getManeuverCategory(double courseChangeWithinTurningSectionInDegrees, boolean markPassing) {
