@@ -108,7 +108,7 @@ public enum BoatClassMasterdata {
     SPLASH_BLUE ("Splash Blue", true, 3.50, 1.50, BoatHullType.MONOHULL, false, "Splash_Blue"),
     SPLASH_RED ("Splash Red", true, 3.50, 1.50, BoatHullType.MONOHULL, false, "Splash_Red"),
     SPLASH_GREEN ("Splash Green", true, 3.50, 1.50, BoatHullType.MONOHULL, false, "Splash_Green"),
-    STAR ("Star", true, 6.92, 1.74, BoatHullType.MONOHULL, false, "STR"),
+    STAR ("Star", true, 6.92, 1.74, BoatHullType.MONOHULL, false, "STR", "STARBOOT", "STARBOAT"),
     STREAMLINE ("Streamline", true, 7.15, 2.55, BoatHullType.MONOHULL, true),
     SUNBEAM_22 ("Sunbeam 22", true, 6.70, 2.15, BoatHullType.MONOHULL, true, "Sunbeam 22.1"),
     SWAN_45 ("Swan 45", true, 13.83, 3.91, BoatHullType.MONOHULL, true, "Swan", "Swan-45"),
