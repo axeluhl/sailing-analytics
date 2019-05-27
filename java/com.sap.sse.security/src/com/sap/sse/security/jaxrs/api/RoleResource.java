@@ -59,14 +59,20 @@ public class RoleResource extends AbstractSecurityResource {
                     permissions.add(new WildcardPermission(permissionString));
                 }
 
-                // check only those metea-permissions which changed
+                // check only those meta-permissions which changed
                 final Set<WildcardPermission> addedPermissions = new HashSet<>(roleDefinition.getPermissions());
                 addedPermissions.removeAll(permissions);
+                final Set<WildcardPermission> removedPermissions = new HashSet<>(permissions);
+                removedPermissions.removeAll(roleDefinition.getPermissions());
 
                 if (!getService().hasUserAllWildcardPermissionsForAlreadyRealizedQualifications(roleDefinition,
                         addedPermissions)) {
                     resp = Response.status(Status.UNAUTHORIZED)
                             .entity("Not permitted to grant permissions for role " + roleDefinition.getName()).build();
+                } else if (!getService().hasUserAllWildcardPermissionsForAlreadyRealizedQualifications(roleDefinition,
+                        removedPermissions)) {
+                    resp = Response.status(Status.UNAUTHORIZED)
+                            .entity("Not permitted to revoke permissions for role " + roleDefinition.getName()).build();
                 } else {
                     // update role definitino with new permissions
                     roleDefinition.setPermissions(permissions);
