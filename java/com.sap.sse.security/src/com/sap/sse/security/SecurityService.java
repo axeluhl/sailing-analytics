@@ -42,9 +42,10 @@ import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 
 /**
  * A service interface for security management. Intended to be used as an OSGi service that can be registered, e.g., by
@@ -605,5 +606,17 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
             TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, String securityDisplayName,
             Action actionToCreateObject);
+
+    /**
+     * Returns if the current user is granted the permission defined by the {@link SecuredSecurityTypes#SERVER server
+     * type} and the given {@link ServerActions action}.
+     */
+    boolean hasCurrentUserServerPermission(ServerActions action);
+
+    /**
+     * Checks if the current user is granted the permission defined by the {@link SecuredSecurityTypes#SERVER server
+     * type} and the given {@link ServerActions action}.
+     */
+    void checkCurrentUserServerPermission(ServerActions action);
 
 }
