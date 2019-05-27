@@ -56,9 +56,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
             throws UnsupportedEncodingException {
         final SecurityService securityService = getSecurityService();
         User user = securityService.getCurrentUser();
-
         securityService.checkCurrentUserServerPermission(ServerActions.CAN_EXPORT_MASTERDATA);
-
         final long startTime = System.currentTimeMillis();
         logger.info("Masterdataexport has started; requesting user: "+user);
         if (compress == null) {
@@ -72,9 +70,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
         }
         logger.info(String.format("Masterdataexport gzip compression is turned %s", compress ? "on" : "off"));
         Map<String, LeaderboardGroup> allLeaderboardGroups = getService().getLeaderboardGroups();
-
         Set<LeaderboardGroup> groupsToExport = new HashSet<LeaderboardGroup>();
-
         if (requestedLeaderboardGroups.isEmpty()) {
             // Add all visible LeaderboardGroups.
             // The request will not fail due to missing LeaderboardGroup READ permissions.
@@ -146,7 +142,6 @@ public class MasterDataResource extends AbstractSailingServerResource {
         for (Event event : getService().getAllEvents()) {
             events.add(event);
         }
-
         ArrayList<MediaTrack> mediaTracks = new ArrayList<>();
         for (MediaTrack mediaTrack : getService().getAllMediaTracks()) {
             mediaTracks.add(mediaTrack);
@@ -158,21 +153,18 @@ public class MasterDataResource extends AbstractSailingServerResource {
         final TopLevelMasterData masterData = new TopLevelMasterData(groupsToExport,
                 events, regattaRaceIds, mediaTracks,
                 getService().getSensorFixStore(), exportWind, raceManagerDeviceConfigurations);
-        
         // Checking permissions after filtering of Events to be transferred.
         for (Event event: masterData.getAllEvents()) {
             if (!securityService.hasCurrentUserReadPermission(event)) {
                 throw new AuthorizationException("No permission to read event " + event.getId());
             }
         }
-        
         // Checking permissions after filtering of MediaTracks to be transferred.
         for (MediaTrack mediaTrack : masterData.getFilteredMediaTracks()) {
             if (!securityService.hasCurrentUserReadPermission(mediaTrack)) {
                 throw new AuthorizationException("No permission to read media track " + mediaTrack.dbId);
             }
         }
-        
         final StreamingOutput streamingOutput;
         if (compress) {
             streamingOutput = new CompressingStreamingOutput(masterData, competitorIds, startTime, securityService);

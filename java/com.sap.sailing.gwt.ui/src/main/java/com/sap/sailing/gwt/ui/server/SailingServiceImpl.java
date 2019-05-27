@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.server;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -5754,15 +5755,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
             String targetServerUsername, String targetServerPassword) {
         getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
-
         String token = RemoteServerUtil.resolveBearerTokenForRemoteServer(urlAsString, targetServerUsername, targetServerPassword);
-
         final UUID importOperationId = UUID.randomUUID();
-        getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT,
-                0.0);
+        getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT, 0.0);
         final User user = getSecurityService().getCurrentUser();
         final UserGroup tenant = getSecurityService().getDefaultTenantForCurrentUser();
-        
         // Create a progress indicator for as long as the server gets data from the other server.
         // As soon as the server starts the import operation, a progress object will be built on every server
         Runnable masterDataImportTask = new Runnable() {
@@ -5797,13 +5794,21 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         inputStream = new TimeoutExtendingInputStream(connection.getInputStream(), connection);
                     }
                     final MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService(),
-                            user,
-                            tenant);
+                            user, tenant);
                     importer.importFromStream(inputStream, importOperationId, override);
                 } catch (Throwable e) {
                     // do not assume that RuntimeException is logged properly
-                    logger.log(Level.SEVERE, e.getMessage(), e);
-                    getService().setDataImportFailedWithReplication(importOperationId, e.getMessage()
+                    String message = e.getMessage();
+                    if (connection instanceof HttpURLConnection) {
+                        // try to obtain an error message from the connection's error stream:
+                        try {
+                            message = new BufferedReader(new InputStreamReader(((HttpURLConnection) connection).getErrorStream())).readLine();
+                        } catch (Exception exceptionTryingToReadErrorStream) {
+                            // in this case we just stay with the exception's message
+                        }
+                    }
+                    logger.log(Level.SEVERE, message, e);
+                    getService().setDataImportFailedWithReplication(importOperationId, message
                             + "\n\nHave you checked if the"
                             + " versions (commit-wise) of the importing and exporting servers are compatible with each other? "
                             + "If the error still occurs, when both servers are running the same version, please report the problem.");
