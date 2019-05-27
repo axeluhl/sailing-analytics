@@ -38,7 +38,9 @@ public class SecurityWebSessionManager extends DefaultWebSessionManager {
      */
     private static final Duration MAX_DURATION_AFTER_WHICH_TO_PING_SESSION = Duration.ONE_HOUR;
     
-    private static final ConcurrentWeakHashMap<Session, Void> sessionsAlreadyScheduledForOnChange = new ConcurrentWeakHashMap<>();
+    private static final Object DUMMY = new Object(); // for use as dummy value in sessionsAlreadyScheduledForOnChange
+    
+    private static final ConcurrentWeakHashMap<Session, Object> sessionsAlreadyScheduledForOnChange = new ConcurrentWeakHashMap<>();
     
     public SecurityWebSessionManager() {
         super();
@@ -55,7 +57,7 @@ public class SecurityWebSessionManager extends DefaultWebSessionManager {
     private void triggerOnChangeLatestInHalfTimeoutPeriod(Session s) {
         Duration sendDurationLatestIn = new MillisecondsDurationImpl(s.getTimeout()).minus(MAX_DURATION_ASSUMED_FOR_MESSAGE_DELIVERY);
         if (!sessionsAlreadyScheduledForOnChange.containsKey(s)) {
-            sessionsAlreadyScheduledForOnChange.put(s, null);
+            sessionsAlreadyScheduledForOnChange.put(s, DUMMY);
             timer.schedule(()->{ onChange(s); sessionsAlreadyScheduledForOnChange.remove(s); },
                     MillisecondsTimePoint.now().plus(
                             sendDurationLatestIn.compareTo(MAX_DURATION_AFTER_WHICH_TO_PING_SESSION) > 0 ?
