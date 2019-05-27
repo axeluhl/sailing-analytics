@@ -36,14 +36,14 @@ installPlugins http://p2.sapsailing.com/p2/sdbg com.github.sdbg.feature.feature.
 echo "Installing EasyShell..."
 installPlugins http://anb0s.github.io/EasyShell de.anbos.eclipse.easyshell.feature.feature.group
 
-echo "Installing BIRT charts (requirement for MAT)..."
-installPlugins https://download.eclipse.org/birt/update-site/photon-interim/ org.eclipse.birt.chart.feature.group
-
 echo "Installing Memory Analyzer..."
 installPlugins http://download.eclipse.org/releases/2019-03 org.eclipse.mat.feature.feature.group,org.eclipse.mat.chart.feature.feature.group
 
 echo "Installing SAP JVM Tools (profiler) ..."
 installPlugins https://tools.hana.ondemand.com/oxygen com.sap.jvm.profiling.feature.group
+
+echo "Installing UMLet ..."
+installPlugins https://www.umlet.com/umlet_latest/repository/ umlet-eclipse-feature.feature.group
 
 echo "Installing javax.xml.bind for news feed polling (see https://stackoverflow.com/questions/52528693/eclipse-internal-error-polling-news-feeds)..."
 installPlugins http://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository javax.xml.bind

@@ -26,7 +26,7 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
     public JSONObject serialize(TrackedRace trackedRace) {
         final Course course = trackedRace.getRace().getCourse();
         JSONObject result = new JSONObject();
-        CompetitorAndBoatJsonSerializer competitorWithBoatSerializer = CompetitorAndBoatJsonSerializer.create();
+        CompetitorAndBoatJsonSerializer competitorWithBoatSerializer = CompetitorAndBoatJsonSerializer.create(/* serializeNonPublicCompetitorFields */ false);
         CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
         JSONArray byCompetitorJson = new JSONArray();
         result.put(BYCOMPETITOR, byCompetitorJson);

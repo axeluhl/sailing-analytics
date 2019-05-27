@@ -3,7 +3,6 @@ package com.sap.sse.filestorage.impl;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -76,12 +75,6 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
             }
         }
         return new AmazonS3Client(creds);
-    }
-
-    private static String getKey(String fileExtension) {
-        String key = UUID.randomUUID().toString();
-        key += fileExtension;
-        return key;
     }
 
     private URI getUri(String key) {

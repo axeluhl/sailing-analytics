@@ -27,8 +27,8 @@ public class ColoradoTest {
     private void validateSomeDeclinationInJanuary2018(final Declination declination) {
         assertEquals(10.0, declination.getPosition().getLatDeg(), 0.000001);
         assertEquals(20.0, declination.getPosition().getLngDeg(), 0.000001);
-        assertEquals(1.89255, declination.getBearing().getDegrees(), 0.000001);
-        assertEquals(0.10649, declination.getAnnualChange().getDegrees(), 0.000001);
+        assertEquals(1.91357, declination.getBearing().getDegrees(), 0.000001);
+        assertEquals(0.1102, declination.getAnnualChange().getDegrees(), 0.000001);
     }
     
     @Test

@@ -2382,7 +2382,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public CoursePositionsDTO getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date) {
         CoursePositionsDTO result = new CoursePositionsDTO();
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
-        getSecurityService().checkCurrentUserReadPermission(trackedRace);
         if (trackedRace != null) {
             getSecurityService().checkCurrentUserReadPermission(trackedRace);
             final TimePoint dateAsTimePoint;
@@ -5428,9 +5427,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         List<RegattaDTO> regattaDTOs = new ArrayList<RegattaDTO>();
         Iterable<Regatta> regattas = structureImporter.getRegattas(parsedEvent);
         for (Regatta regatta : regattas) {
-            if (getSecurityService().hasCurrentUserReadPermission(regatta)) {
-                regattaDTOs.add(convertToRegattaDTO(regatta));
-            }
+            regattaDTOs.add(convertToRegattaDTO(regatta));
         }
         return regattaDTOs;
     }
@@ -5946,18 +5943,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             final DynamicBoat boat = (DynamicBoat) addOrUpdateBoatInternal(competitor.getBoat());
             result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredDomainType.COMPETITOR, CompetitorImpl.getTypeRelativeObjectIdentifier(competitorUUID),
-                    competitor.getName(), new Callable<CompetitorWithBoat>() {
-                        @Override
-                        public CompetitorWithBoat call() throws Exception {
-                            return getBaseDomainFactory().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(
+                    competitor.getName(), ()->getBaseDomainFactory().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(
                                     competitorUUID, competitor.getName(), competitor.getShortName(),
                                     competitor.getColor(), competitor.getEmail(),
                                     competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),
                                     team, competitor.getTimeOnTimeFactor(),
                                     competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag(),
-                                    boat);
-                        }
-                    });
+                                    boat));
         } else {
             SecurityUtils.getSubject().checkPermission(SecuredDomainType.COMPETITOR.getStringPermissionForTypeRelativeIdentifier(
                     DefaultActions.UPDATE, CompetitorImpl.getTypeRelativeObjectIdentifier(competitor.getId())));
@@ -5990,17 +5982,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
             result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredDomainType.COMPETITOR, CompetitorImpl.getTypeRelativeObjectIdentifier(competitorUUID),
-                    competitor.getName(), new Callable<Competitor>() {
-
-                        @Override
-                        public Competitor call() throws Exception {
-                            return getBaseDomainFactory().getOrCreateCompetitor(competitorUUID, competitor.getName(),
+                    competitor.getName(), ()->getBaseDomainFactory().getOrCreateCompetitor(competitorUUID, competitor.getName(),
                                     competitor.getShortName(), competitor.getColor(), competitor.getEmail(),
                                     competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),
                                     team, competitor.getTimeOnTimeFactor(),
-                                    competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag());
-                        }
-                    });
+                                    competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag()));
         } else {
             SecurityUtils.getSubject().checkPermission(
                     SecuredDomainType.COMPETITOR.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
@@ -6031,7 +6017,31 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public List<CompetitorWithBoatDTO> addCompetitors(List<CompetitorDescriptor> competitorDescriptors, String searchTag) throws URISyntaxException {
         List<DynamicCompetitorWithBoat> competitorsForSaving = new ArrayList<>();
         for (final CompetitorDescriptor competitorDescriptor : competitorDescriptors) {
-            competitorsForSaving.add(getService().convertCompetitorDescriptorToCompetitorWithBoat(competitorDescriptor, searchTag));
+            final Action action = ()->competitorsForSaving.add(getService().convertCompetitorDescriptorToCompetitorWithBoat(competitorDescriptor, searchTag));
+            final Boat existingBoat = getService().getCompetitorAndBoatStore().getExistingBoatById(competitorDescriptor.getBoatUUID());
+            final Action actionIncludingBoatSecurityCheck;
+            if (existingBoat == null) {
+                actionIncludingBoatSecurityCheck = ()->getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                    SecuredDomainType.BOAT, BoatImpl.getTypeRelativeObjectIdentifier(competitorDescriptor.getBoatUUID()), competitorDescriptor.getBoatName(),
+                    action);
+            } else {
+                actionIncludingBoatSecurityCheck = action;
+            }
+            final Competitor existingCompetitor = getService().getCompetitorAndBoatStore().getExistingCompetitorById(competitorDescriptor.getCompetitorUUID());
+            final Action actionIncludingCompetitorAndBoatSecurityCheck;
+            if (existingCompetitor == null) {
+                actionIncludingCompetitorAndBoatSecurityCheck = ()->getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                            SecuredDomainType.COMPETITOR,
+                            CompetitorImpl.getTypeRelativeObjectIdentifier(competitorDescriptor.getCompetitorUUID()), competitorDescriptor.getName(),
+                            actionIncludingBoatSecurityCheck);
+            } else {
+                actionIncludingCompetitorAndBoatSecurityCheck = actionIncludingBoatSecurityCheck;
+            }
+            try {
+                actionIncludingCompetitorAndBoatSecurityCheck.run();
+            } catch (Exception e) {
+                throw new RuntimeException(e); // this can onlyhave been a RuntimeException in the first place because nothing of the above throws a checked one
+            }
         }
         getBaseDomainFactory().getCompetitorAndBoatStore().addNewCompetitorsWithBoat(competitorsForSaving);
         return convertToCompetitorWithBoatDTOs(competitorsForSaving);
@@ -6080,14 +6090,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             UUID boatUUID = UUID.randomUUID();
             BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(boat.getBoatClass().getName());
             result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.BOAT, BoatImpl.getTypeRelativeObjectIdentifier(boatUUID), boat.getName(), new Callable<Boat>() {
-
-                        @Override
-                        public Boat call() throws Exception {
-                            return getBaseDomainFactory().getOrCreateBoat(boatUUID, boat.getName(), boatClass,
-                                    boat.getSailId(), boat.getColor());
-                        }
-                    });
+                    SecuredDomainType.BOAT, BoatImpl.getTypeRelativeObjectIdentifier(boatUUID), boat.getName(),
+                    () -> getBaseDomainFactory().getOrCreateBoat(boatUUID, boat.getName(), boatClass, boat.getSailId(), boat.getColor()));
         } else {
             SecurityUtils.getSubject().checkPermission(
                     SecuredDomainType.BOAT.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
@@ -7611,15 +7615,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         for (CompetitorDTO c : competitorDtos) {
             competitors.add(getCompetitor(c));
         }
-        MailInvitationType type = MailInvitationType
-                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.SailInsight1.name()));
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         Regatta regatta = getService().getRegattaByName(leaderboardName);
         getSecurityService().checkCurrentUserUpdatePermission(regatta);
         getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, regatta,
                 serverUrlWithoutTrailingSlash,
-                competitors, iOSAppUrl, androidAppUrl, getLocale(localeInfoName), type);
+                competitors, iOSAppUrl, androidAppUrl, getLocale(localeInfoName), getMailType());
     }
     
     @Override

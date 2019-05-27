@@ -18,6 +18,23 @@
             }
          ]
       },
+      {  
+         "collectionName":"DataMiningGwtUi",
+         "folders":[  
+            {  
+               "startingFolderPath":"java/com.sap.sse.datamining.ui/src/main/java/com/sap/sse/datamining/ui/client",
+               "sourceFilters":[  
+                  "**/StringMessages*.properties"
+               ],
+               "excludedSourceFilters":[
+               	"**/*_zh.properties"
+               	],
+               "xlfFolderPath":"/XLF/[fullPath]/[targetFile]",
+	       "targetFolderPath":".",
+	       "pseudoLocFolderPath":"."
+            }
+         ]
+      },
       {
          "collectionName":"RacelogTracking",
          "folders":[  
@@ -85,7 +102,7 @@
          "collectionName":"FileStorage",
          "folders":[  
             {  
-               "startingFolderPath":"java/com.sap.sse.gwt/src/com/sap/sse/gwt/client/controls/filestorage",
+               "startingFolderPath":"java/com.sap.sse.gwt/src/com/sap/sse/gwt/client",
                "sourceFilters":[  
                   "**/StringMessages*.properties"
                ],
@@ -177,6 +194,72 @@
                "pseudoLocFolderPath":"."
             }
          ]
+      },
+      {
+         "collectionName":"BuoyPingerAppAndroid",
+         "folders":[
+           {
+	     "startingFolderPath": "mobile/com.sap.sailing.android.buoy.positioning.app/res/values/**",
+	     "sourceFilters":["strings.xml"],
+	     "targetFolderPath":"../values-[langCode]",
+		"targetFileNamingConvention":"[filename].[extension]"
+           }
+	 ]
+      },
+      {
+         "collectionName":"BuoyPingerAppAndroid",
+         "folders":[
+           {
+	     "startingFolderPath": "mobile/com.sap.sailing.android.buoy.positioning.app/res/values-land/**",
+	     "sourceFilters":["strings.xml"],
+	     "targetFolderPath":"../values-[langCode]-land",
+		"targetFileNamingConvention":"[filename].[extension]"
+           }
+	 ]
+      },
+      {
+         "collectionName":"RaceManagerAppAndroid",
+         "folders":[
+           {
+	     "startingFolderPath": "mobile/com.sap.sailing.racecommittee.app/res/**",
+	     "sourceFilters":["strings.xml"],
+	     "targetFolderPath":"../values-[langCode]",
+		"targetFileNamingConvention":"[filename].[extension]"
+           }
+	 ]
+      },
+      {
+         "collectionName":"SailInsightAppAndroid",
+         "folders":[
+           {
+	     "startingFolderPath": "mobile/com.sap.sailing.android.tracking.app/res/**",
+	     "sourceFilters":["strings.xml"],
+	     "targetFolderPath":"../values-[langCode]",
+		"targetFileNamingConvention":"[filename].[extension]"
+           }
+	 ]
+      },
+      {
+         "collectionName":"AndroidAppsShared",
+         "folders":[
+	   {
+	     "startingFolderPath": "mobile/com.sap.sailing.android.shared/res/**",
+	     "sourceFilters":["strings.xml"],
+	     "targetFolderPath":"../values-[langCode]",
+		"targetFileNamingConvention":"[filename].[extension]"
+	   }
+	 ]
+      },
+      {
+         "collectionName":"SailInsightAppIOS",
+         "folders":[
+	   {
+	     "startingFolderPath": "ios/SAPTracker/src/xcode/SAPTracker/**",
+	     "sourceFilters":["*.strings"],
+	     "targetFolderPath":"../[langCode].lproj",
+		"targetFileNamingConvention":"[filename].[extension]"
+	   }
+	 ]
       }
    ],
    "defaultConfiguration":{  

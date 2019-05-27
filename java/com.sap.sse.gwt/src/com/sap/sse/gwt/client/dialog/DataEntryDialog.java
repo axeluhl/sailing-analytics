@@ -187,7 +187,7 @@ public abstract class DataEntryDialog<T> {
     }
 
     /**
-     * Allows subcasses to listen to changes of the data shown in the dialog.
+     * Allows subclasses to listen to changes of the data shown in the dialog.
      */
     protected void onChange(T result) {
     }

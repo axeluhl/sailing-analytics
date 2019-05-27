@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.client.media.shared;
 
 import java.util.Date;
 
-import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 
 
 public interface MediaPlayer {
@@ -15,7 +15,7 @@ public interface MediaPlayer {
 
     void raceTimeChanged(Date raceTime);
 
-    MediaTrack getMediaTrack();
+    MediaTrackWithSecurityDTO getMediaTrack();
     
     double getDuration();
     

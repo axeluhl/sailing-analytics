@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -87,12 +86,6 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
                     }
                     return getUri(fileName);
                 });
-    }
-
-    private static String getKey(String fileEnding) {
-        String key = UUID.randomUUID().toString();
-        key += fileEnding;
-        return key;
     }
 
     private URI getUri(String pathToFile) {

@@ -44,6 +44,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
     private final UserTableWrapper<RefreshableMultiSelectionModel<UserDTO>, TR> userList;
     private final RefreshableMultiSelectionModel<UserDTO> userSelectionModel;
     private final TextBox userNameTextbox;
+    private final UserRoleDefinitionPanel userRoleDefinitionPanel;
 
     public UserManagementPanel(final UserService userService, final StringMessages stringMessages,
             ErrorReporter errorReporter, TR tableResources) {
@@ -56,7 +57,10 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         final VerticalPanel west = new VerticalPanel();
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER);
         west.add(buttonPanel);
-        buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::updateUsers);
+        userList = new UserTableWrapper<>(userService, additionalPermissions, stringMessages, errorReporter,
+                /* multiSelection */ true, /* enablePager */ true, tableResources);
+        buttonPanel.addUnsecuredAction(stringMessages.refresh(),
+                () -> userList.refreshUserList((Callback<Iterable<UserDTO>, Throwable>) null, false));
         buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.createUser(),
                 () -> new CreateUserDialog(stringMessages, userManagementService, userCreatedHandlers, userService)
                         .show());
@@ -67,8 +71,6 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         userNameTextbox.addKeyUpHandler(
                 e -> editRolesAndPermissionsForUserButton.setEnabled(!userNameTextbox.getText().isEmpty()));
         editRolesAndPermissionsForUserButton.setEnabled(false);
-        userList = new UserTableWrapper<>(userService, additionalPermissions, stringMessages, errorReporter,
-                /* multiSelection */ true, /* enablePager */ true, tableResources);
         userSelectionModel = userList.getSelectionModel();
         final Button deleteButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
                 assert userSelectionModel.getSelectedSet().size() > 0;
@@ -134,7 +136,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         final HorizontalPanel detailsPanel = new HorizontalPanel();
 
         // add details panel for user roles
-        final UserRoleDefinitionPanel userRoleDefinitionPanel = new UserRoleDefinitionPanel(userService, stringMessages,
+        userRoleDefinitionPanel = new UserRoleDefinitionPanel(userService, stringMessages,
                 errorReporter,
                 tableResources, userList.getSelectionModel(), () -> updateUsers());
         detailsPanel.add(userRoleDefinitionPanel);
@@ -178,6 +180,10 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                 errorReporter.reportError(caught.getMessage());
             }
         });
+    }
+
+    public void refreshSuggests() {
+        userRoleDefinitionPanel.refreshSuggest();
     }
 
     public void updateUsers() {
