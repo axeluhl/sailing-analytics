@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.math.ArgumentOutsideDomainException;
 import org.apache.commons.math.FunctionEvaluationException;
 import org.json.simple.parser.ParseException;
 import org.junit.Assert;
@@ -62,6 +63,7 @@ public class TestORCPerformanceCurve {
     
     @Test
     public void testLagrangeInterpolation() throws FunctionEvaluationException {
+        System.out.println("- testLagrangeInterpolation() -");
         Double accuracy = 0.21;
         ORCCertificateImpl certificate = (ORCCertificateImpl) importer.getCertificate("GER 5549");
         ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(course);
@@ -103,6 +105,7 @@ public class TestORCPerformanceCurve {
     
     @Test
     public void testSimpleConstructedCourse() throws FunctionEvaluationException {
+        System.out.println("- testSimpleConstructedCourse() -");
         ORCCertificateImpl certificate = (ORCCertificateImpl) importer.getCertificate("GER 5549");
         List<ORCPerformanceCurveLeg> legs = new ArrayList<>();
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.0), new DegreeBearingImpl(0)));
@@ -114,7 +117,6 @@ public class TestORCPerformanceCurve {
         ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(simpleCourse);
         Map<Speed, Duration> allowancesPerCourse = performanceCurve.createAllowancesPerCourse();
         
-        assertNotNull(course);
         assertNotNull(performanceCurve);
         assertEquals(498.4, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(6),new DegreeBearingImpl( 60)).asSeconds(), 0.0000000000001);
         assertEquals(506  , performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(6),new DegreeBearingImpl(120)).asSeconds(), 0.0000000000001);
@@ -126,5 +128,18 @@ public class TestORCPerformanceCurve {
         assertEquals(430.3, allowancesPerCourse.get(new KnotSpeedImpl(16)).asSeconds(), 0.1);
         assertEquals(404.3, allowancesPerCourse.get(new KnotSpeedImpl(20)).asSeconds(), 0.1);
     }
+    
+    @Test
+    public void testPerformanceCurveInvertation() throws ArgumentOutsideDomainException {
+        System.out.println("- testPerformanceCurveInvertation() -");
+        Double accuracy = 0.1;
+        ORCCertificateImpl certificate = (ORCCertificateImpl) importer.getCertificate("GER 5549");
+        ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(course);
+        
+        
+        assertEquals(6, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(6))).getKnots(), accuracy);
+        assertEquals(11.5, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(11.5))).getKnots(), accuracy);
+        assertEquals(17.23, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(17.23))).getKnots(), accuracy);
+    } 
 
 }

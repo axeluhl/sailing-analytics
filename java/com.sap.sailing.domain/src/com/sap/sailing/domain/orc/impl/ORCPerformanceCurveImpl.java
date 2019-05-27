@@ -3,18 +3,22 @@ package com.sap.sailing.domain.orc.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.math.ArgumentOutsideDomainException;
 import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math.analysis.polynomials.PolynomialFunctionLagrangeForm;
 import org.apache.commons.math.analysis.polynomials.PolynomialSplineFunction;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.orc.ORCPerformanceCurve;
 import com.sap.sailing.domain.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.orc.ORCPerformanceCurveLeg;
@@ -61,6 +65,12 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      * 
      */
     private final ORCPerformanceCurveCourse course;
+    
+    /**
+     * 
+     */
+    private PolynomialSplineFunction functionTwaToAllowance;
+    private PolynomialSplineFunction functionAllowanceToTwa;
 
     /**
      * Accepts the simplified polar data, one "column" for each of the defined true wind speeds, where each column is a
@@ -79,6 +89,12 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         this.gybeAngles = Collections.unmodifiableMap(gybeAngles);
         this.course = course;
         lagrangePolynomialsPerTrueWindSpeed = createLagrangePolynomials();
+        try {
+            initializePerformanceCurve();
+        } catch (FunctionEvaluationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
@@ -165,7 +181,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         return result;
     }
 
-    private void intializePerformanceCurve() throws FunctionEvaluationException {
+    private void initializePerformanceCurve() throws FunctionEvaluationException {
         Map<Speed, Duration> allowances = createAllowancesPerCourse();
         SplineInterpolator interpolator = new SplineInterpolator();
         double[] xs = new double[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length];
@@ -178,7 +194,18 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             i += 1;
         }
         
-        PolynomialSplineFunction function = interpolator.interpolate(xs, ys);
+        functionAllowanceToTwa = interpolator.interpolate(ys, xs);
+        ArrayUtils.reverse(xs);
+        ArrayUtils.reverse(ys);
+        functionTwaToAllowance = interpolator.interpolate(xs, ys);
+    }
+    
+    public Speed getImpliedWind(Duration time) throws ArgumentOutsideDomainException {
+        return new KnotSpeedImpl(functionAllowanceToTwa.value(time.asSeconds()));
+    }
+    
+    public Duration getAllowancePerCourse(Speed twa) throws ArgumentOutsideDomainException {
+        return Duration.ONE_SECOND.times(functionTwaToAllowance.value(twa.getKnots()));
     }
     
     @Override
