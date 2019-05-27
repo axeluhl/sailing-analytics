@@ -5421,9 +5421,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         List<RegattaDTO> regattaDTOs = new ArrayList<RegattaDTO>();
         Iterable<Regatta> regattas = structureImporter.getRegattas(parsedEvent);
         for (Regatta regatta : regattas) {
-            if (getSecurityService().hasCurrentUserReadPermission(regatta)) {
-                regattaDTOs.add(convertToRegattaDTO(regatta));
-            }
+            regattaDTOs.add(convertToRegattaDTO(regatta));
         }
         return regattaDTOs;
     }
