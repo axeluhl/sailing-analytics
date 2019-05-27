@@ -1668,9 +1668,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             }
 
             if (doServerCreateObjectCheck) {
-                SecurityUtils.getSubject()
-                        .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
-                                ServerActions.CREATE_OBJECT, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+                checkCurrentUserServerPermission(ServerActions.CREATE_OBJECT);
             }
             try {
                 SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
@@ -1702,9 +1700,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public boolean hasCurrentUserServerPermission(ServerActions action) {
-        return SecurityUtils.getSubject().isPermitted(
-                SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
-                        action, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        return SecurityUtils.getSubject().isPermitted(constructServerPermissionString(action));
+    }
+    
+    @Override
+    public void checkCurrentUserServerPermission(ServerActions action) {
+        SecurityUtils.getSubject().checkPermission(constructServerPermissionString(action));
+    }
+
+    private String constructServerPermissionString(ServerActions action) {
+        return SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
+                action, new TypeRelativeObjectIdentifier(ServerInfo.getName()));
     }
 
     @Override

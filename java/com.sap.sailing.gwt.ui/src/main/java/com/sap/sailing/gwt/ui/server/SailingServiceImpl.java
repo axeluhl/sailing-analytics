@@ -4290,9 +4290,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public ReplicationStateDTO getReplicaInfo() {
-        SecurityUtils.getSubject().checkPermission(
-                SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(ServerActions.READ_REPLICATOR,
-                        new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.READ_REPLICATOR);
         ReplicationService service = getReplicationService();
         Set<ReplicaDTO> replicaDTOs = new HashSet<ReplicaDTO>();
         for (ReplicaDescriptor replicaDescriptor : service.getReplicaInfo()) {
@@ -4333,9 +4331,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public void startReplicatingFromMaster(String messagingHost, String masterHostName, String exchangeName,
             int servletPort, int messagingPort, String usernameOrNull, String passwordOrNull)
             throws IOException, ClassNotFoundException, InterruptedException {
-        SecurityUtils.getSubject()
-                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
-                        ServerActions.START_REPLICATION, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.START_REPLICATION);
         // The queue name must always be the same for this server. In order to achieve
         // this we're using the unique server identifier
         final ReplicationService replicationService = getReplicationService();
@@ -5126,9 +5122,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) {
-        SecurityUtils.getSubject()
-                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
-                ServerActions.CONFIGURE_LOCAL_SERVER, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_LOCAL_SERVER);
         getService().apply(new UpdateServerConfiguration(
                 new SailingServerConfigurationImpl(serverConfiguration.isStandaloneServer())));
         if (serverConfiguration.isSelfService() != null) {
@@ -5623,9 +5617,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void stopReplicatingFromMaster() {
-        SecurityUtils.getSubject()
-                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
-                        ServerActions.START_REPLICATION, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.START_REPLICATION);
         try {
             getReplicationService().stopToReplicateFromMaster();
         } catch (IOException e) {
@@ -5636,9 +5628,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void stopAllReplicas() {
-        SecurityUtils.getSubject()
-                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
-                        ServerActions.REPLICATE, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.REPLICATE);
         try {
             getReplicationService().stopAllReplicas();
         } catch (IOException e) {
@@ -5649,9 +5639,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void stopSingleReplicaInstance(String identifier) {
-        SecurityUtils.getSubject()
-                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
-                        ServerActions.REPLICATE, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.REPLICATE);
         UUID uuid = UUID.fromString(identifier);
         try {
             getReplicationService().unregisterReplica(uuid);
@@ -5767,9 +5755,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public UUID importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
             String targetServerUsername, String targetServerPassword) {
-        // FIXME should the targetserver also check this?
-        SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
-                ServerActions.CAN_IMPORT_MASTERDATA, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
 
         String token = RemoteServerUtil.resolveBearerTokenForRemoteServer(urlAsString, targetServerUsername, targetServerPassword);
 

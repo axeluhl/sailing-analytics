@@ -23,7 +23,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.shiro.authz.AuthorizationException;
@@ -58,9 +57,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
         final SecurityService securityService = getSecurityService();
         User user = securityService.getCurrentUser();
 
-        if (!securityService.hasCurrentUserServerPermission(ServerActions.CAN_EXPORT_MASTERDATA)) {
-            return Response.status(Status.FORBIDDEN).build();
-        }
+        securityService.checkCurrentUserServerPermission(ServerActions.CAN_EXPORT_MASTERDATA);
 
         final long startTime = System.currentTimeMillis();
         logger.info("Masterdataexport has started; requesting user: "+user);

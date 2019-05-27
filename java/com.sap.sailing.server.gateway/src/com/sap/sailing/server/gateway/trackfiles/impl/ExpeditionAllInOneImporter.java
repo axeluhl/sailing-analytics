@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.subject.Subject;
 import org.json.simple.parser.ParseException;
@@ -96,7 +95,6 @@ import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard
 import com.sap.sailing.server.operationaltransformation.UpdateEvent;
 import com.sap.sailing.server.security.PermissionAwareRaceTrackingHandler;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
-import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
@@ -108,8 +106,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 
 /**
@@ -287,9 +283,7 @@ public class ExpeditionAllInOneImporter {
     public ImporterResult importFiles(final String filenameWithSuffix, final FileItem fileItem,
             final String boatClassName, ImportMode importMode, String existingRegattaName, boolean importStartData)
                     throws AllInOneImportException, IOException, FormatNotSupportedException {
-        SecurityUtils.getSubject().checkPermission(
-                SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(ServerActions.CREATE_OBJECT,
-                        new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        securityService.checkCurrentUserServerPermission(ServerActions.CREATE_OBJECT);
         final List<ErrorImportDTO> errors = new ArrayList<>();
         final String importTimeString = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC));
         final String filename = ExpeditionImportFilenameUtils.truncateFilenameExtentions(filenameWithSuffix);
