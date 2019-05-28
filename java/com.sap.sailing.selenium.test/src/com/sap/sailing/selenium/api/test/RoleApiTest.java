@@ -102,7 +102,7 @@ public class RoleApiTest extends AbstractSeleniumTest {
         // |A| = |B| ∧ ∀a∈ A: a∈ B --> A and B have the same elements, ignoring order
         assertEquals("Permissions changed!", permissions.size(), Util.size(roleGetAfterUpdate.getPermissions()));
         for (String permission : roleGetAfterUpdate.getPermissions()) {
-            assertTrue("Permissions missing!", permission.contains(permission));
+            assertTrue("Permissions missing!", permissions.contains(permission));
         }
 
         roleApi.deleteRole(adminCtx, roleCreated.getId());
