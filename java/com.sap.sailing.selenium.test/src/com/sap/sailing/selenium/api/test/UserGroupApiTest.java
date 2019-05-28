@@ -43,6 +43,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
         assertEquals("Responded user group names are not the same!", userGroupCreated.getGroupName(),
                 userGroupGet.getGroupName());
         assertSameElements(userGroupCreated.getUsers(), userGroupGet.getUsers());
+        assertSameElements(userGroupCreated.getRoles(), userGroupGet.getRoles());
 
         final UserGroup userGroupGetByName = userGroupApi.getUserGroupByName(adminCtx, groupName);
 

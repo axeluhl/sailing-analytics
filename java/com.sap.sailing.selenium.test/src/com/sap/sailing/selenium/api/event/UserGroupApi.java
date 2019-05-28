@@ -11,12 +11,14 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.core.JsonWrapper;
+import com.sap.sailing.selenium.api.event.RoleApi.Role;
 
 public class UserGroupApi {
 
     private static final String KEY_GROUP_NAME = "groupName";
     private static final String KEY_GROUP_ID = "groupId";
     private static final String KEY_USERS = "users";
+    private static final String KEY_ROLES = "roles";
 
     private static final String USERGROUP_URL = "/api/restsecurity/usergroup/";
 
@@ -57,8 +59,17 @@ public class UserGroupApi {
         public Iterable<String> getUsers() {
             JSONArray array = get(KEY_USERS);
             Collection<String> col = new ArrayList<>();
-            for (Object w : array) {
-                col.add(w.toString());
+            for (Object user : array) {
+                col.add(user.toString());
+            }
+            return col;
+        }
+
+        public Iterable<Role> getRoles() {
+            JSONArray array = get(KEY_ROLES);
+            Collection<Role> col = new ArrayList<>();
+            for (Object roleJson : array) {
+                col.add(new Role((JSONObject) roleJson));
             }
             return col;
         }
