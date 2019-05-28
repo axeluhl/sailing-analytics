@@ -9,6 +9,7 @@ import java.util.concurrent.Callable;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -31,7 +32,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 @Path("/restsecurity/role")
 public class RoleResource extends AbstractSecurityResource {
 
-    @PUT
+    @POST
     @Produces("application/json;charset=UTF-8")
     public Response createRole(@Context UriInfo uriInfo, @FormParam("roleName") String roleName) {
         final String roleDefinitionIdAsString = UUID.randomUUID().toString();
