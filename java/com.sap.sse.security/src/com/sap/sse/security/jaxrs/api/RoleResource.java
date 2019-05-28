@@ -83,9 +83,10 @@ public class RoleResource extends AbstractSecurityResource {
                 resp = Response.status(Status.NOT_FOUND).entity(String.format("No role with id '%s' found.", roleUUID))
                         .build();
             } else {
-                // check read permission on role
-                getService().checkCurrentUserDeletePermission(roleDefinition);
-                getService().deleteRoleDefinition(roleDefinition);
+                // check delete permission and remove role
+                getService().checkPermissionAndDeleteOwnershipForObjectRemoval(roleDefinition, () -> {
+                    getService().deleteRoleDefinition(roleDefinition);
+                });
                 resp = Response.status(Status.NO_CONTENT).build();
             }
         } catch (IllegalArgumentException e) {
