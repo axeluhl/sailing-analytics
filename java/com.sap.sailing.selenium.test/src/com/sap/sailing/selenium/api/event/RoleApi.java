@@ -15,6 +15,9 @@ import com.sap.sailing.selenium.api.core.JsonWrapper;
 public class RoleApi {
 
     private static final String ROLE_URL = "/api/restsecurity/role/";
+    private static final String KEY_ROLE_NAME = "roleName";
+    private static final String KEY_PERMISSIONS = "permissions";
+    private static final String KEY_ID = "roleId";
 
     public Role getRole(ApiContext ctx, UUID roleId) {
         return new Role(ctx.get(ROLE_URL + roleId.toString()));
@@ -22,7 +25,7 @@ public class RoleApi {
 
     public Role createRole(ApiContext ctx, String roleName) {
         final Map<String, String> formParams = new HashMap<>();
-        formParams.put("roleName", roleName);
+        formParams.put(KEY_ROLE_NAME, roleName);
         return new Role(ctx.post(ROLE_URL, new HashMap<>(), formParams));
     }
 
@@ -32,12 +35,12 @@ public class RoleApi {
 
     public String updateRole(ApiContext ctx, UUID roleId, Iterable<String> permissionStrings, String roleName) {
         final JSONObject json = new JSONObject();
-        json.put("roleName", roleName);
+        json.put(KEY_ROLE_NAME, roleName);
         final JSONArray permissionArray = new JSONArray();
         for (String permission : permissionStrings) {
             permissionArray.add(permission);
         }
-        json.put("permissions", permissionArray);
+        json.put(KEY_PERMISSIONS, permissionArray);
         return ctx.put(ROLE_URL + roleId.toString(), new HashMap<>(), json);
     }
 
@@ -48,15 +51,15 @@ public class RoleApi {
         }
 
         public String getName() {
-            return get("name");
+            return get(KEY_ROLE_NAME);
         }
 
         public UUID getId() {
-            return UUID.fromString(get("id"));
+            return UUID.fromString(get(KEY_ID));
         }
 
         public Iterable<String> getPermissions() {
-            JSONArray array = get("permissions");
+            JSONArray array = get(KEY_PERMISSIONS);
             Collection<String> col = new ArrayList<>();
             for (Object w : array) {
                 col.add(w.toString());

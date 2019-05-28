@@ -35,9 +35,13 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 @Path("/restsecurity/role")
 public class RoleResource extends AbstractSecurityResource {
 
+    private static final String KEY_PERMISSIONS = "permissions";
+    private static final String KEY_ROLE_ID = "roleId";
+    private static final String KEY_ROLE_NAME = "roleName";
+
     @POST
     @Produces("application/json;charset=UTF-8")
-    public Response createRole(@Context UriInfo uriInfo, @FormParam("roleName") String roleName) {
+    public Response createRole(@Context UriInfo uriInfo, @FormParam(KEY_ROLE_NAME) String roleName) {
         final String roleDefinitionIdAsString = UUID.randomUUID().toString();
         final RoleDefinition role = getService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.ROLE_DEFINITION, new TypeRelativeObjectIdentifier(roleDefinitionIdAsString),
@@ -53,9 +57,9 @@ public class RoleResource extends AbstractSecurityResource {
             resp = Response.status(Status.INTERNAL_SERVER_ERROR).entity("Role creation failed.").build();
         } else {
             final JSONObject jsonResult = new JSONObject();
-            jsonResult.put("permissions", new JSONArray());
-            jsonResult.put("id", role.getId().toString());
-            jsonResult.put("name", role.getName());
+            jsonResult.put(KEY_PERMISSIONS, new JSONArray());
+            jsonResult.put(KEY_ROLE_ID, role.getId().toString());
+            jsonResult.put(KEY_ROLE_NAME, role.getName());
             resp = Response.status(Status.CREATED).entity(jsonResult.toJSONString()).build();
         }
         return resp;
@@ -64,7 +68,7 @@ public class RoleResource extends AbstractSecurityResource {
     @Path("{roleId}")
     @DELETE
     @Produces("application/json;charset=UTF-8")
-    public Response deleteRole(@Context UriInfo uriInfo, @PathParam("roleId") String roleId) {
+    public Response deleteRole(@Context UriInfo uriInfo, @PathParam(KEY_ROLE_ID) String roleId) {
         Response resp;
         try {
 
@@ -96,7 +100,7 @@ public class RoleResource extends AbstractSecurityResource {
     @PUT
     @Produces("text/plain;charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateRole(@Context UriInfo uriInfo, @PathParam("roleId") String roleId, String json) {
+    public Response updateRole(@Context UriInfo uriInfo, @PathParam(KEY_ROLE_ID) String roleId, String json) {
 
         Response resp;
         try {
@@ -120,7 +124,7 @@ public class RoleResource extends AbstractSecurityResource {
 
                 final JSONObject body = (JSONObject) new JSONParser().parse(json);
                 @SuppressWarnings("unchecked")
-                final Iterable<String> permissionStrings = (Iterable<String>) body.get("permissions");
+                final Iterable<String> permissionStrings = (Iterable<String>) body.get(KEY_PERMISSIONS);
                 for (final String permissionString : permissionStrings) {
                     permissions.add(new WildcardPermission(permissionString));
                 }
@@ -142,7 +146,7 @@ public class RoleResource extends AbstractSecurityResource {
                 } else {
                     // update role definitino with new permissions
                     roleDefinition.setPermissions(permissions);
-                    final String roleName = (String) body.get("roleName");
+                    final String roleName = (String) body.get(KEY_ROLE_NAME);
                     if (roleName != null) {
                         roleDefinition.setName(roleName);
                     }
@@ -161,7 +165,7 @@ public class RoleResource extends AbstractSecurityResource {
     @GET
     @Path("{roleId}")
     @Produces("application/json;charset=UTF-8")
-    public Response getRole(@Context UriInfo uriInfo, @PathParam("roleId") String roleId) {
+    public Response getRole(@Context UriInfo uriInfo, @PathParam(KEY_ROLE_ID) String roleId) {
 
         Response resp;
         try {
@@ -186,9 +190,9 @@ public class RoleResource extends AbstractSecurityResource {
                 for (final WildcardPermission permission : roleDefinition.getPermissions()) {
                     jsonPermissions.add(permission.toString());
                 }
-                jsonResult.put("permissions", jsonPermissions);
-                jsonResult.put("id", roleId);
-                jsonResult.put("name", roleDefinition.getName());
+                jsonResult.put(KEY_PERMISSIONS, jsonPermissions);
+                jsonResult.put(KEY_ROLE_ID, roleId);
+                jsonResult.put(KEY_ROLE_NAME, roleDefinition.getName());
                 resp = Response.ok(jsonResult.toJSONString()).build();
             }
         } catch (IllegalArgumentException e) {
