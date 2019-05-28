@@ -7,10 +7,10 @@ import java.util.UUID;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -27,9 +27,10 @@ import com.sap.sse.security.shared.WildcardPermission;
 @Path("/restsecurity/role")
 public class RoleResource extends AbstractSecurityResource {
 
-    @POST
+    @Path("{roleId}")
+    @PUT
     @Produces("text/plain;charset=UTF-8")
-    public Response updatePermissionsForRole(@Context UriInfo uriInfo, @FormParam("roleId") String roleId,
+    public Response updatePermissionsForRole(@Context UriInfo uriInfo, @PathParam("roleId") String roleId,
             @FormParam("permissions") List<String> permissionStrings) {
 
         Response resp;
@@ -85,8 +86,9 @@ public class RoleResource extends AbstractSecurityResource {
     }
 
     @GET
+    @Path("{roleId}")
     @Produces("application/json;charset=UTF-8")
-    public Response getRole(@Context UriInfo uriInfo, @QueryParam("roleId") String roleId) {
+    public Response getRole(@Context UriInfo uriInfo, @PathParam("roleId") String roleId) {
 
         Response resp;
         try {
