@@ -61,8 +61,10 @@ public class RoleApi {
         public Iterable<String> getPermissions() {
             JSONArray array = get(KEY_PERMISSIONS);
             Collection<String> col = new ArrayList<>();
-            for (Object w : array) {
-                col.add(w.toString());
+            if (array != null) {
+                for (Object w : array) {
+                    col.add(w.toString());
+                }
             }
             return col;
         }
