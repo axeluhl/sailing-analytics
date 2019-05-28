@@ -148,14 +148,6 @@ public class BestPathsCalculator {
                 firstLevel = firstLevel.getPreviousLevel();
             }
             probabilitiesSum = bestPathsUntilLastLevel.getForwardProbabilitiesSum();
-            // BestPathsPerLevel firstLevelInfo = bestPathsPerLevel.get(firstLevel);
-            // double backwardProbabilitiesSum = 0.0;
-            // for (GraphNode currentNode : firstLevel.getLevelNodes()) {
-            // backwardProbabilitiesSum += currentNode.getConfidence() / firstLevel.getLevelNodes().size()
-            // * firstLevelInfo.getBestPreviousNodeInfo(currentNode).getBackwardProbability();
-            // }
-            // double forwardProbabilitiesSum = bestPathsUntilLastLevel.getForwardProbabilitiesSum();
-            // probabilitiesSum = (forwardProbabilitiesSum + backwardProbabilitiesSum) / 2.0;
         } else {
             for (GraphNode node : lastLevel.getLevelNodes()) {
                 double probability = bestPathsUntilLastLevel.getNormalizedProbabilityToNodeFromStart(node);
@@ -204,11 +196,7 @@ public class BestPathsCalculator {
         GraphLevel currentLevel = lastLevel;
         BestPathsPerLevel bestPathsUntilLastLevel = bestPathsPerLevel.get(currentLevel);
         for (GraphNode currentNode : currentLevel.getLevelNodes()) {
-            // double probability = currentNode.getConfidence();
             BestManeuverNodeInfo currentNodeInfo = bestPathsUntilLastLevel.getBestPreviousNodeInfo(currentNode);
-            // Pair<IntersectedWindRange, Double> newWindRangeAndProbability = transitionProbabilitiesCalculator
-            // .mergeWindRangeAndGetTransitionProbability(currentNode, currentLevel, currentNodeInfo, nextNode,
-            // nextLevel);
             currentNodeInfo.setBackwardProbability(1.0);
         }
         GraphLevel nextLevel = currentLevel;

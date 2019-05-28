@@ -32,25 +32,6 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
         return transitionProbabilitiesCalculator;
     }
 
-    /*
-     * public void computeBackwardProbabilities() { GraphLevel currentLevel = lastLevel; BestPathsPerLevel
-     * bestPathsUntilLastLevel = bestPathsPerLevel.get(currentLevel); for (GraphNode currentNode :
-     * currentLevel.getLevelNodes()) { // double probability = currentNode.getConfidence(); BestManeuverNodeInfo
-     * currentNodeInfo = bestPathsUntilLastLevel.getBestPreviousNodeInfo(currentNode); // Pair<IntersectedWindRange,
-     * Double> newWindRangeAndProbability = transitionProbabilitiesCalculator //
-     * .mergeWindRangeAndGetTransitionProbability(currentNode, currentLevel, currentNodeInfo, nextNode, // nextLevel);
-     * currentNodeInfo.setBackwardProbability(1.0); } GraphLevel nextLevel = currentLevel; while ((currentLevel =
-     * currentLevel.getPreviousLevel()) != null) { BestPathsPerLevel bestPathsUntilLevel =
-     * bestPathsPerLevel.get(currentLevel); BestPathsPerLevel bestPathsUntilNextLevel =
-     * bestPathsPerLevel.get(nextLevel); for (GraphNode currentNode : currentLevel.getLevelNodes()) {
-     * BestManeuverNodeInfo currentNodeInfo = bestPathsUntilLevel.getBestPreviousNodeInfo(currentNode); double
-     * backwardProbability = 0; for (GraphNode nextNode : nextLevel.getLevelNodes()) { Pair<IntersectedWindRange,
-     * Double> newWindRangeAndProbability = transitionProbabilitiesCalculator
-     * .mergeWindRangeAndGetTransitionProbability(currentNode, currentLevel, currentNodeInfo, nextNode, nextLevel);
-     * backwardProbability += nextNode.getConfidence() * newWindRangeAndProbability.getB()
-     * bestPathsUntilNextLevel.getNormalizedBackwardProbability(nextNode); }
-     * currentNodeInfo.setBackwardProbability(backwardProbability); } nextLevel = currentLevel; } }
-     */
     @Override
     public List<GraphLevelInference> getBestNodes(MstManeuverGraphComponents graphComponents) {
         Map<MstGraphLevel, MstBestPathsPerLevel> bestPathsPerLevel = new HashMap<>();
@@ -58,9 +39,8 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
             MstBestPathsPerLevel bestPathsUntilLevel = new MstBestPathsPerLevel(currentLevel);
             for (GraphNode currentNode : currentLevel.getLevelNodes()) {
                 double probability = currentNode.getConfidence() / currentLevel.getLevelNodes().size();
-                /* MstBestManeuverNodeInfo currentNodeInfo = */bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode,
+                bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode,
                         null, probability, currentNode.getValidWindRange().toIntersected());
-                // currentNodeInfo.setForwardProbability(probability);
             }
             bestPathsPerLevel.put(currentLevel, bestPathsUntilLevel);
             while ((currentLevel = currentLevel.getParent()) != null) {
@@ -77,20 +57,6 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
         double maxProbability = 0;
         GraphNode bestRootNode = null;
         double probabilitiesSum = 0;
-        /*
-         * if (preciseConfidence) { if (!bestPathsUntilLastLevel.isBackwardProbabilitiesComputed()) {
-         * computeBackwardProbabilities(); } GraphLevel firstLevel = lastLevel; while (firstLevel.getPreviousLevel() !=
-         * null) { firstLevel = firstLevel.getPreviousLevel(); } probabilitiesSum =
-         * bestPathsUntilLastLevel.getForwardProbabilitiesSum(); // BestPathsPerLevel firstLevelInfo =
-         * bestPathsPerLevel.get(firstLevel); // double backwardProbabilitiesSum = 0.0; // for (GraphNode currentNode :
-         * firstLevel.getLevelNodes()) { // backwardProbabilitiesSum += currentNode.getConfidence() /
-         * firstLevel.getLevelNodes().size() // *
-         * firstLevelInfo.getBestPreviousNodeInfo(currentNode).getBackwardProbability(); // } // double
-         * forwardProbabilitiesSum = bestPathsUntilLastLevel.getForwardProbabilitiesSum(); // probabilitiesSum =
-         * (forwardProbabilitiesSum + backwardProbabilitiesSum) / 2.0; } else { for (GraphNode node :
-         * root.getLevelNodes()) { double probability =
-         * bestPathsUntilLevel.getNormalizedProbabilityToNodeFromStart(node); probabilitiesSum += probability; } }
-         */
         List<GraphLevelInference> result = new ArrayList<>();
         for (GraphNode lastNode : root.getLevelNodes()) {
             double probability = bestPathsUntilLevel.getNormalizedProbabilityToNodeFromStart(lastNode);
@@ -119,11 +85,6 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
             MstGraphLevel currentLevel = child.getA();
             GraphNode currentNode = child.getB();
             while (currentLevel != null) {
-                /*
-                 * double nodeConfidence; if (preciseConfidence) { nodeConfidence =
-                 * currentLevelInfo.getNormalizedForwardBackwardProbability(currentNode); } else { nodeConfidence =
-                 * lastNodeProbability / probabilitiesSum; }
-                 */
                 GraphLevelInference entry = new GraphLevelInference(currentLevel, currentNode,
                         confidence * currentNode.getConfidence());
                 result.add(entry);
@@ -158,7 +119,6 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
             double currentNodeProbabilityFromStart = currentNode.getConfidence();
             IntersectedWindRange finalBestIntersectedWindRange = null;
             for (MstBestPathsPerLevel bestPathsUntilPreviousLevel : bestPathsUntilPreviousLevels) {
-                // double forwardProbability = 0;
                 double bestProbabilityFromStart = 0;
                 MstGraphLevel previousLevel = bestPathsUntilPreviousLevel.getCurrentLevel();
                 GraphNode bestPreviousNode = null;
@@ -170,12 +130,8 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
                             .mergeWindRangeAndGetTransitionProbability(currentNode, currentLevel, new PreviousNodeInfo(
                                     previousLevel, previousNode, previousNodeIntersectedWindRange));
                     double transitionProbability = newWindRangeAndProbability.getB();
-                    // double transitionObservationMultipliedProbability = transitionProbability *
-                    // currentNode.getConfidence();
                     double probabilityFromStart = bestPathsUntilPreviousLevel
                             .getNormalizedProbabilityToNodeFromStart(previousNode) * transitionProbability;
-                    // forwardProbability += transitionProbability
-                    // * bestPathsUntilPreviousLevel.getNormalizedForwardProbability(previousNode);
                     if (probabilityFromStart > bestProbabilityFromStart) {
                         bestProbabilityFromStart = probabilityFromStart;
                         bestPreviousNode = previousNode;
@@ -188,9 +144,8 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
                         : finalBestIntersectedWindRange.intersect(bestIntersectedWindRange,
                                 CombinationModeOnViolation.EXPANSION);
             }
-            /* MstBestManeuverNodeInfo currentNodeInfo = */bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode,
+            bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode,
                     currentNodeBestPreviousNodes, currentNodeProbabilityFromStart, finalBestIntersectedWindRange);
-            // currentNodeInfo.setForwardProbability(forwardProbability);
             bestPathsPerLevel.put(currentLevel, bestPathsUntilLevel);
         }
     }
