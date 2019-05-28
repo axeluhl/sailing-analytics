@@ -181,6 +181,14 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                     + roleDefinitionWithNewProperties.getName());
         }
         
+        Set<WildcardPermission> removedPermissions = new HashSet<>(existingRole.getPermissions());
+        removedPermissions.removeAll(roleDefinitionWithNewProperties.getPermissions());
+        
+        if (!getSecurityService().hasUserAllWildcardPermissionsForAlreadyRealizedQualifications(existingRole, removedPermissions)) {
+            throw new UnauthorizedException("Not permitted to revoke permissions for role "
+                    + roleDefinitionWithNewProperties.getName());
+        }
+        
         getSecurityService().updateRoleDefinition(roleDefinitionWithNewProperties);
     }
 
