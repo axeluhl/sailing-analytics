@@ -37,6 +37,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import com.mongodb.WriteConcern;
@@ -152,6 +153,8 @@ import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.PublicReadableActions;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.shared.media.ImageDescriptor;
@@ -205,6 +208,10 @@ public class MasterDataImportTest {
 
         Mockito.doReturn(true).when(securityService)
                 .hasCurrentUserReadPermission(Mockito.any(WithQualifiedObjectIdentifier.class));
+        Mockito.doReturn(true).when(securityService)
+                .hasCurrentUserServerPermission(ServerActions.CAN_EXPORT_MASTERDATA);
+        Mockito.doReturn(true).when(securityService).hasCurrentUserOneOfExplicitPermissions(
+                Mockito.any(WithQualifiedObjectIdentifier.class), Matchers.<PublicReadableActions> anyVararg());
 
 
         Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
