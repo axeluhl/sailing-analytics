@@ -45,6 +45,11 @@
 	                    due to a permission check that was too restrictive, regattas to import could not
 	                    be seen unless the user had "super-admin" power.
 	                </li>
+	                <li>Introduced a new permission SERVER:CAN_EXPORT_MASTERDATA:&lt;server-name&gt;
+                        which controls if a user is allowed to export masterdata used by the MDI.
+                        In addition, the user still needs to be able to read the data to be imported.
+                        On the importing server, the user needs to have the permission SERVER:CAN_IMPORT_MASTERDATA:&lt;server-name&gt;.
+	                </li>
 		    </ul>
 		    
                     <h2 class="articleSubheadline">April 2019</h2>
