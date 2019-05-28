@@ -32,10 +32,19 @@ import com.sun.jersey.api.client.ClientResponse.Status;
 @Path("/restsecurity/usergroup")
 public class UserGroupResource extends AbstractSecurityResource {
 
+    private static final String KEY_ROLE_NAME = "roleName";
+    private static final String KEY_FOR_ALL = "forAll";
+    private static final String KEY_ROLE_ID = "roleId";
+    private static final String KEY_USERNAME = "username";
+    private static final String KEY_ROLES = "roles";
+    private static final String KEY_USERS = "users";
+    private static final String KEY_GROUP_NAME = "groupName";
+    private static final String KEY_GROUP_ID = "groupId";
+
     @Path("{groupId}")
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response getUserGroup(@PathParam("groupId") String userGroupId) {
+    public Response getUserGroup(@PathParam(KEY_GROUP_ID) String userGroupId) {
         Response response;
         try {
             final UUID groupId = UUID.fromString(userGroupId);
@@ -49,7 +58,7 @@ public class UserGroupResource extends AbstractSecurityResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response getUserGroupByName(@QueryParam("groupName") String userGroupName) {
+    public Response getUserGroupByName(@QueryParam(KEY_GROUP_NAME) String userGroupName) {
         Response response;
         if (userGroupName != null) {
             final UserGroup usergroup = getService().getUserGroupByName(userGroupName);
@@ -79,8 +88,8 @@ public class UserGroupResource extends AbstractSecurityResource {
     /** Returns a json object with id, groupname, roles and user names (filtered to thouse the current user can see). */
     private JSONObject convertUserGroupToJson(final UserGroup usergroup) {
         final JSONObject jsonResult = new JSONObject();
-        jsonResult.put("groupId", usergroup.getId().toString());
-        jsonResult.put("groupName", usergroup.getName());
+        jsonResult.put(KEY_GROUP_ID, usergroup.getId().toString());
+        jsonResult.put(KEY_GROUP_NAME, usergroup.getName());
 
         final JSONArray jsonUsersInGroup = new JSONArray();
         for (final User user : usergroup.getUsers()) {
@@ -89,20 +98,20 @@ public class UserGroupResource extends AbstractSecurityResource {
                 jsonUsersInGroup.add(user.getId());
             }
         }
-        jsonResult.put("users", jsonUsersInGroup);
+        jsonResult.put(KEY_USERS, jsonUsersInGroup);
 
         final JSONArray jsonRolesOfGroup = new JSONArray();
         for (final Map.Entry<RoleDefinition, Boolean> roleDefinition : usergroup.getRoleDefinitionMap().entrySet()) {
             // filter users
             if (getService().hasCurrentUserReadPermission(roleDefinition.getKey())) {
                 JSONObject groupJson = new JSONObject();
-                groupJson.put("role_id", roleDefinition.getKey().getId().toString());
-                groupJson.put("role_name", roleDefinition.getKey().getName());
-                groupJson.put("associated", roleDefinition.getValue());
+                groupJson.put(KEY_ROLE_ID, roleDefinition.getKey().getId().toString());
+                groupJson.put(KEY_ROLE_NAME, roleDefinition.getKey().getName());
+                groupJson.put(KEY_FOR_ALL, roleDefinition.getValue());
                 jsonRolesOfGroup.add(groupJson);
             }
         }
-        jsonResult.put("roles", jsonRolesOfGroup);
+        jsonResult.put(KEY_ROLES, jsonRolesOfGroup);
         return jsonResult;
     }
 
@@ -112,7 +121,7 @@ public class UserGroupResource extends AbstractSecurityResource {
     public Response createUserGroup(String jsonBody) {
         final Response response;
         final JSONObject json = (JSONObject) JSONValue.parse(jsonBody);
-        final String groupName = (String) json.get("groupName");
+        final String groupName = (String) json.get(KEY_GROUP_NAME);
         final UserGroup usergroup = getService().getUserGroupByName(groupName);
         if (usergroup != null) {
             response = Response.status(Status.BAD_REQUEST).entity("Usergroup with this name already exists.").build();
@@ -142,7 +151,7 @@ public class UserGroupResource extends AbstractSecurityResource {
     @Path("{groupId}")
     @DELETE
     @Produces("application/json;charset=UTF-8")
-    public Response deleteUserGroup(@PathParam("groupId") String userGroupId) {
+    public Response deleteUserGroup(@PathParam(KEY_GROUP_ID) String userGroupId) {
         Response response;
         try {
             final UUID groupId = UUID.fromString(userGroupId);
@@ -173,8 +182,8 @@ public class UserGroupResource extends AbstractSecurityResource {
     @Path("{groupId}/user/{username}")
     @PUT
     @Produces("application/json;charset=UTF-8")
-    public Response addUserToUserGroup(@PathParam("groupId") String userGroupId,
-            @PathParam("username") String username) {
+    public Response addUserToUserGroup(@PathParam(KEY_GROUP_ID) String userGroupId,
+            @PathParam(KEY_USERNAME) String username) {
         Response response;
         try {
             final UUID groupId = UUID.fromString(userGroupId);
@@ -216,8 +225,8 @@ public class UserGroupResource extends AbstractSecurityResource {
     @Path("{groupId}/user/{username}")
     @DELETE
     @Produces("application/json;charset=UTF-8")
-    public Response deleteUserFromUserGroup(@PathParam("groupId") String userGroupId,
-            @PathParam("username") String username) {
+    public Response deleteUserFromUserGroup(@PathParam(KEY_GROUP_ID) String userGroupId,
+            @PathParam(KEY_USERNAME) String username) {
         Response response;
         try {
             final UUID groupId = UUID.fromString(userGroupId);
@@ -257,8 +266,8 @@ public class UserGroupResource extends AbstractSecurityResource {
     @Path("{groupId}/role/{roleId}")
     @PUT
     @Produces("application/json;charset=UTF-8")
-    public Response addRoleToUserGroup(@PathParam("groupId") String userGroupId,
-            @PathParam("roleId") String roleIdString, @FormParam("forAll") Boolean roleForAll) {
+    public Response addRoleToUserGroup(@PathParam(KEY_GROUP_ID) String userGroupId,
+            @PathParam(KEY_ROLE_ID) String roleIdString, @FormParam(KEY_FOR_ALL) Boolean roleForAll) {
         Response response;
 
         try {
@@ -298,8 +307,8 @@ public class UserGroupResource extends AbstractSecurityResource {
     @Path("{groupId}/role/{roleId}")
     @DELETE
     @Produces("application/json;charset=UTF-8")
-    public Response deleteRoleFromUserGroup(@PathParam("groupId") String userGroupId,
-            @PathParam("roleId") String roleIdString) {
+    public Response deleteRoleFromUserGroup(@PathParam(KEY_GROUP_ID) String userGroupId,
+            @PathParam(KEY_ROLE_ID) String roleIdString) {
         Response response;
 
         try {
