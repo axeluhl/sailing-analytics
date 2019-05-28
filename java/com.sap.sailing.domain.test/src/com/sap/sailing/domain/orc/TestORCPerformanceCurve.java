@@ -158,10 +158,13 @@ public class TestORCPerformanceCurve {
         //assertEquals(    6, performanceCurve.getImpliedWindNewton(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(    6))).getKnots(), accuracy);
         assertEquals( 11.5, performanceCurve.getImpliedWindNewton(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl( 11.5))).getKnots(), accuracy);
         assertEquals(17.23, performanceCurve.getImpliedWindNewton(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(17.23))).getKnots(), accuracy);
+        assertEquals(   18, performanceCurve.getImpliedWindNewton(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(   18))).getKnots(), accuracy);
         
+        assertEquals(  450, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWindNewton(Duration.ONE_SECOND.times(450))).asSeconds(), accuracy);
         assertEquals(  500, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWindNewton(Duration.ONE_SECOND.times(500))).asSeconds(), accuracy);
         assertEquals(  600, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWindNewton(Duration.ONE_SECOND.times(600))).asSeconds(), accuracy);
         assertEquals(  700, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWindNewton(Duration.ONE_SECOND.times(700))).asSeconds(), accuracy);
+        assertEquals(  750, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWindNewton(Duration.ONE_SECOND.times(750))).asSeconds(), accuracy);
     }
 
 }

@@ -197,7 +197,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             i += 1;
         }
         
-        functionAllowanceToTwa = interpolator.interpolate(ys, xs);
+        functionAllowanceToTwa = interpolator.interpolate(ys, xs); //Inverse Function of the "real" PerformanceCurve (ImpliedWind -> Allowance), not needed later
         ArrayUtils.reverse(xs);
         ArrayUtils.reverse(ys);
         functionTwaToAllowance = interpolator.interpolate(xs, ys);
@@ -222,13 +222,11 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         i -= 1;
         workingFunction = functionTwaToAllowance.getPolynomials()[i];
         
-        // PolynomialFunction of degree 1 , containing only the input TWA
-        PolynomialFunction simpleInputFunction = new PolynomialFunction(new double[] {time.asSeconds()});
         //PolynomialFunction which will be solved by the Newton Approach
-        PolynomialFunction subtractedFunction = workingFunction.subtract(simpleInputFunction);
+        PolynomialFunction subtractedFunction = workingFunction.subtract(new PolynomialFunction(new double[] {time.asSeconds()}));
         NewtonSolver solver = new NewtonSolver();
         solver.setAbsoluteAccuracy(0.000001);
-        return new KnotSpeedImpl(solver.solve(subtractedFunction, /*functionTwaToAllowance.getKnots()[i]*/ 0, functionTwaToAllowance.getKnots()[i + 1]) + functionTwaToAllowance.getKnots()[i]);
+        return new KnotSpeedImpl(solver.solve(subtractedFunction, 0, functionTwaToAllowance.getKnots()[i + 1] - functionTwaToAllowance.getKnots()[i]) + functionTwaToAllowance.getKnots()[i]);
     }
     
     public Duration getAllowancePerCourse(Speed twa) throws ArgumentOutsideDomainException {
