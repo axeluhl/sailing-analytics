@@ -13,9 +13,12 @@ import java.util.Map.Entry;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.math.ArgumentOutsideDomainException;
 import org.apache.commons.math.FunctionEvaluationException;
+import org.apache.commons.math.MaxIterationsExceededException;
 import org.apache.commons.math.analysis.interpolation.SplineInterpolator;
+import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math.analysis.polynomials.PolynomialFunctionLagrangeForm;
 import org.apache.commons.math.analysis.polynomials.PolynomialSplineFunction;
+import org.apache.commons.math.analysis.solvers.NewtonSolver;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
@@ -202,6 +205,26 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     
     public Speed getImpliedWind(Duration time) throws ArgumentOutsideDomainException {
         return new KnotSpeedImpl(functionAllowanceToTwa.value(time.asSeconds()));
+    }
+    
+    public Speed getImpliedWindNewton(Duration time) throws MaxIterationsExceededException, FunctionEvaluationException {
+        PolynomialFunction workingFunction;
+        double[] allowances = new double[functionTwaToAllowance.getKnots().length];
+        
+        for (int i = 0; i < allowances.length; i++) {
+            allowances[i] = functionTwaToAllowance.value(functionTwaToAllowance.getKnots()[i]);
+        }
+        
+        int i = 0;
+        while(i < allowances.length && time.asSeconds() <= allowances[i]) {
+            i += 1;
+        }
+        i -= 1;
+        workingFunction = functionTwaToAllowance.getPolynomials()[i-1];
+        
+        NewtonSolver solver = new NewtonSolver(workingFunction.subtract(new PolynomialFunction(new double[] {time.asSeconds()})));
+        solver.setAbsoluteAccuracy(0.000001);
+        return new KnotSpeedImpl(solver.solve(functionTwaToAllowance.getKnots()[i], functionTwaToAllowance.getKnots()[i+1]));
     }
     
     public Duration getAllowancePerCourse(Speed twa) throws ArgumentOutsideDomainException {
