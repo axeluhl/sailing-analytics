@@ -4,7 +4,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -22,10 +24,69 @@ import org.json.simple.JSONObject;
 
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 @Path("/restsecurity/role")
 public class RoleResource extends AbstractSecurityResource {
+
+    @PUT
+    @Produces("application/json;charset=UTF-8")
+    public Response createRole(@Context UriInfo uriInfo, @FormParam("roleName") String roleName) {
+        final String roleDefinitionIdAsString = UUID.randomUUID().toString();
+        final RoleDefinition role = getService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredSecurityTypes.ROLE_DEFINITION, new TypeRelativeObjectIdentifier(roleDefinitionIdAsString),
+                roleName, new Callable<RoleDefinition>() {
+                    @Override
+                    public RoleDefinition call() throws Exception {
+                        return getService().createRoleDefinition(UUID.fromString(roleDefinitionIdAsString), roleName);
+                    }
+                });
+
+        final Response resp;
+        if (role == null) {
+            resp = Response.status(Status.INTERNAL_SERVER_ERROR).entity("Role creation failed.").build();
+        } else {
+            final JSONObject jsonResult = new JSONObject();
+            jsonResult.put("permissions", new JSONArray());
+            jsonResult.put("id", role.getId().toString());
+            jsonResult.put("name", role.getName());
+            resp = Response.status(Status.CREATED).entity(jsonResult.toJSONString()).build();
+        }
+        return resp;
+    }
+
+    @Path("{roleId}")
+    @DELETE
+    @Produces("application/json;charset=UTF-8")
+    public Response deleteRole(@Context UriInfo uriInfo, @PathParam("roleId") String roleId) {
+        Response resp;
+        try {
+
+            // parse UUID
+            final UUID roleUUID = UUID.fromString(roleId);
+
+            // get role definition from role id
+            final RoleDefinition roleDefinition = getService().getRoleDefinition(roleUUID);
+
+            // null check role definition
+            if (roleDefinition == null) {
+                resp = Response.status(Status.NOT_FOUND).entity(String.format("No role with id '%s' found.", roleUUID))
+                        .build();
+            } else {
+                // check read permission on role
+                getService().checkCurrentUserDeletePermission(roleDefinition);
+                getService().deleteRoleDefinition(roleDefinition);
+                resp = Response.status(Status.NO_CONTENT).build();
+            }
+        } catch (IllegalArgumentException e) {
+            resp = Response.status(Status.BAD_REQUEST).entity("Invalid roleId.").build();
+        } catch (UnauthorizedException e) {
+            resp = Response.status(Status.UNAUTHORIZED).build();
+        }
+        return resp;
+    }
 
     @Path("{roleId}")
     @PUT
