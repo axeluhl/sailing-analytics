@@ -209,22 +209,26 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     
     public Speed getImpliedWindNewton(Duration time) throws MaxIterationsExceededException, FunctionEvaluationException {
         PolynomialFunction workingFunction;
-        double[] allowances = new double[functionTwaToAllowance.getKnots().length];
+        double[] allowancesInSeconds = new double[functionTwaToAllowance.getKnots().length];
         
-        for (int i = 0; i < allowances.length; i++) {
-            allowances[i] = functionTwaToAllowance.value(functionTwaToAllowance.getKnots()[i]);
+        for (int i = 0; i < allowancesInSeconds.length; i++) {
+            allowancesInSeconds[i] = functionTwaToAllowance.value(functionTwaToAllowance.getKnots()[i]);
         }
         
         int i = 0;
-        while(i < allowances.length && time.asSeconds() <= allowances[i]) {
+        while(i < allowancesInSeconds.length && time.asSeconds() <= allowancesInSeconds[i]) {
             i += 1;
         }
         i -= 1;
-        workingFunction = functionTwaToAllowance.getPolynomials()[i-1];
+        workingFunction = functionTwaToAllowance.getPolynomials()[i];
         
-        NewtonSolver solver = new NewtonSolver(workingFunction.subtract(new PolynomialFunction(new double[] {time.asSeconds()})));
+        // PolynomialFunction of degree 1 , containing only the input TWA
+        PolynomialFunction simpleInputFunction = new PolynomialFunction(new double[] {time.asSeconds()});
+        //PolynomialFunction which will be solved by the Newton Approach
+        PolynomialFunction subtractedFunction = workingFunction.subtract(simpleInputFunction);
+        NewtonSolver solver = new NewtonSolver();
         solver.setAbsoluteAccuracy(0.000001);
-        return new KnotSpeedImpl(solver.solve(functionTwaToAllowance.getKnots()[i], functionTwaToAllowance.getKnots()[i+1]));
+        return new KnotSpeedImpl(solver.solve(subtractedFunction, /*functionTwaToAllowance.getKnots()[i]*/ 0, functionTwaToAllowance.getKnots()[i + 1]) + functionTwaToAllowance.getKnots()[i]);
     }
     
     public Duration getAllowancePerCourse(Speed twa) throws ArgumentOutsideDomainException {
