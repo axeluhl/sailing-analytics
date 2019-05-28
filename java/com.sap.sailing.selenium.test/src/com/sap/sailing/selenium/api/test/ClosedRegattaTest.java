@@ -47,6 +47,13 @@ public class ClosedRegattaTest extends AbstractSeleniumTest {
         unregisteredCtx = createAnonymousApiContext(getContextRoot(), SERVER_CONTEXT);
         final AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
         adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
+        try {
+            // FIXME: workaround for self service property not being set when the test method is called. Proper waiting
+            // should be implemented...
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
