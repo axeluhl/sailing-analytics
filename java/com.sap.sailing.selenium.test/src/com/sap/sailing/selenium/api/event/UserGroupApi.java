@@ -42,6 +42,22 @@ public class UserGroupApi {
         ctx.delete(USERGROUP_URL + groupId.toString());
     }
 
+    public void addUserToGroup(ApiContext ctx, UUID groupId, String userName) {
+        ctx.put(USERGROUP_URL + groupId.toString() + "/user/" + userName, new HashMap<>(), new JSONObject());
+    }
+
+    public void removeUserFromGroup(ApiContext ctx, UUID groupId, String userName) {
+        ctx.delete(USERGROUP_URL + groupId.toString() + "/user/" + userName);
+    }
+
+    public void addRoleToGroup(ApiContext ctx, UUID groupId, UUID roleId) {
+        ctx.put(USERGROUP_URL + groupId.toString() + "/role/" + roleId.toString(), new HashMap<>(), new JSONObject());
+    }
+
+    public void removeRoleFromGroup(ApiContext ctx, UUID groupId, UUID roleId) {
+        ctx.delete(USERGROUP_URL + groupId.toString() + "/role/" + roleId.toString());
+    }
+
     public class UserGroup extends JsonWrapper {
 
         public UserGroup(JSONObject json) {
