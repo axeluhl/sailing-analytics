@@ -3,7 +3,9 @@ package com.sap.sailing.selenium.api.event;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.json.simple.JSONArray;
@@ -11,6 +13,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.core.JsonWrapper;
+import com.sap.sse.common.Util;
 
 public class RoleApi {
 
@@ -44,7 +47,7 @@ public class RoleApi {
         return ctx.put(ROLE_URL + roleId.toString(), new HashMap<>(), json);
     }
 
-    public class Role extends JsonWrapper {
+    public static class Role extends JsonWrapper {
 
         public Role(JSONObject json) {
             super(json);
@@ -66,5 +69,52 @@ public class RoleApi {
             }
             return col;
         }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            final String name = getName();
+            result = prime * result + ((name == null) ? 0 : name.hashCode());
+            final Set<String> permissions = new HashSet<>();
+            Util.addAll(getPermissions(), permissions);
+            result = prime * result + ((permissions == null) ? 0 : permissions.hashCode());
+            final UUID roleId = getId();
+            result = prime * result + ((roleId == null) ? 0 : roleId.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            Role other = (Role) obj;
+            final String name = getName();
+            final String otherName = other.getName();
+            if (name == null) {
+                if (otherName != null)
+                    return false;
+            } else if (!name.equals(otherName))
+                return false;
+            final Set<String> permissions = new HashSet<>();
+            Util.addAll(getPermissions(), permissions);
+            final Set<String> otherPermissions = new HashSet<>();
+            Util.addAll(other.getPermissions(), otherPermissions);
+            if (!permissions.equals(otherPermissions))
+                return false;
+            final UUID roleId = getId();
+            final UUID otherRoleId = other.getId();
+            if (roleId == null) {
+                if (otherRoleId != null)
+                    return false;
+            } else if (!roleId.equals(otherRoleId))
+                return false;
+            return true;
+        }
+
     }
 }
