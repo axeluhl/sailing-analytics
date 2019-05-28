@@ -14,6 +14,7 @@ import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.UserGroupApi;
 import com.sap.sailing.selenium.api.event.UserGroupApi.UserGroup;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
+import com.sap.sse.common.Util;
 
 public class UserGroupApiTest extends AbstractSeleniumTest {
 
@@ -33,6 +34,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
 
         assertEquals("Responded username of createUserGroup is different!", groupName, userGroupCreated.getGroupName());
         assertNotNull("GroupId is missing in reponse!", userGroupCreated.getGroupId());
+        assertEquals("Wrong username count in response!", 1, Util.size(userGroupCreated.getUsers()));
 
         final UserGroup userGroupGet = userGroupApi.getUserGroup(adminCtx, userGroupCreated.getGroupId());
 
@@ -40,6 +42,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
                 userGroupGet.getGroupId());
         assertEquals("Responded user group names are not the same!", userGroupCreated.getGroupName(),
                 userGroupGet.getGroupName());
+        assertSameElements(userGroupCreated.getUsers(), userGroupGet.getUsers());
 
         final UserGroup userGroupGetByName = userGroupApi.getUserGroupByName(adminCtx, groupName);
 
@@ -53,6 +56,14 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
             fail("Expected parsing error since user group should be null");
         } catch (RuntimeException e) {
             assertTrue("Unrelated exception.", e.getMessage().contains("Usergroup with this id does not exist"));
+        }
+    }
+
+    /** |A| = |B| ∧ ∀a∈ A: a∈ B --> A and B have the same elements, ignoring order. */
+    private <T> void assertSameElements(Iterable<T> a, Iterable<T> b) {
+        assertEquals("Element count changed!", Util.size(a), Util.size(b));
+        for (T elem : b) {
+            assertTrue("Element is missing!", Util.contains(a, elem));
         }
     }
 }

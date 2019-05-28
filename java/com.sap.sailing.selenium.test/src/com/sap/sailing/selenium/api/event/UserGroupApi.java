@@ -1,9 +1,12 @@
 package com.sap.sailing.selenium.api.event;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
@@ -13,6 +16,7 @@ public class UserGroupApi {
 
     private static final String KEY_GROUP_NAME = "groupName";
     private static final String KEY_GROUP_ID = "groupId";
+    private static final String KEY_USERS = "users";
 
     private static final String USERGROUP_URL = "/api/restsecurity/usergroup/";
 
@@ -48,6 +52,15 @@ public class UserGroupApi {
 
         public String getGroupName() {
             return get(KEY_GROUP_NAME);
+        }
+
+        public Iterable<String> getUsers() {
+            JSONArray array = get(KEY_USERS);
+            Collection<String> col = new ArrayList<>();
+            for (Object w : array) {
+                col.add(w.toString());
+            }
+            return col;
         }
     }
 }
