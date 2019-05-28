@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -267,7 +266,7 @@ public class UserGroupResource extends AbstractSecurityResource {
     @PUT
     @Produces("application/json;charset=UTF-8")
     public Response addRoleToUserGroup(@PathParam(KEY_GROUP_ID) String userGroupId,
-            @PathParam(KEY_ROLE_ID) String roleIdString, @FormParam(KEY_FOR_ALL) Boolean roleForAll) {
+            @PathParam(KEY_ROLE_ID) String roleIdString, String body) {
         Response response;
 
         try {
@@ -286,6 +285,8 @@ public class UserGroupResource extends AbstractSecurityResource {
                     if (getService().hasCurrentUserUpdatePermission(usergroup)
                             && getService().hasCurrentUserReadPermission(role)) {
                         final Boolean forAll = usergroup.getRoleAssociation(role);
+                        JSONObject jsonBody = (JSONObject) JSONValue.parse(body);
+                        boolean roleForAll = Boolean.valueOf((String) jsonBody.get(KEY_FOR_ALL));
                         if (forAll == null || forAll != roleForAll) {
                             getService().putRoleDefinitionToUserGroup(usergroup, role, roleForAll);
                             response = Response.ok().build();
