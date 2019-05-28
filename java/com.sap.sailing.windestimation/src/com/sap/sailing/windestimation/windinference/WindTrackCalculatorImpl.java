@@ -39,13 +39,13 @@ public class WindTrackCalculatorImpl implements WindTrackCalculator {
             List<ManeuverWithEstimatedType> improvedManeuverClassifications) {
         List<WindWithConfidence<Pair<Position, TimePoint>>> windFixes = new ArrayList<>();
         for (ManeuverWithEstimatedType maneuverWithEstimatedType : improvedManeuverClassifications) {
-            Bearing windCourse = twdCalculator.getTwd(maneuverWithEstimatedType);
-            if (windCourse != null) {
-                windCourse = windCourse.reverse();
+            Bearing windFrom = twdCalculator.getTwd(maneuverWithEstimatedType);
+            if (windFrom != null) {
+                final Bearing windTo = windFrom.reverse();
                 ManeuverForEstimation maneuver = maneuverWithEstimatedType.getManeuver();
-                Speed avgWindSpeed = twsCalculator.getWindSpeed(maneuver, windCourse);
+                Speed avgWindSpeed = twsCalculator.getWindSpeed(maneuver, windTo);
                 Wind wind = new WindImpl(maneuver.getManeuverPosition(), maneuver.getManeuverTimePoint(),
-                        new KnotSpeedWithBearingImpl(avgWindSpeed.getKnots(), windCourse));
+                        new KnotSpeedWithBearingImpl(avgWindSpeed.getKnots(), windTo));
                 windFixes.add(new WindWithConfidenceImpl<>(wind, maneuverWithEstimatedType.getConfidence(),
                         new Pair<>(wind.getPosition(), wind.getTimePoint()), avgWindSpeed.getKnots() > 0));
             }
