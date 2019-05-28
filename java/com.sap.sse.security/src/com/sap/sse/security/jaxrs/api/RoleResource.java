@@ -67,7 +67,7 @@ public class RoleResource extends AbstractSecurityResource {
 
     @Path("{roleId}")
     @DELETE
-    @Produces("application/json;charset=UTF-8")
+    @Produces("text/plain;charset=UTF-8")
     public Response deleteRole(@Context UriInfo uriInfo, @PathParam(KEY_ROLE_ID) String roleId) {
         Response resp;
         try {
