@@ -103,11 +103,11 @@ public class UserGroupResource extends AbstractSecurityResource {
         for (final Map.Entry<RoleDefinition, Boolean> roleDefinition : usergroup.getRoleDefinitionMap().entrySet()) {
             // filter users
             if (getService().hasCurrentUserReadPermission(roleDefinition.getKey())) {
-                JSONObject groupJson = new JSONObject();
-                groupJson.put(KEY_ROLE_ID, roleDefinition.getKey().getId().toString());
-                groupJson.put(KEY_ROLE_NAME, roleDefinition.getKey().getName());
-                groupJson.put(KEY_FOR_ALL, roleDefinition.getValue());
-                jsonRolesOfGroup.add(groupJson);
+                JSONObject roleJson = new JSONObject();
+                roleJson.put(KEY_ROLE_ID, roleDefinition.getKey().getId().toString());
+                roleJson.put(KEY_ROLE_NAME, roleDefinition.getKey().getName());
+                roleJson.put(KEY_FOR_ALL, roleDefinition.getValue());
+                jsonRolesOfGroup.add(roleJson);
             }
         }
         jsonResult.put(KEY_ROLES, jsonRolesOfGroup);
