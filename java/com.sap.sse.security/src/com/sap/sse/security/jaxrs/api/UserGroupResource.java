@@ -4,9 +4,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
@@ -26,27 +28,31 @@ import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/restsecurity/usergroup")
 public class UserGroupResource extends AbstractSecurityResource {
+
+    @Path("{groupId}")
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response getUserGroupById(@QueryParam("id") String userGroupId,
-            @QueryParam("groupname") String userGroupName) {
-
+    public Response getUserGroup(@PathParam("groupId") String userGroupId) {
         Response response;
-        if (userGroupId != null) {
-            try {
-                final UUID groupId = UUID.fromString(userGroupId);
-                final UserGroup usergroup = getService().getUserGroup(groupId);
-                response = handleExistingUserGroup(usergroup);
-            } catch (IllegalArgumentException e) {
-                response = Response.status(Status.BAD_REQUEST).entity("Invalid group id.").build();
-            }
+        try {
+            final UUID groupId = UUID.fromString(userGroupId);
+            final UserGroup usergroup = getService().getUserGroup(groupId);
+            response = handleExistingUserGroup(usergroup);
+        } catch (IllegalArgumentException e) {
+            response = Response.status(Status.BAD_REQUEST).entity("Invalid group id.").build();
         }
-        else if (userGroupName != null) {
+        return response;
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    public Response getUserGroupByName(@QueryParam("groupName") String userGroupName) {
+        Response response;
+        if (userGroupName != null) {
             final UserGroup usergroup = getService().getUserGroupByName(userGroupName);
             response = handleExistingUserGroup(usergroup);
-        }
-        else {
-            response = Response.status(Status.BAD_REQUEST).entity("Please specify either groupname or id.").build();
+        } else {
+            response = Response.status(Status.BAD_REQUEST).entity("Please specify a groupname.").build();
         }
 
         return response;
@@ -99,7 +105,7 @@ public class UserGroupResource extends AbstractSecurityResource {
 
     @PUT
     @Produces("application/json;charset=UTF-8")
-    public Response createUserGroup(@QueryParam("groupName") String groupName) {
+    public Response createUserGroup(@FormParam("groupName") String groupName) {
         final Response response;
         final UserGroup usergroup = getService().getUserGroupByName(groupName);
         if (usergroup != null) {
@@ -127,106 +133,132 @@ public class UserGroupResource extends AbstractSecurityResource {
         return response;
     }
 
+    @Path("{groupId}")
     @DELETE
     @Produces("application/json;charset=UTF-8")
-    public Response deleteUserGroup(@QueryParam("groupName") String groupName) {
+    public Response deleteUserGroup(@PathParam("groupId") String userGroupId) {
         Response response;
-        final UserGroup usergroup = getService().getUserGroupByName(groupName);
-        if (usergroup == null) {
-            response = Response.status(Status.BAD_REQUEST).entity("Usergroup with this name does not exist.").build();
-        } else {
-            if (getService().hasCurrentUserDeletePermission(usergroup)) {
-                try {
-                    getService().deleteUserGroup(usergroup);
-                    response = Response.status(Status.NO_CONTENT).build();
-                } catch (UserGroupManagementException e) {
-                    response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-                }
+        try {
+            final UUID groupId = UUID.fromString(userGroupId);
+            final UserGroup usergroup = getService().getUserGroup(groupId);
+
+            if (usergroup == null) {
+                response = Response.status(Status.BAD_REQUEST).entity("Usergroup with this name does not exist.")
+                        .build();
             } else {
-                response = Response.status(Status.UNAUTHORIZED).build();
-            }
-        }
-
-        return response;
-    }
-
-    @Path("/user")
-    @PUT
-    @Produces("application/json;charset=UTF-8")
-    public Response addUserToUserGroup(@QueryParam("groupName") String groupName,
-            @QueryParam("username") String username) {
-        final Response response;
-        final UserGroup usergroup = getService().getUserGroupByName(groupName);
-        if (usergroup == null) {
-            response = Response.status(Status.BAD_REQUEST).entity("Usergroup with this name does not exist.").build();
-        } else {
-            final User user = getService().getUserByName(username);
-            if (user == null) {
-                response = Response.status(Status.BAD_REQUEST).entity("User with this name does not exist.").build();
-            } else {
-                if (getService().hasCurrentUserReadPermission(usergroup)) {
-                    if (Util.contains(usergroup.getUsers(), user)) {
-                        response = Response.status(Status.BAD_REQUEST).entity("User is already in this group.").build();
-                    } else {
-                        if (getService().hasCurrentUserUpdatePermission(usergroup)) {
-                            getService().addUserToUserGroup(usergroup, user);
-                            response = Response.ok().build();
-                        } else {
-                            response = Response.status(Status.UNAUTHORIZED).build();
-                        }
-
+                if (getService().hasCurrentUserDeletePermission(usergroup)) {
+                    try {
+                        getService().deleteUserGroup(usergroup);
+                        response = Response.status(Status.NO_CONTENT).build();
+                    } catch (UserGroupManagementException e) {
+                        response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
                     }
                 } else {
                     response = Response.status(Status.UNAUTHORIZED).build();
                 }
             }
+        } catch (IllegalArgumentException e) {
+            response = Response.status(Status.BAD_REQUEST).entity("Invalid group id.").build();
         }
+
         return response;
     }
 
-    @Path("/user")
-    @DELETE
-    @Produces("application/json;charset=UTF-8")
-    public Response deleteUserFromUserGroup(@QueryParam("groupName") String groupName,
-            @QueryParam("username") String username) {
-        final Response response;
-        final UserGroup usergroup = getService().getUserGroupByName(groupName);
-        if (usergroup == null) {
-            response = Response.status(Status.BAD_REQUEST).entity("Usergroup with this name does not exist.").build();
-        } else {
-            final User user = getService().getUserByName(username);
-            if (user == null) {
-                response = Response.status(Status.BAD_REQUEST).entity("User with this name does not exist.").build();
-            } else {
-                if (getService().hasCurrentUserReadPermission(usergroup)) {
-                    if (!Util.contains(usergroup.getUsers(), user)) {
-                        response = Response.status(Status.BAD_REQUEST).entity("User is not in this group.").build();
-                    } else {
-                        if (getService().hasCurrentUserUpdatePermission(usergroup)) {
-                            getService().removeUserFromUserGroup(usergroup, user);
-                            response = Response.status(Status.NO_CONTENT).build();
-                        } else {
-                            response = Response.status(Status.UNAUTHORIZED).build();
-                        }
-
-                    }
-                } else {
-                    response = Response.status(Status.UNAUTHORIZED).build();
-                }
-            }
-        }
-        return response;
-    }
-
-    @Path("/role")
+    @Path("{groupId}/user/{username}")
     @PUT
     @Produces("application/json;charset=UTF-8")
-    public Response addRoleToUserGroup(@QueryParam("groupName") String groupName,
-            @QueryParam("roleId") String roleIdString, @QueryParam("roleAssociated") Boolean roleAssociated) {
+    public Response addUserToUserGroup(@PathParam("groupId") String userGroupId,
+            @PathParam("username") String username) {
         Response response;
-        final UserGroup usergroup = getService().getUserGroupByName(groupName);
+        try {
+            final UUID groupId = UUID.fromString(userGroupId);
+            final UserGroup usergroup = getService().getUserGroup(groupId);
+
+            if (usergroup == null) {
+                response = Response.status(Status.BAD_REQUEST).entity("Usergroup with this name does not exist.")
+                        .build();
+            } else {
+                final User user = getService().getUserByName(username);
+                if (user == null) {
+                    response = Response.status(Status.BAD_REQUEST).entity("User with this name does not exist.")
+                            .build();
+                } else {
+                    if (getService().hasCurrentUserReadPermission(usergroup)) {
+                        if (Util.contains(usergroup.getUsers(), user)) {
+                            response = Response.status(Status.BAD_REQUEST).entity("User is already in this group.")
+                                    .build();
+                        } else {
+                            if (getService().hasCurrentUserUpdatePermission(usergroup)) {
+                                getService().addUserToUserGroup(usergroup, user);
+                                response = Response.ok().build();
+                            } else {
+                                response = Response.status(Status.UNAUTHORIZED).build();
+                            }
+
+                        }
+                    } else {
+                        response = Response.status(Status.UNAUTHORIZED).build();
+                    }
+                }
+            }
+        } catch (IllegalArgumentException e) {
+            response = Response.status(Status.BAD_REQUEST).entity("Invalid group id.").build();
+        }
+        return response;
+    }
+
+    @Path("{groupId}/user/{username}")
+    @DELETE
+    @Produces("application/json;charset=UTF-8")
+    public Response deleteUserFromUserGroup(@PathParam("groupId") String userGroupId,
+            @PathParam("username") String username) {
+        Response response;
+        try {
+            final UUID groupId = UUID.fromString(userGroupId);
+            final UserGroup usergroup = getService().getUserGroup(groupId);
+            if (usergroup == null) {
+                response = Response.status(Status.BAD_REQUEST).entity("Usergroup with this name does not exist.")
+                        .build();
+            } else {
+                final User user = getService().getUserByName(username);
+                if (user == null) {
+                    response = Response.status(Status.BAD_REQUEST).entity("User with this name does not exist.")
+                            .build();
+                } else {
+                    if (getService().hasCurrentUserReadPermission(usergroup)) {
+                        if (!Util.contains(usergroup.getUsers(), user)) {
+                            response = Response.status(Status.BAD_REQUEST).entity("User is not in this group.").build();
+                        } else {
+                            if (getService().hasCurrentUserUpdatePermission(usergroup)) {
+                                getService().removeUserFromUserGroup(usergroup, user);
+                                response = Response.status(Status.NO_CONTENT).build();
+                            } else {
+                                response = Response.status(Status.UNAUTHORIZED).build();
+                            }
+
+                        }
+                    } else {
+                        response = Response.status(Status.UNAUTHORIZED).build();
+                    }
+                }
+            }
+        } catch (IllegalArgumentException e) {
+            response = Response.status(Status.BAD_REQUEST).entity("Invalid group id.").build();
+        }
+        return response;
+    }
+
+    @Path("{groupId}/role/{roleId}")
+    @PUT
+    @Produces("application/json;charset=UTF-8")
+    public Response addRoleToUserGroup(@PathParam("groupId") String userGroupId,
+            @PathParam("roleId") String roleIdString, @FormParam("forAll") Boolean roleForAll) {
+        Response response;
 
         try {
+            final UUID groupId = UUID.fromString(userGroupId);
+            final UserGroup usergroup = getService().getUserGroup(groupId);
+
             final UUID roleId = UUID.fromString(roleIdString);
             if (usergroup == null) {
                 response = Response.status(Status.BAD_REQUEST).entity("Usergroup with this name does not exist.")
@@ -238,9 +270,9 @@ public class UserGroupResource extends AbstractSecurityResource {
                 } else {
                     if (getService().hasCurrentUserUpdatePermission(usergroup)
                             && getService().hasCurrentUserReadPermission(role)) {
-                        final Boolean associated = usergroup.getRoleAssociation(role);
-                        if (associated == null || associated != roleAssociated) {
-                            getService().putRoleDefinitionToUserGroup(usergroup, role, roleAssociated);
+                        final Boolean forAll = usergroup.getRoleAssociation(role);
+                        if (forAll == null || forAll != roleForAll) {
+                            getService().putRoleDefinitionToUserGroup(usergroup, role, roleForAll);
                             response = Response.ok().build();
                         } else {
                             response = Response.status(Status.BAD_REQUEST)
@@ -252,20 +284,21 @@ public class UserGroupResource extends AbstractSecurityResource {
                 }
             }
         } catch (IllegalArgumentException e) {
-            response = Response.status(Status.BAD_REQUEST).entity("Invalid role id.").build();
+            response = Response.status(Status.BAD_REQUEST).entity("Invalid role or group id.").build();
         }
         return response;
     }
 
-    @Path("/role")
+    @Path("{groupId}/role/{roleId}")
     @DELETE
     @Produces("application/json;charset=UTF-8")
-    public Response deleteRoleFromUserGroup(@QueryParam("groupName") String groupName,
-            @QueryParam("roleId") String roleIdString, @QueryParam("roleAssociated") Boolean roleAssociated) {
+    public Response deleteRoleFromUserGroup(@PathParam("groupId") String userGroupId,
+            @PathParam("roleId") String roleIdString) {
         Response response;
-        final UserGroup usergroup = getService().getUserGroupByName(groupName);
 
         try {
+            final UUID groupId = UUID.fromString(userGroupId);
+            final UserGroup usergroup = getService().getUserGroup(groupId);
             final UUID roleId = UUID.fromString(roleIdString);
             if (usergroup == null) {
                 response = Response.status(Status.BAD_REQUEST).entity("Usergroup with this name does not exist.")
@@ -282,7 +315,7 @@ public class UserGroupResource extends AbstractSecurityResource {
                             response = Response.status(Status.NO_CONTENT).build();
                         } else {
                             response = Response.status(Status.BAD_REQUEST)
-                                    .entity("Role was already added to the group.").build();
+                                    .entity("Role is currently not added to the group.").build();
                         }
                     } else {
                         response = Response.status(Status.UNAUTHORIZED).build();
@@ -290,7 +323,7 @@ public class UserGroupResource extends AbstractSecurityResource {
                 }
             }
         } catch (IllegalArgumentException e) {
-            response = Response.status(Status.BAD_REQUEST).entity("Invalid role id.").build();
+            response = Response.status(Status.BAD_REQUEST).entity("Invalid role or group id.").build();
         }
         return response;
     }
