@@ -1,11 +1,11 @@
 package com.sap.sse.security.jaxrs.api;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -15,6 +15,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
@@ -22,6 +23,8 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
 import com.sap.sse.security.shared.RoleDefinition;
@@ -92,8 +95,8 @@ public class RoleResource extends AbstractSecurityResource {
     @Path("{roleId}")
     @PUT
     @Produces("text/plain;charset=UTF-8")
-    public Response updatePermissionsForRole(@Context UriInfo uriInfo, @PathParam("roleId") String roleId,
-            @FormParam("permissions") List<String> permissionStrings) {
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updateRole(@Context UriInfo uriInfo, @PathParam("roleId") String roleId, String json) {
 
         Response resp;
         try {
@@ -114,6 +117,10 @@ public class RoleResource extends AbstractSecurityResource {
 
                 // create permission objects
                 final Set<WildcardPermission> permissions = new HashSet<>();
+
+                final JSONObject body = (JSONObject) new JSONParser().parse(json);
+                @SuppressWarnings("unchecked")
+                final Iterable<String> permissionStrings = (Iterable<String>) body.get("permissions");
                 for (final String permissionString : permissionStrings) {
                     permissions.add(new WildcardPermission(permissionString));
                 }
@@ -135,11 +142,15 @@ public class RoleResource extends AbstractSecurityResource {
                 } else {
                     // update role definitino with new permissions
                     roleDefinition.setPermissions(permissions);
+                    final String roleName = (String) body.get("roleName");
+                    if (roleName != null) {
+                        roleDefinition.setName(roleName);
+                    }
                     getService().updateRoleDefinition(roleDefinition);
                     resp = Response.ok().build();
                 }
             }
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | ParseException e) {
             resp = Response.status(Status.BAD_REQUEST).entity("Invalid roleId.").build();
         } catch (UnauthorizedException e) {
             resp = Response.status(Status.UNAUTHORIZED).build();
