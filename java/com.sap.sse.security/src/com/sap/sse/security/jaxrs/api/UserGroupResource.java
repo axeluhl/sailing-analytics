@@ -3,6 +3,7 @@ package com.sap.sse.security.jaxrs.api;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -11,10 +12,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
@@ -76,8 +79,8 @@ public class UserGroupResource extends AbstractSecurityResource {
     /** Returns a json object with id, groupname, roles and user names (filtered to thouse the current user can see). */
     private JSONObject convertUserGroupToJson(final UserGroup usergroup) {
         final JSONObject jsonResult = new JSONObject();
-        jsonResult.put("id", usergroup.getId().toString());
-        jsonResult.put("groupname", usergroup.getName());
+        jsonResult.put("groupId", usergroup.getId().toString());
+        jsonResult.put("groupName", usergroup.getName());
 
         final JSONArray jsonUsersInGroup = new JSONArray();
         for (final User user : usergroup.getUsers()) {
@@ -104,9 +107,12 @@ public class UserGroupResource extends AbstractSecurityResource {
     }
 
     @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces("application/json;charset=UTF-8")
-    public Response createUserGroup(@FormParam("groupName") String groupName) {
+    public Response createUserGroup(String jsonBody) {
         final Response response;
+        final JSONObject json = (JSONObject) JSONValue.parse(jsonBody);
+        final String groupName = (String) json.get("groupName");
         final UserGroup usergroup = getService().getUserGroupByName(groupName);
         if (usergroup != null) {
             response = Response.status(Status.BAD_REQUEST).entity("Usergroup with this name already exists.").build();
