@@ -29,12 +29,8 @@ public class RoleResource extends AbstractSecurityResource {
 
     @POST
     @Produces("text/plain;charset=UTF-8")
-    public Response updatePermissionsForRole(@Context UriInfo uriInfo, @QueryParam("roleId") String queryRoleId,
-            @FormParam("roleId") String formRoleId, @QueryParam("permissions") List<String> queryPermissions,
-            @FormParam("permissions") List<String> formPermissions) {
-
-        final String roleId = preferFirstIfNotNullOrElseSecond(formRoleId, queryRoleId);
-        final List<String> permissionStrings = preferFirstIfNotEmptyOrElseSecond(formPermissions, queryPermissions);
+    public Response updatePermissionsForRole(@Context UriInfo uriInfo, @FormParam("roleId") String roleId,
+            @FormParam("permissions") List<String> permissionStrings) {
 
         Response resp;
         try {
@@ -126,27 +122,5 @@ public class RoleResource extends AbstractSecurityResource {
             resp = Response.status(Status.UNAUTHORIZED).build();
         }
         return resp;
-    }
-
-    /** Returns the second object if the first is null. */
-    private <T> T preferFirstIfNotNullOrElseSecond(T first, T second) {
-        final T result;
-        if (first != null) {
-            result = first;
-        } else {
-            result = second;
-        }
-        return result;
-    }
-
-    /** Selects the second list if the first list is null or empty. */
-    private <T> List<T> preferFirstIfNotEmptyOrElseSecond(List<T> first, List<T> second) {
-        final List<T> result;
-        if (first != null && !first.isEmpty()) {
-            result = first;
-        } else {
-            result = second;
-        }
-        return result;
     }
 }
