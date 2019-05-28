@@ -27,8 +27,10 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.InvalidatesLeaderboardCache;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
@@ -585,8 +587,24 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         LeaderboardEntryDTO entryDTO = new LeaderboardEntryDTO();
         TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
         entryDTO.race = trackedRace == null ? null : trackedRace.getRaceIdentifier();
-        // TODO bug2822: Should this rather come from raceColumn.getBoatOfCompetitor() ?
-        entryDTO.boat = trackedRace == null ? null : baseDomainFactory.convertToBoatDTO(trackedRace.getBoatOfCompetitor(competitor));
+        Boat boat;
+        if (trackedRace != null) {
+            boat = trackedRace.getBoatOfCompetitor(competitor);
+        } else {
+            // check if it's a CompetitorWithBoat:
+            if (competitor.hasBoat()) {
+                boat = ((CompetitorWithBoat) competitor).getBoat();
+            } else {
+                final Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
+                if (fleetOfCompetitor != null) {
+                    final Map<Competitor, Boat> competitorsAndTheirBoats = raceColumn.getCompetitorsRegisteredInRacelog(fleetOfCompetitor);
+                    boat = competitorsAndTheirBoats.get(competitor);
+                } else {
+                    boat = null;
+                }
+            }
+        }
+        entryDTO.boat = boat == null ? null : baseDomainFactory.convertToBoatDTO(boat);
         entryDTO.totalPoints = entry.getTotalPoints();
         if (fillTotalPointsUncorrected) {
             entryDTO.totalPointsUncorrected = entry.getTotalPointsUncorrected();

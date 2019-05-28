@@ -452,8 +452,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         return result;
     }
 
-    private void createRegattas(final Iterable<RegattaDTO> selectedOriginalRegattasFromXRR,
-            EventDTO newEvent) {
+    private void createRegattas(final Iterable<RegattaDTO> selectedOriginalRegattasFromXRR, EventDTO newEvent) {
         eventManagementPanel.fillEvents();
         final Set<RegattaDTO> regattaConfigurationsToCreate = new HashSet<>();
         for (RegattaDTO originalRegattaFromXRR : selectedOriginalRegattasFromXRR) {

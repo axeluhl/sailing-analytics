@@ -23,19 +23,25 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.apache.shiro.authz.AuthorizationException;
+
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.impl.CompetitorSerializationCustomizer;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.PublicReadableActions;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 
 @Path("/v1/masterdata/leaderboardgroups")
@@ -50,9 +56,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
             throws UnsupportedEncodingException {
         final SecurityService securityService = getSecurityService();
         User user = securityService.getCurrentUser();
-        if (user == null) {
-            return Response.status(Status.FORBIDDEN).build();
-        }
+        securityService.checkCurrentUserServerPermission(ServerActions.CAN_EXPORT_MASTERDATA);
         final long startTime = System.currentTimeMillis();
         logger.info("Masterdataexport has started; requesting user: "+user);
         if (compress == null) {
@@ -66,33 +70,59 @@ public class MasterDataResource extends AbstractSailingServerResource {
         }
         logger.info(String.format("Masterdataexport gzip compression is turned %s", compress ? "on" : "off"));
         Map<String, LeaderboardGroup> allLeaderboardGroups = getService().getLeaderboardGroups();
-
         Set<LeaderboardGroup> groupsToExport = new HashSet<LeaderboardGroup>();
-
         if (requestedLeaderboardGroups.isEmpty()) {
-            // add all visible
+            // Add all visible LeaderboardGroups.
+            // The request will not fail due to missing LeaderboardGroup READ permissions.
             for (LeaderboardGroup group : allLeaderboardGroups.values()) {
                 if (securityService.hasCurrentUserReadPermission(group)) {
                     groupsToExport.add(group);
                 }
             }
         } else {
-            // add all requested, that are visible
+            // Add all requested LeaderboardGroups.
+            // The request will fail due to missing LeaderboardGroup READ permissions.
             for (String name : requestedLeaderboardGroups) {
                 LeaderboardGroup group = allLeaderboardGroups.get(name);
                 if (group != null) {
-                    if (securityService.hasCurrentUserReadPermission(group)) {
-                        groupsToExport.add(group);
+                    if (!securityService.hasCurrentUserReadPermission(group)) {
+                        throw new AuthorizationException("No permission to read leaderboard group '" + name + "'");
                     }
+                    groupsToExport.add(group);
                 }
             }
         }
         final List<Serializable> competitorIds = new ArrayList<Serializable>();
         for (LeaderboardGroup lg : groupsToExport) {
             for (Leaderboard leaderboard : lg.getLeaderboards()) {
-                if (securityService.hasCurrentUserReadPermission(leaderboard)) {
-                    for (Competitor competitor : leaderboard.getAllCompetitors()) {
-                        competitorIds.add(competitor.getId());
+                // All Leaderboards/Regattas contained in the LeaderboardGroup need to be visible
+                // to ensure consistency during import. A partial/pruned import is not intended to take place.
+                if (!securityService.hasCurrentUserReadPermission(leaderboard)
+                        || ((leaderboard instanceof RegattaLeaderboard) && !securityService
+                                .hasCurrentUserReadPermission(((RegattaLeaderboard) leaderboard).getRegatta()))) {
+                    throw new AuthorizationException(
+                            "No permission to read all leaderboards and regattas of leaderboard group '" + lg.getName()
+                                    + "'");
+                }
+                for (Competitor competitor : leaderboard.getAllCompetitors()) {
+                    // All competitors reachable by Leaderboards contained in a LeaderboardGroup
+                    // need to be readable (READ or READ_PUBLIC) to allow the import.
+                    // Pruning of personal data (email) is done during serialization if the user has READ_PUBLIC but no
+                    // READ permission.
+                    if (!securityService.hasCurrentUserOneOfExplicitPermissions(competitor,
+                            PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
+                        throw new AuthorizationException("No permission to read competitor " + competitor.getId()
+                                + " for leaderboard '" + leaderboard.getName() + "'");
+                    }
+                    competitorIds.add(competitor.getId());
+                }
+                for (Boat boat : leaderboard.getAllBoats()) {
+                    // All boats reachable by Leaderboards contained in a LeaderboardGroup
+                    // need to be readable (READ or READ_PUBLIC) to allow the import.
+                    if (!securityService.hasCurrentUserOneOfExplicitPermissions(boat,
+                            PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
+                        throw new AuthorizationException("No permission to read boat " + boat.getId()
+                                + " for leaderboard '" + leaderboard.getName() + "'");
                     }
                 }
             }
@@ -100,43 +130,52 @@ public class MasterDataResource extends AbstractSailingServerResource {
         Set<DeviceConfiguration> raceManagerDeviceConfigurations = new HashSet<>();
         if (exportDeviceConfigs) {
             for (DeviceConfiguration deviceConfig : getAllDeviceConfigs()) {
-                // FIXME here permission check?
-                raceManagerDeviceConfigurations.add(deviceConfig);
+                // DeviceConfiguration are explicitly filtered by their permissions
+                // because no filtering based on the selected LeaderboardGroups is done.
+                // This is the only way to allow importing DeviceConfigurations at all.
+                if (securityService.hasCurrentUserReadPermission(deviceConfig)) {
+                    raceManagerDeviceConfigurations.add(deviceConfig);
+                }
             }
         }
         ArrayList<Event> events = new ArrayList<>();
         for (Event event : getService().getAllEvents()) {
-            if (securityService.hasCurrentUserReadPermission(event)) {
-                events.add(event);
-            }
+            events.add(event);
         }
-
         ArrayList<MediaTrack> mediaTracks = new ArrayList<>();
         for (MediaTrack mediaTrack : getService().getAllMediaTracks()) {
-            if (securityService.hasCurrentUserReadPermission(mediaTrack)) {
-                mediaTracks.add(mediaTrack);
-            }
+            mediaTracks.add(mediaTrack);
         }
         Map<String, Regatta> regattaRaceIds = new HashMap<>();
         for (Entry<String, Regatta> regattaRaceMap : getService().getPersistentRegattasForRaceIDs().entrySet()) {
-            if (securityService.hasCurrentUserReadPermission(regattaRaceMap.getValue())) {
-                regattaRaceIds.put(regattaRaceMap.getKey(), regattaRaceMap.getValue());
-            }
+            regattaRaceIds.put(regattaRaceMap.getKey(), regattaRaceMap.getValue());
         }
         final TopLevelMasterData masterData = new TopLevelMasterData(groupsToExport,
                 events, regattaRaceIds, mediaTracks,
                 getService().getSensorFixStore(), exportWind, raceManagerDeviceConfigurations);
+        // Checking permissions after filtering of Events to be transferred.
+        for (Event event: masterData.getAllEvents()) {
+            if (!securityService.hasCurrentUserReadPermission(event)) {
+                throw new AuthorizationException("No permission to read event " + event.getId());
+            }
+        }
+        // Checking permissions after filtering of MediaTracks to be transferred.
+        for (MediaTrack mediaTrack : masterData.getFilteredMediaTracks()) {
+            if (!securityService.hasCurrentUserReadPermission(mediaTrack)) {
+                throw new AuthorizationException("No permission to read media track " + mediaTrack.dbId);
+            }
+        }
         final StreamingOutput streamingOutput;
         if (compress) {
-            streamingOutput = new CompressingStreamingOutput(masterData, competitorIds, startTime);
+            streamingOutput = new CompressingStreamingOutput(masterData, competitorIds, startTime, securityService);
         } else {
-            streamingOutput = new NonCompressingStreamingOutput(masterData, competitorIds, startTime);
+            streamingOutput = new NonCompressingStreamingOutput(masterData, competitorIds, startTime, securityService);
         }
-        final ResponseBuilder resp = Response.ok(streamingOutput);
+        ResponseBuilder resp = Response.ok(streamingOutput);
         if (compress) {
             resp.header("Content-Encoding", "gzip");
         }
-        Response builtResponse = resp.build();
+        final Response builtResponse = resp.build();
         long timeToExport = System.currentTimeMillis() - startTime;
         logger.info(String.format("Took %s ms to start masterdataexport-streaming.", timeToExport));
         return builtResponse;
@@ -150,39 +189,50 @@ public class MasterDataResource extends AbstractSailingServerResource {
         private final TopLevelMasterData masterData;
         private final List<Serializable> competitorIds;
         private final long startTime;
+        private final SecurityService securityService;
 
-        protected AbstractStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds, long startTime) {
+        protected AbstractStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds, long startTime, SecurityService securityService) {
             super();
             this.masterData = masterData;
             this.competitorIds = competitorIds;
             this.startTime = startTime;
+            this.securityService = securityService;
         }
         
         protected abstract OutputStream wrapOutputStream(OutputStream outputStream) throws IOException;
 
         @Override
         public void write(OutputStream output) throws IOException, WebApplicationException {
-            ObjectOutputStream objectOutputStream = null;
-            try {
-                OutputStream gzipOrNot = wrapOutputStream(output);
-                OutputStream outputStreamWithByteCounter = new ByteCountOutputStreamDecorator(gzipOrNot);
-                objectOutputStream = new ObjectOutputStream(outputStreamWithByteCounter);
-                masterData.setMasterDataExportFlagOnRaceColumns(true);
-                // Actual start of streaming
-                writeObjects(competitorIds, masterData, objectOutputStream);
-            } finally {
-                objectOutputStream.close();
-                masterData.setMasterDataExportFlagOnRaceColumns(false);
-            }
-            long timeToExport = System.currentTimeMillis() - startTime;
-            logger.info(String.format("Took %s ms to finish masterdataexport", timeToExport));
+            CompetitorSerializationCustomizer
+            .doWithCustomizer(c -> {
+                return !securityService.hasCurrentUserReadPermission(c) && c.getEmail() != null;
+            }, () -> {
+                try {
+                    ObjectOutputStream objectOutputStream = null;
+                    try {
+                        OutputStream gzipOrNot = wrapOutputStream(output);
+                        OutputStream outputStreamWithByteCounter = new ByteCountOutputStreamDecorator(gzipOrNot);
+                        objectOutputStream = new ObjectOutputStream(outputStreamWithByteCounter);
+                        masterData.setMasterDataExportFlagOnRaceColumns(true);
+                        // Actual start of streaming
+                        writeObjects(competitorIds, masterData, objectOutputStream);
+                    } finally {
+                        objectOutputStream.close();
+                        masterData.setMasterDataExportFlagOnRaceColumns(false);
+                    }
+                    long timeToExport = System.currentTimeMillis() - startTime;
+                    logger.info(String.format("Took %s ms to finish masterdataexport", timeToExport));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
     }
     
     private class NonCompressingStreamingOutput extends AbstractStreamingOutput {
         protected NonCompressingStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds,
-                long startTime) {
-            super(masterData, competitorIds, startTime);
+                long startTime, SecurityService securityService) {
+            super(masterData, competitorIds, startTime, securityService);
         }
 
         @Override
@@ -193,8 +243,8 @@ public class MasterDataResource extends AbstractSailingServerResource {
     
     private class CompressingStreamingOutput extends AbstractStreamingOutput {
         protected CompressingStreamingOutput(TopLevelMasterData masterData, List<Serializable> competitorIds,
-                long startTime) {
-            super(masterData, competitorIds, startTime);
+                long startTime, SecurityService securityService) {
+            super(masterData, competitorIds, startTime, securityService);
         }
 
         @Override
