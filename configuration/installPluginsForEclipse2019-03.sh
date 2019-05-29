@@ -48,4 +48,7 @@ installPlugins https://www.umlet.com/umlet_latest/repository/ umlet-eclipse-feat
 echo "Installing javax.xml.bind for news feed polling (see https://stackoverflow.com/questions/52528693/eclipse-internal-error-polling-news-feeds)..."
 installPlugins http://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository javax.xml.bind
 
+echo "Installing Enhanced Class Decompiler"
+installPlugins https://ecd-plugin.github.io/update org.sf.feeling.decompiler.feature.group,org.sf.feeling.decompiler.cfr.feature.group,org.sf.feeling.decompiler.jad.feature.group,org.sf.feeling.decompiler.jd.feature.group,org.sf.feeling.decompiler.procyon.feature.group
+
 echo "Installation completed!"
