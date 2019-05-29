@@ -87,6 +87,7 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
         String searchString = sailnumber.replaceAll(" ", "").toUpperCase();
         JSONObject object = (JSONObject) data.get(searchString);
         if (object == null) {
+            //TODO Throw Exception for sailnumber not found. InvalidArgumentException?
             return null;
         }
         for (Entry<Object, Object> entry : object.entrySet()) {

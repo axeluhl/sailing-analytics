@@ -45,6 +45,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      * allowance for a boat at a given TWS and TWA. The first key set contains {@link Speed}s and is equal to the
      * windspeeds defined in the static field of {@link ORCCertificateImpl}. The second key set contains
      * {@link Bearing}s and is equal to the windangles defined in the static fields of the same class.
+     * Needed for LaGrange interpolation.
      */
     private final Map<Speed, Map<Bearing, Duration>> durationPerNauticalMileAtTrueWindAngleAndSpeed;
 
@@ -137,7 +138,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     }
 
     /**
-     * 
+     * TODO Comment
      * @return
      * @throws FunctionEvaluationException
      */

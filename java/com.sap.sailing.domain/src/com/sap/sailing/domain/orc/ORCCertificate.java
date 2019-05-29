@@ -8,16 +8,41 @@ import com.sap.sse.common.Speed;
 //TODO COMMENTS!!!
 public interface ORCCertificate {
 
+    /**
+     * 
+     * @param course
+     * @return
+     */
     public ORCPerformanceCurve getPerformanceCurve (ORCPerformanceCurveCourse course);
     
+    /**
+     * 
+     * @return
+     */
     public double getGPH();
     
+    /**
+     * 
+     * @return
+     */
     public Map<Speed, Duration> getWindwardLeewardAllowances();
     
+    /**
+     * 
+     * @return
+     */
     public Map<Speed, Duration> getCircularRandomAllowances();
     
+    /**
+     * 
+     * @return
+     */
     public Map<Speed, Duration> getLongDistanceAllowances();
     
+    /**
+     * 
+     * @return
+     */
     public Map<Speed, Duration> getNonSpinnakerAllowances();
     
 }

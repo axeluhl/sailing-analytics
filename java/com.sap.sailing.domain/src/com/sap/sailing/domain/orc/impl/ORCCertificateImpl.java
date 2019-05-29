@@ -29,7 +29,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class ORCCertificateImpl implements ORCCertificate {
 
-    /*
+    /**
      * Equals the column heading of the allowances table of an ORC certificate. The speeds are set by the offshore racing congress.
      */
     public static final Speed[] ALLOWANCES_TRUE_WIND_SPEEDS = {new KnotSpeedImpl( 6),
@@ -40,7 +40,7 @@ public class ORCCertificateImpl implements ORCCertificate {
                                                                new KnotSpeedImpl(16),
                                                                new KnotSpeedImpl(20) };
     
-    /*
+    /**
      * 
      */
     public static final Bearing[] ALLOWANCES_TRUE_WIND_ANGLES = {new DegreeBearingImpl( 52),
@@ -52,7 +52,7 @@ public class ORCCertificateImpl implements ORCCertificate {
                                                                  new DegreeBearingImpl(135),
                                                                  new DegreeBearingImpl(150) };
     
-    /*
+    /**
      * 
      */
     public static final Map<Speed, Map<Bearing, Double>> perCentOfAllowancesForLongDistancePC;
@@ -125,7 +125,7 @@ public class ORCCertificateImpl implements ORCCertificate {
         perCentOfAllowancesForLongDistancePC = Collections.unmodifiableMap(result);
     }
     
-    /*
+    /**
      * 
      */
     private final String sailnumber;
@@ -136,7 +136,16 @@ public class ORCCertificateImpl implements ORCCertificate {
     private final Map<Speed, Bearing> beatAngles;
     private final Map<Speed, Bearing> gybeAngles;
 
-
+    /**
+     * 
+     * @param sailnumber
+     * @param boatclass
+     * @param length
+     * @param gph
+     * @param timeAllowancesPerTrueWindSpeedAndAngle
+     * @param beatAngles
+     * @param gybeAngles
+     */
     public ORCCertificateImpl(String sailnumber, String boatclass, Distance length, Duration gph,
             Map<Speed, Map<Bearing, Duration>> timeAllowancesPerTrueWindSpeedAndAngle, Map<Speed, Bearing> beatAngles,
             Map<Speed, Bearing> gybeAngles) {
