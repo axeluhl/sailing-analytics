@@ -87,6 +87,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      */
     public ORCPerformanceCurveImpl(Map<Speed, Map<Bearing, Duration>> twaAllowances, Map<Speed, Bearing> beatAngles,
             Map<Speed, Bearing> gybeAngles, ORCPerformanceCurveCourse course) {
+        //TODO Update constructor with duration to the current progress of the boat on the race course
         durationPerNauticalMileAtTrueWindAngleAndSpeed = Collections.unmodifiableMap(twaAllowances);
         this.beatAngles = Collections.unmodifiableMap(beatAngles);
         this.gybeAngles = Collections.unmodifiableMap(gybeAngles);
@@ -226,11 +227,20 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         PolynomialFunction subtractedFunction = workingFunction.subtract(new PolynomialFunction(new double[] {time.asSeconds()}));
         NewtonSolver solver = new NewtonSolver();
         solver.setAbsoluteAccuracy(0.000001);
+        //TODO Comment for the special treatment of the solver
         return new KnotSpeedImpl(solver.solve(subtractedFunction, 0, functionTwaToAllowance.getKnots()[i + 1] - functionTwaToAllowance.getKnots()[i]) + functionTwaToAllowance.getKnots()[i]);
     }
     
-    public Duration getAllowancePerCourse(Speed twa) throws ArgumentOutsideDomainException {
-        return Duration.ONE_SECOND.times(functionTwaToAllowance.value(twa.getKnots()));
+    @Override
+    public Duration getAllowancePerCourse(Speed impliedWind) {
+        try {
+            return Duration.ONE_SECOND.times(functionTwaToAllowance.value(impliedWind.getKnots()));
+        } catch (ArgumentOutsideDomainException e) {
+            // TODO Auto-generated catch block
+            // TODO Create senseful Exception Handling for this class, Logging ...
+            e.printStackTrace();
+        }
+        return null;
     }
     
     @Override
@@ -241,8 +251,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
 
     @Override
     public Duration getCalculatedTime(ORCPerformanceCurve referenceBoat) {
-        // TODO Auto-generated method stub
-        return null;
+        return referenceBoat.getAllowancePerCourse(getImpliedWind());
     }
     
     // LAGRANGE TEST BASE because of unusual implementation in ORC Pascal code

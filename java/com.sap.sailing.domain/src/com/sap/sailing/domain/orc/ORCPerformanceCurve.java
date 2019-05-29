@@ -8,5 +8,6 @@ public interface ORCPerformanceCurve {
     Speed getImpliedWind();
     
     Duration getCalculatedTime(ORCPerformanceCurve referenceBoat);
-    
+ 
+    Duration getAllowancePerCourse(Speed impliedWind);
 }
