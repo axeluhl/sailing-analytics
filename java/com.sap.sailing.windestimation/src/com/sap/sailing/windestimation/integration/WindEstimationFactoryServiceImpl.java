@@ -34,7 +34,7 @@ public class WindEstimationFactoryServiceImpl extends
 
     private static final ManeuverFeatures MAX_MANEUVER_FEATURES = new ManeuverFeatures(ENABLE_POLARS_INFORMATION,
             ENABLE_SCALED_SPEED, ENABLE_MARKS_INFORMATION);
-    private static final ModelDomainType[] modelDomainTypesRequiredByWindEstimation = new ModelDomainType[] {
+    public static final ModelDomainType[] modelDomainTypesRequiredByWindEstimation = new ModelDomainType[] {
             ModelDomainType.MANEUVER_CLASSIFIER, ModelDomainType.DURATION_BASED_TWD_DELTA_STD_REGRESSOR,
             ModelDomainType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR };
 

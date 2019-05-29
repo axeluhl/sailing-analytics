@@ -20,7 +20,7 @@ public class WindEstimatorManeuverNumberDependentEvaluationRunner {
 
     private static final Integer MAX_RACES = null;
     private static final int MAX_MANEUVERS = 10;
-    private static final boolean EVALUATE_PER_COMPETITOR_TRACK = false;
+    private static final boolean EVALUATE_PER_COMPETITOR_TRACK = true;
     private static final boolean ENABLE_MARKS_INFORMATION = false;
     private static final boolean ENABLE_SCALED_SPEED = false;
     private static final boolean ENABLE_POLARS = true;
@@ -45,7 +45,8 @@ public class WindEstimatorManeuverNumberDependentEvaluationRunner {
         double[] avgConfidencePerManeuverCount = new double[MAX_MANEUVERS];
         double[] avgConfidenceOfCorrectEstimationsPerManeuverCount = new double[MAX_MANEUVERS];
         double[] avgConfidenceOfIncorrectEstimationsPerManeuverCount = new double[MAX_MANEUVERS];
-        double[] accuracyPerManeuverCount = new double[MAX_MANEUVERS];
+        double[] accuracyCorrectRacesPerManeuverCount = new double[MAX_MANEUVERS];
+        double[] accuracyCorrectManeuversPerManeuverCount = new double[MAX_MANEUVERS];
         double[] emptyEstimationsPercentagePerManeuverCount = new double[MAX_MANEUVERS];
         for (int fixedNumberOfManeuvers = 1; fixedNumberOfManeuvers <= MAX_MANEUVERS; fixedNumberOfManeuvers++) {
             LoggingUtil.logInfo("Running evaluation with " + fixedNumberOfManeuvers + " maneuvers");
@@ -70,7 +71,9 @@ public class WindEstimatorManeuverNumberDependentEvaluationRunner {
                     .getAvgConfidenceOfCorrectWindDirectionEstimations();
             avgConfidenceOfIncorrectEstimationsPerManeuverCount[i] = evaluationResult
                     .getAvgConfidenceOfIncorrectWindDirectionEstimations();
-            accuracyPerManeuverCount[i] = evaluationResult.getAccuracyOfWindDirectionEstimation();
+            accuracyCorrectRacesPerManeuverCount[i] = evaluationResult.getAccuracyOfWindDirectionEstimation();
+            accuracyCorrectManeuversPerManeuverCount[i] = evaluationResult
+                    .getPercentageOfCorrectlyEstimatedManeuverTypes();
             emptyEstimationsPercentagePerManeuverCount[i] = evaluationResult
                     .getPercentageOfEmptyWindDirectionEstimations();
         }
@@ -78,7 +81,8 @@ public class WindEstimatorManeuverNumberDependentEvaluationRunner {
                 + buildConfigurationString() + "\r\n");
         toCsv(avgErrorDegreesPerManeuverCount, avgConfidencePerManeuverCount,
                 avgConfidenceOfCorrectEstimationsPerManeuverCount, avgConfidenceOfIncorrectEstimationsPerManeuverCount,
-                accuracyPerManeuverCount, emptyEstimationsPercentagePerManeuverCount);
+                accuracyCorrectRacesPerManeuverCount, accuracyCorrectManeuversPerManeuverCount,
+                emptyEstimationsPercentagePerManeuverCount);
     }
 
     private static String buildConfigurationString() throws IllegalArgumentException, IllegalAccessException {
@@ -94,14 +98,16 @@ public class WindEstimatorManeuverNumberDependentEvaluationRunner {
 
     public static void toCsv(double[] avgErrorDegreesPerManeuverCount, double[] avgConfidencePerManeuverCount,
             double[] avgConfidenceOfCorrectEstimationsPerManeuverCount,
-            double[] avgConfidenceOfIncorrectEstimationsPerManeuverCount, double[] accuracyPerManeuverCount,
-            double[] emptyEstimationsPercentagePerManeuverCount) throws IOException {
+            double[] avgConfidenceOfIncorrectEstimationsPerManeuverCount, double[] accuracyCorrectRacesPerManeuverCount,
+            double[] accuracyCorrectManeuversPerManeuverCount, double[] emptyEstimationsPercentagePerManeuverCount)
+            throws IOException {
         try (FileWriter out = new FileWriter(csvFile)) {
-            String line = "Number of maneuvers; Accuracy; Percentage of empty estimations; Avg. confidence; Avg. confidence (correct races); Avg. confidence (incorrect races); Avg. error in degrees\r\n";
+            String line = "Number of maneuvers; Accuracy (correct races); Accuracy (correct maneuvers); Percentage of empty estimations; Avg. confidence; Avg. confidence (correct races); Avg. confidence (incorrect races); Avg. error in degrees\r\n";
             System.out.println(line);
             out.write(line);
             for (int i = 0; i < MAX_MANEUVERS; i++) {
-                line = (i + 1) + ";" + +accuracyPerManeuverCount[i] + ";"
+                line = (i + 1) + ";" + +accuracyCorrectRacesPerManeuverCount[i] + ";"
+                        + accuracyCorrectManeuversPerManeuverCount[i] + ";"
                         + emptyEstimationsPercentagePerManeuverCount[i] + ";" + avgConfidencePerManeuverCount[i] + ";"
                         + avgConfidenceOfCorrectEstimationsPerManeuverCount[i] + ";"
                         + avgConfidenceOfIncorrectEstimationsPerManeuverCount[i] + ";"

@@ -18,6 +18,7 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RegularManeuversForEstimationPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
+import com.sap.sailing.windestimation.model.exception.ModelNotFoundException;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
@@ -60,6 +61,8 @@ public class PersistedManeuverClassifiersScorePrinter {
                     if (classifierModel != null) {
                         allClassifierModels.add(classifierModel);
                     }
+                } catch(ModelNotFoundException e) {
+                    //ignore
                 } catch (ModelPersistenceException e) {
                     logger.log(Level.SEVERE, "Exception while loading model", e);
                 }
