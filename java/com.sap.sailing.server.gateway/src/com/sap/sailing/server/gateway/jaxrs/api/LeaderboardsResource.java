@@ -200,7 +200,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     TimePoint timePoint = calculateTimePointForResultState(leaderboard, resultState);
                     JSONObject jsonLeaderboard;
                     jsonLeaderboard = getLeaderboardJson(resultState, maxCompetitorsCount, requestTimePoint,
-                            leaderboard, timePoint, /* race column names */ null, /* race detail names */ null, competitorAndBoatIdsOnly);
+                            leaderboard, timePoint, /* race column names */ null, /* race detail names */ null, competitorAndBoatIdsOnly,
+                            /* showOnlyActiveRacesForCompetitorIds */ null);
                     StringWriter sw = new StringWriter();
                     jsonLeaderboard.writeJSONString(sw);
                     String json = sw.getBuffer().toString();
@@ -220,7 +221,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     @Override
     protected JSONObject getLeaderboardJson(Leaderboard leaderboard,
             TimePoint resultTimePoint, ResultStates resultState, Integer maxCompetitorsCount, List<String> raceColumnNames,
-            List<String> raceDetailNames, boolean competitorIdsOnly)
+            List<String> raceDetailNames, boolean competitorIdsOnly, List<String> showOnlyActiveRacesForCompetitorIds)
             throws NoWindException, InterruptedException, ExecutionException {
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(
                 resultTimePoint, Collections.<String> emptyList(), /* addOverallDetails */

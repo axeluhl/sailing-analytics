@@ -27,6 +27,7 @@ import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -46,6 +47,7 @@ import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -63,7 +65,8 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             @QueryParam("time") String time, @QueryParam("timeasmillis") Long timeasmillis,
             @QueryParam("maxCompetitorsCount") Integer maxCompetitorsCount,
             @QueryParam("secret") String regattaSecret,
-            @DefaultValue("false") @QueryParam("competitorAndBoatIdsOnly") boolean competitorAndBoatIdsOnly) {
+            @DefaultValue("false") @QueryParam("competitorAndBoatIdsOnly") boolean competitorAndBoatIdsOnly,
+            @QueryParam("showOnlyActiveRacesForCompetitorIds") List<String> showOnlyActiveRacesForCompetitorIds) {
         ShardingContext.setShardingConstraint(ShardingType.LEADERBOARDNAME, leaderboardName);
         try {
             Response response;
@@ -87,7 +90,9 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                     }
                     JSONObject jsonLeaderboard;
                     if (timePoint != null || resultState == ResultStates.Live) {
-                        jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount, raceColumnNames, raceDetails, competitorAndBoatIdsOnly);
+                        jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount,
+                                raceColumnNames, raceDetails, competitorAndBoatIdsOnly,
+                                showOnlyActiveRacesForCompetitorIds);
                     } else {
                         jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount);
                     }
@@ -109,9 +114,9 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
     @Override
     protected JSONObject getLeaderboardJson(Leaderboard leaderboard,
             TimePoint resultTimePoint, ResultStates resultState, Integer maxCompetitorsCount,
-            List<String> raceColumnNames, List<String> raceDetailNames, boolean competitorAndBoatIdsOnly)
+            List<String> raceColumnNames, List<String> raceDetailNames, boolean competitorAndBoatIdsOnly, List<String> showOnlyActiveRacesForCompetitorIds)
             throws NoWindException, InterruptedException, ExecutionException {
-        List<String> raceColumnsToShow = calculateRaceColumnsToShow(raceColumnNames, leaderboard.getRaceColumns());
+        List<String> raceColumnsToShow = calculateRaceColumnsToShow(leaderboard, raceColumnNames, showOnlyActiveRacesForCompetitorIds, resultTimePoint);
         List<DetailType> raceDetailsToShow = calculateRaceDetailTypesToShow(raceDetailNames);
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(
                 resultTimePoint, raceColumnsToShow, /* addOverallDetails */
@@ -424,22 +429,80 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
     }
 
     /**
-     * If {@code raceColumnNames} is empty or {@code null}, return the names of all {@link raceColumnsOfLeaderboard}; otherwise
-     * return those race column names from {@code raceColumnsOfLeaderboard} that are also in {@code raceColumnNames}.
+     * If {@code raceColumnNames} is empty or {@code null}, return the names of all {@link raceColumnsOfLeaderboard};
+     * otherwise return those race column names from {@code raceColumnsOfLeaderboard} that are also in
+     * {@code raceColumnNames}.
+     * @param leaderboard TODO
+     * @param showOnlyActiveRacesForCompetitorIds
+     *            {@code null}, or specifies zero or more competitor IDs, requesting that the result contained the race
+     *            column holding that competitor's "active" race at the time requested; see also the
+     *            {@code resultTimePoint} parameter. A race is active if it is currently live or is the last race for
+     *            which the competitor has a result. In case multiple competitor IDs are given, all race columns that
+     *            contain an active race of any of the competitors specified will be added to the result. It is possible
+     *            that no such race is found, e.g., because racing has not started yet and the leaderboard is empty. No
+     *            race column will be delivered then. In case the {@code raceColumnNames} parameter is used, too, the
+     *            combined set of race columns from the columnNames parameter and this parameter will be delivered.
+     * @param resultTimePoint
+     *            used together with {@code showOnlyActiveRacesForCompetitorIds} to determine which races are "active"
+     *            for the competitors whose IDs are specified in {@link showOnlyActiveRacesForCompetitorIds} at that
+     *            time
      */
-    private List<String> calculateRaceColumnsToShow(List<String> raceColumnNames, Iterable<RaceColumn> raceColumnsOfLeaderboard) {
+    private List<String> calculateRaceColumnsToShow(Leaderboard leaderboard,
+            List<String> raceColumnNames, Iterable<String> showOnlyActiveRacesForCompetitorIds,
+            TimePoint resultTimePoint) {
         final Set<String> raceColumnNamesAsSet = new HashSet<>();
         if (raceColumnNames != null) {
             raceColumnNamesAsSet.addAll(raceColumnNames);
         }
+        if (showOnlyActiveRacesForCompetitorIds != null) {
+            Util.addAll(getRaceColumnNamesOfActiveRaceColumnsForCompetitorIds(showOnlyActiveRacesForCompetitorIds,
+                    leaderboard, resultTimePoint), raceColumnNamesAsSet);
+        }
         // Calculates the race columns to retrieve data for
         final List<String> raceColumnsToShow = new ArrayList<>();
-        for (final RaceColumn raceColumn : raceColumnsOfLeaderboard) {
-            if (raceColumnNamesAsSet.isEmpty() || raceColumnNamesAsSet.contains(raceColumn.getName())) {
+        for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            // if showOnlyActiveRacesForCompetitorIds specifies at least one ID, don't default to delivering
+            // all columns, even if raceColumnNames is empty, but only show what resulted from finding the
+            // active races combined with columns explicitly specified in raceColumnNames.
+            if ((raceColumnNamesAsSet.isEmpty() && (showOnlyActiveRacesForCompetitorIds==null || Util.isEmpty(showOnlyActiveRacesForCompetitorIds)))
+                    || raceColumnNamesAsSet.contains(raceColumn.getName())) {
                 raceColumnsToShow.add(raceColumn.getName());
             }
         }        
         return raceColumnsToShow;
     }
 
+    private Iterable<String> getRaceColumnNamesOfActiveRaceColumnsForCompetitorIds(
+            Iterable<String> showOnlyActiveRacesForCompetitorIds, Leaderboard leaderboard, TimePoint timePoint) {
+        final Set<String> result = new HashSet<>();
+        for (final String showOnlyActiveRacesForCompetitorId : showOnlyActiveRacesForCompetitorIds) {
+            final String nameOfActiveRaceColumnForCompetitor = getNameOfActiveRaceColumnForCompetitor(showOnlyActiveRacesForCompetitorId, leaderboard, timePoint);
+            if (nameOfActiveRaceColumnForCompetitor != null) {
+                result.add(nameOfActiveRaceColumnForCompetitor);
+            }
+        }
+        return result;
+    }
+
+    private String getNameOfActiveRaceColumnForCompetitor(String showOnlyActiveRacesForCompetitorId, Leaderboard leaderboard, TimePoint timePoint) {
+        final String result;
+        final TimePoint timePointOrLiveTimeIfNull = timePoint != null ? timePoint : leaderboard.getNowMinusDelay();
+        final Competitor competitor = leaderboard.getCompetitorByIdAsString(showOnlyActiveRacesForCompetitorId);
+        if (competitor != null) {
+            RaceColumn lastRaceColumnWithResultForCompetitorAtTimePoint = null;
+            for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                if (leaderboard.getTotalPoints(competitor, raceColumn, timePointOrLiveTimeIfNull) != null) {
+                    lastRaceColumnWithResultForCompetitorAtTimePoint = raceColumn;
+                }
+            }
+            if (lastRaceColumnWithResultForCompetitorAtTimePoint != null) {
+                result = lastRaceColumnWithResultForCompetitorAtTimePoint.getName();
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
+        }
+        return result;
+    }
 }
