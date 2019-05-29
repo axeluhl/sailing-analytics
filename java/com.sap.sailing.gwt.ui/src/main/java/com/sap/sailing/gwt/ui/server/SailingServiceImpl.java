@@ -1024,13 +1024,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public List<RegattaDTO> getRegattas() {
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.REGATTA,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 getService().getAllRegattas(), this::convertToRegattaDTO);
     }
 
     @Override
     public List<RegattaDTO> getRegattasWithUpdatePermission() {
-        return getSecurityService().mapAndFilterByExplicitPermissionForCurrentUser(SecuredDomainType.REGATTA,
+        return getSecurityService().mapAndFilterByExplicitPermissionForCurrentUser(
                 new HasPermissions.Action[] { DefaultActions.READ, DefaultActions.UPDATE },
                 getService().getAllRegattas(), this::convertToRegattaDTO);
     }
@@ -1413,7 +1413,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public List<TracTracConfigurationWithSecurityDTO> getPreviousTracTracConfigurations() throws Exception {
         final Iterable<TracTracConfiguration> configs = tractracDomainObjectFactory.getTracTracConfigurations();
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.TRACTRAC_ACCOUNT,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 configs,
                 ttConfig -> {
                     TracTracConfigurationWithSecurityDTO config = new TracTracConfigurationWithSecurityDTO(
@@ -2712,7 +2712,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     private ArrayList<String> getLeaderboardNamesFilteredForCurrentUser() {
         final ArrayList<String> result = new ArrayList<>();
-        getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.LEADERBOARD,
+        getSecurityService().filterObjectsWithPermissionForCurrentUser(
                 DefaultActions.READ, getService().getLeaderboards().values(), l -> result.add(l.getName()));
         return result;
     }
@@ -2782,7 +2782,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public List<StrippedLeaderboardDTOWithSecurity> getLeaderboardsWithSecurity() {
         final Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.LEADERBOARD,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 leaderboards.values(),
                 leaderboard -> createStrippedLeaderboardDTOWithSecurity(leaderboard, false, false));
     }
@@ -3241,7 +3241,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public List<SwissTimingConfigurationWithSecurityDTO> getPreviousSwissTimingConfigurations() {
         Iterable<SwissTimingConfiguration> configs = swissTimingAdapterPersistence.getSwissTimingConfigurations();
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.SWISS_TIMING_ACCOUNT, configs,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(configs,
                 stConfig -> {
                     final SwissTimingConfigurationWithSecurityDTO config = new SwissTimingConfigurationWithSecurityDTO(
                             stConfig.getName(), stConfig.getJsonURL(),
@@ -4179,7 +4179,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public List<LeaderboardGroupDTO> getLeaderboardGroups(boolean withGeoLocationData) {
         final Map<String, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroups();
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.LEADERBOARD_GROUP,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 leaderboardGroups.values(),
                 leaderboardGroup -> convertToLeaderboardGroupDTO(leaderboardGroup, withGeoLocationData, false));
     }
@@ -4349,7 +4349,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public List<EventDTO> getEvents() throws MalformedURLException {
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.EVENT,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 getService().getAllEvents(), event -> {
                     EventDTO eventDTO = convertToEventDTO(event, false);
                     try {
@@ -5285,8 +5285,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public List<SwissTimingArchiveConfigurationWithSecurityDTO> getPreviousSwissTimingArchiveConfigurations() {
         Iterable<SwissTimingArchiveConfiguration> configs = swissTimingAdapterPersistence
                 .getSwissTimingArchiveConfigurations();
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
-                SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT, configs,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(configs,
                 stArchiveConfig -> {
                     SwissTimingArchiveConfigurationWithSecurityDTO config = new SwissTimingArchiveConfigurationWithSecurityDTO(
                             stArchiveConfig.getJsonURL(), stArchiveConfig.getCreatorName());
@@ -6059,7 +6058,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public Iterable<BoatDTO> getStandaloneBoats() {
         List<BoatDTO> result = new ArrayList<>();
-        getSecurityService().filterObjectsWithAnyPermissionForCurrentUser(SecuredDomainType.BOAT,
+        getSecurityService().filterObjectsWithAnyPermissionForCurrentUser(
                 SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS,
                 getService().getBaseDomainFactory().getCompetitorAndBoatStore().getStandaloneBoats(),
                 filteredObject -> result.add(convertToBoatDTO(filteredObject)));
@@ -6481,13 +6480,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public Iterable<String> getAllIgtimiAccountEmailAddresses() {
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.IGTIMI_ACCOUNT,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 getIgtimiConnectionFactory().getAllAccounts(), acc -> acc.getUser().getEmail());
     }
 
     @Override
     public Iterable<AccountWithSecurityDTO> getAllIgtimiAccountsWithSecurity() {
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.IGTIMI_ACCOUNT,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 getIgtimiConnectionFactory().getAllAccounts(), this::toSecuredIgtimiAccountDTO);
     }
 

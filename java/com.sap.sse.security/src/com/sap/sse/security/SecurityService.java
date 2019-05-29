@@ -391,11 +391,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     void deleteAllDataForRemovedObject(QualifiedObjectIdentifier identifier);
 
-    <T extends WithQualifiedObjectIdentifier> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
+    <T extends WithQualifiedObjectIdentifier> void filterObjectsWithPermissionForCurrentUser(
             com.sap.sse.security.shared.HasPermissions.Action action, Iterable<T> objectsToFilter,
             Consumer<T> filteredObjectsConsumer);
 
-    <T extends WithQualifiedObjectIdentifier> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
+    <T extends WithQualifiedObjectIdentifier> void filterObjectsWithPermissionForCurrentUser(
             com.sap.sse.security.shared.HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
             Consumer<T> filteredObjectsConsumer);
 
@@ -403,13 +403,13 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * Filters objects with any of the given permissions for the current user.
      */
     <T extends WithQualifiedObjectIdentifier> void filterObjectsWithAnyPermissionForCurrentUser(
-            HasPermissions permittedObject, com.sap.sse.security.shared.HasPermissions.Action[] actions,
+            com.sap.sse.security.shared.HasPermissions.Action[] actions,
             Iterable<T> objectsToFilter, Consumer<T> filteredObjectsConsumer);
 
-    <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByReadPermissionForCurrentUser(HasPermissions permittedObject,
+    <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByReadPermissionForCurrentUser(
             Iterable<T> objectsToFilter, Function<T, R> filteredObjectsMapper);
 
-    <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByExplicitPermissionForCurrentUser(HasPermissions permittedObject,
+    <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByExplicitPermissionForCurrentUser(
             HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
             Function<T, R> filteredObjectsMapper);
 
