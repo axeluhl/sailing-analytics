@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -82,30 +83,31 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     @Override
     public Iterable<MediaTrackWithSecurityDTO> getMediaTracksForRace(
             RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
-        return racingEventService().getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
-                racingEventService().getMediaTracksForRace(regattaAndRaceIdentifier),
-                this::getDTOWithSecurityInformation);
+        return mapMediaTracksToDTOsWithSecurityInformationAndFilterByReadPermission(
+                racingEventService().getMediaTracksForRace(regattaAndRaceIdentifier));
     }
 
     @Override
     public Iterable<MediaTrackWithSecurityDTO> getMediaTracksInTimeRange(
             RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
-        return racingEventService().getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
-                racingEventService().getMediaTracksInTimeRange(regattaAndRaceIdentifier),
-                this::getDTOWithSecurityInformation);
+        return mapMediaTracksToDTOsWithSecurityInformationAndFilterByReadPermission(
+                racingEventService().getMediaTracksInTimeRange(regattaAndRaceIdentifier));
     }
 
     @Override
     public Iterable<MediaTrackWithSecurityDTO> getAllMediaTracks() {
-        return racingEventService().getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
-                racingEventService().getAllMediaTracks(), this::getDTOWithSecurityInformation);
+        return mapMediaTracksToDTOsWithSecurityInformationAndFilterByReadPermission(racingEventService().getAllMediaTracks());
     }
 
-    private MediaTrackWithSecurityDTO getDTOWithSecurityInformation(MediaTrack mediaTrack) {
-        final MediaTrackWithSecurityDTO securedMediaTrack = new MediaTrackWithSecurityDTO(mediaTrack);
-        SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), securedMediaTrack,
-                mediaTrack.getIdentifier());
-        return securedMediaTrack;
+    private List<MediaTrackWithSecurityDTO> mapMediaTracksToDTOsWithSecurityInformationAndFilterByReadPermission(
+            Iterable<MediaTrack> mediaTracksToFilter) {
+        return racingEventService().getSecurityService().mapAndFilterByReadPermissionForCurrentUser(mediaTracksToFilter,
+                mediaTrack -> {
+                    final MediaTrackWithSecurityDTO securedMediaTrack = new MediaTrackWithSecurityDTO(mediaTrack);
+                    SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), securedMediaTrack,
+                            mediaTrack.getIdentifier());
+                    return securedMediaTrack;
+                });
     }
     
     @Override
