@@ -3,13 +3,11 @@ package com.sap.sailing.domain.orc.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.math.ArgumentOutsideDomainException;
 import org.apache.commons.math.FunctionEvaluationException;
@@ -42,7 +40,12 @@ import com.sap.sse.common.Speed;
 public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurve {
     private static final long serialVersionUID = 4113356173492168453L;
 
-    //TODO COMMENT for key
+    /**
+     * Same two dimensional map as in the corresponding ORCCertificate. The result is a {@link Duration} called
+     * allowance for a boat at a given TWS and TWA. The first key set contains {@link Speed}s and is equal to the
+     * windspeeds defined in the static field of {@link ORCCertificateImpl}. The second key set contains
+     * {@link Bearing}s and is equal to the windangles defined in the static fields of the same class.
+     */
     private final Map<Speed, Map<Bearing, Duration>> durationPerNauticalMileAtTrueWindAngleAndSpeed;
 
     /**
@@ -65,14 +68,20 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     private transient Map<Speed, PolynomialFunctionLagrangeForm> lagrangePolynomialsPerTrueWindSpeed;
     
     /**
-     * 
+     * The specific course for which the PerformanceCurve of a boat is calculated. The course is set during the
+     * constructor call.
      */
     private final ORCPerformanceCurveCourse course;
     
     /**
-     * 
+     * This PolynomialSplineFunction is created with the array of course specific allowances for the boat which this
+     * ORCPerformanceCurve belongs to. This function contains subfunctions for each interval between two given
+     * calculated points. The input for the function is the value of the implied wind (speed in kts) and the output an
+     * allowance in sec/nm.
      */
-    private PolynomialSplineFunction functionTwaToAllowance;
+    private PolynomialSplineFunction functionImpliedWindToAllowance;
+    
+    //TODO delete, after clarification with ORC. Hopefully not needed anymore.
     private PolynomialSplineFunction functionAllowanceToTwa;
 
     /**
@@ -92,6 +101,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         this.beatAngles = Collections.unmodifiableMap(beatAngles);
         this.gybeAngles = Collections.unmodifiableMap(gybeAngles);
         this.course = course;
+        // TODO extract following statement and functionality to the ORCCertificate interface and implementations.
         lagrangePolynomialsPerTrueWindSpeed = createLagrangePolynomials();
         try {
             initializePerformanceCurve();
@@ -159,17 +169,15 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         Double twa = leg.getTwa().getDegrees();
 
         for (Entry<Speed, PolynomialFunctionLagrangeForm> entry : lagrangePolynomialsPerTrueWindSpeed.entrySet()) {
-            // Case switching on TWA (0. TWA = 0; 1. TWA < Beat; 2. Beat < TWA < Gybe; 3. Gybe < TWA)
+            // Case switching on TWA (0. TWA == 0; 1. TWA < Beat; 2. Beat < TWA < Gybe; 3. Gybe < TWA; 4. TWA == 180)
             if (twa < beatAngles.get(entry.getKey()).getDegrees()) {
                 // Case 0&1
-                // Need Beat Angle Allowances for different TWS, maybe Constructor and Structure need to be changed, to
-                // get direct access? What will be nicer?
                 // result will be: beatVMG * distance / cos(TWA)
                 result.put(entry.getKey(),
                         Duration.ONE_SECOND.times(entry.getValue().value(beatAngles.get(entry.getKey()).getDegrees())
                                 * leg.getLength().getNauticalMiles() * Math.cos(Math.toRadians(twa))));
             } else if (twa > gybeAngles.get(entry.getKey()).getDegrees()) {
-                // Case 3
+                // Case 3 & 4
                 // result will be: runVMG * distance / cos(TWA)
                 result.put(entry.getKey(),
                         Duration.ONE_SECOND.times(entry.getValue().value(gybeAngles.get(entry.getKey()).getDegrees())
@@ -201,7 +209,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         functionAllowanceToTwa = interpolator.interpolate(ys, xs); //Inverse Function of the "real" PerformanceCurve (ImpliedWind -> Allowance), not needed later
         ArrayUtils.reverse(xs);
         ArrayUtils.reverse(ys);
-        functionTwaToAllowance = interpolator.interpolate(xs, ys);
+        functionImpliedWindToAllowance = interpolator.interpolate(xs, ys);
     }
     
     public Speed getImpliedWind(Duration time) throws ArgumentOutsideDomainException {
@@ -210,10 +218,10 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     
     public Speed getImpliedWindNewton(Duration time) throws MaxIterationsExceededException, FunctionEvaluationException {
         PolynomialFunction workingFunction;
-        double[] allowancesInSeconds = new double[functionTwaToAllowance.getKnots().length];
+        double[] allowancesInSeconds = new double[functionImpliedWindToAllowance.getKnots().length];
         
         for (int i = 0; i < allowancesInSeconds.length; i++) {
-            allowancesInSeconds[i] = functionTwaToAllowance.value(functionTwaToAllowance.getKnots()[i]);
+            allowancesInSeconds[i] = functionImpliedWindToAllowance.value(functionImpliedWindToAllowance.getKnots()[i]);
         }
         
         int i = 0;
@@ -221,20 +229,22 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             i += 1;
         }
         i -= 1;
-        workingFunction = functionTwaToAllowance.getPolynomials()[i];
+        workingFunction = functionImpliedWindToAllowance.getPolynomials()[i];
         
         //PolynomialFunction which will be solved by the Newton Approach
         PolynomialFunction subtractedFunction = workingFunction.subtract(new PolynomialFunction(new double[] {time.asSeconds()}));
         NewtonSolver solver = new NewtonSolver();
         solver.setAbsoluteAccuracy(0.000001);
         //TODO Comment for the special treatment of the solver
-        return new KnotSpeedImpl(solver.solve(subtractedFunction, 0, functionTwaToAllowance.getKnots()[i + 1] - functionTwaToAllowance.getKnots()[i]) + functionTwaToAllowance.getKnots()[i]);
+        return new KnotSpeedImpl(solver.solve(subtractedFunction, 0,
+                functionImpliedWindToAllowance.getKnots()[i + 1] - functionImpliedWindToAllowance.getKnots()[i])
+                + functionImpliedWindToAllowance.getKnots()[i]);
     }
     
     @Override
     public Duration getAllowancePerCourse(Speed impliedWind) {
         try {
-            return Duration.ONE_SECOND.times(functionTwaToAllowance.value(impliedWind.getKnots()));
+            return Duration.ONE_SECOND.times(functionImpliedWindToAllowance.value(impliedWind.getKnots()));
         } catch (ArgumentOutsideDomainException e) {
             // TODO Auto-generated catch block
             // TODO Create senseful Exception Handling for this class, Logging ...
@@ -270,6 +280,8 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             }
         }
         
+        // This part is implemented equally to the part from the ORC PCSLib.pas.
+        // ORC decides to use only the nearest 4 values to the searched TWA for interpolation.
         if (i >= 0) {
             int upperBound = Math.min(i + 1, ALLOWANCES_TRUE_WIND_ANGLES.length - 1);
             int lowerBound = Math.max(i - 2, 0);
