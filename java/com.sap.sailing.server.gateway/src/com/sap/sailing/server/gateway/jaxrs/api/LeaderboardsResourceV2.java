@@ -64,7 +64,6 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             @QueryParam("maxCompetitorsCount") Integer maxCompetitorsCount,
             @QueryParam("secret") String regattaSecret) {
         ShardingContext.setShardingConstraint(ShardingType.LEADERBOARDNAME, leaderboardName);
-        
         try {
             Response response;
             Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
@@ -133,7 +132,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                     filteredCompetitorsFromBestToWorst.add(competitor);
                 }
             });
-            for (CompetitorDTO competitor: filteredCompetitorsFromBestToWorst) {
+            for (CompetitorDTO competitor : filteredCompetitorsFromBestToWorst) {
                 LeaderboardRowDTO row = leaderboardDTO.rows.get(competitor);
                 LeaderboardEntryDTO leaderboardEntry = row.fieldsByRaceColumnName.get(raceColumnName);
                 FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
@@ -151,10 +150,12 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
         jsonLeaderboard.put("ShardingLeaderboardName", ShardingType.LEADERBOARDNAME.encodeIfNeeded(leaderboard.getName()));
-        int competitorCounter = 1;
+        final int[] regattaRankCounter = new int[] { 1 };
         // Remark: leaderboardDTO.competitors are ordered by total rank
         List<CompetitorDTO> filteredCompetitors = new ArrayList<>();
+        final Map<CompetitorDTO, Integer> ranks = new HashMap<>(); // holds ranks, regardless of permission-based filtering
         leaderboardDTO.competitors.forEach(competitor -> {
+            ranks.put(competitor, regattaRankCounter[0]++);
             if (SecurityUtils.getSubject()
                     .isPermitted(competitor.getIdentifier()
                             .getStringPermission(SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC))
@@ -163,9 +164,10 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 filteredCompetitors.add(competitor);
             }
         });
+        int competitorCounter = 0;
         for (CompetitorDTO competitor : filteredCompetitors) {
             LeaderboardRowDTO leaderboardRowDTO = leaderboardDTO.rows.get(competitor);
-            if (maxCompetitorsCount != null && competitorCounter > maxCompetitorsCount) {
+            if (maxCompetitorsCount != null && competitorCounter >= maxCompetitorsCount) {
                 break;
             }
             JSONObject jsonCompetitor = new JSONObject();
@@ -176,7 +178,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 writeBoatData(jsonBoat, rowBoatDTO);
                 jsonCompetitor.put("boat", jsonBoat);
             }
-            jsonCompetitor.put("rank", competitorCounter);
+            jsonCompetitor.put("rank", ranks.get(competitor));
             jsonCompetitor.put("carriedPoints", leaderboardRowDTO.carriedPoints);
             jsonCompetitor.put("netPoints", leaderboardRowDTO.netPoints);
             jsonCompetitor.put("overallRank", leaderboardDTO.getTotalRank(competitor));
