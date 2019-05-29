@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.server;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -4290,9 +4291,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public ReplicationStateDTO getReplicaInfo() {
-        SecurityUtils.getSubject().checkPermission(
-                SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(ServerActions.READ_REPLICATOR,
-                        new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.READ_REPLICATOR);
         ReplicationService service = getReplicationService();
         Set<ReplicaDTO> replicaDTOs = new HashSet<ReplicaDTO>();
         for (ReplicaDescriptor replicaDescriptor : service.getReplicaInfo()) {
@@ -4333,9 +4332,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public void startReplicatingFromMaster(String messagingHost, String masterHostName, String exchangeName,
             int servletPort, int messagingPort, String usernameOrNull, String passwordOrNull)
             throws IOException, ClassNotFoundException, InterruptedException {
-        SecurityUtils.getSubject()
-                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
-                        ServerActions.START_REPLICATION, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.START_REPLICATION);
         // The queue name must always be the same for this server. In order to achieve
         // this we're using the unique server identifier
         final ReplicationService replicationService = getReplicationService();
@@ -5126,9 +5123,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) {
-        SecurityUtils.getSubject()
-                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
-                ServerActions.CONFIGURE_LOCAL_SERVER, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_LOCAL_SERVER);
         getService().apply(new UpdateServerConfiguration(
                 new SailingServerConfigurationImpl(serverConfiguration.isStandaloneServer())));
         if (serverConfiguration.isSelfService() != null) {
@@ -5426,9 +5421,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         List<RegattaDTO> regattaDTOs = new ArrayList<RegattaDTO>();
         Iterable<Regatta> regattas = structureImporter.getRegattas(parsedEvent);
         for (Regatta regatta : regattas) {
-            if (getSecurityService().hasCurrentUserReadPermission(regatta)) {
-                regattaDTOs.add(convertToRegattaDTO(regatta));
-            }
+            regattaDTOs.add(convertToRegattaDTO(regatta));
         }
         return regattaDTOs;
     }
@@ -5622,9 +5615,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void stopReplicatingFromMaster() {
-        SecurityUtils.getSubject()
-                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
-                        ServerActions.START_REPLICATION, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.START_REPLICATION);
         try {
             getReplicationService().stopToReplicateFromMaster();
         } catch (IOException e) {
@@ -5635,9 +5626,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void stopAllReplicas() {
-        SecurityUtils.getSubject()
-                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
-                        ServerActions.REPLICATE, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.REPLICATE);
         try {
             getReplicationService().stopAllReplicas();
         } catch (IOException e) {
@@ -5648,9 +5637,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void stopSingleReplicaInstance(String identifier) {
-        SecurityUtils.getSubject()
-                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
-                        ServerActions.REPLICATE, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.REPLICATE);
         UUID uuid = UUID.fromString(identifier);
         try {
             getReplicationService().unregisterReplica(uuid);
@@ -5766,18 +5753,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public UUID importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
             String targetServerUsername, String targetServerPassword) {
-        // FIXME should the targetserver also check this?
-        SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
-                ServerActions.CAN_IMPORT_MASTERDATA, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
-
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
         String token = RemoteServerUtil.resolveBearerTokenForRemoteServer(urlAsString, targetServerUsername, targetServerPassword);
-
         final UUID importOperationId = UUID.randomUUID();
-        getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT,
-                0.0);
+        getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT, 0.0);
         final User user = getSecurityService().getCurrentUser();
         final UserGroup tenant = getSecurityService().getDefaultTenantForCurrentUser();
-        
         // Create a progress indicator for as long as the server gets data from the other server.
         // As soon as the server starts the import operation, a progress object will be built on every server
         Runnable masterDataImportTask = new Runnable() {
@@ -5812,13 +5793,21 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         inputStream = new TimeoutExtendingInputStream(connection.getInputStream(), connection);
                     }
                     final MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService(),
-                            user,
-                            tenant);
+                            user, tenant);
                     importer.importFromStream(inputStream, importOperationId, override);
                 } catch (Throwable e) {
                     // do not assume that RuntimeException is logged properly
-                    logger.log(Level.SEVERE, e.getMessage(), e);
-                    getService().setDataImportFailedWithReplication(importOperationId, e.getMessage()
+                    String message = e.getMessage();
+                    if (connection instanceof HttpURLConnection) {
+                        // try to obtain an error message from the connection's error stream:
+                        try {
+                            message = new BufferedReader(new InputStreamReader(((HttpURLConnection) connection).getErrorStream())).readLine();
+                        } catch (Exception exceptionTryingToReadErrorStream) {
+                            // in this case we just stay with the exception's message
+                        }
+                    }
+                    logger.log(Level.SEVERE, message, e);
+                    getService().setDataImportFailedWithReplication(importOperationId, message
                             + "\n\nHave you checked if the"
                             + " versions (commit-wise) of the importing and exporting servers are compatible with each other? "
                             + "If the error still occurs, when both servers are running the same version, please report the problem.");
@@ -5944,18 +5933,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             final DynamicBoat boat = (DynamicBoat) addOrUpdateBoatInternal(competitor.getBoat());
             result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredDomainType.COMPETITOR, CompetitorImpl.getTypeRelativeObjectIdentifier(competitorUUID),
-                    competitor.getName(), new Callable<CompetitorWithBoat>() {
-                        @Override
-                        public CompetitorWithBoat call() throws Exception {
-                            return getBaseDomainFactory().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(
+                    competitor.getName(), ()->getBaseDomainFactory().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(
                                     competitorUUID, competitor.getName(), competitor.getShortName(),
                                     competitor.getColor(), competitor.getEmail(),
                                     competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),
                                     team, competitor.getTimeOnTimeFactor(),
                                     competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag(),
-                                    boat);
-                        }
-                    });
+                                    boat));
         } else {
             SecurityUtils.getSubject().checkPermission(SecuredDomainType.COMPETITOR.getStringPermissionForTypeRelativeIdentifier(
                     DefaultActions.UPDATE, CompetitorImpl.getTypeRelativeObjectIdentifier(competitor.getId())));
@@ -5988,17 +5972,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
             result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredDomainType.COMPETITOR, CompetitorImpl.getTypeRelativeObjectIdentifier(competitorUUID),
-                    competitor.getName(), new Callable<Competitor>() {
-
-                        @Override
-                        public Competitor call() throws Exception {
-                            return getBaseDomainFactory().getOrCreateCompetitor(competitorUUID, competitor.getName(),
+                    competitor.getName(), ()->getBaseDomainFactory().getOrCreateCompetitor(competitorUUID, competitor.getName(),
                                     competitor.getShortName(), competitor.getColor(), competitor.getEmail(),
                                     competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),
                                     team, competitor.getTimeOnTimeFactor(),
-                                    competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag());
-                        }
-                    });
+                                    competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag()));
         } else {
             SecurityUtils.getSubject().checkPermission(
                     SecuredDomainType.COMPETITOR.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
@@ -6029,7 +6007,31 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public List<CompetitorWithBoatDTO> addCompetitors(List<CompetitorDescriptor> competitorDescriptors, String searchTag) throws URISyntaxException {
         List<DynamicCompetitorWithBoat> competitorsForSaving = new ArrayList<>();
         for (final CompetitorDescriptor competitorDescriptor : competitorDescriptors) {
-            competitorsForSaving.add(getService().convertCompetitorDescriptorToCompetitorWithBoat(competitorDescriptor, searchTag));
+            final Action action = ()->competitorsForSaving.add(getService().convertCompetitorDescriptorToCompetitorWithBoat(competitorDescriptor, searchTag));
+            final Boat existingBoat = getService().getCompetitorAndBoatStore().getExistingBoatById(competitorDescriptor.getBoatUUID());
+            final Action actionIncludingBoatSecurityCheck;
+            if (existingBoat == null) {
+                actionIncludingBoatSecurityCheck = ()->getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                    SecuredDomainType.BOAT, BoatImpl.getTypeRelativeObjectIdentifier(competitorDescriptor.getBoatUUID()), competitorDescriptor.getBoatName(),
+                    action);
+            } else {
+                actionIncludingBoatSecurityCheck = action;
+            }
+            final Competitor existingCompetitor = getService().getCompetitorAndBoatStore().getExistingCompetitorById(competitorDescriptor.getCompetitorUUID());
+            final Action actionIncludingCompetitorAndBoatSecurityCheck;
+            if (existingCompetitor == null) {
+                actionIncludingCompetitorAndBoatSecurityCheck = ()->getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                            SecuredDomainType.COMPETITOR,
+                            CompetitorImpl.getTypeRelativeObjectIdentifier(competitorDescriptor.getCompetitorUUID()), competitorDescriptor.getName(),
+                            actionIncludingBoatSecurityCheck);
+            } else {
+                actionIncludingCompetitorAndBoatSecurityCheck = actionIncludingBoatSecurityCheck;
+            }
+            try {
+                actionIncludingCompetitorAndBoatSecurityCheck.run();
+            } catch (Exception e) {
+                throw new RuntimeException(e); // this can onlyhave been a RuntimeException in the first place because nothing of the above throws a checked one
+            }
         }
         getBaseDomainFactory().getCompetitorAndBoatStore().addNewCompetitorsWithBoat(competitorsForSaving);
         return convertToCompetitorWithBoatDTOs(competitorsForSaving);
@@ -6078,14 +6080,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             UUID boatUUID = UUID.randomUUID();
             BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(boat.getBoatClass().getName());
             result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.BOAT, BoatImpl.getTypeRelativeObjectIdentifier(boatUUID), boat.getName(), new Callable<Boat>() {
-
-                        @Override
-                        public Boat call() throws Exception {
-                            return getBaseDomainFactory().getOrCreateBoat(boatUUID, boat.getName(), boatClass,
-                                    boat.getSailId(), boat.getColor());
-                        }
-                    });
+                    SecuredDomainType.BOAT, BoatImpl.getTypeRelativeObjectIdentifier(boatUUID), boat.getName(),
+                    () -> getBaseDomainFactory().getOrCreateBoat(boatUUID, boat.getName(), boatClass, boat.getSailId(), boat.getColor()));
         } else {
             SecurityUtils.getSubject().checkPermission(
                     SecuredDomainType.BOAT.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,

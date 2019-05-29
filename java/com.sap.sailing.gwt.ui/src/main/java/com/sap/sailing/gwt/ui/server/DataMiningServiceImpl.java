@@ -14,13 +14,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.server.interfaces.RacingEventService;
-import com.sap.sse.ServerInfo;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.Query;
@@ -51,7 +49,6 @@ import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
 import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
 import com.sap.sse.datamining.ui.client.DataMiningService;
 import com.sap.sse.gwt.server.ProxiedRemoteServiceServlet;
-import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
@@ -74,7 +71,7 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
         dataMiningServerTracker = createAndOpenDataMiningServerTracker(context);
         securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
 
-        storedDataMiningQueryPersistor = new StoredDataMiningQueryPersisterImpl(securityServiceTracker.getService());
+        storedDataMiningQueryPersistor = new StoredDataMiningQueryPersisterImpl(getSecurityService());
         dtoFactory = new DataMiningDTOFactory();
     }
 
@@ -88,6 +85,10 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
 
     private DataMiningServer getDataMiningServer() {
         return dataMiningServerTracker.getService();
+    }
+    
+    private SecurityService getSecurityService() {
+        return securityServiceTracker.getService();
     }
 
     @Override
@@ -116,10 +117,7 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
      *             if permission does not exist
      */
     private void checkDataMiningPermission() {
-        // TODO: should be moved to one place (not the ServerInfoDTO) -> could not be moved to ServerInfo, since
-        // sse.security is not available
-        SecurityUtils.getSubject().checkPermission(new ServerInfoDTO(ServerInfo.getName(), ServerInfo.getBuildVersion())
-                .getIdentifier().getStringPermission(ServerActions.DATA_MINING));
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.DATA_MINING);
     }
 
     @Override

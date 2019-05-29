@@ -316,7 +316,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 name = "averageSpeedOverGround-kts";
                 Distance distance = entry.getDistanceTraveled();
                 Duration timeSailed = entry.getTimeSailed();
-                if (distance != null && timeSailed != null) {
+                if (distance != null && timeSailed != null && timeSailed.compareTo(Duration.NULL)>0) {
                     value = roundDouble(distance.inTime(timeSailed).getKnots(), 2);
                 }
                 break;
