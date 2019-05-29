@@ -62,7 +62,8 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             @QueryParam("raceDetails") final List<String> raceDetails,
             @QueryParam("time") String time, @QueryParam("timeasmillis") Long timeasmillis,
             @QueryParam("maxCompetitorsCount") Integer maxCompetitorsCount,
-            @QueryParam("secret") String regattaSecret) {
+            @QueryParam("secret") String regattaSecret,
+            @DefaultValue("false") @QueryParam("competitorAndBoatIdsOnly") boolean competitorAndBoatIdsOnly) {
         ShardingContext.setShardingConstraint(ShardingType.LEADERBOARDNAME, leaderboardName);
         try {
             Response response;
@@ -86,7 +87,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                     }
                     JSONObject jsonLeaderboard;
                     if (timePoint != null || resultState == ResultStates.Live) {
-                        jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount, raceColumnNames, raceDetails);
+                        jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount, raceColumnNames, raceDetails, competitorAndBoatIdsOnly);
                     } else {
                         jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount);
                     }
@@ -108,7 +109,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
     @Override
     protected JSONObject getLeaderboardJson(Leaderboard leaderboard,
             TimePoint resultTimePoint, ResultStates resultState, Integer maxCompetitorsCount,
-            List<String> raceColumnNames, List<String> raceDetailNames)
+            List<String> raceColumnNames, List<String> raceDetailNames, boolean competitorAndBoatIdsOnly)
             throws NoWindException, InterruptedException, ExecutionException {
         List<String> raceColumnsToShow = calculateRaceColumnsToShow(raceColumnNames, leaderboard.getRaceColumns());
         List<DetailType> raceDetailsToShow = calculateRaceDetailTypesToShow(raceDetailNames);
@@ -171,11 +172,11 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 break;
             }
             JSONObject jsonCompetitor = new JSONObject();
-            writeCompetitorBaseData(jsonCompetitor, competitor, leaderboardDTO);
+            writeCompetitorBaseData(jsonCompetitor, competitor, leaderboardDTO, competitorAndBoatIdsOnly);
             BoatDTO rowBoatDTO = leaderboardRowDTO.boat;
             if (rowBoatDTO != null) {
                 JSONObject jsonBoat = new JSONObject();
-                writeBoatData(jsonBoat, rowBoatDTO);
+                writeBoatData(jsonBoat, rowBoatDTO, competitorAndBoatIdsOnly);
                 jsonCompetitor.put("boat", jsonBoat);
             }
             jsonCompetitor.put("rank", ranks.get(competitor));
@@ -192,7 +193,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 BoatDTO entryBoatDTO = leaderboardEntry.boat;
                 if (entryBoatDTO != null) {
                     JSONObject jsonBoat = new JSONObject();
-                    writeBoatData(jsonBoat, entryBoatDTO);
+                    writeBoatData(jsonBoat, entryBoatDTO, competitorAndBoatIdsOnly);
                     jsonEntry.put("boat", jsonBoat);
                 }
                 final FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
