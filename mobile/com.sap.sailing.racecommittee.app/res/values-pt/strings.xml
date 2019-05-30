@@ -306,13 +306,11 @@
     <string name="login_sub_text">"Selecione uma regata"</string>
     <string name="login_onboarding_text">"Integração"</string>
     <string name="sign_up">"Inscrever-me"</string>
-    <string name="wind_display">"dd"</string>
     <string name="flags_abandon">"Anular"</string>
     <string name="flags_recall">"Chamada"</string>
     <string name="flags_course">"Percurso"</string>
     <string name="flags_more">"Concluir"</string>
     <string name="flags_postpone">"Retardar"</string>
-    <string name="flags_dependent_races">"de corridas dependentes"</string>
     <string name="race_select">"Selecionar uma corrida"</string>
 
     <string name="gate_start_pathfinder">"Pathfinder"</string>

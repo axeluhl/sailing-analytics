@@ -306,13 +306,11 @@
     <string name="login_sub_text">"Выберите регату"</string>
     <string name="login_onboarding_text">"Регистрация"</string>
     <string name="sign_up">"Зарегистрируйте меня"</string>
-    <string name="wind_display">"dd"</string>
     <string name="flags_abandon">"Отменить"</string>
     <string name="flags_recall">"Отозвать"</string>
     <string name="flags_course">"Курс"</string>
     <string name="flags_more">"Завершить"</string>
     <string name="flags_postpone">"Отложить"</string>
-    <string name="flags_dependent_races">"зависимых гонок"</string>
     <string name="race_select">"Выберите гонку"</string>
 
     <string name="gate_start_pathfinder">"Указатель курса"</string>

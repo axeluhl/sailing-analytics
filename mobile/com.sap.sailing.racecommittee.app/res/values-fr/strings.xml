@@ -306,13 +306,11 @@
     <string name="login_sub_text">"Sélectionnez une régate"</string>
     <string name="login_onboarding_text">"Activation"</string>
     <string name="sign_up">"M\'inscrire"</string>
-    <string name="wind_display">"dd"</string>
     <string name="flags_abandon">"Annulation"</string>
     <string name="flags_recall">"Rappel"</string>
     <string name="flags_course">"Parcours"</string>
     <string name="flags_more">"Arrivée"</string>
     <string name="flags_postpone">"Retard"</string>
-    <string name="flags_dependent_races">"des courses dépendantes"</string>
     <string name="race_select">"Sélectionner une course"</string>
 
     <string name="gate_start_pathfinder">"Bateau ouvreur"</string>
@@ -337,8 +335,8 @@
     <string name="wind_enter_position">"Définir votre position"</string>
     <string name="wind_kn">"nds"</string>
     <string name="wind_address_hint">"Entrer adresse"</string>
-    <string name="wind_sensor">"à %1$s / du %2$.0f° / %3$.1f nds"</string>
-    <string name="wind_panel">"Du %1$.0f°\navec %2$.1f nds"</string>
+    <string name="wind_sensor">"à %1$s/vent de %2$.0f°/%3$.1f nds"</string>
+    <string name="wind_panel">"Vent de %1$.0f°\navec %2$.1f nds"</string>
     <string name="wind_no_data">"Aucune donnée"</string>
 
     <string name="time_up">"Envoyer dans #TIME#"</string>
@@ -378,7 +376,7 @@
     <string name="race_summary_finish_end">"Fin de l\'arrivée"</string>
     <string name="race_summary_finish_duration">"Durée d\'arrivée"</string>
     <string name="race_summary_wind_direction">"Direction moyenne du vent"</string>
-    <string name="race_summary_wind_direction_value">"de %.0f°"</string>
+    <string name="race_summary_wind_direction_value">"vent de %.0f°"</string>
     <string name="race_summary_wind_speed">"Vitesse moyenne du vent"</string>
     
     <string name="race_summary_individual_recalls">"Rappels individuels"</string>
@@ -541,7 +539,7 @@
     
     <string name="set_column_factor">"Définir facteur"</string>
     <string name="set_factor_error">"Une erreur s\'est produite lors de la définition du facteur : %s"</string>
-    <string name="sync_to_minute">"Synchroniser sur minute"</string>
+    <string name="sync_to_minute">"Synchroniser le temps"</string>
     <string name="non_public_changed_title">"Manifestations non publiques"</string>
 
     <string name="competitor_list">"Résultats"</string>

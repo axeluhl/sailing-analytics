@@ -306,13 +306,11 @@
     <string name="login_sub_text">"レガッタを選択してください"</string>
     <string name="login_onboarding_text">"オンボーディング"</string>
     <string name="sign_up">"サインアップ"</string>
-    <string name="wind_display">"dd"</string>
     <string name="flags_abandon">"放棄"</string>
     <string name="flags_recall">"リコール"</string>
     <string name="flags_course">"コース"</string>
     <string name="flags_more">"フィニッシュ"</string>
     <string name="flags_postpone">"延期"</string>
-    <string name="flags_dependent_races">"/従属レース"</string>
     <string name="race_select">"レースを選択"</string>
 
     <string name="gate_start_pathfinder">"先導艇"</string>
