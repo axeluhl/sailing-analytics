@@ -57,7 +57,7 @@ public enum BoatClassMasterdata {
     GP_26 ("GP 26", true, 7.90, 2.55, BoatHullType.MONOHULL, true, "GP26", "GP-26"),
     HOBIE_16 ("Hobie 16", true, 5.05, 2.41, BoatHullType.CATAMARAN, false, "H16"),
     H_BOAT ("H-Boat", true, 8.28, 2.18, BoatHullType.MONOHULL, true, "HB", "H-Boot"),
-    HANSA_303 ("Hansa 303", false, 3.03, 1.35, BoatHullType.MONOHULL, false, "Hansa-303", "Hansa303"),
+    HANSA_303 ("Hansa 303", true, 3.03, 1.35, BoatHullType.MONOHULL, false, "Hansa-303", "Hansa303"),
     HOBIE_TIGER ("Hobie Tiger", true, 5.51, 2.60, BoatHullType.CATAMARAN, true),
     HOBIE_WILD_CAT ("Hobie Wild Cat", true, 5.49, 2.59, BoatHullType.CATAMARAN, true, "Hobie Wild Cat F18"),
     INTERNATIONAL_14("International 14", true, 4.27, 1.83, BoatHullType.MONOHULL, true, "I14", "Int.14", "Int14"),
