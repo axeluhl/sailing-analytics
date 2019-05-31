@@ -2,6 +2,6 @@
 <resources>
 
     <string name="about_partnership_text">The SAP Sail InSight app supports live tracking of race boats by leveraging mobile phone technology, allowing the ability for friends and fans to follow racing whether onsite or online through live leaderboards and 2D visualization. Following racing sailors can replay their races allowing the opportunity to review performance and optimize strategies all available at: https://www.sapsailing.com\n\nSAP supports US Sailing through the implementation of a range of innovative technology solutions, delivering analytics to help teams and sailors improve performance whilst also providing applications to help sailing operations run more efficiently.\n\nAs the national governing body for sailing, US Sailing provides leadership, integrity and growth for the sport including training and education programs for instructors and race officials alongside administration and oversight of competitive sailing across the country.</string>
-    <string name="about_partnership_clickable">https://www.sapsailing.com</string>
+    <string name="about_partnership_clickable" translatable="false">https://www.sapsailing.com</string>
 
 </resources>
