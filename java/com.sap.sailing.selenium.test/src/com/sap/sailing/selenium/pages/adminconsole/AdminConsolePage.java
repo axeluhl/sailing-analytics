@@ -10,6 +10,7 @@ import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.HostPage;
 import com.sap.sailing.selenium.pages.HostPageWithAuthentication;
+import com.sap.sailing.selenium.pages.adminconsole.advanced.LocalServerPO;
 import com.sap.sailing.selenium.pages.adminconsole.advanced.MasterDataImportPO;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.SmartphoneTrackingEventManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
@@ -84,6 +85,8 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     private static final String ADVANCED_TAB_PARENT_IDENTIFIER = "AdvancedTab";
     private static final String ADVANCED_MASTERDATA_LABEL = "Master Data Import";
     private static final String ADVANCED_MASTERDATA_IDENTIFIER = "MasterDataImport";
+    private static final String ADVANCED_LOCAL_SERVER_LABEL = "Local Server";
+    private static final String ADVANCED_LOCAL_SERVER_IDENTIFIER = "LocalServer";
     /**
      * <p>Goes to the administration console and returns the representing page object.</p>
      * 
@@ -186,7 +189,13 @@ public class AdminConsolePage extends HostPageWithAuthentication {
         return new SmartphoneTrackingEventManagementPanelPO(this.driver, goToTab(SMARTPHONETRACKINGPANEL_PANEL_TAB_LABEL,
                 SMARTPHONETRACKINGPANEL_PANEL_TAB_IDENTIFIER, false));
     }
-    
+
+    public LocalServerPO goToLocalServerPanel() {
+        goToTab(ADVANCED_PARENT_LABEL, ADVANCED_TAB_PARENT_IDENTIFIER, true);
+        return new LocalServerPO(this.driver,
+                goToTab(ADVANCED_LOCAL_SERVER_LABEL, ADVANCED_LOCAL_SERVER_IDENTIFIER, false));
+    }
+
     /**
      * <p>Verifies that the current page is the administration console by checking the title of the page.</p>
      */

@@ -119,6 +119,7 @@ public class LocalServerManagementPanel extends SimplePanel {
         isStandaloneServerCheckbox = captionPanel.addChekBox(stringMessages.standaloneServer() + ":", callback);
         isPublicServerCheckbox = captionPanel.addChekBox(stringMessages.publicServer() + ":", callback);
         isSelfServiceServerCheckbox = captionPanel.addChekBox(stringMessages.selfServiceServer() + ":", callback);
+        isSelfServiceServerCheckbox.ensureDebugId("isSelfServiceServerCheckbox");
         return captionPanel;
     }    
 

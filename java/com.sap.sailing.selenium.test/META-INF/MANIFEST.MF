@@ -13,7 +13,10 @@ Require-Bundle: org.hamcrest;bundle-version="1.1.0",
  com.sap.sse.common,
  jcl.over.slf4j;bundle-version="1.6.4";resolution:=optional,
  slf4j.api;bundle-version="1.6.4";resolution:=optional,
- org.mongodb.mongo-java-driver;bundle-version="3.6.4"
+ org.mongodb.mongo-java-driver;bundle-version="3.6.4",
+ com.sun.jersey;bundle-version="1.17.0"
 Bundle-ClassPath: lib/cglib-nodep-2.2.3.jar,
  .
 Automatic-Module-Name: com.sap.sailing.selenium.test
+Import-Package: org.json.simple,
+ javax.ws.rs.core;version="1.1.1"
