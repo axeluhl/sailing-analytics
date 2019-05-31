@@ -34,7 +34,7 @@ public class DetailTypeMetricOverlay extends FullCanvasOverlay {
     /**
      * Margin space to leave along the boxes edges.
      */
-    private double lineMargin = 5;
+    private double lineMargin = 8;
     private final StringMessages stringMessages;
     private Canvas metricLegend;
     
@@ -180,6 +180,7 @@ public class DetailTypeMetricOverlay extends FullCanvasOverlay {
     }
     
     protected void drawTextCentered(Context2d context2d, double x, double y, double width, String text, String color) {
+        context2d.setFont(textFont);
         TextMetrics metrics = context2d.measureText(text);
         double offset = Math.max((width - metrics.getWidth()) / 2.0, 0.0);
         drawText(context2d, x + offset, y, width - 2 * offset, text, color);
@@ -189,19 +190,20 @@ public class DetailTypeMetricOverlay extends FullCanvasOverlay {
         if (valueRange == null || colorMapper == null) return;
         final double min = valueRange.getMinLeft();
         final double spread = valueRange.getMaxRight() - min;
+        final int maxDigits = (int) Math.ceil(Math.log10(valueRange.getMaxRight()));
+        final int decimals = maxDigits - 3 <= 0 ? -(maxDigits - 3) : 0;
         final int scale_spread;
-        if (spread < 0.5) {
-            scale_spread = 300;
-        } else if (spread < 1) {
-            scale_spread = 100;
+        if (spread < 3) {
+            scale_spread = (int) width / 2;
+        } else if (spread < 15) {
+            scale_spread = (int) width / 4;
         } else {
-            scale_spread = 30;
+            scale_spread = Math.max(30, (int) width / 6);
         }
-        //final int maxIdx = 300;
         final double h = 15;
         String label;
         TextMetrics txtmet;
-        final NumberFormat numberFormatOneDecimal = NumberFormatterFactory.getDecimalFormat(1);
+        final NumberFormat numberFormatOneDecimal = NumberFormatterFactory.getDecimalFormat(decimals);
         for (int idx = 0; idx <= width; idx++) {
             final double speedSteps = min + idx * (spread) / width;
             context2d.setFillStyle(colorMapper.getColor(speedSteps));

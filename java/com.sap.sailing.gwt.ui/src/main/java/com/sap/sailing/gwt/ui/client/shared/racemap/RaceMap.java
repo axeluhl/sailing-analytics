@@ -3165,7 +3165,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     protected void setTailVisualizer() {
-        ValueRangeFlexibleBoundaries boundaries = new ValueRangeFlexibleBoundaries(0, 10, 0.15, 0.5);
+        ValueRangeFlexibleBoundaries boundaries = new ValueRangeFlexibleBoundaries(0, 10, 0.1, 0.25);
         createTailColorMapper(boundaries);
         fixesAndTails.setDetailValueBoundaries(boundaries);
     }
