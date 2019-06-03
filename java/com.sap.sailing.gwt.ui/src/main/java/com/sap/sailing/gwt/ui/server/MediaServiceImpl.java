@@ -19,9 +19,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -84,39 +83,31 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     @Override
     public Iterable<MediaTrackWithSecurityDTO> getMediaTracksForRace(
             RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
-        Collection<MediaTrackWithSecurityDTO> mediaTracks = new ArrayList<>();
-        for (MediaTrack mediaTrack : racingEventService().getMediaTracksForRace(regattaAndRaceIdentifier)) {
-            MediaTrackWithSecurityDTO securedMediaTrack = new MediaTrackWithSecurityDTO(mediaTrack);
-            SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), securedMediaTrack,
-                    mediaTrack.getIdentifier());
-            mediaTracks.add(securedMediaTrack);
-        }
-        return mediaTracks;
+        return mapMediaTracksToDTOsWithSecurityInformationAndFilterByReadPermission(
+                racingEventService().getMediaTracksForRace(regattaAndRaceIdentifier));
     }
 
     @Override
     public Iterable<MediaTrackWithSecurityDTO> getMediaTracksInTimeRange(
             RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
-        Collection<MediaTrackWithSecurityDTO> mediaTracks = new ArrayList<>();
-        for (MediaTrack mediaTrack : racingEventService().getMediaTracksInTimeRange(regattaAndRaceIdentifier)) {
-            MediaTrackWithSecurityDTO securedMediaTrack = new MediaTrackWithSecurityDTO(mediaTrack);
-            SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), securedMediaTrack,
-                    mediaTrack.getIdentifier());
-            mediaTracks.add(securedMediaTrack);
-        }
-        return mediaTracks;
+        return mapMediaTracksToDTOsWithSecurityInformationAndFilterByReadPermission(
+                racingEventService().getMediaTracksInTimeRange(regattaAndRaceIdentifier));
     }
 
     @Override
     public Iterable<MediaTrackWithSecurityDTO> getAllMediaTracks() {
-        Collection<MediaTrackWithSecurityDTO> result = new ArrayList<>();
-        for (MediaTrack mediaTrack : racingEventService().getAllMediaTracks()) {
-            MediaTrackWithSecurityDTO securedMediaTrack = new MediaTrackWithSecurityDTO(mediaTrack);
-            SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), securedMediaTrack,
-                    mediaTrack.getIdentifier());
-            result.add(securedMediaTrack);
-        }
-        return result;
+        return mapMediaTracksToDTOsWithSecurityInformationAndFilterByReadPermission(racingEventService().getAllMediaTracks());
+    }
+
+    private List<MediaTrackWithSecurityDTO> mapMediaTracksToDTOsWithSecurityInformationAndFilterByReadPermission(
+            Iterable<MediaTrack> mediaTracksToFilter) {
+        return racingEventService().getSecurityService().mapAndFilterByReadPermissionForCurrentUser(mediaTracksToFilter,
+                mediaTrack -> {
+                    final MediaTrackWithSecurityDTO securedMediaTrack = new MediaTrackWithSecurityDTO(mediaTrack);
+                    SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), securedMediaTrack,
+                            mediaTrack.getIdentifier());
+                    return securedMediaTrack;
+                });
     }
     
     @Override
@@ -303,9 +294,11 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     public MediaTrack getMediaTrackByUrl(String url) {
         MediaTrack result = null;
         for (MediaTrack mtrack : racingEventService().getAllMediaTracks()) {
-            if (url.equals(mtrack.url)) {
-                result = mtrack;
-                break;
+            if (racingEventService().getSecurityService().hasCurrentUserReadPermission(mtrack)) {
+                if (url.equals(mtrack.url)) {
+                    result = mtrack;
+                    break;
+                }
             }
         }
         return result;

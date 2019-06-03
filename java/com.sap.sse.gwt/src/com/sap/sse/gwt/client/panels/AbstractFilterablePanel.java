@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
@@ -175,8 +176,10 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     public void filter() {
         filtered.getList().clear();
         retainElementsInFilteredThatPassFilter();
-        filtered.flush();
-        sort();
+        Scheduler.get().scheduleFinally(()->{
+            filtered.flush();
+            sort();
+        });
     }
     
 
