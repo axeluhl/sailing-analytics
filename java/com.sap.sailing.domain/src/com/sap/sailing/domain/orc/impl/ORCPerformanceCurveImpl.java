@@ -81,9 +81,6 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      * allowance in sec/nm.
      */
     private PolynomialSplineFunction functionImpliedWindToAllowance;
-    
-    //TODO delete, after clarification with ORC. Hopefully not needed anymore.
-    private PolynomialSplineFunction functionAllowanceToTwa;
 
     /**
      * Accepts the simplified polar data, one "column" for each of the defined true wind speeds, where each column is a
@@ -207,19 +204,27 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             i += 1;
         }
         
-        functionAllowanceToTwa = interpolator.interpolate(ys, xs); //Inverse Function of the "real" PerformanceCurve (ImpliedWind -> Allowance), not needed later
         ArrayUtils.reverse(xs);
         ArrayUtils.reverse(ys);
         functionImpliedWindToAllowance = interpolator.interpolate(xs, ys);
     }
     
-    public Speed getImpliedWind(Duration time) throws ArgumentOutsideDomainException {
-        return new KnotSpeedImpl(functionAllowanceToTwa.value(time.asSeconds()));
+    @Override
+    public Speed getImpliedWind(Duration time) {
+        try {
+            return getImpliedWindNewton(time);
+        } catch (Exception e) {
+            // TODO Think about sensefull error handling in this case
+            e.printStackTrace();
+        }
+        return null;
     }
     
     public Speed getImpliedWindNewton(Duration time) throws MaxIterationsExceededException, FunctionEvaluationException {
         PolynomialFunction workingFunction;
         double[] allowancesInSeconds = new double[functionImpliedWindToAllowance.getKnots().length];
+        
+        // TODO Corner cases for Allowance > Allowance(20kt) or Allowance < Allowance(6kt)
         
         for (int i = 0; i < allowancesInSeconds.length; i++) {
             allowancesInSeconds[i] = functionImpliedWindToAllowance.value(functionImpliedWindToAllowance.getKnots()[i]);
@@ -244,6 +249,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     
     @Override
     public Duration getAllowancePerCourse(Speed impliedWind) {
+        // TODO Corner cases for ImpliedWind > 20kt or ImpliedWind < 6kt
         try {
             return Duration.ONE_SECOND.times(functionImpliedWindToAllowance.value(impliedWind.getKnots()));
         } catch (ArgumentOutsideDomainException e) {
@@ -254,9 +260,11 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         return null;
     }
     
-    @Override
     public Speed getImpliedWind() {
-        // TODO Auto-generated method stub
+        // TODO Think about API of getImpliedWind() method and constructor.
+        // Two options:
+        // 1. getImpliedWind() without parameter, and current sailed duration of boat is passed with the constructor of the performance curve
+        // 2. getImpliedWind(Duration time) with parameter, sailed duration is exchangable. Needed this functionality?
         return null;
     }
 

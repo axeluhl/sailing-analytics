@@ -20,11 +20,10 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
  * For a {@link Competitor} 
  * https://orc.org/index.asp?id=23
  * 
- * @author Daniel Lisunkin (I505543)
+ * @author Daniel Lisunkin (i505543)
  *
  */
 
-// TODO Improve public API in regards of semantic connection with real ORC Certificate (paper)
 // TODO COMMENTS!
 
 public class ORCCertificateImpl implements ORCCertificate {
@@ -41,7 +40,7 @@ public class ORCCertificateImpl implements ORCCertificate {
                                                                new KnotSpeedImpl(20) };
     
     /**
-     * 
+     * Equals the line heading of the allowances table of an ORC certificate. The true wind angles are set by the offshore racing congress.
      */
     public static final Bearing[] ALLOWANCES_TRUE_WIND_ANGLES = {new DegreeBearingImpl( 52),
                                                                  new DegreeBearingImpl( 60),
@@ -53,7 +52,8 @@ public class ORCCertificateImpl implements ORCCertificate {
                                                                  new DegreeBearingImpl(150) };
     
     /**
-     * 
+     * Equals the percentages of accounted allowances at a given speed for the Coastal / Long Distance Performance Curve metric.
+     * Details can be found on: https://orc.org/index.asp?id=32
      */
     public static final Map<Speed, Map<Bearing, Double>> perCentOfAllowancesForLongDistancePC;
     static {

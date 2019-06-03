@@ -6,6 +6,11 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 
 //TODO COMMENTS!!!
+/**
+ * 
+ * @author Daniel Lisunkin (i505543)
+ *
+ */
 public interface ORCCertificate {
 
     /**

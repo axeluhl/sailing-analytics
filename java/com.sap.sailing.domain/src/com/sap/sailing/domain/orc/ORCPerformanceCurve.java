@@ -5,7 +5,7 @@ import com.sap.sse.common.Speed;
 
 public interface ORCPerformanceCurve {
 
-    Speed getImpliedWind();
+    Speed getImpliedWind(Duration time);
     
     Duration getCalculatedTime(ORCPerformanceCurve referenceBoat);
  

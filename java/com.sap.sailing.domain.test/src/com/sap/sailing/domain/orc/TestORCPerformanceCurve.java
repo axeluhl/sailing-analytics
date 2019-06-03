@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.math.ArgumentOutsideDomainException;
 import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.MaxIterationsExceededException;
 import org.json.simple.parser.ParseException;
@@ -131,40 +130,23 @@ public class TestORCPerformanceCurve {
     }
     
     @Test
-    public void testPerformanceCurveInvertation() throws ArgumentOutsideDomainException {
+    public void testPerformanceCurveInvertation() throws MaxIterationsExceededException, FunctionEvaluationException {
         System.out.println("- testPerformanceCurveInvertation() -");
         Double accuracy = 0.1;
         ORCCertificateImpl certificate = (ORCCertificateImpl) importer.getCertificate("GER 5549");
         ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(course);
         
         
-        assertEquals(    6, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(    6))).getKnots(), accuracy);
+        //assertEquals(    6, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(    6))).getKnots(), accuracy);
         assertEquals( 11.5, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl( 11.5))).getKnots(), accuracy);
         assertEquals(17.23, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(17.23))).getKnots(), accuracy);
+        assertEquals(   18, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(   18))).getKnots(), accuracy);
         
+        assertEquals(  450, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(450))).asSeconds(), accuracy);
         assertEquals(  500, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(500))).asSeconds(), accuracy);
         assertEquals(  600, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(600))).asSeconds(), accuracy);
         assertEquals(  700, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(700))).asSeconds(), accuracy);
-    }
-    
-    @Test
-    public void testPerformanceCurveInvertationNewton() throws MaxIterationsExceededException, FunctionEvaluationException {
-        System.out.println("- testPerformanceCurveInvertationNewton() -");
-        Double accuracy = 0.1;
-        ORCCertificateImpl certificate = (ORCCertificateImpl) importer.getCertificate("GER 5549");
-        ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(course);
-        
-        
-        //assertEquals(    6, performanceCurve.getImpliedWindNewton(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(    6))).getKnots(), accuracy);
-        assertEquals( 11.5, performanceCurve.getImpliedWindNewton(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl( 11.5))).getKnots(), accuracy);
-        assertEquals(17.23, performanceCurve.getImpliedWindNewton(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(17.23))).getKnots(), accuracy);
-        assertEquals(   18, performanceCurve.getImpliedWindNewton(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(   18))).getKnots(), accuracy);
-        
-        assertEquals(  450, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWindNewton(Duration.ONE_SECOND.times(450))).asSeconds(), accuracy);
-        assertEquals(  500, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWindNewton(Duration.ONE_SECOND.times(500))).asSeconds(), accuracy);
-        assertEquals(  600, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWindNewton(Duration.ONE_SECOND.times(600))).asSeconds(), accuracy);
-        assertEquals(  700, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWindNewton(Duration.ONE_SECOND.times(700))).asSeconds(), accuracy);
-        assertEquals(  750, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWindNewton(Duration.ONE_SECOND.times(750))).asSeconds(), accuracy);
+        assertEquals(  750, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(750))).asSeconds(), accuracy);
     }
 
 }
