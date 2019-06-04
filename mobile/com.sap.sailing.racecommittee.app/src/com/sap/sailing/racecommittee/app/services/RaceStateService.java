@@ -178,7 +178,7 @@ public class RaceStateService extends Service {
             }
             managedIntents.remove(race.getId());
         } else {
-            ExLog.w(this, TAG, "Couldn't find any managed intents for race "race.getId());
+            ExLog.w(this, TAG, "Couldn't find any managed intents for race "+race.getId());
         }
         ExLog.i(this, TAG, "Race " + race.getId() + " unregistered");
         updateNotification();
