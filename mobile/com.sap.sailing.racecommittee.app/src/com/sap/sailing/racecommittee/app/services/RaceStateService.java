@@ -167,19 +167,19 @@ public class RaceStateService extends Service {
         intent.setAction(AppConstants.INTENT_ACTION_POLLING_RACE_REMOVE);
         intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, race.getId());
         startService(intent);
-
         race.getState().getRaceLog().removeAllListeners();
         registeredLogListeners.remove(race);
-
         race.getState().setStateEventScheduler(null);
         registeredStateEventSchedulers.remove(race);
-
         List<Pair<PendingIntent, RaceStateEvents>> intents = managedIntents.get(race.getId());
-        for (Pair<PendingIntent, RaceStateEvents> intentPair : intents) {
-            alarmManager.cancel(intentPair.first);
+        if (intents != null) {
+            for (Pair<PendingIntent, RaceStateEvents> intentPair : intents) {
+                alarmManager.cancel(intentPair.first);
+            }
+            managedIntents.remove(race.getId());
+        } else {
+            ExLog.w(this, TAG, "Couldn't find any managed intents for race "race.getId());
         }
-        managedIntents.remove(race.getId());
-
         ExLog.i(this, TAG, "Race " + race.getId() + " unregistered");
         updateNotification();
     }
