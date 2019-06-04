@@ -16,6 +16,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
+//TODO Finish this comment.
 /**
  * For a {@link Competitor} 
  * https://orc.org/index.asp?id=23
@@ -23,8 +24,6 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
  * @author Daniel Lisunkin (i505543)
  *
  */
-
-// TODO COMMENTS!
 
 public class ORCCertificateImpl implements ORCCertificate {
 
@@ -136,6 +135,7 @@ public class ORCCertificateImpl implements ORCCertificate {
     private final Map<Speed, Bearing> beatAngles;
     private final Map<Speed, Bearing> gybeAngles;
 
+    //TODO Comment on Constructor
     /**
      * 
      * @param sailnumber

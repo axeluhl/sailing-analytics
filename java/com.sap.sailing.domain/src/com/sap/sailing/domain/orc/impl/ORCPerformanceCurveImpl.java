@@ -3,6 +3,7 @@ package com.sap.sailing.domain.orc.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +28,7 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 
+// TODO Comment for Class, old comment is currently shown
 /**
  * For a {@link Competitor} describes at which wind speeds and angles to the wind the boat is assumed to go at which
  * speed. This represents a simplified polar sheet with "knots" providing values for specific, discrete true wind angles
@@ -94,7 +96,6 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      */
     public ORCPerformanceCurveImpl(Map<Speed, Map<Bearing, Duration>> twaAllowances, Map<Speed, Bearing> beatAngles,
             Map<Speed, Bearing> gybeAngles, ORCPerformanceCurveCourse course) {
-        //TODO Update constructor with duration to the current progress of the boat on the race course
         durationPerNauticalMileAtTrueWindAngleAndSpeed = Collections.unmodifiableMap(twaAllowances);
         this.beatAngles = Collections.unmodifiableMap(beatAngles);
         this.gybeAngles = Collections.unmodifiableMap(gybeAngles);
@@ -220,7 +221,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         return null;
     }
     
-    public Speed getImpliedWindNewton(Duration time) throws MaxIterationsExceededException, FunctionEvaluationException {
+    private Speed getImpliedWindNewton(Duration time) throws MaxIterationsExceededException, FunctionEvaluationException {
         PolynomialFunction workingFunction;
         double[] allowancesInSeconds = new double[functionImpliedWindToAllowance.getKnots().length];
         
@@ -259,46 +260,41 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         }
         return null;
     }
-    
-    public Speed getImpliedWind() {
-        // TODO Think about API of getImpliedWind() method and constructor.
-        // Two options:
-        // 1. getImpliedWind() without parameter, and current sailed duration of boat is passed with the constructor of the performance curve
-        // 2. getImpliedWind(Duration time) with parameter, sailed duration is exchangable. Needed this functionality?
-        return null;
-    }
 
     @Override
     public Duration getCalculatedTime(ORCPerformanceCurve referenceBoat) {
-        return referenceBoat.getAllowancePerCourse(getImpliedWind());
+        return referenceBoat.getAllowancePerCourse(getImpliedWind(Duration.ONE_SECOND)); //TODO Create parameter and update interface API
     }
     
-    // LAGRANGE TEST BASE because of unusual implementation in ORC Pascal code
     // public accessibility needed for tests, not part of the ORCPerformanceCurve contract
     public Duration getLagrangeAllowancePerTrueWindSpeedAndAngle(Speed trueWindSpeed, Bearing trueWindAngle) throws FunctionEvaluationException, IllegalArgumentException {
         Duration result;
         Bearing[] allowancesTrueWindAnglesWithBeatRun = (Bearing[]) ArrayUtils.addAll(new Bearing[] {beatAngles.get(trueWindSpeed)}, ArrayUtils.addAll(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES, new Bearing[] {gybeAngles.get(trueWindSpeed)}));
-        Bearing[] ALLOWANCES_TRUE_WIND_ANGLES = ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES; //allowancesTrueWindAnglesWithBeatRun; //TODO Cleanup, after more information from ORC is available
-        //Arrays.sort(ALLOWANCES_TRUE_WIND_ANGLES);
+        Arrays.sort(allowancesTrueWindAnglesWithBeatRun);
         
-        int i = -1; //after the loop, i equals the next higher available polar data for the given TWA
-        for(int j = 0; j < ALLOWANCES_TRUE_WIND_ANGLES.length; j++) {
-            if(trueWindAngle.compareTo(ALLOWANCES_TRUE_WIND_ANGLES[j]) < 0) {
+        // Controlling whether the gybe angle is greater then the other polars and eliminating those from the array
+        int frontcutpoint = Arrays.binarySearch(allowancesTrueWindAnglesWithBeatRun, beatAngles.get(trueWindSpeed));
+        int backcutpoint  = Arrays.binarySearch(allowancesTrueWindAnglesWithBeatRun, gybeAngles.get(trueWindSpeed));
+        allowancesTrueWindAnglesWithBeatRun = Arrays.copyOfRange(allowancesTrueWindAnglesWithBeatRun, frontcutpoint, backcutpoint);
+        
+        int i = -1; // after the loop, i equals the next higher available polar data for the given TWA
+        for(int j = 0; j < allowancesTrueWindAnglesWithBeatRun.length; j++) {
+            if(trueWindAngle.compareTo(allowancesTrueWindAnglesWithBeatRun[j]) < 0) {
                 i = j;
                 break;
             }
         }
         
         // This part is implemented equally to the part from the ORC PCSLib.pas.
-        // ORC decides to use only the nearest 4 values to the searched TWA for interpolation.
+        // ORC decides to use only up to the nearest 4 values to the searched TWA for interpolation.
         if (i >= 0) {
-            int upperBound = Math.min(i + 1, ALLOWANCES_TRUE_WIND_ANGLES.length - 1);
+            int upperBound = Math.min(i + 1, allowancesTrueWindAnglesWithBeatRun.length - 1);
             int lowerBound = Math.max(i - 2, 0);
             double[] xn = new double[upperBound - lowerBound + 1];
             double[] yn = new double[upperBound - lowerBound + 1];
             for (i = lowerBound; i <= upperBound; i++) {
-                xn[i-lowerBound] = ALLOWANCES_TRUE_WIND_ANGLES[i].getDegrees();
-                yn[i-lowerBound] = durationPerNauticalMileAtTrueWindAngleAndSpeed.get(trueWindSpeed).get(ALLOWANCES_TRUE_WIND_ANGLES[i]).asSeconds();
+                xn[i-lowerBound] = allowancesTrueWindAnglesWithBeatRun[i].getDegrees();
+                yn[i-lowerBound] = durationPerNauticalMileAtTrueWindAngleAndSpeed.get(trueWindSpeed).get(allowancesTrueWindAnglesWithBeatRun[i]).asSeconds();
             }
             result = Duration.ONE_SECOND.times(new PolynomialFunctionLagrangeForm(xn, yn).value(trueWindAngle.getDegrees()));
         } else {
@@ -313,4 +309,16 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         return durationPerNauticalMileAtTrueWindAngleAndSpeed.getOrDefault(trueWindSpeed, null).getOrDefault(trueWindAngle, null);
     }
 
+    @Override
+    public String toString() {
+        try {
+            return "ORCPerformanceCurve [Allowances " + createAllowancesPerCourse() + "]";
+        } catch (FunctionEvaluationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    
 }

@@ -14,8 +14,10 @@ import com.sap.sse.common.Speed;
 public interface ORCCertificate {
 
     /**
+     * Returns a {@link ORCPerformanceCurve} for the competitor owning this {@link ORCCertificate}.
      * 
      * @param course
+     *          equals the {@link ORCPerformanceCurveCourse} (part of the whole course) sailed by the competitor upon the point of this call.
      * @return
      */
     public ORCPerformanceCurve getPerformanceCurve (ORCPerformanceCurveCourse course);

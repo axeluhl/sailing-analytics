@@ -91,8 +91,7 @@ public class TestORCPerformanceCurve {
         
         //assertEquals(537.3, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl(6), new DegreeBearingImpl(50)).asSeconds(), accuracy);
         
-        ///*
-        // TESTS of the corner areas of the polars, currently not working
+        // TESTS of the corner areas of the polars
         assertEquals(588.1, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl( 6),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
         assertEquals(468.4, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl( 8),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
         assertEquals(413.8, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(10),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
@@ -100,7 +99,6 @@ public class TestORCPerformanceCurve {
         assertEquals(355.1, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(14),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
         assertEquals(326.4, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(16),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
         assertEquals(275.4, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(20),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
-        //*/
     }
     
     @Test
