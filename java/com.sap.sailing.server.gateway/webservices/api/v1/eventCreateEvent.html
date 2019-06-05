@@ -81,7 +81,19 @@ consumption of this service simple.</p>
 		  "registrationSecret": "87b99bd8-c7ff-47b5-b299-19edb9f3a433",
 		  "leaderboard": "Session admin 2019-06-06 00:12:25"
 		}
-		</pre></td>
+		</pre>
+		Should an error result, you'll receive a JSON document in the body and a non-2XX response code,
+		based on the following error code definitions:
+		<tt>NO_VENUE(1), NO_BOAT_CLASS(2), LEADERBOARD_GROUP_ALREADY_EXISTS(3),
+		    REGATTA_ALREADY_EXISTS(4), LEADERBOARD_ALREADY_EXISTS(5)</tt>:
+		<pre>
+		{
+		  "message": "No venue specified; provide either venuename or venuelat/venuelng",
+		  "errorCodeName": "NO_VENUE",
+		  "errorCode": 1
+		}
+		</pre>
+		</td>
 	</tr>
 </table>
 <div style="height: 1em;"></div>
