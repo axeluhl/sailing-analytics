@@ -35,16 +35,25 @@
     <string name="error_sending_team_image_to_server">"Ошибка: не удалось отправить изображение группы на сервер."</string>
     <string name="regatta_starts_in">"До старта регаты:"</string>
     <plurals name="hour">
-        <item quantity="one">"ч."</item>
-        <item quantity="other">"ч."</item>
+        <item quantity="zero">"часов"</item>
+        <item quantity="one">"час"</item>
+        <item quantity="few">"часа"</item>
+        <item quantity="many">"часов"</item>
+        <item quantity="other">"часов"</item>
     </plurals>
     <plurals name="minute">
-        <item quantity="one">"мин."</item>
-        <item quantity="other">"мин."</item>
+        <item quantity="zero">"минут"</item>
+        <item quantity="one">"минута"</item>
+        <item quantity="few">"минуты"</item>
+        <item quantity="many">"минут"</item>
+        <item quantity="other">"минут"</item>
     </plurals>
     <plurals name="day">
-        <item quantity="one">"д."</item>
-        <item quantity="other">"дн."</item>
+        <item quantity="zero">"дней"</item>
+        <item quantity="one">"день"</item>
+        <item quantity="few">"дня"</item>
+        <item quantity="many">"дней"</item>
+        <item quantity="other">"дней"</item>
     </plurals>
     <string name="please_listen_to_announcements">"Слушайте уведомления"</string>
     <string name="close">"Закрыть"</string>
