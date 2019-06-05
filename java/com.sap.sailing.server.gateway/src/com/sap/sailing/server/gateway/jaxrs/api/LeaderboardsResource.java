@@ -180,9 +180,9 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     public Response getLeaderboard(@PathParam("name") String leaderboardName,
             @DefaultValue("Live") @QueryParam("resultState") ResultStates resultState,
             @QueryParam("maxCompetitorsCount") Integer maxCompetitorsCount,
-            @QueryParam("secret") String regattaSecret) {
+            @QueryParam("secret") String regattaSecret,
+            @DefaultValue("false") @QueryParam("competitorAndBoatIdsOnly") boolean competitorAndBoatIdsOnly) {
         ShardingContext.setShardingConstraint(ShardingType.LEADERBOARDNAME, leaderboardName);
-        
         try {
             Response response;
             TimePoint requestTimePoint = MillisecondsTimePoint.now();
@@ -200,7 +200,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     TimePoint timePoint = calculateTimePointForResultState(leaderboard, resultState);
                     JSONObject jsonLeaderboard;
                     jsonLeaderboard = getLeaderboardJson(resultState, maxCompetitorsCount, requestTimePoint,
-                            leaderboard, timePoint, /* race column names */ null, /* race detail names */ null);
+                            leaderboard, timePoint, /* race column names */ null, /* race detail names */ null, competitorAndBoatIdsOnly,
+                            /* showOnlyActiveRacesForCompetitorIds */ null);
                     StringWriter sw = new StringWriter();
                     jsonLeaderboard.writeJSONString(sw);
                     String json = sw.getBuffer().toString();
@@ -220,7 +221,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     @Override
     protected JSONObject getLeaderboardJson(Leaderboard leaderboard,
             TimePoint resultTimePoint, ResultStates resultState, Integer maxCompetitorsCount, List<String> raceColumnNames,
-            List<String> raceDetailNames)
+            List<String> raceDetailNames, boolean competitorIdsOnly, List<String> showOnlyActiveRacesForCompetitorIds)
             throws NoWindException, InterruptedException, ExecutionException {
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(
                 resultTimePoint, Collections.<String> emptyList(), /* addOverallDetails */
@@ -238,7 +239,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 break;
             }
             JSONObject jsonCompetitor = new JSONObject();
-            writeCompetitorBaseData(jsonCompetitor, competitor, leaderboardDTO);
+            writeCompetitorBaseData(jsonCompetitor, competitor, leaderboardDTO, competitorIdsOnly);
             jsonCompetitor.put("rank", counter);
             jsonCompetitor.put("carriedPoints", leaderboardRowDTO.carriedPoints);
             jsonCompetitor.put("netPoints", leaderboardRowDTO.netPoints);
