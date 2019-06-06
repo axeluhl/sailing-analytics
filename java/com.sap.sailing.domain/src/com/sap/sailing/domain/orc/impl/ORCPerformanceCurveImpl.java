@@ -28,9 +28,17 @@ import com.sap.sse.common.Speed;
 
 // TODO Comment for Class, old comment is currently shown
 /**
- * For a {@link Competitor} describes at which wind speeds and angles to the wind the boat is assumed to go at which
- * speed. This represents a simplified polar sheet with "knots" providing values for specific, discrete true wind angles
- * and true wind speeds, with bounds for "optimum beat angle" and "optimum run angle." See also <a href=
+ * For a {@link Competitor} and the {@link ORCPerformanceCurveCourse} which the competitor sailed until the creation,
+ * this class represents a so called "Perfromance Curve". This Curve is specified by the so called "Implied Wind" a
+ * {@link Speed} on the x-Axis and the allowance in s/nm respectively a {@link Duration} on the y-Axis. It represents a
+ * simplified polar curve for the given boat and the given part of the course. For a given windspeed the performance
+ * curve returns the allowance for the boat or in simpler words: how long should the boat need for a nautical mile when
+ * sailing 100% performance.
+ * 
+ * The implementation is oriented to the pascal code provided by ORC for the performance curve module. Available here
+ * <a href="https://data.orc.org/tools.php?c=pcs">https://data.orc.org/tools.php?c=pcs</a>.
+ * 
+ * See also <a href=
  * "http://bugzilla.sapsailing.com/bugzilla/attachment.cgi?id=146">http://bugzilla.sapsailing.com/bugzilla/attachment.cgi?id=146</a>
  * for details. The true wind angles are symmetrical, assuming that the boat performs equally well on both tacks.
  * 

@@ -149,16 +149,4 @@ public class TestORCPerformanceCurve {
         // TODO
     }
     
-    @Test
-    public void findErrorInCourseAllowanceCreation() {
-        ORCCertificateImpl certificate = (ORCCertificateImpl) importer.getCertificate("GER 5549");
-        ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(course);
-        try {
-            performanceCurve.createAllowancesPerCourse();
-        } catch (FunctionEvaluationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-    
 }
