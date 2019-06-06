@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources>
+    
+    
+
+    <!-- override default values of android.shared -->
+    
+
+    
+
+    <string name="settings_category_energy_saving">"Ahorro de batería"</string>
+    
+    
+    
+    <string name="preference_energy_saving_sending_interval">"seleccione el intervalo de envío de actualizaciones del GPS"</string> 
+    <string name="preference_energy_saving_sending_interval_summary">"Seleccione un valor lo más alto posible para mantener la vida útil de la batería, mientras continúa disfrutando de una razonable experiencia en directo, dependiendo de su caso de uso."</string>
+
+    <string name="preference_energy_saving_sending_interval_message">"Las actualizaciones del GPS se enviarán al servidor %1$s %2$s."</string>
+    
+    <string name="preference_energy_saving_sending_interval_message_every">"cada"</string>
+    <string-array name="preference_energy_saving_sending_interval_entries">
+    	<item>"inmediatamente"</item>
+    	<item>"5 segundos"</item>
+    	<item>"10 segundos"</item>
+    	<item>"20 segundos"</item>
+    	<item>"60 segundos"</item>
+	</string-array>
+	
+
+    
+    
+    
+    
+    
+    
+
+    <string name="preference_heading_with_declination_subtracted_is_enabled">"Activadas"</string>
+    <string name="preference_heading_with_declination_subtracted_is_disabled">"Desactivadas"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">"Visualización: magnética"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">"Visualización: real"</string>
+    <string name="preference_heading_with_declination_subtracted_enabled">"Rumbo"</string>
+</resources>
