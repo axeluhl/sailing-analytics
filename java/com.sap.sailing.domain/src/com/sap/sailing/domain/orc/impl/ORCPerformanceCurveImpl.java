@@ -231,7 +231,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         
         // Controlling whether the gybe angle is greater then the other polars and eliminating those from the array
         int frontcutpoint = Arrays.binarySearch(allowancesTrueWindAnglesWithBeatRun, beatAngles.get(trueWindSpeed));
-        int backcutpoint  = Arrays.binarySearch(allowancesTrueWindAnglesWithBeatRun, gybeAngles.get(trueWindSpeed));
+        int backcutpoint  = Arrays.binarySearch(allowancesTrueWindAnglesWithBeatRun, gybeAngles.get(trueWindSpeed)) + 1;
         allowancesTrueWindAnglesWithBeatRun = Arrays.copyOfRange(allowancesTrueWindAnglesWithBeatRun, frontcutpoint, backcutpoint);
         
         int i = -1; // after the loop, i equals the next higher available polar data for the given TWA
