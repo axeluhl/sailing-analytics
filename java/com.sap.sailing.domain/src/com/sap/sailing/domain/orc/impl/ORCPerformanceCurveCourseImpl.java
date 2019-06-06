@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.orc.ORCPerformanceCurveLeg;
 import com.sap.sse.common.Distance;
@@ -16,10 +15,9 @@ public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse 
 
     public ORCPerformanceCurveCourseImpl(List<ORCPerformanceCurveLeg> legs) {
         this.legs = Collections.unmodifiableList(legs);
-        totalLength = new NauticalMileDistance(0);
-
+        totalLength = Distance.NULL;
         for (ORCPerformanceCurveLeg leg : legs) {
-            totalLength = new NauticalMileDistance(totalLength.getNauticalMiles() + leg.getLength().getNauticalMiles());
+            totalLength = totalLength.add(leg.getLength());
         }
     }
 
@@ -39,19 +37,15 @@ public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse 
     }
 
     @Override
-    public ORCPerformanceCurveCourse subcourse(int lastFinishedLeg, double perCentOfCurrentLeg) {
-        if (lastFinishedLeg == 0) {
-            ORCPerformanceCurveLeg resultLeg = legs.get(0);
-            List<ORCPerformanceCurveLeg> resultLegs = new ArrayList<>();
-            resultLegs.add(new ORCPerformanceCurveLegImpl(resultLeg.getLength().scale(perCentOfCurrentLeg), resultLeg.getTwa()));
-            return new ORCPerformanceCurveCourseImpl(resultLegs);
-        }
-        else if (lastFinishedLeg >= legs.size()) {
+    public ORCPerformanceCurveCourse subcourse(int lastFinishedLegOneBased, double perCentOfCurrentLeg) {
+        // does function for empty courses, returns again empty course
+        if (lastFinishedLegOneBased >= legs.size()) {
             return this;
         } else {
             List<ORCPerformanceCurveLeg> resultLegs = new ArrayList<>();
-            resultLegs.addAll(legs.subList(0, lastFinishedLeg));
-            resultLegs.add(new ORCPerformanceCurveLegImpl(legs.get(lastFinishedLeg).getLength().scale(perCentOfCurrentLeg), legs.get(lastFinishedLeg).getTwa()));
+            resultLegs.addAll(legs.subList(0, lastFinishedLegOneBased));
+            ORCPerformanceCurveLeg lastFinishedLeg = legs.get(lastFinishedLegOneBased);
+            resultLegs.add(new ORCPerformanceCurveLegImpl(lastFinishedLeg.getLength().scale(perCentOfCurrentLeg), lastFinishedLeg.getTwa()));
             return new ORCPerformanceCurveCourseImpl(resultLegs);
         }
     }

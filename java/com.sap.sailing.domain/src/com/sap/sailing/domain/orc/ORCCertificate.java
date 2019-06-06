@@ -20,13 +20,15 @@ public interface ORCCertificate {
      *          equals the {@link ORCPerformanceCurveCourse} (part of the whole course) sailed by the competitor upon the point of this call.
      * @return
      */
-    public ORCPerformanceCurve getPerformanceCurve (ORCPerformanceCurveCourse course);
+    public ORCPerformanceCurve getPerformanceCurve(ORCPerformanceCurveCourse course);
     
     /**
      * 
      * @return
      */
     public double getGPH();
+    
+    // TODO getCDL für Gruppeneinteilung
     
     /**
      * 

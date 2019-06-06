@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.orc.impl;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,13 +60,6 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      * {@link #durationPerNauticalMileAtTrueWindAngleAndSpeed}
      */
     private final Map<Speed, Bearing> gybeAngles;
-
-    /**
-     * These Lagrange polynomials approximate the function mapping the true wind angle to the time allowance for one
-     * nautical mile at the true wind speed given by the key. The key set equals that of
-     * {@link #durationPerNauticalMileAtTrueWindAngleAndSpeed}.
-     */
-    private transient Map<Speed, PolynomialFunctionLagrangeForm> lagrangePolynomialsPerTrueWindSpeed;
     
     /**
      * The specific course for which the PerformanceCurve of a boat is calculated. The course is set during the
@@ -82,7 +73,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      * calculated points. The input for the function is the value of the implied wind (speed in kts) and the output an
      * allowance in sec/nm.
      */
-    private PolynomialSplineFunction functionImpliedWindToAllowance;
+    private final PolynomialSplineFunction functionImpliedWindToAllowance;
 
     /**
      * Accepts the simplified polar data, one "column" for each of the defined true wind speeds, where each column is a
@@ -100,39 +91,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         this.beatAngles = Collections.unmodifiableMap(beatAngles);
         this.gybeAngles = Collections.unmodifiableMap(gybeAngles);
         this.course = course;
-        // TODO extract following statement and functionality to the ORCCertificate interface and implementations.
-        lagrangePolynomialsPerTrueWindSpeed = createLagrangePolynomials();
-        try {
-            initializePerformanceCurve();
-        } catch (FunctionEvaluationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
-    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-        ois.defaultReadObject();
-        lagrangePolynomialsPerTrueWindSpeed = createLagrangePolynomials();
-    }
-
-    //TODO Decide if needed or if it can be removed. Depending on the information provided by ORC.
-    private Map<Speed, PolynomialFunctionLagrangeForm> createLagrangePolynomials() {
-        Map<Speed, PolynomialFunctionLagrangeForm> writeableLagrange = new HashMap<>();
-        for (Entry<Speed, Map<Bearing, Duration>> twsAndTwaToDuration : durationPerNauticalMileAtTrueWindAngleAndSpeed
-                .entrySet()) {
-            final int numberOfTrueWindAngles = twsAndTwaToDuration.getValue().size();
-            double[] twaInDegrees = new double[numberOfTrueWindAngles];
-            double[] durationInSeconds = new double[numberOfTrueWindAngles];
-            int i = 0;
-            for (Entry<Bearing, Duration> twaAndDuration : twsAndTwaToDuration.getValue().entrySet()) {
-                twaInDegrees[i] = twaAndDuration.getKey().getDegrees();
-                durationInSeconds[i] = twaAndDuration.getValue().asSeconds();
-                i++;
-            }
-            writeableLagrange.put(twsAndTwaToDuration.getKey(),
-                    new PolynomialFunctionLagrangeForm(twaInDegrees, durationInSeconds));
-        }
-        return Collections.unmodifiableMap(writeableLagrange);
+        functionImpliedWindToAllowance = createPerformanceCurve();
     }
 
     /**
@@ -162,38 +121,37 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         
         return result;
     }
-
+        
     private Map<Speed, Duration> createAllowancePerLeg(ORCPerformanceCurveLeg leg) throws FunctionEvaluationException {
         Map<Speed, Duration> result = new HashMap<>();
         Double twa = leg.getTwa().getDegrees();
-
-        for (Entry<Speed, PolynomialFunctionLagrangeForm> entry : lagrangePolynomialsPerTrueWindSpeed.entrySet()) {
+        
+        
+        for (Speed entry : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
             // Case switching on TWA (0. TWA == 0; 1. TWA < Beat; 2. Beat < TWA < Gybe; 3. Gybe < TWA; 4. TWA == 180)
-            if (twa < beatAngles.get(entry.getKey()).getDegrees()) {
-                // Case 0&1
-                // result will be: beatVMG * distance / cos(TWA)
-                result.put(entry.getKey(),
-                        Duration.ONE_SECOND.times(entry.getValue().value(beatAngles.get(entry.getKey()).getDegrees())
-                                * leg.getLength().getNauticalMiles() * Math.cos(Math.toRadians(twa))));
-            } else if (twa > gybeAngles.get(entry.getKey()).getDegrees()) {
-                // Case 3 & 4
-                // result will be: runVMG * distance / cos(TWA)
-                result.put(entry.getKey(),
-                        Duration.ONE_SECOND.times(entry.getValue().value(gybeAngles.get(entry.getKey()).getDegrees())
-                                * leg.getLength().getNauticalMiles() * Math.cos(Math.toRadians(twa))));
+            if (twa < beatAngles.get(entry).getDegrees()) {
+                // Case 0 & 1 - result = beatVMG * distance / cos(TWA)
+                result.put(entry, Duration.ONE_SECOND.times(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(entry, beatAngles.get(entry)).asSeconds() * leg.getLength().getNauticalMiles() * Math.abs(Math.cos(Math.toRadians(twa)))));
+            } else if (twa > gybeAngles.get(entry).getDegrees()) {
+                // Case 3 & 4 - result = runVMG * distance / cos(TWA)
+                result.put(entry, Duration.ONE_SECOND.times(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(entry, gybeAngles.get(entry)).asSeconds() * leg.getLength().getNauticalMiles() * Math.abs(Math.cos(Math.toRadians(twa)))));
             } else {
-                // Case 2
-                // result is given through the laGrange Interpolation, between the Beat and Gybe Angles
-                result.put(entry.getKey(),
-                        getLagrangeAllowancePerTrueWindSpeedAndAngle(entry.getKey(), leg.getTwa()).times(leg.getLength().getNauticalMiles()));
+                // Case 2 - result is given through the laGrange Interpolation, between the Beat and Gybe Angles
+                result.put(entry, getLagrangeAllowancePerTrueWindSpeedAndAngle(entry, leg.getTwa()).times(leg.getLength().getNauticalMiles()));
             }
         }
-
+        
         return result;
     }
 
-    private void initializePerformanceCurve() throws FunctionEvaluationException {
-        Map<Speed, Duration> allowances = createAllowancesPerCourse();
+    private PolynomialSplineFunction createPerformanceCurve() {
+        Map<Speed, Duration> allowances;
+        try {
+            allowances = createAllowancesPerCourse();
+        } catch (FunctionEvaluationException e) {
+            e.printStackTrace();
+            return null;
+        }
         SplineInterpolator interpolator = new SplineInterpolator();
         double[] xs = new double[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length];
         double[] ys = new double[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length];
@@ -207,21 +165,11 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         
         ArrayUtils.reverse(xs);
         ArrayUtils.reverse(ys);
-        functionImpliedWindToAllowance = interpolator.interpolate(xs, ys);
+        return interpolator.interpolate(xs, ys);
     }
     
     @Override
-    public Speed getImpliedWind(Duration time) {
-        try {
-            return getImpliedWindNewton(time);
-        } catch (Exception e) {
-            // TODO Think about sensefull error handling in this case
-            e.printStackTrace();
-        }
-        return null;
-    }
-    
-    private Speed getImpliedWindNewton(Duration time) throws MaxIterationsExceededException, FunctionEvaluationException {
+    public Speed getImpliedWind(Duration time) throws MaxIterationsExceededException, FunctionEvaluationException{
         PolynomialFunction workingFunction;
         double[] allowancesInSeconds = new double[functionImpliedWindToAllowance.getKnots().length];
         
@@ -262,8 +210,17 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     }
 
     @Override
-    public Duration getCalculatedTime(ORCPerformanceCurve referenceBoat) {
-        return referenceBoat.getAllowancePerCourse(getImpliedWind(Duration.ONE_SECOND)); //TODO Create parameter and update interface API
+    public Duration getCalculatedTime(ORCPerformanceCurve referenceBoat, Duration sailedDurationPerNauticalMile) {
+        try {
+            return referenceBoat.getAllowancePerCourse(getImpliedWind(sailedDurationPerNauticalMile));
+        } catch (MaxIterationsExceededException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (FunctionEvaluationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
     
     // public accessibility needed for tests, not part of the ORCPerformanceCurve contract

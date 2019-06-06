@@ -2,6 +2,7 @@ package com.sap.sailing.domain.orc;
 
 import com.sap.sse.common.Distance;
 
+// TODO Comment, can be full course or subcourse like string and substring
 public interface ORCPerformanceCurveCourse {
 
     //TODO Return unmodifiable List/Collection something...
@@ -16,5 +17,5 @@ public interface ORCPerformanceCurveCourse {
     }
     
     // 0 => no legs finished, 1 => 1 leg finished, ... ; not equal to the index of the finished leg in a list
-    ORCPerformanceCurveCourse subcourse(int lastFinishedLeg, double perCentOfCurrentLeg);
+    ORCPerformanceCurveCourse subcourse(int lastFinishedLegOneBased, double perCentOfCurrentLeg);
 }

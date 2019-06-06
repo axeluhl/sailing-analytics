@@ -89,8 +89,6 @@ public class TestORCPerformanceCurve {
         assertEquals(345.0, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(16),new DegreeBearingImpl(98.3)).asSeconds(), accuracy);
         assertEquals(321.7, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(20),new DegreeBearingImpl(98.3)).asSeconds(), accuracy);
         
-        //assertEquals(537.3, performanceCurve.getLagrangeInterpolationPerTrueWindSpeedAndAngle(new KnotSpeedImpl(6), new DegreeBearingImpl(50)).asSeconds(), accuracy);
-        
         // TESTS of the corner areas of the polars
         assertEquals(588.1, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl( 6),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
         assertEquals(468.4, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl( 8),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
@@ -135,7 +133,6 @@ public class TestORCPerformanceCurve {
         ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(course);
         
         
-        //assertEquals(    6, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(    6))).getKnots(), accuracy);
         assertEquals( 11.5, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl( 11.5))).getKnots(), accuracy);
         assertEquals(17.23, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(17.23))).getKnots(), accuracy);
         assertEquals(   18, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(   18))).getKnots(), accuracy);
@@ -146,5 +143,22 @@ public class TestORCPerformanceCurve {
         assertEquals(  700, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(700))).asSeconds(), accuracy);
         assertEquals(  750, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(750))).asSeconds(), accuracy);
     }
-
+    
+    @Test
+    public void testImpliedWind() {
+        // TODO
+    }
+    
+    @Test
+    public void findErrorInCourseAllowanceCreation() {
+        ORCCertificateImpl certificate = (ORCCertificateImpl) importer.getCertificate("GER 5549");
+        ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(course);
+        try {
+            performanceCurve.createAllowancesPerCourse();
+        } catch (FunctionEvaluationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    
 }

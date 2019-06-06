@@ -24,4 +24,10 @@ public class ORCPerformanceCurveLegImpl implements ORCPerformanceCurveLeg {
         return twa;
     }
 
+    @Override
+    public String toString() {
+        return "ORCPerformanceCurveLegImpl [length=" + length.getNauticalMiles() + " nm, twa=" + twa.getDegrees() + "°]";
+    }
+
+    
 }
