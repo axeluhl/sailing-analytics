@@ -42,15 +42,19 @@ public class RaceTimesCalculationUtil {
             } else if (raceTimesInfo.startOfTracking != null) {
                 min = raceTimesInfo.startOfTracking;
             }
-            if (raceTimesInfo.endOfRace != null) {
+            
+            // If there is a blue flag up event use the blue flag down event (may not exist yet)
+            if (false) { //TODO is there a blue flag up event
+                max = new Date(raceTimesInfo.raceFinishedTime.getTime() + MAX_TIME_AFTER_RACE_END);
+            } else { // Else use the endOfRace
                 max = new Date(raceTimesInfo.endOfRace.getTime() + MAX_TIME_AFTER_RACE_END);
-            } else if (raceTimesInfo.newestTrackingEvent != null) {
-                max = raceTimesInfo.newestTrackingEvent;
-                if (raceTimesInfo.endOfTracking != null && raceTimesInfo.endOfTracking.before(raceTimesInfo.newestTrackingEvent)) {
+            }
+            
+            // If there are no end events or the additional offset exceeds end of tracking
+            if (raceTimesInfo.endOfTracking != null) {
+                if (max == null || max.after(raceTimesInfo.endOfTracking)) {
                     max = raceTimesInfo.endOfTracking;
                 }
-            } else if (raceTimesInfo.endOfTracking != null) {
-                max = raceTimesInfo.endOfTracking;
             }
             break;
         }
