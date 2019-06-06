@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><resources>
+
+    <string name="yes">"Sí"</string>
+    <string name="no">"No"</string>
+    <string name="confirm_data_hello_name">"Hola {full_name}"</string>
+    <string name="confirm_data_you_are_signed_in_as_sail_id">"Está iniciando la sesión como {sail_id}"</string>
+    <string name="confirm_data_is_correct">"OK"</string>
+    <string name="decline_data_is_incorrect">"No soy yo"</string>
+    <string name="confirm_delete_checkin">"¿Está seguro de que desea borrar este registro?"</string>
+    <string name="download_team_image_message">"Descargando imagen de equipo..."</string>
+    <string name="checkout_warning_message">"¿Desea REALMENTE cerrar la sesión? Tendrá que volver a iniciar la sesión con el código QR facilitado para acceder a su regata."</string>
+</resources>

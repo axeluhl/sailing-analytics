@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><resources>
+
+    <string name="yes">"はい"</string>
+    <string name="no">"いいえ"</string>
+    <string name="confirm_data_hello_name">"{full_name} さん、こんにちは"</string>
+    <string name="confirm_data_you_are_signed_in_as_sail_id">"{sail_id} としてサインインしようとしています"</string>
+    <string name="confirm_data_is_correct">"OK"</string>
+    <string name="decline_data_is_incorrect">"それは自分ではありません"</string>
+    <string name="confirm_delete_checkin">"このチェックインを削除しますか。"</string>
+    <string name="download_team_image_message">"チーム画像をダウンロード中..."</string>
+    <string name="checkout_warning_message">"ログアウトしますか。レガッタにアクセスするには指定された QR コードで再ログインする必要があります。"</string>
+</resources>

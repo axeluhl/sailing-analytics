@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><resources>
+
+    <string name="yes">"是"</string>
+    <string name="no">"否"</string>
+    <string name="confirm_data_hello_name">"{full_name}，您好"</string>
+    <string name="confirm_data_you_are_signed_in_as_sail_id">"您正在以{sail_id}身份登录"</string>
+    <string name="confirm_data_is_correct">"确定"</string>
+    <string name="decline_data_is_incorrect">"不是本人！"</string>
+    <string name="confirm_delete_checkin">"是否确定要删除此签到？"</string>
+    <string name="download_team_image_message">"正在下载船队图像..."</string>
+    <string name="checkout_warning_message">"是否确定要注销？您需要使用提供的二维码重新登录才能访问比赛！"</string>
+</resources>
