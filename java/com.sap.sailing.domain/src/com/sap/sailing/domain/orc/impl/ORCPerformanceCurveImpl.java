@@ -26,14 +26,13 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 
-// TODO Comment for Class, old comment is currently shown
 /**
- * For a {@link Competitor} and the {@link ORCPerformanceCurveCourse} which the competitor sailed until the creation,
- * this class represents a so called "Perfromance Curve". This Curve is specified by the so called "Implied Wind" a
- * {@link Speed} on the x-Axis and the allowance in s/nm respectively a {@link Duration} on the y-Axis. It represents a
- * simplified polar curve for the given boat and the given part of the course. For a given windspeed the performance
- * curve returns the allowance for the boat or in simpler words: how long should the boat need for a nautical mile when
- * sailing 100% performance.
+ * For a {@link Competitor} and the {@link ORCPerformanceCurveCourse} which the competitor sailed until the creation of
+ * an instance, this class represents a so called "Perfromance Curve". This Curve is specified by the so called "Implied
+ * Wind" a {@link Speed} on the x-Axis and the allowance in s/nm respectively a {@link Duration} on the y-Axis. It
+ * represents a simplified polar curve for the given boat and the given part of the course. For a given windspeed the
+ * performance curve returns the allowance for the boat or in simpler words: how long should the boat need for a
+ * nautical mile when sailing 100% performance.
  * 
  * The implementation is oriented to the pascal code provided by ORC for the performance curve module. Available here
  * <a href="https://data.orc.org/tools.php?c=pcs">https://data.orc.org/tools.php?c=pcs</a>.
