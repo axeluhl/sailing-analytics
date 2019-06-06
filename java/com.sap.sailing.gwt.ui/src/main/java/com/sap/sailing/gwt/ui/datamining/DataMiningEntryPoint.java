@@ -6,6 +6,8 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
@@ -13,6 +15,7 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
@@ -58,6 +61,12 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
     private final DataMiningServiceAsync dataMiningService = GWT.create(DataMiningService.class);
     private DataMiningSession session;
 
+    private QueryDefinitionProviderWithControls queryDefinitionProvider;
+    private CompositeResultsPresenter<?> resultsPresenter;
+
+    private SplitLayoutPanel queryAndResultSplitPanel;
+    private boolean queryAndResultAreVertical = true;
+
     @Override
     protected void doOnModuleLoad() {
         Highcharts.ensureInjectedWithMore();
@@ -78,7 +87,6 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         authorizedContentDecorator.setPermissionToCheck(serverInfo, ServerActions.DATA_MINING);
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
 
-            private QueryDefinitionProviderWithControls queryDefinitionProvider;
             private SimpleQueryRunner queryRunner;
             private final DataMiningSettingsInfoManager settingsManager = new DataMiningSettingsInfoManagerImpl(
                     getStringMessages());
@@ -86,7 +94,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
             @Override
             public Widget get() {
                 DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null);
-                CompositeResultsPresenter<?> resultsPresenter = new TabbedSailingResultsPresenter(/* parent */ null,
+                resultsPresenter = new TabbedSailingResultsPresenter(/* parent */ null,
                         /* context */ null, /* drillDownCallback */ groupKey -> {
                             queryDefinitionProvider.drillDown(groupKey, () -> {
                                 queryRunner.run(queryDefinitionProvider.getQueryDefinition());
@@ -111,6 +119,15 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                             queryDefinitionProvider, dataMiningService, queryRunner);
                     queryDefinitionProvider.addControl(new StoredDataMiningQueryPanel(dataProvider));
                 }
+
+                Button orientationButton = new Button("Orientation"); //TODO Use icon or i18n string
+                orientationButton.addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        setQueryAndResultOrientation();
+                    }
+                });
+                queryDefinitionProvider.addControl(orientationButton);
                 /*
                  * Running queries automatically when they've been changed is currently unnecessary, if not even
                  * counterproductive. This removes the query runner settings to prevent that the user can enable the
@@ -118,9 +135,8 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                  */
                 // settingsControl.addSettingsComponent(queryRunner);
 
-                SplitLayoutPanel splitPanel = new SplitLayoutPanel(10);
-                splitPanel.addSouth(resultsPresenter.getEntryWidget(), 350);
-                splitPanel.add(queryDefinitionProvider.getEntryWidget());
+                queryAndResultSplitPanel = new SplitLayoutPanel(10);
+                addDefinitionProviderAndResultPresenter();
 
                 if (queryIdentifier != null) {
                     if (Storage.isLocalStorageSupported()) {
@@ -153,7 +169,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                                 NotificationType.ERROR);
                     }
                 }
-                return splitPanel;
+                return queryAndResultSplitPanel;
             }
         });
 
@@ -163,6 +179,39 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         panel.add(authorizedContentDecorator);
         panel.ensureDebugId("DataMiningPanel");
         rootPanel.add(panel);
+    }
+
+    /**
+     * Toggles the position of the {@link #resultsPresenter} from south to east and vice versa.
+     */
+    public void setQueryAndResultOrientation() {
+        setQueryAndResultOrientation(!queryAndResultAreVertical);
+    }
+    /**
+     * Sets the position of the {@link #resultsPresenter}.
+     * @param vertical {@code boolean} {@code true} places it in the south position
+     * and {@code false} in the east position.
+     */
+    public void setQueryAndResultOrientation(boolean vertical) {
+        if (vertical != queryAndResultAreVertical) {
+            queryAndResultAreVertical = vertical;
+
+            queryAndResultSplitPanel.remove(resultsPresenter.getEntryWidget());
+            // You can't add panels as long as there is a center panel so temporarily remove it
+            queryAndResultSplitPanel.remove(queryDefinitionProvider.getEntryWidget());
+
+            // Add the center panel back once the changes are made
+            addDefinitionProviderAndResultPresenter();
+        }
+    }
+
+    private void addDefinitionProviderAndResultPresenter() {
+        if (queryAndResultAreVertical) {
+            queryAndResultSplitPanel.addSouth(resultsPresenter.getEntryWidget(), 350);
+        } else {
+            queryAndResultSplitPanel.addEast(resultsPresenter.getEntryWidget(), 400);
+        }
+        queryAndResultSplitPanel.add(queryDefinitionProvider.getEntryWidget());
     }
 
     private void removeUrlParameter() {
