@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.math.ArgumentOutsideDomainException;
 import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.MaxIterationsExceededException;
 import org.json.simple.parser.ParseException;
@@ -31,6 +32,8 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class TestORCPerformanceCurve {
 
+    private final boolean collectErrors = false;
+    
     private static ORCPerformanceCurveCourse course;
     private static ORCCertificateImporter importer;
 
@@ -40,11 +43,12 @@ public class TestORCPerformanceCurve {
     public void assertEquals(double a, double b, double accuracy){
         try{
             Assert.assertEquals(a, b, accuracy);
-            System.out.println("Expected: " + a + " - Recieved: " + b + " | passed");
+            //System.out.println("Expected: " + a + " - Recieved: " + b + " | passed");
         } catch(AssertionError e){
-            System.out.println("Expected: " + a + " - Recieved: " + b + " | failed");
-
-            collector.addError(e);
+            //System.out.println("Expected: " + a + " - Recieved: " + b + " | failed");
+            if(collectErrors) {
+                collector.addError(e);
+            }
         }
    }
     
@@ -63,7 +67,7 @@ public class TestORCPerformanceCurve {
     
     @Test
     public void testLagrangeInterpolation() throws FunctionEvaluationException {
-        System.out.println("- testLagrangeInterpolation() -");
+        //System.out.println("- testLagrangeInterpolation() -");
         Double accuracy = 0.21;
         ORCCertificateImpl certificate = (ORCCertificateImpl) importer.getCertificate("GER 5549");
         ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(course);
@@ -101,7 +105,7 @@ public class TestORCPerformanceCurve {
     
     @Test
     public void testSimpleConstructedCourse() throws FunctionEvaluationException {
-        System.out.println("- testSimpleConstructedCourse() -");
+        //System.out.println("- testSimpleConstructedCourse() -");
         ORCCertificateImpl certificate = (ORCCertificateImpl) importer.getCertificate("GER 5549");
         List<ORCPerformanceCurveLeg> legs = new ArrayList<>();
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.0), new DegreeBearingImpl(0)));
@@ -127,11 +131,10 @@ public class TestORCPerformanceCurve {
     
     @Test
     public void testPerformanceCurveInvertation() throws MaxIterationsExceededException, FunctionEvaluationException {
-        System.out.println("- testPerformanceCurveInvertation() -");
+        //System.out.println("- testPerformanceCurveInvertation() -");
         Double accuracy = 0.1;
         ORCCertificateImpl certificate = (ORCCertificateImpl) importer.getCertificate("GER 5549");
         ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(course);
-        
         
         assertEquals( 11.5, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl( 11.5))).getKnots(), accuracy);
         assertEquals(17.23, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(17.23))).getKnots(), accuracy);
@@ -145,8 +148,17 @@ public class TestORCPerformanceCurve {
     }
     
     @Test
-    public void testImpliedWind() {
-        // TODO
+    public void testImpliedWind() throws ArgumentOutsideDomainException, MaxIterationsExceededException, FunctionEvaluationException {
+       Double accuracy = 0.1;
+       ORCCertificate certificateMoana = importer.getCertificate("GER 5549");
+       ORCCertificate certificateMilan = importer.getCertificate("GER 7323");
+       ORCPerformanceCurve performanceCurveMoana = certificateMoana.getPerformanceCurve(course);
+       ORCPerformanceCurve performanceCurveMilan = certificateMilan.getPerformanceCurve(course);
+       
+       assertNotNull(performanceCurveMoana);
+       assertNotNull(performanceCurveMilan);
+       assertEquals(20.0    , performanceCurveMoana.getImpliedWind(Duration.ONE_HOUR).getKnots(), accuracy);
+       assertEquals(12.89281, performanceCurveMilan.getImpliedWind(Duration.ONE_HOUR).getKnots(), accuracy);
     }
     
 }
