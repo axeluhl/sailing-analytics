@@ -11,7 +11,9 @@ import java.util.function.Consumer;
 
 import com.google.gwt.dom.builder.shared.HtmlBuilderFactory;
 import com.google.gwt.dom.builder.shared.HtmlUListBuilder;
+import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.dom.client.Style.WhiteSpace;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
@@ -108,6 +110,10 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         // Creating the header panel, that contains the retriever chain provider and the controls
         controlsPanel = new FlowPanel();
         controlsPanel.addStyleName("dataMiningMarginBase");
+        // The following 2 lines restrict controlsPanel to using one line
+        // instead of pushing its content into the next line when there is not enough space.
+        controlsPanel.getElement().getStyle().setOverflow(Overflow.HIDDEN);
+        controlsPanel.getElement().getStyle().setWhiteSpace(WhiteSpace.NOWRAP);
 
         this.settingsControl = settingsControl;
         addControl(this.settingsControl.getEntryWidget());
