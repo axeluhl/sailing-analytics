@@ -58,6 +58,9 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
     public static final ComponentResources resources = GWT.create(ComponentResources.class);
     private static final Logger LOG = Logger.getLogger(DataMiningEntryPoint.class.getName());
 
+    private static final int resultsPresenterSouthInitialHeight = 350;
+    private static final int resultsPresenterEastInitialWidth = 700;
+
     private final DataMiningServiceAsync dataMiningService = GWT.create(DataMiningService.class);
     private DataMiningSession session;
 
@@ -207,9 +210,9 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
 
     private void addDefinitionProviderAndResultPresenter() {
         if (queryAndResultAreVertical) {
-            queryAndResultSplitPanel.addSouth(resultsPresenter.getEntryWidget(), 350);
+            queryAndResultSplitPanel.addSouth(resultsPresenter.getEntryWidget(), resultsPresenterSouthInitialHeight);
         } else {
-            queryAndResultSplitPanel.addEast(resultsPresenter.getEntryWidget(), 400);
+            queryAndResultSplitPanel.addEast(resultsPresenter.getEntryWidget(), resultsPresenterEastInitialWidth);
         }
         queryAndResultSplitPanel.add(queryDefinitionProvider.getEntryWidget());
     }

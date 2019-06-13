@@ -72,7 +72,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
 
     private static final double HeaderPanelHeight = 41;
     private static final double InitialQueryDefinitionViewerWidth = 600;
-    private static final double InitialStatisticProviderWidth = 800;
+    private static final double InitialStatisticProviderWidth = 500;
     private static final double FooterPanelHeight = 60;
     private static final int SplitterSize = 10;
 
