@@ -130,6 +130,12 @@ public interface TrackedRace
 
     /**
      * @return the time point taken from a valid, non-revoked {@link RaceLogRaceStatusEvent} that transfers the race
+     * into status {@link RaceLogRaceStatus#FINISHING} or {@code null} if no such event is found.
+     */
+    TimePoint getFinishingTime();
+
+    /**
+     * @return the time point taken from a valid, non-revoked {@link RaceLogRaceStatusEvent} that transfers the race
      *         into status {@link RaceLogRaceStatus#FINISHED} from any of the {@link RaceLog}s attached to this race,
      *         or {@code null} if no such event is found.
      *         

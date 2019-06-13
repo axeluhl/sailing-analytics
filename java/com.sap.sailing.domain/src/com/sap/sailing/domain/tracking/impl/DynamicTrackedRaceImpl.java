@@ -528,6 +528,16 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     @Override
+    public void setFinishingTime(TimePoint newFinishingTime) {
+        final TimePoint oldFinishingTime = getFinishingTime();
+        if (!Util.equalsWithNull(newFinishingTime, oldFinishingTime)) {
+            logger.info("Finishing time of race " + getRace().getName() + " updated from " + getFinishingTime() + " to " + newFinishingTime);
+            super.setFinishingTime(newFinishingTime);
+            notifyListenersFinishingTimeChanged(oldFinishingTime, newFinishingTime);
+        }
+    }
+
+    @Override
     public void setFinishedTime(final TimePoint newFinishedTime) {
         final TimePoint oldFinishedTime = getFinishedTime();
         if (!Util.equalsWithNull(newFinishedTime, oldFinishedTime)) {
@@ -556,6 +566,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     private void notifyListenersStartOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
         notifyListeners(listener -> listener.startOfRaceChanged(oldStartOfRace, newStartOfRace));
+    }
+
+    private void notifyListenersFinishingTimeChanged(TimePoint oldFinishingTime, TimePoint newFinishingTime) {
+        notifyListeners(listener -> listener.finishingTimeChanged(oldFinishingTime, newFinishingTime));
     }
 
     private void notifyListenersFinishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime) {

@@ -148,6 +148,13 @@ public interface DynamicTrackedRace extends TrackedRace {
     void setStartTimeReceived(TimePoint start);
 
     /**
+     * A new finishing time has been received by the {@link DynamicTrackedRaceLogListener} and is announced to this race
+     * by calling this method  and the result of {@link #getFinishingTime()} will return
+     * the {@code newFinishedTime} after this call returns.
+     */
+    void setFinishingTime(final TimePoint newFinishingTime);
+
+    /**
      * A new finished time has been received by the {@link DynamicTrackedRaceLogListener} and is announced to this race
      * by calling this method. The {@link RaceChangeListener}s will be
      * {@link RaceChangeListener#finishedTimeChanged(TimePoint, TimePoint) notified} about this change, and the result

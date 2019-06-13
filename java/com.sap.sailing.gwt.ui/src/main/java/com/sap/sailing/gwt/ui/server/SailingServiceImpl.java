@@ -2286,6 +2286,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             raceTimesInfo.newestTrackingEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
             raceTimesInfo.endOfTracking = trackedRace.getEndOfTracking() == null ? null : trackedRace.getEndOfTracking().asDate();
             raceTimesInfo.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
+            raceTimesInfo.raceFinishingTime = trackedRace.getFinishingTime() == null ? null : trackedRace.getFinishingTime().asDate();
             raceTimesInfo.raceFinishedTime = trackedRace.getFinishedTime() == null ? null : trackedRace.getFinishedTime().asDate();
             raceTimesInfo.delayToLiveInMs = trackedRace.getDelayToLiveInMillis();
 

@@ -135,6 +135,11 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
+    public TimePoint getFinishingTime() {
+        return null;
+    }
+
+    @Override
     public TimePoint getFinishedTime() {
         return null;
     }

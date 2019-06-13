@@ -239,6 +239,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private TimePoint endTime;
 
     /**
+     * The time set by race management ("Blue Flag Up" event) for when the first competitor has finished.
+     */
+    private TimePoint finishingTime;
+
+    /**
      * The time set by race management ("Blue Flag Down" event) for when the race has finished. This field caches what
      * today comes from the {@link RaceLog}s in the form of {@link RaceLogRaceStatusEvent}s setting the status to
      * {@link RaceLogRaceStatus#FINISHED} and is computed by the {@link DynamicTrackedRaceLogListener#getFinishedTime()}
@@ -1019,6 +1024,15 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             endTime = getLastPassingOfFinishLine();
         }
         return endTime;
+    }
+
+    @Override
+    public TimePoint getFinishingTime() {
+        return finishingTime;
+    }
+
+    protected void setFinishingTime(final TimePoint newFinishingTime) {
+        finishingTime = newFinishingTime;
     }
 
     @Override
