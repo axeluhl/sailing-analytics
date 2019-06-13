@@ -58,14 +58,13 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
     public static final ComponentResources resources = GWT.create(ComponentResources.class);
     private static final Logger LOG = Logger.getLogger(DataMiningEntryPoint.class.getName());
 
-    private static final int resultsPresenterSouthInitialHeight = 350;
-    private static final int resultsPresenterEastInitialWidth = 700;
-
     private final DataMiningServiceAsync dataMiningService = GWT.create(DataMiningService.class);
     private DataMiningSession session;
 
     private QueryDefinitionProviderWithControls queryDefinitionProvider;
     private CompositeResultsPresenter<?> resultsPresenter;
+    private Integer resultsPresenterSouthHeight = 350;
+    private Integer resultsPresenterEastWidth = 750;
 
     private SplitLayoutPanel queryAndResultSplitPanel;
     private boolean queryAndResultAreVertical = true;
@@ -197,6 +196,16 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
      */
     public void setQueryAndResultOrientation(boolean vertical) {
         if (vertical != queryAndResultAreVertical) {
+            // Store current size for the next orientation change
+            Double size = queryAndResultSplitPanel.getWidgetSize(resultsPresenter.getEntryWidget());
+            if (size != null) {
+                if (queryAndResultAreVertical) {
+                    resultsPresenterSouthHeight = size.intValue();
+                } else {
+                    resultsPresenterEastWidth = size.intValue();
+                }
+            }
+
             queryAndResultAreVertical = vertical;
 
             queryAndResultSplitPanel.remove(resultsPresenter.getEntryWidget());
@@ -210,9 +219,9 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
 
     private void addDefinitionProviderAndResultPresenter() {
         if (queryAndResultAreVertical) {
-            queryAndResultSplitPanel.addSouth(resultsPresenter.getEntryWidget(), resultsPresenterSouthInitialHeight);
+            queryAndResultSplitPanel.addSouth(resultsPresenter.getEntryWidget(), resultsPresenterSouthHeight);
         } else {
-            queryAndResultSplitPanel.addEast(resultsPresenter.getEntryWidget(), resultsPresenterEastInitialWidth);
+            queryAndResultSplitPanel.addEast(resultsPresenter.getEntryWidget(), resultsPresenterEastWidth);
         }
         queryAndResultSplitPanel.add(queryDefinitionProvider.getEntryWidget());
     }
