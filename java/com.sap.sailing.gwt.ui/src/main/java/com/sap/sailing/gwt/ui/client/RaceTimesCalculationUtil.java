@@ -28,7 +28,23 @@ public class RaceTimesCalculationUtil {
                 } else {
                     // race start was in the past
                     min = new Date(raceTimesInfo.startOfRace.getTime() - MIN_TIME_BEFORE_RACE_START);
-                    max = new Date(liveTimePoint.getTime() + TIME_AFTER_LIVE);
+
+                    if (raceTimesInfo.raceFinishingTime != null) {
+                        // There is a blue flag up event
+                        if (raceTimesInfo.raceFinishedTime != null) {
+                            // And a blue flag down event
+                            max = new Date(raceTimesInfo.raceFinishedTime.getTime() + MAX_TIME_AFTER_RACE_END);
+                        } else {
+                            // No blue flag down event yet so wait for it
+                            max = new Date(liveTimePoint.getTime() + TIME_AFTER_LIVE);
+                        }
+                    } else if (raceTimesInfo.endOfRace != null) {
+                        // No blue flag up event but an endOfRace
+                        max = new Date(raceTimesInfo.endOfRace.getTime() + MAX_TIME_AFTER_RACE_END);
+                    } else {
+                        // No end events yet so keep on waiting
+                        max = new Date(liveTimePoint.getTime() + TIME_AFTER_LIVE);
+                    }
                 }
             } else {
                 // we have NO race start time
@@ -39,14 +55,18 @@ public class RaceTimesCalculationUtil {
         case Replay:
             if (raceTimesInfo.startOfRace != null) {
                 min = new Date(raceTimesInfo.startOfRace.getTime() - MIN_TIME_BEFORE_RACE_START);
-            } else if (raceTimesInfo.startOfTracking != null) {
-                min = raceTimesInfo.startOfTracking;
+            }
+            // If there is no start event or the offset exceeds start of tracking
+            if (raceTimesInfo.startOfTracking != null) {
+                if (min == null || min.before(raceTimesInfo.startOfTracking)) {
+                    min = raceTimesInfo.startOfTracking;
+                }
             }
             
-            // If there is a blue flag up event use the blue flag down event (may not exist yet)
-            if (false) { //TODO is there a blue flag up event
+            // If there is a blue flag down event
+            if (raceTimesInfo.raceFinishedTime != null) {
                 max = new Date(raceTimesInfo.raceFinishedTime.getTime() + MAX_TIME_AFTER_RACE_END);
-            } else { // Else use the endOfRace
+            } else if (raceTimesInfo.endOfRace != null) { // Else try to use endOfRace
                 max = new Date(raceTimesInfo.endOfRace.getTime() + MAX_TIME_AFTER_RACE_END);
             }
             
