@@ -1298,6 +1298,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String editMarkPositions();
     String removeFixedPassings();
     String setFixedPassing();
+    String chooseFixedPassing();
     String setSuppressedPassing();
     String removeSuppressedPassing();
     String errorRemovingFixedPassing(String message);

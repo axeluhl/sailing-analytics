@@ -84,6 +84,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
     private final SingleSelectionModel<Util.Pair<Integer, Date>> waypointSelectionModel;
     private List<WaypointDTO> currentWaypoints;
 
+    private final Button chooseTimeAsMarkPassingsButton;
     private final Button setTimeAsMarkPassingsButton;
     private final Button removeFixedMarkPassingsButton;
     private final Button suppressPassingsButton;
@@ -193,36 +194,13 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
                 }
             }
         });
-        setTimeAsMarkPassingsButton = new Button(stringMessages.setFixedPassing());
-        setTimeAsMarkPassingsButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                final LeaderboardNameRaceColumnNameAndFleetName leaderboardNameRaceColumnNameAndFleetName =
-                        raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(raceIdentifier);
-                if (leaderboardNameRaceColumnNameAndFleetName != null) {
-                    final Integer waypoint = waypointSelectionModel.getSelectedObject().getA();
-                    if (isSettingFixedTimePossible(timer, stringMessages)) {
-                    final Date time = timer.getTime();
-                    sailingService.updateFixedMarkPassing(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
-                            leaderboardNameRaceColumnNameAndFleetName.getRaceColumnName(),
-                            leaderboardNameRaceColumnNameAndFleetName.getFleetName(), waypoint, time, competitor,
-                                    new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError(stringMessages.errorSettingFixedPassing(caught.getMessage()));
-                        }
-    
-                        @Override
-                        public void onSuccess(Void result) {
-                            refillList();
-                        }
-                    });
-                    } else {
-                        Notification.notify(stringMessages.warningSettingFixedPassing(currentWaypoints.get(waypoint).getName()), NotificationType.WARNING);
-                }
-            }
-            }
+        chooseTimeAsMarkPassingsButton = new Button(stringMessages.chooseFixedPassing());
+        chooseTimeAsMarkPassingsButton.addClickHandler(clickEvent -> {
+            //TODO Get time from dialog
+            updateMarkPassingTime(null);
         });
+        setTimeAsMarkPassingsButton = new Button(stringMessages.setFixedPassing());
+        setTimeAsMarkPassingsButton.addClickHandler(clickEvent -> updateMarkPassingTime(timer.getTime()));
 
         // Button for suppressing
         suppressPassingsButton = new Button(stringMessages.setSuppressedPassing());
@@ -286,6 +264,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
         VerticalPanel buttonPanel = new VerticalPanel();
         buttonPanel.setSpacing(3);
         tableAndButtons.add(buttonPanel);
+        buttonPanel.add(chooseTimeAsMarkPassingsButton);
         buttonPanel.add(setTimeAsMarkPassingsButton);
         buttonPanel.add(removeFixedMarkPassingsButton);
         buttonPanel.add(suppressPassingsButton);
@@ -296,18 +275,44 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
         setVisible(false);
     }
     
+    private void updateMarkPassingTime(Date time) {
+        final LeaderboardNameRaceColumnNameAndFleetName leaderboardNameRaceColumnNameAndFleetName =
+                raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(raceIdentifier);
+        if (time != null && leaderboardNameRaceColumnNameAndFleetName != null) {
+            final Integer waypoint = waypointSelectionModel.getSelectedObject().getA();
+            if (isSettingFixedTimePossible(time, stringMessages)) {
+                sailingService.updateFixedMarkPassing(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
+                        leaderboardNameRaceColumnNameAndFleetName.getRaceColumnName(),
+                        leaderboardNameRaceColumnNameAndFleetName.getFleetName(), waypoint, time, competitor,
+                        new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.errorSettingFixedPassing(caught.getMessage()));
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        refillList();
+                    }
+                });
+            } else {
+                Notification.notify(stringMessages.warningSettingFixedPassing(currentWaypoints.get(waypoint).getName()), NotificationType.WARNING);
+            }
+        }
+    }
+
     /**
      * Checks the possibility of setting a new fixed time for selected waypoint
      * 
      * @return false if new fixed time for waypoint is after the fixed time of any of the following waypoints or before
      *         any of the previous ones
      */
-    private boolean isSettingFixedTimePossible(Timer timer, StringMessages stringMessages) {
+    private boolean isSettingFixedTimePossible(Date time, StringMessages stringMessages) {
         Integer selectedWaypointIndex = waypointSelectionModel.getSelectedObject().getA();
         for (Integer waypointIndex : currentCompetitorEdits.keySet()) {
             Date waypointDate = currentCompetitorEdits.get(waypointIndex);
-            if ((waypointIndex < selectedWaypointIndex && waypointDate.after(timer.getTime()))
-                    || (waypointIndex > selectedWaypointIndex && waypointDate.before(timer.getTime()))) {
+            if ((waypointIndex < selectedWaypointIndex && waypointDate.after(time))
+                    || (waypointIndex > selectedWaypointIndex && waypointDate.before(time))) {
                 return false;
             }
         }
@@ -428,6 +433,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
     }
 
     private void enableButtons() {
+        chooseTimeAsMarkPassingsButton.setEnabled(false);
         setTimeAsMarkPassingsButton.setEnabled(false);
         removeFixedMarkPassingsButton.setEnabled(false);
         suppressPassingsButton.setEnabled(false);
@@ -438,6 +444,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
             }
             Pair<Integer, Date> selectedWaypoint = waypointSelectionModel.getSelectedObject();
             if (selectedWaypoint != null) {
+                chooseTimeAsMarkPassingsButton.setEnabled(true);
                 setTimeAsMarkPassingsButton.setEnabled(true);
                 suppressPassingsButton.setEnabled(true);
                 if (currentCompetitorEdits.containsKey(selectedWaypoint.getA())) {
