@@ -32,6 +32,7 @@ public class RaceTableWrapper<S extends RefreshableSelectionModel<RaceColumnDTOA
     public RaceTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection) {
         super(sailingService, stringMessages, errorReporter, multiSelection, /* enablePager */ false,
+                /* paging size */ Integer.MAX_VALUE,
                 new EntityIdentityComparator<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
             @Override
                     public boolean representSameEntity(RaceColumnDTOAndFleetDTOWithNameBasedEquality dto1,
