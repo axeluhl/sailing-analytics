@@ -131,6 +131,7 @@ public class ORCCertificateImpl implements ORCCertificate {
     private final String boatclass;
     private final Distance lengthOverAll;
     private final Duration gph;
+    private final Double cdl;
     private final Map<Speed, Map<Bearing, Duration>> timeAllowancesPerTrueWindSpeedAndAngle;
     private final Map<Speed, Bearing> beatAngles;
     private final Map<Speed, Bearing> gybeAngles;
@@ -146,7 +147,7 @@ public class ORCCertificateImpl implements ORCCertificate {
      * @param beatAngles
      * @param gybeAngles
      */
-    public ORCCertificateImpl(String sailnumber, String boatclass, Distance length, Duration gph,
+    public ORCCertificateImpl(String sailnumber, String boatclass, Distance length, Duration gph, Double cdl,
             Map<Speed, Map<Bearing, Duration>> timeAllowancesPerTrueWindSpeedAndAngle, Map<Speed, Bearing> beatAngles,
             Map<Speed, Bearing> gybeAngles) {
         super();
@@ -154,6 +155,7 @@ public class ORCCertificateImpl implements ORCCertificate {
         this.boatclass = boatclass;
         this.lengthOverAll = length;
         this.gph = gph;
+        this.cdl = cdl;
         this.timeAllowancesPerTrueWindSpeedAndAngle = Collections.unmodifiableMap(timeAllowancesPerTrueWindSpeedAndAngle);
         this.beatAngles = Collections.unmodifiableMap(beatAngles);
         this.gybeAngles = Collections.unmodifiableMap(gybeAngles);
@@ -224,5 +226,10 @@ public class ORCCertificateImpl implements ORCCertificate {
 
     public Distance getLengthOverAll() {
         return lengthOverAll;
+    }
+
+    @Override
+    public double getCDL() {
+        return cdl;
     }
 }

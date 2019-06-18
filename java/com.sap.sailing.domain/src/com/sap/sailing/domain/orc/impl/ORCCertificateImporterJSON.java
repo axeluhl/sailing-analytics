@@ -79,10 +79,11 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
         String boatclass = null;
         Distance length  = null;
         Duration gph     = null;
+        Double cdl       = null;
         Map<Speed, Bearing> beatAngles = new HashMap<>();
         Map<Speed, Bearing> gybeAngles = new HashMap<>();
         Map<Speed, Map<Bearing, Duration>> timeAllowancesPerTrueWindSpeedAndAngle = new HashMap<>();
-        Map<Bearing, Map<Speed, Duration>> twaCourses       = new HashMap<>(); //TODO Rework, no String, directly parsed to the SAPSailing Semantics -> Bearing
+        Map<Bearing, Map<Speed, Duration>> twaCourses       = new HashMap<>();
         Map<String, Map<Speed, Duration>> predefinedCourses = new HashMap<>();
         String searchString = sailnumber.replaceAll(" ", "").toUpperCase();
         JSONObject object = (JSONObject) data.get(searchString);
@@ -101,6 +102,8 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
                 case "GPH":    
                     gph = Duration.ONE_SECOND.times(((Number) entry.getValue()).doubleValue());
                     break;
+                case "CDL":
+                    cdl = ((Number) entry.getValue()).doubleValue();
                 case "Allowances":
                     JSONObject allowances = (JSONObject) object.get("Allowances");
                     for (Object aKey : allowances.keySet()) {
@@ -168,7 +171,7 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
         }
         
         
-        return new ORCCertificateImpl(searchString, boatclass, length, gph, timeAllowancesPerTrueWindSpeedAndAngle, beatAngles, gybeAngles);
+        return new ORCCertificateImpl(searchString, boatclass, length, gph, cdl, timeAllowancesPerTrueWindSpeedAndAngle, beatAngles, gybeAngles);
     }
 
     /**

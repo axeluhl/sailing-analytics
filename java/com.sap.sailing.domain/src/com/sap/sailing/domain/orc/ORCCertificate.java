@@ -28,7 +28,11 @@ public interface ORCCertificate {
      */
     public double getGPH();
     
-    // TODO getCDL f�r Gruppeneinteilung
+    /**
+     * 
+     * @return
+     */
+    public double getCDL();
     
     /**
      * 
