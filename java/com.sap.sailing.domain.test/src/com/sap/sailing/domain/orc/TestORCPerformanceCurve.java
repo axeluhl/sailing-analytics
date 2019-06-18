@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.orc;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
@@ -9,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.math.ArgumentOutsideDomainException;
 import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.MaxIterationsExceededException;
 import org.json.simple.parser.ParseException;
@@ -43,9 +41,7 @@ public class TestORCPerformanceCurve {
     public void assertEquals(double a, double b, double accuracy){
         try{
             Assert.assertEquals(a, b, accuracy);
-            //System.out.println("Expected: " + a + " - Recieved: " + b + " | passed");
         } catch(AssertionError e){
-            //System.out.println("Expected: " + a + " - Recieved: " + b + " | failed");
             if(collectErrors) {
                 collector.addError(e);
             }
@@ -67,7 +63,6 @@ public class TestORCPerformanceCurve {
     
     @Test
     public void testLagrangeInterpolation() throws FunctionEvaluationException {
-        //System.out.println("- testLagrangeInterpolation() -");
         Double accuracy = 0.21;
         ORCCertificateImpl certificate = (ORCCertificateImpl) importer.getCertificate("GER 5549");
         ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(course);
@@ -105,7 +100,6 @@ public class TestORCPerformanceCurve {
     
     @Test
     public void testSimpleConstructedCourse() throws FunctionEvaluationException {
-        //System.out.println("- testSimpleConstructedCourse() -");
         ORCCertificateImpl certificate = (ORCCertificateImpl) importer.getCertificate("GER 5549");
         List<ORCPerformanceCurveLeg> legs = new ArrayList<>();
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.0), new DegreeBearingImpl(0)));
@@ -131,7 +125,6 @@ public class TestORCPerformanceCurve {
     
     @Test
     public void testPerformanceCurveInvertation() throws MaxIterationsExceededException, FunctionEvaluationException {
-        //System.out.println("- testPerformanceCurveInvertation() -");
         Double accuracy = 0.1;
         ORCCertificateImpl certificate = (ORCCertificateImpl) importer.getCertificate("GER 5549");
         ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(course);
@@ -147,18 +140,35 @@ public class TestORCPerformanceCurve {
         assertEquals(  750, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(750))).asSeconds(), accuracy);
     }
     
+    // Tests for a Implied Wind calculation for a simple predefined course. The solutions are extracted from the provided ORC TestPCS.exe application. 
     @Test
-    public void testImpliedWind() throws ArgumentOutsideDomainException, MaxIterationsExceededException, FunctionEvaluationException {
-       Double accuracy = 0.1;
-       ORCCertificate certificateMoana = importer.getCertificate("GER 5549");
-       ORCCertificate certificateMilan = importer.getCertificate("GER 7323");
-       ORCPerformanceCurve performanceCurveMoana = certificateMoana.getPerformanceCurve(course);
-       ORCPerformanceCurve performanceCurveMilan = certificateMilan.getPerformanceCurve(course);
+    public void testImpliedWindSimple() throws MaxIterationsExceededException, FunctionEvaluationException {
+       Double accuracy = 0.000001;
+       ORCCertificate certificateMoana  = importer.getCertificate("GER 5549");
+       ORCCertificate certificateMilan  = importer.getCertificate("GER 7323");
+       ORCCertificate certificateTutima = importer.getCertificate("GER 5609");
+       ORCCertificate certificateBank   = importer.getCertificate("GER 5555");
+       ORCCertificate certificateHaspa  = importer.getCertificate("GER 6300");
+       ORCCertificate certificateHalbtrocken = importer.getCertificate("GER 5564");
+       ORCPerformanceCurve performanceCurveMoana  = certificateMoana.getPerformanceCurve(course);
+       ORCPerformanceCurve performanceCurveMilan  = certificateMilan.getPerformanceCurve(course);
+       ORCPerformanceCurve performanceCurveTutima = certificateTutima.getPerformanceCurve(course);
+       ORCPerformanceCurve performanceCurveBank   = certificateBank.getPerformanceCurve(course);
+       ORCPerformanceCurve performanceCurveHaspa  = certificateHaspa.getPerformanceCurve(course);
+       ORCPerformanceCurve performanceCurveHalbtrocken = certificateHalbtrocken.getPerformanceCurve(course);
        
        assertNotNull(performanceCurveMoana);
        assertNotNull(performanceCurveMilan);
+       
+       // Test for corner case and if the algorithm reacts to the boundaries of 6 and 20 kts.
        assertEquals(20.0    , performanceCurveMoana.getImpliedWind(Duration.ONE_HOUR).getKnots(), accuracy);
-       assertEquals(12.89281, performanceCurveMilan.getImpliedWind(Duration.ONE_HOUR).getKnots(), accuracy);
+       
+       assertEquals(12.89281, performanceCurveMilan .getImpliedWind(Duration.ONE_HOUR.times(1.0)).getKnots(), accuracy);
+       assertEquals(8.72668 , performanceCurveTutima.getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
+       assertEquals(8.07591 , performanceCurveBank  .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
+       assertEquals(7.78413 , performanceCurveHaspa .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
+       assertEquals(7.76218 , performanceCurveMoana .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
+       assertEquals(7.62407 , performanceCurveHalbtrocken.getImpliedWind(Duration.ONE_HOUR.times(2.0)).getKnots(), accuracy);
     }
     
 }

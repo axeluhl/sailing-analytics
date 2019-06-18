@@ -7,7 +7,7 @@ import com.sap.sse.common.Speed;
 
 //TODO COMMENTS!!!
 /**
- * 
+ * Represents semantically a real ORC certificate for a {@link competitor}. 
  * @author Daniel Lisunkin (i505543)
  *
  */
@@ -28,7 +28,7 @@ public interface ORCCertificate {
      */
     public double getGPH();
     
-    // TODO getCDL für Gruppeneinteilung
+    // TODO getCDL fï¿½r Gruppeneinteilung
     
     /**
      * 
@@ -38,13 +38,13 @@ public interface ORCCertificate {
     
     /**
      * 
-     * @return
+     * @return 
      */
     public Map<Speed, Duration> getCircularRandomAllowances();
     
     /**
      * 
-     * @return
+     * @returny
      */
     public Map<Speed, Duration> getLongDistanceAllowances();
     
