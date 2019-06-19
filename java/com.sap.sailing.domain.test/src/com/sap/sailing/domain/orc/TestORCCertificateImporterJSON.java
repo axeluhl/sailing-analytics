@@ -24,7 +24,6 @@ public class TestORCCertificateImporterJSON {
         ORCCertificateImporter importer = new ORCCertificateImporterJSON(new FileInputStream(fileGER));
         ORCCertificate milan = importer.getCertificate(" ger 7323");
         assertNotNull(milan);
-        //assertEquals("19.812", milan.getValueString("LOA"));
     }
     
     @Test

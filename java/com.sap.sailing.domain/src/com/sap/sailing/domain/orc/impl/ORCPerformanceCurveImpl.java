@@ -241,9 +241,14 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         int backcutpoint  = Arrays.binarySearch(allowancesTrueWindAnglesWithBeatRun, gybeAngles.get(trueWindSpeed)) + 1;
         allowancesTrueWindAnglesWithBeatRun = Arrays.copyOfRange(allowancesTrueWindAnglesWithBeatRun, frontcutpoint, backcutpoint);
         
-        int i = -1; // after the loop, i equals the next higher available polar data for the given TWA
+        int i = -1 ; // after the loop, i equals the next higher available polar data for the given TWA
         for(int j = 0; j < allowancesTrueWindAnglesWithBeatRun.length; j++) {
             if(trueWindAngle.compareTo(allowancesTrueWindAnglesWithBeatRun[j]) < 0) {
+                i = j;
+                break;
+            }
+            if(trueWindAngle.compareTo(allowancesTrueWindAnglesWithBeatRun[j]) == 0 && j == allowancesTrueWindAnglesWithBeatRun.length - 1) {
+                // TODO Bug here: legTWA == 180° and RunAngle == 180° => special case not handled
                 i = j;
                 break;
             }
