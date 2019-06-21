@@ -75,7 +75,6 @@ public class TaggingPanel extends ComponentWithoutSettings
 
     // HTML5 Storage for notifying other instances of tag changes
     private static final String LOCAL_STORAGE_UPDATE_KEY = "private-tags-changed";
-    private final String id;
 
     // styling
     private final TagPanelStyle style;
@@ -115,6 +114,9 @@ public class TaggingPanel extends ComponentWithoutSettings
     protected final TimePoint timePointToHighlight;
     protected final String tagToHighlight;
 
+    // ID for inter-instance communication
+    private String id;
+
     /**
      * This boolean prevents the timer from jumping when other users create or delete tags. The timer change event is
      * called by the selection change event and the other way around. When:<br/>
@@ -138,7 +140,6 @@ public class TaggingPanel extends ComponentWithoutSettings
             StrippedLeaderboardDTOWithSecurity leaderboardDTO) {
         super(parent, context);
 
-        this.id = Long.toString(System.currentTimeMillis() * Random.nextInt());
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.userService = userService;
@@ -169,6 +170,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         userService.addUserStatusEventHandler(this);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
 
+        generateRandomId();
         registerStorageEventHandler();
 
         setCurrentState(State.VIEW);
@@ -251,9 +253,19 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     private void firePrivateTagUpdateEvent() {
         if (Storage.isSupported()) {
-            Storage.getLocalStorageIfSupported().setItem(LOCAL_STORAGE_UPDATE_KEY, ""); // Force update
+            if (Storage.getLocalStorageIfSupported().getItem(LOCAL_STORAGE_UPDATE_KEY).equals(id)) {
+                // This instance fired the last update. To fire another one we have to change our id
+                generateRandomId();
+            }
             Storage.getLocalStorageIfSupported().setItem(LOCAL_STORAGE_UPDATE_KEY, id);
         }
+    }
+
+    /**
+     * Generates a new random ID
+     */
+    private void generateRandomId() {
+        id = Long.toString(System.currentTimeMillis() * Random.nextInt());
     }
 
     /**
