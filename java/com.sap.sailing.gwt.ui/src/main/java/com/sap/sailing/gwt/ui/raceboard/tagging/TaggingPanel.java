@@ -10,6 +10,7 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
+import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -38,6 +39,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 import com.sap.sse.gwt.client.player.TimeListener;
@@ -70,6 +72,10 @@ public class TaggingPanel extends ComponentWithoutSettings
             VIEW, // default
             CREATE_TAG, EDIT_TAG
     }
+
+    // HTML5 Storage for notifying other instances of tag changes
+    private static final String LOCAL_STORAGE_UPDATE_KEY = "private-tags-changed";
+    private final String id;
 
     // styling
     private final TagPanelStyle style;
@@ -132,6 +138,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             StrippedLeaderboardDTOWithSecurity leaderboardDTO) {
         super(parent, context);
 
+        this.id = Long.toString(System.currentTimeMillis() * Random.nextInt());
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.userService = userService;
@@ -161,6 +168,8 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         userService.addUserStatusEventHandler(this);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
+
+        registerStorageEventHandler();
 
         setCurrentState(State.VIEW);
         initializePanel();
@@ -223,6 +232,28 @@ public class TaggingPanel extends ComponentWithoutSettings
         });
         taggingPanel.setContentWidget(contentPanel);
         updateContent();
+    }
+
+    /**
+     * Registers a storage event handler that reloads the private tags if another instance has updated them.
+     */
+    private void registerStorageEventHandler() {
+        Storage.addStorageEventHandler(event -> {
+            if (LOCAL_STORAGE_UPDATE_KEY.equals(event.getKey()) && event.getNewValue() != null
+                    && !event.getNewValue().isEmpty() && !event.getNewValue().equals(id.toString())) {
+                reloadPrivateTags();
+            }
+        });
+    }
+
+    /**
+     * Notifies other instances that the private tags have changed.
+     */
+    private void firePrivateTagUpdateEvent() {
+        if (Storage.isSupported()) {
+            Storage.getLocalStorageIfSupported().setItem(LOCAL_STORAGE_UPDATE_KEY, ""); // Force update
+            Storage.getLocalStorageIfSupported().setItem(LOCAL_STORAGE_UPDATE_KEY, id);
+        }
     }
 
     /**
@@ -374,6 +405,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                                 // reload private tags if added tag is private
                                 if (!visibleForPublic) {
                                     reloadPrivateTags();
+                                    firePrivateTagUpdateEvent();
                                 }
                             } else {
                                 Notification.notify(stringMessages.tagNotSavedReason(result.getMessage()),
@@ -421,6 +453,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                             if (!silent) {
                                 Notification.notify(stringMessages.tagRemovedSuccessfully(), NotificationType.SUCCESS);
                             }
+                            firePrivateTagUpdateEvent();
                         } else {
                             Notification.notify(stringMessages.tagNotRemoved() + " " + result.getMessage(),
                                     NotificationType.ERROR);
@@ -464,6 +497,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                                     // refresh UI.
                                     if (!tagToUpdate.isVisibleForPublic() || !visibleForPublic) {
                                         reloadPrivateTags();
+                                        firePrivateTagUpdateEvent();
                                     } else {
                                         updateContent();
                                     }
