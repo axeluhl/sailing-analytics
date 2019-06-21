@@ -15,6 +15,37 @@ It contains also some files:
 
  - test.sh -> script that compiles the code in the src folder, creates the test.jar library and execute the code of the example.
  - Manifest.txt -> manifest used to create the test.jar file
+********************************************
+************* TracAPI 3.12.3 ***************
+********************************************
+This is a final version. It adds a some features. It keeps the backward compatibility.
+
+
+Release date: 30/05/2019
+Build number: 7a3b63b1
+
+ 1) Features
+
+ - Adding the methods IRaceCompetitor.getOfficialRank() and IRaceCompetitor.getOfficialFinishTime()
+  (Requested by Martin Frosch, 29/05/2019)
+
+ 2)
+
+********************************************
+************* TracAPI 3.12.2 ***************
+********************************************
+This is a final version. It adds a some features. It keeps the backward compatibility.
+
+
+Release date: 29/05/2019
+Build number: e939148b
+
+ 1) Features
+
+ - Adding some extra values to the RaceCompetitorStatusType (Requested by Martin Frosch,
+ 28/05/2019)
+
+ 2) Bugs
 
 ********************************************
 ************* TracAPI 3.12.1 ***************
