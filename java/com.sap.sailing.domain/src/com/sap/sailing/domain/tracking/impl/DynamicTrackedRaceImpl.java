@@ -726,21 +726,39 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             } else {
                 foundFinishMarkPassing = true;
                 final MarkPassing finishMarkPassingToUse;
-                if (competitorResult != null && competitorResult.getFinishingTime() != null
-                 && (originalMarkPassing.getOriginal() == originalMarkPassing || !originalMarkPassing.getTimePoint().equals(competitorResult.getFinishingTime()))) {
-                    // since we so far only have the original mark passing or a wrapper mark passing with an
-                    // incorrect time point, we need to create a wrapper mark passing:
-                    finishMarkPassingToUse = new MarkPassingFromRaceLogProvidedFinishingTimeImpl(
-                            competitorResult.getFinishingTime(), finish, competitor,
-                            originalMarkPassing.getOriginal());
-                    logger.info(getRace().getName()+": Updating finish mark passing "+originalMarkPassing.getOriginal()+" to "+finishMarkPassingToUse);
-                    neededToCreateOrUpdateFinishMarkPassing = true;
+                if (/* we have a result for the competitor */ competitorResult != null &&
+                    /* the result has a valid finishing time */ competitorResult.getFinishingTime() != null) {
+                    // we do have a competitor result with a valid finishing time; we shall have a wrapper mark
+                    // passing that has the result's finishing time as its time point.
+                    // If we already have a wrapper in place with the correct time, nothing needs to be done.
+                    // If no wrapper is in place or a wrapper is in place but has the wrong time, a wrapper
+                    // for the original is constructed with the time taken from the competitor result.
+                    if (/* is it the original mark passing? */ originalMarkPassing.getOriginal() == originalMarkPassing ||
+                        /* is the time incorrect? */ !originalMarkPassing.getTimePoint().equals(competitorResult.getFinishingTime())) {
+                        // since we so far only have the original mark passing or a wrapper mark passing with an
+                        // incorrect time point, we need to create a wrapper mark passing:
+                        finishMarkPassingToUse = new MarkPassingFromRaceLogProvidedFinishingTimeImpl(
+                                competitorResult.getFinishingTime(), finish, competitor,
+                                originalMarkPassing.getOriginal());
+                        logger.info(getRace().getName()+": Updating finish mark passing "+originalMarkPassing.getOriginal()+" to "+finishMarkPassingToUse);
+                        neededToCreateOrUpdateFinishMarkPassing = true;
+                    } else {
+                        // the finish mark passing already is a wrapper with the correct time; no action is required:
+                        assert originalMarkPassing.getOriginal() != originalMarkPassing;
+                        assert originalMarkPassing.getTimePoint().equals(competitorResult.getFinishingTime());
+                        finishMarkPassingToUse = originalMarkPassing;
+                        neededToCreateOrUpdateFinishMarkPassing = false;
+                    }
                 } else {
+                    // we don't have a result for the competitor, or we do have a result but the finishing time is null;
+                    // use the original mark passing (null, if none exists) and flag the change in case it is a change
                     finishMarkPassingToUse = originalMarkPassing.getOriginal();
                     if (finishMarkPassingToUse != originalMarkPassing) {
                         logger.info(getRace().getName()+": Reverting race log-based finish mark passing "+originalMarkPassing+" to "+finishMarkPassingToUse+
                                 " because no finishing time found anymore for that competitor in race log");
                         neededToCreateOrUpdateFinishMarkPassing = true;
+                    } else {
+                        neededToCreateOrUpdateFinishMarkPassing = false;
                     }
                 }
                 if (finishMarkPassingToUse != null) {

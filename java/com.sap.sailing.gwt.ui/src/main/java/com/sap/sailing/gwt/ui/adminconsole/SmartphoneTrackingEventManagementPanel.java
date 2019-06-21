@@ -256,9 +256,8 @@ public class SmartphoneTrackingEventManagementPanel
     
     private boolean isFinished(RaceColumnDTOAndFleetDTOWithNameBasedEquality race) {
         RaceDTO raceDTO = race.getA().getRace(race.getB());
-        
         boolean raceFinished = false;
-        if (raceDTO != null){
+        if (raceDTO != null) {
             raceFinished = raceDTO.status.status.equals(TrackedRaceStatusEnum.FINISHED);
         }
         return raceFinished;
@@ -553,24 +552,20 @@ public class SmartphoneTrackingEventManagementPanel
         boolean onlyUntrackedRacesPresent = raceColumnTableSelectionModel.getSelectedSet().size() > 0;
         boolean onlyTrackedRacesPresent = raceColumnTableSelectionModel.getSelectedSet().size() > 0;
         boolean onlyRacesWithNonExistentTracker = raceColumnTableSelectionModel.getSelectedSet().size() > 0;
-        
         for (RaceColumnDTOAndFleetDTOWithNameBasedEquality race : raceColumnTableSelectionModel.getSelectedSet()) {
-            if (getTrackingState(race).isForTracking() && isFinished(race)){
+            if (getTrackingState(race).isForTracking() && isFinished(race)) {
                 onlyUntrackedRacesPresent = false;
                 onlyTrackedRacesPresent = false;
             }
-            
-            if (! getTrackingState(race).isForTracking() || doesTrackerExist(race) || isFinished(race)) {
+            if (!getTrackingState(race).isForTracking() || doesTrackerExist(race) || isFinished(race)) {
                 onlyUntrackedRacesPresent = false;
             } else {
                 onlyTrackedRacesPresent = false;
             }
-            
-            if (trackerExists(race)){
+            if (trackerExists(race)) {
                 onlyRacesWithNonExistentTracker = false;
             }
         }
-        
         boolean hasPermissionToChange = leaderboardSelectionModel.getSelectedSet().stream()
                 .filter(new Predicate<StrippedLeaderboardDTOWithSecurity>() {
                     @Override
@@ -578,22 +573,17 @@ public class SmartphoneTrackingEventManagementPanel
                         return userService.hasPermission(t, DefaultActions.UPDATE);
                     }
                 }).count() > 0;
-        
-        
-        if ((!onlyTrackedRacesPresent && !onlyUntrackedRacesPresent)){
+        if ((!onlyTrackedRacesPresent && !onlyUntrackedRacesPresent)) {
             startStopTrackingButton.setEnabled(false);
         }
-        
-        if (onlyTrackedRacesPresent){
+        if (onlyTrackedRacesPresent) {
             startStopTrackingButton.setDown(true);
             startStopTrackingButton.setEnabled(hasPermissionToChange);
         }
-        
-        if (onlyUntrackedRacesPresent || onlyRacesWithNonExistentTracker){
+        if (onlyUntrackedRacesPresent || onlyRacesWithNonExistentTracker) {
             startStopTrackingButton.setDown(false);
             startStopTrackingButton.setEnabled(hasPermissionToChange);
         }
-        
     }
 
     @Override

@@ -1,11 +1,14 @@
 package com.sap.sailing.server.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -14,32 +17,53 @@ import java.util.function.Function;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningConfirmedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.RacingProcedureFactoryImpl;
 import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
+import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
+import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.test.LeaderboardScoringAndRankingTestBase;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithStartTimeAndRanks;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Color;
@@ -81,6 +105,66 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         service.addLeaderboard(leaderboard); // should add a RaceLogScoringReplicator as listener to the leaderboard
         service.addRegattaWithoutReplication(regatta);
+    }
+    
+    /**
+     * See bug 5073: we have to ensure that when there are no original finish mark passings
+     * for a competitor, the application of competitor results from the race log works
+     * reliably and repeatedly if those competitor results contain finishing times. With the
+     * bug, adding the same result twice clears the artificial finish mark passings accidentally.
+     */
+    @Test
+    public void testApplyCompetitorResultsWithFinishingTimesTwice() {
+        setUp(1, MillisecondsTimePoint.now(), ScoringSchemeType.LOW_POINT);
+        final TrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
+        final Mark startboat = new MarkImpl("StartBoat");
+        final Mark pin = new MarkImpl("Pin");
+        final Mark windward = new MarkImpl("Windward");
+        final ControlPointWithTwoMarks startFinish = new ControlPointWithTwoMarksImpl(pin, startboat, "Start/Finish");
+        final WaypointImpl start = new WaypointImpl(startFinish, PassingInstruction.Line);
+        final WaypointImpl ww = new WaypointImpl(windward, PassingInstruction.Port);
+        final WaypointImpl finish = new WaypointImpl(startFinish, PassingInstruction.Line);
+        final BoatClass _49er = DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true);
+        final Map<Competitor, Boat> competitorsAndTheirBoats = new HashMap<>();
+        int sailId = 1;
+        for (final Competitor competitor : competitors) {
+            final Boat boat = new BoatImpl(UUID.randomUUID(), "Boat for "+competitor.getName(), _49er, ""+sailId++);
+            competitorsAndTheirBoats.put(competitor, boat);
+        }
+        final RaceDefinition newF1Race = new RaceDefinitionImpl("newF1",
+                new CourseImpl("Course for newF1", Arrays.asList(start, ww, finish)), _49er, competitorsAndTheirBoats);
+        final DynamicTrackedRace newF1 = new DynamicTrackedRaceImpl(trackedRegatta, newF1Race, /* sidelines */ new HashSet<>(),
+                EmptyWindStore.INSTANCE,
+                /* delayToLiveInMillis */ 5000, /* millisecondsOverWhichToAverageWind */ 15000,
+                /* millisecondsOverWhichToAverageSpeed */ 10000,
+                /* useInternalMarkPassingAlgorithm */ false, OneDesignRankingMetric::new,
+                /* raceLogResolver */ service);
+        final Fleet fleet = f1Column.getFleets().iterator().next();
+        f1Column.setTrackedRace(fleet, newF1);
+        // Now add a CompetitorResult to the race log:
+        final RaceLog f1RaceLog = f1Column.getRaceLog(fleet);
+        final AbstractLogEventAuthor author = new LogEventAuthorImpl("Me", 1);
+        final CompetitorResults competitorResults = new CompetitorResultsImpl();
+        final TimePoint finishingTime = MillisecondsTimePoint.now();
+        competitorResults.add(createCompetitorResultWithFinishingTime(finishingTime));
+        f1RaceLog.add(new RaceLogFinishPositioningConfirmedEventImpl(finishingTime, author, 1, competitorResults));
+        final MarkPassing finishMarkPassing = newF1.getMarkPassing(competitors.get(0), finish);
+        assertNotNull(finishMarkPassing);
+        assertEquals(finishingTime, finishMarkPassing.getTimePoint());
+        // Now add another race log event with equal finishing time:
+        final CompetitorResults competitorResults2 = new CompetitorResultsImpl();
+        competitorResults2.add(createCompetitorResultWithFinishingTime(finishingTime));
+        f1RaceLog.add(new RaceLogFinishPositioningConfirmedEventImpl(finishingTime, author, 1, competitorResults2));
+        final MarkPassing finishMarkPassing2 = newF1.getMarkPassing(competitors.get(0), finish);
+        assertNotNull(finishMarkPassing2);
+        assertEquals(finishingTime, finishMarkPassing2.getTimePoint());
+    }
+
+    protected CompetitorResultImpl createCompetitorResultWithFinishingTime(final TimePoint finishingTime) {
+        return new CompetitorResultImpl(competitors.get(0).getId(), competitors.get(0).getName(),
+                competitors.get(0).getShortName(), /* boatName */ null,
+                /* boatSailId */ null, /* oneBasedRank */ 0, /* maxPointsReason */ null, /* score */ null,
+                finishingTime, /* comment */ null, /* mergeState */ MergeState.OK);
     }
     
     /**
