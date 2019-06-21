@@ -15,7 +15,8 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
@@ -57,6 +58,8 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
 
     public static final ComponentResources resources = GWT.create(ComponentResources.class);
     private static final Logger LOG = Logger.getLogger(DataMiningEntryPoint.class.getName());
+
+    private static final DataMiningResources dataMiningResources = GWT.create(DataMiningResources.class);
 
     private final DataMiningServiceAsync dataMiningService = GWT.create(DataMiningService.class);
     private DataMiningSession session;
@@ -122,14 +125,17 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                     queryDefinitionProvider.addControl(new StoredDataMiningQueryPanel(dataProvider));
                 }
 
-                Button orientationButton = new Button("Orientation"); //TODO Use icon or i18n string
-                orientationButton.addClickHandler(new ClickHandler() {
+                Anchor orientationAnchor = new Anchor(AbstractImagePrototype.create(
+                        dataMiningResources.orientationIcon()).getSafeHtml());
+                orientationAnchor.addStyleName("orientationAnchor");
+                orientationAnchor.setTitle(getStringMessages().changeOrientation());
+                orientationAnchor.addClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {
                         setQueryAndResultOrientation();
                     }
                 });
-                queryDefinitionProvider.addControl(orientationButton);
+                queryDefinitionProvider.addControl(orientationAnchor);
                 /*
                  * Running queries automatically when they've been changed is currently unnecessary, if not even
                  * counterproductive. This removes the query runner settings to prevent that the user can enable the
