@@ -22,6 +22,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserGroupManagementException;
+import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
@@ -160,16 +161,10 @@ public class UserGroupResource extends AbstractSecurityResource {
                 response = Response.status(Status.BAD_REQUEST).entity("Usergroup with this name does not exist.")
                         .build();
             } else {
-                if (getService().hasCurrentUserDeletePermission(usergroup)) {
-                    try {
-                        getService().deleteUserGroup(usergroup);
-                        response = Response.status(Status.NO_CONTENT).build();
-                    } catch (UserGroupManagementException e) {
-                        response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-                    }
-                } else {
-                    response = Response.status(Status.UNAUTHORIZED).build();
-                }
+                getService().checkPermissionAndDeleteOwnershipForObjectRemoval(usergroup, () -> {
+                    getService().deleteUserGroup(usergroup);
+                });
+                response = Response.status(Status.NO_CONTENT).build();
             }
         } catch (IllegalArgumentException e) {
             response = Response.status(Status.BAD_REQUEST).entity("Invalid group id.").build();
@@ -288,6 +283,12 @@ public class UserGroupResource extends AbstractSecurityResource {
                         JSONObject jsonBody = (JSONObject) JSONValue.parse(body);
                         boolean roleForAll = Boolean.valueOf((String) jsonBody.get(KEY_FOR_ALL));
                         if (forAll == null || forAll != roleForAll) {
+                            if (!getService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(role,
+                                    new Ownership(null, usergroup))) {
+                                response = Response.status(Status.UNAUTHORIZED)
+                                        .entity(String.format("Not permitted to add role %s to group", role.getName()))
+                                        .build();
+                            }
                             getService().putRoleDefinitionToUserGroup(usergroup, role, roleForAll);
                             response = Response.ok().build();
                         } else {
