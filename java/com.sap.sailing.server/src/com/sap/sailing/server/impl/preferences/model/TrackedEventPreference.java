@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
+import com.sap.sse.common.settings.generic.StringSetting;
 import com.sap.sse.common.settings.generic.UUIDSetting;
 
 public class TrackedEventPreference extends AbstractGenericSerializableSettings {
@@ -12,14 +13,16 @@ public class TrackedEventPreference extends AbstractGenericSerializableSettings 
     private transient UUIDSetting uuid;
     private transient UUIDSetting eventId;
     private transient UUIDSetting regattaId;
-    private transient UUIDSetting trackedElementId;
+    private transient StringSetting trackedElementId;
+    private transient StringSetting baseUrl;
     private transient BooleanSetting isArchived;
 
     public TrackedEventPreference() {
         uuid = new UUIDSetting("uuid", this);
         eventId = new UUIDSetting("eventId", this);
         regattaId = new UUIDSetting("regattaId", this);
-        trackedElementId = new UUIDSetting("trackedElementId", this);
+        trackedElementId = new StringSetting("trackedElementId", this);
+        baseUrl = new StringSetting("baseUrl", this);
         isArchived = new BooleanSetting("isArchived", this);
     }
 
@@ -30,6 +33,7 @@ public class TrackedEventPreference extends AbstractGenericSerializableSettings 
         eventId.setValue(other.getEventId());
         regattaId.setValue(other.getRegattaId());
         trackedElementId.setValue(other.getTrackedElementId());
+        baseUrl.setValue(other.getBaseUrl());
         isArchived.setValue(other.getIsArchived());
     }
 
@@ -40,15 +44,18 @@ public class TrackedEventPreference extends AbstractGenericSerializableSettings 
         eventId.setValue(other.getEventId());
         regattaId.setValue(other.getRegattaId());
         trackedElementId.setValue(other.getTrackedElementId());
+        baseUrl.setValue(other.getBaseUrl());
         this.isArchived.setValue(isArchived);
     }
 
-    public TrackedEventPreference(UUID uuid, UUID eventId, UUID regattaId, UUID trackedElementId, boolean isArchived) {
+    public TrackedEventPreference(UUID uuid, UUID eventId, UUID regattaId, String trackedElementId, String baseUrl,
+            boolean isArchived) {
         this();
         this.uuid.setValue(uuid);
         this.eventId.setValue(eventId);
         this.regattaId.setValue(regattaId);
         this.trackedElementId.setValue(trackedElementId);
+        this.baseUrl.setValue(baseUrl);
         this.isArchived.setValue(isArchived);
     }
 
@@ -73,8 +80,12 @@ public class TrackedEventPreference extends AbstractGenericSerializableSettings 
         return regattaId.getValue();
     }
 
-    public UUID getTrackedElementId() {
+    public String getTrackedElementId() {
         return trackedElementId.getValue();
+    }
+
+    public String getBaseUrl() {
+        return baseUrl.getValue();
     }
 
     public boolean getIsArchived() {
