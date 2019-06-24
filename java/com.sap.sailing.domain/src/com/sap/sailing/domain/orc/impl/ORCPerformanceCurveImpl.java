@@ -236,6 +236,10 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         Bearing[] allowancesTrueWindAnglesWithBeatRun = (Bearing[]) ArrayUtils.addAll(new Bearing[] {beatAngles.get(trueWindSpeed)}, ArrayUtils.addAll(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES, new Bearing[] {gybeAngles.get(trueWindSpeed)}));
         Arrays.sort(allowancesTrueWindAnglesWithBeatRun);
         
+        if (Arrays.asList(allowancesTrueWindAnglesWithBeatRun).contains(trueWindAngle)) {
+            return getDurationPerNauticalMileAtTrueWindAngleAndSpeed(trueWindSpeed, trueWindAngle);
+        }
+        
         // Controlling whether the gybe angle is greater then the other polars and eliminating those from the array
         int frontcutpoint = Arrays.binarySearch(allowancesTrueWindAnglesWithBeatRun, beatAngles.get(trueWindSpeed));
         int backcutpoint  = Arrays.binarySearch(allowancesTrueWindAnglesWithBeatRun, gybeAngles.get(trueWindSpeed)) + 1;
