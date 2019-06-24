@@ -208,7 +208,6 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
 
     private void refreshData() {
         Intent intent = new Intent(AppConstants.INTENT_ACTION_RESET);
-        intent.putExtra(AppConstants.EXTRA_FORCE_REFRESH, true);
         BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 
