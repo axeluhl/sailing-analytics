@@ -40,10 +40,10 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
     private static final String KEY_EVENT_NAME = "name";
     private static final String KEY_EVENT_START = "start";
     private static final String KEY_EVENT_AND = "end";
-    private static final String KEY_EVENT_REGISTERED_DEVICE_IDS = "registeredDeviceIds";
+    private static final String KEY_EVENT_TRACKED_ELEMENTS = "trackedElements";
     private static final String KEY_EVENT_BASE_URL = "url";
     private static final String KEY_EVENT_IS_OWNER = "isOwner";
-    private static final String KEY_TRACKED_ELEMENT_ID = "deviceId";
+    private static final String KEY_TRACKED_ELEMENT_DEVICE_ID = "deviceId";
     private static final String KEY_TRACKED_ELEMENT_COMPETITOR_ID = "competitorId";
     private static final String KEY_TRACKED_ELEMENT_BOAT_ID = "boatId";
     private static final String KEY_TRACKED_ELEMENT_MARK_ID = "markId";
@@ -88,7 +88,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
 
                     for(TrackedElementWithDeviceId trackedElement : pref.getTrackedElements()) {
                         JSONObject trackedElementJson = new JSONObject();
-                        trackedElementJson.put(KEY_TRACKED_ELEMENT_ID, trackedElement.getDeviceId());
+                        trackedElementJson.put(KEY_TRACKED_ELEMENT_DEVICE_ID, trackedElement.getDeviceId());
                         if(trackedElement.getTrackedCompetitorId() != null) {
                             trackedElementJson.put(KEY_TRACKED_ELEMENT_COMPETITOR_ID, trackedElement.getTrackedCompetitorId().toString());
                         } else if (trackedElement.getTrackedBoatId() != null) {
@@ -101,7 +101,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                         }
                     }
 
-                    jsonEvent.put(KEY_EVENT_REGISTERED_DEVICE_IDS, deviceIdsWithTrackedElementJson);
+                    jsonEvent.put(KEY_EVENT_TRACKED_ELEMENTS, deviceIdsWithTrackedElementJson);
                     // jsonEvent.put("imageUrl", event.getImages().)
                     jsonEvent.put(KEY_EVENT_BASE_URL, pref.getBaseUrl());
                     jsonEvent.put(KEY_EVENT_IS_ARCHIVED, pref.getIsArchived());
