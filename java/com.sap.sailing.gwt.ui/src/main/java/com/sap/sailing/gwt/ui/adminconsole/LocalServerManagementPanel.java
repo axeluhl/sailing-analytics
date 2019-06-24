@@ -47,7 +47,7 @@ public class LocalServerManagementPanel extends SimplePanel {
 
     private ServerInfoDTO currentServerInfo;
     private final UserService userService;
-    
+
     private final UserStatusEventHandler userStatusEventHandler = new UserStatusEventHandler() {
         @Override
         public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
@@ -72,19 +72,19 @@ public class LocalServerManagementPanel extends SimplePanel {
 
         refreshServerConfiguration();
     }
-    
+
     @Override
     protected void onLoad() {
         super.onLoad();
         userService.addUserStatusEventHandler(userStatusEventHandler, true);
     }
-    
+
     @Override
     protected void onUnload() {
         super.onUnload();
         userService.removeUserStatusEventHandler(userStatusEventHandler);
     }
-    
+
     private AccessControlledButtonPanel createServerActionsUi(final UserService userService) {
         final HasPermissions type = SecuredSecurityTypes.SERVER;
         final Consumer<ServerInfoDTO> updateCallback = event -> userService.updateUser(false);
@@ -112,7 +112,7 @@ public class LocalServerManagementPanel extends SimplePanel {
         userOwnerInfo = captionPanel.addInformation(stringMessages.ownership() + " - " + stringMessages.user() + ":");
         return captionPanel;
     }
-    
+
     private Widget createServerConfigurationUI() {
         final ServerDataCaptionPanel captionPanel = new ServerDataCaptionPanel(stringMessages.serverConfiguration(), 3);
         final Command callback = this::serverConfigurationChanged;
@@ -121,7 +121,7 @@ public class LocalServerManagementPanel extends SimplePanel {
         isSelfServiceServerCheckbox = captionPanel.addChekBox(stringMessages.selfServiceServer() + ":", callback);
         isSelfServiceServerCheckbox.ensureDebugId("isSelfServiceServerCheckbox");
         return captionPanel;
-    }    
+    }
 
     private void serverConfigurationChanged() {
         final Boolean publicServer = isPublicServerCheckbox.isEnabled() ? isPublicServerCheckbox.getValue() : null;
@@ -130,6 +130,7 @@ public class LocalServerManagementPanel extends SimplePanel {
                 : null;
         final ServerConfigurationDTO serverConfig = new ServerConfigurationDTO(isStandaloneServerCheckbox.getValue(),
                 publicServer, selfServiceServer, null);
+        isSelfServiceServerCheckbox.getElement().setAttribute("updating", "true");
 
         sailingService.updateServerConfiguration(serverConfig, new AsyncCallback<Void>() {
             @Override
@@ -137,12 +138,14 @@ public class LocalServerManagementPanel extends SimplePanel {
                 Notification.notify(stringMessages.updatedServerSetupError(), NotificationType.ERROR);
                 errorReporter.reportError(caught.getMessage());
                 refreshServerConfiguration();
+                isSelfServiceServerCheckbox.getElement().setAttribute("updating", "false");
             }
 
             @Override
             public void onSuccess(Void result) {
                 Notification.notify(stringMessages.updatedServerSetup(), NotificationType.SUCCESS);
                 refreshServerConfiguration();
+                isSelfServiceServerCheckbox.getElement().setAttribute("updating", "false");
             }
         });
     }
@@ -150,7 +153,7 @@ public class LocalServerManagementPanel extends SimplePanel {
     private void refreshServerConfiguration() {
         sailingService.getServerConfiguration(new RefreshAsyncCallback<>(this::updateServerConfiguration));
     }
-    
+
     private void updateServerInfo(ServerInfoDTO serverInfo) {
         LocalServerManagementPanel.this.currentServerInfo = serverInfo;
         LocalServerManagementPanel.this.buttonPanel.updateVisibility();
@@ -161,17 +164,18 @@ public class LocalServerManagementPanel extends SimplePanel {
         final boolean hasUserOwner = ownership != null && ownership.getUserOwner() != null;
         groupOwnerInfo.setText(hasGroupOwner ? ownership.getTenantOwner().getName() : "---");
         userOwnerInfo.setText(hasUserOwner ? ownership.getUserOwner().getName() : "---");
-        
+
         // Update changeability
-        isSelfServiceServerCheckbox.setEnabled(userService.hasCurrentUserMetaPermission(serverInfo.getIdentifier().getPermission(ServerActions.CREATE_OBJECT), serverInfo.getOwnership()));
+        isSelfServiceServerCheckbox.setEnabled(userService.hasCurrentUserMetaPermission(
+                serverInfo.getIdentifier().getPermission(ServerActions.CREATE_OBJECT), serverInfo.getOwnership()));
         // TODO update isPublicServerCheckbox -> default server tenant is currently not available in the UI
         isPublicServerCheckbox.setEnabled(true);
     }
-    
+
     private void updateServerConfiguration(ServerConfigurationDTO result) {
         isStandaloneServerCheckbox.setValue(result.isStandaloneServer(), false);
         isStandaloneServerCheckbox.setEnabled(true);
-        
+
         isPublicServerCheckbox.setValue(result.isPublic(), false);
         isSelfServiceServerCheckbox.setValue(result.isSelfService(), false);
     }
@@ -197,10 +201,10 @@ public class LocalServerManagementPanel extends SimplePanel {
     }
 
     private class ServerDataCaptionPanel extends CaptionPanel {
-        
+
         private final Grid grid;
         private int actualRows = 0;
-        
+
         private ServerDataCaptionPanel(final String caption, final int rowCount) {
             super(caption);
             this.grid = new Grid(rowCount, 2);
