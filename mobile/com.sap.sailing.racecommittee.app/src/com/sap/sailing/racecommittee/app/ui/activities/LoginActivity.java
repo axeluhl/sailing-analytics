@@ -425,6 +425,8 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
                     @Override
                     public void onLoadSucceeded(DeviceConfiguration configuration, boolean isCached) {
+                        getSupportLoaderManager().destroyLoader(0);
+
                         dismissProgressSpinner();
 
                         // this is our 'global' configuration, let's store it in app preferences
@@ -554,9 +556,8 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-
             if (AppConstants.INTENT_ACTION_RESET.equals(action)) {
-                resetData(intent.getBooleanExtra(AppConstants.EXTRA_FORCE_REFRESH, false));
+                resetData(true);
             } else if (AppConstants.INTENT_ACTION_VALID_DATA.equals(action)) {
                 resetData(false);
             }
