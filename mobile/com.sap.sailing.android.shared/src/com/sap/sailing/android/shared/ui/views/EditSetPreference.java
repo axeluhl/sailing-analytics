@@ -1,29 +1,29 @@
 package com.sap.sailing.android.shared.ui.views;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import com.sap.sailing.android.shared.R;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.support.v7.preference.DialogPreference;
 import android.util.AttributeSet;
 
+import com.sap.sailing.android.shared.R;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 public class EditSetPreference extends DialogPreference {
 
-    private static final Set<String> defaultFallbackValue = new HashSet<String>();
+    private static final Set<String> defaultFallbackValue = new HashSet<>();
 
     private static final int mDialogLayoutResId = R.layout.edit_set_preference;
 
-    private Set<String> currentValue;
+    private Set<String> currentValues;
 
     private Set<String> exampleValues;
 
     public EditSetPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        this.exampleValues = new HashSet<String>();
+        this.exampleValues = new HashSet<>();
     }
 
     public void setExampleValues(String[] values) {
@@ -34,8 +34,8 @@ public class EditSetPreference extends DialogPreference {
         return exampleValues;
     }
 
-    public Set<String> getCurrentValue() {
-        return currentValue;
+    public Set<String> getCurrentValues() {
+        return currentValues;
     }
 
     @Override
@@ -48,17 +48,17 @@ public class EditSetPreference extends DialogPreference {
     protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
         if (restorePersistedValue) {
             // Restore existing state
-            currentValue = getPersistedStringSet(defaultFallbackValue);
+            currentValues = getPersistedStringSet(defaultFallbackValue);
         } else {
             // Set default state from the XML attribute
-            currentValue = new HashSet<String>((Set<String>) defaultValue);
-            persistStringSet(currentValue);
+            currentValues = new HashSet<>((Set<String>) defaultValue);
+            persistStringSet(currentValues);
         }
     }
 
     @Override
     protected Object onGetDefaultValue(TypedArray a, int index) {
-        Set<String> defaultValue = new HashSet<String>();
+        Set<String> defaultValue = new HashSet<>();
         for (CharSequence chars : a.getTextArray(index)) {
             defaultValue.add(chars.toString());
         }
@@ -71,10 +71,10 @@ public class EditSetPreference extends DialogPreference {
             return defaultReturnValue;
         }
 
-        Set<String> fallbackDefault = defaultReturnValue == null ? null : new HashSet<String>(defaultReturnValue);
+        Set<String> fallbackDefault = defaultReturnValue == null ? null : new HashSet<>(defaultReturnValue);
         Set<String> value = getSharedPreferences().getStringSet(getKey(), fallbackDefault);
 
-        return value == null ? null : new HashSet<String>(value);
+        return value == null ? null : new HashSet<>(value);
     }
 
 }

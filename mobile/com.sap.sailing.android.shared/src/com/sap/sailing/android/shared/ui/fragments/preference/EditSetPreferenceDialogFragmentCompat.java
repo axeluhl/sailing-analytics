@@ -1,14 +1,5 @@
 package com.sap.sailing.android.shared.ui.fragments.preference;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
-import com.sap.sailing.android.shared.R;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.ui.adapters.ArrayRemoveAdapter;
-import com.sap.sailing.android.shared.ui.views.EditSetPreference;
-
 import android.os.Bundle;
 import android.support.v7.preference.DialogPreference;
 import android.support.v7.preference.Preference;
@@ -21,11 +12,20 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ListView;
 
+import com.sap.sailing.android.shared.R;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.ui.adapters.ArrayRemoveAdapter;
+import com.sap.sailing.android.shared.ui.views.EditSetPreference;
+
+import java.util.ArrayList;
+import java.util.Set;
+
 public class EditSetPreferenceDialogFragmentCompat extends PreferenceDialogFragmentCompat {
 
     private static final String TAG = EditSetPreferenceDialogFragmentCompat.class.getName();
 
-    private Set<String> currentValue;
+    private ArrayRemoveAdapter<String> adapter;
+    private Set<String> currentValues;
     private Set<String> exampleValues;
 
     public static EditSetPreferenceDialogFragmentCompat newInstance(Preference preference) {
@@ -40,30 +40,29 @@ public class EditSetPreferenceDialogFragmentCompat extends PreferenceDialogFragm
     protected void onBindDialogView(View view) {
         super.onBindDialogView(view);
 
-        final AutoCompleteTextView inputView = (AutoCompleteTextView) view.findViewById(R.id.edit_set_preference_input);
-        final Button addButton = (Button) view.findViewById(R.id.edit_set_preference_add);
-        final ListView listView = (ListView) view.findViewById(R.id.edit_set_preference_list);
+        final AutoCompleteTextView inputView = view.findViewById(R.id.edit_set_preference_input);
+        final Button addButton = view.findViewById(R.id.edit_set_preference_add);
+        final ListView listView = view.findViewById(R.id.edit_set_preference_list);
 
         DialogPreference preference = getPreference();
         if (preference instanceof EditSetPreference) {
-            currentValue = ((EditSetPreference) preference).getCurrentValue();
+            currentValues = ((EditSetPreference) preference).getCurrentValues();
             exampleValues = ((EditSetPreference) preference).getExampleValues();
         }
 
         // setup list view
-        final ArrayRemoveAdapter<String> adapter = new ArrayRemoveAdapter<String>(view.getContext(),
-                new ArrayList<String>(currentValue));
+        adapter = new ArrayRemoveAdapter<>(view.getContext(), new ArrayList<>(currentValues));
         listView.setEmptyView(view.findViewById(R.id.edit_set_preference_list_empty));
         listView.setAdapter(adapter);
 
         // setup inputView
-        ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<String>(view.getContext(),
-                android.R.layout.simple_dropdown_item_1line, new ArrayList<String>(exampleValues));
+        ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<>(view.getContext(),
+                android.R.layout.simple_dropdown_item_1line, new ArrayList<>(exampleValues));
         inputView.setAdapter(autoCompleteAdapter);
         inputView.addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
-                boolean invalid = s.length() == 0 || currentValue.contains(s.toString());
+                boolean invalid = s.length() == 0 || currentValues.contains(s.toString());
                 addButton.setEnabled(!invalid);
             }
 
@@ -77,6 +76,7 @@ public class EditSetPreferenceDialogFragmentCompat extends PreferenceDialogFragm
         });
 
         // setup add button
+        addButton.setEnabled(false);
         addButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -91,10 +91,12 @@ public class EditSetPreferenceDialogFragmentCompat extends PreferenceDialogFragm
     @Override
     public void onDialogClosed(boolean positiveResult) {
         DialogPreference preference = getPreference();
+        Set<String> values = adapter.getItems();
         if (positiveResult && (preference instanceof EditSetPreference)
-                && preference.callChangeListener(new HashSet<String>(currentValue))) {
+                && preference.callChangeListener(values)) {
             ExLog.i(getContext(), TAG, "Storing result...");
-            preference.persistStringSet(currentValue);
+            preference.persistStringSet(values);
+            currentValues = values;
         }
     }
 }
