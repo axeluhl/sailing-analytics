@@ -88,7 +88,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                     final JSONArray deviceIdsWithTrackedElementJson = new JSONArray();
 
                     for(TrackedElementWithDeviceId trackedElement : pref.getTrackedElements()) {
-                        JSONObject trackedElementJson = new JSONObject();
+                        final JSONObject trackedElementJson = new JSONObject();
                         trackedElementJson.put(KEY_TRACKED_ELEMENT_DEVICE_ID, trackedElement.getDeviceId());
                         if(trackedElement.getTrackedCompetitorId() != null) {
                             trackedElementJson.put(KEY_TRACKED_ELEMENT_COMPETITOR_ID, trackedElement.getTrackedCompetitorId().toString());
@@ -111,10 +111,10 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                 }
             }
 
-            JSONObject resultEvents = new JSONObject();
+            final JSONObject resultEvents = new JSONObject();
             resultEvents.put(KEY_TRACKED_EVENTS, result);
-            String json = resultEvents.toJSONString();
-            builder = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8");
+            final String jsonString = resultEvents.toJSONString();
+            builder = Response.ok(jsonString).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8");
         } else {
             builder = Response.status(Status.UNAUTHORIZED);
         }
@@ -145,8 +145,8 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                         prefs = new TrackedEventPreferences();
                     }
 
-                    Collection<TrackedEventPreference> prefsNew = new ArrayList<>();
-                    Iterator<TrackedEventPreference> it = prefs.getTrackedEvents().iterator();
+                    final Collection<TrackedEventPreference> prefsNew = new ArrayList<>();
+                    final Iterator<TrackedEventPreference> it = prefs.getTrackedEvents().iterator();
                     while (it.hasNext()) {
                         final TrackedEventPreference pref = it.next();
                         if (pref.getEventId().equals(uuid)) {
