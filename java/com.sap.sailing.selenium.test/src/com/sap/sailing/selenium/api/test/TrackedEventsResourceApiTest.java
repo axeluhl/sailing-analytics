@@ -40,6 +40,68 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
     }
 
     @Test
+    public void testCreateMultipleTrackingEventsAndEditOne() {
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final String competitorId = UUID.randomUUID().toString();
+        final String boatId = UUID.randomUUID().toString();
+        final String markId = UUID.randomUUID().toString();
+
+        final String eventBaseUrl = "testUrl";
+        final String deviceId = UUID.randomUUID().toString();
+
+        final Event evt = eventApi.createEvent(adminCtx, "TestEvent-" + UUID.randomUUID().toString(),
+                "75QMNATIONALEKREUZER", CompetitorRegistrationType.CLOSED, "Mannheim");
+        final String eventId = evt.getId();
+        final String regattaId = evt.getName();
+
+        final Event evt2 = eventApi.createEvent(adminCtx, "TestEvent-" + UUID.randomUUID().toString(),
+                "75QMNATIONALEKREUZER", CompetitorRegistrationType.CLOSED, "Mannheim");
+        final String eventId2 = evt2.getId();
+        final String regattaId2 = evt2.getName();
+
+        trackedEventsApi.updateTrackedEvent(adminCtx, eventId, regattaId, eventBaseUrl, deviceId, competitorId, null,
+                null);
+        trackedEventsApi.updateTrackedEvent(adminCtx, eventId, regattaId, eventBaseUrl, deviceId, null, boatId, null);
+        trackedEventsApi.updateTrackedEvent(adminCtx, eventId2, regattaId2, eventBaseUrl, deviceId, null, null, markId);
+
+        trackedEventsApi.setArchived(adminCtx, evt.getId(), true);
+        trackedEventsApi.setArchived(adminCtx, evt2.getId(), false);
+        // check if created event is still there
+        final TrackedEvents trackedEvents = trackedEventsApi.getTrackedEvents(adminCtx, false);
+
+        int cntEvents = 0;
+        for (final TrackedEvent event : trackedEvents.getEvents()) {
+            cntEvents++;
+            Assert.assertEquals("Unexpected event base url", eventBaseUrl, event.getEventBaseUrl());
+            if (eventId.equals(event.getEventId())) {
+                Assert.assertEquals("Unexpected event ID", eventId, event.getEventId());
+                Assert.assertEquals("Unexpected regatta ID", regattaId, event.getRegattaId());
+                Assert.fail("Expected event 1 to not be shown anymore.");
+            } else if (eventId2.equals(event.getEventId())) {
+                Assert.assertEquals("Unexpected event ID", eventId2, event.getEventId());
+                Assert.assertEquals("Unexpected regatta ID", regattaId2, event.getRegattaId());
+            } else {
+                Assert.fail("Invalid event id.");
+            }
+
+            int cntElements = 0;
+            for (final TrackedElement elem : event.getTrackedElements()) {
+                cntElements++;
+                final boolean correctBoatId = boatId.equals(elem.getBoatId());
+                final boolean correctCompetitorId = competitorId.equals(elem.getCompetitorId());
+                final boolean correctMarkId = markId.equals(elem.getMarkId());
+
+                Assert.assertEquals("Unexpected device ID", deviceId, elem.getDeviceId());
+                Assert.assertTrue("More than one or zero items tracked in this element",
+                        correctBoatId ^ correctCompetitorId ^ correctMarkId);
+            }
+            Assert.assertEquals("Invalid numer of elements in this event", 1, cntElements);
+        }
+
+        Assert.assertEquals("Expected 1 events", 1, cntEvents);
+    }
+
+    @Test
     public void testCreateMultipleTrackingEvents() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         final String competitorId = UUID.randomUUID().toString();

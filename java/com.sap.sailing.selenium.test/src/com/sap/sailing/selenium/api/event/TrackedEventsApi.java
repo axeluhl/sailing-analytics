@@ -62,6 +62,13 @@ public class TrackedEventsApi {
         ctx.put(TRACKED_EVENTS_URL, new HashMap<>(), json);
     }
 
+    public void setArchived(ApiContext ctx, String eventId, boolean archived) {
+        final HashMap<String, String> queryParams = new HashMap<>();
+        queryParams.put(KEY_EVENT_ID, eventId);
+        queryParams.put(KEY_EVENT_IS_ARCHIVED, Boolean.toString(archived));
+        ctx.post(TRACKED_EVENTS_URL, queryParams);
+    }
+
     public class TrackedElement extends JsonWrapper {
         public TrackedElement(JSONObject json) {
             super(json);
