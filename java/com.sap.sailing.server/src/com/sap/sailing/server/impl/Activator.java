@@ -46,6 +46,7 @@ import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPrefer
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
 import com.sap.sailing.server.impl.preferences.model.SailorProfilePreferences;
 import com.sap.sailing.server.impl.preferences.model.StoredDataMiningQueryPreferences;
+import com.sap.sailing.server.impl.preferences.model.TrackedEventPreferences;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.notification.impl.SailingNotificationServiceImpl;
 import com.sap.sailing.server.security.SailingViewerRole;
@@ -159,6 +160,9 @@ public class Activator implements BundleActivator {
                 new GenericJSONPreferenceConverter<>(
                         () -> new SailorProfilePreferences(racingEventService.getCompetitorAndBoatStore())),
                 properties));
+        properties.put(PreferenceConverter.KEY_PARAMETER_NAME, TrackedEventPreferences.PREF_NAME);
+        registrations.add(context.registerService(PreferenceConverter.class,
+                new GenericJSONPreferenceConverter<>(() -> new TrackedEventPreferences()), properties));
     }
 
     public static BundleContext getContext() {
