@@ -105,6 +105,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                                 trackedElementJson.put(KEY_TRACKED_ELEMENT_MARK_ID,
                                         trackedElement.getTrackedMarkId().toString());
                             }
+                            deviceIdsWithTrackedElementJson.add(trackedElementJson);
                         }
 
                         jsonEvent.put(KEY_EVENT_TRACKED_ELEMENTS, deviceIdsWithTrackedElementJson);
@@ -144,7 +145,6 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                 final String baseUrl = (String) requestObject.get(KEY_EVENT_BASE_URL);
                 try {
                     final UUID uuidEvent = UUID.fromString(eventId);
-                    final UUID uuidRegatta = UUID.fromString(regattaId);
                     final boolean isArchived = archived;
 
                     TrackedEventPreferences prefs = getSecurityService().getPreferenceObject(currentUser.getName(),
@@ -232,7 +232,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                                 while (it.hasNext()) {
                                     final TrackedEventPreference pref = it.next();
                                     if (pref.getEventId().equals(uuidEvent)
-                                            && pref.getRegattaId().equals(uuidRegatta)) {
+                                            && pref.getRegattaId().equals(regattaId)) {
                                         prefsNew.add(new TrackedEventPreference(pref, newPrefElem));
                                         eventContained = true;
                                     } else {
@@ -242,7 +242,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
 
                                 if (!eventContained) {
                                     final TrackedEventPreference newPreference = new TrackedEventPreference(uuidEvent,
-                                            uuidRegatta, Arrays.asList(newPrefElem), baseUrl, isArchived);
+                                            regattaId, Arrays.asList(newPrefElem), baseUrl, isArchived);
                                     prefsNew.add(newPreference);
                                 }
                                 
