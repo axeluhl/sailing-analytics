@@ -161,10 +161,13 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
 
                     final JSONArray trackedElementsJson = (JSONArray) requestObject.get(KEY_EVENT_TRACKED_ELEMENTS);
 
+                    // check that exactly one trackedElement is in JSON
                     if (trackedElementsJson == null || trackedElementsJson.size() == 0) {
+                        // too few children
                         responseBuilder = Response.status(Status.BAD_REQUEST)
                                 .entity("Invalid JSON body in request: Tracked element is missing.");
                     } else if (trackedElementsJson.size() > 1) {
+                        // too many children
                         responseBuilder = Response.status(Status.BAD_REQUEST).entity(
                                 "Invalid JSON body in request: Too many tracked elements: Only updating one tracked element per call is allowed.");
                     } else {
@@ -178,65 +181,48 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
 
                         else {
 
+                            // parse IDs
                             final String deviceId = (String) jsonTrackedElement.get(KEY_TRACKED_ELEMENT_DEVICE_ID);
                             final String competitorIdStr = (String) jsonTrackedElement
                                     .get(KEY_TRACKED_ELEMENT_COMPETITOR_ID);
                             final String boatIdStr = (String) jsonTrackedElement.get(KEY_TRACKED_ELEMENT_BOAT_ID);
                             final String markIdStr = (String) jsonTrackedElement.get(KEY_TRACKED_ELEMENT_MARK_ID);
 
-                            // cannot be final without either violating single point of return or multiple assignments
-                            // in
-                            // try/catch
-                            UUID competitorId;
-                            UUID boatId;
-                            UUID markId;
+                            // parse UUIDs of tracked element
+                            final UUID competitorId;
+                            final UUID boatId;
+                            final UUID markId;
                             if (competitorIdStr != null && !competitorIdStr.isEmpty()) {
-                                try {
-                                    competitorId = UUID.fromString(competitorIdStr);
-                                } catch (IllegalArgumentException e) {
-                                    responseBuilder = Response.status(Status.BAD_REQUEST)
-                                            .entity("Invalid JSON body in request.");
-                                    competitorId = null;
-                                }
+                                competitorId = parseUUID(competitorIdStr);
                                 boatId = null;
                                 markId = null;
                             } else if (boatIdStr != null && !boatIdStr.isEmpty()) {
-                                try {
-                                    boatId = UUID.fromString(boatIdStr);
-                                } catch (IllegalArgumentException e) {
-                                    responseBuilder = Response.status(Status.BAD_REQUEST)
-                                            .entity("Invalid JSON body in request.");
-                                    boatId = null;
-                                }
                                 competitorId = null;
+                                boatId = parseUUID(boatIdStr);
                                 markId = null;
                             } else if (markIdStr != null && !markIdStr.isEmpty()) {
-                                try {
-                                    markId = UUID.fromString(markIdStr);
-                                } catch (IllegalArgumentException e) {
-                                    responseBuilder = Response.status(Status.BAD_REQUEST)
-                                            .entity("Invalid JSON body in request.");
-                                    markId = null;
-                                }
                                 boatId = null;
                                 competitorId = null;
+                                markId = parseUUID(markIdStr);
                             } else {
-                                responseBuilder = Response.status(Status.BAD_REQUEST)
-                                        .entity("Invalid JSON body in request.");
                                 markId = boatId = competitorId = null;
                             }
 
                             if (boatId != null || markId != null || competitorId != null) {
+
+                                // create TrackedElementWithID holder
                                 final TrackedElementWithDeviceId newPrefElem = new TrackedElementWithDeviceId(deviceId,
                                         boatId, competitorId, markId);
 
                                 final Collection<TrackedEventPreference> prefsNew = new ArrayList<>();
                                 final Iterator<TrackedEventPreference> it = prefs.getTrackedEvents().iterator();
 
+                                // add newPrefElem to correct event or create a tracked event
                                 boolean eventContained = false;
                                 while (it.hasNext()) {
                                     final TrackedEventPreference pref = it.next();
                                     if (pref.getEventId().equals(uuidEvent) && pref.getRegattaId().equals(regattaId)) {
+                                        // tracked event found, add to event
                                         prefsNew.add(new TrackedEventPreference(pref, newPrefElem));
                                         eventContained = true;
                                     } else {
@@ -245,17 +231,21 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                                 }
 
                                 if (!eventContained) {
+                                    // event was not found, create a new tracked event
                                     final TrackedEventPreference newPreference = new TrackedEventPreference(uuidEvent,
                                             regattaId, Arrays.asList(newPrefElem), baseUrl, isArchived);
                                     prefsNew.add(newPreference);
                                 }
 
+                                // update preferences
                                 prefs.setTrackedEvents(prefsNew);
                                 getSecurityService().setPreferenceObject(currentUser.getName(),
                                         SailingPreferences.TRACKED_EVENTS_PREFERENCES, prefs);
                                 responseBuilder = Response.status(Status.ACCEPTED);
                             } else {
                                 // no boatId, competitorId or markId were specified
+                                responseBuilder = Response.status(Status.BAD_REQUEST)
+                                        .entity("Invalid JSON body in request.");
                             }
                         }
 
@@ -272,6 +262,16 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
             responseBuilder = Response.status(Status.UNAUTHORIZED);
         }
         return responseBuilder.build();
+    }
+
+    private UUID parseUUID(String potentialUUID) {
+        UUID uuid;
+        try {
+            uuid = UUID.fromString(potentialUUID);
+        } catch (IllegalArgumentException e) {
+            uuid = null;
+        }
+        return uuid;
     }
 
     @POST
