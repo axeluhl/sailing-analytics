@@ -6,12 +6,15 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.UUID;
+import java.util.function.Function;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -272,9 +275,20 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
     public Response updateTrackedEvents(@QueryParam("eventId") String eventId,
             @QueryParam("isArchived") String archived) {
+        final boolean isArchived = Boolean.parseBoolean(archived);
+        return applyOnEventById(eventId, pref -> new TrackedEventPreference(pref, isArchived));
+    }
+
+    @DELETE
+    @Path("{eventId}")
+    public Response deleteTrackedEvents(@PathParam("eventId") String eventId) {
+        return applyOnEventById(eventId, pref -> null);
+    }
+
+    private Response applyOnEventById(String eventId,
+            Function<TrackedEventPreference, TrackedEventPreference> function) {
         ResponseBuilder responseBuilder;
         final User currentUser = getSecurityService().getCurrentUser();
 
@@ -285,7 +299,6 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
             try {
                 final UUID eventUuid = UUID.fromString(eventId);
 
-                final boolean isArchived = Boolean.parseBoolean(archived);
                 if (prefs == null) {
                     responseBuilder = Response.status(Status.NOT_FOUND)
                             .entity("No tracked events with this eventId found.");
@@ -297,7 +310,10 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                     for (final TrackedEventPreference pref : prefs.getTrackedEvents()) {
                         if (pref.getEventId().equals(eventUuid)) {
                             found = true;
-                            newPrefs.add(new TrackedEventPreference(pref, isArchived));
+                            final TrackedEventPreference updatedPreference = function.apply(pref);
+                            if (updatedPreference != null) {
+                                newPrefs.add(updatedPreference);
+                            }
                         } else {
                             newPrefs.add(pref);
                         }
