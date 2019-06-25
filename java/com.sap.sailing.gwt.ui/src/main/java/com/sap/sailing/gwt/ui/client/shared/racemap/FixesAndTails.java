@@ -857,7 +857,7 @@ public class FixesAndTails {
     protected Double getDetailValueAt(CompetitorDTO competitorDTO, int index) {
         final Trigger<Integer> firstShownFixForCompetitor = firstShownFix.get(competitorDTO);
         int indexOfFirstShownFix = (firstShownFixForCompetitor == null || firstShownFixForCompetitor.get() == null) ? -1 : firstShownFixForCompetitor.get();
-        
+
         try {
             return getFixes(competitorDTO).get(indexOfFirstShownFix + index).detailValue;
         } catch (IndexOutOfBoundsException e) {

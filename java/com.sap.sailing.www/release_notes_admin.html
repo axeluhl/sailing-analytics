@@ -21,6 +21,11 @@
 			<div class="mainContent">
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
+                    <h2 class="articleSubheadline">June 2019</h2>
+                    <ul class="bulletList">
+                        <li>Added new API endpoints for creating, reading, updating and deleting roles under /restsecurity/role.
+                        </li>
+                    </ul>
                     <h2 class="articleSubheadline">May 2019</h2>
                     <ul class="bulletList">
 			<li>Ranks (finishing orders) entered by the Race Manager app user are no longer
@@ -38,6 +43,17 @@
 	                <li>Fixed a problem with competitor import: competitors imported now correctly obtain
 	                    the current session's user as their owner, and the current session's user's
 	                    default creation group as their owning group.
+	                </li>
+	                <li>Fixed issues with Manage2Sail regatta structure import: Imports of regattas with
+	                    no "ClassName" property, such as handicap / Yardstick regattas, will now create
+	                    regattas with "?" as boat class name to avoid other problems; furthermore,
+	                    due to a permission check that was too restrictive, regattas to import could not
+	                    be seen unless the user had "super-admin" power.
+	                </li>
+	                <li>Introduced a new permission SERVER:CAN_EXPORT_MASTERDATA:&lt;server-name&gt;
+                        which controls if a user is allowed to export masterdata used by the MDI.
+                        In addition, the user still needs to be able to read the data to be imported.
+                        On the importing server, the user needs to have the permission SERVER:CAN_IMPORT_MASTERDATA:&lt;server-name&gt;.
 	                </li>
 		    </ul>
 		    

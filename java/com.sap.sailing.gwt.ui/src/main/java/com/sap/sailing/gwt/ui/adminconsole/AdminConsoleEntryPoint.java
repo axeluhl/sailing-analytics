@@ -395,6 +395,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
 
         LocalServerManagementPanel localServerInstancesManagementPanel = new LocalServerManagementPanel(
                 getSailingService(), getUserService(), this, getStringMessages());
+        localServerInstancesManagementPanel.ensureDebugId("LocalServer");
         panel.addToTabPanel(advancedTabPanel,
                 new DefaultRefreshableAdminConsolePanel<LocalServerManagementPanel>(
                         localServerInstancesManagementPanel),

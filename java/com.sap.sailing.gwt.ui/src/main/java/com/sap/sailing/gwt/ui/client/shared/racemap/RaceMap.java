@@ -93,9 +93,9 @@ import com.sap.sailing.gwt.ui.actions.GetPolarAction;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.ClientResources;
-import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
+import com.sap.sailing.gwt.ui.client.DetailTypeComparator;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
@@ -464,7 +464,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      */
     private List<DetailType> sortedAvailableDetailTypes;
     /**
-     * The currently selected {@link DetailType}.
+     * The currently selected {@link DetailType}. {@code null} if no {@link DetailType} is selected.
      */
     private DetailType selectedDetailType;
     /**
@@ -472,7 +472,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * overwrite its cache with new data and needs to reset its internal {@link ValueRangeFlexibleBoundaries} tracking
      * the {@link DetailType} values.
      * If set to {@code true} {@link #refreshMap(Date, long, boolean)} will pass the information along and set it back
-     * to {@code false}.
+     * to {@code false} by {@link #updateBoatPositions(Date, long, Map, Iterable, Map, boolean, boolean)} once the
+     * first update with the new DetailType values arrives at the client.
      */
     private boolean selectedDetailTypeChanged;
     /**
@@ -740,28 +741,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     public void onSuccess(Iterable<DetailType> result) {
                         sortedAvailableDetailTypes = new ArrayList<DetailType>();
                         Util.addAll(result, sortedAvailableDetailTypes);
-                        Collections.sort(sortedAvailableDetailTypes, new Comparator<DetailType>() {
-                            @Override
-                            public int compare(DetailType o1, DetailType o2) {
-                                final boolean o1Expedition = o1.isExpeditionType();
-                                final boolean o2Expedition = o2.isExpeditionType();
-                                if ((o1Expedition && o2Expedition) || (!o1Expedition && !o2Expedition)) {
-                                    final String o1Name = DetailTypeFormatter.format(o1);
-                                    final String o2Name = DetailTypeFormatter.format(o2);
-                                    return Collator.getInstance().compare(o1Name, o2Name);
-                                }
-                                if (o1Expedition && !o2Expedition) {
-                                    return 1;
-                                }
-                                if (o2Expedition && !o1Expedition) {
-                                    return -1;
-                                }
-                                return 0;
-                            }
-                        });
-                        sortedAvailableDetailTypes.remove(DetailType.CHART_COURSE_OVER_GROUND_TRUE_DEGREES);
-                        sortedAvailableDetailTypes.remove(DetailType.CHART_BEAT_ANGLE);
                         sortedAvailableDetailTypes.remove(DetailType.LEG_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
+                        Collections.sort(sortedAvailableDetailTypes, new DetailTypeComparator());
                     }
                 });
     }
@@ -1136,7 +1117,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         callGetRaceMapDataForAllOverlappingAndTipsOfNonOverlappingAndGetBoatPositionsForAllOthers(fromAndToAndOverlap,
                 raceIdentifier, newTime, transitionTimeInMillis, competitorsToShow, isRedraw, selectedDetailType,
                 selectedDetailTypeChanged);
-        if (selectedDetailTypeChanged) selectedDetailTypeChanged = false;
         // draw the wind into the map, get the combined wind
         List<String> windSourceTypeNames = new ArrayList<String>();
         windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
@@ -1417,6 +1397,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             showBoatsOnMap(newTime, transitionTimeInMillis,
                     /* re-calculate; it could have changed since the asynchronous request was made: */
                     getCompetitorsToShow(), updateTailsOnly);
+            if (detailTypeChanged) {
+                selectedDetailTypeChanged = false;
+                tailColorMapper.notifyListeners();
+            }
             if (!updateTailsOnly) {
                 showCompetitorInfoOnMap(newTime, transitionTimeInMillis,
                         competitorSelection.getSelectedFilteredCompetitors());
@@ -2547,6 +2531,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 maneuverMarkersAndLossIndicators.getAndShowManeuvers(race, timeRange);
             }
         }
+
+        // If a metric is shown a click on any competitor / competitors tail will
+        // add them to the selection effectively showing the metric on their tail.
+        if (selectedDetailType != null) {
+            competitorSelection.setSelected(competitorDTO, true);
+        }
         return vPanel;
     }
 
@@ -2579,8 +2569,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     }
                 }
                 if (selectedDetailType != previous) {
-                    selectedDetailTypeChanged = true; // Causes an overwrite of what are now wrong detailValues
+                    // Causes an overwrite of what are now wrong detailValues
+                    selectedDetailTypeChanged = true;
                     setTailVisualizer();
+                    // In case the new values don't make it through this will make the tails visible
+                    tailColorMapper.notifyListeners();
+                    // Forces update of tail values which subsequently results
+                    // in another call to tailColorMapper.notifyListeners
                     redraw();
                 }
             }
@@ -2750,6 +2745,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         }
         // Now update tails for all competitors because selection change may also affect all unselected competitors
+        if (selectedDetailType != null && !selectedDetailTypeChanged) {
+            fixesAndTails.updateDetailValueBoundaries(competitorSelection.getSelectedCompetitors());
+        }
         for (CompetitorDTO oneOfAllCompetitors : competitorSelection.getAllCompetitors()) {
             Colorline tail = fixesAndTails.getTail(oneOfAllCompetitors);
             if (tail != null) {
@@ -2797,6 +2795,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         }
         // Now update tails for all competitors because selection change may also affect all unselected competitors
+        if (selectedDetailType != null && !selectedDetailTypeChanged) {
+            fixesAndTails.updateDetailValueBoundaries(competitorSelection.getSelectedCompetitors());
+        }
         for (CompetitorDTO oneOfAllCompetitors : competitorSelection.getAllCompetitors()) {
             Colorline tail = fixesAndTails.getTail(oneOfAllCompetitors);
             if (tail != null) {
@@ -3106,9 +3107,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         case SELECTED:
             options.setColorMode(ColorlineMode.POLYCHROMATIC);
             options.setColorProvider(i -> {
-                Double detailValue = fixesAndTails.getDetailValueAt(competitor, i);
-                if (detailValue != null) {
-                    return tailColorMapper.getColor(detailValue);
+                // If a DetailType has been selected and we are not currently waiting for the first update with the new values
+                if (selectedDetailType != null && !selectedDetailTypeChanged) {
+                    Double detailValue = fixesAndTails.getDetailValueAt(competitor, i);
+                    if (detailValue != null) {
+                        return tailColorMapper.getColor(detailValue);
+                    }
                 }
                 return competitorSelection.getColor(competitor, raceIdentifier).getAsHtml();
             });
@@ -3161,7 +3165,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     protected void setTailVisualizer() {
-        ValueRangeFlexibleBoundaries boundaries = new ValueRangeFlexibleBoundaries(0, 10, 0.15, 1);
+        ValueRangeFlexibleBoundaries boundaries = new ValueRangeFlexibleBoundaries(0, 10, 0.1, 0.25);
         createTailColorMapper(boundaries);
         fixesAndTails.setDetailValueBoundaries(boundaries);
     }

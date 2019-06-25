@@ -22,7 +22,9 @@ import java.util.UUID;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import com.sap.sailing.domain.base.DomainFactory;
@@ -50,10 +52,10 @@ import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.PublicReadableActions;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
-
-import org.junit.Assert;
 
 public class MediaReplicationTest extends AbstractServerReplicationTest {
       
@@ -202,7 +204,10 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         Mockito.doNothing().when(securityService).checkCurrentUserReadPermission(Mockito.any());
         Mockito.doReturn(true).when(securityService)
                 .hasCurrentUserReadPermission(Mockito.any(WithQualifiedObjectIdentifier.class));
-
+        Mockito.doReturn(true).when(securityService)
+                .hasCurrentUserServerPermission(ServerActions.CAN_EXPORT_MASTERDATA);
+        Mockito.doReturn(true).when(securityService).hasCurrentUserOneOfExplicitPermissions(
+                Mockito.any(WithQualifiedObjectIdentifier.class), Matchers.<PublicReadableActions> anyVararg());
 
         // Setup source service
         RacingEventServiceImpl sourceService = Mockito.spy(new RacingEventServiceImpl());

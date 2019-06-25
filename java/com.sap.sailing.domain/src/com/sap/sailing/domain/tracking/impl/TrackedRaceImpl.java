@@ -3522,7 +3522,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             final Mark portMarkOfStartLine = getStartLine(competitorLegStartTime).getPortMarkWhileApproachingLine();
             final Position portSideOfStartLinePosition = getOrCreateTrack(portMarkOfStartLine)
                     .getEstimatedPosition(competitorLegStartTime, /* extrapolate */true);
-            result = portSideOfStartLinePosition.getDistance(getTrack(competitor).getEstimatedPosition(competitorLegStartTime, /* extrapolate */false));
+            final Position estimatedCompetitorPositionAtStart = getTrack(competitor).getEstimatedPosition(competitorLegStartTime, /* extrapolate */false);
+            if (estimatedCompetitorPositionAtStart != null && portSideOfStartLinePosition != null) {
+                result = portSideOfStartLinePosition.getDistance(estimatedCompetitorPositionAtStart);
+            } else {
+                result = Distance.NULL;
+            }
         } else {
             result = Distance.NULL;
         }
