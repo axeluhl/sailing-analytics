@@ -35,8 +35,8 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
     public void testGetTrackedEventsEmpty() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         final TrackedEvents trackedEvents = trackedEventsApi.getTrackedEvents(adminCtx, true);
-        Assert.assertNotNull(trackedEvents);
-        Assert.assertTrue(Util.isEmpty(trackedEvents.getEvents()));
+        Assert.assertNotNull("Tracked Events element should not be null", trackedEvents);
+        Assert.assertTrue("Expected empty list of tracked events", Util.isEmpty(trackedEvents.getEvents()));
     }
 
     @Test
@@ -50,14 +50,12 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         final String deviceId = UUID.randomUUID().toString();
 
         final Event evt = eventApi.createEvent(adminCtx, "TestEvent-" + UUID.randomUUID().toString(),
-                "75QMNATIONALEKREUZER",
-                CompetitorRegistrationType.CLOSED, "Mannheim");
+                "75QMNATIONALEKREUZER", CompetitorRegistrationType.CLOSED, "Mannheim");
         final String eventId = evt.getId();
         final String regattaId = evt.getName();
 
         final Event evt2 = eventApi.createEvent(adminCtx, "TestEvent-" + UUID.randomUUID().toString(),
-                "75QMNATIONALEKREUZER",
-                CompetitorRegistrationType.CLOSED, "Mannheim");
+                "75QMNATIONALEKREUZER", CompetitorRegistrationType.CLOSED, "Mannheim");
         final String eventId2 = evt2.getId();
         final String regattaId2 = evt2.getName();
 
@@ -72,13 +70,13 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         int cntEvents = 0;
         for (final TrackedEvent event : trackedEvents.getEvents()) {
             cntEvents++;
-            Assert.assertEquals(eventBaseUrl, event.getEventBaseUrl());
+            Assert.assertEquals("Unexpected event base url", eventBaseUrl, event.getEventBaseUrl());
             if (eventId.equals(event.getEventId())) {
-                Assert.assertEquals(eventId, event.getEventId());
-                Assert.assertEquals(regattaId, event.getRegattaId());
+                Assert.assertEquals("Unexpected event ID", eventId, event.getEventId());
+                Assert.assertEquals("Unexpected regatta ID", regattaId, event.getRegattaId());
             } else if (eventId2.equals(event.getEventId())) {
-                Assert.assertEquals(eventId2, event.getEventId());
-                Assert.assertEquals(regattaId2, event.getRegattaId());
+                Assert.assertEquals("Unexpected event ID", eventId2, event.getEventId());
+                Assert.assertEquals("Unexpected regatta ID", regattaId2, event.getRegattaId());
             } else {
                 Assert.fail("Invalid event id.");
             }
@@ -90,13 +88,15 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
                 final boolean correctCompetitorId = competitorId.equals(elem.getCompetitorId());
                 final boolean correctMarkId = markId.equals(elem.getMarkId());
 
-                Assert.assertEquals(deviceId, elem.getDeviceId());
-                Assert.assertTrue(correctBoatId ^ correctCompetitorId ^ correctMarkId);
+                Assert.assertEquals("Unexpected device ID", deviceId, elem.getDeviceId());
+                Assert.assertTrue("More than one or zero items tracked in this element",
+                        correctBoatId ^ correctCompetitorId ^ correctMarkId);
             }
-            Assert.assertEquals(eventId.equals(event.getEventId()) ? 2 : 1, cntElements);
+            Assert.assertEquals("Invalid numer of elements in this event", eventId.equals(event.getEventId()) ? 2 : 1,
+                    cntElements);
         }
 
-        Assert.assertEquals(2, cntEvents);
+        Assert.assertEquals("Expected 2 events", 2, cntEvents);
     }
 
     @Test
@@ -126,9 +126,9 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         int cntEvents = 0;
         for (final TrackedEvent event : trackedEvents.getEvents()) {
             cntEvents++;
-            Assert.assertEquals(eventBaseUrl, event.getEventBaseUrl());
-            Assert.assertEquals(eventId, event.getEventId());
-            Assert.assertEquals(regattaId, event.getRegattaId());
+            Assert.assertEquals("Unexpected event base url", eventBaseUrl, event.getEventBaseUrl());
+            Assert.assertEquals("Unexpected event ID", eventId, event.getEventId());
+            Assert.assertEquals("Unexpected regatta ID", regattaId, event.getRegattaId());
 
             int cntElements = 0;
             for (final TrackedElement elem : event.getTrackedElements()) {
@@ -137,13 +137,14 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
                 final boolean correctCompetitorId = competitorId.equals(elem.getCompetitorId());
                 final boolean correctMarkId = markId.equals(elem.getMarkId());
 
-                Assert.assertEquals(deviceId, elem.getDeviceId());
-                Assert.assertTrue(correctBoatId ^ correctCompetitorId ^ correctMarkId);
+                Assert.assertEquals("Unexpected device ID", deviceId, elem.getDeviceId());
+                Assert.assertTrue("More than one or zero items tracked in this element",
+                        correctBoatId ^ correctCompetitorId ^ correctMarkId);
             }
-            Assert.assertEquals(3, cntElements);
+            Assert.assertEquals("Expected 3 event elements", 3, cntElements);
         }
 
-        Assert.assertEquals(1, cntEvents);
+        Assert.assertEquals("Expected exactly 1 event", 1, cntEvents);
     }
 
     @Test
@@ -173,8 +174,7 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         final String deviceId = UUID.randomUUID().toString();
 
         final Event evt = eventApi.createEvent(adminCtx, eventName, "75QMNATIONALEKREUZER",
-                CompetitorRegistrationType.CLOSED,
-                "Mannheim");
+                CompetitorRegistrationType.CLOSED, "Mannheim");
         final String eventId = evt.getId();
         final String regattaId = evt.getName();
 
@@ -187,22 +187,22 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         boolean hasEvents = false;
         for (final TrackedEvent event : trackedEvents.getEvents()) {
             hasEvents = true;
-            Assert.assertEquals(eventBaseUrl, event.getEventBaseUrl());
-            Assert.assertEquals(eventId, event.getEventId());
-            Assert.assertEquals(regattaId, event.getRegattaId());
+            Assert.assertEquals("Unexpected event base url", eventBaseUrl, event.getEventBaseUrl());
+            Assert.assertEquals("Unexpected event ID", eventId, event.getEventId());
+            Assert.assertEquals("Unexpected regatta ID", regattaId, event.getRegattaId());
 
             boolean hasElements = false;
             for (final TrackedElement elem : event.getTrackedElements()) {
                 hasElements = true;
-                Assert.assertEquals(boatId, elem.getBoatId());
-                Assert.assertEquals(competitorId, elem.getCompetitorId());
-                Assert.assertEquals(deviceId, elem.getDeviceId());
-                Assert.assertEquals(markId, elem.getMarkId());
+                Assert.assertEquals("Unexpected boat ID", boatId, elem.getBoatId());
+                Assert.assertEquals("Unexpected competitor ID", competitorId, elem.getCompetitorId());
+                Assert.assertEquals("Unexpected device ID", deviceId, elem.getDeviceId());
+                Assert.assertEquals("Unexpected mark ID", markId, elem.getMarkId());
             }
-            Assert.assertTrue(hasElements);
+            Assert.assertTrue("Expected at least one element", hasElements);
         }
 
-        Assert.assertTrue(hasEvents);
+        Assert.assertTrue("Expected at least one event", hasEvents);
     }
 
 }
