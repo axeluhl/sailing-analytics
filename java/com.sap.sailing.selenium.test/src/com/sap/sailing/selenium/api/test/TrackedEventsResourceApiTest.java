@@ -230,8 +230,8 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
                 "TestEvent-" + UUID.randomUUID().toString());
     }
 
-    private void testCreateTrackedEventWithTracking(final String competitorId, final String boatId, final String markId,
-            final ApiContext adminCtx, final String eventName) {
+    private String testCreateTrackedEventWithTracking(final String competitorId, final String boatId,
+            final String markId, final ApiContext adminCtx, final String eventName) {
         final String eventBaseUrl = "testUrl";
         final String deviceId = UUID.randomUUID().toString();
 
@@ -265,6 +265,20 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         }
 
         Assert.assertTrue("Expected at least one event", hasEvents);
+        return eventId;
+    }
+
+    @Test
+    public void testDeleteEvent() {
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final String eventId = testCreateTrackedEventWithTracking(UUID.randomUUID().toString(), null, null, adminCtx,
+                "TestEvent-" + UUID.randomUUID().toString());
+
+        trackedEventsApi.deleteEventTrackings(adminCtx, eventId);
+
+        final TrackedEvents trackedEvents = trackedEventsApi.getTrackedEvents(adminCtx, true);
+        Assert.assertNotNull("Tracked Events element should not be null", trackedEvents);
+        Assert.assertTrue("Expected empty list of tracked events", Util.isEmpty(trackedEvents.getEvents()));
     }
 
 }

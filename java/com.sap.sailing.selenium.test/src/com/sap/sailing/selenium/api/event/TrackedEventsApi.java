@@ -69,6 +69,10 @@ public class TrackedEventsApi {
         ctx.post(TRACKED_EVENTS_URL, queryParams);
     }
 
+    public void deleteEventTrackings(ApiContext ctx, String eventId) {
+        ctx.delete(TRACKED_EVENTS_URL + eventId);
+    }
+
     public class TrackedElement extends JsonWrapper {
         public TrackedElement(JSONObject json) {
             super(json);
