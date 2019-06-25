@@ -138,7 +138,7 @@ public class TrackedEventsApi {
             Collection<TrackedElement> col = new ArrayList<>();
             if (array != null) {
                 for (Object w : array) {
-                    col.add((TrackedElement) w);
+                    col.add(new TrackedElement((JSONObject) w));
                 }
             }
             return col;
