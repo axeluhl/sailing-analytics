@@ -209,20 +209,24 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     @Override
     protected Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint, TimePoint timePointOfTosPosition, WindLegTypeAndLegBearingCache cache) {
         final MarkPassing whenToPassedFromWaypoint = getTrackedRace().getMarkPassing(to, fromWaypoint);
-        validateGetDurationToReachAtEqualPerformanceParameters(to, fromWaypoint, timePointOfTosPosition, whenToPassedFromWaypoint);
-        final Duration t_to = whenToPassedFromWaypoint.getTimePoint().until(timePointOfTosPosition);
-        final Distance d_to = getWindwardDistanceTraveled(to, fromWaypoint, timePointOfTosPosition, cache);
-        final double   f_to = getTimeOnTimeFactor(to);
-        final Duration timeOnDistanceFactorInSecondsPerNauticalMileTo = getTimeOnDistanceFactorInSecondsPerNauticalMile(to);
-        final double   g_to = timeOnDistanceFactorInSecondsPerNauticalMileTo==null?0:timeOnDistanceFactorInSecondsPerNauticalMileTo.asSeconds();
-        final Distance d_who = d_to;
-        final double   f_who = getTimeOnTimeFactor(who);
-        final Duration timeOnDistanceFactorInSecondsPerNauticalMileWho = getTimeOnDistanceFactorInSecondsPerNauticalMile(who);
-        final double   g_who = timeOnDistanceFactorInSecondsPerNauticalMileWho==null?0:timeOnDistanceFactorInSecondsPerNauticalMileWho.asSeconds();
-        
-        final Duration t_who = d_to == null ? null : new MillisecondsDurationImpl(Double.valueOf(
-                (1./(d_to.inTime(t_to.times(f_to)).getMetersPerSecond() / Mile.METERS_PER_NAUTICAL_MILE) - g_to + g_who)
-                              * d_who.getNauticalMiles() / f_who * 1000.).longValue());
+        final Duration t_who;
+        if (whenToPassedFromWaypoint == null) {
+            t_who = null;
+        } else {
+            validateGetDurationToReachAtEqualPerformanceParameters(to, fromWaypoint, timePointOfTosPosition, whenToPassedFromWaypoint);
+            final Duration t_to = whenToPassedFromWaypoint.getTimePoint().until(timePointOfTosPosition);
+            final Distance d_to = getWindwardDistanceTraveled(to, fromWaypoint, timePointOfTosPosition, cache);
+            final double   f_to = getTimeOnTimeFactor(to);
+            final Duration timeOnDistanceFactorInSecondsPerNauticalMileTo = getTimeOnDistanceFactorInSecondsPerNauticalMile(to);
+            final double   g_to = timeOnDistanceFactorInSecondsPerNauticalMileTo==null?0:timeOnDistanceFactorInSecondsPerNauticalMileTo.asSeconds();
+            final Distance d_who = d_to;
+            final double   f_who = getTimeOnTimeFactor(who);
+            final Duration timeOnDistanceFactorInSecondsPerNauticalMileWho = getTimeOnDistanceFactorInSecondsPerNauticalMile(who);
+            final double   g_who = timeOnDistanceFactorInSecondsPerNauticalMileWho==null?0:timeOnDistanceFactorInSecondsPerNauticalMileWho.asSeconds();
+            t_who = d_to == null ? null : new MillisecondsDurationImpl(Double.valueOf(
+                    (1./(d_to.inTime(t_to.times(f_to)).getMetersPerSecond() / Mile.METERS_PER_NAUTICAL_MILE) - g_to + g_who)
+                                  * d_who.getNauticalMiles() / f_who * 1000.).longValue());
+        }
         return t_who;
     }
 
