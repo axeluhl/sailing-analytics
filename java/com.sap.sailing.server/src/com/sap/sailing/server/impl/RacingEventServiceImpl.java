@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -3025,11 +3026,21 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private void addOverallLeaderboardToLeaderboardGroup(LeaderboardGroup leaderboardGroup,
             ScoringScheme scoringScheme, int[] discardThresholds) {
-        Leaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup, scoringScheme,
+        final Leaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup, scoringScheme,
                 new ThresholdBasedResultDiscardingRuleImpl(discardThresholds));
-        leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
-        addLeaderboard(overallLeaderboard);
-        updateStoredLeaderboard(overallLeaderboard);
+        // FIXME bug5081 ownership?
+        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(overallLeaderboard.getName()),
+                overallLeaderboard.getDisplayName(),
+                new Callable<Void>() {
+                    @Override
+                    public Void call() throws Exception {
+                        leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
+                        addLeaderboard(overallLeaderboard);
+                        updateStoredLeaderboard(overallLeaderboard);
+                        return null;
+                    }
+                });
     }
 
     @Override
