@@ -40,30 +40,80 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
     }
 
     @Test
+    public void testCreateMultipleTrackingsForSameEvent() {
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final String eventName = "TestEvent-" + UUID.randomUUID().toString();
+        final String competitorId = UUID.randomUUID().toString();
+        final String boatId = UUID.randomUUID().toString();
+        final String markId = UUID.randomUUID().toString();
+
+        final String eventBaseUrl = "testUrl";
+        final String deviceId = UUID.randomUUID().toString();
+
+        final Event evt = eventApi.createEvent(adminCtx, eventName, "75QMNATIONALEKREUZER",
+                CompetitorRegistrationType.CLOSED, "Mannheim");
+        final String eventId = evt.getId();
+        final String regattaId = evt.getName();
+
+        trackedEventsApi.updateTrackedEvent(adminCtx, eventId, regattaId, eventBaseUrl, deviceId, competitorId, null,
+                null);
+        trackedEventsApi.updateTrackedEvent(adminCtx, eventId, regattaId, eventBaseUrl, deviceId, null, boatId, null);
+        trackedEventsApi.updateTrackedEvent(adminCtx, eventId, regattaId, eventBaseUrl, deviceId, null, null, markId);
+
+        // check if created event is still there
+        final TrackedEvents trackedEvents = trackedEventsApi.getTrackedEvents(adminCtx, true);
+
+        int cntEvents = 0;
+        for (final TrackedEvent event : trackedEvents.getEvents()) {
+            cntEvents++;
+            Assert.assertEquals(eventBaseUrl, event.getEventBaseUrl());
+            Assert.assertEquals(eventId, event.getEventId());
+            Assert.assertEquals(regattaId, event.getRegattaId());
+
+            int cntElements = 0;
+            for (final TrackedElement elem : event.getTrackedElements()) {
+                cntElements++;
+                final boolean correctBoatId = boatId.equals(elem.getBoatId());
+                final boolean correctCompetitorId = competitorId.equals(elem.getCompetitorId());
+                final boolean correctMarkId = markId.equals(elem.getMarkId());
+
+                Assert.assertEquals(deviceId, elem.getDeviceId());
+                Assert.assertTrue(correctBoatId ^ correctCompetitorId ^ correctMarkId);
+            }
+            Assert.assertEquals(3, cntElements);
+        }
+
+        Assert.assertEquals(1, cntEvents);
+    }
+
+    @Test
     public void testCreateTrackedEventWithCompetitorTracking() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
-        testCreateTrackedEventWithTracking(UUID.randomUUID().toString(), null, null, adminCtx);
+        testCreateTrackedEventWithTracking(UUID.randomUUID().toString(), null, null, adminCtx,
+                "TestEvent-" + UUID.randomUUID().toString());
     }
 
     @Test
     public void testCreateTrackedEventWithBoatTracking() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
-        testCreateTrackedEventWithTracking(null, UUID.randomUUID().toString(), null, adminCtx);
+        testCreateTrackedEventWithTracking(null, UUID.randomUUID().toString(), null, adminCtx,
+                "TestEvent-" + UUID.randomUUID().toString());
     }
 
     @Test
     public void testCreateTrackedEventWithMarkTracking() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
-        testCreateTrackedEventWithTracking(null, null, UUID.randomUUID().toString(), adminCtx);
+        testCreateTrackedEventWithTracking(null, null, UUID.randomUUID().toString(), adminCtx,
+                "TestEvent-" + UUID.randomUUID().toString());
     }
 
     private void testCreateTrackedEventWithTracking(final String competitorId, final String boatId, final String markId,
-            final ApiContext adminCtx) {
-        final String eventBaseUrl = "testUrl-" + UUID.randomUUID().toString();
+            final ApiContext adminCtx, final String eventName) {
+        final String eventBaseUrl = "testUrl";
         final String deviceId = UUID.randomUUID().toString();
 
-        Event evt = eventApi.createEvent(adminCtx, "TestEvent-" + UUID.randomUUID().toString(), "75QMNATIONALEKREUZER",
-                CompetitorRegistrationType.CLOSED, "Mannheim");
+        Event evt = eventApi.createEvent(adminCtx, eventName, "75QMNATIONALEKREUZER", CompetitorRegistrationType.CLOSED,
+                "Mannheim");
         final String eventId = evt.getId();
         final String regattaId = evt.getName();
 
