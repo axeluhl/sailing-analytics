@@ -3,6 +3,7 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.UUID;
 
@@ -232,8 +233,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                                 boolean eventContained = false;
                                 while (it.hasNext()) {
                                     final TrackedEventPreference pref = it.next();
-                                    if (pref.getEventId().equals(uuidEvent)
-                                            && pref.getRegattaId().equals(regattaId)) {
+                                    if (pref.getEventId().equals(uuidEvent) && pref.getRegattaId().equals(regattaId)) {
                                         prefsNew.add(new TrackedEventPreference(pref, newPrefElem));
                                         eventContained = true;
                                     } else {
@@ -246,7 +246,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                                             regattaId, Arrays.asList(newPrefElem), baseUrl, isArchived);
                                     prefsNew.add(newPreference);
                                 }
-                                
+
                                 prefs.setTrackedEvents(prefsNew);
                                 getSecurityService().setPreferenceObject(currentUser.getName(),
                                         SailingPreferences.TRACKED_EVENTS_PREFERENCES, prefs);
@@ -273,48 +273,48 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateTrackedEvents(String jsonBody) {
+    public Response updateTrackedEvents(@QueryParam("eventId") String eventId,
+            @QueryParam("isArchived") String archived) {
         ResponseBuilder responseBuilder;
         final User currentUser = getSecurityService().getCurrentUser();
 
         if (currentUser != null) {
 
+            final TrackedEventPreferences prefs = getSecurityService().getPreferenceObject(currentUser.getName(),
+                    SailingPreferences.TRACKED_EVENTS_PREFERENCES);
             try {
-                final Object requestBody = JSONValue.parseWithException(jsonBody);
-                final JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
-                final String eventId = (String) requestObject.get(KEY_EVENT_ID);
-                final Boolean archived = (Boolean) requestObject.get(KEY_EVENT_IS_ARCHIVED);
-                try {
-                    final UUID uuid = UUID.fromString(eventId);
-                    final boolean isArchived = archived;
+                final UUID eventUuid = UUID.fromString(eventId);
 
-                    TrackedEventPreferences prefs = getSecurityService().getPreferenceObject(currentUser.getName(),
-                            SailingPreferences.TRACKED_EVENTS_PREFERENCES);
+                final boolean isArchived = Boolean.parseBoolean(archived);
+                if (prefs == null) {
+                    responseBuilder = Response.status(Status.NOT_FOUND)
+                            .entity("No tracked events with this eventId found.");
+                } else {
 
-                    if (prefs == null) {
-                        prefs = new TrackedEventPreferences();
-                    }
+                    boolean found = false;
 
-                    final Collection<TrackedEventPreference> prefsNew = new ArrayList<>();
-                    final Iterator<TrackedEventPreference> it = prefs.getTrackedEvents().iterator();
-                    while (it.hasNext()) {
-                        final TrackedEventPreference pref = it.next();
-                        if (pref.getEventId().equals(uuid)) {
-                            prefsNew.add(new TrackedEventPreference(pref, isArchived));
+                    final Collection<TrackedEventPreference> newPrefs = new HashSet<>();
+                    for (final TrackedEventPreference pref : prefs.getTrackedEvents()) {
+                        if (pref.getEventId().equals(eventUuid)) {
+                            found = true;
+                            newPrefs.add(new TrackedEventPreference(pref, isArchived));
                         } else {
-                            prefsNew.add(pref);
+                            newPrefs.add(pref);
                         }
                     }
+                    if (!found) {
+                        responseBuilder = Response.status(Status.NOT_FOUND)
+                                .entity("No tracked events with this eventId found.");
+                    } else {
+                        prefs.setTrackedEvents(newPrefs);
+                        getSecurityService().setPreferenceObject(currentUser.getName(),
+                                SailingPreferences.TRACKED_EVENTS_PREFERENCES, prefs);
+                        responseBuilder = Response.status(Status.ACCEPTED);
+                    }
 
-                    getSecurityService().setPreferenceObject(currentUser.getName(),
-                            SailingPreferences.TRACKED_EVENTS_PREFERENCES, prefsNew);
-                    responseBuilder = Response.status(Status.ACCEPTED);
-                } catch (IllegalArgumentException | ClassCastException e) {
-                    responseBuilder = Response.status(Status.BAD_REQUEST)
-                            .entity("Invalid or missing attributes in JSON body.");
                 }
-            } catch (ParseException | JsonDeserializationException e) {
-                responseBuilder = Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request.");
+            } catch (IllegalArgumentException e) {
+                responseBuilder = Response.status(Status.BAD_REQUEST).entity("Invalid eventId.");
             }
         } else {
             responseBuilder = Response.status(Status.UNAUTHORIZED);
