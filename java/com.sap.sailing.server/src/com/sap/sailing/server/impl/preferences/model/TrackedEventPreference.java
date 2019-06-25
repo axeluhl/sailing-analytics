@@ -1,7 +1,10 @@
 package com.sap.sailing.server.impl.preferences.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.UUID;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
 import com.sap.sse.common.settings.generic.SettingsList;
@@ -45,6 +48,19 @@ public class TrackedEventPreference extends AbstractGenericSerializableSettings 
         trackedElements.setValues(other.getTrackedElements());
         baseUrl.setValue(other.getBaseUrl());
         this.isArchived.setValue(isArchived);
+    }
+
+    /** copy constructor with additional tracked event */
+    public TrackedEventPreference(TrackedEventPreference other, TrackedElementWithDeviceId trackedElement) {
+        this();
+        eventId.setValue(other.getEventId());
+        regattaId.setValue(other.getRegattaId());
+        final Collection<TrackedElementWithDeviceId> trackedElements = new ArrayList<>();
+        Util.addAll(other.getTrackedElements(), trackedElements);
+        trackedElements.add(trackedElement);
+        this.trackedElements.setValues(trackedElements);
+        baseUrl.setValue(other.getBaseUrl());
+        this.isArchived.setValue(other.getIsArchived());
     }
 
     public TrackedEventPreference(UUID eventId, UUID regattaId, Iterable<TrackedElementWithDeviceId> trackedElements,
