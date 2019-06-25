@@ -47,6 +47,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
     private static final String KEY_TRACKED_ELEMENT_COMPETITOR_ID = "competitorId";
     private static final String KEY_TRACKED_ELEMENT_BOAT_ID = "boatId";
     private static final String KEY_TRACKED_ELEMENT_MARK_ID = "markId";
+    private static final String KEY_TRACKED_EVENTS = "trackedEvents";
 
     @GET
     @Produces("application/json;charset=UTF-8")
@@ -109,7 +110,10 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                     result.add(jsonEvent);
                 }
             }
-            String json = result.toJSONString();
+
+            JSONObject resultEvents = new JSONObject();
+            resultEvents.put(KEY_TRACKED_EVENTS, result);
+            String json = resultEvents.toJSONString();
             builder = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8");
         } else {
             builder = Response.status(Status.UNAUTHORIZED);
