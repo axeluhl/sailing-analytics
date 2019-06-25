@@ -16,6 +16,7 @@ public class TrackedEventsApi {
     private static final String TRACKED_EVENTS_URL = "/api/v1/events/trackedevents/";
     private static final String KEY_TRACKED_EVENTS = "trackedEvents";
 
+    private static final String KEY_REGATTA_ID = "regattaId";
     private static final String KEY_EVENT_ID = "eventId";
     private static final String KEY_EVENT_IS_ARCHIVED = "isArchived";
     private static final String KEY_EVENT_NAME = "name";
@@ -35,6 +36,30 @@ public class TrackedEventsApi {
         final Map<String, String> queryParams = new HashMap<>();
         queryParams.put(KEY_EVENT_IS_ARCHIVED, Boolean.toString(isArchived));
         return new TrackedEvents(ctx.get(TRACKED_EVENTS_URL, queryParams));
+    }
+
+    public void updateTrackedEvent(ApiContext ctx, String eventId, String regattaId, String eventBaseUrl,
+            String deviceId, String competitorId, String boatId, String markId) {
+        final JSONObject json = new JSONObject();
+        json.put(KEY_EVENT_ID, eventId);
+        json.put(KEY_REGATTA_ID, regattaId);
+        json.put(KEY_EVENT_BASE_URL, eventBaseUrl);
+
+        final JSONArray elements = new JSONArray();
+        final JSONObject elem = new JSONObject();
+        elem.put(KEY_TRACKED_ELEMENT_DEVICE_ID, deviceId);
+        if (competitorId != null) {
+            elem.put(KEY_TRACKED_ELEMENT_COMPETITOR_ID, competitorId);
+        } else if (boatId != null) {
+            elem.put(KEY_TRACKED_ELEMENT_BOAT_ID, boatId);
+        } else if (markId != null) {
+            elem.put(KEY_TRACKED_ELEMENT_BOAT_ID, markId);
+        }
+        elements.add(elem);
+
+        json.put(KEY_EVENT_TRACKED_ELEMENTS, elements);
+        json.put(KEY_EVENT_IS_ARCHIVED, false);
+        ctx.put(TRACKED_EVENTS_URL, new HashMap<>(), json);
     }
 
     public class TrackedElement extends JsonWrapper {
@@ -117,6 +142,10 @@ public class TrackedEventsApi {
                 }
             }
             return col;
+        }
+
+        public String getRegattaId() {
+            return get(KEY_REGATTA_ID);
         }
     }
 
