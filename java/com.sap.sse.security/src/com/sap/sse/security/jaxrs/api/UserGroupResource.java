@@ -288,9 +288,10 @@ public class UserGroupResource extends AbstractSecurityResource {
                                 response = Response.status(Status.UNAUTHORIZED)
                                         .entity(String.format("Not permitted to add role %s to group", role.getName()))
                                         .build();
+                            } else {
+                                getService().putRoleDefinitionToUserGroup(usergroup, role, roleForAll);
+                                response = Response.ok().build();
                             }
-                            getService().putRoleDefinitionToUserGroup(usergroup, role, roleForAll);
-                            response = Response.ok().build();
                         } else {
                             response = Response.status(Status.BAD_REQUEST)
                                     .entity("Role was already added to the group.").build();
@@ -328,8 +329,16 @@ public class UserGroupResource extends AbstractSecurityResource {
                     if (getService().hasCurrentUserUpdatePermission(usergroup)
                             && getService().hasCurrentUserReadPermission(role)) {
                         if (usergroup.getRoleAssociation(role) != null) {
-                            getService().removeRoleDefintionFromUserGroup(usergroup, role);
-                            response = Response.status(Status.NO_CONTENT).build();
+                            if (!getService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(role,
+                                    new Ownership(null, usergroup))) {
+                                response = Response
+                                        .status(Status.UNAUTHORIZED).entity(String
+                                                .format("Not permitted to remove role %s from group", role.getName()))
+                                        .build();
+                            } else {
+                                getService().removeRoleDefintionFromUserGroup(usergroup, role);
+                                response = Response.status(Status.NO_CONTENT).build();
+                            }
                         } else {
                             response = Response.status(Status.BAD_REQUEST)
                                     .entity("Role is currently not added to the group.").build();
