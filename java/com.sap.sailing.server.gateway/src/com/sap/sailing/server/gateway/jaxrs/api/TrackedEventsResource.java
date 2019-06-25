@@ -113,6 +113,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                         jsonEvent.put(KEY_EVENT_BASE_URL, pref.getBaseUrl());
                         jsonEvent.put(KEY_EVENT_IS_ARCHIVED, pref.getIsArchived());
                         jsonEvent.put(KEY_EVENT_IS_OWNER, isOwner);
+                        jsonEvent.put(KEY_REGATTA_ID, pref.getRegattaId());
                         result.add(jsonEvent);
                     }
                 }
