@@ -93,7 +93,7 @@ public class TrackedEventsApi {
             final Collection<TrackedEvent> events = new ArrayList<>();
             JSONArray array = get(KEY_TRACKED_EVENTS);
             for (Object json : array) {
-                events.add((TrackedEvent) json);
+                events.add(new TrackedEvent((JSONObject) json));
             }
             return events;
         }
