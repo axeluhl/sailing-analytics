@@ -34,18 +34,9 @@
     <string name="error_could_not_complete_operation_on_server_try_again">"无法在服务器中完成操作。请重试。"</string>
     <string name="error_sending_team_image_to_server">"错误：无法将船队图像发送到服务器。"</string>
     <string name="regatta_starts_in">"比赛开始于："</string>
-    <plurals name="hour">
-        <item quantity="one">"小时"</item>
-        <item quantity="other">"小时"</item>
-    </plurals>
-    <plurals name="minute">
-        <item quantity="one">"分钟"</item>
-        <item quantity="other">"分钟"</item>
-    </plurals>
-    <plurals name="day">
-        <item quantity="one">"天"</item>
-        <item quantity="other">"天"</item>
-    </plurals>
+    <string name="hours">"小时:"</string>
+    <string name="minutes">"分钟:"</string>
+    <string name="days">"天:"</string>
     <string name="please_listen_to_announcements">"请听公告"</string>
     <string name="close">"关闭"</string>
     <string name="thank_you_you_successfully_participated">"谢谢！您已成功参加此比赛。\n\nSAP 帆船队"</string>

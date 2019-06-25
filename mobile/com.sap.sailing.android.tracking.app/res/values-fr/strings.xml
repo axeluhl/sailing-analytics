@@ -34,18 +34,9 @@
     <string name="error_could_not_complete_operation_on_server_try_again">"Impossible de terminer l\'opération sur le serveur. Veuillez réessayer."</string>
     <string name="error_sending_team_image_to_server">"Erreur : impossible de transmettre la photo de l\'équipe au serveur."</string>
     <string name="regatta_starts_in">"Départ de la régate dans :"</string>
-    <plurals name="hour">
-        <item quantity="one">"Heure"</item>
-        <item quantity="other">"Heures"</item>
-    </plurals>
-    <plurals name="minute">
-        <item quantity="one">"Minute"</item>
-        <item quantity="other">"Minutes"</item>
-    </plurals>
-    <plurals name="day">
-        <item quantity="one">"Jour"</item>
-        <item quantity="other">"Jours"</item>
-    </plurals>
+    <string name="hours">Heures:</string>
+    <string name="minutes">Minutes:</string>
+    <string name="days">Jours:</string>
     <string name="please_listen_to_announcements">"Veuillez écouter les annonces."</string>
     <string name="close">"Fermer"</string>
     <string name="thank_you_you_successfully_participated">"Merci ! Votre participation à la régate est une réussite.\n\nVotre équipe SAP Sailing"</string>

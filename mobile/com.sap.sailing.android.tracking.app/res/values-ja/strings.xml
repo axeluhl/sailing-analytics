@@ -34,18 +34,9 @@
     <string name="error_could_not_complete_operation_on_server_try_again">"サーバ上で操作を完了できませんでした。再試行してください。"</string>
     <string name="error_sending_team_image_to_server">"エラー: チーム画像をサーバに送信できませんでした。"</string>
     <string name="regatta_starts_in">"レガッタがスタートするまでの時間:"</string>
-    <plurals name="hour">
-        <item quantity="one">"時"</item>
-        <item quantity="other">"時間"</item>
-    </plurals>
-    <plurals name="minute">
-        <item quantity="one">"分"</item>
-        <item quantity="other">"分"</item>
-    </plurals>
-    <plurals name="day">
-        <item quantity="one">"日"</item>
-        <item quantity="other">"日"</item>
-    </plurals>
+    <string name="hours">"時間:"</string>
+    <string name="minutes">"分:"</string>
+    <string name="days">"日:"</string>
     <string name="please_listen_to_announcements">"アナウンスを聞いてください"</string>
     <string name="close">"閉じる"</string>
     <string name="thank_you_you_successfully_participated">"ありがとうございます。レガッタへの参加が正常に行われました。\n\nSAP Sailing Team"</string>
