@@ -92,7 +92,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
 
                         final JSONArray deviceIdsWithTrackedElementJson = new JSONArray();
 
-                        for (TrackedElementWithDeviceId trackedElement : pref.getTrackedElements()) {
+                        for (final TrackedElementWithDeviceId trackedElement : pref.getTrackedElements()) {
                             final JSONObject trackedElementJson = new JSONObject();
                             trackedElementJson.put(KEY_TRACKED_ELEMENT_DEVICE_ID, trackedElement.getDeviceId());
                             if (trackedElement.getTrackedCompetitorId() != null) {
@@ -155,7 +155,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                         prefs = new TrackedEventPreferences();
                     }
 
-                    JSONArray trackedElementsJson = (JSONArray) requestObject.get(KEY_EVENT_TRACKED_ELEMENTS);
+                    final JSONArray trackedElementsJson = (JSONArray) requestObject.get(KEY_EVENT_TRACKED_ELEMENTS);
 
                     if (trackedElementsJson == null || trackedElementsJson.size() == 0) {
                         responseBuilder = Response.status(Status.BAD_REQUEST)

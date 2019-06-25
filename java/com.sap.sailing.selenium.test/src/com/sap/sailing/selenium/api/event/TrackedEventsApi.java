@@ -91,8 +91,8 @@ public class TrackedEventsApi {
 
         public Iterable<TrackedEvent> getEvents() {
             final Collection<TrackedEvent> events = new ArrayList<>();
-            JSONArray array = get(KEY_TRACKED_EVENTS);
-            for (Object json : array) {
+            final JSONArray array = get(KEY_TRACKED_EVENTS);
+            for (final Object json : array) {
                 events.add(new TrackedEvent((JSONObject) json));
             }
             return events;
@@ -134,10 +134,10 @@ public class TrackedEventsApi {
         }
 
         public Iterable<TrackedElement> getTrackedElements() {
-            JSONArray array = get(KEY_EVENT_TRACKED_ELEMENTS);
-            Collection<TrackedElement> col = new ArrayList<>();
+            final JSONArray array = get(KEY_EVENT_TRACKED_ELEMENTS);
+            final Collection<TrackedElement> col = new ArrayList<>();
             if (array != null) {
-                for (Object w : array) {
+                for (final Object w : array) {
                     col.add(new TrackedElement((JSONObject) w));
                 }
             }

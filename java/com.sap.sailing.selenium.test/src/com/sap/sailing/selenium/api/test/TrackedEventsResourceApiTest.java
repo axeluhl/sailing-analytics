@@ -112,7 +112,8 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         final String eventBaseUrl = "testUrl";
         final String deviceId = UUID.randomUUID().toString();
 
-        Event evt = eventApi.createEvent(adminCtx, eventName, "75QMNATIONALEKREUZER", CompetitorRegistrationType.CLOSED,
+        final Event evt = eventApi.createEvent(adminCtx, eventName, "75QMNATIONALEKREUZER",
+                CompetitorRegistrationType.CLOSED,
                 "Mannheim");
         final String eventId = evt.getId();
         final String regattaId = evt.getName();
@@ -124,14 +125,14 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         final TrackedEvents trackedEvents = trackedEventsApi.getTrackedEvents(adminCtx, true);
 
         boolean hasEvents = false;
-        for (TrackedEvent event : trackedEvents.getEvents()) {
+        for (final TrackedEvent event : trackedEvents.getEvents()) {
             hasEvents = true;
             Assert.assertEquals(eventBaseUrl, event.getEventBaseUrl());
             Assert.assertEquals(eventId, event.getEventId());
             Assert.assertEquals(regattaId, event.getRegattaId());
 
             boolean hasElements = false;
-            for (TrackedElement elem : event.getTrackedElements()) {
+            for (final TrackedElement elem : event.getTrackedElements()) {
                 hasElements = true;
                 Assert.assertEquals(boatId, elem.getBoatId());
                 Assert.assertEquals(competitorId, elem.getCompetitorId());
