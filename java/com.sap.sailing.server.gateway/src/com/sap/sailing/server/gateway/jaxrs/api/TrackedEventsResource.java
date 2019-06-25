@@ -151,79 +151,105 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                         prefs = new TrackedEventPreferences();
                     }
 
-                    final String deviceId = (String) requestObject.get(KEY_TRACKED_ELEMENT_DEVICE_ID);
-                    final String competitorIdStr = (String) requestObject.get(KEY_TRACKED_ELEMENT_COMPETITOR_ID);
-                    final String boatIdStr = (String) requestObject.get(KEY_TRACKED_ELEMENT_BOAT_ID);
-                    final String markIdStr = (String) requestObject.get(KEY_TRACKED_ELEMENT_MARK_ID);
+                    JSONArray trackedElementsJson = (JSONArray) requestObject.get(KEY_EVENT_TRACKED_ELEMENTS);
 
-                    // cannot be final without either violating single point of return or multiple assignments in
-                    // try/catch
-                    UUID competitorId;
-                    UUID boatId;
-                    UUID markId;
-                    if (competitorIdStr != null && !competitorIdStr.isEmpty()) {
-                        try {
-                            competitorId = UUID.fromString(competitorIdStr);
-                        } catch (IllegalArgumentException e) {
-                            responseBuilder = Response.status(Status.BAD_REQUEST)
-                                    .entity("Invalid JSON body in request.");
-                            competitorId = null;
-                        }
-                        boatId = null;
-                        markId = null;
-                    } else if (boatIdStr != null && !boatIdStr.isEmpty()) {
-                        try {
-                            boatId = UUID.fromString(competitorIdStr);
-                        } catch (IllegalArgumentException e) {
-                            responseBuilder = Response.status(Status.BAD_REQUEST)
-                                    .entity("Invalid JSON body in request.");
-                            boatId = null;
-                        }
-                        competitorId = null;
-                        markId = null;
-                    } else if (markIdStr != null && !markIdStr.isEmpty()) {
-                        try {
-                            markId = UUID.fromString(competitorIdStr);
-                        } catch (IllegalArgumentException e) {
-                            responseBuilder = Response.status(Status.BAD_REQUEST)
-                                    .entity("Invalid JSON body in request.");
-                            markId = null;
-                        }
-                        boatId = null;
-                        competitorId = null;
+                    if (trackedElementsJson == null || trackedElementsJson.size() == 0) {
+                        responseBuilder = Response.status(Status.BAD_REQUEST)
+                                .entity("Invalid JSON body in request: Tracked element is missing.");
+                    } else if (trackedElementsJson.size() > 1) {
+                        responseBuilder = Response.status(Status.BAD_REQUEST).entity(
+                                "Invalid JSON body in request: Too many tracked elements: Only updating one tracked element per call is allowed.");
                     } else {
-                        responseBuilder = Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request.");
-                        markId = boatId = competitorId = null;
-                    }
+                        // tracked json elements array has exactly one child
+                        final JSONObject jsonTrackedElement = (JSONObject) trackedElementsJson.get(0);
 
-                    if (boatId != null || markId != null || competitorId != null) {
-                        final TrackedElementWithDeviceId newPrefElem = new TrackedElementWithDeviceId(deviceId, boatId,
-                                competitorId, markId);
+                        if (jsonTrackedElement == null) {
+                            responseBuilder = Response.status(Status.BAD_REQUEST)
+                                    .entity("Invalid JSON body in request: Tracked element is missing in array.");
+                        }
 
-                        final Collection<TrackedEventPreference> prefsNew = new ArrayList<>();
-                        final Iterator<TrackedEventPreference> it = prefs.getTrackedEvents().iterator();
+                        else {
 
-                        boolean eventContained = false;
-                        while (it.hasNext()) {
-                            final TrackedEventPreference pref = it.next();
-                            if (pref.getEventId().equals(uuidEvent) && pref.getRegattaId().equals(uuidRegatta)) {
-                                prefsNew.add(new TrackedEventPreference(pref, newPrefElem));
-                                eventContained = true;
+                            final String deviceId = (String) jsonTrackedElement.get(KEY_TRACKED_ELEMENT_DEVICE_ID);
+                            final String competitorIdStr = (String) jsonTrackedElement
+                                    .get(KEY_TRACKED_ELEMENT_COMPETITOR_ID);
+                            final String boatIdStr = (String) jsonTrackedElement.get(KEY_TRACKED_ELEMENT_BOAT_ID);
+                            final String markIdStr = (String) jsonTrackedElement.get(KEY_TRACKED_ELEMENT_MARK_ID);
+
+                            // cannot be final without either violating single point of return or multiple assignments
+                            // in
+                            // try/catch
+                            UUID competitorId;
+                            UUID boatId;
+                            UUID markId;
+                            if (competitorIdStr != null && !competitorIdStr.isEmpty()) {
+                                try {
+                                    competitorId = UUID.fromString(competitorIdStr);
+                                } catch (IllegalArgumentException e) {
+                                    responseBuilder = Response.status(Status.BAD_REQUEST)
+                                            .entity("Invalid JSON body in request.");
+                                    competitorId = null;
+                                }
+                                boatId = null;
+                                markId = null;
+                            } else if (boatIdStr != null && !boatIdStr.isEmpty()) {
+                                try {
+                                    boatId = UUID.fromString(competitorIdStr);
+                                } catch (IllegalArgumentException e) {
+                                    responseBuilder = Response.status(Status.BAD_REQUEST)
+                                            .entity("Invalid JSON body in request.");
+                                    boatId = null;
+                                }
+                                competitorId = null;
+                                markId = null;
+                            } else if (markIdStr != null && !markIdStr.isEmpty()) {
+                                try {
+                                    markId = UUID.fromString(competitorIdStr);
+                                } catch (IllegalArgumentException e) {
+                                    responseBuilder = Response.status(Status.BAD_REQUEST)
+                                            .entity("Invalid JSON body in request.");
+                                    markId = null;
+                                }
+                                boatId = null;
+                                competitorId = null;
                             } else {
-                                prefsNew.add(pref);
+                                responseBuilder = Response.status(Status.BAD_REQUEST)
+                                        .entity("Invalid JSON body in request.");
+                                markId = boatId = competitorId = null;
+                            }
+
+                            if (boatId != null || markId != null || competitorId != null) {
+                                final TrackedElementWithDeviceId newPrefElem = new TrackedElementWithDeviceId(deviceId,
+                                        boatId, competitorId, markId);
+
+                                final Collection<TrackedEventPreference> prefsNew = new ArrayList<>();
+                                final Iterator<TrackedEventPreference> it = prefs.getTrackedEvents().iterator();
+
+                                boolean eventContained = false;
+                                while (it.hasNext()) {
+                                    final TrackedEventPreference pref = it.next();
+                                    if (pref.getEventId().equals(uuidEvent)
+                                            && pref.getRegattaId().equals(uuidRegatta)) {
+                                        prefsNew.add(new TrackedEventPreference(pref, newPrefElem));
+                                        eventContained = true;
+                                    } else {
+                                        prefsNew.add(pref);
+                                    }
+                                }
+
+                                if (!eventContained) {
+                                    final TrackedEventPreference newPreference = new TrackedEventPreference(uuidEvent,
+                                            uuidRegatta, Arrays.asList(newPrefElem), baseUrl, isArchived);
+                                    prefsNew.add(newPreference);
+                                }
+                                getSecurityService().setPreferenceObject(currentUser.getName(),
+                                        SailingPreferences.TRACKED_EVENTS_PREFERENCES, prefsNew);
+                                responseBuilder = Response.status(Status.ACCEPTED);
+                            } else {
+                                // no boatId, competitorId or markId were specified
                             }
                         }
 
-                        if (!eventContained) {
-                            final TrackedEventPreference newPreference = new TrackedEventPreference(uuidEvent,
-                                    uuidRegatta, Arrays.asList(newPrefElem), baseUrl, isArchived);
-                            prefsNew.add(newPreference);
-                        }
-                        getSecurityService().setPreferenceObject(currentUser.getName(),
-                                SailingPreferences.TRACKED_EVENTS_PREFERENCES, prefsNew);
-                        responseBuilder = Response.status(Status.ACCEPTED);
-                    } else {
-                        // TODO return
                     }
 
                 } catch (IllegalArgumentException | ClassCastException e) {
