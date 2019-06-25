@@ -67,13 +67,15 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
         // TODO: handle requests for anonymous users
         if (currentUser != null) {
 
+            // load tracked events from storage
             final TrackedEventPreferences prefs = getSecurityService().getPreferenceObject(currentUser.getName(),
                     SailingPreferences.TRACKED_EVENTS_PREFERENCES);
 
             final JSONArray result = new JSONArray();
-
             final boolean showArchived = Boolean.parseBoolean(isArchived);
+
             if (prefs != null) {
+                // iterate all stored tracked events
                 for (final TrackedEventPreference pref : prefs.getTrackedEvents()) {
 
                     if (!showArchived && pref.getIsArchived()) {
@@ -84,6 +86,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                     final UUID eventId = pref.getEventId();
                     final Event event = getService().getEvent(eventId);
                     if (event != null) {
+                        // event actually exists -> parse relevant data
                         final OwnershipAnnotation ownership = getSecurityService().getOwnership(event.getIdentifier());
                         final boolean isOwner = currentUser == null ? false
                                 : currentUser.equals(ownership.getAnnotation().getUserOwner());
@@ -96,6 +99,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
 
                         final JSONArray deviceIdsWithTrackedElementJson = new JSONArray();
 
+                        // iterate all trackedElements with their associated device id and parse the data
                         for (final TrackedElementWithDeviceId trackedElement : pref.getTrackedElements()) {
                             final JSONObject trackedElementJson = new JSONObject();
                             trackedElementJson.put(KEY_TRACKED_ELEMENT_DEVICE_ID, trackedElement.getDeviceId());
@@ -123,6 +127,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                 }
             }
 
+            // storage was empty -> respond with empty list
             final JSONObject resultEvents = new JSONObject();
             resultEvents.put(KEY_TRACKED_EVENTS, result);
             final String jsonString = resultEvents.toJSONString();
@@ -287,6 +292,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
         return applyOnEventById(eventId, pref -> null);
     }
 
+    /** Finds the tracked event with the corresponding eventId and applies the function to it. */
     private Response applyOnEventById(String eventId,
             Function<TrackedEventPreference, TrackedEventPreference> function) {
         ResponseBuilder responseBuilder;
@@ -297,18 +303,22 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
             final TrackedEventPreferences prefs = getSecurityService().getPreferenceObject(currentUser.getName(),
                     SailingPreferences.TRACKED_EVENTS_PREFERENCES);
             try {
+                // parse tracked event UUID
                 final UUID eventUuid = UUID.fromString(eventId);
 
                 if (prefs == null) {
+                    // storage is empty
                     responseBuilder = Response.status(Status.NOT_FOUND)
                             .entity("No tracked events with this eventId found.");
                 } else {
 
+                    // iterate stored preferences until tracked event with corresponding eventId is found
                     boolean found = false;
-
                     final Collection<TrackedEventPreference> newPrefs = new HashSet<>();
                     for (final TrackedEventPreference pref : prefs.getTrackedEvents()) {
                         if (pref.getEventId().equals(eventUuid)) {
+                            // tracked event found, apply function on it and remove it if result of function execution
+                            // is null
                             found = true;
                             final TrackedEventPreference updatedPreference = function.apply(pref);
                             if (updatedPreference != null) {
@@ -319,9 +329,11 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                         }
                     }
                     if (!found) {
+                        // tracked event was not found -> respond with error
                         responseBuilder = Response.status(Status.NOT_FOUND)
                                 .entity("No tracked events with this eventId found.");
                     } else {
+                        // update and store preferences
                         prefs.setTrackedEvents(newPrefs);
                         getSecurityService().setPreferenceObject(currentUser.getName(),
                                 SailingPreferences.TRACKED_EVENTS_PREFERENCES, prefs);
@@ -330,6 +342,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
 
                 }
             } catch (IllegalArgumentException e) {
+                // eventId parameter could not be parsed
                 responseBuilder = Response.status(Status.BAD_REQUEST).entity("Invalid eventId.");
             }
         } else {
