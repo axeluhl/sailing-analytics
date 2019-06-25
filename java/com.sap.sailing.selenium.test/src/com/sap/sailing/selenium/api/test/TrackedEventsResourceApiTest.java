@@ -42,15 +42,28 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
     @Test
     public void testCreateTrackedEventWithCompetitorTracking() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        testCreateTrackedEventWithTracking(UUID.randomUUID().toString(), null, null, adminCtx);
+    }
 
-        final String eventBaseUrl = "testUrl";
+    @Test
+    public void testCreateTrackedEventWithBoatTracking() {
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        testCreateTrackedEventWithTracking(null, UUID.randomUUID().toString(), null, adminCtx);
+    }
+
+    @Test
+    public void testCreateTrackedEventWithMarkTracking() {
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        testCreateTrackedEventWithTracking(null, null, UUID.randomUUID().toString(), adminCtx);
+    }
+
+    private void testCreateTrackedEventWithTracking(final String competitorId, final String boatId, final String markId,
+            final ApiContext adminCtx) {
+        final String eventBaseUrl = "testUrl-" + UUID.randomUUID().toString();
         final String deviceId = UUID.randomUUID().toString();
-        final String competitorId = UUID.randomUUID().toString();
-        final String boatId = null;
-        final String markId = null;
 
         Event evt = eventApi.createEvent(adminCtx, "TestEvent-" + UUID.randomUUID().toString(), "75QMNATIONALEKREUZER",
-                CompetitorRegistrationType.CLOSED, "Mannheim-" + UUID.randomUUID().toString());
+                CompetitorRegistrationType.CLOSED, "Mannheim");
         final String eventId = evt.getId();
         final String regattaId = evt.getName();
 
@@ -79,7 +92,6 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         }
 
         Assert.assertTrue(hasEvents);
-
     }
 
 }

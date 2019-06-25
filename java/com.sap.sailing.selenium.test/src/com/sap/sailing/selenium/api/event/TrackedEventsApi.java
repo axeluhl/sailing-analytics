@@ -53,7 +53,7 @@ public class TrackedEventsApi {
         } else if (boatId != null) {
             elem.put(KEY_TRACKED_ELEMENT_BOAT_ID, boatId);
         } else if (markId != null) {
-            elem.put(KEY_TRACKED_ELEMENT_BOAT_ID, markId);
+            elem.put(KEY_TRACKED_ELEMENT_MARK_ID, markId);
         }
         elements.add(elem);
 
