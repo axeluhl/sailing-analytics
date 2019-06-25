@@ -198,7 +198,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                                 markId = null;
                             } else if (boatIdStr != null && !boatIdStr.isEmpty()) {
                                 try {
-                                    boatId = UUID.fromString(competitorIdStr);
+                                    boatId = UUID.fromString(boatIdStr);
                                 } catch (IllegalArgumentException e) {
                                     responseBuilder = Response.status(Status.BAD_REQUEST)
                                             .entity("Invalid JSON body in request.");
@@ -208,7 +208,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                                 markId = null;
                             } else if (markIdStr != null && !markIdStr.isEmpty()) {
                                 try {
-                                    markId = UUID.fromString(competitorIdStr);
+                                    markId = UUID.fromString(markIdStr);
                                 } catch (IllegalArgumentException e) {
                                     responseBuilder = Response.status(Status.BAD_REQUEST)
                                             .entity("Invalid JSON body in request.");
