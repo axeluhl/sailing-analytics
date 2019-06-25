@@ -1,7 +1,7 @@
 package com.sap.sailing.server.impl.preferences.model;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.UUID;
 
 import com.sap.sse.common.Util;
@@ -55,7 +55,7 @@ public class TrackedEventPreference extends AbstractGenericSerializableSettings 
         this();
         eventId.setValue(other.getEventId());
         regattaId.setValue(other.getRegattaId());
-        final Collection<TrackedElementWithDeviceId> trackedElements = new ArrayList<>();
+        final Collection<TrackedElementWithDeviceId> trackedElements = new HashSet<>();
         Util.addAll(other.getTrackedElements(), trackedElements);
         trackedElements.add(trackedElement);
         this.trackedElements.setValues(trackedElements);

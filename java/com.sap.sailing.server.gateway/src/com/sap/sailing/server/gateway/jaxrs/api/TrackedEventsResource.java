@@ -77,40 +77,43 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                         continue;
                     }
 
-                    final Event event = getService().getEvent(pref.getEventId());
-                    final OwnershipAnnotation ownership = getSecurityService().getOwnership(event.getIdentifier());
-                    final boolean isOwner = currentUser == null ? false
-                            : currentUser.equals(ownership.getAnnotation().getUserOwner());
+                    final UUID eventId = pref.getEventId();
+                    final Event event = getService().getEvent(eventId);
+                    if (event != null) {
+                        final OwnershipAnnotation ownership = getSecurityService().getOwnership(event.getIdentifier());
+                        final boolean isOwner = currentUser == null ? false
+                                : currentUser.equals(ownership.getAnnotation().getUserOwner());
 
-                    final JSONObject jsonEvent = new JSONObject();
-                    jsonEvent.put(KEY_EVENT_ID, event.getId().toString());
-                    jsonEvent.put(KEY_EVENT_NAME, event.getName());
-                    jsonEvent.put(KEY_EVENT_START, event.getStartDate().toString());
-                    jsonEvent.put(KEY_EVENT_AND, event.getEndDate().toString());
+                        final JSONObject jsonEvent = new JSONObject();
+                        jsonEvent.put(KEY_EVENT_ID, event.getId().toString());
+                        jsonEvent.put(KEY_EVENT_NAME, event.getName());
+                        jsonEvent.put(KEY_EVENT_START, event.getStartDate().toString());
+                        jsonEvent.put(KEY_EVENT_AND, event.getEndDate().toString());
 
-                    final JSONArray deviceIdsWithTrackedElementJson = new JSONArray();
+                        final JSONArray deviceIdsWithTrackedElementJson = new JSONArray();
 
-                    for (TrackedElementWithDeviceId trackedElement : pref.getTrackedElements()) {
-                        final JSONObject trackedElementJson = new JSONObject();
-                        trackedElementJson.put(KEY_TRACKED_ELEMENT_DEVICE_ID, trackedElement.getDeviceId());
-                        if (trackedElement.getTrackedCompetitorId() != null) {
-                            trackedElementJson.put(KEY_TRACKED_ELEMENT_COMPETITOR_ID,
-                                    trackedElement.getTrackedCompetitorId().toString());
-                        } else if (trackedElement.getTrackedBoatId() != null) {
-                            trackedElementJson.put(KEY_TRACKED_ELEMENT_BOAT_ID,
-                                    trackedElement.getTrackedBoatId().toString());
-                        } else if (trackedElement.getTrackedMarkId() != null) {
-                            trackedElementJson.put(KEY_TRACKED_ELEMENT_MARK_ID,
-                                    trackedElement.getTrackedMarkId().toString());
+                        for (TrackedElementWithDeviceId trackedElement : pref.getTrackedElements()) {
+                            final JSONObject trackedElementJson = new JSONObject();
+                            trackedElementJson.put(KEY_TRACKED_ELEMENT_DEVICE_ID, trackedElement.getDeviceId());
+                            if (trackedElement.getTrackedCompetitorId() != null) {
+                                trackedElementJson.put(KEY_TRACKED_ELEMENT_COMPETITOR_ID,
+                                        trackedElement.getTrackedCompetitorId().toString());
+                            } else if (trackedElement.getTrackedBoatId() != null) {
+                                trackedElementJson.put(KEY_TRACKED_ELEMENT_BOAT_ID,
+                                        trackedElement.getTrackedBoatId().toString());
+                            } else if (trackedElement.getTrackedMarkId() != null) {
+                                trackedElementJson.put(KEY_TRACKED_ELEMENT_MARK_ID,
+                                        trackedElement.getTrackedMarkId().toString());
+                            }
                         }
-                    }
 
-                    jsonEvent.put(KEY_EVENT_TRACKED_ELEMENTS, deviceIdsWithTrackedElementJson);
-                    // jsonEvent.put("imageUrl", event.getImages().)
-                    jsonEvent.put(KEY_EVENT_BASE_URL, pref.getBaseUrl());
-                    jsonEvent.put(KEY_EVENT_IS_ARCHIVED, pref.getIsArchived());
-                    jsonEvent.put(KEY_EVENT_IS_OWNER, isOwner);
-                    result.add(jsonEvent);
+                        jsonEvent.put(KEY_EVENT_TRACKED_ELEMENTS, deviceIdsWithTrackedElementJson);
+                        // jsonEvent.put("imageUrl", event.getImages().)
+                        jsonEvent.put(KEY_EVENT_BASE_URL, pref.getBaseUrl());
+                        jsonEvent.put(KEY_EVENT_IS_ARCHIVED, pref.getIsArchived());
+                        jsonEvent.put(KEY_EVENT_IS_OWNER, isOwner);
+                        result.add(jsonEvent);
+                    }
                 }
             }
 
@@ -242,8 +245,10 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                                             uuidRegatta, Arrays.asList(newPrefElem), baseUrl, isArchived);
                                     prefsNew.add(newPreference);
                                 }
+                                
+                                prefs.setTrackedEvents(prefsNew);
                                 getSecurityService().setPreferenceObject(currentUser.getName(),
-                                        SailingPreferences.TRACKED_EVENTS_PREFERENCES, prefsNew);
+                                        SailingPreferences.TRACKED_EVENTS_PREFERENCES, prefs);
                                 responseBuilder = Response.status(Status.ACCEPTED);
                             } else {
                                 // no boatId, competitorId or markId were specified
