@@ -17,7 +17,7 @@ public class TrackedEventPreferences extends AbstractGenericSerializableSettings
 
     @Override
     protected void addChildSettings() {
-        trackedEvents = new SettingsList<>("trackedEvents", this, () -> new TrackedEventPreference());
+        trackedEvents = new SettingsList<>("trackedEvents", this, TrackedEventPreference::new);
     }
 
     public Iterable<TrackedEventPreference> getTrackedEvents() {

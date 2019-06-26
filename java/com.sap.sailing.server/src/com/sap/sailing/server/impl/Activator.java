@@ -154,7 +154,7 @@ public class Activator implements BundleActivator {
                 properties));
         properties.put(PreferenceConverter.KEY_PARAMETER_NAME, StoredDataMiningQueryPreferences.PREF_NAME);
         registrations.add(context.registerService(PreferenceConverter.class,
-                new GenericJSONPreferenceConverter<>(() -> new StoredDataMiningQueryPreferences()), properties));
+                new GenericJSONPreferenceConverter<>(StoredDataMiningQueryPreferences::new), properties));
         properties.put(PreferenceConverter.KEY_PARAMETER_NAME, SailorProfilePreferences.PREF_NAME);
         registrations.add(context.registerService(PreferenceConverter.class,
                 new GenericJSONPreferenceConverter<>(
@@ -162,7 +162,7 @@ public class Activator implements BundleActivator {
                 properties));
         properties.put(PreferenceConverter.KEY_PARAMETER_NAME, TrackedEventPreferences.PREF_NAME);
         registrations.add(context.registerService(PreferenceConverter.class,
-                new GenericJSONPreferenceConverter<>(() -> new TrackedEventPreferences()), properties));
+                new GenericJSONPreferenceConverter<>(TrackedEventPreferences::new), properties));
     }
 
     public static BundleContext getContext() {
