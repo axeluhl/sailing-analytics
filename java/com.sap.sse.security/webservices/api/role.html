@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../fontface.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sponsorships Engine Security Webservices API</title>
+</head>
+<body>
+<h1>SAP Sponsorships Engine Security Webservices API</h1>
+<h2>URL: /api/restsecurity/role</h2>
+
+<b>Description:</b>
+<p>The service can get, create, delete and update a role and based on the HTTP method used. The path parameter <i>roleId</i> determines, which role is deleted/updated/retrieved.</p>
+<br/>
+<table>
+    <tr>
+        <td>Request Method:</td>
+        <td>GET /{roleId}</td>
+    </tr>
+    <tr>
+        <td>Description:</td>
+        <td>Retrieve the role with the associated <i>roleId</i>.</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>a JSON document of the following format<br>
+            <pre>{"permissions": ["BOAT:READ", "COMPETITOR,EVENT:READ"], "id": "29914406-b0fc-43cd-acc7-62a83931f587", "name": "test-role"}</pre>
+        </td>
+    </tr>
+    <tr>
+        <td>Mandatory path parameters:</td>
+        <td>
+            <div>roleId: UUID of the role to get.</div> 
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl -X GET "127.0.0.1:8888/security/api/restsecurity/role/29914406-b0fc-43cd-acc7-62a83931f587"</code><br>
+                Will provide a JSON document as explained above.</td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td>Request Method:</td>
+        <td>PUT /{roleId}</td>
+    </tr>
+    <tr>
+        <td>Description:</td>
+        <td>Update the role with the associated <i>roleId</i> with the parameters in the JSON body.</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>An empty response with status code 200 in case of success; error-indicating status codes otherwise</td>
+    </tr>
+    <tr>
+        <td>Mandatory path parameters:</td>
+        <td>
+            <div>roleId: UUID of the role to get.</div> 
+        </td>
+    </tr>
+    <tr>
+        <td>Parameters in the JSON body:</td>
+        <td>
+            <div>Mandatory: permissions: Set of String permissions, the role's current permissions will be replaced with.</div> 
+            <div>Optional: roleName: the role's current role name will be replaced with this.</div> 
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl --header "Content-Type: application/json" --request PUT --data '{"permissions": ["COMPETITOR,EVENT:READ", "BOAT:READ"], "roleName":"testrole2"}' 127.0.0.1:8888/security/api/restsecurity/role/29914406-b0fc-43cd-acc7-62a83931f587</code><br>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td>Request Method:</td>
+        <td>DELETE /{roleId}</td>
+    </tr>
+    <tr>
+        <td>Description:</td>
+        <td>Delete the role with the associated <i>roleId</i>.</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>a JSON document of the following format<br>
+            <pre>{"permissions": ["BOAT:READ", "COMPETITOR,EVENT:READ"], "id": "29914406-b0fc-43cd-acc7-62a83931f587", "name": "test-role"}</pre>
+        </td>
+    </tr>
+    <tr>
+        <td>Mandatory path parameters:</td>
+        <td>
+            <div>roleId: UUID of the role to get.</div> 
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl -X DELETE "127.0.0.1:8888/security/api/restsecurity/role/29914406-b0fc-43cd-acc7-62a83931f587"</code></td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td>Request Method:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Description:</td>
+        <td>Create a role with the <i>roleName</i> given as a form parameter.</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>a JSON document of the following format<br>
+            <pre>{"permissions": ["BOAT:READ", "COMPETITOR,EVENT:READ"], "id": "29914406-b0fc-43cd-acc7-62a83931f587", "name": "test-role"}</pre>
+        </td>
+    </tr>
+    <tr>
+        <td>Mandatory form parameters:</td>
+        <td>
+            <div>roleName: Name of the role to create.</div> 
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl -X POST "127.0.0.1:8888/security/api/restsecurity/role/?roleName=test-role"</code></td>
+    </tr>
+</table>
+</body>
+</html>
