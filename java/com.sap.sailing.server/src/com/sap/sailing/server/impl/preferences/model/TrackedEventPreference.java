@@ -22,12 +22,6 @@ public class TrackedEventPreference extends AbstractGenericSerializableSettings 
     private transient SettingsList<TrackedElementWithDeviceId> trackedElements;
 
     public TrackedEventPreference() {
-        eventId = new UUIDSetting("eventId", this);
-        regattaId = new StringSetting("regattaId", this);
-        trackedElements = new SettingsList<TrackedElementWithDeviceId>("trackedElements", this,
-                () -> new TrackedElementWithDeviceId());
-        baseUrl = new StringSetting("baseUrl", this);
-        isArchived = new BooleanSetting("isArchived", this);
     }
 
     /** copy constructor */
@@ -75,11 +69,12 @@ public class TrackedEventPreference extends AbstractGenericSerializableSettings 
 
     @Override
     protected void addChildSettings() {
-        // We do not create the Setting instances here, because access to the RacingEventService would not be given.
-        // Doing this, Java/GWT Serialization isn't working anymore. Because the preferences are only serialized as JSON
-        // in the backend an transferred as DTO to the frontend, this isn't a problem. Due to usage of BoatClass and
-        // Competitor domain objects, it wouldn't be GWT compatible anyway.
-        // The usage of Java Serialization isn't planned by now, either.
+        eventId = new UUIDSetting("eventId", this);
+        regattaId = new StringSetting("regattaId", this);
+        trackedElements = new SettingsList<TrackedElementWithDeviceId>("trackedElements", this,
+                () -> new TrackedElementWithDeviceId());
+        baseUrl = new StringSetting("baseUrl", this);
+        isArchived = new BooleanSetting("isArchived", this);
     }
 
     public UUID getEventId() {
