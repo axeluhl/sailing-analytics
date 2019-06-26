@@ -351,10 +351,7 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
 
         if (resultCode == CommonStatusCodes.SUCCESS && data != null) {
             Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
-            if (QRHelper.with(getActivity()).saveData(barcode.displayValue)) {
-                BroadcastManager.getInstance(getActivity())
-                        .addIntent(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN));
-            }
+            QRHelper.with(getActivity()).saveData(barcode.displayValue);
         } else {
             Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
         }
