@@ -64,7 +64,6 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
         final ResponseBuilder builder;
 
         // check if user logged in
-        // TODO: handle requests for anonymous users
         if (currentUser != null) {
 
             // load tracked events from storage
@@ -86,43 +85,39 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                     final UUID eventId = pref.getEventId();
                     final Event event = getService().getEvent(eventId);
                     if (event != null) {
-                        // event actually exists -> parse relevant data
-                        final OwnershipAnnotation ownership = getSecurityService().getOwnership(event.getIdentifier());
-                        final boolean isOwner = currentUser == null ? false
-                                : currentUser.equals(ownership.getAnnotation().getUserOwner());
+                        if (getSecurityService().hasCurrentUserReadPermission(event)) {
+                            // event actually exists -> parse relevant data
+                            final OwnershipAnnotation ownership = getSecurityService()
+                                    .getOwnership(event.getIdentifier());
+                            final boolean isOwner = currentUser == null ? false
+                                    : currentUser.equals(ownership.getAnnotation().getUserOwner());
 
-                        final JSONObject jsonEvent = new JSONObject();
-                        jsonEvent.put(KEY_EVENT_ID, event.getId().toString());
-                        jsonEvent.put(KEY_EVENT_NAME, event.getName());
-                        jsonEvent.put(KEY_EVENT_START, event.getStartDate().toString());
-                        jsonEvent.put(KEY_EVENT_AND, event.getEndDate().toString());
+                            final JSONObject jsonEvent = new JSONObject();
+                            jsonEvent.put(KEY_EVENT_ID, event.getId().toString());
+                            jsonEvent.put(KEY_EVENT_NAME, event.getName());
+                            jsonEvent.put(KEY_EVENT_START, event.getStartDate().toString());
+                            jsonEvent.put(KEY_EVENT_AND, event.getEndDate().toString());
 
-                        final JSONArray deviceIdsWithTrackedElementJson = new JSONArray();
-
-                        // iterate all trackedElements with their associated device id and parse the data
-                        for (final TrackedElementWithDeviceId trackedElement : pref.getTrackedElements()) {
-                            final JSONObject trackedElementJson = new JSONObject();
-                            trackedElementJson.put(KEY_TRACKED_ELEMENT_DEVICE_ID, trackedElement.getDeviceId());
-                            if (trackedElement.getTrackedCompetitorId() != null) {
-                                trackedElementJson.put(KEY_TRACKED_ELEMENT_COMPETITOR_ID,
-                                        trackedElement.getTrackedCompetitorId().toString());
-                            } else if (trackedElement.getTrackedBoatId() != null) {
-                                trackedElementJson.put(KEY_TRACKED_ELEMENT_BOAT_ID,
-                                        trackedElement.getTrackedBoatId().toString());
-                            } else if (trackedElement.getTrackedMarkId() != null) {
-                                trackedElementJson.put(KEY_TRACKED_ELEMENT_MARK_ID,
-                                        trackedElement.getTrackedMarkId().toString());
-                            }
-                            deviceIdsWithTrackedElementJson.add(trackedElementJson);
+                            jsonEvent.put(KEY_EVENT_TRACKED_ELEMENTS, trackedElementsToJson(pref));
+                            // jsonEvent.put("imageUrl", event.getImages().)
+                            jsonEvent.put(KEY_EVENT_BASE_URL, pref.getBaseUrl());
+                            jsonEvent.put(KEY_EVENT_IS_ARCHIVED, pref.getIsArchived());
+                            jsonEvent.put(KEY_EVENT_IS_OWNER, isOwner);
+                            jsonEvent.put(KEY_REGATTA_ID, pref.getRegattaId());
+                            result.add(jsonEvent);
+                        } else {
+                            // User does not have read permission on event
+                            final JSONObject jsonEvent = new JSONObject();
+                            jsonEvent.put(KEY_EVENT_ID, pref.getEventId());
+                            jsonEvent.put(KEY_REGATTA_ID, pref.getRegattaId());
+                            jsonEvent.put(KEY_EVENT_BASE_URL, pref.getBaseUrl());
+                            jsonEvent.put(KEY_EVENT_IS_ARCHIVED, pref.getIsArchived());
+                            jsonEvent.put(KEY_EVENT_TRACKED_ELEMENTS, trackedElementsToJson(pref));
+                            result.add(jsonEvent);
                         }
-
-                        jsonEvent.put(KEY_EVENT_TRACKED_ELEMENTS, deviceIdsWithTrackedElementJson);
-                        // jsonEvent.put("imageUrl", event.getImages().)
-                        jsonEvent.put(KEY_EVENT_BASE_URL, pref.getBaseUrl());
-                        jsonEvent.put(KEY_EVENT_IS_ARCHIVED, pref.getIsArchived());
-                        jsonEvent.put(KEY_EVENT_IS_OWNER, isOwner);
-                        jsonEvent.put(KEY_REGATTA_ID, pref.getRegattaId());
-                        result.add(jsonEvent);
+                    } else {
+                        // TODO:
+                        // check, if base url is equal to this server, if not, event might be on different server
                     }
                 }
             }
@@ -136,6 +131,24 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
             builder = Response.status(Status.UNAUTHORIZED);
         }
         return builder.build();
+    }
+
+    private JSONArray trackedElementsToJson(final TrackedEventPreference pref) {
+        final JSONArray deviceIdsWithTrackedElementJson = new JSONArray();
+        for (final TrackedElementWithDeviceId trackedElement : pref.getTrackedElements()) {
+            final JSONObject trackedElementJson = new JSONObject();
+            trackedElementJson.put(KEY_TRACKED_ELEMENT_DEVICE_ID, trackedElement.getDeviceId());
+            if (trackedElement.getTrackedCompetitorId() != null) {
+                trackedElementJson.put(KEY_TRACKED_ELEMENT_COMPETITOR_ID,
+                        trackedElement.getTrackedCompetitorId().toString());
+            } else if (trackedElement.getTrackedBoatId() != null) {
+                trackedElementJson.put(KEY_TRACKED_ELEMENT_BOAT_ID, trackedElement.getTrackedBoatId().toString());
+            } else if (trackedElement.getTrackedMarkId() != null) {
+                trackedElementJson.put(KEY_TRACKED_ELEMENT_MARK_ID, trackedElement.getTrackedMarkId().toString());
+            }
+            deviceIdsWithTrackedElementJson.add(trackedElementJson);
+        }
+        return deviceIdsWithTrackedElementJson;
     }
 
     @PUT
