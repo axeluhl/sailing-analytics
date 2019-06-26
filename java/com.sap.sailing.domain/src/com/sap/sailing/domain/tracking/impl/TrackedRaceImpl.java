@@ -805,7 +805,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     /**
      * Monitor object to synchronize access to the {@link #updateStartAndEndOfTracking(boolean)} method. See bug 3922.
      */
-    private final Serializable updateStartAndEndOfTrackingMonitor = "updateStartAndEndOfTrackingMonitor";
+    private final Serializable updateStartAndEndOfTrackingMonitor = ""+new Random().nextDouble();
     
     /**
      * Updates the start and end of tracking in the following precedence order:
@@ -3522,7 +3522,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             final Mark portMarkOfStartLine = getStartLine(competitorLegStartTime).getPortMarkWhileApproachingLine();
             final Position portSideOfStartLinePosition = getOrCreateTrack(portMarkOfStartLine)
                     .getEstimatedPosition(competitorLegStartTime, /* extrapolate */true);
-            result = portSideOfStartLinePosition.getDistance(getTrack(competitor).getEstimatedPosition(competitorLegStartTime, /* extrapolate */false));
+            final Position estimatedCompetitorPositionAtStart = getTrack(competitor).getEstimatedPosition(competitorLegStartTime, /* extrapolate */false);
+            if (estimatedCompetitorPositionAtStart != null && portSideOfStartLinePosition != null) {
+                result = portSideOfStartLinePosition.getDistance(estimatedCompetitorPositionAtStart);
+            } else {
+                result = Distance.NULL;
+            }
         } else {
             result = Distance.NULL;
         }
