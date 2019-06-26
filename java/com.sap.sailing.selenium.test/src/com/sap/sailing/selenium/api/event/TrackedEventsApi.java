@@ -44,8 +44,6 @@ public class TrackedEventsApi {
     public void updateOrCreateTrackedEvent(ApiContext ctx, String eventId, String leaderboardName, String eventBaseUrl,
             String deviceId, String competitorId, String boatId, String markId, String regattaSecret) {
         final JSONObject json = new JSONObject();
-        json.put(KEY_EVENT_ID, eventId);
-        json.put(KEY_LEADERBOARD_NAME, leaderboardName);
         json.put(KEY_EVENT_BASE_URL, eventBaseUrl);
 
         final JSONArray elements = new JSONArray();
@@ -63,18 +61,19 @@ public class TrackedEventsApi {
         json.put(KEY_EVENT_REGATTA_SECRET, regattaSecret);
         json.put(KEY_EVENT_TRACKED_ELEMENTS, elements);
         json.put(KEY_EVENT_IS_ARCHIVED, false);
-        ctx.put(TRACKED_EVENTS_URL, new HashMap<>(), json);
+        ctx.put(TRACKED_EVENTS_URL + eventId + "/" + leaderboardName, new HashMap<>(), json);
     }
 
-    public void setArchived(ApiContext ctx, String eventId, boolean archived) {
+    public void setArchived(ApiContext ctx, String eventId, String leaderboardName, boolean archived) {
         final HashMap<String, String> queryParams = new HashMap<>();
         queryParams.put(KEY_EVENT_ID, eventId);
+        queryParams.put(KEY_LEADERBOARD_NAME, leaderboardName);
         queryParams.put(KEY_QUERY_INCLUDE_ARCHIVED, Boolean.toString(archived));
         ctx.post(TRACKED_EVENTS_URL, queryParams);
     }
 
-    public void deleteEventTrackings(ApiContext ctx, String eventId) {
-        ctx.delete(TRACKED_EVENTS_URL + eventId);
+    public void deleteEventTrackings(ApiContext ctx, String eventId, String leaderboardName) {
+        ctx.delete(TRACKED_EVENTS_URL + eventId + "/" + leaderboardName);
     }
 
     public class TrackedElement extends JsonWrapper {

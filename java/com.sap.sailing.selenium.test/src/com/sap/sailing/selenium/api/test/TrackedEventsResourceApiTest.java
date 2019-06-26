@@ -68,8 +68,8 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         trackedEventsApi.updateOrCreateTrackedEvent(adminCtx, eventId2, leaderboardName2, eventBaseUrl, deviceId, null,
                 null, markId, regattaSecret2);
 
-        trackedEventsApi.setArchived(adminCtx, evt.getId(), true);
-        trackedEventsApi.setArchived(adminCtx, evt2.getId(), false);
+        trackedEventsApi.setArchived(adminCtx, evt.getId(), leaderboardName, true);
+        trackedEventsApi.setArchived(adminCtx, evt2.getId(), leaderboardName2, false);
         // check if created event is still there
         final TrackedEvents trackedEvents = trackedEventsApi.getTrackedEvents(adminCtx, false);
 
@@ -289,10 +289,11 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
     @Test
     public void testDeleteEvent() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final String leaderboardName = "TestEvent-" + UUID.randomUUID().toString();
         final String eventId = testCreateTrackedEventWithTracking(UUID.randomUUID().toString(), null, null, adminCtx,
-                "TestEvent-" + UUID.randomUUID().toString());
+                leaderboardName);
 
-        trackedEventsApi.deleteEventTrackings(adminCtx, eventId);
+        trackedEventsApi.deleteEventTrackings(adminCtx, eventId, leaderboardName);
 
         final TrackedEvents trackedEvents = trackedEventsApi.getTrackedEvents(adminCtx, true);
         Assert.assertNotNull("Tracked Events element should not be null", trackedEvents);

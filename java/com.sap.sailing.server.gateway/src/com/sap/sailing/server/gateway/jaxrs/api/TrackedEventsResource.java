@@ -51,7 +51,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
     private static final String KEY_EVENT_IS_ARCHIVED = "isArchived";
     private static final String KEY_EVENT_NAME = "name";
     private static final String KEY_EVENT_START = "start";
-    private static final String KEY_EVENT_AND = "end";
+    private static final String KEY_EVENT_END = "end";
     private static final String KEY_EVENT_TRACKED_ELEMENTS = "trackedElements";
     private static final String KEY_EVENT_BASE_URL = "url";
     private static final String KEY_EVENT_IS_OWNER = "isOwner";
@@ -104,7 +104,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
 
                             jsonEvent.put(KEY_EVENT_NAME, event.getName());
                             jsonEvent.put(KEY_EVENT_START, event.getStartDate().toString());
-                            jsonEvent.put(KEY_EVENT_AND, event.getEndDate().toString());
+                            jsonEvent.put(KEY_EVENT_END, event.getEndDate().toString());
 
                             final List<ImageDescriptor> imageWithLogoTag = event
                                     .findImagesWithTag(MediaTagConstants.LOGO.getName());
@@ -157,7 +157,9 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateOrCreateTrackedEvent(String jsonBody) {
+    @Path("{eventId}/{leaderboardName}")
+    public Response updateOrCreateTrackedEvent(@PathParam(KEY_EVENT_ID) String eventId,
+            @PathParam(KEY_LEADERBOARD_NAME) String leaderboardName, String jsonBody) {
         ResponseBuilder responseBuilder = null;
         final User currentUser = getSecurityService().getCurrentUser();
 
@@ -166,8 +168,6 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
             try {
                 final Object requestBody = JSONValue.parseWithException(jsonBody);
                 final JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
-                final String eventId = (String) requestObject.get(KEY_EVENT_ID);
-                final String leaderboardName = (String) requestObject.get(KEY_LEADERBOARD_NAME);
                 final Boolean archived = (Boolean) requestObject.get(KEY_EVENT_IS_ARCHIVED);
                 final String baseUrl = (String) requestObject.get(KEY_EVENT_BASE_URL);
                 final String regattaSecret = (String) requestObject.get(KEY_EVENT_REGATTA_SECRET);
@@ -301,19 +301,22 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
 
     @POST
     public Response updateTrackedEventsArchivedStatus(@QueryParam(KEY_EVENT_ID) String eventId,
+            @QueryParam(KEY_LEADERBOARD_NAME) String leaderboardName,
             @QueryParam(KEY_QUERY_INCLUDE_ARCHIVED) String archived) {
         final boolean isArchived = Boolean.parseBoolean(archived);
-        return applyOnEventById(eventId, pref -> new TrackedEventPreference(pref, isArchived));
+        return applyOnEventByIdAndLeadboardName(eventId, leaderboardName,
+                pref -> new TrackedEventPreference(pref, isArchived));
     }
 
     @DELETE
-    @Path("{eventId}")
-    public Response deleteTrackedEvents(@PathParam(KEY_EVENT_ID) String eventId) {
-        return applyOnEventById(eventId, pref -> null);
+    @Path("{eventId}/{leaderboardName}")
+    public Response deleteTrackedEvents(@PathParam(KEY_EVENT_ID) String eventId,
+            @PathParam(KEY_LEADERBOARD_NAME) String leaderboardName) {
+        return applyOnEventByIdAndLeadboardName(eventId, leaderboardName, pref -> null);
     }
 
     /** Finds the tracked event with the corresponding eventId and applies the function to it. */
-    private Response applyOnEventById(String eventId,
+    private Response applyOnEventByIdAndLeadboardName(String eventId, String leaderboardName,
             Function<TrackedEventPreference, TrackedEventPreference> function) {
         ResponseBuilder responseBuilder;
         final User currentUser = getSecurityService().getCurrentUser();
@@ -336,7 +339,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                     boolean found = false;
                     final Collection<TrackedEventPreference> newPrefs = new HashSet<>();
                     for (final TrackedEventPreference pref : prefs.getTrackedEvents()) {
-                        if (pref.getEventId().equals(eventUuid)) {
+                        if (pref.getEventId().equals(eventUuid) && pref.getLeaderboardName().equals(leaderboardName)) {
                             // tracked event found, apply function on it and remove it if result of function execution
                             // is null
                             found = true;
