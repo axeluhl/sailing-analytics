@@ -2,6 +2,7 @@ package com.sap.sailing.selenium.api.test;
 
 import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
+import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
 
 import java.util.UUID;
 
@@ -13,6 +14,7 @@ import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.EventApi.Event;
+import com.sap.sailing.selenium.api.event.SecurityApi;
 import com.sap.sailing.selenium.api.event.TrackedEventsApi;
 import com.sap.sailing.selenium.api.event.TrackedEventsApi.TrackedElement;
 import com.sap.sailing.selenium.api.event.TrackedEventsApi.TrackedEvent;
@@ -25,6 +27,7 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
     private final TrackedEventsApi trackedEventsApi = new TrackedEventsApi();
 
     private final EventApi eventApi = new EventApi();
+    private final SecurityApi securityApi = new SecurityApi();
 
     @Before
     public void setUp() {
@@ -296,6 +299,26 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         trackedEventsApi.deleteEventTrackings(adminCtx, eventId, leaderboardName);
 
         final TrackedEvents trackedEvents = trackedEventsApi.getTrackedEvents(adminCtx, true);
+        Assert.assertNotNull("Tracked Events element should not be null", trackedEvents);
+        Assert.assertTrue("Expected empty list of tracked events", Util.isEmpty(trackedEvents.getEvents()));
+    }
+
+    @Test
+    public void testMultipleUsers() {
+
+        // create test user
+        final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), ApiContext.SECURITY_CONTEXT);
+        securityApi.createUser(adminSecurityCtx, "tuser", "Test User", null, "testuser");
+        final ApiContext userCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "tuser", "testuser");
+
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+
+        // add an event in the user context of admin user
+        testCreateTrackedEventWithTracking(null, UUID.randomUUID().toString(), null, adminCtx,
+                "TestEvent-" + UUID.randomUUID().toString());
+
+        // check if event is invisible to the other user
+        final TrackedEvents trackedEvents = trackedEventsApi.getTrackedEvents(userCtx, true);
         Assert.assertNotNull("Tracked Events element should not be null", trackedEvents);
         Assert.assertTrue("Expected empty list of tracked events", Util.isEmpty(trackedEvents.getEvents()));
     }
