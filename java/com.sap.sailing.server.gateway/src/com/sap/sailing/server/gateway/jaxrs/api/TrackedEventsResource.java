@@ -46,7 +46,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
 
     private static final String KEY_QUERY_INCLUDE_ARCHIVED = "includeArchived";
 
-    private static final String KEY_REGATTA_ID = "regattaId";
+    private static final String KEY_LEADERBOARD_NAME = "leaderboardName";
     private static final String KEY_EVENT_ID = "eventId";
     private static final String KEY_EVENT_IS_ARCHIVED = "isArchived";
     private static final String KEY_EVENT_NAME = "name";
@@ -113,13 +113,13 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                             jsonEvent.put(KEY_EVENT_BASE_URL, pref.getBaseUrl());
                             jsonEvent.put(KEY_EVENT_IS_ARCHIVED, pref.getIsArchived());
                             jsonEvent.put(KEY_EVENT_IS_OWNER, isOwner);
-                            jsonEvent.put(KEY_REGATTA_ID, pref.getRegattaId());
+                            jsonEvent.put(KEY_LEADERBOARD_NAME, pref.getLeaderboardName());
                             result.add(jsonEvent);
                         } else {
                             // User does not have read permission on event
                             final JSONObject jsonEvent = new JSONObject();
                             jsonEvent.put(KEY_EVENT_ID, pref.getEventId());
-                            jsonEvent.put(KEY_REGATTA_ID, pref.getRegattaId());
+                            jsonEvent.put(KEY_LEADERBOARD_NAME, pref.getLeaderboardName());
                             final List<ImageDescriptor> imageWithLogoTag = event
                                     .findImagesWithTag(MediaTagConstants.LOGO.getName());
                             if (!imageWithLogoTag.isEmpty()) {
@@ -178,7 +178,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                 final Object requestBody = JSONValue.parseWithException(jsonBody);
                 final JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
                 final String eventId = (String) requestObject.get(KEY_EVENT_ID);
-                final String regattaId = (String) requestObject.get(KEY_REGATTA_ID);
+                final String leaderboardName = (String) requestObject.get(KEY_LEADERBOARD_NAME);
                 final Boolean archived = (Boolean) requestObject.get(KEY_EVENT_IS_ARCHIVED);
                 final String baseUrl = (String) requestObject.get(KEY_EVENT_BASE_URL);
                 try {
@@ -254,7 +254,8 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                                 boolean eventContained = false;
                                 while (it.hasNext()) {
                                     final TrackedEventPreference pref = it.next();
-                                    if (pref.getEventId().equals(uuidEvent) && pref.getRegattaId().equals(regattaId)) {
+                                    if (pref.getEventId().equals(uuidEvent)
+                                            && pref.getLeaderboardName().equals(leaderboardName)) {
                                         // tracked event found, add to event
                                         prefsNew.add(new TrackedEventPreference(pref, newPrefElem));
                                         eventContained = true;
@@ -266,7 +267,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                                 if (!eventContained) {
                                     // event was not found, create a new tracked event
                                     final TrackedEventPreference newPreference = new TrackedEventPreference(uuidEvent,
-                                            regattaId, Arrays.asList(newPrefElem), baseUrl, isArchived);
+                                            leaderboardName, Arrays.asList(newPrefElem), baseUrl, isArchived);
                                     prefsNew.add(newPreference);
                                 }
 

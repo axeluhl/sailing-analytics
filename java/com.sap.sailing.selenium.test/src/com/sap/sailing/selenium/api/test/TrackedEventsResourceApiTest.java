@@ -52,17 +52,19 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         final Event evt = eventApi.createEvent(adminCtx, "TestEvent-" + UUID.randomUUID().toString(),
                 "75QMNATIONALEKREUZER", CompetitorRegistrationType.CLOSED, "Mannheim");
         final String eventId = evt.getId();
-        final String regattaId = evt.getName();
+        final String leaderboardName = evt.getName();
 
         final Event evt2 = eventApi.createEvent(adminCtx, "TestEvent-" + UUID.randomUUID().toString(),
                 "75QMNATIONALEKREUZER", CompetitorRegistrationType.CLOSED, "Mannheim");
         final String eventId2 = evt2.getId();
-        final String regattaId2 = evt2.getName();
+        final String leaderboardName2 = evt2.getName();
 
-        trackedEventsApi.updateTrackedEvent(adminCtx, eventId, regattaId, eventBaseUrl, deviceId, competitorId, null,
+        trackedEventsApi.updateTrackedEvent(adminCtx, eventId, leaderboardName, eventBaseUrl, deviceId, competitorId,
+                null, null);
+        trackedEventsApi.updateTrackedEvent(adminCtx, eventId, leaderboardName, eventBaseUrl, deviceId, null, boatId,
                 null);
-        trackedEventsApi.updateTrackedEvent(adminCtx, eventId, regattaId, eventBaseUrl, deviceId, null, boatId, null);
-        trackedEventsApi.updateTrackedEvent(adminCtx, eventId2, regattaId2, eventBaseUrl, deviceId, null, null, markId);
+        trackedEventsApi.updateTrackedEvent(adminCtx, eventId2, leaderboardName2, eventBaseUrl, deviceId, null, null,
+                markId);
 
         trackedEventsApi.setArchived(adminCtx, evt.getId(), true);
         trackedEventsApi.setArchived(adminCtx, evt2.getId(), false);
@@ -75,11 +77,11 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
             Assert.assertEquals("Unexpected event base url", eventBaseUrl, event.getEventBaseUrl());
             if (eventId.equals(event.getEventId())) {
                 Assert.assertEquals("Unexpected event ID", eventId, event.getEventId());
-                Assert.assertEquals("Unexpected regatta ID", regattaId, event.getRegattaId());
+                Assert.assertEquals("Unexpected leaderboard name", leaderboardName, event.getLeaderboardName());
                 Assert.fail("Expected event 1 to not be shown anymore.");
             } else if (eventId2.equals(event.getEventId())) {
                 Assert.assertEquals("Unexpected event ID", eventId2, event.getEventId());
-                Assert.assertEquals("Unexpected regatta ID", regattaId2, event.getRegattaId());
+                Assert.assertEquals("Unexpected leaderboard name", leaderboardName2, event.getLeaderboardName());
             } else {
                 Assert.fail("Invalid event id.");
             }
@@ -114,17 +116,19 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         final Event evt = eventApi.createEvent(adminCtx, "TestEvent-" + UUID.randomUUID().toString(),
                 "75QMNATIONALEKREUZER", CompetitorRegistrationType.CLOSED, "Mannheim");
         final String eventId = evt.getId();
-        final String regattaId = evt.getName();
+        final String leaderboardName = evt.getName();
 
         final Event evt2 = eventApi.createEvent(adminCtx, "TestEvent-" + UUID.randomUUID().toString(),
                 "75QMNATIONALEKREUZER", CompetitorRegistrationType.CLOSED, "Mannheim");
         final String eventId2 = evt2.getId();
-        final String regattaId2 = evt2.getName();
+        final String leaderboardName2 = evt2.getName();
 
-        trackedEventsApi.updateTrackedEvent(adminCtx, eventId, regattaId, eventBaseUrl, deviceId, competitorId, null,
+        trackedEventsApi.updateTrackedEvent(adminCtx, eventId, leaderboardName, eventBaseUrl, deviceId, competitorId,
+                null, null);
+        trackedEventsApi.updateTrackedEvent(adminCtx, eventId, leaderboardName, eventBaseUrl, deviceId, null, boatId,
                 null);
-        trackedEventsApi.updateTrackedEvent(adminCtx, eventId, regattaId, eventBaseUrl, deviceId, null, boatId, null);
-        trackedEventsApi.updateTrackedEvent(adminCtx, eventId2, regattaId2, eventBaseUrl, deviceId, null, null, markId);
+        trackedEventsApi.updateTrackedEvent(adminCtx, eventId2, leaderboardName2, eventBaseUrl, deviceId, null, null,
+                markId);
 
         // check if created event is still there
         final TrackedEvents trackedEvents = trackedEventsApi.getTrackedEvents(adminCtx, true);
@@ -135,10 +139,10 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
             Assert.assertEquals("Unexpected event base url", eventBaseUrl, event.getEventBaseUrl());
             if (eventId.equals(event.getEventId())) {
                 Assert.assertEquals("Unexpected event ID", eventId, event.getEventId());
-                Assert.assertEquals("Unexpected regatta ID", regattaId, event.getRegattaId());
+                Assert.assertEquals("Unexpected leaderboard name", leaderboardName, event.getLeaderboardName());
             } else if (eventId2.equals(event.getEventId())) {
                 Assert.assertEquals("Unexpected event ID", eventId2, event.getEventId());
-                Assert.assertEquals("Unexpected regatta ID", regattaId2, event.getRegattaId());
+                Assert.assertEquals("Unexpected leaderboard name", leaderboardName2, event.getLeaderboardName());
             } else {
                 Assert.fail("Invalid event id.");
             }
@@ -175,12 +179,14 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         final Event evt = eventApi.createEvent(adminCtx, eventName, "75QMNATIONALEKREUZER",
                 CompetitorRegistrationType.CLOSED, "Mannheim");
         final String eventId = evt.getId();
-        final String regattaId = evt.getName();
+        final String leaderboardName = evt.getName();
 
-        trackedEventsApi.updateTrackedEvent(adminCtx, eventId, regattaId, eventBaseUrl, deviceId, competitorId, null,
+        trackedEventsApi.updateTrackedEvent(adminCtx, eventId, leaderboardName, eventBaseUrl, deviceId, competitorId,
+                null, null);
+        trackedEventsApi.updateTrackedEvent(adminCtx, eventId, leaderboardName, eventBaseUrl, deviceId, null, boatId,
                 null);
-        trackedEventsApi.updateTrackedEvent(adminCtx, eventId, regattaId, eventBaseUrl, deviceId, null, boatId, null);
-        trackedEventsApi.updateTrackedEvent(adminCtx, eventId, regattaId, eventBaseUrl, deviceId, null, null, markId);
+        trackedEventsApi.updateTrackedEvent(adminCtx, eventId, leaderboardName, eventBaseUrl, deviceId, null, null,
+                markId);
 
         // check if created event is still there
         final TrackedEvents trackedEvents = trackedEventsApi.getTrackedEvents(adminCtx, true);
@@ -190,7 +196,7 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
             cntEvents++;
             Assert.assertEquals("Unexpected event base url", eventBaseUrl, event.getEventBaseUrl());
             Assert.assertEquals("Unexpected event ID", eventId, event.getEventId());
-            Assert.assertEquals("Unexpected regatta ID", regattaId, event.getRegattaId());
+            Assert.assertEquals("Unexpected leaderboard name", leaderboardName, event.getLeaderboardName());
 
             int cntElements = 0;
             for (final TrackedElement elem : event.getTrackedElements()) {
@@ -238,10 +244,10 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         final Event evt = eventApi.createEvent(adminCtx, eventName, "75QMNATIONALEKREUZER",
                 CompetitorRegistrationType.CLOSED, "Mannheim");
         final String eventId = evt.getId();
-        final String regattaId = evt.getName();
+        final String leaderboardName = evt.getName();
 
-        trackedEventsApi.updateTrackedEvent(adminCtx, eventId, regattaId, eventBaseUrl, deviceId, competitorId, boatId,
-                markId);
+        trackedEventsApi.updateTrackedEvent(adminCtx, eventId, leaderboardName, eventBaseUrl, deviceId, competitorId,
+                boatId, markId);
 
         // check if created event is still there
         final TrackedEvents trackedEvents = trackedEventsApi.getTrackedEvents(adminCtx, true);
@@ -251,7 +257,7 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
             hasEvents = true;
             Assert.assertEquals("Unexpected event base url", eventBaseUrl, event.getEventBaseUrl());
             Assert.assertEquals("Unexpected event ID", eventId, event.getEventId());
-            Assert.assertEquals("Unexpected regatta ID", regattaId, event.getRegattaId());
+            Assert.assertEquals("Unexpected leaderboard name", leaderboardName, event.getLeaderboardName());
 
             boolean hasElements = false;
             for (final TrackedElement elem : event.getTrackedElements()) {

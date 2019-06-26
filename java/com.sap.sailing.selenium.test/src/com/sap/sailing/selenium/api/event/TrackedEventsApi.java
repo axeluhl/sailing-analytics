@@ -16,7 +16,7 @@ public class TrackedEventsApi {
     private static final String TRACKED_EVENTS_URL = "/api/v1/events/trackedevents/";
     private static final String KEY_TRACKED_EVENTS = "trackedEvents";
 
-    private static final String KEY_REGATTA_ID = "regattaId";
+    private static final String KEY_LEADERBOARD_NAME = "leaderboardName";
     private static final String KEY_EVENT_ID = "eventId";
     private static final String KEY_EVENT_IS_ARCHIVED = "isArchived";
     private static final String KEY_EVENT_NAME = "name";
@@ -40,11 +40,11 @@ public class TrackedEventsApi {
         return new TrackedEvents(ctx.get(TRACKED_EVENTS_URL, queryParams));
     }
 
-    public void updateTrackedEvent(ApiContext ctx, String eventId, String regattaId, String eventBaseUrl,
+    public void updateTrackedEvent(ApiContext ctx, String eventId, String leaderboardName, String eventBaseUrl,
             String deviceId, String competitorId, String boatId, String markId) {
         final JSONObject json = new JSONObject();
         json.put(KEY_EVENT_ID, eventId);
-        json.put(KEY_REGATTA_ID, regattaId);
+        json.put(KEY_LEADERBOARD_NAME, leaderboardName);
         json.put(KEY_EVENT_BASE_URL, eventBaseUrl);
 
         final JSONArray elements = new JSONArray();
@@ -157,8 +157,8 @@ public class TrackedEventsApi {
             return col;
         }
 
-        public String getRegattaId() {
-            return get(KEY_REGATTA_ID);
+        public String getLeaderboardName() {
+            return get(KEY_LEADERBOARD_NAME);
         }
     }
 

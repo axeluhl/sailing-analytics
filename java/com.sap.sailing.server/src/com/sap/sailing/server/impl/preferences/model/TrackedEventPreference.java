@@ -15,7 +15,7 @@ public class TrackedEventPreference extends AbstractGenericSerializableSettings 
     private static final long serialVersionUID = 234711768869820003L;
 
     private transient UUIDSetting eventId;
-    private transient StringSetting regattaId;
+    private transient StringSetting leaderboardName;
     private transient StringSetting baseUrl;
     private transient BooleanSetting isArchived;
 
@@ -28,7 +28,7 @@ public class TrackedEventPreference extends AbstractGenericSerializableSettings 
     public TrackedEventPreference(TrackedEventPreference other) {
         this();
         eventId.setValue(other.getEventId());
-        regattaId.setValue(other.getRegattaId());
+        leaderboardName.setValue(other.getLeaderboardName());
         trackedElements.setValues(other.getTrackedElements());
         baseUrl.setValue(other.getBaseUrl());
         isArchived.setValue(other.getIsArchived());
@@ -38,7 +38,7 @@ public class TrackedEventPreference extends AbstractGenericSerializableSettings 
     public TrackedEventPreference(TrackedEventPreference other, boolean isArchived) {
         this();
         eventId.setValue(other.getEventId());
-        regattaId.setValue(other.getRegattaId());
+        leaderboardName.setValue(other.getLeaderboardName());
         trackedElements.setValues(other.getTrackedElements());
         baseUrl.setValue(other.getBaseUrl());
         this.isArchived.setValue(isArchived);
@@ -48,7 +48,7 @@ public class TrackedEventPreference extends AbstractGenericSerializableSettings 
     public TrackedEventPreference(TrackedEventPreference other, TrackedElementWithDeviceId trackedElement) {
         this();
         eventId.setValue(other.getEventId());
-        regattaId.setValue(other.getRegattaId());
+        leaderboardName.setValue(other.getLeaderboardName());
         final Collection<TrackedElementWithDeviceId> trackedElements = new HashSet<>();
         Util.addAll(other.getTrackedElements(), trackedElements);
         trackedElements.add(trackedElement);
@@ -57,11 +57,11 @@ public class TrackedEventPreference extends AbstractGenericSerializableSettings 
         this.isArchived.setValue(other.getIsArchived());
     }
 
-    public TrackedEventPreference(UUID eventId, String regattaId, Iterable<TrackedElementWithDeviceId> trackedElements,
-            String baseUrl, boolean isArchived) {
+    public TrackedEventPreference(UUID eventId, String leaderboardName,
+            Iterable<TrackedElementWithDeviceId> trackedElements, String baseUrl, boolean isArchived) {
         this();
         this.eventId.setValue(eventId);
-        this.regattaId.setValue(regattaId);
+        this.leaderboardName.setValue(leaderboardName);
         this.trackedElements.setValues(trackedElements);
         this.baseUrl.setValue(baseUrl);
         this.isArchived.setValue(isArchived);
@@ -70,7 +70,7 @@ public class TrackedEventPreference extends AbstractGenericSerializableSettings 
     @Override
     protected void addChildSettings() {
         eventId = new UUIDSetting("eventId", this);
-        regattaId = new StringSetting("regattaId", this);
+        leaderboardName = new StringSetting("leaderboardName", this);
         trackedElements = new SettingsList<TrackedElementWithDeviceId>("trackedElements", this,
                 () -> new TrackedElementWithDeviceId());
         baseUrl = new StringSetting("baseUrl", this);
@@ -81,8 +81,8 @@ public class TrackedEventPreference extends AbstractGenericSerializableSettings 
         return eventId.getValue();
     }
 
-    public String getRegattaId() {
-        return regattaId.getValue();
+    public String getLeaderboardName() {
+        return leaderboardName.getValue();
     }
 
     public Iterable<TrackedElementWithDeviceId> getTrackedElements() {
