@@ -227,7 +227,12 @@ public class MasterDataImportTest {
         sourceService = Mockito
                 .spy(new RacingEventServiceImpl(dbFactory, mongoObjectFactory,
                 MediaDBFactory.INSTANCE.getDefaultMediaDB(), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE,
-                false));
+                        false) {
+                    @Override
+                    public SecurityService getSecurityService() {
+                        return securityService;
+                    }
+                });
 
 
         masterDataResource = spyResource(new DummyMasterDataRessource(), sourceService);
@@ -1879,7 +1884,13 @@ public class MasterDataImportTest {
     public void testMasterDataImportForMediaTracks() throws MalformedURLException, IOException, InterruptedException,
             ClassNotFoundException {
         // Setup source service
-        RacingEventService sourceService = new RacingEventServiceImpl();
+        RacingEventService sourceService = new RacingEventServiceImpl() {
+            @Override
+            public SecurityService getSecurityService() {
+                return securityService;
+            }
+        };
+        ;
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         String regattaName1 = "49er";
         String regattaName2 = "49er FX";
