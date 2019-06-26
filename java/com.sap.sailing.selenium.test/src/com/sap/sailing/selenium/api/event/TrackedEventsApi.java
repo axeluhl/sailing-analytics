@@ -32,9 +32,11 @@ public class TrackedEventsApi {
     private static final String KEY_TRACKED_ELEMENT_BOAT_ID = "boatId";
     private static final String KEY_TRACKED_ELEMENT_MARK_ID = "markId";
 
+    private static final String KEY_QUERY_INCLUDE_ARCHIVED = "includeArchived";
+
     public TrackedEvents getTrackedEvents(ApiContext ctx, boolean isArchived) {
         final Map<String, String> queryParams = new HashMap<>();
-        queryParams.put(KEY_EVENT_IS_ARCHIVED, Boolean.toString(isArchived));
+        queryParams.put(KEY_QUERY_INCLUDE_ARCHIVED, Boolean.toString(isArchived));
         return new TrackedEvents(ctx.get(TRACKED_EVENTS_URL, queryParams));
     }
 
@@ -65,7 +67,7 @@ public class TrackedEventsApi {
     public void setArchived(ApiContext ctx, String eventId, boolean archived) {
         final HashMap<String, String> queryParams = new HashMap<>();
         queryParams.put(KEY_EVENT_ID, eventId);
-        queryParams.put(KEY_EVENT_IS_ARCHIVED, Boolean.toString(archived));
+        queryParams.put(KEY_QUERY_INCLUDE_ARCHIVED, Boolean.toString(archived));
         ctx.post(TRACKED_EVENTS_URL, queryParams);
     }
 

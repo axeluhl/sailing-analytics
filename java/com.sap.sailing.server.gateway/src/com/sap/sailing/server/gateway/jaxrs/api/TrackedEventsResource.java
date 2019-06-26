@@ -44,6 +44,8 @@ import com.sap.sse.shared.media.ImageDescriptor;
 @Path("/v1/events/trackedevents/")
 public class TrackedEventsResource extends AbstractSailingServerResource {
 
+    private static final String KEY_QUERY_INCLUDE_ARCHIVED = "includeArchived";
+
     private static final String KEY_REGATTA_ID = "regattaId";
     private static final String KEY_EVENT_ID = "eventId";
     private static final String KEY_EVENT_IS_ARCHIVED = "isArchived";
@@ -62,7 +64,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response getTrackedEvents(@QueryParam(KEY_EVENT_IS_ARCHIVED) String isArchived) {
+    public Response getTrackedEvents(@QueryParam(KEY_QUERY_INCLUDE_ARCHIVED) String includeArchivedStr) {
 
         final User currentUser = getSecurityService().getCurrentUser();
         final ResponseBuilder builder;
@@ -75,13 +77,13 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                     SailingPreferences.TRACKED_EVENTS_PREFERENCES);
 
             final JSONArray result = new JSONArray();
-            final boolean showArchived = Boolean.parseBoolean(isArchived);
+            final boolean includeArchived = Boolean.parseBoolean(includeArchivedStr);
 
             if (prefs != null) {
                 // iterate all stored tracked events
                 for (final TrackedEventPreference pref : prefs.getTrackedEvents()) {
 
-                    if (!showArchived && pref.getIsArchived()) {
+                    if (!includeArchived && pref.getIsArchived()) {
                         // skip, if event is archived and should be filtered out
                         continue;
                     }
@@ -306,15 +308,15 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
     }
 
     @POST
-    public Response updateTrackedEvents(@QueryParam("eventId") String eventId,
-            @QueryParam("isArchived") String archived) {
+    public Response updateTrackedEventsArchivedStatus(@QueryParam(KEY_EVENT_ID) String eventId,
+            @QueryParam(KEY_QUERY_INCLUDE_ARCHIVED) String archived) {
         final boolean isArchived = Boolean.parseBoolean(archived);
         return applyOnEventById(eventId, pref -> new TrackedEventPreference(pref, isArchived));
     }
 
     @DELETE
     @Path("{eventId}")
-    public Response deleteTrackedEvents(@PathParam("eventId") String eventId) {
+    public Response deleteTrackedEvents(@PathParam(KEY_EVENT_ID) String eventId) {
         return applyOnEventById(eventId, pref -> null);
     }
 
