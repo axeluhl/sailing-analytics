@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -35,8 +36,10 @@ import com.sap.sailing.server.impl.preferences.model.SailingPreferences;
 import com.sap.sailing.server.impl.preferences.model.TrackedElementWithDeviceId;
 import com.sap.sailing.server.impl.preferences.model.TrackedEventPreference;
 import com.sap.sailing.server.impl.preferences.model.TrackedEventPreferences;
+import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.shared.media.ImageDescriptor;
 
 @Path("/v1/events/trackedevents/")
 public class TrackedEventsResource extends AbstractSailingServerResource {
@@ -50,6 +53,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
     private static final String KEY_EVENT_TRACKED_ELEMENTS = "trackedElements";
     private static final String KEY_EVENT_BASE_URL = "url";
     private static final String KEY_EVENT_IS_OWNER = "isOwner";
+    private static final String KEY_EVENT_IMAGE_URL = "imageUrl";
     private static final String KEY_TRACKED_ELEMENT_DEVICE_ID = "deviceId";
     private static final String KEY_TRACKED_ELEMENT_COMPETITOR_ID = "competitorId";
     private static final String KEY_TRACKED_ELEMENT_BOAT_ID = "boatId";
@@ -99,7 +103,11 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                             jsonEvent.put(KEY_EVENT_AND, event.getEndDate().toString());
 
                             jsonEvent.put(KEY_EVENT_TRACKED_ELEMENTS, trackedElementsToJson(pref));
-                            // jsonEvent.put("imageUrl", event.getImages().)
+                            final List<ImageDescriptor> imageWithLogoTag = event
+                                    .findImagesWithTag(MediaTagConstants.LOGO.getName());
+                            if (!imageWithLogoTag.isEmpty()) {
+                                jsonEvent.put(KEY_EVENT_IMAGE_URL, imageWithLogoTag.get(0).getURL().toExternalForm());
+                            }
                             jsonEvent.put(KEY_EVENT_BASE_URL, pref.getBaseUrl());
                             jsonEvent.put(KEY_EVENT_IS_ARCHIVED, pref.getIsArchived());
                             jsonEvent.put(KEY_EVENT_IS_OWNER, isOwner);
@@ -110,6 +118,11 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                             final JSONObject jsonEvent = new JSONObject();
                             jsonEvent.put(KEY_EVENT_ID, pref.getEventId());
                             jsonEvent.put(KEY_REGATTA_ID, pref.getRegattaId());
+                            final List<ImageDescriptor> imageWithLogoTag = event
+                                    .findImagesWithTag(MediaTagConstants.LOGO.getName());
+                            if (!imageWithLogoTag.isEmpty()) {
+                                jsonEvent.put(KEY_EVENT_IMAGE_URL, imageWithLogoTag.get(0).getURL().toExternalForm());
+                            }
                             jsonEvent.put(KEY_EVENT_BASE_URL, pref.getBaseUrl());
                             jsonEvent.put(KEY_EVENT_IS_ARCHIVED, pref.getIsArchived());
                             jsonEvent.put(KEY_EVENT_TRACKED_ELEMENTS, trackedElementsToJson(pref));
