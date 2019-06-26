@@ -13,7 +13,7 @@ import com.sap.sailing.selenium.api.core.JsonWrapper;
 
 public class TrackedEventsApi {
 
-    private static final String TRACKED_EVENTS_URL = "/api/v1/events/trackedevents/";
+    private static final String TRACKED_EVENTS_URL = "/api/v1/trackedevents/";
     private static final String KEY_TRACKED_EVENTS = "trackedEvents";
 
     private static final String KEY_LEADERBOARD_NAME = "leaderboardName";

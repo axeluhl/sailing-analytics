@@ -41,7 +41,7 @@ import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.shared.media.ImageDescriptor;
 
-@Path("/v1/events/trackedevents/")
+@Path("/v1/trackedevents/")
 public class TrackedEventsResource extends AbstractSailingServerResource {
 
     private static final String KEY_QUERY_INCLUDE_ARCHIVED = "includeArchived";
