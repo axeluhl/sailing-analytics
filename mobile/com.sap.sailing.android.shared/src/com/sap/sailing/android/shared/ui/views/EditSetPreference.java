@@ -77,4 +77,9 @@ public class EditSetPreference extends DialogPreference {
         return value == null ? null : new HashSet<>(value);
     }
 
+    @Override
+    public boolean persistStringSet(Set<String> values) {
+        currentValues = values;
+        return super.persistStringSet(values);
+    }
 }

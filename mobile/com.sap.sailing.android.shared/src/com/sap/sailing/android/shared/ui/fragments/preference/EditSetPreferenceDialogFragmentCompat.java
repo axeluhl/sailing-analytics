@@ -96,7 +96,6 @@ public class EditSetPreferenceDialogFragmentCompat extends PreferenceDialogFragm
                 && preference.callChangeListener(values)) {
             ExLog.i(getContext(), TAG, "Storing result...");
             preference.persistStringSet(values);
-            currentValues = values;
         }
     }
 }
