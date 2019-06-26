@@ -166,7 +166,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response addTrackedEvent(String jsonBody) {
+    public Response updateOrCreateTrackedEvent(String jsonBody) {
         ResponseBuilder responseBuilder = null;
         final User currentUser = getSecurityService().getCurrentUser();
 
