@@ -24,6 +24,7 @@ public class TrackedEventsApi {
     private static final String KEY_EVENT_END = "end";
     private static final String KEY_EVENT_BASE_URL = "url";
     private static final String KEY_EVENT_IS_OWNER = "isOwner";
+    private static final String KEY_EVENT_REGATTA_SECRET = "regattaSecret";
 
     private static final String KEY_EVENT_TRACKED_ELEMENTS = "trackedElements";
 
@@ -40,8 +41,8 @@ public class TrackedEventsApi {
         return new TrackedEvents(ctx.get(TRACKED_EVENTS_URL, queryParams));
     }
 
-    public void updateTrackedEvent(ApiContext ctx, String eventId, String leaderboardName, String eventBaseUrl,
-            String deviceId, String competitorId, String boatId, String markId) {
+    public void updateOrCreateTrackedEvent(ApiContext ctx, String eventId, String leaderboardName, String eventBaseUrl,
+            String deviceId, String competitorId, String boatId, String markId, String regattaSecret) {
         final JSONObject json = new JSONObject();
         json.put(KEY_EVENT_ID, eventId);
         json.put(KEY_LEADERBOARD_NAME, leaderboardName);
@@ -59,6 +60,7 @@ public class TrackedEventsApi {
         }
         elements.add(elem);
 
+        json.put(KEY_EVENT_REGATTA_SECRET, regattaSecret);
         json.put(KEY_EVENT_TRACKED_ELEMENTS, elements);
         json.put(KEY_EVENT_IS_ARCHIVED, false);
         ctx.put(TRACKED_EVENTS_URL, new HashMap<>(), json);
@@ -159,6 +161,10 @@ public class TrackedEventsApi {
 
         public String getLeaderboardName() {
             return get(KEY_LEADERBOARD_NAME);
+        }
+
+        public String getRegattaSecret() {
+            return get(KEY_EVENT_REGATTA_SECRET);
         }
     }
 

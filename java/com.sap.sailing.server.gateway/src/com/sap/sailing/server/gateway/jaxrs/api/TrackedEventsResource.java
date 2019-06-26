@@ -56,6 +56,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
     private static final String KEY_EVENT_BASE_URL = "url";
     private static final String KEY_EVENT_IS_OWNER = "isOwner";
     private static final String KEY_EVENT_IMAGE_URL = "imageUrl";
+    private static final String KEY_EVENT_REGATTA_SECRET = "regattaSecret";
     private static final String KEY_TRACKED_ELEMENT_DEVICE_ID = "deviceId";
     private static final String KEY_TRACKED_ELEMENT_COMPETITOR_ID = "competitorId";
     private static final String KEY_TRACKED_ELEMENT_BOAT_ID = "boatId";
@@ -91,45 +92,33 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                     final UUID eventId = pref.getEventId();
                     final Event event = getService().getEvent(eventId);
                     if (event != null) {
+                        // event actually exists -> parse relevant data
+                        final JSONObject jsonEvent = new JSONObject();
                         if (getSecurityService().hasCurrentUserReadPermission(event)) {
-                            // event actually exists -> parse relevant data
+                            // user has read permission on event -> add additional event-specific data
                             final OwnershipAnnotation ownership = getSecurityService()
                                     .getOwnership(event.getIdentifier());
                             final boolean isOwner = currentUser == null ? false
                                     : currentUser.equals(ownership.getAnnotation().getUserOwner());
+                            jsonEvent.put(KEY_EVENT_IS_OWNER, isOwner);
 
-                            final JSONObject jsonEvent = new JSONObject();
-                            jsonEvent.put(KEY_EVENT_ID, event.getId().toString());
                             jsonEvent.put(KEY_EVENT_NAME, event.getName());
                             jsonEvent.put(KEY_EVENT_START, event.getStartDate().toString());
                             jsonEvent.put(KEY_EVENT_AND, event.getEndDate().toString());
 
-                            jsonEvent.put(KEY_EVENT_TRACKED_ELEMENTS, trackedElementsToJson(pref));
                             final List<ImageDescriptor> imageWithLogoTag = event
                                     .findImagesWithTag(MediaTagConstants.LOGO.getName());
                             if (!imageWithLogoTag.isEmpty()) {
                                 jsonEvent.put(KEY_EVENT_IMAGE_URL, imageWithLogoTag.get(0).getURL().toExternalForm());
                             }
-                            jsonEvent.put(KEY_EVENT_BASE_URL, pref.getBaseUrl());
-                            jsonEvent.put(KEY_EVENT_IS_ARCHIVED, pref.getIsArchived());
-                            jsonEvent.put(KEY_EVENT_IS_OWNER, isOwner);
-                            jsonEvent.put(KEY_LEADERBOARD_NAME, pref.getLeaderboardName());
-                            result.add(jsonEvent);
-                        } else {
-                            // User does not have read permission on event
-                            final JSONObject jsonEvent = new JSONObject();
-                            jsonEvent.put(KEY_EVENT_ID, pref.getEventId());
-                            jsonEvent.put(KEY_LEADERBOARD_NAME, pref.getLeaderboardName());
-                            final List<ImageDescriptor> imageWithLogoTag = event
-                                    .findImagesWithTag(MediaTagConstants.LOGO.getName());
-                            if (!imageWithLogoTag.isEmpty()) {
-                                jsonEvent.put(KEY_EVENT_IMAGE_URL, imageWithLogoTag.get(0).getURL().toExternalForm());
-                            }
-                            jsonEvent.put(KEY_EVENT_BASE_URL, pref.getBaseUrl());
-                            jsonEvent.put(KEY_EVENT_IS_ARCHIVED, pref.getIsArchived());
-                            jsonEvent.put(KEY_EVENT_TRACKED_ELEMENTS, trackedElementsToJson(pref));
-                            result.add(jsonEvent);
                         }
+                        jsonEvent.put(KEY_EVENT_ID, pref.getEventId().toString());
+                        jsonEvent.put(KEY_EVENT_REGATTA_SECRET, pref.getRegattaSecret());
+                        jsonEvent.put(KEY_EVENT_BASE_URL, pref.getBaseUrl());
+                        jsonEvent.put(KEY_EVENT_IS_ARCHIVED, pref.getIsArchived());
+                        jsonEvent.put(KEY_LEADERBOARD_NAME, pref.getLeaderboardName());
+                        jsonEvent.put(KEY_EVENT_TRACKED_ELEMENTS, trackedElementsToJson(pref));
+                        result.add(jsonEvent);
                     } else {
                         // TODO:
                         // check, if base url is equal to this server, if not, event might be on different server
@@ -181,6 +170,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                 final String leaderboardName = (String) requestObject.get(KEY_LEADERBOARD_NAME);
                 final Boolean archived = (Boolean) requestObject.get(KEY_EVENT_IS_ARCHIVED);
                 final String baseUrl = (String) requestObject.get(KEY_EVENT_BASE_URL);
+                final String regattaSecret = (String) requestObject.get(KEY_EVENT_REGATTA_SECRET);
                 try {
                     final UUID uuidEvent = UUID.fromString(eventId);
                     final boolean isArchived = archived;
@@ -267,7 +257,8 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                                 if (!eventContained) {
                                     // event was not found, create a new tracked event
                                     final TrackedEventPreference newPreference = new TrackedEventPreference(uuidEvent,
-                                            leaderboardName, Arrays.asList(newPrefElem), baseUrl, isArchived);
+                                            leaderboardName, Arrays.asList(newPrefElem), baseUrl, isArchived,
+                                            regattaSecret);
                                     prefsNew.add(newPreference);
                                 }
 
