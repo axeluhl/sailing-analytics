@@ -227,12 +227,7 @@ public class MasterDataImportTest {
         sourceService = Mockito
                 .spy(new RacingEventServiceImpl(dbFactory, mongoObjectFactory,
                 MediaDBFactory.INSTANCE.getDefaultMediaDB(), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE,
-                        false) {
-                    @Override
-                    public SecurityService getSecurityService() {
-                        return securityService;
-                    }
-                });
+                        false));
 
 
         masterDataResource = spyResource(new DummyMasterDataRessource(), sourceService);
