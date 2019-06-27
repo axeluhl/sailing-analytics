@@ -11,6 +11,7 @@ import java.util.function.Function;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -300,9 +301,10 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
     }
 
     @POST
-    public Response updateTrackedEventsArchivedStatus(@QueryParam(KEY_EVENT_ID) String eventId,
-            @QueryParam(KEY_LEADERBOARD_NAME) String leaderboardName,
-            @QueryParam(KEY_QUERY_INCLUDE_ARCHIVED) String archived) {
+    @Path("{eventId}/{leaderboardName}")
+    public Response updateTrackedEventsArchivedStatus(@PathParam(KEY_EVENT_ID) String eventId,
+            @PathParam(KEY_LEADERBOARD_NAME) String leaderboardName,
+            @FormParam(KEY_QUERY_INCLUDE_ARCHIVED) String archived) {
         final boolean isArchived = Boolean.parseBoolean(archived);
         return applyOnEventByIdAndLeadboardName(eventId, leaderboardName,
                 pref -> new TrackedEventPreference(pref, isArchived));

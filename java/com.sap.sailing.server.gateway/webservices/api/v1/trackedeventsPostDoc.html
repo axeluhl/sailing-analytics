@@ -28,10 +28,10 @@
   </tr>
   <tr>
    <td>Mandatory parameters:</td>
-   <td>eventId: Identifier of the associated event<br />
-    leaderboardName: Name of the associated leaderboard<br />
-    isArchived: True or False depending on whether the event should be
-    set to archived or non-archived.
+   <td>eventId (Path parameter): Identifier of the associated event<br />
+    leaderboardName (Path parameter): Name of the associated leaderboard<br />
+    isArchived (Form parameter): True or False depending on whether the
+    event should be set to archived or non-archived.
    </td>
   </tr>
   <tr>
@@ -45,8 +45,8 @@
   <tr>
    <td>Example:</td>
    <td>Request:
-    http://www.sapsailing.com/sailingserver/api/v1/trackedevents?eventId=71fe232b-19b8-455f-ac91-23a53a5c557a&leaderbaordName=TestRegattaLeaderboard<br />
-    Status 202 <br />
+    http://www.sapsailing.com/sailingserver/api/v1/trackedevents/71fe232b-19b8-455f-ac91-23a53a5c557a/TestRegattaLeaderboard<br />
+    form: isArchived=true<br /> Status 202 <br />
   </tr>
  </table>
  <div style="height: 1em;"></div>

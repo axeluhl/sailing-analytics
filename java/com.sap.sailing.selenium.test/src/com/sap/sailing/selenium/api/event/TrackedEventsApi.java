@@ -65,11 +65,9 @@ public class TrackedEventsApi {
     }
 
     public void setArchived(ApiContext ctx, String eventId, String leaderboardName, boolean archived) {
-        final HashMap<String, String> queryParams = new HashMap<>();
-        queryParams.put(KEY_EVENT_ID, eventId);
-        queryParams.put(KEY_LEADERBOARD_NAME, leaderboardName);
-        queryParams.put(KEY_QUERY_INCLUDE_ARCHIVED, Boolean.toString(archived));
-        ctx.post(TRACKED_EVENTS_URL, queryParams);
+        final HashMap<String, String> formParams = new HashMap<>();
+        formParams.put(KEY_QUERY_INCLUDE_ARCHIVED, Boolean.toString(archived));
+        ctx.post(TRACKED_EVENTS_URL + eventId + "/" + leaderboardName, new HashMap<String, String>(), formParams);
     }
 
     public void deleteEventTrackings(ApiContext ctx, String eventId, String leaderboardName) {
