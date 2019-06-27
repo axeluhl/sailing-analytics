@@ -16,10 +16,6 @@ public class TrackedElementWithDeviceId extends AbstractGenericSerializableSetti
     private transient UUIDSetting trackedMarkId;
 
     public TrackedElementWithDeviceId() {
-        deviceId = new StringSetting("deviceId", this);
-        trackedCompetitorId = new UUIDSetting("trackedCompetitorId", this);
-        trackedBoatId = new UUIDSetting("trackedBoatId", this);
-        trackedMarkId = new UUIDSetting("trackedMarkId", this);
     }
 
     /** copy constructor */
@@ -42,11 +38,10 @@ public class TrackedElementWithDeviceId extends AbstractGenericSerializableSetti
 
     @Override
     protected void addChildSettings() {
-        // We do not create the Setting instances here, because access to the RacingEventService would not be given.
-        // Doing this, Java/GWT Serialization isn't working anymore. Because the preferences are only serialized as JSON
-        // in the backend an transferred as DTO to the frontend, this isn't a problem. Due to usage of BoatClass and
-        // Competitor domain objects, it wouldn't be GWT compatible anyway.
-        // The usage of Java Serialization isn't planned by now, either.
+        deviceId = new StringSetting("deviceId", this);
+        trackedCompetitorId = new UUIDSetting("trackedCompetitorId", this);
+        trackedBoatId = new UUIDSetting("trackedBoatId", this);
+        trackedMarkId = new UUIDSetting("trackedMarkId", this);
     }
 
     public String getDeviceId() {
