@@ -92,9 +92,9 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
 
                     final UUID eventId = pref.getEventId();
                     final Event event = getService().getEvent(eventId);
+                    final JSONObject jsonEvent = new JSONObject();
                     if (event != null) {
-                        // event actually exists -> parse relevant data
-                        final JSONObject jsonEvent = new JSONObject();
+                        // event actually exists on this server -> parse relevant data
                         if (getSecurityService().hasCurrentUserReadPermission(event)) {
                             // user has read permission on event -> add additional event-specific data
                             final OwnershipAnnotation ownership = getSecurityService()
@@ -111,19 +111,21 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                                     .findImagesWithTag(MediaTagConstants.LOGO.getName());
                             if (!imageWithLogoTag.isEmpty()) {
                                 jsonEvent.put(KEY_EVENT_IMAGE_URL, imageWithLogoTag.get(0).getURL().toExternalForm());
+                            } else {
+                                // user does not have read permissions for this event on this server -> only send back
+                                // basic data
                             }
                         }
-                        jsonEvent.put(KEY_EVENT_ID, pref.getEventId().toString());
-                        jsonEvent.put(KEY_EVENT_REGATTA_SECRET, pref.getRegattaSecret());
-                        jsonEvent.put(KEY_EVENT_BASE_URL, pref.getBaseUrl());
-                        jsonEvent.put(KEY_EVENT_IS_ARCHIVED, pref.getIsArchived());
-                        jsonEvent.put(KEY_LEADERBOARD_NAME, pref.getLeaderboardName());
-                        jsonEvent.put(KEY_EVENT_TRACKED_ELEMENTS, trackedElementsToJson(pref));
-                        result.add(jsonEvent);
                     } else {
-                        // TODO:
-                        // check, if base url is equal to this server, if not, event might be on different server
+                        // event does not exist on this server --> only send back basic data
                     }
+                    jsonEvent.put(KEY_EVENT_ID, pref.getEventId().toString());
+                    jsonEvent.put(KEY_EVENT_REGATTA_SECRET, pref.getRegattaSecret());
+                    jsonEvent.put(KEY_EVENT_BASE_URL, pref.getBaseUrl());
+                    jsonEvent.put(KEY_EVENT_IS_ARCHIVED, pref.getIsArchived());
+                    jsonEvent.put(KEY_LEADERBOARD_NAME, pref.getLeaderboardName());
+                    jsonEvent.put(KEY_EVENT_TRACKED_ELEMENTS, trackedElementsToJson(pref));
+                    result.add(jsonEvent);
                 }
             }
 
