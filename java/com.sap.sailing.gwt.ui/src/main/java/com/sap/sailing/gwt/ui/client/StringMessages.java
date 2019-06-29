@@ -1033,6 +1033,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String finishTimeString();
     String setFinishingAndFinishTime();
     String finishTimeMustBeAtOrAfterFinishingTime();
+    String youHaveToEnterAFinishingTimeIfYouEnterAFinishedTime();
     String currentPass();
     String setStartTimeDescription();
     String setFinishingAndFinishTimeDescription();

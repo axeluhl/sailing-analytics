@@ -22,8 +22,6 @@ public class FinishedTimeFinder extends RaceLogAnalyzer<TimePoint> {
                 }
             }
         }
-        
         return null;
     }
-
 }
