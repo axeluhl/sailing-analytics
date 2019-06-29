@@ -45,7 +45,7 @@ public class CombinedWindPanel extends FlowPanel {
             public void onClick(ClickEvent event) {
                 RaceMapSettings oldRaceMapSettings = map.getSettings();
                 boolean newShowStreamletsOverlaySetting = !oldRaceMapSettings.isShowWindStreamletOverlay();
-                
+                // TODO three states: on / colored / off
                 final RaceMapSettings newRaceMapSettings = new RaceMapSettings(oldRaceMapSettings.getZoomSettings(),
                         oldRaceMapSettings.getHelpLinesSettings(), oldRaceMapSettings.getTransparentHoverlines(), 
                         oldRaceMapSettings.getHoverlineStrokeWeight(), oldRaceMapSettings.getTailLengthInMilliseconds(), oldRaceMapSettings.isWindUp(),
