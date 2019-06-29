@@ -3522,8 +3522,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 }
                 break;
             case CHART_BEAT_ANGLE:
+            case CHART_ABS_TWA:
                 Bearing twa = trackedRace.getTWA(competitor, timePoint, cache);
-                result = twa == null? null:twa.getDegrees();
+                result = twa == null ? null : twa.getDegrees();
+                if (result != null && dataType == DetailType.CHART_ABS_TWA) {
+                    result = Math.abs(result);
+                }
                 break;
             case BRAVO_RACE_HEEL_IN_DEGREES:
             case BRAVO_LEG_CURRENT_HEEL_IN_DEGREES: {
