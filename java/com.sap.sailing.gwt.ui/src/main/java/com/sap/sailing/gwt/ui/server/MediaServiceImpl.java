@@ -21,6 +21,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.UnauthenticatedException;
 import org.mp4parser.AbstractBoxParser;
 import org.mp4parser.IsoFile;
 import org.mp4parser.PropertyBoxParserImpl;
@@ -53,6 +55,7 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
 
 public class MediaServiceImpl extends RemoteServiceServlet implements MediaService {
@@ -112,17 +115,24 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     
     @Override
     public MediaTrackWithSecurityDTO addMediaTrack(MediaTrack mediaTrack) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.MEDIA_TRACK.getStringPermission(DefaultActions.CREATE));
         if (mediaTrack.dbId != null) {
             throw new IllegalStateException("Property dbId must not be null for newly created media track.");
         }
         racingEventService().mediaTrackAdded(mediaTrack);
-        SecurityService securityService = racingEventService().getSecurityService();
-        securityService.setDefaultOwnershipIfNotSet(mediaTrack.getIdentifier());
-        MediaTrackWithSecurityDTO mediaTrackWithSecurity = new MediaTrackWithSecurityDTO(mediaTrack);
-        SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), mediaTrackWithSecurity,
-                mediaTrackWithSecurity.getIdentifier());
-        return mediaTrackWithSecurity;
+        final SecurityService securityService = racingEventService().getSecurityService();
+        final QualifiedObjectIdentifier identifier = mediaTrack.getIdentifier();
+        securityService.setDefaultOwnershipIfNotSet(identifier);
+        if (!SecurityUtils.getSubject().isPermitted(identifier.getStringPermission(DefaultActions.CREATE))) {
+            // the user was not permitted to create the object; remove it again
+            racingEventService().mediaTrackDeleted(mediaTrack);
+            securityService.deleteOwnership(identifier);
+            throw new UnauthenticatedException("Not authorized to create media track object");
+        } else {
+            final MediaTrackWithSecurityDTO mediaTrackWithSecurity = new MediaTrackWithSecurityDTO(mediaTrack);
+            SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), mediaTrackWithSecurity,
+                    mediaTrackWithSecurity.getIdentifier());
+            return mediaTrackWithSecurity;
+        }
     }
 
     @Override
