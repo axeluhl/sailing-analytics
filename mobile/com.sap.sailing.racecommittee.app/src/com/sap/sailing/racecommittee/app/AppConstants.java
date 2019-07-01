@@ -11,7 +11,6 @@ public class AppConstants {
     public final static String INTENT_EXTRA_TIMEPOINT_MILLIS = PACKAGE_NAME + ".timePoint.millis";
     public final static String INTENT_EXTRA_EVENTNAME = PACKAGE_NAME + ".eventName";
     public final static String FLAG_KEY = PACKAGE_NAME + ".raceFlag";
-    public final static String EXTRA_FORCE_REFRESH = PACKAGE_NAME + ".forceRefresh";
 
     public final static String AUTHOR_TYPE_OFFICER_VESSEL = "Race Officer on Vessel";
     public final static String AUTHOR_TYPE_SHORE_CONTROL = "Shore Control";
