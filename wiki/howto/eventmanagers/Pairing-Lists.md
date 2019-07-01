@@ -62,7 +62,7 @@ This function can be used to print your final Pairing list as paper or PDF docum
 * Layout: Orientation of the page  
 * Paper size: various formats of paper sizes  
 * Margins: Space on the pages borders (It is recommended to set this to 'Default' because otherwise the printer may cut some content)  
-* Background graphics: Make sure to enable this because otherwise boat colors are not displaying.)  
+* Background graphics: Make sure to enable this because otherwise boat colors are not displaying.
 
 After selecting your leaderboard in the 'Leaderboards' section hit the 'Print' button under 'Actions':  
 **(Note! You can only print a pairing list if you applied one to your race logs!)**
