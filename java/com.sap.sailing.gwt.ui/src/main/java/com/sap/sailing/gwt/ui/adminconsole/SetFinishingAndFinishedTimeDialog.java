@@ -87,15 +87,17 @@ public class SetFinishingAndFinishedTimeDialog extends SetTimeDialog<RaceLogSetF
 
         @Override
         public String getErrorMessage(RaceLogSetFinishingAndFinishTimeDTO dto) {
-            if (dto.authorName == null || dto.authorName.isEmpty() || dto.authorPriority == null
-                    || dto.finishTime == null || dto.finishingTime == null) {
-                return stringMessages.pleaseEnterAValue();
-            }
-            // both times are != null at this point
-            if (dto.finishTime.before(dto.finishingTime)) {
+            final String result;
+            if (dto.authorName == null || dto.authorName.isEmpty() || dto.authorPriority == null) {
+                result = stringMessages.pleaseEnterAValue();
+            } else if (dto.finishTime != null && dto.finishingTime == null) {
+                result = stringMessages.youHaveToEnterAFinishingTimeIfYouEnterAFinishedTime();
+            } else if (dto.finishTime != null && dto.finishTime.before(dto.finishingTime)) {
                 return stringMessages.finishTimeMustBeAtOrAfterFinishingTime();
+            } else {
+                result = null;
             }
-            return null;
+            return result;
         }
     }
 
