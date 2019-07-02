@@ -1862,11 +1862,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 RaceMapDataDTO rcDTO;
                 rcDTO = new RaceMapDataDTO();
                 rcDTO.coursePositions = new CoursePositionsDTO();
-            rcDTO.coursePositions.waypointPositions = new ArrayList<Position>();
-            rcDTO.coursePositions.waypointPositions.add(simulationResults.getStartPosition());
-            rcDTO.coursePositions.waypointPositions.add(simulationResults.getEndPosition());
-            result = new SimulatorResultsDTO(simulationResults.getVersion().asMillis(), legIdentifier.getLegNumber()+1, simulationResults.getStartTime(), simulationResults.getTimeStep(),
-                    simulationResults.getLegDuration(), rcDTO, pathDTOs, null, null);
+                rcDTO.coursePositions.waypointPositions = new ArrayList<Position>();
+                rcDTO.coursePositions.waypointPositions.add(simulationResults.getStartPosition());
+                rcDTO.coursePositions.waypointPositions.add(simulationResults.getEndPosition());
+                result = new SimulatorResultsDTO(simulationResults.getVersion().asMillis(), legIdentifier.getLegNumber()+1, simulationResults.getStartTime(), simulationResults.getTimeStep(),
+                        simulationResults.getLegDuration(), rcDTO, pathDTOs, null, null);
             }
         return result;
     }
