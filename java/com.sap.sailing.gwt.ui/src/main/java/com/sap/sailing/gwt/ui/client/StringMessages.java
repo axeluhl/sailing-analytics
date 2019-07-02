@@ -1033,6 +1033,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String finishTimeString();
     String setFinishingAndFinishTime();
     String finishTimeMustBeAtOrAfterFinishingTime();
+    String youHaveToEnterAFinishingTimeIfYouEnterAFinishedTime();
     String currentPass();
     String setStartTimeDescription();
     String setFinishingAndFinishTimeDescription();
@@ -1072,6 +1073,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String timeSinceStart(String timeSince);
     String distanceToLine();
     String TWATooltip();
+    String absoluteTWATooltip();
     String showBoatClassChartsLabel();
     String showDiagram();
     String rerunQueryAfterRefreshTooltip();
@@ -2021,6 +2023,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String boatSpeed();
     String knotsUnit();
     String windSpeed();
+    String absoluteTWA();
     String TWA();
     String degreesShort();
     String numberOfDataPoints();

@@ -1,9 +1,5 @@
 package com.sap.sailing.android.shared.ui.adapters;
 
-import java.util.List;
-
-import com.sap.sailing.android.shared.R;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +8,12 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
+
+import com.sap.sailing.android.shared.R;
+
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ArrayRemoveAdapter<T> extends ArrayAdapter<T> {
 
@@ -52,6 +54,14 @@ public class ArrayRemoveAdapter<T> extends ArrayAdapter<T> {
         if (listener != null) {
             listener.onNotifyDataSetChanged(this);
         }
+    }
+
+    public Set<T> getItems() {
+        Set<T> items = new LinkedHashSet<>(getCount());
+        for (int position = 0; position < getCount(); position++) {
+            items.add(getItem(position));
+        }
+        return items;
     }
 
     public NotifyDataSetChangedListener<T> getDataSetChangedListener() {
