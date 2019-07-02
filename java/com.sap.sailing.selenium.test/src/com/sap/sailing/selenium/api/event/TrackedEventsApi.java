@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.core.JsonWrapper;
+import com.sap.sse.common.Util.Triple;
 
 public class TrackedEventsApi {
 
@@ -42,21 +44,23 @@ public class TrackedEventsApi {
     }
 
     public void updateOrCreateTrackedEvent(ApiContext ctx, String eventId, String leaderboardName, String eventBaseUrl,
-            String deviceId, String competitorId, String boatId, String markId, String regattaSecret) {
+            String deviceId, Set<Triple<String, String, String>> trackedIds, String regattaSecret) {
         final JSONObject json = new JSONObject();
         json.put(KEY_EVENT_BASE_URL, eventBaseUrl);
 
         final JSONArray elements = new JSONArray();
-        final JSONObject elem = new JSONObject();
-        elem.put(KEY_TRACKED_ELEMENT_DEVICE_ID, deviceId);
-        if (competitorId != null) {
-            elem.put(KEY_TRACKED_ELEMENT_COMPETITOR_ID, competitorId);
-        } else if (boatId != null) {
-            elem.put(KEY_TRACKED_ELEMENT_BOAT_ID, boatId);
-        } else if (markId != null) {
-            elem.put(KEY_TRACKED_ELEMENT_MARK_ID, markId);
+        for (Triple<String, String, String> trackedId : trackedIds) {
+            final JSONObject elem = new JSONObject();
+            elem.put(KEY_TRACKED_ELEMENT_DEVICE_ID, deviceId);
+            if (trackedId.getA() != null) {
+                elem.put(KEY_TRACKED_ELEMENT_COMPETITOR_ID, trackedId.getA());
+            } else if (trackedId.getB() != null) {
+                elem.put(KEY_TRACKED_ELEMENT_BOAT_ID, trackedId.getB());
+            } else if (trackedId.getC() != null) {
+                elem.put(KEY_TRACKED_ELEMENT_MARK_ID, trackedId.getC());
+            }
+            elements.add(elem);
         }
-        elements.add(elem);
 
         json.put(KEY_EVENT_REGATTA_SECRET, regattaSecret);
         json.put(KEY_EVENT_TRACKED_ELEMENTS, elements);

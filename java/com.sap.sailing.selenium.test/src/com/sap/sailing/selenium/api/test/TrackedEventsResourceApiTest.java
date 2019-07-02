@@ -4,6 +4,9 @@ import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import org.junit.Assert;
@@ -21,6 +24,7 @@ import com.sap.sailing.selenium.api.event.TrackedEventsApi.TrackedEvent;
 import com.sap.sailing.selenium.api.event.TrackedEventsApi.TrackedEvents;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 
 public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
 
@@ -64,12 +68,13 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         final String leaderboardName2 = evt2.getName();
         final String regattaSecret2 = evt.getSecret();
 
+        final Set<Triple<String, String, String>> trackedIds = new HashSet<>();
+        trackedIds.add(new Triple<>(competitorId, null, null));
+        trackedIds.add(new Triple<>(null, boatId, null));
         trackedEventsApi.updateOrCreateTrackedEvent(adminCtx, eventId, leaderboardName, eventBaseUrl, deviceId,
-                competitorId, null, null, regattaSecret);
-        trackedEventsApi.updateOrCreateTrackedEvent(adminCtx, eventId, leaderboardName, eventBaseUrl, deviceId, null,
-                boatId, null, regattaSecret);
-        trackedEventsApi.updateOrCreateTrackedEvent(adminCtx, eventId2, leaderboardName2, eventBaseUrl, deviceId, null,
-                null, markId, regattaSecret2);
+                trackedIds, regattaSecret);
+        trackedEventsApi.updateOrCreateTrackedEvent(adminCtx, eventId2, leaderboardName2, eventBaseUrl, deviceId,
+                new HashSet<>(Arrays.asList(new Triple<>(null, null, markId))), regattaSecret2);
 
         trackedEventsApi.setArchived(adminCtx, evt.getId(), leaderboardName, true);
         trackedEventsApi.setArchived(adminCtx, evt2.getId(), leaderboardName2, false);
@@ -132,12 +137,13 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         final String leaderboardName2 = evt2.getName();
         final String regattaSecret2 = evt2.getSecret();
 
+        final Set<Triple<String, String, String>> trackedIds = new HashSet<>();
+        trackedIds.add(new Triple<>(competitorId, null, null));
+        trackedIds.add(new Triple<>(null, boatId, null));
         trackedEventsApi.updateOrCreateTrackedEvent(adminCtx, eventId, leaderboardName, eventBaseUrl, deviceId,
-                competitorId, null, null, regattaSecret);
-        trackedEventsApi.updateOrCreateTrackedEvent(adminCtx, eventId, leaderboardName, eventBaseUrl, deviceId, null,
-                boatId, null, regattaSecret);
-        trackedEventsApi.updateOrCreateTrackedEvent(adminCtx, eventId2, leaderboardName2, eventBaseUrl, deviceId, null,
-                null, markId, regattaSecret2);
+                trackedIds, regattaSecret);
+        trackedEventsApi.updateOrCreateTrackedEvent(adminCtx, eventId2, leaderboardName2, eventBaseUrl, deviceId,
+                new HashSet<>(Arrays.asList(new Triple<>(null, null, markId))), regattaSecret2);
 
         // check if created event is still there
         final TrackedEvents trackedEvents = trackedEventsApi.getTrackedEvents(adminCtx, true);
@@ -193,12 +199,12 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         final String leaderboardName = evt.getName();
         final String regattaSecret = evt.getSecret();
 
+        final Set<Triple<String, String, String>> trackedIds = new HashSet<>();
+        trackedIds.add(new Triple<>(competitorId, null, null));
+        trackedIds.add(new Triple<>(null, boatId, null));
+        trackedIds.add(new Triple<>(null, null, markId));
         trackedEventsApi.updateOrCreateTrackedEvent(adminCtx, eventId, leaderboardName, eventBaseUrl, deviceId,
-                competitorId, null, null, regattaSecret);
-        trackedEventsApi.updateOrCreateTrackedEvent(adminCtx, eventId, leaderboardName, eventBaseUrl, deviceId, null,
-                boatId, null, regattaSecret);
-        trackedEventsApi.updateOrCreateTrackedEvent(adminCtx, eventId, leaderboardName, eventBaseUrl, deviceId, null,
-                null, markId, regattaSecret);
+                trackedIds, regattaSecret);
 
         // check if created event is still there
         final TrackedEvents trackedEvents = trackedEventsApi.getTrackedEvents(adminCtx, true);
@@ -261,7 +267,7 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         final String regattaSecret = evt.getSecret();
 
         trackedEventsApi.updateOrCreateTrackedEvent(adminCtx, eventId, leaderboardName, eventBaseUrl, deviceId,
-                competitorId, boatId, markId, regattaSecret);
+                new HashSet<>(Arrays.asList(new Triple<>(competitorId, boatId, markId))), regattaSecret);
 
         // check if created event is still there
         final TrackedEvents trackedEvents = trackedEventsApi.getTrackedEvents(adminCtx, true);

@@ -1,13 +1,13 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -192,20 +192,21 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                         // too few children
                         responseBuilder = Response.status(Status.BAD_REQUEST)
                                 .entity("Invalid JSON body in request: Tracked element is missing.");
-                    } else if (trackedElementsJson.size() > 1) {
-                        // too many children
-                        responseBuilder = Response.status(Status.BAD_REQUEST).entity(
-                                "Invalid JSON body in request: Too many tracked elements: Only updating one tracked element per call is allowed.");
                     } else {
-                        // tracked json elements array has exactly one child
-                        final JSONObject jsonTrackedElement = (JSONObject) trackedElementsJson.get(0);
 
-                        if (jsonTrackedElement == null) {
-                            responseBuilder = Response.status(Status.BAD_REQUEST)
-                                    .entity("Invalid JSON body in request: Tracked element is missing in array.");
-                        }
+                        // Copy tracked event preference objects to new list while removing the changed
+                        // event/leaderboard node
+                        final Collection<TrackedEventPreference> prefsNew = //
+                                StreamSupport.stream(prefs.getTrackedEvents().spliterator(), false)
+                                        .filter(pref -> !(pref.getEventId().equals(uuidEvent)
+                                                && pref.getLeaderboardName().equals(leaderboardName)))
+                                        .collect(Collectors.toList());
 
-                        else {
+                        // Create new tracked elements for this event/leaderboard from JSON body
+                        final Collection<TrackedElementWithDeviceId> trackedElements = new ArrayList<>();
+
+                        for (int i = 0; i < trackedElementsJson.size(); i++) {
+                            final JSONObject jsonTrackedElement = (JSONObject) trackedElementsJson.get(i);
 
                             // parse IDs
                             final String deviceId = (String) jsonTrackedElement.get(KEY_TRACKED_ELEMENT_DEVICE_ID);
@@ -215,68 +216,34 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                             final String markIdStr = (String) jsonTrackedElement.get(KEY_TRACKED_ELEMENT_MARK_ID);
 
                             // parse UUIDs of tracked element
-                            final UUID competitorId;
-                            final UUID boatId;
-                            final UUID markId;
-                            if (competitorIdStr != null && !competitorIdStr.isEmpty()) {
-                                competitorId = parseUUID(competitorIdStr);
-                                boatId = null;
-                                markId = null;
-                            } else if (boatIdStr != null && !boatIdStr.isEmpty()) {
-                                competitorId = null;
-                                boatId = parseUUID(boatIdStr);
-                                markId = null;
-                            } else if (markIdStr != null && !markIdStr.isEmpty()) {
-                                boatId = null;
-                                competitorId = null;
-                                markId = parseUUID(markIdStr);
-                            } else {
-                                markId = boatId = competitorId = null;
-                            }
+                            final UUID competitorId = parseUUID(competitorIdStr);
+                            final UUID boatId = parseUUID(boatIdStr);
+                            final UUID markId = parseUUID(markIdStr);
 
-                            if (boatId != null || markId != null || competitorId != null) {
+                            if (boatId != null ^ markId != null ^ competitorId != null) {
 
                                 // create TrackedElementWithID holder
                                 final TrackedElementWithDeviceId newPrefElem = new TrackedElementWithDeviceId(deviceId,
                                         boatId, competitorId, markId);
+                                trackedElements.add(newPrefElem);
 
-                                final Collection<TrackedEventPreference> prefsNew = new ArrayList<>();
-                                final Iterator<TrackedEventPreference> it = prefs.getTrackedEvents().iterator();
-
-                                // add newPrefElem to correct event or create a tracked event
-                                boolean eventContained = false;
-                                while (it.hasNext()) {
-                                    final TrackedEventPreference pref = it.next();
-                                    if (pref.getEventId().equals(uuidEvent)
-                                            && pref.getLeaderboardName().equals(leaderboardName)) {
-                                        // tracked event found, add to event
-                                        prefsNew.add(new TrackedEventPreference(pref, newPrefElem));
-                                        eventContained = true;
-                                    } else {
-                                        prefsNew.add(pref);
-                                    }
-                                }
-
-                                if (!eventContained) {
-                                    // event was not found, create a new tracked event
-                                    final TrackedEventPreference newPreference = new TrackedEventPreference(uuidEvent,
-                                            leaderboardName, Arrays.asList(newPrefElem), baseUrl, isArchived,
-                                            regattaSecret);
-                                    prefsNew.add(newPreference);
-                                }
-
-                                // update preferences
-                                prefs.setTrackedEvents(prefsNew);
-                                getSecurityService().setPreferenceObject(currentUser.getName(),
-                                        SailingPreferences.TRACKED_EVENTS_PREFERENCES, prefs);
-                                responseBuilder = Response.status(Status.ACCEPTED);
                             } else {
                                 // no boatId, competitorId or markId were specified
                                 responseBuilder = Response.status(Status.BAD_REQUEST)
                                         .entity("Invalid JSON body in request.");
                             }
+
                         }
 
+                        final TrackedEventPreference newPreference = new TrackedEventPreference(uuidEvent,
+                                leaderboardName, trackedElements, baseUrl, isArchived, regattaSecret);
+                        prefsNew.add(newPreference);
+
+                        prefs.setTrackedEvents(prefsNew);
+
+                        getSecurityService().setPreferenceObject(currentUser.getName(),
+                                SailingPreferences.TRACKED_EVENTS_PREFERENCES, prefs);
+                        responseBuilder = Response.status(Status.ACCEPTED);
                     }
 
                 } catch (IllegalArgumentException | ClassCastException e) {
@@ -294,9 +261,14 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
 
     private UUID parseUUID(String potentialUUID) {
         UUID uuid;
-        try {
-            uuid = UUID.fromString(potentialUUID);
-        } catch (IllegalArgumentException e) {
+        if (potentialUUID != null && !potentialUUID.isEmpty()) {
+
+            try {
+                uuid = UUID.fromString(potentialUUID);
+            } catch (IllegalArgumentException e) {
+                uuid = null;
+            }
+        } else {
             uuid = null;
         }
         return uuid;
