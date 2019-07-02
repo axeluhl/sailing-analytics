@@ -71,17 +71,17 @@ public class DeviceConfigurationListComposite extends Composite  {
         configurationTable.setVisible(true);
         refreshableConfigurationSelectionModel = new RefreshableMultiSelectionModel<>(
                 new EntityIdentityComparator<DeviceConfigurationWithSecurityDTO>() {
-            @Override
+                    @Override
                     public boolean representSameEntity(DeviceConfigurationWithSecurityDTO dto1,
                             DeviceConfigurationWithSecurityDTO dto2) {
-                return Util.equalsWithNull(dto1.id, dto2.id);
-            }
+                        return Util.equalsWithNull(dto1.id, dto2.id);
+                    }
 
-            @Override
+                    @Override
                     public int hashCode(DeviceConfigurationWithSecurityDTO t) {
-                return t.id == null ? 0 : t.id.hashCode();
-            }
-        }, configurationsDataProvider);
+                        return t.id == null ? 0 : t.id.hashCode();
+                    }
+                }, configurationsDataProvider);
         configurationTable.setSelectionModel(refreshableConfigurationSelectionModel);
         panel.add(configurationTable);
         initWidget(mainPanel);
@@ -136,8 +136,6 @@ public class DeviceConfigurationListComposite extends Composite  {
 
         final TextColumn<DeviceConfigurationWithSecurityDTO> deviceConfigurationUUidColumn = new AbstractSortableTextColumn<DeviceConfigurationWithSecurityDTO>(
                 config -> config.id == null ? "<null>" : config.id.toString());
-
-
         final HasPermissions type = SecuredSecurityTypes.USER_GROUP;
         final AccessControlledActionsColumn<DeviceConfigurationWithSecurityDTO, DefaultActionsImagesBarCell> actionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
@@ -156,23 +154,27 @@ public class DeviceConfigurationListComposite extends Composite  {
                 });
             }
         });
-
         final EditOwnershipDialog.DialogConfig<DeviceConfigurationWithSecurityDTO> configOwnership = EditOwnershipDialog
                 .create(userService.getUserManagementService(), type, user -> refreshTable(), stringMessages);
-
         final EditACLDialog.DialogConfig<DeviceConfigurationWithSecurityDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, user -> user.getAccessControlList(), stringMessages);
-
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
                 configOwnership::openDialog);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 u -> configACL.openDialog(u));
-
-
         SecuredDTOOwnerColumn.configureOwnerColumns(table, columnSortHandler, stringMessages);
         table.addColumn(deviceConfigurationUUidColumn, stringMessages.id());
         table.addColumn(actionColumn, stringMessages.actions());
         return table;
     }
 
+    void update(DeviceConfigurationWithSecurityDTO configurationToUpdate) {
+        final List<DeviceConfigurationWithSecurityDTO> configList = configurationsDataProvider.getList();
+        for (int i=0; i<configList.size(); i++) {
+            if (configList.get(i).id.equals(configurationToUpdate.id)) {
+                configList.set(i, configurationToUpdate);
+                break;
+            }
+        }
+    }
 }

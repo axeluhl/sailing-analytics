@@ -53,7 +53,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
     private VerticalPanel contentPanel;
     private Button cloneButton;
     private Button updateButton;
-    protected DeviceConfigurationDTO originalConfiguration;
+    protected DeviceConfigurationWithSecurityDTO originalConfiguration;
     protected TextBox uuidBox;
     protected TextBox identifierBox;
     private StringListEditorComposite allowedCourseAreasList;
@@ -64,7 +64,8 @@ public class DeviceConfigurationDetailComposite extends Composite {
     private final UserService userService;
 
     public static interface DeviceConfigurationFactory {
-        void obtainAndSetNameForConfigurationAndAdd(final DeviceConfigurationDTO configurationToObtainAndSetNameForAndAdd);
+        void obtainAndSetNameForConfigurationAndAdd(final DeviceConfigurationWithSecurityDTO configurationToObtainAndSetNameForAndAdd);
+        void update(DeviceConfigurationWithSecurityDTO configurationToUpdate);
     }
 
     public DeviceConfigurationDetailComposite(SailingServiceAsync sailingService, UserService userService,
@@ -80,10 +81,10 @@ public class DeviceConfigurationDetailComposite extends Composite {
         cloneButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                updateConfiguration();
+                updateConfiguration(callbackInterface);
                 // create a new, cloned configuration object and set a new UUID; then ask for a name,
                 // then send it to the server and add to the local list
-                final DeviceConfigurationDTO cloned = getResult();
+                final DeviceConfigurationWithSecurityDTO cloned = getResult();
                 cloned.id = UUID.randomUUID();
                 callbackInterface.obtainAndSetNameForConfigurationAndAdd(cloned);
             }
@@ -92,7 +93,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         updateButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                updateConfiguration();
+                updateConfiguration(callbackInterface);
             }
         });
         verticalPanel.add(contentPanel);
@@ -249,8 +250,10 @@ public class DeviceConfigurationDetailComposite extends Composite {
         }
     }
 
-    private DeviceConfigurationDTO getResult() {
-        DeviceConfigurationDTO result = new DeviceConfigurationDTO();
+    private DeviceConfigurationWithSecurityDTO getResult() {
+        DeviceConfigurationWithSecurityDTO result = new DeviceConfigurationWithSecurityDTO(originalConfiguration.getIdentifier());
+        result.setOwnership(originalConfiguration.getOwnership());
+        result.setAccessControlList(originalConfiguration.getAccessControlList());
         result.name = identifierBox.getValue();
         result.id = UUID.fromString(uuidBox.getValue());
         if (!allowedCourseAreasList.getValue().isEmpty()) {
@@ -268,16 +271,17 @@ public class DeviceConfigurationDetailComposite extends Composite {
         return result;
     }
 
-    private void updateConfiguration() {
+    private void updateConfiguration(DeviceConfigurationFactory callbackInterface) {
         if (originalConfiguration == null) {
             errorReporter.reportError(stringMessages.invalidState());
             return;
         }
-        DeviceConfigurationDTO dto = getResult();
+        DeviceConfigurationWithSecurityDTO dto = getResult();
         sailingService.createOrUpdateDeviceConfiguration(dto, new MarkedAsyncCallback<>(new AsyncCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 markAsDirty(false);
+                callbackInterface.update(dto);
             }
 
             @Override

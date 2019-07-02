@@ -28,7 +28,6 @@ import com.sap.sse.security.jaxrs.api.SecurityResource;
  *
  */
 public class BearerTokenOrBasicOrFormAuthenticationFilter extends BasicHttpAuthenticationFilter {
-    
     private static final String BEARER = "Bearer";
     
     /**

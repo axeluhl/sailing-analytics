@@ -8,7 +8,7 @@ import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.SecurityInformationDTO;
 
-public class DeviceConfigurationWithSecurityDTO extends DeviceConfigurationDTO implements SecuredDTO{
+public class DeviceConfigurationWithSecurityDTO extends DeviceConfigurationDTO implements SecuredDTO {
 
     private static final long serialVersionUID = 7187283665921500148L;
 
