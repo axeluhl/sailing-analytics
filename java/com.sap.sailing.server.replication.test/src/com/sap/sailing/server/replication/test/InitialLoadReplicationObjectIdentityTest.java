@@ -17,9 +17,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -90,12 +92,18 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
     /**
      * Drops the test DB. Sets up master and replica, starts the JMS message broker and registers the replica with the master.
      */
+    @SuppressWarnings("unchecked")
     @Before
     @Override
     public void setUp() throws Exception {
         persistenceSetUp(/* dropDB */ true);
         
         final SecurityService securityService = SecurityServiceMockFactory.mockSecurityService();
+
+        Mockito.when(securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(Mockito.any(),
+                Mockito.any(), Mockito.any(), Mockito.any(Callable.class)))
+                .thenAnswer(i -> i.getArgumentAt(3, Callable.class).call());
+
         this.master = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(testSetUp.mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
                         .getMongoObjectFactory(testSetUp.mongoDBService),
                 MediaDBFactory.INSTANCE.getMediaDB(testSetUp.mongoDBService), EmptyWindStore.INSTANCE,
@@ -105,7 +113,6 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
                 return securityService;
             }
         };
-        ;
         this.replica = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(testSetUp.mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
                         .getMongoObjectFactory(testSetUp.mongoDBService),
                 MediaDBFactory.INSTANCE.getMediaDB(testSetUp.mongoDBService), EmptyWindStore.INSTANCE,
@@ -115,7 +122,6 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
                 return securityService;
             }
         };
-        ;
     }
     
     private void performReplicationSetup() throws Exception {
