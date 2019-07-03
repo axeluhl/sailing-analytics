@@ -92,7 +92,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     public URL getReplicationRegistrationRequestURL(UUID uuid, String additional) throws MalformedURLException,
             UnsupportedEncodingException {
         final String[] replicableIdsAsString = StreamSupport.stream(replicables.spliterator(), /* parallel */ false).map(r->r.getId()).toArray(i->new String[i]);
-        return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
+        return new URL(getHttpRequestProtocol(), getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.REGISTER.name() + "&" + ReplicationServlet.SERVER_UUID + "="
                 + java.net.URLEncoder.encode(uuid.toString(), "UTF-8") + "&"
                 + ReplicationServlet.ADDITIONAL_INFORMATION + "="
@@ -101,9 +101,13 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
                 + java.net.URLEncoder.encode(String.join(",", replicableIdsAsString), "UTF-8"));
     }
 
+    private String getHttpRequestProtocol() {
+        return servletPort==443?"https":"http";
+    }
+
     @Override
     public URL getReplicationDeRegistrationRequestURL(UUID uuid) throws MalformedURLException {
-        return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
+        return new URL(getHttpRequestProtocol(), getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.DEREGISTER.name() + "&" + ReplicationServlet.SERVER_UUID + "="
                 + uuid.toString());
     }
@@ -160,14 +164,14 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     public URL getInitialLoadURL(Iterable<Replicable<?, ?>> replicables) throws MalformedURLException {
         final String replicablesIdsAsStringSeparatedByCommas = StreamSupport.stream(replicables.spliterator(), /* parallel */ false).
             map(r->r.getId().toString()).collect(Collectors.joining(","));
-        return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
+        return new URL(getHttpRequestProtocol(), getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.INITIAL_LOAD.name() +
                 "&"+ReplicationServlet.REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED+"="+replicablesIdsAsStringSeparatedByCommas);
     }
     
     @Override
     public URL getSendReplicaInitiatedOperationToMasterURL(String replicableIdAsString) throws MalformedURLException {
-        return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET);
+        return new URL(getHttpRequestProtocol(), getHostname(), servletPort, REPLICATION_SERVLET);
     }
 
     @Override

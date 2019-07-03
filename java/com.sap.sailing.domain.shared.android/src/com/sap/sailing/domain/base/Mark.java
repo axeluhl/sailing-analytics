@@ -13,8 +13,8 @@ import com.sap.sse.common.IsManagedByCache;
  * 
  */
 public interface Mark extends ControlPoint, IsManagedByCache<SharedDomainFactory> {
-    public Color getColor();
-    public String getShape();
-    public String getPattern();
-    public MarkType getType();
+    Color getColor();
+    String getShape();
+    String getPattern();
+    MarkType getType();
 }
