@@ -34,5 +34,6 @@ Require-Bundle: com.sap.sailing.server,
  org.mongodb.mongo-java-driver;bundle-version="3.6.4",
  com.sap.sse.security,
  com.sap.sse.security.common,
- com.sun.jersey;bundle-version="1.17.0"
+ com.sun.jersey;bundle-version="1.17.0",
+ com.sap.sse.security.testsupport
 Automatic-Module-Name: com.sap.sailing.server.replication.test
