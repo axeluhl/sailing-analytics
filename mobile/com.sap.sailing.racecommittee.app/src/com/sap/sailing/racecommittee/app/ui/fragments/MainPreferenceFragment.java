@@ -98,6 +98,8 @@ public class MainPreferenceFragment extends LoggableFragment {
                                         @Override
                                         public void onLoadSucceeded(DeviceConfiguration configuration,
                                                 boolean isCached) {
+                                            getLoaderManager().destroyLoader(0);
+
                                             // this is our 'global' configuration, let's store it in app preferences
                                             PreferencesDeviceConfigurationLoader
                                                     .wrap(configuration, AppPreferences.on(getActivity())).store();

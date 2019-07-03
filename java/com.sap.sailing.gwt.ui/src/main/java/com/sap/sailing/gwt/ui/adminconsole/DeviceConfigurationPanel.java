@@ -121,7 +121,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
     }
     
     private void createConfiguration() {
-        final DeviceConfigurationDTO newConfiguration = new DeviceConfigurationDTO();
+        final DeviceConfigurationWithSecurityDTO newConfiguration = new DeviceConfigurationWithSecurityDTO(null);
         newConfiguration.id = UUID.randomUUID(); // the name will be obtained by the following call
         obtainAndSetNameForConfigurationAndAdd(newConfiguration);
     }
@@ -136,7 +136,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
      */
     @Override
     public void obtainAndSetNameForConfigurationAndAdd(
-            final DeviceConfigurationDTO configurationToObtainAndSetNameForAndAdd) {
+            final DeviceConfigurationWithSecurityDTO configurationToObtainAndSetNameForAndAdd) {
         sailingService.getDeviceConfigurations(
                 new MarkedAsyncCallback<>(new AsyncCallback<List<DeviceConfigurationWithSecurityDTO>>() {
             @Override
@@ -170,6 +170,11 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
                 errorReporter.reportError(caught.getMessage());
             }
         }));
+    }
+    
+    @Override
+    public void update(DeviceConfigurationWithSecurityDTO configurationToUpdate) {
+        listComposite.update(configurationToUpdate);
     }
     
     private void removeConfiguration() {
