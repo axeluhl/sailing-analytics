@@ -136,11 +136,11 @@ public class TestORCPerformanceCurve {
         assertEquals(17.23, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(17.23))).getKnots(), accuracy);
         assertEquals(   18, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(   18))).getKnots(), accuracy);
         
-        assertEquals(  450, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(450).times(courseLengthNauticalMiles))).asSeconds(), accuracy);
-        assertEquals(  500, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(500).times(courseLengthNauticalMiles))).asSeconds(), accuracy);
-        assertEquals(  600, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(600).times(courseLengthNauticalMiles))).asSeconds(), accuracy);
-        assertEquals(  700, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(700).times(courseLengthNauticalMiles))).asSeconds(), accuracy);
-        assertEquals(  750, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(750).times(courseLengthNauticalMiles))).asSeconds(), accuracy);
+        assertEquals(  450, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(450).times(courseLengthNauticalMiles))).asSeconds() / courseLengthNauticalMiles, accuracy);
+        assertEquals(  500, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(500).times(courseLengthNauticalMiles))).asSeconds() / courseLengthNauticalMiles, accuracy);
+        assertEquals(  600, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(600).times(courseLengthNauticalMiles))).asSeconds() / courseLengthNauticalMiles, accuracy);
+        assertEquals(  700, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(700).times(courseLengthNauticalMiles))).asSeconds() / courseLengthNauticalMiles, accuracy);
+        assertEquals(  750, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(750).times(courseLengthNauticalMiles))).asSeconds() / courseLengthNauticalMiles, accuracy);
     }
     
     // Tests for a Implied Wind calculation for a simple predefined course. The solutions are extracted from the provided ORC TestPCS.exe application. 

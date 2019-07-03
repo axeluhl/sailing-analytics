@@ -186,14 +186,14 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         }
 
         // Corner cases for Allowance > Allowance(20kt) or Allowance < Allowance(6kt)
-        if(timePerNauticalMileInSeconds >= allowancesInSeconds[allowancesInSeconds.length - 1]) {
+        if(timePerNauticalMileInSeconds <= allowancesInSeconds[allowancesInSeconds.length - 1]) {
             return new KnotSpeedImpl(6);
         } else if (timePerNauticalMileInSeconds >= allowancesInSeconds[0]) {
             return new KnotSpeedImpl(20);
         }
         
         int i = 0;
-        while(i < allowancesInSeconds.length && timePerNauticalMileInSeconds >= allowancesInSeconds[i]) {
+        while(i < allowancesInSeconds.length && timePerNauticalMileInSeconds <= allowancesInSeconds[i]) {
             i += 1;
         }
         i -= 1;
