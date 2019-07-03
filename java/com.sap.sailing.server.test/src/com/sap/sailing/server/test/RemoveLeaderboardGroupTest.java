@@ -36,16 +36,25 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardGroup;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.testsupport.SecurityServiceMockFactory;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
 public class RemoveLeaderboardGroupTest {
     private RacingEventService server;
     private Event pfingstbusch;
-
+    
     @Before
     public void setUp() {
-        server = new RacingEventServiceImpl();
+        
+        final SecurityService securityService = SecurityServiceMockFactory.mockSecurityService();
+        server = new RacingEventServiceImpl() {
+            @Override
+            public SecurityService getSecurityService() {
+                return securityService;
+            }
+        };
         List<Event> allEvents = new ArrayList<>();
         Util.addAll(server.getAllEvents(), allEvents);
         for (final Event e : allEvents) {
