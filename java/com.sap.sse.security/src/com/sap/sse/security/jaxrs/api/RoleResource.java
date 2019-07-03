@@ -111,23 +111,19 @@ public class RoleResource extends AbstractSecurityResource {
             } else {
                 // check update permission on role
                 getService().checkCurrentUserUpdatePermission(roleDefinition);
-
                 // create permission objects
                 final Set<WildcardPermission> permissions = new HashSet<>();
-
                 final JSONObject body = (JSONObject) new JSONParser().parse(json);
                 @SuppressWarnings("unchecked")
                 final Iterable<String> permissionStrings = (Iterable<String>) body.get(KEY_PERMISSIONS);
                 for (final String permissionString : permissionStrings) {
                     permissions.add(new WildcardPermission(permissionString));
                 }
-
                 // check only those meta-permissions which changed
                 final Set<WildcardPermission> addedPermissions = new HashSet<>(roleDefinition.getPermissions());
                 addedPermissions.removeAll(permissions);
                 final Set<WildcardPermission> removedPermissions = new HashSet<>(permissions);
                 removedPermissions.removeAll(roleDefinition.getPermissions());
-
                 if (!getService().hasUserAllWildcardPermissionsForAlreadyRealizedQualifications(roleDefinition,
                         addedPermissions)) {
                     resp = Response.status(Status.UNAUTHORIZED)
