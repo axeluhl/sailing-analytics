@@ -176,9 +176,9 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     }
     
     @Override
-    public Speed getImpliedWind(Duration totalTime) throws MaxIterationsExceededException, FunctionEvaluationException{
+    public Speed getImpliedWind(Duration timePerNauticalMile) throws MaxIterationsExceededException, FunctionEvaluationException{
         PolynomialFunction workingFunction;
-        double timePerNauticalMileInSeconds = totalTime.divide(course.getTotalLength().getNauticalMiles()).asSeconds();
+        double timePerNauticalMileInSeconds = timePerNauticalMile.asSeconds();
         double[] allowancesInSeconds = new double[functionImpliedWindToAllowance.getKnots().length];
         
         for(int i = 0; i < allowancesInSeconds.length; i++) {
@@ -213,7 +213,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     public Duration getAllowancePerCourse(Speed impliedWind) {
         // TODO Corner cases for ImpliedWind > 20kt or ImpliedWind < 6kt
         try {
-            return Duration.ONE_SECOND.times(functionImpliedWindToAllowance.value(impliedWind.getKnots()) * course.getTotalLength().getNauticalMiles());
+            return Duration.ONE_SECOND.times(functionImpliedWindToAllowance.value(impliedWind.getKnots()));
         } catch (ArgumentOutsideDomainException e) {
             // TODO Auto-generated catch block
             // TODO Create senseful Exception Handling for this class, Logging ...

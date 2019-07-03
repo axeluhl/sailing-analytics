@@ -130,51 +130,52 @@ public class TestORCPerformanceCurve {
         Double accuracy = 0.1;
         ORCCertificateImpl certificate = (ORCCertificateImpl) importer.getCertificate("GER 5549");
         ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(course);
-        double courseLengthNauticalMiles = course.getTotalLength().getNauticalMiles();
         
         assertEquals( 11.5, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl( 11.5))).getKnots(), accuracy);
         assertEquals(17.23, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(17.23))).getKnots(), accuracy);
         assertEquals(   18, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(   18))).getKnots(), accuracy);
         
-        assertEquals(  450, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(450).times(courseLengthNauticalMiles))).asSeconds() / courseLengthNauticalMiles, accuracy);
-        assertEquals(  500, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(500).times(courseLengthNauticalMiles))).asSeconds() / courseLengthNauticalMiles, accuracy);
-        assertEquals(  600, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(600).times(courseLengthNauticalMiles))).asSeconds() / courseLengthNauticalMiles, accuracy);
-        assertEquals(  700, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(700).times(courseLengthNauticalMiles))).asSeconds() / courseLengthNauticalMiles, accuracy);
-        assertEquals(  750, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(750).times(courseLengthNauticalMiles))).asSeconds() / courseLengthNauticalMiles, accuracy);
+        assertEquals(  450, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(450))).asSeconds(), accuracy);
+        assertEquals(  500, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(500))).asSeconds(), accuracy);
+        assertEquals(  600, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(600))).asSeconds(), accuracy);
+        assertEquals(  700, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(700))).asSeconds(), accuracy);
+        assertEquals(  750, performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(750))).asSeconds(), accuracy);
     }
     
     // Tests for a Implied Wind calculation for a simple predefined course. The solutions are extracted from the provided ORC TestPCS.exe application. 
     @Test
     public void testImpliedWindSimple() throws MaxIterationsExceededException, FunctionEvaluationException {
-       Double accuracy = 0.000001;
-       ORCCertificate certificateMoana  = importer.getCertificate("GER 5549");
-       ORCCertificate certificateMilan  = importer.getCertificate("GER 7323");
-       ORCCertificate certificateTutima = importer.getCertificate("GER 5609");
-       ORCCertificate certificateBank   = importer.getCertificate("GER 5555");
-       ORCCertificate certificateHaspa  = importer.getCertificate("GER 6300");
-       ORCCertificate certificateHalbtrocken = importer.getCertificate("GER 5564");
-       ORCPerformanceCurve performanceCurveMoana  = certificateMoana.getPerformanceCurve(course);
-       ORCPerformanceCurve performanceCurveMilan  = certificateMilan.getPerformanceCurve(course);
-       ORCPerformanceCurve performanceCurveTutima = certificateTutima.getPerformanceCurve(course);
-       ORCPerformanceCurve performanceCurveBank   = certificateBank.getPerformanceCurve(course);
-       ORCPerformanceCurve performanceCurveHaspa  = certificateHaspa.getPerformanceCurve(course);
-       ORCPerformanceCurve performanceCurveHalbtrocken = certificateHalbtrocken.getPerformanceCurve(course);
+       double accuracy = 0.000001;
+       double courseLengthInNauticalMiles = course.getTotalLength().getNauticalMiles(); 
+       ORCCertificate certificateMoana          = importer.getCertificate("GER 5549");
+       ORCCertificate certificateMilan          = importer.getCertificate("GER 7323");
+       ORCCertificate certificateTutima         = importer.getCertificate("GER 5609");
+       ORCCertificate certificateBank           = importer.getCertificate("GER 5555");
+       ORCCertificate certificateHaspa          = importer.getCertificate("GER 6300");
+       ORCCertificate certificateHalbtrocken    = importer.getCertificate("GER 5564");
+       ORCPerformanceCurve performanceCurveMoana        = certificateMoana.getPerformanceCurve(course);
+       ORCPerformanceCurve performanceCurveMilan        = certificateMilan.getPerformanceCurve(course);
+       ORCPerformanceCurve performanceCurveTutima       = certificateTutima.getPerformanceCurve(course);
+       ORCPerformanceCurve performanceCurveBank         = certificateBank.getPerformanceCurve(course);
+       ORCPerformanceCurve performanceCurveHaspa        = certificateHaspa.getPerformanceCurve(course);
+       ORCPerformanceCurve performanceCurveHalbtrocken  = certificateHalbtrocken.getPerformanceCurve(course);
        
        assertNotNull(performanceCurveMoana);
        assertNotNull(performanceCurveMilan);
        
        // Test for corner case and if the algorithm reacts to the boundaries of 6 and 20 kts.
-//       assertEquals(20.0    , performanceCurveMoana.getImpliedWind(Duration.ONE_HOUR).getKnots(), accuracy);
+       assertEquals( 6.0    , performanceCurveMoana.getImpliedWind(Duration.ONE_HOUR.times(24)).getKnots(), accuracy);
+       assertEquals(20.0    , performanceCurveMoana.getImpliedWind(Duration.ONE_HOUR).getKnots(), accuracy);
        
        // TODO Found new bug in creation of the course allowances
        // When the legTWA == 180° and runAngle of the boat == 180°, there are no senseful leg allowances created
        
-       assertEquals(12.89281, performanceCurveMilan .getImpliedWind(Duration.ONE_HOUR.times(1.0)).getKnots(), accuracy);
-       assertEquals(8.72668 , performanceCurveTutima.getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
-       assertEquals(8.07591 , performanceCurveBank  .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
-       assertEquals(7.78413 , performanceCurveHaspa .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
-       assertEquals(7.76218 , performanceCurveMoana .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
-       assertEquals(7.62407 , performanceCurveHalbtrocken.getImpliedWind(Duration.ONE_HOUR.times(2.0)).getKnots(), accuracy);
+       assertEquals(12.89281, performanceCurveMilan      .getImpliedWind(Duration.ONE_HOUR.times(1.0).divide(courseLengthInNauticalMiles)).getKnots(), accuracy);
+       assertEquals(8.72668 , performanceCurveTutima     .getImpliedWind(Duration.ONE_HOUR.times(1.5).divide(courseLengthInNauticalMiles)).getKnots(), accuracy);
+       assertEquals(8.07591 , performanceCurveBank       .getImpliedWind(Duration.ONE_HOUR.times(1.5).divide(courseLengthInNauticalMiles)).getKnots(), accuracy);
+       assertEquals(7.78413 , performanceCurveHaspa      .getImpliedWind(Duration.ONE_HOUR.times(1.5).divide(courseLengthInNauticalMiles)).getKnots(), accuracy);
+       assertEquals(7.76218 , performanceCurveMoana      .getImpliedWind(Duration.ONE_HOUR.times(1.5).divide(courseLengthInNauticalMiles)).getKnots(), accuracy);
+       assertEquals(7.62407 , performanceCurveHalbtrocken.getImpliedWind(Duration.ONE_HOUR.times(2.0).divide(courseLengthInNauticalMiles)).getKnots(), accuracy);
     }
     
 }

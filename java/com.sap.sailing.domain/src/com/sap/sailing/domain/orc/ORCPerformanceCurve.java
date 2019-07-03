@@ -8,6 +8,8 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 
+// TODO Finish Comments for API
+
 /**
  * For a {@link Competitor} and the {@link ORCPerformanceCurveCourse} which the competitor sailed until the creation of
  * an instance of an implementing class, this instance represents a so called "Perfromance Curve". This Curve is
@@ -23,13 +25,13 @@ public interface ORCPerformanceCurve {
 
     /**
      * 
-     * @param time
+     * @param timePerNauticalMile equals the average duration the boat needed to conquer one mile on the racecourse, => totalTime / course.getTotalLength()
      * @return
      * @throws ArgumentOutsideDomainException
      * @throws MaxIterationsExceededException
      * @throws FunctionEvaluationException
      */
-    Speed getImpliedWind(Duration time) throws ArgumentOutsideDomainException, MaxIterationsExceededException, FunctionEvaluationException;
+    Speed getImpliedWind(Duration timePerNauticalMile) throws ArgumentOutsideDomainException, MaxIterationsExceededException, FunctionEvaluationException;
     
     /**
      * TODO getComment done
@@ -47,4 +49,5 @@ public interface ORCPerformanceCurve {
      * @return
      */
     Duration getAllowancePerCourse(Speed impliedWind);
+    
 }
