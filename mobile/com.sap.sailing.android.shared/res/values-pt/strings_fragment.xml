@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources>
+    <string name="scan_qr">"Digitalizar código QR"</string>
+    <string name="scan_hint">"O código QR pode ser encontrado na sua confirmação de participação"</string>
+    <string name="no_qr_code">"Não tem um código QR?"</string>
+</resources>

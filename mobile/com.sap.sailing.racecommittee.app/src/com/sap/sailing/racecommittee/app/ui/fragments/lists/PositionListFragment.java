@@ -42,6 +42,7 @@ public class PositionListFragment extends LoggableListFragment {
 
         preferences = AppPreferences.on(getActivity());
 
+        values.clear();
         values.add(new LoginTypeItem(1, getString(R.string.login_type_officer_on_vessel),
                 AppConstants.AUTHOR_TYPE_OFFICER_VESSEL, LoginType.OFFICER));
         values.add(new LoginTypeItem(2, getString(R.string.login_type_shore_control),

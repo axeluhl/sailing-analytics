@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources>
+    <string name="accuracy">"Точность"</string>
+    <string name="distance">"Дистанция"</string>
+    <string name="accuracy_detail">"от позиции GPS"</string>
+    <string name="distance_detail">"до старого буя"</string>
+</resources>

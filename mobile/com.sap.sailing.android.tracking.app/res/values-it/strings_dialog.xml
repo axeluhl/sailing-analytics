@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><resources>
+
+    <string name="yes">"Sì"</string>
+    <string name="no">"No"</string>
+    <string name="confirm_data_hello_name">"Salve {full_name}"</string>
+    <string name="confirm_data_you_are_signed_in_as_sail_id">"Ti stai registrando come {sail_id}"</string>
+    <string name="confirm_data_is_correct">"OK"</string>
+    <string name="decline_data_is_incorrect">"Non sono io!"</string>
+    <string name="confirm_delete_checkin">"Confermare l\'eliminazione di questo check-in?"</string>
+    <string name="download_team_image_message">"È in corso il download dell\'immagine della squadra..."</string>
+    <string name="checkout_warning_message">"CONFERMARE il logout? Sarà necessario rieseguire la connessione con il codice QR fornito per accedere alla regata!"</string>
+</resources>
