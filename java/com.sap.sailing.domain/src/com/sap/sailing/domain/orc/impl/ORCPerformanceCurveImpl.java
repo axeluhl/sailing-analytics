@@ -176,25 +176,31 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     }
     
     @Override
-    public Speed getImpliedWind(Duration time) throws MaxIterationsExceededException, FunctionEvaluationException{
+    public Speed getImpliedWind(Duration totalTime) throws MaxIterationsExceededException, FunctionEvaluationException{
         PolynomialFunction workingFunction;
+        double timePerNauticalMileInSeconds = totalTime.divide(course.getTotalLength().getNauticalMiles()).asSeconds();
         double[] allowancesInSeconds = new double[functionImpliedWindToAllowance.getKnots().length];
         
-        // TODO Corner cases for Allowance > Allowance(20kt) or Allowance < Allowance(6kt)
-        
-        for (int i = 0; i < allowancesInSeconds.length; i++) {
+        for(int i = 0; i < allowancesInSeconds.length; i++) {
             allowancesInSeconds[i] = functionImpliedWindToAllowance.value(functionImpliedWindToAllowance.getKnots()[i]);
+        }
+
+        // Corner cases for Allowance > Allowance(20kt) or Allowance < Allowance(6kt)
+        if(timePerNauticalMileInSeconds >= allowancesInSeconds[allowancesInSeconds.length - 1]) {
+            return new KnotSpeedImpl(6);
+        } else if (timePerNauticalMileInSeconds >= allowancesInSeconds[0]) {
+            return new KnotSpeedImpl(20);
         }
         
         int i = 0;
-        while(i < allowancesInSeconds.length && time.asSeconds() <= allowancesInSeconds[i]) {
+        while(i < allowancesInSeconds.length && timePerNauticalMileInSeconds >= allowancesInSeconds[i]) {
             i += 1;
         }
         i -= 1;
         workingFunction = functionImpliedWindToAllowance.getPolynomials()[i];
         
         //PolynomialFunction which will be solved by the Newton Approach
-        PolynomialFunction subtractedFunction = workingFunction.subtract(new PolynomialFunction(new double[] {time.asSeconds()}));
+        PolynomialFunction subtractedFunction = workingFunction.subtract(new PolynomialFunction(new double[] {timePerNauticalMileInSeconds}));
         NewtonSolver solver = new NewtonSolver();
         solver.setAbsoluteAccuracy(0.000001);
         //TODO Comment for the special treatment of the solver
@@ -207,7 +213,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     public Duration getAllowancePerCourse(Speed impliedWind) {
         // TODO Corner cases for ImpliedWind > 20kt or ImpliedWind < 6kt
         try {
-            return Duration.ONE_SECOND.times(functionImpliedWindToAllowance.value(impliedWind.getKnots()));
+            return Duration.ONE_SECOND.times(functionImpliedWindToAllowance.value(impliedWind.getKnots()) * course.getTotalLength().getNauticalMiles());
         } catch (ArgumentOutsideDomainException e) {
             // TODO Auto-generated catch block
             // TODO Create senseful Exception Handling for this class, Logging ...

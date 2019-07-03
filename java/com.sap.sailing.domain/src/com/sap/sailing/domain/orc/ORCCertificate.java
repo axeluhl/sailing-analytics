@@ -40,17 +40,13 @@ public interface ORCCertificate {
      * Returns the GPH value for the {@link Competitor}. The GPH value represents the overall performance of the boat.
      * The value itself is again an allowance (in seconds per nautical mile) and could be used as a ToD Factor.
      * Most of the times it is used to divide a big fleet into similar fast divisions.
-     * 
-     * @return double value in seconds per nautical mile
      */
     public double getGPH();
     
     /**
      * Returns the CDL (Class Division Length) value for the {@link Competitor}. This value is another (and newer) approach to rate the overall performance of different boats.
      * The different division intervals are - in contrast to the intervals of the GPH - set by the Offshore Race Committee and not by the national association for a uniform handling.
-     * The higher the value, the higher the overall performance.
-     * 
-     * @return double value in meter
+     * The higher the value, the higher the overall performance, it is measured in meters.
      */
     public double getCDL();
     
