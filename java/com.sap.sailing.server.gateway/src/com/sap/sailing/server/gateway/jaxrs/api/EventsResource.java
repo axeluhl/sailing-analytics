@@ -109,6 +109,19 @@ public class EventsResource extends AbstractSailingServerResource {
     private static final Logger logger = Logger.getLogger(EventsResource.class.getName());
     private static final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     
+    public static enum ErrorCodes {
+        NO_VENUE(1), NO_BOAT_CLASS(2), LEADERBOARD_GROUP_ALREADY_EXISTS(3), REGATTA_ALREADY_EXISTS(4), LEADERBOARD_ALREADY_EXISTS(5);
+        
+        private ErrorCodes(int errorCode) {
+            this.errorCode = errorCode;
+        }
+        
+        public int getErrorCode() {
+            return errorCode;
+        }
+        
+        private final int errorCode;
+    }
     
     public EventsResource() {
     }
@@ -159,7 +172,7 @@ public class EventsResource extends AbstractSailingServerResource {
             NumberFormatException, IOException, org.json.simple.parser.ParseException, InvalidDateException {
         final Response response;
         if (venueNameParam == null && (venueLat == null || venueLng == null)) {
-            response = Response.status(Status.PRECONDITION_FAILED).entity("No venue specified; provide either venuename or venuelat/venuelng").build();
+            response = createErrorResponse(Status.PRECONDITION_FAILED, "No venue specified; provide either venuename or venuelat/venuelng", ErrorCodes.NO_VENUE);
         } else {
             Triple<Event, LeaderboardGroup, RegattaLeaderboard> eventAndLeaderboardGroupAndLeaderboard = validateAndCreateEvent(uriInfo, eventNameParam, eventDescriptionParam, startDateParam,
                     startDateAsMillis, endDateParam, endDateAsMillis, venueNameParam,
@@ -183,6 +196,14 @@ public class EventsResource extends AbstractSailingServerResource {
             response = ok(jsonResponse.toJSONString(), MediaType.APPLICATION_JSON);
         }
         return response;
+    }
+    
+    private Response createErrorResponse(Status responseStatus, String message, ErrorCodes errorCode) {
+        final JSONObject responseBody = new JSONObject();
+        responseBody.put("message", message);
+        responseBody.put("errorCodeName", errorCode.name());
+        responseBody.put("errorCode", errorCode.getErrorCode());
+        return Response.status(responseStatus).entity(responseBody.toString()).build();
     }
     
     @PUT
@@ -433,24 +454,21 @@ public class EventsResource extends AbstractSailingServerResource {
         String leaderboardGroupName = eventName;
         String regattaAndLeaderboardName = eventName;
         if (createRegatta && boatClassName == null) {
-            throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
-                    .entity(ExceptionManager.parameterRequiredMsg("boatClassName")).type(MediaType.TEXT_PLAIN).build());
+            throw new WebApplicationException(createErrorResponse(Status.BAD_REQUEST, ExceptionManager.parameterRequiredMsg("boatClassName"),
+                    ErrorCodes.NO_BOAT_CLASS));
         }
         if (createLeaderboardGroup && getService().getLeaderboardGroupByName(leaderboardGroupName) != null) {
-            throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
-                    .entity(ExceptionManager.objectAlreadyExists("leaderboard group", leaderboardGroupName))
-                    .type(MediaType.TEXT_PLAIN).build());
+            throw new WebApplicationException(createErrorResponse(Status.BAD_REQUEST,
+                    ExceptionManager.objectAlreadyExists("leaderboard group", leaderboardGroupName), ErrorCodes.LEADERBOARD_GROUP_ALREADY_EXISTS));
         }
         if (createRegatta) {
             if (getService().getRegattaByName(regattaAndLeaderboardName) != null) {
-                throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
-                        .entity(ExceptionManager.objectAlreadyExists("regatta", regattaAndLeaderboardName))
-                        .type(MediaType.TEXT_PLAIN).build());
+                throw new WebApplicationException(createErrorResponse(Status.BAD_REQUEST,
+                        ExceptionManager.objectAlreadyExists("regatta", regattaAndLeaderboardName), ErrorCodes.REGATTA_ALREADY_EXISTS));
             }
             if (getService().getLeaderboardByName(regattaAndLeaderboardName) != null) {
-                throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
-                        .entity(ExceptionManager.objectAlreadyExists("leaderboard", regattaAndLeaderboardName))
-                        .type(MediaType.TEXT_PLAIN).build());
+                throw new WebApplicationException(createErrorResponse(Status.BAD_REQUEST,
+                        ExceptionManager.objectAlreadyExists("leaderboard", regattaAndLeaderboardName), ErrorCodes.LEADERBOARD_ALREADY_EXISTS));
             }
         }
         String eventDescription = eventDescriptionParam == null ? eventName : eventDescriptionParam;

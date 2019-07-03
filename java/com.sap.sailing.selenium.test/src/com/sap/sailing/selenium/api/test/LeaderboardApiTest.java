@@ -39,9 +39,7 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
     @Test
     public void testGetLeaderboardForCreatedEvent() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
-
         eventApi.createEvent(ctx, LEADERBOARD_NAME, BOATCLASSNAME, CLOSED, "default");
-
         JSONObject leaderBoard = leaderboardApi.getLeaderboard(ctx, LEADERBOARD_NAME);
         assertEquals("read: leaderboard.name is different", LEADERBOARD_NAME, leaderBoard.get("name"));
         assertEquals("read: leaderboard.displayName is different", LEADERBOARD_NAME, leaderBoard.get("displayName"));
@@ -65,14 +63,11 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
     @Test
     public void testDeviceMappingStartAndEnd() throws Exception {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
-
         eventApi.createEvent(ctx, LEADERBOARD_NAME, BOATCLASSNAME, CLOSED, "default");
         final Competitor competitor = regattaApi.createAndAddCompetitor(ctx, LEADERBOARD_NAME, BOATCLASSNAME, "test@de",
                 "Max Mustermann", "USA");
-
         final DeviceMappingRequest request = leaderboardApi.createDeviceMappingRequest(ctx, LEADERBOARD_NAME)
                 .forCompetitor(competitor.getId()).withDeviceUuid(randomUUID());
-
         @SuppressWarnings("unused") // TODO: check result
         JSONObject mappingStart = request.startDeviceMapping(currentTimeMillis());
         @SuppressWarnings("unused") // TODO: check result

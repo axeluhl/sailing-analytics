@@ -775,25 +775,32 @@ public class CandidateChooserImpl implements CandidateChooser {
      */
     private Distance getIgnoreDueToTimingInducedEstimatedSpeeds(Competitor c, Candidate c1, Candidate c2) {
         final boolean ignore;
+        final Distance totalGreatCircleDistance;
         assert c1.getOneBasedIndexOfWaypoint() < c2.getOneBasedIndexOfWaypoint();
         assert c2 != end;
-        final TimePoint middleOfc1Andc2 = new MillisecondsTimePoint(c1.getTimePoint().plus(c2.getTimePoint().asMillis()).asMillis() / 2);
-        Waypoint first = getFirstWaypoint(c1);
-        final Waypoint second = c2.getWaypoint();
-        final Distance totalGreatCircleDistance = getMinimumTotalGreatCircleDistanceBetweenWaypoints(first, second, middleOfc1Andc2);
-        if (totalGreatCircleDistance == null) {
-            ignore = true; // no distance known; cannot tell, so ignore the edge
+        if (c1.getTimePoint() == null || c2.getTimePoint() == null) {
+            // cannot compute a distance in case of unknown timings; ignore the edge
+            ignore = true;
+            totalGreatCircleDistance = null;
         } else {
-            // Computing the distance traveled can be quite expensive, especially for candidates very far apart.
-            // As a quick approximation let's look at how long the time between the candidates was and relate that to the minimum distance
-            // between the waypoints. This leads to a speed estimation; if we take the minimum distance times two, we
-            // get an upper bound for a reasonable distance sailed between the waypoints and therefore an estimation
-            // for the maximum speed at which the competitor would have had to sail:
-            Speed estimatedMaxSpeed = totalGreatCircleDistance.scale(2).inTime(c1.getTimePoint().until(c2.getTimePoint()));
-            final double estimatedMinSpeedBasedProbability = Math.max(0, estimatedMaxSpeed.divide(MINIMUM_REASONABLE_SPEED));
-            final double estimatedMaxSpeedBasedProbability = Math.max(0, MAXIMUM_REASONABLE_SPEED.divide(estimatedMaxSpeed));
-            final double estimatedSpeedBasedProbabilityMinimum = Math.min(estimatedMaxSpeedBasedProbability, estimatedMinSpeedBasedProbability);
-            ignore = estimatedSpeedBasedProbabilityMinimum < MINIMUM_PROBABILITY;
+            final TimePoint middleOfc1Andc2 = new MillisecondsTimePoint(c1.getTimePoint().plus(c2.getTimePoint().asMillis()).asMillis() / 2);
+            Waypoint first = getFirstWaypoint(c1);
+            final Waypoint second = c2.getWaypoint();
+            totalGreatCircleDistance = getMinimumTotalGreatCircleDistanceBetweenWaypoints(first, second, middleOfc1Andc2);
+            if (totalGreatCircleDistance == null) {
+                ignore = true; // no distance known; cannot tell, so ignore the edge
+            } else {
+                // Computing the distance traveled can be quite expensive, especially for candidates very far apart.
+                // As a quick approximation let's look at how long the time between the candidates was and relate that to the minimum distance
+                // between the waypoints. This leads to a speed estimation; if we take the minimum distance times two, we
+                // get an upper bound for a reasonable distance sailed between the waypoints and therefore an estimation
+                // for the maximum speed at which the competitor would have had to sail:
+                Speed estimatedMaxSpeed = totalGreatCircleDistance.scale(2).inTime(c1.getTimePoint().until(c2.getTimePoint()));
+                final double estimatedMinSpeedBasedProbability = Math.max(0, estimatedMaxSpeed.divide(MINIMUM_REASONABLE_SPEED));
+                final double estimatedMaxSpeedBasedProbability = Math.max(0, MAXIMUM_REASONABLE_SPEED.divide(estimatedMaxSpeed));
+                final double estimatedSpeedBasedProbabilityMinimum = Math.min(estimatedMaxSpeedBasedProbability, estimatedMinSpeedBasedProbability);
+                ignore = estimatedSpeedBasedProbabilityMinimum < MINIMUM_PROBABILITY;
+            }
         }
         return ignore ? null : totalGreatCircleDistance;
     }

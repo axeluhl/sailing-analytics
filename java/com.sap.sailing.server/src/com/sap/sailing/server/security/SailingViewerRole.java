@@ -19,7 +19,7 @@ public class SailingViewerRole extends RolePrototype {
         super("sailing_viewer", "c42948df-517b-45cb-9fa9-d1e79f18e115",
                 WildcardPermission.builder().withTypes(SecuredDomainType.EVENT, SecuredDomainType.LEADERBOARD_GROUP,
                         SecuredDomainType.LEADERBOARD, SecuredDomainType.REGATTA, SecuredDomainType.TRACKED_RACE,
-                        SecuredDomainType.SIMULATOR)
+                        SecuredDomainType.SIMULATOR, SecuredDomainType.MEDIA_TRACK)
                         .withActions(DefaultActions.READ).build(), WildcardPermission.builder().withTypes(SecuredDomainType.COMPETITOR, SecuredDomainType.BOAT)
                         .withActions(SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC).build());
     }

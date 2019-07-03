@@ -89,7 +89,6 @@ public class AccessControlStoreImpl implements AccessControlStore {
     @Override
     public void loadACLsAndOwnerships() {
         LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {
-
             @Override
             public void run() {
                 if (domainObjectFactory != null) {
@@ -97,7 +96,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
                         internalAddACL(acl);
                     }
                     for (OwnershipAnnotation ownership : domainObjectFactory.loadAllOwnerships(userStore)) {
-                        internalSetOwnershipAndmapUserAndUserGroupToOwnership(ownership);
+                        internalSetOwnershipAndMapUserAndUserGroupToOwnership(ownership);
                     }
                 }
             }
@@ -294,13 +293,12 @@ public class AccessControlStoreImpl implements AccessControlStore {
         final OwnershipAnnotation ownership = new OwnershipAnnotation(new Ownership(userOwnerName, tenantOwner), id,
                 displayNameOfOwnedObject);
         LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {
-
             @Override
             public void run() {
                 // first removing it, prevents the necessity to do a delta update
                 removeUserAndUserGroupToOwnershipMapping(ownership);
                 // and add it to the new ownership
-                internalSetOwnershipAndmapUserAndUserGroupToOwnership(ownership);
+                internalSetOwnershipAndMapUserAndUserGroupToOwnership(ownership);
             }
         });
         // and that it is finally written
@@ -308,7 +306,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
         return ownership;
     }
 
-    private void internalSetOwnershipAndmapUserAndUserGroupToOwnership(final OwnershipAnnotation ownership) {
+    private void internalSetOwnershipAndMapUserAndUserGroupToOwnership(final OwnershipAnnotation ownership) {
         ownerships.put(ownership.getIdOfAnnotatedObject(), ownership);
         UserGroup tenantOwner = ownership.getAnnotation().getTenantOwner();
         if (tenantOwner != null) {
@@ -413,7 +411,6 @@ public class AccessControlStoreImpl implements AccessControlStore {
     @Override
     public void replaceContentsFrom(final AccessControlStore newAccessControlStore) {
         LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {
-
             @Override
             public void run() {
                 clear();
@@ -421,7 +418,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
                     internalAddACL(acl);
                 }
                 for (OwnershipAnnotation ownership : newAccessControlStore.getOwnerships()) {
-                    ownerships.put(ownership.getIdOfAnnotatedObject(), ownership);
+                    internalSetOwnershipAndMapUserAndUserGroupToOwnership(ownership);
                 }
             }
         });
