@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.coursetemplate.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeNoException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,5 +82,44 @@ public class TestLapConfiguration {
         final Iterable<WaypointTemplate> waypointsOfOneLapper = courseTemplate.getWaypoints(3);
         final List<ControlPointTemplate> expected = Arrays.asList(startFinish, top, gate, top, gate, top, startFinish);
         verify(waypointsOfOneLapper, expected);
+    }
+
+    @Test
+    public void testExceptionInCaseMarkIsMissing() {
+        startBoat = new MarkTemplateImpl("Start Boat", "SB", /* color */ null, /* shape */ null, /* pattern */ null, MarkType.STARTBOAT);
+        pin = new MarkTemplateImpl("Pin End", "Pin", /* color */ null, /* shape */ null, /* pattern */ null, MarkType.BUOY);
+        startFinish = new ControlPointTemplateImpl("Start/Finish", Arrays.asList(startBoat, pin));
+        try {
+            courseTemplate = new CourseTemplateImpl("Test",
+                    /* marks */ Arrays.asList(startBoat),
+                    /* waypoints */ Arrays.asList(new WaypointTemplateImpl(startFinish, PassingInstruction.Line)));
+            fail("Expected an IllegalArgumentException due to missing mark <pin> but it wasn't thrown");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+    }
+
+    @Test
+    public void testZeroLapsOkIfNoRepeatablePart() {
+        startBoat = new MarkTemplateImpl("Start Boat", "SB", /* color */ null, /* shape */ null, /* pattern */ null, MarkType.STARTBOAT);
+        pin = new MarkTemplateImpl("Pin End", "Pin", /* color */ null, /* shape */ null, /* pattern */ null, MarkType.BUOY);
+        startFinish = new ControlPointTemplateImpl("Start/Finish", Arrays.asList(startBoat, pin));
+        courseTemplate = new CourseTemplateImpl("Test", /* marks */ Arrays.asList(startBoat, pin),
+                /* waypoints */ Arrays.asList(new WaypointTemplateImpl(startFinish, PassingInstruction.Line)));
+        try {
+            courseTemplate.getWaypoints(0);
+        } catch (IllegalArgumentException e) {
+            assumeNoException("No IllegalArgumentException should have been thrown for zero laps because the course has no repeatable part", e);
+        }
+    }
+    
+    @Test
+    public void testIllegalArgumentExceptionForZeroLaps() {
+        try {
+            courseTemplate.getWaypoints(/* illegal to request 0 laps if course template defines repeatable part */ 0);
+            fail("Expected an IllegalArgumentException but none was thrown");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
     }
 }

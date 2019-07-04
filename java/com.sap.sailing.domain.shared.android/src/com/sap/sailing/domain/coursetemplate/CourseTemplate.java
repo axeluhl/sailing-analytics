@@ -43,9 +43,16 @@ public interface CourseTemplate extends NamedWithID {
      * to repeat this sub-sequence. Typically, the repeatable sub-sequence will be repeated one times fewer than the
      * {@code numberOfLaps}. For example, in a typical windward-leeward "L" course we would have
      * {@code Start/Finish, [1, 4p/4s], 1, Start/Finish}. For an "L1" course with only one lap, we'd like to have
-     * {@code Start/Finish, 1, Start/Finish}, so the repeatable sub-sequence, enclosed by the brackets in the example above,
-     * will occur zero times. For an "L2" the repeatable sub-sequence will occur once, and so on. However, an implementation
-     * is free to choose an interpretation of {@code numberOfLaps} that meets callers' expectations.  
+     * {@code Start/Finish, 1, Start/Finish}, so the repeatable sub-sequence, enclosed by the brackets in the example
+     * above, will occur zero times. For an "L2" the repeatable sub-sequence will occur once, and so on. However, an
+     * implementation is free to choose an interpretation of {@code numberOfLaps} that meets callers' expectations.
+     * 
+     * @param numberOfLaps
+     *            if the course defines a repeatable part, the number of laps at least needs to be {@code 1} for the
+     *            default implementation, and an {@link IllegalArgumentException} shall be thrown in case a value less
+     *            than {@code 1} is used if this template specifies a repeatable part. Note again that the number of
+     *            repetitions of the repeatable part is usually one less than the number of laps, therefore this
+     *            limitation.
      */
     Iterable<WaypointTemplate> getWaypoints(int numberOfLaps);
 }

@@ -80,6 +80,9 @@ public class CourseTemplateImpl extends NamedWithIDImpl implements CourseTemplat
     public Iterable<WaypointTemplate> getWaypoints(int numberOfLaps) {
         final Iterable<WaypointTemplate> result;
         if (hasRepeatablePart()) {
+            if (numberOfLaps < 1) {
+                throw new IllegalArgumentException("The course template "+this+" has a repeatable part, hence the number of laps needs to be at least 1.");
+            }
             final List<WaypointTemplate> resultList = new LinkedList<>();
             for (int i=0; i<waypoints.size(); i++) {
                 if (i == zeroBasedIndexOfRepeatablePartStart) {
