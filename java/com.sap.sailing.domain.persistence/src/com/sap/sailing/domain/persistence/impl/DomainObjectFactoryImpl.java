@@ -2480,12 +2480,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String markColorAsString = (String) dbObject.get(FieldNames.MARK_COLOR.name());
         Color markColor = AbstractColor.getCssColor(markColorAsString);
         String markName = (String) dbObject.get(FieldNames.MARK_NAME.name());
+        String markShortName = (String) dbObject.get(FieldNames.MARK_SHORT_NAME.name());
         String markPattern = (String) dbObject.get(FieldNames.MARK_PATTERN.name());
         String markShape = (String) dbObject.get(FieldNames.MARK_SHAPE.name());
         Object markTypeRaw = dbObject.get(FieldNames.MARK_TYPE.name());
         MarkType markType = markTypeRaw == null ? null : MarkType.valueOf((String) markTypeRaw);
 
-        Mark mark = baseDomainFactory.getOrCreateMark(markId, markName, markType, markColor, markShape, markPattern);
+        Mark mark = baseDomainFactory.getOrCreateMark(markId, markName, markShortName, markType, markColor, markShape, markPattern);
         return mark;
     }
 

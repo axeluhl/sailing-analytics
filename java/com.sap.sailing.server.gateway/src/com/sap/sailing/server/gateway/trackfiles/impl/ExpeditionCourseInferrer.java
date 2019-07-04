@@ -60,6 +60,8 @@ public class ExpeditionCourseInferrer {
     private static final String START_LINE_STARBOARD_END_LON = "Stbd lon";
     private static final String START_LINE_PORT_END_MARK_NAME = "Start P";
     private static final String START_LINE_STARBOARD_END_MARK_NAME = "Start S";
+    private static final String START_LINE_PORT_END_MARK_SHORT_NAME = "S/P";
+    private static final String START_LINE_STARBOARD_END_MARK_SHORT_NAME = "S/S";
     private static final String START_LINE_CONTROL_POINT_NAME = "Start";
     
     private final RaceLogTrackingAdapter raceLogTrackingAdapter;
@@ -148,9 +150,9 @@ public class ExpeditionCourseInferrer {
             }
             final DynamicTrackedRace anyTrackedRace = trackedRaces.iterator().next();
             logger.info("Adding mark pings for "+START_LINE_PORT_END_MARK_NAME+" using tracked race "+anyTrackedRace.getRace().getName());
-            final Mark portMark = getOrCreateMarkAndAddPings(anyTrackedRace, START_LINE_PORT_END_MARK_NAME, startData.getStartLinePortFixes(), racingEventService);
+            final Mark portMark = getOrCreateMarkAndAddPings(anyTrackedRace, START_LINE_PORT_END_MARK_NAME, START_LINE_PORT_END_MARK_SHORT_NAME, startData.getStartLinePortFixes(), racingEventService);
             logger.info("Adding mark pings for "+START_LINE_STARBOARD_END_MARK_NAME+" using tracked race "+anyTrackedRace.getRace().getName());
-            final Mark starboardMark = getOrCreateMarkAndAddPings(anyTrackedRace, START_LINE_STARBOARD_END_MARK_NAME, startData.getStartLineStarboardFixes(), racingEventService);
+            final Mark starboardMark = getOrCreateMarkAndAddPings(anyTrackedRace, START_LINE_STARBOARD_END_MARK_NAME, START_LINE_STARBOARD_END_MARK_SHORT_NAME, startData.getStartLineStarboardFixes(), racingEventService);
             for (final DynamicTrackedRace trackedRace : trackedRaces) {
                 setCourseWithStartLine(trackedRace, racingEventService, portMark, starboardMark);
             }
@@ -173,8 +175,8 @@ public class ExpeditionCourseInferrer {
         raceLog.add(event);
     }
 
-    private Mark getOrCreateMarkAndAddPings(DynamicTrackedRace trackedRace, String markName, Iterable<GPSFix> markFixes, RacingEventService racingEventService) {
-        final Mark mark = getOrCreateMark(trackedRace, markName, racingEventService);
+    private Mark getOrCreateMarkAndAddPings(DynamicTrackedRace trackedRace, String markName, String markShortName, Iterable<GPSFix> markFixes, RacingEventService racingEventService) {
+        final Mark mark = getOrCreateMark(trackedRace, markName, markShortName, racingEventService);
         for (final GPSFix fix : markFixes) {
             recordFix(mark, fix, trackedRace, racingEventService);
         }
@@ -196,7 +198,7 @@ public class ExpeditionCourseInferrer {
      *            found in the race or regatta.
      * @return the mark found or created
      */
-    private Mark getOrCreateMark(DynamicTrackedRace trackedRace, String markName, RacingEventService racingEventService) {
+    private Mark getOrCreateMark(DynamicTrackedRace trackedRace, String markName, String markShortName, RacingEventService racingEventService) {
         Mark mark = null;
         final Regatta regatta = trackedRace.getTrackedRegatta().getRegatta();
         outer: for (final RaceColumn raceColumn : regatta.getRaceColumns()) {
@@ -211,7 +213,7 @@ public class ExpeditionCourseInferrer {
                         }
                     }
                     if (mark == null) {
-                        mark = racingEventService.getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), markName);
+                        mark = racingEventService.getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), markName, markShortName);
                         final TimePoint now = MillisecondsTimePoint.now();
                         RegattaLogDefineMarkEventImpl defineMarkEvent = new RegattaLogDefineMarkEventImpl(now,
                                 racingEventService.getServerAuthor(), now, UUID.randomUUID(), mark);

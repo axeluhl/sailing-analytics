@@ -14,6 +14,7 @@ public class MarkJsonSerializer extends BaseControlPointJsonSerializer implement
     public static final String FIELD_PATTERN = "pattern";
     public static final String FIELD_SHAPE = "shape";
     public static final String FIELD_TYPE = "type";
+    public static final String FIELD_SHORT_NAME = "shortName";
 
     @Override
     protected String getClassFieldValue() {
@@ -24,7 +25,6 @@ public class MarkJsonSerializer extends BaseControlPointJsonSerializer implement
     public JSONObject serialize(ControlPoint object) {
         Mark mark = (Mark) object;
         JSONObject result = super.serialize(mark);
-
         result.put(FIELD_ID, mark.getId().toString());
         if (mark.getColor() != null) {
             result.put(FIELD_COLOR, mark.getColor().getAsHtml());
@@ -38,7 +38,9 @@ public class MarkJsonSerializer extends BaseControlPointJsonSerializer implement
         if (mark.getType() != null) {
             result.put(FIELD_TYPE, mark.getType().name());
         }
-
+        if (mark.getShortName() != null) {
+            result.put(FIELD_SHORT_NAME, mark.getShortName());
+        }
         return result;
     }
 

@@ -73,6 +73,17 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 @Path("/v1/mark")
 public class MarkRessource extends AbstractSailingServerResource {
+    private static final String TIME_MILLIS = "timeMillis";
+    private static final String LAT_DEG = "latDeg";
+    private static final String LON_DEG = "lonDeg";
+    private static final String FLEET_NAME = "fleetName";
+    private static final String RACE_COLUMN_NAME = "raceColumnName";
+    private static final String LEADERBOARD_NAME = "leaderboardName";
+    private static final String MARK_ID = "markId";
+    private static final String REGATTA_NAME = "regattaName";
+    private static final String MARK_NAME = "markName";
+    private static final String MARK_SHORT_NAME = "markShortName";
+
     @POST
     @Path("/addMarkToRegatta")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -80,10 +91,11 @@ public class MarkRessource extends AbstractSailingServerResource {
     public Response addMarkToRegatta(String json) throws Exception {
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
-        String markName = (String) requestObject.get("markName");
+        String markName = (String) requestObject.get(MARK_NAME);
+        String markShortName = (String) requestObject.get(MARK_SHORT_NAME);
         UUID markId = UUID.randomUUID();
-        Mark mark = getService().getBaseDomainFactory().getOrCreateMark(markId, markName);
-        String regattaName = (String) requestObject.get("regattaName");
+        Mark mark = getService().getBaseDomainFactory().getOrCreateMark(markId, markName, markShortName);
+        String regattaName = (String) requestObject.get(REGATTA_NAME);
         Regatta regatta = getService().getRegattaByName(regattaName);
         Response response;
         if (regatta == null) {
@@ -97,7 +109,7 @@ public class MarkRessource extends AbstractSailingServerResource {
                     getService().getServerAuthor(), MillisecondsTimePoint.now(), UUID.randomUUID(), mark);
             regattaLog.add(event);
             JSONObject answer = new JSONObject();
-            answer.put("markId", markId.toString());
+            answer.put(MARK_ID, markId.toString());
             response = Response.ok(answer.toJSONString())
                     .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
@@ -114,13 +126,13 @@ public class MarkRessource extends AbstractSailingServerResource {
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
 
-        String leaderboardName = (String) requestObject.get("leaderboardName");
-        String raceColumnName = (String) requestObject.get("raceColumnName");
-        String fleetName = (String) requestObject.get("fleetName");
-        String markId = (String) requestObject.get("markId");
-        String lonDeg = (String) requestObject.get("lonDeg");
-        String latDeg = (String) requestObject.get("latDeg");
-        String timeMillis = (String) requestObject.get("timeMillis");
+        String leaderboardName = (String) requestObject.get(LEADERBOARD_NAME);
+        String raceColumnName = (String) requestObject.get(RACE_COLUMN_NAME);
+        String fleetName = (String) requestObject.get(FLEET_NAME);
+        String markId = (String) requestObject.get(MARK_ID);
+        String lonDeg = (String) requestObject.get(LON_DEG);
+        String latDeg = (String) requestObject.get(LAT_DEG);
+        String timeMillis = (String) requestObject.get(TIME_MILLIS);
 
         RaceLogTrackingAdapter raceLogTrackingAdapter = RaceLogTrackingAdapterFactory.INSTANCE
                 .getAdapter(getService().getBaseDomainFactory());
@@ -164,12 +176,12 @@ public class MarkRessource extends AbstractSailingServerResource {
             throws DoesNotHaveRegattaLogException, NotFoundException, ParseException, JsonDeserializationException {
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
-        String leaderboardName = (String) requestObject.get("leaderboardName");
+        String leaderboardName = (String) requestObject.get(LEADERBOARD_NAME);
         SecurityUtils.getSubject().checkPermission(
                 SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
                         Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
-        String raceColumnName = (String) requestObject.get("raceColumnName");
-        String fleetName = (String) requestObject.get("fleetName");
+        String raceColumnName = (String) requestObject.get(RACE_COLUMN_NAME);
+        String fleetName = (String) requestObject.get(FLEET_NAME);
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         String courseName = "Course of " + raceColumnName;
         if (!LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName)) {
@@ -239,7 +251,7 @@ public class MarkRessource extends AbstractSailingServerResource {
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
 
-        String leaderboardName = (String) requestObject.get("leaderboardName");
+        String leaderboardName = (String) requestObject.get(LEADERBOARD_NAME);
         Leaderboard leaderBoard = getService().getLeaderboardByName(leaderboardName);
         Response response;
         if (leaderBoard == null) {
@@ -250,8 +262,8 @@ public class MarkRessource extends AbstractSailingServerResource {
             SecurityUtils.getSubject().checkPermission(
                     SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
                             Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
-            String raceColumnName = (String) requestObject.get("raceColumnName");
-            String fleetName = (String) requestObject.get("fleetName");
+            String raceColumnName = (String) requestObject.get(RACE_COLUMN_NAME);
+            String fleetName = (String) requestObject.get(FLEET_NAME);
 
             JSONArray competitorsRaw = (JSONArray) requestObject.get("competitors");
             Map<Competitor, Boat> competitorsToRegister = new HashMap<>();

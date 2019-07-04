@@ -1310,6 +1310,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.MARK_ID.name(), mark.getId());
         result.put(FieldNames.MARK_COLOR.name(), mark.getColor()==null?null:mark.getColor().getAsHtml());
         result.put(FieldNames.MARK_NAME.name(), mark.getName());
+        result.put(FieldNames.MARK_SHORT_NAME.name(), mark.getShortName());
         result.put(FieldNames.MARK_PATTERN.name(), mark.getPattern());
         result.put(FieldNames.MARK_SHAPE.name(), mark.getShape());
         result.put(FieldNames.MARK_TYPE.name(), mark.getType() == null ? null : mark.getType().name());

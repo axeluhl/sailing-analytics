@@ -17,7 +17,7 @@ public interface SharedDomainFactory extends CompetitorFactory, BoatFactory {
     Nationality getOrCreateNationality(String threeLetterIOCCode);
 
     /**
-     * The name will also be used as the mark's ID. If you have a unique ID, use {@link #getOrCreateMark(Serializable, String)} instead.
+     * The name will also be used as the mark's ID. If you have a unique ID, use {@link #getOrCreateMark(Serializable, String, String)} instead.
      */
     Mark getOrCreateMark(String name);
 
@@ -30,25 +30,27 @@ public interface SharedDomainFactory extends CompetitorFactory, BoatFactory {
      * <p>
      * 
      * This method first looks up the actual ID whose string representation is <code>toStringRepresentationOfID</code>
-     * and then calls {@link #getOrCreateMark(Serializable, String)} with the result and the <code>name</code>
+     * and then calls {@link #getOrCreateMark(Serializable, String, String)} with the result and the <code>name</code>
      * parameter, or with <code>ToStringRepresentationOfID</code> and <code>name</code> in case the string
      * representation of the ID is not known. So in the latter case, the string is used as the ID for the new mark.
+     * @param shortName TODO
      */
-    Mark getOrCreateMark(String toStringRepresentationOfID, String name);
+    Mark getOrCreateMark(String toStringRepresentationOfID, String name, String shortName);
 
-    Mark getOrCreateMark(Serializable id, String name);
+    Mark getOrCreateMark(Serializable id, String name, String shortName);
 
     /**
      * If the single mark with ID <code>id</code> already exists, it is returned. Its color may differ from <code>color</code>
      * in that case. Otherwise, a new {@link Mark} is created with <code>color</code> as its {@link Mark#getColor()} 
      * and <code>shape</code> as its {@link Mark#getShape()}.
      */
-    Mark getOrCreateMark(Serializable id, String name, MarkType type, Color color, String shape, String pattern);
+    Mark getOrCreateMark(Serializable id, String name, String shortName, MarkType type, Color color, String shape, String pattern);
     
     /**
-     * @see #getOrCreateMark(String, String)
+     * @param shortName TODO
+     * @see #getOrCreateMark(String, String, String)
      */
-    Mark getOrCreateMark(String toStringRepresentationOfID, String name, MarkType type, Color color, String shape, String pattern);
+    Mark getOrCreateMark(String toStringRepresentationOfID, String name, String shortName, MarkType type, Color color, String shape, String pattern);
 
     /**
      * @param name also uses the name as the gate's ID; if you have a real ID, use {@link #createControlPointWithTwoMarks(Serializable, Mark, Mark, String)} instead

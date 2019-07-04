@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.coursetemplate;
 
-import com.sap.sailing.domain.base.Course;
 import com.sap.sse.common.NamedWithID;
 
 /**

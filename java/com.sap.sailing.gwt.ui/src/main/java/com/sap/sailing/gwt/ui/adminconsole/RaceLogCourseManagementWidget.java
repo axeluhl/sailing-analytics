@@ -38,7 +38,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
         addMark.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new MarkEditDialog(stringMessages, new MarkDTO(null, null), true,
+                new MarkEditDialog(stringMessages, new MarkDTO(null, null, null), true,
                         new DataEntryDialog.DialogCallback<MarkDTO>() {
                             @Override
                             public void ok(MarkDTO mark) {

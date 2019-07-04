@@ -14,10 +14,8 @@ public abstract class BaseControlPointJsonSerializer implements JsonSerializer<C
     @Override
     public JSONObject serialize(ControlPoint object) {
         JSONObject result = new JSONObject();
-
         result.put(FIELD_CLASS, getClassFieldValue());
         result.put(FIELD_NAME, object.getName());
-
         return result;
     }
 

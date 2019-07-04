@@ -1052,9 +1052,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     private MarkDTO convertToMarkDTO(Mark mark, Position position) {
         MarkDTO markDTO;
         if (position != null) {
-            markDTO = new MarkDTO(mark.getId().toString(), mark.getName(), position.getLatDeg(), position.getLngDeg());
+            markDTO = new MarkDTO(mark.getId().toString(), mark.getName(), mark.getShortName(), position.getLatDeg(), position.getLngDeg());
         } else {
-            markDTO = new MarkDTO(mark.getId().toString(), mark.getName());
+            markDTO = new MarkDTO(mark.getId().toString(), mark.getName(), mark.getShortName());
         }
         markDTO.color = mark.getColor();
         markDTO.shape = mark.getShape();
@@ -2534,7 +2534,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             return baseDomainFactory.getOrCreateControlPointWithTwoMarks(idAsString, gateDTO.getName(), left, right);
         } else {
             MarkDTO markDTO = (MarkDTO) dto;
-            return baseDomainFactory.getOrCreateMark(idAsString, dto.getName(), markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
+            return baseDomainFactory.getOrCreateMark(idAsString, dto.getName(), markDTO.getShortName(), markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
         }
     }
 
@@ -6836,7 +6836,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
         if (result == null) {
             Serializable id = UUID.randomUUID();
-            result = baseDomainFactory.getOrCreateMark(id, dto.getName(), dto.type, dto.color, dto.shape, dto.pattern);
+            result = baseDomainFactory.getOrCreateMark(id, dto.getName(), dto.getShortName(), dto.type, dto.color, dto.shape, dto.pattern);
         }
         return result;
     }
@@ -7939,7 +7939,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 final Fleet fleet = raceColumn.getFleetByName(fleetName);
                 if (fleet != null) {
                     for (final Mark mark : raceColumn.getAvailableMarks(fleet)) {
-                        marks.add(new MarkDTO(mark.getId().toString(), mark.getName()));
+                        marks.add(new MarkDTO(mark.getId().toString(), mark.getName(), mark.getShortName()));
                     }
                 }
             }

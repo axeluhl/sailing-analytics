@@ -218,8 +218,9 @@ public class DomainFactoryImpl implements DomainFactory {
                 List<Mark> marks = new ArrayList<Mark>();
                 for (ControlPointMetaData markMetadata : controlPointMetadata) {
                     Mark mark = baseDomainFactory.getOrCreateMark(markMetadata.getId(), markMetadata.getName(),
-                            markMetadata.getType(), markMetadata.getColor(), markMetadata.getShape(),
-                            markMetadata.getPattern());
+                            /* no separate short name; use name as short name, too */ markMetadata.getName(),
+                            markMetadata.getType(), markMetadata.getColor(),
+                            markMetadata.getShape(), markMetadata.getPattern());
                     marks.add(mark);
                 }
                 if (controlPoint.getHasTwoPoints()) {

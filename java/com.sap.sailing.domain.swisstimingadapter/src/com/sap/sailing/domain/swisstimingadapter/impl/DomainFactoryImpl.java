@@ -369,7 +369,7 @@ public class DomainFactoryImpl implements DomainFactory {
      */
     @Override
     public com.sap.sailing.domain.base.Mark getOrCreateMark(Serializable trackerId, String description) {
-        return baseDomainFactory.getOrCreateMark(trackerId, description);
+        return baseDomainFactory.getOrCreateMark(trackerId, description, /* no short name available */ description);
     }
 
     @Override

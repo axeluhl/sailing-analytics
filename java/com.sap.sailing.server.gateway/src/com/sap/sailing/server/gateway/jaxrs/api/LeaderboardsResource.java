@@ -855,11 +855,11 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                             fromStartBoatToPinEnd.reverse(), LINE_MARGIN);
                     final Position pinEndPosition = leftmostAndRightmostPositionsAtStart.getA().translateGreatCircle(
                             fromStartBoatToPinEnd, LINE_MARGIN);
-                    final Mark startBoat = getService().getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), "Auto "+waypointName+" Boat");
+                    final Mark startBoat = getService().getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), "Auto "+waypointName+" Boat", waypointName+"/S");
                     RegattaLogDefineMarkEventImpl defineStartBoatEvent = new RegattaLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
                             getService().getServerAuthor(), timePointForMarkFixes, UUID.randomUUID(), startBoat);
                     regattaLog.add(defineStartBoatEvent);
-                    final Mark pinEnd = getService().getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), "Auto "+waypointName+" Pin End");
+                    final Mark pinEnd = getService().getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), "Auto "+waypointName+" Pin End", waypointName+"/P");
                     RegattaLogDefineMarkEventImpl definePinEndEvent = new RegattaLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
                             getService().getServerAuthor(), timePointForMarkFixes, UUID.randomUUID(), pinEnd);
                     regattaLog.add(definePinEndEvent);
