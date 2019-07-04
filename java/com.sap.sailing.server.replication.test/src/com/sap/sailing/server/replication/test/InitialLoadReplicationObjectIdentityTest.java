@@ -17,9 +17,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -56,14 +58,19 @@ import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
+import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.tracking.EmptySensorFixStore;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.test.PositionAssert;
 import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
@@ -81,21 +88,47 @@ import com.sap.sse.common.media.MimeType;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.ReplicationReceiverImpl;
 import com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp.ReplicationServiceTestImpl;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.testsupport.SecurityServiceMockFactory;
 
 public class InitialLoadReplicationObjectIdentityTest extends AbstractServerReplicationTest {
     private Pair<ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> replicationDescriptorPair;
     
+    private static class RacingEventServiceWithSecurityService extends RacingEventServiceImpl {
+        private final SecurityService securityService;
+        
+        private RacingEventServiceWithSecurityService(final DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
+            MediaDB mediaDB, WindStore windStore, SensorFixStore sensorFixStore, boolean restoreTrackedRaces, SecurityService securityService) {
+            super(domainObjectFactory, mongoObjectFactory, mediaDB, windStore, sensorFixStore, restoreTrackedRaces);
+            this.securityService = securityService;
+        }
+
+        @Override
+        public SecurityService getSecurityService() {
+            return securityService;
+        }
+    }
+    
     /**
      * Drops the test DB. Sets up master and replica, starts the JMS message broker and registers the replica with the master.
      */
+    @SuppressWarnings("unchecked")
     @Before
     @Override
     public void setUp() throws Exception {
         persistenceSetUp(/* dropDB */ true);
-        this.master = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(testSetUp.mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                .getMongoObjectFactory(testSetUp.mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(testSetUp.mongoDBService), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE, /* restoreTrackedRaces */ false);
-        this.replica = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(testSetUp.mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                .getMongoObjectFactory(testSetUp.mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(testSetUp.mongoDBService), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE, /* restoreTrackedRaces */ false);
+        final SecurityService securityService = SecurityServiceMockFactory.mockSecurityService();
+        Mockito.when(securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(Mockito.any(),
+                Mockito.any(), Mockito.any(), Mockito.any(Callable.class)))
+                .thenAnswer(i -> i.getArgumentAt(3, Callable.class).call());
+        this.master = new RacingEventServiceWithSecurityService(PersistenceFactory.INSTANCE.getDomainObjectFactory(testSetUp.mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
+                        .getMongoObjectFactory(testSetUp.mongoDBService),
+                MediaDBFactory.INSTANCE.getMediaDB(testSetUp.mongoDBService), EmptyWindStore.INSTANCE,
+                EmptySensorFixStore.INSTANCE, /* restoreTrackedRaces */ false, securityService);
+        this.replica = new RacingEventServiceWithSecurityService(PersistenceFactory.INSTANCE.getDomainObjectFactory(testSetUp.mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
+                        .getMongoObjectFactory(testSetUp.mongoDBService),
+                MediaDBFactory.INSTANCE.getMediaDB(testSetUp.mongoDBService), EmptyWindStore.INSTANCE,
+                EmptySensorFixStore.INSTANCE, /* restoreTrackedRaces */ false, securityService);
     }
     
     private void performReplicationSetup() throws Exception {

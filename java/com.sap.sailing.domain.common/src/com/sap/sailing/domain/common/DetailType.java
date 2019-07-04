@@ -117,6 +117,7 @@ public enum DetailType implements Serializable {
     RACE_TIME_TRAVELED_REACHING(0, ASCENDING),
     CHART_DISTANCE_TO_START_LINE(0, ASCENDING, "DISTANCE_TO_START_LINE"),
     CHART_BEAT_ANGLE(0, ASCENDING, "BEAT_ANGLE"),
+    CHART_ABS_TWA(0, ASCENDING),
     CHART_COURSE_OVER_GROUND_TRUE_DEGREES(0, ASCENDING, "COURSE_OVER_GROUND_TRUE_DEGREES"),
     OVERALL_TOTAL_SCORED_RACE_COUNT(0, ASCENDING, "TOTAL_SCORED_RACE_COUNT"),
     EXPEDITION_RACE_AWA(2, ASCENDING),
@@ -261,6 +262,7 @@ public enum DetailType implements Serializable {
         availableDetailsTypes.add(DetailType.REGATTA_RANK);
         availableDetailsTypes.add(DetailType.CHART_DISTANCE_TO_START_LINE);
         availableDetailsTypes.add(DetailType.CHART_BEAT_ANGLE);
+        availableDetailsTypes.add(DetailType.CHART_ABS_TWA);
         availableDetailsTypes.add(DetailType.CHART_COURSE_OVER_GROUND_TRUE_DEGREES);
         availableDetailsTypes.add(DetailType.BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
         availableDetailsTypes.add(DetailType.BRAVO_RACE_HEEL_IN_DEGREES);

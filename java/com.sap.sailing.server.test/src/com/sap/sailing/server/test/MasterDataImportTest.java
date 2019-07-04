@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.core.Response;
@@ -190,6 +191,7 @@ public class MasterDataImportTest {
         deleteAllDataFromDatabase();
     }
 
+    @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
         UserGroupImpl defaultTenant = new UserGroupImpl(new UUID(0, 1), "defaultTenant");
@@ -213,6 +215,9 @@ public class MasterDataImportTest {
         Mockito.doReturn(true).when(securityService).hasCurrentUserOneOfExplicitPermissions(
                 Mockito.any(WithQualifiedObjectIdentifier.class), Matchers.<PublicReadableActions> anyVararg());
 
+        Mockito.when(securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(Mockito.any(),
+                Mockito.any(), Mockito.any(), Mockito.any(Callable.class)))
+                .thenAnswer(i -> i.getArgumentAt(3, Callable.class).call());
 
         Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
 
@@ -227,7 +232,7 @@ public class MasterDataImportTest {
         sourceService = Mockito
                 .spy(new RacingEventServiceImpl(dbFactory, mongoObjectFactory,
                 MediaDBFactory.INSTANCE.getDefaultMediaDB(), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE,
-                false));
+                        false));
 
 
         masterDataResource = spyResource(new DummyMasterDataRessource(), sourceService);
@@ -1879,7 +1884,13 @@ public class MasterDataImportTest {
     public void testMasterDataImportForMediaTracks() throws MalformedURLException, IOException, InterruptedException,
             ClassNotFoundException {
         // Setup source service
-        RacingEventService sourceService = new RacingEventServiceImpl();
+        RacingEventService sourceService = new RacingEventServiceImpl() {
+            @Override
+            public SecurityService getSecurityService() {
+                return securityService;
+            }
+        };
+        ;
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         String regattaName1 = "49er";
         String regattaName2 = "49er FX";

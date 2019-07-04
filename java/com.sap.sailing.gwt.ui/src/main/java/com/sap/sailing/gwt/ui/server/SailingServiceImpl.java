@@ -1862,11 +1862,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 RaceMapDataDTO rcDTO;
                 rcDTO = new RaceMapDataDTO();
                 rcDTO.coursePositions = new CoursePositionsDTO();
-            rcDTO.coursePositions.waypointPositions = new ArrayList<Position>();
-            rcDTO.coursePositions.waypointPositions.add(simulationResults.getStartPosition());
-            rcDTO.coursePositions.waypointPositions.add(simulationResults.getEndPosition());
-            result = new SimulatorResultsDTO(simulationResults.getVersion().asMillis(), legIdentifier.getLegNumber()+1, simulationResults.getStartTime(), simulationResults.getTimeStep(),
-                    simulationResults.getLegDuration(), rcDTO, pathDTOs, null, null);
+                rcDTO.coursePositions.waypointPositions = new ArrayList<Position>();
+                rcDTO.coursePositions.waypointPositions.add(simulationResults.getStartPosition());
+                rcDTO.coursePositions.waypointPositions.add(simulationResults.getEndPosition());
+                result = new SimulatorResultsDTO(simulationResults.getVersion().asMillis(), legIdentifier.getLegNumber()+1, simulationResults.getStartTime(), simulationResults.getTimeStep(),
+                        simulationResults.getLegDuration(), rcDTO, pathDTOs, null, null);
             }
         return result;
     }
@@ -3523,8 +3523,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 }
                 break;
             case CHART_BEAT_ANGLE:
+            case CHART_ABS_TWA:
                 Bearing twa = trackedRace.getTWA(competitor, timePoint, cache);
-                result = twa == null? null:twa.getDegrees();
+                result = twa == null ? null : twa.getDegrees();
+                if (result != null && dataType == DetailType.CHART_ABS_TWA) {
+                    result = Math.abs(result);
+                }
                 break;
             case BRAVO_RACE_HEEL_IN_DEGREES:
             case BRAVO_LEG_CURRENT_HEEL_IN_DEGREES: {
@@ -6368,16 +6372,18 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public Pair<Boolean, Boolean> setFinishingAndEndTime(RaceLogSetFinishingAndFinishTimeDTO dto)
             throws NotFoundException {
         getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(dto.leaderboardName));
+        final MillisecondsTimePoint finishingTimePoint = dto.finishingTime==null?null:new MillisecondsTimePoint(dto.finishingTime);
         TimePoint newFinsihingTime = getService().setFinishingTime(dto.leaderboardName, dto.raceColumnName, 
                 dto.fleetName, dto.authorName, dto.authorPriority,
-                dto.passId, new MillisecondsTimePoint(dto.finishingTime));
+                dto.passId, finishingTimePoint);
         
+        final TimePoint finishTimePoint = dto.finishTime==null?null:new MillisecondsTimePoint(dto.finishTime);
         TimePoint newEndTime = getService().setEndTime(dto.leaderboardName, dto.raceColumnName, 
                 dto.fleetName, dto.authorName, dto.authorPriority,
-                dto.passId, new MillisecondsTimePoint(dto.finishTime));
+                dto.passId, finishTimePoint);
         
-        return new Pair<Boolean, Boolean>(new MillisecondsTimePoint(dto.finishingTime).equals(newFinsihingTime),
-                new MillisecondsTimePoint(dto.finishTime).equals(newEndTime));
+        return new Pair<Boolean, Boolean>(Util.equalsWithNull(finishingTimePoint, newFinsihingTime),
+                Util.equalsWithNull(finishTimePoint, newEndTime));
     }
 
     @Override
