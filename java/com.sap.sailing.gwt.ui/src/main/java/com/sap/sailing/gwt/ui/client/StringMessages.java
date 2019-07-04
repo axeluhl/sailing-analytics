@@ -962,6 +962,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String raceTimeReachingTooltip();
     String raceTimeUpwindTooltip();
     String dataMining();
+    String changeOrientation();
     String hideToolbar();
     String showSeriesLeaderboards();
     String showOverallLeaderboard();
