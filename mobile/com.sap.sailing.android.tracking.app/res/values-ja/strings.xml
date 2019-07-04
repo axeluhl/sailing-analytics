@@ -35,8 +35,8 @@
     <string name="error_sending_team_image_to_server">"エラー: チーム画像をサーバに送信できませんでした。"</string>
     <string name="regatta_starts_in">"レガッタがスタートするまでの時間:"</string>
     <string name="hours">"時間:"</string>
-    <string name="minutes">"分:"</string>
-    <string name="days">"日:"</string>
+    <string name="minutes">"分数:"</string>
+    <string name="days">"日数:"</string>
     <string name="please_listen_to_announcements">"アナウンスを聞いてください"</string>
     <string name="close">"閉じる"</string>
     <string name="thank_you_you_successfully_participated">"ありがとうございます。レガッタへの参加が正常に行われました。\n\nSAP Sailing Team"</string>
