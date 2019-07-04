@@ -185,7 +185,7 @@ public class ORCCertificateImpl implements ORCCertificate {
 
     @Override
     public Map<Speed, Duration> getCircularRandomAllowances() {
-        // TODO Auto-generated method stub
+        // TODO Circular Random Allowanes currently not saved in this class and need to be given by the importer
         return null;
     }
 
@@ -212,7 +212,7 @@ public class ORCCertificateImpl implements ORCCertificate {
     
     @Override
     public Map<Speed, Duration> getNonSpinnakerAllowances() {
-        // TODO Auto-generated method stub
+        // TODO Non Spinnaker Allowances currently not saved in this class and need to be given by the importer
         return null;
     }
 

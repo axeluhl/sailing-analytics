@@ -25,8 +25,10 @@ public interface ORCPerformanceCurve {
 
     /**
      * 
-     * @param timePerNauticalMile equals the average duration the boat needed to conquer one mile on the racecourse, => totalTime / course.getTotalLength()
-     * @return
+     * 
+     * @param timePerNauticalMile equals the average duration the boat needed to conquer one mile on the sailed subcourse, => totalTime / course.getTotalLength()
+     * @return 
+     * 
      * @throws ArgumentOutsideDomainException
      * @throws MaxIterationsExceededException
      * @throws FunctionEvaluationException

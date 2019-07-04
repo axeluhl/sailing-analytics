@@ -24,7 +24,6 @@ import com.sap.sailing.domain.orc.impl.ORCCertificateImporterJSON;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveCourseImpl;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveImpl;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveLegImpl;
-import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.impl.DegreeBearingImpl;
