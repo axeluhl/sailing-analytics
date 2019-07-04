@@ -88,6 +88,7 @@ public class CourseTemplateImpl extends NamedWithIDImpl implements CourseTemplat
                             resultList.add(waypoints.get(i));
                         }
                     }
+                    i = zeroBasedIndexOfRepeatablePartEnd; // make sure to skip in case of only one lap
                 }
                 // special case: repeatable part ends at end of waypoint list:
                 if (i<waypoints.size()) {
@@ -102,6 +103,6 @@ public class CourseTemplateImpl extends NamedWithIDImpl implements CourseTemplat
     }
 
     private boolean hasRepeatablePart() {
-        return zeroBasedIndexOfRepeatablePartEnd == -1;
+        return zeroBasedIndexOfRepeatablePartEnd != -1;
     }
 }
