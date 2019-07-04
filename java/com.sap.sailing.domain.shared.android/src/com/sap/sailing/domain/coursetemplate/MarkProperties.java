@@ -1,35 +1,92 @@
 package com.sap.sailing.domain.coursetemplate;
 
+import java.util.Map;
+
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MarkType;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.NamedWithID;
+import com.sap.sse.common.TimePoint;
 
 /**
- * Stores properties that can be applied to a mark in the context of an event or a regatta,
- * including the mark's own attributes as well as tracking-related information such as a
- * reference to the tracking device used to track the mark, or a fixed mark position, such as
- * for a land mark, an official lateral or cardinal buoy, a regatta mark in a fixed position
- * or a lighthouse.<p>
+ * Stores properties that can be applied to a mark in the context of an event or a regatta, including the mark's own
+ * attributes as well as tracking-related information such as a reference to the tracking device used to track the mark,
+ * or a fixed mark position, such as for a land mark, an official lateral or cardinal buoy, a regatta mark in a fixed
+ * position or a lighthouse.
+ * <p>
  * 
- * Such a properties object can be linked to zero or more {@link MarkTemplate}s. When the user
- * creates a course from a {@link CourseTemplate}, linked {@link MarkProperties} can be offered
- * to configure the {@link Mark} created from the {@link CourseTemplate}'s {@link MarkTemplate}s.<p>
+ * Such a properties object can be linked to zero or more {@link MarkTemplate}s. When the user creates a course from a
+ * {@link CourseTemplate}, linked {@link MarkProperties} can be offered to configure the {@link Mark} created from the
+ * {@link CourseTemplate}'s {@link MarkTemplate}s.
+ * <p>
  * 
- * {@link MarkProperties} objects can be tagged, and the tags may be used to search and filter a
- * library of such {@link MarkProperties}. The tags can, e.g., express a venue name or a course
- * area name or the name of a set of tracking devices typically used to track a course. A user may
- * have more than one {@link MarkProperties} object available that is linked to a particular
- * {@link MarkTemplate}. One of those could be selected depending on when it was used last for
- * the {@link MarkTemplate}, or the user may be presented with the set of {@link MarkProperties}
- * available and can select, search and filter.
- *  
+ * {@link MarkProperties} objects can be tagged, and the tags may be used to search and filter a library of such
+ * {@link MarkProperties}. The tags can, e.g., express a venue name or a course area name or the name of a set of
+ * tracking devices typically used to track a course. A user may have more than one {@link MarkProperties} object
+ * available that is linked to a particular {@link MarkTemplate}. One of those could be selected depending on
+ * {@link #getPreviousUsage() when it was used last} for the {@link MarkTemplate}, or the user may be presented with the
+ * set of {@link MarkProperties} available and can select, search and filter.<p>
+ * 
+ * These properties objects are entities and can be updated. For example, if the device used to track the mark
+ * shall be replaced permanently, also for future uses, the device ID could be updated.
+ * 
  * @author Axel Uhl (d043530)
  *
  */
-public interface MarkProperties extends NamedWithID {
-    Color getColor();
-    String getShape();
-    String getPattern();
-    MarkType getType();
-    String getShortName();
+public interface MarkProperties extends CommonMarkProperties, NamedWithID {
+    void setColor(Color color);
+
+    void setShape(String shape);
+
+    void setPattern(String pattern);
+
+    void setType(MarkType type);
+
+    void setShortName(String shortName);
+
+    /**
+     * If not {@code null} then a device identifier that can be used to create a device mapping
+     * in the scope of a regatta such that the tracking device with the ID returned will be used
+     * to track the mark to which these properties are applied. No timing for any device mapping is
+     * provided here. It is up to the process of creating and configuring the regatta marks to decide
+     * about device mapping time intervals.
+     */
+    DeviceIdentifier getTrackingDeviceIdentifier();
+    
+    /**
+     * Updates this properties object such that the next call to {@link #getTrackingDeviceIdentifier()} returns the
+     * {@code deviceIdentifier} provided to this call. The {@code deviceIdentifier} may be {@code null}, meaning that no
+     * default tracking device mapping is desired for marks configured with these properties. It is an error, and an
+     * {@link IllegalStateException} will be thrown, if a non-{@code null} {@link #getFixedPosition() fixed position} is
+     * currently defined by these properties because a mark cannot have a fixed position and be tracked by a device at
+     * the same time.
+     */
+    void setTrackingDeviceIdentifier(DeviceIdentifier deviceIdentifier);
+    
+    /**
+     * Returns a fixed position to be used to "ping" the mark to which these properties are applied; or {@code null} in
+     * case the mark is not at a fixed position or no position is known. In particular, it is considered an error to
+     * provide a non-{@code null} fixed position when a non-{@code null} {@link #getTrackingDeviceIdentifier() tracking
+     * device identifier} has been provided for these mark properties.
+     */
+    Position getFixedPosition();
+    
+    /**
+     * Provides a fixed position to be set by means of a "ping" when these properties are applied to a mark. The
+     * {@code fixedPosition} parameter can be {@code null}, meaning that no fixed position is known (anymore). It is an
+     * error, and an {@link IllegalStateException} will be thrown, if a non-{@code null}
+     * {@link #getTrackingDeviceIdentifier() tracking device identifier} is currently defined for these mark properties
+     * because a mark cannot have a fixed position and be tracked by a device at the same time.
+     */
+    void setFixedPosition(Position fixedPosition);
+    
+    /**
+     * Whenever these properties have been applied to configure a mark that was created from a {@link MarkTemplate}, the
+     * application of this object is remembered. With this method, previous applications can be looked up. In addition
+     * to the {@link MarkTemplate}s to which these properties were applied, the time point of applying these properties
+     * is recorded to allow clients to make default proposals based on a "most recently used" basis.
+     */
+    Map<MarkTemplate, TimePoint> getPreviousUsage();
 }

@@ -28,7 +28,24 @@ import com.sap.sse.common.NamedWithID;
  *
  */
 public interface CourseTemplate extends NamedWithID {
+    /**
+     * The templates for all the marks that shall be made available in the regatta when applying this template. All
+     * marks required to construct the waypoint sequence must be produced from this set of mark templates. There may be
+     * additional mark templates returned by this method, for constructing marks not immediately required for the
+     * waypoint sequence but, e.g., as proposals for spare or alternative marks. For example, templates for alternative
+     * marks for the windward mark may be returned to quickly accommodate for wind shifts.
+     */
     Iterable<MarkTemplate> getMarks();
 
+    /**
+     * Returns a sequence of {@link WaypointTemplate}s that can be use to construct a course. If this course template
+     * defines a repeatable waypoint sub-sequence, the {@code numberOfLaps} parameter is used to decide how many times
+     * to repeat this sub-sequence. Typically, the repeatable sub-sequence will be repeated one times fewer than the
+     * {@code numberOfLaps}. For example, in a typical windward-leeward "L" course we would have
+     * {@code Start/Finish, [1, 4p/4s], 1, Start/Finish}. For an "L1" course with only one lap, we'd like to have
+     * {@code Start/Finish, 1, Start/Finish}, so the repeatable sub-sequence, enclosed by the brackets in the example above,
+     * will occur zero times. For an "L2" the repeatable sub-sequence will occur once, and so on. However, an implementation
+     * is free to choose an interpretation of {@code numberOfLaps} that meets callers' expectations.  
+     */
     Iterable<WaypointTemplate> getWaypoints(int numberOfLaps);
 }

@@ -1,8 +1,6 @@
 package com.sap.sailing.domain.coursetemplate;
 
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.common.MarkType;
-import com.sap.sse.common.Color;
 
 /**
  * A template for creating a {@link Mark}. It has a globally unique ID and can be used in zero or more
@@ -13,10 +11,5 @@ import com.sap.sse.common.Color;
  * @author Axel Uhl (d043530)
  *
  */
-public interface MarkTemplate extends ControlPointTemplate {
-    Color getColor();
-    String getShape();
-    String getPattern();
-    MarkType getType();
-    String getShortName();
+public interface MarkTemplate extends ControlPointTemplate, CommonMarkProperties {
 }
