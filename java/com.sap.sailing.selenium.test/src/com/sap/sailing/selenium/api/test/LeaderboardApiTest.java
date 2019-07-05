@@ -18,7 +18,9 @@ import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi.DeviceMappingRequest;
+import com.sap.sailing.selenium.api.event.LeaderboardApi.TrackingTimes;
 import com.sap.sailing.selenium.api.regatta.Competitor;
+import com.sap.sailing.selenium.api.regatta.RaceColumn;
 import com.sap.sailing.selenium.api.regatta.RegattaApi;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
@@ -72,5 +74,19 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
         JSONObject mappingStart = request.startDeviceMapping(currentTimeMillis());
         @SuppressWarnings("unused") // TODO: check result
         JSONObject mappingEnd = request.endDeviceMapping(currentTimeMillis());
+    }
+
+    @Test
+    public void testSetTrackingTimes() throws Exception {
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        eventApi.createEvent(ctx, LEADERBOARD_NAME, BOATCLASSNAME, CLOSED, "default");
+        final RaceColumn race = regattaApi.addRaceColumn(ctx, LEADERBOARD_NAME, null, 1)[0];
+        final Long startTime = currentTimeMillis();
+        final Long endTime = currentTimeMillis() + 10000L;
+        leaderboardApi.startRaceLogTracking(ctx, LEADERBOARD_NAME, race.getRaceName(), "Default");
+        TrackingTimes trackingTimes = leaderboardApi.setTrackingTimes(ctx, LEADERBOARD_NAME, race.getRaceName(),
+                "Default", startTime, endTime);
+        assertEquals("read: startTime is different", startTime, trackingTimes.getStartOfTracking());
+        assertEquals("read: endTime is different", endTime, trackingTimes.getEndOfTracking());
     }
 }
