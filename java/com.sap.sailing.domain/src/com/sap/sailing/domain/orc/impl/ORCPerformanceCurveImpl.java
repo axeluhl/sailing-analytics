@@ -182,7 +182,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             PolynomialFunction subtractedFunction = workingFunction.subtract(new PolynomialFunction(new double[] {durationToCompleteCourseInSeconds}));
             NewtonSolver solver = new NewtonSolver();
             solver.setAbsoluteAccuracy(0.000001);
-            //TODO Comment for the special treatment of the solver
+            // TODO Comment for the special treatment of the solver
             result = new KnotSpeedImpl(solver.solve(subtractedFunction, 0,
                     functionImpliedWindInKnotsToAllowanceInSecondsForCourse.getKnots()[i + 1] - functionImpliedWindInKnotsToAllowanceInSecondsForCourse.getKnots()[i])
                     + functionImpliedWindInKnotsToAllowanceInSecondsForCourse.getKnots()[i]);
@@ -291,6 +291,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         try {
             return "ORCPerformanceCurve [Allowances " + getAllowancesPerTrueWindSpeedsForCourse() + "]";
         } catch (FunctionEvaluationException e) {
+            logger.warning("Exception trying to compute string representation of an ORC Performance Curve object: "+e.getMessage());
             throw new RuntimeException(e);
         }
     }
