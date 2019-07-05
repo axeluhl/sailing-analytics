@@ -51,7 +51,6 @@ public class RoleResource extends AbstractSecurityResource {
                         return getService().createRoleDefinition(UUID.fromString(roleDefinitionIdAsString), roleName);
                     }
                 });
-
         final Response resp;
         if (role == null) {
             resp = Response.status(Status.INTERNAL_SERVER_ERROR).entity("Role creation failed.").build();
@@ -71,13 +70,10 @@ public class RoleResource extends AbstractSecurityResource {
     public Response deleteRole(@Context UriInfo uriInfo, @PathParam(KEY_ROLE_ID) String roleId) {
         Response resp;
         try {
-
             // parse UUID
             final UUID roleUUID = UUID.fromString(roleId);
-
             // get role definition from role id
             final RoleDefinition roleDefinition = getService().getRoleDefinition(roleUUID);
-
             // null check role definition
             if (roleDefinition == null) {
                 resp = Response.status(Status.NOT_FOUND).entity(String.format("No role with id '%s' found.", roleUUID))
@@ -102,16 +98,12 @@ public class RoleResource extends AbstractSecurityResource {
     @Produces("text/plain;charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateRole(@Context UriInfo uriInfo, @PathParam(KEY_ROLE_ID) String roleId, String json) {
-
         Response resp;
         try {
-
             // parse UUID
             final UUID roleUUID = UUID.fromString(roleId);
-
             // get role definition from role id
             final RoleDefinition roleDefinition = getService().getRoleDefinition(roleUUID);
-
             // null check role definition
             if (roleDefinition == null) {
                 resp = Response.status(Status.NOT_FOUND).entity(String.format("No role with id '%s' found.", roleUUID))
@@ -119,23 +111,19 @@ public class RoleResource extends AbstractSecurityResource {
             } else {
                 // check update permission on role
                 getService().checkCurrentUserUpdatePermission(roleDefinition);
-
                 // create permission objects
                 final Set<WildcardPermission> permissions = new HashSet<>();
-
                 final JSONObject body = (JSONObject) new JSONParser().parse(json);
                 @SuppressWarnings("unchecked")
                 final Iterable<String> permissionStrings = (Iterable<String>) body.get(KEY_PERMISSIONS);
                 for (final String permissionString : permissionStrings) {
                     permissions.add(new WildcardPermission(permissionString));
                 }
-
                 // check only those meta-permissions which changed
                 final Set<WildcardPermission> addedPermissions = new HashSet<>(roleDefinition.getPermissions());
                 addedPermissions.removeAll(permissions);
                 final Set<WildcardPermission> removedPermissions = new HashSet<>(permissions);
                 removedPermissions.removeAll(roleDefinition.getPermissions());
-
                 if (!getService().hasUserAllWildcardPermissionsForAlreadyRealizedQualifications(roleDefinition,
                         addedPermissions)) {
                     resp = Response.status(Status.UNAUTHORIZED)
@@ -167,16 +155,12 @@ public class RoleResource extends AbstractSecurityResource {
     @Path("{roleId}")
     @Produces("application/json;charset=UTF-8")
     public Response getRole(@Context UriInfo uriInfo, @PathParam(KEY_ROLE_ID) String roleId) {
-
         Response resp;
         try {
-
             // parse UUID
             final UUID roleUUID = UUID.fromString(roleId);
-
             // get role definition from role id
             final RoleDefinition roleDefinition = getService().getRoleDefinition(roleUUID);
-
             // null check role definition
             if (roleDefinition == null) {
                 resp = Response.status(Status.NOT_FOUND).entity(String.format("No role with id '%s' found.", roleUUID))
@@ -184,7 +168,6 @@ public class RoleResource extends AbstractSecurityResource {
             } else {
                 // check read permission on role
                 getService().checkCurrentUserReadPermission(roleDefinition);
-
                 // build json result with permissions and id
                 final JSONObject jsonResult = new JSONObject();
                 final JSONArray jsonPermissions = new JSONArray();
