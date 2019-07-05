@@ -45,28 +45,20 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
     /**
      * Receives an {@link InputStream} from different possible sources (web, local file, ...) and does parse the
      * {@code .json} file.
-     * 
-     * @param in
-     * @throws IOException
-     * @throws ParseException
      */
     public ORCCertificateImporterJSON(InputStream in) throws IOException, ParseException {
         Map<String, Object> result = new HashMap<>();
-
         String defaultEncoding = "UTF-8";
         BOMInputStream bOMInputStream = new BOMInputStream(in);
         ByteOrderMark bom = bOMInputStream.getBOM();
         String charsetName = bom == null ? defaultEncoding : bom.getCharsetName();
         InputStreamReader reader = new InputStreamReader(new BufferedInputStream(bOMInputStream), charsetName);
-
         JSONObject parsedJson = (JSONObject) new JSONParser().parse(reader);
-
         JSONArray dataArray = (JSONArray) parsedJson.get("rms");
         for (int i = 0; i < dataArray.size(); i++) {
             JSONObject object = (JSONObject) dataArray.get(i);
             result.put(((String) object.get("SailNo")).replaceAll(" ", "").toUpperCase(), object);
         }
-
         data = result;
     }
 
@@ -105,10 +97,9 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
                 case "CDL":
                     cdl = ((Number) entry.getValue()).doubleValue();
                 case "Allowances":
-                    JSONObject allowances = (JSONObject) object.get("Allowances");
-                    for (Object aKey : allowances.keySet()) {
-                        JSONArray array = (JSONArray) allowances.get(aKey);
-    
+                    final JSONObject allowances = (JSONObject) object.get("Allowances");
+                    for (final Object aKey : allowances.keySet()) {
+                        final JSONArray array = (JSONArray) allowances.get(aKey);
                         if (((String) aKey).equals("BeatAngle")) {
                             for (int i = 0; i < array.size(); i++) {
                                 beatAngles.put(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i],
@@ -116,7 +107,6 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
                             }
                             continue;
                         }
-    
                         if (((String) aKey).equals("GybeAngle")) {
                             for (int i = 0; i < array.size(); i++) {
                                 gybeAngles.put(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i],
@@ -124,13 +114,11 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
                             }
                             continue;
                         }
-    
                         Map<Speed, Duration> twsMap = new HashMap<>();
                         for (int i = 0; i < array.size(); i++) {
                             twsMap.put(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i],
                                     Duration.ONE_SECOND.times(((Number) array.get(i)).doubleValue()));
                         }
-    
                         switch ((String) aKey) {
                             case "R52":
                             case "R60":

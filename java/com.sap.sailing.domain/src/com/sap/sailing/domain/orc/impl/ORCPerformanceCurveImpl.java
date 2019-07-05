@@ -115,7 +115,6 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             // Case switching on TWA (0. TWA == 0; 1. TWA < Beat; 2. Beat < TWA < Gybe; 3. Gybe < TWA; 4. TWA == 180)
             if (leg.getTwa().compareTo(beatAngles.get(tws)) <= 0) {
                 // Case 0 & 1 - result = beatVMG * distance * cos(TWA)
-                // FIXME if the leg is an upwind but not at 0deg we need to project the VMG by the cos(legTWA)
                 result.put(tws, beatVMGPredictionPerTrueWindSpeed.get(tws).getDuration(
                         /* rhumb line distance of upwind leg projected to wind */ leg.getLength().scale(Math.cos(leg.getTwa().getRadians()))));
             } else if (leg.getTwa().compareTo(runAngles.get(tws)) >= 0) {
@@ -146,7 +145,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         double[] xs = new double[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length];
         double[] ys = new double[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length];
         int i = 0;
-        for(final Entry<Speed,Duration> entry : allowancesForCoursePerTrueWindSpeed.entrySet()) {
+        for (final Entry<Speed, Duration> entry : allowancesForCoursePerTrueWindSpeed.entrySet()) {
             xs[i] = entry.getKey().getKnots();
             ys[i] = entry.getValue().asSeconds();
             i++;
@@ -193,7 +192,6 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     
     @Override
     public Duration getAllowancePerCourse(Speed impliedWind) throws ArgumentOutsideDomainException {
-        // TODO Corner cases for ImpliedWind > 20kt or ImpliedWind < 6kt
         return Duration.ONE_SECOND.times(functionImpliedWindInKnotsToAllowanceInSecondsForCourse.value(impliedWind.getKnots()));
     }
 
@@ -210,7 +208,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     
     /**
      * @return an array containing two arrays: the first array holds the TWAs, the second array holds the corresponding
-     *         allowances in seconds per nautical mile for the TWA at the corresponding index in the first array
+     *         speed over ground in knots for the TWA at the corresponding index in the first array
      */
     private double[][] createPolarsPerTrueWindSpeed(Speed trueWindSpeed, Map<Speed, Map<Bearing, Speed>> reachingSpeedPredictionsPerTrueWindSpeedAndAngle,
             Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
@@ -248,7 +246,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         double[][] polarPoints = createPolarsPerTrueWindSpeed(trueWindSpeed, twaAllowances, beatAngles,
                 beatVMGPredictionPerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed);
         double[] twaPolarPoints = polarPoints[0];
-        double[] allowancesInSecondsPerNauticalMilePolarPoints = polarPoints[1];
+        double[] speedsOverGroundInKnotsPolarPoints = polarPoints[1];
         int i = -1; // after the loop, i equals the next higher available polar data for the given TWA
         for (int j = 0; j < twaPolarPoints.length; j++) {
             if (trueWindAngle.getDegrees() < twaPolarPoints[j]) {
@@ -257,7 +255,8 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             }
         }
         // This part is implemented equally to the part from the ORC PCSLib.pas.
-        // ORC decides to use only up to the nearest 4 values to the searched TWA for interpolation.
+        // ORC decides to use only up to the nearest 4 values to the searched TWA for interpolation,
+        // cutting off at the rims, so potentially working only with three values.
         if (i >= 0) {
             int upperBound = Math.min(i + 1, twaPolarPoints.length - 1);
             int lowerBound = Math.max(i - 2, 0);
@@ -265,7 +264,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             double[] yn = new double[upperBound - lowerBound + 1];
             for (i = lowerBound; i <= upperBound; i++) {
                 xn[i - lowerBound] = twaPolarPoints[i];
-                yn[i - lowerBound] = allowancesInSecondsPerNauticalMilePolarPoints[i];
+                yn[i - lowerBound] = speedsOverGroundInKnotsPolarPoints[i];
             }
             result = new KnotSpeedImpl(new PolynomialFunctionLagrangeForm(xn, yn).value(trueWindAngle.getDegrees()));
         } else {

@@ -120,7 +120,6 @@ public class TestORCPerformanceCurve {
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.0), new DegreeBearingImpl(180)));
         ORCPerformanceCurveCourse simpleCourse = new ORCPerformanceCurveCourseImpl(legs);
         ORCPerformanceCurve performanceCurve = certificate.getPerformanceCurve(simpleCourse);
-        
         assertNotNull(performanceCurve);
         testAllowance(performanceCurve, 654.4, 538.6, 485.1, 458.7, 444.1, 430.3, 404.3);
     }
