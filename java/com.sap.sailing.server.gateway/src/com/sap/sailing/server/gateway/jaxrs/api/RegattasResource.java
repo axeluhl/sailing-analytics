@@ -349,13 +349,17 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/competitors/{competitorid}/add")
     public Response addCompetitor(@PathParam("regattaname") String regattaName,
-            @PathParam("competitorid") String competitorIdAsString) {
+            @PathParam("competitorid") String competitorIdAsString,
+            @QueryParam("secret") String registrationLinkSecret) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
-            getSecurityService().checkCurrentUserUpdatePermission(regatta);
+            boolean skipPermissionCheck = getService().skipChecksDueToCorrectSecret(regattaName, registrationLinkSecret);
+            if (!skipPermissionCheck) {
+                getSecurityService().checkCurrentUserUpdatePermission(regatta);
+            }
             Serializable competitorId;
             try {
                 competitorId = UUID.fromString(competitorIdAsString);
