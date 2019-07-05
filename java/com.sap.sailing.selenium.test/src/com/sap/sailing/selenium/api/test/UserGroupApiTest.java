@@ -7,6 +7,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,6 +24,7 @@ import com.sap.sse.common.Util;
 public class UserGroupApiTest extends AbstractSeleniumTest {
 
     private final UserGroupApi userGroupApi = new UserGroupApi();
+    private final RoleApi roleApi = new RoleApi();
 
     @Before
     public void setUp() {
@@ -65,6 +68,41 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
             fail("Expected parsing error since user group should be null");
         } catch (RuntimeException e) {
             assertTrue("Unrelated exception.", e.getMessage().contains("Usergroup with this id does not exist"));
+        }
+    }
+
+    @Test
+    public void testMetaPermissionCheck() {
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+
+        // add test users
+        final SecurityApi securityApi = new SecurityApi();
+        final String addingUsername = "adding user";
+        final String addedUsername = "added user";
+
+        securityApi.createUser(adminCtx, addingUsername, "test", "company", "password");
+        securityApi.createUser(adminCtx, addedUsername, "test", "company", "password");
+
+        final ApiContext userCtx = ApiContext.createApiContext(getContextRoot(), SECURITY_CONTEXT, addingUsername,
+                "password");
+
+        // create user group
+        final UserGroup userGroupCreated = userGroupApi.createUserGroup(userCtx, "test-group-01");
+        assertNotNull("GroupId is missing in reponse!", userGroupCreated.getGroupId());
+
+        // add new role to group with admin user
+        final Role createdRole = roleApi.createRole(adminCtx, "My-Epic-Role");
+        roleApi.updateRole(adminCtx, createdRole.getId(), Arrays.asList("*"), createdRole.getName());
+        userGroupApi.addRoleToGroup(adminCtx, userGroupCreated.getGroupId(), createdRole.getId(), false);
+
+        try {
+
+            // add user to group with a user who does not have one of the roles implicated by the group
+            userGroupApi.addUserToGroup(userCtx, userGroupCreated.getGroupId(), addedUsername);
+
+            fail("Expected unauthorized exception.");
+        } catch (RuntimeException e) {
+            assertTrue("Expected unauthorized exception", e.getMessage().contains("failed (rc=401)"));
         }
     }
 
