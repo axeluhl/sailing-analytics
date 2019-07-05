@@ -14,7 +14,9 @@ public class RegattaApi {
 
     private static final String REGATTAS = "/api/v1/regattas";
     private static final String LIST_REGATTA_RACES = "/races";
-    private static final String COMPETITOR_CREATE_AND_ADD_WITH_BOAT = "/competitors/createandadd";
+    private static final String COMPETITORS = "/competitors";
+    private static final String COMPETITOR_CREATE_AND_ADD_WITH_BOAT = COMPETITORS + "/createandadd";
+    private static final String ADD = "/add";
     private static final String ADD_RACE_COLUMN_URL = "/addracecolumns";
 
     public Regatta getRegatta(ApiContext ctx, String regattaName) {
@@ -75,6 +77,13 @@ public class RegattaApi {
             result[i] = new RaceColumn((JSONObject) (json.get(i)));
         }
         return result;
+    }
+    
+    public void addCompetitor(ApiContext ctx, String regattaName, UUID competitorId, Optional<String> secret) {
+        final String url = REGATTAS + "/" + regattaName + COMPETITORS + "/" + competitorId + ADD;
+        final Map<String, String> queryParams = new TreeMap<>();
+        queryParams.put("secret", secret.orElse(null));
+        ctx.post(url, queryParams);
     }
 
 }

@@ -3,18 +3,24 @@ package com.sap.sailing.selenium.api.test;
 import static com.sap.sailing.domain.common.CompetitorRegistrationType.CLOSED;
 import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
+import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+
+import java.util.Optional;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
+import com.sap.sailing.selenium.api.event.EventApi.Event;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
+import com.sap.sailing.selenium.api.event.SecurityApi;
 import com.sap.sailing.selenium.api.regatta.Competitor;
 import com.sap.sailing.selenium.api.regatta.RaceColumn;
 import com.sap.sailing.selenium.api.regatta.Regatta;
@@ -25,6 +31,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 public class RegattaApiTest extends AbstractSeleniumTest {
 
     private static String EVENT_NAME = "<ppp> loggingsession";
+    private static String OTHER_EVENT_NAME = "<xxx> loggingsession";
     private static String BOAT_CLASS = "75QMNATIONALEKREUZER";
 
     private final EventApi eventApi = new EventApi();
@@ -109,5 +116,25 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         assertEquals("read: racecolumn.racename is different", "T1", result[0].getRaceName());
         // assertEquals("read: racecolumn.seriesname is different", "Default", result[4].getSeriesName());
         // assertEquals("read: racecolumn.racename is different", "T5", result[4].getRaceName());
+    }
+    
+    @Test
+    public void testRegisterExistingCompetitorWithSecret() {
+        SecurityApi securityApi = new SecurityApi();
+        final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
+        final ApiContext userWithCompetitorCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
+        securityApi.createUser(adminSecurityCtx, "dagobert", "Dagobert Duck", null, "daisy1337");
+        final ApiContext userOwningEventCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "dagobert", "daisy1337");
+        
+        // TODO we currently can't just create a competitor using the API. This is only possible by using a temporary Event/Regatta.
+        eventApi.createEvent(userWithCompetitorCtx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
+        Competitor competitor = regattaApi.createAndAddCompetitor(userWithCompetitorCtx, EVENT_NAME, BOAT_CLASS, null, "donald", "USA");
+        
+        // This is the event to register the existing competitor for
+        Event eventToRegisterExistingCompetitor = eventApi.createEvent(userWithCompetitorCtx, OTHER_EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.OPEN_UNMODERATED, "default");
+        regattaApi.addCompetitor(userWithCompetitorCtx, OTHER_EVENT_NAME, competitor.getId(), Optional.of(eventToRegisterExistingCompetitor.getSecret()));
+        Regatta regatta = regattaApi.getRegatta(userOwningEventCtx, OTHER_EVENT_NAME);
+        System.out.println(regatta.getJson());
     }
 }
