@@ -198,8 +198,13 @@ public class UserGroupResource extends AbstractSecurityResource {
                                     .build();
                         } else {
                             if (getService().hasCurrentUserUpdatePermission(usergroup)) {
-                                getService().addUserToUserGroup(usergroup, user);
-                                response = Response.ok().build();
+                                if (!getService().hasCurrentUserMetaPermissionsOfRoleDefinitionsWithQualification(
+                                        usergroup.getRoleDefinitionMap().keySet(), new Ownership(null, usergroup))) {
+                                    response = Response.status(Status.UNAUTHORIZED).build();
+                                } else {
+                                    getService().addUserToUserGroup(usergroup, user);
+                                    response = Response.ok().build();
+                                }
                             } else {
                                 response = Response.status(Status.UNAUTHORIZED).build();
                             }
