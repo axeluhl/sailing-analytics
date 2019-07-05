@@ -87,7 +87,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
                 "password");
 
         // create user group
-        final UserGroup userGroupCreated = userGroupApi.createUserGroup(userCtx, "test-group-01");
+        final UserGroup userGroupCreated = userGroupApi.createUserGroup(adminCtx, "test-group-01");
         assertNotNull("GroupId is missing in reponse!", userGroupCreated.getGroupId());
 
         // add new role to group with admin user
