@@ -180,7 +180,6 @@ public class UserGroupResource extends AbstractSecurityResource {
             @PathParam(KEY_USERNAME) String username) {
         Response response;
         try {
-
             final UUID groupId = UUID.fromString(userGroupId);
             final UserGroup usergroup = getService().getUserGroup(groupId);
 
@@ -200,8 +199,7 @@ public class UserGroupResource extends AbstractSecurityResource {
                         } else {
                             if (getService().hasCurrentUserUpdatePermission(usergroup)) {
                                 if (!getService().hasCurrentUserMetaPermissionsOfRoleDefinitionsWithQualification(
-                                        usergroup.getRoleDefinitionMap().keySet(),
-                                        new Ownership(getService().getCurrentUser(), null))) {
+                                        usergroup.getRoleDefinitionMap().keySet(), new Ownership(null, usergroup))) {
                                     response = Response.status(Status.UNAUTHORIZED).build();
                                 } else {
                                     getService().addUserToUserGroup(usergroup, user);
@@ -291,7 +289,7 @@ public class UserGroupResource extends AbstractSecurityResource {
                         boolean roleForAll = Boolean.valueOf((String) jsonBody.get(KEY_FOR_ALL));
                         if (forAll == null || forAll != roleForAll) {
                             if (!getService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(role,
-                                    new Ownership(getService().getCurrentUser(), null))) {
+                                    new Ownership(null, usergroup))) {
                                 response = Response.status(Status.UNAUTHORIZED)
                                         .entity(String.format("Not permitted to add role %s to group", role.getName()))
                                         .build();
@@ -337,7 +335,7 @@ public class UserGroupResource extends AbstractSecurityResource {
                             && getService().hasCurrentUserReadPermission(role)) {
                         if (usergroup.getRoleAssociation(role) != null) {
                             if (!getService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(role,
-                                    new Ownership(getService().getCurrentUser(), null))) {
+                                    new Ownership(null, usergroup))) {
                                 response = Response
                                         .status(Status.UNAUTHORIZED).entity(String
                                                 .format("Not permitted to remove role %s from group", role.getName()))
