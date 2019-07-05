@@ -16,7 +16,7 @@ import com.sap.sse.common.Speed;
  * course. For a given windspeed the performance curve returns the allowance for the boat or in simpler words: how long
  * should the boat need for a nautical mile when sailing 100% performance.
  * 
- * @author Daniel Lisunkin (i505543)˝
+ * @author Daniel Lisunkin (i505543)
  *
  */
 public interface ORCPerformanceCurve {
@@ -24,31 +24,25 @@ public interface ORCPerformanceCurve {
     /**
      * TODO Comment
      * 
-     * @param timePerNauticalMile equals the average duration the boat needed to conquer one mile on the sailed subcourse, => totalTime / course.getTotalLength()
+     * @param durationToCompleteCourse equals the duration the boat needed to conquer the {@link #getCourse() course}
      * @return 
      * 
      * @throws ArgumentOutsideDomainException
      * @throws MaxIterationsExceededException
      * @throws FunctionEvaluationException
      */
-    Speed getImpliedWind(Duration timePerNauticalMile) throws MaxIterationsExceededException, FunctionEvaluationException;
+    Speed getImpliedWind(Duration durationToCompleteCourse) throws MaxIterationsExceededException, FunctionEvaluationException;
     
     /**
      * TODO getComment done
      * "Scratchboat"
-     * 
-     * @param referenceBoat
-     * @param sailedDurationPerNauticalMile
-     * @return
      */
-    Duration getCalculatedTime(ORCPerformanceCurve referenceBoat, Duration sailedDurationPerNauticalMile);
+    Duration getCalculatedTime(ORCPerformanceCurve referenceBoat, Duration sailedDurationPerNauticalMile) throws MaxIterationsExceededException, FunctionEvaluationException;
  
     /**
      * TODO Comment
-     * 
-     * @param impliedWind
-     * @return
      */
-    Duration getAllowancePerCourse(Speed impliedWind);
+    Duration getAllowancePerCourse(Speed impliedWind) throws ArgumentOutsideDomainException;
     
+    ORCPerformanceCurveCourse getCourse();
 }

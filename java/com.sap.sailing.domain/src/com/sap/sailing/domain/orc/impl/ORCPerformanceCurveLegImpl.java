@@ -5,7 +5,6 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 
 public class ORCPerformanceCurveLegImpl implements ORCPerformanceCurveLeg {
-
     private Distance length;
     private Bearing twa;
     
@@ -28,6 +27,4 @@ public class ORCPerformanceCurveLegImpl implements ORCPerformanceCurveLeg {
     public String toString() {
         return "ORCPerformanceCurveLegImpl [length=" + length.getNauticalMiles() + " nm, twa=" + twa.getDegrees() + "°]";
     }
-
-    
 }

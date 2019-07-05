@@ -2,6 +2,8 @@ package com.sap.sailing.domain.orc;
 
 import java.util.Map;
 
+import org.apache.commons.math.FunctionEvaluationException;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sse.common.Duration;
@@ -33,7 +35,7 @@ public interface ORCCertificate {
      * @return performance curve to calculate the implied wind for the boat and the sailed part of the course so the
      *         performance can be compared with other competitors.
      */
-    public ORCPerformanceCurve getPerformanceCurve(ORCPerformanceCurveCourse course);
+    public ORCPerformanceCurve getPerformanceCurve(ORCPerformanceCurveCourse course) throws FunctionEvaluationException;
     
     /**
      * Returns the GPH value for the {@link Competitor}. The GPH value represents the overall performance of the boat.
@@ -56,7 +58,7 @@ public interface ORCCertificate {
      * @return Map with elements of type wind {@link Speed} as keys and {@link Duration}s equaling a time allowance per
      *         nautical mile as values.
      */
-    public Map<Speed, Duration> getWindwardLeewardAllowances();
+    public Map<Speed, Speed> getWindwardLeewardSpeedPrediction();
     
     /**
      * Returns a Map of allowances (in sec/nm) for different wind speeds to use for a {@link ORCPerformanceCurve} rating
@@ -65,7 +67,7 @@ public interface ORCCertificate {
      * @return Map with elements of type wind {@link Speed} as keys and {@link Duration}s equaling a time allowance per
      *         nautical mile as values.
      */
-    public Map<Speed, Duration> getCircularRandomAllowances();
+    public Map<Speed, Speed> getCircularRandomSpeedPredictions();
     
     /**
      * Returns a Map of allowances (in sec/nm) for different wind speeds to use for a {@link ORCPerformanceCurve} rating
@@ -74,7 +76,7 @@ public interface ORCCertificate {
      * @return Map with elements of type wind {@link Speed} as keys and {@link Duration}s equaling a time allowance per
      *         nautical mile as values.
      */
-    public Map<Speed, Duration> getLongDistanceAllowances();
+    public Map<Speed, Speed> getLongDistanceSpeedPredictions();
     
     /**
      * Returns a Map of allowances (in sec/nm) for different wind speeds to use for a {@link ORCPerformanceCurve} rating
@@ -83,6 +85,6 @@ public interface ORCCertificate {
      * @return Map with elements of type wind {@link Speed} as keys and {@link Duration}s equaling a time allowance per
      *         nautical mile as values.
      */
-    public Map<Speed, Duration> getNonSpinnakerAllowances();
+    public Map<Speed, Speed> getNonSpinnakerSpeedPredictions();
     
 }

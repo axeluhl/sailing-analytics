@@ -2,12 +2,13 @@ package com.sap.sailing.domain.orc.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.math.ArgumentOutsideDomainException;
 import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.MaxIterationsExceededException;
@@ -26,6 +27,7 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.impl.DegreeBearingImpl;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 /**
  * For a {@link Competitor} and the {@link ORCPerformanceCurveCourse} which the competitor sailed until the creation of
@@ -46,30 +48,9 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
  * 
  */
 public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurve {
+    private static final Logger logger = Logger.getLogger(ORCPerformanceCurveImpl.class.getName()); // TODO Daniel wants to add some logging!
     private static final long serialVersionUID = 4113356173492168453L;
 
-    /**
-     * Same two dimensional map as in the corresponding ORCCertificate. The result is a {@link Duration} called
-     * allowance for a boat at a given TWS and TWA. The first key set contains {@link Speed}s and is equal to the
-     * windspeeds defined in the static field of {@link ORCCertificateImpl}. The second key set contains
-     * {@link Bearing}s and is equal to the windangles defined in the static fields of the same class.
-     * This map contains the allowances of the beat and run angles to the related wind speed.
-     * Needed for LaGrange interpolation.
-     */
-    private final Map<Speed, Map<Bearing, Duration>> durationPerNauticalMileAtTrueWindAngleAndSpeed;
-
-    /**
-     * The beat angles for the true wind speeds; key set is equal to that of
-     * {@link #durationPerNauticalMileAtTrueWindAngleAndSpeed}
-     */
-    private final Map<Speed, Bearing> beatAngles;
-
-    /**
-     * The gybe angles for the true wind speeds; key set is equal to that of
-     * {@link #durationPerNauticalMileAtTrueWindAngleAndSpeed}
-     */
-    private final Map<Speed, Bearing> gybeAngles;
-    
     /**
      * The specific course for which the PerformanceCurve of a boat is calculated. The course is set during the
      * constructor call.
@@ -82,204 +63,197 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      * calculated points. The input for the function is the value of the implied wind (speed in kts) and the output an
      * allowance in sec/nm.
      */
-    private final PolynomialSplineFunction functionImpliedWindToAllowance;
+    private final PolynomialSplineFunction functionImpliedWindInKnotsToAllowanceInSecondsForCourse;
 
     /**
      * Accepts the simplified polar data, one "column" for each of the defined true wind speeds, where each column is a
      * map from the true wind angle (here expressed as an object of type {@link Bearing}) and the {@link Duration} the
      * boat is assumed to need at that true wind speed/angle for one nautical mile.
-     *     
-     * @param twaAllowances
-     * @param beatAngles
-     * @param gybeAngles
-     * @param course
      */
-    public ORCPerformanceCurveImpl(Map<Speed, Map<Bearing, Duration>> twaAllowances, Map<Speed, Bearing> beatAngles,
-            Map<Speed, Bearing> gybeAngles, ORCPerformanceCurveCourse course) {
-        durationPerNauticalMileAtTrueWindAngleAndSpeed = Collections.unmodifiableMap(twaAllowances);
-        this.beatAngles = Collections.unmodifiableMap(beatAngles);
-        this.gybeAngles = Collections.unmodifiableMap(gybeAngles);
+    public ORCPerformanceCurveImpl(Map<Speed, Map<Bearing, Speed>> twaAllowances, Map<Speed, Bearing> beatAngles,
+            Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed, Map<Speed, Bearing> runAngles,
+            Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed, ORCPerformanceCurveCourse course) throws FunctionEvaluationException {
         this.course = course;
-        functionImpliedWindToAllowance = createPerformanceCurve();
+        functionImpliedWindInKnotsToAllowanceInSecondsForCourse = createPerformanceCurve(twaAllowances, beatAngles,
+                beatVMGPredictionPerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed);
     }
 
     /**
-     * TODO Comment
-     * @return
-     * @throws FunctionEvaluationException
+     * Computes the duration the boat to which this performance curve belongs is expected to sail to complete the
+     * {@link #course}, keyed by the different true wind speeds. The resulting {@link LinkedHashMap}'s iteration
+     * order is guaranteed to deliver the true wind speed keys in the order of ascending wind speeds.
      */
-    public Map<Speed, Duration> createAllowancesPerCourse() throws FunctionEvaluationException {
-        Map<Speed, Duration> result = new HashMap<>();
-        Map<ORCPerformanceCurveLeg, Map<Speed, Duration>> allowancesPerLeg = new HashMap<>();
-        
-        for (ORCPerformanceCurveLeg leg : course.getLegs()) {
-            allowancesPerLeg.put(leg, createAllowancePerLeg(leg));
+    public LinkedHashMap<Speed, Duration> createAllowancesPerCourse(Map<Speed, Map<Bearing, Speed>> twaAllowances,
+            Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
+            Map<Speed, Bearing> runAngles, Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed)
+            throws FunctionEvaluationException {
+        final LinkedHashMap<Speed, Duration> result = new LinkedHashMap<>();
+        final Map<ORCPerformanceCurveLeg, Map<Speed, Duration>> allowancesPerLeg = new HashMap<>();
+        for (final ORCPerformanceCurveLeg leg : course.getLegs()) {
+            allowancesPerLeg.put(leg, createAllowancePerLeg(leg, twaAllowances, beatAngles,
+                    beatVMGPredictionPerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed));
         }
-
-        for (Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
-            Double allowancePerTws = 0.0;
-            for (Entry<ORCPerformanceCurveLeg, Map<Speed, Duration>> entry : allowancesPerLeg.entrySet()) {
+        for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
+            double allowancePerTws = 0.0;
+            for (final Entry<ORCPerformanceCurveLeg, Map<Speed, Duration>> entry : allowancesPerLeg.entrySet()) {
                 allowancePerTws += Math.abs(entry.getValue().get(tws).asSeconds());
             }
             result.put(tws, Duration.ONE_SECOND.times(allowancePerTws));
         }
-        
-        for (Entry<Speed, Duration> entry : result.entrySet()) {
-            result.replace(entry.getKey(), entry.getValue().divide(course.getTotalLength().getNauticalMiles()));
-        }
-        
         return result;
     }
-        
-    private Map<Speed, Duration> createAllowancePerLeg(ORCPerformanceCurveLeg leg) throws FunctionEvaluationException {
+
+    /**
+     * Computes the durations the boat to which this performance curve belongs is expected to sail to complete the {@code leg},
+     * considering the leg's {@link ORCPerformanceCurveLeg#getLength() length}.
+     */
+    private Map<Speed, Duration> createAllowancePerLeg(ORCPerformanceCurveLeg leg,
+            Map<Speed, Map<Bearing, Speed>> twaAllowances, Map<Speed, Bearing> beatAngles,
+            Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed, Map<Speed, Bearing> runAngles,
+            Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed) throws FunctionEvaluationException {
         final Map<Speed, Duration> result = new HashMap<>();
-        final double twaDeg = leg.getTwa().getDegrees();
-        final double twaRad = leg.getTwa().getRadians();
-        for (final Speed entry : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
+        for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
             // Case switching on TWA (0. TWA == 0; 1. TWA < Beat; 2. Beat < TWA < Gybe; 3. Gybe < TWA; 4. TWA == 180)
-            // TODO (so ? beatAngles : gybeAngles)
-            if (twaDeg <= beatAngles.get(entry).getDegrees()) {
+            if (leg.getTwa().compareTo(beatAngles.get(tws)) <= 0) {
                 // Case 0 & 1 - result = beatVMG * distance * cos(TWA)
-                result.put(entry, Duration.ONE_SECOND.times(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(entry, beatAngles.get(entry)).asSeconds() * leg.getLength().getNauticalMiles()));
-            } else if (twaDeg >= gybeAngles.get(entry).getDegrees()) {
+                result.put(tws, beatVMGPredictionPerTrueWindSpeed.get(tws).getDuration(/* rhumb line distance of upwind leg */ leg.getLength()));
+            } else if (leg.getTwa().compareTo(runAngles.get(tws)) >= 0) {
                 // Case 3 & 4 - result = runVMG * distance * cos(TWA)
-                result.put(entry, Duration.ONE_SECOND.times(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(entry, gybeAngles.get(entry)).asSeconds() * leg.getLength().getNauticalMiles()));
+                result.put(tws, runVMGPredictionPerTrueWindSpeed.get(tws).getDuration(/* rhumb line distance of upwind leg */ leg.getLength()));
             } else {
                 // Case 2 - result is given through the laGrange Interpolation, between the Beat and Gybe Angles
-                result.put(entry, getLagrangeAllowancePerTrueWindSpeedAndAngle(entry, leg.getTwa()).times(leg.getLength().getNauticalMiles()));
+                result.put(tws,
+                        getLagrangeSpeedPredictionForTrueWindSpeedAndAngle(twaAllowances, beatAngles,
+                                beatVMGPredictionPerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed, tws,
+                                leg.getTwa()).getDuration(leg.getLength()));
             }
         }
         return result;
     }
 
-    private PolynomialSplineFunction createPerformanceCurve() {
-        Map<Speed, Duration> allowances;
-        try {
-            allowances = createAllowancesPerCourse();
-        } catch (FunctionEvaluationException e) {
-            e.printStackTrace();
-            return null;
-        }
+    /**
+     * Computes a function that, given a true wind speed (TWS) calculates the duration (in seconds) that the boat to
+     * which this performance curve belongs is expected to sail to complete the {@link #course}.
+     */
+    private PolynomialSplineFunction createPerformanceCurve(Map<Speed, Map<Bearing, Speed>> twaAllowances,
+            Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
+            Map<Speed, Bearing> runAngles, Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed) throws FunctionEvaluationException {
+        final Map<Speed, Duration> allowancesForCoursePerTrueWindSpeed = createAllowancesPerCourse(twaAllowances, beatAngles,
+                beatVMGPredictionPerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed);
         SplineInterpolator interpolator = new SplineInterpolator();
         double[] xs = new double[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length];
         double[] ys = new double[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length];
         int i = 0;
-        
-        for(Entry<Speed,Duration> entry : allowances.entrySet()) {
+        for(final Entry<Speed,Duration> entry : allowancesForCoursePerTrueWindSpeed.entrySet()) {
             xs[i] = entry.getKey().getKnots();
             ys[i] = entry.getValue().asSeconds();
-            i += 1;
+            i++;
         }
-        
-        ArrayUtils.reverse(xs);
-        ArrayUtils.reverse(ys);
         return interpolator.interpolate(xs, ys);
     }
     
     @Override
-    public Speed getImpliedWind(Duration timePerNauticalMile) throws MaxIterationsExceededException, FunctionEvaluationException{
+    public Speed getImpliedWind(Duration durationToCompleteCourse) throws MaxIterationsExceededException, FunctionEvaluationException{
         PolynomialFunction workingFunction;
-        double timePerNauticalMileInSeconds = timePerNauticalMile.asSeconds();
-        double[] allowancesInSeconds = new double[functionImpliedWindToAllowance.getKnots().length];
-        
-        for(int i = 0; i < allowancesInSeconds.length; i++) {
-            allowancesInSeconds[i] = functionImpliedWindToAllowance.value(functionImpliedWindToAllowance.getKnots()[i]);
-        }
-
+        double durationToCompleteCourseInSeconds = durationToCompleteCourse.asSeconds();
+        double[] allowancesInSecondsToCompleteCourse = Arrays.stream(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS).mapToDouble(tws->{
+            try {
+                return functionImpliedWindInKnotsToAllowanceInSecondsForCourse.value(tws.getKnots());
+            } catch (ArgumentOutsideDomainException e) {
+                throw new RuntimeException(e);
+            }
+        }).toArray();
+        final Speed result;
         // Corner cases for Allowance > Allowance(20kt) or Allowance < Allowance(6kt)
-        if(timePerNauticalMileInSeconds <= allowancesInSeconds[allowancesInSeconds.length - 1]) {
-            return new KnotSpeedImpl(20);
-        } else if (timePerNauticalMileInSeconds >= allowancesInSeconds[0]) {
-            return new KnotSpeedImpl(6);
+        if (durationToCompleteCourseInSeconds <= allowancesInSecondsToCompleteCourse[allowancesInSecondsToCompleteCourse.length - 1]) {
+            result = ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length-1];
+        } else if (durationToCompleteCourseInSeconds >= allowancesInSecondsToCompleteCourse[0]) {
+            result = ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[0];
+        } else {
+            // find the polynomial splined function that produces the durationToCompleteCourse within its validity range
+            int i = 0;
+            while (i < allowancesInSecondsToCompleteCourse.length && durationToCompleteCourseInSeconds <= allowancesInSecondsToCompleteCourse[i]) {
+                i++;
+            }
+            i--;
+            workingFunction = functionImpliedWindInKnotsToAllowanceInSecondsForCourse.getPolynomials()[i];
+            //PolynomialFunction which will be solved by the Newton Approach
+            PolynomialFunction subtractedFunction = workingFunction.subtract(new PolynomialFunction(new double[] {durationToCompleteCourseInSeconds}));
+            NewtonSolver solver = new NewtonSolver();
+            solver.setAbsoluteAccuracy(0.000001);
+            //TODO Comment for the special treatment of the solver
+            result = new KnotSpeedImpl(solver.solve(subtractedFunction, 0,
+                    functionImpliedWindInKnotsToAllowanceInSecondsForCourse.getKnots()[i + 1] - functionImpliedWindInKnotsToAllowanceInSecondsForCourse.getKnots()[i])
+                    + functionImpliedWindInKnotsToAllowanceInSecondsForCourse.getKnots()[i]);
         }
-        
-        int i = 0;
-        while(i < allowancesInSeconds.length && timePerNauticalMileInSeconds <= allowancesInSeconds[i]) {
-            i += 1;
-        }
-        i -= 1;
-        workingFunction = functionImpliedWindToAllowance.getPolynomials()[i];
-        
-        //PolynomialFunction which will be solved by the Newton Approach
-        PolynomialFunction subtractedFunction = workingFunction.subtract(new PolynomialFunction(new double[] {timePerNauticalMileInSeconds}));
-        NewtonSolver solver = new NewtonSolver();
-        solver.setAbsoluteAccuracy(0.000001);
-        //TODO Comment for the special treatment of the solver
-        return new KnotSpeedImpl(solver.solve(subtractedFunction, 0,
-                functionImpliedWindToAllowance.getKnots()[i + 1] - functionImpliedWindToAllowance.getKnots()[i])
-                + functionImpliedWindToAllowance.getKnots()[i]);
+        return result;
     }
     
     @Override
-    public Duration getAllowancePerCourse(Speed impliedWind) {
+    public Duration getAllowancePerCourse(Speed impliedWind) throws ArgumentOutsideDomainException {
         // TODO Corner cases for ImpliedWind > 20kt or ImpliedWind < 6kt
-        try {
-            return Duration.ONE_SECOND.times(functionImpliedWindToAllowance.value(impliedWind.getKnots()));
-        } catch (ArgumentOutsideDomainException e) {
-            // TODO Auto-generated catch block
-            // TODO Create senseful Exception Handling for this class, Logging ...
-            e.printStackTrace();
-        }
-        return null;
+        return Duration.ONE_SECOND.times(functionImpliedWindInKnotsToAllowanceInSecondsForCourse.value(impliedWind.getKnots()));
     }
 
     @Override
-    public Duration getCalculatedTime(ORCPerformanceCurve referenceBoat, Duration sailedDurationPerNauticalMile) {
-        try {
-            return referenceBoat.getAllowancePerCourse(getImpliedWind(sailedDurationPerNauticalMile));
-        } catch (MaxIterationsExceededException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (FunctionEvaluationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return null;
+    public ORCPerformanceCurveCourse getCourse() {
+        return course;
+    }
+
+    @Override
+    public Duration getCalculatedTime(ORCPerformanceCurve referenceBoat, Duration sailedDurationPerNauticalMile)
+            throws MaxIterationsExceededException, FunctionEvaluationException {
+        return referenceBoat.getAllowancePerCourse(getImpliedWind(sailedDurationPerNauticalMile));
     }
     
-    private double[][] createPolarsPerTrueWindSpeed(Speed trueWindSpeed) {
+    /**
+     * @return an array containing two arrays: the first array holds the TWAs, the second array holds the corresponding
+     *         allowances in seconds per nautical mile for the TWA at the corresponding index in the first array
+     */
+    private double[][] createPolarsPerTrueWindSpeed(Speed trueWindSpeed, Map<Speed, Map<Bearing, Speed>> reachingSpeedPredictionsPerTrueWindSpeedAndAngle,
+            Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
+            Map<Speed, Bearing> runAngles, Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed) {
         ArrayList<Double> resultWindAngles = new ArrayList<>();
-        ArrayList<Double> resultAllowances = new ArrayList<>();
+        ArrayList<Double> resultSpeedsOverGroundInKnots = new ArrayList<>();
         Bearing beatAngle = beatAngles.get(trueWindSpeed);
-        Bearing gybeAngle = gybeAngles.get(trueWindSpeed);
-        final Bearing TWO_DEGREES = new DegreeBearingImpl(2);
-        final Bearing MINUS_TWO_DEGREES = new DegreeBearingImpl(-2);
-        
+        Bearing runAngle = runAngles.get(trueWindSpeed);
+        final double TWO = 2;
+        final Bearing TWO_DEGREES = new DegreeBearingImpl(TWO);
+        final Bearing MINUS_TWO_DEGREES = new DegreeBearingImpl(-TWO);
         resultWindAngles.add(beatAngle.add(MINUS_TWO_DEGREES).getDegrees());
-        resultAllowances.add(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(trueWindSpeed, beatAngle).divide(Math.cos(beatAngle.add(MINUS_TWO_DEGREES).getRadians())).asSeconds());
+        resultSpeedsOverGroundInKnots.add(beatVMGPredictionPerTrueWindSpeed.get(trueWindSpeed).getKnots() / Math.cos(beatAngle.add(MINUS_TWO_DEGREES).getRadians()));
         resultWindAngles.add(beatAngle.getDegrees());
-        resultAllowances.add(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(trueWindSpeed, beatAngle).divide(Math.cos(beatAngle.getRadians())).asSeconds());
-        
-        for (Bearing twa : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES) {
-            if (twa.compareTo(beatAngle) > 0 && twa.compareTo(gybeAngle) < 0) {
+        resultSpeedsOverGroundInKnots.add(beatVMGPredictionPerTrueWindSpeed.get(trueWindSpeed).getKnots() / Math.cos(beatAngle.getRadians()));
+        for (final Bearing twa : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES) {
+            if (twa.compareTo(beatAngle) > 0 && twa.compareTo(runAngle) < 0) {
                 resultWindAngles.add(twa.getDegrees());
-                resultAllowances.add(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(trueWindSpeed, twa).asSeconds());
+                resultSpeedsOverGroundInKnots.add(reachingSpeedPredictionsPerTrueWindSpeedAndAngle.get(trueWindSpeed).get(twa).getKnots());
             }
         }
-        
-        resultWindAngles.add(gybeAngle.getDegrees());
-        resultAllowances.add(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(trueWindSpeed, gybeAngle).divide(Math.cos(Math.PI - gybeAngle.getRadians())).asSeconds());
-        resultWindAngles.add(gybeAngle.add(TWO_DEGREES).getDegrees());
-        resultAllowances.add(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(trueWindSpeed, gybeAngle).divide(Math.cos(Math.PI - Math.toRadians(gybeAngle.add(TWO_DEGREES).getDegrees()))).asSeconds());
-        
-        return new double[][] {resultWindAngles.stream().mapToDouble(d -> d).toArray(), resultAllowances.stream().mapToDouble(d -> d).toArray()};
+        resultWindAngles.add(runAngle.getDegrees());
+        resultSpeedsOverGroundInKnots.add(runVMGPredictionPerTrueWindSpeed.get(trueWindSpeed).getKnots() / Math.cos(Math.PI-runAngle.getRadians()));
+        resultWindAngles.add(runAngle.add(TWO_DEGREES).getDegrees());
+        resultSpeedsOverGroundInKnots.add(runVMGPredictionPerTrueWindSpeed.get(trueWindSpeed).getKnots() / Math.cos(Math.PI-runAngle.add(TWO_DEGREES).getRadians()));
+        return new double[][] {resultWindAngles.stream().mapToDouble(d -> d).toArray(), resultSpeedsOverGroundInKnots.stream().mapToDouble(d -> d).toArray()};
     }
     
     // public accessibility needed for tests, not part of the ORCPerformanceCurve contract
-    public Duration getLagrangeAllowancePerTrueWindSpeedAndAngle(Speed trueWindSpeed, Bearing trueWindAngle) throws FunctionEvaluationException, IllegalArgumentException {
-        Duration result;
-        double[][] polarPoints = createPolarsPerTrueWindSpeed(trueWindSpeed);
+    public Speed getLagrangeSpeedPredictionForTrueWindSpeedAndAngle(Map<Speed, Map<Bearing, Speed>> twaAllowances,
+            Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
+            Map<Speed, Bearing> runAngles, Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed, Speed trueWindSpeed,
+            Bearing trueWindAngle) throws FunctionEvaluationException, IllegalArgumentException {
+        final Speed result;
+        double[][] polarPoints = createPolarsPerTrueWindSpeed(trueWindSpeed, twaAllowances, beatAngles,
+                beatVMGPredictionPerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed);
         double[] twaPolarPoints = polarPoints[0];
-        double[] allowancesPolarPoints = polarPoints[1];
-        
-        int i = -1 ; // after the loop, i equals the next higher available polar data for the given TWA
-        for(int j = 0; j < twaPolarPoints.length; j++) {
-            if(trueWindAngle.getDegrees() < twaPolarPoints[j]) {
+        double[] allowancesInSecondsPerNauticalMilePolarPoints = polarPoints[1];
+        int i = -1; // after the loop, i equals the next higher available polar data for the given TWA
+        for (int j = 0; j < twaPolarPoints.length; j++) {
+            if (trueWindAngle.getDegrees() < twaPolarPoints[j]) {
                 i = j;
                 break;
             }
         }
-        
         // This part is implemented equally to the part from the ORC PCSLib.pas.
         // ORC decides to use only up to the nearest 4 values to the searched TWA for interpolation.
         if (i >= 0) {
@@ -288,32 +262,36 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             double[] xn = new double[upperBound - lowerBound + 1];
             double[] yn = new double[upperBound - lowerBound + 1];
             for (i = lowerBound; i <= upperBound; i++) {
-                xn[i-lowerBound] = twaPolarPoints[i];
-                yn[i-lowerBound] = allowancesPolarPoints[i];
+                xn[i - lowerBound] = twaPolarPoints[i];
+                yn[i - lowerBound] = allowancesInSecondsPerNauticalMilePolarPoints[i];
             }
-            
-            result = Duration.ONE_SECOND.times(new PolynomialFunctionLagrangeForm(xn, yn).value(trueWindAngle.getDegrees()));
+            result = new KnotSpeedImpl(new PolynomialFunctionLagrangeForm(xn, yn).value(trueWindAngle.getDegrees()));
         } else {
             result = null;
         }
-        
         return result;
     }
     
-    // public accessibility needed for tests, not part of the ORCPerformanceCurve contract
-    public Duration getDurationPerNauticalMileAtTrueWindAngleAndSpeed(Speed trueWindSpeed, Bearing trueWindAngle) {
-        return durationPerNauticalMileAtTrueWindAngleAndSpeed.getOrDefault(trueWindSpeed, null).getOrDefault(trueWindAngle, null);
+    /**
+     * Obtains the durations that the boat for which this performance curve was created is expected to sail to complete
+     * the {@link #course} (which may be a prefix of a longer course) at the true wind speed provided to the resulting
+     * map as the key.
+     */
+    public Map<Speed, Duration> getAllowancesPerTrueWindSpeedsForCourse() throws ArgumentOutsideDomainException {
+        final Map<Speed, Duration> result = new HashMap<>();
+        for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
+            result.put(tws, Duration.ONE_SECOND.times(functionImpliedWindInKnotsToAllowanceInSecondsForCourse.value(tws.getKnots())));
+        }
+        return result;
     }
-
+    
     @Override
     public String toString() {
         try {
-            return "ORCPerformanceCurve [Allowances " + createAllowancesPerCourse() + "]";
+            return "ORCPerformanceCurve [Allowances " + getAllowancesPerTrueWindSpeedsForCourse() + "]";
         } catch (FunctionEvaluationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     
