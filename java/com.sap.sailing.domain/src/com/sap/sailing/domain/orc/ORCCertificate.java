@@ -7,7 +7,6 @@ import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 
-//TODO COMMENTS!!!
 /**
  * Represents semantically a real ORC certificate for a {@link Competitor}, which is used to rate different type of
  * boats for different insohre and offshore race conditions.

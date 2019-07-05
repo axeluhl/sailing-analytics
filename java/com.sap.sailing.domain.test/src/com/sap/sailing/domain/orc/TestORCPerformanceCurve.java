@@ -2,6 +2,8 @@ package com.sap.sailing.domain.orc;
 
 import static org.junit.Assert.assertNotNull;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -33,6 +35,7 @@ public class TestORCPerformanceCurve {
     // for the usage of 
     private final boolean collectErrors = true;
     
+    private static final String RESOURCES = "resources/orc/";
     private static ORCPerformanceCurveCourse course;
     private static ORCCertificateImporter importer;
 
@@ -59,7 +62,13 @@ public class TestORCPerformanceCurve {
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.03), new DegreeBearingImpl(165)));
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.17), new DegreeBearingImpl(180)));
         course = new ORCPerformanceCurveCourseImpl(legs);
-        importer = new ORCCertificateImporterJSON(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
+        
+        // Local File:
+        File fileGER = new File(RESOURCES + "GER2019.json");
+        importer = new ORCCertificateImporterJSON(new FileInputStream(fileGER));
+        
+        // Online File:
+        //importer = new ORCCertificateImporterJSON(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
     }
     
     @Test
@@ -164,7 +173,7 @@ public class TestORCPerformanceCurve {
        
        // Test for corner case and if the algorithm reacts to the boundaries of 6 and 20 kts.
        assertEquals( 6.0    , performanceCurveMoana.getImpliedWind(Duration.ONE_HOUR.times(24)).getKnots(), accuracy);
-       assertEquals(20.0    , performanceCurveMoana.getImpliedWind(Duration.ONE_HOUR).getKnots(), accuracy);
+       assertEquals(20.0    , performanceCurveMoana.getImpliedWind(Duration.ONE_HOUR.divide(24)).getKnots(), accuracy);
        
        // TODO Found new bug in creation of the course allowances
        // When the legTWA == 180° and runAngle of the boat == 180°, there are no senseful leg allowances created
