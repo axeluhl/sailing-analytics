@@ -392,7 +392,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 throw new UserManagementException("user '" + username + "' not found.");
             }
             if (getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionsWithQualification(
-                    tenant.getRoleDefinitionMap().keySet(), new Ownership(userByName, null))) {
+                    tenant.getRoleDefinitionMap().keySet(), new Ownership(null, tenant))) {
                 getSecurityService().addUserToUserGroup(tenant, userByName);
             } else {
                 throw new UnauthorizedException(
