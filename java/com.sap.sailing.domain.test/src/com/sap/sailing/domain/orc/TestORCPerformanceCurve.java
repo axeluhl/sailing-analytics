@@ -127,7 +127,7 @@ public class TestORCPerformanceCurve {
     private void testAllowance(ORCPerformanceCurve performanceCurve, double... allowancePerNauticalMileInSeconds) throws ArgumentOutsideDomainException {
         for (int i=0; i<allowancePerNauticalMileInSeconds.length; i++) {
             assertEquals(allowancePerNauticalMileInSeconds[i]*performanceCurve.getCourse().getTotalLength().getNauticalMiles(),
-                    performanceCurve.getAllowancePerCourse(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i]).asSeconds(), 0.1);
+                    performanceCurve.getAllowancePerCourse(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i]).asSeconds(), 0.3);
         }
     }
 
@@ -162,7 +162,7 @@ public class TestORCPerformanceCurve {
     // Tests for a Implied Wind calculation for a simple predefined course. The solutions are extracted from the provided ORC TestPCS.exe application. 
     @Test
     public void testImpliedWindSimple() throws MaxIterationsExceededException, FunctionEvaluationException {
-       double accuracy = 0.000001;
+       double accuracy = 0.0001;
        ORCCertificate certificateMoana          = importer.getCertificate("GER 5549");
        ORCCertificate certificateMilan          = importer.getCertificate("GER 7323");
        ORCCertificate certificateTutima         = importer.getCertificate("GER 5609");

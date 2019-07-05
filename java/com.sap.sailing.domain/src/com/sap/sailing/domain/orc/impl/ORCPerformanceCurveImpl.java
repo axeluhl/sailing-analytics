@@ -181,7 +181,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             //PolynomialFunction which will be solved by the Newton Approach
             PolynomialFunction subtractedFunction = workingFunction.subtract(new PolynomialFunction(new double[] {durationToCompleteCourseInSeconds}));
             NewtonSolver solver = new NewtonSolver();
-            solver.setAbsoluteAccuracy(0.000001);
+            solver.setAbsoluteAccuracy(0.00000001);
             // TODO Comment for the special treatment of the solver
             result = new KnotSpeedImpl(solver.solve(subtractedFunction, 0,
                     functionImpliedWindInKnotsToAllowanceInSecondsForCourse.getKnots()[i + 1] - functionImpliedWindInKnotsToAllowanceInSecondsForCourse.getKnots()[i])
