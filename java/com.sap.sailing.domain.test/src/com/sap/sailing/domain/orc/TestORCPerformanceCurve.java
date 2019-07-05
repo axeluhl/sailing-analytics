@@ -36,7 +36,7 @@ public class TestORCPerformanceCurve {
     private final boolean collectErrors = true;
     
     private static final String RESOURCES = "resources/orc/";
-    private static ORCPerformanceCurveCourse course;
+    private static ORCPerformanceCurveCourse course1;
     private static ORCCertificateImporter importer;
 
     @Rule
@@ -61,7 +61,7 @@ public class TestORCPerformanceCurve {
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.03), new DegreeBearingImpl(15)));
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.03), new DegreeBearingImpl(165)));
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.17), new DegreeBearingImpl(180)));
-        course = new ORCPerformanceCurveCourseImpl(legs);
+        course1 = new ORCPerformanceCurveCourseImpl(legs);
         
         // Local File:
         File fileGER = new File(RESOURCES + "GER2019.json");
@@ -75,10 +75,10 @@ public class TestORCPerformanceCurve {
     public void testLagrangeInterpolation() throws FunctionEvaluationException {
         Double accuracy = 0.21;
         ORCCertificateImpl certificate = (ORCCertificateImpl) importer.getCertificate("GER 5549");
-        ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(course);
+        ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(course1);
         Double value = performanceCurve.getDurationPerNauticalMileAtTrueWindAngleAndSpeed(new KnotSpeedImpl(6), new DegreeBearingImpl(60)).asSeconds();
 
-        assertNotNull(course);
+        assertNotNull(course1);
         assertNotNull(performanceCurve);
         assertEquals(value, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl( 6),new DegreeBearingImpl(  60)).asSeconds(), 0.000001);
         
@@ -98,7 +98,7 @@ public class TestORCPerformanceCurve {
         assertEquals(345.0, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(16),new DegreeBearingImpl(98.3)).asSeconds(), accuracy);
         assertEquals(321.7, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(20),new DegreeBearingImpl(98.3)).asSeconds(), accuracy);
         
-        // TESTS of the corner areas of the polars
+        // TESTS of the corner areas of the polar
         assertEquals(588.1, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl( 6),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
         assertEquals(468.4, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl( 8),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
         assertEquals(413.8, performanceCurve.getLagrangeAllowancePerTrueWindSpeedAndAngle(new KnotSpeedImpl(10),new DegreeBearingImpl(138.7)).asSeconds(), accuracy);
@@ -137,7 +137,7 @@ public class TestORCPerformanceCurve {
     public void testPerformanceCurveInvertation() throws MaxIterationsExceededException, FunctionEvaluationException {
         Double accuracy = 0.1;
         ORCCertificateImpl certificate = (ORCCertificateImpl) importer.getCertificate("GER 5549");
-        ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(course);
+        ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(course1);
         
         assertEquals( 11.5, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl( 11.5))).getKnots(), accuracy);
         assertEquals(17.23, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl(17.23))).getKnots(), accuracy);
@@ -154,19 +154,19 @@ public class TestORCPerformanceCurve {
     @Test
     public void testImpliedWindSimple() throws MaxIterationsExceededException, FunctionEvaluationException {
        double accuracy = 0.000001;
-       double courseLengthInNauticalMiles = course.getTotalLength().getNauticalMiles(); 
+       double courseLengthInNauticalMiles = course1.getTotalLength().getNauticalMiles(); 
        ORCCertificate certificateMoana          = importer.getCertificate("GER 5549");
        ORCCertificate certificateMilan          = importer.getCertificate("GER 7323");
        ORCCertificate certificateTutima         = importer.getCertificate("GER 5609");
        ORCCertificate certificateBank           = importer.getCertificate("GER 5555");
        ORCCertificate certificateHaspa          = importer.getCertificate("GER 6300");
        ORCCertificate certificateHalbtrocken    = importer.getCertificate("GER 5564");
-       ORCPerformanceCurve performanceCurveMoana        = certificateMoana.getPerformanceCurve(course);
-       ORCPerformanceCurve performanceCurveMilan        = certificateMilan.getPerformanceCurve(course);
-       ORCPerformanceCurve performanceCurveTutima       = certificateTutima.getPerformanceCurve(course);
-       ORCPerformanceCurve performanceCurveBank         = certificateBank.getPerformanceCurve(course);
-       ORCPerformanceCurve performanceCurveHaspa        = certificateHaspa.getPerformanceCurve(course);
-       ORCPerformanceCurve performanceCurveHalbtrocken  = certificateHalbtrocken.getPerformanceCurve(course);
+       ORCPerformanceCurve performanceCurveMoana        = certificateMoana.getPerformanceCurve(course1);
+       ORCPerformanceCurve performanceCurveMilan        = certificateMilan.getPerformanceCurve(course1);
+       ORCPerformanceCurve performanceCurveTutima       = certificateTutima.getPerformanceCurve(course1);
+       ORCPerformanceCurve performanceCurveBank         = certificateBank.getPerformanceCurve(course1);
+       ORCPerformanceCurve performanceCurveHaspa        = certificateHaspa.getPerformanceCurve(course1);
+       ORCPerformanceCurve performanceCurveHalbtrocken  = certificateHalbtrocken.getPerformanceCurve(course1);
        
        assertNotNull(performanceCurveMoana);
        assertNotNull(performanceCurveMilan);

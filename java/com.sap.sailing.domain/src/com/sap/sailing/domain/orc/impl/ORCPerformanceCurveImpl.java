@@ -1,9 +1,7 @@
 package com.sap.sailing.domain.orc.impl;
 
-import java.awt.List;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -134,24 +132,23 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     }
         
     private Map<Speed, Duration> createAllowancePerLeg(ORCPerformanceCurveLeg leg) throws FunctionEvaluationException {
-        Map<Speed, Duration> result = new HashMap<>();
-        Double twa = leg.getTwa().getDegrees();
-        
-        
-        for (Speed entry : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
+        final Map<Speed, Duration> result = new HashMap<>();
+        final double twaDeg = leg.getTwa().getDegrees();
+        final double twaRad = leg.getTwa().getRadians();
+        for (final Speed entry : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
             // Case switching on TWA (0. TWA == 0; 1. TWA < Beat; 2. Beat < TWA < Gybe; 3. Gybe < TWA; 4. TWA == 180)
-            if (twa < beatAngles.get(entry).getDegrees()) {
-                // Case 0 & 1 - result = beatVMG * distance / cos(TWA)
-                result.put(entry, Duration.ONE_SECOND.times(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(entry, beatAngles.get(entry)).asSeconds() * leg.getLength().getNauticalMiles() * Math.abs(Math.cos(Math.toRadians(twa)))));
-            } else if (twa > gybeAngles.get(entry).getDegrees()) {
-                // Case 3 & 4 - result = runVMG * distance / cos(TWA)
-                result.put(entry, Duration.ONE_SECOND.times(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(entry, gybeAngles.get(entry)).asSeconds() * leg.getLength().getNauticalMiles() * Math.abs(Math.cos(Math.toRadians(twa)))));
+            // TODO (so ? beatAngles : gybeAngles)
+            if (twaDeg <= beatAngles.get(entry).getDegrees()) {
+                // Case 0 & 1 - result = beatVMG * distance * cos(TWA)
+                result.put(entry, Duration.ONE_SECOND.times(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(entry, beatAngles.get(entry)).asSeconds() * leg.getLength().getNauticalMiles()));
+            } else if (twaDeg >= gybeAngles.get(entry).getDegrees()) {
+                // Case 3 & 4 - result = runVMG * distance * cos(TWA)
+                result.put(entry, Duration.ONE_SECOND.times(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(entry, gybeAngles.get(entry)).asSeconds() * leg.getLength().getNauticalMiles()));
             } else {
                 // Case 2 - result is given through the laGrange Interpolation, between the Beat and Gybe Angles
                 result.put(entry, getLagrangeAllowancePerTrueWindSpeedAndAngle(entry, leg.getTwa()).times(leg.getLength().getNauticalMiles()));
             }
         }
-        
         return result;
     }
 
@@ -243,26 +240,27 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     private double[][] createPolarsPerTrueWindSpeed(Speed trueWindSpeed) {
         ArrayList<Double> resultWindAngles = new ArrayList<>();
         ArrayList<Double> resultAllowances = new ArrayList<>();
-        
         Bearing beatAngle = beatAngles.get(trueWindSpeed);
         Bearing gybeAngle = gybeAngles.get(trueWindSpeed);
+        final Bearing TWO_DEGREES = new DegreeBearingImpl(2);
+        final Bearing MINUS_TWO_DEGREES = new DegreeBearingImpl(-2);
         
-        resultWindAngles.add(beatAngle.add(new DegreeBearingImpl(-2)).getDegrees());
-        resultAllowances.add(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(trueWindSpeed, beatAngle).divide(Math.cos(Math.toRadians(beatAngle.add(new DegreeBearingImpl(-2)).getDegrees()))).asSeconds());
+        resultWindAngles.add(beatAngle.add(MINUS_TWO_DEGREES).getDegrees());
+        resultAllowances.add(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(trueWindSpeed, beatAngle).divide(Math.cos(beatAngle.add(MINUS_TWO_DEGREES).getRadians())).asSeconds());
         resultWindAngles.add(beatAngle.getDegrees());
-        resultAllowances.add(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(trueWindSpeed, beatAngle).asSeconds());
+        resultAllowances.add(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(trueWindSpeed, beatAngle).divide(Math.cos(beatAngle.getRadians())).asSeconds());
         
-        for(Bearing twa : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES) {
-            if(twa.compareTo(beatAngle) > 0 && twa.compareTo(gybeAngle) < 0) {
+        for (Bearing twa : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES) {
+            if (twa.compareTo(beatAngle) > 0 && twa.compareTo(gybeAngle) < 0) {
                 resultWindAngles.add(twa.getDegrees());
                 resultAllowances.add(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(trueWindSpeed, twa).asSeconds());
             }
         }
         
         resultWindAngles.add(gybeAngle.getDegrees());
-        resultAllowances.add(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(trueWindSpeed, gybeAngle).asSeconds());
-        resultWindAngles.add(gybeAngle.add(new DegreeBearingImpl(2)).getDegrees());
-        resultAllowances.add(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(trueWindSpeed, gybeAngle).divide(Math.abs(Math.cos(Math.PI - Math.toRadians(gybeAngle.add(new DegreeBearingImpl(2)).getDegrees())))).asSeconds());
+        resultAllowances.add(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(trueWindSpeed, gybeAngle).divide(Math.cos(Math.PI - gybeAngle.getRadians())).asSeconds());
+        resultWindAngles.add(gybeAngle.add(TWO_DEGREES).getDegrees());
+        resultAllowances.add(getDurationPerNauticalMileAtTrueWindAngleAndSpeed(trueWindSpeed, gybeAngle).divide(Math.cos(Math.PI - Math.toRadians(gybeAngle.add(TWO_DEGREES).getDegrees()))).asSeconds());
         
         return new double[][] {resultWindAngles.stream().mapToDouble(d -> d).toArray(), resultAllowances.stream().mapToDouble(d -> d).toArray()};
     }

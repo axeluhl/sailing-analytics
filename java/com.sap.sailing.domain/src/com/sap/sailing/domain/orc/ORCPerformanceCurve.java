@@ -8,8 +8,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 
-// TODO Finish Comments for API
-
 /**
  * For a {@link Competitor} and the {@link ORCPerformanceCurveCourse} which the competitor sailed until the creation of
  * an instance of an implementing class, this instance represents a so called "Perfromance Curve". This Curve is
@@ -18,13 +16,13 @@ import com.sap.sse.common.Speed;
  * course. For a given windspeed the performance curve returns the allowance for the boat or in simpler words: how long
  * should the boat need for a nautical mile when sailing 100% performance.
  * 
- * @author Daniel Lisunkin (i505543)
+ * @author Daniel Lisunkin (i505543)˝
  *
  */
 public interface ORCPerformanceCurve {
 
     /**
-     * 
+     * TODO Comment
      * 
      * @param timePerNauticalMile equals the average duration the boat needed to conquer one mile on the sailed subcourse, => totalTime / course.getTotalLength()
      * @return 
@@ -33,7 +31,7 @@ public interface ORCPerformanceCurve {
      * @throws MaxIterationsExceededException
      * @throws FunctionEvaluationException
      */
-    Speed getImpliedWind(Duration timePerNauticalMile) throws ArgumentOutsideDomainException, MaxIterationsExceededException, FunctionEvaluationException;
+    Speed getImpliedWind(Duration timePerNauticalMile) throws MaxIterationsExceededException, FunctionEvaluationException;
     
     /**
      * TODO getComment done
@@ -46,6 +44,7 @@ public interface ORCPerformanceCurve {
     Duration getCalculatedTime(ORCPerformanceCurve referenceBoat, Duration sailedDurationPerNauticalMile);
  
     /**
+     * TODO Comment
      * 
      * @param impliedWind
      * @return
