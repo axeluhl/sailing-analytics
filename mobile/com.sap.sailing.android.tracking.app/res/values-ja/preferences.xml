@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources>
+    
+    
+
+    <!-- override default values of android.shared -->
+    
+
+    
+
+    <string name="settings_category_energy_saving">"バッテリー節約"</string>
+    
+    
+    
+    <string name="preference_energy_saving_sending_interval">"GPS アップデート送信間隔を選択"</string> 
+    <string name="preference_energy_saving_sending_interval_summary">"使用ケースに応じて、アップデートの間隔が妥当な範囲になるようにしつつバッテリーが持つようにするために、できるだけ大きい値を選択します。"</string>
+
+    <string name="preference_energy_saving_sending_interval_message">"GPS アップデートがサーバ %1$s %2$s に送信されます。"</string>
+    
+    <string name="preference_energy_saving_sending_interval_message_every">"毎"</string>
+    <string-array name="preference_energy_saving_sending_interval_entries">
+    	<item>"即時"</item>
+    	<item>"5 秒"</item>
+    	<item>"10 秒"</item>
+    	<item>"20 秒"</item>
+    	<item>"60 秒"</item>
+	</string-array>
+	
+
+    
+    
+    
+    
+    
+    
+
+    <string name="preference_heading_with_declination_subtracted_is_enabled">"オン"</string>
+    <string name="preference_heading_with_declination_subtracted_is_disabled">"オフ"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">"表示: 磁方位"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">"表示: 真方位"</string>
+    <string name="preference_heading_with_declination_subtracted_enabled">"ヘッダ"</string>
+</resources>

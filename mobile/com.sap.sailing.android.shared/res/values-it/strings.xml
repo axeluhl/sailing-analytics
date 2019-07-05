@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources xmlns:tools="http://schemas.android.com/tools">
+
+    
+    
+    <string name="options_menu_live">"Informazioni sulla connessione"</string>
+    <string name="remove">"Rimuovi"</string>
+    <string name="enter_new_item">"Inserisci nuovo elemento"</string>
+    <string name="add">"Aggiungi"</string>
+    <string name="there_are_no_items_yet_">"Non c\'è ancora nessun elemento."</string>
+
+    <!-- SystemInformationActivity -->
+    
+    
+    
+    
+    
+    
+    
+    
+
+    <!-- Generic -->
+    
+    <string name="generic_error">"Errore"</string>
+    <string name="about">"Info"</string>
+
+    <!-- Signal quality -->
+    <string name="signal_accuracy_indicator_view_description">"Accuratezza GPS"</string>
+    <string name="poor">"scarso"</string>
+    <string name="good">"buono"</string>
+    <string name="great">"ottimo"</string>
+    <string name="no_signal">"assenza di segnale"</string>
+    <string name="ok">"OK"</string>
+
+    <!-- Regatta -->
+    <string name="your_regattas">"Le tue regate:"</string>
+    <string name="options_refresh">"Aggiorna"</string>
+
+    <!-- QR Code -->
+    <string name="notify_user_db_operation_failed">"Errore: operazione database non riuscita."</string>
+    <string name="no_qr_code_popup_title">"Nessun codice QR?"</string>
+    <string name="no_qr_code_popup_message">"Se non hai ricevuto un codice QR contatta i responsabili della gestione della gara."</string>
+    <string name="error_play_store_and_scanning_not_available">"PlayStore e scansione non disponibili."</string>
+    <string name="scanning_cancelled">"Scansione annullata"</string>
+    <string name="error_scanning_qrcode">"Errore nella scansione del codice QR {codice risultato}"</string>
+    <string name="notify_user_api_call_failed">"Si è verificato un errore nel tentativo di contattare il server. Riprovare."</string>
+    <string name="please_wait">"Attendi"</string>
+    <string name="error_invalid_qr_code">"Codice QR non valido"</string>
+    
+    
+    
+
+    <!-- Eula -->
+    <string name="eula_title">"Licenza per utente finale"</string>
+    <string name="eula_message">"Utilizzando questa App si conferma di accettare il contratto di licenza per utente finale SAP SE. Leggere il contratto di licenza per utente finale qui."</string>
+    <string name="eula_confirm">"Conferma"</string>
+    <string name="linked_eula_message_part">"qui"</string>
+
+    <!-- About this app -->
+    <string name="about_this_app">"Informazioni sull\'app"</string>
+    <string name="eula">"EULA"</string>
+    <string name="license_information">"Informazioni sulla licenza"</string>
+
+    <!-- HTTP Requests -->
+    
+    
+    
+    
+
+    <!-- Dialog -->
+    <string name="yes">"Sì"</string>
+    <string name="no">"No"</string>
+    <string name="warning">"Messaggio di avvertimento"</string>
+    <string name="enable_gps">"Il GPS è disattivato. Questa app richiede posizioni GPS. Attivare il GPS con la parametrizzazione dell\'ubicazione?"</string>
+
+    <!-- Message Sending -->
+    <string name="sending_waiting">"Attualmente %1$d eventi attendono di essere inviati.\nL\'ultimo invio eseguito correttamente è avvenuto alle %2$s"</string>
+    <string name="sending_no_waiting">"Attualmente non vi sono eventi in attesa di invio."</string>
+
+    <!-- Competitor list footer text -->
+    <string name="footer_text">"Ulteriori informazioni su"</string>
+    <string name="footer_text_link">"https://www.sapsailing.com"</string>
+
+    <string name="yesterday">"Ieri"</string>
+    <string name="today">"Oggi"</string>
+    <string name="tomorrow">"Domani"</string>
+    
+    
+
+    
+
+</resources>

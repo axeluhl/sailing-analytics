@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources>
+    
+    
+
+    <!-- override default values of android.shared -->
+    
+
+    
+
+    <string name="settings_category_energy_saving">"Poupança de bateria"</string>
+    
+    
+    
+    <string name="preference_energy_saving_sending_interval">"selecionar intervalo de envio de atualização do GPS"</string> 
+    <string name="preference_energy_saving_sending_interval_summary">"Selecione um valor o mais alto possível para preservar a vida da bateria, ao mesmo tempo que é mantida uma experiência ao vivo razoável, dependendo do seu caso de utilização."</string>
+
+    <string name="preference_energy_saving_sending_interval_message">"As atualizações do GPS serão enviadas para o servidor%1$s %2$s."</string>
+    
+    <string name="preference_energy_saving_sending_interval_message_every">"a cada"</string>
+    <string-array name="preference_energy_saving_sending_interval_entries">
+    	<item>"imediatamente"</item>
+    	<item>"5 segundos"</item>
+    	<item>"10 segundos"</item>
+    	<item>"20 segundos"</item>
+    	<item>"60 segundos"</item>
+	</string-array>
+	
+
+    
+    
+    
+    
+    
+    
+
+    <string name="preference_heading_with_declination_subtracted_is_enabled">"On"</string>
+    <string name="preference_heading_with_declination_subtracted_is_disabled">"Off"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">"Exibição: magnético"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">"Exibição: verdadeiro"</string>
+    <string name="preference_heading_with_declination_subtracted_enabled">"Direção da bússola"</string>
+</resources>

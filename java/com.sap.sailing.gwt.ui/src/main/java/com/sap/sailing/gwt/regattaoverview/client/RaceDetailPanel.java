@@ -134,7 +134,7 @@ public class RaceDetailPanel extends SimplePanel {
 
     private void resetProcedureGrid() {
         procedureGrid.removeAllRows();
-        procedureGrid.setWidget(0, 0, new Label("Start procedure"));
+        procedureGrid.setWidget(0, 0, new Label(stringMessages.startProcedure()));
         procedureGrid.setWidget(0, 1, startProcedureLabel);
     }
 
@@ -226,7 +226,7 @@ public class RaceDetailPanel extends SimplePanel {
                     LineStartInfoDTO rrsInfo = (LineStartInfoDTO) data.raceInfo.startProcedureDTO;
                     if (rrsInfo != null) {
                         if (rrsInfo.startModeFlag != null) {
-                            showProcedureInfo("Start mode", rrsInfo.startModeFlag.toString());
+                            showProcedureInfo(stringMessages.startMode(), rrsInfo.startModeFlag.toString());
                         }
                     }
                     break;
@@ -237,7 +237,7 @@ public class RaceDetailPanel extends SimplePanel {
                             showProcedureInfo("Pathfinder", gateInfo.pathfinderId);
                         }
                         if (gateInfo.gateLineOpeningTime != null) {
-                            showProcedureInfo("Gate Opening Time", (int) (gateInfo.gateLineOpeningTime / 1000. / 60.)
+                            showProcedureInfo(stringMessages.gateOpeningTime(), (int) (gateInfo.gateLineOpeningTime / 1000. / 60.)
                                     + "min");
                         }
                     }
