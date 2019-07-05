@@ -9,16 +9,16 @@ import com.sap.sailing.domain.orc.ORCPerformanceCurveLeg;
 import com.sap.sse.common.Distance;
 
 public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse {
-
-    private List<ORCPerformanceCurveLeg> legs;
-    private Distance totalLength;
+    private final List<ORCPerformanceCurveLeg> legs;
+    private final Distance totalLength;
 
     public ORCPerformanceCurveCourseImpl(List<ORCPerformanceCurveLeg> legs) {
         this.legs = Collections.unmodifiableList(legs);
-        totalLength = Distance.NULL;
+        Distance myTotalLength = Distance.NULL;
         for (ORCPerformanceCurveLeg leg : legs) {
-            totalLength = totalLength.add(leg.getLength());
+            myTotalLength = myTotalLength.add(leg.getLength());
         }
+        totalLength = myTotalLength;
     }
 
     public ORCPerformanceCurveLeg getLeg(int i) {
@@ -49,5 +49,9 @@ public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse 
             return new ORCPerformanceCurveCourseImpl(resultLegs);
         }
     }
-    
+
+    @Override
+    public String toString() {
+        return "[legs=" + legs + ", totalLength=" + totalLength + "]";
+    }
 }

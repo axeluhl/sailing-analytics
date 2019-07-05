@@ -27,7 +27,6 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.impl.DegreeBearingImpl;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 /**
  * For a {@link Competitor} and the {@link ORCPerformanceCurveCourse} which the competitor sailed until the creation of
@@ -116,10 +115,13 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             // Case switching on TWA (0. TWA == 0; 1. TWA < Beat; 2. Beat < TWA < Gybe; 3. Gybe < TWA; 4. TWA == 180)
             if (leg.getTwa().compareTo(beatAngles.get(tws)) <= 0) {
                 // Case 0 & 1 - result = beatVMG * distance * cos(TWA)
-                result.put(tws, beatVMGPredictionPerTrueWindSpeed.get(tws).getDuration(/* rhumb line distance of upwind leg */ leg.getLength()));
+                // FIXME if the leg is an upwind but not at 0deg we need to project the VMG by the cos(legTWA)
+                result.put(tws, beatVMGPredictionPerTrueWindSpeed.get(tws).getDuration(
+                        /* rhumb line distance of upwind leg projected to wind */ leg.getLength().scale(Math.cos(leg.getTwa().getRadians()))));
             } else if (leg.getTwa().compareTo(runAngles.get(tws)) >= 0) {
                 // Case 3 & 4 - result = runVMG * distance * cos(TWA)
-                result.put(tws, runVMGPredictionPerTrueWindSpeed.get(tws).getDuration(/* rhumb line distance of upwind leg */ leg.getLength()));
+                result.put(tws, runVMGPredictionPerTrueWindSpeed.get(tws).getDuration(
+                        /* rhumb line distance of downwind leg projected to wind */ leg.getLength().scale(Math.cos(Math.PI-leg.getTwa().getRadians()))));
             } else {
                 // Case 2 - result is given through the laGrange Interpolation, between the Beat and Gybe Angles
                 result.put(tws,

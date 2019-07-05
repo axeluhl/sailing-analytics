@@ -41,15 +41,15 @@ public class TestORCPerformanceCurve {
     @Rule
     public ErrorCollector collector = new ErrorCollector();
     
-    public void assertEquals(double a, double b, double accuracy){
-        try{
+    public void assertEquals(double a, double b, double accuracy) {
+        try {
             Assert.assertEquals(a, b, accuracy);
-        } catch(AssertionError e){
-            if(collectErrors) {
+        } catch (AssertionError e) {
+            if (collectErrors) {
                 collector.addError(e);
             }
         }
-   }
+    }
     
     @BeforeClass
     public static void initialize() throws IOException, ParseException {
@@ -133,7 +133,7 @@ public class TestORCPerformanceCurve {
     }
 
     @Test
-    public void testPerformanceCurveInvertation() throws MaxIterationsExceededException, FunctionEvaluationException {
+    public void testPerformanceCurveInversion() throws MaxIterationsExceededException, FunctionEvaluationException {
         Double accuracy = 0.1;
         ORCCertificateImpl certificate = (ORCCertificateImpl) importer.getCertificate("GER 5549");
         ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(course1);
@@ -152,10 +152,12 @@ public class TestORCPerformanceCurve {
         assertEquals(impliedWindInKnots, performanceCurve.getImpliedWind(performanceCurve.getAllowancePerCourse(new KnotSpeedImpl( impliedWindInKnots))).getKnots(), accuracy);
     }
 
-    private void testForwardBackward(Double accuracy, ORCPerformanceCurveImpl performanceCurve, final int secondsPerNauticalMile)
+    private void testForwardBackward(Double accuracy, ORCPerformanceCurveImpl performanceCurve, final double secondsPerNauticalMile)
             throws ArgumentOutsideDomainException, MaxIterationsExceededException, FunctionEvaluationException {
-        assertEquals(secondsPerNauticalMile*course1.getTotalLength().getNauticalMiles(),
-                performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(Duration.ONE_SECOND.times(secondsPerNauticalMile))).asSeconds(), accuracy);
+        final double secondsForCourse = secondsPerNauticalMile*course1.getTotalLength().getNauticalMiles();
+        assertEquals(secondsForCourse,
+                performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(
+                        Duration.ONE_SECOND.times(secondsForCourse))).asSeconds(), accuracy);
     }
     
     // Tests for a Implied Wind calculation for a simple predefined course. The solutions are extracted from the provided ORC TestPCS.exe application. 
