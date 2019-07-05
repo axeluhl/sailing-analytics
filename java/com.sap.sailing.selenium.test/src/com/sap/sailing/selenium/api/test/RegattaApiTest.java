@@ -4,6 +4,7 @@ import static com.sap.sailing.domain.common.CompetitorRegistrationType.CLOSED;
 import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
+import static com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage.goToPage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -26,6 +27,7 @@ import com.sap.sailing.selenium.api.regatta.RaceColumn;
 import com.sap.sailing.selenium.api.regatta.Regatta;
 import com.sap.sailing.selenium.api.regatta.RegattaApi;
 import com.sap.sailing.selenium.api.regatta.RegattaRaces;
+import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class RegattaApiTest extends AbstractSeleniumTest {
@@ -41,6 +43,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
     @Before
     public void setUp() {
         clearState(getContextRoot());
+        super.setUp();
     }
 
     @Test
@@ -120,8 +123,11 @@ public class RegattaApiTest extends AbstractSeleniumTest {
     
     @Test
     public void testRegisterExistingCompetitorWithSecret() {
+        final AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
+        adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
+        
         SecurityApi securityApi = new SecurityApi();
-        final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), ApiContext.SECURITY_CONTEXT);
         securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
         final ApiContext userWithCompetitorCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
         securityApi.createUser(adminSecurityCtx, "dagobert", "Dagobert Duck", null, "daisy1337");
@@ -132,9 +138,9 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         Competitor competitor = regattaApi.createAndAddCompetitor(userWithCompetitorCtx, EVENT_NAME, BOAT_CLASS, null, "donald", "USA");
         
         // This is the event to register the existing competitor for
-        Event eventToRegisterExistingCompetitor = eventApi.createEvent(userWithCompetitorCtx, OTHER_EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.OPEN_UNMODERATED, "default");
+        Event eventToRegisterExistingCompetitor = eventApi.createEvent(userOwningEventCtx, OTHER_EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.OPEN_UNMODERATED, "default");
         regattaApi.addCompetitor(userWithCompetitorCtx, OTHER_EVENT_NAME, competitor.getId(), Optional.of(eventToRegisterExistingCompetitor.getSecret()));
-        Regatta regatta = regattaApi.getRegatta(userOwningEventCtx, OTHER_EVENT_NAME);
-        System.out.println(regatta.getJson());
+        
+        // TODO check if the competitor is added to the regatta
     }
 }
