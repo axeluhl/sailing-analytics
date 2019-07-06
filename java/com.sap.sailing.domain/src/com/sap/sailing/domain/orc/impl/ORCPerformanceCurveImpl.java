@@ -44,6 +44,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
  * for details. The true wind angles are symmetrical, assuming that the boat performs equally well on both tacks.
  * 
  * @author Daniel Lisunkin (i505543)
+ * @author Axel Uhl (d043530)
  * 
  */
 public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurve {
@@ -62,7 +63,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      * calculated points. The input for the function is the value of the implied wind (speed in kts) and the output an
      * allowance in sec/nm.
      */
-    private final PolynomialSplineFunction functionImpliedWindInKnotsToAllowanceInSecondsForCourse;
+    private final PolynomialSplineFunction functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse;
 
     /**
      * Accepts the simplified polar data, one "column" for each of the defined true wind speeds, where each column is a
@@ -73,7 +74,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed, Map<Speed, Bearing> runAngles,
             Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed, ORCPerformanceCurveCourse course) throws FunctionEvaluationException {
         this.course = course;
-        functionImpliedWindInKnotsToAllowanceInSecondsForCourse = createPerformanceCurve(twaAllowances, beatAngles,
+        functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse = createPerformanceCurve(twaAllowances, beatAngles,
                 beatVMGPredictionPerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed);
     }
 
@@ -133,8 +134,20 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     }
 
     /**
-     * Computes a function that, given a true wind speed (TWS) calculates the duration (in seconds) that the boat to
-     * which this performance curve belongs is expected to sail to complete the {@link #course}.
+     * Computes a function that, given a true wind speed (TWS) calculates the average speed in knots at which the boat
+     * to which this performance curve belongs is expected to sail the {@link #course}.
+     * <p>
+     * 
+     * The original interpolation in the ORC PCS Pascal code uses the true wind speed values on the X axis and the
+     * average velocities in knots on the Y axis. The allowances in seconds per nautical mile are then obtained by
+     * dividing 3600 by the average velocity in knots.
+     * <p>
+     * 
+     * The points for the interpolation are constructed from the allowances for each true wind speed value taken from
+     * {@link ORCCertificateImpl#ALLOWANCES_TRUE_WIND_SPEEDS}, extended on the left by the value 0 and to the right by
+     * the value 10000. On the left, the velocity assumed at 0kts true wind speed is 0kts. On the right, the velocity
+     * assumed at 10000kts true wind speed is the same as for the highest wind speed from the original list.
+     * <p>
      */
     private PolynomialSplineFunction createPerformanceCurve(Map<Speed, Map<Bearing, Speed>> twaAllowances,
             Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
@@ -142,57 +155,64 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         final Map<Speed, Duration> allowancesForCoursePerTrueWindSpeed = createAllowancesPerCourse(twaAllowances, beatAngles,
                 beatVMGPredictionPerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed);
         SplineInterpolator interpolator = new SplineInterpolator();
-        double[] xs = new double[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length];
-        double[] ys = new double[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length];
+        double[] xs = new double[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length+2];
+        double[] ys = new double[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length+2];
         int i = 0;
+        xs[i] = 0; // see original Pascal code; the first "knot" is set to (0.0, 0.0)
+        ys[i] = 0;
+        i++;
         for (final Entry<Speed, Duration> entry : allowancesForCoursePerTrueWindSpeed.entrySet()) {
             xs[i] = entry.getKey().getKnots();
-            ys[i] = entry.getValue().asSeconds();
+            ys[i] = getCourse().getTotalLength().inTime(entry.getValue()).getKnots();
             i++;
         }
+        xs[i] = 10000;   // see original Pascal code; the last "knot" is at 10000 knots of true wind speed
+        ys[i] = ys[i-1]; // and repeats the last allowance, probably to flatten the curve at its end
         return interpolator.interpolate(xs, ys);
     }
     
     @Override
     public Speed getImpliedWind(Duration durationToCompleteCourse) throws MaxIterationsExceededException, FunctionEvaluationException{
-        PolynomialFunction workingFunction;
-        double durationToCompleteCourseInSeconds = durationToCompleteCourse.asSeconds();
-        double[] allowancesInSecondsToCompleteCourse = Arrays.stream(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS).mapToDouble(tws->{
+        final Speed averageSpeedOnCourse = getCourse().getTotalLength().inTime(durationToCompleteCourse);
+        final PolynomialFunction workingFunction;
+        final double[] averageSpeedsInKnotsForTotalCourseByTrueWindSpeed = Arrays.stream(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS).mapToDouble(tws->{
             try {
-                return functionImpliedWindInKnotsToAllowanceInSecondsForCourse.value(tws.getKnots());
+                return functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse.value(tws.getKnots());
             } catch (ArgumentOutsideDomainException e) {
                 throw new RuntimeException(e);
             }
         }).toArray();
         final Speed result;
         // Corner cases for Allowance > Allowance(20kt) or Allowance < Allowance(6kt)
-        if (durationToCompleteCourseInSeconds <= allowancesInSecondsToCompleteCourse[allowancesInSecondsToCompleteCourse.length - 1]) {
+        if (averageSpeedOnCourse.getKnots() >= averageSpeedsInKnotsForTotalCourseByTrueWindSpeed[averageSpeedsInKnotsForTotalCourseByTrueWindSpeed.length-1]) {
             result = ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length-1];
-        } else if (durationToCompleteCourseInSeconds >= allowancesInSecondsToCompleteCourse[0]) {
+        } else if (averageSpeedOnCourse.getKnots() <= averageSpeedsInKnotsForTotalCourseByTrueWindSpeed[0]) {
             result = ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[0];
         } else {
             // find the polynomial splined function that produces the durationToCompleteCourse within its validity range
-            int i = 0;
-            while (i < allowancesInSecondsToCompleteCourse.length && durationToCompleteCourseInSeconds <= allowancesInSecondsToCompleteCourse[i]) {
+            int i = 1; // skip the auxiliary spline segment from (0.0, 0.0) to (6.0, ...)
+            while (i < averageSpeedsInKnotsForTotalCourseByTrueWindSpeed.length && averageSpeedOnCourse.getKnots() >= averageSpeedsInKnotsForTotalCourseByTrueWindSpeed[i-1]) {
                 i++;
             }
             i--;
-            workingFunction = functionImpliedWindInKnotsToAllowanceInSecondsForCourse.getPolynomials()[i];
-            //PolynomialFunction which will be solved by the Newton Approach
-            PolynomialFunction subtractedFunction = workingFunction.subtract(new PolynomialFunction(new double[] {durationToCompleteCourseInSeconds}));
+            workingFunction = functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse.getPolynomials()[i];
+            // PolynomialFunction which will be solved by the Newton Approach
+            PolynomialFunction subtractedFunction = workingFunction.subtract(new PolynomialFunction(new double[] {averageSpeedOnCourse.getKnots()}));
             NewtonSolver solver = new NewtonSolver();
             solver.setAbsoluteAccuracy(0.00000001);
             // TODO Comment for the special treatment of the solver
             result = new KnotSpeedImpl(solver.solve(subtractedFunction, 0,
-                    functionImpliedWindInKnotsToAllowanceInSecondsForCourse.getKnots()[i + 1] - functionImpliedWindInKnotsToAllowanceInSecondsForCourse.getKnots()[i])
-                    + functionImpliedWindInKnotsToAllowanceInSecondsForCourse.getKnots()[i]);
+                    functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse.getKnots()[i + 1] - functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse.getKnots()[i])
+                    + functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse.getKnots()[i]);
         }
         return result;
     }
     
     @Override
-    public Duration getAllowancePerCourse(Speed impliedWind) throws ArgumentOutsideDomainException {
-        return Duration.ONE_SECOND.times(functionImpliedWindInKnotsToAllowanceInSecondsForCourse.value(impliedWind.getKnots()));
+    public Duration getAllowancePerCourse(Speed trueWindSpeed) throws ArgumentOutsideDomainException {
+        return new KnotSpeedImpl(
+                functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse.value(trueWindSpeed.getKnots()))
+                        .getDuration(getCourse().getTotalLength());
     }
 
     @Override
@@ -276,12 +296,12 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     /**
      * Obtains the durations that the boat for which this performance curve was created is expected to sail to complete
      * the {@link #course} (which may be a prefix of a longer course) at the true wind speed provided to the resulting
-     * map as the key.
+     * map as the key. Iteration order is in ascending true wind speeds.
      */
-    public Map<Speed, Duration> getAllowancesPerTrueWindSpeedsForCourse() throws ArgumentOutsideDomainException {
-        final Map<Speed, Duration> result = new HashMap<>();
+    public LinkedHashMap<Speed, Duration> getAllowancesPerTrueWindSpeedsForCourse() throws ArgumentOutsideDomainException {
+        final LinkedHashMap<Speed, Duration> result = new LinkedHashMap<>();
         for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
-            result.put(tws, Duration.ONE_SECOND.times(functionImpliedWindInKnotsToAllowanceInSecondsForCourse.value(tws.getKnots())));
+            result.put(tws, getAllowancePerCourse(tws));
         }
         return result;
     }
@@ -289,12 +309,24 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     @Override
     public String toString() {
         try {
-            return "ORCPerformanceCurve [Allowances " + getAllowancesPerTrueWindSpeedsForCourse() + "]";
+            return "ORCPerformanceCurve [Allowances " + allowancesToString(getAllowancesPerTrueWindSpeedsForCourse()) + "]";
         } catch (FunctionEvaluationException e) {
             logger.warning("Exception trying to compute string representation of an ORC Performance Curve object: "+e.getMessage());
             throw new RuntimeException(e);
         }
     }
 
-    
+    private String allowancesToString(Map<Speed, Duration> allowancesPerTrueWindSpeedsForCourse) {
+        final StringBuilder result = new StringBuilder();
+        for (final Entry<Speed, Duration> e : allowancesPerTrueWindSpeedsForCourse.entrySet()) {
+            result.append(e.getKey());
+            result.append(':');
+            final Speed averageSpeed = getCourse().getTotalLength().inTime(e.getValue());
+            result.append(averageSpeed.getDuration(ORCCertificateImpl.NAUTICAL_MILE).asSeconds());
+            result.append("s/NM, ");
+            result.append(e.getValue().asSeconds());
+            result.append("s total; ");
+        }
+        return result.substring(0, result.length()-2).toString();
+    }
 }

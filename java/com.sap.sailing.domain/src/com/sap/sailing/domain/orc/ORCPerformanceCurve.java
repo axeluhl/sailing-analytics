@@ -40,9 +40,10 @@ public interface ORCPerformanceCurve {
     Duration getCalculatedTime(ORCPerformanceCurve referenceBoat, Duration sailedDurationPerNauticalMile) throws MaxIterationsExceededException, FunctionEvaluationException;
  
     /**
-     * TODO Comment
+     * The duration that the boat represented by this performance curve is predicted to take to sail the
+     * {@link #getCourse() course} at the given {@code trueWindSpeed}.
      */
-    Duration getAllowancePerCourse(Speed impliedWind) throws ArgumentOutsideDomainException;
+    Duration getAllowancePerCourse(Speed trueWindSpeed) throws ArgumentOutsideDomainException;
     
     ORCPerformanceCurveCourse getCourse();
 }
