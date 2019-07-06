@@ -175,11 +175,10 @@ public class TestORCPerformanceCurve {
        ORCPerformanceCurve performanceCurveBank         = certificateBank.getPerformanceCurve(course1);
        ORCPerformanceCurve performanceCurveHaspa        = certificateHaspa.getPerformanceCurve(course1);
        ORCPerformanceCurve performanceCurveHalbtrocken  = certificateHalbtrocken.getPerformanceCurve(course1);
-       assertNotNull(performanceCurveMoana);
-       assertNotNull(performanceCurveMilan);
        // Test for corner case and if the algorithm reacts to the boundaries of 6 and 20 kts.
        assertEquals( 6.0    , performanceCurveMoana.getImpliedWind(Duration.ONE_HOUR.times(24)).getKnots(), accuracy);
        assertEquals(20.0    , performanceCurveMoana.getImpliedWind(Duration.ONE_HOUR.divide(24)).getKnots(), accuracy);
+       assertEquals(performanceCurveMilan.getAllowancePerCourse(new KnotSpeedImpl(12.796996347329166)).asSeconds(), Duration.ONE_HOUR.asSeconds(), accuracy); 
        assertEquals(12.89281, performanceCurveMilan      .getImpliedWind(Duration.ONE_HOUR.times(1.0)).getKnots(), accuracy);
        assertEquals(8.72668 , performanceCurveTutima     .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
        assertEquals(8.07591 , performanceCurveBank       .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
