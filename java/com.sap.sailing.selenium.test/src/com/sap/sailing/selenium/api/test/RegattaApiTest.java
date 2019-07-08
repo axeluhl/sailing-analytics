@@ -15,6 +15,7 @@ import java.util.Optional;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -167,6 +168,39 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         Event eventToRegisterExistingCompetitor = eventApi.createEvent(userOwningEventCtx, OTHER_EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.OPEN_UNMODERATED, "default");
         regattaApi.addCompetitor(userWithCompetitorCtx, OTHER_EVENT_NAME, competitor.getId(), Optional.of(eventToRegisterExistingCompetitor.getSecret()));
         
+        // TODO check if the competitor is added to the regatta
+    }
+
+    @Test
+    public void testRegisterExistingCompetitorWithBadSecret() {
+        final AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
+        adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
+
+        SecurityApi securityApi = new SecurityApi();
+        final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), ApiContext.SECURITY_CONTEXT);
+        securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
+        final ApiContext userWithCompetitorCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald",
+                "daisy0815");
+        securityApi.createUser(adminSecurityCtx, "dagobert", "Dagobert Duck", null, "daisy1337");
+        final ApiContext userOwningEventCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "dagobert",
+                "daisy1337");
+
+        // TODO we currently can't just create a competitor using the API. This is only possible by using a temporary
+        // Event/Regatta.
+        eventApi.createEvent(userWithCompetitorCtx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
+        Competitor competitor = regattaApi.createAndAddCompetitor(userWithCompetitorCtx, EVENT_NAME, BOAT_CLASS, null,
+                "donald", "USA");
+
+        // This is the event to register the existing competitor for
+        Event eventToRegisterExistingCompetitor = eventApi.createEvent(userOwningEventCtx, OTHER_EVENT_NAME, BOAT_CLASS,
+                CompetitorRegistrationType.OPEN_UNMODERATED, "default");
+        try {
+            regattaApi.addCompetitor(userWithCompetitorCtx, OTHER_EVENT_NAME, competitor.getId(),
+                    Optional.of(eventToRegisterExistingCompetitor.getSecret() + "bad"));
+            Assert.fail("Expected error because of bad secret.");
+        } catch (RuntimeException e) {
+            Assert.assertTrue("Exepcted HTTP 401 - Unauthorized", e.getMessage().contains("rc=401"));
+        }
         // TODO check if the competitor is added to the regatta
     }
 }
