@@ -327,6 +327,6 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             result.append(e.getValue().asSeconds());
             result.append("s total; ");
         }
-        return result.substring(0, result.length()-2).toString();
+        return result.substring(0, result.length()-2);
     }
 }

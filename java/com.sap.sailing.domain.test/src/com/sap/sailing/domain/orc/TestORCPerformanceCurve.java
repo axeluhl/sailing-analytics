@@ -73,34 +73,34 @@ public class TestORCPerformanceCurve {
     @Test
     public void testLagrangeInterpolation60() throws FunctionEvaluationException {
         ORCCertificate certificate = importer.getCertificate("GER 5549");
-        test(certificate, 60.0, 498.4);
+        testAllowancePerLeg(certificate, 60.0, 498.4);
     }
     
     @Test
     public void testLagrangeInterpolation62_5() throws FunctionEvaluationException {
         ORCCertificate certificate = importer.getCertificate("GER 5549");
-        test(certificate, 62.5, 492.2, 425.0, 403.6, 393.1, 386.7, 382.6, 371.4);
+        testAllowancePerLeg(certificate, 62.5, 492.2, 425.0, 403.6, 393.1, 386.7, 382.6, 371.4);
     }
     
     @Test
     public void testLagrangeInterpolation98_3() throws FunctionEvaluationException {
         ORCCertificate certificate = importer.getCertificate("GER 5549");
-        test(certificate, 98.3, 483.6, 418.7, 394.8, 377.9, 360.2, 345.0, 321.7);
+        testAllowancePerLeg(certificate, 98.3, 483.6, 418.7, 394.8, 377.9, 360.2, 345.0, 321.7);
     }
     
     @Test
     public void testLagrangeInterpolation120() throws FunctionEvaluationException {
         ORCCertificate certificate = importer.getCertificate("GER 5549");
-        test(certificate, 120.0, 506);
+        testAllowancePerLeg(certificate, 120.0, 506);
     }
     
     @Test
     public void testLagrangeInterpolation138_7() throws FunctionEvaluationException {
         ORCCertificate certificate = importer.getCertificate("GER 5549");
-        test(certificate, 138.7, 588.1, 468.4, 413.8, 382.6, 355.1, 326.4, 275.4);
+        testAllowancePerLeg(certificate, 138.7, 588.1, 468.4, 413.8, 382.6, 355.1, 326.4, 275.4);
     }
     
-    private void test(ORCCertificate certificate, double twa, double... expectedAllowancesPerTrueWindSpeed) throws FunctionEvaluationException {
+    private void testAllowancePerLeg(ORCCertificate certificate, double twa, double... expectedAllowancesPerTrueWindSpeed) throws FunctionEvaluationException {
         Double accuracy = 0.1;
         final ORCPerformanceCurveCourse course = new ORCPerformanceCurveCourseImpl(Arrays.asList(new ORCPerformanceCurveLegImpl(ORCCertificateImpl.NAUTICAL_MILE, new DegreeBearingImpl(twa))));
         final ORCPerformanceCurve performanceCurve = certificate.getPerformanceCurve(course);
@@ -121,10 +121,10 @@ public class TestORCPerformanceCurve {
         ORCPerformanceCurveCourse simpleCourse = new ORCPerformanceCurveCourseImpl(legs);
         ORCPerformanceCurve performanceCurve = certificate.getPerformanceCurve(simpleCourse);
         assertNotNull(performanceCurve);
-        testAllowance(performanceCurve, 654.4, 538.6, 485.1, 458.7, 444.1, 430.3, 404.3);
+        testAllowancePerCourse(performanceCurve, 654.4, 538.6, 485.1, 458.7, 444.1, 430.3, 404.3);
     }
 
-    private void testAllowance(ORCPerformanceCurve performanceCurve, double... allowancePerNauticalMileInSeconds) throws ArgumentOutsideDomainException {
+    private void testAllowancePerCourse(ORCPerformanceCurve performanceCurve, double... allowancePerNauticalMileInSeconds) throws ArgumentOutsideDomainException {
         for (int i=0; i<allowancePerNauticalMileInSeconds.length; i++) {
             assertEquals(allowancePerNauticalMileInSeconds[i]*performanceCurve.getCourse().getTotalLength().getNauticalMiles(),
                     performanceCurve.getAllowancePerCourse(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i]).asSeconds(), 0.3);
@@ -181,8 +181,8 @@ public class TestORCPerformanceCurve {
        assertEquals(performanceCurveMilan.getAllowancePerCourse(new KnotSpeedImpl(12.809089256546626)).asSeconds(), Duration.ONE_HOUR.asSeconds(), accuracy); 
        // scratch sheets and implied wind as calculated by Altura for course1 and 1:00:00 / 1:30:00 time sailed, respectively:
        //               6kts    8kts    10kts   12kts   14kts   16kts   20kts   implied wind    Altura          ORC Scorer      ORC PCS Test    SAP
-       // Milan:        675.2   539.5   473.1   437.6   412.7   388.8   350.8                   12.8091135      12.80881        12.89281        12.796996
-       // Moana:        775.7   627.5   549.9   512.4   493.3   473.1   435.0                   7.76029797      7.76218         7.76218         7.783746
+       // Milan:        675.2   539.5   473.1   437.6   412.7   388.8   350.8                   12.8091135      12.80881        12.89281        12.809089
+       // Moana:        775.7   627.5   549.9   512.4   493.3   473.1   435.0                   7.76029797      7.76218         7.76218         7.7602936
        
        // scratch sheet as computed by ORC Scorer:
        //               6kts    8kts    10kts   12kts   14kts   16kts   20kts
