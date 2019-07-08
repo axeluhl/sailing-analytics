@@ -27,8 +27,10 @@ import com.sap.sse.common.impl.TimeRangeImpl;
 /**
  * A sequence of {@link Candidate}s such that the track of smoothed GPS fixes between them fits into a bounding box that
  * has a maximum {@link Bounds#getDiameter() diameter} of {@link #CANDIDATE_FILTER_DISTANCE}. Candidates less than
- * {@link #CANDIDATE_FILTER_TIME_WINDOW} away from one of the ends of this sequence are considered valid and are returned
- * from {@link #getValidCandidates()}.<p>
+ * {@link #CANDIDATE_FILTER_TIME_WINDOW} away from one of the ends of this sequence as well as the first and the last
+ * candidate for each waypoint for which candidates exist in this sequence are considered valid and are returned from
+ * {@link #getValidCandidates()}.
+ * <p>
  * 
  * @author Axel Uhl (D043530)
  *
@@ -208,7 +210,7 @@ public class StationarySequence {
         Set<Candidate> candidatesEffectivelyRemoved) {
         final SortedSet<Candidate> candidatesNoLongerPassingFilter = getCandidatesInTimeRange(timeRangeNoLongerPassingFilter);
         for (final Candidate candidate : candidatesNoLongerPassingFilter) {
-            if (!candidate.isFixed()) {
+            if (!candidate.isFixed()) { // TODO bug5086: consider using isValidCandidate; only remove if not the first/last candidate for its waypoint
                 candidatesEffectivelyAdded.removeAll(candidatesNoLongerPassingFilter);
                 candidatesEffectivelyRemoved.addAll(candidatesNoLongerPassingFilter);
             }
@@ -232,6 +234,7 @@ public class StationarySequence {
      * a candidate for a {@link Candidate#isFixed() fixed mark passing}.
      */
     private boolean isValidCandidate(Candidate c) {
+        // TODO bug5086: consider a candidate valid if its the first or the last in this sequence for its waypoint
         return c.isFixed() || isCloseEnoughToSequenceBorder(c); // TODO bug5086: we also need to make sure to deliver at least one candidate per waypoint for which this sequence has one
     }
     
@@ -311,6 +314,7 @@ public class StationarySequence {
                 if (extendedBy.compareTo(Duration.NULL) > 0) {
                     refreshBoundingBox();
                 }
+                // TODO bug5086: how is this influenced by the semantics change of delivering the first and last for each waypoint?
                 final TimeRange timeRangeForCandidatesBecomingValid = getExtendedEndBorderRange(extendedBy);
                 if (timeRangeForCandidatesBecomingValid != null) {
                     addToFilterResult(timeRangeForCandidatesBecomingValid, candidatesEffectivelyAdded,
