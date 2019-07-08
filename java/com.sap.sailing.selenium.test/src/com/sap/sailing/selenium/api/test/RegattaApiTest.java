@@ -167,6 +167,9 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         Event eventToRegisterExistingCompetitor = eventApi.createEvent(userOwningEventCtx, OTHER_EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.OPEN_UNMODERATED, "default");
         regattaApi.addCompetitor(userWithCompetitorCtx, OTHER_EVENT_NAME, competitor.getId(), Optional.of(eventToRegisterExistingCompetitor.getSecret()));
         
-        // TODO check if the competitor is added to the regatta
+        Competitor[] competitors = regattaApi.getCompetitors(userOwningEventCtx, OTHER_EVENT_NAME);
+        
+        assertEquals(1, competitors.length);
+        assertEquals(competitor.getId(), competitors[0].getId());
     }
 }
