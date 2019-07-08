@@ -17,6 +17,9 @@ public class GpsFixApi {
         final JSONObject gpsFix = new JSONObject();
         gpsFix.put("deviceUuid", deviceUuid != null ? deviceUuid.toString() : null);
         final JSONArray fixesArray = new JSONArray();
+        for (GpsFix fix : fixes) {
+            fixesArray.add(fix.getJson());
+        }
         gpsFix.put("fixes", fixesArray);
         return new GpsFixResponse(ctx.post(POST_FIX_URL, null, gpsFix));
     }

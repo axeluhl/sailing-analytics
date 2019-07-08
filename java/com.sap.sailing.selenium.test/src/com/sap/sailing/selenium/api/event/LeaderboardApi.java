@@ -9,6 +9,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
+import com.sap.sailing.selenium.api.core.JsonWrapper;
 
 public class LeaderboardApi {
 
@@ -38,14 +39,14 @@ public class LeaderboardApi {
         return new DeviceMappingRequest(ctx, leaderboardName);
     }
 
-    public JSONObject setTrackingTimes(ApiContext ctx, String leaderboardName, String raceColumnName, String fleetName,
+    public TrackingTimes setTrackingTimes(ApiContext ctx, String leaderboardName, String raceColumnName, String fleetName,
             Long startTime, Long endTime) {
         final Map<String, String> queryParams = new TreeMap<>();
         queryParams.put("race_column", raceColumnName);
         queryParams.put("fleet", fleetName);
         queryParams.put("startoftrackingasmillis", startTime != null ? startTime.toString() : null);
         queryParams.put("endoftrackingasmillis", endTime != null ? endTime.toString() : null);
-        return ctx.post(toUrl(SET_TRACKING_TIMES_URL, leaderboardName), queryParams);
+        return new TrackingTimes(ctx.post(toUrl(SET_TRACKING_TIMES_URL, leaderboardName), queryParams));
     }
 
     public JSONObject startRaceLogTracking(ApiContext ctx, String leaderboardName, String raceColumnName,
@@ -114,6 +115,21 @@ public class LeaderboardApi {
             return result;
         }
 
+    }
+
+    public class TrackingTimes extends JsonWrapper {
+
+        private TrackingTimes(JSONObject json) {
+            super(json);
+        }
+
+        public Long getStartOfTracking() {
+            return get("startoftracking");
+        }
+
+        public Long getEndOfTracking() {
+            return get("endoftracking");
+        }
     }
 
 }
