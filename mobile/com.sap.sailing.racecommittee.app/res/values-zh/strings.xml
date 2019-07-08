@@ -1,0 +1,569 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources xmlns:tools="http://schemas.android.com/tools">
+
+    <string-array name="empty_array" tools:ignore="UnusedResources"/>
+    <string name="empty"/>
+    
+    
+
+    
+    
+    
+    <string name="url_google_geocoder">"http://maps.googleapis.com/maps/api/geocode/json?address="</string>
+    <string name="urlpart_google_geocoder_sensor">"?sensor=true"</string>
+    <string name="running_on_course">"（在场地%s上）"</string>
+    <string name="course_design_number_waypoints">"场地具有%d个航路点"</string>
+    
+    <string name="service_text_no_races">"正在等待要监控的比赛轮次…"</string>
+    <string name="service_text_num_races">"目前正在监控%d轮比赛。"</string>
+    
+    <string name="set_time">"开始"</string>
+    <string name="reset_time">"重新开始"</string>
+    <string name="choose">"选择"</string>
+    <string name="current_time">"当前时间"</string>
+    <string name="race_finished_template">"%s完成"</string>
+    <string name="race_first_boat_finished">"第一艘船完成时间："</string>
+    <string name="race_first_finisher">"首位完成者时间：%1$s"</string>
+    <string name="race_first_finisher_and_time_limit">"首位完成者时间：%1$s，比赛轮次结束限制时间为：%2$s"</string>
+    <string name="race_time_limit">"比赛轮次结束限制时间为：%s"</string>
+    <string name="choose_startmode">"选择此比赛轮次的起航模式"</string>
+    <string name="choose_abort_mode">"选择要显示的旗标"</string>
+    <string name="choose_abort_flag_mode">"选择中止旗标模式"</string>
+    <string name="flags_up">"升"</string>
+    <string name="flags_down">"降"</string>
+    <string name="ap_or_november">"选择中止旗标"</string>
+    <string name="choose_start_mode_flag">"选择起航模式旗标"</string>
+    <string name="abort_starting_phase">"中止开始阶段"</string>
+    <string name="abort_running_race">"中止比赛轮次"</string>
+    <string name="choose_xray_flag_up">"显示个别召回"</string>
+    <string name="choose_xray_flag_down">"移除个别召回"</string>
+    <string name="choose_first_substitute_flag">"全召"</string>
+    <string name="confirm_general_recall">"执行全召？"</string>
+    <string name="confirm">"确认"</string>
+    <string name="abort">"取消"</string>
+    <string name="choose_blue_flag">"开始结束阶段"</string>
+    <string name="flag_ap">"AP"</string>
+    <string name="flag_november">"N"</string>
+    <string name="flag_jury">"评委会"</string>
+    <string name="label_login_events">"比赛"</string>
+    <string name="label_login_course_area">"区域"</string>
+    <string name="label_login_position">"位置"</string>
+    <string name="login_type_superuser">"以超级用户身份登录"</string>
+    <string name="login_type_officer_on_vessel">"以赛船裁判长身份登录。"</string>
+    <string name="login_type_shore_control">"以岸上控制登录。"</string>
+    <string name="login_type_viewer">"以仅查看（演示模式）用户身份登录。"</string>
+    <string name="racelist_unscheduled">"尚未安排"</string>
+    <string name="racelist_prescheduled">"已为%s预先安排"</string>
+    <string name="racelist_scheduled">"已为%s安排"</string>
+    <string name="racelist_startphase">"开始于%s正在进行"</string>
+    <string name="racelist_running">"自%s后航行"</string>
+    <string name="racelist_finishing">"正在完成"</string>
+    <string name="racelist_finished">"已完成"</string>
+    <string name="racelist_unknown">"未知"</string>
+    <string name="currentlyLoading">"目前正在加载…"</string>
+    <string name="racingview_header">"场地区域 \'%s\' 上的比赛轮次"</string>
+    <string name="running_on_unknown">"（点击设置场地）"</string>
+    <string name="updateIndicator">"更新标识"</string>
+    <string name="reset_race">"重置比赛轮次"</string>
+    <string name="postpone">"延迟"</string>
+    <string name="race_running_since_template">"自%2$s后%1$s次航行"</string>
+    <string name="race_reset_confirmation_header">"您即将重置比赛轮次"</string>
+    <string name="race_reset_confirmation_warning">"重置比赛轮次将永久移除其保存的所有数据。必须再次输入有关比赛轮次状态的所有信息。仅保留输入的场地信息。我们强烈建议不要重置比赛轮次。"</string>
+    <string name="race_reset_confirmation_title">"是否重置此比赛轮次？"</string>
+    <string name="race_reset_reset_button">"仍然重置"</string>
+    <string name="race_finished_start_time">"比赛轮次开始时间："</string>
+    <string name="race_finished_end_time">"比赛轮次完成时间："</string>
+    <string name="race_startphase_countdown_mode_remove">"%1$s直到%2$s已移除"</string>
+    <string name="race_startphase_countdown_mode_display">"%1$s直到%2$s已显示"</string>
+    <string name="race_startphase_countdown_start">"%1$s直到%2$s开始"</string>
+    <string name="set_pathfinder">"探路者"</string>
+    <string name="set_pathfinder_title">"选择探路者"</string>
+    <string name="protest_dialog_title">"声明开始时间"</string>
+    <string name="finished_dialog_title">"设置比赛轮次完成的时间"</string>
+    <string name="protest_start_time">"声明开始时间：%s"</string>
+    <string name="protest_duration">"声明持续时间：%d分钟"</string>
+    <string name="protest_end_time">"声明结束时间：%s"</string>
+    <string name="protest_duration_dialog_title">"持续时间（分钟）"</string>
+    <string name="no_pathfinder_selected">"未选择探路者"</string>
+    <string name="set_line_opening_time">"门标下水"</string>
+    <string name="no_line_opening_time_selected">"未选择时间"</string>
+    <string name="set_gate_line_opening_time_title">"设置门标下水时间"</string>
+    <string name="choose_line_open_min">"分钟"</string>
+    <string name="previous_course">"先前场地"</string>
+    <string name="make_new_course">"创建场地"</string>
+    <string name="course_design_assets">"场地设计资产"</string>
+    <string name="course_design_dialog_title">"设置场地设计"</string>
+    <string name="pick_a_rounding_direction">"选取绕行方向"</string>
+    <string name="select_penalty_reason">"选择惩罚原因"</string>
+
+    <string name="passing_instruction_none">"无"</string>
+    <string name="passing_instruction_port">"左舷"</string>
+    <string name="passing_instruction_starboard">"右舷"</string>
+    <string name="passing_instruction_single_unknown">"单个，未知"</string>
+    <string name="passing_instruction_gate">"门标"</string>
+    <string name="passing_instruction_line">"航线"</string>
+    <string name="passing_instruction_offset">"分支"</string>
+    <string name="passing_instruction_fixed_bearing">"固定航向角"</string>
+
+    <string name="publish">"发布"</string>
+    <string name="unpublish">"取消发布"</string>
+    <string name="take_previous">"使用先前场地"</string>
+    <string name="take_previous_short">"使用此项"</string>
+    <string name="markImage">"标志图像"</string>
+    <string name="cancel">"取消"</string>
+    <string name="retry">"重试"</string>
+    <string name="yes">"是"</string>
+    <string name="no">"否"</string>
+    <string name="tracking_list_01">"参赛队清单"</string>
+    <string name="tracking_list_02">"结果清单"</string>
+    <string name="availableFinishingCompetitors">"参赛队"</string>
+    <string name="choose_blue_flag_finishing">"完成比赛轮次"</string>
+    <string name="drag_handle_description">"拖动手柄"</string>
+    <string name="options_menu_settings">"设置"</string>
+    <string name="results_capturing_title">"比赛轮次结果"</string>
+    <string name="results_capturing_view_subject">"邮件主题"</string>
+    <string name="results_capturing_view_body">"邮件正文"</string>
+    <string name="results_capturing_view_send">"发送结果"</string>
+    <string name="results_capturing_view_add_photo">"添加照片"</string>
+    <string name="results_capturing_view_list_header">"附加的照片"</string>
+    <string name="results_capturing_view_list_empty">"尚无照片"</string>
+    <string name="results_mail_subject">"[Race Committee - %1$s] %2$s"</string>
+    <string name="results_mail_body">"比赛轮次 \'%s\' 的结果已附加。\n\n"</string>
+    <string name="results_mail_body_boat_class">"船只级别：%s\n"</string>
+    <string name="results_mail_body_race_group">"比赛轮次组：%s\n"</string>
+    <string name="results_mail_body_start">"开始时间：%s\n"</string>
+    <string name="results_mail_body_finish">"结束时间：%s\n"</string>
+
+    <!-- WIND FRAGMENT -->
+    <string name="wind_direction_degrees">"风向自（度）"</string>
+    <string name="enter_wind_direction">"方向（自）"</string>
+    <string name="enter_wind_speed">"速度 (kts)"</string>
+    <string name="enter_wind_gps">"风测量位置"</string>
+    <string name="check_all_data">"3. 检查所有数据"</string>
+    <string name="in_degrees">"度"</string>
+    <string name="in_knots">"节"</string>
+    <string name="wind_speed_direction_not_a_valid_number">"风速或风向不是有效的数字。请更正此值。"</string>
+    <string name="wind_location_or_fields_not_valid">"输入的地点、风速或风向为空。请更正值。"</string>
+    <string name="waiting_for_gps">"正在等待 GPS 信号…"</string>
+    <string name="manual_entry">"手动位置输入"</string>
+    <string name="found_gps_position">"基于 GPS 的位置"</string>
+    <string name="set_position_manually">"手动添加位置"</string>
+    <string name="searchPosition">"地点搜索…"</string>
+    <string name="no_location_found">"根据查询无法找到地点"</string>
+    <string name="store_position">"使用此位置"</string>
+    <string name="store_wind">"储存风力"</string>
+
+    <!-- SETTINGS -->
+    <string name="settings_activity_title">"设置"</string>
+    <string name="settings_category_general">"其他"</string>
+    <string name="settings_general_manageareas_header">"管理的场地区域"</string>
+    <string name="settings_general_language_header">"选择语言"</string>
+    <string name="settings_general_language_description">"选择语言。您可能需要重新启动应用才能应用更改。"</string>
+    <string name="override_default_start_procedure_type_select_header">"覆盖时默认设置起航程序类型"</string>
+    <string name="override_default_start_procedure_type_select_description">"比赛轮次将使用选择的起航程序类型作为默认值。要使此选项有效，必须启用覆盖复选框。"</string>
+    <string name="settings_please_reload">"请执行“重新加载”操作以应用更改。"</string>
+    <string name="settings_advanced_service_header">"Web 服务 URL"</string>
+    <string name="settings_advanced_mail_header">"结果邮件收件人"</string>
+    <string name="settings_category_polling">"轮询"</string>
+    <string name="settings_polling_active_header">"激活轮询"</string>
+    <string name="settings_polling_active_description">"有效时，服务器将针对更改进行轮询。"</string>
+    <string name="settings_polling_interval_header">"轮询间隔（秒）"</string>
+    <string name="settings_category_developer">"开发人员选项"</string>
+    <string name="compass_view_compass">"指南针"</string>
+    <string name="compass_view_needle">"指针"</string>
+    <string name="racing_course_area_missing">"场地区域无法加载。请返回到登录页面。"</string>
+    <string name="racing_load_success">"已成功加载%d轮比赛。"</string>
+    <string name="generic_load_failure">"加载请求的数据出错：\n\n\"%s\"\n\n是否重试？"</string>
+    <string name="set_course_layout">"设定场地设置"</string>
+    <string name="loading_failure">"加载失败"</string>
+    <string name="wind_unknown">"（点击设置风力）"</string>
+    <string name="wind_info">"%2$s / %1$f kts"</string>
+    <string name="login">"登录"</string>
+    <string name="please_select_a_login_type">"请选择登录类型。"</string>
+    <string name="race_list_filter_show_all">"显示全部"</string>
+    <string name="race_list_filter_show_active">"显示有效项"</string>
+    <string name="race_reset_time_schedule_race">"比赛轮次日程安排"</string>
+    <string name="race_reset_time_startmode_starttime">"选择起航模式和开始时间"</string>
+    <string name="start">"设置开始时间"</string>
+    <string name="nationality">"国籍"</string>
+    <string name="number">"编号"</string>
+    <string name="set_tracking_list">"设置跟踪清单"</string>
+    <string name="confirm_tracking_list">@string/publish_button_empty</string>
+    <string name="snap">"捕捉"</string>
+    <string name="logout_dialog_title">@string/logout</string>
+    <string name="logout_dialog_message">"是否要注销并以新用户登录？将仍然监控所有比赛轮次。"</string>
+    <string name="change_dialog_title">"更改比赛"</string>
+    <string name="change_dialog_message">"是否要更改比赛和/或区域？将断开目前监控的比赛轮次。"</string>
+    <string name="logout">"注销"</string>
+    <string name="loading_configuration">"正在加载配置…"</string>
+    <string name="loading_configuration_failed">"加载配置时出错。"</string>
+    <string name="loading_configuration_not_found">"未找到此设备的远程配置。"</string>
+    <string name="loading_configuration_succeded">"远程配置已应用。"</string>
+    <string name="gate_launch_stops_after">"门标下水在 %dmin 后停止"</string>
+    <string name="settings_category_regatta_defaults">"比赛配置（默认值）"</string>
+    <string name="settings_category_regattas">"比赛配置（特定）"</string>
+    <string name="settings_category_course_designer">"场地设计器配置"</string>
+    <string name="override_default_course_designer_type_select_header">"场地设计器类型"</string>
+    <string name="settings_course_designer_by_name_course_names_header">"场地名称"</string>
+    <string name="preference_racing_procedure_startmode_flags_header">"起航模式旗标"</string>
+    <string name="preference_racing_procedure_classflag_header">"级别旗标"</string>
+    <string name="preference_racing_procedure_hasxray_header">"个别召回"</string>
+    <string name="preference_racing_procedure_hasxray_description">"激活此选项以启用个别召回"</string>
+    <string name="preference_racing_procedure_resultentryenabled_header">"结果条目"</string>
+    <string name="preference_racing_procedure_resultentryenabled_description">"激活此选项，以在完成比赛轮次期间和之后输入结果"</string>
+    <string name="preference_racing_procedure_gatestart_haspathfinder_description">"激活此选项以选择探路者"</string>
+    <string name="preference_racing_procedure_gatestart_haspathfinder_header">"探路者"</string>
+    <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_description">"激活此选项以选择附加高尔夫旗标下降时间"</string>
+    <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_header">"附加高尔夫旗标下降时间"</string>
+    <string name="device_identifier">"设备名称"</string>
+    <string name="synchronize_connection_settings_header">"与服务器同步"</string>
+    <string name="synchronize_connection_settings_description">"在服务器上创建配置时，点击此处通过二维码同步应用和连接设置。"</string>
+    <string name="update_app_header">"强制更新"</string>
+    <string name="update_app_description">"从服务器强制更新。使用同步选项更好。"</string>
+    <string name="preference_wakelock_header">"屏幕保持常亮"</string>
+    <string name="preference_wakelock_summary">"使屏幕强制保持唤醒状态。注意：使用更多电量。"</string>
+    <string name="preference_offline_header">"离线模式"</string>
+    <string name="preference_offline_summary">"禁用与服务器的连接，并使用静态数据"</string>
+    <string name="preference_allow_demo_header">"允许以查看者身份登录"</string>
+    <string name="preference_allow_demo_summary">"如果设置，则允许您以查看者身份登录。比赛轮次更改将不会发回到服务器。"</string>
+    <string name="options_menu_info">"专家信息"</string>
+    <string name="options_menu_refresh">"刷新数据"</string>
+    <string name="auto_update_install">"安装"</string>
+    <string name="auto_update_install_anyway">"仍然安装"</string>
+    <string name="gate_launch">"门标下水"</string>
+    <string name="golf_down">"高尔夫旗标下降"</string>
+    <string name="preference_regatta_specific_title">"比赛配置 - %1$s"</string>
+    <string name="preference_regatta_specific_save_title">"保存%1$s配置"</string>
+    <string name="preference_regatta_specific_save_description">"将为%1$s的所有比赛轮次保存显示的配置。"</string>
+    <string name="auto_update">"自动更新"</string>
+    <string name="auto_update_checking_version">"正在检查服务器中的版本信息…"</string>
+    <string name="auto_update_downloading_version">"正在尝试从%1$s下载自动更新"</string>
+    <string name="auto_update_version_file_url_invalid">"此版本文件链接无效。"</string>
+    <string name="auto_update_click_install">"点击“安装”，执行更新至版本%1$d。"</string>
+    <string name="auto_update_force_install">"您已安装服务器（版本%1$d）提供的版本。"</string>
+    <string name="auto_update_with_store">"当前版本从%1$s安装。在不卸载当前应用的情况下，无法安装来自服务器的下载。"</string>
+    <string name="auto_update_already_up_to_date">"您已拥有最新信息！"</string>
+    <string name="auto_update_downloading_apk">"正在从服务器下载 APK…"</string>
+    <string name="auto_update_apk_link_invalid">"此下载链接无效。"</string>
+    <string name="auto_update_apk_file_error">"下载文件无法创建。"</string>
+    <string name="auto_update_error">"尝试自动更新时出错。"</string>
+    <string name="auto_update_completed">"自动更新已完成"</string>
+    <string name="auto_update_completed_text">"自动更新已完成。您现在应将连接设置与服务器重新同步。"</string>
+    <string name="auto_update_completed_take_me_there">"前往"</string>
+    <string name="wind_gps_is_disabled">"GPS 被禁用。是否将其启用？"</string>
+    <string name="rrs26_start_mode_changed_to">"起航模式旗标已更改为%1$s"</string>
+    <string name="preference_there_are_no_regattas">"没有加载的比赛。"</string>
+    <string name="configure_regatta">"配置比赛%1$s"</string>
+    <string name="race_start_in_5_minutes">"5 分钟"</string>
+    <string name="race_start_in_4_minutes">"4 分钟"</string>
+    <string name="race_start_in_2_minutes">"2 分钟"</string>
+    <string name="race_start_in_1_minute">"1 分钟"</string>
+    <string name="race_start_time_in">"-%s"</string>
+    <string name="race_start_time_ago">"%s"</string>
+    <string name="race_set_time">"设置时间"</string>
+    <string name="race_reset_course">"重置场地"</string>
+    <string name="no_course_active">"没有有效的场地"</string>
+    <string name="toggle_group_race_mode">"将比赛轮次分组？"</string>
+    <string name="toggle_group_race_mode_off">"无小组赛"</string>
+    <string name="toggle_group_race_mode_on">"小组赛"</string>
+    <string name="the_selected_time_is_before_the_race_start_">"选择的时间早于比赛轮次开始时间。"</string>
+
+    <string name="confirm_start_time">"确认开始时间"</string>
+    <string name="confirm_start_mode">"确认起航模式"</string>
+
+    <string name="start_procedure_change">"更改起航程序"</string>
+    <string name="start_procedure_confirm">"确认起航程序"</string>
+    <string name="start_procedure_line_start">"起航线"</string>
+    <string name="start_procedure_gate_start">"起航门标"</string>
+    <string name="start_procedure_ess">"ESS"</string>
+    <string name="start_procedure_simplified">"简化"</string>
+    <string name="nav_drawer_open">"打开导航抽屉"</string>
+    <string name="nav_drawer_close">"关闭导航抽屉"</string>
+
+    <string name="available_races">"可用的比赛轮次"</string>
+
+    <string name="race_started">"已开始%s"</string>
+    <string name="race_finished">"已完成%s"</string>
+    <string name="race_start">"开始%s"</string>
+    <string name="race_unscheduled">"已取消安排"</string>
+
+    <string name="race_show_all">"显示全部"</string>
+    <string name="race_show_less">"显示更少"</string>
+
+    <string name="races_current">"当前比赛轮次"</string>
+    <string name="races_all">"所有比赛轮次"</string>
+
+    <string name="welcome">"欢迎"</string>
+    <string name="change">"更改"</string>
+
+    <string name="start_procedure">"程序"</string>
+    <string name="start_procedure_more">"更多"</string>
+    <string name="start_mode">"模式"</string>
+    <string name="course">"场地"</string>
+    <string name="wind">"风力"</string>
+    <string name="loading_events_succeded">"活动已加载。"</string>
+
+    <string name="login_text">"欢迎使用\nSAP Sailing Race Manager"</string>
+    <string name="login_sub_text">"请选择比赛"</string>
+    <string name="login_onboarding_text">"登录"</string>
+    <string name="sign_up">"我要注册"</string>
+    <string name="flags_abandon">"放弃"</string>
+    <string name="flags_recall">"召回"</string>
+    <string name="flags_course">"场地"</string>
+    <string name="flags_more">"完成"</string>
+    <string name="flags_postpone">"延迟"</string>
+    <string name="race_select">"选择比赛轮次"</string>
+
+    <string name="gate_start_pathfinder">"探路者"</string>
+    <string name="gate_start_nationality">"国家/地区"</string>
+    <string name="gate_start_number">"编号"</string>
+    <string name="gate_start_set_pathfinder">"设置探路者"</string>
+    <string name="gate_start_timing">"计时"</string>
+    <string name="gate_start_set">"设置门标时间"</string>
+
+    <string name="time_launch">"门标下水\n（分钟）"</string>
+    <string name="time_golf">"高尔夫旗标\n（分钟）"</string>
+    <string name="time_total">"总计\n（分钟）"</string>
+
+    <string name="wind_from">"来自"</string>
+    <string name="wind_speed">"速度"</string>
+    <string name="wind_position">"位置"</string>
+    <string name="wind_set_data">"设置风力数据"</string>
+    <string name="wind_set_data_multi">"设置风力数据（多个）"</string>
+    <string name="wind_off">"无风力感应器"</string>
+    <string name="wind_on">"风力感应器有效"</string>
+    <string name="wind_set_position">"设置位置"</string>
+    <string name="wind_enter_position">"设置您的位置"</string>
+    <string name="wind_kn">"kts"</string>
+    <string name="wind_address_hint">"输入地址"</string>
+    <string name="wind_sensor">"时间：%1$s / 风向：%2$.0f° / 风速：%3$.1f kts"</string>
+    <string name="wind_panel">"风向：%1$.0f°\n风速：%2$.1f kts"</string>
+    <string name="wind_no_data">"无数据"</string>
+
+    <string name="time_up">"#TIME# 后升起"</string>
+    <string name="time_down">"#TIME# 后下降"</string>
+    <string name="time_start">"开始%s"</string>
+    <string name="time_finish">"完成 - 不适用"</string>
+    <string name="time">"#TIME#"</string>
+    <string name="set_signal">"设置信号"</string>
+    <string name="flag_ap_desc">"延迟即将进行的比赛轮次"</string>
+    <string name="flag_ap_alpha_desc">"延迟，今天没有其他比赛"</string>
+    <string name="flag_ap_hotel_desc">"延迟，岸上等待更多信息"</string>
+    <string name="flag_ap_alpha">"AP &amp; A"</string>
+    <string name="flag_ap_hotel">"AP &amp; H"</string>
+    <string name="flag_xray">"X"</string>
+    <string name="flag_xray_desc">"个别召回"</string>
+    <string name="flag_first_subst">"第一后备旗号"</string>
+    <string name="flag_first_subst_desc">"全召"</string>
+    <string name="flag_blue">"蓝色"</string>
+    <string name="flag_blue_desc">"开始结束阶段"</string>
+    <string name="flag_november_desc">"放弃所有开始的比赛轮次"</string>
+    <string name="flag_november_alpha">"N &amp; A"</string>
+    <string name="flag_november_hotel">"N &amp; H"</string>
+    <string name="flag_november_alpha_desc">"放弃，今天没有其他比赛"</string>
+    <string name="flag_november_hotel_desc">"放弃，岸上等待更多信息"</string>
+    <string name="race_reset_confirm">"重置比赛轮次"</string>
+    <string name="race_reset_cancel">"不，谢谢"</string>
+    <string name="race_reset_message">"是否确定要重置此比赛轮次，包括进行的所有设置和操作？无法撤消。"</string>
+    <string name="race_begin_finish_header">"开始结束"</string>
+    <string name="race_end_finish_header">"完成结束\n（开始结束：%s）"</string>
+    <string name="race_begin_finish_current">"当前时间"</string>
+    <string name="race_begin_finish_custom">"自定义时间"</string>
+    <string name="race_setup_confirm">"确认设置"</string>
+
+    <string name="race_summary_title">"比赛轮次汇总"</string>
+    <string name="race_summary_start">"比赛轮次开始"</string>
+    <string name="race_summary_finish_begin">"开始结束"</string>
+    <string name="race_summary_finish_end">"完成结束"</string>
+    <string name="race_summary_finish_duration">"结束持续时间"</string>
+    <string name="race_summary_wind_direction">"平均风向"</string>
+    <string name="race_summary_wind_direction_value">"风向：%.0f°"</string>
+    <string name="race_summary_wind_speed">"平均风速"</string>
+    
+    <string name="race_summary_individual_recalls">"个别召回"</string>
+    
+    <string name="record_voice">"录制语音"</string>
+    <string name="finishing_started">"首位结束时间：%1$s"</string>
+    <string name="finishing_started_since">"(%s)"</string>
+    <string name="finishing_done">"现在下降"</string>
+
+    <string name="finished_recording">"正在录制"</string>
+    <string name="finished_replay">"重播语音"</string>
+    <string name="finished_list">"结束清单"</string>
+    <string name="finished_photos">"拍摄照片"</string>
+    <string name="finished_tracking">@string/competitor_list</string>
+    <string name="finished_edit">"编辑清单"</string>
+    <string name="finished_publishing">"正在发布"</string>
+    <string name="finished_submit">"提交"</string>
+    <string name="finished_duration">"#TIME# 分钟"</string>
+
+    <string name="finished_text_01">"请评估并提交此比赛轮次汇总。"</string>
+    <string name="finished_text_02">"您的评估已发布。需要重新提交更改，才能生效。"</string>
+
+    <string name="protest_time">"声明时间"</string>
+    <string name="protest_time_start">"开始声明时间"</string>
+    <string name="protest_time_end">"结束声明时间"</string>
+    <string name="degrees">"度"</string>
+
+    <string name="no_camera">"未找到照相机应用"</string>
+    <string name="delete_file_title">"删除文件"</string>
+    <string name="delete_file">"将删除图片"</string>
+    <string name="start_time">"开始时间"</string>
+    <string name="start_time_value">"%2$s%1$s"</string>
+
+    <!--Extracted locales -->
+    <string name="selected_course_area_lost">"选择的场地区域丢失。"</string>
+    <string name="no_fitting_race_group_found">"未找到合适的比赛轮次组。"</string>
+    <string name="loading_of_course_area_succeeded">"场地数据加载已成功。"</string>
+    <string name="scores">"得分"</string>
+    <string name="no_text">"无文本。"</string>
+    <string name="error_picture_callback">"写入图像文件时出错。"</string>
+    <string name="competitor_load_error">"参赛队：%s"</string>
+    <string name="error_announced_finish_time">"提供的结束时间早于首位完成者时间。请重新检查时间。"</string>
+    <string name="error_time_before_finish">"选择的时间早于比赛轮次开始时间。"</string>
+    <string name="error_set_wind">"设置风力信息"</string>
+    <string name="use_previous_course_dialog_title">"使用先前场地设计"</string>
+    <string name="use_previous_course_dialog_message">"是否使用先前发布的场地设计？"</string>
+    <string name="please_enter_valid_number">"请输入有效的数字"</string>
+    <string name="please_enter_valid_pathfinder">"请输入有效的探路者"</string>
+    <string name="error_scanning_qr">"扫描二维码出错 (%d)"</string>
+    <string name="error_scanning_qr_malformed">"URL 不正确"</string>
+    <string name="marks_w_placeholder">"标志：%s"</string>
+    <string name="error_no_course_to_copy">"没有可用于复制的场地"</string>
+    <string name="error_missing_second_mark">"选择的绕标说明需要两个浮标。请选择第二个浮标。"</string>
+    <string name="error_missing_passing_instructions">"航路点没有绕标说明。请长按航路点，选择绕标说明。"</string>
+    <string name="error_no_way_point">"场地设计必须至少有一个航路点。"</string>
+    <string name="start_w_placeholder">"开始%s"</string>
+    <string name="events_waiting_to_be_sent">"目前，%1$d个活动等待发送。\n上次成功发送时间：%2$s。"</string>
+    <string name="no_event_to_be_sent">"目前没有等待发送的活动。"</string>
+    <string name="never">"从不"</string>
+    <string name="connected_to_wp">"已连接到：%1$s\n%2$s\n绑定服务：%3$s"</string>
+    <string name="theme_changed_title">"主题更改"</string>
+    <string name="theme_changed_message">"主题更改将在重新启动应用后生效。"</string>
+    <string name="url_refresh_title">"服务器 URL 已更改"</string>
+    <string name="app_refresh_message">"请从当前活动中注销，以加载新服务器中的数据。"</string>
+    <string name="until_xray_removed">"X 将在%s移除"</string>
+    <string name="send_photos">"发送照片"</string>
+    <string name="error_wrong_degree_value_title">"错误"</string>
+    <string name="error_wrong_degree_value_message">"请提供 0 到 360 之间的值"</string>
+
+    <string name="author_type_officer_vessel">"赛船裁判长"</string>
+    <string name="author_type_shore_control">"岸上控制"</string>
+    <string name="author_viewer">"演示模式"</string>
+    <string name="author_type_superuser">"超级用户"</string>
+    <string name="change_proceed">"继续"</string>
+    <string name="change_cancel">"取消"</string>
+    <string name="change_message">"根据比赛轮次规则，此数据在当前\n比赛轮次状态不可更改。但是，您可以继续更正错误的输入。"</string>
+    <string name="change_title">"警告"</string>
+    <string name="send_mail">"发送邮件…"</string>
+    <string name="data_reload_title">"数据已在外部更改"</string>
+    <string name="data_reload_message">"数据需要重新加载。可能会出现数据丢失。"</string>
+    <string name="preference_allow_dependent_races_header">"相对开始时间（分钟）"</string>
+    <string name="preference_allow_dependent_races_description">"启用比赛轮次之间的相对开始时间"</string>
+    <string name="preference_dependent_races_offset_header">"默认相对开始时间偏移（分钟）"</string>
+    <string name="preference_allow_edit_race_factor_header">"比赛轮次因素变化"</string>
+    <string name="preference_protest_time_header">"声明持续时间（分钟）"</string>
+    <string name="preference_allow_edit_race_factor_description">"赛事经理可以更改各比赛轮次的比赛轮次因素"</string>
+    <string name="error_finished_time">"提供的结束时间早于首位完成者时间。请重新检查时间。"</string>
+    <string name="error_finishing_time">"选择的时间早于比赛轮次开始时间。"</string>
+    <string name="error_time_in_future">"提供的时间在将来。请重新检查时间。"</string>
+    <string name="error_wrong_race_state">"比赛轮次状态不在正确的状态（需要：%1$s - 当前：%2$s）"</string>
+    <string name="wind_map_button_show">"风图"</string>
+    <string name="wind_map_button_hide">"隐藏"</string>
+    <string name="wind_latitude">"纬度："</string>
+    <string name="wind_longitude">"经度："</string>
+    <string name="wind_accuracy">"准确度："</string>
+    <string name="dependent_races_absolute">"绝对开始时间"</string>
+    <string name="dependent_races_relative">"相对开始时间"</string>
+    <string name="dependent_races_prompt">"请选择比赛轮次"</string>
+    <string name="minutes_after">"此后分钟数"</string>
+    <string name="minutes_after_long">"%2$s后%1$.0f分钟"</string>
+    <string name="wind_accuracy_ago">"前"</string>
+    <string name="gate_time_schedule_long">"%1$d + %2$d = %3$d分钟"</string>
+    <string name="gate_time_schedule_short">"%d分钟"</string>
+    <string name="not_available">"不适用"</string>
+    
+    
+    
+    <string name="accuracy_timestamp">"（自%s）"</string>
+    <string name="prev_course">"先前场地"</string>
+    <string name="layout_course">"场地设置"</string>
+    <string name="wind_degree">"°"</string>
+    <string name="add_waypoint">"按加号，添加航路点"</string>
+    <string name="unpublished_course">"未发布的场地设计"</string>
+    <string name="reset_state_1">"新建"</string>
+    <string name="reset_state_2">"重置"</string>
+    <string name="reset_message_1">"是否要清除此清单？"</string>
+    <string name="reset_message_2">"是否要重置上次的状态？"</string>
+    
+    <string name="onboarding_scan">"扫描二维码"</string>
+    <string name="onboarding_input">"手动输入"</string>
+    <string name="race_group">"小组赛"</string>
+    <string name="wind_select_race">"选择比赛轮次"</string>
+    <string name="added_to_result_list">"已在位置%2$d将 \'%1$s\' 添加到结果清单"</string>
+    <string name="get_started">"入门"</string>
+    <string name="position">"位置"</string>
+    <string name="server_deeplink_message">"服务器已成功更改为%1$s。"</string>
+    <string name="penalty">"惩罚"</string>
+    <string name="score">"得分"</string>
+    <string name="finishing_time">"结束时间"</string>
+    <string name="comment">"备注"</string>
+    <string name="get_started_url">"https://www.sapsailing.com/gwt/Home.html?locale=en#SolutionsPlace:navigationTab=RaceCommitteeApp"</string>
+    <string name="user_unauthorized">"请求失败。用户未经授权。"</string>
+    <string name="server_url">"服务器"</string>
+    <string name="username">"用户名"</string>
+    <string name="password">"密码"</string>
+    <string name="wrong_credentials">"用户名或密码无效"</string>
+    <string name="unexpected_error">"发生意外错误"</string>
+    <string name="sending_exception_title">"警告"</string>
+    <string name="sending_exception_message">"您可能没有将数据发送到服务器的权限。是否更改登录凭据？"</string>
+
+    <string name="preference_heading_with_declination_subtracted_is_enabled">"开"</string>
+    <string name="preference_heading_with_declination_subtracted_is_disabled">"关"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">"磁性"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">"基于北"</string>
+    <string name="preference_heading_with_declination_subtracted_enabled">"标题"</string>
+    <string name="finishing_date">"结束日期"</string>
+    <string-array name="sort_by_values">
+        <item>"按帆号"</item>
+        <item>"按名称"</item>
+    </string-array>
+
+    <string name="preference_non_public_events_header">"显示非公开活动"</string>
+    <string name="preference_non_public_events_summary">"加载所有活动，包括非公开活动。"</string>
+    <string name="race_factor">"因素"</string>
+    <string name="options_menu_role">"更改比赛"</string>
+    <string name="reload_config">"从服务器重新加载配置"</string>
+    <string name="abort_title">"中止比赛轮次"</string>
+    <string name="abort_hint">"要中止哪轮比赛？"</string>
+    <string name="abort_dismiss">"取消"</string>
+    
+    <string name="set_column_factor">"设置因素"</string>
+    <string name="set_factor_error">"设置因素时出错：%s"</string>
+    <string name="sync_to_minute">"同步到分钟"</string>
+    <string name="non_public_changed_title">"非公开活动"</string>
+
+    <string name="competitor_list">"结果"</string>
+    <string name="sort_by_boat">"按帆号"</string>
+    <string name="sort_by_short_name">"按短名称"</string>
+    <string name="sort_by_name">"按参赛队名称"</string>
+    <string name="sort_by_start">"按距离起航线的位置"</string>
+    <string name="sort_by_goal">"按跟踪的位置"</string>
+
+    <string name="apply_button">"应用"</string>
+    <string name="publish_button_empty">"发布"</string>
+    <string name="publish_button_other">"发布 (%d)"</string>
+    <string name="publish_clicked">"结果已发布"</string>
+    <string name="competitor_count">"%d"</string>
+
+    <string name="refresh_title">"数据已更改"</string>
+    <string name="refresh_message">"以下参赛队的数据已更改。请检查：\n\n%s"</string>
+    <string name="refresh_positive">@android:string/ok</string>
+    <string name="hello_call_error_title">"无法连接到 SAP"</string>
+    <string name="hello_call_error_message">"此应用无法与 SAP Sailing 建立连接。\n请检查您是否有稳定的移动连接。\n是否重试？"</string>
+    <string name="hello_call_error_positive">"重试"</string>
+    <string name="hello_call_error_negative">"退出"</string>
+    <string name="hello_call_error_neutral">"更改服务器"</string>
+
+    <string name="competitor_merge_error_message">"此参赛队已从其他设备更改，您已更改相同的数据。请确保，此数据现在正确无误。"</string>
+
+</resources>

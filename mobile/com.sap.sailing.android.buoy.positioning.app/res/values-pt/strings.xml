@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><resources>
+
+    
+    
+    
+    
+    <string name="course_type">"Tipo de percurso"</string>
+    <string name="marks">"Marcas"</string>
+    <string name="set_position">"Definir posição"</string>
+    <string name="set_position_disabled_gps">"Ativar GPS\npara definir posição"</string>
+    <string name="set_position_no_gps_yet">"Aguardando conexão a GPS"</string>
+    <string name="reset_position">"Reinicializar posição"</string>
+    <string name="getting_marks">"Obtendo marcas da corrida..."</string>
+    <string name="set">"definido"</string>
+    <string name="unknown">"n/a"</string>
+    <string name="not_set">"não definido"</string>
+    <string name="mark_list_accuracy">"(Precisão de aproximadamente %1$sm)"</string>
+    <string name="accuracy_detail">"de posição de GPS"</string>
+    <string name="distance_detail">"até boia antiga"</string>
+    
+    
+    <string name="accuracy">"Precisão de GPS"</string>
+    <string name="distance">"Distância até boia antiga"</string>
+    <string name="position_set">"A posição foi definida"</string>
+    <string name="no_information">"Sem informação"</string>
+    <string name="title_activity_settings">@string/settings</string>
+    <string name="error_message_no_position">"Posicione o dispositivo perto da marca e pressione \'definir posição\' para definir a posição da marca. Utilize o indicador de precisão para decidir se a posição exibida é suficientemente boa. Ative o GPS ou aguarde a disponibilidade do GPS."</string>
+    <string name="action_settings">@string/settings</string>
+    <string name="settings">"Configurações"</string>
+
+    <string name="server">"Sondagem"</string>
+    <string name="server_sync_settings">"Intervalo de sondagem (segundos)"</string>
+
+    <string name="options_menu_checkout">"Check-out"</string>
+    <string name="checkout_warning_message">"Você pretende REALMENTE efetuar o logoff? será necessário efetuar um novo logon com o código QR fornecido para acessar suas marcas!"</string>
+
+    <string name="no_marks_message">"Sem marcas"</string>
+
+</resources>

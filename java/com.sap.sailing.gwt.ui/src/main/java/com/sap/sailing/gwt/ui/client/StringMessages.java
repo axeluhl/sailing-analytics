@@ -962,6 +962,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String raceTimeReachingTooltip();
     String raceTimeUpwindTooltip();
     String dataMining();
+    String changeOrientation();
     String hideToolbar();
     String showSeriesLeaderboards();
     String showOverallLeaderboard();
@@ -2256,12 +2257,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String editSwissTimingAchivedConnection();
     String addSwissTimingAchivedConnection();
     String filterSwissTimingAchivedConnections();
-
     String editSwissTimingConnections();
-
     String filterSwissTimingConnections();
-
     String updateURL();
-
     String addSwissTimingConnection();
+    String startProcedure();
+    String startMode();
+    String gateOpeningTime();
+    String protestTimeInMinutes();
 }
