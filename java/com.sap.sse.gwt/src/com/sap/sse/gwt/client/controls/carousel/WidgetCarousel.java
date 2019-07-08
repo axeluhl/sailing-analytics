@@ -168,15 +168,8 @@ public class WidgetCarousel extends Composite {
             }
         }
         items.add(slide);
-
-        // This command will be executed after the initialization command has finished.
-        Scheduler.get().scheduleDeferred(new Command() {
-            @Override
-            public void execute() {
-                sliderMainUi.add(slide);
-            }
-        });
-
+        sliderMainUi.add(slide);
+        onAfterChange();
     }
 
     /**
