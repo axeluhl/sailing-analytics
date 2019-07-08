@@ -232,7 +232,7 @@ public class StationarySequence {
      * a candidate for a {@link Candidate#isFixed() fixed mark passing}.
      */
     private boolean isValidCandidate(Candidate c) {
-        return c.isFixed() || isCloseEnoughToSequenceBorder(c);
+        return c.isFixed() || isCloseEnoughToSequenceBorder(c); // TODO bug5086: we also need to make sure to deliver at least one candidate per waypoint for which this sequence has one
     }
     
     private boolean isCloseEnoughToSequenceBorder(Candidate candidate) {
