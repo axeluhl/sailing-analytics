@@ -181,7 +181,7 @@ public class TestORCPerformanceCurve {
        assertEquals(performanceCurveMilan.getAllowancePerCourse(new KnotSpeedImpl(12.809089256546626)).asSeconds(), Duration.ONE_HOUR.asSeconds(), accuracy); 
        // scratch sheets and implied wind as calculated by Altura for course1 and 1:00:00 / 1:30:00 time sailed, respectively:
        //               6kts    8kts    10kts   12kts   14kts   16kts   20kts   implied wind    Altura          ORC Scorer      ORC PCS Test    SAP
-       // Milan:        675.2   539.5   473.1   437.6   412.7   388.8   350.8                   12.8091135      12.80881        12.89281        12.809089
+       // Milan:        675.2   539.5   473.1   437.6   412.7   388.8   350.8                   12.8091135      12.80881        12.80881        12.809089
        // Moana:        775.7   627.5   549.9   512.4   493.3   473.1   435.0                   7.76029797      7.76218         7.76218         7.7602936
        
        // scratch sheet as computed by ORC Scorer:
