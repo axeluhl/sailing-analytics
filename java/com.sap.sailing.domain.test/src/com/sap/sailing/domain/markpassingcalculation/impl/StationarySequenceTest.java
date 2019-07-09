@@ -1,7 +1,12 @@
 package com.sap.sailing.domain.markpassingcalculation.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashSet;
+import java.util.NavigableSet;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 
@@ -45,8 +50,8 @@ public class StationarySequenceTest extends AbstractCandidateFilterTestSupport {
                 UUID.randomUUID(), new MarkImpl(UUID.randomUUID(), "Committee Boat"),
                 new MarkImpl(UUID.randomUUID(), "Pin"), "Start/Finish"));
         c1 = candidate(now, "c1", w3);
-        c2 = candidate(c1.getTimePoint().plus(StationarySequence.CANDIDATE_FILTER_TIME_WINDOW.times(2)), "c2", w5);
-        c3 = candidate(c2.getTimePoint().plus(StationarySequence.CANDIDATE_FILTER_TIME_WINDOW.times(2)), "c3", w3);
+        c2 = candidate(c1.getTimePoint().plus(Duration.ONE_SECOND.times(10)), "c2", w5);
+        c3 = candidate(c2.getTimePoint().plus(Duration.ONE_SECOND.times(10)), "c3", w3);
         competitorCandidates.clear();
         competitorCandidates.add(c1);
         competitorCandidates.add(c2);
@@ -84,6 +89,41 @@ public class StationarySequenceTest extends AbstractCandidateFilterTestSupport {
      */
     @Test
     public void testOneCandidatePerWaypointInStationarySequence() {
+        assertEquals(3, Util.size(stationarySequence.getAllCandidates()));
         assertTrue(Util.contains(stationarySequence.getValidCandidates(), c2));
+    }
+    
+    /**
+     * Asserts that when a fix at one end of the bounding box is replaced by a fix that is on the other side of the bounding box
+     * and would, if both were considered by the bounding box, let the bounding box exceed limits; but if the fix replaced is
+     * no longer considered, the new fix would leave the bounding box within limits, so no split must happen, and all candidates
+     * previously contained must remain within the sequence.
+     */
+    @Test
+    public void testFixReplacementThatKeepsBoundingBoxWithinLimits() {
+        assertEquals(3, Util.size(stationarySequence.getAllCandidates()));
+        // the track travels north (towards 0deg); let's travel west, then replace by a fix
+        // that travels east:
+        final TimePoint timePointForNewFix = c2.getTimePoint().plus(c2.getTimePoint().until(c3.getTimePoint()).times(0.5));
+        final Position originalPosition = track.getEstimatedPosition(timePointForNewFix, /* extrapolate */ false);
+        final Position westPosition = originalPosition.translateGreatCircle(new DegreeBearingImpl(270), StationarySequence.CANDIDATE_FILTER_DISTANCE.scale(0.5));
+        final Position eastPosition = originalPosition.translateGreatCircle(new DegreeBearingImpl(90), StationarySequence.CANDIDATE_FILTER_DISTANCE.scale(0.5));
+        final GPSFixMovingImpl westFix = new GPSFixMovingImpl(westPosition, timePointForNewFix, originalPosition.getSpeedWithBearingToReachOnGreatCircle(westPosition, c2.getTimePoint().until(timePointForNewFix)));
+        track.add(westFix);
+        final Set<Candidate> candidatesEffectivelyAdded = new HashSet<>();
+        final Set<Candidate> candidatesEffectivelyRemoved = new HashSet<>();
+        final NavigableSet<StationarySequence> stationarySequenceSetToUpdate = new TreeSet<>((ss1, ss2)->candidateComparator.compare(ss1.getFirst(), ss2.getFirst()));
+        final StationarySequence resultForWestFix = stationarySequence.tryToAddFix(westFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved, stationarySequenceSetToUpdate, /* isReplacement */ false);
+        assertNull(resultForWestFix); // no split should have been necessary
+        assertEquals(3, Util.size(stationarySequence.getAllCandidates())); // and all candidates should still be part of the sequence
+        assertTrue(candidatesEffectivelyAdded.isEmpty());
+        assertTrue(candidatesEffectivelyRemoved.isEmpty());
+        final GPSFixMovingImpl eastFix = new GPSFixMovingImpl(eastPosition, timePointForNewFix, originalPosition.getSpeedWithBearingToReachOnGreatCircle(eastPosition, c2.getTimePoint().until(timePointForNewFix)));
+        track.add(eastFix, /* replace */ true);
+        final StationarySequence resultForEastFix = stationarySequence.tryToAddFix(eastFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved, stationarySequenceSetToUpdate, /* isReplacement */ true);
+        assertNull(resultForEastFix); // again no split should have been necessary
+        assertEquals(3, Util.size(stationarySequence.getAllCandidates())); // and all candidates should still be part of the sequence
+        assertTrue(candidatesEffectivelyAdded.isEmpty());
+        assertTrue(candidatesEffectivelyRemoved.isEmpty());
     }
 }
