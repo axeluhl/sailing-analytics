@@ -20,6 +20,9 @@ public class MstGraphLevel extends GraphLevelBase {
     private final List<MstGraphLevel> children = new ArrayList<>();
     private final double distanceToParent;
 
+    /**
+     * Constructs a root node, setting the {@link #parent} to {@code null}.
+     */
     public MstGraphLevel(ManeuverWithProbabilisticTypeClassification observation,
             GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
         super(observation, transitionProbabilitiesCalculator);

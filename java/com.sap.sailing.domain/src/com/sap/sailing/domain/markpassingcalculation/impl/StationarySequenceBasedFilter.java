@@ -207,7 +207,6 @@ public class StationarySequenceBasedFilter {
     }
 
     private void updateFilteredCandidates(final Set<Candidate> candidatesEffectivelyAdded, final Set<Candidate> candidatesEffectivelyRemoved) {
-        assert !new HashSet<>(filteredCandidates).removeAll(candidatesEffectivelyAdded);
         filteredCandidates.addAll(candidatesEffectivelyAdded);
         filteredCandidates.removeAll(candidatesEffectivelyRemoved);
         assert !new HashSet<>(candidatesEffectivelyAdded).removeAll(candidatesEffectivelyRemoved) &&

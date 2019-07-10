@@ -40,22 +40,22 @@ public class MstManeuverGraphGenerator extends AbstractMstGraphGenerator<Maneuve
         if (nodes.isEmpty()) {
             return null;
         }
-        List<MstGraphLevel> leafs = new ArrayList<>();
+        List<MstGraphLevel> leaves = new ArrayList<>();
         NodeWithNeighbors<ManeuverWithProbabilisticTypeClassification> firstNode = nodes.get(0);
         MstGraphLevel firstGraphLevel = new MstGraphLevel(firstNode.getObservation(),
                 transitionProbabilitiesCalculator);
-        parseGraphFromNodes(firstNode, firstGraphLevel, null, leafs);
-        MstManeuverGraphComponents graphComponents = new MstManeuverGraphComponents(firstGraphLevel, leafs);
+        parseGraphFromNodes(firstNode, firstGraphLevel, null, leaves);
+        MstManeuverGraphComponents graphComponents = new MstManeuverGraphComponents(firstGraphLevel, leaves);
         return graphComponents;
     }
 
     private void parseGraphFromNodes(NodeWithNeighbors<ManeuverWithProbabilisticTypeClassification> previousNode,
             MstGraphLevel previousGraphLevel,
             NodeWithNeighbors<ManeuverWithProbabilisticTypeClassification> parentOfPreviousNode,
-            List<MstGraphLevel> leafs) {
+            List<MstGraphLevel> leaves) {
         List<NodeWithDistance<ManeuverWithProbabilisticTypeClassification>> childNodes = previousNode.getNeighbors();
         if (childNodes.size() <= 1 && (childNodes.isEmpty() || parentOfPreviousNode != null)) {
-            leafs.add(previousGraphLevel);
+            leaves.add(previousGraphLevel);
         } else {
             for (NodeWithDistance<ManeuverWithProbabilisticTypeClassification> childNodeWithDistance : childNodes) {
                 NodeWithNeighbors<ManeuverWithProbabilisticTypeClassification> childNode = childNodeWithDistance
@@ -63,7 +63,7 @@ public class MstManeuverGraphGenerator extends AbstractMstGraphGenerator<Maneuve
                 if (childNode != parentOfPreviousNode) {
                     MstGraphLevel newGraphLevel = previousGraphLevel.addChild(childNodeWithDistance.getDistance(),
                             childNode.getObservation(), transitionProbabilitiesCalculator);
-                    parseGraphFromNodes(childNode, newGraphLevel, previousNode, leafs);
+                    parseGraphFromNodes(childNode, newGraphLevel, previousNode, leaves);
                 }
             }
         }
@@ -76,20 +76,19 @@ public class MstManeuverGraphGenerator extends AbstractMstGraphGenerator<Maneuve
 
     public static class MstManeuverGraphComponents {
         private final MstGraphLevel root;
-        private final List<MstGraphLevel> leafs;
+        private final List<MstGraphLevel> leaves;
 
-        public MstManeuverGraphComponents(MstGraphLevel root, List<MstGraphLevel> leafs) {
+        public MstManeuverGraphComponents(MstGraphLevel root, List<MstGraphLevel> leaves) {
             this.root = root;
-            this.leafs = leafs;
+            this.leaves = leaves;
         }
 
         public MstGraphLevel getRoot() {
             return root;
         }
 
-        public List<MstGraphLevel> getLeafs() {
-            return leafs;
+        public List<MstGraphLevel> getLeaves() {
+            return leaves;
         }
     }
-
 }

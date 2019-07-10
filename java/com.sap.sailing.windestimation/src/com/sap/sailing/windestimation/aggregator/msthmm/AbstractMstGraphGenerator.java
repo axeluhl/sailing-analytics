@@ -11,7 +11,7 @@ import java.util.Map;
 import com.sap.sse.common.Util.Triple;
 
 /**
- * A generic implementation of Incremental Minimum Spanning Tree (MST) builder which is capable to parse an acyclic
+ * A generic implementation of Incremental Minimum Spanning Tree (MST) builder which is capable of parsing an acyclic
  * directed graph for arbitrary instances provided that the distance between instances can be measured (see
  * {@link #getDistanceBetweenObservations(Object, Object)}).
  * 

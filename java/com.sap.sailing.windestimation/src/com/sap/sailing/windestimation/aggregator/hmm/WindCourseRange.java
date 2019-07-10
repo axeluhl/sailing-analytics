@@ -34,14 +34,6 @@ public class WindCourseRange {
         return new WindCourseRange(newFromPortside, newAngleTowardStarboard);
     }
 
-    public double getAvgWindCourse() {
-        double avgWindCourse = fromPortside + angleTowardStarboard / 2.0;
-        if (avgWindCourse > 360) {
-            avgWindCourse -= 360;
-        }
-        return avgWindCourse;
-    }
-
     public IntersectedWindRange toIntersected() {
         return new IntersectedWindRange(fromPortside, angleTowardStarboard, 0);
     }

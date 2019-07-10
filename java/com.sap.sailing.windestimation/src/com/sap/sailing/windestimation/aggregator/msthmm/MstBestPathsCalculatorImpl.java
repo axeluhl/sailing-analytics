@@ -13,8 +13,8 @@ import com.sap.sailing.windestimation.aggregator.msthmm.MstManeuverGraphGenerato
 import com.sap.sse.common.Util.Pair;
 
 /**
- * Infers best path within MST using an adapted variant of Viterbi for conventional HMM models which allows to label
- * each provided maneuver with its most suitable maneuver type.
+ * Infers best path within Minimum Spanning Tree (MST) using an adapted variant of Viterbi for conventional HMM models
+ * which allows to label each provided maneuver with its most suitable maneuver type.
  * 
  * @author Vladislav Chumak (D069712)
  *
@@ -35,12 +35,13 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
     @Override
     public List<GraphLevelInference> getBestNodes(MstManeuverGraphComponents graphComponents) {
         Map<MstGraphLevel, MstBestPathsPerLevel> bestPathsPerLevel = new HashMap<>();
-        for (MstGraphLevel currentLevel : graphComponents.getLeafs()) {
+        // trace back to the graphComponents' root starting at the leaves
+        for (MstGraphLevel currentLevel : graphComponents.getLeaves()) {
             MstBestPathsPerLevel bestPathsUntilLevel = new MstBestPathsPerLevel(currentLevel);
             for (GraphNode currentNode : currentLevel.getLevelNodes()) {
                 double probability = currentNode.getConfidence() / currentLevel.getLevelNodes().size();
-                bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode,
-                        null, probability, currentNode.getValidWindRange().toIntersected());
+                bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode, null, probability,
+                        currentNode.getValidWindRange().toIntersected());
             }
             bestPathsPerLevel.put(currentLevel, bestPathsUntilLevel);
             while ((currentLevel = currentLevel.getParent()) != null) {
@@ -114,6 +115,8 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
             bestPathsUntilPreviousLevels.add(bestPathsUntilPreviousLevel);
         }
         MstBestPathsPerLevel bestPathsUntilLevel = new MstBestPathsPerLevel(currentLevel);
+        // the edges connecting the four nodes of the currentLevel to the four nodes of the previous level
+        // are now analyzed and evaluated, based on the 
         for (GraphNode currentNode : currentLevel.getLevelNodes()) {
             List<Pair<MstGraphLevel, GraphNode>> currentNodeBestPreviousNodes = new ArrayList<>();
             double currentNodeProbabilityFromStart = currentNode.getConfidence();
@@ -144,8 +147,8 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
                         : finalBestIntersectedWindRange.intersect(bestIntersectedWindRange,
                                 CombinationModeOnViolation.EXPANSION);
             }
-            bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode,
-                    currentNodeBestPreviousNodes, currentNodeProbabilityFromStart, finalBestIntersectedWindRange);
+            bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode, currentNodeBestPreviousNodes,
+                    currentNodeProbabilityFromStart, finalBestIntersectedWindRange);
             bestPathsPerLevel.put(currentLevel, bestPathsUntilLevel);
         }
     }

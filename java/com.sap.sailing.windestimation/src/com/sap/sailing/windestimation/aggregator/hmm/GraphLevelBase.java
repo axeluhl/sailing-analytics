@@ -9,10 +9,11 @@ import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 
 /**
- * A layer within HMM which represents an observation with its possible hidden states. The observation are the feature
- * represented by the provided maneuver instance. The possible hidden states are the possible maneuver types for the
- * maneuver (see {@link ManeuverTypeForClassification}). The observation probabilities for a maneuver type are derived
- * from the provided maneuver classification.
+ * A layer within HMM which represents an observation with its possible hidden states, each represented by a
+ * {@link GraphNode} object in the {@link #levelNodes} list. The observation are the features represented by the
+ * provided maneuver instance. The possible hidden states are the possible maneuver types for the maneuver (see
+ * {@link ManeuverTypeForClassification}). The observation probabilities for a maneuver type are derived from the
+ * provided maneuver classification.
  * 
  * @author Vladislav Chumak (D069712)
  *
