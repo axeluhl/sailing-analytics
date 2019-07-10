@@ -480,8 +480,8 @@ public class StationarySequenceBasedFilter {
     
     /**
      * Informs this filter that for its competitor a new position fix was added or replaced. All necessary updates to
-     * the stationary sequences managed by this filter are carried out, and the changes that this has to the result of
-     * calling {@link #getFilteredCandidates()} are reported as the return value, with the {@link Pair#getA() first}
+     * the stationary sequences managed by this filter are carried out, and the changes that this causes for the result
+     * of calling {@link #getFilteredCandidates()} are reported as the return value, with the {@link Pair#getA() first}
      * element of the pair being the candidates that now additionally pass this filter, and the {@link Pair#getB()
      * second} element describing those that no longer pass the filter.
      * <p>
@@ -493,21 +493,21 @@ public class StationarySequenceBasedFilter {
      * still remains small enough, nothing changes. Otherwise, the algorithm tries to extend the stationary sequence
      * from the last candidate before the new fix until the track lets the bounding box grow too large. A new stationary
      * sequence is started, adding all remaining candidates. Any sequence resulting from such a split and having only
-     * one candidate left is removed. The candidates immediately left and right of the split now pass the filter and
-     * therefore are added to the {@link #allEdges graph}.</li>
+     * one candidate left is removed. The candidates for each waypoint immediately left and right of the split now pass
+     * the filter and therefore reported as added.</li>
      * <li>A GPS fix was added outside any stationary sequence. Nothing changes because no bounding box would get
      * smaller by a new fix added.</li>
      * <li>A GPS fix <em>replaces</em> an existing one outside of any stationary sequence. In this case it is possible
      * that the fix replaced caused a bounding box to exceed the diameter threshold and thus avoided a stationary
-     * sequence from being created or extended, and the new fix "smoothes" the track such that a stationary sequence may come into
-     * existence or be extended. Therefore, if a fix is replaced outside of any stationary sequence, a stationary sequence creation or
-     * extension attempt is made for any adjacent candidate towards the fix replaced. For simplicity, the extension
-     * attempts will stop as they reach the next candidate, although slightly improved results may be
-     * achievable by trying to merge two adjacent stationary sequences in their entirety where possible. We can, however,
-     * be sure that we won't miss any possible segment between two candidates; being able to extend further than up to the next
-     * candidate would mean that there must already have been a stationary sequence covering the segment from the next to
-     * the one after the next, but that was excluded because we didn't want to extend into existing adjacent stationary
-     * sequences.</li>
+     * sequence from being created or extended, and the new fix "smoothes" the track such that a stationary sequence may
+     * come into existence or be extended. Therefore, if a fix is replaced outside of any stationary sequence, a
+     * stationary sequence creation or extension attempt is made for any adjacent candidate towards the fix replaced.
+     * For simplicity, the extension attempts will stop as they reach the next candidate, although slightly improved
+     * results may be achievable by trying to merge two adjacent stationary sequences in their entirety where possible.
+     * We can, however, be sure that we won't miss any possible segment between two candidates; being able to extend
+     * further than up to the next candidate would mean that there must already have been a stationary sequence covering
+     * the segment from the next to the one after the next, but that was excluded because we didn't want to extend into
+     * existing adjacent stationary sequences.</li>
      * </ul>
      * 
      * @return the candidates that now pass the filter after applying the fix changes (and which didn't pass before) as
@@ -526,7 +526,7 @@ public class StationarySequenceBasedFilter {
                 final StationarySequence lastSequenceStartingAtOrBeforeFix = stationarySequences.floor(createStationarySequence(
                         StationarySequence.createDummyCandidate(newFix.getTimePoint())));
                 if (lastSequenceStartingAtOrBeforeFix != null && !lastSequenceStartingAtOrBeforeFix.getLast().getTimePoint().before(newFix.getTimePoint())) {
-                    // fix falls into the existing StationarySequence; update its bounding box:
+                    // fix falls into the existing StationarySequence; update its bounding box and the filter result delta:
                     final StationarySequence splitResult = lastSequenceStartingAtOrBeforeFix.tryToAddFix(
                             newFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved,
                             /* StationarySequence set to update */ stationarySequences,

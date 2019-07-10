@@ -14,11 +14,9 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
 
 import org.apache.shiro.authz.UnauthorizedException;
 import org.json.simple.JSONArray;
@@ -41,7 +39,7 @@ public class RoleResource extends AbstractSecurityResource {
 
     @POST
     @Produces("application/json;charset=UTF-8")
-    public Response createRole(@Context UriInfo uriInfo, @FormParam(KEY_ROLE_NAME) String roleName) {
+    public Response createRole(@FormParam(KEY_ROLE_NAME) String roleName) {
         final String roleDefinitionIdAsString = UUID.randomUUID().toString();
         final RoleDefinition role = getService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.ROLE_DEFINITION, new TypeRelativeObjectIdentifier(roleDefinitionIdAsString),
@@ -67,7 +65,7 @@ public class RoleResource extends AbstractSecurityResource {
     @Path("{roleId}")
     @DELETE
     @Produces("text/plain;charset=UTF-8")
-    public Response deleteRole(@Context UriInfo uriInfo, @PathParam(KEY_ROLE_ID) String roleId) {
+    public Response deleteRole(@PathParam(KEY_ROLE_ID) String roleId) {
         Response resp;
         try {
             // parse UUID
@@ -97,7 +95,7 @@ public class RoleResource extends AbstractSecurityResource {
     @PUT
     @Produces("text/plain;charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateRole(@Context UriInfo uriInfo, @PathParam(KEY_ROLE_ID) String roleId, String json) {
+    public Response updateRole(@PathParam(KEY_ROLE_ID) String roleId, String json) {
         Response resp;
         try {
             // parse UUID
@@ -154,7 +152,7 @@ public class RoleResource extends AbstractSecurityResource {
     @GET
     @Path("{roleId}")
     @Produces("application/json;charset=UTF-8")
-    public Response getRole(@Context UriInfo uriInfo, @PathParam(KEY_ROLE_ID) String roleId) {
+    public Response getRole(@PathParam(KEY_ROLE_ID) String roleId) {
         Response resp;
         try {
             // parse UUID

@@ -1993,6 +1993,20 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
+    public boolean hasCurrentUserMetaPermissionsOfRoleDefinitionsWithQualification(Set<RoleDefinition> roleDefinitions,
+            Ownership qualificationForGrantedPermissions) {
+        boolean result = true;
+        for (final RoleDefinition roleDefinition : roleDefinitions) {
+            result &= hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(roleDefinition,
+                    qualificationForGrantedPermissions);
+            if (!result) {
+                break;
+            }
+        }
+        return result;
+    }
+
+    @Override
     public RoleDefinition getOrCreateRoleDefinitionFromPrototype(final RolePrototype rolePrototype) {
         final RoleDefinition potentiallyExistingRoleDefinition = store.getRoleDefinition(rolePrototype.getId());
         final RoleDefinition result;

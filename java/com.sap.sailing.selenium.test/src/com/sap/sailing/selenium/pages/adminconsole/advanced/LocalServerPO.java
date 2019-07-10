@@ -19,7 +19,18 @@ public class LocalServerPO extends PageArea {
     public void setSelfServiceServer(boolean selfService) {
         if (selfService != isSelfServiceServerCheckbox.isSelected()) {
             isSelfServiceServerCheckbox.click();
+            awaitServerConfigurationUpdated();
         }
+    }
+
+    private void awaitServerConfigurationUpdated() {
+        while (isServerConfigurationUpdating()) {
+        }
+    }
+
+    public boolean isServerConfigurationUpdating() {
+        final String updating = isSelfServiceServerCheckbox.getAttribute("updating");
+        return "true".equals(updating);
     }
 
 }
