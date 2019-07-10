@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -25,6 +26,8 @@ import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.EventApi.Event;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
 import com.sap.sailing.selenium.api.event.SecurityApi;
+import com.sap.sailing.selenium.api.event.UserGroupApi;
+import com.sap.sailing.selenium.api.event.UserGroupApi.UserGroup;
 import com.sap.sailing.selenium.api.regatta.Competitor;
 import com.sap.sailing.selenium.api.regatta.RaceColumn;
 import com.sap.sailing.selenium.api.regatta.Regatta;
@@ -42,6 +45,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
     private final EventApi eventApi = new EventApi();
     private final RegattaApi regattaApi = new RegattaApi();
     private final LeaderboardApi leaderboardApi = new LeaderboardApi();
+    private final UserGroupApi usergroupApi = new UserGroupApi();
 
     @Before
     public void setUp() {
@@ -157,12 +161,19 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), ApiContext.SECURITY_CONTEXT);
         securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
         final ApiContext userWithCompetitorCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
+        final ApiContext userWithCompetitorAndSecurityCtx = createApiContext(getContextRoot(),
+                ApiContext.SECURITY_CONTEXT, "donald", "daisy0815");
         securityApi.createUser(adminSecurityCtx, "dagobert", "Dagobert Duck", null, "daisy1337");
         final ApiContext userOwningEventCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "dagobert", "daisy1337");
         
         // TODO we currently can't just create a competitor using the API. This is only possible by using a temporary Event/Regatta.
         eventApi.createEvent(userWithCompetitorCtx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
         Competitor competitor = regattaApi.createAndAddCompetitor(userWithCompetitorCtx, EVENT_NAME, BOAT_CLASS, null, "donald", "USA");
+        
+        // ensure the reader can actually see the competitor
+        UserGroup group = usergroupApi.getUserGroupByName(userWithCompetitorAndSecurityCtx, "donald-tenant");
+        usergroupApi.addRoleToGroup(userWithCompetitorAndSecurityCtx, group.getGroupId(),
+                UUID.fromString(/* sailing viewer role id */"c42948df-517b-45cb-9fa9-d1e79f18e115"), true);
         
         // This is the event to register the existing competitor for
         Event eventToRegisterExistingCompetitor = eventApi.createEvent(userOwningEventCtx, OTHER_EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.OPEN_UNMODERATED, "default");
@@ -188,11 +199,19 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         final ApiContext userOwningEventCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "dagobert",
                 "daisy1337");
 
+        final ApiContext userWithCompetitorAndSecurityCtx = createApiContext(getContextRoot(),
+                ApiContext.SECURITY_CONTEXT, "donald", "daisy0815");
+
         // TODO we currently can't just create a competitor using the API. This is only possible by using a temporary
         // Event/Regatta.
         eventApi.createEvent(userWithCompetitorCtx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
         Competitor competitor = regattaApi.createAndAddCompetitor(userWithCompetitorCtx, EVENT_NAME, BOAT_CLASS, null,
                 "donald", "USA");
+
+        // ensure the reader can actually see the competitor
+        UserGroup group = usergroupApi.getUserGroupByName(userWithCompetitorAndSecurityCtx, "donald-tenant");
+        usergroupApi.addRoleToGroup(userWithCompetitorAndSecurityCtx, group.getGroupId(),
+                UUID.fromString(/* sailing viewer role id */"c42948df-517b-45cb-9fa9-d1e79f18e115"), true);
 
         // This is the event to register the existing competitor for
         Event eventToRegisterExistingCompetitor = eventApi.createEvent(userOwningEventCtx, OTHER_EVENT_NAME, BOAT_CLASS,
@@ -204,6 +223,9 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         } catch (RuntimeException e) {
             Assert.assertTrue("Exepcted HTTP 401 - Unauthorized", e.getMessage().contains("rc=401"));
         }
-        // TODO check if the competitor is added to the regatta
+
+        Competitor[] competitors = regattaApi.getCompetitors(userOwningEventCtx, OTHER_EVENT_NAME);
+
+        assertEquals(0, competitors.length);
     }
 }
