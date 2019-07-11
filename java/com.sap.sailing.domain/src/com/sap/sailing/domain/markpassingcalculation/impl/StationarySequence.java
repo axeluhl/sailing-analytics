@@ -21,6 +21,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.ValueCollectionConstructor;
@@ -32,6 +33,21 @@ import com.sap.sse.common.Util.ValueCollectionConstructor;
  * candidates are considered valid and are returned from {@link #getValidCandidates()}. Note, that first, last and most
  * probably may fully or partly overlap, especially in cases with fewer than three candidates for a single waypoint.
  * <p>
+ * 
+ * A sequence can be updated by adding ({@link #addWithin(Candidate, Set, Set)},
+ * {@link #tryToExtendAfterLast(Candidate, Set, Set)}, and
+ * {@link #tryToExtendBeforeFirst(Candidate, Set, Set, NavigableSet)}) and by removing
+ * ({@link #remove(Candidate, Set, Set, NavigableSet)}) candidates, as well as by
+ * {@link #tryToAddFix(GPSFixMoving, Set, Set, NavigableSet, boolean) announcing GPS fixes} that were added to or
+ * replaced in the underlying {@link #track}. If candidates are added/removed after changes to the track were made but
+ * before those changes were {@link #tryToAddFix(GPSFixMoving, Set, Set, NavigableSet, boolean) announced},
+ * inconsistencies regarding the bounding box may be observed. Fixes may have appeared that cause the bounding box
+ * around the track between the first and the last candidate in this sequence to exceed the maximum "diameter" allowed
+ * for a {@link StationarySequence} (see also bug 5087). The implementation reacts tolerant to such observations and
+ * assumes that the call to {@link #tryToAddFix(GPSFixMoving, Set, Set, NavigableSet, boolean)} that announces the
+ * offending change will be made at a later point in time, then making the necessary adjustments again. In particular,
+ * the implementation will tolerate bounding box sizes in violation of the diameter rule if this violation is unexpected
+ * (e.g., upon removing a candidate
  * 
  * @author Axel Uhl (D043530)
  *
@@ -102,7 +118,8 @@ public class StationarySequence {
      */
     public boolean tryToExtendAfterLast(Candidate candidateAfterSequence,
             Set<Candidate> candidatesEffectivelyAdded, Set<Candidate> candidatesEffectivelyRemoved) {
-        Bounds bounds = computeExtendedBoundsForFixesBetweenCandidates(getLast(), candidateAfterSequence, boundingBoxOfTrackSpanningCandidates);
+        Bounds bounds = computeExtendedBoundsForFixesBetweenCandidates(getLast(), candidateAfterSequence,
+                boundingBoxOfTrackSpanningCandidates, /* tolerateTemporaryBoundingBoxExcess */ false);
         if (bounds != null) {
             boundingBoxOfTrackSpanningCandidates = bounds;
             addCandidateAndUpdateFilterResultDelta(candidateAfterSequence, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
@@ -115,11 +132,16 @@ public class StationarySequence {
      * yet updated to the result of this method. Use the method to test whether extending the
      * {@cod eboundingBoxToStartWith} would be possible.
      * 
+     * @param tolerateTemporaryBoundingBoxExcess
+     *            if {@code true}, fixes will be added to the bounding box returned no matter its
+     *            {@link Bounds#getDiameter() diameter}
+     * 
      * @return {@code null} if {code #boundingBoxToStartWith} was {@code null} already or the
-     *         {@link #boundingBoxToStartWith} would grow too large if the fixes between {@code start} and
-     *         {@code end} were inserted; the extended bounds otherwise.
+     *         {@link #boundingBoxToStartWith} would grow too large if the fixes between {@code start} and {@code end}
+     *         were inserted; the extended bounds otherwise.
      */
-    private Bounds computeExtendedBoundsForFixesBetweenCandidates(Candidate start, Candidate end, Bounds boundingBoxToStartWith) {
+    private Bounds computeExtendedBoundsForFixesBetweenCandidates(Candidate start, Candidate end,
+            Bounds boundingBoxToStartWith, boolean tolerateTemporaryBoundingBoxExcess) {
         Bounds bounds = boundingBoxToStartWith;
         if (bounds != null) {
             track.lockForRead();
@@ -129,7 +151,7 @@ public class StationarySequence {
                 while (iter.hasNext()) {
                     final GPSFixMoving fix = iter.next();
                     bounds = bounds.extend(fix.getPosition());
-                    if (bounds.getDiameter().compareTo(CANDIDATE_FILTER_DISTANCE) > 0) {
+                    if (!tolerateTemporaryBoundingBoxExcess && bounds.getDiameter().compareTo(CANDIDATE_FILTER_DISTANCE) > 0) {
                         bounds = null;
                         break;
                     }
@@ -160,7 +182,8 @@ public class StationarySequence {
     public boolean tryToExtendBeforeFirst(Candidate candidateBeforeSequence,
             Set<Candidate> candidatesEffectivelyAdded, Set<Candidate> candidatesEffectivelyRemoved,
             NavigableSet<StationarySequence> stationarySequenceSetToUpdate) {
-        Bounds bounds = computeExtendedBoundsForFixesBetweenCandidates(candidateBeforeSequence, getFirst(), boundingBoxOfTrackSpanningCandidates);
+        Bounds bounds = computeExtendedBoundsForFixesBetweenCandidates(candidateBeforeSequence, getFirst(),
+                boundingBoxOfTrackSpanningCandidates, /* tolerateTemporaryBoundingBoxExcess */ false);
         if (bounds != null) {
             boundingBoxOfTrackSpanningCandidates = bounds;
             addCandidateAndUpdateFilterResultDelta(candidateBeforeSequence, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
@@ -306,6 +329,7 @@ public class StationarySequence {
         assert candidatesWithSameWaypointSortedByAscendingProbability.contains(candidate);
         final boolean wasValidCandidate = isValidCandidate(candidate);
         final boolean wasFirst = candidate == getFirst();
+        final boolean wasLast = candidate == getLast();
         final boolean wasFirstOfItsWaypoint = candidatesWithSameWaypoint.first() == candidate;
         final boolean wasLastOfItsWaypoint = candidatesWithSameWaypoint.last() == candidate;
         final boolean wasMostProbableOfItsWaypoint = candidatesWithSameWaypointSortedByAscendingProbability.last() == candidate;
@@ -318,7 +342,12 @@ public class StationarySequence {
         if (wasFirst && candidates.size() > 1) {
             stationarySequenceSetToUpdate.add(this);
         }
-        refreshBoundingBox();
+        // recalculate the bounding box if the candidate removal causes the track spanned from first
+        // to last candidate to actually shrink
+        if ((wasFirst && candidate.getTimePoint().until(getFirst().getTimePoint()).compareTo(Duration.NULL) > 0) ||
+            (wasLast  && getLast().getTimePoint().until(candidate.getTimePoint()).compareTo(Duration.NULL) > 0)) {
+            refreshBoundingBox();
+        }
         if (wasValidCandidate) {
             candidatesEffectivelyRemoved.add(candidate);
             candidatesEffectivelyAdded.remove(candidate);
@@ -344,29 +373,37 @@ public class StationarySequence {
     }
 
     /**
-     * {@link #recomputeBounds() Computes} and sets this sequence's bounding box from scratch. It is
-     * assumed that this method is called <em>after</em> having made sure that the bounding box does not
-     * exceed limits.
+     * {@link #recomputeBounds(boolean) Computes} and sets this sequence's bounding box from scratch. It is assumed that
+     * this method is called <em>after</em> having made sure that the bounding box does not exceed limits.
+     * <p>
+     * 
+     * The method allows for the {@link #boundingBoxOfTrackSpanningCandidates bounding box} to grow larger than
+     * {@link #CANDIDATE_FILTER_DISTANCE} in {@link Bounds#getDiameter() diameter}, assuming this is only temporary and
+     * caused by fixes added to or replaced in the track while candidate updates were going on and assuming that this
+     * will be fixed by calls to {@link #tryToAddFix(GPSFixMoving, Set, Set, NavigableSet, boolean)} later.
      */
     private void refreshBoundingBox() {
         Bounds newBounds;
-        newBounds = recomputeBounds();
+        newBounds = recomputeBounds(/* tolerateTemporaryBoundingBoxExcess */ true);
         assert isEmpty() || newBounds != null;
         boundingBoxOfTrackSpanningCandidates = newBounds;
     }
 
     /**
+     * @param tolerateTemporaryBoundingBoxExcess
+     *            if {@code true}, fixes will be added to the bounding box returned no matter its
+     *            {@link Bounds#getDiameter() diameter}
      * @return {@code null} if empty or the bounds would exceed a {@link Bounds#getDiameter() diameter} of
      *         {@link StationarySequence#CANDIDATE_FILTER_DISTANCE}; otherwise the {@link Bounds} containing all fixed
      *         starting with the first and ending at the last {@link #candidates} in this sequence.
      */
-    private Bounds recomputeBounds() {
+    private Bounds recomputeBounds(boolean tolerateTemporaryBoundingBoxExcess) {
         Bounds newBounds;
         if (isEmpty()) {
             newBounds = null;
         } else {
             newBounds = createNewBounds(getFirst());
-            newBounds = computeExtendedBoundsForFixesBetweenCandidates(getFirst(), getLast(), newBounds);
+            newBounds = computeExtendedBoundsForFixesBetweenCandidates(getFirst(), getLast(), newBounds, tolerateTemporaryBoundingBoxExcess);
         }
         return newBounds;
     }
@@ -424,7 +461,7 @@ public class StationarySequence {
         if (isReplacement) {
             // the fix could have replaced another one that was "far out," and the bounding box may shrink now;
             // later additions may unnecessarily split, so we need to refresh the bounding box in this case:
-            newBounds = recomputeBounds(); // can be null only if bounds' diameter exceeds threshold
+            newBounds = recomputeBounds(/* tolerateTemporaryBoundingBoxExcess */ false); // can be null only if bounds' diameter exceeds threshold
         } else {
             newBounds = boundingBoxOfTrackSpanningCandidates.extend(newFix.getPosition());
         }
