@@ -250,7 +250,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE.name(), 1);
         index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), 1);
         index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_STRING_REPRESENTATION.name(), 1);
-        gpsFixCollection.createIndex(index, new IndexOptions().name("fixbydevandtime"));
+        gpsFixCollection.createIndex(index, new IndexOptions().name("fixbytimeanddev"));
         return gpsFixCollection;
     }
     
