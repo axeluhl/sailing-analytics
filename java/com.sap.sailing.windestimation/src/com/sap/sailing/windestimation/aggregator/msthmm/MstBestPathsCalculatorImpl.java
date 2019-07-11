@@ -116,7 +116,12 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
         }
         MstBestPathsPerLevel bestPathsUntilLevel = new MstBestPathsPerLevel(currentLevel);
         // the edges connecting the four nodes of the currentLevel to the four nodes of the previous level
-        // are now analyzed and evaluated, based on the 
+        // are now analyzed and evaluated. The probability for the path to the currentNode is determined
+        // as the product of the probability for the path to the previous node (which already includes
+        // the previous node's own classification confidence) and the transition probability to the
+        // current node (determined by the TWD delta between the wind range carried through to the previous
+        // node and the wind range computed for the current node) and the classification confidence of
+        // the current node.
         for (GraphNode currentNode : currentLevel.getLevelNodes()) {
             List<Pair<MstGraphLevel, GraphNode>> currentNodeBestPreviousNodes = new ArrayList<>();
             double currentNodeProbabilityFromStart = currentNode.getConfidence();
