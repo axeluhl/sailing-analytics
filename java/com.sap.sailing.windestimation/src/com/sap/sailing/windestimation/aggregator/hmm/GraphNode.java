@@ -32,6 +32,10 @@ public class GraphNode {
         return validWindRange;
     }
 
+    /**
+     * @return the confidence computed by the classifier that the maneuver has the type returned by
+     *         {@link #getManeuverType()}
+     */
     public double getConfidence() {
         return confidence;
     }
