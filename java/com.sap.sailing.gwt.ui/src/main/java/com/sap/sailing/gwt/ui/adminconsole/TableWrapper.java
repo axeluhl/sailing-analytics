@@ -20,10 +20,17 @@ extends com.sap.sse.gwt.client.celltable.TableWrapper<T, S, StringMessages, Admi
     protected static final int DEFAULT_PAGING_SIZE = 100;
     protected final SailingServiceAsync sailingService;
 
+    /**
+     * @param enablePager if {@code true}, a paging control will be shown; this constructor, other than
+     * {@link #TableWrapper(SailingServiceAsync, StringMessages, ErrorReporter, boolean, boolean, int, EntityIdentityComparator)},
+     * uses a {@link #DEFAULT_PAGING_SIZE} of 100 elements shown. If the {@code enablePager} parameter is
+     * {@code false}, no pager will be shown and the paging size will be set to {@link Integer#MAX_VALUE}.
+     */
     public TableWrapper(SailingServiceAsync sailingService, final StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection, boolean enablePager,
             EntityIdentityComparator<T> entityIdentityComparator) {
-        this(sailingService, stringMessages, errorReporter, multiSelection, enablePager, DEFAULT_PAGING_SIZE,
+        this(sailingService, stringMessages, errorReporter, multiSelection, enablePager,
+                enablePager ? DEFAULT_PAGING_SIZE : Integer.MAX_VALUE /* if no pager, show all */,
                 entityIdentityComparator);
     }
 

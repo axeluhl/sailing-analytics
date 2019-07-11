@@ -16,6 +16,7 @@ public class RegattaApi {
     private static final String LIST_REGATTA_RACES = "/races";
     private static final String COMPETITOR_CREATE_AND_ADD_WITH_BOAT = "/competitors/createandadd";
     private static final String ADD_RACE_COLUMN_URL = "/addracecolumns";
+    private static final String LIST_COMPETITORS = "/competitors";
 
     public Regatta getRegatta(ApiContext ctx, String regattaName) {
         return new Regatta(ctx.get(REGATTAS + "/" + regattaName));
@@ -47,6 +48,16 @@ public class RegattaApi {
             String competitorEmail, String competitorName, String nationalityIOC, String secret) {
         return createAndAddCompetitor(ctx, regattaName, boatclass, competitorEmail, competitorName, nationalityIOC,
                 Optional.ofNullable(secret), Optional.empty());
+    }
+
+    public Competitor[] getCompetitors(final ApiContext ctx, final String regattaName) {
+        final String url = REGATTAS + "/" + regattaName + LIST_COMPETITORS;
+        final JSONArray competitors = ctx.get(url);
+        if (competitors != null) {
+            return competitors.stream().map(c -> (JSONObject) c).map(Competitor::new).toArray(Competitor[]::new);
+        } else {
+            return new Competitor[] {};
+        }
     }
 
     private Competitor createAndAddCompetitor(ApiContext ctx, String regattaName, String boatclass,

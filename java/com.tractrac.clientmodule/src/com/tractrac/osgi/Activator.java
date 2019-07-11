@@ -14,6 +14,7 @@ import com.tractrac.model.lib.impl.attachment.DefaultAttachmentManager;
 import com.tractrac.model.lib.impl.data.DefaultPositionFactory;
 import com.tractrac.model.lib.impl.event.EventFactory;
 import com.tractrac.model.lib.impl.metadata.DefaultMetadataFactory;
+import com.tractrac.model.lib.impl.route.PathRouteFactory;
 import com.tractrac.subscription.lib.api.SubscriptionLocator;
 import com.tractrac.subscription.lib.impl.SubscriberFactory;
 import com.tractrac.util.lib.api.UtilLocator;
@@ -33,6 +34,7 @@ public class Activator implements BundleActivator {
         DataflowProviderLocator.registerStoredDataProviderFactory(new MTBStoredDataProviderFactory());
         ModelLocator.registerAttachmentManager(new DefaultAttachmentManager());
         ModelLocator.registerEventFactory(new EventFactory());
+        ModelLocator.registerPathRouteFactory(new PathRouteFactory());
         ModelLocator.registerPositionFactory(new DefaultPositionFactory());
         ModelLocator.registerMetadataFactory(new DefaultMetadataFactory());
         SubscriptionLocator.registerSubscriberFactory(new SubscriberFactory());

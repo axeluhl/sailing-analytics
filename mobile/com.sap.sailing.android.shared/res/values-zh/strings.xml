@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources xmlns:tools="http://schemas.android.com/tools">
+
+    
+    
+    <string name="options_menu_live">"连接信息"</string>
+    <string name="remove">"移除"</string>
+    <string name="enter_new_item">"输入新项目"</string>
+    <string name="add">"添加"</string>
+    <string name="there_are_no_items_yet_">"尚无任何项目。"</string>
+
+    <!-- SystemInformationActivity -->
+    
+    
+    
+    
+    
+    
+    
+    
+
+    <!-- Generic -->
+    
+    <string name="generic_error">"错误"</string>
+    <string name="about">"信息"</string>
+
+    <!-- Signal quality -->
+    <string name="signal_accuracy_indicator_view_description">"GPS 准确度"</string>
+    <string name="poor">"差"</string>
+    <string name="good">"良好"</string>
+    <string name="great">"很好"</string>
+    <string name="no_signal">"无信号"</string>
+    <string name="ok">"确定"</string>
+
+    <!-- Regatta -->
+    <string name="your_regattas">"您的比赛："</string>
+    <string name="options_refresh">"刷新"</string>
+
+    <!-- QR Code -->
+    <string name="notify_user_db_operation_failed">"错误：数据库操作失败。"</string>
+    <string name="no_qr_code_popup_title">"没有二维码？"</string>
+    <string name="no_qr_code_popup_message">"如果没有收到二维码，请联系赛事管理。"</string>
+    <string name="error_play_store_and_scanning_not_available">"PlayStore 和扫描不可用。"</string>
+    <string name="scanning_cancelled">"扫描已取消"</string>
+    <string name="error_scanning_qrcode">"扫描二维码时出错 {结果代码}"</string>
+    <string name="notify_user_api_call_failed">"联系服务器时发生错误。请重试。"</string>
+    <string name="please_wait">"请稍候"</string>
+    <string name="error_invalid_qr_code">"二维码无效"</string>
+    
+    
+    
+
+    <!-- Eula -->
+    <string name="eula_title">"最终用户许可协议"</string>
+    <string name="eula_message">"使用此应用即表示您确认接受 SAP SE 最终用户许可协议。请阅读此处的“最终用户许可协议”。"</string>
+    <string name="eula_confirm">"确认"</string>
+    <string name="linked_eula_message_part">"此处"</string>
+
+    <!-- About this app -->
+    <string name="about_this_app">"关于此应用"</string>
+    <string name="eula">"最终用户许可协议"</string>
+    <string name="license_information">"许可证信息"</string>
+
+    <!-- HTTP Requests -->
+    
+    
+    
+    
+
+    <!-- Dialog -->
+    <string name="yes">"是"</string>
+    <string name="no">"否"</string>
+    <string name="warning">"警告"</string>
+    <string name="enable_gps">"GPS 已关闭。此应用需要 GPS 位置。是否在定位设置中打开 GPS？"</string>
+
+    <!-- Message Sending -->
+    <string name="sending_waiting">"目前，%1$d个活动等待发送。\n上次成功发送时间：%2$s"</string>
+    <string name="sending_no_waiting">"目前没有等待发送的活动。"</string>
+
+    <!-- Competitor list footer text -->
+    <string name="footer_text">"更多信息，请访问"</string>
+    <string name="footer_text_link">"https://www.sapsailing.com"</string>
+
+    <string name="yesterday">"昨天"</string>
+    <string name="today">"今天"</string>
+    <string name="tomorrow">"明天"</string>
+    
+    
+
+    
+
+</resources>

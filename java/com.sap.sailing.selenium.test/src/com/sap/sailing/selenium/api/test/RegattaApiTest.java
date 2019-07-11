@@ -4,8 +4,10 @@ import static com.sap.sailing.domain.common.CompetitorRegistrationType.CLOSED;
 import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -33,7 +35,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
 
     @Before
     public void setUp() {
-        clearState(getContextRoot());
+        clearState(getContextRoot(), /* headless */ true);
     }
 
     @Test
@@ -71,8 +73,8 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         RegattaRaces regattaRaces = regattaApi.getRegattaRaces(ctx, EVENT_NAME);
 
         assertEquals("read: regatta is different", EVENT_NAME, regattaRaces.getRegattaName());
-        //assertEquals("read: reagtta.series should have 0 entries", 0, regattaRaces.getRaces().length);
-        
+        // assertEquals("read: reagtta.series should have 0 entries", 0, regattaRaces.getRaces().length);
+
         RaceColumn[] raceColumns = regattaApi.addRaceColumn(ctx, EVENT_NAME, "R", 1);
         leaderboardApi.startRaceLogTracking(ctx, EVENT_NAME, raceColumns[0].getRaceName(), "Default");
         regattaRaces = regattaApi.getRegattaRaces(ctx, EVENT_NAME);
@@ -97,6 +99,30 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         assertNotNull("read: competitor.boat.boatClass should not be empty", competitor.getBoat().getBoatClass());
         assertEquals("read: competitor.boat.boatClass.name is differnet", BOAT_CLASS,
                 competitor.getBoat().getBoatClass().getName());
+    }
+
+    @Test
+    public void testGetCompetitors() {
+        final String competitor1Name = "Max Mustermann";
+        final String competitor2Name = "Hans Albatros";
+        final String competitor1Nationality = "GER";
+        final String competitor2Nationality = "USA";
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
+        final Competitor competitor1 = regattaApi.createAndAddCompetitor(ctx, EVENT_NAME, BOAT_CLASS, "test@de",
+                competitor1Name, competitor1Nationality);
+        assertNotNull("Competitor1 should not be null", competitor1);
+        final Competitor competitor2 = regattaApi.createAndAddCompetitor(ctx, EVENT_NAME, BOAT_CLASS, "test@de",
+                competitor2Name, competitor2Nationality);
+        assertNotNull("Competitor2 should not be null", competitor2);
+        final Competitor[] competitors = regattaApi.getCompetitors(ctx, EVENT_NAME);
+        assertNotNull("read: list of competitors should not be null", competitors);
+        assertNotEquals("read: list of competitors should not be empty", 0, competitors.length);
+        assertEquals("read: list of competitors should contains 2 comeptitors", 2, competitors.length);
+        for (Competitor competitor : competitors) {
+            assertTrue("competitor name " + competitor.getName() + " is wrong",
+                    competitor1Name.equals(competitor.getName()) || competitor2Name.equals(competitor.getName()));
+        }
     }
 
     @Test

@@ -1,0 +1,15 @@
+/* InfoPlist.strings
+    SAPTracker
+  
+    Created by Raimund Wege on 04.11.16.
+    Copyright © 2016 com.sap.sailing. All rights reserved. */
+"NSLocationAlwaysUsageDescription" = "Pour pouvoir suivre l'intégralité de votre course, votre téléphone doit continuer le suivi même si vous l'éteignez ou verrouillez l'écran (pour économiser de l'énergie). Ainsi, vous évitez un arrêt non voulu du suivi.";
+
+"NSLocationWhenInUseUsageDescription" = "Pour pouvoir suivre l'intégralité de votre course, votre téléphone doit continuer le suivi même si vous l'éteignez ou verrouillez l'écran (pour économiser de l'énergie). Ainsi, vous évitez un arrêt non voulu du suivi.";
+
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "Pour pouvoir suivre l'intégralité de votre course, votre téléphone doit continuer le suivi même si vous l'éteignez ou verrouillez l'écran (pour économiser de l'énergie). Ainsi, vous évitez un arrêt non voulu du suivi.";
+
+"NSCameraUsageDescription" = "L'appareil photo est nécessaire pour pouvoir se connecter à l'aide du code QR.";
+
+"NSPhotoLibraryUsageDescription" = "Pour pouvoir remplacer la photo de l'équipe, l'application doit accéder à la galerie de photos.";
+

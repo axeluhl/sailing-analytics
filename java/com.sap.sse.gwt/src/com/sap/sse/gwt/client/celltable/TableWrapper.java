@@ -110,6 +110,7 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
     public void refresh(Iterable<T> newItems) {
         dataProvider.getList().clear();
         Util.addAll(newItems, dataProvider.getList());
+        dataProvider.refresh();
         dataProvider.flush();
     }
     

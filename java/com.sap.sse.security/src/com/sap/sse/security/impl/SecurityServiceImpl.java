@@ -1182,7 +1182,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             store.removeAllQualifiedRolesForUser(userToDelete);
 
             final String defaultTenantNameForUsername = getDefaultTenantNameForUsername(username);
-            UserGroup defaultTenantUserGroup = getUserGroupByName(defaultTenantNameForUsername);
+            final UserGroup defaultTenantUserGroup = getUserGroupByName(defaultTenantNameForUsername);
             if (defaultTenantUserGroup != null) {
                 List<User> usersInGroupList = Util.asList(defaultTenantUserGroup.getUsers());
                 if (usersInGroupList.size() == 1 && usersInGroupList.contains(userToDelete)) {
@@ -1196,7 +1196,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             }
             // also remove from all usergroups
             for (UserGroup userGroup : userToDelete.getUserGroups()) {
-                internalRemoveUserFromUserGroup(userGroup.getId(), userToDelete.getName());
+                if (userGroup != defaultTenantUserGroup) { // the defaultTenantUserGroup has already been deleted above
+                    internalRemoveUserFromUserGroup(userGroup.getId(), userToDelete.getName());
+                }
             }
             store.deleteUser(username);
         }
@@ -1991,6 +1993,20 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
+    public boolean hasCurrentUserMetaPermissionsOfRoleDefinitionsWithQualification(Set<RoleDefinition> roleDefinitions,
+            Ownership qualificationForGrantedPermissions) {
+        boolean result = true;
+        for (final RoleDefinition roleDefinition : roleDefinitions) {
+            result &= hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(roleDefinition,
+                    qualificationForGrantedPermissions);
+            if (!result) {
+                break;
+            }
+        }
+        return result;
+    }
+
+    @Override
     public RoleDefinition getOrCreateRoleDefinitionFromPrototype(final RolePrototype rolePrototype) {
         final RoleDefinition potentiallyExistingRoleDefinition = store.getRoleDefinition(rolePrototype.getId());
         final RoleDefinition result;
@@ -2024,6 +2040,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void initiallyFillFromInternal(ObjectInputStream is) throws IOException, ClassNotFoundException,
             InterruptedException {
+        logger.info("Reading cache manager...");
         ReplicatingCacheManager newCacheManager = (ReplicatingCacheManager) is.readObject();
         cacheManager.replaceContentsFrom(newCacheManager);
         // overriding thread context class loader because the user store may be provided by a different bundle;
@@ -2032,6 +2049,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (store != null) {
             Thread.currentThread().setContextClassLoader(store.getClass().getClassLoader());
         }
+        logger.info("Reading user store...");
         try {
             UserStore newUserStore = (UserStore) is.readObject();
             store.replaceContentsFrom(newUserStore);
@@ -2041,12 +2059,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (accessControlStore != null) {
             Thread.currentThread().setContextClassLoader(accessControlStore.getClass().getClassLoader());
         }
+        logger.info("Reading access control store...");
         try {
             AccessControlStore newAccessControlStore = (AccessControlStore) is.readObject();
             accessControlStore.replaceContentsFrom(newAccessControlStore);
         } finally {
             Thread.currentThread().setContextClassLoader(oldCCL);
         }
+        logger.info("Done filling SecurityService");
     }
 
     @Override

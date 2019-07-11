@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources>
+    
+    
+
+    <!-- override default values of android.shared -->
+    
+
+    
+
+    <string name="settings_category_energy_saving">"Salvataggio batteria"</string>
+    
+    
+    
+    <string name="preference_energy_saving_sending_interval">"seleziona intervallo di invio aggiornamento GPS"</string> 
+    <string name="preference_energy_saving_sending_interval_summary">"Selezionare un valore più alto possibile per conservare la vita della batteria pur mantenendo una ragionevole esperienza live, a seconda del proprio caso di utilizzo."</string>
+
+    <string name="preference_energy_saving_sending_interval_message">"Gli aggiornamenti GPS verranno inviati al server%1$s %2$s."</string>
+    
+    <string name="preference_energy_saving_sending_interval_message_every">"ogni"</string>
+    <string-array name="preference_energy_saving_sending_interval_entries">
+    	<item>"immediatamente"</item>
+    	<item>"5 secondi"</item>
+    	<item>"10 secondi"</item>
+    	<item>"20 secondi"</item>
+    	<item>"60 secondi"</item>
+	</string-array>
+	
+
+    
+    
+    
+    
+    
+    
+
+    <string name="preference_heading_with_declination_subtracted_is_enabled">"Attivato"</string>
+    <string name="preference_heading_with_declination_subtracted_is_disabled">"Disattivato"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">"Visualizzazione: Prua magnetica"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">"Visualizzazione: Prua vera"</string>
+    <string name="preference_heading_with_declination_subtracted_enabled">"Angolo di rotta"</string>
+</resources>

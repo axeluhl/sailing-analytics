@@ -220,6 +220,11 @@ input.magnifier {
 	top: 7.5px;
 }
 
+.orientationAnchor {
+	position: relative;
+    top: 7.5px;
+}
+
 .groupingProvider {
     padding: 3px 0px;
     overflow-y: auto;

@@ -525,7 +525,7 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
         raceStatusColumn.setFieldUpdater(new FieldUpdater<RegattaOverviewEntryDTO, SafeHtml>() {
             @Override
             public void update(int index, RegattaOverviewEntryDTO object, SafeHtml value) {
-                if(entryClickedHandler != null) {
+                if (entryClickedHandler != null) {
                     entryClickedHandler.onEntryClicked(object);
                 }
             }
@@ -807,17 +807,6 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
                 }
             }
         }
-        // if (!hasAnyRaceGroupASeries) {
-        // if (regattaOverviewTable.getColumnIndex(seriesNameColumn) >= 0) {
-        // regattaOverviewTable.removeColumn(seriesNameColumn);
-        // }
-        // }
-        // if (!hasAnyRaceGroupAFleet) {
-        // if (regattaOverviewTable.getColumnIndex(fleetNameColumn) >= 0) {
-        // regattaOverviewTable.removeColumn(fleetNameColumn);
-        // }
-        // }
-        // regattaOverviewTable.redraw();
     }
 
     private DialogBox createCourseViewDialogBox(RaceInfoDTO raceInfoDTO) {

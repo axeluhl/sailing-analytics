@@ -10,6 +10,7 @@ import java.util.TreeSet;
 
 import org.junit.Before;
 
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.tracking.impl.TimedComparator;
 import com.sap.sse.common.Duration;
@@ -70,7 +71,11 @@ public class AbstractCandidateFilterTestSupport {
     }
 
     protected Candidate candidate(TimePoint timePoint, String name) {
-        return new CandidateImpl(1, timePoint, 1.0, null) {
+        return candidate(timePoint, name, /* waypoint */ null);
+    }
+
+    protected Candidate candidate(TimePoint timePoint, String name, Waypoint waypoint) {
+        return new CandidateImpl(1, timePoint, 1.0, waypoint) {
             private static final long serialVersionUID = 8547646939054562751L;
             @Override public String toString() { return name; }
         };
