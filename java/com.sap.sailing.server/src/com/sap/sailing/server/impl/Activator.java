@@ -118,13 +118,10 @@ public class Activator implements BundleActivator {
 
     public void start(BundleContext context) throws Exception {
         Activator.context = context;
-
         extenderBundleTracker = new ExtenderBundleTracker(context);
         extenderBundleTracker.open();
-
         mailServiceTracker = ServiceTrackerFactory.createAndOpen(context, MailService.class);
         securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
-
         if (securityServiceTracker != null) {
             new Thread("Racingevent wait for securityservice for migration thread") {
                 public void run() {
@@ -139,8 +136,6 @@ public class Activator implements BundleActivator {
                 };
             }.start();
         }
-        
-
     }
 
     /**

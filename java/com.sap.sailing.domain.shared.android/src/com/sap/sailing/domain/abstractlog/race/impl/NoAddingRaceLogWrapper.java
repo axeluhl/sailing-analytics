@@ -160,6 +160,12 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     }
 
     @Override
+    public Iterator<RaceLogEvent> getRawFixesIterator(TimePoint startingAt, boolean startingAtInclusive,
+            TimePoint endingAt, boolean endingAtInclusive) {
+        return innerRaceLog.getRawFixesIterator(startingAt, startingAtInclusive, endingAt, endingAtInclusive);
+    }
+
+    @Override
     public Serializable getId() {
         return innerRaceLog;
     }

@@ -14,4 +14,17 @@ import com.sap.sse.util.ThreadPoolUtil;
  * @param <V>
  */
 public interface KnowsExecutorAndTracingGet<V> extends KnowsExecutor, HasTracingGet<V> {
+    /**
+     * Assuming that the thread pool's thread has taken over and is about to run this task,
+     * sets all inheritable thread local values for the executing thread. The values
+     * are obtained through {@link #getThreadLocalValuesToInherit()}.
+     */
+    void setInheritableThreadLocalValues();
+    
+    /**
+     * Removes / "unsets" the values for all thread locals whose values were memorized by
+     * {@link #getThreadLocalValuesToInherit()}. Call this method at the end of the
+     * call/run method of this task.
+     */
+    void removeInheritableThreadLocalValues();
 }

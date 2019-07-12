@@ -268,8 +268,10 @@ public class RoleDefinitionsPanel extends VerticalPanel {
 
     private Set<WildcardPermission> getAllPermissions() {
         Set<WildcardPermission> allPermissionsAsStrings = new HashSet<>();
-        for (final RoleDefinition roleFromAllRoles : getAllRoleDefinitions()) {
-            Util.addAll(roleFromAllRoles.getPermissions(), allPermissionsAsStrings);
+        for (HasPermissions permission : userService.getAllKnownPermissions()) {
+            for (HasPermissions.Action action : permission.getAvailableActions()) {
+                allPermissionsAsStrings.add(permission.getPermission(action));
+            }
         }
         return allPermissionsAsStrings;
     }

@@ -36,8 +36,8 @@ public enum InMemoryDataStore implements DataStore {
     private Context mContext;
     private LinkedHashMap<Serializable, EventBase> eventsById;
     private LinkedHashMap<SimpleRaceLogIdentifier, ManagedRace> managedRaceById;
-    private LinkedHashMap<Serializable, Mark> marksById;
-    private CourseBase courseData;
+    private LinkedHashMap<RaceGroup, LinkedHashMap<Serializable, Mark>> marksData;
+    private LinkedHashMap<RaceGroup, CourseBase> courseData;
     private SharedDomainFactory domainFactory;
 
     private Serializable eventUUID;
@@ -63,8 +63,8 @@ public enum InMemoryDataStore implements DataStore {
     public void reset() {
         eventsById = new LinkedHashMap<>();
         managedRaceById = new LinkedHashMap<>();
-        marksById = new LinkedHashMap<>();
-        courseData = null;
+        marksData = new LinkedHashMap<>();
+        courseData = new LinkedHashMap<>();
         domainFactory = new SharedDomainFactoryImpl(new AndroidRaceLogResolver());
 
         eventUUID = null;
@@ -255,34 +255,47 @@ public enum InMemoryDataStore implements DataStore {
      * * * * * * MARKS * * * * * *
      */
 
-    @Override
-    public Collection<Mark> getMarks() {
-        return marksById.values();
+    private LinkedHashMap<Serializable, Mark> getMarksByRaceGroup(RaceGroup raceGroup) {
+        LinkedHashMap<Serializable, Mark> marks = marksData.get(raceGroup);
+        if (marks == null) {
+            marks = new LinkedHashMap<>();
+            marksData.put(raceGroup, marks);
+        }
+        return marks;
+    }
+
+    private void setMarksByRaceGroup(RaceGroup raceGroup, LinkedHashMap<Serializable, Mark> marks) {
+        marksData.put(raceGroup, marks);
     }
 
     @Override
-    public Mark getMark(Serializable id) {
-        return marksById.get(id);
+    public Collection<Mark> getMarks(RaceGroup raceGroup) {
+        return getMarksByRaceGroup(raceGroup).values();
     }
 
     @Override
-    public boolean hasMark(Serializable id) {
-        return marksById.containsKey(id);
+    public Mark getMark(RaceGroup raceGroup, Serializable id) {
+        return getMarksByRaceGroup(raceGroup).get(id);
     }
 
     @Override
-    public void addMark(Mark mark) {
-        marksById.put(mark.getId(), mark);
+    public boolean hasMark(RaceGroup raceGroup, Serializable id) {
+        return getMarksByRaceGroup(raceGroup).containsKey(id);
     }
 
     @Override
-    public CourseBase getLastPublishedCourseDesign() {
-        return courseData;
+    public void addMark(RaceGroup raceGroup, Mark mark) {
+        getMarksByRaceGroup(raceGroup).put(mark.getId(), mark);
     }
 
     @Override
-    public void setLastPublishedCourseDesign(CourseBase courseData) {
-        this.courseData = courseData;
+    public CourseBase getLastPublishedCourseDesign(RaceGroup raceGroup) {
+        return courseData.get(raceGroup);
+    }
+
+    @Override
+    public void setLastPublishedCourseDesign(RaceGroup raceGroup, CourseBase courseData) {
+        this.courseData.put(raceGroup, courseData);
     }
 
     @Override

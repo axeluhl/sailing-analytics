@@ -126,8 +126,8 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
         this.stringMessages = stringMessages;
         this.permissionType = permissionType;
         this.securedObjectId = securedObjectId;
-        final StrippedUserDTO userOwner = ownership.getUserOwner();
-        resolvedUserGroup = ownership.getTenantOwner();
+        final StrippedUserDTO userOwner = ownership == null ? null : ownership.getUserOwner();
+        this.resolvedUserGroup = ownership == null ? null : ownership.getTenantOwner();
 
         // User Suggest
         final MultiWordSuggestOracle suggestUserOracle = new MultiWordSuggestOracle();
@@ -146,8 +146,7 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
         });
 
         this.suggestUserName = createSuggestBox(suggestUserOracle);
-        this.suggestUserName.setText(
-                ownership == null || userOwner == null ? "" : userOwner.getName());
+        this.suggestUserName.setText(userOwner == null ? "" : userOwner.getName());
 
         // User Group Suggest
         final MultiWordSuggestOracle suggestUserGroupOracle = new MultiWordSuggestOracle();
@@ -168,8 +167,7 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
             }
         });
         this.suggestUserGroupName = createSuggestBox(suggestUserGroupOracle);
-        this.suggestUserGroupName.setText(
-                ownership == null || ownership.getTenantOwner() == null ? "" : ownership.getTenantOwner().getName());
+        this.suggestUserGroupName.setText(resolvedUserGroup == null ? "" : resolvedUserGroup.getName());
 
         this.suggestUserName.addValueChangeHandler(e -> checkIfUserExists());
         this.suggestUserGroupName.addValueChangeHandler(e -> resolveUserGroup());
@@ -295,8 +293,10 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
             final QualifiedObjectIdentifier identifier = securedObject.getIdentifier();
             final String permissionType = identifier.getTypeIdentifier();
             final String id = identifier.getTypeRelativeObjectIdentifier().toString();
-            new EditOwnershipDialog(userManagementService, securedObject.getOwnership(),
-                    StringMessages.INSTANCE, new EditOwnershipDialogCallback(securedObject), permissionType, id).show();
+            // new EditOwnershipDialog(userManagementService, null, // securedObject.getOwnership(),
+            // StringMessages.INSTANCE, new EditOwnershipDialogCallback(securedObject), permissionType, id).show();
+            new EditOwnershipDialog(userManagementService, securedObject.getOwnership(), StringMessages.INSTANCE,
+                    new EditOwnershipDialogCallback(securedObject), permissionType, id).show();
         }
 
         private class EditOwnershipDialogCallback implements DialogCallback<OwnershipDialogResult> {

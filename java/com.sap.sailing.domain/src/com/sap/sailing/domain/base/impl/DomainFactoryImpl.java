@@ -162,7 +162,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
 
     @Override
     public CompetitorAndBoatDTO convertToCompetitorAndBoatDTO(Competitor competitor, Boat boat) {
-        return new CompetitorAndBoatDTO(competitorAndBoatStore.convertToCompetitorDTO(competitor), competitorAndBoatStore.convertToBoatDTO(boat));
+        return new CompetitorAndBoatDTO(convertToCompetitorDTO(competitor), competitorAndBoatStore.convertToBoatDTO(boat));
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,7 +43,7 @@ public class LowPointForLeagueOverallLeaderboard extends LowPoint {
      */
     @Override
     public int compareByBetterScore(Competitor o1, List<Pair<RaceColumn, Double>> o1Scores,
-            Competitor o2, List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint, Leaderboard leaderboard) {
+            Competitor o2, List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint, Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor) {
         final Double o1ScoreSum = o1Scores.stream().collect(Collectors.summingDouble(rcAndScore->rcAndScore.getB()));
         final Double o2ScoreSum = o2Scores.stream().collect(Collectors.summingDouble(rcAndScore->rcAndScore.getB()));
         assert Math.abs(o1ScoreSum - o2ScoreSum) < 0.00001;

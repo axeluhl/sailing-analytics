@@ -366,13 +366,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     public void onResume() {
         super.onResume();
 
-        if (preferences.needConfigRefresh()) {
-            preferences.setNeedConfigRefresh(false);
-            Intent intent = new Intent(this, getClass());
-            startActivity(intent);
-            finish();
-        }
-
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_RESET);
         filter.addAction(AppConstants.INTENT_ACTION_VALID_DATA);
@@ -408,7 +401,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                     public void onLoadFailed(Exception reason) {
                         dismissProgressSpinner();
 
-                        preferences.setDefaultProtestTimeDurationInMinutesCustomEditable(true);
                         if (reason instanceof FileNotFoundException) {
                             Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_not_found),
                                     Toast.LENGTH_LONG).show();
@@ -425,6 +417,8 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
                     @Override
                     public void onLoadSucceeded(DeviceConfiguration configuration, boolean isCached) {
+                        getSupportLoaderManager().destroyLoader(0);
+
                         dismissProgressSpinner();
 
                         // this is our 'global' configuration, let's store it in app preferences
@@ -441,7 +435,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             getSupportLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
         } else {
             dismissProgressSpinner();
-            slideUpBackdropDelayed();
         }
     }
 
@@ -531,15 +524,16 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     /**
      * Reset the data (reload from server)
      *
-     * @param force
-     *            Reload data, even if the backdrop is moved up
+     * @param force Reload data, even if the backdrop is moved up
      */
     private void resetData(boolean force) {
-        if (!force && backdrop.getY() != 0) {
-            return;
+        if (force) {
+            setupDataManager();
         }
 
-        setupDataManager();
+        if (backdrop.getY() == 0f) {
+            slideUpBackdropDelayed();
+        }
 
         addEventListFragment();
 
@@ -554,11 +548,15 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-
             if (AppConstants.INTENT_ACTION_RESET.equals(action)) {
-                resetData(intent.getBooleanExtra(AppConstants.EXTRA_FORCE_REFRESH, false));
+                resetData(true);
             } else if (AppConstants.INTENT_ACTION_VALID_DATA.equals(action)) {
-                resetData(false);
+                if (preferences.needConfigRefresh()) {
+                    resetData(true);
+                    preferences.setNeedConfigRefresh(false);
+                } else {
+                    resetData(false);
+                }
             }
         }
     }

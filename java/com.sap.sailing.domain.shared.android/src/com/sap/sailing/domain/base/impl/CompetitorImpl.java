@@ -46,6 +46,14 @@ public class CompetitorImpl implements DynamicCompetitor {
         this.searchTag = searchTag;
         this.listeners = new HashSet<CompetitorChangeListener>();
     }
+
+    private Object writeReplace() {
+        if (CompetitorSerializationCustomizer.getCurrentCustomizer().removalOfPersonalDataNecessary(this)) {
+            return new CompetitorImpl(id, name, shortName, color, /* email */ null, flagImage, team, timeOnTimeFactor,
+                    timeOnDistanceAllowancePerNauticalMile, searchTag);
+        }
+        return this;
+    }
     
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         ois.defaultReadObject();

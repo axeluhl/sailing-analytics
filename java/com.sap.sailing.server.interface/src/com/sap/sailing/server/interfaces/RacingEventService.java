@@ -884,10 +884,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
             result = false;
         } else {
             Regatta regatta = getRegattaByName(leaderboardName);
-            if (regatta == null && secret != null) {
-                logger.warning(
-                        "Attempt to skip security checks using regatta secret \"" + secret + "\" for leaderboard \""
-                                + leaderboardName + "\", but a regatta with the same name could not be resolved");
+            if (regatta == null) {
+                if (secret != null) {
+                    logger.warning(
+                            "Attempt to skip security checks using regatta secret \"" + secret + "\" for leaderboard \""
+                                    + leaderboardName + "\", but a regatta with the same name could not be resolved");
+                } // else regatta not found, but no secret specified either; checks won't be skipped, but no skipping was really requested
                 result = false;
             } else {
                 result = Util.equalStringsWithEmptyIsNull(regatta.getRegistrationLinkSecret(), secret);

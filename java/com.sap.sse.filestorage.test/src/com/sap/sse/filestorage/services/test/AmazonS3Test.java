@@ -21,21 +21,21 @@ import com.sap.sse.filestorage.testsupport.AmazonS3TestSupport;
 import com.sap.sse.security.testsupport.SecurityServiceMockFactory;
 
 public class AmazonS3Test {
-   @Before
-    public void setup() throws InvalidPropertiesException {
-       setUpSecurity();
+    @Before
+    public void setup() throws InvalidPropertiesException, IOException {
+        setUpSecurity();
         storageService = AmazonS3TestSupport.createService(SecurityServiceMockFactory.mockSecurityService());
     }
-   
-   private void setUpSecurity() {
-       org.apache.shiro.mgt.SecurityManager securityManager = Mockito.mock(org.apache.shiro.mgt.SecurityManager.class);
-       Subject fakeSubject = Mockito.mock(Subject.class);
-       SecurityUtils.setSecurityManager(securityManager);
-       Mockito.doReturn(fakeSubject).when(securityManager).createSubject(Mockito.any());
-       Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
-       Mockito.doNothing().when(fakeSubject).checkPermission(Mockito.anyString());
-   }
-    
+
+    private void setUpSecurity() {
+        org.apache.shiro.mgt.SecurityManager securityManager = Mockito.mock(org.apache.shiro.mgt.SecurityManager.class);
+        Subject fakeSubject = Mockito.mock(Subject.class);
+        SecurityUtils.setSecurityManager(securityManager);
+        Mockito.doReturn(fakeSubject).when(securityManager).createSubject(Mockito.any());
+        Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
+        Mockito.doNothing().when(fakeSubject).checkPermission(Mockito.anyString());
+    }
+
     private static final String teamImageFile = "Bundesliga2014_Regatta6_eventteaser.jpg";
     private FileStorageService storageService;
     

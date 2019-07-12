@@ -22,8 +22,9 @@ public class CompetitorAndBoatJsonSerializer implements JsonSerializer<Pair<Comp
     public static final String FIELD_BOAT = "boat";
     public static final String FIELD_COMPETITOR = "competitor";
 
-    public static CompetitorAndBoatJsonSerializer create() {
-        return new CompetitorAndBoatJsonSerializer(CompetitorJsonSerializer.create(), BoatJsonSerializer.create());
+    public static CompetitorAndBoatJsonSerializer create(boolean serializeNonPublicCompetitorFields) {
+        return new CompetitorAndBoatJsonSerializer(CompetitorJsonSerializer.create(/* serialize boat */ true,
+                serializeNonPublicCompetitorFields), BoatJsonSerializer.create());
     }
 
     public CompetitorAndBoatJsonSerializer(JsonSerializer<Competitor> competitorJsonSerializer, JsonSerializer<Boat> boatJsonSerializer) {

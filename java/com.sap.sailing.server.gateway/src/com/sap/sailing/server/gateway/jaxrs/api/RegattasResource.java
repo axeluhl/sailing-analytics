@@ -104,7 +104,6 @@ import com.sap.sailing.server.gateway.serialization.impl.AbstractTrackedRaceData
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorTrackWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompleteManeuverCurveWithEstimationDataJsonSerializer;
@@ -328,7 +327,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             NationalityJsonSerializer nationalityJsonSerializer = new NationalityJsonSerializer();
             BoatJsonSerializer boatJsonSerializer = new BoatJsonSerializer(new BoatClassJsonSerializer());
             CompetitorJsonSerializer competitorJsonSerializer = new CompetitorJsonSerializer(new TeamJsonSerializer(
-                    new PersonJsonSerializer(nationalityJsonSerializer)), boatJsonSerializer);
+                    new PersonJsonSerializer(nationalityJsonSerializer)), boatJsonSerializer, /* serializeNonPublicFields */ false);
             JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(null, competitorJsonSerializer, boatJsonSerializer, getSecurityService());
             JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
             String json = serializedRegatta.toJSONString();
@@ -358,8 +357,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
             } else {
-                CompetitorAndBoatJsonSerializer competitorAndBoatJsonSerializer = CompetitorAndBoatJsonSerializer.create();
-                JsonSerializer<RaceDefinition> raceEntriesSerializer = new RaceEntriesJsonSerializer(competitorAndBoatJsonSerializer, getSecurityService());
+                JsonSerializer<RaceDefinition> raceEntriesSerializer = new RaceEntriesJsonSerializer(getSecurityService());
                 JSONObject serializedRaceEntries = raceEntriesSerializer.serialize(race);
                 String json = serializedRaceEntries.toJSONString();
                 response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
@@ -428,7 +426,6 @@ public class RegattasResource extends AbstractSailingServerResource {
             String competitorName, String competitorShortName, String competitorEmail, String flagImageURIString,
             String teamImageURIString, Function<String, DynamicBoat> boatObtainer, String deviceUuid,
             String registrationLinkSecret) {
-
         final Subject subject = SecurityUtils.getSubject();
         final User user = getSecurityService().getCurrentUser();
         Response response;
@@ -1103,13 +1100,16 @@ public class RegattasResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/races/{racename}/times")
-    public Response getTimes(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+    public Response getTimes(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName,
+            @QueryParam("secret") String regattaSecret) {
         Response response = null;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
-            getSecurityService().checkCurrentUserReadPermission(regatta);
+            if (!getService().skipChecksDueToCorrectSecret(regattaName, regattaSecret)) {
+                getSecurityService().checkCurrentUserReadPermission(regatta);
+            }
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);

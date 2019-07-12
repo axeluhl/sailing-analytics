@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.media.MediaSynchAdapter.EditFlag;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -247,7 +247,7 @@ public class MediaSynchControl implements EditFlag {
         }
         mediaSynchAdapter.setControlsVisible(showEditUI);
         previewButton.setEnabled(showEditUI);
-        MediaTrack videoTrack = mediaSynchAdapter.getMediaTrack();
+        MediaTrackWithSecurityDTO videoTrack = mediaSynchAdapter.getMediaTrack();
         editButton.setEnabled(hasRightToEdit(videoTrack) && !showEditUI);
         mainPanel.getElement().getStyle()
                 .setDisplay(showEditUI && hasRightToEdit(videoTrack) ? Display.BLOCK : Display.NONE);
@@ -256,9 +256,8 @@ public class MediaSynchControl implements EditFlag {
         discardButton.setEnabled(showEditUI || isDirty);
     }
 
-    private boolean hasRightToEdit(MediaTrack video) {
-        return userservice.hasPermission(
-                SecuredDomainType.MEDIA_TRACK.getPermissionForObject(DefaultActions.UPDATE, video));
+    private boolean hasRightToEdit(MediaTrackWithSecurityDTO video) {
+        return userservice.hasPermission(video, DefaultActions.UPDATE);
     }
 
     private boolean isDirty() {

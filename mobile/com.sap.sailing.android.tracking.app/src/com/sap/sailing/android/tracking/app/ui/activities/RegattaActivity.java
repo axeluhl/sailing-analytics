@@ -66,6 +66,7 @@ import java.net.URL;
 import java.util.Locale;
 
 import static com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants.URL_LEADERBOARD_NAME;
+import static com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants.URL_LEADERBOARD_NAME_FOR_SECRET;
 import static com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants.URL_SECRET;
 
 public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
@@ -277,8 +278,8 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
         String secret = uri.getQueryParameter(URL_SECRET);
         if (secret != null) {
             builder.appendQueryParameter(URL_SECRET, secret);
+            builder.appendQueryParameter(URL_LEADERBOARD_NAME_FOR_SECRET, uri.getQueryParameter(URL_LEADERBOARD_NAME));
         }
-        builder.appendQueryParameter(URL_LEADERBOARD_NAME, uri.getQueryParameter(URL_LEADERBOARD_NAME));
         return new URL(builder.build().toString());
     }
 
@@ -385,8 +386,8 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
             String secret = uri.getQueryParameter(URL_SECRET);
             if (secret != null) {
                 builder.appendQueryParameter(URL_SECRET, secret);
+                builder.appendQueryParameter(URL_LEADERBOARD_NAME_FOR_SECRET, uri.getQueryParameter(URL_LEADERBOARD_NAME));
             }
-            builder.appendQueryParameter(URL_LEADERBOARD_NAME, uri.getQueryParameter(URL_LEADERBOARD_NAME));
             new UploadTeamImageTask(this, imageFile, this).execute(builder.build().toString());
         } catch (UnsupportedEncodingException e) {
             ExLog.e(this, TAG, "Failed to encode competitor ID: " + e.getMessage());

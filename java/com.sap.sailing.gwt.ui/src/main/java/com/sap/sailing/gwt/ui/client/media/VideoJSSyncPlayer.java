@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.client.media;
 
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.MediaSynchPlayer;
 import com.sap.sse.common.TimePoint;
@@ -16,7 +16,7 @@ public class VideoJSSyncPlayer extends AbstractMediaPlayer implements MediaSynch
     private final TimePoint raceStartTime;
     private final Timer raceTimer;
 
-    public VideoJSSyncPlayer(MediaTrack mediaTrack, TimePoint raceStartTime, Timer raceTimer) {
+    public VideoJSSyncPlayer(MediaTrackWithSecurityDTO mediaTrack, TimePoint raceStartTime, Timer raceTimer) {
         super(mediaTrack);
         videoJsDelegate = new VideoJSPlayer(true, false);
         this.raceStartTime = raceStartTime;

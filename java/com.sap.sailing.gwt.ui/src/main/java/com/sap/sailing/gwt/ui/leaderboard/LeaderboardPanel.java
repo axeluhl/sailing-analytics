@@ -1265,17 +1265,17 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             result.put(DetailType.RACE_CURRENT_LEG, new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_CURRENT_LEG,
                     new CurrentLeg(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_TIME_TRAVELED,
-                    new TimeTraveledRaceColumn(getLeaderboardPanel(), this, stringMessages, LEG_COLUMN_HEADER_STYLE,
+                    new TimeTraveledRaceColumnInSeconds(getLeaderboardPanel(), this, stringMessages, LEG_COLUMN_HEADER_STYLE,
                             LEG_COLUMN_STYLE, LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE));
             result.put(DetailType.RACE_CALCULATED_TIME_TRAVELED,
-                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_CALCULATED_TIME_TRAVELED,
+                    new TotalTimeColumn(DetailType.RACE_CALCULATED_TIME_TRAVELED,
                             new RaceCalculatedTimeTraveledInSeconds(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
-                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(
-                            DetailType.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
+                    new TotalTimeColumn(DetailType.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
                             new RaceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds(),
-                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
+                            LeaderboardPanel.this));
             result.put(DetailType.EXPEDITION_RACE_AWA,
                     new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_AWA,
                             new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionAWA),
@@ -3030,12 +3030,13 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     }
 
     /**
-     * To be expandable, a race column needs to have one or more tracked races associated and needs to have at least
-     * some GPS data available. Wind data is not required for expandability because several metrics can reasonably be
-     * determined even without reliable wind information.
+     * To be expandable, a race column needs to have one or more tracked races associated. No GPS data is required
+     * (anymore) because there are some interesting columns that may be fed solely based on the Race Log contents, such
+     * as finishing times and start times, resulting in time sailed and calculated times. Wind data is not required for
+     * expandability either because several metrics can reasonably be determined even without reliable wind information.
      */
     private boolean shallExpandRaceColumn(RaceColumnDTO raceColumnDTO) {
-        return showRaceDetails && raceColumnDTO.hasTrackedRaces() && raceColumnDTO.hasGPSData();
+        return showRaceDetails && raceColumnDTO.hasTrackedRaces();
     }
 
     private void removeUnusedRaceColumns(LeaderboardDTO leaderboard) {

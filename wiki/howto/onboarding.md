@@ -11,17 +11,16 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 1. Eclipse (Eclipse IDE for Eclipse Committers, version 4.11.0 ["2019-03"]https://www.eclipse.org/downloads/packages/release/2019-03/r/eclipse-ide-eclipse-committers)), [http://www.eclipse.org](http://www.eclipse.org)
 2. Install the eclipse plugins (see Automatic Eclipse plugin installation below)
 3. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)
-4. MongoDB (e.g. Production Release 2.6.7), download: [https://www.mongodb.com/](https://www.mongodb.com/)
+4. MongoDB (e.g. Production Release 3.6.12), download: [https://www.mongodb.com/](https://www.mongodb.com/)
 5. RabbitMQ, download from [http://www.rabbitmq.com](http://www.rabbitmq.com). Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang. Some sources report that there may be trouble with latest versions of RabbitMQ. In some cases, McAffee seems to block the installation of the latest version on SAP hardware; in other cases connection problems to newest versions have been reported. We know that version 3.6.8 works well. [https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8](https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8) is the link.
-6. JDK 1.7 (Java SE 7), [http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html](http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html) --- Alternatively you can use the SAPJVM 1.7: Go to [http://sapjvm.wdf.sap.corp:1080/downloads](http://sapjvm.wdf.sap.corp:1080/downloads), select JVM 1.7, extract the downloaded .zip into desired location (e.g. C:\Program Files\Java), then Go to Window -> Preferences -> Java -> Installed JREs and add the VM.
-7. JDK 1.8 (Java SE 8), [http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) --- Alternatively you can use the SAPJVM 1.8: Go to [http://sapjvm.wdf.sap.corp:1080/downloads](http://sapjvm.wdf.sap.corp:1080/downloads), select JVM 1.8, extract the downloaded .zip into desired location (e.g. C:\Program Files\Java), then Go to Window -> Preferences -> Java -> Installed JREs and add the VM.
-8. Maven 3.1.1 (or higher), [http://maven.apache.org](http://maven.apache.org)
-9. GWT SDK 2.8.2 ([http://www.gwtproject.org/download.html](http://www.gwtproject.org/download.html))
-10. Standalone Android SDK (see section "Additional steps required for Android projects"). OPTIONALLY: You may additionally install Android Studio ([https://developer.android.com/tools/studio/index.html](https://developer.android.com/tools/studio/index.html)) or IntelliJ IDEA ([https://www.jetbrains.com/idea/download/](https://www.jetbrains.com/idea/download/)).
+6. JDK 1.8 (Java SE 8), [http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) --- Alternatively you can use the SAPJVM 1.8: Go to [http://sapjvm.wdf.sap.corp:1080/downloads](http://sapjvm.wdf.sap.corp:1080/downloads), select JVM 1.8, extract the downloaded .zip into desired location (e.g. C:\Program Files\Java), then Go to Window -> Preferences -> Java -> Installed JREs and add the VM.
+7. Maven 3.1.1 (or higher), [http://maven.apache.org](http://maven.apache.org)
+8. GWT SDK 2.8.2 ([http://www.gwtproject.org/download.html](http://www.gwtproject.org/download.html))
+9. Standalone Android SDK (see section "Additional steps required for Android projects"). OPTIONALLY: You may additionally install Android Studio ([https://developer.android.com/tools/studio/index.html](https://developer.android.com/tools/studio/index.html)) or IntelliJ IDEA ([https://www.jetbrains.com/idea/download/](https://www.jetbrains.com/idea/download/)).
 
 #### Automatic Eclipse plugin installation
 
-The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.11.0 "2019-03"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/photonr) by using the script "configuration/installPluginsForEclipse2019-03.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
+The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.11.0 "2019-03"](https://www.eclipse.org/downloads/packages/release/2019-03/r/eclipse-ide-eclipse-committers) by using the script "configuration/installPluginsForEclipse2019-03.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
 
     ./installPluginsForEclipse2019-03.sh "/some/path/on/my/computer/eclipse"
 
@@ -37,11 +36,23 @@ The script will install the following plugins for your convenience:
 
 * GWT Plugin ([https://github.com/gwt-plugins/gwt-eclipse-plugin](https://github.com/gwt-plugins/gwt-eclipse-plugin))
 * GWT SDM Debug Bridge ([http://sdbg.github.io/](http://sdbg.github.io/))
-* Android Tools ([https://marketplace.eclipse.org/content/android-development-tools-eclipse](https://marketplace.eclipse.org/content/android-development-tools-eclipse))
 * Easy Shell ([https://anb0s.github.io/EasyShell/](https://anb0s.github.io/EasyShell/))
 * Memory Analyzer ([https://www.eclipse.org/mat/](https://www.eclipse.org/mat/))
 * SAP JVM Profiler ([https://tools.hana.ondemand.com](https://tools.hana.ondemand.com))
+* UMLet ([https://www.umlet.com/](https://www.umlet.com/))
 * various updates to preinstalled plugins
+
+#### Tuning the Eclipse Installation
+
+Out of the box, two settings in Eclipse avoid a clean workspace. Go to Window - Preferences and change the following two settings:
+
+* Set the "Missing GWT SDK" warning to "Ignore". See screenshot below.
+
+![](ignore-missing-gwt-sdk-warning.png)
+
+* Set the "Plug-in does not export all packages" warning to "Ignore". See screenshot below.
+
+![](ignore-package-not-exported-warning.png)
 
 #### Further optional but recommended installations
 
@@ -87,9 +98,8 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Install Eclipse debugger for GWT SuperDevMode
   * Install Eclipse eGit (optional)
   * Check that JDK 1.8 is available and has been set for compilation in Eclipse
-  * Check that the both JDKs are available (Windows->Preferences->Java->Installed JREs)
-  * Check that JDK 1.7 has been matched to JavaSE-1.7 and that JDK 1.8 has been matched to JavaSE-1.8 (...>Installed JREs>Execution Environments)
-  * It is also possible to match the SAPJVM 7 or 8 to JavaSE-1.7 / JavaSE-1.8 (for profiling purposes)
+  * Check that JDK 1.8 has been matched to JavaSE-1.8 (...>Installed JREs>Execution Environments)
+  * It is also possible to match the SAPJVM 8 to JavaSE-1.8 (for profiling purposes)
   * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import via the wizard <del>"Git->Projects from Git"</del> "Import->General->Projects from Folder or Archive" in Eclipse, and additionally make sure to scan for nested projects!)
   * Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
   * Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions)
@@ -135,40 +145,11 @@ When doing a merge in Eclipse, you can tell the merge editor to do a similar thi
 
 When a file has "wrong line endings" (line endings are different to what is configured in ".gitattributes" file) and you touch those files without changing the contents, git will potentially show that these files are changed. To get rid of those phantom changes, you can do a "git checkout HEAD path/toFile/in/repository".
 
-#### Additional steps required for Android projects
-
-To ensure that all components of the Analysis Suite are working, you should also import all Android projects (mobile/) into your workspace. There are some additional requirements to enable the build process of these projects.
-
-1. Add the Android Development Tools (ADT) plugin to your Eclipse IDE
-  - In Eclipse click Help -> Install New Software -> Add and enter [https://dl-ssl.google.com/android/eclipse/](https://dl-ssl.google.com/android/eclipse/)
-  - Select the Developer Tools and install
-  - After restarting Eclipse the "Welcome to Android Development"-window should help you with installing the Android SDK
-  - It is also possible to download the Android SDK separately from the official Google download website. However, as of Revision 25.0.0 of the Android SDK Tools, the SDK Manager became an integrated part of Android Studio. Therefore, Revisions newer than 24.4.1 will not come with a standalone SDK Manager. Since it is absolutely essential if you want to use Eclipse, please download the Android SDK from the following link: Windows: [https://dl.google.com/android/installer_r24.4.1-windows.exe](https://dl.google.com/android/installer_r24.4.1-windows.exe) MacOS: [https://dl.google.com/android/android-sdk_r24.4.1-macosx.zip](https://dl.google.com/android/android-sdk_r24.4.1-macosx.zip) Linux: [https://dl.google.com/android/android-sdk_r24.4.1-linux.tgz](https://dl.google.com/android/android-sdk_r24.4.1-linux.tgz) 
-2. Setup the Android SDK
-  * In Eclipse press Window -> Android SDK Manager
-  * Install most recent version of "Android SDK Platform Tools" under "Tools" (hint: watch out not to update Android SDK Tools, see note below)
-  * Install everything of "Android 3.2 API 13"
-  * Install everything of "Android 5.1.1 API 22"
-  * From the package "Extras", install "Android Support Repository" **or** "Android Support Library". Additionally install "Google Play Services", "Google Repository" **and** "Google USB Driver".
-  * Please note that versions of the Android SDK Build Tools from 24.0.0 onwards might cause problems for your Eclipse IDE. The same goes for API versions from 24 onwards. If you get errors containing the message "refusing to generate code from aidl file defining parcelable", a workaround for now is to uninstall these newer versions of the Build Tools and the API. In the future however, this temporary solution may not be available anymore for compability reasons.
-3. Import the Android projects into your workspace
-  * Android projects can be found in the /mobile subdirectory
-
-To deploy an Android project (for example com.sap.sailing.racecommittee.app) to a real device:
-
-1. Plug-in the device
-  * Development mode must be enabled on the device
-  * For certain device/OS combinations additional device drivers are needed
-  * You can check if the device is detected correctly by checking the "Devices" tab of the "DDMS" Eclipse perspective.
-2. Start a run configuration of the project
-3. Select your attached device in the device selection screen
-4. The app should be started after deployment
-
 #### Further hints
 
 If you are working with a linux-system and you get the error message `error while loading shared libraries: libz.so.1: cannot open shared object file: No such file or directory` try to install  lib32z1 and lib32stdc++6.
 
-####Steps to consider for using other modules
+#### Steps to consider for using other modules
 1. For Eclipse Build
    * MANIFEST.MF , add module names unter dependencies
    * *.gwt.xml , add `<inherits name="-modulename-.-gwt.xml file name-" />`

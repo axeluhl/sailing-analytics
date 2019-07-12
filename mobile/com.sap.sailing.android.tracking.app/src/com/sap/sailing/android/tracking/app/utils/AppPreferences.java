@@ -67,9 +67,9 @@ public class AppPreferences extends BaseAppPreferences {
         return context.getString(R.string.preference_server_team_info_path).replace("{competitor_id}", competitorId);
     }
 
-    public String getServerMarkPath(String leaderboardName, String markId) {
+    public String getServerMarkPath(String urlEncodedLeaderboardName, String markId) {
         String path = context.getString(R.string.preference_server_mark_path);
-        return path.replace("{leaderboardName}", leaderboardName).replace("{mark_id}", markId);
+        return path.replace("{leaderboardName}", urlEncodedLeaderboardName).replace("{mark_id}", markId);
     }
 
     public String getServerBoatPath(String boatId) {

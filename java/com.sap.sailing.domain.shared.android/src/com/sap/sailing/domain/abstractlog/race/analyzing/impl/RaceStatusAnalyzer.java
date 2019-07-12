@@ -74,7 +74,8 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<Pair<RaceLogRaceStatus, 
             // events; but dispatch all other events (particularly start-related events) to the dispatcher:
             final boolean dispatch;
             if (statusTypesToIgnoreIfEventNotValidYet.contains(event.getNextStatus())) {
-                if (event.getLogicalTimePoint().after(now)) { // event not valid yet
+                if (statusesToIgnore.contains(event.getNextStatus()) // event of this type already found but it's not valid (yet)
+                        || event.getLogicalTimePoint() == null || event.getLogicalTimePoint().after(now)) { // event not valid yet
                     statusesToIgnore.add(event.getNextStatus()); // but ignore events of same status with lesser relevance
                     dispatch = false;
                 } else {

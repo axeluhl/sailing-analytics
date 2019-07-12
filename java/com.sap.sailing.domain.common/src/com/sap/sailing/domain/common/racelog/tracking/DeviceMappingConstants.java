@@ -26,6 +26,7 @@ public class DeviceMappingConstants {
     public static final String URL_CHECKIN_URL = "checkinUrl";
     public static final String URL_EVENT_ID = "event_id";
     public static final String URL_LEADERBOARD_NAME = "leaderboard_name";
+    public static final String URL_LEADERBOARD_NAME_FOR_SECRET = "leaderboardName";
     public static final String URL_COMPETITOR_ID_AS_STRING = "competitor_id";
     public static final String URL_BOAT_ID_AS_STRING = "boat_id";
     public static final String URL_MARK_ID_AS_STRING = "mark_id";

@@ -11,6 +11,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,6 +37,11 @@ public class SignInTest {
     @Before
     public void setUp() throws ClientProtocolException, IOException, org.json.simple.parser.ParseException {
         Activator.getInstance().setSecurityService(SecurityServiceMockFactory.mockSecurityService());
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        Activator.getInstance().setSecurityService(null);
     }
 
     @Test

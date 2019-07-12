@@ -155,6 +155,9 @@ public class SwissTimingConnectionTableWrapper extends
                 if (t.getPort() != null) {
                     strings.add(t.getPort().toString());
                 }
+                if (t.getJsonUrl() != null) {
+                    strings.add(t.getJsonUrl());
+                }
                 return strings;
             }
 

@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -11,7 +10,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.gwt.ui.client.Collator;
+import com.sap.sailing.gwt.ui.client.DetailTypeComparator;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
@@ -57,25 +56,7 @@ public class MultiCompetitorRaceChartSettingsComponent extends
         
         List<DetailType> sortedAvailableDetailTypes = new ArrayList<DetailType>();
         Util.addAll(availableDetailsTypes, sortedAvailableDetailTypes);
-        Collections.sort(sortedAvailableDetailTypes, new Comparator<DetailType>() {
-            @Override
-            public int compare(DetailType o1, DetailType o2) {
-                final boolean o1Expedition = o1.isExpeditionType();
-                final boolean o2Expedition = o2.isExpeditionType();
-                if ((o1Expedition && o2Expedition) || (!o1Expedition && !o2Expedition)) {
-                    final String o1Name = DetailTypeFormatter.format(o1);
-                    final String o2Name = DetailTypeFormatter.format(o2);
-                    return Collator.getInstance().compare(o1Name, o2Name);
-                }
-                if (o1Expedition && !o2Expedition) {
-                    return 1;
-                }
-                if (o2Expedition && !o1Expedition) {
-                    return -1;
-                }
-                return 0;
-            }
-        });
+        Collections.sort(sortedAvailableDetailTypes, new DetailTypeComparator());
         
         for (DetailType detailType : sortedAvailableDetailTypes) {
             chartFirstTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType), detailType.name());

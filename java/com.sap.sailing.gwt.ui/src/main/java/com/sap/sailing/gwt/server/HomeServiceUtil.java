@@ -465,10 +465,12 @@ public final class HomeServiceUtil {
             URL baseURL = getBaseURL(serverRef.getURL());
             if (remoteEvents != null) {
                 for (EventBase remoteEvent : remoteEvents) {
-                    if (remoteEvent.isPublic() && securityService.hasCurrentUserReadPermission(remoteEvent)) {
-                        for(EventVisitor visitor : visitors) {
-                            visitor.visit(remoteEvent, true, baseURL);
-                        }
+                    // Those events have been publicly advertised and have been received by an unauthenticated
+                    // anonymous call to the /events end point to the remote server. No security checks or filtering
+                    // seems necessary here because we should be seeing only the public remote events anyway.
+                    // See also bug 5000.
+                    for (EventVisitor visitor : visitors) {
+                        visitor.visit(remoteEvent, true, baseURL);
                     }
                 }
             }

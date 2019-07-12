@@ -46,11 +46,38 @@ There is also the 'ALL' shortcut constant which can be used to get all available
 	</tr>
     <tr>
         <td>&nbsp;</td>
-        <td>columnNames [Default = all columns]</td>
+        <td>columnNames [Default = all columns or what showOnlyActiveRacesForCompetitorIds specifies]</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td>
+            <div>showOnlyActiveRacesForCompetitorIds: specify a competitor ID, and the result will contain
+                 the race column holding that competitor's "active" race at the time requested; see also the time and
+                 timeasmillis parameters. A race is active if it is currently live or is the last race for which the
+                 competitor has a result. The parameter can be specified multiple times, thus providing more than
+                 one competitor ID. In case multiple competitor IDs are given, all race columns that contain an
+                 active race of any of the competitors specified will be added to the result. It is possible that no such
+                 race is found, e.g., because racing has not started yet and the leaderboard is empty. No race column
+                 will be delivered then. In case the columnNames parameter is used, too, the combined set of
+                 race columns from the columnNames parameter and this parameter will be delivered. If
+                 this parameter is used but columnNames is not, only the columns specified by this parameter
+                 will be delivered.</div>
+        </td>
     </tr>
     <tr>
         <td>&nbsp;</td>
         <td>raceDetails [Default = RACE_GAP_TO_LEADER_IN_SECONDS, RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS, CURRENT_LEG]</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td>
+            <div>competitorAndBoatIdsOnly [Default = false, true] if true, only IDs and no further attributes
+                 will be delivered for competitor and boat JSON objects in the result document. This can help
+                 save bandwidth if the competitor and boat data have been received already during previous calls
+                 and the current call is only an update. Note, however, that competitor and boat data may change,
+                 so every now and then it is advisable to still set this to false to obtain the full up-to-date
+                 fields for all competitors and boats again.</div>
+        </td>
     </tr>
     <tr>
         <td>&nbsp;</td>

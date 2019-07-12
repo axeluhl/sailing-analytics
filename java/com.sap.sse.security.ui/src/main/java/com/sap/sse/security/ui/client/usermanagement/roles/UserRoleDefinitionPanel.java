@@ -49,6 +49,7 @@ public class UserRoleDefinitionPanel extends HorizontalPanel
     private final SuggestBox suggestRole;
     private final RoleAndPermissionDetailsResources roleAndPermissionDetailsResources = GWT
             .create(RoleAndPermissionDetailsResources.class);
+    private final RoleDefinitionSuggestOracle oracle;
 
     public UserRoleDefinitionPanel(final UserService userService, final StringMessages stringMessages,
             final ErrorReporter errorReporter, final CellTableWithCheckboxResources tableResources,
@@ -72,7 +73,7 @@ public class UserRoleDefinitionPanel extends HorizontalPanel
         this.userSelectionModel = multiToSingleSelectionModelAdapter;
 
         // create role suggest
-        final RoleDefinitionSuggestOracle oracle = new RoleDefinitionSuggestOracle(
+        oracle = new RoleDefinitionSuggestOracle(
                 userService.getUserManagementService(), stringMessages);
         suggestRole = new SuggestBox(oracle);
         roleAndPermissionDetailsResources.css().ensureInjected();
@@ -146,6 +147,10 @@ public class UserRoleDefinitionPanel extends HorizontalPanel
         this.setVisible(false);
 
         add(captionPanel);
+    }
+
+    public void refreshSuggest() {
+        oracle.refresh();
     }
 
     private void initPlaceholder(final UIObject target, final String placeholder) {

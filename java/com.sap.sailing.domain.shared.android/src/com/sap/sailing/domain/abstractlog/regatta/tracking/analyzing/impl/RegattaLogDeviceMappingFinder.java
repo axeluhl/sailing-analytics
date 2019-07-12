@@ -49,7 +49,8 @@ public class RegattaLogDeviceMappingFinder<ItemT extends WithID>
 
     protected DeviceMappingWithRegattaLogEvent<ItemT> createMapping(DeviceIdentifier device, ItemT item,
             TimePoint from, TimePoint toInclusive, Serializable originalEventId, RegattaLogDeviceMappingEvent<ItemT> event) {
-        return new DeviceMappingWithRegattaLogEventImpl<ItemT>(item, device, new TimeRangeImpl(from, toInclusive, /* inclusive */ true),
+        return new DeviceMappingWithRegattaLogEventImpl<ItemT>(item, device, new TimeRangeImpl(from,
+                toInclusive != null && toInclusive.before(from) ? from : toInclusive, /* inclusive */ true),
                 Collections.singletonList(originalEventId), event);
     }
 

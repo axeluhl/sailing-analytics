@@ -23,6 +23,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -458,7 +459,8 @@ public class CourseFragmentMarks extends CourseFragment
     }
 
     private void fillPreviousCourseElementsWithLastPublishedCourseDesign() {
-        CourseBase lastPublishedCourseDesign = InMemoryDataStore.INSTANCE.getLastPublishedCourseDesign();
+        CourseBase lastPublishedCourseDesign = InMemoryDataStore.INSTANCE
+                .getLastPublishedCourseDesign(getRace().getIdentifier().getRaceGroup());
         if (lastPublishedCourseDesign != null) {
             fillPreviousCourseElementsInList(lastPublishedCourseDesign);
         }
@@ -546,7 +548,8 @@ public class CourseFragmentMarks extends CourseFragment
 
     private void saveChangedCourseDesignInCache(CourseBase courseDesign) {
         if (!Util.isEmpty(courseDesign.getWaypoints())) {
-            InMemoryDataStore.INSTANCE.setLastPublishedCourseDesign(courseDesign);
+            RaceGroup raceGroup = getRace().getRaceGroup();
+            InMemoryDataStore.INSTANCE.setLastPublishedCourseDesign(raceGroup, courseDesign);
         }
     }
 

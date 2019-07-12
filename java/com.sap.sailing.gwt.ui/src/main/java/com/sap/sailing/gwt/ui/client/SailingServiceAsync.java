@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.shiro.authz.AuthorizationException;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -66,7 +68,6 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
-import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
@@ -424,31 +425,18 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void getRaceboardData(String regattaName, String raceName, String leaderboardName, 
             String leaderboardGroupName, UUID eventId, AsyncCallback<RaceboardDataDTO> callback);
 
-    /**
-     * @param date
-     *            use <code>null</code> to indicate "live" in which case the server live time stamp for the race
-     *            identified by <code>raceIdentifier</code> will be used, considering that race's delay.
-     * @param md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID
-     *            used to decide whether the client requires an update to the race's competitor set. If the server
-     *            has the same MD5 hash for the race's competitors, no competitor set is transmitted to the client.
-     *            Otherwise, the full race competitor ID's as strings are sent to the client again for update.
-     * @param estimatedDurationRequired {@code true} if the estimated duration should be calculated
-     * @param timeToGetTheEstimatedDurationFor the time to use for the calculation of the estimated duration.
-     *            May be {@code null} if estimatedDurationRequired is {@code false}
-     */
     void getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate, LegIdentifier simulationLegIdentifier,
-            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID, Date timeToGetTheEstimatedDurationFor,
-            boolean estimatedDurationRequired, AsyncCallback<CompactRaceMapDataDTO> callback);
+            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,
+            Date timeToGetTheEstimatedDurationFor, boolean estimatedDurationRequired, DetailType detailType,
+            String leaderboardName, String leaderboardGroupName, AsyncCallback<CompactRaceMapDataDTO> callback);
 
     void getBoatPositions(RegattaAndRaceIdentifier raceIdentifier, Map<String, Date> fromPerCompetitorIdAsString,
-            Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate,
-            AsyncCallback<CompactBoatPositionsDTO> callback);
+            Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate, DetailType detailType,
+            String leaderboardName, String leaderboardGroupName, AsyncCallback<CompactBoatPositionsDTO> callback);
 
     void getEvents(AsyncCallback<List<EventDTO>> callback);
-
-    void getPublicEventsOfAllSailingServers(AsyncCallback<List<EventBaseDTO>> callback);
 
     /**
      * Renames the event with the name <code>oldName</code> to the <code>newName</code>.<br />
@@ -1041,6 +1029,13 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void getAvailableDetailTypesForLeaderboard(String leaderboardName, RegattaAndRaceIdentifier raceOrNull,
             AsyncCallback<Iterable<DetailType>> asyncCallback);
 
+    /**
+     * Checks whether the user may cut the race identified by {@code radeIdentifier} into multiple races. For this, it
+     * has to be found and it has to be a "smartphone-tracked" race with a valid start-of-tracking time. If not,
+     * {@code false} will be returned. If the user it not <em>permitted</em> to slice the race, e.g., because no
+     * permission has been granted to modify the leaderboard or regatta, an {@link AuthorizationException} will be
+     * thrown.
+     */
     void canSliceRace(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> callback);
 
     void sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName, TimePoint sliceFrom, TimePoint sliceTo,
@@ -1078,13 +1073,6 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
      * @param asyncCallback
      */
     void openRegattaRegistrationQrCode(String url, AsyncCallback<String> asyncCallback);
-
-    /**
-     * Sets the tenant that is used for CREATE operations done on this server
-     * 
-     * @param tennant
-     */
-    void setDefaultTenantForCurrentServer(String tennant, AsyncCallback<Void> asyncCallback);
 
     /**
      * gets a (possibly imcomplete) list of available tennants to choose from.

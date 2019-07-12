@@ -244,7 +244,10 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
     /**
      * @param callback optional; may be {@code null}
      */
-    public void refreshUserList(final Callback<Iterable<UserDTO>, Throwable> callback) {
+    public void refreshUserList(final Callback<Iterable<UserDTO>, Throwable> callback, boolean clearSelection) {
+        if (clearSelection) {
+            getSelectionModel().clear();
+        }
         final AsyncCallback<Collection<UserDTO>> myCallback = new AsyncCallback<Collection<UserDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -264,6 +267,10 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
             }
         };
         getUserManagementService().getUserList(myCallback);
+    }
+
+    public void refreshUserList(final Callback<Iterable<UserDTO>, Throwable> callback) {
+        refreshUserList(callback, true);
     }
 
     private void getFilteredUsers(Iterable<UserDTO> result) {

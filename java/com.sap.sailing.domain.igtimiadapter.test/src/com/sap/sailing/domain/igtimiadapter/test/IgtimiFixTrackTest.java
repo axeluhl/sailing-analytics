@@ -4,8 +4,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.Locale;
@@ -13,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.apache.http.client.ClientProtocolException;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.Wind;
@@ -41,8 +38,7 @@ public class IgtimiFixTrackTest extends AbstractTestWithIgtimiConnection {
     private static final Logger logger = Logger.getLogger(IgtimiFixTrackTest.class.getName());
     
     @Test
-    public void testFetchFixesIntoTracks() throws ParseException, ClientProtocolException, IllegalStateException, IOException, org.json.simple.parser.ParseException {
-        setUp();
+    public void testFetchFixesIntoTracks() throws Exception {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.GERMAN);
         TimePoint start = new MillisecondsTimePoint(dateFormat.parse("2013-11-09T07:00:00Z"));
         TimePoint end   = new MillisecondsTimePoint(dateFormat.parse("2013-11-09T07:10:00Z"));
