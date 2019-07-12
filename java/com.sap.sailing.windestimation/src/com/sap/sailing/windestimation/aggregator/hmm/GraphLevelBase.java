@@ -55,7 +55,7 @@ public class GraphLevelBase {
     }
 
     private void initBearAwayNode(GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
-        Tack tackAfter = maneuver.getCourseChangeInDegrees() < 0 ? Tack.PORT : Tack.STARBOARD;
+        Tack tackAfter = maneuver.getCourseChangeInDegrees() < 0 ? Tack.STARBOARD : Tack.PORT;
         WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
                 ManeuverTypeForClassification.BEAR_AWAY);
         double confidence = maneuverClassification.getManeuverTypeLikelihood(ManeuverTypeForClassification.BEAR_AWAY);
@@ -63,7 +63,7 @@ public class GraphLevelBase {
     }
 
     private void initHeadUpNode(GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
-        Tack tackAfter = maneuver.getCourseChangeInDegrees() < 0 ? Tack.STARBOARD : Tack.PORT;
+        Tack tackAfter = maneuver.getCourseChangeInDegrees() < 0 ? Tack.PORT : Tack.STARBOARD;
         WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
                 ManeuverTypeForClassification.HEAD_UP);
         double confidence = maneuverClassification.getManeuverTypeLikelihood(ManeuverTypeForClassification.HEAD_UP);
@@ -74,7 +74,7 @@ public class GraphLevelBase {
         WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
                 ManeuverTypeForClassification.JIBE);
         double confidence = maneuverClassification.getManeuverTypeLikelihood(ManeuverTypeForClassification.JIBE);
-        Tack tackAfter = maneuver.getCourseChangeWithinMainCurveInDegrees() < 0 ? Tack.STARBOARD : Tack.PORT;
+        Tack tackAfter = maneuver.getCourseChangeWithinMainCurveInDegrees() < 0 ? Tack.PORT : Tack.STARBOARD;
         addManeuverNode(ManeuverTypeForClassification.JIBE, tackAfter, windRange, confidence);
     }
 
@@ -82,7 +82,7 @@ public class GraphLevelBase {
         WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
                 ManeuverTypeForClassification.TACK);
         double confidence = maneuverClassification.getManeuverTypeLikelihood(ManeuverTypeForClassification.TACK);
-        Tack tackAfter = maneuver.getCourseChangeWithinMainCurveInDegrees() < 0 ? Tack.PORT : Tack.STARBOARD;
+        Tack tackAfter = maneuver.getCourseChangeWithinMainCurveInDegrees() < 0 ? Tack.STARBOARD : Tack.PORT;
         addManeuverNode(ManeuverTypeForClassification.TACK, tackAfter, windRange, confidence);
     }
 
