@@ -26,6 +26,10 @@ public class TracTracConfigurationWithSecurityDTO implements IsSerializable, Sec
 
     public TracTracConfigurationWithSecurityDTO() {
     }
+    
+    public TracTracConfigurationWithSecurityDTO(String creatorName) {
+        this.creatorName = creatorName;
+    }
 
     public TracTracConfigurationWithSecurityDTO(String name, String jsonUrl, String liveDataURI, String storedDataURI,
             String courseDesignUpdateUrl, String tractracUsername, String tractracPassword, String creatorName) {

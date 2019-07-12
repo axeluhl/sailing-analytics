@@ -4,9 +4,9 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.common.client.suggestion.BoatClassMasterdataSuggestOracle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -23,11 +23,13 @@ public abstract class AbstractCompetitorWithBoatDialog extends CompetitorEditDia
     
     protected static class CompetitorWithBoatValidator extends CompetitorWithoutBoatValidator<CompetitorWithBoatDTO> {
         protected final StringMessages stringMessages;
+        private final BoatDTO originalBoat;
 
-        public CompetitorWithBoatValidator(StringMessages stringMessages) {
+        public CompetitorWithBoatValidator(StringMessages stringMessages, BoatDTO originalBoat) {
             super(stringMessages);
             
             this.stringMessages = stringMessages;
+            this.originalBoat = originalBoat;
         }
         
         @Override
@@ -35,20 +37,46 @@ public abstract class AbstractCompetitorWithBoatDialog extends CompetitorEditDia
             String result = super.getErrorMessage(competitorToValidate);
             if (result == null) {
                 BoatDTO boatToValidate = competitorToValidate.getBoat();
-                boolean invalidSailId = boatToValidate.getSailId() == null || boatToValidate.getSailId().isEmpty(); 
+                boolean invalidSailId = boatToValidate.getSailId() == null || boatToValidate.getSailId().isEmpty();
                 boolean invalidName = boatToValidate.getName() == null || boatToValidate.getName().isEmpty();
                 if (invalidSailId && invalidName) {
                     result = stringMessages.pleaseEnterASailNumberOrABoatName();
                 } else if (boatToValidate.getColor() != null && boatToValidate.getColor() instanceof InvalidColor) {
                     result = boatToValidate.getColor().getAsHtml();
-                } else if (boatToValidate.getBoatClass().getName() == null || boatToValidate.getBoatClass().getName().isEmpty()) {
+                } else if (boatClassWasChanged(boatToValidate, originalBoat) && isBoatClassInvalid(boatToValidate)) {
+                    // only validate if boat class has changed and the originalBoat actually exists and is not to be
+                    // created here
                     result = stringMessages.pleaseEnterABoatClass();
                 }
             }
             return result;
         }
+
+        private boolean isBoatClassInvalid(BoatDTO boatToValidate) {
+            return boatToValidate.getBoatClass().getName() == null || boatToValidate.getBoatClass().getName().isEmpty();
+        }
+
+        private boolean boatClassWasChanged(BoatDTO boatToValidate, BoatDTO originalBoat) {
+            boolean changed = false;
+            if (boatToValidate.getBoatClass() == null && originalBoat.getBoatClass() != null) {
+                // boat class has been added
+                changed = true;
+            } else if (boatToValidate.getBoatClass() != null && originalBoat.getBoatClass() == null) {
+                //
+                changed = true;
+            } else if (boatToValidate.getBoatClass() == null && originalBoat.getBoatClass() == null) {
+                // this is a create dialog, the boat class was just created
+                changed = true;
+            } else if (originalBoat.getBoatClass().getName()
+                    .equals(boatToValidate.getBoatClass().getName())) {
+                // boat class exists and stayed the same
+                changed = false;
+            }
+            return changed;
+        }
     }
     
+
     /**
      * The class creates the UI-dialog to type in the Data about a competitor.
      * 
@@ -60,7 +88,10 @@ public abstract class AbstractCompetitorWithBoatDialog extends CompetitorEditDia
      */
     public AbstractCompetitorWithBoatDialog(String dialogTitle, StringMessages stringMessages, CompetitorWithBoatDTO competitorToEdit,
             DialogCallback<CompetitorWithBoatDTO> callback, String boatClass) {
-        super(dialogTitle, stringMessages, competitorToEdit, new AbstractCompetitorWithBoatDialog.CompetitorWithBoatValidator(stringMessages), callback);
+        super(dialogTitle, stringMessages, competitorToEdit,
+                new AbstractCompetitorWithBoatDialog.CompetitorWithBoatValidator(stringMessages,
+                        competitorToEdit.getBoat()),
+                callback);
                 
         final BoatDTO boatToEdit = competitorToEdit.getBoat();
         this.boatClassNameTextBox = createSuggestBox(new BoatClassMasterdataSuggestOracle());

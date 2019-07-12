@@ -23,6 +23,19 @@ public class EditSwissTimingArchivedConnectionDialog
     private TextBox jsonURLTextBox;
     private final SwissTimingArchiveConfigurationWithSecurityDTO dtoToEdit;
 
+    private static class EmptyTextValidator implements Validator<SwissTimingArchiveConfigurationWithSecurityDTO> {
+        @Override
+        public String getErrorMessage(SwissTimingArchiveConfigurationWithSecurityDTO valueToValidate) {
+            final String result;
+            if (valueToValidate.getJsonUrl() == null || valueToValidate.getJsonUrl().trim().isEmpty()) {
+                result = stringMessages.pleaseEnterNonEmptyUrl();
+            } else {
+                result = null;
+            }
+            return result;
+        }
+    }
+    
     /**
      * The class creates the UI-dialog to type in the Data about a the selected swiss timing account.
      * 
@@ -34,7 +47,7 @@ public class EditSwissTimingArchivedConnectionDialog
             final UserService userService,
             final ErrorReporter errorReporter) {
         super(stringMessages.editSwissTimingAchivedConnection(), null, stringMessages.ok(), stringMessages.cancel(),
-                /* validator */ null, /* animationEnabled */true, callback);
+                /* validator */ new EmptyTextValidator(), /* animationEnabled */true, callback);
         this.dtoToEdit = dtoToEdit;
         this.ensureDebugId("EditSwissTimingArchivedConnectionDialog");
         createUi();
@@ -43,24 +56,18 @@ public class EditSwissTimingArchivedConnectionDialog
 
     private void setData(final SwissTimingArchiveConfigurationWithSecurityDTO dtotoEdit) {
         jsonURLTextBox.setText(dtotoEdit.getJsonUrl());
-        super.getOkButton().setEnabled(!jsonURLTextBox.getText().isEmpty());
+        validateAndUpdate();
     }
 
     private void createUi() {
-
         grid = new Grid(2, 2);
         grid.setWidget(0, 0, new Label(stringMessages.details() + ":"));
-
         // JSON URL
         Label jsonURLLabel = new Label(stringMessages.jsonUrl() + ":");
-
-        jsonURLTextBox = new TextBox();
+        jsonURLTextBox = createTextBox("");
         jsonURLTextBox.ensureDebugId("JsonURLTextBox");
         jsonURLTextBox.setVisibleLength(100);
-
         // validation: User should not create empty connections
-        jsonURLTextBox.addKeyUpHandler(e -> super.getOkButton().setEnabled(!jsonURLTextBox.getText().isEmpty()));
-
         grid.setWidget(1, 0, jsonURLLabel);
         grid.setWidget(1, 1, jsonURLTextBox);
     }

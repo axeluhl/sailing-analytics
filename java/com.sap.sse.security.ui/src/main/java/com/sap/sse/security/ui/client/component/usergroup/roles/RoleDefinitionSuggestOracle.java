@@ -24,12 +24,22 @@ public class RoleDefinitionSuggestOracle extends MultiWordSuggestOracle {
 
     private final Map<String, StrippedRoleDefinitionDTO> allRoles = new HashMap<>();
     private boolean initialized = false;
+    private final UserManagementServiceAsync userManagementService;
+    private final StringMessages stringMessages;
 
     public RoleDefinitionSuggestOracle(final UserManagementServiceAsync userManagementService,
             final StringMessages stringMessages) {
+        this.userManagementService = userManagementService;
+        this.stringMessages = stringMessages;
+        refresh();
+    }
+
+    public void refresh() {
+        initialized = false;
         userManagementService.getRoleDefinitions(new AsyncCallback<ArrayList<RoleDefinitionDTO>>() {
             @Override
             public void onSuccess(ArrayList<RoleDefinitionDTO> result) {
+                allRoles.clear();
                 for (RoleDefinitionDTO role : result) {
                     allRoles.put(role.getName(),
                             new StrippedRoleDefinitionDTO(role.getId(), role.getName(), role.getPermissions()));

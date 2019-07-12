@@ -58,17 +58,17 @@ public interface DataStore {
 
     void registerRaces(Collection<ManagedRace> races);
 
-    Collection<Mark> getMarks();
+    Collection<Mark> getMarks(RaceGroup raceGroup);
 
-    Mark getMark(Serializable id);
+    Mark getMark(RaceGroup raceGroup, Serializable id);
 
-    boolean hasMark(Serializable id);
+    boolean hasMark(RaceGroup raceGroup, Serializable id);
 
-    void addMark(Mark mark);
+    void addMark(RaceGroup raceGroup, Mark mark);
 
-    CourseBase getLastPublishedCourseDesign();
+    CourseBase getLastPublishedCourseDesign(RaceGroup raceGroup);
 
-    void setLastPublishedCourseDesign(CourseBase courseData);
+    void setLastPublishedCourseDesign(RaceGroup raceGroup, CourseBase courseData);
 
     Set<RaceGroup> getRaceGroups();
 

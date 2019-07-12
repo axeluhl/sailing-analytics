@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.server;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -1024,13 +1025,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public List<RegattaDTO> getRegattas() {
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.REGATTA,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 getService().getAllRegattas(), this::convertToRegattaDTO);
     }
 
     @Override
     public List<RegattaDTO> getRegattasWithUpdatePermission() {
-        return getSecurityService().mapAndFilterByExplicitPermissionForCurrentUser(SecuredDomainType.REGATTA,
+        return getSecurityService().mapAndFilterByExplicitPermissionForCurrentUser(
                 new HasPermissions.Action[] { DefaultActions.READ, DefaultActions.UPDATE },
                 getService().getAllRegattas(), this::convertToRegattaDTO);
     }
@@ -1413,7 +1414,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public List<TracTracConfigurationWithSecurityDTO> getPreviousTracTracConfigurations() throws Exception {
         final Iterable<TracTracConfiguration> configs = tractracDomainObjectFactory.getTracTracConfigurations();
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.TRACTRAC_ACCOUNT,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 configs,
                 ttConfig -> {
                     TracTracConfigurationWithSecurityDTO config = new TracTracConfigurationWithSecurityDTO(
@@ -1832,7 +1833,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 .hasCurrentUserAnyPermission(SecuredDomainType.SIMULATOR.getPermission(DefaultActions.READ))) {
             throw new UnauthorizedException("Not permitted to see simulator results.");
         }
-
         // get simulation-results from smart-future-cached simulation-service
         SimulatorResultsDTO result = null;
         SimulationService simulationService = getService().getSimulationService();
@@ -1862,11 +1862,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 RaceMapDataDTO rcDTO;
                 rcDTO = new RaceMapDataDTO();
                 rcDTO.coursePositions = new CoursePositionsDTO();
-            rcDTO.coursePositions.waypointPositions = new ArrayList<Position>();
-            rcDTO.coursePositions.waypointPositions.add(simulationResults.getStartPosition());
-            rcDTO.coursePositions.waypointPositions.add(simulationResults.getEndPosition());
-            result = new SimulatorResultsDTO(simulationResults.getVersion().asMillis(), legIdentifier.getLegNumber()+1, simulationResults.getStartTime(), simulationResults.getTimeStep(),
-                    simulationResults.getLegDuration(), rcDTO, pathDTOs, null, null);
+                rcDTO.coursePositions.waypointPositions = new ArrayList<Position>();
+                rcDTO.coursePositions.waypointPositions.add(simulationResults.getStartPosition());
+                rcDTO.coursePositions.waypointPositions.add(simulationResults.getEndPosition());
+                result = new SimulatorResultsDTO(simulationResults.getVersion().asMillis(), legIdentifier.getLegNumber()+1, simulationResults.getStartTime(), simulationResults.getTimeStep(),
+                        simulationResults.getLegDuration(), rcDTO, pathDTOs, null, null);
             }
         return result;
     }
@@ -2025,7 +2025,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate, LegIdentifier simulationLegIdentifier,
             byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,
-            Date timeToGetTheEstimatedDurationFor, boolean estimatedDurationRequired) throws NoWindException {
+            Date timeToGetTheEstimatedDurationFor, boolean estimatedDurationRequired, DetailType detailType,
+            String leaderboardName, String leaderboardGroupName) throws NoWindException {
         final HashSet<String> raceCompetitorIdsAsStrings;
         final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         getSecurityService().checkCurrentUserReadPermission(trackedRace);
@@ -2047,7 +2048,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             estimatedDuration = null;
         }
         final Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions = getBoatPositionsInternal(raceIdentifier,
-                fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate);
+                fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate, detailType, leaderboardName, leaderboardGroupName);
         final CoursePositionsDTO coursePositions = getCoursePositions(raceIdentifier, date);
         final List<SidelineDTO> courseSidelines = getCourseSidelines(raceIdentifier, date);
         final QuickRanksDTO quickRanks = getQuickRanksWithoutSecuritychecks(raceIdentifier, date);
@@ -2075,8 +2076,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public CompactBoatPositionsDTO getBoatPositions(RegattaAndRaceIdentifier raceIdentifier,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
-            boolean extrapolate) throws NoWindException {
-        return new CompactBoatPositionsDTO(getBoatPositionsInternal(raceIdentifier, fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate));
+            boolean extrapolate, DetailType detailType, String leaderboardName, String leaderboardGroupName)
+                    throws NoWindException {
+        return new CompactBoatPositionsDTO(getBoatPositionsInternal(raceIdentifier, fromPerCompetitorIdAsString,
+                toPerCompetitorIdAsString, extrapolate, detailType, leaderboardName, leaderboardGroupName));
     }
 
     /**
@@ -2095,15 +2098,19 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
      *            entry returned in the list of GPS fixes will be obtained by extrapolating from the competitors last
      *            known position at <code>to</code> and the estimated speed. With this, the {@code to} time point is no
      *            longer exclusive.
+     * @param detailType
+     *            if not <code>null</code> the fixes will be equipped with a value representing {@link DetailType} at
+     *            their respective timestamps.
      * @return a map where for each competitor participating in the race the list of GPS fixes in increasing
      *         chronological order is provided. The last one is the last position at or before <code>date</code>.
      */
     private Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> getBoatPositionsInternal(RegattaAndRaceIdentifier raceIdentifier,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
-            boolean extrapolate)
+            boolean extrapolate, DetailType detailType, String leaderboardName, String leaderboardGroupName)
             throws NoWindException {
         Map<Pair<Leg, TimePoint>, LegType> legTypeCache = new HashMap<>();
         Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> result = new HashMap<>();
+        final ConcurrentHashMap<TimePoint, WindLegTypeAndLegBearingCache> cachesByTimePoint = new ConcurrentHashMap<>();
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         getSecurityService().checkCurrentUserReadPermission(trackedRace);
         if (trackedRace != null) {
@@ -2182,7 +2189,22 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                                 legType = null;
                             }
                             WindDTO windDTO = wind == null ? null : createWindDTOFromAlreadyAveraged(wind, toTimePointExcluding);
-                            GPSFixDTOWithSpeedWindTackAndLegType fixDTO = createGPSFixDTO(fix, estimatedSpeed, windDTO, tack, legType, /* extrapolate */ extrapolatedFixes.contains(fix));
+                            Double detailValue = null;
+                            if (detailType != null) {
+                                MillisecondsTimePoint time = new MillisecondsTimePoint(fix.getTimePoint().asMillis());
+                                WindLegTypeAndLegBearingCache cache = cachesByTimePoint.get(time);
+                                if (cache == null) {
+                                    cache = new LeaderboardDTOCalculationReuseCache(time);
+                                    cachesByTimePoint.put(time, cache);
+                                }
+                                try {
+                                    detailValue = getCompetitorRaceDataEntry(detailType, trackedRace, competitor,
+                                            fix.getTimePoint(), leaderboardGroupName, leaderboardName, cache);
+                                } catch (NoWindException nwe) {
+                                    detailValue = null;
+                                }
+                            }
+                            GPSFixDTOWithSpeedWindTackAndLegType fixDTO = createGPSFixDTO(fix, estimatedSpeed, windDTO, tack, legType, /* extrapolate */ extrapolatedFixes.contains(fix), detailValue);
                             fixesForCompetitor.add(fixDTO);
                             if (fixIter.hasNext()) {
                                 fix = fixIter.next();
@@ -2240,9 +2262,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 .getBearing().getDegrees());
     }
 
-    private GPSFixDTOWithSpeedWindTackAndLegType createGPSFixDTO(GPSFix fix, SpeedWithBearing speedWithBearing, WindDTO windDTO, Tack tack, LegType legType, boolean extrapolated) {
+    private GPSFixDTOWithSpeedWindTackAndLegType createGPSFixDTO(GPSFix fix, SpeedWithBearing speedWithBearing, WindDTO windDTO, Tack tack, LegType legType, boolean extrapolated, Double detailValue) {
         return new GPSFixDTOWithSpeedWindTackAndLegType(fix.getTimePoint().asDate(), fix.getPosition()==null?null:fix.getPosition(),
-                speedWithBearing==null?null:createSpeedWithBearingDTO(speedWithBearing), windDTO, tack, legType, extrapolated);
+                speedWithBearing==null?null:createSpeedWithBearingDTO(speedWithBearing), windDTO, tack, legType, extrapolated, detailValue);
     }
 
     @Override
@@ -2360,7 +2382,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public CoursePositionsDTO getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date) {
         CoursePositionsDTO result = new CoursePositionsDTO();
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
-        getSecurityService().checkCurrentUserReadPermission(trackedRace);
         if (trackedRace != null) {
             getSecurityService().checkCurrentUserReadPermission(trackedRace);
             final TimePoint dateAsTimePoint;
@@ -2691,7 +2712,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     private ArrayList<String> getLeaderboardNamesFilteredForCurrentUser() {
         final ArrayList<String> result = new ArrayList<>();
-        getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.LEADERBOARD,
+        getSecurityService().filterObjectsWithPermissionForCurrentUser(
                 DefaultActions.READ, getService().getLeaderboards().values(), l -> result.add(l.getName()));
         return result;
     }
@@ -2761,7 +2782,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public List<StrippedLeaderboardDTOWithSecurity> getLeaderboardsWithSecurity() {
         final Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.LEADERBOARD,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 leaderboards.values(),
                 leaderboard -> createStrippedLeaderboardDTOWithSecurity(leaderboard, false, false));
     }
@@ -3220,7 +3241,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public List<SwissTimingConfigurationWithSecurityDTO> getPreviousSwissTimingConfigurations() {
         Iterable<SwissTimingConfiguration> configs = swissTimingAdapterPersistence.getSwissTimingConfigurations();
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.SWISS_TIMING_ACCOUNT, configs,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(configs,
                 stConfig -> {
                     final SwissTimingConfigurationWithSecurityDTO config = new SwissTimingConfigurationWithSecurityDTO(
                             stConfig.getName(), stConfig.getJsonURL(),
@@ -3501,8 +3522,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 }
                 break;
             case CHART_BEAT_ANGLE:
+            case CHART_ABS_TWA:
                 Bearing twa = trackedRace.getTWA(competitor, timePoint, cache);
-                result = twa == null? null:twa.getDegrees();
+                result = twa == null ? null : twa.getDegrees();
+                if (result != null && dataType == DetailType.CHART_ABS_TWA) {
+                    result = Math.abs(result);
+                }
                 break;
             case BRAVO_RACE_HEEL_IN_DEGREES:
             case BRAVO_LEG_CURRENT_HEEL_IN_DEGREES: {
@@ -4033,7 +4058,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         Wind wind = trackedRace.getWind(fix.getPosition(), fix.getTimePoint());
         WindDTO windDTO = createWindDTOFromAlreadyAveraged(wind, fix.getTimePoint());
         GPSFixDTOWithSpeedWindTackAndLegType fixDTO = createGPSFixDTO(fix, speedWithBearing, windDTO, tack, legType, /* extrapolated */
-                false);
+                false, null);
         return fixDTO;
     }
 
@@ -4158,7 +4183,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public List<LeaderboardGroupDTO> getLeaderboardGroups(boolean withGeoLocationData) {
         final Map<String, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroups();
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.LEADERBOARD_GROUP,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 leaderboardGroups.values(),
                 leaderboardGroup -> convertToLeaderboardGroupDTO(leaderboardGroup, withGeoLocationData, false));
     }
@@ -4269,9 +4294,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public ReplicationStateDTO getReplicaInfo() {
-        SecurityUtils.getSubject().checkPermission(
-                SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(ServerActions.READ_REPLICATOR,
-                        new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.READ_REPLICATOR);
         ReplicationService service = getReplicationService();
         Set<ReplicaDTO> replicaDTOs = new HashSet<ReplicaDTO>();
         for (ReplicaDescriptor replicaDescriptor : service.getReplicaInfo()) {
@@ -4312,9 +4335,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public void startReplicatingFromMaster(String messagingHost, String masterHostName, String exchangeName,
             int servletPort, int messagingPort, String usernameOrNull, String passwordOrNull)
             throws IOException, ClassNotFoundException, InterruptedException {
-        SecurityUtils.getSubject()
-                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
-                        ServerActions.START_REPLICATION, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.START_REPLICATION);
         // The queue name must always be the same for this server. In order to achieve
         // this we're using the unique server identifier
         final ReplicationService replicationService = getReplicationService();
@@ -4328,7 +4349,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public List<EventDTO> getEvents() throws MalformedURLException {
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.EVENT,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 getService().getAllEvents(), event -> {
                     EventDTO eventDTO = convertToEventDTO(event, false);
                     try {
@@ -4339,32 +4360,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     eventDTO.setIsOnRemoteServer(false);
                     return eventDTO;
                 });
-    }
-
-    @Override
-    public List<EventBaseDTO> getPublicEventsOfAllSailingServers() throws MalformedURLException {
-        List<EventBaseDTO> result = new ArrayList<>();
-        for (EventDTO localEvent : getEvents()) {
-            if (localEvent.isPublic) {
-                result.add(localEvent);
-            }
-        }
-        for (Entry<RemoteSailingServerReference, com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception>> serverRefAndEventsOrException :
-                        getService().getPublicEventsOfAllSailingServers().entrySet()) {
-            final com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = serverRefAndEventsOrException.getValue();
-            final RemoteSailingServerReference serverRef = serverRefAndEventsOrException.getKey();
-            final Iterable<EventBase> remoteEvents = eventsOrException.getA();
-            String baseURLFromServerReference = getBaseURL(serverRef.getURL()).toString();
-            if (remoteEvents != null) {
-                for (EventBase remoteEvent : remoteEvents) {
-                    EventBaseDTO remoteEventDTO = convertToEventDTO(remoteEvent);
-                    remoteEventDTO.setBaseURL(remoteEvent.getBaseURL() == null ? baseURLFromServerReference : remoteEvent.getBaseURL().toString());
-                    remoteEventDTO.setIsOnRemoteServer(true);
-                    result.add(remoteEventDTO);
-                }
-            }
-        }
-        return result;
     }
 
     /**
@@ -5131,9 +5126,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) {
-        SecurityUtils.getSubject()
-                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
-                ServerActions.CONFIGURE_LOCAL_SERVER, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_LOCAL_SERVER);
         getService().apply(new UpdateServerConfiguration(
                 new SailingServerConfigurationImpl(serverConfiguration.isStandaloneServer())));
         if (serverConfiguration.isSelfService() != null) {
@@ -5290,8 +5283,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public List<SwissTimingArchiveConfigurationWithSecurityDTO> getPreviousSwissTimingArchiveConfigurations() {
         Iterable<SwissTimingArchiveConfiguration> configs = swissTimingAdapterPersistence
                 .getSwissTimingArchiveConfigurations();
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
-                SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT, configs,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(configs,
                 stArchiveConfig -> {
                     SwissTimingArchiveConfigurationWithSecurityDTO config = new SwissTimingArchiveConfigurationWithSecurityDTO(
                             stArchiveConfig.getJsonURL(), stArchiveConfig.getCreatorName());
@@ -5432,9 +5424,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         List<RegattaDTO> regattaDTOs = new ArrayList<RegattaDTO>();
         Iterable<Regatta> regattas = structureImporter.getRegattas(parsedEvent);
         for (Regatta regatta : regattas) {
-            if (getSecurityService().hasCurrentUserReadPermission(regatta)) {
-                regattaDTOs.add(convertToRegattaDTO(regatta));
-            }
+            regattaDTOs.add(convertToRegattaDTO(regatta));
         }
         return regattaDTOs;
     }
@@ -5628,9 +5618,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void stopReplicatingFromMaster() {
-        SecurityUtils.getSubject()
-                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
-                        ServerActions.START_REPLICATION, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.START_REPLICATION);
         try {
             getReplicationService().stopToReplicateFromMaster();
         } catch (IOException e) {
@@ -5641,9 +5629,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void stopAllReplicas() {
-        SecurityUtils.getSubject()
-                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
-                        ServerActions.REPLICATE, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.REPLICATE);
         try {
             getReplicationService().stopAllReplicas();
         } catch (IOException e) {
@@ -5654,9 +5640,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void stopSingleReplicaInstance(String identifier) {
-        SecurityUtils.getSubject()
-                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
-                        ServerActions.REPLICATE, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.REPLICATE);
         UUID uuid = UUID.fromString(identifier);
         try {
             getReplicationService().unregisterReplica(uuid);
@@ -5772,18 +5756,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public UUID importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
             String targetServerUsername, String targetServerPassword) {
-        // FIXME should the targetserver also check this?
-        SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
-                ServerActions.CAN_IMPORT_MASTERDATA, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
-
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
         String token = RemoteServerUtil.resolveBearerTokenForRemoteServer(urlAsString, targetServerUsername, targetServerPassword);
-
         final UUID importOperationId = UUID.randomUUID();
-        getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT,
-                0.0);
+        getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT, 0.0);
         final User user = getSecurityService().getCurrentUser();
         final UserGroup tenant = getSecurityService().getDefaultTenantForCurrentUser();
-        
         // Create a progress indicator for as long as the server gets data from the other server.
         // As soon as the server starts the import operation, a progress object will be built on every server
         Runnable masterDataImportTask = new Runnable() {
@@ -5818,13 +5796,21 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         inputStream = new TimeoutExtendingInputStream(connection.getInputStream(), connection);
                     }
                     final MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService(),
-                            user,
-                            tenant);
+                            user, tenant);
                     importer.importFromStream(inputStream, importOperationId, override);
                 } catch (Throwable e) {
                     // do not assume that RuntimeException is logged properly
-                    logger.log(Level.SEVERE, e.getMessage(), e);
-                    getService().setDataImportFailedWithReplication(importOperationId, e.getMessage()
+                    String message = e.getMessage();
+                    if (connection instanceof HttpURLConnection) {
+                        // try to obtain an error message from the connection's error stream:
+                        try {
+                            message = new BufferedReader(new InputStreamReader(((HttpURLConnection) connection).getErrorStream())).readLine();
+                        } catch (Exception exceptionTryingToReadErrorStream) {
+                            // in this case we just stay with the exception's message
+                        }
+                    }
+                    logger.log(Level.SEVERE, message, e);
+                    getService().setDataImportFailedWithReplication(importOperationId, message
                             + "\n\nHave you checked if the"
                             + " versions (commit-wise) of the importing and exporting servers are compatible with each other? "
                             + "If the error still occurs, when both servers are running the same version, please report the problem.");
@@ -5950,18 +5936,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             final DynamicBoat boat = (DynamicBoat) addOrUpdateBoatInternal(competitor.getBoat());
             result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredDomainType.COMPETITOR, CompetitorImpl.getTypeRelativeObjectIdentifier(competitorUUID),
-                    competitor.getName(), new Callable<CompetitorWithBoat>() {
-                        @Override
-                        public CompetitorWithBoat call() throws Exception {
-                            return getBaseDomainFactory().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(
+                    competitor.getName(), ()->getBaseDomainFactory().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(
                                     competitorUUID, competitor.getName(), competitor.getShortName(),
                                     competitor.getColor(), competitor.getEmail(),
                                     competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),
                                     team, competitor.getTimeOnTimeFactor(),
                                     competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag(),
-                                    boat);
-                        }
-                    });
+                                    boat));
         } else {
             SecurityUtils.getSubject().checkPermission(SecuredDomainType.COMPETITOR.getStringPermissionForTypeRelativeIdentifier(
                     DefaultActions.UPDATE, CompetitorImpl.getTypeRelativeObjectIdentifier(competitor.getId())));
@@ -5994,17 +5975,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
             result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredDomainType.COMPETITOR, CompetitorImpl.getTypeRelativeObjectIdentifier(competitorUUID),
-                    competitor.getName(), new Callable<Competitor>() {
-
-                        @Override
-                        public Competitor call() throws Exception {
-                            return getBaseDomainFactory().getOrCreateCompetitor(competitorUUID, competitor.getName(),
+                    competitor.getName(), ()->getBaseDomainFactory().getOrCreateCompetitor(competitorUUID, competitor.getName(),
                                     competitor.getShortName(), competitor.getColor(), competitor.getEmail(),
                                     competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),
                                     team, competitor.getTimeOnTimeFactor(),
-                                    competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag());
-                        }
-                    });
+                                    competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag()));
         } else {
             SecurityUtils.getSubject().checkPermission(
                     SecuredDomainType.COMPETITOR.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
@@ -6035,7 +6010,31 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public List<CompetitorWithBoatDTO> addCompetitors(List<CompetitorDescriptor> competitorDescriptors, String searchTag) throws URISyntaxException {
         List<DynamicCompetitorWithBoat> competitorsForSaving = new ArrayList<>();
         for (final CompetitorDescriptor competitorDescriptor : competitorDescriptors) {
-            competitorsForSaving.add(getService().convertCompetitorDescriptorToCompetitorWithBoat(competitorDescriptor, searchTag));
+            final Action action = ()->competitorsForSaving.add(getService().convertCompetitorDescriptorToCompetitorWithBoat(competitorDescriptor, searchTag));
+            final Boat existingBoat = getService().getCompetitorAndBoatStore().getExistingBoatById(competitorDescriptor.getBoatUUID());
+            final Action actionIncludingBoatSecurityCheck;
+            if (existingBoat == null) {
+                actionIncludingBoatSecurityCheck = ()->getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                    SecuredDomainType.BOAT, BoatImpl.getTypeRelativeObjectIdentifier(competitorDescriptor.getBoatUUID()), competitorDescriptor.getBoatName(),
+                    action);
+            } else {
+                actionIncludingBoatSecurityCheck = action;
+            }
+            final Competitor existingCompetitor = getService().getCompetitorAndBoatStore().getExistingCompetitorById(competitorDescriptor.getCompetitorUUID());
+            final Action actionIncludingCompetitorAndBoatSecurityCheck;
+            if (existingCompetitor == null) {
+                actionIncludingCompetitorAndBoatSecurityCheck = ()->getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                            SecuredDomainType.COMPETITOR,
+                            CompetitorImpl.getTypeRelativeObjectIdentifier(competitorDescriptor.getCompetitorUUID()), competitorDescriptor.getName(),
+                            actionIncludingBoatSecurityCheck);
+            } else {
+                actionIncludingCompetitorAndBoatSecurityCheck = actionIncludingBoatSecurityCheck;
+            }
+            try {
+                actionIncludingCompetitorAndBoatSecurityCheck.run();
+            } catch (Exception e) {
+                throw new RuntimeException(e); // this can onlyhave been a RuntimeException in the first place because nothing of the above throws a checked one
+            }
         }
         getBaseDomainFactory().getCompetitorAndBoatStore().addNewCompetitorsWithBoat(competitorsForSaving);
         return convertToCompetitorWithBoatDTOs(competitorsForSaving);
@@ -6064,7 +6063,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public Iterable<BoatDTO> getStandaloneBoats() {
         List<BoatDTO> result = new ArrayList<>();
-        getSecurityService().filterObjectsWithAnyPermissionForCurrentUser(SecuredDomainType.BOAT,
+        getSecurityService().filterObjectsWithAnyPermissionForCurrentUser(
                 SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS,
                 getService().getBaseDomainFactory().getCompetitorAndBoatStore().getStandaloneBoats(),
                 filteredObject -> result.add(convertToBoatDTO(filteredObject)));
@@ -6084,14 +6083,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             UUID boatUUID = UUID.randomUUID();
             BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(boat.getBoatClass().getName());
             result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.BOAT, BoatImpl.getTypeRelativeObjectIdentifier(boatUUID), boat.getName(), new Callable<Boat>() {
-
-                        @Override
-                        public Boat call() throws Exception {
-                            return getBaseDomainFactory().getOrCreateBoat(boatUUID, boat.getName(), boatClass,
-                                    boat.getSailId(), boat.getColor());
-                        }
-                    });
+                    SecuredDomainType.BOAT, BoatImpl.getTypeRelativeObjectIdentifier(boatUUID), boat.getName(),
+                    () -> getBaseDomainFactory().getOrCreateBoat(boatUUID, boat.getName(), boatClass, boat.getSailId(), boat.getColor()));
         } else {
             SecurityUtils.getSubject().checkPermission(
                     SecuredDomainType.BOAT.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
@@ -6378,16 +6371,18 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public Pair<Boolean, Boolean> setFinishingAndEndTime(RaceLogSetFinishingAndFinishTimeDTO dto)
             throws NotFoundException {
         getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(dto.leaderboardName));
+        final MillisecondsTimePoint finishingTimePoint = dto.finishingTime==null?null:new MillisecondsTimePoint(dto.finishingTime);
         TimePoint newFinsihingTime = getService().setFinishingTime(dto.leaderboardName, dto.raceColumnName, 
                 dto.fleetName, dto.authorName, dto.authorPriority,
-                dto.passId, new MillisecondsTimePoint(dto.finishingTime));
+                dto.passId, finishingTimePoint);
         
+        final TimePoint finishTimePoint = dto.finishTime==null?null:new MillisecondsTimePoint(dto.finishTime);
         TimePoint newEndTime = getService().setEndTime(dto.leaderboardName, dto.raceColumnName, 
                 dto.fleetName, dto.authorName, dto.authorPriority,
-                dto.passId, new MillisecondsTimePoint(dto.finishTime));
+                dto.passId, finishTimePoint);
         
-        return new Pair<Boolean, Boolean>(new MillisecondsTimePoint(dto.finishingTime).equals(newFinsihingTime),
-                new MillisecondsTimePoint(dto.finishTime).equals(newEndTime));
+        return new Pair<Boolean, Boolean>(Util.equalsWithNull(finishingTimePoint, newFinsihingTime),
+                Util.equalsWithNull(finishTimePoint, newEndTime));
     }
 
     @Override
@@ -6486,13 +6481,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public Iterable<String> getAllIgtimiAccountEmailAddresses() {
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.IGTIMI_ACCOUNT,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 getIgtimiConnectionFactory().getAllAccounts(), acc -> acc.getUser().getEmail());
     }
 
     @Override
     public Iterable<AccountWithSecurityDTO> getAllIgtimiAccountsWithSecurity() {
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.IGTIMI_ACCOUNT,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 getIgtimiConnectionFactory().getAllAccounts(), this::toSecuredIgtimiAccountDTO);
     }
 
@@ -7615,15 +7610,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         for (CompetitorDTO c : competitorDtos) {
             competitors.add(getCompetitor(c));
         }
-        MailInvitationType type = MailInvitationType
-                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.LEGACY.name()));
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         Regatta regatta = getService().getRegattaByName(leaderboardName);
         getSecurityService().checkCurrentUserUpdatePermission(regatta);
         getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, regatta,
                 serverUrlWithoutTrailingSlash,
-                competitors, iOSAppUrl, androidAppUrl, getLocale(localeInfoName), type);
+                competitors, iOSAppUrl, androidAppUrl, getLocale(localeInfoName), getMailType());
     }
     
     @Override
@@ -7637,7 +7630,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         Regatta regatta = getService().getRegattaByName(leaderboardName);
         getSecurityService().checkCurrentUserUpdatePermission(regatta);
         MailInvitationType type = MailInvitationType
-                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.LEGACY.name()));
+                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.SailInsight1.name()));
         getRaceLogTrackingAdapter().inviteBuoyTenderViaEmail(event, leaderboard, regatta, serverUrlWithoutTrailingSlash,
                 emails, iOSAppUrl, androidAppUrl, getLocale(localeInfoName), type);
     }
@@ -8246,17 +8239,16 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
-        final Subject subject = SecurityUtils.getSubject();
-        subject.checkPermission(
-                SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForTypeRelativeIdentifier(
-                        DefaultActions.CREATE,
-                        new TypeRelativeObjectIdentifier(ServerInfo.getName(), deviceConfiguration.getName())));
-
-        // TODO consider replication
-        final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
-        if (expeditionConnector != null) {
-            expeditionConnector.addOrReplaceDeviceConfiguration(deviceConfiguration);
-        }
+        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION,
+                new TypeRelativeObjectIdentifier(ServerInfo.getName(), deviceConfiguration.getName()),
+                /* display name */ ServerInfo.getName() + "/" + deviceConfiguration.getName(),
+                () -> {
+                    // TODO consider replication
+                    final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
+                    if (expeditionConnector != null) {
+                        expeditionConnector.addOrReplaceDeviceConfiguration(deviceConfiguration);
+                    }
+                });
     }
 
     @Override
@@ -9136,7 +9128,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public MailInvitationType getMailType() {
         MailInvitationType type = MailInvitationType
-                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.LEGACY.name()));
+                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.SailInsight2.name()));
         return type;
     }
 
@@ -9150,22 +9142,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             logger.log(Level.WARNING, "Error while generating QR code for open regatta", e);
         }
         return result;
-    }
-
-    @Override
-    public void setDefaultTenantForCurrentServer(String tennant) {
-        User user = getSecurityService().getCurrentUser();
-        if (user != null) {
-            if (tennant == null) {
-                user.getDefaultTenantMap().remove(ServerInfo.getName());
-            } else {
-                UserGroup userGroupCandidate = getSecurityService().getUserGroupByName(tennant);
-                // FIXME allow admins to pose as any tenant?
-                if (Util.contains(user.getUserGroups(), userGroupCandidate)) {
-                    user.getDefaultTenantMap().put(ServerInfo.getName(), userGroupCandidate);
-                }
-            }
-        }
     }
 
     @Override

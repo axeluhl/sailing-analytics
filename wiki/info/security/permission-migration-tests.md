@@ -255,7 +255,7 @@ The following checks need to be done using a normal user:
 
 * Technical tabs in the AdminConsole need to be unavailable (e.g. local server)
 * Many publicly readable domain objects must not provide update actions in the respective AdminConsole tabs (events, leaderboards, ...)
-* Other sensible data must be invisible (either absence of the tab or empty list) to normal users (e.g. Tracking connections, Igtimi accounts, ...)
+* Other sensitive data must be invisible (either absence of the tab or empty list) to normal users (e.g. Tracking connections, Igtimi accounts, ...)
 * The server group may not be available in the default creation tenant selection of the user profile page
 * The whole user profile page needs to be available and usable
 
@@ -286,7 +286,7 @@ The following operational scenarios need to be checked
 
 ### Smartphone tracking and App interaction test
 
-A test setup needs to be created to cover an end to end scenarios using our various apps. The following scenarios should be verified in this test:
+A test setup needs to be created to cover an end to end scenario using our various apps. The following scenarios should be verified in this test:
 
 * Different types of invitations and QR codes
 * Integration of branch.io and roundtrip/redirects of the QRCodePlace
@@ -302,7 +302,7 @@ For the tests of this scenario, we need a fully featured setup consisting of the
 * A regatta having dynamic competitor/boat assignments
 * Pinged marks as well as tracked marks
 
-The a smartphone tracking setup needs to get repeated using the following invitation and app combinations (some cases can be tested in parallel):
+Then a smartphone tracking setup needs to get repeated using the following invitation and app combinations (some cases can be tested in parallel):
 
 * Legacy invitations/QR codes with the old apps
 * Legacy invitations/QR codes with Sail Insight 2.0

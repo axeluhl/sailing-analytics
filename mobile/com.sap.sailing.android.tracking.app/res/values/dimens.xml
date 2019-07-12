@@ -12,7 +12,6 @@
     <dimen name="tracking_button_height">80dp</dimen>
     <dimen name="tracking_button_text_size">@dimen/highlight_text_size</dimen>
     <dimen name="regatta_start_date_side_margin">22dp</dimen>
-    <dimen name="countdown_separator_height">35dp</dimen>
-    <dimen name="countdown_separator_width">2dp</dimen>
+    <dimen name="countdown_separator_width">1dp</dimen>
 
 </resources>

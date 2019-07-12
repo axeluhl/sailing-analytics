@@ -3,6 +3,7 @@ package com.sap.sse.filestorage.impl;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -46,6 +47,12 @@ public abstract class BaseFileStorageServiceImpl implements FileStorageService {
         return name;
     }
     
+    protected static String getKey(String fileExtension) {
+        String key = UUID.randomUUID().toString();
+        key += "."+fileExtension;
+        return key;
+    }
+
     @Override
     public String getDescription(Locale locale) {
         return FileStorageI18n.STRING_MESSAGES.get(locale, descriptionKey);

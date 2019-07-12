@@ -1,8 +1,6 @@
 package com.sap.sailing.domain.igtimiadapter.test;
 
-import java.io.IOException;
-
-import org.apache.http.client.ClientProtocolException;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.Timeout;
@@ -22,11 +20,16 @@ public class AbstractTestWithIgtimiConnection {
 
 
     @Before
-    public void setUp() throws ClientProtocolException, IOException, org.json.simple.parser.ParseException {
+    public void setUp() throws Exception {
         Activator.getInstance().setSecurityService(SecurityServiceMockFactory.mockSecurityService());
         final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
         Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("admin", "9fded995cf21c8ed91ddaec13b220e8d5e44c65808d22ec2b1b7c32261121f26");
         connection = connectionFactory.connect(account);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        Activator.getInstance().setSecurityService(null);
     }
 
 }

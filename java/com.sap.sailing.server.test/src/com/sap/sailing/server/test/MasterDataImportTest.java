@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.core.Response;
@@ -37,6 +38,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import com.mongodb.WriteConcern;
@@ -152,6 +154,8 @@ import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.PublicReadableActions;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.shared.media.ImageDescriptor;
@@ -187,6 +191,7 @@ public class MasterDataImportTest {
         deleteAllDataFromDatabase();
     }
 
+    @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
         UserGroupImpl defaultTenant = new UserGroupImpl(new UUID(0, 1), "defaultTenant");
@@ -205,7 +210,14 @@ public class MasterDataImportTest {
 
         Mockito.doReturn(true).when(securityService)
                 .hasCurrentUserReadPermission(Mockito.any(WithQualifiedObjectIdentifier.class));
+        Mockito.doReturn(true).when(securityService)
+                .hasCurrentUserServerPermission(ServerActions.CAN_EXPORT_MASTERDATA);
+        Mockito.doReturn(true).when(securityService).hasCurrentUserOneOfExplicitPermissions(
+                Mockito.any(WithQualifiedObjectIdentifier.class), Matchers.<PublicReadableActions> anyVararg());
 
+        Mockito.when(securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(Mockito.any(),
+                Mockito.any(), Mockito.any(), Mockito.any(Callable.class)))
+                .thenAnswer(i -> i.getArgumentAt(3, Callable.class).call());
 
         Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
 
@@ -220,7 +232,7 @@ public class MasterDataImportTest {
         sourceService = Mockito
                 .spy(new RacingEventServiceImpl(dbFactory, mongoObjectFactory,
                 MediaDBFactory.INSTANCE.getDefaultMediaDB(), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE,
-                false));
+                        false));
 
 
         masterDataResource = spyResource(new DummyMasterDataRessource(), sourceService);
@@ -1872,7 +1884,13 @@ public class MasterDataImportTest {
     public void testMasterDataImportForMediaTracks() throws MalformedURLException, IOException, InterruptedException,
             ClassNotFoundException {
         // Setup source service
-        RacingEventService sourceService = new RacingEventServiceImpl();
+        RacingEventService sourceService = new RacingEventServiceImpl() {
+            @Override
+            public SecurityService getSecurityService() {
+                return securityService;
+            }
+        };
+        ;
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         String regattaName1 = "49er";
         String regattaName2 = "49er FX";

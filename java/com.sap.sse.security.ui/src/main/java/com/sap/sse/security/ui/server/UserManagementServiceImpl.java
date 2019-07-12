@@ -124,7 +124,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         RoleDefinition role = getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.ROLE_DEFINITION, new TypeRelativeObjectIdentifier(roleDefinitionIdAsString), name,
                 new Callable<RoleDefinition>() {
-
                     @Override
                     public RoleDefinition call() throws Exception {
                         return getSecurityService().createRoleDefinition(UUID.fromString(roleDefinitionIdAsString),
@@ -182,6 +181,14 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                     + roleDefinitionWithNewProperties.getName());
         }
         
+        Set<WildcardPermission> removedPermissions = new HashSet<>(existingRole.getPermissions());
+        removedPermissions.removeAll(roleDefinitionWithNewProperties.getPermissions());
+        
+        if (!getSecurityService().hasUserAllWildcardPermissionsForAlreadyRealizedQualifications(existingRole, removedPermissions)) {
+            throw new UnauthorizedException("Not permitted to revoke permissions for role "
+                    + roleDefinitionWithNewProperties.getName());
+        }
+        
         getSecurityService().updateRoleDefinition(roleDefinitionWithNewProperties);
     }
 
@@ -194,9 +201,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public OwnershipDTO setOwnership(String username, UUID userGroupId,
-            QualifiedObjectIdentifier idOfOwnedObject,
-            String displayNameOfOwnedObject) {
+    public OwnershipDTO setOwnership(final String username, final UUID userGroupId,
+            final QualifiedObjectIdentifier idOfOwnedObject, final String displayNameOfOwnedObject) {
 
         SecurityUtils.getSubject()
                 .checkPermission(idOfOwnedObject.getStringPermission(DefaultActions.CHANGE_OWNERSHIP));
@@ -205,7 +211,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         // no security check if current user can see the user associated with the given username
 
         final Ownership result = getSecurityService().setOwnership(idOfOwnedObject, user,
-                getSecurityService().getUserGroup(userGroupId));
+                getSecurityService().getUserGroup(userGroupId), displayNameOfOwnedObject);
         return securityDTOFactory.createOwnershipDTO(result, new HashMap<>(), new HashMap<>());
     }
 
@@ -286,8 +292,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public Collection<UserGroupDTO> getUserGroups() {
         Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser = new HashMap<>();
         Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup = new HashMap<>();
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredSecurityTypes.USER_GROUP,
-                getSecurityService().getUserGroupList(),
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(getSecurityService().getUserGroupList(),
                 ug -> securityDTOFactory.createUserGroupDTOFromUserGroup(ug, fromOriginalToStrippedDownUser,
                         fromOriginalToStrippedDownUserGroup, getSecurityService()));
     }
@@ -342,10 +347,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             throw new UserGroupManagementException(
                     String.format("A user group with the name '%s' already exists.", name));
         }
-
         UserGroup group = getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.USER_GROUP, UserGroupImpl.getTypeRelativeObjectIdentifier(newTenantId), name, () -> {
-                    
                     UserGroup userGroup;
                     try {
                         userGroup = getSecurityService().createUserGroup(newTenantId, name);
@@ -354,7 +357,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                     }
                     return userGroup;
                 });
-
         Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser = new HashMap<>();
         Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup = new HashMap<>();
         return securityDTOFactory.createUserGroupDTOFromUserGroup(group, fromOriginalToStrippedDownUser,
@@ -389,7 +391,13 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             if (userByName == null) {
                 throw new UserManagementException("user '" + username + "' not found.");
             }
-            getSecurityService().addUserToUserGroup(tenant, userByName);
+            if (getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionsWithQualification(
+                    tenant.getRoleDefinitionMap().keySet(), new Ownership(null, tenant))) {
+                getSecurityService().addUserToUserGroup(tenant, userByName);
+            } else {
+                throw new UnauthorizedException(
+                        "Current user does not have all the meta permissions of the user group the user would be added to");
+            }
         } else {
             throw new UnauthorizedException("Not permitted to add user to group");
         }
@@ -530,15 +538,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public void updateSimpleUserPassword(final String username, String oldPassword, String passwordResetSecret, String newPassword) throws UserManagementException {
         final User user = getSecurityService().getUserByName(username);
-        getSecurityService().checkCurrentUserUpdatePermission(user);
-        if (getSecurityService().hasCurrentUserOneOfExplicitPermissions(user, UserActions.FORCE_OVERWRITE_PASSWORD)) {
-            // e.g. admin is allowed to update the password without knowing the old password and/or secret
-            getSecurityService().updateSimpleUserPassword(username, newPassword);
-            sendPasswordChangedMailAsync(username);
-        } else if (// someone knew a username and the correct password for that user
+        // Is, e.g., admin is allowed to update the password without knowing the old password and/or secret?
+        if (getSecurityService().hasCurrentUserOneOfExplicitPermissions(user, UserActions.FORCE_OVERWRITE_PASSWORD)
+        || // someone knew a username and the correct password for that user
         (oldPassword != null && getSecurityService().checkPassword(username, oldPassword))
-            // someone provided the correct password reset secret for the correct username
-         || (passwordResetSecret != null && getSecurityService().checkPasswordResetSecret(username, passwordResetSecret))) {
+        || // someone provided the correct password reset secret for the correct username
+        (passwordResetSecret != null && getSecurityService().checkPasswordResetSecret(username, passwordResetSecret))) {
             getSecurityService().updateSimpleUserPassword(username, newPassword);
             sendPasswordChangedMailAsync(username);
         } else {
@@ -886,6 +891,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
                         @Override
                         public void run() throws Exception {
+                            final QualifiedObjectIdentifier qualifiedObjectAssociationIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
+                                    .getQualifiedObjectIdentifier(associationTypeIdentifier);
+                            getSecurityService().addToAccessControlList(qualifiedObjectAssociationIdentifier,
+                                    null, DefaultActions.READ.name());
+
                             getSecurityService().addRoleForUser(user, role);
                             logger.info(message);
                         }
@@ -1031,6 +1041,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
                         @Override
                         public void run() throws Exception {
+                            final QualifiedObjectIdentifier qualifiedObjectAssociationIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                                    .getQualifiedObjectIdentifier(associationTypeIdentifier);
+                            getSecurityService().addToAccessControlList(qualifiedObjectAssociationIdentifier,
+                                    null, DefaultActions.READ.name());
                             getSecurityService().addPermissionForUser(username, permission);
                             logger.info(message);
                         }

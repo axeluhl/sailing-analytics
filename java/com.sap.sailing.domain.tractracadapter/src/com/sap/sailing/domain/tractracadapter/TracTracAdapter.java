@@ -74,8 +74,6 @@ public interface TracTracAdapter {
      *            described above will be created and used.
      * @param offsetToStartTimeOfSimulatedRace
      *            if non-<code>null</code>, the {@link Simulator} will be used with this duration as start offset
-     * @param trackWind TODO
-     * @param correctWindDirectionByMagneticDeclination TODO
      */
     RaceHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, URL paramURL,
             URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint trackingStartTime,

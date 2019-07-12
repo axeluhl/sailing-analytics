@@ -9,5 +9,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.junit;bundle-version="4.8.2",
  com.sap.sse.common,
  com.sap.sailing.domain.test;bundle-version="1.0.0",
- com.tractrac.clientmodule;bundle-version="3.0.7"
+ com.tractrac.clientmodule;bundle-version="3.0.7",
+ org.mockito.mockito-core,
+ org.objenesis;bundle-version="2.1.0",
+ org.hamcrest;bundle-version="1.1.0"
 Automatic-Module-Name: com.sap.sailing.xmlexport.test

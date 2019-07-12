@@ -108,6 +108,12 @@ public class LeaderboardEntryDTO implements Serializable {
      * race up to the leg's end, regardless of where the leading and fastest boat are.
      */
     public Duration gapToLeaderInOwnTime;
+    
+    /**
+     * The time sailed since the race start time. When the competitor represented by this record has finished the
+     * race, this will be the duration between race start time and the time when the competitor finished the race. 
+     */
+    public Duration timeSailedSinceRaceStart;
 
     /**
      * The corrected time spent in the race; usually based on the current time and distance, calculated by the {@link RankingMetric}.
@@ -594,6 +600,7 @@ public class LeaderboardEntryDTO implements Serializable {
         result = prime * result + ((averageSignedCrossTrackErrorInMeters == null) ? 0
                 : averageSignedCrossTrackErrorInMeters.hashCode());
         result = prime * result + ((boat == null) ? 0 : boat.hashCode());
+        result = prime * result + ((timeSailedSinceRaceStart == null) ? 0 : timeSailedSinceRaceStart.hashCode());
         result = prime * result + ((calculatedTime == null) ? 0 : calculatedTime.hashCode());
         result = prime * result + ((calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead == null) ? 0
                 : calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead.hashCode());
@@ -665,6 +672,11 @@ public class LeaderboardEntryDTO implements Serializable {
             if (other.boat != null)
                 return false;
         } else if (!boat.equals(other.boat))
+            return false;
+        if (timeSailedSinceRaceStart == null) {
+            if (other.timeSailedSinceRaceStart != null)
+                return false;
+        } else if (!timeSailedSinceRaceStart.equals(other.timeSailedSinceRaceStart))
             return false;
         if (calculatedTime == null) {
             if (other.calculatedTime != null)

@@ -202,6 +202,8 @@ public class DetailTypeFormatter {
             return stringMessages.distanceToLine();
         case CHART_BEAT_ANGLE:
             return stringMessages.TWA();
+        case CHART_ABS_TWA:
+            return stringMessages.absoluteTWA();
         case CHART_COURSE_OVER_GROUND_TRUE_DEGREES:
             return stringMessages.courseOverGroundTrueDegrees();
         case OVERALL_TOTAL_SCORED_RACE_COUNT:
@@ -461,9 +463,7 @@ public class DetailTypeFormatter {
         case RACE_GAP_TO_LEADER_IN_SECONDS:
         case LEG_ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
         case LEG_CORRECTED_TIME_TRAVELED:
-        case RACE_CALCULATED_TIME_TRAVELED:
         case TIME_BETWEEN_RACE_START_AND_COMPETITOR_START:
-        case RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD:
         case EXPEDITION_RACE_TIME_TO_BURN_TO_LINE:
         case EXPEDITION_LEG_TIME_TO_BURN_TO_LINE:
         case EXPEDITION_RACE_TIME_TO_GUN:
@@ -484,6 +484,8 @@ public class DetailTypeFormatter {
         case RACE_TIME_TRAVELED_DOWNWIND:
         case RACE_TIME_TRAVELED_REACHING:
         case RACE_TIME_TRAVELED_UPWIND:
+        case RACE_CALCULATED_TIME_TRAVELED:
+        case RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD:
         case LEG_TIME_TRAVELED:
         case BRAVOEXTENDED_LEG_CURRENT_DURATION_FOILED_IN_SECONDS:
         case RACE_CURRENT_DURATION_FOILED_IN_SECONDS:
@@ -515,6 +517,7 @@ public class DetailTypeFormatter {
         case RACE_DISPLAY_BOATS:
         case LEG_SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
         case CHART_BEAT_ANGLE:
+        case CHART_ABS_TWA:
         case OVERALL_TIME_ON_TIME_FACTOR:
         case OVERALL_TOTAL_SCORED_RACE_COUNT:
         case EXPEDITION_RACE_AWA:
@@ -788,6 +791,8 @@ public class DetailTypeFormatter {
             return stringMessages.raceTimeUpwindTooltip();
         case CHART_BEAT_ANGLE:
             return stringMessages.TWATooltip();
+        case CHART_ABS_TWA:
+            return stringMessages.absoluteTWATooltip();
         case CHART_DISTANCE_TO_START_LINE:
             return "";
         case CHART_COURSE_OVER_GROUND_TRUE_DEGREES:

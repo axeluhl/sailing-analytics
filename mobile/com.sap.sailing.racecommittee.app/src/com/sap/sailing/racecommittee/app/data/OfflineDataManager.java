@@ -164,9 +164,9 @@ public class OfflineDataManager extends DataManager {
         Mark m2 = new MarkImpl("Green");
         Mark m3 = new MarkImpl("White");
 
-        dataStore.addMark(m1);
-        dataStore.addMark(m2);
-        dataStore.addMark(m3);
+        dataStore.addMark(raceGroup, m1);
+        dataStore.addMark(raceGroup, m2);
+        dataStore.addMark(raceGroup, m3);
     }
 
     @Override
@@ -224,7 +224,7 @@ public class OfflineDataManager extends DataManager {
         return new ImmediateDataLoaderCallbacks<Collection<Mark>>(context, callback, new Callable<Collection<Mark>>() {
             @Override
             public Collection<Mark> call() throws Exception {
-                return dataStore.getMarks();
+                return dataStore.getMarks(managedRace.getRaceGroup());
             }
         });
     }

@@ -392,23 +392,6 @@ public class UserService {
         }
     }
     
-    public boolean hasPermission(String permission) {
-        return hasPermission(new WildcardPermission(permission));
-    }
-
-    public boolean hasAllPermissions(WildcardPermission... permissions) {
-        for (WildcardPermission permission : permissions) {
-            if (!hasPermission(permission)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public boolean hasPermission(WildcardPermission permission) {
-        return hasPermission(permission, /* ownership */ null, /* acl */ null);
-    }
-    
     /**
      * Checks whether the user has the permission to the given action for the given object.
      */

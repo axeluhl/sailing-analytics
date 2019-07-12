@@ -86,7 +86,8 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         dropAndCreateRegatta();
         
         Response leaderboardReponse = leaderboardsResource.getLeaderboard(regatta.getName(),
-                AbstractLeaderboardsResource.ResultStates.Final, null, null);
+                AbstractLeaderboardsResource.ResultStates.Final, null, null,
+                /* competitorAndBoatIdsOnly */ false);
 
         String jsonString = (String) leaderboardReponse.getEntity();
         Object obj= JSONValue.parse(jsonString);
@@ -111,7 +112,8 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         dropAndCreateRegatta();
         
         Response leaderboardReponse = leaderboardsResource.getLeaderboard(regatta.getName(),
-                AbstractLeaderboardsResource.ResultStates.Final, null, null);
+                AbstractLeaderboardsResource.ResultStates.Final, null, null,
+                /* competitorAndBoatIdsOnly */ false);
 
         String jsonString = (String) leaderboardReponse.getEntity();
         Object obj= JSONValue.parse(jsonString);
@@ -129,7 +131,8 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         regattaLeaderboard.getScoreCorrection().setTimePointOfLastCorrectionsValidity(MillisecondsTimePoint.now());
         
         Response leaderboardReponse2 = leaderboardsResource.getLeaderboard(regatta.getName(),
-                AbstractLeaderboardsResource.ResultStates.Final, null, null);
+                AbstractLeaderboardsResource.ResultStates.Final, null, null,
+                /* competitorAndBoatIdsOnly */ false);
 
         String jsonString2 = (String) leaderboardReponse2.getEntity();        
         obj= JSONValue.parse(jsonString2);
@@ -143,7 +146,8 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
     public void testExportLeaderboardWithLiveResultStateAsJson() throws Exception {
         dropAndCreateRegatta();
         Response leaderboardReponse = leaderboardsResource.getLeaderboard(regatta.getName(),
-                AbstractLeaderboardsResource.ResultStates.Live, null, null);
+                AbstractLeaderboardsResource.ResultStates.Live, null, null,
+                /* competitorAndBoatIdsOnly */ false);
         String jsonString = (String) leaderboardReponse.getEntity();
         Object obj= JSONValue.parse(jsonString);
         JSONObject jsonObject = (JSONObject) obj;
@@ -168,7 +172,8 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
 
         // call the servlet for the first time
         Response leaderboardReponse = leaderboardsResource.getLeaderboard(regatta.getName(),
-                AbstractLeaderboardsResource.ResultStates.Final, null, null);
+                AbstractLeaderboardsResource.ResultStates.Final, null, null,
+                /* competitorAndBoatIdsOnly */ false);
 
         String jsonString = (String) leaderboardReponse.getEntity();
         Object obj= JSONValue.parse(jsonString);
@@ -187,7 +192,8 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         Thread.sleep(100);
 
         Response leaderboardReponse2 = leaderboardsResource.getLeaderboard(regatta.getName(),
-                AbstractLeaderboardsResource.ResultStates.Final, null, null);
+                AbstractLeaderboardsResource.ResultStates.Final, null, null,
+                /* competitorAndBoatIdsOnly */ false);
 
         String jsonString2 = (String) leaderboardReponse2.getEntity();
         Object obj2= JSONValue.parse(jsonString2);
@@ -210,7 +216,8 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         Integer maxCompetitorsCount = 2;
         
         Response leaderboardReponse = leaderboardsResource.getLeaderboard(regatta.getName(),
-                AbstractLeaderboardsResource.ResultStates.Final, null, null);
+                AbstractLeaderboardsResource.ResultStates.Final, null, null,
+                /* competitorAndBoatIdsOnly */ false);
 
         String jsonString = (String) leaderboardReponse.getEntity();
         Object obj= JSONValue.parse(jsonString);
@@ -229,7 +236,8 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
 
         // first call for 'all' competitors
         Response leaderboardReponse2 = leaderboardsResource.getLeaderboard(regatta.getName(),
-                AbstractLeaderboardsResource.ResultStates.Final, null, null);
+                AbstractLeaderboardsResource.ResultStates.Final, null, null,
+                /* competitorAndBoatIdsOnly */ false);
 
         jsonString = (String) leaderboardReponse2.getEntity();
         obj= JSONValue.parse(jsonString);
@@ -241,7 +249,8 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
 
         // second call with maxCompetitorsCount set
         Response leaderboardReponse3 = leaderboardsResource.getLeaderboard(regatta.getName(),
-                AbstractLeaderboardsResource.ResultStates.Final, maxCompetitorsCount, null);
+                AbstractLeaderboardsResource.ResultStates.Final, maxCompetitorsCount, null,
+                /* competitorAndBoatIdsOnly */ false);
 
         jsonString = (String) leaderboardReponse3.getEntity();
         obj= JSONValue.parse(jsonString);
@@ -253,7 +262,8 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
 
         // third call for 'all' competitors
         Response leaderboardReponse4 = leaderboardsResource.getLeaderboard(regatta.getName(),
-                AbstractLeaderboardsResource.ResultStates.Final, null, null);
+                AbstractLeaderboardsResource.ResultStates.Final, null, null,
+                /* competitorAndBoatIdsOnly */ false);
 
         jsonString = (String) leaderboardReponse4.getEntity();
         obj= JSONValue.parse(jsonString);

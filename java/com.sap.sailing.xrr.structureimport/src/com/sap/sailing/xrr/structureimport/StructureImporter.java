@@ -30,6 +30,7 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.FleetColors;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
@@ -64,6 +65,7 @@ public class StructureImporter {
     private LinkedHashMap<String, Boat> boatForPerson;
     private final DomainFactory baseDomainFactory;
     private final SetRacenumberStrategy setRacenumberStrategy;
+    private final static String UNKNOWN_BOATCLASS_NAME = "?";
 
     public StructureImporter(SetRacenumberStrategy setRacenumber, DomainFactory baseDomainFactory) {
         this.setRacenumberStrategy = setRacenumber;
@@ -98,9 +100,18 @@ public class StructureImporter {
             BuildStructure buildStructure = new BuildStructure(races);
             final TimePoint startDate = null; // TODO can regatta start time be inferred from XRR document?
             final TimePoint endDate = null; // TODO can regatta end time be inferred from XRR document?
-            RegattaImpl regatta = new RegattaImpl(RegattaImpl.getDefaultName(event.getTitle(), ((Division) event
-                    .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()),
-                    baseDomainFactory.getOrCreateBoatClass(result.getA().getBoatClass()), 
+            final String regattaName = RegattaImpl.getDefaultName(event.getTitle(), ((Division) event
+                    .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle());
+            final String boatClassName;
+            if (result.getA().getBoatClass() != null) {
+                boatClassName = result.getA().getBoatClass();
+            } else {
+                // we need a boat class; use some default
+                logger.warning("No boat class set in regatta to import: "+regattaName+". Setting to \""+UNKNOWN_BOATCLASS_NAME+"\"");
+                boatClassName = UNKNOWN_BOATCLASS_NAME;
+            }
+            RegattaImpl regatta = new RegattaImpl(regattaName,
+                    baseDomainFactory.getOrCreateBoatClass(boatClassName), 
                     /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                     startDate, endDate, getSeries(buildStructure), false,
                     this.baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(), null,

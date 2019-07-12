@@ -43,8 +43,8 @@ public class SearchResource extends AbstractSailingServerResource {
         Iterable<LeaderboardSearchResult> searchResults = search(query).getHits();
         JSONArray jsonSearchResults = new JSONArray();
         for (LeaderboardSearchResult searchResult : searchResults) {
-            if(searchResult.getLeaderboard() == null || getSecurityService().hasCurrentUserReadPermission(searchResult.getLeaderboard())) {
-                if(searchResult.getRegatta() == null || getSecurityService().hasCurrentUserReadPermission(searchResult.getRegatta())) {
+            if (searchResult.getLeaderboard() == null || getSecurityService().hasCurrentUserReadPermission(searchResult.getLeaderboard())) {
+                if (searchResult.getRegatta() == null || getSecurityService().hasCurrentUserReadPermission(searchResult.getRegatta())) {
                     if (searchResult.getLeaderboard() == null || checkAll(searchResult.getLeaderboardGroups())) {
                         jsonSearchResults.add(serializer.serialize(searchResult));
                     }

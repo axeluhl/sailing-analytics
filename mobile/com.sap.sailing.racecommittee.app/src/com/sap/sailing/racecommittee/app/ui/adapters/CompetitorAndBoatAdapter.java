@@ -17,6 +17,8 @@ import com.sap.sailing.racecommittee.app.ui.utils.CompetitorUtils;
 import java.util.List;
 import java.util.Map;
 
+import static android.support.v7.widget.RecyclerView.NO_POSITION;
+
 public class CompetitorAndBoatAdapter extends RecyclerView.Adapter<CompetitorAndBoatAdapter.ViewHolder> {
 
     private static final String TAG = CompetitorAndBoatAdapter.class.getName();
@@ -92,8 +94,11 @@ public class CompetitorAndBoatAdapter extends RecyclerView.Adapter<CompetitorAnd
 
         @Override
         public void onClick(View v) {
-            if (mListener != null) {
-                Competitor competitor = mData.get(getAdapterPosition()).getKey();
+            // Returns RecyclerView#NO_POSITION if item has been removed from the adapter
+            // This can be reproduced by double-tap on item
+            int position = getAdapterPosition();
+            if (position != NO_POSITION && mListener != null) {
+                Competitor competitor = mData.get(position).getKey();
                 if (competitor != null) {
                     mListener.onCompetitorClick(competitor);
                 }

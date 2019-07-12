@@ -82,7 +82,6 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
-import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
@@ -163,9 +162,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     RegattaDTO getRegattaByName(String regattaName) throws UnauthorizedException;
 
-    List<EventDTO> getEvents() throws UnauthorizedException, Exception;
-
-    List<EventBaseDTO> getPublicEventsOfAllSailingServers() throws UnauthorizedException, Exception;
+    List<EventDTO> getEvents() throws Exception;
 
     Util.Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL,
             boolean listHiddenRaces) throws UnauthorizedException, Exception;
@@ -225,12 +222,13 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate, LegIdentifier simulationLegIdentifier,
             byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,
-            Date timeToGetTheEstimatedDurationFor, boolean estimatedDurationRequired)
-            throws NoWindException, UnauthorizedException;
+            Date timeToGetTheEstimatedDurationFor, boolean estimatedDurationRequired, DetailType detailType,
+            String leaderboardName, String leaderboardGroupName) throws NoWindException, UnauthorizedException;
 
     CompactBoatPositionsDTO getBoatPositions(RegattaAndRaceIdentifier raceIdentifier,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
-            boolean extrapolate) throws NoWindException, UnauthorizedException;
+            boolean extrapolate, DetailType detailType, String leaderboardName, String leaderboardGroupName)
+                    throws NoWindException, UnauthorizedException;
 
     RaceTimesInfoDTO getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier) throws UnauthorizedException;
 
@@ -1144,8 +1142,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      * @return base64 encoded string containg a png-image of the genrated qrcode
      */
     String openRegattaRegistrationQrCode(String url) throws UnauthorizedException;
-
-    void setDefaultTenantForCurrentServer(String tennant) throws UnauthorizedException;
 
     List<String> getPossibleTennants() throws UnauthorizedException;
 

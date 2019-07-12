@@ -143,7 +143,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final MongoDatabase database;
     private final CompetitorWithBoatRefJsonSerializer competitorWithBoatRefSerializer = CompetitorWithBoatRefJsonSerializer.create();
-    private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
+    private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create(/* serialize boat */ true, /* serializeNonPublicCompetitorFields */ true);
     private final BoatJsonSerializer boatSerializer = BoatJsonSerializer.create();
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
     private final TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> raceTrackingConnectivityParamsServiceFinder;
@@ -242,15 +242,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     public MongoCollection<Document> getGPSFixCollection() {
         MongoCollection<Document> gpsFixCollection = database.getCollection(CollectionNames.GPS_FIXES.name());
-        
         // Removes old indexes not needed anymore
         dropIndexSafe(gpsFixCollection, "DEVICE_ID.DEVICE_TYPE_SPECIFIC_ID_1_GPSFIX.TIME_AS_MILLIS_1");
         dropIndexSafe(gpsFixCollection, "DEVICE_ID_1_GPSFIX.TIME_AS_MILLIS_1");
-        
         Document index = new Document();
-        index.put(FieldNames.DEVICE_ID.name(), 1);
         index.put(FieldNames.TIME_AS_MILLIS.name(), 1);
-        gpsFixCollection.createIndex(index);
+        index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE.name(), 1);
+        index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), 1);
+        index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_STRING_REPRESENTATION.name(), 1);
+        gpsFixCollection.createIndex(index, new IndexOptions().name("fixbytimeanddev"));
         return gpsFixCollection;
     }
     
@@ -1052,7 +1052,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogDenoteForTrackingEvent.class.getSimpleName());
         result.put(FieldNames.RACE_NAME.name(), event.getRaceName());
-        result.put(FieldNames.BOAT_CLASS_NAME.name(), event.getBoatClass().getName());
+        result.put(FieldNames.BOAT_CLASS_NAME.name(), event.getBoatClass()==null?null:event.getBoatClass().getName());
         result.put(FieldNames.RACE_ID.name(), event.getRaceId());
         return result;
     }
