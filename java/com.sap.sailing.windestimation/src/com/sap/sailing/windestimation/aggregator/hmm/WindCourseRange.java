@@ -50,7 +50,7 @@ public class WindCourseRange {
         double newAngleTowardStarboard = nextWindRange.angleTowardStarboard;
         double violationRange = 0;
         if (deviationFromPortsideTowardStarboardInDegrees <= 0) {
-            // other.fromPortside is within the range
+            // nextWindRange.fromPortside is within the range
             switch (combinationModeOnViolation) {
             case INTERSECTION:
                 newFromPortside = nextWindRange.fromPortside;
@@ -73,7 +73,7 @@ public class WindCourseRange {
             double deviationFromPortsideTowardPortsideInDegrees = deviationFromPortsideBoundaryTowardPortside
                     - nextWindRange.angleTowardStarboard;
             if (deviationFromPortsideTowardPortsideInDegrees <= 0) {
-                // fromPortside is within the other range
+                // fromPortside is within nextWindRange
                 switch (combinationModeOnViolation) {
                 case INTERSECTION:
                     newFromPortside = fromPortside;
@@ -172,6 +172,19 @@ public class WindCourseRange {
         if (Double.doubleToLongBits(fromPortside) != Double.doubleToLongBits(other.fromPortside))
             return false;
         return true;
+    }
+    
+    @Override
+    public String toString() {
+        double a = 180+fromPortside;
+        if (a>360) {
+            a -= 360;
+        }
+        double b = a-angleTowardStarboard;
+        if (b<0) {
+            b += 360;
+        }
+        return "Wind from "+b+"-"+a+"°";
     }
 
     public enum CombinationModeOnViolation {

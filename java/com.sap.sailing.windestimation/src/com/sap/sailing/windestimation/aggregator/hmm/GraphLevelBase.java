@@ -108,4 +108,8 @@ public class GraphLevelBase {
         }
     }
 
+    @Override
+    public String toString() {
+        return "Maneuver at "+getManeuver().getManeuverTimePoint()+", "+getManeuver().getManeuverPosition()+", classified as "+getLevelNodes();
+    }
 }

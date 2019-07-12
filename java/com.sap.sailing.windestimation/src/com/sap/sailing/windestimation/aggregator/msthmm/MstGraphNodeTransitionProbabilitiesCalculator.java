@@ -19,6 +19,8 @@ public interface MstGraphNodeTransitionProbabilitiesCalculator extends GraphNode
     double getCompoundDistance(ManeuverForEstimation fromManeuver, ManeuverForEstimation toManeuver);
 
     /**
+     * Similar to
+     * {@link #mergeWindRangeAndGetTransitionProbability(GraphNode, GraphLevelBase, IntersectedWindRange, GraphNode, GraphLevelBase)}.
      * For two maneuver classifications ({@code previousNodeInfo} and {@code currentNode}) estimates the probability of
      * the second maneuver following the first, taking into account a "wind range" that has been built along the
      * sequence of maneuver classifications leading up to the {@code previousNode}. The idea is that true wind direction

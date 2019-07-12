@@ -52,4 +52,9 @@ public class GraphNode {
         return tackAfter;
     }
 
+    @Override
+    public String toString() {
+        return ""+maneuverType+" onto "+tackAfter+" tack, confidence=" + confidence +", estimated " + validWindRange;
+    }
+
 }
