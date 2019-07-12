@@ -69,17 +69,15 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
         MstBestPathsPerLevel bestPathsUntilLevel = bestPathsPerLevel.get(root);
         double maxProbability = 0;
         GraphNode bestRootNode = null;
-        double probabilitiesSum = 0;
         List<GraphLevelInference> result = new ArrayList<>();
         for (GraphNode lastNode : root.getLevelNodes()) {
-            double probability = bestPathsUntilLevel.getNormalizedProbabilityToNodeFromStart(lastNode);
-            probabilitiesSum += probability;
+            double probability = bestPathsUntilLevel.getBestPreviousNodeInfo(lastNode).getProbabilityFromStart();
             if (maxProbability < probability) {
                 maxProbability = probability;
                 bestRootNode = lastNode;
             }
         }
-        double confidence = maxProbability / probabilitiesSum;
+        double confidence = maxProbability;
         GraphLevelInference entry = new GraphLevelInference(root, bestRootNode,
                 confidence * bestRootNode.getConfidence());
         result.add(entry);
@@ -131,7 +129,7 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
             bestPathsUntilPreviousLevels.add(bestPathsUntilPreviousLevel);
         }
         MstBestPathsPerLevel bestPathsUntilLevel = new MstBestPathsPerLevel(currentLevel);
-        // the edges connecting the four nodes of the currentLevel to the four nodes of the previous level
+        // the edges connecting the four nodes of the currentLevel to the four nodes of each child level
         // are now analyzed and evaluated. The probability for the path to the currentNode is determined
         // as the product of the probability for the path to the previous node (which already includes
         // the previous node's own classification confidence) and the transition probability to the
@@ -154,8 +152,9 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
                             .mergeWindRangeAndGetTransitionProbability(currentNode, currentLevel, new PreviousNodeInfo(
                                     previousLevel, previousNode, previousNodeIntersectedWindRange));
                     double transitionProbability = newWindRangeAndProbability.getB();
+                    // TODO is normalization across different previousLevel objects correct here? Wouldn't we need to normalize across all children, if we normalize here at all?
                     double probabilityFromStart = bestPathsUntilPreviousLevel
-                            .getNormalizedProbabilityToNodeFromStart(previousNode) * transitionProbability;
+                            .getBestPreviousNodeInfo(previousNode).getProbabilityFromStart() * transitionProbability;
                     if (probabilityFromStart > bestProbabilityFromStart) {
                         bestProbabilityFromStart = probabilityFromStart;
                         bestPreviousNode = previousNode;
