@@ -38,14 +38,26 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
         // trace back to the graphComponents' root starting at the leaves
         for (MstGraphLevel currentLevel : graphComponents.getLeaves()) {
             MstBestPathsPerLevel bestPathsUntilLevel = new MstBestPathsPerLevel(currentLevel);
+            // initialize bestPathsUntilLevel using the confidences of the maneuver classifications
+            // in the leaf node:
             for (GraphNode currentNode : currentLevel.getLevelNodes()) {
-                double probability = currentNode.getConfidence() / currentLevel.getLevelNodes().size();
+                double probability = currentNode.getConfidence();
                 bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode, null, probability,
                         currentNode.getValidWindRange().toIntersected());
             }
             bestPathsPerLevel.put(currentLevel, bestPathsUntilLevel);
             while ((currentLevel = currentLevel.getParent()) != null) {
-                computeBestPathsToNextLevel(currentLevel, bestPathsPerLevel);
+                // computeBestPathsToNextLevel will return immediately if not all children have been
+                // evaluated yet and will return false in this case;
+                // this leads to something like a "breadth-first search" which first
+                // evaluates all children of a parent, and only after evaluating the last child can
+                // progress to the common parent.
+                // Ascending further after the computeBestPathsToNextLevel for currentLevel has been aborted
+                // doesn't seem to make much sense because for all parents up to the root not all their children
+                // have been evaluated, so all those calls again are aborted.
+                if (!computeBestPathsToNextLevel(currentLevel, bestPathsPerLevel)) {
+                    break;
+                }
             }
         }
         List<GraphLevelInference> inference = inferShortestPath(graphComponents.getRoot(), bestPathsPerLevel);
@@ -102,15 +114,19 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
         }
     }
 
-    private void computeBestPathsToNextLevel(MstGraphLevel nextLevel,
+    /**
+     * @return {@code false} if no update was computed for the {@code currentLevel}; {@code true} otherwise. Callers can
+     *         use this information to stop any ascending in the MST towards the root because calls for direct and
+     *         transitive parent nodes will abort, too, due to missing information for {@code currentLevel}.
+     */
+    private boolean computeBestPathsToNextLevel(MstGraphLevel currentLevel,
             Map<MstGraphLevel, MstBestPathsPerLevel> bestPathsPerLevel) {
-        MstGraphLevel currentLevel = nextLevel;
-        // check that all branches until current (joining) node are processed
+        // check that all branches until current (joining) node are processed, or else return immediately
         List<MstBestPathsPerLevel> bestPathsUntilPreviousLevels = new ArrayList<>();
         for (MstGraphLevel previousLevel : currentLevel.getChildren()) {
             MstBestPathsPerLevel bestPathsUntilPreviousLevel = bestPathsPerLevel.get(previousLevel);
             if (bestPathsUntilPreviousLevel == null) {
-                return;
+                return false;
             }
             bestPathsUntilPreviousLevels.add(bestPathsUntilPreviousLevel);
         }
@@ -154,8 +170,9 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
             }
             bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode, currentNodeBestPreviousNodes,
                     currentNodeProbabilityFromStart, finalBestIntersectedWindRange);
-            bestPathsPerLevel.put(currentLevel, bestPathsUntilLevel);
         }
+        bestPathsPerLevel.put(currentLevel, bestPathsUntilLevel);
+        return true;
     }
 
 }

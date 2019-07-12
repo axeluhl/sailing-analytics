@@ -46,4 +46,11 @@ public class BestNodeInfo {
         return intersectedWindRange;
     }
 
+    @Override
+    public String toString() {
+        return "[probabilityFromStart=" + probabilityFromStart + ", forwardProbability="
+                + forwardProbability + ", backwardProbability=" + backwardProbability + ", "
+                + intersectedWindRange + "]";
+    }
+
 }

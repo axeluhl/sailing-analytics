@@ -38,6 +38,13 @@ public class WindCourseRange {
         return new IntersectedWindRange(fromPortside, angleTowardStarboard, 0);
     }
 
+    /**
+     * @param combinationModeOnViolation
+     *            With {@link CombinationModeOnViolation#EXPANSION} the resulting range is the union of both ranges plus
+     *            the gap between the two non-overlapping ranges; with {@link CombinationModeOnViolation#INTERSECTION}
+     *            the resulting range describes only the gap. In both cases,
+     *            {@link IntersectedWindRange#getViolationRange()} will return the size of the gap in degrees.
+     */
     public IntersectedWindRange intersect(WindCourseRange nextWindRange,
             CombinationModeOnViolation combinationModeOnViolation) {
         double deviationFromPortsideBoundaryTowardStarboard = nextWindRange.fromPortside - fromPortside;
@@ -180,11 +187,11 @@ public class WindCourseRange {
         if (a>360) {
             a -= 360;
         }
-        double b = a-angleTowardStarboard;
-        if (b<0) {
-            b += 360;
+        double b = a+angleTowardStarboard;
+        if (b>360) {
+            b -= 360;
         }
-        return "Wind from "+b+"-"+a+"°";
+        return "Wind from "+(a==b?a:(a+"-"+b))+"°";
     }
 
     public enum CombinationModeOnViolation {

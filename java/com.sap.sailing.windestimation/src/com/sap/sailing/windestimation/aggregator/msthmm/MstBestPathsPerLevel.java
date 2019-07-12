@@ -6,6 +6,7 @@ import com.sap.sailing.windestimation.aggregator.hmm.AbstractBestPathsPerLevel;
 import com.sap.sailing.windestimation.aggregator.hmm.BestNodeInfo;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphNode;
 import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRange;
+import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sse.common.Util.Pair;
 
 /**
@@ -48,4 +49,15 @@ public class MstBestPathsPerLevel extends AbstractBestPathsPerLevel {
         return bestPreviousNodeInfosPerManeuverNode;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder result = new StringBuilder();
+        for (final ManeuverTypeForClassification maneuverType : ManeuverTypeForClassification.values()) {
+            result.append(maneuverType);
+            result.append(": ");
+            result.append(getPreviousNodeInfosPerManeuverNode()[maneuverType.ordinal()]);
+            result.append(", ");
+        }
+        return result.substring(0, result.length()-2);
+    }
 }
