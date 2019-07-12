@@ -25,6 +25,10 @@ public class IntegerEditTextPreference extends EditTextPreference {
 
     @Override
     protected boolean persistString(String value) {
-        return persistInt(Integer.valueOf(value));
+        try {
+            return persistInt(Integer.valueOf(value));
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }
