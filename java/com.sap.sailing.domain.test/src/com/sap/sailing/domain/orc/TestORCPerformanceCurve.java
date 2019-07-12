@@ -31,11 +31,11 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class TestORCPerformanceCurve {
 
-    // for the usage of 
+    // set true to see all the differences i
     private final boolean collectErrors = true;
     
     private static final String RESOURCES = "resources/orc/";
-    private static ORCPerformanceCurveCourse course1;
+    private static ORCPerformanceCurveCourse alturaCourse;
     private static ORCCertificateImporter importer;
 
     @Rule
@@ -60,7 +60,7 @@ public class TestORCPerformanceCurve {
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.03), new DegreeBearingImpl(15)));
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.03), new DegreeBearingImpl(165)));
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.17), new DegreeBearingImpl(180)));
-        course1 = new ORCPerformanceCurveCourseImpl(legs);
+        alturaCourse = new ORCPerformanceCurveCourseImpl(legs);
         
         // Local File:
         File fileGER = new File(RESOURCES + "GER2019.json");
@@ -135,7 +135,7 @@ public class TestORCPerformanceCurve {
     public void testPerformanceCurveInversion() throws MaxIterationsExceededException, FunctionEvaluationException {
         Double accuracy = 0.1;
         ORCCertificateImpl certificate = (ORCCertificateImpl) importer.getCertificate("GER 5549");
-        ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(course1);
+        ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(alturaCourse);
         testBackwardForward(accuracy, performanceCurve, 11.5);
         testBackwardForward(accuracy, performanceCurve, 17.23);
         testBackwardForward(accuracy, performanceCurve, 18);
@@ -153,7 +153,7 @@ public class TestORCPerformanceCurve {
 
     private void testForwardBackward(Double accuracy, ORCPerformanceCurveImpl performanceCurve, final double secondsPerNauticalMile)
             throws ArgumentOutsideDomainException, MaxIterationsExceededException, FunctionEvaluationException {
-        final double secondsForCourse = secondsPerNauticalMile*course1.getTotalLength().getNauticalMiles();
+        final double secondsForCourse = secondsPerNauticalMile*alturaCourse.getTotalLength().getNauticalMiles();
         assertEquals(secondsForCourse,
                 performanceCurve.getAllowancePerCourse(performanceCurve.getImpliedWind(
                         Duration.ONE_SECOND.times(secondsForCourse))).asSeconds(), accuracy);
@@ -162,23 +162,24 @@ public class TestORCPerformanceCurve {
     // Tests for a Implied Wind calculation for a simple predefined course. The solutions are extracted from the provided ORC TestPCS.exe application. 
     @Test
     public void testImpliedWindSimple() throws MaxIterationsExceededException, FunctionEvaluationException {
-       double accuracy = 0.01;
+       double accuracy = 0.00000001;
        ORCCertificate certificateMoana          = importer.getCertificate("GER 5549");
        ORCCertificate certificateMilan          = importer.getCertificate("GER 7323");
        ORCCertificate certificateTutima         = importer.getCertificate("GER 5609");
        ORCCertificate certificateBank           = importer.getCertificate("GER 5555");
        ORCCertificate certificateHaspa          = importer.getCertificate("GER 6300");
        ORCCertificate certificateHalbtrocken    = importer.getCertificate("GER 5564");
-       ORCPerformanceCurve performanceCurveMoana        = certificateMoana.getPerformanceCurve(course1);
-       ORCPerformanceCurve performanceCurveMilan        = certificateMilan.getPerformanceCurve(course1);
-       ORCPerformanceCurve performanceCurveTutima       = certificateTutima.getPerformanceCurve(course1);
-       ORCPerformanceCurve performanceCurveBank         = certificateBank.getPerformanceCurve(course1);
-       ORCPerformanceCurve performanceCurveHaspa        = certificateHaspa.getPerformanceCurve(course1);
-       ORCPerformanceCurve performanceCurveHalbtrocken  = certificateHalbtrocken.getPerformanceCurve(course1);
+       ORCPerformanceCurve performanceCurveMoana        = certificateMoana.getPerformanceCurve(alturaCourse);
+       ORCPerformanceCurve performanceCurveMilan        = certificateMilan.getPerformanceCurve(alturaCourse);
+       ORCPerformanceCurve performanceCurveTutima       = certificateTutima.getPerformanceCurve(alturaCourse);
+       ORCPerformanceCurve performanceCurveBank         = certificateBank.getPerformanceCurve(alturaCourse);
+       ORCPerformanceCurve performanceCurveHaspa        = certificateHaspa.getPerformanceCurve(alturaCourse);
+       ORCPerformanceCurve performanceCurveHalbtrocken  = certificateHalbtrocken.getPerformanceCurve(alturaCourse);
        // Test for corner case and if the algorithm reacts to the boundaries of 6 and 20 kts.
        assertEquals( 6.0    , performanceCurveMoana.getImpliedWind(Duration.ONE_HOUR.times(24)).getKnots(), accuracy);
        assertEquals(20.0    , performanceCurveMoana.getImpliedWind(Duration.ONE_HOUR.divide(24)).getKnots(), accuracy);
        assertEquals(performanceCurveMilan.getAllowancePerCourse(new KnotSpeedImpl(12.809089256546626)).asSeconds(), Duration.ONE_HOUR.asSeconds(), accuracy); 
+       assertEquals(performanceCurveMilan.getAllowancePerCourse(new KnotSpeedImpl(12.80881)).asSeconds(), Duration.ONE_HOUR.asSeconds(), accuracy); 
        // scratch sheets and implied wind as calculated by Altura for course1 and 1:00:00 / 1:30:00 time sailed, respectively:
        //               6kts    8kts    10kts   12kts   14kts   16kts   20kts   implied wind    Altura          ORC Scorer      ORC PCS Test    SAP
        // Milan:        675.2   539.5   473.1   437.6   412.7   388.8   350.8                   12.8091135      12.80881        12.80881        12.809089

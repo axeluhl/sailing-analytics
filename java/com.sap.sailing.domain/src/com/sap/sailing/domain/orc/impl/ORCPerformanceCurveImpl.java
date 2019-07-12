@@ -175,7 +175,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     public Speed getImpliedWind(Duration durationToCompleteCourse) throws MaxIterationsExceededException, FunctionEvaluationException{
         final Speed averageSpeedOnCourse = getCourse().getTotalLength().inTime(durationToCompleteCourse);
         final PolynomialFunction workingFunction;
-        final double[] averageSpeedsInKnotsForTotalCourseByTrueWindSpeed = Arrays.stream(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS).mapToDouble(tws->{
+        final double[] predictedSpeedsInKnotsForTotalCourseByTrueWindSpeed = Arrays.stream(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS).mapToDouble(tws->{
             try {
                 return functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse.value(tws.getKnots());
             } catch (ArgumentOutsideDomainException e) {
@@ -184,14 +184,14 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         }).toArray();
         final Speed result;
         // Corner cases for Allowance > Allowance(20kt) or Allowance < Allowance(6kt)
-        if (averageSpeedOnCourse.getKnots() >= averageSpeedsInKnotsForTotalCourseByTrueWindSpeed[averageSpeedsInKnotsForTotalCourseByTrueWindSpeed.length-1]) {
+        if (averageSpeedOnCourse.getKnots() >= predictedSpeedsInKnotsForTotalCourseByTrueWindSpeed[predictedSpeedsInKnotsForTotalCourseByTrueWindSpeed.length-1]) {
             result = ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length-1];
-        } else if (averageSpeedOnCourse.getKnots() <= averageSpeedsInKnotsForTotalCourseByTrueWindSpeed[0]) {
+        } else if (averageSpeedOnCourse.getKnots() <= predictedSpeedsInKnotsForTotalCourseByTrueWindSpeed[0]) {
             result = ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[0];
         } else {
             // find the polynomial splined function that produces the durationToCompleteCourse within its validity range
             int i = 1; // skip the auxiliary spline segment from (0.0, 0.0) to (6.0, ...)
-            while (i < averageSpeedsInKnotsForTotalCourseByTrueWindSpeed.length && averageSpeedOnCourse.getKnots() >= averageSpeedsInKnotsForTotalCourseByTrueWindSpeed[i-1]) {
+            while (i < predictedSpeedsInKnotsForTotalCourseByTrueWindSpeed.length && averageSpeedOnCourse.getKnots() >= predictedSpeedsInKnotsForTotalCourseByTrueWindSpeed[i-1]) {
                 i++;
             }
             i--;
@@ -257,7 +257,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         return new double[][] {resultWindAngles.stream().mapToDouble(d -> d).toArray(), resultSpeedsOverGroundInKnots.stream().mapToDouble(d -> d).toArray()};
     }
     
-    // public accessibility needed for tests, not part of the ORCPerformanceCurve contract
+ // public accessibility needed for tests, not part of the ORCPerformanceCurve contract
     public Speed getLagrangeSpeedPredictionForTrueWindSpeedAndAngle(Map<Speed, Map<Bearing, Speed>> twaAllowances,
             Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
             Map<Speed, Bearing> runAngles, Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed, Speed trueWindSpeed,
