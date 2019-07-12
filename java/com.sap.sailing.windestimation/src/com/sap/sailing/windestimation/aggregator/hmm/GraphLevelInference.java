@@ -30,4 +30,9 @@ public class GraphLevelInference {
         return confidence;
     }
 
+    @Override
+    public String toString() {
+        return "" + graphNode + " at "+graphLevel.getManeuver().getManeuverTimePoint()+" "+graphLevel.getManeuver().getManeuverPosition()+
+                ", confidence=" + confidence + "]";
+    }
 }
