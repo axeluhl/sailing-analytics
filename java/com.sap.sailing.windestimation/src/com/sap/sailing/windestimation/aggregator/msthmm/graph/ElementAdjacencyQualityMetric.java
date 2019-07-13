@@ -15,6 +15,7 @@ package com.sap.sailing.windestimation.aggregator.msthmm.graph;
  *
  * @param <T>
  */
+@FunctionalInterface
 public interface ElementAdjacencyQualityMetric<T extends ElementWithQuality> {
     /**
      * @return the quality metric of the edge connecting the two elements; the elements are expected to be part of two
