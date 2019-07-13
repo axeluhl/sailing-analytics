@@ -31,10 +31,33 @@ implements Function<T, Iterable<T>> {
     private final Map<T, Set<T>> successors;
     private final T artificialRoot;
     private final Map<G, T> artificialLeaves;
+    private final Function<String, T> artificialInnerNodeConstructor;
     
-    public InnerGraphSuccessorSupplier(Tree<G> overarchingTree) {
+    /**
+     * Constructs the inner graph's edge structure from the {@code overarchingTree}.
+     * 
+     * @param overarchingTree
+     *            defines the tree of nodes of type {@link GroupOutOfWhichToPickTheBestElement} or a subtype thereof;
+     *            the inner {@link GroupOutOfWhichToPickTheBestElement#getElements() elements} of each of this tree's
+     *            nodes is used as a node of the "inner graph," and edges are defined by this new object leading from
+     *            all of the {@code overarchingTree}'s child inner
+     *            {@link GroupOutOfWhichToPickTheBestElement#getElements() elements} to each of those child's parent's
+     *            inner {@link GroupOutOfWhichToPickTheBestElement#getElements() elements}.
+     * 
+     * @param artificialInnerNodeConstructor
+     *            all inner {@link GroupOutOfWhichToPickTheBestElement#getElements() elements} of the
+     *            {@code overarchingTree}'s root node have to be connected to a single "end node" that needs to be
+     *            constructed. Likewise, all leaf nodes of the {@code overarchingTree} need an artificial start node
+     *            that has all of the leaf node's {@link GroupOutOfWhichToPickTheBestElement#getElements() elements} as
+     *            its successors. This node constructor is used to construct those artificial inner graph start and end
+     *            nodes. It accepts a {@link String} as a name argument. The {@link ElementWithQuality#getQuality()
+     *            quality} of the element created is expected to be set to the same value for all invocations, e.g.,
+     *            {@code 1.0}.
+     */
+    public InnerGraphSuccessorSupplier(Tree<G> overarchingTree, Function<String, T> artificialInnerNodeConstructor) {
         successors = new HashMap<>();
-        artificialRoot = null; // TODO generate an artificial root of type T
+        this.artificialInnerNodeConstructor = artificialInnerNodeConstructor;
+        artificialRoot = artificialInnerNodeConstructor.apply("End Node at Root");
         artificialLeaves = new HashMap<>();
         if (overarchingTree.getRoot() != null) {
             // add the edges to the artificial root node
@@ -49,7 +72,7 @@ implements Function<T, Iterable<T>> {
         final Iterable<T> innerChildElements;
         if (Util.isEmpty(node.getChildren())) {
             // leaf node; add an artificial leaf:
-            final T artificialLeaf = null; // TODO generate an artificial leaf of type T
+            final T artificialLeaf = artificialInnerNodeConstructor.apply("Start Node for "+node);
             artificialLeaves.put(node, artificialLeaf);
             innerChildElements = Collections.singleton(artificialLeaf);
         } else {

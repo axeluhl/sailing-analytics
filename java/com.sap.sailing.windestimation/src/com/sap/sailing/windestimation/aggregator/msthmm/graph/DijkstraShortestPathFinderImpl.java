@@ -13,6 +13,23 @@ import java.util.function.Function;
 
 import com.sap.sse.common.Util;
 
+/**
+ * This implementation of a Dijkstra Shortest ("best") Path algorithm uses as the metric for the "distance" from the
+ * start to a target node the {@link ElementWithQuality#getQuality() "quality"} of the target element multiplied with
+ * the "quality" measure of the edge leading from the current node to the target node, multiplied by the total quality
+ * aggregated up to the current node (the "distance" from the start). Note that numerically this inverses the target
+ * search. Where the original Dijkstra algorithm strives to <em>minimize</em> the distance to the end node, this
+ * implementation strives to <em>maximize</em> the "quality" of a path from the start to the end node.
+ * <p>
+ * 
+ * The definition of path quality is implemented in
+ * {@link #getPathQuality(double, ElementWithQuality, ElementAdjacencyQualityMetric, ElementWithQuality)} which
+ * subclasses may override. Keep in mind that "higher is better."
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ * @param <T>
+ */
 public class DijkstraShortestPathFinderImpl<T extends ElementWithQuality> implements DijsktraShortestPathFinder<T> {
     @Override
     public Iterable<T> getShortestPath(T startNode, T endNode, Function<T, Iterable<T>> successorSupplier,
@@ -54,7 +71,7 @@ public class DijkstraShortestPathFinderImpl<T extends ElementWithQuality> implem
         return visited.contains(endNode) ? getPath(predecessorsInBestPath, endNode) : null;
     }
 
-    private double getPathQuality(double qualityOfPathToCurrent, T currentNode,
+    protected double getPathQuality(double qualityOfPathToCurrent, T currentNode,
             ElementAdjacencyQualityMetric<T> edgeQualitySupplier, T successor) {
         return qualityOfPathToCurrent * edgeQualitySupplier.getQuality(currentNode, successor) * successor.getQuality();
     }

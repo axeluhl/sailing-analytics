@@ -7,7 +7,7 @@ package com.sap.sailing.windestimation.aggregator.msthmm.graph;
  * {@link Tree}'s levels. At each level (at each {@link TreeNode} along the path to the root node) there are a number of
  * {@link #getElements() elements}. The inner graph has edges starting at each {@link #getElements() element} and
  * pointing to each of the {@link #getParent() parent's} {@link #getElements() elements}. The {@link ElementAdjacencyQualityMetric}
- * describes the quality (or "probability") of each such edge.<p>
+ * describes the quality (or "probability") of each such edge. See also {@link InnerGraphSuccessorSupplier}.<p>
  * 
  * The interesting spots in the overarching {@link Tree} are those objects of this type that have more than one
  * {@link #getChildren() child}. For those, two "inner graphs" from a leaf to the root of the overarching {@link Tree}
