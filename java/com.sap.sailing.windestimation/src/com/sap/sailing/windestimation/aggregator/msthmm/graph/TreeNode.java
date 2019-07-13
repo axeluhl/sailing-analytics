@@ -1,7 +1,8 @@
 package com.sap.sailing.windestimation.aggregator.msthmm.graph;
 
 /**
- * A node in a {@link Tree}
+ * A node in a {@link Tree}. If it has no (a {@code null}) {@link #getParent() parent}, it is the {@link Tree#getRoot()
+ * root} of the tree. If it has an empty set of {@link #getChildren() children}, it is called a <em>leaf</em> in the tree.
  * 
  * @author Axel Uhl (D043530)
  *

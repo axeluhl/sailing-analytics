@@ -10,6 +10,6 @@ package com.sap.sailing.windestimation.aggregator.msthmm.graph;
  *
  * @param <T>
  */
-public interface BestElementPicker<T extends ElementWithQuality> {
-    Iterable<T> getBestElements(Tree<GroupOutOfWhichToPickTheBestElement<T>> tree);
+public interface BestElementPicker<T extends ElementWithQuality, G extends GroupOutOfWhichToPickTheBestElement<T, G>> {
+    Iterable<T> getBestElements(Tree<GroupOutOfWhichToPickTheBestElement<T, G>> tree);
 }
