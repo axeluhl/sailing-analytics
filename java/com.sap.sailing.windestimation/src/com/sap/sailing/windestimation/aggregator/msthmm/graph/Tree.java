@@ -7,6 +7,7 @@ package com.sap.sailing.windestimation.aggregator.msthmm.graph;
  *
  * @param <TN>
  */
+@FunctionalInterface
 public interface Tree<TN extends TreeNode<? extends TN>> {
     TN getRoot();
 }

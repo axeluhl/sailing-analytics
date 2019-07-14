@@ -77,10 +77,11 @@ implements Function<T, Iterable<T>> {
             innerChildElements = Collections.singleton(artificialLeaf);
         } else {
             final Set<T> allInnerChildNodes = new HashSet<>();
-            for (final GroupOutOfWhichToPickTheBestElement<T, G> child : node.getChildren()) {
+            for (final G child : node.getChildren()) {
                 for (final T innerChildElement : child.getElements()) {
                     allInnerChildNodes.add(innerChildElement);
                 }
+                addAllEdges(child);
             }
             innerChildElements = allInnerChildNodes;
         }
@@ -94,5 +95,22 @@ implements Function<T, Iterable<T>> {
     @Override
     public Iterable<T> apply(T t) {
         return successors.get(t);
+    }
+
+    /**
+     * @return the artificial single root node that is parent of all of the
+     *         {@link GroupOutOfWhichToPickTheBestElement#getElements() elements} of the {@link Tree#getRoot() root} of
+     *         the {@link Tree} passed to this object's constructor.
+     */
+    public T getArtificialRoot() {
+        return artificialRoot;
+    }
+    
+    /**
+     * @return the artificial leaf node for which all {@link GroupOutOfWhichToPickTheBestElement#getElements() elements}
+     *         of the {@code treeLeafNode} are configured as successors.
+     */
+    public T getArtificialLeaf(G treeLeafNode) {
+        return artificialLeaves.get(treeLeafNode);
     }
 }
