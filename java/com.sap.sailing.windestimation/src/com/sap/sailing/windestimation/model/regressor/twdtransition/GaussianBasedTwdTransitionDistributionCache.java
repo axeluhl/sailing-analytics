@@ -58,12 +58,14 @@ public class GaussianBasedTwdTransitionDistributionCache {
     }
 
     /**
-     * Gets the probability for being the provided TWD transition valid/true. The probability is determined considering
+     * Gets the probability for the provided TWD transition being valid/true. The probability is determined considering
      * the seconds, meters and TWD delta of the provided TWD transition. More in detail, two standard deviations for TWD
      * delta are calculated, one by considering the distance dimension, another by considering the duration dimension. A
      * final standard deviation is calculated as sum of both standard deviation values. Then a Gaussian Distribution is
-     * initialized with zero mean the the final standard deviation. The transition probability is sampled from the
-     * Gaussian Distribution at position of TWD delta in degrees.
+     * initialized with zero mean the the final standard deviation. The transition probability is taken to be the
+     * probability of the TWD changing <em>at least</em> {@link TwdTransition#getTwdChange()} for the given distribution.
+     * This, in turn, is computed using the cumulative distribution function which is used to determine the integral
+     * of the distribution function outside of the interval -TWDchange..+TWDchange.
      */
     public double getProbability(TwdTransition twdTransition) {
         double stdSum = getCompoundDistance(twdTransition);
@@ -72,12 +74,12 @@ public class GaussianBasedTwdTransitionDistributionCache {
     }
 
     /**
-     * Samples the probability at provided position x within a Gaussian Distribution which is parametrized with the
-     * provided standard deviation std and zero mean.
+     * Computes the probability that the value described by the Gaussian Distribution with standard deviation {@code std}
+     * and zero mean is outside of the interval {@code -x .. +x}.
      */
     public double getGaussianProbability(double std, double x) {
         GaussianDistribution gaussianDistribution = new GaussianDistribution(0, std);
-        double p = gaussianDistribution.p(x);
+        double p = 1-(gaussianDistribution.cdf(x) - gaussianDistribution.cdf(-x));
         return p;
     }
 
