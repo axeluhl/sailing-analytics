@@ -96,6 +96,10 @@ public class GraphLevelBase<GL extends GraphLevelBase<GL>> {
         return maneuverClassification;
     }
 
+    /**
+     * The {@link GraphNode}s in this tree node, ordered by the ordinal of their {@link GraphNode#getManeuverType()}
+     * classification.
+     */
     public List<GraphNode<GL>> getLevelNodes() {
         return levelNodes;
     }

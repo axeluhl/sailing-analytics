@@ -58,4 +58,13 @@ public interface MstGraphNodeTransitionProbabilitiesCalculator extends GraphNode
     Pair<IntersectedWindRange, Double> mergeWindRangeAndGetTransitionProbability(GraphNode<MstGraphLevel> currentNode,
             MstGraphLevel currentLevel, PreviousNodeInfo previousNodeInfo);
 
+    /**
+     * Based on the true wind direction ranges estimated from the hypothetical maneuver classifications
+     * {@code previousNode} and {@code currentNode}, and based on the {@code combinedDistanceBetweenNodes} (a metric
+     * that combines space and time distance into one value based on the trained TWD models and their standard
+     * deviations) computes a probability in the range {@code (0..1]} that these two maneuvers are classified correctly.
+     */
+    double getTransitionProbability(GraphNode<MstGraphLevel> currentNode, GraphNode<MstGraphLevel> previousNode,
+            double combinedDistanceBetweenNodes);
+
 }

@@ -101,7 +101,7 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
             }
             MstManeuverGraphComponents graphComponents = mstManeuverGraphGenerator.parseGraph();
             if (graphComponents != null) {
-                List<GraphLevelInference<MstGraphLevel>> bestPath = bestPathsCalculator.getBestNodes(graphComponents);
+                Iterable<GraphLevelInference<MstGraphLevel>> bestPath = bestPathsCalculator.getBestNodes(graphComponents);
                 for (GraphLevelInference<MstGraphLevel> inference : bestPath) {
                     ManeuverWithEstimatedType maneuverWithEstimatedType = new ManeuverWithEstimatedType(
                             inference.getGraphLevel().getManeuver(), inference.getGraphNode().getManeuverType(),

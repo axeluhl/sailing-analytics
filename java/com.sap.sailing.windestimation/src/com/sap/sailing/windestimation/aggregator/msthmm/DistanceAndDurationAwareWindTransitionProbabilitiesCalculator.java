@@ -50,6 +50,17 @@ public class DistanceAndDurationAwareWindTransitionProbabilitiesCalculator
     }
 
     @Override
+    public double getTransitionProbability(GraphNode<MstGraphLevel> currentNode, GraphNode<MstGraphLevel> previousNode,
+            double combinedDistanceBetweenNodes) {
+        final IntersectedWindRange intersectedWindRange = previousNode.getValidWindRange()
+                .intersect(currentNode.getValidWindRange(), CombinationModeOnViolation.INTERSECTION);
+        final double transitionProbability = gaussianBasedTwdTransitionDistributionCache
+                .getGaussianProbability(combinedDistanceBetweenNodes, intersectedWindRange.getViolationRange())
+                + LA_PLACE_TRANSITION_PROBABILITY;
+        return transitionProbability;
+    }
+    
+    @Override
     public Pair<IntersectedWindRange, Double> mergeWindRangeAndGetTransitionProbability(GraphNode<MstGraphLevel> currentNode,
             MstGraphLevel currentLevel, PreviousNodeInfo previousNodeInfo) {
         IntersectedWindRange[] intersectedWindRanges = new IntersectedWindRange[currentLevel.getLevelNodes().size()];

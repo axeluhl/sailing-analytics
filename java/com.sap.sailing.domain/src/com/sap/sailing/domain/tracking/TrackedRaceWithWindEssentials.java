@@ -108,11 +108,12 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
                     if (windSource.getType() == WindSourceType.MANEUVER_BASED_ESTIMATION) {
                         // wind track of wind estimation gets unavailable only in one case: wind estimation was detached
                         // but it is still running. Hence, return dummy track to complete to finish the run.
-                        return new DummyWindTrackImpl();
+                        result = new DummyWindTrackImpl();
+                    } else {
+                        result = createWindTrack(windSource,
+                                delayForWindEstimationCacheInvalidation == -1 ? getMillisecondsOverWhichToAverageWind() / 2
+                                        : delayForWindEstimationCacheInvalidation);
                     }
-                    result = createWindTrack(windSource,
-                            delayForWindEstimationCacheInvalidation == -1 ? getMillisecondsOverWhichToAverageWind() / 2
-                                    : delayForWindEstimationCacheInvalidation);
                 }
             }
         }

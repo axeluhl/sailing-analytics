@@ -11,18 +11,16 @@ package com.sap.sailing.windestimation.aggregator.hmm;
  */
 public class GraphLevelInference<GL extends GraphLevelBase<GL>> {
 
-    private final GL graphLevel;
     private final GraphNode<GL> graphNode;
     private final double confidence;
 
-    public GraphLevelInference(GL graphLevel, GraphNode<GL> graphNode, double confidence) {
-        this.graphLevel = graphLevel;
+    public GraphLevelInference(GraphNode<GL> graphNode, double confidence) {
         this.graphNode = graphNode;
         this.confidence = confidence;
     }
 
     public GL getGraphLevel() {
-        return graphLevel;
+        return getGraphNode().getGraphLevel();
     }
 
     public GraphNode<GL> getGraphNode() {
@@ -35,7 +33,7 @@ public class GraphLevelInference<GL extends GraphLevelBase<GL>> {
 
     @Override
     public String toString() {
-        return "" + graphNode + " at "+graphLevel.getManeuver().getManeuverTimePoint()+" "+graphLevel.getManeuver().getManeuverPosition()+
-                ", confidence=" + confidence + "]";
+        return "" + graphNode + " at " + getGraphLevel().getManeuver().getManeuverTimePoint() + " "
+                + getGraphLevel().getManeuver().getManeuverPosition() + ", confidence=" + confidence + "]";
     }
 }

@@ -166,7 +166,7 @@ public class BestPathsCalculator {
             } else {
                 nodeConfidence = lastNodeProbability / probabilitiesSum;
             }
-            GraphLevelInference<GraphLevel> entry = new GraphLevelInference<>(currentLevel, currentNode, nodeConfidence);
+            GraphLevelInference<GraphLevel> entry = new GraphLevelInference<>(currentNode, nodeConfidence);
             result.add(0, entry);
             currentNode = currentNodeInfo.getBestPreviousNode();
             currentLevel = currentLevel.getPreviousLevel();
