@@ -32,7 +32,7 @@ public enum WindSourceType {
      * Estimates wind conditions by analyzing the maneuvers of all boat tracks closely interoperating with incremental
      * maneuver detector.
      */
-    MANEUVER_BASED_ESTIMATION(false, 0.5, /* useSpeed */ false),
+    MANEUVER_BASED_ESTIMATION(false, 0.1, /* useSpeed */ false),
 
     /**
      * Inferred from the race course layout if the course is known to have its first leg be an upwind leg. This
