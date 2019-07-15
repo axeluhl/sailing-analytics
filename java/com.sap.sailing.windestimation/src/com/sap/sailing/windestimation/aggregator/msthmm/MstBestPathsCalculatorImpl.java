@@ -180,8 +180,9 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
     private Iterable<GraphLevelInference<MstGraphLevel>> disambiguate(Set<Result<GraphNode<MstGraphLevel>>> dijkstraShortestPathResults) {
         final Map<MstGraphLevel, Map<ManeuverTypeForClassification, List<Double>>> qualitiesPerTypePerTreeNode = new HashMap<>();
         for (final Result<GraphNode<MstGraphLevel>> onePathResult : dijkstraShortestPathResults) {
-            final double normalizedPathNodeQuality = Math.pow(onePathResult.getPathQuality(), -Util.size(onePathResult.getShortestPath()));
-            for (final GraphNode<MstGraphLevel> nodeSelected : onePathResult.getShortestPath()) {
+            final Iterable<GraphNode<MstGraphLevel>> shortestPath = onePathResult.getShortestPath();
+            final double normalizedPathNodeQuality = Math.pow(onePathResult.getPathQuality(), 1.0/Util.size(shortestPath));
+            for (final GraphNode<MstGraphLevel> nodeSelected : shortestPath) {
                 if (nodeSelected.getGraphLevel() != null) { // otherwise it's an artificial root/leaf node that can be ignored here
                     Map<ManeuverTypeForClassification, List<Double>> mapForTreeNode = qualitiesPerTypePerTreeNode.computeIfAbsent(nodeSelected.getGraphLevel(),
                             k->new HashMap<>());
