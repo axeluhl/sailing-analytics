@@ -175,7 +175,6 @@ public class DijkstraTest {
      */
     private ElementAdjacencyQualityMetric<Node> getEdgeQualitySupplier() {
         return (n1, n2) -> {
-            final Pair<Node, Node> nodes = new Pair<>(n1, n2);
             final Double quality = edgeQuality.get(new Pair<>(n1, n2));
             return quality == null ? 1.0 : quality;
         };
