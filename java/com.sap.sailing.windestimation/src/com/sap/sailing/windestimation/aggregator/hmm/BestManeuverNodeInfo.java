@@ -6,17 +6,17 @@ package com.sap.sailing.windestimation.aggregator.hmm;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class BestManeuverNodeInfo extends BestNodeInfo {
+public class BestManeuverNodeInfo<GL extends GraphLevelBase<GL>> extends BestNodeInfo {
 
-    private final GraphNode bestPreviousNode;
+    private final GraphNode<GL> bestPreviousNode;
 
-    public BestManeuverNodeInfo(GraphNode bestPreviousNode, double probabilityFromStart,
+    public BestManeuverNodeInfo(GraphNode<GL> bestPreviousNode, double probabilityFromStart,
             IntersectedWindRange intersectedWindRange) {
         super(probabilityFromStart, intersectedWindRange);
         this.bestPreviousNode = bestPreviousNode;
     }
 
-    public GraphNode getBestPreviousNode() {
+    public GraphNode<GL> getBestPreviousNode() {
         return bestPreviousNode;
     }
 

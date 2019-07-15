@@ -15,7 +15,7 @@ import com.sap.sse.common.Util.Pair;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class MstBestPathsPerLevel extends AbstractBestPathsPerLevel {
+public class MstBestPathsPerLevel extends AbstractBestPathsPerLevel<MstGraphLevel> {
 
     private final MstBestManeuverNodeInfo[] bestPreviousNodeInfosPerManeuverNode;
     private final MstGraphLevel currentLevel;
@@ -26,12 +26,12 @@ public class MstBestPathsPerLevel extends AbstractBestPathsPerLevel {
     }
 
     @Override
-    public MstBestManeuverNodeInfo getBestPreviousNodeInfo(GraphNode currentNode) {
+    public MstBestManeuverNodeInfo getBestPreviousNodeInfo(GraphNode<MstGraphLevel> currentNode) {
         return bestPreviousNodeInfosPerManeuverNode[currentNode.getIndexInLevel()];
     }
 
-    public MstBestManeuverNodeInfo addBestPreviousNodeInfo(GraphNode currentNode,
-            List<Pair<MstGraphLevel, GraphNode>> previousGraphLevelsWithBestPreviousNodes, double probabilityFromStart,
+    public MstBestManeuverNodeInfo addBestPreviousNodeInfo(GraphNode<MstGraphLevel> currentNode,
+            List<Pair<MstGraphLevel, GraphNode<MstGraphLevel>>> previousGraphLevelsWithBestPreviousNodes, double probabilityFromStart,
             IntersectedWindRange intersectedWindRange) {
         MstBestManeuverNodeInfo bestManeuverNodeInfo = new MstBestManeuverNodeInfo(
                 previousGraphLevelsWithBestPreviousNodes, probabilityFromStart, intersectedWindRange);

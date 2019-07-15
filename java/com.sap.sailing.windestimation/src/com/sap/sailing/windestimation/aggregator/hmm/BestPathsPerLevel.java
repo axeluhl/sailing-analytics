@@ -6,24 +6,26 @@ package com.sap.sailing.windestimation.aggregator.hmm;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class BestPathsPerLevel extends AbstractBestPathsPerLevel implements Comparable<BestPathsPerLevel> {
+public class BestPathsPerLevel extends AbstractBestPathsPerLevel<GraphLevel> implements Comparable<BestPathsPerLevel> {
 
-    private final BestManeuverNodeInfo[] bestPreviousNodeInfosPerManeuverNode;
+    private final BestManeuverNodeInfo<GraphLevel>[] bestPreviousNodeInfosPerManeuverNode;
     private final GraphLevel currentLevel;
 
     public BestPathsPerLevel(GraphLevel currentLevel) {
         this.currentLevel = currentLevel;
-        this.bestPreviousNodeInfosPerManeuverNode = new BestManeuverNodeInfo[currentLevel.getLevelNodes().size()];
+        @SuppressWarnings("unchecked")
+        final BestManeuverNodeInfo<GraphLevel>[] typeSafeArray = (BestManeuverNodeInfo<GraphLevel>[]) new BestManeuverNodeInfo<?>[currentLevel.getLevelNodes().size()];
+        this.bestPreviousNodeInfosPerManeuverNode = typeSafeArray;
     }
 
     @Override
-    public BestManeuverNodeInfo getBestPreviousNodeInfo(GraphNode currentNode) {
+    public BestManeuverNodeInfo<GraphLevel> getBestPreviousNodeInfo(GraphNode<GraphLevel> currentNode) {
         return bestPreviousNodeInfosPerManeuverNode[currentNode.getIndexInLevel()];
     }
 
-    public BestManeuverNodeInfo addBestPreviousNodeInfo(GraphNode currentNode, GraphNode bestPreviousNode,
+    public BestManeuverNodeInfo<GraphLevel> addBestPreviousNodeInfo(GraphNode<GraphLevel> currentNode, GraphNode<GraphLevel> bestPreviousNode,
             double probabilityFromStart, IntersectedWindRange intersectedWindRange) {
-        BestManeuverNodeInfo bestManeuverNodeInfo = new BestManeuverNodeInfo(bestPreviousNode, probabilityFromStart,
+        BestManeuverNodeInfo<GraphLevel> bestManeuverNodeInfo = new BestManeuverNodeInfo<GraphLevel>(bestPreviousNode, probabilityFromStart,
                 intersectedWindRange);
         bestPreviousNodeInfosPerManeuverNode[currentNode.getIndexInLevel()] = bestManeuverNodeInfo;
         return bestManeuverNodeInfo;

@@ -13,10 +13,10 @@ import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRange;
 public class PreviousNodeInfo {
 
     private final MstGraphLevel previousLevel;
-    private final GraphNode previousNode;
+    private final GraphNode<MstGraphLevel> previousNode;
     private final IntersectedWindRange previousNodeIntersectedWindRange;
 
-    public PreviousNodeInfo(MstGraphLevel previousLevel, GraphNode previousNode,
+    public PreviousNodeInfo(MstGraphLevel previousLevel, GraphNode<MstGraphLevel> previousNode,
             IntersectedWindRange previousNodeIntersectedWindRange) {
         this.previousLevel = previousLevel;
         this.previousNode = previousNode;
@@ -27,7 +27,7 @@ public class PreviousNodeInfo {
         return previousLevel;
     }
 
-    public GraphNode getPreviousNode() {
+    public GraphNode<MstGraphLevel> getPreviousNode() {
         return previousNode;
     }
 

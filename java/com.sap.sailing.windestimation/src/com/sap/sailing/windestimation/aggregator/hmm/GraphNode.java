@@ -1,14 +1,15 @@
 package com.sap.sailing.windestimation.aggregator.hmm;
 
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.windestimation.aggregator.graph.ElementWithQuality;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 
 /**
  * Assumed maneuver type of a maneuver within {@link GraphLevelBase}.
  *
  */
-public class GraphNode {
-
+public class GraphNode<GL extends GraphLevelBase<GL>> implements ElementWithQuality {
+    private final GL graphLevel; 
     private final WindCourseRange validWindRange;
     private double confidence;
     private final int indexInLevel;
@@ -16,12 +17,13 @@ public class GraphNode {
     private final Tack tackAfter;
 
     public GraphNode(ManeuverTypeForClassification maneuverType, Tack tackAfter, WindCourseRange validWindRange,
-            double confidence, int indexInLevel) {
+            double confidence, int indexInLevel, GL graphLevel) {
         this.maneuverType = maneuverType;
         this.tackAfter = tackAfter;
         this.validWindRange = validWindRange;
         this.confidence = confidence;
         this.indexInLevel = indexInLevel;
+        this.graphLevel = graphLevel;
     }
 
     public ManeuverTypeForClassification getManeuverType() {
@@ -31,6 +33,10 @@ public class GraphNode {
     public WindCourseRange getValidWindRange() {
         return validWindRange;
     }
+    
+    public GL getGraphLevel() {
+        return graphLevel;
+    }
 
     /**
      * @return the confidence computed by the classifier that the maneuver has the type returned by
@@ -38,6 +44,11 @@ public class GraphNode {
      */
     public double getConfidence() {
         return confidence;
+    }
+
+    @Override
+    public double getQuality() {
+        return getConfidence();
     }
 
     public int getIndexInLevel() {

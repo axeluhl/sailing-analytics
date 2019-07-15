@@ -12,6 +12,7 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.windestimation.aggregator.clustering.ManeuverClassificationForClusteringImpl;
 import com.sap.sailing.windestimation.aggregator.clustering.ManeuverClusteringBasedWindEstimationTrackImpl;
 import com.sap.sailing.windestimation.aggregator.hmm.BestPathsCalculator;
+import com.sap.sailing.windestimation.aggregator.hmm.GraphLevel;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphNodeTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRangeBasedTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.hmm.ManeuverSequenceGraph;
@@ -56,14 +57,14 @@ public class ManeuverClassificationsAggregatorFactory {
     public ManeuverClassificationsAggregator hmm(
             HmmTransitionProbabilitiesCalculator transitionProbabilitiesCalculatorType,
             boolean propagateIntersectedWindRangeOfHeadupAndBearAway) {
-        GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator = null;
+        GraphNodeTransitionProbabilitiesCalculator<GraphLevel> transitionProbabilitiesCalculator = null;
         switch (transitionProbabilitiesCalculatorType) {
         case SIMPLE:
-            transitionProbabilitiesCalculator = new SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator(
+            transitionProbabilitiesCalculator = new SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator<>(
                     propagateIntersectedWindRangeOfHeadupAndBearAway);
             break;
         case INTERSECTED:
-            transitionProbabilitiesCalculator = new IntersectedWindRangeBasedTransitionProbabilitiesCalculator(
+            transitionProbabilitiesCalculator = new IntersectedWindRangeBasedTransitionProbabilitiesCalculator<>(
                     propagateIntersectedWindRangeOfHeadupAndBearAway);
             break;
         case CLASSIFIER:
@@ -72,10 +73,7 @@ public class ManeuverClassificationsAggregatorFactory {
                     propagateIntersectedWindRangeOfHeadupAndBearAway);
             break;
         case GAUSSIAN_REGRESSOR:
-            transitionProbabilitiesCalculator = new DistanceAndDurationAwareWindTransitionProbabilitiesCalculator(
-                    new GaussianBasedTwdTransitionDistributionCache(modelStore, preloadAllModels,
-                            modelCacheKeepAliveMillis),
-                    propagateIntersectedWindRangeOfHeadupAndBearAway);
+            throw new IllegalArgumentException(""+transitionProbabilitiesCalculatorType+" not supported for regular non-MST HMM");
         }
         return new ManeuverSequenceGraph(new BestPathsCalculator(transitionProbabilitiesCalculator));
     }

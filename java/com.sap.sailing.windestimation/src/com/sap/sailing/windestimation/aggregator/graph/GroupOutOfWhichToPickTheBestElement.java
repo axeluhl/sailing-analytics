@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.aggregator.msthmm.graph;
+package com.sap.sailing.windestimation.aggregator.graph;
 
 /**
  * A special {@link TreeNode tree node} that has a number of elements, each of which representing a node in a graph to

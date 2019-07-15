@@ -16,8 +16,8 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
-        implements GraphNodeTransitionProbabilitiesCalculator {
+public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator<GL extends GraphLevelBase<GL>>
+        implements GraphNodeTransitionProbabilitiesCalculator<GL> {
 
     private static final double LA_PLACE_TRANSITION_PROBABILITY = 0.001;
 
@@ -39,15 +39,15 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
     }
 
     @Override
-    public Pair<IntersectedWindRange, Double> mergeWindRangeAndGetTransitionProbability(GraphNode previousNode,
-            GraphLevelBase previousLevel, IntersectedWindRange previousIntersectedWindRange, GraphNode currentNode,
-            GraphLevelBase currentLevel) {
+    public Pair<IntersectedWindRange, Double> mergeWindRangeAndGetTransitionProbability(GraphNode<GL> previousNode,
+            GL previousLevel, IntersectedWindRange previousIntersectedWindRange, GraphNode<GL> currentNode,
+            GL currentLevel) {
         Duration durationPassed = getDuration(previousLevel.getManeuver(), currentLevel.getManeuver());
         Distance distancePassed = getDistance(previousLevel.getManeuver(), currentLevel.getManeuver());
         double transitionProbabilitySum = 0;
         double transitionProbabilityUntilCurrentNode = -1;
         IntersectedWindRange intersectedWindRangeUntilCurrentNode = null;
-        for (GraphNode node : currentLevel.getLevelNodes()) {
+        for (GraphNode<GL> node : currentLevel.getLevelNodes()) {
             IntersectedWindRange intersectedWindRange = previousIntersectedWindRange.intersect(node.getValidWindRange(),
                     CombinationModeOnViolation.INTERSECTION);
             TwdTransition twdTransition = constructTwdTransition(durationPassed, distancePassed,

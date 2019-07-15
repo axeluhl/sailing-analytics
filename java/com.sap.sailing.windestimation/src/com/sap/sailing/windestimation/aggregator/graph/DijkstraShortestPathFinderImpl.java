@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.aggregator.msthmm.graph;
+package com.sap.sailing.windestimation.aggregator.graph;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -32,7 +32,7 @@ import com.sap.sse.common.Util;
  */
 public class DijkstraShortestPathFinderImpl<T extends ElementWithQuality> implements DijsktraShortestPathFinder<T> {
     @Override
-    public Iterable<T> getShortestPath(T startNode, T endNode, Function<T, Iterable<T>> successorSupplier,
+    public Result<T> getShortestPath(T startNode, T endNode, Function<T, Iterable<T>> successorSupplier,
             ElementAdjacencyQualityMetric<T> edgeQualitySupplier) {
         final Set<T> visited = new HashSet<>();
         final Map<T, T> predecessorsInBestPath = new HashMap<>();
@@ -68,7 +68,17 @@ public class DijkstraShortestPathFinderImpl<T extends ElementWithQuality> implem
                 }
             }
         }
-        return visited.contains(endNode) ? getPath(predecessorsInBestPath, endNode) : null;
+        return visited.contains(endNode) ? new Result<T>() {
+            @Override
+            public Iterable<T> getShortestPath() {
+                return getPath(predecessorsInBestPath, endNode);
+            }
+
+            @Override
+            public double getPathQuality() {
+                return qualityOfPathToNode.get(endNode);
+            }
+        } : null;
     }
 
     protected double getPathQuality(double qualityOfPathToCurrent, T currentNode,

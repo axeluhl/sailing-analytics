@@ -11,17 +11,17 @@ import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProb
  * @author Vladislav Chumak (D069712)
  *
  */
-public class GraphLevel extends GraphLevelBase {
+public class GraphLevel extends GraphLevelBase<GraphLevel> {
 
     private GraphLevel previousLevel = null;
     private GraphLevel nextLevel = null;
 
-    public GraphLevel(ManeuverWithProbabilisticTypeClassification maneuverClassification, List<GraphNode> levelNodes) {
+    public GraphLevel(ManeuverWithProbabilisticTypeClassification maneuverClassification, List<GraphNode<GraphLevel>> levelNodes) {
         super(maneuverClassification, levelNodes);
     }
 
     public GraphLevel(ManeuverWithProbabilisticTypeClassification maneuverClassification,
-            GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
+            GraphNodeTransitionProbabilitiesCalculator<GraphLevel> transitionProbabilitiesCalculator) {
         super(maneuverClassification, transitionProbabilitiesCalculator);
     }
 

@@ -5,11 +5,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.sap.sailing.windestimation.aggregator.graph.DijkstraShortestPathFinderImpl;
+import com.sap.sailing.windestimation.aggregator.graph.DijsktraShortestPathFinder;
+import com.sap.sailing.windestimation.aggregator.graph.InnerGraphSuccessorSupplier;
+import com.sap.sailing.windestimation.aggregator.graph.Tree;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphLevelInference;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphNode;
 import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRange;
+import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange;
 import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange.CombinationModeOnViolation;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstManeuverGraphGenerator.MstManeuverGraphComponents;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
 /**
@@ -33,14 +39,14 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
     }
 
     @Override
-    public List<GraphLevelInference> getBestNodes(MstManeuverGraphComponents graphComponents) {
+    public List<GraphLevelInference<MstGraphLevel>> getBestNodes(MstManeuverGraphComponents graphComponents) {
         Map<MstGraphLevel, MstBestPathsPerLevel> bestPathsPerLevel = new HashMap<>();
         // trace back to the graphComponents' root starting at the leaves
         for (MstGraphLevel currentLevel : graphComponents.getLeaves()) {
             MstBestPathsPerLevel bestPathsUntilLevel = new MstBestPathsPerLevel(currentLevel);
             // initialize bestPathsUntilLevel using the confidences of the maneuver classifications
             // in the leaf node:
-            for (GraphNode currentNode : currentLevel.getLevelNodes()) {
+            for (GraphNode<MstGraphLevel> currentNode : currentLevel.getLevelNodes()) {
                 double probability = currentNode.getConfidence();
                 bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode, null, probability,
                         currentNode.getValidWindRange().toIntersected());
@@ -60,17 +66,73 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
                 }
             }
         }
-        List<GraphLevelInference> inference = inferShortestPath(graphComponents.getRoot(), bestPathsPerLevel);
+        List<GraphLevelInference<MstGraphLevel>> inference = inferShortestPath(graphComponents.getRoot(), bestPathsPerLevel);
         return inference;
     }
+    
+    /**
+     * The {@code graphComponents} represent a {@link Tree} of {@link MstGraphLevel} nodes, each of which contains a
+     * {@link GraphNode} per possible maneuver classification, e.g., one for the "tack" hypothesis, one for the "gybe"
+     * hypothesis, and so on. These inner nodes are virtually connected with the nodes of the parent and child
+     * {@link MstGraphLevel} objects. These virtual connections are rated using the
+     * {@link MstGraphNodeTransitionProbabilitiesCalculator} which takes pair of {@link GraphNode}s and judges the
+     * likelihood of the true wind direction (TWD) change implied by their hypothetical classifications, considering
+     * their time and space distance from each other.
+     * <p>
+     * 
+     * A path in the tree from a leaf to the root hence forms a graph over the {@link GraphNode}s contained in this
+     * path, with the virtual edges connecting the nodes of adjacent overarching tree nodes. We apply a
+     * {@link DijkstraShortestPathFinder Dijkstra Shortest Path algorithm} to the inner graph produced by the path from
+     * each leaf to the root, equating "short" with "high quality" and considering the quality of a path to be the
+     * product of the {@link GraphNode}s' {@link GraphNode#getQuality() quality} and the transition probability computed
+     * by the {@link MstGraphNodeTransitionProbabilitiesCalculator}. The {@link InnerGraphSuccessorSupplier} also adds
+     * artificial root and leaf nodes to the inner graph to have a single start and end node.
+     * <p>
+     * 
+     * Solving the "shortest path" problem for each leaf-to-root path gives as many picks of a "best" {@link GraphNode}
+     * per {@link MstGraphLevel} as there are paths from leaves to the tree root passing through that
+     * {@link MstGraphLevel} tree node. In particular, there will be exactly one such pick for all leaves, and as many
+     * for the root as there are leaves.
+     * <p>
+     * 
+     * If several "best picks" exist for a {@link MstGraphLevel} tree node, they may not be consistent. In case there is
+     * a tie (e.g., one path picking "tack" and one path picking "gybe"), no selection is made. If there is a majority,
+     * the majority's decision is selected, and the ratio of paths with the winning selection over the total number of
+     * paths through that node, multiplied by the {@link DijsktraShortestPathFinder.Result#getPathQuality() overall path
+     * probability} is used to scale the maneuver classification's confidence.
+     * 
+     * @return a set of {@link GraphLevelInference} objects for a subset of the {@link MstGraphLevel} objects in the
+     *         graph, each combined with the {@link GraphLevelInference#getGraphNode() graph node} selected within the
+     *         {@link GraphLevelInference#getGraphLevel() overarching tree node} and the respective
+     *         {@link GraphLevelInference#getConfidence() confidence}. For some nodes of the overarching tree no
+     *         conclusion may have been reached for a valid classification which is why this may cover only a true
+     *         subset of the nodes of the overarching tree.
+     */
+    public List<GraphLevelInference<MstGraphLevel>> getBestNodes2(MstManeuverGraphComponents graphComponents) {
+        for (MstGraphLevel leaf : graphComponents.getLeaves()) {
+            final DijsktraShortestPathFinder<GraphNode<MstGraphLevel>> dijsktraShortestPathFinder = new DijkstraShortestPathFinderImpl<>();
+            final InnerGraphSuccessorSupplier<GraphNode<MstGraphLevel>, MstGraphLevel> innerGraphSuccessorSupplier =
+                    new InnerGraphSuccessorSupplier<GraphNode<MstGraphLevel>, MstGraphLevel>(graphComponents,
+                    // supplier for artificial nodes; always full confidence and full possible wind course range
+                    (final String name)->new GraphNode<MstGraphLevel>(/* maneuverType */ null, /* tackAfter */ null, new WindCourseRange(0, 360), /* confidence */ 1.0, /* indexInLevel */ 0, /* graphLevel */ null) {
+                        @Override
+                        public String toString() {
+                            return name;
+                        }
+            });
+            dijsktraShortestPathFinder.getShortestPath(innerGraphSuccessorSupplier.getArtificialLeaf(leaf), innerGraphSuccessorSupplier.getArtificialRoot(),
+                    innerGraphSuccessorSupplier, (n1, n2)->0.0 /* TODO */);
+        }
+        return null; // TODO
+    }
 
-    private List<GraphLevelInference> inferShortestPath(MstGraphLevel root,
+    private List<GraphLevelInference<MstGraphLevel>> inferShortestPath(MstGraphLevel root,
             Map<MstGraphLevel, MstBestPathsPerLevel> bestPathsPerLevel) {
         MstBestPathsPerLevel bestPathsUntilLevel = bestPathsPerLevel.get(root);
         double maxProbability = 0;
-        GraphNode bestRootNode = null;
-        List<GraphLevelInference> result = new ArrayList<>();
-        for (GraphNode lastNode : root.getLevelNodes()) {
+        GraphNode<MstGraphLevel> bestRootNode = null;
+        List<GraphLevelInference<MstGraphLevel>> result = new ArrayList<>();
+        for (GraphNode<MstGraphLevel> lastNode : root.getLevelNodes()) {
             double probability = bestPathsUntilLevel.getBestPreviousNodeInfo(lastNode).getProbabilityFromStart();
             if (maxProbability < probability) {
                 maxProbability = probability;
@@ -78,32 +140,32 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
             }
         }
         double confidence = maxProbability;
-        GraphLevelInference entry = new GraphLevelInference(root, bestRootNode,
+        GraphLevelInference<MstGraphLevel> entry = new GraphLevelInference<>(root, bestRootNode,
                 confidence * bestRootNode.getConfidence());
         result.add(entry);
         inferShortestPath(root, bestRootNode, confidence, result, bestPathsPerLevel);
         return result;
     }
 
-    private void inferShortestPath(MstGraphLevel lastLevel, GraphNode lastNode, double confidence,
-            List<GraphLevelInference> result, Map<MstGraphLevel, MstBestPathsPerLevel> bestPathsPerLevel) {
-        if (lastLevel.getChildren().isEmpty()) {
+    private void inferShortestPath(MstGraphLevel lastLevel, GraphNode<MstGraphLevel> lastNode, double confidence,
+            List<GraphLevelInference<MstGraphLevel>> result, Map<MstGraphLevel, MstBestPathsPerLevel> bestPathsPerLevel) {
+        if (Util.isEmpty(lastLevel.getChildren())) {
             return;
         }
         MstBestPathsPerLevel lastLevelInfo = bestPathsPerLevel.get(lastLevel);
         MstBestManeuverNodeInfo lastNodeInfo = lastLevelInfo.getBestPreviousNodeInfo(lastNode);
-        for (Pair<MstGraphLevel, GraphNode> child : lastNodeInfo.getPreviousGraphLevelsWithBestPreviousNodes()) {
+        for (Pair<MstGraphLevel, GraphNode<MstGraphLevel>> child : lastNodeInfo.getPreviousGraphLevelsWithBestPreviousNodes()) {
             MstGraphLevel currentLevel = child.getA();
-            GraphNode currentNode = child.getB();
+            GraphNode<MstGraphLevel> currentNode = child.getB();
             while (currentLevel != null) {
-                GraphLevelInference entry = new GraphLevelInference(currentLevel, currentNode,
+                GraphLevelInference<MstGraphLevel> entry = new GraphLevelInference<>(currentLevel, currentNode,
                         confidence * currentNode.getConfidence());
                 result.add(entry);
-                if (currentLevel.getChildren().size() == 1) {
+                if (Util.size(currentLevel.getChildren()) == 1) {
                     MstBestPathsPerLevel currentLevelInfo = bestPathsPerLevel.get(currentLevel);
                     MstBestManeuverNodeInfo currentNodeInfo = currentLevelInfo.getBestPreviousNodeInfo(currentNode);
                     currentNode = currentNodeInfo.getPreviousGraphLevelsWithBestPreviousNodes().get(0).getB();
-                    currentLevel = currentLevel.getChildren().get(0);
+                    currentLevel = currentLevel.getChildren().iterator().next();
                 } else {
                     inferShortestPath(currentLevel, currentNode, confidence, result, bestPathsPerLevel);
                     currentLevel = null;
@@ -136,16 +198,16 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
         // current node (determined by the TWD delta between the wind range carried through to the previous
         // node and the wind range computed for the current node) and the classification confidence of
         // the current node.
-        for (GraphNode currentNode : currentLevel.getLevelNodes()) {
-            List<Pair<MstGraphLevel, GraphNode>> currentNodeBestPreviousNodes = new ArrayList<>();
+        for (GraphNode<MstGraphLevel> currentNode : currentLevel.getLevelNodes()) {
+            List<Pair<MstGraphLevel, GraphNode<MstGraphLevel>>> currentNodeBestPreviousNodes = new ArrayList<>();
             double currentNodeProbabilityFromStart = currentNode.getConfidence();
             IntersectedWindRange finalBestIntersectedWindRange = null;
             for (MstBestPathsPerLevel bestPathsUntilPreviousLevel : bestPathsUntilPreviousLevels) {
                 double bestProbabilityFromStart = 0;
                 MstGraphLevel previousLevel = bestPathsUntilPreviousLevel.getCurrentLevel();
-                GraphNode bestPreviousNode = null;
+                GraphNode<MstGraphLevel> bestPreviousNode = null;
                 IntersectedWindRange bestIntersectedWindRange = null;
-                for (GraphNode previousNode : previousLevel.getLevelNodes()) {
+                for (GraphNode<MstGraphLevel> previousNode : previousLevel.getLevelNodes()) {
                     IntersectedWindRange previousNodeIntersectedWindRange = bestPathsUntilPreviousLevel
                             .getBestPreviousNodeInfo(previousNode).getIntersectedWindRange();
                     Pair<IntersectedWindRange, Double> newWindRangeAndProbability = transitionProbabilitiesCalculator

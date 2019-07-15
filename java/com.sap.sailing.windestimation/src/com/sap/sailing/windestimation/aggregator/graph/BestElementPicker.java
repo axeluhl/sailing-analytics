@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.aggregator.msthmm.graph;
+package com.sap.sailing.windestimation.aggregator.graph;
 
 /**
  * An algorithm that, given a tree of element groups, from each group picks an element considered "best" according to

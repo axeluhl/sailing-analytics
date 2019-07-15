@@ -19,7 +19,7 @@ import com.sap.sse.common.Util.Pair;
  *
  */
 public class DistanceAndDurationAwareWindTransitionProbabilitiesCalculator
-        extends SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator
+        extends SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator<MstGraphLevel>
         implements MstGraphNodeTransitionProbabilitiesCalculator {
 
     // La place is used to prevent the probabilities from being zero
@@ -50,12 +50,12 @@ public class DistanceAndDurationAwareWindTransitionProbabilitiesCalculator
     }
 
     @Override
-    public Pair<IntersectedWindRange, Double> mergeWindRangeAndGetTransitionProbability(GraphNode currentNode,
+    public Pair<IntersectedWindRange, Double> mergeWindRangeAndGetTransitionProbability(GraphNode<MstGraphLevel> currentNode,
             MstGraphLevel currentLevel, PreviousNodeInfo previousNodeInfo) {
         IntersectedWindRange[] intersectedWindRanges = new IntersectedWindRange[currentLevel.getLevelNodes().size()];
         MstGraphLevel previousLevel = previousNodeInfo.getPreviousLevel();
         double stdSum = previousLevel.getDistanceToParent();
-        for (GraphNode node : currentLevel.getLevelNodes()) {
+        for (GraphNode<MstGraphLevel> node : currentLevel.getLevelNodes()) {
             IntersectedWindRange intersectedWindRange = previousNodeInfo.getPreviousNodeIntersectedWindRange()
                     .intersect(node.getValidWindRange(), CombinationModeOnViolation.INTERSECTION);
             int nodeIndex = node.getIndexInLevel();

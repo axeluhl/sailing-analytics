@@ -84,8 +84,8 @@ public class TwdTransitionImporter {
 
     private static List<LabeledTwdTransition> getTwdTransitions(
             List<ManeuverWithProbabilisticTypeClassification> sortedManeuvers, String regattaName) {
-        SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator simpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator = new SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator(
-                true);
+        SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator<GraphLevel> simpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator =
+                new SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator<>(true);
         List<LabeledTwdTransition> result = new ArrayList<>(sortedManeuvers.size()
                 * ManeuverTypeForClassification.values().length * ManeuverTypeForClassification.values().length);
         int maneuverIndex = 0;
@@ -102,11 +102,11 @@ public class TwdTransitionImporter {
                         .until(currentManeuver.getManeuver().getManeuverTimePoint());
                 Distance distance = previousManeuver.getManeuver().getManeuverPosition()
                         .getDistance(currentManeuver.getManeuver().getManeuverPosition());
-                for (GraphNode previousNode : previousLevel.getLevelNodes()) {
+                for (GraphNode<GraphLevel> previousNode : previousLevel.getLevelNodes()) {
                     if (previousNode.getManeuverType() == ((LabeledManeuverForEstimation) previousLevel.getManeuver())
                             .getManeuverType()) {
                         WindCourseRange previousWindCourseRange = previousNode.getValidWindRange();
-                        for (GraphNode currentNode : currentLevel.getLevelNodes()) {
+                        for (GraphNode<GraphLevel> currentNode : currentLevel.getLevelNodes()) {
                             WindCourseRange currentWindCourseRange = currentNode.getValidWindRange();
                             IntersectedWindRange intersectedWindRange = previousWindCourseRange
                                     .intersect(currentWindCourseRange, CombinationModeOnViolation.INTERSECTION);

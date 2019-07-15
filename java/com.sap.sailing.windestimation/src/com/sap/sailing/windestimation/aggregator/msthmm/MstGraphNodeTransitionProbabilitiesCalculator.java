@@ -14,7 +14,7 @@ import com.sap.sse.common.Util.Pair;
  * @author Vladislav Chumak (D069712)
  *
  */
-public interface MstGraphNodeTransitionProbabilitiesCalculator extends GraphNodeTransitionProbabilitiesCalculator {
+public interface MstGraphNodeTransitionProbabilitiesCalculator extends GraphNodeTransitionProbabilitiesCalculator<MstGraphLevel> {
 
     double getCompoundDistance(ManeuverForEstimation fromManeuver, ManeuverForEstimation toManeuver);
 
@@ -55,7 +55,7 @@ public interface MstGraphNodeTransitionProbabilitiesCalculator extends GraphNode
      *         {@link previousNode} and {@link currentNode} being correct based on the true wind direction change this
      *         would imply
      */
-    Pair<IntersectedWindRange, Double> mergeWindRangeAndGetTransitionProbability(GraphNode currentNode,
+    Pair<IntersectedWindRange, Double> mergeWindRangeAndGetTransitionProbability(GraphNode<MstGraphLevel> currentNode,
             MstGraphLevel currentLevel, PreviousNodeInfo previousNodeInfo);
 
 }

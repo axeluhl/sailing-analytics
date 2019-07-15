@@ -7,11 +7,11 @@ package com.sap.sailing.windestimation.aggregator.hmm;
  * @author Vladislav Chumak (D069712)
  *
  */
-public abstract class AbstractBestPathsPerLevel {
+public abstract class AbstractBestPathsPerLevel<GL extends GraphLevelBase<GL>> {
 
-    public abstract BestNodeInfo getBestPreviousNodeInfo(GraphNode currentNode);
+    public abstract BestNodeInfo getBestPreviousNodeInfo(GraphNode<GL> currentNode);
 
-    public abstract GraphLevelBase getCurrentLevel();
+    public abstract GL getCurrentLevel();
 
     protected abstract BestNodeInfo[] getPreviousNodeInfosPerManeuverNode();
 
@@ -26,7 +26,7 @@ public abstract class AbstractBestPathsPerLevel {
     /**
      * Avoid that probability product becomes zero due to precision of Double
      */
-    public double getNormalizedProbabilityToNodeFromStart(GraphNode currentNode) {
+    public double getNormalizedProbabilityToNodeFromStart(GraphNode<GL> currentNode) {
         return getBestPreviousNodeInfo(currentNode).getProbabilityFromStart() / getProbabilitiesFromStartSum();
     }
 
@@ -50,18 +50,18 @@ public abstract class AbstractBestPathsPerLevel {
         return sumForwardProbabilities;
     }
 
-    public double getNormalizedForwardProbability(GraphNode currentNode) {
+    public double getNormalizedForwardProbability(GraphNode<GL> currentNode) {
         return getBestPreviousNodeInfo(currentNode).getForwardProbability() / getForwardProbabilitiesSum();
     }
 
-    public double getNormalizedBackwardProbability(GraphNode currentNode) {
+    public double getNormalizedBackwardProbability(GraphNode<GL> currentNode) {
         return getBestPreviousNodeInfo(currentNode).getBackwardProbability() / getBackwardProbabilitiesSum();
     }
 
-    public double getNormalizedForwardBackwardProbability(GraphNode currentNode) {
+    public double getNormalizedForwardBackwardProbability(GraphNode<GL> currentNode) {
         double sumForwardBackwardProbabilities = 0;
         double currentNodeForwardBackwardProbability = -1;
-        for (GraphNode node : getCurrentLevel().getLevelNodes()) {
+        for (GraphNode<GL> node : getCurrentLevel().getLevelNodes()) {
             double forwardBackwardProbability = getNormalizedForwardProbability(node)
                     * getNormalizedBackwardProbability(node);
             sumForwardBackwardProbabilities += forwardBackwardProbability;

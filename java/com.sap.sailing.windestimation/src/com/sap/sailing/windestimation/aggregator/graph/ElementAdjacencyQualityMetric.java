@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.aggregator.msthmm.graph;
+package com.sap.sailing.windestimation.aggregator.graph;
 
 /**
  * For a {@link Tree} of {@link GroupOutOfWhichToPickTheBestElement} nodes, objects of this type can tell what the

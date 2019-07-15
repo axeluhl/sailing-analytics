@@ -15,15 +15,15 @@ import com.sap.sse.common.Util.Pair;
  */
 public class MstBestManeuverNodeInfo extends BestNodeInfo {
 
-    private final List<Pair<MstGraphLevel, GraphNode>> previousGraphLevelsWithBestPreviousNodes;
+    private final List<Pair<MstGraphLevel, GraphNode<MstGraphLevel>>> previousGraphLevelsWithBestPreviousNodes;
 
-    public MstBestManeuverNodeInfo(List<Pair<MstGraphLevel, GraphNode>> previousGraphLevelsWithBestPreviousNodes,
+    public MstBestManeuverNodeInfo(List<Pair<MstGraphLevel, GraphNode<MstGraphLevel>>> previousGraphLevelsWithBestPreviousNodes,
             double probabilityFromStart, IntersectedWindRange intersectedWindRange) {
         super(probabilityFromStart, intersectedWindRange);
         this.previousGraphLevelsWithBestPreviousNodes = previousGraphLevelsWithBestPreviousNodes;
     }
 
-    public List<Pair<MstGraphLevel, GraphNode>> getPreviousGraphLevelsWithBestPreviousNodes() {
+    public List<Pair<MstGraphLevel, GraphNode<MstGraphLevel>>> getPreviousGraphLevelsWithBestPreviousNodes() {
         return previousGraphLevelsWithBestPreviousNodes;
     }
 

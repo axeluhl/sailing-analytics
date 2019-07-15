@@ -10,7 +10,7 @@ import com.sap.sse.common.Util.Pair;
  * @author Vladislav Chumak (D069712)
  *
  */
-public interface GraphNodeTransitionProbabilitiesCalculator {
+public interface GraphNodeTransitionProbabilitiesCalculator<GL extends GraphLevelBase<GL>> {
     /**
      * For two maneuver classifications ({@code previousNode} and {@code currentNode}) estimates the probability of the
      * second maneuver following the first, taking into account a "wind range" that has been built along the sequence of
@@ -47,12 +47,11 @@ public interface GraphNodeTransitionProbabilitiesCalculator {
      *         {@link previousNode} and {@link currentNode} being correct based on the true wind direction change this
      *         would imply
      */
-    Pair<IntersectedWindRange, Double> mergeWindRangeAndGetTransitionProbability(GraphNode previousNode,
-            GraphLevelBase previousLevel, IntersectedWindRange previousNodeIntersectedWindRange, GraphNode currentNode,
-            GraphLevelBase currentLevel);
+    Pair<IntersectedWindRange, Double> mergeWindRangeAndGetTransitionProbability(GraphNode<GL> previousNode,
+            GL previousLevel, IntersectedWindRange previousNodeIntersectedWindRange, GraphNode<GL> currentNode,
+            GL currentLevel);
 
-    WindCourseRange getWindCourseRangeForManeuverType(ManeuverForEstimation maneuver,
-            ManeuverTypeForClassification maneuverType);
+    WindCourseRange getWindCourseRangeForManeuverType(ManeuverForEstimation maneuver, ManeuverTypeForClassification maneuverType);
 
     boolean isPropagateIntersectedWindRangeOfHeadupAndBearAway();
 

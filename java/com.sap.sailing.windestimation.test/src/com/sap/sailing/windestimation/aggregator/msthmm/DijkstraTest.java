@@ -14,11 +14,12 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.windestimation.aggregator.msthmm.graph.DijkstraShortestPathFinderImpl;
-import com.sap.sailing.windestimation.aggregator.msthmm.graph.ElementAdjacencyQualityMetric;
-import com.sap.sailing.windestimation.aggregator.msthmm.graph.ElementWithQuality;
-import com.sap.sailing.windestimation.aggregator.msthmm.graph.GroupOutOfWhichToPickTheBestElement;
-import com.sap.sailing.windestimation.aggregator.msthmm.graph.InnerGraphSuccessorSupplier;
+import com.sap.sailing.windestimation.aggregator.graph.DijkstraShortestPathFinderImpl;
+import com.sap.sailing.windestimation.aggregator.graph.DijsktraShortestPathFinder.Result;
+import com.sap.sailing.windestimation.aggregator.graph.ElementAdjacencyQualityMetric;
+import com.sap.sailing.windestimation.aggregator.graph.ElementWithQuality;
+import com.sap.sailing.windestimation.aggregator.graph.GroupOutOfWhichToPickTheBestElement;
+import com.sap.sailing.windestimation.aggregator.graph.InnerGraphSuccessorSupplier;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.NamedImpl;
@@ -139,10 +140,10 @@ public class DijkstraTest {
         // ...and solve the inner graph's shortest path problem, once for each artificial leaf:
         final Iterable<Node> bestPathStartingAtLevel3Left = new DijkstraShortestPathFinderImpl<Node>().getShortestPath(
                 successorSupplier.getArtificialLeaf(level3Left), successorSupplier.getArtificialRoot(),
-                successorSupplier, getEdgeQualitySupplier());
+                successorSupplier, getEdgeQualitySupplier()).getShortestPath();
         final Iterable<Node> bestPathStartingAtLevel3Right = new DijkstraShortestPathFinderImpl<Node>().getShortestPath(
                 successorSupplier.getArtificialLeaf(level3Right), successorSupplier.getArtificialRoot(),
-                successorSupplier, getEdgeQualitySupplier());
+                successorSupplier, getEdgeQualitySupplier()).getShortestPath();
         // We expect the two solutions to provide different best inner nodes for the converging level1 node.
         // For the indices, note that 0 denotes the artificial leaf node, so index 1 denotes the inner
         // level3 node selected, index 2 the inner level2 node, and index 3 the inner level1 node which is
@@ -165,8 +166,9 @@ public class DijkstraTest {
     }
 
     private Iterable<Node> getShortestPath() {
-        return dijkstra.getShortestPath(startNode, endNode,
+        final Result<Node> result = dijkstra.getShortestPath(startNode, endNode,
                 n -> successors.get(n), getEdgeQualitySupplier());
+        return result == null ? null : result.getShortestPath();
     }
 
     /**

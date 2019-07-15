@@ -22,19 +22,19 @@ public class BestPathsCalculator {
     private GraphLevel lastLevel;
     private Map<GraphLevel, BestPathsPerLevel> bestPathsPerLevel;
     private final boolean preciseConfidence;
-    private final GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator;
+    private final GraphNodeTransitionProbabilitiesCalculator<GraphLevel> transitionProbabilitiesCalculator;
 
-    public BestPathsCalculator(GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
+    public BestPathsCalculator(GraphNodeTransitionProbabilitiesCalculator<GraphLevel> transitionProbabilitiesCalculator) {
         this(true, transitionProbabilitiesCalculator);
     }
 
     public BestPathsCalculator(boolean preciseConfidence,
-            GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
+            GraphNodeTransitionProbabilitiesCalculator<GraphLevel> transitionProbabilitiesCalculator) {
         this.preciseConfidence = preciseConfidence;
         this.transitionProbabilitiesCalculator = transitionProbabilitiesCalculator;
     }
 
-    public GraphNodeTransitionProbabilitiesCalculator getTransitionProbabilitiesCalculator() {
+    public GraphNodeTransitionProbabilitiesCalculator<GraphLevel> getTransitionProbabilitiesCalculator() {
         return transitionProbabilitiesCalculator;
     }
 
@@ -93,9 +93,9 @@ public class BestPathsCalculator {
         if (previousLevel == null) {
             bestPathsPerLevel = new HashMap<>();
             BestPathsPerLevel bestPathsUntilLevel = new BestPathsPerLevel(currentLevel);
-            for (GraphNode currentNode : currentLevel.getLevelNodes()) {
+            for (GraphNode<GraphLevel> currentNode : currentLevel.getLevelNodes()) {
                 double probability = currentNode.getConfidence() / currentLevel.getLevelNodes().size();
-                BestManeuverNodeInfo currentNodeInfo = bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode, null,
+                BestManeuverNodeInfo<GraphLevel> currentNodeInfo = bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode, null,
                         probability, currentNode.getValidWindRange().toIntersected());
                 currentNodeInfo.setForwardProbability(probability);
             }
@@ -103,12 +103,12 @@ public class BestPathsCalculator {
         } else {
             BestPathsPerLevel bestPathsUntilPreviousLevel = bestPathsPerLevel.get(previousLevel);
             BestPathsPerLevel bestPathsUntilLevel = new BestPathsPerLevel(currentLevel);
-            for (GraphNode currentNode : currentLevel.getLevelNodes()) {
+            for (GraphNode<GraphLevel> currentNode : currentLevel.getLevelNodes()) {
                 double bestProbabilityFromStart = 0;
                 double forwardProbability = 0;
-                GraphNode bestPreviousNode = null;
+                GraphNode<GraphLevel> bestPreviousNode = null;
                 IntersectedWindRange bestIntersectedWindRange = null;
-                for (GraphNode previousNode : previousLevel.getLevelNodes()) {
+                for (GraphNode<GraphLevel> previousNode : previousLevel.getLevelNodes()) {
                     IntersectedWindRange previousNodeIntersectedWindRange = bestPathsUntilPreviousLevel
                             .getBestPreviousNodeInfo(previousNode).getIntersectedWindRange();
                     Pair<IntersectedWindRange, Double> newWindRangeAndProbability = transitionProbabilitiesCalculator
@@ -126,7 +126,7 @@ public class BestPathsCalculator {
                         bestIntersectedWindRange = newWindRangeAndProbability.getA();
                     }
                 }
-                BestManeuverNodeInfo currentNodeInfo = bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode,
+                BestManeuverNodeInfo<GraphLevel> currentNodeInfo = bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode,
                         bestPreviousNode, bestProbabilityFromStart, bestIntersectedWindRange);
                 currentNodeInfo.setForwardProbability(forwardProbability);
             }
@@ -135,7 +135,7 @@ public class BestPathsCalculator {
         this.lastLevel = currentLevel;
     }
 
-    public List<GraphLevelInference> getBestPath(GraphLevel lastLevel, GraphNode lastNode) {
+    public List<GraphLevelInference<GraphLevel>> getBestPath(GraphLevel lastLevel, GraphNode<GraphLevel> lastNode) {
         double probabilitiesSum = 0;
         BestPathsPerLevel bestPathsUntilLastLevel = bestPathsPerLevel.get(lastLevel);
         double lastNodeProbability = bestPathsUntilLastLevel.getNormalizedProbabilityToNodeFromStart(lastNode);
@@ -149,24 +149,24 @@ public class BestPathsCalculator {
             }
             probabilitiesSum = bestPathsUntilLastLevel.getForwardProbabilitiesSum();
         } else {
-            for (GraphNode node : lastLevel.getLevelNodes()) {
+            for (GraphNode<GraphLevel> node : lastLevel.getLevelNodes()) {
                 double probability = bestPathsUntilLastLevel.getNormalizedProbabilityToNodeFromStart(node);
                 probabilitiesSum += probability;
             }
         }
-        List<GraphLevelInference> result = new LinkedList<>();
-        GraphNode currentNode = lastNode;
+        List<GraphLevelInference<GraphLevel>> result = new LinkedList<>();
+        GraphNode<GraphLevel> currentNode = lastNode;
         GraphLevel currentLevel = lastLevel;
         while (currentLevel != null) {
             BestPathsPerLevel currentLevelInfo = bestPathsPerLevel.get(currentLevel);
-            BestManeuverNodeInfo currentNodeInfo = currentLevelInfo.getBestPreviousNodeInfo(currentNode);
+            BestManeuverNodeInfo<GraphLevel> currentNodeInfo = currentLevelInfo.getBestPreviousNodeInfo(currentNode);
             double nodeConfidence;
             if (preciseConfidence) {
                 nodeConfidence = currentLevelInfo.getNormalizedForwardBackwardProbability(currentNode);
             } else {
                 nodeConfidence = lastNodeProbability / probabilitiesSum;
             }
-            GraphLevelInference entry = new GraphLevelInference(currentLevel, currentNode, nodeConfidence);
+            GraphLevelInference<GraphLevel> entry = new GraphLevelInference<>(currentLevel, currentNode, nodeConfidence);
             result.add(0, entry);
             currentNode = currentNodeInfo.getBestPreviousNode();
             currentLevel = currentLevel.getPreviousLevel();
@@ -174,11 +174,11 @@ public class BestPathsCalculator {
         return result;
     }
 
-    public List<GraphLevelInference> getBestPath(GraphLevel lastLevel) {
+    public List<GraphLevelInference<GraphLevel>> getBestPath(GraphLevel lastLevel) {
         BestPathsPerLevel bestPathsUntilLevel = bestPathsPerLevel.get(lastLevel);
         double maxProbability = 0;
-        GraphNode bestLastNode = null;
-        for (GraphNode lastNode : lastLevel.getLevelNodes()) {
+        GraphNode<GraphLevel> bestLastNode = null;
+        for (GraphNode<GraphLevel> lastNode : lastLevel.getLevelNodes()) {
             double probability = bestPathsUntilLevel.getNormalizedProbabilityToNodeFromStart(lastNode);
             if (maxProbability < probability) {
                 maxProbability = probability;
@@ -195,18 +195,18 @@ public class BestPathsCalculator {
     public void computeBackwardProbabilities() {
         GraphLevel currentLevel = lastLevel;
         BestPathsPerLevel bestPathsUntilLastLevel = bestPathsPerLevel.get(currentLevel);
-        for (GraphNode currentNode : currentLevel.getLevelNodes()) {
-            BestManeuverNodeInfo currentNodeInfo = bestPathsUntilLastLevel.getBestPreviousNodeInfo(currentNode);
+        for (GraphNode<GraphLevel> currentNode : currentLevel.getLevelNodes()) {
+            BestManeuverNodeInfo<GraphLevel> currentNodeInfo = bestPathsUntilLastLevel.getBestPreviousNodeInfo(currentNode);
             currentNodeInfo.setBackwardProbability(1.0);
         }
         GraphLevel nextLevel = currentLevel;
         while ((currentLevel = currentLevel.getPreviousLevel()) != null) {
             BestPathsPerLevel bestPathsUntilLevel = bestPathsPerLevel.get(currentLevel);
             BestPathsPerLevel bestPathsUntilNextLevel = bestPathsPerLevel.get(nextLevel);
-            for (GraphNode currentNode : currentLevel.getLevelNodes()) {
-                BestManeuverNodeInfo currentNodeInfo = bestPathsUntilLevel.getBestPreviousNodeInfo(currentNode);
+            for (GraphNode<GraphLevel> currentNode : currentLevel.getLevelNodes()) {
+                BestManeuverNodeInfo<GraphLevel> currentNodeInfo = bestPathsUntilLevel.getBestPreviousNodeInfo(currentNode);
                 double backwardProbability = 0;
-                for (GraphNode nextNode : nextLevel.getLevelNodes()) {
+                for (GraphNode<GraphLevel> nextNode : nextLevel.getLevelNodes()) {
                     Pair<IntersectedWindRange, Double> newWindRangeAndProbability = transitionProbabilitiesCalculator
                             .mergeWindRangeAndGetTransitionProbability(currentNode, currentLevel,
                                     currentNodeInfo.getIntersectedWindRange(), nextNode, nextLevel);

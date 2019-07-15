@@ -10,7 +10,7 @@ import com.sap.sailing.windestimation.model.classifier.twdtransition.TwdTransiti
  *
  */
 public class TwdTransitionClassifierBasedTransitionProbabilitiesCalculator
-        extends SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator {
+        extends SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator<GraphLevel> {
 
     private final TwdTransitionClassifiersCache twdTransitionClassifiersCache;
 

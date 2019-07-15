@@ -46,8 +46,8 @@ public class MstManeuverGraph implements ManeuverClassificationsAggregator {
         }
         MstManeuverGraphComponents graphComponents = graphGenerator.parseGraph();
         List<ManeuverWithEstimatedType> maneuversWithEstimatedType = new ArrayList<>();
-        List<GraphLevelInference> bestPath = bestPathsCalculator.getBestNodes(graphComponents);
-        for (GraphLevelInference inference : bestPath) {
+        List<GraphLevelInference<MstGraphLevel>> bestPath = bestPathsCalculator.getBestNodes(graphComponents);
+        for (GraphLevelInference<MstGraphLevel> inference : bestPath) {
             ManeuverWithEstimatedType maneuverWithEstimatedType = new ManeuverWithEstimatedType(
                     inference.getGraphLevel().getManeuver(), inference.getGraphNode().getManeuverType(),
                     inference.getConfidence());

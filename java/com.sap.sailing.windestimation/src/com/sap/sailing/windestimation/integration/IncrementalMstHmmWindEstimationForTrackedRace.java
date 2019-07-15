@@ -26,6 +26,7 @@ import com.sap.sailing.windestimation.aggregator.hmm.GraphLevelInference;
 import com.sap.sailing.windestimation.aggregator.msthmm.DistanceAndDurationAwareWindTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstBestPathsCalculator;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstBestPathsCalculatorImpl;
+import com.sap.sailing.windestimation.aggregator.msthmm.MstGraphLevel;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstManeuverGraphGenerator.MstManeuverGraphComponents;
 import com.sap.sailing.windestimation.data.ManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifiersCache;
@@ -100,8 +101,8 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
             }
             MstManeuverGraphComponents graphComponents = mstManeuverGraphGenerator.parseGraph();
             if (graphComponents != null) {
-                List<GraphLevelInference> bestPath = bestPathsCalculator.getBestNodes(graphComponents);
-                for (GraphLevelInference inference : bestPath) {
+                List<GraphLevelInference<MstGraphLevel>> bestPath = bestPathsCalculator.getBestNodes(graphComponents);
+                for (GraphLevelInference<MstGraphLevel> inference : bestPath) {
                     ManeuverWithEstimatedType maneuverWithEstimatedType = new ManeuverWithEstimatedType(
                             inference.getGraphLevel().getManeuver(), inference.getGraphNode().getManeuverType(),
                             inference.getConfidence());

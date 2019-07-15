@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.aggregator.msthmm.graph;
+package com.sap.sailing.windestimation.aggregator.graph;
 
 /**
  * An acyclic tree of {@link TreeNode nodes} with a single root node.

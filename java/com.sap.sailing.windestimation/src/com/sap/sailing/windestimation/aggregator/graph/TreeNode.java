@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.aggregator.msthmm.graph;
+package com.sap.sailing.windestimation.aggregator.graph;
 
 /**
  * A node in a {@link Tree}. If it has no (a {@code null}) {@link #getParent() parent}, it is the {@link Tree#getRoot()

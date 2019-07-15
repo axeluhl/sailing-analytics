@@ -18,15 +18,15 @@ import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProb
  * @author Vladislav Chumak (D069712)
  *
  */
-public class GraphLevelBase {
 
+public class GraphLevelBase<GL extends GraphLevelBase<GL>> {
     private final ManeuverForEstimation maneuver;
     private ManeuverWithProbabilisticTypeClassification maneuverClassification;
 
-    private final List<GraphNode> levelNodes;
+    private final List<GraphNode<GL>> levelNodes;
 
     public GraphLevelBase(ManeuverWithProbabilisticTypeClassification maneuverClassification,
-            GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
+            GraphNodeTransitionProbabilitiesCalculator<GL> transitionProbabilitiesCalculator) {
         this.maneuver = maneuverClassification.getManeuver();
         this.maneuverClassification = maneuverClassification;
         this.levelNodes = new ArrayList<>();
@@ -34,13 +34,13 @@ public class GraphLevelBase {
     }
 
     public GraphLevelBase(ManeuverWithProbabilisticTypeClassification maneuverClassification,
-            List<GraphNode> levelNodes) {
+            List<GraphNode<GL>> levelNodes) {
         this.maneuver = maneuverClassification.getManeuver();
         this.maneuverClassification = maneuverClassification;
         this.levelNodes = levelNodes;
     }
 
-    private void initNodes(GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
+    private void initNodes(GraphNodeTransitionProbabilitiesCalculator<GL> transitionProbabilitiesCalculator) {
         initTackNode(transitionProbabilitiesCalculator);
         initJibeNode(transitionProbabilitiesCalculator);
         initHeadUpNode(transitionProbabilitiesCalculator);
@@ -50,11 +50,13 @@ public class GraphLevelBase {
 
     private void addManeuverNode(ManeuverTypeForClassification maneuverType, Tack tackAfter, WindCourseRange windRange,
             double confidence) {
-        GraphNode maneuverNode = new GraphNode(maneuverType, tackAfter, windRange, confidence, levelNodes.size());
+        @SuppressWarnings("unchecked")
+        GL thisGL = (GL) this;
+        GraphNode<GL> maneuverNode = new GraphNode<GL>(maneuverType, tackAfter, windRange, confidence, levelNodes.size(), thisGL);
         levelNodes.add(maneuverNode);
     }
 
-    private void initBearAwayNode(GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
+    private void initBearAwayNode(GraphNodeTransitionProbabilitiesCalculator<GL> transitionProbabilitiesCalculator) {
         Tack tackAfter = maneuver.getCourseChangeInDegrees() < 0 ? Tack.STARBOARD : Tack.PORT;
         WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
                 ManeuverTypeForClassification.BEAR_AWAY);
@@ -62,7 +64,7 @@ public class GraphLevelBase {
         addManeuverNode(ManeuverTypeForClassification.BEAR_AWAY, tackAfter, windRange, confidence);
     }
 
-    private void initHeadUpNode(GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
+    private void initHeadUpNode(GraphNodeTransitionProbabilitiesCalculator<GL> transitionProbabilitiesCalculator) {
         Tack tackAfter = maneuver.getCourseChangeInDegrees() < 0 ? Tack.PORT : Tack.STARBOARD;
         WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
                 ManeuverTypeForClassification.HEAD_UP);
@@ -70,7 +72,7 @@ public class GraphLevelBase {
         addManeuverNode(ManeuverTypeForClassification.HEAD_UP, tackAfter, windRange, confidence);
     }
 
-    private void initJibeNode(GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
+    private void initJibeNode(GraphNodeTransitionProbabilitiesCalculator<GL> transitionProbabilitiesCalculator) {
         WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
                 ManeuverTypeForClassification.JIBE);
         double confidence = maneuverClassification.getManeuverTypeLikelihood(ManeuverTypeForClassification.JIBE);
@@ -78,7 +80,7 @@ public class GraphLevelBase {
         addManeuverNode(ManeuverTypeForClassification.JIBE, tackAfter, windRange, confidence);
     }
 
-    private void initTackNode(GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
+    private void initTackNode(GraphNodeTransitionProbabilitiesCalculator<GL> transitionProbabilitiesCalculator) {
         WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
                 ManeuverTypeForClassification.TACK);
         double confidence = maneuverClassification.getManeuverTypeLikelihood(ManeuverTypeForClassification.TACK);
@@ -94,16 +96,16 @@ public class GraphLevelBase {
         return maneuverClassification;
     }
 
-    public List<GraphNode> getLevelNodes() {
+    public List<GraphNode<GL>> getLevelNodes() {
         return levelNodes;
     }
 
     private void normalizeNodeConfidences() {
         double probabilitiesSum = 0;
-        for (GraphNode currentNode : levelNodes) {
+        for (GraphNode<GL> currentNode : levelNodes) {
             probabilitiesSum += currentNode.getConfidence();
         }
-        for (GraphNode currentNode : levelNodes) {
+        for (GraphNode<GL> currentNode : levelNodes) {
             currentNode.setConfidence(currentNode.getConfidence() / probabilitiesSum);
         }
     }

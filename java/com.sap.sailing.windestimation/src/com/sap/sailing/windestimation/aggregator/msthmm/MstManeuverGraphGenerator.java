@@ -3,6 +3,7 @@ package com.sap.sailing.windestimation.aggregator.msthmm;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.windestimation.aggregator.graph.Tree;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 
 /**
@@ -74,7 +75,7 @@ public class MstManeuverGraphGenerator extends AbstractMstGraphGenerator<Maneuve
         return new MstManeuverGraphGenerator(getClonedNodes(), transitionProbabilitiesCalculator);
     }
 
-    public static class MstManeuverGraphComponents {
+    public static class MstManeuverGraphComponents implements Tree<MstGraphLevel> {
         private final MstGraphLevel root;
         private final List<MstGraphLevel> leaves;
 
@@ -83,6 +84,7 @@ public class MstManeuverGraphGenerator extends AbstractMstGraphGenerator<Maneuve
             this.leaves = leaves;
         }
 
+        @Override
         public MstGraphLevel getRoot() {
             return root;
         }

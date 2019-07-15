@@ -72,10 +72,10 @@ public class ManeuverSequenceGraph implements ManeuverClassificationsAggregator 
             appendManeuverAsGraphLevel(maneuverClassification);
         }
         List<ManeuverWithEstimatedType> maneuversWithEstimatedType = new ArrayList<>();
-        List<GraphLevelInference> bestPath = bestPathsCalculator.getBestPath(lastGraphLevel);
-        for (ListIterator<GraphLevelInference> iterator = bestPath.listIterator(bestPath.size()); iterator
+        List<GraphLevelInference<GraphLevel>> bestPath = bestPathsCalculator.getBestPath(lastGraphLevel);
+        for (ListIterator<GraphLevelInference<GraphLevel>> iterator = bestPath.listIterator(bestPath.size()); iterator
                 .hasPrevious();) {
-            GraphLevelInference entry = iterator.previous();
+            GraphLevelInference<GraphLevel> entry = iterator.previous();
             ManeuverWithEstimatedType maneuverWithEstimatedType = new ManeuverWithEstimatedType(
                     entry.getGraphLevel().getManeuver(), entry.getGraphNode().getManeuverType(), entry.getConfidence());
             maneuversWithEstimatedType.add(maneuverWithEstimatedType);

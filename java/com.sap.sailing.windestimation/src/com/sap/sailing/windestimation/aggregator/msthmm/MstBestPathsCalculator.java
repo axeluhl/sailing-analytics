@@ -16,6 +16,6 @@ public interface MstBestPathsCalculator {
 
     MstGraphNodeTransitionProbabilitiesCalculator getTransitionProbabilitiesCalculator();
 
-    List<GraphLevelInference> getBestNodes(MstManeuverGraphComponents graphComponents);
+    List<GraphLevelInference<MstGraphLevel>> getBestNodes(MstManeuverGraphComponents graphComponents);
 
 }

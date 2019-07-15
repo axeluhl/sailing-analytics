@@ -8,8 +8,8 @@ import com.sap.sse.common.Bearing;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator
-        extends IntersectedWindRangeBasedTransitionProbabilitiesCalculator {
+public class SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator<GL extends GraphLevelBase<GL>>
+        extends IntersectedWindRangeBasedTransitionProbabilitiesCalculator<GL> {
 
     public SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator(
             boolean propagateIntersectedWindRangeOfHeadupAndBearAway) {
