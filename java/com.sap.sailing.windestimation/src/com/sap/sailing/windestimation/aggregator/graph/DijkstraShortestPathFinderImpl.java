@@ -78,6 +78,11 @@ public class DijkstraShortestPathFinderImpl<T extends ElementWithQuality> implem
             public double getPathQuality() {
                 return qualityOfPathToNode.get(endNode);
             }
+            
+            @Override
+            public String toString() {
+                return "Shortest path with "+Util.size(getShortestPath())+" elements, quality "+getPathQuality();
+            }
         } : null;
     }
 

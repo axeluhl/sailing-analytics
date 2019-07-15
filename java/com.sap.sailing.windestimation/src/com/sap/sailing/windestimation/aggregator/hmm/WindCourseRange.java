@@ -191,7 +191,7 @@ public class WindCourseRange {
         if (b>360) {
             b -= 360;
         }
-        return "Wind from "+(a==b?a:(a+"-"+b))+"°";
+        return "Wind from "+(angleTowardStarboard==0?a:(a+"-"+b))+"° ("+angleTowardStarboard+"°)";
     }
 
     public enum CombinationModeOnViolation {
