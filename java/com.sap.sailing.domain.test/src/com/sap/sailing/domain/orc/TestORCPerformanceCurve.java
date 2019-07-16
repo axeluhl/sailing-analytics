@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -64,10 +65,10 @@ public class TestORCPerformanceCurve {
         
         // Local File:
         File fileGER = new File(RESOURCES + "GER2019.json");
-        importer = new ORCCertificateImporterJSON(new FileInputStream(fileGER));
+        //importer = new ORCCertificateImporterJSON(new FileInputStream(fileGER));
         
         // Online File:
-        //importer = new ORCCertificateImporterJSON(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
+        importer = new ORCCertificateImporterJSON(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
     }
     
     @Test
@@ -189,12 +190,12 @@ public class TestORCPerformanceCurve {
        //               6kts    8kts    10kts   12kts   14kts   16kts   20kts
        // Milan:        675.2   539.5   473.1   437.6   412.7   388.8   350.8
        // Moana:        775.7   627.5   549.9   512.4   493.3   473.1   435.0
-       assertEquals(12.8091135 /* Altura value */ , performanceCurveMilan.getImpliedWind(Duration.ONE_HOUR.times(1.0)).getKnots(), accuracy);
-       assertEquals(8.72668 , performanceCurveTutima     .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
-       assertEquals(8.07591 , performanceCurveBank       .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
-       assertEquals(7.78413 , performanceCurveHaspa      .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
-       assertEquals(7.76218 , performanceCurveMoana      .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
-       assertEquals(7.62407 , performanceCurveHalbtrocken.getImpliedWind(Duration.ONE_HOUR.times(2.0)).getKnots(), accuracy);
+       assertEquals(12.80881 , performanceCurveMilan.getImpliedWind(Duration.ONE_HOUR.times(1.0)).getKnots(), accuracy);
+       assertEquals(8.65816  , performanceCurveTutima     .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
+       assertEquals(8.07975  , performanceCurveBank       .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
+       assertEquals(7.78413  , performanceCurveHaspa      .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
+       assertEquals(7.76218  , performanceCurveMoana      .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
+       assertEquals(7.62407  , performanceCurveHalbtrocken.getImpliedWind(Duration.ONE_HOUR.times(2.0)).getKnots(), accuracy);
     }
     
 }
