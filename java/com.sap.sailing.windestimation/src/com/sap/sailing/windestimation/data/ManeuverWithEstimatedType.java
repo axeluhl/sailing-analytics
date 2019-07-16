@@ -36,4 +36,9 @@ public class ManeuverWithEstimatedType implements Comparable<ManeuverWithEstimat
         return maneuver.compareTo(o.maneuver);
     }
 
+    @Override
+    public String toString() {
+        return "" + maneuver + " of type " + maneuverType + ", confidence="
+                + confidence;
+    }
 }

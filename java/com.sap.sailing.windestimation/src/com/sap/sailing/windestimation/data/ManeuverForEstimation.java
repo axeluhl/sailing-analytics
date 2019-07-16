@@ -152,4 +152,9 @@ public class ManeuverForEstimation implements Comparable<ManeuverForEstimation> 
         return maneuverTimePoint.compareTo(o.maneuverTimePoint);
     }
 
+    @Override
+    public String toString() {
+        return "Maneuver at " + maneuverTimePoint + ", "
+                + maneuverPosition + ", middleCourse=" + middleCourse + ", courseChangeInDegrees=" + courseChangeInDegrees;
+    }
 }
