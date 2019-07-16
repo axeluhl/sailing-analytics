@@ -103,5 +103,12 @@ public class SecondsDurationImpl implements Duration {
     public Duration mod(Duration d) {
         return new SecondsDurationImpl(seconds % d.asSeconds());
     }
+    
+    @Override
+    public String toString() {
+        StringBuffer result = new StringBuffer();
+        result.append(asSeconds()).append("s");
+        return result.toString();
+    }
 
 }
