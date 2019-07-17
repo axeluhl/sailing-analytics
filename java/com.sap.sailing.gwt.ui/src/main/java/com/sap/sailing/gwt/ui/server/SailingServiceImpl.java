@@ -5209,19 +5209,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public List<String> getResultImportUrls(String resultProviderName) {
-        List<String> result = new ArrayList<String>();
+        final List<String> result = new ArrayList<String>();
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
         ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
         if (urlBasedScoreCorrectionProvider != null) {
-            Iterable<URL> allUrls = resultUrlRegistry.getResultUrls(resultProviderName);
-            final Subject subject = SecurityUtils.getSubject();
-            for (URL url : allUrls) {
-                if (subject
-                        .isPermitted(SecuredDomainType.RESULT_IMPORT_URL.getStringPermissionForTypeRelativeIdentifier(
-                                DefaultActions.READ, new TypeRelativeObjectIdentifier(
-                                        urlBasedScoreCorrectionProvider.getName(), url.toString())))) {
-                    result.add(url.toString());
-                }
+            Iterable<URL> allUrlsReadableBySubject = resultUrlRegistry.getResultUrls(resultProviderName);
+            for (URL url : allUrlsReadableBySubject) {
+                result.add(url.toString());
             }
         }
         return result;
