@@ -10,6 +10,8 @@ import static com.sap.sailing.selenium.api.core.GpsFixMoving.createFix;
 import static com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage.goToPage;
 import static java.lang.System.currentTimeMillis;
 import static java.util.UUID.randomUUID;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.UUID;
 
@@ -21,7 +23,6 @@ import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.EventApi.Event;
 import com.sap.sailing.selenium.api.event.GpsFixApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
-import com.sap.sailing.selenium.api.event.LeaderboardApi.DeviceMappingRequest;
 import com.sap.sailing.selenium.api.event.MarkApi;
 import com.sap.sailing.selenium.api.event.MarkApi.Mark;
 import com.sap.sailing.selenium.api.event.SecurityApi;
@@ -33,6 +34,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class OpenRegattaTest extends AbstractSeleniumTest {
 
+    private ApiContext adminCtx;
     private ApiContext ownerCtx;
     private ApiContext sailorCtx;
 
@@ -50,8 +52,9 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();
-        final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+        ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
+        adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         ownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
         sailorCtx = createAnonymousApiContext(getContextRoot(), SERVER_CONTEXT);
         final AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
@@ -59,7 +62,7 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
     }
 
     @Test
-    public void simpleTest() {
+    public void simpleTest() throws Exception {
         final UUID deviceUuidCompetitor1 = randomUUID();
         final UUID deviceUuidCompetitor2 = randomUUID();
         final Event event = eventApi.createEvent(ownerCtx, EVENT_NAME, BOAT_CLASS, OPEN_UNMODERATED,
@@ -67,25 +70,24 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
         final String registrationLinkSecret = event.getSecret();
         final RaceColumn race = regattaApi.addRaceColumn(ownerCtx, EVENT_NAME, null, 1)[0];
 
-        final Competitor competitor1 = regattaApi.createAndAddCompetitorWithSecret(ownerCtx, EVENT_NAME, BOAT_CLASS,
-                /* email */ null, "Donald Duck", "USA", registrationLinkSecret, deviceUuidCompetitor1);
-        final Competitor competitor2 = regattaApi.createAndAddCompetitorWithSecret(sailorCtx, EVENT_NAME, BOAT_CLASS,
-                /* email */ null, "Mickey Mouse", "USA", registrationLinkSecret, deviceUuidCompetitor2);
+        final Competitor competitorOwner = regattaApi.createAndAddCompetitorWithSecret(ownerCtx, EVENT_NAME, BOAT_CLASS,
+                /* email */ null, "Competitor Owner", "USA", registrationLinkSecret, deviceUuidCompetitor1);
+        assertNotNull("Competitor for Owner should not be null!", competitorOwner);
+        final Competitor competitorSailor = regattaApi.createAndAddCompetitorWithSecret(sailorCtx, EVENT_NAME,
+                BOAT_CLASS, /* email */ null, "Competitor Sailor", "USA", registrationLinkSecret,
+                deviceUuidCompetitor2);
+        assertNotNull("Competitor for Sailor should not be null!", competitorSailor);
 
-        final DeviceMappingRequest devideMappingRequestOwner = leaderboardApi
-                .createDeviceMappingRequest(ownerCtx, EVENT_NAME).forCompetitor(competitor1.getId())
-                .withDeviceUuid(deviceUuidCompetitor1);
-        final DeviceMappingRequest deviceMappingRequestSailor = leaderboardApi
-                .createDeviceMappingRequest(sailorCtx, EVENT_NAME).forCompetitor(competitor2.getId())
-                .withDeviceUuid(deviceUuidCompetitor2).withSecret(registrationLinkSecret);
+        assertEquals("Regatta should contain 2 competitors (seen by regatta owner)", 2,
+                regattaApi.getCompetitors(ownerCtx, EVENT_NAME).length);
+        assertEquals("Regatta should contain 1 competitor (seen by anonymous)", 1,
+                regattaApi.getCompetitors(sailorCtx, EVENT_NAME).length);
+        assertEquals("Regatta should contain 2 competitors (seen by admin)", 2,
+                regattaApi.getCompetitors(adminCtx, EVENT_NAME).length);
 
-        devideMappingRequestOwner.startDeviceMapping(currentTimeMillis());
-        deviceMappingRequestSailor.startDeviceMapping(currentTimeMillis());
-
-        leaderboardApi.setTrackingTimes(ownerCtx, EVENT_NAME, race.getRaceName(), "Default", currentTimeMillis(), null);
         leaderboardApi.startRaceLogTracking(ownerCtx, EVENT_NAME, race.getRaceName(), "Default");
-        
-        System.out.println(regattaApi.getRegattaRaces(ownerCtx, EVENT_NAME));
+        leaderboardApi.setTrackingTimes(ownerCtx, EVENT_NAME, race.getRaceName(), "Default", currentTimeMillis(),
+                currentTimeMillis() + 600_000L);
 
         for (double i = 0.0; i < 100.0; i++) {
             final Double longitude = 9.12 + i / 1000.0, latitude = .599 + i / 1000.0, speed = 10.0, course = 180.0;
@@ -95,18 +97,11 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
                     createFix(longitude, latitude, currentTimeMillis(), speed, course));
         }
 
-        devideMappingRequestOwner.startDeviceMapping(currentTimeMillis());
-        deviceMappingRequestSailor.startDeviceMapping(currentTimeMillis());
-
         final Mark mark1 = markApi.addMarkToRegatta(ownerCtx, EVENT_NAME, "FirstMark");
-        final UUID deviceUuidMark1 = randomUUID();
-        final DeviceMappingRequest deviceMappingRequestFirstMark = leaderboardApi
-                .createDeviceMappingRequest(ownerCtx, EVENT_NAME).forMark(mark1.getMarkId())
-                .withDeviceUuid(deviceUuidMark1);
-        deviceMappingRequestFirstMark.startDeviceMapping(currentTimeMillis());
-        // TODO: Add mark fix(es)
-        deviceMappingRequestFirstMark.endDeviceMapping(currentTimeMillis());
 
+        final Double longitude = 9.12, latitude = .599;
+        markApi.addMarkFix(ownerCtx, EVENT_NAME, race.getRaceName(), "Default", mark1.getMarkId(), longitude, latitude,
+                currentTimeMillis());
     }
 
 }

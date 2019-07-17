@@ -1,8 +1,5 @@
 package com.sap.sailing.racecommittee.app.domain.configuration.impl;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
@@ -22,6 +19,9 @@ import com.sap.sailing.domain.base.configuration.procedures.SWCStartConfiguratio
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sse.common.Duration;
+
+import java.util.ArrayList;
+import java.util.HashSet;
 
 public class PreferencesRegattaConfigurationLoader implements ConfigurationLoader<RegattaConfiguration> {
 
@@ -113,9 +113,6 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
         if (configuration.getDefaultProtestTimeDuration() != null) {
             preferences.setDefaultProtestTimeDurationInMinutes(
                     (int) configuration.getDefaultProtestTimeDuration().asMinutes());
-            preferences.setDefaultProtestTimeDurationInMinutesCustomEditable(false);
-        } else {
-            preferences.setDefaultProtestTimeDurationInMinutesCustomEditable(true);
         }
 
         if (configuration.getRRS26Configuration() != null) {

@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/regattas/{regattaname}/competitors/{competitorId}/add</h2>
+
+<b>Description:</b>
+<p>Registers an existing competitor with the regatta.<br/>
+This provides functionality <li> for the regatta owner (or any user with update permission on the regatta) to add existing
+competitors to the regatta <li> and for any user to register himself to an regatta that is explicitly open for self-registrations.<br/>
+All slashes contained within the {regattaname} parameter must be replaced by "__" (double underscore).</p>
+<br/>
+<table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>None</td>
+    </tr>
+    <tr>
+        <td>Mandatory parameters:</td>
+        <td>
+            <div>regattaname the name of the regatta to register a competitor for</div>
+            <div>competitorid the UUID of the competitor to register</div>
+        </td>
+    </tr>
+    <tr>
+        <td>Additional mandatory parameters for user self-registrations on open regattas:</td>
+        <td>
+            <div>secret secret string required for self registration validation purpose</div>
+        </td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>POST</td>
+    </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

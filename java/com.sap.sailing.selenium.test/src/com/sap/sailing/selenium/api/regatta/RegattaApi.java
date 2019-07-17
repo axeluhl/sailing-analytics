@@ -14,8 +14,11 @@ public class RegattaApi {
 
     private static final String REGATTAS = "/api/v1/regattas";
     private static final String LIST_REGATTA_RACES = "/races";
-    private static final String COMPETITOR_CREATE_AND_ADD_WITH_BOAT = "/competitors/createandadd";
+    private static final String COMPETITORS = "/competitors";
+    private static final String COMPETITOR_CREATE_AND_ADD_WITH_BOAT = COMPETITORS + "/createandadd";
+    private static final String ADD = "/add";
     private static final String ADD_RACE_COLUMN_URL = "/addracecolumns";
+    private static final String LIST_COMPETITORS = "/competitors";
 
     public Regatta getRegatta(ApiContext ctx, String regattaName) {
         return new Regatta(ctx.get(REGATTAS + "/" + regattaName));
@@ -49,6 +52,16 @@ public class RegattaApi {
                 Optional.ofNullable(secret), Optional.empty());
     }
 
+    public Competitor[] getCompetitors(final ApiContext ctx, final String regattaName) {
+        final String url = REGATTAS + "/" + regattaName + LIST_COMPETITORS;
+        final JSONArray competitors = ctx.get(url);
+        if (competitors != null) {
+            return competitors.stream().map(c -> (JSONObject) c).map(Competitor::new).toArray(Competitor[]::new);
+        } else {
+            return new Competitor[] {};
+        }
+    }
+
     private Competitor createAndAddCompetitor(ApiContext ctx, String regattaName, String boatclass,
             String competitorEmail, String competitorName, String nationalityIOC, Optional<String> secret,
             Optional<UUID> deviceUuid) {
@@ -75,6 +88,13 @@ public class RegattaApi {
             result[i] = new RaceColumn((JSONObject) (json.get(i)));
         }
         return result;
+    }
+    
+    public void addCompetitor(ApiContext ctx, String regattaName, UUID competitorId, Optional<String> secret) {
+        final String url = REGATTAS + "/" + regattaName + COMPETITORS + "/" + competitorId + ADD;
+        final Map<String, String> queryParams = new TreeMap<>();
+        queryParams.put("secret", secret.orElse(null));
+        ctx.post(url, queryParams);
     }
 
 }

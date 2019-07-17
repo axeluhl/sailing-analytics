@@ -12,8 +12,12 @@ Export-Package: com.sap.sailing.resultimport,
  com.sap.sailing.resultimport.impl
 Import-Package: com.sap.sailing.competitorimport,
  com.sap.sailing.domain.common,
+ com.sap.sailing.domain.common.security,
  com.sap.sailing.domain.persistence,
  com.sap.sailing.server.interfaces,
+ com.sap.sse.security.shared,
+ org.apache.shiro;version="1.2.2",
+ org.apache.shiro.subject;version="1.2.2",
  org.osgi.framework;version="1.5.0",
  org.osgi.util.tracker;version="1.5.1"
 Require-Bundle: com.sap.sse.common
