@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,9 +21,9 @@ import com.sap.sailing.windestimation.aggregator.graph.ElementAdjacencyQualityMe
 import com.sap.sailing.windestimation.aggregator.graph.ElementWithQuality;
 import com.sap.sailing.windestimation.aggregator.graph.GroupOutOfWhichToPickTheBestElement;
 import com.sap.sailing.windestimation.aggregator.graph.InnerGraphSuccessorSupplier;
+import com.sap.sse.common.Named;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.NamedImpl;
 
 public class DijkstraTest {
     private Node startNode;
@@ -30,13 +31,23 @@ public class DijkstraTest {
     private Map<Node, Set<Node>> successors;
     private Map<Pair<Node, Node>, Double> edgeQuality;
     
-    private static class Node extends NamedImpl implements ElementWithQuality {
-        private static final long serialVersionUID = 6000367519447493367L;
+    private static class Node implements ElementWithQuality, Named {
+        private static final long serialVersionUID = 4495016215564212071L;
         private final double quality;
+        private final Supplier<String> nameSupplier;
         
         public Node(String name, double quality) {
-            super(name);
+            this(()->name, quality);
+        }
+        
+        public Node(Supplier<String> nameSupplier, double quality) {
             this.quality = quality;
+            this.nameSupplier = nameSupplier;
+        }
+        
+        @Override
+        public String getName() {
+            return nameSupplier.get();
         }
 
         @Override

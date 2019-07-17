@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.sap.sailing.windestimation.aggregator.graph.DijkstraShortestPathFinderImpl;
@@ -129,10 +130,10 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
             final InnerGraphSuccessorSupplier<GraphNode<MstGraphLevel>, MstGraphLevel> innerGraphSuccessorSupplier =
                     new InnerGraphSuccessorSupplier<GraphNode<MstGraphLevel>, MstGraphLevel>(graphComponents,
                             // supplier for artificial nodes; always full confidence and full possible wind course range
-                            (final String name)->new GraphNode<MstGraphLevel>(/* maneuverType */ null, /* tackAfter */ null, new WindCourseRange(0, 360), /* confidence */ 1.0, /* indexInLevel */ 0, /* graphLevel */ null) {
+                            (final Supplier<String> nameSupplier)->new GraphNode<MstGraphLevel>(/* maneuverType */ null, /* tackAfter */ null, new WindCourseRange(0, 360), /* confidence */ 1.0, /* indexInLevel */ 0, /* graphLevel */ null) {
                                 @Override
                                 public String toString() {
-                                    return name;
+                                    return nameSupplier.get();
                                 }
                             });
             final DijsktraShortestPathFinder<GraphNode<MstGraphLevel>> dijsktraShortestPathFinder = new DijkstraShortestPathFinderImpl<GraphNode<MstGraphLevel>>(

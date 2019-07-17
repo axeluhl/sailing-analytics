@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.sap.sse.common.Util;
 
@@ -31,7 +32,7 @@ implements Function<T, Iterable<T>> {
     private final Map<T, Set<T>> successors;
     private final T artificialRoot;
     private final Map<G, T> artificialLeaves;
-    private final Function<String, T> artificialInnerNodeConstructor;
+    private final Function<Supplier<String>, T> artificialInnerNodeConstructor;
     
     /**
      * Constructs the inner graph's edge structure from the {@code overarchingTree}.
@@ -54,10 +55,10 @@ implements Function<T, Iterable<T>> {
      *            quality} of the element created is expected to be set to the same value for all invocations, e.g.,
      *            {@code 1.0}.
      */
-    public InnerGraphSuccessorSupplier(Tree<G> overarchingTree, Function<String, T> artificialInnerNodeConstructor) {
+    public InnerGraphSuccessorSupplier(Tree<G> overarchingTree, Function<Supplier<String>, T> artificialInnerNodeConstructor) {
         successors = new HashMap<>();
         this.artificialInnerNodeConstructor = artificialInnerNodeConstructor;
-        artificialRoot = artificialInnerNodeConstructor.apply("End Node at Root");
+        artificialRoot = artificialInnerNodeConstructor.apply(()->"End Node at Root");
         artificialLeaves = new HashMap<>();
         if (overarchingTree.getRoot() != null) {
             // add the edges to the artificial root node
@@ -72,7 +73,7 @@ implements Function<T, Iterable<T>> {
         final Iterable<T> innerChildElements;
         if (Util.isEmpty(node.getChildren())) {
             // leaf node; add an artificial leaf:
-            final T artificialLeaf = artificialInnerNodeConstructor.apply("Start Node for "+node);
+            final T artificialLeaf = artificialInnerNodeConstructor.apply(()->"Start Node for "+node);
             artificialLeaves.put(node, artificialLeaf);
             innerChildElements = Collections.singleton(artificialLeaf);
         } else {
