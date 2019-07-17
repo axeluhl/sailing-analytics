@@ -47,6 +47,7 @@ import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPrefer
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
 import com.sap.sailing.server.impl.preferences.model.SailorProfilePreferences;
 import com.sap.sailing.server.impl.preferences.model.StoredDataMiningQueryPreferences;
+import com.sap.sailing.server.impl.preferences.model.TrackedEventPreferences;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.notification.impl.SailingNotificationServiceImpl;
 import com.sap.sailing.server.security.SailingViewerRole;
@@ -156,12 +157,15 @@ public class Activator implements BundleActivator {
                 properties));
         properties.put(PreferenceConverter.KEY_PARAMETER_NAME, StoredDataMiningQueryPreferences.PREF_NAME);
         registrations.add(context.registerService(PreferenceConverter.class,
-                new GenericJSONPreferenceConverter<>(() -> new StoredDataMiningQueryPreferences()), properties));
+                new GenericJSONPreferenceConverter<>(StoredDataMiningQueryPreferences::new), properties));
         properties.put(PreferenceConverter.KEY_PARAMETER_NAME, SailorProfilePreferences.PREF_NAME);
         registrations.add(context.registerService(PreferenceConverter.class,
                 new GenericJSONPreferenceConverter<>(
                         () -> new SailorProfilePreferences(racingEventService.getCompetitorAndBoatStore())),
                 properties));
+        properties.put(PreferenceConverter.KEY_PARAMETER_NAME, TrackedEventPreferences.PREF_NAME);
+        registrations.add(context.registerService(PreferenceConverter.class,
+                new GenericJSONPreferenceConverter<>(TrackedEventPreferences::new), properties));
     }
 
     public static BundleContext getContext() {
