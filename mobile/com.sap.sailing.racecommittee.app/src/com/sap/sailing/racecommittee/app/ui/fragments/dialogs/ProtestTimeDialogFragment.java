@@ -319,8 +319,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
         TimePoint startTime = TimeUtils.getTime(mTimePicker);
         TimePoint now = MillisecondsTimePoint.now();
         for (ManagedRace race : selectedRaces) {
-            Duration duration = Duration.ONE_MINUTE
-                    .times(AppPreferences.on(getActivity()).getProtestTimeDurationInMinutes());
+            Duration duration = Duration.ONE_MINUTE.times(mDuration);
             TimeRange protestTime = new TimeRangeImpl(startTime, startTime.plus(duration));
             race.getState().setProtestTime(now, protestTime);
         }
@@ -404,12 +403,6 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
     private void updateProtestRange() {
         if (mDuration == null) {
             mDuration = mPreferences.getProtestTimeDurationInMinutes();
-            if (mPreferences.isDefaultProtestTimeCustomEditable()) {
-                int custom = mPreferences.getProtestTimeDurationInMinutesCustom();
-                if (custom >= 0) {
-                    mDuration = custom;
-                }
-            }
         }
         if (mProtestDuration != null) {
             mProtestDuration.setText(getString(R.string.protest_duration, mDuration));
@@ -468,9 +461,9 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
             builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    mDuration = Integer.parseInt(duration.getText().toString());
-                    if (mPreferences.isDefaultProtestTimeCustomEditable()) {
-                        mPreferences.setDefaultProtestTimeDurationInMinutesCustom(mDuration);
+                    try {
+                        mDuration = Integer.parseInt(duration.getText().toString());
+                    } catch (NumberFormatException ignored) {
                     }
                     updateProtestRange();
                 }

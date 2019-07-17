@@ -401,7 +401,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                     public void onLoadFailed(Exception reason) {
                         dismissProgressSpinner();
 
-                        preferences.setDefaultProtestTimeDurationInMinutesCustomEditable(true);
                         if (reason instanceof FileNotFoundException) {
                             Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_not_found),
                                     Toast.LENGTH_LONG).show();

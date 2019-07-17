@@ -33,6 +33,7 @@ import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
 import java.io.FileNotFoundException;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 public class GeneralPreferenceFragment extends BasePreferenceFragment {
@@ -200,6 +201,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
                 //Update all the other preferences, e.g. course areas, mail recipient
                 final SharedPreferences.OnSharedPreferenceChangeListener listener =
                         new SharedPreferences.OnSharedPreferenceChangeListener() {
+                            @SuppressWarnings("unchecked")
                             @Override
                             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                                 final Preference preference = findPreference(key);
@@ -210,6 +212,9 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
                                 final OnPreferenceChangeListener listener = preference.getOnPreferenceChangeListener();
                                 if (listener != null) {
                                     listener.onPreferenceChange(preference, newValue);
+                                }
+                                if (preference instanceof EditSetPreference) {
+                                    preference.persistStringSet((Set<String>) newValue);
                                 }
                             }
                         };
