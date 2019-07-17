@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import com.sap.sailing.windestimation.aggregator.graph.DijkstraShortestPathFinderImpl;
 import com.sap.sailing.windestimation.aggregator.graph.DijsktraShortestPathFinder;
-import com.sap.sailing.windestimation.aggregator.graph.DijsktraShortestPathFinder.Result;
 import com.sap.sailing.windestimation.aggregator.graph.ElementAdjacencyQualityMetric;
 import com.sap.sailing.windestimation.aggregator.graph.InnerGraphSuccessorSupplier;
 import com.sap.sailing.windestimation.aggregator.graph.Tree;
@@ -118,27 +117,50 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
         // judge the quality of edges between GraphNode objects in two adjacent overarching tree nodes by
         // taking their TWD ranges and asking the transition probabilities calculator for the 
         final ElementAdjacencyQualityMetric<GraphNode<MstGraphLevel>> edgeQualityMetric = (previousNode, currentNode) -> {
-            return transitionProbabilitiesCalculator.getTransitionProbability(currentNode, previousNode,
+            final double result;
+            result = transitionProbabilitiesCalculator.getTransitionProbability(currentNode, previousNode,
                     previousNode.getGraphLevel()==null ?
                             /*artificial node */ 0.0 :
                                 previousNode.getGraphLevel().getDistanceToParent());
+            return result;
         };
-        final Set<Result<GraphNode<MstGraphLevel>>> dijkstraShortestPathResults = new HashSet<>();
+        final Set<DijsktraShortestPathFinder<GraphNode<MstGraphLevel>>> dijkstraShortestPathResults = new HashSet<>();
         for (MstGraphLevel leaf : graphComponents.getLeaves()) {
-            final DijsktraShortestPathFinder<GraphNode<MstGraphLevel>> dijsktraShortestPathFinder = new DijkstraShortestPathFinderImpl<>();
             final InnerGraphSuccessorSupplier<GraphNode<MstGraphLevel>, MstGraphLevel> innerGraphSuccessorSupplier =
                     new InnerGraphSuccessorSupplier<GraphNode<MstGraphLevel>, MstGraphLevel>(graphComponents,
-                    // supplier for artificial nodes; always full confidence and full possible wind course range
-                    (final String name)->new GraphNode<MstGraphLevel>(/* maneuverType */ null, /* tackAfter */ null, new WindCourseRange(0, 360), /* confidence */ 1.0, /* indexInLevel */ 0, /* graphLevel */ null) {
-                        @Override
-                        public String toString() {
-                            return name;
-                        }
-            });
-            final Result<GraphNode<MstGraphLevel>> shortestPathResult = dijsktraShortestPathFinder.getShortestPath(
+                            // supplier for artificial nodes; always full confidence and full possible wind course range
+                            (final String name)->new GraphNode<MstGraphLevel>(/* maneuverType */ null, /* tackAfter */ null, new WindCourseRange(0, 360), /* confidence */ 1.0, /* indexInLevel */ 0, /* graphLevel */ null) {
+                                @Override
+                                public String toString() {
+                                    return name;
+                                }
+                            });
+            final DijsktraShortestPathFinder<GraphNode<MstGraphLevel>> dijsktraShortestPathFinder = new DijkstraShortestPathFinderImpl<GraphNode<MstGraphLevel>>(
                     innerGraphSuccessorSupplier.getArtificialLeaf(leaf),
-                    innerGraphSuccessorSupplier.getArtificialRoot(), innerGraphSuccessorSupplier, edgeQualityMetric);
-            dijkstraShortestPathResults.add(shortestPathResult);
+                    innerGraphSuccessorSupplier.getArtificialRoot(), innerGraphSuccessorSupplier, edgeQualityMetric) {
+                        /**
+                         * The special rule implemented by this path quality override is that if {@code currentNode}
+                         * is a {@link ManeuverTypeForClassification#BEAR_AWAY} or {@link ManeuverTypeForClassification#HEAD_UP}
+                         * then the predecessors are traversed as long as we reach the {@link #startNode} or a node
+                         * that represents a classification as either {@link ManeuverTypeForClassification#TACK} or
+                         * {@link ManeuverTypeForClassification#JIBE}. Then, the TWD-based transition probability is calculated based on
+                         * the wind range transition of that node with that of {@code successor}.
+                         */
+                        @Override
+                        protected double getPathQuality(final double qualityOfPathToCurrent,
+                                final GraphNode<MstGraphLevel> currentNode, final GraphNode<MstGraphLevel> successor) {
+                            GraphNode<MstGraphLevel> nodeAgainstWhoseWindRangeToCompareThatOfSuccessor = currentNode;
+                            while (nodeAgainstWhoseWindRangeToCompareThatOfSuccessor != getStartNode() &&
+                                    (nodeAgainstWhoseWindRangeToCompareThatOfSuccessor.getManeuverType()==ManeuverTypeForClassification.BEAR_AWAY ||
+                                            nodeAgainstWhoseWindRangeToCompareThatOfSuccessor.getManeuverType()==ManeuverTypeForClassification.HEAD_UP)) {
+                                nodeAgainstWhoseWindRangeToCompareThatOfSuccessor = getPredecessorInBestPath(nodeAgainstWhoseWindRangeToCompareThatOfSuccessor);
+                            }
+                            return qualityOfPathToCurrent *
+                                    getEdgeQualitySupplier().getQuality(nodeAgainstWhoseWindRangeToCompareThatOfSuccessor, successor) *
+                                    successor.getQuality();
+                        }
+            };
+            dijkstraShortestPathResults.add(dijsktraShortestPathFinder);
         }
         return disambiguate(dijkstraShortestPathResults);
     }
@@ -177,9 +199,9 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
      * and multiplying them for the majority matches, then inverting again to obtain the positive probability again?
      * </ul>
      */
-    private Iterable<GraphLevelInference<MstGraphLevel>> disambiguate(Set<Result<GraphNode<MstGraphLevel>>> dijkstraShortestPathResults) {
+    private Iterable<GraphLevelInference<MstGraphLevel>> disambiguate(Set<DijsktraShortestPathFinder<GraphNode<MstGraphLevel>>> dijkstraShortestPathResults) {
         final Map<MstGraphLevel, Map<ManeuverTypeForClassification, List<Double>>> qualitiesPerTypePerTreeNode = new HashMap<>();
-        for (final Result<GraphNode<MstGraphLevel>> onePathResult : dijkstraShortestPathResults) {
+        for (final DijsktraShortestPathFinder<GraphNode<MstGraphLevel>> onePathResult : dijkstraShortestPathResults) {
             final Iterable<GraphNode<MstGraphLevel>> shortestPath = onePathResult.getShortestPath();
             for (final GraphNode<MstGraphLevel> nodeSelected : shortestPath) {
                 if (nodeSelected.getGraphLevel() != null) { // otherwise it's an artificial root/leaf node that can be ignored here
@@ -325,7 +347,6 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
                             .mergeWindRangeAndGetTransitionProbability(currentNode, currentLevel, new PreviousNodeInfo(
                                     previousLevel, previousNode, previousNodeIntersectedWindRange));
                     double transitionProbability = newWindRangeAndProbability.getB();
-                    // TODO is normalization across different previousLevel objects correct here? Wouldn't we need to normalize across all children, if we normalize here at all?
                     double probabilityFromStart = bestPathsUntilPreviousLevel
                             .getBestPreviousNodeInfo(previousNode).getProbabilityFromStart() * transitionProbability;
                     if (probabilityFromStart > bestProbabilityFromStart) {

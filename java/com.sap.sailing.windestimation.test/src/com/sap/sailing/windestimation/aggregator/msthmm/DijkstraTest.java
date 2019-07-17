@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.windestimation.aggregator.graph.DijkstraShortestPathFinderImpl;
-import com.sap.sailing.windestimation.aggregator.graph.DijsktraShortestPathFinder.Result;
+import com.sap.sailing.windestimation.aggregator.graph.DijsktraShortestPathFinder;
 import com.sap.sailing.windestimation.aggregator.graph.ElementAdjacencyQualityMetric;
 import com.sap.sailing.windestimation.aggregator.graph.ElementWithQuality;
 import com.sap.sailing.windestimation.aggregator.graph.GroupOutOfWhichToPickTheBestElement;
@@ -25,7 +25,6 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.NamedImpl;
 
 public class DijkstraTest {
-    private DijkstraShortestPathFinderImpl<Node> dijkstra;
     private Node startNode;
     private Node endNode;
     private Map<Node, Set<Node>> successors;
@@ -79,7 +78,6 @@ public class DijkstraTest {
     
     @Before
     public void setUp() {
-        dijkstra = new DijkstraShortestPathFinderImpl<DijkstraTest.Node>();
         startNode = new Node("Start", 1.0);
         endNode = new Node("End", 1.0);
         successors = new HashMap<>();
@@ -138,10 +136,10 @@ public class DijkstraTest {
                 ()->root, nodeName->new Node(nodeName, 1.0));
         // the edge qualities for the additional artificial nodes will all default to 1.0
         // ...and solve the inner graph's shortest path problem, once for each artificial leaf:
-        final Iterable<Node> bestPathStartingAtLevel3Left = new DijkstraShortestPathFinderImpl<Node>().getShortestPath(
+        final Iterable<Node> bestPathStartingAtLevel3Left = new DijkstraShortestPathFinderImpl<Node>(
                 successorSupplier.getArtificialLeaf(level3Left), successorSupplier.getArtificialRoot(),
                 successorSupplier, getEdgeQualitySupplier()).getShortestPath();
-        final Iterable<Node> bestPathStartingAtLevel3Right = new DijkstraShortestPathFinderImpl<Node>().getShortestPath(
+        final Iterable<Node> bestPathStartingAtLevel3Right = new DijkstraShortestPathFinderImpl<Node>(
                 successorSupplier.getArtificialLeaf(level3Right), successorSupplier.getArtificialRoot(),
                 successorSupplier, getEdgeQualitySupplier()).getShortestPath();
         // We expect the two solutions to provide different best inner nodes for the converging level1 node.
@@ -166,7 +164,7 @@ public class DijkstraTest {
     }
 
     private Iterable<Node> getShortestPath() {
-        final Result<Node> result = dijkstra.getShortestPath(startNode, endNode,
+        final DijsktraShortestPathFinder<Node> result = new DijkstraShortestPathFinderImpl<Node>(startNode, endNode,
                 n -> successors.get(n), getEdgeQualitySupplier());
         return result == null ? null : result.getShortestPath();
     }

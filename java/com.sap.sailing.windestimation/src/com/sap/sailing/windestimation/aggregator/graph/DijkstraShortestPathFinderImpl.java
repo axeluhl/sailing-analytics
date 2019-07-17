@@ -31,16 +31,22 @@ import com.sap.sse.common.Util;
  * @param <T>
  */
 public class DijkstraShortestPathFinderImpl<T extends ElementWithQuality> implements DijsktraShortestPathFinder<T> {
-    @Override
-    public Result<T> getShortestPath(T startNode, T endNode, Function<T, Iterable<T>> successorSupplier,
+    private final Set<T> visited = new HashSet<>();
+    private final Map<T, T> predecessorsInBestPath = new HashMap<>();
+    private final Map<T, Double> qualityOfPathToNode = new HashMap<>();
+    private final Comparator<T> nodeByPathQualityComparator = (node1, node2) -> Comparator
+            .nullsFirst((Double q1, Double q2) -> Double.compare(q1, q2))
+            .compare(qualityOfPathToNode.get(node1), qualityOfPathToNode.get(node2));
+    private final SortedSet<T> nodeWithBestQualitySoFar = new TreeSet<>(nodeByPathQualityComparator);
+    private final T startNode;
+    private final T endNode;
+    private final ElementAdjacencyQualityMetric<T> edgeQualitySupplier;
+
+    public DijkstraShortestPathFinderImpl(T startNode, T endNode, Function<T, Iterable<T>> successorSupplier,
             ElementAdjacencyQualityMetric<T> edgeQualitySupplier) {
-        final Set<T> visited = new HashSet<>();
-        final Map<T, T> predecessorsInBestPath = new HashMap<>();
-        final Map<T, Double> qualityOfPathToNode = new HashMap<>();
-        final Comparator<T> nodeByPathQualityComparator = (node1, node2)->
-            Comparator.nullsFirst((Double q1, Double q2)->Double.compare(q1, q2)).compare(
-                    qualityOfPathToNode.get(node1), qualityOfPathToNode.get(node2));
-        final SortedSet<T> nodeWithBestQualitySoFar = new TreeSet<>(nodeByPathQualityComparator);
+        this.startNode = startNode;
+        this.endNode = endNode;
+        this.edgeQualitySupplier = edgeQualitySupplier;
         // initialize for start node:
         qualityOfPathToNode.put(startNode, 1.0);
         visited.add(startNode);
@@ -57,7 +63,7 @@ public class DijkstraShortestPathFinderImpl<T extends ElementWithQuality> implem
             final double qualityOfPathToCurrent = qualityOfPathToNode.get(currentNode);
             for (final T successor : successors) {
                 if (!visited.contains(successor)) {
-                    final double qualityOfPathFromCurrentToSuccessor = getPathQuality(qualityOfPathToCurrent, currentNode, edgeQualitySupplier, successor);
+                    final double qualityOfPathFromCurrentToSuccessor = getPathQuality(qualityOfPathToCurrent, currentNode, successor);
                     final Double qualityOfPathToSuccessorSoFar = qualityOfPathToNode.get(successor);
                     if (qualityOfPathToSuccessorSoFar == null || qualityOfPathFromCurrentToSuccessor > qualityOfPathToSuccessorSoFar) {
                         nodeWithBestQualitySoFar.remove(successor); // before updating quality
@@ -68,35 +74,68 @@ public class DijkstraShortestPathFinderImpl<T extends ElementWithQuality> implem
                 }
             }
         }
-        return visited.contains(endNode) ? new Result<T>() {
-            @Override
-            public Iterable<T> getShortestPath() {
-                return getPath(predecessorsInBestPath, endNode);
-            }
-
-            @Override
-            public double getPathQuality() {
-                return qualityOfPathToNode.get(endNode);
-            }
-            
-            @Override
-            public String toString() {
-                return "Shortest path with "+Util.size(getShortestPath())+" elements, quality "+getPathQuality();
-            }
-        } : null;
     }
 
-    protected double getPathQuality(double qualityOfPathToCurrent, T currentNode,
-            ElementAdjacencyQualityMetric<T> edgeQualitySupplier, T successor) {
+    @Override
+    public String toString() {
+        final StringBuilder result = new StringBuilder();
+        result.append("Shortest path:\n");
+        T predecessor = null;
+        for (final T nodeOnShortestPath : getShortestPath()) {
+            result.append(nodeOnShortestPath);
+            result.append(", cumulative quality: ");
+            result.append(qualityOfPathToNode.get(nodeOnShortestPath));
+            result.append(", transition probability from predecessor: ");
+            if (predecessor != null) {
+                result.append(edgeQualitySupplier.getQuality(predecessor, nodeOnShortestPath));
+            }
+            result.append("\n");
+            predecessor = nodeOnShortestPath;
+        }
+        
+        return result.toString();
+    }
+
+    /**
+     * Being {@code protected}, subclasses may override this for more fine-grained control over how transition qualities
+     * are rated. This default implementation uses the quality of the path to the {@code currentNode}, passed as
+     * {@code qualityOfPathToCurrent}, and multiplies it by the {@link #edgeQualitySupplier}-provided
+     * {@link ElementAdjacencyQualityMetric#getQuality(ElementWithQuality, ElementWithQuality) quality of the edge}
+     * from {@code currentNode} to {@code successor}, then multiplied by the {@link ElementWithQuality#getQuality() quality}
+     * of the {@code successor} element itself.
+     */
+    protected double getPathQuality(double qualityOfPathToCurrent, T currentNode, T successor) {
         return qualityOfPathToCurrent * edgeQualitySupplier.getQuality(currentNode, successor) * successor.getQuality();
     }
+    
+    protected ElementAdjacencyQualityMetric<T> getEdgeQualitySupplier() {
+        return edgeQualitySupplier;
+    }
 
-    private Iterable<T> getPath(Map<T, T> predecessors, T endNode) {
-        final List<T> result = new LinkedList<>();
-        T current = endNode;
-        while (current != null) {
-            result.add(0, current);
-            current = predecessors.get(current);
+    protected T getPredecessorInBestPath(T node) {
+        return predecessorsInBestPath.get(node);
+    }
+    
+    protected T getStartNode() {
+        return startNode;
+    }
+
+    @Override
+    public double getPathQuality() {
+        return qualityOfPathToNode.get(endNode);
+    }
+
+    public Iterable<T> getShortestPath() {
+        final List<T> result;
+        if (visited.contains(endNode)) {
+            result = new LinkedList<>();
+            T current = endNode;
+            while (current != null) {
+                result.add(0, current);
+                current = predecessorsInBestPath.get(current);
+            }
+        } else {
+            result = null;
         }
         return result;
     }
