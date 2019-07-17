@@ -3,7 +3,6 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -29,7 +28,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
-import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
@@ -37,10 +35,7 @@ import com.sap.sailing.server.impl.preferences.model.SailingPreferences;
 import com.sap.sailing.server.impl.preferences.model.TrackedElementWithDeviceId;
 import com.sap.sailing.server.impl.preferences.model.TrackedEventPreference;
 import com.sap.sailing.server.impl.preferences.model.TrackedEventPreferences;
-import com.sap.sse.common.media.MediaTagConstants;
-import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.impl.User;
-import com.sap.sse.shared.media.ImageDescriptor;
 
 @Path("/v1/trackedevents/")
 public class TrackedEventsResource extends AbstractSailingServerResource {
@@ -50,13 +45,8 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
     private static final String KEY_LEADERBOARD_NAME = "leaderboardName";
     private static final String KEY_EVENT_ID = "eventId";
     private static final String KEY_EVENT_IS_ARCHIVED = "isArchived";
-    private static final String KEY_EVENT_NAME = "name";
-    private static final String KEY_EVENT_START = "start";
-    private static final String KEY_EVENT_END = "end";
     private static final String KEY_EVENT_TRACKED_ELEMENTS = "trackedElements";
     private static final String KEY_EVENT_BASE_URL = "url";
-    private static final String KEY_EVENT_IS_OWNER = "isOwner";
-    private static final String KEY_EVENT_IMAGE_URL = "imageUrl";
     private static final String KEY_EVENT_REGATTA_SECRET = "regattaSecret";
     private static final String KEY_TRACKED_ELEMENT_DEVICE_ID = "deviceId";
     private static final String KEY_TRACKED_ELEMENT_COMPETITOR_ID = "competitorId";
@@ -90,35 +80,7 @@ public class TrackedEventsResource extends AbstractSailingServerResource {
                         continue;
                     }
 
-                    final UUID eventId = pref.getEventId();
-                    final Event event = getService().getEvent(eventId);
                     final JSONObject jsonEvent = new JSONObject();
-                    if (event != null) {
-                        // event actually exists on this server -> parse relevant data
-                        if (getSecurityService().hasCurrentUserReadPermission(event)) {
-                            // user has read permission on event -> add additional event-specific data
-                            final OwnershipAnnotation ownership = getSecurityService()
-                                    .getOwnership(event.getIdentifier());
-                            final boolean isOwner = currentUser == null ? false
-                                    : currentUser.equals(ownership.getAnnotation().getUserOwner());
-                            jsonEvent.put(KEY_EVENT_IS_OWNER, isOwner);
-
-                            jsonEvent.put(KEY_EVENT_NAME, event.getName());
-                            jsonEvent.put(KEY_EVENT_START, event.getStartDate().toString());
-                            jsonEvent.put(KEY_EVENT_END, event.getEndDate().toString());
-
-                            final List<ImageDescriptor> imageWithLogoTag = event
-                                    .findImagesWithTag(MediaTagConstants.LOGO.getName());
-                            if (!imageWithLogoTag.isEmpty()) {
-                                jsonEvent.put(KEY_EVENT_IMAGE_URL, imageWithLogoTag.get(0).getURL().toExternalForm());
-                            } else {
-                                // user does not have read permissions for this event on this server -> only send back
-                                // basic data
-                            }
-                        }
-                    } else {
-                        // event does not exist on this server --> only send back basic data
-                    }
                     jsonEvent.put(KEY_EVENT_ID, pref.getEventId().toString());
                     jsonEvent.put(KEY_EVENT_REGATTA_SECRET, pref.getRegattaSecret());
                     jsonEvent.put(KEY_EVENT_BASE_URL, pref.getBaseUrl());
