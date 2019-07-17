@@ -34,8 +34,6 @@ public class SecuredDomainType extends HasPermissionsImpl {
         return Collections.unmodifiableSet(allInstances);
     }
 
-    public static final HasPermissions SIMULATOR = new SecuredDomainType("SIMULATOR");
-
     public static final HasPermissions FILE_STORAGE = new SecuredDomainType("FILE_STORAGE");
     
     // AdminConsole permissions
