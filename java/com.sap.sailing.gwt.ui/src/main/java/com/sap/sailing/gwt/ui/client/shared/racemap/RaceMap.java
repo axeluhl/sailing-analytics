@@ -552,10 +552,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection,
             RaceCompetitorSet raceCompetitorSet, StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
-            RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider) {
+            RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider,
+            boolean isSimulationEnabled) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
-                showHeaderPanel, quickRanksDTOProvider, "", "");
+                showHeaderPanel, quickRanksDTOProvider, "", "", isSimulationEnabled);
     }
     
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
@@ -564,10 +565,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection,
             RaceCompetitorSet raceCompetitorSet, StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
             RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider,
-            String leaderboardName, String leaderboardGroupName) {
+            String leaderboardName, String leaderboardGroupName, boolean isSimulationEnabled) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
-                showHeaderPanel, quickRanksDTOProvider, visible -> {}, leaderboardName, leaderboardGroupName);
+                showHeaderPanel, quickRanksDTOProvider, visible -> {
+                }, leaderboardName, leaderboardGroupName, isSimulationEnabled);
     }
     
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
@@ -575,7 +577,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
             StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources, boolean showHeaderPanel,
-            QuickRanksDTOProvider quickRanksDTOProvider, Consumer<WindSource> showWindChartForProvider, String leaderboardName, String leaderboardGroupName) {
+            QuickRanksDTOProvider quickRanksDTOProvider, Consumer<WindSource> showWindChartForProvider,
+            String leaderboardName, String leaderboardGroupName, boolean isSimulationEnabled) {
         super(parent, context);
         this.maneuverMarkersAndLossIndicators = new ManeuverMarkersAndLossIndicators(this, sailingService, errorReporter, stringMessages);
         this.showHeaderPanel = showHeaderPanel;
@@ -587,7 +590,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.errorReporter = errorReporter;
         this.timer = timer;
-        this.isSimulationEnabled = true;
+        this.isSimulationEnabled = isSimulationEnabled;
         this.showWindChartForProvider = showWindChartForProvider;
         this.leaderboardName = leaderboardName;
         this.leaderboardGroupName = leaderboardGroupName;

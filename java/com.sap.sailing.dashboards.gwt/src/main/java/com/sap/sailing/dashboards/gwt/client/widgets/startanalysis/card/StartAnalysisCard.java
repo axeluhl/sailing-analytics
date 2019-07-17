@@ -183,7 +183,8 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
                 sailingServiceAsync,
                 asyncActionsExecutor, errorReporter, timer, competitorSelectionModel,
                 new RaceCompetitorSet(competitorSelectionModel), StringMessages.INSTANCE,
-                startAnalysisDTO.regattaAndRaceIdentifier, raceMapResources, /* showHeaderPanel */ true, new DefaultQuickRanksDTOProvider());
+                startAnalysisDTO.regattaAndRaceIdentifier, raceMapResources, /* showHeaderPanel */ true,
+                new DefaultQuickRanksDTOProvider(), /* isSimulationEnabled */false);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.setSize("100%", "100%");
         card_map_container.getElement().getStyle().setHeight(getHeightForRaceMapInPixels(), Unit.PX);

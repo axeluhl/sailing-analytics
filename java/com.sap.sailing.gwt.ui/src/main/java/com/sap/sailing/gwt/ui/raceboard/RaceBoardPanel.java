@@ -44,6 +44,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 import com.sap.sailing.gwt.common.authentication.SailingAuthenticationEntryPointLinkFactory;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
@@ -248,11 +249,14 @@ public class RaceBoardPanel
                 .findSettingsByComponentId(raceTimePanelLifecycle.getComponentId());
         final RaceCompetitorSet raceCompetitorSet = new RaceCompetitorSet(competitorSelectionProvider);
         quickRanksDTOProvider = new QuickRanksDTOFromLeaderboardDTOProvider(raceCompetitorSet, selectedRaceIdentifier);
+
+        boolean isSimulationPermitted = userService.hasPermission(raceDTO, TrackedRaceActions.SIMULATOR);
+
         raceMap = new RaceMap(this, componentContext, raceMapLifecycle, defaultRaceMapSettings, sailingService, asyncActionsExecutor,
                 errorReporter, timer,
                 competitorSelectionProvider, raceCompetitorSet, stringMessages, selectedRaceIdentifier, 
                 raceMapResources, /* showHeaderPanel */ true, quickRanksDTOProvider, this::showInWindChart,
-                leaderboardName, leaderboardGroupName) {
+                leaderboardName, leaderboardGroupName, isSimulationPermitted) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
             @Override
