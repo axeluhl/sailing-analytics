@@ -124,6 +124,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -199,6 +200,7 @@ import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
+import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminatorImpl;
@@ -455,6 +457,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             RacingEventService.class.getName(), 0);
 
     private PolarDataService polarDataService;
+    
+    private WindEstimationFactoryService windEstimationFactoryService;
 
     private final SimulationService simulationService;
 
@@ -1995,6 +1999,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             if (polarDataService != null) {
                 trackedRace.setPolarDataService(polarDataService);
             }
+            if (windEstimationFactoryService != null) {
+                trackedRace.setWindEstimation(
+                        windEstimationFactoryService.createIncrementalWindEstimationTrack(trackedRace));
+            }
         }
     }
     
@@ -2194,12 +2202,16 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
         @Override
         public void windDataReceived(Wind wind, WindSource windSource) {
-            replicate(new RecordWindFix(getRaceIdentifier(), windSource, wind));
+            if (windSource.getType() != WindSourceType.MANEUVER_BASED_ESTIMATION) {
+                replicate(new RecordWindFix(getRaceIdentifier(), windSource, wind));
+            }
         }
 
         @Override
         public void windDataRemoved(Wind wind, WindSource windSource) {
-            replicate(new RemoveWindFix(getRaceIdentifier(), windSource, wind));
+            if (windSource.getType() != WindSourceType.MANEUVER_BASED_ESTIMATION) {
+                replicate(new RemoveWindFix(getRaceIdentifier(), windSource, wind));
+            }
         }
 
         @Override
@@ -4087,6 +4099,34 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
     }
 
+    public void setWindEstimationFactoryService(WindEstimationFactoryService service) {
+        if (windEstimationFactoryService != null || service != null) {
+            windEstimationFactoryService = service;
+            setWindEstimationOnAllTrackedRaces(service);
+        }
+    }
+
+    private void setWindEstimationOnAllTrackedRaces(WindEstimationFactoryService service) {
+        Iterable<Regatta> allRegattas = getAllRegattas();
+        for (Regatta regatta : allRegattas) {
+            DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
+            if (trackedRegatta != null) {
+                trackedRegatta.lockTrackedRacesForRead();
+                try {
+                    Iterable<DynamicTrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
+                    for (TrackedRace trackedRace : trackedRaces) {
+                        trackedRace.setWindEstimation(
+                                service == null ? null : service.createIncrementalWindEstimationTrack(trackedRace));
+                    }
+                } catch (Throwable e) {
+                    logger.log(Level.SEVERE, "Error reconstructing the wind estimation models for tracked races", e);
+                } finally {
+                    trackedRegatta.unlockTrackedRacesAfterRead();
+                }
+            }
+        }
+    }
+
     private void setPolarDataServiceOnAllTrackedRaces(PolarDataService service) {
         Iterable<Regatta> allRegattas = getAllRegattas();
         for (Regatta regatta : allRegattas) {
@@ -4116,7 +4156,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             setPolarDataServiceOnAllTrackedRaces(null);
         }
     }
-
+    
     @Override
     public Iterable<Competitor> getCompetitorInOrderOfWindwardDistanceTraveledFarthestFirst(TrackedRace trackedRace, TimePoint timePoint) {
         final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
