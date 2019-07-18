@@ -21,6 +21,41 @@
 			<div class="mainContent">
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
+		    <h2 class="articleSubheadline">July 2019</h2>
+                    <ul class="bulletList">
+                        <li>Result and competitor import URLs are now only considered when the requesting user
+                            has the permission to read that URL.</li>
+                        <li>A new wind source that estimates true wind direction and speed from maneuvers is available.
+                            It has been trained using machine learning techniques, based on approximately 12 million
+                            maneuvers that the SAP Sailing Analytics have tracked and classified so far. It is intended
+                            to serve as a fallback wind source in case the wind direction is not being made available
+                            to a tracked race in any other way (entry through the Race Manager app, the web page or
+                            estimated based on the first upwind leg's direction). Therefore, the confidence level has
+                            been set fairly low, hence this wind source will always be outweighed by any real wind
+                            sensor out on the course.<p>
+                            
+                            To make the wind source available in a server, the trained
+                            maneuver classification models have to be available in the server's underlying database.
+                            To achieve this, upon first launch, when the database still does not have this data,
+                            the system property parameter <tt>-Dwindestimation.source.url=https://www.sapsailing.com</tt>
+                            can be used to import the wind data once from the archive server. Alternatively, the model data
+                            can be obtained as a file from another server like this: <tt>curl -o windEstimationModels.dat https://www.sapsailing.com/windestimation/api/windestimation_data</tt>.
+                            Alternatively, a recent copy is also maintained at <a href="http://static.sapsailing.com/windEstimationModels.dat">http://static.sapsailing.com/windEstimationModels.dat</a>.
+                            The resulting file, <tt>windEstimationModels.dat</tt>, can then be uploaded to another server, like this:
+                            <tt>curl -X POST -H "Content-Type: application/octet-stream" --data-binary @windEstimationModels.dat https://username:password@host.sapsailing.com/windestimation/api/windestimation_data</tt>
+                            Note that user credentials need to be provided with the request. The user must have the permission
+                            <tt>WIND_ESTIMATION_MODELS:UPDATE:&lt;server-name&gt;</tt> for the server to which the
+                            model data is to be stored.<p>
+                            
+                            Subsequent server starts
+                            won't need to load the remote model data again because it has been stored in the server's
+                            database during the initial import. Replicas will receive the model data from their master.<p>
+                            
+                            For more details, in particular how to re-train the models, see also
+                            <a href="https://wiki.sapsailing.com/wiki/howto/windestimation">https://wiki.sapsailing.com/wiki/howto/windestimation</a>.
+                        </li>
+                    </ul>
+		    
                     <h2 class="articleSubheadline">June 2019</h2>
                     <ul class="bulletList">
                         <li>Added new API endpoints for creating, reading, updating and deleting roles under /restsecurity/role.
@@ -35,7 +70,12 @@
                         <li>Blue flag up/down times can be cleared in the AdminConsole now</li>
                         <li>Users can now create media tracks if they have the permissions based on the ownership that
                             will result from the creation process.</li>
+                        <li>A couple of new API end points for managing tracked events were added under /api/v1/trackedevents/. 
+                            The new end points support creation, reading, updating and deleting tracked events and their 
+                            associated device-competitor/boat/mark elements for the current user.
+                        </li>
                     </ul>
+
                     <h2 class="articleSubheadline">May 2019</h2>
                     <ul class="bulletList">
 			<li>Ranks (finishing orders) entered by the Race Manager app user are no longer

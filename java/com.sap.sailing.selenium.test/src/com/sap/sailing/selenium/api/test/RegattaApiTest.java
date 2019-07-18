@@ -3,39 +3,54 @@ package com.sap.sailing.selenium.api.test;
 import static com.sap.sailing.domain.common.CompetitorRegistrationType.CLOSED;
 import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
+import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
+import static com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage.goToPage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
+import com.sap.sailing.selenium.api.event.EventApi.Event;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
+import com.sap.sailing.selenium.api.event.SecurityApi;
+import com.sap.sailing.selenium.api.event.UserGroupApi;
+import com.sap.sailing.selenium.api.event.UserGroupApi.UserGroup;
 import com.sap.sailing.selenium.api.regatta.Competitor;
 import com.sap.sailing.selenium.api.regatta.RaceColumn;
 import com.sap.sailing.selenium.api.regatta.Regatta;
 import com.sap.sailing.selenium.api.regatta.RegattaApi;
 import com.sap.sailing.selenium.api.regatta.RegattaRaces;
+import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class RegattaApiTest extends AbstractSeleniumTest {
 
     private static String EVENT_NAME = "<ppp> loggingsession";
+    private static String OTHER_EVENT_NAME = "<xxx> loggingsession";
     private static String BOAT_CLASS = "75QMNATIONALEKREUZER";
 
     private final EventApi eventApi = new EventApi();
     private final RegattaApi regattaApi = new RegattaApi();
     private final LeaderboardApi leaderboardApi = new LeaderboardApi();
+    private final UserGroupApi usergroupApi = new UserGroupApi();
 
     @Before
     public void setUp() {
         clearState(getContextRoot(), /* headless */ true);
+        super.setUp();
     }
 
     @Test
@@ -73,8 +88,8 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         RegattaRaces regattaRaces = regattaApi.getRegattaRaces(ctx, EVENT_NAME);
 
         assertEquals("read: regatta is different", EVENT_NAME, regattaRaces.getRegattaName());
-        // assertEquals("read: reagtta.series should have 0 entries", 0, regattaRaces.getRaces().length);
-
+        //assertEquals("read: reagtta.series should have 0 entries", 0, regattaRaces.getRaces().length);
+        
         RaceColumn[] raceColumns = regattaApi.addRaceColumn(ctx, EVENT_NAME, "R", 1);
         leaderboardApi.startRaceLogTracking(ctx, EVENT_NAME, raceColumns[0].getRaceName(), "Default");
         regattaRaces = regattaApi.getRegattaRaces(ctx, EVENT_NAME);
@@ -135,5 +150,82 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         assertEquals("read: racecolumn.racename is different", "T1", result[0].getRaceName());
         // assertEquals("read: racecolumn.seriesname is different", "Default", result[4].getSeriesName());
         // assertEquals("read: racecolumn.racename is different", "T5", result[4].getRaceName());
+    }
+    
+    @Test
+    public void testRegisterExistingCompetitorWithSecret() {
+        final AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
+        adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
+        
+        SecurityApi securityApi = new SecurityApi();
+        final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), ApiContext.SECURITY_CONTEXT);
+        securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
+        final ApiContext userWithCompetitorCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
+        final ApiContext userWithCompetitorAndSecurityCtx = createApiContext(getContextRoot(),
+                ApiContext.SECURITY_CONTEXT, "donald", "daisy0815");
+        securityApi.createUser(adminSecurityCtx, "dagobert", "Dagobert Duck", null, "daisy1337");
+        final ApiContext userOwningEventCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "dagobert", "daisy1337");
+        
+        // TODO we currently can't just create a competitor using the API. This is only possible by using a temporary Event/Regatta.
+        eventApi.createEvent(userWithCompetitorCtx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
+        Competitor competitor = regattaApi.createAndAddCompetitor(userWithCompetitorCtx, EVENT_NAME, BOAT_CLASS, null, "donald", "USA");
+        
+        // ensure the reader can actually see the competitor
+        UserGroup group = usergroupApi.getUserGroupByName(userWithCompetitorAndSecurityCtx, "donald-tenant");
+        usergroupApi.addRoleToGroup(userWithCompetitorAndSecurityCtx, group.getGroupId(),
+                UUID.fromString(/* sailing viewer role id */"c42948df-517b-45cb-9fa9-d1e79f18e115"), true);
+        
+        // This is the event to register the existing competitor for
+        Event eventToRegisterExistingCompetitor = eventApi.createEvent(userOwningEventCtx, OTHER_EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.OPEN_UNMODERATED, "default");
+        regattaApi.addCompetitor(userWithCompetitorCtx, OTHER_EVENT_NAME, competitor.getId(), Optional.of(eventToRegisterExistingCompetitor.getSecret()));
+        
+        Competitor[] competitors = regattaApi.getCompetitors(userOwningEventCtx, OTHER_EVENT_NAME);
+        
+        assertEquals(1, competitors.length);
+        assertEquals(competitor.getId(), competitors[0].getId());
+    }
+
+    @Test
+    public void testRegisterExistingCompetitorWithBadSecret() {
+        final AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
+        adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
+
+        SecurityApi securityApi = new SecurityApi();
+        final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), ApiContext.SECURITY_CONTEXT);
+        securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
+        final ApiContext userWithCompetitorCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald",
+                "daisy0815");
+        securityApi.createUser(adminSecurityCtx, "dagobert", "Dagobert Duck", null, "daisy1337");
+        final ApiContext userOwningEventCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "dagobert",
+                "daisy1337");
+
+        final ApiContext userWithCompetitorAndSecurityCtx = createApiContext(getContextRoot(),
+                ApiContext.SECURITY_CONTEXT, "donald", "daisy0815");
+
+        // TODO we currently can't just create a competitor using the API. This is only possible by using a temporary
+        // Event/Regatta.
+        eventApi.createEvent(userWithCompetitorCtx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
+        Competitor competitor = regattaApi.createAndAddCompetitor(userWithCompetitorCtx, EVENT_NAME, BOAT_CLASS, null,
+                "donald", "USA");
+
+        // ensure the reader can actually see the competitor
+        UserGroup group = usergroupApi.getUserGroupByName(userWithCompetitorAndSecurityCtx, "donald-tenant");
+        usergroupApi.addRoleToGroup(userWithCompetitorAndSecurityCtx, group.getGroupId(),
+                UUID.fromString(/* sailing viewer role id */"c42948df-517b-45cb-9fa9-d1e79f18e115"), true);
+
+        // This is the event to register the existing competitor for
+        Event eventToRegisterExistingCompetitor = eventApi.createEvent(userOwningEventCtx, OTHER_EVENT_NAME, BOAT_CLASS,
+                CompetitorRegistrationType.OPEN_UNMODERATED, "default");
+        try {
+            regattaApi.addCompetitor(userWithCompetitorCtx, OTHER_EVENT_NAME, competitor.getId(),
+                    Optional.of(eventToRegisterExistingCompetitor.getSecret() + "bad"));
+            Assert.fail("Expected error because of bad secret.");
+        } catch (RuntimeException e) {
+            Assert.assertTrue("Exepcted HTTP 401 - Unauthorized", e.getMessage().contains("rc=401"));
+        }
+
+        Competitor[] competitors = regattaApi.getCompetitors(userOwningEventCtx, OTHER_EVENT_NAME);
+
+        assertEquals(0, competitors.length);
     }
 }
