@@ -190,7 +190,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
     
                         @Override
                         public void onSuccess(Void result) {
-                            refillList();
+                            refillList(true);
                         }
                     });
                 }
@@ -202,7 +202,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
                     waypointSelectionModel.getSelectedObject().getB(), new DataEntryDialog.DialogCallback<Date>() {
                 @Override
                 public void ok(Date editedObject) {
-                    updateMarkPassingTime(editedObject);
+                    updateMarkPassingTime(editedObject, true);
                 }
                 @Override
                 public void cancel() {
@@ -210,7 +210,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
             }).show();
         });
         setTimeAsMarkPassingsButton = new Button(stringMessages.setFixedPassing());
-        setTimeAsMarkPassingsButton.addClickHandler(clickEvent -> updateMarkPassingTime(timer.getTime()));
+        setTimeAsMarkPassingsButton.addClickHandler(clickEvent -> updateMarkPassingTime(timer.getTime(), true));
 
         // Button for suppressing
         suppressPassingsButton = new Button(stringMessages.setSuppressedPassing());
@@ -285,7 +285,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
         setVisible(false);
     }
     
-    private void updateMarkPassingTime(Date time) {
+    private void updateMarkPassingTime(Date time, boolean waitForCalculations) {
         final LeaderboardNameRaceColumnNameAndFleetName leaderboardNameRaceColumnNameAndFleetName =
                 raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(raceIdentifier);
         if (time != null && leaderboardNameRaceColumnNameAndFleetName != null) {
@@ -302,7 +302,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
 
                     @Override
                     public void onSuccess(Void result) {
-                        refillList();
+                        refillList(waitForCalculations);
                     }
                 });
             } else {
@@ -361,7 +361,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
         waypointList.getList().clear();
         clearInfo();
     }
-    
+
     /**
      * Overloaded version of refill list which accepts new mark passing created on UI.
      * Implemented due to TrackedRace inaccessibility at GWT 
@@ -369,10 +369,14 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
      * @param markPassing - pair of waypoint (integer) and datetime of passing
      */
     private void refillList() {
+        refillList(false);
+    }
+
+    private void refillList(boolean waitForCalculations) {
         clearInfo();
         competitor = competitorSelectionModel.getSelectedCompetitors().iterator().next();
         // Get current mark passings
-        sailingService.getCompetitorMarkPassings(raceIdentifier, competitor, /* waitForCalculations */ false, new AsyncCallback<Map<Integer, Date>>() {
+        sailingService.getCompetitorMarkPassings(raceIdentifier, competitor, waitForCalculations, new AsyncCallback<Map<Integer, Date>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(stringMessages.errorTryingToObtainMarkPassing(caught.getMessage()));
@@ -388,7 +392,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
                 waypointList.getList().clear();
                 waypointList.getList().addAll(newMarkPassings);
                 // Get current edits
-                
+
                 final LeaderboardNameRaceColumnNameAndFleetName leaderboardNameRaceColumnNameAndFleetName =
                         raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(raceIdentifier);
                 if (leaderboardNameRaceColumnNameAndFleetName != null) {
@@ -399,7 +403,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(stringMessages.errorTryingToObtainRaceLogMarkPassingData(caught.getMessage()));
                         }
-    
+
                         @Override
                         public void onSuccess(Map<Integer, Date> result) {
                             for (Entry<Integer, Date> data : result.entrySet()) {
