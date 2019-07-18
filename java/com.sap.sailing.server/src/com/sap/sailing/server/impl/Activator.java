@@ -41,6 +41,7 @@ import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMovingMong
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStoreSupplier;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
+import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
 import com.sap.sailing.server.RacingEventServiceMXBean;
 import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreferences;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
@@ -96,6 +97,8 @@ public class Activator implements BundleActivator {
     private ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService> masterDataImportClassLoaderServiceTracker;
 
     private ServiceTracker<PolarDataService, PolarDataService> polarDataServiceTracker;
+    
+    private ServiceTracker<WindEstimationFactoryService, WindEstimationFactoryService> windEstimationFactoryServiceTrack;
 
     private OSGiBasedTrackedRegattaListener trackedRegattaListener;
 
@@ -238,23 +241,21 @@ public class Activator implements BundleActivator {
                 serviceFinderFactory, trackedRegattaListener, notificationService,
                 trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker);
         notificationService.setRacingEventService(racingEventService);
-
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,
                 new MasterDataImportClassLoaderServiceTrackerCustomizer(context, racingEventService));
         masterDataImportClassLoaderServiceTracker.open();
-
         polarDataServiceTracker = new ServiceTracker<PolarDataService, PolarDataService>(context,
                 PolarDataService.class,
                 new PolarDataServiceTrackerCustomizer(context, racingEventService));
         polarDataServiceTracker.open();
-
+        windEstimationFactoryServiceTrack = new ServiceTracker<WindEstimationFactoryService, WindEstimationFactoryService>(context,
+                WindEstimationFactoryService.class, new WindEstimationFactoryServiceTrackerCustomizer(context, racingEventService));
+        windEstimationFactoryServiceTrack.open();
         // register the racing service in the OSGi registry
         racingEventService.setBundleContext(context);
-        context.registerService(MongoObjectFactory.class, racingEventService.getMongoObjectFactory(),
-                /* properties */ null);
-        context.registerService(DomainObjectFactory.class, racingEventService.getDomainObjectFactory(),
-                /* properties */ null);
+        context.registerService(MongoObjectFactory.class, racingEventService.getMongoObjectFactory(), /* properties */ null);
+        context.registerService(DomainObjectFactory.class, racingEventService.getDomainObjectFactory(), /* properties */ null);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
         replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name,
                 racingEventService.getId().toString());
@@ -300,7 +301,6 @@ public class Activator implements BundleActivator {
         mbs.registerMBean(mbean, mBeanName);
         logger.log(Level.INFO, "Started " + context.getBundle().getSymbolicName()
                 + ". Character encoding: " + Charset.defaultCharset());
-
         // do initial setup/migration logic
         racingEventService.ensureOwnerships();
     }
@@ -364,6 +364,36 @@ public class Activator implements BundleActivator {
         public void removedService(ServiceReference<PolarDataService> reference, PolarDataService service) {
             racingEventService.unsetPolarDataService(service);
         }
+    }
+    
+    private class WindEstimationFactoryServiceTrackerCustomizer
+            implements ServiceTrackerCustomizer<WindEstimationFactoryService, WindEstimationFactoryService> {
+        private final BundleContext context;
+        private final RacingEventServiceImpl racingEventService;
 
+        public WindEstimationFactoryServiceTrackerCustomizer(BundleContext context,
+                RacingEventServiceImpl racingEventService) {
+            this.context = context;
+            this.racingEventService = racingEventService;
+        }
+
+        @Override
+        public WindEstimationFactoryService addingService(ServiceReference<WindEstimationFactoryService> reference) {
+            WindEstimationFactoryService service = context.getService(reference);
+            service.addWindEstimationModelsChangedListenerAndReceiveUpdate(windEstimationReady -> {
+                racingEventService.setWindEstimationFactoryService(windEstimationReady ? service : null);
+            });
+            return service;
+        }
+
+        @Override
+        public void modifiedService(ServiceReference<WindEstimationFactoryService> reference,
+                WindEstimationFactoryService service) {
+        }
+
+        @Override
+        public void removedService(ServiceReference<WindEstimationFactoryService> reference,
+                WindEstimationFactoryService service) {
+        }
     }
 }

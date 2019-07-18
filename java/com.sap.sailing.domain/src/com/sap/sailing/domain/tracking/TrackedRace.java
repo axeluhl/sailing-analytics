@@ -54,6 +54,7 @@ import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.impl.NonCachingMarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
+import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -1149,6 +1150,27 @@ public interface TrackedRace
      */
     SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode,
             WindLegTypeAndLegBearingCache cache);
+
+    boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter);
+
+    void removeWind(Wind wind, WindSource windSource);
+
+    /**
+     * Gets polar service which is currently set in this tracked race instance.
+     * @see #setPolarDataService(PolarDataService)
+     */
+    PolarDataService getPolarDataService();
+
+    /**
+     * Sets wind estimation for this tracked race instance. The previous wind estimation with its wind source and wind
+     * track are completely removed from this tracked race instance. If not {@code null}, the wind estimation is set and
+     * configured accordingly so that it gets supplied by maneuver detector with new maneuvers in order to produce a
+     * wind track with estimated wind. An appropriate wind source of type
+     * {@link WindSourceType#MANEUVER_BASED_ESTIMATION} with corresponding wind track is added to the tracked race. If
+     * {@code null}, the wind estimation will be disabled for the tracked race. After the call of this method, maneuver
+     * cache and wind cache will be reset and its recalculation will be triggered.
+     */
+    void setWindEstimation(IncrementalWindEstimation windEstimation);
 
     /**
      * Obtains a quick, rough summary of the wind conditions during this race, based on a few wind samples at the

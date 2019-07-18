@@ -23,9 +23,9 @@ public class ManeuverMainCurveDetailsWithBearingSteps extends ManeuverCurveBound
     public ManeuverMainCurveDetailsWithBearingSteps(TimePoint timePointBefore, TimePoint timePointAfter,
             TimePoint timePoint, SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
             double directionChangeInDegrees, double maxTurningRateInDegreesPerSecond, Speed lowestSpeed,
-            SpeedWithBearingStepsIterable speedWithBearingSteps) {
+            Speed highestSpeed, SpeedWithBearingStepsIterable speedWithBearingSteps) {
         super(timePointBefore, timePointAfter, speedWithBearingBefore, speedWithBearingAfter, directionChangeInDegrees,
-                lowestSpeed);
+                lowestSpeed, highestSpeed);
         this.timePoint = timePoint;
         this.maxTurningRateInDegreesPerSecond = maxTurningRateInDegreesPerSecond;
         this.speedWithBearingSteps = speedWithBearingSteps;
@@ -61,7 +61,7 @@ public class ManeuverMainCurveDetailsWithBearingSteps extends ManeuverCurveBound
 
     public ManeuverCurveBoundaries extractCurveBoundariesOnly() {
         return new ManeuverCurveBoundariesImpl(getTimePointBefore(), getTimePointAfter(), getSpeedWithBearingBefore(),
-                getSpeedWithBearingAfter(), getDirectionChangeInDegrees(), getLowestSpeed());
+                getSpeedWithBearingAfter(), getDirectionChangeInDegrees(), getLowestSpeed(), getHighestSpeed());
     }
 
 }

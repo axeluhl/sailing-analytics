@@ -11,7 +11,7 @@ import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
  *
  */
 public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer
-        extends ManeuverCurveBoundariesWithDetailedManeuverLossJsonSerializer {
+        extends ManeuverCurveBoundariesJsonSerializer {
 
     public final static String AVERAGE_SPEED_BEFORE_IN_KNOTS = "averageSpeedBeforeInKnots";
     public final static String AVERAGE_SPEED_AFTER_IN_KNOTS = "averageSpeedAfterInKnots";
