@@ -30,6 +30,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.gwt.ui.adminconsole.SetTimePointDialog;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -46,6 +47,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
@@ -196,8 +198,16 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
         });
         chooseTimeAsMarkPassingsButton = new Button(stringMessages.chooseFixedPassing());
         chooseTimeAsMarkPassingsButton.addClickHandler(clickEvent -> {
-            //TODO Get time from dialog
-            updateMarkPassingTime(null);
+            new SetTimePointDialog(stringMessages, stringMessages.chooseFixedPassing(),
+                    waypointSelectionModel.getSelectedObject().getB(), new DataEntryDialog.DialogCallback<Date>() {
+                @Override
+                public void ok(Date editedObject) {
+                    updateMarkPassingTime(editedObject);
+                }
+                @Override
+                public void cancel() {
+                }
+            }).show();
         });
         setTimeAsMarkPassingsButton = new Button(stringMessages.setFixedPassing());
         setTimeAsMarkPassingsButton.addClickHandler(clickEvent -> updateMarkPassingTime(timer.getTime()));
