@@ -1,5 +1,6 @@
 package com.sap.sailing.windestimation.integration;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -29,6 +30,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.maneuverdetection.impl.IncrementalManeuverDetectorImpl;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorWithEstimationDataSupportDecoratorImpl;
@@ -51,8 +53,10 @@ import com.sap.sailing.windestimation.preprocessing.RaceElementsFilteringPreproc
 import com.sap.sailing.windestimation.windinference.DummyBasedTwsCalculatorImpl;
 import com.sap.sailing.windestimation.windinference.MiddleCourseBasedTwdCalculatorImpl;
 import com.sap.sailing.windestimation.windinference.WindTrackCalculatorImpl;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
@@ -147,6 +151,7 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
             // + Math.round(wind.getFrom().getDegrees()));
         }
         List<Wind> estimatedWindFixes = new ArrayList<>();
+        assertMostFixesTWDAround(targetWindFixes, 233, /* range for 90% quantile */ 17, /* average tolerance */ 2);
         estimatedWindTrackOfTrackedRace.lockForRead();
         try {
             for (Wind wind : estimatedWindTrackOfTrackedRace.getFixes()) {
@@ -191,6 +196,30 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
                 fail("Target wind fix not present at: " + wind.getTimePoint() + " " + wind.getPosition());
             }
         }
+    }
+
+    private void assertMostFixesTWDAround(List<Wind> targetWindFixes, double expectedTWDAverageInDegrees, double toleranceFor90PercentQuantile, double averageToleranceInDegrees) {
+        int insideRange = 0;
+        Bearing targetTWD = new DegreeBearingImpl(expectedTWDAverageInDegrees);
+        ScalableBearing bearingSum = null;
+        for (final Wind wind : targetWindFixes) {
+            if (wind.getFrom().getDifferenceTo(targetTWD).abs().getDegrees() <= toleranceFor90PercentQuantile) {
+                insideRange++;
+            }
+            final ScalableBearing scalableBearing = new ScalableBearing(wind.getFrom());
+            if (bearingSum == null) {
+                bearingSum = scalableBearing;
+            } else {
+                bearingSum = bearingSum.add(scalableBearing);
+            }
+        }
+        final Bearing averageBearing = bearingSum.divide(targetWindFixes.size());
+        assertTrue("Expected at least 95% of the wind fixes to be in range "+
+                new DegreeBearingImpl(expectedTWDAverageInDegrees).add(new DegreeBearingImpl(-toleranceFor90PercentQuantile))+
+                        " to "+new DegreeBearingImpl(expectedTWDAverageInDegrees).add(new DegreeBearingImpl(toleranceFor90PercentQuantile))+
+                        " but only "+(double) insideRange / targetWindFixes.size()+" were.",
+                        (double) insideRange / targetWindFixes.size() >= 0.9);
+        assertEquals(expectedTWDAverageInDegrees, averageBearing.getDegrees(), averageToleranceInDegrees);
     }
 
 }
