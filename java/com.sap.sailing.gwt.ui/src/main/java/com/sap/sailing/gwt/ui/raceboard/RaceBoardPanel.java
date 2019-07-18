@@ -514,20 +514,12 @@ public class RaceBoardPanel
         Set<MediaTrack> videoPlaying = mediaPlayerManagerComponent.getPlayingVideoTracks();
         Set<MediaTrackWithSecurityDTO> audioPlaying = mediaPlayerManagerComponent.getPlayingAudioTrack();
         for (MediaTrack track : mediaPlayerManagerComponent.getAssignedMediaTracks()) {
-            double start = track.startTime.asMillis();
-            // do not show bars for very short videos but show for live streaming ones
-            if (track.duration == null || track.duration.asMinutes() > 1) {
-                TimePoint endTp = track.deriveEndTime();
-                double end;
-                if (endTp == null) {
-                    end = Double.MAX_VALUE;
-                } else {
-                    end = endTp.asMillis();
-                }
-                final boolean isPlaying = videoPlaying.contains(track) || audioPlaying.contains(track);
-                overlays.add(new BarOverlay(start, end, isPlaying,
-                        track.title));
-            }
+            final double start = track.startTime.asMillis();
+            final TimePoint endTp = track.deriveEndTime();
+            // set to max value if null
+            final double end = endTp == null ? Double.MAX_VALUE : endTp.asMillis();
+            final boolean isPlaying = videoPlaying.contains(track) || audioPlaying.contains(track);
+            overlays.add(new BarOverlay(start, end, isPlaying, track.title));
         }
         racetimePanel.setBarOverlays(overlays);
     }

@@ -1,0 +1,121 @@
+package com.sap.sailing.windestimation.aggregator.hmm;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.windestimation.data.ManeuverForEstimation;
+import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
+
+/**
+ * A layer within HMM which represents an observation with its possible hidden states, each represented by a
+ * {@link GraphNode} object in the {@link #levelNodes} list. The observation are the features represented by the
+ * provided maneuver instance. The possible hidden states are the possible maneuver types for the maneuver (see
+ * {@link ManeuverTypeForClassification}). The observation probabilities for a maneuver type are derived from the
+ * provided maneuver classification.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
+
+public class GraphLevelBase<GL extends GraphLevelBase<GL>> {
+    private final ManeuverForEstimation maneuver;
+    private ManeuverWithProbabilisticTypeClassification maneuverClassification;
+
+    private final List<GraphNode<GL>> levelNodes;
+
+    public GraphLevelBase(ManeuverWithProbabilisticTypeClassification maneuverClassification,
+            GraphNodeTransitionProbabilitiesCalculator<GL> transitionProbabilitiesCalculator) {
+        this.maneuver = maneuverClassification.getManeuver();
+        this.maneuverClassification = maneuverClassification;
+        this.levelNodes = new ArrayList<>();
+        initNodes(transitionProbabilitiesCalculator);
+    }
+
+    public GraphLevelBase(ManeuverWithProbabilisticTypeClassification maneuverClassification,
+            List<GraphNode<GL>> levelNodes) {
+        this.maneuver = maneuverClassification.getManeuver();
+        this.maneuverClassification = maneuverClassification;
+        this.levelNodes = levelNodes;
+    }
+
+    private void initNodes(GraphNodeTransitionProbabilitiesCalculator<GL> transitionProbabilitiesCalculator) {
+        initTackNode(transitionProbabilitiesCalculator);
+        initJibeNode(transitionProbabilitiesCalculator);
+        initHeadUpNode(transitionProbabilitiesCalculator);
+        initBearAwayNode(transitionProbabilitiesCalculator);
+        normalizeNodeConfidences();
+    }
+
+    private void addManeuverNode(ManeuverTypeForClassification maneuverType, Tack tackAfter, WindCourseRange windRange,
+            double confidence) {
+        @SuppressWarnings("unchecked")
+        GL thisGL = (GL) this;
+        GraphNode<GL> maneuverNode = new GraphNode<GL>(maneuverType, tackAfter, windRange, confidence, levelNodes.size(), thisGL);
+        levelNodes.add(maneuverNode);
+    }
+
+    private void initBearAwayNode(GraphNodeTransitionProbabilitiesCalculator<GL> transitionProbabilitiesCalculator) {
+        Tack tackAfter = maneuver.getCourseChangeInDegrees() < 0 ? Tack.STARBOARD : Tack.PORT;
+        WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
+                ManeuverTypeForClassification.BEAR_AWAY);
+        double confidence = maneuverClassification.getManeuverTypeLikelihood(ManeuverTypeForClassification.BEAR_AWAY);
+        addManeuverNode(ManeuverTypeForClassification.BEAR_AWAY, tackAfter, windRange, confidence);
+    }
+
+    private void initHeadUpNode(GraphNodeTransitionProbabilitiesCalculator<GL> transitionProbabilitiesCalculator) {
+        Tack tackAfter = maneuver.getCourseChangeInDegrees() < 0 ? Tack.PORT : Tack.STARBOARD;
+        WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
+                ManeuverTypeForClassification.HEAD_UP);
+        double confidence = maneuverClassification.getManeuverTypeLikelihood(ManeuverTypeForClassification.HEAD_UP);
+        addManeuverNode(ManeuverTypeForClassification.HEAD_UP, tackAfter, windRange, confidence);
+    }
+
+    private void initJibeNode(GraphNodeTransitionProbabilitiesCalculator<GL> transitionProbabilitiesCalculator) {
+        WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
+                ManeuverTypeForClassification.JIBE);
+        double confidence = maneuverClassification.getManeuverTypeLikelihood(ManeuverTypeForClassification.JIBE);
+        Tack tackAfter = maneuver.getCourseChangeWithinMainCurveInDegrees() < 0 ? Tack.PORT : Tack.STARBOARD;
+        addManeuverNode(ManeuverTypeForClassification.JIBE, tackAfter, windRange, confidence);
+    }
+
+    private void initTackNode(GraphNodeTransitionProbabilitiesCalculator<GL> transitionProbabilitiesCalculator) {
+        WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
+                ManeuverTypeForClassification.TACK);
+        double confidence = maneuverClassification.getManeuverTypeLikelihood(ManeuverTypeForClassification.TACK);
+        Tack tackAfter = maneuver.getCourseChangeWithinMainCurveInDegrees() < 0 ? Tack.STARBOARD : Tack.PORT;
+        addManeuverNode(ManeuverTypeForClassification.TACK, tackAfter, windRange, confidence);
+    }
+
+    public ManeuverForEstimation getManeuver() {
+        return maneuver;
+    }
+
+    public ManeuverWithProbabilisticTypeClassification getManeuverClassification() {
+        return maneuverClassification;
+    }
+
+    /**
+     * The {@link GraphNode}s in this tree node, ordered by the ordinal of their {@link GraphNode#getManeuverType()}
+     * classification.
+     */
+    public List<GraphNode<GL>> getLevelNodes() {
+        return levelNodes;
+    }
+
+    private void normalizeNodeConfidences() {
+        double probabilitiesSum = 0;
+        for (GraphNode<GL> currentNode : levelNodes) {
+            probabilitiesSum += currentNode.getConfidence();
+        }
+        for (GraphNode<GL> currentNode : levelNodes) {
+            currentNode.setConfidence(currentNode.getConfidence() / probabilitiesSum);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Maneuver at "+getManeuver().getManeuverTimePoint()+", "+getManeuver().getManeuverPosition()+", classified as "+getLevelNodes();
+    }
+}
