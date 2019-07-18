@@ -48,7 +48,7 @@ public class Activator implements BundleActivator {
         final String windEstimationModelDataSourceFolder = System
                 .getProperty(WIND_ESTIMATION_MODEL_DATA_SOURCE_FOLDER_PROPERTY_NAME);
         if (windEstimationModelDataSourceURL != null && windEstimationModelDataSourceFolder != null) {
-            throw new ModelLoadingException("Maximal one of the two parameters must be provided: \""
+            throw new ModelLoadingException("At most one of the two parameters may be provided: \""
                     + WIND_ESTIMATION_MODEL_DATA_SOURCE_URL_PROPERTY_NAME + "\" or \""
                     + WIND_ESTIMATION_MODEL_DATA_SOURCE_FOLDER_PROPERTY_NAME + "\"");
         }
