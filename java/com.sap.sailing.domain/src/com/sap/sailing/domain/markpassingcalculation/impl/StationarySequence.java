@@ -332,13 +332,20 @@ public class StationarySequence {
         final boolean wasLast = candidate == getLast();
         final boolean wasFirstOfItsWaypoint = candidatesWithSameWaypoint.first() == candidate;
         final boolean wasLastOfItsWaypoint = candidatesWithSameWaypoint.last() == candidate;
+        final boolean secondOfItsWaypointWasValid = candidatesWithSameWaypoint.size() > 1 &&
+                isValidCandidate(candidatesWithSameWaypoint.higher(candidatesWithSameWaypoint.first()));
+        final boolean secondToLastOfItsWaypointWasValid = candidatesWithSameWaypoint.size() > 1 &&
+                isValidCandidate(candidatesWithSameWaypoint.lower(candidatesWithSameWaypoint.last()));
         final boolean wasMostProbableOfItsWaypoint = candidatesWithSameWaypointSortedByAscendingProbability.last() == candidate;
+        final boolean secondMostProbableOfItsWaypointWasValid = candidatesWithSameWaypointSortedByAscendingProbability.size() > 1 &&
+                isValidCandidate(candidatesWithSameWaypointSortedByAscendingProbability.lower(candidatesWithSameWaypointSortedByAscendingProbability.last()));
         if (wasFirst || size() == 2) { // if size() == 2 then it will shrink to 1 and this sequence shall be removed
             stationarySequenceSetToUpdate.remove(this);
         }
         candidates.remove(candidate);
         Util.removeFromValueSet(candidatesByWaypoint, candidate.getWaypoint(), candidate);
         Util.removeFromValueSet(candidatesByWaypointSortedByAscendingProbability, candidate.getWaypoint(), candidate);
+        assert !candidatesWithSameWaypointSortedByAscendingProbability.contains(candidate);
         if (wasFirst && candidates.size() > 1) {
             stationarySequenceSetToUpdate.add(this);
         }
@@ -354,20 +361,30 @@ public class StationarySequence {
             // incremental update of delta structures:
             // check if another candidate of the same waypoint has become valid by removing "candidate"
             if (wasFirstOfItsWaypoint) {
-                if (!candidatesWithSameWaypoint.isEmpty()) {
+                if (!secondOfItsWaypointWasValid && !candidatesWithSameWaypoint.isEmpty()) {
+                    // add only if the now first (which used to be the second before removing candidate)
+                    // wasn't already valid before, e.g., because it used to be the most probable or
+                    // the last; see bug 5094
                     candidatesEffectivelyAdded.add(candidatesWithSameWaypoint.first());
                     candidatesEffectivelyRemoved.remove(candidatesWithSameWaypoint.first());
                 }
             } else if (wasLastOfItsWaypoint) {
-                if (!candidatesWithSameWaypoint.isEmpty()) {
+                if (!secondToLastOfItsWaypointWasValid && !candidatesWithSameWaypoint.isEmpty()) {
+                    // add only if the now last (which used to be the second to last before removing candidate)
+                    // wasn't already valid before, e.g., because it used to be the most probable or
+                    // the first; see bug 5094
                     candidatesEffectivelyAdded.add(candidatesWithSameWaypoint.last());
                     candidatesEffectivelyRemoved.remove(candidatesWithSameWaypoint.last());
                 }
             }
             // check if another candidate of the same waypoint has become the most probable
-            if (wasMostProbableOfItsWaypoint && !candidatesWithSameWaypointSortedByAscendingProbability.isEmpty()) {
-                candidatesEffectivelyAdded.add(candidatesWithSameWaypointSortedByAscendingProbability.last());
-                candidatesEffectivelyRemoved.remove(candidatesWithSameWaypointSortedByAscendingProbability.last());
+            if (wasMostProbableOfItsWaypoint) {
+                if (!secondMostProbableOfItsWaypointWasValid && !candidatesWithSameWaypointSortedByAscendingProbability.isEmpty()) {
+                    // add only if the now most probable (which used to be the second most probable before removing candidate)
+                    // wasn't already valid before, e.g., because it used to be the first or the last; see bug 5094
+                    candidatesEffectivelyAdded.add(candidatesWithSameWaypointSortedByAscendingProbability.last());
+                    candidatesEffectivelyRemoved.remove(candidatesWithSameWaypointSortedByAscendingProbability.last());
+                }
             }
         }
     }
