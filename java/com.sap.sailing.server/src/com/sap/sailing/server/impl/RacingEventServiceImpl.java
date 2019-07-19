@@ -298,6 +298,7 @@ import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -1033,6 +1034,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             securityService.migrateOwnership(boat);
         }
         securityService.assumeOwnershipMigrated(SecuredDomainType.BOAT.getName());
+        securityService.migrateOwnership(SecuredDomainType.WIND_ESTIMATION_MODELS.getQualifiedObjectIdentifier(
+                new TypeRelativeObjectIdentifier(ServerInfo.getName())), "Wind estimation models for server "+ServerInfo.getName());
         securityService.checkMigration(SecuredDomainType.getAllInstances());
     }
 
