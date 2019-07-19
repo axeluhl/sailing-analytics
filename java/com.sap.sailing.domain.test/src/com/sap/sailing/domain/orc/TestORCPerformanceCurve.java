@@ -198,4 +198,28 @@ public class TestORCPerformanceCurve {
        assertEquals(7.62407  , performanceCurveHalbtrocken.getImpliedWind(Duration.ONE_HOUR.times(2.0)).getKnots(), accuracy);
     }
     
+    // Tests for a Allowance calculation for a simple predefined course and given Implied Winds. The solutions are extracted from the provided ORC TestPCS.exe
+    @Test
+    public void testAllowances() throws FunctionEvaluationException {
+        double accuracy = 0.00001;
+        ORCCertificate certificateMoana          = importer.getCertificate("GER 5549");
+        ORCCertificate certificateMilan          = importer.getCertificate("GER 7323");
+        ORCCertificate certificateTutima         = importer.getCertificate("GER 5609");
+        ORCCertificate certificateBank           = importer.getCertificate("GER 5555");
+        ORCCertificate certificateHaspa          = importer.getCertificate("GER 6300");
+        ORCCertificate certificateHalbtrocken    = importer.getCertificate("GER 5564");
+        ORCPerformanceCurve performanceCurveMoana        = certificateMoana.getPerformanceCurve(alturaCourse);
+        ORCPerformanceCurve performanceCurveMilan        = certificateMilan.getPerformanceCurve(alturaCourse);
+        ORCPerformanceCurve performanceCurveTutima       = certificateTutima.getPerformanceCurve(alturaCourse);
+        ORCPerformanceCurve performanceCurveBank         = certificateBank.getPerformanceCurve(alturaCourse);
+        ORCPerformanceCurve performanceCurveHaspa        = certificateHaspa.getPerformanceCurve(alturaCourse);
+        ORCPerformanceCurve performanceCurveHalbtrocken  = certificateHalbtrocken.getPerformanceCurve(alturaCourse);
+        assertEquals(Duration.ONE_HOUR.times(1.0).asHours(), performanceCurveMilan.getAllowancePerCourse(new KnotSpeedImpl(12.80881)).asHours(), accuracy);
+        assertEquals(Duration.ONE_HOUR.times(1.5).asHours(), performanceCurveTutima.getAllowancePerCourse(new KnotSpeedImpl(8.65816)).asHours(), accuracy);
+        assertEquals(Duration.ONE_HOUR.times(1.5).asHours(), performanceCurveBank.getAllowancePerCourse(new KnotSpeedImpl(8.07975)).asHours(), accuracy);
+        assertEquals(Duration.ONE_HOUR.times(1.5).asHours(), performanceCurveHaspa.getAllowancePerCourse(new KnotSpeedImpl(7.78413)).asHours(), accuracy);
+        assertEquals(Duration.ONE_HOUR.times(1.5).asHours(), performanceCurveMoana.getAllowancePerCourse(new KnotSpeedImpl(7.76218)).asHours(), accuracy);
+        assertEquals(Duration.ONE_HOUR.times(2.0).asHours(), performanceCurveHalbtrocken.getAllowancePerCourse(new KnotSpeedImpl(7.62407)).asHours(), accuracy);
+   }
+    
 }
