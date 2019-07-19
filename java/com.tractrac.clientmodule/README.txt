@@ -15,6 +15,22 @@ It contains also some files:
 
  - test.sh -> script that compiles the code in the src folder, creates the test.jar library and execute the code of the example.
  - Manifest.txt -> manifest used to create the test.jar file
+
+********************************************
+************* TracAPI 3.12.4 ***************
+********************************************
+This is a final version. It fixes some bugs. It keeps the backward compatibility.
+
+
+Release date: 19/07/2019
+Build number: 0579368
+
+ 1) Bugs
+
+ - The IRaceCompetitor.getMetadata() was not updated in live (Reported by Jorge Piera, 13/07/2019)
+ - The IEventSubscriber.start() can throw a NullPointerException when it is created from an
+ MTB file (Reported by Alex Uhl, 16/07/2019)
+
 ********************************************
 ************* TracAPI 3.12.3 ***************
 ********************************************
