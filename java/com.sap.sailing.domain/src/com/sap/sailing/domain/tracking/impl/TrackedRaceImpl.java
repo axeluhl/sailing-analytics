@@ -2386,7 +2386,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         Set<WindSource> estimationExcluded = new HashSet<>();
         estimationExcluded.addAll(getWindSources(WindSourceType.TRACK_BASED_ESTIMATION));
         estimationExcluded.addAll(getWindSources(WindSourceType.COURSE_BASED));
-        estimationExcluded.addAll(getWindSources(WindSourceType.MANEUVER_BASED_ESTIMATION));
         if (bearings != null) {
             int numberOfFixesUpwind = bearings.get(LegType.UPWIND).getA().size();
             if (numberOfFixesUpwind > 0) {
