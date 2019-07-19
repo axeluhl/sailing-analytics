@@ -30,7 +30,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.security,
  com.sap.sse.security.userstore.mongodb,
  com.sap.sse.security.common,
- org.mongodb.mongo-java-driver;bundle-version="3.6.4"
+ org.mongodb.mongo-java-driver;bundle-version="3.6.4",
+ org.apache.commons.math3;bundle-version="3.5.0"
 Export-Package: com.sap.sailing.domain.test,
  com.sap.sailing.domain.test.mock
 Import-Package: org.apache.commons.math;version="2.1.0",

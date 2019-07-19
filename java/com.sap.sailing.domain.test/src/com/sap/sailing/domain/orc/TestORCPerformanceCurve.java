@@ -30,6 +30,11 @@ import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
+/**
+ * 
+ * @author Daniel Lisunkin {i505543)
+ *
+ */
 public class TestORCPerformanceCurve {
 
     // set true to see all the differences i
