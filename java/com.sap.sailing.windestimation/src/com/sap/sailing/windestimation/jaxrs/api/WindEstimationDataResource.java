@@ -39,8 +39,8 @@ public class WindEstimationDataResource extends AbstractWindEstimationDataResour
     public Response getInternalModelData() throws IOException {
         final Subject subject = SecurityUtils.getSubject();
         logger.info("Wind Estimation Model Data requested by "+
-                subject.getPrincipal() == null ? "anonymous user" :
-                    subject.getPrincipal().toString());
+                (subject.getPrincipal() == null ? "anonymous user" :
+                    subject.getPrincipal().toString()));
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         getWindEstimationFactoryServiceImpl().serializeForInitialReplication(bos);
         bos.close();
@@ -53,8 +53,8 @@ public class WindEstimationDataResource extends AbstractWindEstimationDataResour
     public Response postInternalModelData(InputStream inputStream) throws Exception {
         final Subject subject = SecurityUtils.getSubject();
         logger.info("Wind Estimation Model Data Update requested by "+
-                subject.getPrincipal() == null ? "anonymous user" :
-                    subject.getPrincipal().toString());
+                (subject.getPrincipal() == null ? "anonymous user" :
+                    subject.getPrincipal().toString()));
         subject.checkPermission(SecuredDomainType.WIND_ESTIMATION_MODELS.getStringPermissionForTypeRelativeIdentifier(
                 DefaultActions.UPDATE, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         ObjectInputStream ois = getWindEstimationFactoryServiceImpl()
@@ -64,8 +64,8 @@ public class WindEstimationDataResource extends AbstractWindEstimationDataResour
                 exportedModels);
         getWindEstimationFactoryServiceImpl().apply(windEstimationModelsUpdateOperation);
         logger.info("Wind Estimation Model Data Update requested by "+
-                subject.getPrincipal() == null ? "anonymous user" :
-                    subject.getPrincipal().toString()+" has completed.");
+                (subject.getPrincipal() == null ? "anonymous user" :
+                    subject.getPrincipal().toString())+" has completed.");
         return Response.ok("Wind estimation models accepted").build();
     }
 }
