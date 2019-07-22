@@ -36,9 +36,12 @@
                             
                             To make the wind source available in a server, the trained
                             maneuver classification models have to be available in the server's underlying database.
-                            To achieve this, upon first launch, when the database still does not have this data,
+                            To achieve this,
                             the system property parameter <tt>-Dwindestimation.source.url=https://www.sapsailing.com</tt>
-                            can be used to import the wind data once from the archive server. Alternatively, the model data
+                            can be used to import the wind data from the archive server in case no local model
+                            exists yet in the server's database. To force loading the data from another server,
+                            regardless of whether a model exists in the local server's database, use
+                            <tt>-Dwindestimation.source.always.url</tt>, respectively. Alternatively, the model data
                             can be obtained as a file from another server like this: <tt>curl -o windEstimationModels.dat https://www.sapsailing.com/windestimation/api/windestimation_data</tt>.
                             Alternatively, a recent copy is also maintained at <a href="http://static.sapsailing.com/windEstimationModels.dat">http://static.sapsailing.com/windEstimationModels.dat</a>.
                             The resulting file, <tt>windEstimationModels.dat</tt>, can then be uploaded to another server, like this:
