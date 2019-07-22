@@ -381,6 +381,11 @@ public class Activator implements BundleActivator {
         public WindEstimationFactoryService addingService(ServiceReference<WindEstimationFactoryService> reference) {
             WindEstimationFactoryService service = context.getService(reference);
             service.addWindEstimationModelsChangedListenerAndReceiveUpdate(windEstimationReady -> {
+                // setting the wind estimation factory service to null here in case it becomes
+                // unavailable is the reason we may not need a specific implementation of
+                // removedService(...) here. Yet, just to be on the safe side, we'll also
+                // set the wind estimation factory service to null there. Maybe the service
+                // is de-registered without shutting the service down...
                 racingEventService.setWindEstimationFactoryService(windEstimationReady ? service : null);
             });
             return service;
@@ -394,6 +399,7 @@ public class Activator implements BundleActivator {
         @Override
         public void removedService(ServiceReference<WindEstimationFactoryService> reference,
                 WindEstimationFactoryService service) {
+            racingEventService.setWindEstimationFactoryService(null);
         }
     }
 }
