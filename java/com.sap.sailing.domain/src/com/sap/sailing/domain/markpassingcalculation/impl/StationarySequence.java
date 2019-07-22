@@ -218,10 +218,12 @@ public class StationarySequence {
         final NavigableSet<Candidate> candidatesForSameWaypoint;
         final NavigableSet<Candidate> candidatesForSameWaypointSortedByAscendingProbability;
         return c.isFixed() ||
-                (!(candidatesForSameWaypoint=candidatesByWaypoint.get(c.getWaypoint())).isEmpty()
+                ((candidatesForSameWaypoint=candidatesByWaypoint.get(c.getWaypoint())) != null
+                        && !candidatesForSameWaypoint.isEmpty()
                         && (candidatesForSameWaypoint.first() == c || candidatesForSameWaypoint.last() == c)) ||
-                (!(candidatesForSameWaypointSortedByAscendingProbability=candidatesByWaypointSortedByAscendingProbability.get(c.getWaypoint())).isEmpty() &&
-                        candidatesForSameWaypointSortedByAscendingProbability.last() == c);
+                ((candidatesForSameWaypointSortedByAscendingProbability=candidatesByWaypointSortedByAscendingProbability.get(c.getWaypoint())) != null
+                        && !candidatesForSameWaypointSortedByAscendingProbability.isEmpty()
+                        && candidatesForSameWaypointSortedByAscendingProbability.last() == c);
     }
     
     public int size() {
