@@ -242,6 +242,11 @@ public class CandidateChooserImpl implements CandidateChooser {
                         result = Double.compare(o1.getProbability(), o2.getProbability());
                         if (result == 0) {
                             result = o2.getClass().getSimpleName().compareTo(o1.getClass().getSimpleName());
+                            if (result == 0) {
+                                // last resort: try object identity hash code which is not guaranteed to be
+                                // different for distinct objects, but it's highly likely
+                                result = Integer.compare(System.identityHashCode(o1), System.identityHashCode(o2));
+                            }
                         }
                     }
                 }
