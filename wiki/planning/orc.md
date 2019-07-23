@@ -17,6 +17,8 @@ The calculation involves the following implemented parts:
 - get ImpliedWind for a given Duration on the Performance Curve
 - get Duration for a given ImpliedWind on the Performance Curve
 
+The last two stated points have currently some issues regarding the accuracy of the calculation. It is difficult to find an accurate splining method to match the values of the official ORC tools.
+
 ### Mixed Course
 The next step is to extend the properties of an ORCPerformanceCurveLeg to not only be defined as a leg with a specified TWA and an fixed allowance calculated with Lagrange but also be defined as a leg as a predefined course.
 - [ ] Add or change ORCPerformanceCurveLeg implementation (and interface)
