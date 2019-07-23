@@ -2,8 +2,9 @@ package com.sap.sailing.domain.orc;
 
 import static org.junit.Assert.assertNotNull;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,6 +41,8 @@ public class TestORCPerformanceCurve {
     
     private static ORCPerformanceCurveCourse alturaCourse;
     private static ORCCertificateImporter importer;
+    
+    private static final String RESOURCES = "resources/orc/";
 
     @Rule
     public ErrorCollector collector = new ErrorCollector();
@@ -54,9 +57,6 @@ public class TestORCPerformanceCurve {
         }
     }
     
-    // uncomment the following in case of loading certificates from local files
-    // private static final String RESOURCES = "resources/orc/";
-
     @BeforeClass
     public static void initialize() throws IOException, ParseException {
         List<ORCPerformanceCurveLeg> legs = new ArrayList<>();
@@ -68,12 +68,12 @@ public class TestORCPerformanceCurve {
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.17), new DegreeBearingImpl(180)));
         alturaCourse = new ORCPerformanceCurveCourseImpl(legs);
         
-        // Local File: uncomment the following two lines
-        // File fileGER = new File(RESOURCES + "GER2019.json");
-        // importer = new ORCCertificateImporterJSON(new FileInputStream(fileGER));
+        // Local File:
+        File fileGER = new File(RESOURCES + "GER2019.json");
+        importer = new ORCCertificateImporterJSON(new FileInputStream(fileGER));
         
-        // Online File:
-        importer = new ORCCertificateImporterJSON(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
+        // Online File:         uncomment the following line to use online file instead
+        // importer = new ORCCertificateImporterJSON(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
     }
     
     @Test
