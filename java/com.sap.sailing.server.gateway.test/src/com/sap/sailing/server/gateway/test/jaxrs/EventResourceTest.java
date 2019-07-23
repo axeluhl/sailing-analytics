@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.URI;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.UUID;
 
 import javax.ws.rs.core.Response;
@@ -24,6 +25,8 @@ import org.junit.Test;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RankingMetrics;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.server.gateway.jaxrs.api.AbstractLeaderboardsResource;
 import com.sap.sse.InvalidDateException;
@@ -105,6 +108,24 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
         JSONArray arrLeaderboards = (JSONArray) objLeaderboardGroup.get("leaderboards");
         assertTrue(containsObjectWithAttrbuteNameAndValue(arrLeaderboards, "name", strRegattaName));
     }
+    
+    @Test
+    public void testCreateEventWithScoringShemeRankingMetricAndDiscards() throws Exception {
+        String eventName = randomName;
+        Response eventResponse = createEventWithScoringShemeRankingMetricAndDiscards();
+        assertTrue(isValidCreateEventResponse(eventResponse));
+        JSONObject regatta = getRegatta(eventName);
+        String scoringSystem = (String) regatta.get("scoringSystem");
+        assertEquals(ScoringSchemeType.HIGH_POINT.name(), scoringSystem);
+        String rankingMetric = (String) regatta.get("rankingMetric");
+        assertEquals(RankingMetrics.ORC_PERFORMANCE_CURVE.name(), rankingMetric);
+        
+        JSONObject leaderboard = getLeaderboardAsJsonObject(getLeaderboard(eventName));
+        JSONArray discardIndices = (JSONArray) leaderboard.get("discardIndexResultsStartingWithHowManyRaces");
+        assertEquals(2, discardIndices.size());
+        assertEquals(2, ((Number) discardIndices.get(0)).intValue());
+        assertEquals(4, ((Number) discardIndices.get(1)).intValue());
+    }
 
     private Response createEventWithLeaderboardGroup() throws ParseException, NotFoundException, NumberFormatException,
             IOException, org.json.simple.parser.ParseException, InvalidDateException {
@@ -149,6 +170,17 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
                 /* createLeaderboardGroupParam */ "true", /* createRegattaParam */ "true",
                 /* boatClassNameParam */ "A_CAT", /* numberOfRacesParam */ null, false, CompetitorRegistrationType.CLOSED.name(), null,
                 /* rankingMetricParam */ null, /* scoringSchemeParam */ null, /* leaderboardDiscardThresholdsParam */ null);
+    }
+    
+    private Response createEventWithScoringShemeRankingMetricAndDiscards() throws ParseException, NotFoundException,
+    NumberFormatException, IOException, org.json.simple.parser.ParseException, InvalidDateException {
+        return eventsResource.createEvent(uriInfo, randomName, randomName, /* startDateParam */ null,
+                /* startDateAsMillis */ null, /* endDateParam */ null, /* endDateAsMillis */ null,
+                /* venueNameParam */ randomName, /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null,
+                /* officialWebsiteURLParam */ null, /* baseURLParam */ null, /* leaderboardGroupIdsListParam */ null,
+                /* createLeaderboardGroupParam */ "true", /* createRegattaParam */ "true",
+                /* boatClassNameParam */ ScoringSchemeType.HIGH_POINT.name(), /* numberOfRacesParam */ "6", false, CompetitorRegistrationType.CLOSED.name(), null,
+                /* rankingMetricParam */ RankingMetrics.ORC_PERFORMANCE_CURVE.name(), /* scoringSchemeParam */ "HIGH_POINT", /* leaderboardDiscardThresholdsParam */ Arrays.asList(2, 4));
     }
     
     private Response getLeaderboard(String name) {
