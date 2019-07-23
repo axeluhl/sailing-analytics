@@ -2,8 +2,6 @@ package com.sap.sailing.domain.orc;
 
 import static org.junit.Assert.assertNotNull;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -40,7 +38,6 @@ public class TestORCPerformanceCurve {
     // set true to see all the differences i
     private final boolean collectErrors = true;
     
-    private static final String RESOURCES = "resources/orc/";
     private static ORCPerformanceCurveCourse alturaCourse;
     private static ORCCertificateImporter importer;
 
@@ -57,6 +54,9 @@ public class TestORCPerformanceCurve {
         }
     }
     
+    // uncomment the following in case of loading certificates from local files
+    // private static final String RESOURCES = "resources/orc/";
+
     @BeforeClass
     public static void initialize() throws IOException, ParseException {
         List<ORCPerformanceCurveLeg> legs = new ArrayList<>();
@@ -68,9 +68,9 @@ public class TestORCPerformanceCurve {
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.17), new DegreeBearingImpl(180)));
         alturaCourse = new ORCPerformanceCurveCourseImpl(legs);
         
-        // Local File:
-        File fileGER = new File(RESOURCES + "GER2019.json");
-        //importer = new ORCCertificateImporterJSON(new FileInputStream(fileGER));
+        // Local File: uncomment the following two lines
+        // File fileGER = new File(RESOURCES + "GER2019.json");
+        // importer = new ORCCertificateImporterJSON(new FileInputStream(fileGER));
         
         // Online File:
         importer = new ORCCertificateImporterJSON(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
