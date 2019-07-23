@@ -57,7 +57,6 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         writeCommonLeaderboardData(jsonLeaderboard, leaderboard, resultState, null, maxCompetitorsCount);
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
-        addDiscardsIfAvaliable(leaderboard, jsonLeaderboard);
         for (Competitor competitor : leaderboard.getCompetitors()) {
             JSONObject jsonCompetitor = new JSONObject();
             jsonCompetitor.put("name", competitor.getName());
@@ -95,18 +94,6 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         return jsonLeaderboard;
     }
 
-    protected void addDiscardsIfAvaliable(Leaderboard leaderboard, JSONObject jsonLeaderboard) {
-        ResultDiscardingRule resultDiscardingRule = leaderboard.getResultDiscardingRule();
-        if (resultDiscardingRule instanceof ThresholdBasedResultDiscardingRule) {
-            final ThresholdBasedResultDiscardingRule thresholdBasedResultDiscardingRule = (ThresholdBasedResultDiscardingRule) resultDiscardingRule;
-            JSONArray discardIndices = new JSONArray();
-            jsonLeaderboard.put("discardIndexResultsStartingWithHowManyRaces", discardIndices);
-            for (int index : thresholdBasedResultDiscardingRule.getDiscardIndexResultsStartingWithHowManyRaces()) {
-                discardIndices.add(index);
-            }
-        }
-    }
-    
     protected void writeCompetitorBaseData(JSONObject jsonCompetitor, CompetitorDTO competitor, LeaderboardDTO leaderboard, boolean competitorAndBoatIdsOnly) {
         jsonCompetitor.put("id", competitor.getIdAsString());
         if (!competitorAndBoatIdsOnly) {
@@ -139,6 +126,15 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.getTime() : null);
         jsonLeaderboard.put("resultState", resultState.name());
         jsonLeaderboard.put("type", leaderboard.getLeaderboardType().name());
+        ResultDiscardingRule resultDiscardingRule = leaderboard.getResultDiscardingRule();
+        if (resultDiscardingRule instanceof ThresholdBasedResultDiscardingRule) {
+            final ThresholdBasedResultDiscardingRule thresholdBasedResultDiscardingRule = (ThresholdBasedResultDiscardingRule) resultDiscardingRule;
+            JSONArray discardIndices = new JSONArray();
+            jsonLeaderboard.put("discardIndexResultsStartingWithHowManyRaces", discardIndices);
+            for (int index : thresholdBasedResultDiscardingRule.getDiscardIndexResultsStartingWithHowManyRaces()) {
+                discardIndices.add(index);
+            }
+        }
         if (leaderboard instanceof RegattaLeaderboard) {
             RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
             jsonLeaderboard.put("canBoatsOfCompetitorsChangePerRace", regattaLeaderboard.getRegatta().canBoatsOfCompetitorsChangePerRace());
