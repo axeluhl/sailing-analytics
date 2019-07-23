@@ -56,6 +56,7 @@ public class CubicSpline {
          * Fixed first derivative at the boundary.
          */
         FirstDerivative,
+    @SuppressWarnings("unused")
 
         /**
          * Fixed second derivative at the boundary.

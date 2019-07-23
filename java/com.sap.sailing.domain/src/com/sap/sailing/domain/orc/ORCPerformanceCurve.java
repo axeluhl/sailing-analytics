@@ -7,6 +7,7 @@ import org.apache.commons.math.MaxIterationsExceededException;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
+import com.sap.sse.common.TimePoint;
 
 /**
  * For a {@link Competitor} and the {@link ORCPerformanceCurveCourse} which the competitor sailed until the creation of
@@ -45,5 +46,10 @@ public interface ORCPerformanceCurve {
      */
     Duration getAllowancePerCourse(Speed trueWindSpeed) throws ArgumentOutsideDomainException;
     
+    /**
+     * 
+     * @return the {@link ORCPerformanceCurve}, which is the sailed part of the whole course this PerformanceCurve was
+     *         created for
+     */
     ORCPerformanceCurveCourse getCourse();
 }
