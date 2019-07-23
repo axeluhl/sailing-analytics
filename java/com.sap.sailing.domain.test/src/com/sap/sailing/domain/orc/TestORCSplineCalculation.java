@@ -27,7 +27,7 @@ import com.sap.sse.common.TimePoint;
  * </pre>
  * 
  * The calculated velocity predictions for the total course used in the interpolation are calculated correctly. These
- * velocitys are checked with the values from Manage2Sail/SwissTiming and the used ORC certificates are from the 15th
+ * velocities are checked with the values from Manage2Sail/SwissTiming and the used ORC certificates are from the 15th
  * July 2019.
  * 
  * @author Daniel Lisunkin (i505543)
@@ -47,7 +47,7 @@ public class TestORCSplineCalculation {
     
     @Test
     public void testMilan() { //currently M2S Values, not SAP
-        assertEquals (1.0, interpolate(new double[] {0, 5.33185058489951, 6.6728248852317, 7.6093958376704, 8.22730088526476, 8.72313604446258, 9.26000390485965, 10.2627508086351, 10.2627508086351}, 12.80881), accuracy);
+        assertEquals(1.0, interpolate(new double[] {0, 5.33185058489951, 6.6728248852317, 7.6093958376704, 8.22730088526476, 8.72313604446258, 9.26000390485965, 10.2627508086351, 10.2627508086351}, 12.80881), accuracy);
     }
     
     @Test
