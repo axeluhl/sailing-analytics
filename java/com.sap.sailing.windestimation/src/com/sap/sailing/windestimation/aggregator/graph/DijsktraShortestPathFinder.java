@@ -5,6 +5,8 @@ package com.sap.sailing.windestimation.aggregator.graph;
  * successors, and a quality metric for edges connecting two nodes, this method determines the shortest path
  * from the {@code startNode} to the {@code endNode}, assuming such a path exists. Otherwise, {@code null}
  * is returned.
+ * 
+ * @author Axel Uhl (D043530)
  */
 public interface DijsktraShortestPathFinder<T extends ElementWithQuality> {
     Iterable<T> getShortestPath();

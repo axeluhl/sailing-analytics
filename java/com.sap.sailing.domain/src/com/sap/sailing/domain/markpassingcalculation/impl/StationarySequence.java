@@ -102,6 +102,7 @@ public class StationarySequence {
         Util.addToValueSet(candidatesByWaypoint, seed.getWaypoint(), seed, valueSetConstructorForCandidatesByTime);
         Util.addToValueSet(candidatesByWaypointSortedByAscendingProbability, seed.getWaypoint(), seed, valueSetConstructorForCandidatesByAscendingProbability);
         boundingBoxOfTrackSpanningCandidates = createNewBounds(seed);
+        assert isCandidatesConsistent(seed);
     }
     
     /**
@@ -260,6 +261,7 @@ public class StationarySequence {
      */
     private void addCandidateAndUpdateFilterResultDelta(Candidate candidate, Set<Candidate> candidatesEffectivelyAdded,
             Set<Candidate> candidatesEffectivelyRemoved) {
+        assert isCandidatesConsistent(candidate);
         candidates.add(candidate);
         final NavigableSet<Candidate> candidatesForSameWaypointSortedByAscendingProbability = candidatesByWaypointSortedByAscendingProbability.get(candidate.getWaypoint());
         assert candidatesForSameWaypointSortedByAscendingProbability == null || !candidatesForSameWaypointSortedByAscendingProbability.contains(candidate);
@@ -271,6 +273,7 @@ public class StationarySequence {
         }
         Util.addToValueSet(candidatesByWaypoint, candidate.getWaypoint(), candidate, valueSetConstructorForCandidatesByTime);
         Util.addToValueSet(candidatesByWaypointSortedByAscendingProbability, candidate.getWaypoint(), candidate, valueSetConstructorForCandidatesByAscendingProbability);
+        assert isCandidatesConsistent(candidate);
         if (isValidCandidate(candidate)) {
             candidatesEffectivelyAdded.add(candidate);
             candidatesEffectivelyRemoved.remove(candidate);
@@ -325,6 +328,7 @@ public class StationarySequence {
     void remove(Candidate candidate, Set<Candidate> candidatesEffectivelyAdded, Set<Candidate> candidatesEffectivelyRemoved,
             NavigableSet<StationarySequence> stationarySequenceSetToUpdate) {
         assert candidates.contains(candidate);
+        assert isCandidatesConsistent(candidate);
         final NavigableSet<Candidate> candidatesWithSameWaypoint = candidatesByWaypoint.get(candidate.getWaypoint());
         assert candidatesWithSameWaypoint.contains(candidate);
         final NavigableSet<Candidate> candidatesWithSameWaypointSortedByAscendingProbability = candidatesByWaypointSortedByAscendingProbability.get(candidate.getWaypoint());
@@ -348,6 +352,7 @@ public class StationarySequence {
         Util.removeFromValueSet(candidatesByWaypoint, candidate.getWaypoint(), candidate);
         Util.removeFromValueSet(candidatesByWaypointSortedByAscendingProbability, candidate.getWaypoint(), candidate);
         assert !candidatesWithSameWaypointSortedByAscendingProbability.contains(candidate);
+        assert isCandidatesConsistent(candidate);
         if (wasFirst && candidates.size() > 1) {
             stationarySequenceSetToUpdate.add(this);
         }
@@ -389,6 +394,19 @@ public class StationarySequence {
                 }
             }
         }
+    }
+    
+    /**
+     * For internal assertions, validates that regarding {@code candidate} the three collections
+     * {@link #candidates}, {@link #candidatesByWaypoint} and {@link #candidatesByWaypointSortedByAscendingProbability}
+     * consistently either do or do not contain {@code candidate}.
+     */
+    private boolean isCandidatesConsistent(Candidate candidate) {
+        final boolean inCandidates = candidates.contains(candidate);
+        final boolean inCandidatesByWaypoint = candidatesByWaypoint.get(candidate.getWaypoint()) != null && candidatesByWaypoint.get(candidate.getWaypoint()).contains(candidate);
+        final boolean inCandidatesByWaypointSortedByAscendingProbability = candidatesByWaypointSortedByAscendingProbability.get(candidate.getWaypoint()) != null &&
+                candidatesByWaypointSortedByAscendingProbability.get(candidate.getWaypoint()).contains(candidate);
+        return inCandidates == inCandidatesByWaypoint && inCandidates == inCandidatesByWaypointSortedByAscendingProbability;
     }
 
     /**
@@ -517,6 +535,7 @@ public class StationarySequence {
             for (final Candidate candidateFromFullTailSet : fullTailSet) {
                 Util.removeFromValueSet(candidatesByWaypoint, candidateFromFullTailSet.getWaypoint(), candidateFromFullTailSet);
                 Util.removeFromValueSet(candidatesByWaypointSortedByAscendingProbability, candidateFromFullTailSet.getWaypoint(), candidateFromFullTailSet);
+                assert isCandidatesConsistent(candidateFromFullTailSet);
             }
             if (size() == 1) {
                 stationarySequenceSetToUpdate.remove(this);
@@ -559,8 +578,10 @@ public class StationarySequence {
         assert candidateIterator.hasNext();
         final StationarySequence result = new StationarySequence(candidateIterator.next(), candidateComparator, track);
         while (candidateIterator.hasNext()) {
-            boolean extensionOk = result.tryToExtendAfterLast(candidateIterator.next(), candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+            final Candidate nextCandidate = candidateIterator.next();
+            boolean extensionOk = result.tryToExtendAfterLast(nextCandidate, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
             assert extensionOk;
+            assert isCandidatesConsistent(nextCandidate);
         }
         return result;
     }
