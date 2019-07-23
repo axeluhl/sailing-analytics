@@ -71,7 +71,8 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
         this.estimatedWindTrack = new WindTrackWithConfidenceForEachWindFixImpl(millisecondsOverWhichToAverage,
                 DEFAULT_BASE_CONFIDENCE,
                 WindSourceType.MANEUVER_BASED_ESTIMATION.useSpeed() && polarDataService != null,
-                IncrementalMstHmmWindEstimationForTrackedRace.class.getName(), false, windTrackWithConfidences);
+                IncrementalMstHmmWindEstimationForTrackedRace.class.getSimpleName()+" "+
+                trackedRace.getRaceIdentifier(), false, windTrackWithConfidences);
         this.trackedRace = trackedRace;
         this.windSource = windSource;
         DistanceAndDurationAwareWindTransitionProbabilitiesCalculator transitionProbabilitiesCalculator = new DistanceAndDurationAwareWindTransitionProbabilitiesCalculator(
