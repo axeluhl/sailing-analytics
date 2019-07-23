@@ -95,29 +95,30 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
     public void newManeuverSpotsDetected(Competitor competitor, Iterable<CompleteManeuverCurve> newManeuvers,
             TrackTimeInfo trackTimeInfo) {
         List<ManeuverWithEstimatedType> maneuversWithEstimatedType = new ArrayList<>();
-        estimatedWindTrack.lockForWrite();
-        try {
-            for (CompleteManeuverCurve newManeuverSpot : newManeuvers) {
-                mstManeuverGraphGenerator.add(competitor, newManeuverSpot, trackTimeInfo);
+        final MstManeuverGraphComponents graphComponents;
+        for (CompleteManeuverCurve newManeuverSpot : newManeuvers) {
+            mstManeuverGraphGenerator.add(competitor, newManeuverSpot, trackTimeInfo);
+        }
+        graphComponents = mstManeuverGraphGenerator.parseGraph();
+        if (graphComponents != null) {
+            Iterable<GraphLevelInference<MstGraphLevel>> bestPath = bestPathsCalculator.getBestNodes(graphComponents);
+            for (GraphLevelInference<MstGraphLevel> inference : bestPath) {
+                ManeuverWithEstimatedType maneuverWithEstimatedType = new ManeuverWithEstimatedType(
+                        inference.getGraphLevel().getManeuver(), inference.getGraphNode().getManeuverType(),
+                        inference.getConfidence());
+                maneuversWithEstimatedType.add(maneuverWithEstimatedType);
             }
-            MstManeuverGraphComponents graphComponents = mstManeuverGraphGenerator.parseGraph();
-            if (graphComponents != null) {
-                Iterable<GraphLevelInference<MstGraphLevel>> bestPath = bestPathsCalculator.getBestNodes(graphComponents);
-                for (GraphLevelInference<MstGraphLevel> inference : bestPath) {
-                    ManeuverWithEstimatedType maneuverWithEstimatedType = new ManeuverWithEstimatedType(
-                            inference.getGraphLevel().getManeuver(), inference.getGraphNode().getManeuverType(),
-                            inference.getConfidence());
-                    maneuversWithEstimatedType.add(maneuverWithEstimatedType);
-                }
-                Collections.sort(maneuversWithEstimatedType);
-                List<WindWithConfidence<Pair<Position, TimePoint>>> newWindTrack = windTrackCalculator
-                        .getWindTrackFromManeuverClassifications(maneuversWithEstimatedType);
-                Map<Pair<Position, TimePoint>, WindWithConfidence<Pair<Position, TimePoint>>> newWindTrackMap = new HashMap<>(
-                        newWindTrack.size());
-                for (WindWithConfidence<Pair<Position, TimePoint>> wind : newWindTrack) {
-                    newWindTrackMap.put(wind.getRelativeTo(), wind);
-                }
-                List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToAdd = new ArrayList<>();
+            Collections.sort(maneuversWithEstimatedType);
+            List<WindWithConfidence<Pair<Position, TimePoint>>> newWindTrack = windTrackCalculator
+                    .getWindTrackFromManeuverClassifications(maneuversWithEstimatedType);
+            Map<Pair<Position, TimePoint>, WindWithConfidence<Pair<Position, TimePoint>>> newWindTrackMap = new HashMap<>(
+                    newWindTrack.size());
+            for (WindWithConfidence<Pair<Position, TimePoint>> wind : newWindTrack) {
+                newWindTrackMap.put(wind.getRelativeTo(), wind);
+            }
+            List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToAdd = new ArrayList<>();
+            estimatedWindTrack.lockForWrite();
+            try {
                 for (Iterator<WindWithConfidence<Pair<Position, TimePoint>>> previousWindFixesIterator = windTrackWithConfidences
                         .values().iterator(); previousWindFixesIterator.hasNext();) {
                     WindWithConfidence<Pair<Position, TimePoint>> previousWind = previousWindFixesIterator.next();
@@ -141,9 +142,9 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
                     windTrackWithConfidences.put(windFixToAdd.getRelativeTo(), windFixToAdd);
                     trackedRace.recordWind(windFixToAdd.getObject(), windSource, false);
                 }
+            } finally {
+                estimatedWindTrack.unlockAfterWrite();
             }
-        } finally {
-            estimatedWindTrack.unlockAfterWrite();
         }
     }
 
