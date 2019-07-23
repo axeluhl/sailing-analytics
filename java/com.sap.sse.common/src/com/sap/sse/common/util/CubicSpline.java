@@ -1,5 +1,6 @@
+package com.sap.sse.common.util;
+
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.function.Supplier;
 
 import com.sap.sse.common.Util;
@@ -33,15 +34,14 @@ import com.sap.sse.common.Util;
 // OTHER DEALINGS IN THE SOFTWARE.
 // </copyright>
 
-/// <summary>
-/// Cubic Spline Interpolation.
-/// </summary>
-/// <remarks>Supports both differentiation and integration.</remarks>
+/**
+ * Cubic Spline Interpolation. Supports both differentiation and integration.
+ */
 public class CubicSpline {
     /**
      * Left and right boundary conditions.
      */
-    public enum SplineBoundaryCondition {
+    public static enum SplineBoundaryCondition {
         /**
          * Natural Boundary (Zero second derivative).
          */
@@ -56,7 +56,6 @@ public class CubicSpline {
          * Fixed first derivative at the boundary.
          */
         FirstDerivative,
-    @SuppressWarnings("unused")
 
         /**
          * Fixed second derivative at the boundary.
@@ -64,18 +63,35 @@ public class CubicSpline {
         SecondDerivative
     }
     
-    final double[] _x;
-    final double[] _c0;
-    final double[] _c1;
-    final double[] _c2;
-    final double[] _c3;
+    private final double[] _x;
+    private final double[] _c0;
+    private final double[] _c1;
+    private final double[] _c2;
+    private final double[] _c3;
+    private static final double EPSILON = 0.000000000001;
+    
     Supplier<double[]>_indefiniteIntegral;
+    
+    private static boolean almostEqual(double d1, double d2) {
+        return almostEqual(d1, d2, EPSILON);
+    }
 
-    /// <param name="x">sample points (N+1), sorted ascending</param>
-    /// <param name="c0">Zero order spline coefficients (N)</param>
-    /// <param name="c1">First order spline coefficients (N)</param>
-    /// <param name="c2">second order spline coefficients (N)</param>
-    /// <param name="c3">third order spline coefficients (N)</param>
+    private static boolean almostEqual(double d1, double d2, double epsilon) {
+        return Math.abs(d1-d2)<=epsilon;
+    }
+
+    /**
+     * @param x
+     *            sample points (N+1), sorted ascending
+     * @param c0
+     *            Zero order spline coefficients (N)
+     * @param c1
+     *            First order spline coefficients (N)
+     * @param c2
+     *            second order spline coefficients (N)
+     * @param c3
+     *            third order spline coefficients (N)
+     */
     public CubicSpline(double[] x, double[] c0, double[] c1, double[] c2, double[] c3) {
         if (x.length != c0.length + 1 || x.length != c1.length + 1 || x.length != c2.length + 1
                 || x.length != c3.length + 1) {
@@ -89,14 +105,14 @@ public class CubicSpline {
         _c1 = c1;
         _c2 = c2;
         _c3 = c3;
-        _indefiniteIntegral = this::ComputeIndefiniteIntegral;
+        _indefiniteIntegral = this::computeIndefiniteIntegral;
     }
 
-    /// <summary>
-    /// Create a Hermite cubic spline interpolation from a set of (x,y) value pairs and their slope (first derivative),
-    /// sorted ascendingly by x.
-    /// </summary>
-    public static CubicSpline InterpolateHermiteSorted(double[] x, double[] y, double[] firstDerivatives) {
+    /**
+     * Create a Hermite cubic spline interpolation from a set of (x,y) value pairs and their slope (first derivative),
+     * sorted ascendingly by x.
+     */
+    public static CubicSpline interpolateHermiteSorted(double[] x, double[] y, double[] firstDerivatives) {
         if (x.length != y.length || x.length != firstDerivatives.length) {
             throw new IllegalArgumentException("Argument vectors must have same length");
         }
@@ -118,11 +134,10 @@ public class CubicSpline {
         return new CubicSpline(x, c0, c1, c2, c3);
     }
 
-    /// <summary>
-    /// Create a Hermite cubic spline interpolation from an unsorted set of (x,y) value pairs and their slope (first
-    /// derivative).
-    /// WARNING: Works in-place and can thus causes the data array to be reordered.
-    /// </summary>
+    /**
+     * Create a Hermite cubic spline interpolation from an unsorted set of (x,y) value pairs and their slope (first
+     * derivative). WARNING: Works in-place and can thus causes the data array to be reordered.
+     */
     public static CubicSpline InterpolateHermiteInplace(double[] x, double[] y, double[] firstDerivatives) {
         if (x.length != y.length || x.length != firstDerivatives.length) {
             throw new IllegalArgumentException("Argument vectors must have same length");
@@ -130,25 +145,15 @@ public class CubicSpline {
         if (x.length < 2) {
             throw new IllegalArgumentException("Array too small, must be at least two but was "+x.length);
         }
-        Collections.sort(x, y, firstDerivatives);
-        return InterpolateHermiteSorted(x, y, firstDerivatives);
+        Util.sort(x, y, firstDerivatives);
+        return interpolateHermiteSorted(x, y, firstDerivatives);
     }
 
-    /// <summary>
-    /// Create a Hermite cubic spline interpolation from an unsorted set of (x,y) value pairs and their slope (first
-    /// derivative).
-    /// </summary>
-    public static CubicSpline InterpolateHermite(IEnumerable<double> x, IEnumerable<double> y, IEnumerable<double> firstDerivatives)
-        {
-            // note: we must make a copy, even if the input was arrays already
-            return InterpolateHermiteInplace(x.ToArray(), y.ToArray(), firstDerivatives.ToArray());
-        }
-
-    /// <summary>
-    /// Create an Akima cubic spline interpolation from a set of (x,y) value pairs, sorted ascendingly by x.
-    /// Akima splines are robust to outliers.
-    /// </summary>
-    public static CubicSpline InterpolateAkimaSorted(double[] x, double[] y) {
+    /**
+     * Create an Akima cubic spline interpolation from a set of (x,y) value pairs, sorted ascendingly by x. Akima
+     * splines are robust to outliers.
+     */
+    public static CubicSpline interpolateAkimaSorted(double[] x, double[] y) {
         if (x.length != y.length) {
             throw new IllegalArgumentException("Argument vectors must have same length");
         }
@@ -167,36 +172,35 @@ public class CubicSpline {
         /* Prepare Hermite interpolation scheme */
         final double[] dd = new double[x.length];
         for (int i = 2; i < dd.length - 2; i++) {
-            dd[i] = weights[i - 1].AlmostEqual(0.0) && weights[i + 1].AlmostEqual(0.0)
+            dd[i] = almostEqual(weights[i - 1], 0.0) && almostEqual(weights[i + 1], 0.0)
                     ? (((x[i + 1] - x[i]) * diff[i - 1]) + ((x[i] - x[i - 1]) * diff[i])) / (x[i + 1] - x[i - 1])
                     : ((weights[i + 1] * diff[i - 1]) + (weights[i - 1] * diff[i])) / (weights[i + 1] + weights[i - 1]);
         }
-        dd[0] = DifferentiateThreePoint(x, y, 0, 0, 1, 2);
-        dd[1] = DifferentiateThreePoint(x, y, 1, 0, 1, 2);
-        dd[x.length - 2] = DifferentiateThreePoint(x, y, x.length - 2, x.length - 3, x.length - 2, x.length - 1);
-        dd[x.length - 1] = DifferentiateThreePoint(x, y, x.length - 1, x.length - 3, x.length - 2, x.length - 1);
+        dd[0] = differentiateThreePoint(x, y, 0, 0, 1, 2);
+        dd[1] = differentiateThreePoint(x, y, 1, 0, 1, 2);
+        dd[x.length - 2] = differentiateThreePoint(x, y, x.length - 2, x.length - 3, x.length - 2, x.length - 1);
+        dd[x.length - 1] = differentiateThreePoint(x, y, x.length - 1, x.length - 3, x.length - 2, x.length - 1);
         /* Build Akima spline using Hermite interpolation scheme */
-        return InterpolateHermiteSorted(x, y, dd);
+        return interpolateHermiteSorted(x, y, dd);
     }
 
-    /// <summary>
-    /// Create an Akima cubic spline interpolation from an unsorted set of (x,y) value pairs.
-    /// Akima splines are robust to outliers.
-    /// WARNING: Works in-place and can thus causes the data array to be reordered.
-    /// </summary>
-    public static CubicSpline InterpolateAkimaInplace(double[] x, double[] y) {
+    /**
+     * Create an Akima cubic spline interpolation from an unsorted set of (x,y) value pairs. Akima splines are robust to
+     * outliers. WARNING: Works in-place and can thus causes the data array to be reordered.
+     */
+    public static CubicSpline interpolateAkimaInplace(double[] x, double[] y) {
         if (x.length != y.length) {
             throw new IllegalArgumentException("Argument vectors must have same length");
         }
-        Sorting.Sort(x, y);
-        return InterpolateAkimaSorted(x, y);
+        Util.sort(x, y);
+        return interpolateAkimaSorted(x, y);
     }
 
-    /// <summary>
-    /// Create a cubic spline interpolation from a set of (x,y) value pairs, sorted ascendingly by x,
-    /// and custom boundary/termination conditions.
-    /// </summary>
-    public static CubicSpline InterpolateBoundariesSorted(double[] x, double[] y,
+    /**
+     * Create a cubic spline interpolation from a set of (x,y) value pairs, sorted ascendingly by x, and custom
+     * boundary/termination conditions.
+     */
+    public static CubicSpline interpolateBoundariesSorted(double[] x, double[] y,
             SplineBoundaryCondition leftBoundaryCondition, double leftBoundary,
             SplineBoundaryCondition rightBoundaryCondition, double rightBoundary) {
         if (x.length != y.length) {
@@ -283,30 +287,37 @@ public class CubicSpline {
         }
 
         // Build Spline
-        double[] dd = SolveTridiagonal(a1, a2, a3, b);
-        return InterpolateHermiteSorted(x, y, dd);
+        double[] dd = solveTridiagonal(a1, a2, a3, b);
+        return interpolateHermiteSorted(x, y, dd);
     }
 
-    /// <summary>
-    /// Create a natural cubic spline interpolation from a set of (x,y) value pairs
-    /// and zero second derivatives at the two boundaries, sorted ascendingly by x.
-    /// </summary>
-    public static CubicSpline InterpolateNaturalSorted(double[] x, double[] y) {
-        return InterpolateBoundariesSorted(x, y, SplineBoundaryCondition.SecondDerivative, 0.0,
+    /**
+     * Create a natural cubic spline interpolation from a set of (x,y) value pairs and zero second derivatives at the
+     * two boundaries, sorted ascendingly by x.
+     */
+    public static CubicSpline interpolateNaturalSorted(double[] x, double[] y) {
+        return interpolateBoundariesSorted(x, y, SplineBoundaryCondition.SecondDerivative, 0.0,
                 SplineBoundaryCondition.SecondDerivative, 0.0);
     }
 
-    /// <summary>
-    /// Three-Point Differentiation Helper.
-    /// </summary>
-    /// <param name="xx">Sample Points t.</param>
-    /// <param name="yy">Sample Values x(t).</param>
-    /// <param name="indexT">Index of the point of the differentiation.</param>
-    /// <param name="index0">Index of the first sample.</param>
-    /// <param name="index1">Index of the second sample.</param>
-    /// <param name="index2">Index of the third sample.</param>
-    /// <returns>The derivative approximation.</returns>
-    static double DifferentiateThreePoint(double[] xx, double[] yy, int indexT, int index0, int index1, int index2) {
+    /**
+     * Three-Point Differentiation Helper.
+     * 
+     * @param xx
+     *            Sample Points t.
+     * @param yy
+     *            Sample Values x(t).
+     * @param indexT
+     *            Index of the point of the differentiation.
+     * @param index0
+     *            Index of the first sample.
+     * @param index1
+     *            Index of the second sample.
+     * @param index2
+     *            Index of the third sample.
+     * @return The derivative approximation.
+     */
+    private static double differentiateThreePoint(double[] xx, double[] yy, int indexT, int index0, int index1, int index2) {
         double x0 = yy[index0];
         double x1 = yy[index1];
         double x2 = yy[index2];
@@ -318,15 +329,20 @@ public class CubicSpline {
         return (2 * a * t) + b;
     }
 
-    /// <summary>
-    /// Tridiagonal Solve Helper.
-    /// </summary>
-    /// <param name="a">The a-vector[n].</param>
-    /// <param name="b">The b-vector[n], will be modified by this function.</param>
-    /// <param name="c">The c-vector[n].</param>
-    /// <param name="d">The d-vector[n], will be modified by this function.</param>
-    /// <returns>The x-vector[n]</returns>
-    static double[] SolveTridiagonal(double[] a, double[] b, double[] c, double[] d) {
+    /**
+     * Tridiagonal Solve Helper.
+     * 
+     * @param a
+     *            The a-vector[n].
+     * @param b
+     *            The b-vector[n], will be modified by this function.
+     * @param c
+     *            The c-vector[n].
+     * @param d
+     *            The d-vector[n], will be modified by this function.
+     * @return The x-vector[n]
+     */
+    private static double[] solveTridiagonal(double[] a, double[] b, double[] c, double[] d) {
         for (int k = 1; k < a.length; k++) {
             double t = a[k] / b[k - 1];
             b[k] = b[k] - (t * c[k - 1]);
@@ -340,59 +356,66 @@ public class CubicSpline {
         return x;
     }
 
-    /// <summary>
-    /// Interpolate at point t.
-    /// </summary>
-    /// <param name="t">Point t to interpolate at.</param>
-    /// <returns>Interpolated value x(t).</returns>
-    public double Interpolate(double t) {
-        int k = LeftSegmentIndex(t);
+    /**
+     * Interpolate at point t.
+     * 
+     * @param t
+     *            Point t to interpolate at.
+     * @return Interpolated value x(t).
+     */
+    public double interpolate(double t) {
+        int k = leftSegmentIndex(t);
         final double x = t - _x[k];
         return _c0[k] + x * (_c1[k] + x * (_c2[k] + x * _c3[k]));
     }
 
-    /// <summary>
-    /// Differentiate at point t.
-    /// </summary>
-    /// <param name="t">Point t to interpolate at.</param>
-    /// <returns>Interpolated first derivative at point t.</returns>
-    public double Differentiate(double t) {
-        int k = LeftSegmentIndex(t);
+    /**
+     * Differentiate at point t.
+     * @param t Point t to interpolate at.
+     * @return Interpolated first derivative at point t.
+     */
+    public double differentiate(double t) {
+        int k = leftSegmentIndex(t);
         final double x = t - _x[k];
         return _c1[k] + x * (2 * _c2[k] + x * 3 * _c3[k]);
     }
 
-    /// <summary>
-    /// Differentiate twice at point t.
-    /// </summary>
-    /// <param name="t">Point t to interpolate at.</param>
-    /// <returns>Interpolated second derivative at point t.</returns>
-    public double Differentiate2(double t) {
-        int k = LeftSegmentIndex(t);
+    /**
+     * Differentiate twice at point t.
+     * @param t Point t to interpolate at.
+     * @return Interpolated second derivative at point t.
+     */
+    public double differentiate2(double t) {
+        int k = leftSegmentIndex(t);
         final double x = t - _x[k];
         return 2 * _c2[k] + x * 6 * _c3[k];
     }
 
-    /// <summary>
-    /// Indefinite integral at point t.
-    /// </summary>
-    /// <param name="t">Point t to integrate at.</param>
-    public double Integrate(double t) {
-        int k = LeftSegmentIndex(t);
+    /**
+     * Indefinite integral at point t.
+     * 
+     * @param t
+     *            Point t to integrate at.
+     */
+    public double integrate(double t) {
+        int k = leftSegmentIndex(t);
         final double x = t - _x[k];
         return _indefiniteIntegral.get()[k] + x * (_c0[k] + x * (_c1[k] / 2 + x * (_c2[k] / 3 + x * _c3[k] / 4)));
     }
 
-    /// <summary>
-    /// Definite integral between points a and b.
-    /// </summary>
-    /// <param name="a">Left bound of the integration interval [a,b].</param>
-    /// <param name="b">Right bound of the integration interval [a,b].</param>
-    public double Integrate(double a, double b) {
-        return Integrate(b) - Integrate(a);
+    /**
+     * Definite integral between points a and b.
+     * 
+     * @param a
+     *            Left bound of the integration interval [a,b].
+     * @param bRight
+     *            bound of the integration interval [a,b].
+     */
+    public double integrate(double a, double b) {
+        return integrate(b) - integrate(a);
     }
 
-    private double[] ComputeIndefiniteIntegral() {
+    private double[] computeIndefiniteIntegral() {
         final double[] integral = new double[_c1.length];
         for (int i = 0; i < integral.length - 1; i++) {
             double w = _x[i + 1] - _x[i];
@@ -401,11 +424,11 @@ public class CubicSpline {
         return integral;
     }
 
-    /// <summary>
-    /// Find the index of the greatest sample point smaller than t,
-    /// or the left index of the closest segment for extrapolation.
-    /// </summary>
-    private int LeftSegmentIndex(double t) {
+    /**
+     * Find the index of the greatest sample point smaller than t, or the left index of the closest segment for
+     * extrapolation.
+     */
+    private int leftSegmentIndex(double t) {
         int index = Arrays.binarySearch(_x, t);
         if (index < 0) {
             index = ~index - 1;

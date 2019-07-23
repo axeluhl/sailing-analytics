@@ -7,7 +7,6 @@ import org.apache.commons.math.MaxIterationsExceededException;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
-import com.sap.sse.common.TimePoint;
 
 /**
  * For a {@link Competitor} and the {@link ORCPerformanceCurveCourse} which the competitor sailed until the creation of
