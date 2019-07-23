@@ -168,7 +168,8 @@ public class EventsResource extends AbstractSailingServerResource {
             @FormParam("numberofraces") String numberOfRacesParam,
             @FormParam("canBoatsOfCompetitorsChangePerRace") boolean canBoatsOfCompetitorsChangePerRace,
             @FormParam("competitorRegistrationType") String competitorRegistrationType,
-            @FormParam("secret") String competitorRegistrationSecret) throws ParseException, NotFoundException,
+            @FormParam("secret") String competitorRegistrationSecret,
+            @FormParam("rankingMetric") String rankingMetricParam) throws ParseException, NotFoundException,
             NumberFormatException, IOException, org.json.simple.parser.ParseException, InvalidDateException {
         final Response response;
         if (venueNameParam == null && (venueLat == null || venueLng == null)) {
@@ -178,7 +179,8 @@ public class EventsResource extends AbstractSailingServerResource {
                     startDateAsMillis, endDateParam, endDateAsMillis, venueNameParam,
                     /* venue latitude */ venueLat, /* venue longitude */ venueLng, isPublicParam, officialWebsiteURLParam,
                     baseURLParam, leaderboardGroupIdsListParam, createLeaderboardGroupParam, createRegattaParam,
-                    boatClassNameParam, numberOfRacesParam, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, competitorRegistrationSecret);
+                    boatClassNameParam, numberOfRacesParam, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, competitorRegistrationSecret,
+                    rankingMetricParam);
             final JSONObject jsonResponse = new JSONObject();
             jsonResponse.put("eventid", eventAndLeaderboardGroupAndLeaderboard.getA().getId().toString());
             jsonResponse.put("eventname", eventAndLeaderboardGroupAndLeaderboard.getA().getName());
@@ -443,7 +445,7 @@ public class EventsResource extends AbstractSailingServerResource {
             String isPublicParam, String officialWebsiteURLParam, String baseURLParam,
             List<String> leaderboardGroupIdsListParam, String createLeaderboardGroupParam, String createRegattaParam,
             String boatClassName, String numberOfRacesParam, boolean canBoatsOfCompetitorsChangePerRace,
-            String competitorRegistrationTypeString, String competitorRegistrationSecret)
+            String competitorRegistrationTypeString, String competitorRegistrationSecret, String rankingMetric)
             throws ParseException, NotFoundException, NumberFormatException, IOException,
             org.json.simple.parser.ParseException, InvalidDateException {
         boolean isPublic = isPublicParam == null ? false : Boolean.parseBoolean(isPublicParam);
@@ -518,7 +520,7 @@ public class EventsResource extends AbstractSailingServerResource {
                     leaderboard = validateAndCreateRegatta(regattaAndLeaderboardName, boatClassName,
                             /* scoringSchemeParam */ null, courseArea.getId(), /* buoyZoneRadiusInHullLengthsParam */ null,
                             /* useStartTimeInterferenceParam */ null, /* controlTrackingFromStartAndFinishTimesParam */ null,
-                            /* rankingMetricParam */ null, /* leaderboardDiscardThresholdsParam */ null,
+                            /* rankingMetricParam */ rankingMetric, /* leaderboardDiscardThresholdsParam */ null,
                             numberOfRacesParam, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType,
                             localCompetitorRegistrationSecret);
                     if (leaderboardGroup != null) {
