@@ -51,8 +51,10 @@ public class IncrementalMstManeuverGraphGenerator extends MstManeuverGraphGenera
 
     /**
      * Adds a new maneuver classification to MST if the quality requirements are satisfied by the provided maneuver.
+     * Uses synchronization to lock against concurrent execution of this {@link #add(Competitor, CompleteManeuverCurve, TrackTimeInfo)}
+     * method
      */
-    public void add(Competitor competitor, CompleteManeuverCurve newManeuver, TrackTimeInfo trackTimeInfo) {
+    public synchronized void add(Competitor competitor, CompleteManeuverCurve newManeuver, TrackTimeInfo trackTimeInfo) {
         ManeuverDataOfCompetitor maneuverData = maneuverDataPerCompetitor.get(competitor);
         if (maneuverData == null) {
             maneuverData = new ManeuverDataOfCompetitor();
@@ -124,7 +126,7 @@ public class IncrementalMstManeuverGraphGenerator extends MstManeuverGraphGenera
     }
 
     @Override
-    public MstManeuverGraphComponents parseGraph() {
+    public synchronized MstManeuverGraphComponents parseGraph() {
         List<ManeuverWithProbabilisticTypeClassification> nonTemporaryNodes = new ArrayList<>();
         List<ManeuverWithProbabilisticTypeClassification> temporaryNodes = new ArrayList<>();
         for (ManeuverDataOfCompetitor maneuverData : maneuverDataPerCompetitor.values()) {
