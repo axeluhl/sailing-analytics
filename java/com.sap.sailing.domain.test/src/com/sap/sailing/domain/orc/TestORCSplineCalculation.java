@@ -11,20 +11,20 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sse.common.TimePoint;
 
 /**
- * This test class has the goal to show the accuracy of the used splining method. The spline is calculated when creating
- * a {@link ORCPerformanceCurve} for a {@link Competitor} for a given {@link TimePoint} on the {@link Course}. <br>
- * <br>
- * The used course in here consists out of the following legs:<br>
- * [No. | TWA | length] <br>
- * - 1. | 010° | 2.23nm <br>
- * - 2. | 170° | 2.00nm <br>
- * - 3. | 000° | 0.97nm <br>
- * - 4. | 015° | 1.03nm <br>
- * - 5. | 165° | 1.03nm <br>
- * - 6. | 180° | 1.17nm <br>
- * -------------------- <br>
- * Total Length: 8.43nm <br>
- * <br>
+ * This test class has the goal to show the accuracy of the splining method used. The spline is calculated when creating
+ * an {@link ORCPerformanceCurve} for a {@link Competitor} for a given {@link TimePoint} on the {@link Course}.<p>
+ * 
+ * The used course in here consists out of the following legs:<pre>
+ * [No. | TWA | length]
+ * - 1. | 010° | 2.23nm
+ * - 2. | 170° | 2.00nm
+ * - 3. | 000° | 0.97nm
+ * - 4. | 015° | 1.03nm
+ * - 5. | 165° | 1.03nm
+ * - 6. | 180° | 1.17nm
+ * --------------------
+ * Total Length: 8.43nm
+ * </pre>
  * 
  * The calculated velocity predictions for the total course used in the interpolation are calculated correctly. These
  * velocitys are checked with the values from Manage2Sail/SwissTiming and the used ORC certificates are from the 15th
