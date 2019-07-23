@@ -2,8 +2,13 @@ package com.sap.sailing.domain.orc;
 
 import static org.junit.Assert.assertEquals;
 
+import org.apache.commons.math3.analysis.FunctionUtils;
+import org.apache.commons.math3.analysis.differentiation.UnivariateDifferentiableFunction;
+import org.apache.commons.math3.analysis.function.Constant;
 import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;
+import org.apache.commons.math3.analysis.interpolation.HermiteInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+import org.apache.commons.math3.analysis.solvers.NewtonRaphsonSolver;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -28,26 +33,38 @@ import com.sap.sse.common.TimePoint;
  * 
  * The calculated velocity predictions for the total course used in the interpolation are calculated correctly. These
  * velocities are checked with the values from Manage2Sail/SwissTiming and the used ORC certificates are from the 15th
- * July 2019.
+ * July 2019.<p>
+ * 
+ * Note that the ORC PCS algorithm prescribes two additional knots in the spline input: one at (0, 0) and one at
+ * (10000, &lt;value-for-20kts&gt;).
  * 
  * @author Daniel Lisunkin (i505543)
  *
  */
 public class TestORCSplineCalculation {
 
-    private static final double[] xn = { 0, 6, 8, 10, 12, 14, 16, 20, 1000 };
-    private static final double totalLength = 8.43;
+    private static final double[] xn = { 0, 6, 8, 10, 12, 14, 16, 20, 10000 };
+    private static final double totalCourseLengthInNauticalMiles = 8.43;
     private static final double accuracy = 0.00001;
 
     @Test
     public void testMoana() {
         assertEquals(1.5, interpolate(new double[] {0, 4.641211342235869, 5.736695797981516, 6.546702285181061, 7.02579946374626, 7.298101614710148, 7.608915286969485, 8.275181564996913, 8.275181564996913}, 7.62180), accuracy);
-
+    }
+    
+    @Test
+    public void testMoanaInverse() {
+        assertEquals(7.62180, interpolate(1.5, new double[] {0, 4.641211342235869, 5.736695797981516, 6.546702285181061, 7.02579946374626, 7.298101614710148, 7.608915286969485, 8.275181564996913, 8.275181564996913}), accuracy);
     }
     
     @Test
     public void testMilan() { //currently M2S Values, not SAP
         assertEquals(1.0, interpolate(new double[] {0, 5.33185058489951, 6.6728248852317, 7.6093958376704, 8.22730088526476, 8.72313604446258, 9.26000390485965, 10.2627508086351, 10.2627508086351}, 12.80881), accuracy);
+    }
+    
+    @Test
+    public void testMilanInverse() { //currently M2S Values, not SAP
+        assertEquals(12.80881, interpolate(1.0, new double[] {0, 5.33185058489951, 6.6728248852317, 7.6093958376704, 8.22730088526476, 8.72313604446258, 9.26000390485965, 10.2627508086351, 10.2627508086351}), accuracy);
     }
     
     @Test
@@ -73,10 +90,18 @@ public class TestORCSplineCalculation {
     // for a given implied wind, we expect to get back the velocity prediction for the whole course. The total Course
     // Length can be divided with the prediction to get the Allowance in hours.
     private double interpolate(double[] yn, double input) {
-        AkimaSplineInterpolator interpolator = new AkimaSplineInterpolator();
-        PolynomialSplineFunction function = interpolator.interpolate(xn, yn);
-        
-        return totalLength / function.value(input);
+        final AkimaSplineInterpolator interpolator = new AkimaSplineInterpolator();
+        final PolynomialSplineFunction function = interpolator.interpolate(xn, yn);
+        return totalCourseLengthInNauticalMiles / function.value(input);
     }
 
+    private double interpolate(double durationInHours, double[] yn) {
+        final HermiteInterpolator interpolator = new HermiteInterpolator();
+        final PolynomialSplineFunction function = interpolator.interpolate(xn, yn);
+        final Constant averageSpeedInKnots = new Constant(totalCourseLengthInNauticalMiles / durationInHours);
+        final NewtonRaphsonSolver newtonSolver = new NewtonRaphsonSolver(0.0000000001);
+        final UnivariateDifferentiableFunction targetZeroFunction = FunctionUtils.add(function, FunctionUtils.multiply(
+                (UnivariateDifferentiableFunction) averageSpeedInKnots, (UnivariateDifferentiableFunction) new Constant(-1))); 
+        return newtonSolver.solve(1000, targetZeroFunction, 10 /* knots of true wind speed */);
+    }
 }
