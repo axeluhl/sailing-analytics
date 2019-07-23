@@ -22,7 +22,9 @@ import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -55,6 +57,7 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         writeCommonLeaderboardData(jsonLeaderboard, leaderboard, resultState, null, maxCompetitorsCount);
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
+        addDiscardsIfAvaliable(leaderboard, jsonLeaderboard);
         for (Competitor competitor : leaderboard.getCompetitors()) {
             JSONObject jsonCompetitor = new JSONObject();
             jsonCompetitor.put("name", competitor.getName());
@@ -90,6 +93,18 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
             }
         }
         return jsonLeaderboard;
+    }
+
+    protected void addDiscardsIfAvaliable(Leaderboard leaderboard, JSONObject jsonLeaderboard) {
+        ResultDiscardingRule resultDiscardingRule = leaderboard.getResultDiscardingRule();
+        if (resultDiscardingRule instanceof ThresholdBasedResultDiscardingRule) {
+            final ThresholdBasedResultDiscardingRule thresholdBasedResultDiscardingRule = (ThresholdBasedResultDiscardingRule) resultDiscardingRule;
+            JSONArray discardIndices = new JSONArray();
+            jsonLeaderboard.put("discardIndexResultsStartingWithHowManyRaces", discardIndices);
+            for (int index : thresholdBasedResultDiscardingRule.getDiscardIndexResultsStartingWithHowManyRaces()) {
+                discardIndices.add(index);
+            }
+        }
     }
     
     protected void writeCompetitorBaseData(JSONObject jsonCompetitor, CompetitorDTO competitor, LeaderboardDTO leaderboard, boolean competitorAndBoatIdsOnly) {

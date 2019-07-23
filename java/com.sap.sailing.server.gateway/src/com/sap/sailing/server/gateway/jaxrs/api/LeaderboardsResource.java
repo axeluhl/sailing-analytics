@@ -231,6 +231,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         writeCommonLeaderboardData(jsonLeaderboard, leaderboard, resultState, leaderboardDTO.getTimePoint(), maxCompetitorsCount);
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
+        addDiscardsIfAvaliable(leaderboard, jsonLeaderboard);
         jsonLeaderboard.put("ShardingLeaderboardName", ShardingType.LEADERBOARDNAME.encodeIfNeeded(leaderboard.getName()));
         int counter = 1;
         for (CompetitorDTO competitor : leaderboardDTO.competitors) {
