@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,7 +41,8 @@ public class TestORCPerformanceCurve {
     private final boolean collectErrors = true;
     
     private static ORCPerformanceCurveCourse alturaCourse;
-    private static ORCCertificateImporter importer;
+    private static ORCCertificateImporter importerLocal;
+    private static ORCCertificateImporter importerOnline;
     
     private static final String RESOURCES = "resources/orc/";
 
@@ -70,39 +72,39 @@ public class TestORCPerformanceCurve {
         
         // Local File:
         File fileGER = new File(RESOURCES + "GER2019.json");
-        importer = new ORCCertificateImporterJSON(new FileInputStream(fileGER));
+        importerLocal = new ORCCertificateImporterJSON(new FileInputStream(fileGER));
         
-        // Online File:         uncomment the following line to use online file instead
-        // importer = new ORCCertificateImporterJSON(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
+        // Online File:
+        importerOnline = new ORCCertificateImporterJSON(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
     }
     
     @Test
     public void testLagrangeInterpolation60() throws FunctionEvaluationException {
-        ORCCertificate certificate = importer.getCertificate("GER 5549");
+        ORCCertificate certificate = importerLocal.getCertificate("GER 5549");
         testAllowancePerLeg(certificate, 60.0, 498.4);
     }
     
     @Test
     public void testLagrangeInterpolation62_5() throws FunctionEvaluationException {
-        ORCCertificate certificate = importer.getCertificate("GER 5549");
+        ORCCertificate certificate = importerLocal.getCertificate("GER 5549");
         testAllowancePerLeg(certificate, 62.5, 492.2, 425.0, 403.6, 393.1, 386.7, 382.6, 371.4);
     }
     
     @Test
     public void testLagrangeInterpolation98_3() throws FunctionEvaluationException {
-        ORCCertificate certificate = importer.getCertificate("GER 5549");
+        ORCCertificate certificate = importerLocal.getCertificate("GER 5549");
         testAllowancePerLeg(certificate, 98.3, 483.6, 418.7, 394.8, 377.9, 360.2, 345.0, 321.7);
     }
     
     @Test
     public void testLagrangeInterpolation120() throws FunctionEvaluationException {
-        ORCCertificate certificate = importer.getCertificate("GER 5549");
+        ORCCertificate certificate = importerLocal.getCertificate("GER 5549");
         testAllowancePerLeg(certificate, 120.0, 506);
     }
     
     @Test
     public void testLagrangeInterpolation138_7() throws FunctionEvaluationException {
-        ORCCertificate certificate = importer.getCertificate("GER 5549");
+        ORCCertificate certificate = importerLocal.getCertificate("GER 5549");
         testAllowancePerLeg(certificate, 138.7, 588.1, 468.4, 413.8, 382.6, 355.1, 326.4, 275.4);
     }
     
@@ -117,7 +119,7 @@ public class TestORCPerformanceCurve {
     
     @Test
     public void testSimpleConstructedCourse() throws FunctionEvaluationException {
-        ORCCertificateImpl certificate = (ORCCertificateImpl) importer.getCertificate("GER 5549");
+        ORCCertificateImpl certificate = (ORCCertificateImpl) importerLocal.getCertificate("GER 5549");
         List<ORCPerformanceCurveLeg> legs = new ArrayList<>();
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.0), new DegreeBearingImpl(0)));
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.0), new DegreeBearingImpl(30)));
@@ -140,7 +142,7 @@ public class TestORCPerformanceCurve {
     @Test
     public void testPerformanceCurveInversion() throws MaxIterationsExceededException, FunctionEvaluationException {
         Double accuracy = 0.1;
-        ORCCertificateImpl certificate = (ORCCertificateImpl) importer.getCertificate("GER 5549");
+        ORCCertificateImpl certificate = (ORCCertificateImpl) importerLocal.getCertificate("GER 5549");
         ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(alturaCourse);
         testBackwardForward(accuracy, performanceCurve, 11.5);
         testBackwardForward(accuracy, performanceCurve, 17.23);
@@ -169,12 +171,12 @@ public class TestORCPerformanceCurve {
     @Test
     public void testImpliedWindSimple() throws MaxIterationsExceededException, FunctionEvaluationException {
        double accuracy = 0.1;
-       ORCCertificate certificateMoana          = importer.getCertificate("GER 5549");
-       ORCCertificate certificateMilan          = importer.getCertificate("GER 7323");
-       ORCCertificate certificateTutima         = importer.getCertificate("GER 5609");
-       ORCCertificate certificateBank           = importer.getCertificate("GER 5555");
-       ORCCertificate certificateHaspa          = importer.getCertificate("GER 6300");
-       ORCCertificate certificateHalbtrocken    = importer.getCertificate("GER 5564");
+       ORCCertificate certificateMoana          = importerLocal.getCertificate("GER 5549");
+       ORCCertificate certificateMilan          = importerLocal.getCertificate("GER 7323");
+       ORCCertificate certificateTutima         = importerLocal.getCertificate("GER 5609");
+       ORCCertificate certificateBank           = importerLocal.getCertificate("GER 5555");
+       ORCCertificate certificateHaspa          = importerLocal.getCertificate("GER 6300");
+       ORCCertificate certificateHalbtrocken    = importerLocal.getCertificate("GER 5564");
        ORCPerformanceCurve performanceCurveMoana        = certificateMoana.getPerformanceCurve(alturaCourse);
        ORCPerformanceCurve performanceCurveMilan        = certificateMilan.getPerformanceCurve(alturaCourse);
        ORCPerformanceCurve performanceCurveTutima       = certificateTutima.getPerformanceCurve(alturaCourse);
@@ -207,12 +209,12 @@ public class TestORCPerformanceCurve {
     @Test
     public void testAllowances() throws FunctionEvaluationException {
         double accuracy = 0.00001;
-        ORCCertificate certificateMoana          = importer.getCertificate("GER 5549");
-        ORCCertificate certificateMilan          = importer.getCertificate("GER 7323");
-        ORCCertificate certificateTutima         = importer.getCertificate("GER 5609");
-        ORCCertificate certificateBank           = importer.getCertificate("GER 5555");
-        ORCCertificate certificateHaspa          = importer.getCertificate("GER 6300");
-        ORCCertificate certificateHalbtrocken    = importer.getCertificate("GER 5564");
+        ORCCertificate certificateMoana          = importerLocal.getCertificate("GER 5549");
+        ORCCertificate certificateMilan          = importerLocal.getCertificate("GER 7323");
+        ORCCertificate certificateTutima         = importerLocal.getCertificate("GER 5609");
+        ORCCertificate certificateBank           = importerLocal.getCertificate("GER 5555");
+        ORCCertificate certificateHaspa          = importerLocal.getCertificate("GER 6300");
+        ORCCertificate certificateHalbtrocken    = importerLocal.getCertificate("GER 5564");
         ORCPerformanceCurve performanceCurveMoana        = certificateMoana.getPerformanceCurve(alturaCourse);
         ORCPerformanceCurve performanceCurveMilan        = certificateMilan.getPerformanceCurve(alturaCourse);
         ORCPerformanceCurve performanceCurveTutima       = certificateTutima.getPerformanceCurve(alturaCourse);
@@ -226,5 +228,22 @@ public class TestORCPerformanceCurve {
         assertEquals(Duration.ONE_HOUR.times(1.5).asHours(), performanceCurveMoana.getAllowancePerCourse(new KnotSpeedImpl(7.76218)).asHours(), accuracy);
         assertEquals(Duration.ONE_HOUR.times(2.0).asHours(), performanceCurveHalbtrocken.getAllowancePerCourse(new KnotSpeedImpl(7.62407)).asHours(), accuracy);
    }
+    
+    // Tests to make sure, that the structure of the certificate files didn't change and performance curves can be build
+    @Test
+    public void testOnlineImport() throws FunctionEvaluationException {
+        ORCCertificate certificateMoana          = importerOnline.getCertificate("GER 5549");
+        ORCCertificate certificateMilan          = importerOnline.getCertificate("GER 7323");
+        ORCCertificate certificateTutima         = importerOnline.getCertificate("GER 5609");
+        ORCCertificate certificateBank           = importerOnline.getCertificate("GER 5555");
+        ORCCertificate certificateHaspa          = importerOnline.getCertificate("GER 6300");
+        ORCCertificate certificateHalbtrocken    = importerOnline.getCertificate("GER 5564");
+        certificateMoana.getPerformanceCurve(alturaCourse);
+        certificateMilan.getPerformanceCurve(alturaCourse);
+        certificateTutima.getPerformanceCurve(alturaCourse);
+        certificateBank.getPerformanceCurve(alturaCourse);
+        certificateHaspa.getPerformanceCurve(alturaCourse);
+        certificateHalbtrocken.getPerformanceCurve(alturaCourse);
+    }
     
 }
