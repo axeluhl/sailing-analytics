@@ -90,6 +90,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.ThreadPoolUtil;
 import com.sap.sse.util.impl.FutureTaskWithTracingGet;
 
@@ -358,7 +359,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             final boolean fillTotalPointsUncorrected)
             throws NoWindException {
         ShardingContext.checkConstraint(ShardingType.LEADERBOARDNAME, getName());
-        long startOfRequestHandling = System.currentTimeMillis();
+        final TimePoint startOfRequestHandling = MillisecondsTimePoint.now();
         final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
         final BoatClass boatClass = getBoatClass();
         final LeaderboardDTO result = new LeaderboardDTO(timePoint.asDate(), this.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ? null
@@ -530,12 +531,25 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 }
             }
         }
+        final Duration computeTime = startOfRequestHandling.until(MillisecondsTimePoint.now());
         logger.info("computeLeaderboardByName(" + this.getName() + ", " + timePoint + ", "
                 + namesOfRaceColumnsForWhichToLoadLegDetails + ", addOverallDetails=" + addOverallDetails + ") took "
-                + (System.currentTimeMillis() - startOfRequestHandling) + "ms");
+                + computeTime);
+        updateStats(timePoint, startOfRequestHandling, computeTime);
         return result;
     }
  
+    /**
+     * Updates statistics about how long it took to compute DTOs for this leaderboard.
+     * 
+     * @param forTimePoint the "validity" time point for which the leaderboard DTO was computed
+     * @param startOfRequestHandling when the request to compute the DTO was received
+     * @param computeDuration how long it took to complete the DTO calculation request
+     */
+    private void updateStats(TimePoint forTimePoint, TimePoint startOfRequestHandling, Duration computeDuration) {
+        
+    }
+
     private Integer getTotalRaces(Competitor competitor, LeaderboardRowDTO row, TimePoint timePoint) {
         int amount = 0;
         for (RaceColumn raceColumn : getRaceColumns()) {
