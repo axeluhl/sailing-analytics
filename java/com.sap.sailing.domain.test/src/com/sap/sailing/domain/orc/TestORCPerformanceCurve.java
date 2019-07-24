@@ -168,7 +168,7 @@ public class TestORCPerformanceCurve {
     // Tests for a Implied Wind calculation for a simple predefined course. The solutions are extracted from the provided ORC TestPCS.exe application. 
     @Test
     public void testImpliedWindSimple() throws MaxIterationsExceededException, FunctionEvaluationException {
-       double accuracy = 0.00000001;
+       double accuracy = 0.00001;
        ORCCertificate certificateMoana          = importer.getCertificate("GER 5549");
        ORCCertificate certificateMilan          = importer.getCertificate("GER 7323");
        ORCCertificate certificateTutima         = importer.getCertificate("GER 5609");

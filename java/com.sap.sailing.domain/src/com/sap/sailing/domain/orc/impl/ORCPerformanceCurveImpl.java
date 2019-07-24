@@ -13,10 +13,12 @@ import org.apache.commons.math.ArgumentOutsideDomainException;
 import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.MaxIterationsExceededException;
 import org.apache.commons.math.analysis.polynomials.PolynomialFunctionLagrangeForm;
+import org.apache.commons.math3.analysis.FunctionUtils;
+import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
+import org.apache.commons.math3.analysis.differentiation.UnivariateDifferentiableFunction;
+import org.apache.commons.math3.analysis.function.Constant;
 import org.apache.commons.math3.analysis.solvers.NewtonRaphsonSolver;
-import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;
-import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
-import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+import org.apache.commons.math3.exception.DimensionMismatchException;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
@@ -28,6 +30,8 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.SecondsDurationImpl;
+import com.sap.sse.common.util.CubicSpline;
+import com.sap.sse.common.util.CubicSpline.SplineBoundaryCondition;
 
 /**
  * For a {@link Competitor} and the {@link ORCPerformanceCurveCourse} which the competitor sailed until the creation of
@@ -64,7 +68,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      * calculated points. The input for the function is the value of the implied wind (speed in kts) and the output an
      * allowance in sec/nm.
      */
-    private final PolynomialSplineFunction functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse;
+    private final UnivariateDifferentiableFunction functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse;
 
     /**
      * Accepts the simplified polar data, one "column" for each of the defined true wind speeds, where each column is a
@@ -96,12 +100,11 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      * assumed at 10000kts true wind speed is the same as for the highest wind speed from the original list.
      * <p>
      */
-    private PolynomialSplineFunction createPerformanceCurve(Map<Speed, Map<Bearing, Speed>> twaAllowances,
+    private UnivariateDifferentiableFunction createPerformanceCurve(Map<Speed, Map<Bearing, Speed>> twaAllowances,
             Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed, Map<Speed, Duration> beatAllowancePerTrueWindSpeed,
             Map<Speed, Bearing> runAngles, Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed, Map<Speed, Duration> runAllowancePerTrueWindSpeed) throws FunctionEvaluationException {
         final Map<Speed, Duration> allowancesForCoursePerTrueWindSpeed = createAllowancesPerCourse(twaAllowances, beatAngles,
                 beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed, runAllowancePerTrueWindSpeed);
-        AkimaSplineInterpolator interpolator = new AkimaSplineInterpolator();
         double[] xs = new double[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length+2];
         double[] ys = new double[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length+2];
         int i = 0;
@@ -115,7 +118,22 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         }
         xs[i] = 10000;   // see original Pascal code; the last "knot" is at 10000 knots of true wind speed
         ys[i] = ys[i-1]; // and repeats the last allowance, probably to flatten the curve at its end
-        return interpolator.interpolate(xs, ys);
+        final CubicSpline interpolator = CubicSpline.interpolateBoundariesSorted(xs, ys,
+                SplineBoundaryCondition.ParabolicallyTerminated, /* leftBoundary */ 0,
+                SplineBoundaryCondition.ParabolicallyTerminated, /* rightBoundary */ 0);
+        final UnivariateDifferentiableFunction splineFunction = new UnivariateDifferentiableFunction() {
+            @Override
+            public double value(double x) {
+                return interpolator.interpolate(x);
+            }
+
+            @Override
+            public DerivativeStructure value(DerivativeStructure t) throws DimensionMismatchException {
+                return new DerivativeStructure(t.getFreeParameters(), t.getOrder(), interpolator.interpolate(t.getValue()),
+                        interpolator.differentiate(t.getValue()));
+            }
+        };
+        return splineFunction;
     }
 
     /**
@@ -217,7 +235,6 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     @Override
     public Speed getImpliedWind(Duration durationToCompleteCourse) throws MaxIterationsExceededException, FunctionEvaluationException{
         final Speed averageSpeedOnCourse = getCourse().getTotalLength().inTime(durationToCompleteCourse);
-        final PolynomialFunction workingFunction;
         final double[] predictedSpeedsInKnotsForTotalCourseByTrueWindSpeed = Arrays.stream(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS).mapToDouble
                 (tws->{ return functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse.value(tws.getKnots()); }).toArray();
         final Speed result;
@@ -233,12 +250,14 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
                 i++;
             }
             i--;
-            workingFunction = functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse.getPolynomials()[i];
             // PolynomialFunction which will be solved by the Newton Approach
-            PolynomialFunction subtractedFunction = workingFunction.subtract(new PolynomialFunction(new double[] {averageSpeedOnCourse.getKnots()}));
-            NewtonRaphsonSolver solver = new NewtonRaphsonSolver(0.00000001);
-            // TODO Comment for the special treatment of the solver
-            result = new KnotSpeedImpl(solver.solve(100000, subtractedFunction, 0)+ functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse.getKnots()[i]);
+            final Constant averageSpeedInKnots = new Constant(averageSpeedOnCourse.getKnots());
+            final NewtonRaphsonSolver newtonSolver = new NewtonRaphsonSolver(0.0000000001);
+            final UnivariateDifferentiableFunction targetZeroFunction = FunctionUtils.add(functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse,
+                    FunctionUtils.multiply((UnivariateDifferentiableFunction) averageSpeedInKnots,
+                            (UnivariateDifferentiableFunction) new Constant(-1)));
+            final double impliedWindSpeedInKnots = newtonSolver.solve(1000, targetZeroFunction, 10 /* knots of true wind speed */);
+            result = new KnotSpeedImpl(impliedWindSpeedInKnots);
         }
         return result;
     }
