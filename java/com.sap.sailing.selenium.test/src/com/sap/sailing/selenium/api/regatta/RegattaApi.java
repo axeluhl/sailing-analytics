@@ -19,6 +19,7 @@ public class RegattaApi {
     private static final String ADD = "/add";
     private static final String ADD_RACE_COLUMN_URL = "/addracecolumns";
     private static final String LIST_COMPETITORS = "/competitors";
+    private static final String TRACKING_DEVICES = "/tracking_devices";
 
     public Regatta getRegatta(ApiContext ctx, String regattaName) {
         return new Regatta(ctx.get(REGATTAS + "/" + regattaName));
@@ -96,5 +97,9 @@ public class RegattaApi {
         queryParams.put("secret", secret.orElse(null));
         ctx.post(url, queryParams);
     }
-
+    
+    public RegattaDeviceStatus getTrackingDeviceStatus(ApiContext ctx, String regattaName) {
+        final String url = REGATTAS + "/" + regattaName + TRACKING_DEVICES;
+        return new RegattaDeviceStatus(ctx.get(url));
+    }
 }
