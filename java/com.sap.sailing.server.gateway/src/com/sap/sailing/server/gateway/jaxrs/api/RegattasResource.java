@@ -2287,7 +2287,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/tracking_devices")
+    @Path("{regattaName}/tracking_devices")
     public Response getTrackingStatus(@PathParam("regattaName") String regattaName) {
         Regatta regatta = getService().getRegattaByName(regattaName);
         if (regatta != null) {
