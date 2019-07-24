@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.management.ManagementFactory;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
@@ -40,6 +41,14 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
@@ -1121,6 +1130,31 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         final LeaderboardScoreCorrectionNotifier scoreCorrectionListener = new LeaderboardScoreCorrectionNotifier(leaderboard);
         scoreCorrectionListenersByLeaderboard.put(leaderboard, scoreCorrectionListener);
         leaderboard.addScoreCorrectionListener(scoreCorrectionListener);
+        tryToRegisterMBeanForLeaderboard(leaderboard);
+    }
+
+    private void tryToRegisterMBeanForLeaderboard(Leaderboard leaderboard) {
+        try {
+            // register an MBean for the leaderboard for JMX support
+            LeaderboardMXBeanImpl mbean = new LeaderboardMXBeanImpl(leaderboard);
+            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+            final ObjectName mBeanName = mbean.getObjectName();
+            mbs.registerMBean(mbean, mBeanName);
+        } catch (MalformedObjectNameException | InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException e) {
+            logger.log(Level.SEVERE, "Couldn't register MBean for leaderboard "+leaderboard.getName(), e);
+        }
+    }
+    
+    private void removeMBeanForLeaderboard(Leaderboard leaderboard) {
+        try {
+            // register an MBean for the leaderboard for JMX support
+            LeaderboardMXBeanImpl mbean = new LeaderboardMXBeanImpl(leaderboard);
+            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+            final ObjectName mBeanName = mbean.getObjectName();
+            mbs.unregisterMBean(mBeanName);
+        } catch (MalformedObjectNameException | MBeanRegistrationException | InstanceNotFoundException e) {
+            logger.log(Level.SEVERE, "Couldn't unregister MBean for leaderboard "+leaderboard.getName(), e);
+        }
     }
 
     private void loadStoredLeaderboardsAndGroups() {
@@ -1335,9 +1369,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 throw new IllegalArgumentException("Leaderboard with name " + newName + " already exists");
             }
             if (toRename instanceof Renamable) {
+                removeMBeanForLeaderboard(toRename);
                 ((Renamable) toRename).setName(newName);
                 leaderboardsByName.remove(oldName);
                 leaderboardsByName.put(newName, toRename);
+                tryToRegisterMBeanForLeaderboard(toRename);
             } else {
                 throw new IllegalArgumentException("Leaderboard with name " + newName + " is of type "
                         + toRename.getClass().getSimpleName() + " and therefore cannot be renamed");
@@ -1385,6 +1421,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private Leaderboard removeLeaderboardFromLeaderboardsByName(String leaderboardName) {
         LockUtil.lockForWrite(leaderboardsByNameLock);
         try {
+            final Leaderboard leaderboard = leaderboardsByName.get(leaderboardName);
+            if (leaderboard != null) {
+                removeMBeanForLeaderboard(leaderboard);
+            }
             return leaderboardsByName.remove(leaderboardName);
         } finally {
             LockUtil.unlockAfterWrite(leaderboardsByNameLock);
@@ -3220,6 +3260,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
         logger.info("Reading leaderboards by name...");
         leaderboardsByName.putAll((Map<String, Leaderboard>) ois.readObject());
+        for (final Leaderboard leaderboard : leaderboardsByName.values()) {
+            tryToRegisterMBeanForLeaderboard(leaderboard);
+        }
         logoutput.append("Received " + leaderboardsByName.size() + " NEW leaderboards\n");
         for (Leaderboard leaderboard : leaderboardsByName.values()) {
             logoutput.append(String.format("%3s\n", leaderboard.toString()));
@@ -3361,6 +3404,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         LockUtil.lockForWrite(leaderboardsByNameLock);
         try {
+            for (final Leaderboard leaderboardToClear : leaderboardsByName.values()) {
+                removeMBeanForLeaderboard(leaderboardToClear);
+            }
             leaderboardsByName.clear();
             scoreCorrectionListenersByLeaderboard.clear();
         } finally {
