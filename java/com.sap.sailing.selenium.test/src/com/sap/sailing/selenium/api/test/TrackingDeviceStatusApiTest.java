@@ -13,11 +13,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
+import com.sap.sailing.selenium.api.core.DeviceStatus;
+import com.sap.sailing.selenium.api.core.GPSFixResponse;
 import com.sap.sailing.selenium.api.core.GpsFixMoving;
 import com.sap.sailing.selenium.api.event.GpsFixApi;
 import com.sap.sailing.selenium.api.event.TrackingDeviceApi;
-import com.sap.sailing.selenium.api.event.TrackingDeviceApi.DeviceStatus;
-import com.sap.sailing.selenium.api.event.TrackingDeviceApi.GPSFixResponse;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TrackingDeviceStatusApiTest extends AbstractSeleniumTest {
