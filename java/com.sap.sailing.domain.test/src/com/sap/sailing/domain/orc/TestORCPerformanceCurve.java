@@ -68,7 +68,7 @@ public class TestORCPerformanceCurve {
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.03), new DegreeBearingImpl(15)));
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.03), new DegreeBearingImpl(165)));
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.17), new DegreeBearingImpl(180)));
-        alturaCourse = new ORCPerformanceCurveCourseImpl(legs);
+        alturaCourse = new ORCPerformanceCurveCourseImpl(legs);         //this course is the same course as seen in the Altura "IMS Explanation" sheet
         
         // Local File:
         File fileGER = new File(RESOURCES + "GER2019.json");
@@ -167,10 +167,10 @@ public class TestORCPerformanceCurve {
                         Duration.ONE_SECOND.times(secondsForCourse))).asSeconds(), accuracy);
     }
     
-    // Tests for a Implied Wind calculation for a simple predefined course. The solutions are extracted from the provided ORC TestPCS.exe application. 
+    // Tests for a Implied Wind calculation for a simple predefined course. The solutions are extracted from the provided ORC TestPCS.exe application.
     @Test
-    public void testImpliedWindSimple() throws MaxIterationsExceededException, FunctionEvaluationException {
-       double accuracy = 0.1;
+    public void testImpliedWind() throws MaxIterationsExceededException, FunctionEvaluationException {
+       double accuracy = 0.0001;
        ORCCertificate certificateMoana          = importerLocal.getCertificate("GER 5549");
        ORCCertificate certificateMilan          = importerLocal.getCertificate("GER 7323");
        ORCCertificate certificateTutima         = importerLocal.getCertificate("GER 5609");
@@ -186,7 +186,6 @@ public class TestORCPerformanceCurve {
        // Test for corner case and if the algorithm reacts to the boundaries of 6 and 20 kts.
        assertEquals( 6.0    , performanceCurveMoana.getImpliedWind(Duration.ONE_HOUR.times(24)).getKnots(), accuracy);
        assertEquals(20.0    , performanceCurveMoana.getImpliedWind(Duration.ONE_HOUR.divide(24)).getKnots(), accuracy);
-       assertEquals(performanceCurveMilan.getAllowancePerCourse(new KnotSpeedImpl(12.809089256546626)).asSeconds(), Duration.ONE_HOUR.asSeconds(), accuracy); 
        assertEquals(performanceCurveMilan.getAllowancePerCourse(new KnotSpeedImpl(12.80881)).asSeconds(), Duration.ONE_HOUR.asSeconds(), accuracy); 
        // scratch sheets and implied wind as calculated by Altura for course1 and 1:00:00 / 1:30:00 time sailed, respectively:
        //               6kts    8kts    10kts   12kts   14kts   16kts   20kts   implied wind    Altura          ORC Scorer      ORC PCS Test    SAP
@@ -198,8 +197,8 @@ public class TestORCPerformanceCurve {
        // Milan:        675.2   539.5   473.1   437.6   412.7   388.8   350.8
        // Moana:        775.7   627.5   549.9   512.4   493.3   473.1   435.0
        assertEquals(12.80881 , performanceCurveMilan.getImpliedWind(Duration.ONE_HOUR.times(1.0)).getKnots(), accuracy);
-       assertEquals(8.65816  , performanceCurveTutima     .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
-       assertEquals(8.07975  , performanceCurveBank       .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
+       assertEquals(8.72668  , performanceCurveTutima     .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
+       assertEquals(8.07591  , performanceCurveBank       .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
        assertEquals(7.78413  , performanceCurveHaspa      .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
        assertEquals(7.76218  , performanceCurveMoana      .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
        assertEquals(7.62407  , performanceCurveHalbtrocken.getImpliedWind(Duration.ONE_HOUR.times(2.0)).getKnots(), accuracy);
