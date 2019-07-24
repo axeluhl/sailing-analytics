@@ -36,6 +36,8 @@ import com.sap.sse.common.Util;
 
 /**
  * Cubic Spline Interpolation. Supports both differentiation and integration.
+ * <p>
+ * Based on: <a href="github.com">https://github.com/mathnet/mathnet-numerics/blob/master/src/Numerics/Interpolation/CubicSpline.cs</a>
  */
 public class CubicSpline {
     /**
