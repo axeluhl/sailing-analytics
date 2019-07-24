@@ -6,8 +6,6 @@ import org.apache.commons.math3.analysis.FunctionUtils;
 import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
 import org.apache.commons.math3.analysis.differentiation.UnivariateDifferentiableFunction;
 import org.apache.commons.math3.analysis.function.Constant;
-import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;
-import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.analysis.solvers.NewtonRaphsonSolver;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.junit.Test;
@@ -52,7 +50,7 @@ public class TestORCSplineCalculation {
 
     private static final double[] xn = { 0, 6, 8, 10, 12, 14, 16, 20, 10000 };
     private static final double totalCourseLengthInNauticalMiles = 8.43;
-    private static final double accuracy = 0.00001;
+    private static final double accuracy = 0.00003;
 
     @Test
     public void testMoana() {
