@@ -145,9 +145,10 @@ public class TestORCSplineCalculation {
     // for a given implied wind, we expect to get back the velocity prediction for the whole course. The total Course
     // Length can be divided with the prediction to get the Allowance in hours.
     private double interpolate(double[] yn, double input) {
-        final AkimaSplineInterpolator interpolator = new AkimaSplineInterpolator();
-        final PolynomialSplineFunction function = interpolator.interpolate(xn, yn);
-        return totalCourseLengthInNauticalMiles / function.value(input);
+        final CubicSpline interpolator = CubicSpline.interpolateBoundariesSorted(xn, yn,
+                SplineBoundaryCondition.ParabolicallyTerminated, /* leftBoundary */ 0,
+                SplineBoundaryCondition.ParabolicallyTerminated, /* rightBoundary */ 0);
+        return totalCourseLengthInNauticalMiles / interpolator.interpolate(input);
     }
 
     private double interpolate(double durationInHours, double[] yn) {
