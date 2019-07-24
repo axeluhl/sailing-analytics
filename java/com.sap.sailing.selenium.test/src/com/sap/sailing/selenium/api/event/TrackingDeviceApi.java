@@ -20,12 +20,12 @@ public class TrackingDeviceApi {
             super(json);
         }
 
-        public UUID getDeviceUUID() {
-            return UUID.fromString(get("deviceUUID"));
+        public String getDeviceId() {
+            return (String) ((JSONObject)get("deviceId")).get("id");
         }
         
-        public GPSFixResponse getLastFix() {
-            JSONObject jsonObject = get("lastFix");
+        public GPSFixResponse getLastGPSFix() {
+            JSONObject jsonObject = get("lastGPSFix");
             return jsonObject == null ? null : new GPSFixResponse(jsonObject);
         }
     }

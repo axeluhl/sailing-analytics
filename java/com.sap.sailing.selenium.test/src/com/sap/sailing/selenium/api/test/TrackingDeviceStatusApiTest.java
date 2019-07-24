@@ -35,14 +35,14 @@ public class TrackingDeviceStatusApiTest extends AbstractSeleniumTest {
         final UUID deviceUUID = UUID.randomUUID();
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         final DeviceStatus statusBeforeFix = trackingDeviceApi.getDeviceStatus(ctx, deviceUUID);
-        assertEquals(deviceUUID, statusBeforeFix.getDeviceUUID());
-        assertNull(statusBeforeFix.getLastFix());
+        assertEquals(deviceUUID.toString(), statusBeforeFix.getDeviceId());
+        assertNull(statusBeforeFix.getLastGPSFix());
         
         final long fix1Millis = System.currentTimeMillis() - 100;
         final GpsFixMoving fix1 = createFix(49.121, 8.5987, fix1Millis, 10.0, 180.0);
         gpsFixApi.postGpsFix(ctx, deviceUUID, fix1);
         final DeviceStatus statusWithFix1 = trackingDeviceApi.getDeviceStatus(ctx, deviceUUID);
-        final GPSFixResponse lastFix1 = statusWithFix1.getLastFix();
+        final GPSFixResponse lastFix1 = statusWithFix1.getLastGPSFix();
         assertNotNull(lastFix1);
         assertEquals(fix1Millis, lastFix1.getTime());
         
@@ -50,6 +50,6 @@ public class TrackingDeviceStatusApiTest extends AbstractSeleniumTest {
         final GpsFixMoving fix2 = createFix(49.12, 8.599, fix2Millis, 10.0, 180.0);
         gpsFixApi.postGpsFix(ctx, deviceUUID, fix2);
         final DeviceStatus statusWithFix2 = trackingDeviceApi.getDeviceStatus(ctx, deviceUUID);
-        assertEquals(fix2Millis, statusWithFix2.getLastFix().getTime());
+        assertEquals(fix2Millis, statusWithFix2.getLastGPSFix().getTime());
     }
 }
