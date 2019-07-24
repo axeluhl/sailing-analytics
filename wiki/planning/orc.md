@@ -8,7 +8,7 @@ The scoring itself allows to choose between using the simpler provided ToT/ToD s
 ---
 ## Calculation Module
 
-Currently the calculation for a constructed course with set TWAs does work with a pretty good accuracy and almost the same value as altura (differences start to occur in 1/10000 areas). The internal calculations follow the ideas provided in the ORC pascal code, many calculating parts are using the predicted velocity value instead of the allowance.
+Currently the calculation for a constructed course with set TWAs does work with matching values to the official ORC tools and M2S. The internal calculations follow the ideas provided in the ORC pascal code, many calculating parts are using the predicted velocity value instead of the allowance.
 The calculation involves the following implemented parts:
 - get Allowances for Leg with TWA
 - get Lagrange interpolated Allowance for TWA/TWS
@@ -19,6 +19,7 @@ The calculation involves the following implemented parts:
 
 ### Mixed Course
 The next step is to extend the properties of an ORCPerformanceCurveLeg to not only be defined as a leg with a specified TWA and an fixed allowance calculated with Lagrange but also be defined as a leg as a predefined course.
+- [ ] Add enums for predefined courses
 - [ ] Add or change ORCPerformanceCurveLeg implementation (and interface)
 - [ ] Adapt ORCPerformanceCurveImpl to handle Legs with predefined allowances
 - [ ] Get Allowances from the Importer to the Certificate
@@ -31,12 +32,16 @@ This problem should be resolved by the usage of the RaceLog and by the usage of 
 
 The next challenge will be to use the RegattaLog (and maybe also RaceLog) to define the used RankingMetric for a Race. It's not common but there are some races which mix the used RankingMetrics during a regatta. It can be Windward/Leeward with TripleNumbers on some inshore races and constructed course on a coastal.
 
+Scratchbook:
 - TrackedRace
 - RaceLog
 - RaceLogEvent -> non revokable
 
 ---
 ## Certificate Management
+[tbd]
+
+Scratchbook:
 - MGMT, DB, PC, TripleN, ToT
 - CompetitorAndBoatStore
 - BoatStore
@@ -45,11 +50,18 @@ The next challenge will be to use the RegattaLog (and maybe also RaceLog) to def
 
 ---
 ## Ranking Metric
+[tbd]
+
+Scratchbook:
 - Differences in corrected time do apply on the boat farthest ahead
 - Possibility needed to select scratch boat afterwards, so comparison of corrected times with other tools under the same conditions can be provided
 
 ---
 ## UI Adaptions
+Scratchbook:
+- Possibility to set RaceLogs (Leg Information) from Admin Console
+- Possibility to choose Scratch Boat from Admin Console
+- Possibility to match Boat (Competitor with Boat) to an unique Certificate
 - Leaderboard should change in regards of the ranking metric (Implied Wind automatically shown on performance curve scoring but not shown during one design races)
 
 ---
