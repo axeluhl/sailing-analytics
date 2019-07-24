@@ -58,13 +58,13 @@ public class TestORCSplineCalculation {
     public void testMoana() {
         assertEquals(1.5,
                 interpolate(new double[] { 0, 4.641211342235869, 5.736695797981516, 6.546702285181061, 7.02579946374626,
-                        7.298101614710148, 7.608915286969485, 8.275181564996913, 8.275181564996913 }, 7.62180),
+                        7.298101614710148, 7.608915286969485, 8.275181564996913, 8.275181564996913 }, 7.76218),
                 accuracy);
     }
 
     @Test
     public void testMoanaInverse() {
-        assertEquals(7.62180,
+        assertEquals(7.76218,
                 interpolate(1.5,
                         new double[] { 0, 4.641211342235869, 5.736695797981516, 6.546702285181061, 7.02579946374626,
                                 7.298101614710148, 7.608915286969485, 8.275181564996913, 8.275181564996913 }),
@@ -94,9 +94,23 @@ public class TestORCSplineCalculation {
     }
 
     @Test
+    public void testTutimaInverse() { // currently M2S Values, not SAP
+        assertEquals(8.65816, interpolate(1.5, new double[] { 0, 4.37052612624555, 5.35354546146804, 6.0793252346297,
+                6.57769022120612, 6.90362398496227, 7.18395896558393, 7.64346679121362, 7.64346679121362 }),
+                accuracy);
+    }
+
+    @Test
     public void testBank() { // currently M2S Values, not SAP
         assertEquals(1.5, interpolate(new double[] { 0, 4.46956401552239, 5.580405095336, 6.43249233334714,
                 6.94538913004541, 7.2362905433394, 7.53723401035461, 8.08306640881786, 8.08306640881786 }, 8.07975),
+                accuracy);
+    }
+
+    @Test
+    public void testBankInverse() { // currently M2S Values, not SAP
+        assertEquals(8.07975, interpolate(1.5, new double[] { 0, 4.46956401552239, 5.580405095336, 6.43249233334714,
+                6.94538913004541, 7.2362905433394, 7.53723401035461, 8.08306640881786, 8.08306640881786 }),
                 accuracy);
     }
 
@@ -108,9 +122,23 @@ public class TestORCSplineCalculation {
     }
 
     @Test
+    public void testHaspaInverse() { // currently M2S Values, not SAP
+        assertEquals(7.78413, interpolate(1.5, new double[] { 0, 4.60774719206753, 5.72829292214811, 6.56131742170233,
+                7.08141937866223, 7.38334720210887, 7.71474004575847, 8.31942615578485, 8.31942615578485 }),
+                accuracy);
+    }
+
+    @Test
     public void testHalbtrocken() { // currently M2S Values, not SAP
         assertEquals(2.0, interpolate(new double[] { 0, 3.54855412341278, 4.35655332156811, 5.0403620360792,
                 5.56104371720063, 5.8858664928928, 6.0785496349971, 6.36326266675515, 6.36326266675515 }, 7.62407),
+                accuracy);
+    }
+
+    @Test
+    public void testHalbtrockenInverse() { // currently M2S Values, not SAP
+        assertEquals(7.62407, interpolate(2.0, new double[] { 0, 3.54855412341278, 4.35655332156811, 5.0403620360792,
+                5.56104371720063, 5.8858664928928, 6.0785496349971, 6.36326266675515, 6.36326266675515 }),
                 accuracy);
     }
 
