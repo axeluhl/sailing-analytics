@@ -33,7 +33,7 @@ public abstract class AbstractMstGraphGenerator<T> {
         this.nodes = nodes;
     }
 
-    public void addNode(T observation) {
+    public synchronized void addNode(T observation) {
         NodeWithNeighbors<T> newNode = new NodeWithNeighbors<>(observation);
         LinkedList<NodeWithDistance<T>> distancesFromOtherNodes = getDistancesFromNearestOtherNodes(observation);
         nodes.add(newNode);
