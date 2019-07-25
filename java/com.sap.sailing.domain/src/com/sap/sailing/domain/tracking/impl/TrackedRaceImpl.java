@@ -148,6 +148,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindSummary;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -391,8 +392,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * Caches wind requests for a few seconds to accelerate access in live mode
      */
     private transient ShortTimeWindCache shortTimeWindCache;
-    
+
     private transient PolarDataService polarDataService;
+
+    private transient volatile IncrementalWindEstimation windEstimation;
+
+    private transient ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector> maneuverDetectorPerCompetitorCache;
 
     /**
      * Tells how ranks are to be assigned to the competitors at any time during the race. For one-design boat classes
@@ -413,7 +418,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private transient RaceLogResolver raceLogResolver;
     
     private final NamedReentrantReadWriteLock sensorTracksLock;
-
+    
     /**
      * Constructs the tracked race with one-design ranking.
      */
@@ -460,6 +465,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
         this.delayToLiveInMillis = delayToLiveInMillis;
         this.startToNextMarkCacheInvalidationListeners = new ConcurrentHashMap<Mark, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
+        this.maneuverDetectorPerCompetitorCache = createManeuverDetectorCache();
         this.maneuverCache = createManeuverCache();
         this.markTracks = new ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>>();
         int i = 0;
@@ -574,6 +580,29 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             logger.log(Level.SEVERE, "Waiting for loading from stores to finish was interrupted", e);
         }
     }
+    
+    @Override
+    public boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter) {
+        final boolean result;
+        if (!applyFilter || takesWindFixWithTimePoint(wind.getTimePoint())) {
+            WindTrack windTrack = getOrCreateWindTrack(windSource);
+            result = windTrack.add(wind);
+            if (result) {
+                updated(wind.getTimePoint());
+                triggerManeuverCacheRecalculationForAllCompetitors();
+            }
+        } else {
+            result = false;
+        }
+        return result;
+    }
+
+    @Override
+    public void removeWind(Wind wind, WindSource windSource) {
+        getOrCreateWindTrack(windSource).remove(wind);
+        updated(/* time point */null); // wind events shouldn't advance race time
+        triggerManeuverCacheRecalculationForAllCompetitors();
+    }
 
     @Override
     public RankingMetric getRankingMetric() {
@@ -663,6 +692,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         directionFromStartToNextMarkCache = new ConcurrentHashMap<>();
         crossTrackErrorCache = new CrossTrackErrorCache(this);
         crossTrackErrorCache.invalidate();
+        maneuverDetectorPerCompetitorCache = createManeuverDetectorCache();
         maneuverCache = createManeuverCache();
         // considering the unlikely possibility that the course and this tracked race's internal structures
         // may be inconsistent, e.g., due to non-atomic serialization of course and tracked race; see bug 2223
@@ -707,13 +737,16 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             getManeuvers(competitor, true);
         }
     }
+    
+    private ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector> createManeuverDetectorCache() {
+        return new ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector>(
+                /* preserve how many milliseconds */ 10000,
+                competitor -> new IncrementalManeuverDetectorImpl(TrackedRaceImpl.this, competitor, windEstimation));
+    }
 
     private SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval> createManeuverCache() {
         return new SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval>(
                 new AbstractCacheUpdater<Competitor, List<Maneuver>, EmptyUpdateInterval>() {
-                    private ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector> maneuverDetectorPerCompetitorCache = new ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector>(
-                            /* preserve how many milliseconds */ 10000,
-                            competitor -> new IncrementalManeuverDetectorImpl(TrackedRaceImpl.this, competitor));
 
                     @Override
                     public List<Maneuver> computeCacheUpdate(Competitor competitor, EmptyUpdateInterval updateInterval)
@@ -947,6 +980,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * and not {@link Object}.
      */
     private final String updateStartOfRaceCacheFieldsMonitor = ""+new Random().nextDouble();
+
     protected void updateStartOfRaceCacheFields() {
         synchronized (updateStartOfRaceCacheFieldsMonitor) {
             TimePoint newStartTime = null;
@@ -2686,7 +2720,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
     }
 
-    protected void triggerManeuverCacheRecalculation(final Competitor competitor) {
+    public void triggerManeuverCacheRecalculation(final Competitor competitor) {
         if (cachesSuspended) {
             triggerManeuverCacheInvalidationForAllCompetitors = true;
         } else {
@@ -2908,6 +2942,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     private void resumeAllCachesNotUpdatingWhileLoading() {
         cachesSuspended = false;
+        shortTimeWindCache.clearCache();
         for (GPSFixTrack<Competitor, GPSFixMoving> competitorTrack : tracks.values()) {
             competitorTrack.resumeValidityCaching();
         }
@@ -3583,6 +3618,32 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public void setPolarDataService(PolarDataService polarDataService) {
         this.polarDataService = polarDataService;
+        if(polarDataService != null && windEstimation != null) {
+            updateManeuversAndWindWithNewWindEstimation(windEstimation, windEstimation);
+        }
+    }
+    
+    @Override
+    public void setWindEstimation(IncrementalWindEstimation windEstimation) {
+        IncrementalWindEstimation previousWindEstimation = this.windEstimation;
+        if (previousWindEstimation != windEstimation) {
+            updateManeuversAndWindWithNewWindEstimation(windEstimation, previousWindEstimation);
+        }
+    }
+
+    private void updateManeuversAndWindWithNewWindEstimation(IncrementalWindEstimation windEstimation,
+            IncrementalWindEstimation previousWindEstimation) {
+        WindSource windSource = new WindSourceImpl(WindSourceType.MANEUVER_BASED_ESTIMATION);
+        windTracks.remove(windSource);
+        if (windEstimation != null) {
+            windTracks.put(windSource, windEstimation.getWindTrack());
+        }
+        this.windEstimation = windEstimation;
+        // TODO Make more efficient by reusing the state of incremental maneuver detectors. The already computed
+        // complete maneuver curves can be fed directly into the windEstimation.
+        maneuverDetectorPerCompetitorCache.clearCache();
+        shortTimeWindCache.clearCache();
+        triggerManeuverCacheRecalculationForAllCompetitors();
     }
 
     /**
@@ -3815,7 +3876,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
         return wind;
     }
-
+    
+    @Override
+    public PolarDataService getPolarDataService() {
+        return polarDataService;
+    }
+    
     @Override
     public WindSummary getWindSummary() {
         Speed minTrueWindSpeed = null;
