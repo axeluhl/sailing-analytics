@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Predicate;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -19,6 +20,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -179,10 +181,11 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
                 final LeaderboardNameRaceColumnNameAndFleetName leaderboardNameRaceColumnNameAndFleetName =
                         raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(raceIdentifier);
                 if (leaderboardNameRaceColumnNameAndFleetName != null) {
+                    Pair<Integer, Date> selectedObject = waypointSelectionModel.getSelectedObject();
                     sailingService.updateFixedMarkPassing(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
                                 leaderboardNameRaceColumnNameAndFleetName.getRaceColumnName(),
                                 leaderboardNameRaceColumnNameAndFleetName.getFleetName(),
-                                waypointSelectionModel.getSelectedObject().getA(), null, competitor, new AsyncCallback<Void>() {
+                                selectedObject.getA(), null, competitor, new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(stringMessages.errorRemovingFixedPassing(caught.getMessage()));
@@ -190,7 +193,10 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
     
                         @Override
                         public void onSuccess(Void result) {
-                            refillList(true);
+                            refillList((map) -> {
+                                return map.containsKey(selectedObject.getA())
+                                        && !map.get(selectedObject.getA()).equals(selectedObject.getB());
+                            }, 1);
                         }
                     });
                 }
@@ -264,6 +270,18 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
                 }
             }
         });
+        Label warningChangesHaveNoEffect = new Label(stringMessages.warningMarkPassingChangesNoEffect());
+        warningChangesHaveNoEffect.setStylePrimaryName("errorLabel");
+        warningChangesHaveNoEffect.setVisible(false);
+        sailingService.getTrackedRaceIsUsingMarkPassingCalculator(raceIdentifier, new AsyncCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+                warningChangesHaveNoEffect.setVisible(!result);
+            }
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+        });
         selectCompetitorLabel.setText(stringMessages.selectCompetitor());
         refreshWaypoints();
         AbsolutePanel rootPanel = new AbsolutePanel();
@@ -281,6 +299,8 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
         buttonPanel.add(removeSuppressedPassingButton);
         buttonPanel.add(selectCompetitorLabel);
         enableButtons();
+        tableAndButtons.add(warningChangesHaveNoEffect);
+        tableAndButtons.setCellVerticalAlignment(warningChangesHaveNoEffect, HasVerticalAlignment.ALIGN_MIDDLE);
         initWidget(rootPanel);
         setVisible(false);
     }
@@ -302,7 +322,9 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
 
                     @Override
                     public void onSuccess(Void result) {
-                        refillList(waitForCalculations);
+                        refillList((map) -> {
+                            return map.containsKey(waypoint) && map.get(waypoint).equals(time);
+                        }, 1);
                     }
                 });
             } else {
@@ -369,10 +391,17 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
      * @param markPassing - pair of waypoint (integer) and datetime of passing
      */
     private void refillList() {
-        refillList(false);
+        refillList(null, 0);
     }
 
-    private void refillList(boolean waitForCalculations) {
+    /**
+     * @param resultValidator ignored if {@code null}. If {@code resultValidator} returns {@code false}
+     * {@code triesLeft} will be decremented and {@link #refillList(Predicate, int)} will be called again as long as
+     * {@code triesLeft} {@code >= 1}.
+     * @param triesLeft number of times to call {@link #refillList(Predicate, int)} again excluding this call.
+     */
+    private void refillList(Predicate<Map<Integer, Date>> resultValidator, int triesLeft) {
+        boolean waitForCalculations = resultValidator != null;
         clearInfo();
         competitor = competitorSelectionModel.getSelectedCompetitors().iterator().next();
         // Get current mark passings
@@ -417,6 +446,10 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
                             wayPointSelectionTable.redraw();
                         }
                     });
+                }
+
+                if (resultValidator != null && !resultValidator.test(result) && triesLeft > 0) {
+                    refillList(resultValidator, triesLeft - 1);
                 }
             }
         });

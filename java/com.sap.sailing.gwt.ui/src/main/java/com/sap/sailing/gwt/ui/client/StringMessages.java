@@ -1308,6 +1308,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorRemovingSupressedPassing(String message);
     String errorTryingToObtainMarkPassing(String message);
     String errorTryingToObtainRaceLogMarkPassingData(String message);
+    String warningMarkPassingChangesNoEffect();
     String email();
     String pleaseEnterAnEmail();
     String inviteCompetitors();
