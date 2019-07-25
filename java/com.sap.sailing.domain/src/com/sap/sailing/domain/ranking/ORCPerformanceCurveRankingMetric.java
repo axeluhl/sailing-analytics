@@ -1,12 +1,16 @@
 package com.sap.sailing.domain.ranking;
 
 import java.util.Comparator;
+import java.util.Map;
 import java.util.function.Supplier;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.orc.ORCCertificate;
+import com.sap.sailing.domain.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -19,6 +23,14 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
     private static final long serialVersionUID = -7814822523533929816L;
 
     public final static RankingMetricConstructor CONSTRUCTOR = ORCPerformanceCurveRankingMetric::new;
+    
+    /**
+     * This field contains a map of all current certificates used for calculation in this {@link TrackedRace}. Each
+     * participating {@link Competitor} with one {@link Boat} has only one currently active {@link ORCCertificate}.
+     */
+    private Map<Boat, ORCCertificate> certificates;
+    
+    private ORCPerformanceCurveCourse totalCourse;
     
     public ORCPerformanceCurveRankingMetric(TrackedRace trackedRace) {
         super(trackedRace);
