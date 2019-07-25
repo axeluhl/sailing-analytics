@@ -100,13 +100,12 @@ public class ManeuverBasedWindEstimationTrackImpl extends AbstractManeuverBasedW
             double averageTackLikelihood = getAverageLikelihoodOfBeingManeuver(ManeuverType.TACK, cluster.stream());
             final Bearing approximateMiddleCOG = getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(cluster,
                     ManeuverType.TACK).getA();
-            // search for the opposite tack cluster by finding the one that has the smallest angular distance to the
-            // expected
+            // search for the opposite tack cluster by finding the one that has the smallest angular distance to the expected
             // middle COG (same as for the candidate cluster) and expected maneuver angle (the cluster's average maneuver
             // angle with inverted sign)
             final Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble> oppositeTackCluster = clusters
                     .stream().filter((c) -> c != cluster)
-                    .min((a, b) -> (int) Math
+                    .min((a, b) -> a.isEmpty() ? b.isEmpty() ? 0 : -1 : b.isEmpty() ? 1 : (int) Math
                             .signum(getClusterDistanceBasedOnAverageManeuverLikelihoodAndWeightedAverageMiddleCOG(a,
                                     -cluster.getCentroid().getB(), approximateMiddleCOG)
                                     - getClusterDistanceBasedOnAverageManeuverLikelihoodAndWeightedAverageMiddleCOG(b,
@@ -118,8 +117,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends AbstractManeuverBasedW
                     : getLikelihoodOfClusterBasedOnDistanceFromExpected(-cluster.getCentroid().getB(), approximateMiddleCOG,
                             oppositeTackCluster);
             // compute weighted averages across the current candidate cluster and its supposed opposite tack cluster where
-            // the latter
-            // is weighted by the likelihoodOfOppositeCluster whereas the candidate cluster is always weighed as 1.0 for
+            // the latter is weighted by the likelihoodOfOppositeCluster whereas the candidate cluster is always weighed as 1.0 for
             // this purpose
             final double averageTackingAngleDeg = (Math
                     .abs(getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(cluster, ManeuverType.TACK).getB())
@@ -142,7 +140,6 @@ public class ManeuverBasedWindEstimationTrackImpl extends AbstractManeuverBasedW
                     .add(new DegreeBearingImpl(averageTackingAngleDeg / 2.));
             double portHeadUpBearAwayClusterLikelihood = getLikelihoodOfBestFittingHeadUpBearAwayCluster(
                     clusters.stream().filter(c -> c != cluster), expectedUpwindPortTackCOG);
-    
             // under the assumption that cluster holds tacks, find the clusters that then most likely hold the jibes
             final Bearing approximateMiddleCOGForJibes = averageUpwindCOG.reverse();
             Stream<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>> jibeClusters = getJibeClusters(
@@ -156,8 +153,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends AbstractManeuverBasedW
                 double jibeClusterLikelihood = getLikelihoodOfBeingJibeCluster(tackClusterWeightedAverageSpeed,
                         jibeClusters.map((jc) -> jc.stream()).reduce(Stream::concat).orElse(Stream.empty()), getBoatClass(),
                         clusters);
-                // Likely jibe clusters may raise the general likelihood by up to 20% of the value so far, but not to over
-                // 1.0
+                // Likely jibe clusters may raise the general likelihood by up to 20% of the value so far, but not to over 1.0
                 result = Math.min(1.0,
                         averageTackLikelihood * likelihoodOfOppositeCluster
                                 * (1.0 + BOOST_FACTOR_FOR_FULL_JIBE_CLUSTER_LIKELIHOOD * jibeClusterLikelihood
