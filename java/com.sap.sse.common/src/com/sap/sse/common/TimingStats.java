@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -15,7 +16,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * this object by calling {@link #recordTiming(TimePoint, Duration)}. In turn, this object will maintain averages about
  * access timings for one or more durations from "now" backwards into the past, grouped by a set of "ages" that can
  * be specified at {@link #TimingStats(Duration...) construction}. These averages can be obtained by calling
- * {@link #getAverageDurations()} for the current time.
+ * {@link #getAverageDurationsAndNumberOfRequests()} for the current time.
  * <p>
  * 
  * For example, an object of this type can be configured to keep statistics about the last 10s, 30s, 1min, and 5min, for
@@ -179,25 +180,27 @@ public class TimingStats {
     }
     
     /**
-     * Keyed by the durations provided to this object's {@link #TimingStats(Duration...) constructor},
-     * the result contains the average duration of the requests that are no older than the key
-     * {@link Duration} at the time of calling this method. The value for a key will be {@code null}
-     * in case there are no requests in the respective time range.
+     * Keyed by the durations provided to this object's {@link #TimingStats(Duration...) constructor}, the result
+     * contains the average duration of the requests that are no older than the key {@link Duration} at the time of
+     * calling this method, plus the number of events logged in the respective time range. The {@link Duration} value in
+     * the first component of the value pair for a key will be {@code null} in case there are no requests in the
+     * respective time range, so in this case the second pair element will contain the value {@code 0}.
      */
-    public Map<Duration, Duration> getAverageDurations() {
+    public Map<Duration, Pair<Duration, Integer>> getAverageDurationsAndNumberOfRequests() {
         final TimePoint now = MillisecondsTimePoint.now();
         return getAverageDurations(now);
     }
     
-    Map<Duration, Duration> getAverageDurations(TimePoint now) {
+    Map<Duration, Pair<Duration, Integer>> getAverageDurations(TimePoint now) {
         updateStatsBasedOnNewNow(now);
         final LogEntry dummyLogEntryForNow = timePointLogEntry(now);
-        final Map<Duration, Duration> result = new HashMap<>();
+        final Map<Duration, Pair<Duration, Integer>> result = new HashMap<>();
         for (final Entry<Duration, AtomicLong> e : agesForAveragesAndTheirDurationSumsInMillis.entrySet()) {
             final int eventCount = logEntries.subSet(
                     timePointLogEntry(now.minus(e.getKey())), /* fromInclusive */ true,
                     dummyLogEntryForNow, /* toInclusive */ true).size();
-            result.put(e.getKey(), eventCount == 0 ? null : new MillisecondsDurationImpl(e.getValue().get() / eventCount));
+            result.put(e.getKey(), new Pair<Duration, Integer>(
+                    eventCount == 0 ? null : new MillisecondsDurationImpl(e.getValue().get() / eventCount), eventCount));
         }
         return result;
     }

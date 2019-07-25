@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TimingStatsTest {
@@ -21,17 +22,18 @@ public class TimingStatsTest {
         final TimingStats timingStats = new TimingStats(now.minus(Duration.ONE_HOUR), YOUNG, OLD);
         {
             timingStats.recordTiming(now, now.minus(YOUNG).minus(Duration.ONE_MILLISECOND), SHORT);
-            final Map<Duration, Duration> stats = timingStats.getAverageDurations(now);
-            assertNull(stats.get(YOUNG));
-            assertEquals(SHORT, stats.get(OLD));
+            final Map<Duration, Pair<Duration, Integer>> stats = timingStats.getAverageDurations(now);
+            assertNull(stats.get(YOUNG).getA());
+            assertEquals(0, stats.get(OLD).getB().intValue());
+            assertEquals(SHORT, stats.get(OLD).getA());
         }
         // add another one later, such that the new one is expected to be YOUNG, and the formerly OLD one is expected to still be old
         {
             final TimePoint newNow = now.plus(YOUNG.divide(2));
             timingStats.recordTiming(newNow, newNow.minus(Duration.ONE_MILLISECOND), LONG);
-            final Map<Duration, Duration> newStats = timingStats.getAverageDurations(newNow);
-            assertEquals(LONG, newStats.get(YOUNG));
-            assertEquals(SHORT.plus(LONG).divide(2).asMillis(), newStats.get(OLD).asMillis());
+            final Map<Duration, Pair<Duration, Integer>> newStats = timingStats.getAverageDurations(newNow);
+            assertEquals(LONG, newStats.get(YOUNG).getA());
+            assertEquals(SHORT.plus(LONG).divide(2).asMillis(), newStats.get(OLD).getA().asMillis());
         }
         // now advance the time by adding another one, causing the oldest one to drop out of the frame
         {
@@ -42,15 +44,17 @@ public class TimingStatsTest {
             // the new entry added is 1ms old, ending up in YOUNG and OLD
             // So we expect YOUNG to represent one entry: 2*LONG
             // and OLD to represent two entries: 2*LONG + LONG with average 1.5*LONG
-            final Map<Duration, Duration> newStats = timingStats.getAverageDurations(newNow);
-            assertEquals(LONG.times(2), newStats.get(YOUNG));
-            assertEquals(LONG.times(2).plus(LONG).divide(2).asMillis(), newStats.get(OLD).asMillis());
+            final Map<Duration, Pair<Duration, Integer>> newStats = timingStats.getAverageDurations(newNow);
+            assertEquals(LONG.times(2), newStats.get(YOUNG).getA());
+            assertEquals(LONG.times(2).plus(LONG).divide(2).asMillis(), newStats.get(OLD).getA().asMillis());
         }
         // simply advance the time to force all elements to drop out
         {
-            final Map<Duration, Duration> newStats = timingStats.getAverageDurations(now.plus(OLD.times(4)));
-            assertNull(newStats.get(YOUNG));
-            assertNull(newStats.get(OLD));
+            final Map<Duration, Pair<Duration, Integer>> newStats = timingStats.getAverageDurations(now.plus(OLD.times(4)));
+            assertNull(newStats.get(YOUNG).getA());
+            assertEquals(0, newStats.get(YOUNG).getB().intValue());
+            assertNull(newStats.get(OLD).getA());
+            assertEquals(0, newStats.get(OLD).getB().intValue());
         }
     }
     
@@ -59,8 +63,8 @@ public class TimingStatsTest {
         final TimePoint now = MillisecondsTimePoint.now();
         final TimingStats timingStats = new TimingStats(now.minus(Duration.ONE_HOUR), YOUNG, OLD);
         timingStats.recordTiming(now, now.minus(YOUNG), SHORT);
-        final Map<Duration, Duration> stats = timingStats.getAverageDurations(now);
-        assertEquals(SHORT, stats.get(YOUNG));
-        assertEquals(SHORT, stats.get(OLD));
+        final Map<Duration, Pair<Duration, Integer>> stats = timingStats.getAverageDurations(now);
+        assertEquals(SHORT, stats.get(YOUNG).getA());
+        assertEquals(SHORT, stats.get(OLD).getA());
     }
 }
