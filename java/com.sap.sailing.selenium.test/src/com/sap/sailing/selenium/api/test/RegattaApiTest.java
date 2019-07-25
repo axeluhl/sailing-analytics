@@ -1,9 +1,11 @@
 package com.sap.sailing.selenium.api.test;
 
 import static com.sap.sailing.domain.common.CompetitorRegistrationType.CLOSED;
+import static com.sap.sailing.domain.common.CompetitorRegistrationType.OPEN_UNMODERATED;
 import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
+import static com.sap.sailing.selenium.api.core.GpsFixMoving.createFix;
 import static com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage.goToPage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -11,8 +13,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -22,8 +27,10 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
+import com.sap.sailing.selenium.api.core.DeviceStatus;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.EventApi.Event;
+import com.sap.sailing.selenium.api.event.GpsFixApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
 import com.sap.sailing.selenium.api.event.SecurityApi;
 import com.sap.sailing.selenium.api.event.UserGroupApi;
@@ -32,6 +39,8 @@ import com.sap.sailing.selenium.api.regatta.Competitor;
 import com.sap.sailing.selenium.api.regatta.RaceColumn;
 import com.sap.sailing.selenium.api.regatta.Regatta;
 import com.sap.sailing.selenium.api.regatta.RegattaApi;
+import com.sap.sailing.selenium.api.regatta.RegattaDeviceStatus;
+import com.sap.sailing.selenium.api.regatta.RegattaDeviceStatus.CompetitorDeviceStatus;
 import com.sap.sailing.selenium.api.regatta.RegattaRaces;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
@@ -46,6 +55,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
     private final RegattaApi regattaApi = new RegattaApi();
     private final LeaderboardApi leaderboardApi = new LeaderboardApi();
     private final UserGroupApi usergroupApi = new UserGroupApi();
+    private final GpsFixApi gpsFixApi = new GpsFixApi();
 
     @Before
     public void setUp() {
@@ -227,5 +237,43 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         Competitor[] competitors = regattaApi.getCompetitors(userOwningEventCtx, OTHER_EVENT_NAME);
 
         assertEquals(0, competitors.length);
+    }
+    
+    @Test
+    public void testTrackingDeviceStatus() {
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+
+        Event event = eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, OPEN_UNMODERATED, "default");
+        final UUID competitor1DeviceID = UUID.randomUUID();
+        final Competitor competitor1 = regattaApi.createAndAddCompetitorWithSecret(ctx, EVENT_NAME, BOAT_CLASS, "test@de", "Max",
+                "USA", event.getSecret(), competitor1DeviceID);
+        final UUID competitor2DeviceID = UUID.randomUUID();
+        final Competitor competitor2 = regattaApi.createAndAddCompetitorWithSecret(ctx, EVENT_NAME, BOAT_CLASS, "test@de",
+                "Peter", "USA", event.getSecret(), competitor2DeviceID);
+
+        final long timeMillisCompetitor1 = System.currentTimeMillis();
+        gpsFixApi.postGpsFix(ctx, competitor1DeviceID, createFix(49.121, 8.5987, timeMillisCompetitor1, 10.0, 180.0));
+        final long timeMillisCompetitor2 = System.currentTimeMillis() - 50;
+        gpsFixApi.postGpsFix(ctx, competitor2DeviceID, createFix(49.120, 8.5988, timeMillisCompetitor2, 10.0, 180.0));
+
+        final RegattaDeviceStatus trackingDeviceStatus = regattaApi.getTrackingDeviceStatus(ctx, EVENT_NAME);
+
+        final List<CompetitorDeviceStatus> competitorsTrackingDeviceStatus = trackingDeviceStatus.getCompetitors();
+        assertEquals(2, competitorsTrackingDeviceStatus.size());
+        final Map<UUID, List<DeviceStatus>> statusByCompetitorUUID = competitorsTrackingDeviceStatus.stream()
+                .collect(Collectors.toMap(c -> UUID.fromString(c.getCompetitorId()), c -> c.getDeviceStatuses()));
+        assertTrue(statusByCompetitorUUID.containsKey(competitor1.getId()));
+        assertTrue(statusByCompetitorUUID.containsKey(competitor2.getId()));
+
+        List<DeviceStatus> competitor1DeviceStatuses = statusByCompetitorUUID.get(competitor1.getId());
+        assertEquals(1, competitor1DeviceStatuses.size());
+        DeviceStatus competitor1DeviceStatus = competitor1DeviceStatuses.iterator().next();
+        assertEquals(competitor1DeviceID.toString(), competitor1DeviceStatus.getDeviceId());
+        assertEquals(timeMillisCompetitor1, competitor1DeviceStatus.getLastGPSFix().getTime());
+        List<DeviceStatus> competitor2DeviceStatuses = statusByCompetitorUUID.get(competitor2.getId());
+        assertEquals(1, competitor1DeviceStatuses.size());
+        DeviceStatus competitor2DeviceStatus = competitor2DeviceStatuses.iterator().next();
+        assertEquals(competitor2DeviceID.toString(), competitor2DeviceStatus.getDeviceId());
+        assertEquals(timeMillisCompetitor2, competitor2DeviceStatus.getLastGPSFix().getTime());
     }
 }
