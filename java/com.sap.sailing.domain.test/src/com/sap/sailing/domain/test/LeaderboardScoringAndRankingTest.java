@@ -1179,54 +1179,18 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
     /**
      * Tests the {@link LowPointTieBreakBasedOnLastSeriesOnly} scoring scheme's tie breaking rule. c[0] and c[2] have
      * equal scores after excluding their worst score each. They both exclude a score from the final series. c[1]'s and
-     * c[3]'s net points sum is worse than that of c[0] and c[2], so c[1] is not tied. Comparing c[0]'s and c[2]'s
-     * non-excluded final series scores does not break the tie. They both have as their only non-excluded race a win in
-     * the final series. So the tie break needs to continue by comparing the sorted non-excluded scores from the
-     * qualification series. c[2]'s excluded score from the final series is worse than the one c[0] excludes in the
-     * final series. Yet, in the qualification, c[2] has the better ordered scores, so is expected to be found the
-     * winner.
+     * c[3]'s net points sum is worse than that of c[0] and c[2], so c[1] is not tied. Comparing c[0]'s and c[2]'s final
+     * series <em>including the excluded ones</em> breaks the tie because both have won one race in the final series,
+     * and c[0] scores a 3.0 in F1, c[2] only scores a 4.0 in F2, so c[0] wins.
      */
     @Test
-    public void testTieBreakBasedOnLastNonMedalSeriesNoMedalOneDiscard() throws NoWindException {
+    public void testTieBreakBasedIncludingDiscardInFinalSeries() throws NoWindException {
         Competitor[] c = createCompetitors(4).toArray(new Competitor[0]);
-        Competitor[] q1 = new Competitor[] { c[0], c[1], c[2], c[3] }; // c[2]'s net points: 6.0; c[0]'s net points: 6.0
-        Competitor[] q2 = new Competitor[] { c[2], c[0], c[1], c[3] }; // c[2] has two wins in the qualification, c[0] only one
+        Competitor[] q1 = new Competitor[] { c[0], c[1], c[2], c[3] };
+        Competitor[] q2 = new Competitor[] { c[2], c[0], c[1], c[3] };
         Competitor[] q3 = new Competitor[] { c[2], c[0], c[1], c[3] };
-        Competitor[] f1 = new Competitor[] { c[2], c[1], c[0], c[3] }; // c[0] discards this race; remaining is one win in the final series
-        Competitor[] f2 = new Competitor[] { c[0], c[1], c[3], c[2] }; // c[2] discards this race; remaining is one win in the final series
-        Regatta regatta = createRegatta(/* qualifying */3, new String[] { "Default" }, /* final */2, new String[] { "Default" },
-                /* medal */ false, /* medal */ 0, "testTieBreakWithTieBreakBasedOnLastNonMedalSeriesNoMedal",
-                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
-                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT_TIE_BREAK_BASED_ON_LAST_SERIES_ONLY));
-        Leaderboard leaderboard = createLeaderboard(regatta,
-                /* discarding thresholds: one discard when four races have been completed */ new int[] { 4 });
-        createAndAttachTrackedRaces(series.get(0), "Default", /* withScores */ true, q1, q2, q3);
-        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2);
-        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
-        assertEquals(leaderboard.getNetPoints(c[0], later), leaderboard.getNetPoints(c[2], later), 0.000000001);
-        assertTrue(rankedCompetitors.indexOf(c[2]) < rankedCompetitors.indexOf(c[0]));
-    }
-
-    /**
-     * Tests the {@link LowPointTieBreakBasedOnLastSeriesOnly} scoring scheme's tie breaking rule. c[0] and c[2] have
-     * equal scores after excluding their worst score each. c[0] excludes a score from the final series, c[2] from the
-     * qualification. The way we understand the rules up to now (see also
-     * https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4717#c4) we have to sort by series as the primary and by
-     * score as the secondary criterion, making c[0]'s second score from the top the best score from the qualification,
-     * whereas for c[2] the second score from the top will be the worst score from the final series. This will break the
-     * tie in c[0]'s favor. 
-     * <p>
-     * 
-     * c[1]'s and c[3]'s net points sum is worse than that of c[0] and c[2], so c[1] is not tied.
-     */
-    @Test
-    public void testTieBreakBasedOnLastNonMedalSeriesNoMedalDiscardsInDifferentSeries() throws NoWindException {
-        Competitor[] c = createCompetitors(4).toArray(new Competitor[0]);
-        Competitor[] q1 = new Competitor[] { c[0], c[1], c[3], c[2] }; // c[2] discards this race
-        Competitor[] q2 = new Competitor[] { c[2], c[0], c[1], c[3] }; // c[2] net points: 6.0; c[0] net points: 6.0
-        Competitor[] q3 = new Competitor[] { c[2], c[0], c[1], c[3] };
-        Competitor[] f1 = new Competitor[] { c[2], c[1], c[0], c[3] }; // c[0] discards this race
-        Competitor[] f2 = new Competitor[] { c[0], c[1], c[2], c[3] }; // c[0] and c[2] won one race in the final series; next, c[2]'s 3.0 points in f2 compare to c[0]'s win in q1
+        Competitor[] f1 = new Competitor[] { c[2], c[1], c[0], c[3] }; // c[0] discards this race, but it doesn't matter: the scoring scheme also considers discarded scores
+        Competitor[] f2 = new Competitor[] { c[0], c[1], c[3], c[2] }; // c[2] discards this race, but the scoring scheme also uses the discarded scores
         Regatta regatta = createRegatta(/* qualifying */3, new String[] { "Default" }, /* final */2, new String[] { "Default" },
                 /* medal */ false, /* medal */ 0, "testTieBreakWithTieBreakBasedOnLastNonMedalSeriesNoMedal",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
@@ -1240,6 +1204,36 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         assertTrue(rankedCompetitors.indexOf(c[0]) < rankedCompetitors.indexOf(c[2]));
     }
 
+    /**
+     * Tests the {@link LowPointTieBreakBasedOnLastSeriesOnly} scoring scheme's tie breaking rule. c[0] and c[2] have
+     * equal scores after excluding their worst score each: c[0] scores 5.0 in the qualification and 4.0 in the final,
+     * together 9.0, and excludes as her worst race the 3.0 from the F1 race, ending up with 6.0 net points.
+     * c[2] scores 6.0 in the qualification and 4.0 in the final, together 10.0, and excludes as her worst race the
+     * 4.0 from the Q1 race, also ending up with 6.0 net points. c[0] excludes a score from the final series, c[2] from the
+     * qualification. The rule claims that excluded scores shall still be used for tie-breaking. So from the tie-breaking
+     * rule's perspective, both equally score 4.0 points in the final series, hence tie-breaking has to resort to the
+     * qualification series where c[0] has one win, c[2] has two, so c[2] shall win this tie break.
+     */
+    @Test
+    public void testTieBreakBasedOnLastNonMedalSeriesNoMedalDiscardsInDifferentSeries() throws NoWindException {
+        Competitor[] c = createCompetitors(4).toArray(new Competitor[0]);
+        Competitor[] q1 = new Competitor[] { c[0], c[1], c[3], c[2] }; // c[2] discards this race with 4.0 points
+        Competitor[] q2 = new Competitor[] { c[2], c[0], c[1], c[3] }; // 
+        Competitor[] q3 = new Competitor[] { c[2], c[0], c[1], c[3] }; // but c[2] has two wins, c[0] only one
+        Competitor[] f1 = new Competitor[] { c[2], c[1], c[0], c[3] }; // c[0] discards this race with 3.0 points
+        Competitor[] f2 = new Competitor[] { c[0], c[1], c[2], c[3] }; // c[0] and c[2] both have [1.0, 3.0] as scores in the final series
+        Regatta regatta = createRegatta(/* qualifying */3, new String[] { "Default" }, /* final */2, new String[] { "Default" },
+                /* medal */ false, /* medal */ 0, "testTieBreakWithTieBreakBasedOnLastNonMedalSeriesNoMedal",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT_TIE_BREAK_BASED_ON_LAST_SERIES_ONLY));
+        Leaderboard leaderboard = createLeaderboard(regatta,
+                /* discarding thresholds: one discard when four races have been completed */ new int[] { 4 });
+        createAndAttachTrackedRaces(series.get(0), "Default", /* withScores */ true, q1, q2, q3);
+        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2);
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(leaderboard.getNetPoints(c[0], later), leaderboard.getNetPoints(c[2], later), 0.000000001);
+        assertTrue(rankedCompetitors.indexOf(c[2]) < rankedCompetitors.indexOf(c[0]));
+    }
 
     /**
      * Tests the {@link LowPointTieBreakBasedOnLastSeriesOnly} scoring scheme's tie breaking rule by setting up a
