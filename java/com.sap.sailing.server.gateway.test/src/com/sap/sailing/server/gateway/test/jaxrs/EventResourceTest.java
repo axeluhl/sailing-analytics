@@ -179,8 +179,8 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
                 /* venueNameParam */ randomName, /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null,
                 /* officialWebsiteURLParam */ null, /* baseURLParam */ null, /* leaderboardGroupIdsListParam */ null,
                 /* createLeaderboardGroupParam */ "true", /* createRegattaParam */ "true",
-                /* boatClassNameParam */ ScoringSchemeType.HIGH_POINT.name(), /* numberOfRacesParam */ "6", false, CompetitorRegistrationType.CLOSED.name(), null,
-                /* rankingMetricParam */ RankingMetrics.ORC_PERFORMANCE_CURVE.name(), /* scoringSchemeParam */ "HIGH_POINT", /* leaderboardDiscardThresholdsParam */ Arrays.asList(2, 4));
+                /* boatClassNameParam */ "TP52", /* numberOfRacesParam */ "6", false, CompetitorRegistrationType.CLOSED.name(), null,
+                /* rankingMetricParam */ RankingMetrics.ORC_PERFORMANCE_CURVE.name(), /* scoringSchemeParam */ ScoringSchemeType.HIGH_POINT.name(), /* leaderboardDiscardThresholdsParam */ Arrays.asList(2, 4));
     }
     
     private Response getLeaderboard(String name) {
