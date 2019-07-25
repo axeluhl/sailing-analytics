@@ -107,6 +107,18 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
         JSONObject objLeaderboardGroup = getLeaderboardGroup(eventName);
         JSONArray arrLeaderboards = (JSONArray) objLeaderboardGroup.get("leaderboards");
         assertTrue(containsObjectWithAttrbuteNameAndValue(arrLeaderboards, "name", strRegattaName));
+        JSONObject leaderboard = getLeaderboardAsJsonObject(getLeaderboard(eventName));
+        assertEquals("/leaderboard/" + eventName, leaderboard.get("shardingLeaderboardName"));
+    }
+    
+    @Test
+    public void testShardingNameInLeaderboardResponse() throws Exception {
+        String originalRandomName = randomName;
+        String eventName = randomName += "ä$";
+        Response eventResponse = createEventWithLeaderboardGroupAndRegatta();
+        assertTrue(isValidCreateEventResponse(eventResponse));
+        JSONObject leaderboard = getLeaderboardAsJsonObject(getLeaderboard(eventName));
+        assertEquals("/leaderboard/" + originalRandomName + "__", leaderboard.get("shardingLeaderboardName"));
     }
     
     @Test
