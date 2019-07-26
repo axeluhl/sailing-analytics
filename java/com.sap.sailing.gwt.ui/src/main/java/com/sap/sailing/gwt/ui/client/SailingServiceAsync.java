@@ -1118,4 +1118,6 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void existsSwissTimingArchiveConfigurationForCurrentUser(String jsonUrl, AsyncCallback<Boolean> callback);
 
     void existsTracTracConfigurationForCurrentUser(String jsonUrl, AsyncCallback<Boolean> callback);
+
+    void getTrackedRaceIsUsingMarkPassingCalculator(RegattaAndRaceIdentifier regattaNameAndRaceName, AsyncCallback<Boolean> callback);
 }
