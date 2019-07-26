@@ -3,6 +3,7 @@ package com.sap.sailing.server;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import com.sap.sailing.server.LeaderboardMXBean.ComputationTimeAverage;
 import com.sap.sailing.server.interfaces.RacingEventService;
 
 /**
@@ -16,4 +17,7 @@ public interface RacingEventServiceMXBean {
     public long getNumberOfTrackedRacesToRestore();
     public int getNumberOfTrackedRacesRestored();
     ObjectName[] getLeaderboards() throws MalformedObjectNameException;
+    ComputationTimeAverage getLeaderboardComputationStatisticsYoung();
+    ComputationTimeAverage getLeaderboardComputationStatisticsMedium();
+    ComputationTimeAverage getLeaderboardComputationStatisticsOld();
 }

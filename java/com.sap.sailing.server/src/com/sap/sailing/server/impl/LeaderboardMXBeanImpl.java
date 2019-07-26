@@ -1,7 +1,7 @@
 package com.sap.sailing.server.impl;
 
-import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -96,15 +96,26 @@ public class LeaderboardMXBeanImpl implements LeaderboardMXBean {
     }
     
     @Override
-    public ComputationTimeAverage[] getComputationTimeAverages() {
-        final Map<Duration, Pair<Duration, Integer>> computationTimeStatistics = getLeaderboard().getComputationTimeStatistics();
-        final ComputationTimeAverage[] result = new ComputationTimeAverage[computationTimeStatistics.size()];
-        int i=0;
-        for (final Entry<Duration, Pair<Duration, Integer>> e : computationTimeStatistics.entrySet()) {
-            result[i++] = new ComputationTimeAverageImpl(e.getKey().asMillis(),
+    public ComputationTimeAverage getComputationTimeAverageYoung() {
+        return getComputationTimeAverages(0);
+    }
+
+    @Override
+    public ComputationTimeAverage getComputationTimeAverageMedium() {
+        return getComputationTimeAverages(1);
+    }
+
+    @Override
+    public ComputationTimeAverage getComputationTimeAverageOld() {
+        return getComputationTimeAverages(2);
+    }
+
+    private ComputationTimeAverage getComputationTimeAverages(int indexInStatsSortedByAscendingSampleDuration) {
+        final TreeMap<Duration, Pair<Duration, Integer>> computationTimeStatistics = new TreeMap<>(getLeaderboard().getComputationTimeStatistics());
+        final Entry<Duration, Pair<Duration, Integer>> e = Util.get(computationTimeStatistics.entrySet(), indexInStatsSortedByAscendingSampleDuration);
+        final ComputationTimeAverage result = new ComputationTimeAverageImpl(e.getKey().asMillis(),
                                                          e.getValue().getA()==null?-1:e.getValue().getA().asMillis(),
                                                          e.getValue().getB());
-        }
         return result;
     }
 }

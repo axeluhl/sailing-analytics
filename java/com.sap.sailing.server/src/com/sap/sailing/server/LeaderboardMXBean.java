@@ -19,5 +19,7 @@ public interface LeaderboardMXBean extends Named {
     String getType();
     long getDelayToLiveInMillis();
     String getBoatClass();
-    ComputationTimeAverage[] getComputationTimeAverages();
+    ComputationTimeAverage getComputationTimeAverageYoung();
+    ComputationTimeAverage getComputationTimeAverageMedium();
+    ComputationTimeAverage getComputationTimeAverageOld();
 }
