@@ -190,7 +190,55 @@ The landscape and architecture concepts described so far can be mapped to the K8
 
 ### Load Balancing and Ingress
 
-K8s has a concept of "Ingress" which is an external access point to a service or an application.  
+K8s has a concept of "Ingress" which is an external access point to a service or an application. The way we use AWS ALBs to route access through target groups to hosts which usually run Apache reverse proxies to log, rewrite and SSL-terminate traffic which they then forward to applications can be represented well by a set of Ingress resources.
+
+We can distinguish between write loads and read loads, directing write loads to the replica set's master, and read loads to the group of replicas. Currently, write loads are identified by the "-master" part of the subdomain name. However, in future releases we may decide to "tag" write requests, particularly the GWT RPC requests that actually perform updates, by specific URL path elements that the Ingress resource definition may identify and use for a routing decision.
+
+Ingress resources can also be used for our standard services such as the Hudson build server, the Wiki service, the "static" content, releases.sapsailing.com and bugzilla. All other SAP Sailing Analytics replica sets, including dev.sapsailing.com, all "club" servers as well as event and league servers plus the archive server can be Ingress resources of their own.
+
+By means of the "IngressGroup" feature of the most recent beta version of the AWS ALB Ingress Controller we may be able to map our requirements to regular ALBs, avoiding "horizontal" traffic that crosses availability zones (AZs) and being very scalable and efficient.
+
+### MongoDB and RabbitMQ
+
+Our replica sets require basic services such as a MongoDB for persistence and a RabbitMQ for replication. Both components are capable of running in a high-available clustering mode, also within K8s. K8s can then help to keep those services highly available.
+
+For MongoDB we shall map our current design of two instances in two different AZs with fast NMVe disks of appropriate size for "live" workloads and a hidden replica with a gp2 SSD with full incremental snapshot backups. The two non-hidden instances will share the same node type requirements in terms of memory, NVMe support and vCPUs. The hidden replica will be less demanding as it has time during off-peak periods to process the op-log.
+
+Similarly, for RabbitMQ we could and should configure a small deployment with at least two pods so that in case of one pod's failure the other can take over. This would give us a highly available scenario also for replication use cases.
+
+### SAP Sailing Analytics "Replica Sets"
+
+Such a replica set would contain a single master instance and zero or more replicas. A "reading" service will be defined that receives all non-administrative, non-mass-data-ingesting requests, including all read requests as well as simple session management requests, but not GPS data ingestion or AdminConsole-triggered requests. The "writing" service will receive data ingestion load as well as anything coming from the AdminConsole entry point. We would need to distinguish reading and writing GWT RPC requests, probably by a URL path extension, similar to the "sharding" pattern we have employed to separate traffic by regatta/leaderboard.
+
+Replicas should know their master by means of a DNS record for the respective "master" service of the replica set. This way, when a master replacement is necessary, replicas may recover from not finding their master temporarily, as the new master appears under the same label.
+
+Replica sets should be subject to scaling by a Horizontal Pod Autoscaler (HPA). The metrics observed should be the leaderboard recalculation times as well as the number of requests received per second, maybe also the traffic.
+
+A "replica set" should start out with a single master pod labeled as both, write and read load handler. As the read load increases, replicas may be fired up in a new deployment, subject to HPA.
+
+### Vertically Scaling a Master Pod
+
+When a master dies or requires scaling up/down, a new master server needs to be provisioned. A new pod may launch, on the same DB as the current master. For this not to cause trouble, the current master needs to be removed from its service, e.g., by removing its service-related label. This way, the old master stops processing requests. Write requests will have to be queued or rejected, and clients should be built such that they will re-try at a later point in time.
+
+When the new master has completed its start-up phase and is considered available, it can be tagged with the master service tag. This will let existing replicas as well as external writing clients send their traffic to the new master.
+
+### Vertically Scaling Replicas
+
+Easy... Launch more replicas with the configuration desired and dismantle the old ones.
+
+### Archive Server
+
+The archive server shall provide smooth fail-over because it is the critical landing page of the entire web site. We aim to have to copies of an archive server running at all times. One is the current master, the other is a fail-over that usually will be on a previous version. The reason for this is that in case of a regression or other grave problem introduced by a new release we can simply shut off the new archive server instance, and the fail-over instance with the last-known-good version should take over transparently until a new, fixed version has been deployed.
+
+The archive servers are pretty special. They require lots of RAM but could live with less RAM than would be suggested for the size of RAM requested. Clever worker node group configurations may help utilizing expensive hardware used mainly for archive servers better.
+
+### Version Upgrades
+
+Upgrading versions is tricky because the GWT RPC clients are sensitive to even small changes. So are round robin-scheduled client calls to different versions of the GWT RPC service implementation.
+
+It is therefore advisable to launch an entirely new replica set with a new master and a new set of replicas, as required by the current traffic / request loads. The old master should be removed from its service when launching the new replica set starts. Once the new replica set is available the Ingress definition can be switched to point to the new version of the service.
+
+Afterwards, the old version of the service with all its pods can be terminated.
 
 ## Orchestration Use Cases
 
