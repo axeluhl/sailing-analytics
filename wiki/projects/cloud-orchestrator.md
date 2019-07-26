@@ -184,6 +184,14 @@ Subject to backup are all production MongoDB databases, the MySQL database conte
 
 The backup script on *dbserver.internal.sapsailing.com:/opt/backup.sh* does *not* backup all MongoDB databases available. I think that it should. See also *configuration/backup_full.sh* in our git repository for a new version.
 
+## How Kubernetes (K8s) May Help
+
+The landscape and architecture concepts described so far can be mapped to the K8s world in many aspects.
+
+### Load Balancing and Ingress
+
+K8s has a concept of "Ingress" which is an external access point to a service or an application.  
+
 ## Orchestration Use Cases
 
 ### Create a New Event on a Dedicated Replication Cluster
