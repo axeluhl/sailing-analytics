@@ -25,7 +25,11 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * 
  * The boundary durations are inclusive, meaning that an entry {@link #recordTiming(TimePoint, Duration) recorded} is
  * considered part of the range represented by the age passed to the constructor if it is exactly of that age at the
- * time of recording.
+ * time of recording.<p>
+ * 
+ * Objects of this class are capable of handling multi-threaded access and update. The log entries are managed
+ * in a {@link ConcurrentSkipListSet} that is safe for concurrent reads and updates. The statistics are managed
+ * by {@link AtomicLong} objects that by definition are thread safe.
  * 
  * @author Axel Uhl (d043530)
  *
@@ -69,10 +73,11 @@ public class TimingStats {
     }
     
     /**
-     * Keys are the durations for which to maintain averages; the values are maintained transactionally; the elements in
-     * represent the sum of all {@link LogEntry#getHowLong() durations} of all {@link #logEntries} that are
-     * no older (considering the time point when {@link #updateStatsBasedOnNewNow()} was called last) than
-     * the corresponding key tells.
+     * Keys are the durations for which to maintain averages; the values are maintained transactionally; they represent
+     * the sum of all {@link LogEntry#getHowLong() durations} in milliseconds of all {@link #logEntries} that are no
+     * older (considering the time point when {@link #updateStatsBasedOnNewNow()} was called last) than the
+     * corresponding key tells. After this map has been initialized by the constructor, it does not change anymore.
+     * The {@link AtomicLong} objects are changed "in-place" to update the statistics.
      */
     private final Map<Duration, AtomicLong> agesForAveragesAndTheirDurationSumsInMillis;
     
@@ -146,7 +151,6 @@ public class TimingStats {
      * @param newNow if earlier than {@link #lastNow}, this call is a no-op and the method returns immediately
      */
     private void updateStatsBasedOnNewNow(final TimePoint newNow) {
-        // TODO synchronization / locking?
         if (newNow.after(lastNow)) {
             Duration oldestAge = Duration.NULL;
             for (final Entry<Duration, AtomicLong> e : agesForAveragesAndTheirDurationSumsInMillis.entrySet()) {
