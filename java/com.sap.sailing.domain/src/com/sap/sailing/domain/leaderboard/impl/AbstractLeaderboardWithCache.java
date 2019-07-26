@@ -564,7 +564,11 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
      *            how long it took to complete the DTO calculation request
      */
     private void updateStats(TimePoint startOfRequestHandling, Duration computeDuration) {
-        timingStats.recordTiming(startOfRequestHandling, computeDuration);
+        try {
+            timingStats.recordTiming(startOfRequestHandling, computeDuration);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Exception trying to update leaderboard compute time stats", e);
+        }
     }
     
     @Override
