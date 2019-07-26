@@ -24,7 +24,7 @@ public class TimingStatsTest {
             timingStats.recordTiming(now, now.minus(YOUNG).minus(Duration.ONE_MILLISECOND), SHORT);
             final Map<Duration, Pair<Duration, Integer>> stats = timingStats.getAverageDurations(now);
             assertNull(stats.get(YOUNG).getA());
-            assertEquals(0, stats.get(OLD).getB().intValue());
+            assertEquals(1, stats.get(OLD).getB().intValue());
             assertEquals(SHORT, stats.get(OLD).getA());
         }
         // add another one later, such that the new one is expected to be YOUNG, and the formerly OLD one is expected to still be old
