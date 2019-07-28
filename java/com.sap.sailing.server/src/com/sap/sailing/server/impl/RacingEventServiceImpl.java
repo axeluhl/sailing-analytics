@@ -3548,8 +3548,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public void setRegattaForRace(Regatta regatta, String raceIdAsString) {
-        persistentRegattasForRaceIDs.put(raceIdAsString, regatta);
-        mongoObjectFactory.storeRegattaForRaceID(raceIdAsString, regatta);
+        final Regatta oldRegatta = persistentRegattasForRaceIDs.put(raceIdAsString, regatta);
+        if (oldRegatta != regatta) {
+            mongoObjectFactory.storeRegattaForRaceID(raceIdAsString, regatta);
+        }
     }
 
     @Override
