@@ -66,11 +66,11 @@ public class PersistentCompetitorAndBoatStore extends TransientCompetitorAndBoat
         } else {
             Collection<DynamicBoat> allBoats = loadFrom.loadAllBoats();
             for (DynamicBoat boat : allBoats) {
-                super.addNewBoat(boat);
+                super.addNewBoat(boat, /* storePersistently */ false);
             }
             Collection<DynamicCompetitor> allCompetitors = loadFrom.loadAllCompetitors();
             for (DynamicCompetitor competitor : allCompetitors) {
-                super.addNewCompetitor(competitor);
+                super.addNewCompetitor(competitor, /* storePersistently */ false);
             }
         }
     }
@@ -130,9 +130,11 @@ public class PersistentCompetitorAndBoatStore extends TransientCompetitorAndBoat
     }
 
     @Override
-    protected void addNewCompetitor(DynamicCompetitor competitor) {
-        storeTo.storeCompetitor(competitor);
-        super.addNewCompetitor(competitor);
+    protected void addNewCompetitor(DynamicCompetitor competitor, boolean storePersistently) {
+        if (storePersistently) {
+            storeTo.storeCompetitor(competitor);
+        }
+        super.addNewCompetitor(competitor, storePersistently);
     }
 
     @Override
@@ -149,10 +151,12 @@ public class PersistentCompetitorAndBoatStore extends TransientCompetitorAndBoat
     @Override
     public Competitor updateCompetitor(String idAsString, String newName, String newShortName, Color newRgbDisplayColor, String newEmail,
             Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile,
-            String searchTag) {
+            String searchTag, boolean storePersistently) {
         Competitor result = super.updateCompetitor(idAsString, newName, newShortName, newRgbDisplayColor, newEmail, newNationality,
-                newTeamImageUri, newFlagImageUri, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
-        storeTo.storeCompetitor(result);
+                newTeamImageUri, newFlagImageUri, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, storePersistently);
+        if (storePersistently) {
+            storeTo.storeCompetitor(result);
+        }
         return result;
     }
     
@@ -163,9 +167,9 @@ public class PersistentCompetitorAndBoatStore extends TransientCompetitorAndBoat
     }
 
     @Override
-    protected void addNewBoat(DynamicBoat boat) {
+    protected void addNewBoat(DynamicBoat boat, boolean storePersistently) {
         storeTo.storeBoat(boat);
-        super.addNewBoat(boat);
+        super.addNewBoat(boat, storePersistently);
     }
 
     @Override

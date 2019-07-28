@@ -89,16 +89,17 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<DynamicCompe
             final Double timeOnDistanceAllowanceInSecondsPerNauticalMile = timeOnDistanceAllowanceInSecondsPerNauticalMileAsNumber != null ? 
             		timeOnDistanceAllowanceInSecondsPerNauticalMileAsNumber.doubleValue() : 0.0;
             final DynamicCompetitor result;
+            // FIXME don't use getOrCreateCompetitor[WithBoat] because it will store boat/competitor to DB redundantly again; introduct a load... method or similar
             if (boat == null) {
                 result = competitorWithBoatFactory.getOrCreateCompetitor(competitorId, name, shortName, displayColor, email,
                         flagImageURI, team, timeOnTimeFactor,
                         timeOnDistanceAllowanceInSecondsPerNauticalMile == null ? null : 
-                            new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag);
+                            new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag, /* storePersistently */ true);
             } else {
                 result = competitorWithBoatFactory.getOrCreateCompetitorWithBoat(competitorId, name, shortName, displayColor, email,
                         flagImageURI, team, timeOnTimeFactor,
                         timeOnDistanceAllowanceInSecondsPerNauticalMile == null ? null : 
-                            new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag, boat);
+                            new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag, boat, /* storePersistently */ true);
             }
             return result;
         } catch (Exception e) {

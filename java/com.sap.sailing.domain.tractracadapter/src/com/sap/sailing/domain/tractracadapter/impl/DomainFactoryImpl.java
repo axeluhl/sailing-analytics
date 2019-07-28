@@ -319,7 +319,7 @@ public class DomainFactoryImpl implements DomainFactory {
             // TODO bug2822: if only boat is to be updated then this would currently fail here; consider competitorStore.isBoatToUpdateDuringGetOrCreate(...)
             DynamicTeam team = createTeam(name, nationality, competitorId);
             DynamicBoat boat = (DynamicBoat) competitorStore.getOrCreateBoat(domainCompetitor == null ? UUID.randomUUID() : domainCompetitor.getBoat().getId(),
-                    null /* no boat name available */, boatClass, sailId, /* color */ null);
+                    null /* no boat name available */, boatClass, sailId, /* color */ null, /* storePersistently */ true);
             domainCompetitor = raceTrackingHandler.getOrCreateCompetitorWithBoat(competitorStore, competitorId, name,
                     shortName, null /* displayColor */,
                     null /* email */, null /* flagImag */, team, (double) timeOnTimeFactor,
@@ -816,7 +816,7 @@ public class DomainFactoryImpl implements DomainFactory {
                                     rc.getCompetitor().getShortName(), competitorToUse.getColor(),
                                     competitorToUse.getEmail(), competitorToUse.getNationality(), competitorToUse.getTeam().getImage(), 
                                     competitorToUse.getFlagImage(), competitorToUse.getTimeOnTimeFactor(),
-                                    competitorToUse.getTimeOnDistanceAllowancePerNauticalMile(), competitorToUse.getSearchTag());
+                                    competitorToUse.getTimeOnDistanceAllowancePerNauticalMile(), competitorToUse.getSearchTag(), /* storePersistently */ true);
                             if (savedIsCompetitorToUpdateDuringGetOrCreate) {
                                 competitorAndBoatStore.allowCompetitorResetToDefaults(competitorToUse);
                             }

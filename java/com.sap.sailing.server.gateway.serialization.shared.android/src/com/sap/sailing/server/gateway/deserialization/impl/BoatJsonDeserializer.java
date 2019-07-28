@@ -78,7 +78,7 @@ public class BoatJsonDeserializer implements JsonDeserializer<DynamicBoat> {
             String colorAsString = (String) object.get(BoatJsonSerializer.FIELD_COLOR);
             final Color color = colorAsString == null || colorAsString.isEmpty() ? null
                     : new RGBColor(colorAsString);
-            DynamicBoat boat = (DynamicBoat) boatFactory.getOrCreateBoat(boatId, name, boatClass, sailId, color);
+            DynamicBoat boat = (DynamicBoat) boatFactory.getOrCreateBoat(boatId, name, boatClass, sailId, color, /* storePersistently */ true);
             return boat;
         } catch (Exception e) {
             throw new JsonDeserializationException(e);
