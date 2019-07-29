@@ -108,6 +108,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[UI Tests with Selenium|wiki/howto/development/selenium-ui-tests]]
 * [[Profiling|wiki/howto/development/profiling]]
 * [[Working with GWT Super Dev Mode|wiki/howto/development/super-dev-mode]]
+* [[Training of internal Wind Estimation models|wiki/howto/windestimation]]
 
 ### For Event Managers
 
@@ -129,6 +130,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 
 * [[Cook Book|wiki/howto/misc/cook-book]]
 * [[Polars|wiki/howto/misc/polars]]
+* [[Wind Estimation - Core concepts|wiki/misc/windestimation-core-concepts]]
 * [[Server Replication|wiki/howto/misc/server-replication]]
 * [[TracTrac|wiki/howto/misc/tractrac-lifecycle]]
 * [[UI Tests|wiki/howto/misc/ui-tests-tutorial]]

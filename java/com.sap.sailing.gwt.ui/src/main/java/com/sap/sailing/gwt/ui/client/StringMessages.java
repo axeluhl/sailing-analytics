@@ -326,6 +326,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String legMiddleWindSourceTypeName();
     String courseBasedWindSourceTypeName();
     String trackBasedEstimationWindSourceTypeName();
+    String maneuverBasedEstimationWindSourceTypeName();
     String windSensorWindSourceTypeName();
     String webWindSourceTypeName();
     String raceCommitteeWindSourceTypeName();
@@ -910,13 +911,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String lastFinished();
     String times();
     String dataAmount();
-    String averageCleanedServerTime();
-    String averageCleanedOverallTime();
     String dataMiningBenchmarkResults();
     String serverTime();
-    String cleanedServerTime();
     String overallTime();
-    String cleanedOverallTime();
     String confidenceShouldBeBetween();
     String minDataValuesNeedToBeAtLeastZero();
     String numberOfColumnsAtLeast2();
@@ -949,6 +946,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String legMiddleWindSourceTypeTooltip();
     String courseBasedWindSourceTypeTooltip();
     String trackBasedEstimationWindSourceTypeTooltip();
+    String maneuverBasedEstimationWindSourceTypeTooltip();
     String windSensorWindSourceTypeTooltip();
     String webWindSourceTypeTooltip();
     String raceCommitteeWindSourceTypeTooltip();
@@ -1301,6 +1299,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String editMarkPositions();
     String removeFixedPassings();
     String setFixedPassing();
+    String chooseFixedPassing();
     String setSuppressedPassing();
     String removeSuppressedPassing();
     String errorRemovingFixedPassing(String message);
@@ -1309,6 +1308,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorRemovingSupressedPassing(String message);
     String errorTryingToObtainMarkPassing(String message);
     String errorTryingToObtainRaceLogMarkPassingData(String message);
+    String warningMarkPassingChangesNoEffect();
     String email();
     String pleaseEnterAnEmail();
     String inviteCompetitors();

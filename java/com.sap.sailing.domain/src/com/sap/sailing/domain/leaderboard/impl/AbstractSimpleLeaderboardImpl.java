@@ -59,7 +59,7 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
  *
  */
 public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardWithCache
-        implements Leaderboard, RaceColumnListener {
+        implements RaceColumnListener {
     private static final long serialVersionUID = 330156778603279333L;
 
     static final Double DOUBLE_0 = new Double(0);
