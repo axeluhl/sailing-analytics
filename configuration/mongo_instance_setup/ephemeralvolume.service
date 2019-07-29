@@ -1,5 +1,5 @@
 [Unit]
-Description=Ensures /dev/nvme0n1 is XFS-formatted
+Description=Ensures /dev/nvme0n1 or /dev/xvdb is XFS-formatted
 Requires=-.mount
 After=-.mount
 
