@@ -179,12 +179,11 @@ public class ORCCertificateImpl implements ORCCertificate {
     private final Map<Speed, Duration> runAllowancePerTrueWindSpeed;
 
     // TODO Comment on Constructor
-    public ORCCertificateImpl(String sailnumber, String boatclass, Distance length, Duration gph, Double cdl,
-            Map<Speed, Map<Bearing, Speed>> timeAllowancesPerTrueWindSpeedAndAngle, Map<Speed, Bearing> beatAngles,
-            Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed, Map<Speed, Duration> beatAllowancePerTrueWindSpeed,
-            Map<Speed, Bearing> runAngles, Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed,
-            Map<Speed, Duration> runAllowancePerTrueWindSpeed) {
-        super();
+    public ORCCertificateImpl(String sailnumber, String boatclass, Distance length, Duration gph,
+            Double cdl, Map<Speed, Map<Bearing, Speed>> timeAllowancesPerTrueWindSpeedAndAngle,
+            Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
+            Map<Speed, Duration> beatAllowancePerTrueWindSpeed, Map<Speed, Bearing> runAngles,
+            Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed, Map<Speed, Duration> runAllowancePerTrueWindSpeed) {
         this.sailnumber = sailnumber;
         this.boatclass = boatclass;
         this.lengthOverAll = length;
@@ -258,6 +257,7 @@ public class ORCCertificateImpl implements ORCCertificate {
         return null;
     }
 
+    @Override
     public String getSailnumber() {
         return sailnumber;
     }

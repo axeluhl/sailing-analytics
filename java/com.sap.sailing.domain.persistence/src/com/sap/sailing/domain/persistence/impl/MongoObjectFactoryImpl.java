@@ -108,6 +108,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.orc.ORCCertificate;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.PlaceHolderDeviceIdentifierMongoHandler;
@@ -1792,5 +1793,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    
+    private Document storeORCCertificate(ORCCertificate certificate) {
+        Document result = new Document(FieldNames.ORC_CERTIFICATE.name(), certificate.getSailnumber());
+        return result;
     }
 }

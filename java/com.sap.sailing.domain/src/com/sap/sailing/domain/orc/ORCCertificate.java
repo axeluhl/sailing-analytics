@@ -38,6 +38,14 @@ public interface ORCCertificate {
     public ORCPerformanceCurve getPerformanceCurve(ORCPerformanceCurveCourse course) throws FunctionEvaluationException;
     
     /**
+     * Returns the sailnumber of the {@link Competitor} which this certificate belongs to.
+     * 
+     * @return sailnumber as a string, which consists out of some alphanumeric characters (most time the nation or
+     *         boatclass id), a blank space and some numerical digits
+     */
+    public String getSailnumber();
+    
+    /**
      * Returns the GPH value for the {@link Competitor}. The GPH value represents the overall performance of the boat.
      * The value itself is again an allowance (in seconds per nautical mile) and could be used as a ToD Factor.
      * Most of the times it is used to divide a big fleet into similar fast divisions.

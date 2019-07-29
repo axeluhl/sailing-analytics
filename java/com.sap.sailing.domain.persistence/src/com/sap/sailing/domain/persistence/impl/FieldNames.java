@@ -170,5 +170,8 @@ public enum FieldNames {
     FIX,
     
     //anniversary fields
-    START_OF_RACE, ANNIVERSARY_NUMBER, REMOTE_URL, ANNIVERSARY_TYPE, EVENT_TYPE;
+    START_OF_RACE, ANNIVERSARY_NUMBER, REMOTE_URL, ANNIVERSARY_TYPE, EVENT_TYPE,
+    
+    //ORC certificate fields,
+    ORC_CERTIFICATE;
 }
