@@ -117,7 +117,7 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
                 newWindTrackMap.put(wind.getRelativeTo(), wind);
             }
             List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToAdd = new ArrayList<>();
-            estimatedWindTrack.lockForWrite();
+            estimatedWindTrack.lockForWrite(); // TODO is this write lock really necessary when each trackedRace.removeWind/addWind obtains it, too?
             try {
                 for (Iterator<WindWithConfidence<Pair<Position, TimePoint>>> previousWindFixesIterator = windTrackWithConfidences
                         .values().iterator(); previousWindFixesIterator.hasNext();) {
