@@ -184,6 +184,76 @@ Subject to backup are all production MongoDB databases, the MySQL database conte
 
 The backup script on *dbserver.internal.sapsailing.com:/opt/backup.sh* does *not* backup all MongoDB databases available. I think that it should. See also *configuration/backup_full.sh* in our git repository for a new version.
 
+## How Kubernetes (K8s) May Help
+
+The landscape and architecture concepts described so far can be mapped to the K8s world in many aspects.
+
+### Load Balancing and Ingress
+
+K8s has a concept of "Ingress" which is an external access point to a service or an application. The way we use AWS ALBs to route access through target groups to hosts which usually run Apache reverse proxies to log, rewrite and SSL-terminate traffic which they then forward to applications can be represented well by a set of Ingress resources.
+
+We can distinguish between write loads and read loads, directing write loads to the replica set's master, and read loads to the group of replicas. Currently, write loads are identified by the "-master" part of the subdomain name. However, in future releases we may decide to "tag" write requests, particularly the GWT RPC requests that actually perform updates, by specific URL path elements that the Ingress resource definition may identify and use for a routing decision.
+
+Ingress resources can also be used for our standard services such as the Hudson build server, the Wiki service, the "static" content, releases.sapsailing.com and bugzilla. All other SAP Sailing Analytics replica sets, including dev.sapsailing.com, all "club" servers as well as event and league servers plus the archive server can be Ingress resources of their own.
+
+By means of the "IngressGroup" feature of the most recent beta version of the AWS ALB Ingress Controller we may be able to map our requirements to regular ALBs, avoiding "horizontal" traffic that crosses availability zones (AZs) and being very scalable and efficient. We could try to employ K8s to mimic our current use of AWS ALBs, such that for rather short-lived events we try to get along with a single ALB that is targeted by a "catch-all" DNS rule for "sapsailing.com" such that any host name not explicitly mapped by DNS will end up at that ALB. There, in turn, if no rule exists for the DNS name then it will be mapped to the archive server. Otherwise, the ALB will map to the specific target group that represents a K8s service. This set-up has the advantage of not requiring potentially long-lived and replicated DNS records for mapping the event hostnames to services. When the event moves to the archive, only an ALB configuration change is required, no DNS record needs to be modified.
+
+All long-lived set-ups, however, should have DNS records pointing to the respective ALB. Hopefully, the Route53 support of the AWS ALB Ingress Controller can handle this automatically for us.
+
+### MongoDB and RabbitMQ
+
+Our replica sets require basic services such as a MongoDB for persistence and a RabbitMQ for replication. Both components are capable of running in a high-available clustering mode, also within K8s. K8s can then help to keep those services highly available.
+
+For MongoDB we shall map our current design of two instances in two different AZs with fast NMVe disks of appropriate size for "live" workloads and a hidden replica with a gp2 SSD with full incremental snapshot backups. The two non-hidden instances will share the same node type requirements in terms of memory, NVMe support and vCPUs. They can be part of a regular "Deployment" with pods that shall have anti-affinity, ideally ending up in different availability zones (AZs). They can be restarted at any time because their containers are configured such that they find their replica set and synchronize their content as necessary.
+
+The hidden replica will be less demanding as it has time during off-peak periods to process the op-log. It shall be a StatefulSet resource with exactly one pod, and it requires a PersistentVolumeClaim that is fulfilled by a gp2 SSD. If the pod dies, it can be re-started, attaching to the same PersistentVolumeClaim and hooking up to its replica set again.
+
+The archive DB is also a StatefulSet with exactly one pod. Its configuration will ask for a large but slow PersistentVolumeClaim.
+
+Similarly, for RabbitMQ we could and should configure a small deployment with at least two pods so that in case of one pod's failure the other can take over. This would give us a highly available scenario also for replication use cases.
+
+### SAP Sailing Analytics "Replica Sets"
+
+Such a replica set (not in K8s terms, but in SAP Sailing Analytics terms) would contain a single master instance and zero or more replicas. A "reading" service will be defined that receives all non-administrative, non-mass-data-ingesting requests, including all read requests as well as simple session management requests, but not GPS data ingestion or AdminConsole-triggered requests. The "writing" service will receive data ingestion load as well as anything coming from the AdminConsole entry point. We would need to distinguish reading and writing GWT RPC requests, probably by a URL path extension, similar to the "sharding" pattern we have employed to separate traffic by regatta/leaderboard. In a single-master replica set, the master will be labelled for both, the reading and the writing service. In scaled-out set-ups the master may choose to carry only the "writing" service's label and leave the "reading" service to its replicas.
+
+Replicas should know their master by means of a DNS record for the respective "master" service of the replica set. This way, when a master replacement is necessary, replicas may recover from not finding their master temporarily, as the new master appears under the same label.
+
+Replica sets should be subject to scaling by a Horizontal Pod Autoscaler (HPA). The metrics observed should be the leaderboard recalculation times as well as the number of requests received per second, maybe also the traffic.
+
+A "replica set" should start out with a single master pod labeled as both, write and read load handler. As the read load increases, replicas may be fired up in a new deployment, subject to HPA.
+
+### Vertically Scaling a Master Pod
+
+When a master dies or requires scaling up/down, a new master server needs to be provisioned. A new pod may launch, on the same DB as the current master. For this not to cause trouble, the current master needs to be removed from its service, e.g., by removing its service-related label. This way, the old master stops processing requests. Write requests will have to be queued or rejected, and clients should be built such that they will re-try at a later point in time.
+
+When the new master has completed its start-up phase and is considered available, it can be tagged with the master service tag. This will let existing replicas as well as external writing clients send their traffic to the new master.
+
+### Vertically Scaling Replicas
+
+Easy... Launch more replicas with the configuration desired and dismantle the old ones.
+
+### Archive Server
+
+The archive server shall provide smooth fail-over because it is the critical landing page of the entire web site. We aim to have two copies of an archive server running at all times. One is the current master, the other is a fail-over that usually will be on a previous version. The reason for this is that in case of a regression or other grave problem introduced by a new release we can simply shut off the new archive server instance, and the fail-over instance with the last-known-good version should take over transparently until a new, fixed version has been deployed.
+
+The archive servers are pretty special. They require lots of RAM but could live with less RAM than would be suggested for the size of RAM requested. Clever worker node group configurations may help utilizing expensive hardware used mainly for archive servers better.
+
+The details of how the failover logic is implemented and how an upgrade is to be performed need to be clarified. In particular the launch of an archive server instance up to now brings a bunch of issues with it, in particular, we regularly see that some races don't load properly during the automatic restore process. These need to be identified, and re-tries need to be issued. Only when the new archive server is available with all races loaded shall it be labeled with the production archive service label, then taking the www.sapsailing.com traffic, whereas the old archive server pod then shall be demoted to the failover set-up.
+
+### Version Upgrades
+
+Upgrading versions is tricky because the GWT RPC clients are sensitive to even small changes. So are round robin-scheduled client calls to different versions of the GWT RPC service implementation.
+
+It is therefore advisable to launch an entirely new replica set with a new master and a new set of replicas, as required by the current traffic / request loads. The old master should be removed from its service when launching the new replica set starts. Once the new replica set is available the Ingress definition can be switched to point to the new version of the service.
+
+Afterwards, the old version of the service with all its pods can be terminated.
+
+### Cross-Region and Multi-Region Set-Up
+
+For events or clubs or federations in specific regions we should make use of the possibility to place the service in the appropriate region. This will require a K8s cluster in that region, and all those clusters need to share a common Route53 set-up with the same "sapsailing.com" record set that is being configured by the Route53 support of the AWS ALB Ingress Controllers running in the various clusters.
+
+Regarding MongoDB and RabbitMQ connectivity, the VPCs in the different regions will need to be connected such that pods in remote regions can still see and access the MongoDB and RabbitMQ services. Alternatively, we could add a MongoDB and RabbitMQ replica per region, but the problem with that is that specifically for MongoDB we would need to start introducing sharding because otherwise the primary MongoDB instance may be in a different regions, requiring all write requests to be remote.
+
 ## Orchestration Use Cases
 
 ### Create a New Event on a Dedicated Replication Cluster

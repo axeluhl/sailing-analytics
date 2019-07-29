@@ -740,7 +740,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     private ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector> createManeuverDetectorCache() {
         return new ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector>(
-                /* preserve how many milliseconds */ 10000,
+                /* preserve how many milliseconds */ 600000,
                 competitor -> new IncrementalManeuverDetectorImpl(TrackedRaceImpl.this, competitor, windEstimation));
     }
 

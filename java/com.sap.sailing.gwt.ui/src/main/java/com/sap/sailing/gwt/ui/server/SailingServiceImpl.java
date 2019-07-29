@@ -9304,4 +9304,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
         return result;
     }
+
+    @Override
+    public boolean getTrackedRaceIsUsingMarkPassingCalculator(RegattaAndRaceIdentifier regattaNameAndRaceName) {
+        return getExistingTrackedRace(regattaNameAndRaceName).isUsingMarkPassingCalculator();
+    }
 }
