@@ -32,10 +32,29 @@ import com.sap.sse.util.ClearStateTestSupport;
 public class Activator implements BundleActivator {
 
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
+    
+    /**
+     * Use a system property by this name to specify a server base URL, such as
+     * {@code https://www.sapsailing.com} in case you'd like to load the models
+     * from there in case they are <em>not yet</em> stored in the local database.
+     */
     private static final String WIND_ESTIMATION_MODEL_DATA_SOURCE_URL_PROPERTY_NAME = "windestimation.source.url";
+
+    /**
+     * Use a system property by this name to specify a server base URL, such as {@code https://www.sapsailing.com} in
+     * case you'd like to <em>always</em> load the models from there upon activation of this bundle, regardless of
+     * whether they are stored yet in the local database.
+     */
+    private static final String WIND_ESTIMATION_MODEL_DATA_SOURCE_ALWAYS_URL_PROPERTY_NAME = "windestimation.source.always.url";
+    
+    /**
+     * Use a system property by this name to specify the path to a folder in the
+     * file system that contains serialized model files to load.
+     */
     private static final String WIND_ESTIMATION_MODEL_DATA_SOURCE_FOLDER_PROPERTY_NAME = "windestimation.source.folder";
 
     private final Set<ServiceRegistration<?>> registrations = new HashSet<>();
+    
     private WindEstimationFactoryServiceImpl service;
 
     @Override
@@ -45,15 +64,23 @@ public class Activator implements BundleActivator {
         service = new WindEstimationFactoryServiceImpl();
         final String windEstimationModelDataSourceURL = System
                 .getProperty(WIND_ESTIMATION_MODEL_DATA_SOURCE_URL_PROPERTY_NAME);
+        final String windEstimationModelDataSourceAlwaysURL = System
+                .getProperty(WIND_ESTIMATION_MODEL_DATA_SOURCE_ALWAYS_URL_PROPERTY_NAME);
         final String windEstimationModelDataSourceFolder = System
                 .getProperty(WIND_ESTIMATION_MODEL_DATA_SOURCE_FOLDER_PROPERTY_NAME);
-        if (windEstimationModelDataSourceURL != null && windEstimationModelDataSourceFolder != null) {
-            throw new ModelLoadingException("At most one of the two parameters may be provided: \""
+        int loadFromCount = (windEstimationModelDataSourceURL != null ? 1 : 0) +
+                (windEstimationModelDataSourceAlwaysURL != null ? 1 : 0) +
+                (windEstimationModelDataSourceFolder != null ? 1 : 0);
+        if (loadFromCount > 1) {
+            throw new ModelLoadingException("At most one of the three parameters may be provided: \""
                     + WIND_ESTIMATION_MODEL_DATA_SOURCE_URL_PROPERTY_NAME + "\" or \""
+                    + WIND_ESTIMATION_MODEL_DATA_SOURCE_ALWAYS_URL_PROPERTY_NAME + "\" or \""
                     + WIND_ESTIMATION_MODEL_DATA_SOURCE_FOLDER_PROPERTY_NAME + "\"");
         }
-        if (windEstimationModelDataSourceURL != null) {
+        if (windEstimationModelDataSourceURL != null && !service.isReady()) {
             importWindEstimationModelsFromUrl(windEstimationModelDataSourceURL);
+        } else if (windEstimationModelDataSourceAlwaysURL != null) {
+            importWindEstimationModelsFromUrl(windEstimationModelDataSourceAlwaysURL);
         } else if (windEstimationModelDataSourceFolder != null) {
             importWindEstimationModelsFromFolder(windEstimationModelDataSourceFolder);
         }

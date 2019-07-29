@@ -429,7 +429,7 @@ public class Util {
      * <code>null</code> is permissible for both, <code>o1</code> and <code>o2</code>, where a <code>null</code> value
      * is considered less than a non-null value if <code>nullIsLess</code> is <code>true</code>, greater otherwise.
      */
-    public static <T> int compareToWithNull(Comparable<T> o1, T o2, boolean nullIsLess) {
+    public static <T extends Comparable<T>> int compareToWithNull(T o1, T o2, boolean nullIsLess) {
         final int result;
         if (o1 == null) {
             if (o2 == null) {

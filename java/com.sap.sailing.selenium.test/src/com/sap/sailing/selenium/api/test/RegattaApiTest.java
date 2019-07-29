@@ -93,7 +93,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         RaceColumn[] raceColumns = regattaApi.addRaceColumn(ctx, EVENT_NAME, "R", 1);
         leaderboardApi.startRaceLogTracking(ctx, EVENT_NAME, raceColumns[0].getRaceName(), "Default");
         regattaRaces = regattaApi.getRegattaRaces(ctx, EVENT_NAME);
-        assertEquals("read: reagtta.series should have 0 entries", 1, regattaRaces.getRaces().length);
+        assertEquals("read: reagtta.series should have 1 entries", 1, regattaRaces.getRaces().length);
     }
 
     @Test

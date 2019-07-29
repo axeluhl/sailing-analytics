@@ -89,7 +89,10 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimingStats;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.ThreadPoolUtil;
 import com.sap.sse.util.impl.FutureTaskWithTracingGet;
 
@@ -108,6 +111,11 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
     private String displayName;
 
     private transient Set<LeaderboardChangeListener> leaderboardChangeListeners;
+    
+    /**
+     * Keeps statistics about the re-calculation times in different short-term time ranges.
+     */
+    private transient TimingStats timingStats;
     
     /**
      * Used to remove all these listeners from their tracked races when this servlet is {@link #destroy() destroyed}.
@@ -216,9 +224,18 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         this.raceDetailsAtEndOfTrackingCache = new HashMap<>();
         this.cacheInvalidationListeners = new HashSet<>();
         this.leaderboardChangeListeners = new HashSet<>();
+        this.timingStats = createTimingStats();
         // When many updates are triggered in a short period of time by a single thread, ensure that the single thread
         // providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
         // core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
+    }
+    
+    /**
+     * Creates the {@link #timingStats} statistics keeper with a few time intervals, tracking
+     * the re-computing times.
+     */
+    private TimingStats createTimingStats() {
+        return new TimingStats(Duration.ONE_SECOND.times(5), Duration.ONE_SECOND.times(30), Duration.ONE_MINUTE);
     }
 
     @Override
@@ -358,7 +375,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             final boolean fillTotalPointsUncorrected)
             throws NoWindException {
         ShardingContext.checkConstraint(ShardingType.LEADERBOARDNAME, getName());
-        long startOfRequestHandling = System.currentTimeMillis();
+        final TimePoint startOfRequestHandling = MillisecondsTimePoint.now();
         final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
         final BoatClass boatClass = getBoatClass();
         final LeaderboardDTO result = new LeaderboardDTO(timePoint.asDate(), this.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ? null
@@ -530,12 +547,35 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 }
             }
         }
+        final Duration computeTime = startOfRequestHandling.until(MillisecondsTimePoint.now());
         logger.info("computeLeaderboardByName(" + this.getName() + ", " + timePoint + ", "
                 + namesOfRaceColumnsForWhichToLoadLegDetails + ", addOverallDetails=" + addOverallDetails + ") took "
-                + (System.currentTimeMillis() - startOfRequestHandling) + "ms");
+                + computeTime);
+        updateStats(startOfRequestHandling, computeTime);
         return result;
     }
  
+    /**
+     * Updates statistics about how long it took to compute DTOs for this leaderboard.
+     * 
+     * @param startOfRequestHandling
+     *            when the request to compute the DTO was received
+     * @param computeDuration
+     *            how long it took to complete the DTO calculation request
+     */
+    private void updateStats(TimePoint startOfRequestHandling, Duration computeDuration) {
+        try {
+            timingStats.recordTiming(startOfRequestHandling, computeDuration);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Exception trying to update leaderboard compute time stats", e);
+        }
+    }
+    
+    @Override
+    public Map<Duration, Pair<Duration, Integer>> getComputationTimeStatistics() {
+        return timingStats.getAverageDurationsAndNumberOfRequests();
+    }
+
     private Integer getTotalRaces(Competitor competitor, LeaderboardRowDTO row, TimePoint timePoint) {
         int amount = 0;
         for (RaceColumn raceColumn : getRaceColumns()) {
