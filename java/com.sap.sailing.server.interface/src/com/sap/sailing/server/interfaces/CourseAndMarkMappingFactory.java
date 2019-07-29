@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.coursefactory;
+package com.sap.sailing.server.interfaces;
 
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseBase;
@@ -10,7 +10,7 @@ import com.sap.sailing.domain.coursetemplate.CourseTemplate;
  * @author Axel Uhl (d043530)
  *
  */
-public interface CourseFactory {
+public interface CourseAndMarkMappingFactory {
     Course createCourse(CourseTemplate courseTemplate, int numberOfLaps);
 
     void updateCourse(Course courseToUpdate, CourseTemplate courseTemplate, int numberOfLaps);

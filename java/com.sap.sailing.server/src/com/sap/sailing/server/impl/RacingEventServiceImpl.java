@@ -221,6 +221,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserial
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResultBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
+import com.sap.sailing.server.interfaces.CourseAndMarkMappingFactory;
 import com.sap.sailing.server.interfaces.DataImportLockWithProgress;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.SimulationService;
@@ -552,6 +553,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
 
+    private final CourseAndMarkMappingFactory courseAndMarkMappingFactory;
+
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
      * in some cases because containment and initialization order of some types is fairly tightly coupled.
@@ -800,6 +803,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             }
         });
         this.dataImportLock = new DataImportLockWithProgress();
+        this.courseAndMarkMappingFactory = new CourseAndMarkMappingFactoryImpl();
 
         remoteSailingServerSet = new RemoteSailingServerSet(scheduler, baseDomainFactory);
         regattasByName = new ConcurrentHashMap<String, Regatta>();
@@ -4654,6 +4658,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     public SecurityService getSecurityService() {
         return securityServiceTracker.getService();
+    }
+    
+    @Override
+    public CourseAndMarkMappingFactory getCourseAndMarkMappingFactory() {
+        return courseAndMarkMappingFactory;
     }
 
     public void setUnsentOperationToMasterSender(OperationsToMasterSendingQueue service) {

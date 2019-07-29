@@ -1,10 +1,10 @@
-package com.sap.sailing.domain.coursefactory.impl;
+package com.sap.sailing.server.impl;
 
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.coursefactory.CourseFactory;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
+import com.sap.sailing.server.interfaces.CourseAndMarkMappingFactory;
 
-public class CourseFactoryImpl implements CourseFactory {
+public class CourseAndMarkMappingFactoryImpl implements CourseAndMarkMappingFactory {
 
     @Override
     public Course createCourse(CourseTemplate courseTemplate, int numberOfLaps) {
