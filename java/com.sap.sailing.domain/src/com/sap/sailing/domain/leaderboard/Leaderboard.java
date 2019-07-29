@@ -655,4 +655,11 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
         }
         return result;
     }
+
+    /**
+     * @return a map whose keys contain different averaging time spans, e.g., 5s, 30s, and 60s, and whose values contain
+     *         a pair with the average leaderboard computation time for all computation requests not older than the time
+     *         given as the key, and as the second pair component the number of computations in that time period.
+     */
+    Map<Duration, Pair<Duration, Integer>> getComputationTimeStatistics();
 }

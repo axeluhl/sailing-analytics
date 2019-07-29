@@ -117,40 +117,40 @@ public class WidgetCarousel extends Composite {
      */
     native void setupSlider(WidgetCarousel sliderReference) /*-{
 
-	$wnd
-		.$(
-			'.'
-				+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
-		.on(
-			'afterChange',
-			function() {
-			    sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::onAfterChange()();
-			});
-	$wnd
-		.$(
-			'.'
-				+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
-		.on(
-			'init',
-			function() {
-			    sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::onAfterChange()();
-			});
+        $wnd
+                .$(
+                        '.'
+                                + (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
+                .on(
+                        'afterChange',
+                        function() {
+                            sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::onAfterChange()();
+                        });
+        $wnd
+                .$(
+                        '.'
+                                + (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
+                .on(
+                        'init',
+                        function() {
+                            sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::onAfterChange()();
+                        });
 
-	$wnd
-		.$(
-			'.'
-				+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
-		.slick(
-			{
-			    dots : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::showDots),
-			    infinite : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::infiniteScrolling),
-			    swipeToSlide : false,
-			    responsive : false,
-			    arrows : sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::showArrows,
-			    prevArrow : "<div class='slick-prev'/>",
-			    nextArrow : "<div class='slick-next'/>"
+        $wnd
+                .$(
+                        '.'
+                                + (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
+                .slick(
+                        {
+                            dots : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::showDots),
+                            infinite : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::infiniteScrolling),
+                            swipeToSlide : false,
+                            responsive : false,
+                            arrows : sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::showArrows,
+                            prevArrow : "<div class='slick-prev'/>",
+                            nextArrow : "<div class='slick-next'/>"
 
-			});
+                        });
 
     }-*/;
 
@@ -169,7 +169,7 @@ public class WidgetCarousel extends Composite {
         }
         items.add(slide);
         sliderMainUi.add(slide);
-
+        onAfterChange();
     }
 
     /**

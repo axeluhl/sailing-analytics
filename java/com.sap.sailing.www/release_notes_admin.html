@@ -57,6 +57,45 @@
                             For more details, in particular how to re-train the models, see also
                             <a href="https://wiki.sapsailing.com/wiki/howto/windestimation">https://wiki.sapsailing.com/wiki/howto/windestimation</a>.
                         </li>
+                        <li>JMX metrics in Prometheus-ready form have been added for the leaderboard computation times. Metrics are offered
+                            for each leaderboard in a server, as well as a summary averaging and counting all leaderboard accesses, each
+                            in a short, medium and long time interval (e.g., 5, 30, and 60 seconds, respectively).<p>
+                            
+                            <img src="images/JConsoleLeaderboardComputationStats_Overall.png"><br>
+                            Example of the overall leaderboard computation statistics<p>
+                            <img src="images/JConsoleLeaderboardComputationStats_Specific.png"><br>
+                            Example of the specific leaderboard computation statistics for one leaderboard<p>
+                            
+                            This can then also be used, e.g., to export these metrics to other tools, such as
+                            Prometheus. See <a href="https://github.com/prometheus/jmx_exporter">here</a> for an exporter
+                            that can be used to expose JMX data to Prometheus. If the Java VM running the SAP Sailing Analytics
+                            server is invoked with a VM argument such as <tt>-javaagent:/path/to/jmx_prometheus_javaagent-0.12.0.jar=9000:/path/to/jmxPrometheusConfig.yaml</tt>
+                            then an HTTP GET request to <tt>http://hostname:9000/</tt> will produce a document that contains
+                            lines such as:<p>
+                            <pre>
+        com_sap_sailing_Leaderboard_ComputationTimeAverageMedium_averageComputeDurationInMillis{name="5O5-Worlds 2010 (5O5)",} -1.0
+	com_sap_sailing_Leaderboard_ComputationTimeAverageMedium_numberOfComputations{name="5O5-Worlds 2010 (5O5)",} 0.0
+	com_sap_sailing_Leaderboard_ComputationTimeAverageYoung_averageRangeInMillis{name="5O5-Worlds 2010 (5O5)",} 5000.0
+	com_sap_sailing_Leaderboard_ComputationTimeAverageOld_averageComputeDurationInMillis{name="5O5-Worlds 2010 (5O5)",} 597.0
+	com_sap_sailing_Leaderboard_DelayToLiveInMillis{name="5O5-Worlds 2010 (5O5)",} 20000.0
+	com_sap_sailing_Leaderboard_ComputationTimeAverageYoung_numberOfComputations{name="5O5-Worlds 2010 (5O5)",} 0.0
+	com_sap_sailing_Leaderboard_ComputationTimeAverageOld_numberOfComputations{name="5O5-Worlds 2010 (5O5)",} 1.0
+	com_sap_sailing_Leaderboard_ComputationTimeAverageOld_averageRangeInMillis{name="5O5-Worlds 2010 (5O5)",} 60000.0
+	com_sap_sailing_Leaderboard_ComputationTimeAverageYoung_averageComputeDurationInMillis{name="5O5-Worlds 2010 (5O5)",} -1.0
+	com_sap_sailing_Leaderboard_NumberOfCompetitors{name="5O5-Worlds 2010 (5O5)",} 147.0
+	com_sap_sailing_Leaderboard_NumberOfAllCompetitors{name="5O5-Worlds 2010 (5O5)",} 147.0
+	com_sap_sailing_Leaderboard_ComputationTimeAverageMedium_averageRangeInMillis{name="5O5-Worlds 2010 (5O5)",} 30000.0
+        ...
+        com_sap_sailing_RacingEventService_LeaderboardComputationStatisticsYoung_averageComputeDurationInMillis 13.0
+	com_sap_sailing_RacingEventService_LeaderboardComputationStatisticsMedium_averageComputeDurationInMillis 52.0
+	com_sap_sailing_RacingEventService_LeaderboardComputationStatisticsYoung_numberOfComputations 5.0
+	com_sap_sailing_RacingEventService_LeaderboardComputationStatisticsMedium_numberOfComputations 17.0
+	com_sap_sailing_RacingEventService_LeaderboardComputationStatisticsYoung_averageRangeInMillis 30000.0
+	com_sap_sailing_RacingEventService_LeaderboardComputationStatisticsMedium_averageRangeInMillis 60000.0
+                            </pre>
+                            Note that average durations of <tt>-1</tt> mean "no data" and should be ignored. The corresponding
+                            <tt>numberOfComputations</tt> value will be <tt>0.0</tt> in those cases.
+                            
                     </ul>
 		    
                     <h2 class="articleSubheadline">June 2019</h2>

@@ -1181,4 +1181,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     boolean existsSwissTimingArchiveConfigurationForCurrentUser(String jsonUrl) throws Exception, UnauthorizedException;
 
     boolean existsTracTracConfigurationForCurrentUser(String jsonUrl) throws Exception, UnauthorizedException;
+
+    boolean getTrackedRaceIsUsingMarkPassingCalculator(RegattaAndRaceIdentifier regattaNameAndRaceName);
 }
