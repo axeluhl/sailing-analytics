@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -284,8 +285,19 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         return checkbox;
     }
 
-    public void setCheckboxEnabledFilter(Filter<T> filter) {
-        this.checkboxFilter.setFilterToApply(filter);
+    public void setCheckboxEnabledFilter(Function<T, Boolean> filterFunction) {
+
+        this.checkboxFilter.setFilterToApply(new Filter<T>() {
+            @Override
+            public boolean matches(T object) {
+                return filterFunction.apply(object);
+            }
+
+            @Override
+            public String getName() {
+                return "Update Permission Filter";
+            }
+        });
         addDefaultCheckBoxIfNecessary();
     }
 
