@@ -105,15 +105,12 @@ Connected to the PRIMARY using the ``mongo`` shell, a replica can be added using
 
 ## Launch Script for a MongoDB Replica
 
-Under ``configuration/aws-automation/launch-mongodb-replica.sh`` there is a script that can be used for quickly launching a MongoDB replica. Usage:```
-	launch-mongodb-replica.sh [ &lt;replica-set-name&gt; [ &lt;primary-host:primary-port&gt; [ &lt;priority&gt; ] ] ]
-```
-The defaults for the parameters are, respectively: ``live``, ``mongo0.internal.sapsailing.com:27017``, and ``1``.
+Under ``configuration/aws-automation/launch-mongodb-replica.sh`` there is a script that can be used for quickly launching a MongoDB replica. Usage hints by calling without arguments.
 
 This can, e.g., be used to fire up a replica for the ``winddb`` instance on ``dbserver.internal.sapsailing.com:10201`` which is configured to run on a slow, inexpensive but large disk and on a host that has only little RAM configured because the only load it has to serve may be occasional master data import activity and burst-loads during archive server re-starts. To handle the latter, an instance with more RAM and fast disk would be preferable because otherwise indices won't fit into RAM, letting MongoDB read indices from the slow disk. This lets the archive server take many days to load.
 
 Instead, the ``launch-mongodb-replica.sh`` script can be used to fire up a replica with a very fast NMVe SSD attached to the instance. A good instance type for this may be ``i2.xlarge`` which has 30GB of RAM, 4 vCPUs and 800GB of NVMe storage. Launch like this:
 
-``configuration/aws-automation/launch-mongodb-replica.sh archive dbserver.internal.sapsailing.com:10201 0``
+``configuration/aws-automation/launch-mongodb-replica.sh -r archive -p dbserver.internal.sapsailing.com:10201 -P 0 -t i2.xlarge -k &lt;your-aws-key-pair-name&gt;``
 
 You can then check the replication status by connecting your ``mongo`` client to ``dbserver.internal.sapsailing.com:10201`` and check the output of ``rs.status()``. As long as the new instance is listed in status ``STARTUP2`` it is still synchronizing from the primary. Eventually (took 55min during the last test) it transitions to status ``SECONDARY``. You can then use a connection string such as ``mongodb://dbserver.internal.sapsailing.com:10201/winddb?replicaSet=archive&retryWrites=true&readPreference=secondary`` for the ``MONGODB_URI`` in your archive server Java instance which will then preferably connect to your new fast secondary replica. Consider that the new secondary replica will have to build indices when first queried. This can take another 20 minutes. When done loading the archive server, terminate the instance which will properly remove the replica from the replica set.
