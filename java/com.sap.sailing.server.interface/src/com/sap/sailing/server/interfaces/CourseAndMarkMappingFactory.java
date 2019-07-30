@@ -20,9 +20,9 @@ public interface CourseAndMarkMappingFactory {
 
     CourseTemplateMapping createMappingForCourseTemplate(Regatta regatta, CourseTemplate courseTemplate);
 
-    // TODO Define Course based on CourseTemplateMapping that internally references MarkTemplateMappings
     CourseWithMarkTemplateMappings createCourseTemplateMappingFromMapping(Regatta regatta,
             CourseTemplateMapping courseTemplateMapping, int numberOfLaps);
+
     // TODO Do we need to loosely couple creation of DefineMarkEvents for the Regatta
     Course createCourseFromMappingAndDefineMarksAsNeeded(Regatta regatta,
             CourseWithMarkTemplateMappings courseTemplateMappingWithMarkTemplateMappings);
