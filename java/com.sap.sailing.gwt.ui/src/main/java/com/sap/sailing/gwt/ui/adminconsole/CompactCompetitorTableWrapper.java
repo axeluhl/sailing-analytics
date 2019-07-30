@@ -28,6 +28,8 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * A compact filterable competitor table. The data model is managed by the {@link #getFilterField() filter field}. In
@@ -44,7 +46,7 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
     private final Map<CompetitorDTO, BoatDTO> boatsForCompetitors;
     
     public CompactCompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
-            boolean multiSelection, boolean enablePager) {
+            boolean multiSelection, boolean enablePager, UserService userService) {
         super(sailingService, stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<CompetitorDTO>() {
                     @Override
@@ -148,6 +150,8 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
                 return table;
             }
         };
+        filterField.setCheckboxEnabledFilter(comp -> userService.hasPermission(comp, DefaultActions.UPDATE));
+
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(competitorColumnListHandler);
