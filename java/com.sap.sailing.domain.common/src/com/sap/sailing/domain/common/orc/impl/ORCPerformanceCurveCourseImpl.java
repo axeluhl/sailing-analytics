@@ -1,11 +1,11 @@
-package com.sap.sailing.domain.orc.impl;
+package com.sap.sailing.domain.common.orc.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.sap.sailing.domain.orc.ORCPerformanceCurveCourse;
-import com.sap.sailing.domain.orc.ORCPerformanceCurveLeg;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sse.common.Distance;
 
 public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse {

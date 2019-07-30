@@ -11,7 +11,8 @@ import java.net.URL;
 import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
-import com.sap.sailing.domain.orc.impl.ORCCertificateImpl;
+import com.sap.sailing.domain.common.orc.ORCCertificate;
+import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 import com.sap.sailing.domain.orc.impl.ORCCertificateImporterJSON;
 
 

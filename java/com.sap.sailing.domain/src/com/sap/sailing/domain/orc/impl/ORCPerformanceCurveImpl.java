@@ -22,9 +22,11 @@ import org.apache.commons.math3.exception.DimensionMismatchException;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.common.orc.ORCCertificate;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
+import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 import com.sap.sailing.domain.orc.ORCPerformanceCurve;
-import com.sap.sailing.domain.orc.ORCPerformanceCurveCourse;
-import com.sap.sailing.domain.orc.ORCPerformanceCurveLeg;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
@@ -75,13 +77,12 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      * map from the true wind angle (here expressed as an object of type {@link Bearing}) and the {@link Duration} the
      * boat is assumed to need at that true wind speed/angle for one nautical mile.
      */
-    public ORCPerformanceCurveImpl(Map<Speed, Map<Bearing, Speed>> velocityPredictionPerTrueWindSpeedAndAngle,
-            Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed, Map<Speed, Duration> beatAllowancePerTrueWindSpeed,
-            Map<Speed, Bearing> runAngles, Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed, Map<Speed, Duration> runAllowancePerTrueWindSpeed,
-            ORCPerformanceCurveCourse course) throws FunctionEvaluationException {
+    public ORCPerformanceCurveImpl(ORCCertificate cer, ORCPerformanceCurveCourse course) throws FunctionEvaluationException {
         this.course = course;
-        functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse = createPerformanceCurve(velocityPredictionPerTrueWindSpeedAndAngle, beatAngles,
-                beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed, runAllowancePerTrueWindSpeed);
+        functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse = createPerformanceCurve(
+                cer.getVelocityPredictionPerTrueWindSpeedAndAngle(),
+                cer.getBeatAngles(), cer.getBeatVMGPredictions(), cer.getBeatAllowances(),
+                cer.getRunAngles(), cer.getRunVMGPredictions(), cer.getRunAllowances());
     }
 
     /**

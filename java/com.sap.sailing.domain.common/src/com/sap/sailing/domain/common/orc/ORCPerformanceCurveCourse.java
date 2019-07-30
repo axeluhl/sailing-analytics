@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.orc;
+package com.sap.sailing.domain.common.orc;
 
 import com.sap.sse.common.Distance;
 

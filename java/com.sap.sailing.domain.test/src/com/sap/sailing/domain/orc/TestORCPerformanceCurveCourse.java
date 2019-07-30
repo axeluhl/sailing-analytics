@@ -9,8 +9,9 @@ import org.junit.Test;
 
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
-import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveCourseImpl;
-import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveLegImpl;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
+import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveCourseImpl;
+import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 
 public class TestORCPerformanceCurveCourse {
 

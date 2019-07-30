@@ -22,11 +22,13 @@ import org.junit.rules.ErrorCollector;
 
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
-import com.sap.sailing.domain.orc.impl.ORCCertificateImpl;
+import com.sap.sailing.domain.common.orc.ORCCertificate;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
+import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
+import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveCourseImpl;
+import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.orc.impl.ORCCertificateImporterJSON;
-import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveCourseImpl;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveImpl;
-import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 

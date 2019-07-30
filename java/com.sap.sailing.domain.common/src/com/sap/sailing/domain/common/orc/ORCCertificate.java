@@ -1,14 +1,12 @@
-package com.sap.sailing.domain.orc;
+package com.sap.sailing.domain.common.orc;
 
 import java.io.Serializable;
 import java.util.Map;
 
-import org.apache.commons.math.FunctionEvaluationException;
-
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.ranking.RankingMetric;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
+import com.sap.sse.common.impl.SecondsDurationImpl;
 
 /**
  * Represents semantically a real ORC certificate for a {@link Competitor}, which is used to rate different type of
@@ -27,7 +25,7 @@ import com.sap.sse.common.Speed;
  */
 public interface ORCCertificate extends Serializable {
 
-    /**
+    /*
      * Returns a {@link ORCPerformanceCurve} for the competitor owning this {@link ORCCertificate}.
      * 
      * @param course
@@ -36,7 +34,7 @@ public interface ORCCertificate extends Serializable {
      * @return performance curve to calculate the implied wind for the boat and the sailed part of the course so the
      *         performance can be compared with other competitors.
      */
-    public ORCPerformanceCurve getPerformanceCurve(ORCPerformanceCurveCourse course) throws FunctionEvaluationException;
+    //public ORCPerformanceCurve getPerformanceCurve(ORCPerformanceCurveCourse course) throws FunctionEvaluationException;
     
     /**
      * Returns the sailnumber of the {@link Competitor} which this certificate belongs to.
@@ -95,5 +93,19 @@ public interface ORCCertificate extends Serializable {
      *         nautical mile as values.
      */
     public Map<Speed, Speed> getNonSpinnakerSpeedPredictions();
+    
+    public Map<Speed, Bearing> getBeatAngles();
+    
+    public Map<Speed, Bearing> getRunAngles();
+    
+    public Map<Speed, Duration> getBeatAllowances();
+    
+    public Map<Speed, Duration> getRunAllowances();
+    
+    public Map<Speed, Speed> getBeatVMGPredictions();
+    
+    public Map<Speed, Speed> getRunVMGPredictions();
+    
+    public Map<Speed, Map<Bearing, Speed>> getVelocityPredictionPerTrueWindSpeedAndAngle();
     
 }

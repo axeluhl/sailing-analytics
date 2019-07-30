@@ -5,6 +5,7 @@ import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.MaxIterationsExceededException;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 

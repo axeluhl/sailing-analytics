@@ -16,7 +16,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.orc.ORCCertificate;
+import com.sap.sailing.domain.common.orc.ORCCertificate;
+import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 import com.sap.sailing.domain.orc.ORCCertificateImporter;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;

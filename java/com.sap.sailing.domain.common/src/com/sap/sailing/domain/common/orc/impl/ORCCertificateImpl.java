@@ -1,18 +1,13 @@
-package com.sap.sailing.domain.orc.impl;
+package com.sap.sailing.domain.common.orc.impl;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.math.FunctionEvaluationException;
-
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
-import com.sap.sailing.domain.orc.ORCCertificate;
-import com.sap.sailing.domain.orc.ORCPerformanceCurve;
-import com.sap.sailing.domain.orc.ORCPerformanceCurveCourse;
+import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -138,11 +133,11 @@ public class ORCCertificateImpl implements ORCCertificate {
     private final Double cdl;
 
     // TODO add meaningful Javadoc
-    private final Map<Speed, Map<Bearing, Speed>> speedPredictionsPerTrueWindSpeedAndAngle;
+    private final Map<Speed, Map<Bearing, Speed>> velocityPredictionPerTrueWindSpeedAndAngle;
 
     /**
      * The beat angles for the true wind speeds; key set is equal to that of
-     * {@link #speedPredictionsPerTrueWindSpeedAndAngle}.
+     * {@link #velocityPredictionPerTrueWindSpeedAndAngle}.
      */
     private final Map<Speed, Bearing> beatAngles;
     
@@ -155,7 +150,7 @@ public class ORCCertificateImpl implements ORCCertificate {
     /**
      * The duration in seconds per nautical mile the boat represented by this certificate is allowed to sail at 100%
      * performance and a given windspeed, when sailing upwind. Key set is equal to that of
-     * {@link #speedPredictionsPerTrueWindSpeedAndAngle}.
+     * {@link #velocityPredictionPerTrueWindSpeedAndAngle}.
      */
     private final Map<Speed, Duration> beatAllowancePerTrueWindSpeed;
 
@@ -176,7 +171,7 @@ public class ORCCertificateImpl implements ORCCertificate {
     /**
      * The duration in seconds per nautical mile the boat represented by this certificate is allowed to sail at 100%
      * performance and a given windspeed, when sailing downwind. Key set is equal to that of
-     * {@link #speedPredictionsPerTrueWindSpeedAndAngle}.
+     * {@link #velocityPredictionPerTrueWindSpeedAndAngle}.
      */
     private final Map<Speed, Duration> runAllowancePerTrueWindSpeed;
 
@@ -191,7 +186,7 @@ public class ORCCertificateImpl implements ORCCertificate {
         this.lengthOverAll = length;
         this.gph = gph;
         this.cdl = cdl;
-        this.speedPredictionsPerTrueWindSpeedAndAngle = Collections
+        this.velocityPredictionPerTrueWindSpeedAndAngle = Collections
                 .unmodifiableMap(timeAllowancesPerTrueWindSpeedAndAngle);
         this.beatAngles = Collections.unmodifiableMap(beatAngles);
         this.beatVMGPredictionPerTrueWindSpeed = Collections.unmodifiableMap(beatVMGPredictionPerTrueWindSpeed);
@@ -199,13 +194,6 @@ public class ORCCertificateImpl implements ORCCertificate {
         this.runAngles = Collections.unmodifiableMap(runAngles);
         this.runVMGPredictionPerTrueWindSpeed = Collections.unmodifiableMap(runVMGPredictionPerTrueWindSpeed);
         this.runAllowancePerTrueWindSpeed = Collections.unmodifiableMap(runAllowancePerTrueWindSpeed);
-    }
-
-    @Override
-    public ORCPerformanceCurve getPerformanceCurve(ORCPerformanceCurveCourse course)
-            throws FunctionEvaluationException {
-        return new ORCPerformanceCurveImpl(speedPredictionsPerTrueWindSpeedAndAngle, beatAngles,
-                beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed, runAllowancePerTrueWindSpeed, course);
     }
 
     @Override
@@ -244,7 +232,7 @@ public class ORCCertificateImpl implements ORCCertificate {
                     allowance = allowance.plus(runVMGPredictionPerTrueWindSpeed.get(twsEntry.getKey())
                             .getDuration(NAUTICAL_MILE).times(twaEntry.getValue()));
                 } else {
-                    allowance = allowance.plus(speedPredictionsPerTrueWindSpeedAndAngle.get(twsEntry.getKey())
+                    allowance = allowance.plus(velocityPredictionPerTrueWindSpeedAndAngle.get(twsEntry.getKey())
                             .get(twaEntry.getKey()).getDuration(NAUTICAL_MILE).times(twaEntry.getValue()));
                 }
             }
@@ -275,5 +263,40 @@ public class ORCCertificateImpl implements ORCCertificate {
     @Override
     public double getCDL() {
         return cdl;
+    }
+
+    @Override
+    public Map<Speed, Bearing> getBeatAngles() {
+        return beatAngles;
+    }
+
+    @Override
+    public Map<Speed, Bearing> getRunAngles() {
+        return runAngles;
+    }
+
+    @Override
+    public Map<Speed, Duration> getBeatAllowances() {
+        return beatAllowancePerTrueWindSpeed;
+    }
+
+    @Override
+    public Map<Speed, Duration> getRunAllowances() {
+        return runAllowancePerTrueWindSpeed;
+    }
+
+    @Override
+    public Map<Speed, Map<Bearing, Speed>> getVelocityPredictionPerTrueWindSpeedAndAngle() {
+        return velocityPredictionPerTrueWindSpeedAndAngle;
+    }
+
+    @Override
+    public Map<Speed, Speed> getBeatVMGPredictions() {
+        return beatVMGPredictionPerTrueWindSpeed;
+    }
+
+    @Override
+    public Map<Speed, Speed> getRunVMGPredictions() {
+        return runVMGPredictionPerTrueWindSpeed;
     }
 }

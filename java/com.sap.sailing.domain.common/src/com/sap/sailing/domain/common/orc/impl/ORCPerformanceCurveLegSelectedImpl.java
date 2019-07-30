@@ -1,6 +1,6 @@
-package com.sap.sailing.domain.orc.impl;
+package com.sap.sailing.domain.common.orc.impl;
 
-import com.sap.sailing.domain.orc.ORCPerformanceCurveLeg;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 
