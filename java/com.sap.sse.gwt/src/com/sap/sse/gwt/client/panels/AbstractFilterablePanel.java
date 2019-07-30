@@ -11,6 +11,7 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -49,8 +50,38 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     protected ListDataProvider<T> all;
     protected final ListDataProvider<T> filtered;
     protected final TextBox textBox;
+    protected final CheckBox checkbox;
     
     private final Set<Filter<T>> filters = new HashSet<>();
+    private final CheckboxEnablableFilter<T> checkboxFilter;
+
+    static class CheckboxEnablableFilter<T> implements Filter<T> {
+
+        private final CheckBox checkbox;
+        private Filter<T> filterToApply;
+
+        public CheckboxEnablableFilter(CheckBox checkbox) {
+            this.checkbox = checkbox;
+        }
+
+        @Override
+        public boolean matches(T object) {
+            if (!this.checkbox.getValue()) {
+                return true;
+            }
+            return filterToApply.matches(object);
+        }
+
+        @Override
+        public String getName() {
+            return filterToApply.getName();
+        }
+
+        public void setFilterToApply(Filter<T> filterToApply) {
+            this.filterToApply = filterToApply;
+        }
+
+    }
 
     protected final AbstractKeywordFilter<T> filterer = new AbstractKeywordFilter<T>() {
         @Override
@@ -79,6 +110,9 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         this.filtered = filtered;
         this.textBox = new TextBox();
         this.textBox.ensureDebugId("FilterTextBox");
+        // TODO: i18n
+        this.checkbox = new CheckBox("Hide elements w/o update rights");
+        checkboxFilter = new CheckboxEnablableFilter<>(checkbox);
         this.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         setAll(all);
         if (drawTextBox) {
@@ -221,6 +255,11 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         });
     }
 
+    public void addDefaultCheckBox() {
+        add(getCheckBox());
+        getCheckBox().addClickHandler(e -> filter());
+    }
+
     public void search(String searchString) {
         getTextBox().setText(searchString);
         filterer.setKeywords(Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(searchString));
@@ -229,6 +268,14 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
 
     public TextBox getTextBox() {
         return textBox;
+    }
+
+    public CheckBox getCheckBox() {
+        return checkbox;
+    }
+
+    public void setCheckboxEnabledFilter(Filter<T> filter) {
+        this.checkboxFilter.setFilterToApply(filter);
     }
 
     public Iterable<T> getAll() {
