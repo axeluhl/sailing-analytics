@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base;
 
+import java.util.UUID;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.sap.sailing.domain.common.PassingInstruction;
@@ -46,4 +47,9 @@ public interface Course extends CourseBase, Renamable {
     int getNumberOfWaypoints();
 
     Leg getLeg(int zeroBasedIndexOfWaypoint);
+
+    default UUID getCourseTemplateIdOrNull() {
+        // FIXME implement handling of course template references
+        return null;
+    }
 }
