@@ -499,6 +499,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         };
         groupsFilterablePanel.getTextBox().ensureDebugId("LeaderboardGroupsFilterTextBox");
         leaderboardGroupsContentPanel.add(groupsFilterablePanel);
+        groupsFilterablePanel.setCheckboxEnabledFilter(
+                leaderboardGroup -> userService.hasPermission(leaderboardGroup, DefaultActions.UPDATE));
         
         final Button createButton = buttonPanel.addCreateAction(stringMessages.createNewLeaderboardGroup(),
                 this::addNewGroup);

@@ -129,6 +129,8 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         regattaTable.ensureDebugId("RegattasCellTable");
         refreshableRegattaMultiSelectionModel = (RefreshableMultiSelectionModel<RegattaDTO>) regattaTable.getSelectionModel();
         regattaTable.setVisible(false);
+        filterablePanelRegattas
+                .setCheckboxEnabledFilter(regatta -> userService.hasPermission(regatta, DefaultActions.UPDATE));
         panel.add(filterablePanelRegattas);
 
         panel.add(regattaTable);
