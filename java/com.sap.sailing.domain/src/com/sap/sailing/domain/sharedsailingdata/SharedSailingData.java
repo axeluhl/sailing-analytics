@@ -15,13 +15,13 @@ import com.sap.sse.common.TimePoint;
 
 public interface SharedSailingData {
     
-    Iterable<MarkProperties> getAllMarkProperties();
+    Iterable<MarkProperties> getAllMarkProperties(Iterable<String> tagsToFilterFor);
     
-    Iterable<MarkTemplate> getAllMarkTemplates();
+    Iterable<MarkTemplate> getAllMarkTemplates(Iterable<String> tagsToFilterFor);
     
-    Iterable<CourseTemplate> getAllCourseTemplates();
+    Iterable<CourseTemplate> getAllCourseTemplates(Iterable<String> tagsToFilterFor);
 
-    MarkProperties createMarkProperties(UUID id, CommonMarkProperties properties);
+    MarkProperties createMarkProperties(UUID id, CommonMarkProperties properties, Iterable<String> tags);
     
     /**
      * This overrides a previously set fixed position or associated tracking device.
@@ -33,10 +33,10 @@ public interface SharedSailingData {
      */
     void setTrackingDeviceIdentifierForMarkProperties(UUID id, DeviceIdentifier deviceIdentifier);
     
-    MarkTemplate createMarkTemplate(UUID id, CommonMarkProperties properties);
+    MarkTemplate createMarkTemplate(UUID id, CommonMarkProperties properties, Iterable<String> tags);
     
     CourseTemplate createCourseTemplate(UUID id, Iterable<MarkTemplate> marks, List<WaypointTemplate> waypoints,
-            int zeroBasedIndexOfRepeatablePartStart, int zeroBasedIndexOfRepeatablePartEnd);
+            int zeroBasedIndexOfRepeatablePartStart, int zeroBasedIndexOfRepeatablePartEnd, Iterable<String> tags);
     
     void recordUsage(MarkTemplate markTemplate, MarkProperties markProperties);
     

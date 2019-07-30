@@ -32,7 +32,7 @@ import com.sap.sse.common.NamedWithID;
  * @author Axel Uhl (d043530)
  *
  */
-public interface MarkProperties extends CommonMarkProperties, NamedWithID {
+public interface MarkProperties extends CommonMarkProperties, NamedWithID, HasTags {
     void setColor(Color color);
 
     void setShape(String shape);

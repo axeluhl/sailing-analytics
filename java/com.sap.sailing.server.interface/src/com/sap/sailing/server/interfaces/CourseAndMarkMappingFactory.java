@@ -1,5 +1,8 @@
 package com.sap.sailing.server.interfaces;
 
+import java.util.List;
+import java.util.function.Predicate;
+
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Mark;
@@ -7,7 +10,9 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplateMapping;
 import com.sap.sailing.domain.coursetemplate.CourseWithMarkTemplateMappings;
+import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.MarkTemplateMapping;
 
 /**
  * From a {@link CourseTemplate} constructs or updates a {@link CourseBase}.
@@ -42,7 +47,9 @@ public interface CourseAndMarkMappingFactory {
      */
     CourseTemplate resolveCourseTemplate(Course course);
 
-    CourseTemplateMapping createMappingForCourseTemplate(Regatta regatta, CourseTemplate courseTemplate);
+    CourseTemplateMapping createMappingForCourseTemplate(Regatta regatta, CourseTemplate courseTemplate, Predicate<MarkProperties> markPropertiesFilter, Iterable<String> tagsToFilterFor);
+    
+    List<MarkTemplateMapping> createSuggestionsForMarkTemplate(Regatta regatta, MarkTemplate markTemplate, Predicate<MarkProperties> markPropertiesFilter, Iterable<String> tagsToFilterFor);
 
     CourseWithMarkTemplateMappings createCourseTemplateMappingFromMapping(Regatta regatta,
             CourseTemplateMapping courseTemplateMapping, int numberOfLaps);
