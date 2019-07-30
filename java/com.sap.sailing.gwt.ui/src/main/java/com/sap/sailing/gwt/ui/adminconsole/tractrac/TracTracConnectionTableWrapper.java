@@ -150,6 +150,8 @@ public class TracTracConnectionTableWrapper extends
             }
         };
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
+        filterField
+                .setCheckboxEnabledFilter(connection -> userService.hasPermission(connection, DefaultActions.UPDATE));
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(tracTracAccountColumnListHandler);
         table.addColumn(tracTracAccountNameColumn, getStringMessages().name());
