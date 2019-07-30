@@ -9,7 +9,7 @@ if [ -z "$REPLICA_SET_PRIMARY" ]; then
 fi
 REPLICA_SET_PRIORITY=$(ec2-metadata | grep REPLICA_SET_PRIORITY | sed -e 's/^user-data: //' | sed -e 's/^REPLICA_SET_PRIORITY=//')
 if [ -z "$REPLICA_SET_PRIORITY" ]; then
-  REPLICA_SET_PRIORITY=0
+  REPLICA_SET_PRIORITY=1
 fi
 if [ \! -z "REPLICA_SET_PRIMARY" ]; then
   IP=$(ec2-metadata -o | sed -e 's/^local-ipv4: //')
