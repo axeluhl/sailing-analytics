@@ -111,6 +111,6 @@ This can, e.g., be used to fire up a replica for the ``winddb`` instance on ``db
 
 Instead, the ``launch-mongodb-replica.sh`` script can be used to fire up a replica with a very fast NMVe SSD attached to the instance. A good instance type for this may be ``i2.xlarge`` which has 30GB of RAM, 4 vCPUs and 800GB of NVMe storage. Launch like this:
 
-``configuration/aws-automation/launch-mongodb-replica.sh -r archive -p dbserver.internal.sapsailing.com:10201 -P 0 -t i2.xlarge -k &lt;your-aws-key-pair-name&gt;``
+``configuration/aws-automation/launch-mongodb-replica.sh -r archive -p dbserver.internal.sapsailing.com:10201 -P 0 -t i2.xlarge -k <your-aws-key-pair-name>``
 
 You can then check the replication status by connecting your ``mongo`` client to ``dbserver.internal.sapsailing.com:10201`` and check the output of ``rs.status()``. As long as the new instance is listed in status ``STARTUP2`` it is still synchronizing from the primary. Eventually (took 55min during the last test) it transitions to status ``SECONDARY``. You can then use a connection string such as ``mongodb://dbserver.internal.sapsailing.com:10201/winddb?replicaSet=archive&retryWrites=true&readPreference=secondary`` for the ``MONGODB_URI`` in your archive server Java instance which will then preferably connect to your new fast secondary replica. Consider that the new secondary replica will have to build indices when first queried. This can take another 20 minutes. When done loading the archive server, terminate the instance which will properly remove the replica from the replica set.
