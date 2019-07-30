@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
+import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.CountryCode;
@@ -63,10 +64,25 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
     /**
      * Creates a serializer for {@link Competitor} objects which if {@code serializeBoat==true} and if the competitor
      * {@link Competitor#hasBoat() has a boat attached} will serialize the boat in the
-     * {@link CompetitorJsonConstants#FIELD_BOAT} field of the resulting document.
+     * {@link CompetitorJsonConstants#FIELD_BOAT} field of the resulting document. The boat class will be
+     * serialized in verbose format. See also {@link #create(boolean, boolean, boolean)}.
      */
     public static CompetitorJsonSerializer create(boolean serializeBoat, boolean serializeNonPublicCompetitorFields) {
-        return new CompetitorJsonSerializer(TeamJsonSerializer.create(), serializeBoat?BoatJsonSerializer.create():null,
+        return create(serializeBoat, serializeNonPublicCompetitorFields, /* verboseBoatClassSerializer */ true);
+    }
+
+    /**
+     * Creates a serializer for {@link Competitor} objects which if {@code serializeBoat==true} and if the competitor
+     * {@link Competitor#hasBoat() has a boat attached} will serialize the boat in the
+     * {@link CompetitorJsonConstants#FIELD_BOAT} field of the resulting document. If {@code verboseBoatClassSerializer}
+     * is {@code true}, a verbose set of fields describing the boat class is serialized with every boat. If
+     * {@code false}, the serialized boat class will still have enough information to be de-serialized by
+     * {@link BoatClassJsonDeserializer}.
+     */
+    public static CompetitorJsonSerializer create(boolean serializeBoat, boolean serializeNonPublicCompetitorFields,
+            boolean verboseBoatClassSerializer) {
+        return new CompetitorJsonSerializer(TeamJsonSerializer.create(),
+                serializeBoat ? new BoatJsonSerializer(new BoatClassJsonSerializer(verboseBoatClassSerializer)) : null,
                 serializeNonPublicCompetitorFields);
     }
 
