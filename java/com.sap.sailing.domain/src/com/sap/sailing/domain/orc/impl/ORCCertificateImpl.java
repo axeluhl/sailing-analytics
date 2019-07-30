@@ -29,6 +29,8 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class ORCCertificateImpl implements ORCCertificate {
 
+    private static final long serialVersionUID = 8725162998514202782L;
+
     /**
      * Equals the column heading of the allowances table of an ORC certificate. The speeds are set by the offshore
      * racing congress. The speeds occur in the array in ascending order.

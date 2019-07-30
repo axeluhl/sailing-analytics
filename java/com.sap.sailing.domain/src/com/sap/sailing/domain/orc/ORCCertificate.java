@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.orc;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import org.apache.commons.math.FunctionEvaluationException;
@@ -24,7 +25,7 @@ import com.sap.sse.common.Speed;
  * @author Daniel Lisunkin (i505543)
  *
  */
-public interface ORCCertificate {
+public interface ORCCertificate extends Serializable {
 
     /**
      * Returns a {@link ORCPerformanceCurve} for the competitor owning this {@link ORCCertificate}.
