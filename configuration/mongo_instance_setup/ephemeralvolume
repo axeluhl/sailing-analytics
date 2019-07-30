@@ -5,6 +5,9 @@
 # An existing xfs partition will be left alone.
 
 PARTITION=/dev/nvme0n1
+if [ \! -e $PARTITION ]; then
+  PARTITION=/dev/xvdb
+fi
 FSTYPE=$(blkid -p $PARTITION -s TYPE -o value)
 if [ "$FSTYPE" != "xfs" ]; then
   echo FSTYPE was "$FSTYPE" but should have been xfs. Formatting $PARTITION...
@@ -12,3 +15,5 @@ if [ "$FSTYPE" != "xfs" ]; then
 else
   echo FSTYPE was "$FSTYPE" which is just right :-\)
 fi
+# mount the thing to /var/lib/mongo
+mount $PARTITION /var/lib/mongo

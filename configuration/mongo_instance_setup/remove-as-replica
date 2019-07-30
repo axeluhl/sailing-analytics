@@ -1,0 +1,7 @@
+#!/bin/bash
+REPLICA_SET_NAME=$(ec2-metadata | grep REPLICA_SET_NAME | sed -e 's/^user-data: //' | sed -e 's/^REPLICA_SET_NAME=//')
+REPLICA_SET_PRIMARY=$(ec2-metadata | grep REPLICA_SET_PRIMARY | sed -e 's/^user-data: //' | sed -e 's/^REPLICA_SET_PRIMARY=//')
+if [ \! -z "REPLICA_SET_PRIMARY" ]; then
+  IP=$(ec2-metadata -o | sed -e 's/^local-ipv4: //')
+  echo "rs.remove(\"$IP:27017\")" | mongo "mongodb://$REPLICA_SET_PRIMARY/?replicaSet=$REPLICA_SET_NAME&retryWrites=true"
+fi
