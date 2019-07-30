@@ -11,6 +11,7 @@
 #        connects to the "archive" replica set at dbserver.internal.sapsailing.com:10201 and ensures
 #        that the new replica never becomes PRIMARY by setting the priority to 0
 #
-aws ec2 run-instances --placement AvailabilityZone=eu-west-1c --instance-type i2.xlarge --security-group-ids sg-0a9bc2fb61f10a342 --image-id ami-0e7e1e80586782638 --count 1 --user-data "REPLICA_SET_NAME=$1
+IMAGE_ID=ami-0875074f93689aa3a
+aws ec2 run-instances --placement AvailabilityZone=eu-west-1c --instance-type i2.xlarge --security-group-ids sg-0a9bc2fb61f10a342 --image-id $IMAGE_ID --count 1 --user-data "REPLICA_SET_NAME=$1
 REPLICA_SET_PRIMARY=$2
 REPLICA_SET_PRIORITY=$3" --ebs-optimized --key-name Axel
