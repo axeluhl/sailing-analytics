@@ -121,6 +121,7 @@ public class UserGroupTableWrapper extends
                 return table;
             }
         };
+        filterField.setCheckboxEnabledFilter(userGroup -> userService.hasPermission(userGroup, DefaultActions.UPDATE));
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
 
         mainPanel.insert(filterField, 0);
