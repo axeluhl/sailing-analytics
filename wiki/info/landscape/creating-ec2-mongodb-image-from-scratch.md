@@ -34,7 +34,7 @@ and instead add
   bindIp: 0.0.0.0
 ```
 
-so that MongoDB listens on all interfaces, not only localhost. Furthermore, set the ``directoryPerDB`` property to ``true`` and provide a replication set name using the ``replication.replSetName`` property.
+so that MongoDB listens on all interfaces, not only localhost. Furthermore, set the ``directoryPerDB`` property to ``true`` and provide a replication set name using the ``replication.replSetName`` property. The MongoDB default would be ``rs0``. In our landscape we're using ``archive`` for the ``winddb`` database on ``dbserver.internal.sapsailing.com:10201`` and ``live`` for all live events with a hidden replica at ``dbserver.internal.sapsailing.com:10203``. 
 
 Here is the full ``/etc/mongod.conf`` file:
 
@@ -88,7 +88,7 @@ replication:
 #snmp:
 ```
 
-To deal with the set-up of the ephemeral volume, there are a number of ``systemd`` units that can be found in the git repository at ``configuration/mongo_instance_setup``. The ``ephemeralvolume.service`` ensures that the volume exists and is formatted with the XFS file system. This service uses the ``/usr/local/bin/ephemeralvolume`` script to do so. After that, the volume is mounted to ``/var/lib/mongo`` using the ``var-lib-mongo.mount`` unit. The ownerships are adjusted after that by the ``chownvarlibmongo.service`` unit to the ``mongod`` user. This is then also the last unit required to run before the ``mongod.service``.
+To deal with the set-up of the ephemeral volume, there are a number of ``systemd`` units that can be found in the git repository at ``configuration/mongo_instance_setup``. The ``ephemeralvolume.service`` ensures that the volume exists and is formatted with the XFS file system. It looks for the volume at ``/dev/nvme0n1`` and on ``/dev/xvdb``, ensures XFS formatting and then mounts the partition to ``/var/lib/mongo``. This service uses the ``/usr/local/bin/ephemeralvolume`` script to do so. The ownerships are adjusted after that by the ``chownvarlibmongo.service`` unit to the ``mongod`` user. This is then also the last unit required to run before the ``mongod.service`` can start. After that, the replica set hook-up needs to take place. For that, the unit ``mongo-replica-set.service`` is provided, together with the two scripts ``/usr/local/bin/add-as-replica`` and ``/usr/local/bin/remove-as-replica``. The service unit is configured so that it is "wanted" by ``multi-user.target``, making 
 
 Then execute ``systemctl enable mongod.service`` to launch the MongoDB process and ensure it is always launched when the instance (re-)boots.
 
@@ -100,3 +100,10 @@ Connected to the PRIMARY using the ``mongo`` shell, a replica can be added using
 
 
 TODO: automate the initialization and replica set extension using "Addition Details" in the instance; create a MongoDB script that is executed during start-up; if no replica set exists and no user detail specifies where the primary is, run ``rs.initiate()``. If a replica set already exists, leave things unchanged. If no replica set exists and in a user detail something like ``REPLICA_SET_NAME=...`` and ``REPLICA_SET_PRIMARY=...`` is provided, add the local node as a secondary to the primary / replica set specified.
+
+## Launch Script for a MongoDB Replica
+
+
+
+55min initial replication for archive server winddb with dbserver.internal.sapsailing.com:10201/winddb using a gp2 SSD; additional 20min to build index
+
