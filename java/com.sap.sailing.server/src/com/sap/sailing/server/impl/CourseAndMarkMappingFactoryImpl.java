@@ -12,6 +12,7 @@ import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkTemplateMapping;
 import com.sap.sailing.server.interfaces.CourseAndMarkMappingFactory;
+import com.sap.sse.common.TimePoint;
 
 public class CourseAndMarkMappingFactoryImpl implements CourseAndMarkMappingFactory {
 
@@ -43,7 +44,16 @@ public class CourseAndMarkMappingFactoryImpl implements CourseAndMarkMappingFact
 
     @Override
     public Course createCourseFromMappingAndDefineMarksAsNeeded(Regatta regatta,
-            CourseWithMarkTemplateMappings courseTemplateMappingWithMarkTemplateMappings) {
+            CourseWithMarkTemplateMappings courseTemplateMappingWithMarkTemplateMappings,
+            TimePoint timePointForDefinitionOfMarksAndDeviceMappings) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Course createCourseFromMappingAndDefineMarksAsNeededAndExportCourseTemplate(Regatta regatta,
+            CourseWithMarkTemplateMappings courseTemplateMappingWithMarkTemplateMappings,
+            TimePoint timePointForDefinitionOfMarksAndDeviceMappings, String courseTemplateName) {
         // TODO Auto-generated method stub
         return null;
     }

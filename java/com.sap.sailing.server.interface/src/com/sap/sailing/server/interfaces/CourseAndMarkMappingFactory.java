@@ -13,6 +13,7 @@ import com.sap.sailing.domain.coursetemplate.CourseWithMarkTemplateMappings;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkTemplateMapping;
+import com.sap.sse.common.TimePoint;
 
 /**
  * From a {@link CourseTemplate} constructs or updates a {@link CourseBase}.
@@ -24,11 +25,13 @@ public interface CourseAndMarkMappingFactory {
     Course createCourse(CourseTemplate courseTemplate, int numberOfLaps);
 
     /**
-     * The given {@link Course} need to exactly match the structure of the given {@link CourseTemplate} regarding the following specifics:
+     * The given {@link Course} need to exactly match the structure of the given {@link CourseTemplate} regarding the
+     * following specifics:
      * <ul>
-     *  <li>All used {@link Mark Marks} need to reference a {@link MarkTemplate} being part of the given {@link CourseTemplate}</li>
-     *  <li>The parts before and after the repeatable part need to exactly match the start and end of the course</li>
-     *  <li>Between the start end only full cycles of the repeatable part need to exist</li>
+     * <li>All used {@link Mark Marks} need to reference a {@link MarkTemplate} being part of the given
+     * {@link CourseTemplate}</li>
+     * <li>The parts before and after the repeatable part need to exactly match the start and end of the course</li>
+     * <li>Between the start end only full cycles of the repeatable part need to exist</li>
      * </ul>
      * 
      * In addition, the given {@link CourseTemplate} needs to provide a repeatable part.
@@ -47,15 +50,22 @@ public interface CourseAndMarkMappingFactory {
      */
     CourseTemplate resolveCourseTemplate(Course course);
 
-    CourseTemplateMapping createMappingForCourseTemplate(Regatta regatta, CourseTemplate courseTemplate, Predicate<MarkProperties> markPropertiesFilter, Iterable<String> tagsToFilterFor);
-    
-    List<MarkTemplateMapping> createSuggestionsForMarkTemplate(Regatta regatta, MarkTemplate markTemplate, Predicate<MarkProperties> markPropertiesFilter, Iterable<String> tagsToFilterFor);
+    CourseTemplateMapping createMappingForCourseTemplate(Regatta regatta, CourseTemplate courseTemplate,
+            Predicate<MarkProperties> markPropertiesFilter, Iterable<String> tagsToFilterMarkProperties);
+
+    List<MarkTemplateMapping> createSuggestionsForMarkTemplate(Regatta regatta, MarkTemplate markTemplate,
+            Predicate<MarkProperties> markPropertiesFilter, Iterable<String> tagsToFilterMarkProperties);
 
     CourseWithMarkTemplateMappings createCourseTemplateMappingFromMapping(Regatta regatta,
             CourseTemplateMapping courseTemplateMapping, int numberOfLaps);
 
     // TODO Do we need to loosely couple creation of DefineMarkEvents for the Regatta
     Course createCourseFromMappingAndDefineMarksAsNeeded(Regatta regatta,
-            CourseWithMarkTemplateMappings courseTemplateMappingWithMarkTemplateMappings);
+            CourseWithMarkTemplateMappings courseTemplateMappingWithMarkTemplateMappings,
+            TimePoint timePointForDefinitionOfMarksAndDeviceMappings);
+    
+    Course createCourseFromMappingAndDefineMarksAsNeededAndExportCourseTemplate(Regatta regatta,
+            CourseWithMarkTemplateMappings courseTemplateMappingWithMarkTemplateMappings,
+            TimePoint timePointForDefinitionOfMarksAndDeviceMappings, String courseTemplateName);
 
 }
