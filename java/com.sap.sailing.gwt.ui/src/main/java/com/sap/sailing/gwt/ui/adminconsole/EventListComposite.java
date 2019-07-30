@@ -57,6 +57,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.adminconsole.HandleTabSelectable;
@@ -215,6 +216,18 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         panel.add(noEventsLabel);
         fillEvents();
         initWidget(panel);
+        filterTextbox.setCheckboxEnabledFilter(new Filter<EventDTO>() {
+            
+            @Override
+            public boolean matches(EventDTO object) {
+                return userService.hasPermission(object, DefaultActions.UPDATE);
+            }
+            
+            @Override
+            public String getName() {
+                return "Update Permission Filter";
+            }
+        });
     }
 
     private CellTable<EventDTO> createEventTable(UserDTO user) {

@@ -55,6 +55,8 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     private final Set<Filter<T>> filters = new HashSet<>();
     private final CheckboxEnablableFilter<T> checkboxFilter;
 
+    private boolean added = false;
+
     static class CheckboxEnablableFilter<T> implements Filter<T> {
 
         private final CheckBox checkbox;
@@ -66,6 +68,9 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
 
         @Override
         public boolean matches(T object) {
+            if (filterToApply == null) {
+                return true;
+            }
             if (!this.checkbox.getValue()) {
                 return true;
             }
@@ -112,7 +117,9 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         this.textBox.ensureDebugId("FilterTextBox");
         // TODO: i18n
         this.checkbox = new CheckBox("Hide elements w/o update rights");
+        checkbox.setValue(true);
         checkboxFilter = new CheckboxEnablableFilter<>(checkbox);
+        filters.add(checkboxFilter);
         this.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         setAll(all);
         if (drawTextBox) {
@@ -255,9 +262,12 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         });
     }
 
-    public void addDefaultCheckBox() {
-        add(getCheckBox());
-        getCheckBox().addClickHandler(e -> filter());
+    public void addDefaultCheckBoxIfNecessary() {
+        if (!added) {
+            add(getCheckBox());
+            getCheckBox().addClickHandler(e -> filter());
+            added = true;
+        }
     }
 
     public void search(String searchString) {
@@ -276,6 +286,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
 
     public void setCheckboxEnabledFilter(Filter<T> filter) {
         this.checkboxFilter.setFilterToApply(filter);
+        addDefaultCheckBoxIfNecessary();
     }
 
     public Iterable<T> getAll() {
