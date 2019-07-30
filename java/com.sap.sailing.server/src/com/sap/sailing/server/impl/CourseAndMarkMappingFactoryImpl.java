@@ -4,7 +4,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplateMapping;
-import com.sap.sailing.domain.coursetemplate.CourseTemplateWithMarkTemplateMappings;
+import com.sap.sailing.domain.coursetemplate.CourseWithMarkTemplateMappings;
 import com.sap.sailing.server.interfaces.CourseAndMarkMappingFactory;
 
 public class CourseAndMarkMappingFactoryImpl implements CourseAndMarkMappingFactory {
@@ -28,7 +28,7 @@ public class CourseAndMarkMappingFactoryImpl implements CourseAndMarkMappingFact
     }
 
     @Override
-    public CourseTemplateWithMarkTemplateMappings createCourseTemplateMappingFromMapping(Regatta regatta,
+    public CourseWithMarkTemplateMappings createCourseTemplateMappingFromMapping(Regatta regatta,
             CourseTemplateMapping courseTemplateMapping, int numberOfLaps) {
         // TODO Auto-generated method stub
         return null;
@@ -36,7 +36,7 @@ public class CourseAndMarkMappingFactoryImpl implements CourseAndMarkMappingFact
 
     @Override
     public Course createCourseFromMappingAndDefineMarksAsNeeded(Regatta regatta,
-            CourseTemplateWithMarkTemplateMappings courseTemplateMappingWithMarkTemplateMappings) {
+            CourseWithMarkTemplateMappings courseTemplateMappingWithMarkTemplateMappings) {
         // TODO Auto-generated method stub
         return null;
     }

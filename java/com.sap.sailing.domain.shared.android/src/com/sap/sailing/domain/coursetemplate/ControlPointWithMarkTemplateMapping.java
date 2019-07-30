@@ -10,6 +10,6 @@ import com.sap.sse.common.NamedWithID;
  * @author Axel Uhl (d043530)
  *
  */
-public interface ControlPointTemplateWithMarkTemplateMapping extends NamedWithID {
+public interface ControlPointWithMarkTemplateMapping extends NamedWithID {
     Iterable<MarkTemplateMapping> getMarkMappings();
 }
