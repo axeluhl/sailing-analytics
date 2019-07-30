@@ -87,13 +87,20 @@ public interface CompetitorAndBoatStore extends CompetitorFactory, BoatFactory {
     Iterable<Competitor> getCompetitorsWithoutBoat();
 
     /**
-     * Updates the competitor with {@link Competitor#getId() ID} <code>id</code> by setting the name, sail ID and nationality to
-     * the values provided. Doing so will not fire any events nor will it replicate this change from a master to any replicas.
-     * The calling client has to make sure that the changes applied will reach replicas and all other interested clients. It will
-     * be sufficient to ensure that subsequent DTOs produced from the competitor modified will reflect the changes.<p>
+     * Updates the competitor with {@link Competitor#getId() ID} <code>id</code> by setting the name, sail ID and
+     * nationality to the values provided. Doing so will not fire any events nor will it replicate this change from a
+     * master to any replicas. The calling client has to make sure that the changes applied will reach replicas and all
+     * other interested clients. It will be sufficient to ensure that subsequent DTOs produced from the competitor
+     * modified will reflect the changes.
+     * <p>
      * 
-     * If no competitor with the ID requested is found, the call is a no-op, doing nothing, not even throwing an exception.
-     * @param storePersistently TODO
+     * If no competitor with the ID requested is found, the call is a no-op, doing nothing, not even throwing an
+     * exception.
+     * 
+     * @param storePersistently
+     *            if {@code true}, updates and creations will be store durably in the database; otherwise it is assumed
+     *            that the "creation" is caused by the loading process that fetches the objects from the persistence
+     *            layer; no need then to store them back to the DB. See also bug5106
      */
     Competitor updateCompetitor(String idAsString, String newName, String newShortName, Color newDisplayColor, String newEmail,
             Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,

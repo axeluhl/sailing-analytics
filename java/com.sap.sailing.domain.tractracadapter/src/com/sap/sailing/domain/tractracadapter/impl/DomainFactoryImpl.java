@@ -285,7 +285,7 @@ public class DomainFactoryImpl implements DomainFactory {
     
     private Competitor getOrCreateCompetitor(ICompetitor competitor, RaceTrackingHandler raceTrackingHandler) {
         Competitor result = getOrCreateCompetitor(competitor.getId(), competitor.getNationality(), competitor.getName(),
-                competitor.getShortName(), competitor.getHandicapToT(), competitor.getHandicapToD(), null,
+                competitor.getShortName(), competitor.getHandicapToT(), competitor.getHandicapToD(), /* searchTag */ null,
                 raceTrackingHandler);
         return result;
     }
