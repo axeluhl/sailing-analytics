@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.coursetemplate;
 
 import com.sap.sse.common.NamedWithID;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * A {@link Course} can be created from this template. The template defines {@link MarkTemplate}s,
@@ -55,4 +56,8 @@ public interface CourseTemplate extends NamedWithID {
      *            limitation.
      */
     Iterable<WaypointTemplate> getWaypoints(int numberOfLaps);
+    
+    boolean hasRepeatablePart();
+    
+    Pair<Integer, Integer> getRepeatablePart();
 }

@@ -10,6 +10,7 @@ import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.NamedWithIDImpl;
 
 public class CourseTemplateImpl extends NamedWithIDImpl implements CourseTemplate {
@@ -105,7 +106,14 @@ public class CourseTemplateImpl extends NamedWithIDImpl implements CourseTemplat
         return result;
     }
 
-    private boolean hasRepeatablePart() {
+    @Override
+    public boolean hasRepeatablePart() {
         return zeroBasedIndexOfRepeatablePartEnd != -1;
+    }
+    
+    @Override
+    public Pair<Integer, Integer> getRepeatablePart() {
+        return hasRepeatablePart() ? new Pair<>(zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd)
+                : null;
     }
 }
