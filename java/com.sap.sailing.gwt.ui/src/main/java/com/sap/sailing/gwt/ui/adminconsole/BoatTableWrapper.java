@@ -167,6 +167,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                 return table;
             }
         };
+        filterField.setCheckboxEnabledFilter(boat -> userService.hasPermission(boat, DefaultActions.UPDATE));
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         
         // BoatTable edit features
