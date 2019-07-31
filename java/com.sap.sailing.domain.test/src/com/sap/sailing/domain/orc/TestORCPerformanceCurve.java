@@ -24,6 +24,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveCourseImpl;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
@@ -113,7 +114,7 @@ public class TestORCPerformanceCurve {
     private void testAllowancePerLeg(ORCCertificate certificate, double twa, double... expectedAllowancesPerTrueWindSpeed) throws FunctionEvaluationException {
         Double accuracy = 0.1;
         final ORCPerformanceCurveCourse course = new ORCPerformanceCurveCourseImpl(Arrays.asList(new ORCPerformanceCurveLegImpl(ORCCertificateImpl.NAUTICAL_MILE, new DegreeBearingImpl(twa))));
-        final ORCPerformanceCurve performanceCurve = certificate.getPerformanceCurve(course);
+        final ORCPerformanceCurve performanceCurve = new ORCPerformanceCurveImpl(certificate, course);
         for (int i=0; i<expectedAllowancesPerTrueWindSpeed.length; i++) {
             assertEquals(expectedAllowancesPerTrueWindSpeed[i], performanceCurve.getAllowancePerCourse(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i]).asSeconds(), accuracy);
         }
@@ -129,7 +130,7 @@ public class TestORCPerformanceCurve {
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.0), new DegreeBearingImpl(120)));
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.0), new DegreeBearingImpl(180)));
         ORCPerformanceCurveCourse simpleCourse = new ORCPerformanceCurveCourseImpl(legs);
-        ORCPerformanceCurve performanceCurve = certificate.getPerformanceCurve(simpleCourse);
+        ORCPerformanceCurve performanceCurve = new ORCPerformanceCurveImpl(certificate, simpleCourse);
         assertNotNull(performanceCurve);
         testAllowancePerCourse(performanceCurve, 654.4, 538.6, 485.1, 458.7, 444.1, 430.3, 404.3);
     }
@@ -145,7 +146,7 @@ public class TestORCPerformanceCurve {
     public void testPerformanceCurveInversion() throws MaxIterationsExceededException, FunctionEvaluationException {
         Double accuracy = 0.1;
         ORCCertificateImpl certificate = (ORCCertificateImpl) importerLocal.getCertificate("GER 5549");
-        ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) certificate.getPerformanceCurve(alturaCourse);
+        ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) new ORCPerformanceCurveImpl(certificate, alturaCourse);
         testBackwardForward(accuracy, performanceCurve, 11.5);
         testBackwardForward(accuracy, performanceCurve, 17.23);
         testBackwardForward(accuracy, performanceCurve, 18);
@@ -179,12 +180,12 @@ public class TestORCPerformanceCurve {
        ORCCertificate certificateBank           = importerLocal.getCertificate("GER 5555");
        ORCCertificate certificateHaspa          = importerLocal.getCertificate("GER 6300");
        ORCCertificate certificateHalbtrocken    = importerLocal.getCertificate("GER 5564");
-       ORCPerformanceCurve performanceCurveMoana        = certificateMoana.getPerformanceCurve(alturaCourse);
-       ORCPerformanceCurve performanceCurveMilan        = certificateMilan.getPerformanceCurve(alturaCourse);
-       ORCPerformanceCurve performanceCurveTutima       = certificateTutima.getPerformanceCurve(alturaCourse);
-       ORCPerformanceCurve performanceCurveBank         = certificateBank.getPerformanceCurve(alturaCourse);
-       ORCPerformanceCurve performanceCurveHaspa        = certificateHaspa.getPerformanceCurve(alturaCourse);
-       ORCPerformanceCurve performanceCurveHalbtrocken  = certificateHalbtrocken.getPerformanceCurve(alturaCourse);
+       ORCPerformanceCurve performanceCurveMoana        = new ORCPerformanceCurveImpl(certificateMoana, alturaCourse);
+       ORCPerformanceCurve performanceCurveMilan        = new ORCPerformanceCurveImpl(certificateMilan, alturaCourse);
+       ORCPerformanceCurve performanceCurveTutima       = new ORCPerformanceCurveImpl(certificateTutima, alturaCourse);
+       ORCPerformanceCurve performanceCurveBank         = new ORCPerformanceCurveImpl(certificateBank, alturaCourse);
+       ORCPerformanceCurve performanceCurveHaspa        = new ORCPerformanceCurveImpl(certificateHaspa, alturaCourse);
+       ORCPerformanceCurve performanceCurveHalbtrocken  = new ORCPerformanceCurveImpl(certificateHalbtrocken, alturaCourse);
        // Test for corner case and if the algorithm reacts to the boundaries of 6 and 20 kts.
        assertEquals( 6.0    , performanceCurveMoana.getImpliedWind(Duration.ONE_HOUR.times(24)).getKnots(), accuracy);
        assertEquals(20.0    , performanceCurveMoana.getImpliedWind(Duration.ONE_HOUR.divide(24)).getKnots(), accuracy);
@@ -216,12 +217,12 @@ public class TestORCPerformanceCurve {
         ORCCertificate certificateBank           = importerLocal.getCertificate("GER 5555");
         ORCCertificate certificateHaspa          = importerLocal.getCertificate("GER 6300");
         ORCCertificate certificateHalbtrocken    = importerLocal.getCertificate("GER 5564");
-        ORCPerformanceCurve performanceCurveMoana        = certificateMoana.getPerformanceCurve(alturaCourse);
-        ORCPerformanceCurve performanceCurveMilan        = certificateMilan.getPerformanceCurve(alturaCourse);
-        ORCPerformanceCurve performanceCurveTutima       = certificateTutima.getPerformanceCurve(alturaCourse);
-        ORCPerformanceCurve performanceCurveBank         = certificateBank.getPerformanceCurve(alturaCourse);
-        ORCPerformanceCurve performanceCurveHaspa        = certificateHaspa.getPerformanceCurve(alturaCourse);
-        ORCPerformanceCurve performanceCurveHalbtrocken  = certificateHalbtrocken.getPerformanceCurve(alturaCourse);
+        ORCPerformanceCurve performanceCurveMoana        = new ORCPerformanceCurveImpl(certificateMoana, alturaCourse);
+        ORCPerformanceCurve performanceCurveMilan        = new ORCPerformanceCurveImpl(certificateMilan, alturaCourse);
+        ORCPerformanceCurve performanceCurveTutima       = new ORCPerformanceCurveImpl(certificateTutima, alturaCourse);
+        ORCPerformanceCurve performanceCurveBank         = new ORCPerformanceCurveImpl(certificateBank, alturaCourse);
+        ORCPerformanceCurve performanceCurveHaspa        = new ORCPerformanceCurveImpl(certificateHaspa, alturaCourse);
+        ORCPerformanceCurve performanceCurveHalbtrocken  = new ORCPerformanceCurveImpl(certificateHalbtrocken, alturaCourse);
         assertEquals(Duration.ONE_HOUR.times(1.0).asHours(), performanceCurveMilan.getAllowancePerCourse(new KnotSpeedImpl(12.80881)).asHours(), accuracy);
         assertEquals(Duration.ONE_HOUR.times(1.5).asHours(), performanceCurveTutima.getAllowancePerCourse(new KnotSpeedImpl(8.72668)).asHours(), accuracy);
         assertEquals(Duration.ONE_HOUR.times(1.5).asHours(), performanceCurveBank.getAllowancePerCourse(new KnotSpeedImpl(8.07591)).asHours(), accuracy);
@@ -239,12 +240,12 @@ public class TestORCPerformanceCurve {
         ORCCertificate certificateBank           = importerOnline.getCertificate("GER 5555");
         ORCCertificate certificateHaspa          = importerOnline.getCertificate("GER 6300");
         ORCCertificate certificateHalbtrocken    = importerOnline.getCertificate("GER 5564");
-        certificateMoana.getPerformanceCurve(alturaCourse);
-        certificateMilan.getPerformanceCurve(alturaCourse);
-        certificateTutima.getPerformanceCurve(alturaCourse);
-        certificateBank.getPerformanceCurve(alturaCourse);
-        certificateHaspa.getPerformanceCurve(alturaCourse);
-        certificateHalbtrocken.getPerformanceCurve(alturaCourse);
+        new ORCPerformanceCurveImpl(certificateMoana, alturaCourse);
+        new ORCPerformanceCurveImpl(certificateMilan, alturaCourse);
+        new ORCPerformanceCurveImpl(certificateTutima, alturaCourse);
+        new ORCPerformanceCurveImpl(certificateBank, alturaCourse);
+        new ORCPerformanceCurveImpl(certificateHaspa, alturaCourse);
+        new ORCPerformanceCurveImpl(certificateHalbtrocken, alturaCourse);
     }
     
 }
