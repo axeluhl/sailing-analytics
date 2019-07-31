@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race;
 
 import com.sap.sailing.domain.abstractlog.orc.ORCLegDataEvent;
-import com.sap.sailing.domain.abstractlog.orc.impl.ORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
@@ -58,5 +57,5 @@ public interface RaceLogEventVisitor {
 
     public void visit(RaceLogTagEvent event);
 
-    public void visit(ORCLegDataEvent orcLegDataEventImpl);
+    public void visit(ORCLegDataEvent event);
 }

@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
+import com.sap.sailing.domain.abstractlog.orc.ORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
@@ -149,5 +150,10 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
     @Override
     public void visit(RaceLogTagEvent event) {
         //TODO maybe add overridding visit methods for subclasses of this class D067890
+    }
+    
+    @Override
+    public void visit(ORCLegDataEvent orcLegDataEventImpl) {
+        
     }
 }

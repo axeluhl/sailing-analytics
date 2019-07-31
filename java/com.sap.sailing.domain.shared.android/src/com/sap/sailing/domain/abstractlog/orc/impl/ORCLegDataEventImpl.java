@@ -36,4 +36,19 @@ public class ORCLegDataEventImpl extends RaceLogEventImpl implements ORCLegDataE
     public String getShortInfo() {
         return "ORCLegData, legNr= " + legNr + ", twa: " + twa.getDegrees() + ", length: " + length.getNauticalMiles();
     }
+    
+    @Override
+    public int getLegNr() {
+        return legNr;
+    }
+    
+    @Override
+    public Distance getLength() {
+        return length;
+    }
+        
+    @Override
+    public Bearing getTwa() {
+        return twa;
+    }
 }

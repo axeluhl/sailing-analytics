@@ -27,6 +27,7 @@ import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.orc.ORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
@@ -1797,6 +1798,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     
     private Document storeORCCertificate(ORCCertificate certificate) {
         Document result = new Document(FieldNames.ORC_CERTIFICATE.name(), certificate.getSailnumber());
+        // TODO
         return result;
+    }
+
+    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, ORCLegDataEvent event) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

@@ -6,7 +6,6 @@ import java.util.Map;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
-import com.sap.sse.common.impl.SecondsDurationImpl;
 
 /**
  * Represents semantically a real ORC certificate for a {@link Competitor}, which is used to rate different type of
