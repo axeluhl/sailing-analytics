@@ -62,8 +62,8 @@ public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
     protected RegattaLog regattaLog;
     protected SensorFixStore store;
     protected final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
-    protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
-    protected final Boat boat = DomainFactory.INSTANCE.getOrCreateBoat("boat", "boat", boatClass, "GER 234", null);
+    protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
+    protected final Boat boat = DomainFactory.INSTANCE.getOrCreateBoat("boat", "boat", boatClass, "GER 234", null, /* storePersistently */ true);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
 
     protected GPSFixMoving createFix(long millis, double lat, double lng, double knots, double degrees) {

@@ -72,7 +72,7 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
     @Test
     public void testSerializeAndDeserializeRaceLogFinishPositioningConfirmedEvent() throws JsonDeserializationException {
         Boat storedBoat = DomainFactory.INSTANCE.getOrCreateBoat(UUID.randomUUID(), "SAP Extreme Sailing Team",
-                new BoatClassImpl("X40", false), "123", Color.RED);
+                new BoatClassImpl("X40", false), "123", Color.RED, /* storePersistently */ true);
         positioningList.add(new CompetitorResultImpl(UUID.randomUUID(), "SAP Extreme", "SAP Ext", storedBoat.getName(),
                 storedBoat.getSailID(), /* rank */ 1, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null,
                 /* comment */ null, MergeState.OK));
