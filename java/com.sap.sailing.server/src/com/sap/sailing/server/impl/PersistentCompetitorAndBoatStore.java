@@ -168,7 +168,9 @@ public class PersistentCompetitorAndBoatStore extends TransientCompetitorAndBoat
 
     @Override
     protected void addNewBoat(DynamicBoat boat, boolean storePersistently) {
-        storeTo.storeBoat(boat);
+        if (storePersistently) {
+            storeTo.storeBoat(boat);
+        }
         super.addNewBoat(boat, storePersistently);
     }
 

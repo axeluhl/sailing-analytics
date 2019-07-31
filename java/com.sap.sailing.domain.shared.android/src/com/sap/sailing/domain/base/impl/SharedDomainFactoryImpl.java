@@ -380,7 +380,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
             logger.log(Level.FINEST, "getting or creating competitor "+name+" with ID "+competitorId+" in domain factory "+this);
         }
         return getCompetitorAndBoatStore().getOrCreateCompetitor(competitorId, name, shortname, displayColor, email, flagImage, team,
-                timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, /* storePersistently */ true);
+                timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, storePersistently);
     }
 
     @Override
@@ -391,7 +391,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
             logger.log(Level.FINEST, "getting or creating competitor "+name+" with ID "+competitorId+" in domain factory "+this);
         }
         return getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(competitorId, name, shortName, displayColor, email, flagImageURI, team,
-                timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat, /* storePersistently */ true);
+                timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat, storePersistently);
     }
 
     @Override
@@ -406,7 +406,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
 
     @Override
     public DynamicBoat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color, boolean storePersistently) {
-        return getCompetitorAndBoatStore().getOrCreateBoat(id, name, boatClass, sailId, color, /* storePersistently */ true);
+        return getCompetitorAndBoatStore().getOrCreateBoat(id, name, boatClass, sailId, color, storePersistently);
     }
 
     @Override

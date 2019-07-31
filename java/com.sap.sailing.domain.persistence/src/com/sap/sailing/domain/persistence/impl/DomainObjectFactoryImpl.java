@@ -308,7 +308,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         this.baseDomainFactory = baseDomainFactory;
         this.legacyCompetitorWithBoatDeserializer = LegacyCompetitorWithContainedBoatJsonDeserializer.create(baseDomainFactory);
         this.competitorWithBoatRefDeserializer = CompetitorWithBoatRefJsonDeserializer.create(baseDomainFactory);
-        this.boatDeserializer = BoatJsonDeserializer.create(baseDomainFactory);
+        this.boatDeserializer = BoatJsonDeserializer.create(baseDomainFactory, /* storeDeserializedBoatPersistently */ false);
         this.database = db;
     }
 

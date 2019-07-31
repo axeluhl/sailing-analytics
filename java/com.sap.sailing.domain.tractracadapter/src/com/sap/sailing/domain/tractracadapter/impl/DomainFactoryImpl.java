@@ -316,7 +316,6 @@ public class DomainFactoryImpl implements DomainFactory {
                 nationality = null;
                 logger.log(Level.SEVERE, "Unknown nationality "+nationalityAsString+" for competitor "+name+"; leaving null", iae);
             }
-            // TODO bug2822: if only boat is to be updated then this would currently fail here; consider competitorStore.isBoatToUpdateDuringGetOrCreate(...)
             DynamicTeam team = createTeam(name, nationality, competitorId);
             DynamicBoat boat = (DynamicBoat) competitorStore.getOrCreateBoat(domainCompetitor == null ? UUID.randomUUID() : domainCompetitor.getBoat().getId(),
                     null /* no boat name available */, boatClass, sailId, /* color */ null, /* storePersistently */ true);
