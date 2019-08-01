@@ -46,7 +46,7 @@ public class CompetitorsResourceTeamImageTest extends AbstractJaxRsApiTest {
         DynamicTeam team = new TeamImpl(null, Collections.singleton(new PersonImpl(null, new NationalityImpl(
                 nationality), null, null)), null);
         racingEventService.getBaseDomainFactory().getOrCreateCompetitor(id, name, null, null, null, null, team,
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true);
     }
 
     @Test

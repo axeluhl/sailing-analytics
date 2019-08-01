@@ -80,9 +80,9 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
                 (List<PersonImpl>) Arrays.asList(new PersonImpl[] { new PersonImpl("Tina Lutz", masterDomainFactory.getOrCreateNationality("GER"), null, null),
                 new PersonImpl("Tina Lutz", masterDomainFactory.getOrCreateNationality("GER"), null, null) }),
                 new PersonImpl("Rigo de Mas", masterDomainFactory.getOrCreateNationality("NED"), null, null)),
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
         Boat boat = masterDomainFactory.getCompetitorAndBoatStore().getOrCreateBoat("boat123", "boat123",
-                masterDomainFactory.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61", null);
+                masterDomainFactory.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61", null, /* storePersistently */ true);
         Map<Competitor, Boat> competitorAndBoats = new HashMap<>();
         competitorAndBoats.put(competitor, boat);
         final String baseEventName = "Test Event";

@@ -18,12 +18,10 @@ public class BoatClassJsonDeserializer implements JsonDeserializer<BoatClass> {
 
     public BoatClass deserialize(JSONObject object) throws JsonDeserializationException {
         String name = (String) object.get(BoatClassJsonSerializer.FIELD_NAME);
-        
         if (object.containsKey(BoatClassJsonSerializer.FIELD_TYPICALLY_STARTS_UPWIND)) {
         	boolean typicallyStartsUpwind = Boolean.parseBoolean(object.get(BoatClassJsonSerializer.FIELD_TYPICALLY_STARTS_UPWIND).toString());
             return domainFactory.getOrCreateBoatClass(name, typicallyStartsUpwind);
         }
-        
         return domainFactory.getOrCreateBoatClass(name);
     }
 
