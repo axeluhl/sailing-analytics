@@ -7,7 +7,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplateMapping;
-import com.sap.sailing.domain.coursetemplate.CourseWithMarkTemplateMappings;
+import com.sap.sailing.domain.coursetemplate.CourseWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
@@ -36,7 +36,7 @@ public class CourseAndMarkMappingFactoryImpl implements CourseAndMarkMappingFact
     }
 
     @Override
-    public CourseWithMarkTemplateMappings createCourseTemplateMappingFromMapping(Regatta regatta,
+    public CourseWithMarkConfiguration createCourseTemplateMappingFromMapping(Regatta regatta,
             CourseTemplateMapping courseTemplateMapping, int numberOfLaps) {
         // TODO Auto-generated method stub
         return null;
@@ -44,7 +44,7 @@ public class CourseAndMarkMappingFactoryImpl implements CourseAndMarkMappingFact
 
     @Override
     public Course createCourseFromMappingAndDefineMarksAsNeeded(Regatta regatta,
-            CourseWithMarkTemplateMappings courseTemplateMappingWithMarkTemplateMappings,
+            CourseWithMarkConfiguration courseTemplateMappingWithMarkTemplateMappings,
             TimePoint timePointForDefinitionOfMarksAndDeviceMappings) {
         // TODO Auto-generated method stub
         return null;
@@ -52,7 +52,7 @@ public class CourseAndMarkMappingFactoryImpl implements CourseAndMarkMappingFact
     
     @Override
     public Course createCourseFromMappingAndDefineMarksAsNeededAndExportCourseTemplate(Regatta regatta,
-            CourseWithMarkTemplateMappings courseTemplateMappingWithMarkTemplateMappings,
+            CourseWithMarkConfiguration courseTemplateMappingWithMarkTemplateMappings,
             TimePoint timePointForDefinitionOfMarksAndDeviceMappings, String courseTemplateName) {
         // TODO Auto-generated method stub
         return null;

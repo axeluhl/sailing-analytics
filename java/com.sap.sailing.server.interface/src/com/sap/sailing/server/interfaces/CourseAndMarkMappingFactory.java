@@ -9,7 +9,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplateMapping;
-import com.sap.sailing.domain.coursetemplate.CourseWithMarkTemplateMappings;
+import com.sap.sailing.domain.coursetemplate.CourseWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
@@ -57,16 +57,16 @@ public interface CourseAndMarkMappingFactory {
     List<MarkConfiguration> createSuggestionsForMarkTemplate(Regatta regatta, MarkTemplate markTemplate,
             Predicate<MarkProperties> markPropertiesFilter, Iterable<String> tagsToFilterMarkProperties);
 
-    CourseWithMarkTemplateMappings createCourseTemplateMappingFromMapping(Regatta regatta,
+    CourseWithMarkConfiguration createCourseTemplateMappingFromMapping(Regatta regatta,
             CourseTemplateMapping courseTemplateMapping, int numberOfLaps);
 
     // TODO Do we need to loosely couple creation of DefineMarkEvents for the Regatta
     Course createCourseFromMappingAndDefineMarksAsNeeded(Regatta regatta,
-            CourseWithMarkTemplateMappings courseTemplateMappingWithMarkTemplateMappings,
+            CourseWithMarkConfiguration courseTemplateMappingWithMarkTemplateMappings,
             TimePoint timePointForDefinitionOfMarksAndDeviceMappings);
     
     Course createCourseFromMappingAndDefineMarksAsNeededAndExportCourseTemplate(Regatta regatta,
-            CourseWithMarkTemplateMappings courseTemplateMappingWithMarkTemplateMappings,
+            CourseWithMarkConfiguration courseTemplateMappingWithMarkTemplateMappings,
             TimePoint timePointForDefinitionOfMarksAndDeviceMappings, String courseTemplateName);
 
 }

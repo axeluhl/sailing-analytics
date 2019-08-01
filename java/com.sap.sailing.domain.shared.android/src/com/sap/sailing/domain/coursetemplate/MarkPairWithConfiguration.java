@@ -10,7 +10,7 @@ import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
  * @author Axel Uhl (d043530)
  *
  */
-public interface MarkPairWithTemplateMapping extends ControlPointWithMarkConfiguration {
+public interface MarkPairWithConfiguration extends ControlPointWithMarkConfiguration {
     MarkConfiguration getLeft();
 
     MarkConfiguration getRight();
