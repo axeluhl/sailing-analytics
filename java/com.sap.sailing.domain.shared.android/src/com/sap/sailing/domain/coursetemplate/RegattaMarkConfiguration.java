@@ -21,7 +21,7 @@ import com.sap.sailing.domain.base.Mark;
  * @author Axel Uhl (D043530)
  *
  */
-public interface RegattaMarkTemplateMapping extends MarkConfiguration {
+public interface RegattaMarkConfiguration extends MarkConfiguration {
     @Override
     MarkTemplate getMarkTemplate();
 
