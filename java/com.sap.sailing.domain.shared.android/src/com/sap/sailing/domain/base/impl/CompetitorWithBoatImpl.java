@@ -46,7 +46,7 @@ public class CompetitorWithBoatImpl extends CompetitorImpl implements DynamicCom
         } else {
             result = domainFactory.getOrCreateCompetitorWithBoat(getId(), getName(), getShortName(), getColor(),
                     getEmail(), getFlagImage(), getTeam(), getTimeOnTimeFactor(),
-                    getTimeOnDistanceAllowancePerNauticalMile(), getSearchTag(), getBoat());
+                    getTimeOnDistanceAllowancePerNauticalMile(), getSearchTag(), getBoat(), /* storePersistently */ true);
         }
         return result;
     }

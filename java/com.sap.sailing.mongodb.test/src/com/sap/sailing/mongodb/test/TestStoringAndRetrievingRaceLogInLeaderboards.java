@@ -308,9 +308,9 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
     public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogFinishPositioningConfirmedEvent() {   
         Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", "SAP",
                 Color.RED, "someone@nowhere.de", null, null,
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true);
         Boat storedBoat = DomainFactory.INSTANCE.getOrCreateBoat(UUID.randomUUID(), "SAP Extreme Sailing Team",
-                new BoatClassImpl("X40", false), "123", Color.RED);
+                new BoatClassImpl("X40", false), "123", Color.RED, /* storePersistently */ true);
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
         storedPositioningList.add(new CompetitorResultImpl(storedCompetitor.getId(), storedCompetitor.getName(), storedCompetitor.getShortName(),
                 storedBoat.getName(), storedBoat.getSailID(), /* rank */ 1, MaxPointsReason.NONE, /* score */ null, /* finishingTimePoint */null,
@@ -335,9 +335,9 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
     public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogFinishPositioningConfirmedEventWithContents() {   
         Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", "SAP",
                 Color.RED, "someone@nowhere.de", null, null,
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true);
         Boat storedBoat = DomainFactory.INSTANCE.getOrCreateBoat(UUID.randomUUID(), "SAP Extreme Sailing Team",
-                new BoatClassImpl("X40", false), "123", Color.RED);
+                new BoatClassImpl("X40", false), "123", Color.RED, /* storePersistently */ true);
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
         final TimePoint finishingTimePoint = MillisecondsTimePoint.now();
         final String comment = "This is a comment";
@@ -406,9 +406,9 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
     @Test
     public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogFinishPositioningListChangeEvent() {
         Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", "SAP", Color.RED,
-                "someone@nowhere.de", null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                "someone@nowhere.de", null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true);
         Boat storedBoat = DomainFactory.INSTANCE.getOrCreateBoat(UUID.randomUUID(), "SAP Extreme Sailing Team",
-                new BoatClassImpl("X40", false), "123", Color.RED);
+                new BoatClassImpl("X40", false), "123", Color.RED, /* storePersistently */ true);
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
         storedPositioningList.add(new CompetitorResultImpl(storedCompetitor.getId(), storedCompetitor.getName(), storedCompetitor.getShortName(),
                 storedBoat.getName(), storedBoat.getSailID(), /* rank */ 1, MaxPointsReason.NONE, /* score */ null, /* finishingTimePoint */null,

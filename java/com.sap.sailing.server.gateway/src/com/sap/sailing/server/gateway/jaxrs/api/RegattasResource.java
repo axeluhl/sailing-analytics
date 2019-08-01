@@ -521,7 +521,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                                             timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null
                                                     : new MillisecondsDurationImpl(
                                                             timeOnDistanceAllowancePerNauticalMileAsMillis),
-                                            searchTag, boat);
+                                            searchTag, boat, /* storePersistently */ true);
                                 }
                             });
             } else {
@@ -529,7 +529,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         name, shortName, color, email, flagImageURI, team, timeOnTimeFactor,
                         timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null
                                 : new MillisecondsDurationImpl(timeOnDistanceAllowancePerNauticalMileAsMillis),
-                        searchTag, boat);
+                        searchTag, boat, /* storePersistently */ true);
                 getSecurityService().setOwnership(competitor.getIdentifier(),
                         (User) regattaOwnerShipAnnotation.getAnnotation().getUserOwner(),
                         regattaOwnerShipAnnotation.getAnnotation().getTenantOwner(), name);

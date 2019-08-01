@@ -83,8 +83,8 @@ public class TrackedRaceWithSensorFixStoreContentsReplicationTest extends Abstra
                 (List<PersonImpl>) Arrays.asList(new PersonImpl[] { new PersonImpl("Tina Lutz", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null),
                 new PersonImpl("Tina Lutz", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null) }),
                 new PersonImpl("Rigo de Mas", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null)),
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
-        Boat boat = masterDomainFactory.getCompetitorAndBoatStore().getOrCreateBoat("boat", "GER 61", boatClass470, "GER 61", null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
+        Boat boat = masterDomainFactory.getCompetitorAndBoatStore().getOrCreateBoat("boat", "GER 61", boatClass470, "GER 61", null, /* storePersistently */ true);
         final String baseEventName = "Test Event";
         AddDefaultRegatta addEventOperation = new AddDefaultRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, 
                 /*startDate*/ null, /*endDate*/ null, UUID.randomUUID());
