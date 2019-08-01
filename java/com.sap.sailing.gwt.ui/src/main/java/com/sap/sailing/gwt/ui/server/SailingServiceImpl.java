@@ -5939,7 +5939,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                                     competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),
                                     team, competitor.getTimeOnTimeFactor(),
                                     competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag(),
-                                    boat));
+                                    boat, /* storePersistently */ true));
         } else {
             SecurityUtils.getSubject().checkPermission(SecuredDomainType.COMPETITOR.getStringPermissionForTypeRelativeIdentifier(
                     DefaultActions.UPDATE, CompetitorImpl.getTypeRelativeObjectIdentifier(competitor.getId())));
@@ -5976,7 +5976,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                                     competitor.getShortName(), competitor.getColor(), competitor.getEmail(),
                                     competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),
                                     team, competitor.getTimeOnTimeFactor(),
-                                    competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag()));
+                                    competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag(), /* storePersistently */ true));
         } else {
             SecurityUtils.getSubject().checkPermission(
                     SecuredDomainType.COMPETITOR.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
@@ -6081,7 +6081,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(boat.getBoatClass().getName());
             result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredDomainType.BOAT, BoatImpl.getTypeRelativeObjectIdentifier(boatUUID), boat.getName(),
-                    () -> getBaseDomainFactory().getOrCreateBoat(boatUUID, boat.getName(), boatClass, boat.getSailId(), boat.getColor()));
+                    () -> getBaseDomainFactory().getOrCreateBoat(boatUUID, boat.getName(), boatClass, boat.getSailId(), boat.getColor(), /* storePersistently */ true));
         } else {
             SecurityUtils.getSubject().checkPermission(
                     SecuredDomainType.BOAT.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,

@@ -1,0 +1,12 @@
+[Unit]
+Description=Check EC2 metadata for MongoDB Replica Set Name and patch /etc/mongod.conf accordingly
+Requires=ephemeralvolume.service
+After=ephemeralvolume.service
+Before=mongod.service
+
+[Install]
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/usr/local/bin/patch-mongo-replicaset-name-from-ec2-metadata

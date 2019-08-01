@@ -224,7 +224,7 @@ public class StructureImporter {
                     BoatAndTeam boatAndTeam = getBoatAndTeam(idAsString, name, nationality, boatClass);
                     this.baseDomainFactory.convertToCompetitorDTO(this.baseDomainFactory.getOrCreateCompetitor(
                             UUID.fromString(idAsString), name, shortName, color, email, flagImage, boatAndTeam.getTeam(),
-                            /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
+                            /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true));
                 } else {
                     break;
                 }

@@ -3298,12 +3298,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         dynamicCompetitor.getColor(), dynamicCompetitor.getEmail(), dynamicCompetitor.getFlagImage(),
                         dynamicCompetitor.getTeam(), dynamicCompetitor.getTimeOnTimeFactor(),
                         dynamicCompetitor.getTimeOnDistanceAllowancePerNauticalMile(), dynamicCompetitor.getSearchTag(),
-                        ((DynamicCompetitorWithBoat) dynamicCompetitor).getBoat());
+                        ((DynamicCompetitorWithBoat) dynamicCompetitor).getBoat(), /* storePersistently */ true);
             } else {
                 competitorAndBoatStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(), dynamicCompetitor.getShortName(),
                         dynamicCompetitor.getColor(), dynamicCompetitor.getEmail(), dynamicCompetitor.getFlagImage(),
                         dynamicCompetitor.getTeam(), dynamicCompetitor.getTimeOnTimeFactor(),
-                        dynamicCompetitor.getTimeOnDistanceAllowancePerNauticalMile(), dynamicCompetitor.getSearchTag());
+                        dynamicCompetitor.getTimeOnDistanceAllowancePerNauticalMile(), dynamicCompetitor.getSearchTag(), /* storePersistently */ true);
             }
         }
         logoutput.append("Received " + competitorAndBoatStore.getCompetitorsCount() + " NEW competitors\n");
@@ -4638,11 +4638,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         DynamicPerson sailor = new PersonImpl(competitorDescriptor.getName(), nationality, null, null);
         DynamicTeam team = new TeamImpl(competitorDescriptor.getName(), Collections.singleton(sailor), null);
         BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitorDescriptor.getBoatClassName());
-        DynamicBoat boat = getCompetitorAndBoatStore().getOrCreateBoat(competitorUUID, competitorDescriptor.getBoatName(), boatClass, competitorDescriptor.getSailNumber(), /* color */ null);
+        DynamicBoat boat = getCompetitorAndBoatStore().getOrCreateBoat(competitorUUID, competitorDescriptor.getBoatName(), boatClass, competitorDescriptor.getSailNumber(), /* color */ null, /* storePersistently */ true);
         DynamicCompetitorWithBoat competitorWithBoat = getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(boatUUID,
                 competitorDescriptor.getName(), competitorDescriptor.getShortName(), /* color */ null, /* eMail */ null,
                 /* flag image */ null, team, competitorDescriptor.getTimeOnTimeFactor(),
-                competitorDescriptor.getTimeOnDistanceAllowancePerNauticalMile(), searchTag, boat);
+                competitorDescriptor.getTimeOnDistanceAllowancePerNauticalMile(), searchTag, boat, /* storePersistently */ true);
         return competitorWithBoat;
     }
 
