@@ -77,7 +77,7 @@ public interface RaceTrackingHandler {
                 Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
             return competitorStore.getOrCreateCompetitor(competitorId, name, shortName, displayColor, email,
                     flagImageURI, team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile,
-                    searchTag);
+                    searchTag, /* storePersistently */ true);
         }
 
         @Override
@@ -86,13 +86,13 @@ public interface RaceTrackingHandler {
                 URI flagImageURI, DynamicTeam team, Double timeOnTimeFactor,
                 Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
             return competitorStore.getOrCreateCompetitorWithBoat(competitorId, name, shortName, displayColor, email,
-                    flagImageURI, team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
+                    flagImageURI, team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat, /* storePersistently */ true);
         }
 
         @Override
         public DynamicBoat getOrCreateBoat(CompetitorAndBoatStore competitorAndBoatStore, Serializable id, String name,
                 BoatClass boatClass, String sailId, Color color) {
-            return competitorAndBoatStore.getOrCreateBoat(id, name, boatClass, sailId, color);
+            return competitorAndBoatStore.getOrCreateBoat(id, name, boatClass, sailId, color, /* storePersistently */ true);
         }
     }
 }

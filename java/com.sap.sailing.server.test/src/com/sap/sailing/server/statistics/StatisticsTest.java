@@ -57,7 +57,7 @@ public class StatisticsTest {
     private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
     private final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", "c", null, null, null, null,
             /* timeOnTimeFactor */ null,
-            /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+            /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
     private final Boat boat = new BoatImpl("boat", "b", boatClass, "DE 12345");
     private final Mark mark1 = DomainFactory.INSTANCE.getOrCreateMark("mark1");
     private final Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");

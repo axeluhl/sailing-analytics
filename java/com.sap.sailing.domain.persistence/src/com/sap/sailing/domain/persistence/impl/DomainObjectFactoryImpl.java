@@ -313,7 +313,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         this.baseDomainFactory = baseDomainFactory;
         this.legacyCompetitorWithBoatDeserializer = LegacyCompetitorWithContainedBoatJsonDeserializer.create(baseDomainFactory);
         this.competitorWithBoatRefDeserializer = CompetitorWithBoatRefJsonDeserializer.create(baseDomainFactory);
-        this.boatDeserializer = BoatJsonDeserializer.create(baseDomainFactory);
+        this.boatDeserializer = BoatJsonDeserializer.create(baseDomainFactory, /* storeDeserializedBoatPersistently */ false);
         this.database = db;
     }
 
@@ -1746,7 +1746,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final String sailId = ""+(secondLeagueBoatCounter++ % 6 + 1);
         final String auxiliaryBoatId = "b2567e08-26d9-45c1-b5e0-8c410c8db18b#"+sailId;
         final Boat auxiliaryBoat = baseDomainFactory.getCompetitorAndBoatStore().getOrCreateBoat(auxiliaryBoatId, sailId,
-                baseDomainFactory.getOrCreateBoatClass(BoatClassMasterdata.J70.getDisplayName()), sailId, /* color */ null);
+                baseDomainFactory.getOrCreateBoatClass(BoatClassMasterdata.J70.getDisplayName()), sailId, /* color */ null, /* storePersistently */ true);
         return createRaceLogRegisterCompetitorEventImpl(createdAt, author, logicalTimePoint, id, passId, auxiliaryBoat, competitor);
     }
     

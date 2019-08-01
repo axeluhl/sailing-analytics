@@ -72,9 +72,9 @@ public class RaceLogFixTrackerManagerTest {
     protected RegattaLog regattaLog;
     protected SensorFixStore store;
     protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", "c2", null, null, null,
-            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
     private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
-    protected final Boat boat = DomainFactory.INSTANCE.getOrCreateBoat("boat", "boat", boatClass, "USA 123", null);
+    protected final Boat boat = DomainFactory.INSTANCE.getOrCreateBoat("boat", "boat", boatClass, "USA 123", null, /* storePersistently */ true);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
     protected final Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
 
