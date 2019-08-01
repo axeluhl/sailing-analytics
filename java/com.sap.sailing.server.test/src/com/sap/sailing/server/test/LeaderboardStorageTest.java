@@ -57,7 +57,7 @@ public class LeaderboardStorageTest extends TestCase {
         DynamicTeam team = new TeamImpl("team", sailorList, null);
         String competitorId = "testC";
         Competitor competitor = service.getBaseDomainFactory().getOrCreateCompetitor(competitorId, "Test C", null, null,
-                null, null, team, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+                null, null, team, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
 
         double carriedPoints = 2.0;
         leaderboard.setCarriedPoints(competitor, carriedPoints);

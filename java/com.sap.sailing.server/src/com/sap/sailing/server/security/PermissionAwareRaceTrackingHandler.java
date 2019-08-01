@@ -124,7 +124,7 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
             Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
         final DynamicCompetitor competitor = competitorStore.getOrCreateCompetitor(competitorId, name, shortName,
                 displayColor, email, flagImageURI, team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile,
-                searchTag);
+                searchTag, /* storePersistently */ true);
         createOwnershipIfMissing(competitor.getIdentifier());
         return competitor;
     }
@@ -136,7 +136,7 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
             Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
         final DynamicCompetitorWithBoat competitorWithBoat = competitorStore.getOrCreateCompetitorWithBoat(competitorId,
                 name, shortName, displayColor, email, flagImageURI,
-                team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
+                team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat, /* storePersistently */ true);
         createOwnershipIfMissing(competitorWithBoat.getIdentifier());
         createOwnershipIfMissing(competitorWithBoat.getBoat().getIdentifier());
         return competitorWithBoat;
@@ -145,7 +145,7 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
     @Override
     public DynamicBoat getOrCreateBoat(CompetitorAndBoatStore competitorAndBoatStore, Serializable id, String name,
             BoatClass boatClass, String sailId, Color color) {
-        final DynamicBoat boat = competitorAndBoatStore.getOrCreateBoat(id, name, boatClass, sailId, color);
+        final DynamicBoat boat = competitorAndBoatStore.getOrCreateBoat(id, name, boatClass, sailId, color, /* storePersistently */ true);
         createOwnershipIfMissing(boat.getIdentifier());
         return boat;
     }
