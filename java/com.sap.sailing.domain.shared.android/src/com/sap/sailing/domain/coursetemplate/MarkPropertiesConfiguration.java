@@ -9,7 +9,7 @@ package com.sap.sailing.domain.coursetemplate;
  * @author Axel Uhl (D043530)
  *
  */
-public interface MarkPropertiesMarkTemplateMapping extends MarkConfiguration {
+public interface MarkPropertiesConfiguration extends MarkConfiguration {
     @Override
     MarkTemplate getMarkTemplate();
 
