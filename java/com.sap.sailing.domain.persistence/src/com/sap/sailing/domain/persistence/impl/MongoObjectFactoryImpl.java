@@ -986,7 +986,22 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogSuppressedMarkPassingsEvent(event));
         return result;
     }
+    
+    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, ORCLegDataEvent event) {
+        Document result = new Document();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeORCLegDataEvent(event));
+        return result;
+    }
 
+    private Object storeORCLegDataEvent(ORCLegDataEvent event) {
+        Document result = new Document();
+        result.put(FieldNames.ORC_LEG_NR.toString(), event.getLegNr());
+        result.put(FieldNames.ORC_LEG_LENGTH.toString(), event.getLength().getNauticalMiles());
+        result.put(FieldNames.ORC_LEG_TWA.toString(), event.getTwa().getDegrees());
+        return result;
+    }
+    
     private Object storeRaceLogWindFix(RaceLogWindFixEvent event) {
         Document result = new Document();
         storeRaceLogEventProperties(event, result);
@@ -1796,14 +1811,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
     }
     
+    @SuppressWarnings("unused")
     private Document storeORCCertificate(ORCCertificate certificate) {
         Document result = new Document(FieldNames.ORC_CERTIFICATE.name(), certificate.getSailnumber());
         // TODO
         return result;
-    }
-
-    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, ORCLegDataEvent event) {
-        // TODO Auto-generated method stub
-        return null;
     }
 }

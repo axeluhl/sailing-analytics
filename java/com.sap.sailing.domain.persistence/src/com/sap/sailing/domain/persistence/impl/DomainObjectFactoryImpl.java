@@ -44,6 +44,8 @@ import com.mongodb.client.model.RenameCollectionOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.orc.ORCLegDataEvent;
+import com.sap.sailing.domain.abstractlog.orc.impl.ORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -191,6 +193,7 @@ import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
@@ -245,7 +248,9 @@ import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.deserialization.impl.LegacyCompetitorWithContainedBoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RegattaConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
@@ -1616,7 +1621,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     competitors, dbObject);
         } else if (eventClass.equals(RaceLogTagEvent.class.getSimpleName())) {
             resultEvent = loadRaceLogTagEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
-        }else {
+        } else if (eventClass.equals(ORCLegDataEvent.class.getSimpleName())) {
+            resultEvent = loadRaceLogORCLegDataEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
+        } else {
             throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
         }
         return new Pair<>(resultEvent, dbObjectForUpdate);
@@ -2004,6 +2011,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         RaceLogRaceStatus nextStatus = RaceLogRaceStatus
                 .valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name()));
         return new RaceLogRaceStatusEventImpl(createdAt, logicalTimePoint, author, id, passId, nextStatus);
+    }
+    
+    private ORCLegDataEvent loadRaceLogORCLegDataEvent(TimePoint createdAt, AbstractLogEventAuthor author,
+            TimePoint logicalTimePoint, Serializable id, Integer passId, Document dbObject) {
+        int legNr = (int) dbObject.get(FieldNames.ORC_LEG_NR.name());
+        Bearing twa = new DegreeBearingImpl((double) dbObject.get(FieldNames.ORC_LEG_TWA.name()));
+        Distance length = new NauticalMileDistance((double) dbObject.get(FieldNames.ORC_LEG_LENGTH.name()));
+        return new ORCLegDataEventImpl(logicalTimePoint, logicalTimePoint, author, id, passId, legNr, twa, length);
     }
 
     @Override

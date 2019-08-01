@@ -1,0 +1,42 @@
+package com.sap.sailing.server.gateway.serialization.racelog.impl;
+
+import org.json.simple.JSONObject;
+
+import com.sap.sailing.domain.abstractlog.orc.ORCLegDataEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+
+/**
+ * Serializer for {@link com.sap.sailing.domain.abstractlog.orc.ORCLegDataEvent ORCLegDataEvent}.
+ * 
+ * @author Daniel Lisunkin (i505543)
+ *
+ */
+public class RaceLogORCLegDataEventSerializer extends BaseRaceLogEventSerializer {
+
+    public static final String VALUE_CLASS = ORCLegDataEvent.class.getSimpleName();
+    public static final String ORC_LEG_NR = "legNr";
+    public static final String ORC_LEG_TWA = "twa";
+    public static final String ORC_LEG_LENGTH = "length";
+    
+    public RaceLogORCLegDataEventSerializer(JsonSerializer<Competitor> competitorSerializer) {
+        super(competitorSerializer);
+    }
+
+    @Override
+    public JSONObject serialize(RaceLogEvent object) {
+        ORCLegDataEvent legData = (ORCLegDataEvent) object;
+        JSONObject result = super.serialize(legData);
+        result.put(ORC_LEG_NR, legData.getLegNr());
+        result.put(ORC_LEG_LENGTH, legData.getLength().getNauticalMiles());
+        result.put(ORC_LEG_TWA, legData.getTwa().getDegrees());
+        return result;
+    }
+
+    @Override
+    protected String getClassFieldValue() {
+        return VALUE_CLASS;
+    }
+
+}

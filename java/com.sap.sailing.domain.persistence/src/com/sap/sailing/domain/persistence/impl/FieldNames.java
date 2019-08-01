@@ -172,6 +172,9 @@ public enum FieldNames {
     //anniversary fields
     START_OF_RACE, ANNIVERSARY_NUMBER, REMOTE_URL, ANNIVERSARY_TYPE, EVENT_TYPE,
     
+    //ORC Leg fields
+    ORC_LEG_NR, ORC_LEG_LENGTH, ORC_LEG_TWA,
+    
     //ORC certificate fields,
     ORC_CERTIFICATE;
 }

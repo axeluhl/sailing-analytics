@@ -83,7 +83,8 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
                 new RaceLogStartOfTrackingEventSerializer(competitorSerializer),
                 new RaceLogUseCompetitorsFromRaceLogEventSerializer(competitorSerializer),
                 new RaceLogEndOfTrackingEventSerializer(competitorSerializer),
-                new RaceLogTagEventSerializer(competitorSerializer));
+                new RaceLogTagEventSerializer(competitorSerializer),
+                new RaceLogORCLegDataEventSerializer(competitorSerializer));
     }
 
     private final JsonSerializer<RaceLogEvent> flagEventSerializer;
@@ -139,7 +140,8 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
             JsonSerializer<RaceLogEvent> startOfTrackingEventSerializer,
             JsonSerializer<RaceLogEvent> useCompetitorsFromRaceLogEventSerializer,
             JsonSerializer<RaceLogEvent> endOfTrackingEventSerializer,
-            JsonSerializer<RaceLogEvent> tagSerializer) {
+            JsonSerializer<RaceLogEvent> tagSerializer,
+            JsonSerializer<RaceLogEvent> orcLegDataEventSerializer) {
 
         this.flagEventSerializer = flagEventSerializer;
         this.startTimeSerializer = startTimeSerializer;
@@ -165,8 +167,8 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
         this.endOfTrackingEventSerializer = endOfTrackingEventSerializer;
         this.useCompetitorsFromRaceLogEventSerializer = useCompetitorsFromRaceLogEventSerializer;
         this.tagSerializer = tagSerializer;
+        this.orcLegDataEventSerializer = orcLegDataEventSerializer;
         
-        this.orcLegDataEventSerializer = null; //TODO create ORCLegDataEventSerializer
         this.chosenSerializer = null;
     }
 
