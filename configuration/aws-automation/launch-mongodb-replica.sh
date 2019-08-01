@@ -41,7 +41,7 @@ if [ $# -eq 0 ]; then
     exit 2
 fi
 
-options='r:p:P:t:a:i:k:'
+options='r:p:P:t:a:i:k:v:'
 while getopts $options option
 do
     case $option in
