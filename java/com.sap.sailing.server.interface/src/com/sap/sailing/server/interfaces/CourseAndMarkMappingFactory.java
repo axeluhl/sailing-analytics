@@ -3,16 +3,24 @@ package com.sap.sailing.server.interfaces;
 import java.util.List;
 import java.util.function.Predicate;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
-import com.sap.sailing.domain.coursetemplate.CourseTemplateMapping;
+import com.sap.sailing.domain.coursetemplate.CourseTemplateConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseWithMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
-import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
+import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.WithOptionalRepeatablePart;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -50,23 +58,59 @@ public interface CourseAndMarkMappingFactory {
      */
     CourseTemplate resolveCourseTemplate(Course course);
 
+    /**
+     * If {@link MarkConfiguration#getOptionalMarkTemplate() markConfiguration.getOptionalMarkTemplate()} returns a
+     * non-{@code null} {@link MarkTemplate} then that is returned. Otherwise, a new {@link MarkTemplate} object is
+     * created which reflects the {@link #getEffectiveProperties() effective properties} that this mark configuration
+     * currently has.
+     */
+    MarkTemplate getOrCreateMarkTemplate(MarkConfiguration markConfiguration);
+
+    /**
+     * The {@link CourseWithMarkConfiguration} contains everything required to produce a new {@link CourseTemplate} from
+     * it: the {@link MarkTemplate}s can be obtained by mapping all
+     * {@link CourseWithMarkConfiguration#getMarkConfigurations() mark configurations} through
+     * {@link #getOrCreateMarkTemplate(MarkConfiguration)}. The {@link WithOptionalRepeatablePart repeatable part
+     * specification} is obtained immediately from the {@link CourseWithMarkConfiguration}. For each
+     * {@link CourseWithMarkConfiguration#getWaypoints() waypoint configuration} of the
+     * {@code courseWithMarkConfiguration}, a {@link WaypointTemplate} is created where the {@link MarkTemplate}s
+     * referenced by these {@link WaypointTemplates} are those obtained by
+     * {@link #getOrCreateMarkTemplate(MarkConfiguration)} for the respective {@link MarkConfiguration} objects used in
+     * the {@link WaypointWithMarkConfiguration} objects.
+     * 
+     * @param name
+     *            the name of the new course template; returned by calling
+     *            {@link CourseWithMarkConfiguration#getOptionalCourseTemplate()
+     *            getOptionalCourseTemplate()}.{@link CourseTemplate#getName() getName()} on the result of this method.
+     * @return a course with its mark configurations and a {@link CourseTemplate} returned by
+     *         {@link CourseWithMarkConfiguration#getOptionalCourseTemplate()} that is always valid, never {@code null}.
+     *         All {@link MarkConfiguration} objects in the result all have a valid
+     *         {@link MarkConfiguration#getOptionalMarkTemplate() mark template} that is part of the
+     *         {@link CourseTemplate} obtained from {@link CourseWithMarkConfiguration#getOptionalCourseTemplate()}.
+     */
+    CourseWithMarkConfiguration createCourseTemplateAndUpdatedConfiguration(String name,
+            CourseWithMarkConfiguration courseWithMarkConfiguration);
+
     // TODO is a markPropertiesFilter appropriate here from a client's perspective?
-    CourseTemplateMapping createMappingForCourseTemplate(Regatta regatta, CourseTemplate courseTemplate,
+    CourseTemplateConfiguration createMappingForCourseTemplate(Regatta regatta, CourseTemplate courseTemplate,
             Predicate<MarkProperties> markPropertiesFilter, Iterable<String> tagsToFilterMarkProperties);
 
     List<MarkConfiguration> createSuggestionsForMarkTemplate(Regatta regatta, MarkTemplate markTemplate,
             Predicate<MarkProperties> markPropertiesFilter, Iterable<String> tagsToFilterMarkProperties);
 
-    CourseWithMarkConfiguration createCourseTemplateMappingFromMapping(Regatta regatta,
-            CourseTemplateMapping courseTemplateMapping, int numberOfLaps);
-
     // TODO Do we need to loosely couple creation of DefineMarkEvents for the Regatta
-    Course createCourseFromMappingAndDefineMarksAsNeeded(Regatta regatta,
+    /**
+     * Use the result to create a {@link RaceLogCourseDesignChangedEvent} or obtain the {@link ControlPoint} and
+     * {@link PassingInstruction} pairs to {@code Course.update(...)} a course.
+     * 
+     * @param regatta
+     *            the regatta whose {@link RegattaLog} to use to define the new {@link Mark}s in.
+     * @param author
+     *            for {@link RegattaLogDefineMarkEvent}s and the {@link RegattaLogDeviceMappingEvent}s.
+     * @return the sequence of waypoints, obtained by expanding the
+     */
+    CourseBase createCourseFromMappingAndDefineMarksAsNeeded(Regatta regatta,
             CourseWithMarkConfiguration courseTemplateMappingWithMarkTemplateMappings,
-            TimePoint timePointForDefinitionOfMarksAndDeviceMappings);
-    
-    Course createCourseFromMappingAndDefineMarksAsNeededAndExportCourseTemplate(Regatta regatta,
-            CourseWithMarkConfiguration courseTemplateMappingWithMarkTemplateMappings,
-            TimePoint timePointForDefinitionOfMarksAndDeviceMappings, String courseTemplateName);
-
+            int lapCount,
+            TimePoint timePointForDefinitionOfMarksAndDeviceMappings, AbstractLogEventAuthor author);
 }

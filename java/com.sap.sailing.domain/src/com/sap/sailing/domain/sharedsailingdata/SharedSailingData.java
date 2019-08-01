@@ -14,7 +14,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
- * TODO document what this service encapuslated, such as persistence, replication, ...
+ * TODO document what this service encapuslated, such as persistence, replication, ...; mention reason for providing UUID in factory methods, regarding security aspects
  * 
  * @author Axel Uhl (D043530)
  *
@@ -50,8 +50,9 @@ public interface SharedSailingData {
             int zeroBasedIndexOfRepeatablePartStart, int zeroBasedIndexOfRepeatablePartEnd, Iterable<String> tags);
     
     /**
-     * Keeps the {@link MillisecondsTimePoint#now() current time} of this call which will be returned
-     * for {@code markTemplate} when invoking {@link #getUsedMarkProperties(MarkTemplate)}.
+     * Records the fact that the {@code markProperties} were used to configure a mark that takes the role defined by the
+     * {@code markTemplate}. Keeps the {@link MillisecondsTimePoint#now() current time} of this call which will be
+     * returned for {@code markTemplate} when invoking {@link #getUsedMarkProperties(MarkTemplate)}.
      */
     void recordUsage(MarkTemplate markTemplate, MarkProperties markProperties);
     

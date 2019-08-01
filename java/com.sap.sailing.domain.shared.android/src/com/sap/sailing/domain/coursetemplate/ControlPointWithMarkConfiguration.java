@@ -11,5 +11,5 @@ import com.sap.sse.common.NamedWithUUID;
  *
  */
 public interface ControlPointWithMarkConfiguration extends NamedWithUUID {
-    Iterable<MarkConfiguration> getMarkMappings();
+    Iterable<MarkConfiguration> getMarkConfigurations();
 }

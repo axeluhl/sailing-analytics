@@ -9,7 +9,7 @@ import com.sap.sailing.domain.base.Mark;
  * location/position/tracking data.
  * <p>
  * 
- * An optional non-{@code null} {@link MarkTemplate} may be returned from {@link #getMarkTemplate()} which then leads to
+ * An optional non-{@code null} {@link MarkTemplate} may be returned from {@link #getOptionalMarkTemplate()} which then leads to
  * recording a usage relation between the regatta {@link Mark} and said {@link MarkTemplate}.
  * <p>
  * 
@@ -22,16 +22,8 @@ import com.sap.sailing.domain.base.Mark;
  *
  */
 public interface RegattaMarkConfiguration extends MarkConfiguration {
-    @Override
-    MarkTemplate getMarkTemplate();
-
-    @Override
     Mark getMark();
 
     @Override
     CommonMarkPropertiesWithOptionalPositioning getEffectiveProperties();
-
-    @Override
-    boolean isStoreToInventory();
-
 }

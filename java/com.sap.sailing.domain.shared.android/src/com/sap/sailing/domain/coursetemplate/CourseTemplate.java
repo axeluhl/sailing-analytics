@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.coursetemplate;
 
 import com.sap.sse.common.NamedWithUUID;
-import com.sap.sse.common.Util.Pair;
 
 /**
  * A {@link Course} can be created from this template. The template defines {@link MarkTemplate}s,
@@ -28,7 +27,7 @@ import com.sap.sse.common.Util.Pair;
  * @author Axel Uhl (d043530)
  *
  */
-public interface CourseTemplate extends NamedWithUUID, HasTags {
+public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUID, HasTags {
     /**
      * The templates for all the marks that shall be made available in the regatta when applying this template. All
      * marks required to construct the waypoint sequence must be produced from this set of mark templates. There may be
@@ -48,7 +47,7 @@ public interface CourseTemplate extends NamedWithUUID, HasTags {
      * above, will occur zero times. For an "L2" the repeatable sub-sequence will occur once, and so on. However, an
      * implementation is free to choose an interpretation of {@code numberOfLaps} that meets callers' expectations.
      * 
-     * @param numberOfLaps
+     * @param numberOfLaps TODO remove this parameter and return only the base waypoint sequence; move to {@link CourseWithMarkConfiguration}
      *            if the course defines a repeatable part, the number of laps at least needs to be {@code 1} for the
      *            default implementation, and an {@link IllegalArgumentException} shall be thrown in case a value less
      *            than {@code 1} is used if this template specifies a repeatable part. Note again that the number of
@@ -56,8 +55,4 @@ public interface CourseTemplate extends NamedWithUUID, HasTags {
      *            limitation.
      */
     Iterable<WaypointTemplate> getWaypoints(int numberOfLaps);
-    
-    boolean hasRepeatablePart();
-    
-    Pair<Integer, Integer> getRepeatablePart();
 }

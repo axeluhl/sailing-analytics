@@ -6,11 +6,11 @@ import java.util.function.Predicate;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
-import com.sap.sailing.domain.coursetemplate.CourseTemplateMapping;
+import com.sap.sailing.domain.coursetemplate.CourseTemplateConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseWithMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
-import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.server.interfaces.CourseAndMarkMappingFactory;
 import com.sap.sse.common.TimePoint;
 
@@ -29,15 +29,8 @@ public class CourseAndMarkMappingFactoryImpl implements CourseAndMarkMappingFact
     }
 
     @Override
-    public CourseTemplateMapping createMappingForCourseTemplate(Regatta regatta, CourseTemplate courseTemplate,
+    public CourseTemplateConfiguration createMappingForCourseTemplate(Regatta regatta, CourseTemplate courseTemplate,
             Predicate<MarkProperties> markPropertiesFilter, Iterable<String> tagsToFilterFor) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public CourseWithMarkConfiguration createCourseTemplateMappingFromMapping(Regatta regatta,
-            CourseTemplateMapping courseTemplateMapping, int numberOfLaps) {
         // TODO Auto-generated method stub
         return null;
     }

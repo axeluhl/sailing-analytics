@@ -16,7 +16,7 @@ public interface MarkPairWithConfiguration extends ControlPointWithMarkConfigura
     MarkConfiguration getRight();
 
     @Override
-    default Iterable<MarkConfiguration> getMarkMappings() {
+    default Iterable<MarkConfiguration> getMarkConfigurations() {
         return Arrays.asList(getLeft(), getRight());
     }
 }

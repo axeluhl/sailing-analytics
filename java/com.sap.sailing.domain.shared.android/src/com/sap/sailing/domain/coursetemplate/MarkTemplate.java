@@ -11,5 +11,5 @@ import com.sap.sailing.domain.base.Mark;
  * @author Axel Uhl (d043530)
  *
  */
-public interface MarkTemplate extends ControlPointTemplate, CommonMarkProperties, HasTags {
+public interface MarkTemplate extends ControlPointTemplate, CommonMarkProperties {
 }
