@@ -1,16 +1,24 @@
 package com.sap.sailing.domain.abstractlog.orc;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 
-// TODO Comments
+/**
+ * This special {@link RaceLogEvent} is used for setting the needed information for a {@link ORCPerformanceCurveCourse}
+ * and {@link ORCPerformanceCurveLeg}, when ranking a race by the usage of a {@link ORCPerformanceCurve} and the
+ * constructed course setting.
+ * 
+ * @author Daniel Lisunkin (i505543)
+ */
 public interface ORCLegDataEvent extends RaceLogEvent {
 
     public Distance getLength();
-    
+
     public Bearing getTwa();
-    
+
     public int getLegNr();
-    
+
 }

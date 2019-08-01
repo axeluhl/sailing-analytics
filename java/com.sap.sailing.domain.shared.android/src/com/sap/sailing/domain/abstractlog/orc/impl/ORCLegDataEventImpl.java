@@ -10,7 +10,6 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 
-// TODO Comments
 public class ORCLegDataEventImpl extends RaceLogEventImpl implements ORCLegDataEvent {
 
     private static final long serialVersionUID = -5063350268001993185L;
