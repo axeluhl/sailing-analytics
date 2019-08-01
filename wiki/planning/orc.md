@@ -33,6 +33,7 @@ After the functionality for the different course possibilities is added, there n
 This problem should be resolved by the usage of the RaceLog and by the usage of an adapter pattern to match the information given from a TrackedRace to the ORCPerformanceCurveCourse.
 
 For this purpose there are the following subtasks:
+
 - [ ] UML for this concept
 - [x] create RaceLogEvent for TWA/Length information per Leg. This task additionally consists out of some design decisions regarding the revokability of events.
 - [x] create RaceLogEventAnalyzer for this Event *currently focussed on these tasks*
