@@ -21,6 +21,15 @@
 			<div class="mainContent">
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
+		    <h2 class="articleSubheadline">August 2019</h2>
+                    <ul class="bulletList">
+                        <li>New API endpoints were added to get the status of tracking devices.
+                            Under /sailingserver/api/v1/tracking_devices/[deviceUUID] the status of smartphone tracking devices can be read by using the device's UUID.
+                            /sailingserver/api/v1/regattas/[regattaName]/tracking_devices the status for all tracking devices associated to a regatta is returned.
+                            While the first requires the non public device UUID to be included in the request, the latter requires a user to have UPDATE permission for the regatta in question.
+                            </li>
+                    </ul>
+		    
 		    <h2 class="articleSubheadline">July 2019</h2>
                     <ul class="bulletList">
                         <li>Result and competitor import URLs are now only considered when the requesting user
