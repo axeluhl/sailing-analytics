@@ -2319,6 +2319,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                 } else if (item instanceof Mark) {
                     itemObject.put("markId", item.getId().toString());
                     ((JSONArray) result.computeIfAbsent("marks", k -> new JSONArray())).add(itemObject);
+                } else {
+                    logger.log(Level.WARNING, "Unexpected tracked item found while calculating the tracker status. ID: "
+                            + item.getId() + "; type: " + item.getClass().getName());
                 }
             });
             return Response.ok(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
