@@ -2289,26 +2289,30 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaName}/tracking_devices")
     public Response getTrackingStatus(@PathParam("regattaName") String regattaName) {
-        Regatta regatta = getService().getRegattaByName(regattaName);
+        final Regatta regatta = getService().getRegattaByName(regattaName);
         if (regatta != null) {
             // Deeper insights to tracking data is only available to users who can administer a regatta
-            SecurityUtils.getSubject().checkPermission(regatta.getIdentifier().getStringPermission(DefaultActions.UPDATE));
-            
-            TrackingDeviceStatusSerializer serializer = new TrackingDeviceStatusSerializer(new DeviceIdentifierJsonSerializer(
-                    getServiceFinderFactory().createServiceFinder(DeviceIdentifierJsonHandler.class)));
-            
-            RegattaLogDeviceMappingFinder<WithID> regattaLogDeviceMappingFinder = new RegattaLogDeviceMappingFinder<WithID>(regatta.getRegattaLog());
-            Map<WithID, List<DeviceMappingWithRegattaLogEvent<WithID>>> foundMappings = regattaLogDeviceMappingFinder.analyze();
-            
-            JSONObject result = new JSONObject();
+            SecurityUtils.getSubject()
+                    .checkPermission(regatta.getIdentifier().getStringPermission(DefaultActions.UPDATE));
+
+            final TrackingDeviceStatusSerializer serializer = new TrackingDeviceStatusSerializer(
+                    new DeviceIdentifierJsonSerializer(
+                            getServiceFinderFactory().createServiceFinder(DeviceIdentifierJsonHandler.class)));
+
+            final RegattaLogDeviceMappingFinder<WithID> regattaLogDeviceMappingFinder = new RegattaLogDeviceMappingFinder<WithID>(
+                    regatta.getRegattaLog());
+            final Map<WithID, List<DeviceMappingWithRegattaLogEvent<WithID>>> foundMappings = regattaLogDeviceMappingFinder
+                    .analyze();
+
+            final JSONObject result = new JSONObject();
             foundMappings.forEach((item, mappings) -> {
-                JSONArray deviceStatusesOfTrackedItem = new JSONArray();
-                mappings.stream().map(DeviceMappingWithRegattaLogEvent<WithID>::getDevice).collect(Collectors.toSet())
-                        .forEach(deviceIdentifier -> {
-                            deviceStatusesOfTrackedItem.add(serializer.serialize(
-                                    TrackingDeviceStatus.calculateDeviceStatus(deviceIdentifier, getService())));
-                        });
-                JSONObject itemObject = new JSONObject();
+                final JSONArray deviceStatusesOfTrackedItem = new JSONArray();
+                deviceStatusesOfTrackedItem
+                        .addAll(mappings.stream().map(DeviceMappingWithRegattaLogEvent<WithID>::getDevice).distinct()
+                                .map(deviceIdentifier -> serializer.serialize(
+                                        TrackingDeviceStatus.calculateDeviceStatus(deviceIdentifier, getService())))
+                                .collect(Collectors.toList()));
+                final JSONObject itemObject = new JSONObject();
                 itemObject.put("deviceStatuses", deviceStatusesOfTrackedItem);
                 if (item instanceof Competitor) {
                     itemObject.put("competitorId", item.getId().toString());
@@ -2324,8 +2328,8 @@ public class RegattasResource extends AbstractSailingServerResource {
                             + item.getId() + "; type: " + item.getClass().getName());
                 }
             });
-            return Response.ok(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
-                    .build();
+            return Response.ok(result.toJSONString())
+                    .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         } else {
             throw new IllegalStateException("Regatta named " + regattaName + " could not be resolved");
         }
