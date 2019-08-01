@@ -116,6 +116,9 @@ public enum FieldNames {
     /** @deprecated Replaced by CONTROLPOINTWITHTWOMARKS_NAME, still used to migrate old races*/ @Deprecated GATE_NAME,
     /** @deprecated Replaced by CONTROLPOINTWITHTWOMARKS_LEFT, still used to migrate old races*/ @Deprecated GATE_LEFT,
     /** @deprecated Replaced by CONTROLPOINTWITHTWOMARKS_RIGHT, still used to migrate old races*/ @Deprecated GATE_RIGHT,
+    
+   //ORC Leg fields
+    ORC_LEG_NR, ORC_LEG_LENGTH, ORC_LEG_TWA,
 
     // regatta log
     // did not reuse RACE_LOG* types, as this would require handling old versions of all events
@@ -171,9 +174,6 @@ public enum FieldNames {
     
     //anniversary fields
     START_OF_RACE, ANNIVERSARY_NUMBER, REMOTE_URL, ANNIVERSARY_TYPE, EVENT_TYPE,
-    
-    //ORC Leg fields
-    ORC_LEG_NR, ORC_LEG_LENGTH, ORC_LEG_TWA,
     
     //ORC certificate fields,
     ORC_CERTIFICATE;

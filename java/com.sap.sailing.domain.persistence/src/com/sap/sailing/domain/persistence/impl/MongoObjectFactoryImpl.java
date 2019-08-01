@@ -998,9 +998,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     private Object storeORCLegDataEvent(ORCLegDataEvent event) {
         Document result = new Document();
-        result.put(FieldNames.ORC_LEG_NR.toString(), event.getLegNr());
-        result.put(FieldNames.ORC_LEG_LENGTH.toString(), event.getLength().getNauticalMiles());
-        result.put(FieldNames.ORC_LEG_TWA.toString(), event.getTwa().getDegrees());
+        result.put(FieldNames.ORC_LEG_NR.name(), event.getLegNr()); // TODO Null handling
+        result.put(FieldNames.ORC_LEG_LENGTH.name(), event.getLength().getNauticalMiles());
+        result.put(FieldNames.ORC_LEG_TWA.name(), event.getTwa().getDegrees());
         return result;
     }
     

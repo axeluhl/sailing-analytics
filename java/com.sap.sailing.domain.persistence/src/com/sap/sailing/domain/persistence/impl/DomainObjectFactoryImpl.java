@@ -2015,7 +2015,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     private ORCLegDataEvent loadRaceLogORCLegDataEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, Integer passId, Document dbObject) {
-        int legNr = (int) dbObject.get(FieldNames.ORC_LEG_NR.name());
+        int legNr = (int) dbObject.get(FieldNames.ORC_LEG_NR.name()); //TODO Nullhandling
         Bearing twa = new DegreeBearingImpl((double) dbObject.get(FieldNames.ORC_LEG_TWA.name()));
         Distance length = new NauticalMileDistance((double) dbObject.get(FieldNames.ORC_LEG_LENGTH.name()));
         return new ORCLegDataEventImpl(logicalTimePoint, logicalTimePoint, author, id, passId, legNr, twa, length);
