@@ -13,18 +13,20 @@
 #
 AVAILABILITY_ZONE=eu-west-1c
 INSTANCE_TYPE=i2.xlarge
-IMAGE_ID=ami-0875074f93689aa3a
+IMAGE_ID=ami-01b868df7b51fa5e5
 KEY_NAME=Axel
 REPLICA_SET_NAME=
 REPLICA_SET_PRIMARY=
 REPLICA_SET_PRIORITY=
+REPLICA_SET_VOTES=
 
 if [ $# -eq 0 ]; then
-    echo "$0 [-r <replica-set-name>] [-p <host>:<port>] [-P <priority] [-t <instance-type>] [-a <availability-zone>] [-i <ami-id>] [-k <key-pair-name>]"
+    echo "$0 [-r <replica-set-name>] [-p <host>:<port>] [-P <priority] [-t <instance-type>] [-a <availability-zone>] [-i <ami-id>] [-k <key-pair-name>] [-v <votes>]"
     echo ""
     echo "-r Replica set name, e.g., live"
     echo "-p Primary host:port, e.g., mongo0.internal.sapsailing.com:27017"
     echo "-P priority, e.g., 0 if the replica shall never become PRIMARY"
+    echo "-v number of votes, e.g., 0 to not let this affect the PRIMARY's votes"
     echo "-t Instance type; defaults to $INSTANCE_TYPE"
     echo "-a Availability zone, defaults to $AVAILABILITY_ZONE"
     echo "-i Amazon Machine Image (AMI) ID to use to launch the instance"
@@ -46,6 +48,7 @@ do
 	r) REPLICA_SET_NAME=$OPTARG;;
 	p) REPLICA_SET_PRIMARY=$OPTARG;;
 	P) REPLICA_SET_PRIORITY=$OPTARG;;
+	v) REPLICA_SET_VOTES=$OPTARG;;
         t) INSTANCE_TYPE=$OPTARG;;
         a) AVAILABILITY_ZONE=$OPTARG;;
         i) IMAGE_ID=$OPTARG;;
@@ -57,4 +60,5 @@ done
 
 aws ec2 run-instances --placement AvailabilityZone=$AVAILABILITY_ZONE --instance-type $INSTANCE_TYPE --security-group-ids sg-0a9bc2fb61f10a342 --image-id $IMAGE_ID --count 1 --user-data "REPLICA_SET_NAME=$REPLICA_SET_NAME
 REPLICA_SET_PRIMARY=$REPLICA_SET_PRIMARY
-REPLICA_SET_PRIORITY=$REPLICA_SET_PRIORITY" --ebs-optimized --key-name $KEY_NAME --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=MongoDB Replica Set $REPLICA_SET_NAME P$REPLICA_SET_PRIORITY}]" "ResourceType=volume,Tags=[{Key=Name,Value=MongoDB Replica Set $REPLICA_SET_NAME P$REPLICA_SET_PRIORITY}]"
+REPLICA_SET_PRIORITY=$REPLICA_SET_PRIORITY
+REPLICA_SET_VOTES=$REPLICA_SET_VOTES" --ebs-optimized --key-name $KEY_NAME --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=MongoDB Replica Set $REPLICA_SET_NAME P$REPLICA_SET_PRIORITY}]" "ResourceType=volume,Tags=[{Key=Name,Value=MongoDB Replica Set $REPLICA_SET_NAME P$REPLICA_SET_PRIORITY}]"
