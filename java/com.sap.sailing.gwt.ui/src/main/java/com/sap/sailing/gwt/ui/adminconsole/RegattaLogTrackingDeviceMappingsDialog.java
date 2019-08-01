@@ -184,7 +184,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
         deviceMappingPanel.add(chart);
         filterField = new LabeledAbstractFilterablePanel<DeviceMappingDTO>(
                 new Label(stringMessages.filterDeviceMappings()),
-                new ArrayList<DeviceMappingDTO>(), deviceMappingTable.getDataProvider()) {
+                new ArrayList<DeviceMappingDTO>(), deviceMappingTable.getDataProvider(), stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(DeviceMappingDTO t) {
                 List<String> string = new ArrayList<String>();

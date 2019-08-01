@@ -22,6 +22,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractKeywordFilter;
 import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.common.filter.Filter;
+import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 /**
@@ -109,7 +110,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      *            normal circumstances the text box will be empty in this case, not making filtering any stricter.
      */
     public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered,
-            boolean drawTextBox) {
+            boolean drawTextBox, final StringMessages stringMessages) {
         filters.add(filterer);
         setSpacing(5);
         this.all = new ListDataProvider<>();
@@ -117,7 +118,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         this.textBox = new TextBox();
         this.textBox.ensureDebugId("FilterTextBox");
         // TODO: i18n
-        this.checkbox = new CheckBox("Hide elements w/o update rights");
+        this.checkbox = new CheckBox(stringMessages.hideElementsWithoutUpdateRights());
         checkbox.setValue(true);
         checkboxFilter = new CheckboxEnablableFilter<>(checkbox);
         filters.add(checkboxFilter);
@@ -128,8 +129,9 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         }
     }
 
-    public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered) {
-        this(all, filtered, /* show default filter text box */ true);
+    public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered,
+            final StringMessages stringMessages) {
+        this(all, filtered, /* show default filter text box */ true, stringMessages);
     }
 
     private void setAll(Iterable<? extends T> all) {

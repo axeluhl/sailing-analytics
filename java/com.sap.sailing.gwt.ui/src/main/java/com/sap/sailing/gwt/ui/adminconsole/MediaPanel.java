@@ -173,7 +173,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
 
         this.filterableMediaTracks = new LabeledAbstractFilterablePanel<MediaTrackWithSecurityDTO>(lblFilterRaces,
                 allMediaTracks,
-                mediaTrackListDataProvider) {
+                mediaTrackListDataProvider, stringMessages) {
             @Override
             public List<String> getSearchableStrings(MediaTrackWithSecurityDTO t) {
                 List<String> strings = new ArrayList<String>();

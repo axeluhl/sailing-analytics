@@ -163,7 +163,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
 
         eventListDataProvider = new ListDataProvider<EventDTO>();
         filterTextbox = new LabeledAbstractFilterablePanel<EventDTO>(new Label(stringMessages.filterEventsByName()),
-                allEvents, eventListDataProvider) {
+                allEvents, eventListDataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(EventDTO t) {
                 List<String> result = new ArrayList<String>();

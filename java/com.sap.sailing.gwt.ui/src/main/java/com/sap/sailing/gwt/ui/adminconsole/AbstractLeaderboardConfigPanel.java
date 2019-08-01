@@ -185,7 +185,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         leaderboardTable = new FlushableCellTable<StrippedLeaderboardDTOWithSecurity>(/* pageSize */10000, tableRes);
         filterLeaderboardPanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTOWithSecurity>(lblFilterEvents,
-                availableLeaderboardList, filteredLeaderboardList) {
+                availableLeaderboardList, filteredLeaderboardList, stringMessages) {
             @Override
             public List<String> getSearchableStrings(StrippedLeaderboardDTOWithSecurity t) {
                 List<String> strings = new ArrayList<String>();

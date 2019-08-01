@@ -134,7 +134,7 @@ public class TracTracConnectionTableWrapper extends
                 u -> configACL.openDialog(u));
         filterField = new LabeledAbstractFilterablePanel<TracTracConfigurationWithSecurityDTO>(
                 new Label(stringMessages.filterTracTracConnections()),
-                new ArrayList<TracTracConfigurationWithSecurityDTO>(), dataProvider) {
+                new ArrayList<TracTracConfigurationWithSecurityDTO>(), dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(TracTracConfigurationWithSecurityDTO t) {
                 List<String> strings = new ArrayList<String>();

@@ -161,7 +161,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         filterPanel.add(lblFilterRaces);
         filterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
         raceList = raceTableWrapper.getDataProvider();
-        filterablePanelRaces = new CustomizableFilterablePanel<RaceDTO>(allRaces, raceList) {            
+        filterablePanelRaces = new CustomizableFilterablePanel<RaceDTO>(allRaces, raceList, stringMessages) {
             @Override
             public List<String> getSearchableStrings(RaceDTO t) {
                 List<String> strings = new ArrayList<String>();

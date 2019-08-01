@@ -135,7 +135,7 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
         };
         
         filterField = new LabeledAbstractFilterablePanel<CompetitorDTO>(new Label(stringMessages.filterCompetitors()),
-                new ArrayList<CompetitorDTO>(), dataProvider) {
+                new ArrayList<CompetitorDTO>(), dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(CompetitorDTO t) {
                 List<String> string = new ArrayList<String>();

@@ -108,7 +108,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         regattaListDataProvider = new ListDataProvider<RegattaDTO>();
         
         filterablePanelRegattas = new LabeledAbstractFilterablePanel<RegattaDTO>(filterRegattasLabel, allRegattas,
-                regattaListDataProvider) {
+                regattaListDataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(RegattaDTO t) {
                 List<String> string = new ArrayList<String>();

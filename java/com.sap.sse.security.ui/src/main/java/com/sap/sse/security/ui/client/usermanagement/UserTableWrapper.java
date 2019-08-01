@@ -195,7 +195,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 u -> configACL.openDialog(u));
         
         filterField = new LabeledAbstractFilterablePanel<UserDTO>(new Label(stringMessages.filterUsers()),
-                new ArrayList<UserDTO>(), dataProvider) {
+                new ArrayList<UserDTO>(), dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(UserDTO t) {
                 List<String> string = new ArrayList<String>();

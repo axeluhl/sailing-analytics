@@ -220,7 +220,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         leaderboardsTable = new FlushableCellTable<StrippedLeaderboardDTO>(10000, tableRes);
         leaderboardsTable.ensureDebugId("LeaderboardsCellTable");
         leaderboardsFilterablePanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTO>(
-                filterLeaderboardsLabel, availableLeaderboards, leaderboardsProvider) {
+                filterLeaderboardsLabel, availableLeaderboards, leaderboardsProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(StrippedLeaderboardDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -484,7 +484,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         groupsTable = new FlushableCellTable<LeaderboardGroupDTO>(10000, tableRes);
         groupsTable.ensureDebugId("LeaderboardGroupsCellTable");
         groupsFilterablePanel = new LabeledAbstractFilterablePanel<LeaderboardGroupDTO>(filterLeaderboardGroupsLbl,
-                availableLeaderboardGroups, groupsProvider) {
+                availableLeaderboardGroups, groupsProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(LeaderboardGroupDTO t) {
                 List<String> string = new ArrayList<String>();

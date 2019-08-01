@@ -151,7 +151,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
         });
 
         filterField = new LabeledAbstractFilterablePanel<BoatDTO>(new Label(stringMessages.filterBoats()),
-                new ArrayList<BoatDTO>(), dataProvider) {
+                new ArrayList<BoatDTO>(), dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(BoatDTO boat) {
                 List<String> string = new ArrayList<String>();
