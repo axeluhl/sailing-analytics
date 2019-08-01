@@ -4,7 +4,7 @@ import com.sap.sse.common.NamedWithID;
 
 public interface CourseWithMarkTemplateMappings extends NamedWithID {
 
-    Iterable<MarkTemplateMapping> getMarkMappings();
+    Iterable<MarkConfiguration> getMarkMappings();
 
     Iterable<WaypointWithMarkTemplateMapping> getWaypoints();
 }

@@ -5,9 +5,9 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.coursetemplate.MarkPairTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
-import com.sap.sse.common.impl.NamedWithIDImpl;
+import com.sap.sse.common.impl.NamedWithUUIDImpl;
 
-public class MarkPairTemplateImpl extends NamedWithIDImpl implements MarkPairTemplate {
+public class MarkPairTemplateImpl extends NamedWithUUIDImpl implements MarkPairTemplate {
     private static final long serialVersionUID = -4966456947099578789L;
     private final MarkTemplate left;
     private final MarkTemplate right;

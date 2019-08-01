@@ -12,7 +12,7 @@ import com.sap.sailing.domain.coursetemplate.CourseTemplateMapping;
 import com.sap.sailing.domain.coursetemplate.CourseWithMarkTemplateMappings;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
-import com.sap.sailing.domain.coursetemplate.MarkTemplateMapping;
+import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -50,10 +50,11 @@ public interface CourseAndMarkMappingFactory {
      */
     CourseTemplate resolveCourseTemplate(Course course);
 
+    // TODO is a markPropertiesFilter appropriate here from a client's perspective?
     CourseTemplateMapping createMappingForCourseTemplate(Regatta regatta, CourseTemplate courseTemplate,
             Predicate<MarkProperties> markPropertiesFilter, Iterable<String> tagsToFilterMarkProperties);
 
-    List<MarkTemplateMapping> createSuggestionsForMarkTemplate(Regatta regatta, MarkTemplate markTemplate,
+    List<MarkConfiguration> createSuggestionsForMarkTemplate(Regatta regatta, MarkTemplate markTemplate,
             Predicate<MarkProperties> markPropertiesFilter, Iterable<String> tagsToFilterMarkProperties);
 
     CourseWithMarkTemplateMappings createCourseTemplateMappingFromMapping(Regatta regatta,

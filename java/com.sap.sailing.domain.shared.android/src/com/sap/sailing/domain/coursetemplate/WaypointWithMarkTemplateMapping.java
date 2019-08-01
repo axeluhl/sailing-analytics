@@ -4,6 +4,6 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sse.common.WithID;
 
 public interface WaypointWithMarkTemplateMapping extends WithID {
-    ControlPointWithMarkTemplateMapping getControlPoint();
+    ControlPointWithMarkConfiguration getControlPoint();
     PassingInstruction getPassingInstruction();
 }

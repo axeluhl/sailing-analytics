@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.coursetemplate;
 
-import com.sap.sse.common.NamedWithID;
+import com.sap.sse.common.NamedWithUUID;
 import com.sap.sse.common.Util.Pair;
 
 /**
@@ -28,7 +28,7 @@ import com.sap.sse.common.Util.Pair;
  * @author Axel Uhl (d043530)
  *
  */
-public interface CourseTemplate extends NamedWithID, HasTags {
+public interface CourseTemplate extends NamedWithUUID, HasTags {
     /**
      * The templates for all the marks that shall be made available in the regatta when applying this template. All
      * marks required to construct the waypoint sequence must be produced from this set of mark templates. There may be

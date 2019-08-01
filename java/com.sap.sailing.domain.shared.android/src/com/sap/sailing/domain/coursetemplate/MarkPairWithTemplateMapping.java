@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.coursetemplate;
 
+import java.util.Arrays;
+
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 
 /**
@@ -8,8 +10,13 @@ import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
  * @author Axel Uhl (d043530)
  *
  */
-public interface MarkPairWithTemplateMapping extends ControlPointWithMarkTemplateMapping {
-    MarkTemplateMapping getLeft();
+public interface MarkPairWithTemplateMapping extends ControlPointWithMarkConfiguration {
+    MarkConfiguration getLeft();
 
-    MarkTemplateMapping getRight();
+    MarkConfiguration getRight();
+
+    @Override
+    default Iterable<MarkConfiguration> getMarkMappings() {
+        return Arrays.asList(getLeft(), getRight());
+    }
 }

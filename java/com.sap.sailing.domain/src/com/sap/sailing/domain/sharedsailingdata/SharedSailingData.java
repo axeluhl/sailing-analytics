@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.sharedsailingdata;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -12,7 +11,14 @@ import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+/**
+ * TODO document what this service encapuslated, such as persistence, replication, ...
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public interface SharedSailingData {
     
     Iterable<MarkProperties> getAllMarkProperties(Iterable<String> tagsToFilterFor);
@@ -21,30 +27,41 @@ public interface SharedSailingData {
     
     Iterable<CourseTemplate> getAllCourseTemplates(Iterable<String> tagsToFilterFor);
 
-    MarkProperties createMarkProperties(UUID id, CommonMarkProperties properties, Iterable<String> tags);
+    MarkProperties createMarkProperties(UUID idOfNewMarkProperties, CommonMarkProperties properties, Iterable<String> tags);
     
     /**
      * This overrides a previously set fixed position or associated tracking device.
      */
-    void setFixedPositionForMarkProperties(UUID id, Position position);
+    void setFixedPositionForMarkProperties(MarkProperties markProperties, Position position);
+    
+    MarkProperties getMarkPropertiesById(UUID id);
     
     /**
      * This overrides a previously set fixed position or associated tracking device.
      */
-    void setTrackingDeviceIdentifierForMarkProperties(UUID id, DeviceIdentifier deviceIdentifier);
+    void setTrackingDeviceIdentifierForMarkProperties(MarkProperties markProperties, DeviceIdentifier deviceIdentifier);
     
-    MarkTemplate createMarkTemplate(UUID id, CommonMarkProperties properties, Iterable<String> tags);
+    MarkTemplate createMarkTemplate(UUID idOfNewMarkTemplate, CommonMarkProperties properties, Iterable<String> tags);
     
-    CourseTemplate createCourseTemplate(UUID id, Iterable<MarkTemplate> marks, List<WaypointTemplate> waypoints,
+    /**
+     * @param waypoints the waypoints in their defined order (iteration order equals order of waypoints in course)
+     */
+    CourseTemplate createCourseTemplate(UUID idOfNewCourseTemplate, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
             int zeroBasedIndexOfRepeatablePartStart, int zeroBasedIndexOfRepeatablePartEnd, Iterable<String> tags);
     
+    /**
+     * Keeps the {@link MillisecondsTimePoint#now() current time} of this call which will be returned
+     * for {@code markTemplate} when invoking {@link #getUsedMarkProperties(MarkTemplate)}.
+     */
     void recordUsage(MarkTemplate markTemplate, MarkProperties markProperties);
     
+    /**
+     * Returns the time points when {@link MarkProperties} objects were {@link #recordUsage(MarkTemplate, MarkProperties) last used}
+     * for the {@link MarkTemplate} passed in the {@code markTemplate} parameter.
+     */
     Map<MarkProperties, TimePoint> getUsedMarkProperties(MarkTemplate markTemplate);
     
-    void deleteMarkProperties(UUID id);
+    void deleteMarkProperties(MarkProperties markProperties);
     
-    void deleteMarkTemplate(UUID id);
-    
-    void deleteCourseTemplate(UUID id);
+    void deleteCourseTemplate(CourseTemplate courseTemplate);
 }

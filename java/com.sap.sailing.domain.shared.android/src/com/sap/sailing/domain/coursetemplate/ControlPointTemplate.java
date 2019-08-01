@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.coursetemplate;
 
 import com.sap.sailing.domain.base.ControlPoint;
-import com.sap.sse.common.NamedWithID;
+import com.sap.sse.common.NamedWithUUID;
 
 /**
  * What a {@link WaypointTemplate} references. It is a template for the construction of a {@link ControlPoint} and
@@ -10,6 +10,6 @@ import com.sap.sse.common.NamedWithID;
  * @author Axel Uhl (d043530)
  *
  */
-public interface ControlPointTemplate extends NamedWithID {
+public interface ControlPointTemplate extends NamedWithUUID {
     Iterable<MarkTemplate> getMarks();
 }

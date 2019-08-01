@@ -6,9 +6,9 @@ import java.util.UUID;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sse.common.Color;
-import com.sap.sse.common.impl.NamedWithIDImpl;
+import com.sap.sse.common.impl.NamedWithUUIDImpl;
 
-public class MarkTemplateImpl extends NamedWithIDImpl implements MarkTemplate {
+public class MarkTemplateImpl extends NamedWithUUIDImpl implements MarkTemplate {
     private static final long serialVersionUID = 620307743421809258L;
     private final String shortName;
     private final Color color;

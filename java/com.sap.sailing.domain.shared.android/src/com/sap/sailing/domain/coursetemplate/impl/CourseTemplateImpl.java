@@ -11,9 +11,9 @@ import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.NamedWithIDImpl;
+import com.sap.sse.common.impl.NamedWithUUIDImpl;
 
-public class CourseTemplateImpl extends NamedWithIDImpl implements CourseTemplate {
+public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTemplate {
     private static final long serialVersionUID = -183875832585632806L;
 
     private final Iterable<MarkTemplate> marks;

@@ -5,9 +5,9 @@ import java.util.UUID;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sse.common.Color;
-import com.sap.sse.common.impl.NamedWithIDImpl;
+import com.sap.sse.common.impl.NamedWithUUIDImpl;
 
-public abstract class CommonMarkPropertiesImpl extends NamedWithIDImpl implements CommonMarkProperties {
+public abstract class CommonMarkPropertiesImpl extends NamedWithUUIDImpl implements CommonMarkProperties {
     private static final long serialVersionUID = 5599464471737104833L;
     protected String shortName;
     protected Color color;

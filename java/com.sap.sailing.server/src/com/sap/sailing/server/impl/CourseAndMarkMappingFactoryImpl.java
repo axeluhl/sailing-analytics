@@ -10,7 +10,7 @@ import com.sap.sailing.domain.coursetemplate.CourseTemplateMapping;
 import com.sap.sailing.domain.coursetemplate.CourseWithMarkTemplateMappings;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
-import com.sap.sailing.domain.coursetemplate.MarkTemplateMapping;
+import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.server.interfaces.CourseAndMarkMappingFactory;
 import com.sap.sse.common.TimePoint;
 
@@ -59,7 +59,7 @@ public class CourseAndMarkMappingFactoryImpl implements CourseAndMarkMappingFact
     }
     
     @Override
-    public List<MarkTemplateMapping> createSuggestionsForMarkTemplate(Regatta regatta, MarkTemplate markTemplate,
+    public List<MarkConfiguration> createSuggestionsForMarkTemplate(Regatta regatta, MarkTemplate markTemplate,
             Predicate<MarkProperties> markPropertiesFilter, Iterable<String> tagsToFilterFor) {
         // TODO Auto-generated method stub
         return null;
