@@ -1327,8 +1327,23 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.MARK_TYPE.name(), mark.getType() == null ? null : mark.getType().name());
         return result;
     }
-    
-    public Document storeMarkProperties(
+
+    @Override
+    public void storeMarkProperties(TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder,
+            MarkProperties markProperties) {
+        MongoCollection<Document> collection = database.getCollection(CollectionNames.MARK_PROPERTIES.name());
+        Document query = new Document(FieldNames.MARK_PROPERTIES_ID.name(), markProperties.getId().toString());
+        Document entry;
+        try {
+            entry = storeMarkPropertiesToDocument(deviceIdentifierServiceFinder, markProperties);
+            collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry,
+                    new UpdateOptions().upsert(true));
+        } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+            logger.log(Level.WARNING, "Could not mark properties because device identifier could not be stored.", e);
+        }
+    }
+
+    private Document storeMarkPropertiesToDocument(
             TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder,
             MarkProperties markProperties) throws TransformationException, NoCorrespondingServiceRegisteredException {
         final Document result = new Document();
