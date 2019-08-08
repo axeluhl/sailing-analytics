@@ -31,7 +31,6 @@ public class SharedSailingDataImpl implements SharedSailingData {
     private final Map<UUID, MarkProperties> markPropertiesById = new ConcurrentHashMap<>();
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
 
-
     public SharedSailingDataImpl(final DomainObjectFactory domainObjectFactory,
             final MongoObjectFactory mongoObjectFactory,
             TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder) {
@@ -98,6 +97,7 @@ public class SharedSailingDataImpl implements SharedSailingData {
                     "Did not find a mark properties with ID %s for setting a fixed position, creating one.",
                     markProperties.getId().toString()));
         }
+        // TODO: synchronization
         markProperties.setFixedPosition(position);
         markPropertiesById.put(markProperties.getId(), markProperties);
         mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
@@ -116,6 +116,7 @@ public class SharedSailingDataImpl implements SharedSailingData {
                     "Did not find a mark properties with ID %s for setting a tracking device, creating one.",
                     markProperties.getId().toString()));
         }
+        // TODO: synchronization
         markProperties.setTrackingDeviceIdentifier(deviceIdentifier);
         markPropertiesById.put(markProperties.getId(), markProperties);
         mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
@@ -151,6 +152,7 @@ public class SharedSailingDataImpl implements SharedSailingData {
 
     @Override
     public void deleteMarkProperties(MarkProperties markProperties) {
+        // TODO: synchronization
         if (this.markPropertiesById.remove(markProperties.getId()) != null) {
             mongoObjectFactory.removeMarkProperties(markProperties.getId());
         } else {
