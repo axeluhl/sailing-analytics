@@ -87,8 +87,9 @@ public class SharedSailingDataImpl implements SharedSailingData {
 
     @Override
     public void setFixedPositionForMarkProperties(MarkProperties markProperties, Position position) {
-        // TODO Auto-generated method stub
-
+        markProperties.setFixedPosition(position);
+        markPropertiesById.put(markProperties.getId(), markProperties);
+        mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
     }
 
     @Override
@@ -99,7 +100,9 @@ public class SharedSailingDataImpl implements SharedSailingData {
     @Override
     public void setTrackingDeviceIdentifierForMarkProperties(MarkProperties markProperties,
             DeviceIdentifier deviceIdentifier) {
-        // TODO Auto-generated method stub
+        markProperties.setTrackingDeviceIdentifier(deviceIdentifier);
+        markPropertiesById.put(markProperties.getId(), markProperties);
+        mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
 
     }
 
@@ -132,8 +135,8 @@ public class SharedSailingDataImpl implements SharedSailingData {
 
     @Override
     public void deleteMarkProperties(MarkProperties markProperties) {
-        // TODO Auto-generated method stub
-
+            // TODO Auto-generated method stub
+            
     }
 
     @Override
