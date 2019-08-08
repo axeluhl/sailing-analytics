@@ -201,7 +201,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
-import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesImpl;
+import com.sap.sailing.domain.coursetemplate.MarkPropertiesBuilder;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.EventResolver;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -2602,12 +2602,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     @Override
     public Iterable<MarkProperties> loadAllMarkProperties() {
-        List<MarkProperties> result = new ArrayList<>();
-        MongoCollection<Document> configurationCollection = database
+        final List<MarkProperties> result = new ArrayList<>();
+        final MongoCollection<Document> configurationCollection = database
                 .getCollection(CollectionNames.MARK_PROPERTIES.name());
         try {
-            for (Document dbObject : configurationCollection.find()) {
-                MarkProperties entry = loadMarkPropertiesEntry(dbObject);
+            for (final Document dbObject : configurationCollection.find()) {
+                final MarkProperties entry = loadMarkPropertiesEntry(dbObject);
                 result.add(entry);
             }
         } catch (Exception e) {
@@ -2618,7 +2618,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private MarkProperties loadMarkPropertiesEntry(Document dbObject) {
+    private MarkProperties loadMarkPropertiesEntry(final Document dbObject) {
         final UUID id = UUID.fromString(dbObject.getString(FieldNames.MARK_PROPERTIES_ID));
         final String name = dbObject.getString(FieldNames.MARK_PROPERTIES_NAME);
         final String shortName = dbObject.getString(FieldNames.MARK_PROPERTIES_SHORT_NAME);
@@ -2631,26 +2631,26 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final String storedColor = dbObject.getString(FieldNames.MARK_PROPERTIES_COLOR);
         final Color color = AbstractColor.getCssColor(storedColor);
 
-        final MarkPropertiesImpl result = new MarkPropertiesImpl(id, name, shortName, color, shape, pattern, markType);
 
         final Position fixedPosition = loadPosition(
                 dbObject.get(FieldNames.MARK_PROPERTIES_FIXED_POSITION, Document.class));
-        result.setFixedPosition(fixedPosition);
+
+        final BasicDBList tagsList = dbObject.get(FieldNames.MARK_PROPERTIES_TAGS, BasicDBList.class);
+        final Collection<String> tags = new ArrayList<>();
+        tagsList.forEach(t -> tags.add(t.toString()));
+
+        final MarkPropertiesBuilder builder = new MarkPropertiesBuilder(id, name, shortName, color, shape, pattern,
+                markType).withFixedPosition(fixedPosition).withTags(tags);
 
         try {
             final DeviceIdentifier deviceIdentifier = loadDeviceId(deviceIdentifierServiceFinder,
                     dbObject.get(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER, Document.class));
-            result.setTrackingDeviceIdentifier(deviceIdentifier);
+            builder.withDeviceId(deviceIdentifier);
         } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
             logger.log(Level.WARNING, "Could not load deviceId for MarkProperties", e);
         }
 
-        final BasicDBList tagsList = dbObject.get(FieldNames.MARK_PROPERTIES_TAGS, BasicDBList.class);
-        Collection<String> tags = new ArrayList<>();
-        tagsList.forEach(t -> tags.add(t.toString()));
-        result.setTags(tags);
-
-        return result;
+        return builder.build();
     }
 
     private DeviceConfiguration loadConfigurationEntry(Document dbObject) throws JsonDeserializationException, ParseException {
