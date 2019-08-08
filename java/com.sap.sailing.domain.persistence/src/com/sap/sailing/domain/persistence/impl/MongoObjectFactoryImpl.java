@@ -93,6 +93,7 @@ import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Positioned;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -100,6 +101,7 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -228,6 +230,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             result.put(FieldNames.LAT_DEG.name(), positioned.getPosition().getLatDeg());
             result.put(FieldNames.LNG_DEG.name(), positioned.getPosition().getLngDeg());
         }
+    }
+
+    private Document storePosition(Position position) {
+        Document result = new Document();
+        result.put(FieldNames.LAT_DEG.name(), position.getLatDeg());
+        result.put(FieldNames.LNG_DEG.name(), position.getLngDeg());
+        return result;
     }
 
     @Override
@@ -1319,6 +1328,26 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
     
+    public Document storeMarkProperties(
+            TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder,
+            MarkProperties markProperties) throws TransformationException, NoCorrespondingServiceRegisteredException {
+        final Document result = new Document();
+        result.put(FieldNames.MARK_PROPERTIES_ID.name(), markProperties.getId().toString());
+        result.put(FieldNames.MARK_PROPERTIES_COLOR.name(),
+                markProperties.getColor() == null ? null : markProperties.getColor().getAsHtml());
+
+        result.put(FieldNames.MARK_PROPERTIES_FIXED_POSITION.name(), storePosition(markProperties.getFixedPosition()));
+        result.put(FieldNames.MARK_PROPERTIES_NAME.name(), markProperties.getName());
+        result.put(FieldNames.MARK_PROPERTIES_PATTERN.name(), markProperties.getPattern());
+        result.put(FieldNames.MARK_PROPERTIES_SHAPE.name(), markProperties.getShape());
+        result.put(FieldNames.MARK_PROPERTIES_SHORT_NAME.name(), markProperties.getShortName());
+        result.put(FieldNames.MARK_PROPERTIES_TAGS.name(), markProperties.getTags());
+        result.put(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER.name(),
+                storeDeviceId(deviceIdentifierServiceFinder, markProperties.getTrackingDeviceIdentifier()));
+        result.put(FieldNames.MARK_PROPERTIES_TYPE.name(), markProperties.getType());
+        return result;
+    }
+
     private String getPassingInstructions(PassingInstruction passingInstructions) {
         final String passing;
         if (passingInstructions != null) {
