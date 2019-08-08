@@ -28,6 +28,7 @@ import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
+import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.leaderboard.EventResolver;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -216,4 +217,6 @@ public interface DomainObjectFactory {
      * Loads all stored anniversary races.
      */
     Map<? extends Integer, ? extends Pair<DetailedRaceInfo, AnniversaryType>> getAnniversaryData() throws MalformedURLException;
+
+    Iterable<MarkProperties> loadAllMarkProperties();
 }

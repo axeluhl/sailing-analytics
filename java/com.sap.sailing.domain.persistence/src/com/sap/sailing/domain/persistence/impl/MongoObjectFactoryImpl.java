@@ -1333,9 +1333,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             MarkProperties markProperties) {
         MongoCollection<Document> collection = database.getCollection(CollectionNames.MARK_PROPERTIES.name());
         Document query = new Document(FieldNames.MARK_PROPERTIES_ID.name(), markProperties.getId().toString());
-        Document entry;
         try {
-            entry = storeMarkPropertiesToDocument(deviceIdentifierServiceFinder, markProperties);
+            Document entry = storeMarkPropertiesToDocument(deviceIdentifierServiceFinder, markProperties);
             collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry,
                     new UpdateOptions().upsert(true));
         } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
@@ -1356,10 +1355,16 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.MARK_PROPERTIES_PATTERN.name(), markProperties.getPattern());
         result.put(FieldNames.MARK_PROPERTIES_SHAPE.name(), markProperties.getShape());
         result.put(FieldNames.MARK_PROPERTIES_SHORT_NAME.name(), markProperties.getShortName());
-        result.put(FieldNames.MARK_PROPERTIES_TAGS.name(), markProperties.getTags());
+
+        BasicDBList tags = new BasicDBList();
+        markProperties.getTags().forEach(t -> tags.add(t));
+        result.put(FieldNames.MARK_PROPERTIES_TAGS.name(), tags);
+
         result.put(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER.name(),
                 storeDeviceId(deviceIdentifierServiceFinder, markProperties.getTrackingDeviceIdentifier()));
-        result.put(FieldNames.MARK_PROPERTIES_TYPE.name(), markProperties.getType());
+
+        result.put(FieldNames.MARK_PROPERTIES_TYPE.name(),
+                markProperties.getType() == null ? null : markProperties.getType().name());
         return result;
     }
 

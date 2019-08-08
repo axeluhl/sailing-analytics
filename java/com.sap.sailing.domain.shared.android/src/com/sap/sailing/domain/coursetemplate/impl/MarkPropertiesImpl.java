@@ -12,6 +12,7 @@ public class MarkPropertiesImpl extends CommonMarkPropertiesImpl implements Mark
     private static final long serialVersionUID = -5588202720707030502L;
     private DeviceIdentifier trackingDeviceIdentifier;
     private Position fixedPosition;
+    private Iterable<String> tags;
 
     public MarkPropertiesImpl(String name, String shortName, Color color, String shape, String pattern, MarkType type) {
         super(name, shortName, color, shape, pattern, type);
@@ -65,6 +66,15 @@ public class MarkPropertiesImpl extends CommonMarkPropertiesImpl implements Mark
     @Override
     public void setFixedPosition(Position fixedPosition) {
         this.fixedPosition = fixedPosition;
+    }
+
+    @Override
+    public Iterable<String> getTags() {
+        return this.tags;
+    }
+
+    public void setTags(Iterable<String> tags) {
+        this.tags = tags;
     }
 
 }
