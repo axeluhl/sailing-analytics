@@ -3,6 +3,7 @@ package com.sap.sailing.server.impl;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
@@ -22,7 +23,8 @@ import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.Util;
 
 public class SharedSailingDataImpl implements SharedSailingData {
-    
+
+    private static final Logger LOG = Logger.getLogger(SharedSailingDataImpl.class.getName());
     private final DomainObjectFactory domainObjectFactory;
     private final MongoObjectFactory mongoObjectFactory;
 
@@ -36,7 +38,7 @@ public class SharedSailingDataImpl implements SharedSailingData {
         this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
         this.deviceIdentifierServiceFinder = deviceIdentifierServiceFinder;
-        
+
     }
 
     @Override
@@ -46,7 +48,7 @@ public class SharedSailingDataImpl implements SharedSailingData {
         if (markPropertiesById.isEmpty()) {
             domainObjectFactory.loadAllMarkProperties().forEach(m -> markPropertiesById.put(m.getId(), m));
         }
-        
+
         return markPropertiesById.values().stream().filter(m -> containsAny(m.getTags(), tagsToFilterFor))
                 .collect(Collectors.toList());
     }
@@ -75,6 +77,10 @@ public class SharedSailingDataImpl implements SharedSailingData {
     @Override
     public MarkProperties createMarkProperties(UUID idOfNewMarkProperties, CommonMarkProperties properties,
             Iterable<String> tags) {
+        if (markPropertiesById.containsKey(idOfNewMarkProperties)) {
+            LOG.warning(
+                    String.format("Found a mark properties with ID %s, overwrite.", idOfNewMarkProperties.toString()));
+        }
         final MarkProperties markProperties = new MarkPropertiesBuilder(idOfNewMarkProperties, properties.getName(),
                 properties.getShortName(), properties.getColor(), properties.getShape(), properties.getPattern(),
                 properties.getType()).withTags(tags).build();
@@ -87,6 +93,11 @@ public class SharedSailingDataImpl implements SharedSailingData {
 
     @Override
     public void setFixedPositionForMarkProperties(MarkProperties markProperties, Position position) {
+        if (!markPropertiesById.containsKey(markProperties.getId())) {
+            LOG.warning(String.format(
+                    "Did not find a mark properties with ID %s for setting a fixed position, creating one.",
+                    markProperties.getId().toString()));
+        }
         markProperties.setFixedPosition(position);
         markPropertiesById.put(markProperties.getId(), markProperties);
         mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
@@ -100,6 +111,11 @@ public class SharedSailingDataImpl implements SharedSailingData {
     @Override
     public void setTrackingDeviceIdentifierForMarkProperties(MarkProperties markProperties,
             DeviceIdentifier deviceIdentifier) {
+        if (!markPropertiesById.containsKey(markProperties.getId())) {
+            LOG.warning(String.format(
+                    "Did not find a mark properties with ID %s for setting a tracking device, creating one.",
+                    markProperties.getId().toString()));
+        }
         markProperties.setTrackingDeviceIdentifier(deviceIdentifier);
         markPropertiesById.put(markProperties.getId(), markProperties);
         mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
@@ -138,7 +154,8 @@ public class SharedSailingDataImpl implements SharedSailingData {
         if (this.markPropertiesById.remove(markProperties.getId()) != null) {
             mongoObjectFactory.removeMarkProperties(markProperties.getId());
         } else {
-            throw new NullPointerException("Did not find a mark properties with ID " + markProperties.getId());
+            throw new NullPointerException(
+                    String.format("Did not find a mark properties with ID %s", markProperties.getId()));
         }
 
     }
