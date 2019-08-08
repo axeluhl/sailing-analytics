@@ -10,21 +10,32 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
+import com.sap.sailing.domain.coursetemplate.MarkPropertiesBuilder;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.Util;
 
 public class SharedSailingDataImpl implements SharedSailingData {
     
     private final DomainObjectFactory domainObjectFactory;
+    private final MongoObjectFactory mongoObjectFactory;
 
     private final Map<UUID, MarkProperties> markPropertiesById = new ConcurrentHashMap<>();
+    private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
 
-    public SharedSailingDataImpl(final DomainObjectFactory domainObjectFactory) {
+
+    public SharedSailingDataImpl(final DomainObjectFactory domainObjectFactory,
+            final MongoObjectFactory mongoObjectFactory,
+            TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder) {
         this.domainObjectFactory = domainObjectFactory;
+        this.mongoObjectFactory = mongoObjectFactory;
+        this.deviceIdentifierServiceFinder = deviceIdentifierServiceFinder;
         
     }
 
@@ -64,8 +75,14 @@ public class SharedSailingDataImpl implements SharedSailingData {
     @Override
     public MarkProperties createMarkProperties(UUID idOfNewMarkProperties, CommonMarkProperties properties,
             Iterable<String> tags) {
-        // TODO Auto-generated method stub
-        return null;
+        final MarkProperties markProperties = new MarkPropertiesBuilder(idOfNewMarkProperties, properties.getName(),
+                properties.getShortName(), properties.getColor(), properties.getShape(), properties.getPattern(),
+                properties.getType()).withTags(tags).build();
+
+        // TODO: synchronization
+        markPropertiesById.put(markProperties.getId(), markProperties);
+        mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
+        return markProperties;
     }
 
     @Override
@@ -76,8 +93,7 @@ public class SharedSailingDataImpl implements SharedSailingData {
 
     @Override
     public MarkProperties getMarkPropertiesById(UUID id) {
-        // TODO Auto-generated method stub
-        return null;
+        return markPropertiesById.get(id);
     }
 
     @Override
