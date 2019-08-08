@@ -135,8 +135,12 @@ public class SharedSailingDataImpl implements SharedSailingData {
 
     @Override
     public void deleteMarkProperties(MarkProperties markProperties) {
-            // TODO Auto-generated method stub
-            
+        if (this.markPropertiesById.remove(markProperties.getId()) != null) {
+            mongoObjectFactory.removeMarkProperties(markProperties.getId());
+        } else {
+            throw new NullPointerException("Did not find a mark properties with ID " + markProperties.getId());
+        }
+
     }
 
     @Override

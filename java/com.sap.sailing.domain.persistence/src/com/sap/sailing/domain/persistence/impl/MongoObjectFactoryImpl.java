@@ -1368,6 +1368,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
+    @Override
+    public void removeMarkProperties(UUID markPropertiesId) {
+        MongoCollection<Document> configurationsCollections = database
+                .getCollection(CollectionNames.MARK_PROPERTIES.name());
+        Document query = new Document(FieldNames.MARK_PROPERTIES_ID.name(), markPropertiesId.toString());
+        configurationsCollections.deleteOne(query);
+    }
+
     private String getPassingInstructions(PassingInstruction passingInstructions) {
         final String passing;
         if (passingInstructions != null) {

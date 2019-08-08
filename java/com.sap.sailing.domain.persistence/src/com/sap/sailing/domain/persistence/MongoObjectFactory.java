@@ -214,7 +214,10 @@ public interface MongoObjectFactory {
      */
     void storeAnniversaryData(ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries);
 
-    /** Stores {@link MarkProperties}. */
+    /** Stores {@link MarkProperties} from the database. */
     void storeMarkProperties(TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder,
             MarkProperties markProperties);
+
+    /** Removes a {@link MarkProperties} object from the database. */
+    void removeMarkProperties(UUID markPropertiesId);
 }
