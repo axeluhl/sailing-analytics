@@ -1347,17 +1347,21 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             MarkProperties markProperties) throws TransformationException, NoCorrespondingServiceRegisteredException {
         final Document result = new Document();
         result.put(FieldNames.MARK_PROPERTIES_ID.name(), markProperties.getId().toString());
-        result.put(FieldNames.MARK_PROPERTIES_COLOR.name(),
-                markProperties.getColor() == null ? null : markProperties.getColor().getAsHtml());
+        if (markProperties.getColor() != null) {
+            result.put(FieldNames.MARK_PROPERTIES_COLOR.name(), markProperties.getColor().getAsHtml());
+        }
 
-        result.put(FieldNames.MARK_PROPERTIES_FIXED_POSITION.name(), storePosition(markProperties.getFixedPosition()));
+        if (markProperties.getFixedPosition() != null) {
+            result.put(FieldNames.MARK_PROPERTIES_FIXED_POSITION.name(),
+                    storePosition(markProperties.getFixedPosition()));
+        }
         result.put(FieldNames.MARK_PROPERTIES_NAME.name(), markProperties.getName());
         result.put(FieldNames.MARK_PROPERTIES_PATTERN.name(), markProperties.getPattern());
         result.put(FieldNames.MARK_PROPERTIES_SHAPE.name(), markProperties.getShape());
         result.put(FieldNames.MARK_PROPERTIES_SHORT_NAME.name(), markProperties.getShortName());
 
         BasicDBList tags = new BasicDBList();
-        markProperties.getTags().forEach(t -> tags.add(t));
+        markProperties.getTags().forEach(tags::add);
         result.put(FieldNames.MARK_PROPERTIES_TAGS.name(), tags);
 
         result.put(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER.name(),
