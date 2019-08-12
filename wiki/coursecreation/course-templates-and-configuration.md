@@ -1,9 +1,13 @@
-# Scope
+# Motivation and scope
 
-* TODO
+Previously, marks as well as courses were exclusively bound to the regatta context. In addition the definition of courses was possible with existing regatta marks only. Having this kind of model, it is not easily possible to transfer courses including their respective tracking information to another regatta. In addition on the fly changes while doing so is another inconvenience.
+
+Therefore a regatta independent model is required that allows the definition of course sequences as well as tracking information. This new model is defined below and allows an easy bootstrapping of courses in different regatta contexts but based on the same masterdata.
+
+The new model is not intended to replace the regatta specific course and mark model but rather extends it to cover the newly emerged use cases. In addition the new model - while being able to map all cases - allows an entirely free definition of courses using just a subset of the possibilities in the UI.
 
 
-# Model
+# Regatta independent course model
 
 We defined the model for course templating and configuration. In addition the various model elements have defined masterdata and other properties.
 
@@ -82,13 +86,15 @@ When designing courses, the following aspects and data sources need to get inclu
 
 ## Mark configuration types and their carried information
 
-* Mark template
+* Mark template based configuration
     * Appearance is defined by mark template
     * Optional positioning information to be used upon mark creation
-* Regatta mark
+* Regatta mark based configuration
     * Appearance is defined by mark. Changing is not supported which means in this case, a new mark needs to be defined in any supported way as replacement for new courses, while the old definition remains for old courses.
     * Optional positioning information (to update the regatta mark)
-* Freestyle mark definition
+* Mark properties based configuration
+    * Appearance is defined by mark properties defaulting to the definition of the mark template if none is defined in the properties
+* Freestyle mark configuration
     * optional mark template reference
     * optional mark properties reference
 
@@ -98,10 +104,12 @@ When designing courses, the following aspects and data sources need to get inclu
 ### Construction from course template
 
 * For each regatta mark, a mark configuration needs to be created.
-* If a mark was already mapped to a given role in an existing course, this is used. If there are multiple usages, the most recent ones is used. A mark can only be mapped to one role within one regatta.
+* If a mark was already mapped to a given role in an existing course, this is used. If there are multiple usages, the most recent ones is used. A mark can only be mapped to one role within one regatta to prevent information loss by mapping several "slots" of a course sequence to the same mark configuration.
 * Create mark configuration objects for all mark templates not existing in the regatta. Those are subsequently associated to the remaining roles.
 * For each role that remains unmapped (those ones a user unmapped manually or by side effects of editing the sequence), a new entry from the mark template is created and mapped to the role.
-* Optionally, for all mark configurations created from mark templates the mark properties object needs to be mapped based on the last use.
+* For each mark template based configuration referenced by a role, mark properties objects needs to be associated based on the last use of the mark properties for the role.
+* For all mark configurations created from mark templates the mark properties object needs to be associated based on the last use of the mark properties for the mark template.
+
 
 ### Construction from regatta course
 
@@ -109,7 +117,6 @@ When designing courses, the following aspects and data sources need to get inclu
 * The mapping of mark configurations to roles is based on the optional mapping of a mark to a role in a course. 
     * If the course is based on a course template, the set of roles needs to match the set of roles in the associated course template.
     * If the course is not based on a course template, the role mapping is created from the course defaulting to the names of the marks.
-
 
 
 ## Roles and their significance
@@ -137,9 +144,40 @@ Said that, it is necessary to provide a distinct and complete (bijective) mappin
 
 ## Definition of valid actions for mark configurations
 
-* TODO possible actions and their mapping to the course configuration
+* Mark template based configuration
+    * Changing appearance/attaching tracking information: Replaces it with a freestyle configuration having a mark template reference
+    * Select mark properties: Replaces it with a freestyle configuration having both, a mark template and mark properties reference
+* Regatta mark based configuration
+    * Attaching tracking information: Updates the existing configuration with tracking information
+* Mark properties based configuration
+    * Changing appearance/attaching tracking information: Replaces it with a freestyle configuration keeping the mark properties and optional mark template reference
+* Freestyle configuration
+    * Changing appearance/attaching tracking information: Updates the existing configuration accordingly keeping any mark template or mark properties reference
+    
+New configurations may be created (e.g. by adding a new mark to the sequence or course configuration) as follows:
+* Freestyle configuration: Adding a new mark
+* Mark properties based configuration: By selecting a mark from the mark properties inventory
+
+In addition, for marks used in the course sequence, a new freestyle mark configuration may be created replacing the original configuration in the role. This causes the previous configuration to remain unused but not to be deleted automatically.
 
 
-# Use Cases
+## Tracking usages
 
-TODO: do we need this?
+When choosing a course template, as many parts of the configuration should get preselect as possible. In addition, when loading a course that was based on a template, also as much configuration as possible should be reconstructed. This requires us to track several usages:
+
+* Usage of mark properties to roles: Allows suggestions of mark properties for the role in question based on last usage (globally based on READ permissions)
+* Usage of mark properties to mark templates: Allows further suggestions of mark properties for marks referenced in course templates (globally based on READ permissions)
+* Originating mark template for regatta mark: This allows to only create those marks based on templates that are not already present
+* Originating mark properties for regatta mark: This allows the user to export tracking information attached to a mark also to the originating mark properties.
+* Mapping of marks to roles in a regatta course: This allows to suggest mapping of either regatta marks or mark templates based on last usage to roles when creating a configuration based on a course template.
+
+
+## Selection of mark configuration for a role
+
+For each role being part of the course sequence, a replacement may be selected. The following substitutes are provided by their respective priority:
+
+1. Regatta marks not already used by another role
+2. Additional Mark configurations not used in the sequence
+3. Mark properties with usage of the intended role sorted by last usage
+4. Mark properties not having a usage recorded for the role yet
+
