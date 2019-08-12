@@ -17,8 +17,8 @@ We defined the model for course templating and configuration. In addition the va
 
 * Appearance
 * Optional positioning information
-** Fixed position
-** Tracking device identifier
+    * Fixed position
+    * Tracking device identifier
 * Mark properties are mutable
 
 
@@ -28,35 +28,35 @@ We defined the model for course templating and configuration. In addition the va
 * Optional repeatable part
 * Course templates may contain mark templates that aren't part of the defined sequence
 * For every mark template that is part of the sequence, a distinct role name need to be provided
-** Distinct means it is a bijective mapping of marks in the sequence and role names
-** The role name may the same as the mark template being mapped
+    * Distinct means it is a bijective mapping of marks in the sequence and role names
+    * The role name may the same as the mark template being mapped
 
 
 ### Course configuration
 
 * In memory representation with optional references to domain objects
-** If freely created, no references to domain objects exist yet
-** When created based on a course template or regatta course, the created elements are based on the elements of the originating source
-** While changing a course configuration in the UI, a mix of different definitions may show up
+    * If freely created, no references to domain objects exist yet
+    * When created based on a course template or regatta course, the created elements are based on the elements of the originating source
+    * While changing a course configuration in the UI, a mix of different definitions may show up
 
 * A sequence of waypoints
-** Including an optional repeatable part
+    * Including an optional repeatable part
 
 * Marks in a course configuration can be freely created or based on:
-** Regatta mark
-** Mark template
-** Mark properties
+    * Regatta mark
+    * Mark template
+    * Mark properties
 
 * Can be constructed from or saved to
-** Course template
-** Regatta course
+    * Course template
+    * Regatta course
 
 * When stored in one of the possible forms, all required domain objects are required to be created automatically. This means, all data required needs to be provided in the configuration as well.
-** This is defined in contrast to directly creating regatta courses, where all required marks and tracking information need to get created in distinct requests.
+    * This is defined in contrast to directly creating regatta courses, where all required marks and tracking information need to get created in distinct requests.
 
 * Optionally be based on a course template
-** As long as the sequence of a course isn't changed with regard to the course template, a course is meant to be based on the original course template. This reference may be transferred through update steps.
-** As long as a course configuration is based on a course template, its structure can be mapped to the originating course template (including potentially existing repeatable parts)
+    * As long as the sequence of a course isn't changed with regard to the course template, a course is meant to be based on the original course template. This reference may be transferred through update steps.
+    * As long as a course configuration is based on a course template, its structure can be mapped to the originating course template (including potentially existing repeatable parts)
 
 
 # Definition of various aspects for handling the source configuration model
@@ -66,42 +66,40 @@ We defined the model for course templating and configuration. In addition the va
 When designing courses, the following aspects and data sources need to get included in the course configuration.
 
 1. Regatta context
-1a. Designing a course in a regatta context
-1b. Designing a course independently of a regatta
+    * Designing a course in a regatta context
+    * Designing a course independently of a regatta
 
 2. Regatta specifics
-2a. Define course for a regatta without pre existing marks
-2b. Define course for a regatta with pre existing marks
-2c. Updating a regatta course
+    * Define course for a regatta without pre existing marks
+    * Define course for a regatta with pre existing marks
+    * Updating a regatta course
 
 3. Course Template context
-3a. A course configuration based on a course template
-3b. A course configuration not based on a course template
-3c. A course configuration with changed sequence after a course template was applied
+    * A course configuration based on a course template
+    * A course configuration not based on a course template
+    * A course configuration with changed sequence after a course template was applied
 
 
 ## Rules for the construction mark configurations
 
 1. Construction from course template
-
-* TODO
+    * TODO
 
 2. Construction from regatta course
-
-* TODO
+    * TODO
 
 
 ## Mark configuration types and their carried information
 
 * Mark template
-** Appearance is defined by mark template
-** Optional positioning information to be used upon mark creation
+    * Appearance is defined by mark template
+    * Optional positioning information to be used upon mark creation
 * Regatta mark
-** Appearance is defined by mark. Changing is not supported which means in this case, a new mark needs to be defined in any supported way as replacement for new courses, while the old definition remains for old courses.
-** Optional positioning information (to update the regatta mark)
+    * Appearance is defined by mark. Changing is not supported which means in this case, a new mark needs to be defined in any supported way as replacement for new courses, while the old definition remains for old courses.
+    * Optional positioning information (to update the regatta mark)
 * Freestyle mark definition
-** TODO discuss: optional mark template reference
-** optional mark properties reference
+    * TODO discuss: optional mark template reference
+    * optional mark properties reference
 
 
 
