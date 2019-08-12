@@ -80,6 +80,19 @@ When designing courses, the following aspects and data sources need to get inclu
     * A course configuration with changed sequence after a course template was applied
 
 
+## Mark configuration types and their carried information
+
+* Mark template
+    * Appearance is defined by mark template
+    * Optional positioning information to be used upon mark creation
+* Regatta mark
+    * Appearance is defined by mark. Changing is not supported which means in this case, a new mark needs to be defined in any supported way as replacement for new courses, while the old definition remains for old courses.
+    * Optional positioning information (to update the regatta mark)
+* Freestyle mark definition
+    * optional mark template reference
+    * optional mark properties reference
+
+
 ## Rules for the construction of mark configurations
 
 ### Construction from course template
@@ -96,19 +109,6 @@ When designing courses, the following aspects and data sources need to get inclu
 * The mapping of mark configurations to roles is based on the optional mapping of a mark to a role in a course. 
     * If the course is based on a course template, the set of roles needs to match the set of roles in the associated course template.
     * If the course is not based on a course template, the role mapping is created from the course defaulting to the names of the marks.
-
-
-## Mark configuration types and their carried information
-
-* Mark template
-    * Appearance is defined by mark template
-    * Optional positioning information to be used upon mark creation
-* Regatta mark
-    * Appearance is defined by mark. Changing is not supported which means in this case, a new mark needs to be defined in any supported way as replacement for new courses, while the old definition remains for old courses.
-    * Optional positioning information (to update the regatta mark)
-* Freestyle mark definition
-    * TODO discuss: optional mark template reference
-    * optional mark properties reference
 
 
 
