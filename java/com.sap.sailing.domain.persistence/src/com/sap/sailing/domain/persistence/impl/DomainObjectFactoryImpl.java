@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.bson.Document;
 import org.bson.json.JsonMode;
@@ -2632,19 +2633,20 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final Color color = AbstractColor.getCssColor(storedColor);
 
 
-        final Position fixedPosition = loadPosition(
-                dbObject.get(FieldNames.MARK_PROPERTIES_FIXED_POSITION, Document.class));
+        final Document positionDocument = dbObject.get(FieldNames.MARK_PROPERTIES_FIXED_POSITION, Document.class);
+        final Position fixedPosition = positionDocument == null ? null : loadPosition(positionDocument);
 
         final BasicDBList tagsList = dbObject.get(FieldNames.MARK_PROPERTIES_TAGS, BasicDBList.class);
-        final Collection<String> tags = new ArrayList<>();
-        tagsList.forEach(t -> tags.add(t.toString()));
+        final Collection<String> tags = tagsList.stream().map(t -> t.toString()).collect(Collectors.toList());
 
         final MarkPropertiesBuilder builder = new MarkPropertiesBuilder(id, name, shortName, color, shape, pattern,
                 markType).withFixedPosition(fixedPosition).withTags(tags);
 
         try {
-            final DeviceIdentifier deviceIdentifier = loadDeviceId(deviceIdentifierServiceFinder,
-                    dbObject.get(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER, Document.class));
+            final Document deviceIdDocument = dbObject.get(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER, Document.class);
+            final DeviceIdentifier deviceIdentifier = deviceIdDocument == null ? null
+                    : loadDeviceId(deviceIdentifierServiceFinder,
+                    deviceIdDocument);
             builder.withDeviceId(deviceIdentifier);
         } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
             logger.log(Level.WARNING, "Could not load deviceId for MarkProperties", e);
