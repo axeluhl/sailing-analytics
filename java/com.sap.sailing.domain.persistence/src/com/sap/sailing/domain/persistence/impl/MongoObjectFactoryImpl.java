@@ -1372,12 +1372,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.MARK_PROPERTIES_TYPE.name(),
                 markProperties.getType() == null ? null : markProperties.getType().name());
 
-        Map<String, String> lastUsedTemplateMap = markProperties.getLastUsedTemplate().entrySet().stream()
-                .collect(Collectors.toMap(k -> k.getKey().getId().toString(), v -> "" + v.getValue().asMillis()));
+        Map<String, Long> lastUsedTemplateMap = markProperties.getLastUsedTemplate().entrySet().stream()
+                .collect(Collectors.toMap(k -> k.getKey().getId().toString(), v -> v.getValue().asMillis()));
         result.put(FieldNames.MARK_PROPERTIES_USED_TEMPLATE.name(), new BasicDBObject(lastUsedTemplateMap));
 
-        Map<String, String> lastUsedRoleMap = markProperties.getLastUsedRole().entrySet().stream()
-                .collect(Collectors.toMap(k -> k.getKey(), v -> "" + v.getValue().asMillis()));
+        Map<String, Long> lastUsedRoleMap = markProperties.getLastUsedRole().entrySet().stream()
+                .collect(Collectors.toMap(k -> k.getKey(), v -> v.getValue().asMillis()));
         result.put(FieldNames.MARK_PROPERTIES_USED_ROLE.name(), new BasicDBObject(lastUsedRoleMap));
         return result;
     }
