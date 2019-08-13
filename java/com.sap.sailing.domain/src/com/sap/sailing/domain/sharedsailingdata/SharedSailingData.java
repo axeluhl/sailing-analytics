@@ -27,7 +27,7 @@ public interface SharedSailingData {
     
     Iterable<CourseTemplate> getAllCourseTemplates(Iterable<String> tagsToFilterFor);
 
-    MarkProperties createMarkProperties(UUID idOfNewMarkProperties, CommonMarkProperties properties, Iterable<String> tags);
+    MarkProperties createMarkProperties(CommonMarkProperties properties, Iterable<String> tags);
     
     /**
      * This overrides a previously set fixed position or associated tracking device.
@@ -41,13 +41,17 @@ public interface SharedSailingData {
      */
     void setTrackingDeviceIdentifierForMarkProperties(MarkProperties markProperties, DeviceIdentifier deviceIdentifier);
     
-    MarkTemplate createMarkTemplate(UUID idOfNewMarkTemplate, CommonMarkProperties properties, Iterable<String> tags);
+    MarkTemplate createMarkTemplate(CommonMarkProperties properties, Iterable<String> tags);
+    
+    MarkTemplate getMarkTemplateById(UUID id);
     
     /**
      * @param waypoints the waypoints in their defined order (iteration order equals order of waypoints in course)
      */
-    CourseTemplate createCourseTemplate(UUID idOfNewCourseTemplate, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
+    CourseTemplate createCourseTemplate(Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
             int zeroBasedIndexOfRepeatablePartStart, int zeroBasedIndexOfRepeatablePartEnd, Iterable<String> tags);
+    
+    CourseTemplate getCourseTemplateById(UUID id);
     
     /**
      * Records the fact that the {@code markProperties} were used to configure a mark that takes the role defined by the

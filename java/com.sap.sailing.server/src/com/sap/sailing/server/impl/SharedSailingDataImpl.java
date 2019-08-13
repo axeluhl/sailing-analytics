@@ -98,7 +98,15 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
 
     @Override
-    public MarkProperties createMarkProperties(UUID idOfNewMarkProperties, CommonMarkProperties properties,
+    public MarkProperties createMarkProperties(CommonMarkProperties properties,
+            Iterable<String> tags) {
+        final UUID idOfNewMarkProperties = UUID.randomUUID();
+        apply(s -> s.internalCreateMarkProperties(idOfNewMarkProperties, properties, tags));
+        return getMarkPropertiesById(idOfNewMarkProperties);
+    }
+    
+    @Override
+    public Void internalCreateMarkProperties(UUID idOfNewMarkProperties, CommonMarkProperties properties,
             Iterable<String> tags) {
         if (markPropertiesById.containsKey(idOfNewMarkProperties)) {
             LOG.warning(
@@ -111,20 +119,21 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         // TODO: synchronization
         markPropertiesById.put(markProperties.getId(), markProperties);
         mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
-        return markProperties;
+        return null;
     }
 
     @Override
-    public void setFixedPositionForMarkProperties(MarkProperties markProperties, Position position) {
-        if (!markPropertiesById.containsKey(markProperties.getId())) {
-            LOG.warning(String.format(
-                    "Did not find a mark properties with ID %s for setting a fixed position, creating one.",
-                    markProperties.getId().toString()));
-        }
-        // TODO: synchronization
+    public void setFixedPositionForMarkProperties(final MarkProperties markProperties, final Position position) {
+        final UUID markPropertiesUUID = markProperties.getId();
+        apply(s -> s.internalSetFixedPositionForMarkProperties(markPropertiesUUID, position));
+    }
+    
+    @Override
+    public Void internalSetFixedPositionForMarkProperties(UUID markPropertiesId, Position position) {
+        final MarkProperties markProperties = markPropertiesById.get(markPropertiesId);
         markProperties.setFixedPosition(position);
-        markPropertiesById.put(markProperties.getId(), markProperties);
         mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
+        return null;
     }
 
     @Override
@@ -133,31 +142,62 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
 
     @Override
-    public void setTrackingDeviceIdentifierForMarkProperties(MarkProperties markProperties,
+    public void setTrackingDeviceIdentifierForMarkProperties(final MarkProperties markProperties,
+            final DeviceIdentifier deviceIdentifier) {
+        final UUID markPropertiesUUID = markProperties.getId();
+        apply(s -> s.internalSetTrackingDeviceIdentifierForMarkProperties(markPropertiesUUID, deviceIdentifier));
+    }
+    
+    @Override
+    public Void internalSetTrackingDeviceIdentifierForMarkProperties(UUID markPropertiesId,
             DeviceIdentifier deviceIdentifier) {
-        if (!markPropertiesById.containsKey(markProperties.getId())) {
-            LOG.warning(String.format(
-                    "Did not find a mark properties with ID %s for setting a tracking device, creating one.",
-                    markProperties.getId().toString()));
-        }
-        // TODO: synchronization
+        final MarkProperties markProperties = markPropertiesById.get(markPropertiesId);
         markProperties.setTrackingDeviceIdentifier(deviceIdentifier);
-        markPropertiesById.put(markProperties.getId(), markProperties);
         mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
-
+        return null;
     }
 
     @Override
-    public MarkTemplate createMarkTemplate(UUID idOfNewMarkTemplate, CommonMarkProperties properties,
+    public MarkTemplate createMarkTemplate(CommonMarkProperties properties,
             Iterable<String> tags) {
+        final UUID idOfNewMarkTemplate = UUID.randomUUID();
+        apply(s -> s.internalCreateMarkTemplate(idOfNewMarkTemplate, properties, tags));
+        return getMarkTemplateById(idOfNewMarkTemplate);
+    }
+    
+    @Override
+    public Void internalCreateMarkTemplate(UUID idOfNewMarkTemplate, CommonMarkProperties properties,
+            Iterable<String> tags) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public MarkTemplate getMarkTemplateById(UUID id) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public CourseTemplate createCourseTemplate(UUID idOfNewCourseTemplate, Iterable<MarkTemplate> marks,
+    public CourseTemplate createCourseTemplate(Iterable<MarkTemplate> marks,
             Iterable<WaypointTemplate> waypoints, int zeroBasedIndexOfRepeatablePartStart,
             int zeroBasedIndexOfRepeatablePartEnd, Iterable<String> tags) {
+        final UUID idOfNewCourseTemplate = UUID.randomUUID();
+        apply(s -> s.internalCreateCourseTemplate(idOfNewCourseTemplate, marks, waypoints,
+                zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd, tags));
+        return getCourseTemplateById(idOfNewCourseTemplate);
+    }
+    
+    @Override
+    public Void internalCreateCourseTemplate(UUID idOfNewCourseTemplate, Iterable<MarkTemplate> marks,
+            Iterable<WaypointTemplate> waypoints, int zeroBasedIndexOfRepeatablePartStart,
+            int zeroBasedIndexOfRepeatablePartEnd, Iterable<String> tags) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public CourseTemplate getCourseTemplateById(UUID id) {
         // TODO Auto-generated method stub
         return null;
     }
