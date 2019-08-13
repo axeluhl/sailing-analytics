@@ -21,6 +21,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,6 +36,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
 import com.mongodb.MongoException;
 import com.mongodb.MongoNamespace;
 import com.mongodb.client.FindIterable;
@@ -203,6 +205,7 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBuilder;
+import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.EventResolver;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -2602,13 +2605,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Iterable<MarkProperties> loadAllMarkProperties() {
+    public Iterable<MarkProperties> loadAllMarkProperties(Function<UUID, MarkTemplate> markTemplateResolver) {
         final List<MarkProperties> result = new ArrayList<>();
         final MongoCollection<Document> configurationCollection = database
                 .getCollection(CollectionNames.MARK_PROPERTIES.name());
         try {
             for (final Document dbObject : configurationCollection.find()) {
-                final MarkProperties entry = loadMarkPropertiesEntry(dbObject);
+                final MarkProperties entry = loadMarkPropertiesEntry(dbObject, markTemplateResolver);
                 result.add(entry);
             }
         } catch (Exception e) {
@@ -2619,7 +2622,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private MarkProperties loadMarkPropertiesEntry(final Document dbObject) {
+    private MarkProperties loadMarkPropertiesEntry(final Document dbObject,
+            Function<UUID, MarkTemplate> markTemplateResolver) {
+        //load all mandatory data
         final UUID id = UUID.fromString(dbObject.getString(FieldNames.MARK_PROPERTIES_ID));
         final String name = dbObject.getString(FieldNames.MARK_PROPERTIES_NAME);
         final String shortName = dbObject.getString(FieldNames.MARK_PROPERTIES_SHORT_NAME);
@@ -2639,9 +2644,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final BasicDBList tagsList = dbObject.get(FieldNames.MARK_PROPERTIES_TAGS, BasicDBList.class);
         final Collection<String> tags = tagsList.stream().map(t -> t.toString()).collect(Collectors.toList());
 
+        //all mandatory data are loaded -> create builder 
         final MarkPropertiesBuilder builder = new MarkPropertiesBuilder(id, name, shortName, color, shape, pattern,
                 markType).withFixedPosition(fixedPosition).withTags(tags);
 
+        //load optional deviceId
         try {
             final Document deviceIdDocument = dbObject.get(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER, Document.class);
             final DeviceIdentifier deviceIdentifier = deviceIdDocument == null ? null
@@ -2652,7 +2659,27 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.log(Level.WARNING, "Could not load deviceId for MarkProperties", e);
         }
 
+        //load map of last used templates
+        final BasicDBObject lastUsedTemplateObject = dbObject.get(FieldNames.MARK_PROPERTIES_USED_TEMPLATE,
+                BasicDBObject.class);
+        final Map<?, ?> mapLastUsedTemplate = lastUsedTemplateObject.toMap();
+        final Map<MarkTemplate, TimePoint> lastUsedTemplate = mapLastUsedTemplate.entrySet().stream().collect(Collectors
+                .toMap(k -> markTemplateResolver.apply(UUID.fromString(k.toString())), v -> parseTimePoint(v)));
+        builder.withLastUsedTemplate(lastUsedTemplate);
+
+        //load map of last used roles
+        final BasicDBObject lastUsedRoleObject = dbObject.get(FieldNames.MARK_PROPERTIES_USED_ROLE,
+                BasicDBObject.class);
+        final Map<?, ?> mapUsedRole = lastUsedRoleObject.toMap();
+        final Map<String, TimePoint> lastUsedRole = mapUsedRole.entrySet().stream()
+                .collect(Collectors.toMap(k -> k.toString(), v -> parseTimePoint(v)));
+        builder.withLastUsedRole(lastUsedRole);
+
         return builder.build();
+    }
+
+    private TimePoint parseTimePoint(Object timePointAsNumber) {
+        return timePointAsNumber != null ? new MillisecondsTimePoint(((Number) timePointAsNumber).longValue()) : null;
     }
 
     private DeviceConfiguration loadConfigurationEntry(Document dbObject) throws JsonDeserializationException, ParseException {

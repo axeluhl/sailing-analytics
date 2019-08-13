@@ -47,6 +47,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     private final MongoObjectFactory mongoObjectFactory;
 
     private final Map<UUID, MarkProperties> markPropertiesById = new ConcurrentHashMap<>();
+    private final Map<UUID, MarkTemplate> markTemplatesById = new ConcurrentHashMap<>();
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
     private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
 
@@ -76,9 +77,12 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     @Override
     public Iterable<MarkProperties> getAllMarkProperties(Iterable<String> tagsToFilterFor) {
 
+        // TODO: ensure mark templates are loaded
+
         // TODO: synchronization
         if (markPropertiesById.isEmpty()) {
-            domainObjectFactory.loadAllMarkProperties().forEach(m -> markPropertiesById.put(m.getId(), m));
+            domainObjectFactory.loadAllMarkProperties(v -> markTemplatesById.get(v))
+                    .forEach(m -> markPropertiesById.put(m.getId(), m));
         }
 
         return markPropertiesById.values().stream().filter(m -> containsAny(m.getTags(), tagsToFilterFor))

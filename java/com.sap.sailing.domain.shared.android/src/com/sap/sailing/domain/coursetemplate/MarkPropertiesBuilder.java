@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.coursetemplate;
 
+import java.util.Map;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
@@ -7,6 +8,7 @@ import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesImpl;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.TimePoint;
 
 public class MarkPropertiesBuilder {
 
@@ -20,6 +22,8 @@ public class MarkPropertiesBuilder {
     private Iterable<String> tags;
     private DeviceIdentifier deviceId;
     private Position position;
+    private Map<MarkTemplate, TimePoint> lastUsedTemplate;
+    private Map<String, TimePoint> lastUsedRole;
 
     public MarkPropertiesBuilder(UUID id, String name, String shortName, Color color, String shape, String pattern,
             MarkType type) {
@@ -60,7 +64,21 @@ public class MarkPropertiesBuilder {
         if (position != null) {
             impl.setFixedPosition(position);
         }
+        if (lastUsedTemplate != null) {
+            impl.setLastUsedTemplate(lastUsedTemplate);
+        }
+        if (lastUsedRole != null) {
+            impl.setLastUsedRole(lastUsedRole);
+        }
         return impl;
+    }
+
+    public void withLastUsedTemplate(Map<MarkTemplate, TimePoint> lastUsedTemplate) {
+        this.lastUsedTemplate = lastUsedTemplate;
+    }
+
+    public void withLastUsedRole(Map<String, TimePoint> lastUsedRole) {
+        this.lastUsedRole = lastUsedRole;
     }
 
 }
