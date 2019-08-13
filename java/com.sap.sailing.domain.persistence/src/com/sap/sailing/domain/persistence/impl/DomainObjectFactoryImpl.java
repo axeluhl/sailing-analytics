@@ -3178,7 +3178,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         tagsDbObject.forEach(t -> tags.add(t.toString()));
 
 
-        final CourseTemplateImpl courseTemplateImpl = new CourseTemplateImpl(name, markTemplates, waypointTemplates, zeroBasedIndexOfRepeatablePartStart,
+        final CourseTemplateImpl courseTemplateImpl = new CourseTemplateImpl(id, name, markTemplates, waypointTemplates,
+                zeroBasedIndexOfRepeatablePartStart,
                 zeroBasedIndexOfRepeatablePartEnd);
         courseTemplateImpl.setTags(tags);
         return courseTemplateImpl;
