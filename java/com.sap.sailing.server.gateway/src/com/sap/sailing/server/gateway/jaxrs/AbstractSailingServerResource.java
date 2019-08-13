@@ -11,6 +11,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.interfaces.RacingEventService;
@@ -59,6 +60,12 @@ public abstract class AbstractSailingServerResource {
     public RacingEventService getService() {
         @SuppressWarnings("unchecked")
         ServiceTracker<RacingEventService, RacingEventService> tracker = (ServiceTracker<RacingEventService, RacingEventService>) servletContext.getAttribute(RestServletContainer.RACING_EVENT_SERVICE_TRACKER_NAME);
+        return tracker.getService(); 
+    }
+    
+    protected SharedSailingData getSharedSailingData() {
+        @SuppressWarnings("unchecked")
+        ServiceTracker<SharedSailingData, SharedSailingData> tracker = (ServiceTracker<SharedSailingData, SharedSailingData>) servletContext.getAttribute(RestServletContainer.SHARED_SAILING_DATA_TRACKER_NAME);
         return tracker.getService(); 
     }
     
