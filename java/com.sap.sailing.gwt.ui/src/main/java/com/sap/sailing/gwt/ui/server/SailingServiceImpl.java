@@ -9333,8 +9333,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private MarkTemplateDTO convertToMarkTemplateDTO(MarkTemplate markTemplate) {
-        return new MarkTemplateDTO(markTemplate.getId(), markTemplate.getName(), markTemplate.getShortName(),
+        final MarkTemplateDTO markTemplateDTO = new MarkTemplateDTO(markTemplate.getId(), markTemplate.getName(),
+                markTemplate.getShortName(),
                 markTemplate.getColor(), markTemplate.getShape(), markTemplate.getPattern(), markTemplate.getType());
+
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), markTemplateDTO, markTemplate.getIdentifier());
+        return markTemplateDTO;
     }
 
     @Override
