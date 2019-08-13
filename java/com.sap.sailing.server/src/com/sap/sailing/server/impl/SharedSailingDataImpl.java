@@ -238,10 +238,22 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
 
     @Override
-    public void recordUsage(MarkTemplate markTemplate, MarkProperties markProperties) {
-        getSecurityService().checkCurrentUserUpdatePermission(markProperties);
+    public Void internalRecordUsage(UUID markTemplateId, UUID markPropertiesId) {
+        final MarkProperties markProperties = markPropertiesById.get(markPropertiesId);
+        final MarkTemplate markTemplate = markTemplatesById.get(markTemplateId);
         markProperties.getLastUsedTemplate().put(markTemplate, new MillisecondsTimePoint(System.currentTimeMillis()));
         mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
+        return null;
+    }
+
+
+    @Override
+    public void recordUsage(MarkTemplate markTemplate, MarkProperties markProperties) {
+        getSecurityService().checkCurrentUserUpdatePermission(markProperties);
+        final UUID markPropertiesId = markProperties.getId();
+        final UUID markTemplateId = markTemplate.getId();
+
+        apply(s -> s.internalRecordUsage(markTemplateId, markPropertiesId));
     }
 
     @Override
