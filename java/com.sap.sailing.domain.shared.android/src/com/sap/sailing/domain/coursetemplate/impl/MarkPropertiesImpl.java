@@ -95,10 +95,12 @@ public class MarkPropertiesImpl extends CommonMarkPropertiesImpl implements Mark
     }
 
     public void setLastUsedRole(Map<String, TimePoint> lastUsedRole) {
+        this.lastUsedRole.clear();
         this.lastUsedRole.putAll(lastUsedRole);
     }
 
     public void setLastUsedTemplate(Map<MarkTemplate, TimePoint> lastUsedTemplate) {
+        this.lastUsedTemplate.clear();
         this.lastUsedTemplate.putAll(lastUsedTemplate);
     }
 
