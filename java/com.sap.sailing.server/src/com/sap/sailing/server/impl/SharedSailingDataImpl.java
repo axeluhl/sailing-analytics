@@ -18,6 +18,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
@@ -111,11 +112,15 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
 
     @Override
-    public MarkProperties createMarkProperties(CommonMarkProperties properties,
-            Iterable<String> tags) {
+    public MarkProperties createMarkProperties(CommonMarkProperties properties, Iterable<String> tags) {
         final UUID idOfNewMarkProperties = UUID.randomUUID();
-        apply(s -> s.internalCreateMarkProperties(idOfNewMarkProperties, properties, tags));
-        return getMarkPropertiesById(idOfNewMarkProperties);
+        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredDomainType.MARK_PROPERTIES,
+                MarkProperties.getTypeRelativeObjectIdentifier(idOfNewMarkProperties),
+                idOfNewMarkProperties + "/" + properties.getName(), () -> {
+                    apply(s -> s.internalCreateMarkProperties(idOfNewMarkProperties, properties, tags));
+                    return getMarkPropertiesById(idOfNewMarkProperties);
+                });
     }
     
     @Override
@@ -171,11 +176,14 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
 
     @Override
-    public MarkTemplate createMarkTemplate(CommonMarkProperties properties,
-            Iterable<String> tags) {
+    public MarkTemplate createMarkTemplate(CommonMarkProperties properties, Iterable<String> tags) {
         final UUID idOfNewMarkTemplate = UUID.randomUUID();
-        apply(s -> s.internalCreateMarkTemplate(idOfNewMarkTemplate, properties, tags));
-        return getMarkTemplateById(idOfNewMarkTemplate);
+        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredDomainType.MARK_TEMPLATE, MarkTemplate.getTypeRelativeObjectIdentifier(idOfNewMarkTemplate),
+                idOfNewMarkTemplate + "/" + properties.getName(), () -> {
+                    apply(s -> s.internalCreateMarkTemplate(idOfNewMarkTemplate, properties, tags));
+                    return getMarkTemplateById(idOfNewMarkTemplate);
+                });
     }
     
     @Override
@@ -196,9 +204,14 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
             Iterable<WaypointTemplate> waypoints, int zeroBasedIndexOfRepeatablePartStart,
             int zeroBasedIndexOfRepeatablePartEnd, Iterable<String> tags) {
         final UUID idOfNewCourseTemplate = UUID.randomUUID();
-        apply(s -> s.internalCreateCourseTemplate(idOfNewCourseTemplate, courseTemplateName, marks, waypoints,
-                zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd, tags));
-        return getCourseTemplateById(idOfNewCourseTemplate);
+        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredDomainType.COURSE_TEMPLATE,
+                CourseTemplate.getTypeRelativeObjectIdentifier(idOfNewCourseTemplate),
+                idOfNewCourseTemplate + "/" + courseTemplateName, () -> {
+                    apply(s -> s.internalCreateCourseTemplate(idOfNewCourseTemplate, courseTemplateName, marks,
+                            waypoints, zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd, tags));
+                    return getCourseTemplateById(idOfNewCourseTemplate);
+                });
     }
     
     @Override
