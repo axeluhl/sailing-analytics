@@ -304,6 +304,7 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
+import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
@@ -470,6 +471,7 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
 import com.sap.sailing.manage2sail.RaceResultDescriptor;
@@ -9320,5 +9322,16 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public boolean getTrackedRaceIsUsingMarkPassingCalculator(RegattaAndRaceIdentifier regattaNameAndRaceName) {
         return getExistingTrackedRace(regattaNameAndRaceName).isUsingMarkPassingCalculator();
+    }
+
+    @Override
+    public Iterable<MarkTemplateDTO> getMarkTemplates() {
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
+                getSharedSailingData().getAllMarkTemplates(), m -> convertToMarkTemplateDTO(m));
+    }
+
+    private MarkTemplateDTO convertToMarkTemplateDTO(MarkTemplate markTemplate) {
+        return new MarkTemplateDTO(markTemplate.getId(), markTemplate.getName(), markTemplate.getShortName(),
+                markTemplate.getColor(), markTemplate.getShape(), markTemplate.getPattern(), markTemplate.getType());
     }
 }
