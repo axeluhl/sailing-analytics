@@ -304,7 +304,9 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
+import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesImpl;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
@@ -9332,6 +9334,23 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     private MarkTemplateDTO convertToMarkTemplateDTO(MarkTemplate markTemplate) {
         return new MarkTemplateDTO(markTemplate.getId(), markTemplate.getName(), markTemplate.getShortName(),
+                markTemplate.getColor(), markTemplate.getShape(), markTemplate.getPattern(), markTemplate.getType());
+    }
+
+    @Override
+    public MarkTemplateDTO addOrUpdateMarkTemplate(MarkTemplateDTO markTemplate) {
+        final UUID markTemplateUUID = UUID.randomUUID();
+        final MarkTemplate mTemplate = getSecurityService()
+                .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                        SecuredDomainType.MARK_TEMPLATE,
+                        MarkTemplate.getTypeRelativeObjectIdentifier(markTemplateUUID), markTemplate.getName(),
+                        () -> getSharedSailingData()
+                                .createMarkTemplate(convertDtoToCommonMarkProperties(markTemplateUUID, markTemplate)));
+        return convertToMarkTemplateDTO(mTemplate);
+    }
+
+    private CommonMarkProperties convertDtoToCommonMarkProperties(UUID markTemplateUUID, MarkTemplateDTO markTemplate) {
+        return new MarkPropertiesImpl(markTemplateUUID, markTemplate.getName(), markTemplate.getShortName(),
                 markTemplate.getColor(), markTemplate.getShape(), markTemplate.getPattern(), markTemplate.getType());
     }
 }

@@ -1187,4 +1187,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     boolean getTrackedRaceIsUsingMarkPassingCalculator(RegattaAndRaceIdentifier regattaNameAndRaceName);
 
     Iterable<MarkTemplateDTO> getMarkTemplates();
+
+    MarkTemplateDTO addOrUpdateMarkTemplate(MarkTemplateDTO markTemplate);
 }

@@ -17,14 +17,18 @@ import com.sap.sse.security.shared.dto.SecurityInformationDTO;
 public class MarkTemplateDTO extends NamedDTO implements SecuredDTO {
     private static final long serialVersionUID = -9092124519699246140L;
 
-    private final UUID uuid;
-    private final String shortName;
-    private final Color color;
-    private final String shape;
-    private final String pattern;
-    private final MarkType type;
+    private UUID uuid;
+    private String shortName;
+    private Color color;
+    private String shape;
+    private String pattern;
+    private MarkType type;
 
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
+
+    /** GWT constructor */
+    public MarkTemplateDTO() {
+    }
 
     public MarkTemplateDTO(UUID uuid, String name, String shortName, Color color, String shape, String pattern,
             MarkType type) {

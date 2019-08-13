@@ -1123,4 +1123,6 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void getTrackedRaceIsUsingMarkPassingCalculator(RegattaAndRaceIdentifier regattaNameAndRaceName, AsyncCallback<Boolean> callback);
 
     void getMarkTemplates(AsyncCallback<Iterable<MarkTemplateDTO>> callback);
+
+    void addOrUpdateMarkTemplate(MarkTemplateDTO markTemplate, AsyncCallback<MarkTemplateDTO> asyncCallback);
 }
