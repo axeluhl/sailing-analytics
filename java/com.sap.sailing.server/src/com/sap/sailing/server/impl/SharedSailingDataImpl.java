@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.osgi.util.tracker.ServiceTracker;
@@ -47,7 +46,6 @@ import com.sap.sse.util.ClearStateTestSupport;
 
 public class SharedSailingDataImpl implements ReplicatingSharedSailingData, ClearStateTestSupport {
 
-    private static final Logger LOG = Logger.getLogger(SharedSailingDataImpl.class.getName());
     private final DomainObjectFactory domainObjectFactory;
     private final MongoObjectFactory mongoObjectFactory;
 
@@ -108,7 +106,8 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     @Override
     public Iterable<MarkTemplate> getAllMarkTemplates() {
-        return markTemplatesById.values();
+        return markTemplatesById.values().stream().filter(getSecurityService()::hasCurrentUserReadPermission)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -132,10 +131,6 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     @Override
     public Void internalCreateMarkProperties(UUID idOfNewMarkProperties, CommonMarkProperties properties,
             Iterable<String> tags) {
-        if (markPropertiesById.containsKey(idOfNewMarkProperties)) {
-            LOG.warning(
-                    String.format("Found a mark properties with ID %s, overwrite.", idOfNewMarkProperties.toString()));
-        }
         final MarkProperties markProperties = new MarkPropertiesBuilder(idOfNewMarkProperties, properties.getName(),
                 properties.getShortName(), properties.getColor(), properties.getShape(), properties.getPattern(),
                 properties.getType()).withTags(tags).build();
@@ -198,7 +193,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     
     @Override
     public Void internalCreateMarkTemplate(UUID idOfNewMarkTemplate, CommonMarkProperties properties) {
-        MarkTemplate markTemplate = new MarkTemplateImpl(idOfNewMarkTemplate, properties);
+        final MarkTemplate markTemplate = new MarkTemplateImpl(idOfNewMarkTemplate, properties);
         mongoObjectFactory.storeMarkTemplate(markTemplate);
         markTemplatesById.put(markTemplate.getId(), markTemplate);
         return null;
@@ -206,7 +201,11 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     
     @Override
     public MarkTemplate getMarkTemplateById(UUID id) {
-        return markTemplatesById.get(id);
+        final MarkTemplate markTemplate = markTemplatesById.get(id);
+        if (markTemplate != null) {
+            getSecurityService().checkCurrentUserReadPermission(markTemplate);
+        }
+        return markTemplate;
     }
 
     @Override
