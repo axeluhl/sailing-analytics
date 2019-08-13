@@ -55,7 +55,7 @@ public class TestLapConfiguration {
     
     @Test
     public void testSimpleCourseWithOneLap() {
-        final Iterable<WaypointTemplate> waypointsOfOneLapper = courseTemplate.getWaypoints(1);
+        final Iterable<WaypointTemplate> waypointsOfOneLapper = courseTemplate.getWaypointTemplates(1);
         final List<ControlPointTemplate> expected = Arrays.asList(startFinish, top, startFinish);
         verify(waypointsOfOneLapper, expected);
     }
@@ -72,14 +72,14 @@ public class TestLapConfiguration {
 
     @Test
     public void testSimpleCourseWithTwoLaps() {
-        final Iterable<WaypointTemplate> waypointsOfOneLapper = courseTemplate.getWaypoints(2);
+        final Iterable<WaypointTemplate> waypointsOfOneLapper = courseTemplate.getWaypointTemplates(2);
         final List<ControlPointTemplate> expected = Arrays.asList(startFinish, top, gate, top, startFinish);
         verify(waypointsOfOneLapper, expected);
     }
 
     @Test
     public void testSimpleCourseWithThreeLaps() {
-        final Iterable<WaypointTemplate> waypointsOfOneLapper = courseTemplate.getWaypoints(3);
+        final Iterable<WaypointTemplate> waypointsOfOneLapper = courseTemplate.getWaypointTemplates(3);
         final List<ControlPointTemplate> expected = Arrays.asList(startFinish, top, gate, top, gate, top, startFinish);
         verify(waypointsOfOneLapper, expected);
     }
@@ -107,7 +107,7 @@ public class TestLapConfiguration {
         courseTemplate = new CourseTemplateImpl("Test", /* marks */ Arrays.asList(startBoat, pin),
                 /* waypoints */ Arrays.asList(new WaypointTemplateImpl(startFinish, PassingInstruction.Line)));
         try {
-            courseTemplate.getWaypoints(0);
+            courseTemplate.getWaypointTemplates(0);
         } catch (IllegalArgumentException e) {
             assumeNoException("No IllegalArgumentException should have been thrown for zero laps because the course has no repeatable part", e);
         }
@@ -116,7 +116,8 @@ public class TestLapConfiguration {
     @Test
     public void testIllegalArgumentExceptionForZeroLaps() {
         try {
-            courseTemplate.getWaypoints(/* illegal to request 0 laps if course template defines repeatable part */ 0);
+            courseTemplate
+                    .getWaypointTemplates(/* illegal to request 0 laps if course template defines repeatable part */ 0);
             fail("Expected an IllegalArgumentException but none was thrown");
         } catch (IllegalArgumentException e) {
             // expected

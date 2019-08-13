@@ -1,9 +1,11 @@
 package com.sap.sailing.domain.coursetemplate.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
@@ -20,6 +22,8 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     
     private final ArrayList<WaypointTemplate> waypoints;
     
+    private final Map<MarkTemplate, String> associatedRoles = new HashMap<>();
+
     /**
      * The index into {@link #waypoints} of the first waypoint that is to be cloned for repetitive laps.
      * -1 means no repeatable part.
@@ -73,13 +77,13 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     }
 
     @Override
-    public Iterable<MarkTemplate> getMarks() {
+    public Iterable<MarkTemplate> getMarkTemplates() {
         return marks;
     }
 
     // TODO move to CourseTemplateConfigurations
     @Override
-    public Iterable<WaypointTemplate> getWaypoints(int numberOfLaps) {
+    public Iterable<WaypointTemplate> getWaypointTemplates(int numberOfLaps) {
         final Iterable<WaypointTemplate> result;
         if (hasRepeatablePart()) {
             if (numberOfLaps < 1) {
@@ -116,5 +120,15 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     public Pair<Integer, Integer> getRepeatablePart() {
         return hasRepeatablePart() ? new Pair<>(zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd)
                 : null;
+    }
+
+    @Override
+    public Map<MarkTemplate, String> getAssociatedRoles() {
+        return associatedRoles;
+    }
+
+    public void setAssociatedRoles(Map<MarkTemplate, String> associatedRoles) {
+        this.associatedRoles.clear();
+        this.associatedRoles.putAll(associatedRoles);
     }
 }
