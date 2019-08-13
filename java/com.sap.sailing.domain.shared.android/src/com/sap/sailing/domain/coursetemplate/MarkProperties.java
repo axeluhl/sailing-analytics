@@ -1,11 +1,14 @@
 package com.sap.sailing.domain.coursetemplate;
 
+import java.util.Map;
+
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.NamedWithUUID;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Stores properties that can be applied to a mark in the context of an event or a regatta, including the mark's own
@@ -61,4 +64,8 @@ public interface MarkProperties extends CommonMarkPropertiesWithOptionalPosition
      * because a mark cannot have a fixed position and be tracked by a device at the same time.
      */
     void setFixedPosition(Position fixedPosition);
+
+    Map<MarkTemplate, TimePoint> getLastUsedTemplate();
+
+    Map<String, TimePoint> getLastUsedRole();
 }
