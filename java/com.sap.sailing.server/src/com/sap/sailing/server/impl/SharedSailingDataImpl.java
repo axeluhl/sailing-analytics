@@ -17,12 +17,12 @@ import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
-import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.Util;
+import com.sap.sse.util.ClearStateTestSupport;
 
-public class SharedSailingDataImpl implements SharedSailingData {
+public class SharedSailingDataImpl implements ReplicatingSharedSailingData, ClearStateTestSupport {
 
     private static final Logger LOG = Logger.getLogger(SharedSailingDataImpl.class.getName());
     private final DomainObjectFactory domainObjectFactory;
@@ -38,6 +38,11 @@ public class SharedSailingDataImpl implements SharedSailingData {
         this.mongoObjectFactory = mongoObjectFactory;
         this.deviceIdentifierServiceFinder = deviceIdentifierServiceFinder;
 
+    }
+    
+    @Override
+    public void clearState() throws Exception {
+        markPropertiesById.clear();
     }
 
     @Override
