@@ -2626,15 +2626,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             Function<UUID, MarkTemplate> markTemplateResolver) {
         //load all mandatory data
         final UUID id = UUID.fromString(dbObject.getString(FieldNames.MARK_PROPERTIES_ID));
-        final String name = dbObject.getString(FieldNames.MARK_PROPERTIES_NAME);
-        final String shortName = dbObject.getString(FieldNames.MARK_PROPERTIES_SHORT_NAME);
-        final String pattern = dbObject.getString(FieldNames.MARK_PROPERTIES_PATTERN);
-        final String shape = dbObject.getString(FieldNames.MARK_PROPERTIES_SHAPE);
+        final String name = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_NAME);
+        final String shortName = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_SHORT_NAME);
+        final String pattern = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_PATTERN);
+        final String shape = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_SHAPE);
 
-        final String type = dbObject.getString(FieldNames.MARK_PROPERTIES_TYPE);
+        final String type = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_TYPE);
         final MarkType markType = MarkType.valueOf(type);
 
-        final String storedColor = dbObject.getString(FieldNames.MARK_PROPERTIES_COLOR);
+        final String storedColor = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_COLOR);
         final Color color = AbstractColor.getCssColor(storedColor);
 
 
