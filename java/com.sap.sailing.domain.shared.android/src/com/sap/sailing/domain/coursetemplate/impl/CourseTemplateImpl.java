@@ -24,6 +24,8 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     
     private final Map<MarkTemplate, String> associatedRoles = new HashMap<>();
 
+    private Iterable<String> tags = new ArrayList<>();
+
     /**
      * The index into {@link #waypoints} of the first waypoint that is to be cloned for repetitive laps.
      * -1 means no repeatable part.
@@ -121,6 +123,7 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
         return hasRepeatablePart() ? new Pair<>(zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd)
                 : null;
     }
+    
 
     @Override
     public Map<MarkTemplate, String> getAssociatedRoles() {
@@ -130,5 +133,14 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     public void setAssociatedRoles(Map<MarkTemplate, String> associatedRoles) {
         this.associatedRoles.clear();
         this.associatedRoles.putAll(associatedRoles);
+    }
+
+    @Override
+    public Iterable<String> getTags() {
+        return this.tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
     }
 }
