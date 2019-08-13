@@ -192,17 +192,17 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
 
     @Override
-    public CourseTemplate createCourseTemplate(Iterable<MarkTemplate> marks,
+    public CourseTemplate createCourseTemplate(String courseTemplateName, Iterable<MarkTemplate> marks,
             Iterable<WaypointTemplate> waypoints, int zeroBasedIndexOfRepeatablePartStart,
             int zeroBasedIndexOfRepeatablePartEnd, Iterable<String> tags) {
         final UUID idOfNewCourseTemplate = UUID.randomUUID();
-        apply(s -> s.internalCreateCourseTemplate(idOfNewCourseTemplate, marks, waypoints,
+        apply(s -> s.internalCreateCourseTemplate(idOfNewCourseTemplate, courseTemplateName, marks, waypoints,
                 zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd, tags));
         return getCourseTemplateById(idOfNewCourseTemplate);
     }
     
     @Override
-    public Void internalCreateCourseTemplate(UUID idOfNewCourseTemplate, Iterable<MarkTemplate> marks,
+    public Void internalCreateCourseTemplate(UUID idOfNewCourseTemplate, String courseTemplateName, Iterable<MarkTemplate> marks,
             Iterable<WaypointTemplate> waypoints, int zeroBasedIndexOfRepeatablePartStart,
             int zeroBasedIndexOfRepeatablePartEnd, Iterable<String> tags) {
         // TODO Auto-generated method stub
