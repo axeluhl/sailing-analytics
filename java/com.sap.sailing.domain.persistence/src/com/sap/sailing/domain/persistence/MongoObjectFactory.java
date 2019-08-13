@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
+import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -225,4 +226,8 @@ public interface MongoObjectFactory {
     void storeMarkTemplate(MarkTemplate markTemplate);
 
     void removeMarkTemplate(UUID markTemplateId);
+
+    void storeCourseTemplate(CourseTemplate courseTemplate);
+
+    void removeCourseTemplate(UUID courseTemplateId);
 }

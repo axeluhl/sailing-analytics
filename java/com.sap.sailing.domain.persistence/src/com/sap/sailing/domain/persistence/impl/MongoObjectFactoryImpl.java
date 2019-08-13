@@ -104,8 +104,10 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
+import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -1897,6 +1899,82 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         final MongoCollection<Document> configurationsCollections = database
                 .getCollection(CollectionNames.MARK_TEMPLATES.name());
         final Document query = new Document(FieldNames.MARK_TEMPLATE_ID.name(), markTemplateId.toString());
+        configurationsCollections.deleteOne(query);
+    }
+
+    @Override
+    public void storeCourseTemplate(CourseTemplate courseTemplate) {
+        final MongoCollection<Document> collection = database.getCollection(CollectionNames.COURSE_TEMPLATES.name());
+        final Document query = new Document(FieldNames.COURSE_TEMPLATE_ID.name(), courseTemplate.getId().toString());
+
+        final Document entry = storeCourseTemplateToDocument(courseTemplate);
+        collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry,
+                new UpdateOptions().upsert(true));
+    }
+
+    private Document storeCourseTemplateToDocument(CourseTemplate courseTemplate) {
+        final Document result = new Document();
+
+        // store master data
+        result.put(FieldNames.COURSE_TEMPLATE_ID.name(), courseTemplate.getId());
+        result.put(FieldNames.COURSE_TEMPLATE_NAME.name(), courseTemplate.getName());
+
+        // store waypoint templates
+        final BasicDBList waypointTemplates = new BasicDBList();
+        for (WaypointTemplate waypointTemplate : courseTemplate.getWaypointTemplates(1)) {
+            BasicDBObject waypointTemplateObject = storeWaypointTemplate(waypointTemplate);
+            waypointTemplates.add(waypointTemplateObject);
+        }
+        result.put(FieldNames.COURSE_TEMPLATE_WAYPOINTS.name(), waypointTemplates);
+
+        // associated roles
+        final BasicDBList associatedRoles = new BasicDBList();
+        courseTemplate.getAssociatedRoles().entrySet()
+                .forEach(e -> associatedRoles.add(new BasicDBObject(e.getKey().getId().toString(), e.getValue())));
+        result.put(FieldNames.COURSE_TEMPLATE_ASSOCIATED_ROLES.name(), associatedRoles);
+
+        // mark templates
+        final BasicDBList markTemplates = new BasicDBList();
+        courseTemplate.getMarkTemplates().forEach(m -> markTemplates.add(m.getId().toString()));
+        result.put(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATES.name(), markTemplates);
+
+        // tags
+        final BasicDBList tags = new BasicDBList();
+        courseTemplate.getTags().forEach(t -> tags.add(t));
+        result.put(FieldNames.COURSE_TEMPLATE_TAGS.name(), tags);
+
+        // repeatable part
+        if (courseTemplate.hasRepeatablePart()) {
+            final BasicDBObject repeatablePart = storeRepeatablePart(courseTemplate);
+            result.put(FieldNames.COURSE_TEMPLATE_REPEATABLE_PART.name(), repeatablePart);
+        }
+
+        return result;
+    }
+
+    private BasicDBObject storeWaypointTemplate(WaypointTemplate waypointTemplate) {
+        BasicDBObject waypointTemplateObject = new BasicDBObject();
+        waypointTemplateObject.put(FieldNames.WAYPOINT_TEMPLATE_PASSINGINSTRUCTION.name(),
+                getPassingInstructions(waypointTemplate.getPassingInstruction()));
+
+        final BasicDBList markTemplates = new BasicDBList();
+        waypointTemplate.getControlPointTemplate().getMarks().forEach(m -> markTemplates.add(m.getId().toString()));
+        waypointTemplateObject.put(FieldNames.WAYPOINT_TEMPLATE_MARK_TEMPLATES.name(), markTemplates);
+        return waypointTemplateObject;
+    }
+
+    private BasicDBObject storeRepeatablePart(CourseTemplate courseTemplate) {
+        final BasicDBObject repeatablePart = new BasicDBObject();
+        repeatablePart.put(FieldNames.REPEATABLE_PART_START.name(), courseTemplate.getRepeatablePart().getA());
+        repeatablePart.put(FieldNames.REPEATABLE_PART_END.name(), courseTemplate.getRepeatablePart().getB());
+        return repeatablePart;
+    }
+
+    @Override
+    public void removeCourseTemplate(UUID courseTemplateId) {
+        final MongoCollection<Document> configurationsCollections = database
+                .getCollection(CollectionNames.COURSE_TEMPLATES.name());
+        final Document query = new Document(FieldNames.COURSE_TEMPLATE_ID.name(), courseTemplateId.toString());
         configurationsCollections.deleteOne(query);
     }
 

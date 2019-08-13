@@ -67,7 +67,7 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
      */
     private void validateWaypointsAgainstMarks() {
         for (final WaypointTemplate waypoint : waypoints) {
-            for (final MarkTemplate mark : waypoint.getControlPoint().getMarks()) {
+            for (final MarkTemplate mark : waypoint.getControlPointTemplate().getMarks()) {
                 if (!Util.contains(marks, mark)) {
                     throw new IllegalArgumentException("Mark "+mark+" used by waypoint template "+
                             waypoint+" in course template "+this+" is not provided in the collection of marks");

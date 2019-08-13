@@ -65,7 +65,7 @@ public class TestLapConfiguration {
         assertEquals(expected.size(), Util.size(waypointsOfOneLapper));
         final List<ControlPointTemplate> controlPoints = new ArrayList<>();
         for (final WaypointTemplate waypoint : waypointsOfOneLapper) {
-            controlPoints.add(waypoint.getControlPoint());
+            controlPoints.add(waypoint.getControlPointTemplate());
         }
         assertEquals(expected, controlPoints);
     }
