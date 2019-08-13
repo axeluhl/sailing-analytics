@@ -3,6 +3,7 @@ package com.sap.sailing.domain.persistence.impl;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
+import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 
 /**
@@ -124,5 +125,8 @@ public enum CollectionNames {
     ANNIVERSARIES,
 
     /** Contains the {@link MarkProperties}. */
-    MARK_PROPERTIES
+    MARK_PROPERTIES,
+
+    /** Contains the {@link MarkTemplate} objects. */
+    MARK_TEMPLATES
 }

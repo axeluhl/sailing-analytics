@@ -105,6 +105,7 @@ import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
+import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -1874,4 +1875,29 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public void storeMarkTemplate(MarkTemplate markTemplate) {
+        final MongoCollection<Document> collection = database.getCollection(CollectionNames.MARK_TEMPLATES.name());
+        final Document query = new Document(FieldNames.MARK_TEMPLATE_ID.name(), markTemplate.getId().toString());
+
+        final Document entry = storeMarkTemplateToDocument(markTemplate);
+        collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry,
+                new UpdateOptions().upsert(true));
+    }
+
+    private Document storeMarkTemplateToDocument(MarkTemplate markTemplate) {
+        final Document result = new Document(FieldNames.MARK_TEMPLATE_ID.name(), markTemplate.getId().toString());
+        storeCommonMarkProperties(markTemplate, result);
+        return result;
+    }
+
+    @Override
+    public void removeMarkTemplate(UUID markTemplateId) {
+        final MongoCollection<Document> configurationsCollections = database
+                .getCollection(CollectionNames.MARK_TEMPLATES.name());
+        final Document query = new Document(FieldNames.MARK_TEMPLATE_ID.name(), markTemplateId.toString());
+        configurationsCollections.deleteOne(query);
+    }
+
 }
