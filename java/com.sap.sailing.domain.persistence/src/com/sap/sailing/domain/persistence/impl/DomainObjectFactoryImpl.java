@@ -3133,14 +3133,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final BasicDBList associatedRolesDbObject = dbObject.get(FieldNames.COURSE_TEMPLATE_ASSOCIATED_ROLES.name(),
                 BasicDBList.class);
         final Map<MarkTemplate, String> associatedRoles = new HashMap<>();
-        for (String key : associatedRolesDbObject.keySet()) {
-            final String roleName = associatedRolesDbObject.get(key).toString();
-            final MarkTemplate markTemplate = markTemplateResolver.apply(UUID.fromString(key));
-            if (markTemplate != null) {
-                associatedRoles.put(markTemplate, roleName);
-            } else {
-                logger.warning(
-                        String.format("Could not resolve MarkTemplate with id %s for CourseTemplate %s.", key, id));
+        for (Object obj : associatedRolesDbObject) {
+            BasicDBObject bdo = (BasicDBObject) obj;
+            for (String key : bdo.keySet()) {
+                final String roleName = bdo.get(key).toString();
+                final MarkTemplate markTemplate = markTemplateResolver.apply(UUID.fromString(key));
+                if (markTemplate != null) {
+                    associatedRoles.put(markTemplate, roleName);
+                } else {
+                    logger.warning(
+                            String.format("Could not resolve MarkTemplate with id %s for CourseTemplate %s.", key, id));
+                }
             }
         }
 
@@ -3148,13 +3151,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final BasicDBList markTemplatesList = dbObject.get(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATES.name(),
                 BasicDBList.class);
         final Set<MarkTemplate> markTemplates = new HashSet<>();
-        for (String key : markTemplatesList.keySet()) {
-            final MarkTemplate markTemplate = markTemplateResolver.apply(UUID.fromString(key));
+        for (Object key : markTemplatesList) {
+            final MarkTemplate markTemplate = markTemplateResolver.apply(UUID.fromString(key.toString()));
             if (markTemplate != null) {
                 markTemplates.add(markTemplate);
             } else {
                 logger.warning(
-                        String.format("Could not resolve MarkTemplate with id %s for CourseTemplate %s.", key, id));
+                        String.format("Could not resolve MarkTemplate with id %s for CourseTemplate %s.",
+                                key.toString(), id));
             }
         }
         
