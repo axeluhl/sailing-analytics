@@ -206,6 +206,7 @@ import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBuilder;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateImpl;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.EventResolver;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -3060,5 +3061,39 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             fromDb.put(anniversary, new Pair<>(loadedAnniversary, AnniversaryType.valueOf(type)));
         }
         return fromDb;
+    }
+
+    @Override
+    public Iterable<MarkTemplate> loadAllMarkTemplates() {
+        final List<MarkTemplate> result = new ArrayList<>();
+        final MongoCollection<Document> configurationCollection = database
+                .getCollection(CollectionNames.MARK_TEMPLATES.name());
+        try {
+            for (final Document dbObject : configurationCollection.find()) {
+                final MarkTemplate entry = loadMarkTemplateEntry(dbObject);
+                result.add(entry);
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load mark templates.");
+            logger.log(Level.SEVERE, "loadAllMarkTemplates", e);
+        }
+
+        return result;
+    }
+
+    private MarkTemplate loadMarkTemplateEntry(Document dbObject) {
+        final UUID id = UUID.fromString(dbObject.getString(FieldNames.MARK_PROPERTIES_ID));
+        final String name = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_NAME);
+        final String shortName = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_SHORT_NAME);
+        final String pattern = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_PATTERN);
+        final String shape = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_SHAPE);
+
+        final String type = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_TYPE);
+        final MarkType markType = MarkType.valueOf(type);
+
+        final String storedColor = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_COLOR);
+        final Color color = AbstractColor.getCssColor(storedColor);
+
+        return new MarkTemplateImpl(id, name, shortName, color, shape, pattern, markType);
     }
 }
