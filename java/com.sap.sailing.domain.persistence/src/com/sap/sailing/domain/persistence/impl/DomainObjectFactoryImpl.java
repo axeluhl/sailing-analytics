@@ -2626,23 +2626,24 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private MarkProperties loadMarkPropertiesEntry(final Document dbObject,
             Function<UUID, MarkTemplate> markTemplateResolver) {
         //load all mandatory data
-        final UUID id = UUID.fromString(dbObject.getString(FieldNames.MARK_PROPERTIES_ID));
-        final String name = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_NAME);
-        final String shortName = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_SHORT_NAME);
-        final String pattern = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_PATTERN);
-        final String shape = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_SHAPE);
+        final UUID id = UUID.fromString(dbObject.getString(FieldNames.MARK_PROPERTIES_ID.name()));
+        final String name = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_NAME.name());
+        final String shortName = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_SHORT_NAME.name());
+        final String pattern = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_PATTERN.name());
+        final String shape = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_SHAPE.name());
 
-        final String type = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_TYPE);
+        final String type = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_TYPE.name());
         final MarkType markType = MarkType.valueOf(type);
 
-        final String storedColor = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_COLOR);
+        final String storedColor = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_COLOR.name());
         final Color color = AbstractColor.getCssColor(storedColor);
 
 
-        final Document positionDocument = dbObject.get(FieldNames.MARK_PROPERTIES_FIXED_POSITION, Document.class);
+        final Document positionDocument = dbObject.get(FieldNames.MARK_PROPERTIES_FIXED_POSITION.name(),
+                Document.class);
         final Position fixedPosition = positionDocument == null ? null : loadPosition(positionDocument);
 
-        final BasicDBList tagsList = dbObject.get(FieldNames.MARK_PROPERTIES_TAGS, BasicDBList.class);
+        final BasicDBList tagsList = dbObject.get(FieldNames.MARK_PROPERTIES_TAGS.name(), BasicDBList.class);
         final Collection<String> tags = tagsList.stream().map(t -> t.toString()).collect(Collectors.toList());
 
         //all mandatory data are loaded -> create builder 
@@ -2651,7 +2652,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
         //load optional deviceId
         try {
-            final Document deviceIdDocument = dbObject.get(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER, Document.class);
+            final Document deviceIdDocument = dbObject.get(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER.name(),
+                    Document.class);
             final DeviceIdentifier deviceIdentifier = deviceIdDocument == null ? null
                     : loadDeviceId(deviceIdentifierServiceFinder,
                     deviceIdDocument);
@@ -2661,7 +2663,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
 
         //load map of last used templates
-        final BasicDBObject lastUsedTemplateObject = dbObject.get(FieldNames.MARK_PROPERTIES_USED_TEMPLATE,
+        final BasicDBObject lastUsedTemplateObject = dbObject.get(FieldNames.MARK_PROPERTIES_USED_TEMPLATE.name(),
                 BasicDBObject.class);
         @SuppressWarnings("unchecked")
         final Map<Object, Object> mapLastUsedTemplate = lastUsedTemplateObject.toMap();
@@ -2680,7 +2682,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         builder.withLastUsedTemplate(lastUsedTemplate);
 
         //load map of last used roles
-        final BasicDBObject lastUsedRoleObject = dbObject.get(FieldNames.MARK_PROPERTIES_USED_ROLE,
+        final BasicDBObject lastUsedRoleObject = dbObject.get(FieldNames.MARK_PROPERTIES_USED_ROLE.name(),
                 BasicDBObject.class);
         final Map<?, ?> mapUsedRole = lastUsedRoleObject.toMap();
         final Map<String, TimePoint> lastUsedRole = mapUsedRole.entrySet().stream()
