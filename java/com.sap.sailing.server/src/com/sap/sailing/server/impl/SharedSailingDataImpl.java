@@ -25,6 +25,7 @@ import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBuilder;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
+import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
@@ -60,8 +61,18 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         this.mongoObjectFactory = mongoObjectFactory;
         this.deviceIdentifierServiceFinder = deviceIdentifierServiceFinder;
         this.securityServiceTracker = securityServiceTracker;
+
+        load();
     }
     
+    private void load() {
+        // load mark templates before mark properties
+        domainObjectFactory.loadAllMarkTemplates().forEach(m -> markTemplatesById.put(m.getId(), m));
+
+        domainObjectFactory.loadAllMarkProperties(v -> markTemplatesById.get(v))
+                .forEach(m -> markPropertiesById.put(m.getId(), m));
+    }
+
     @Override
     public void clearState() throws Exception {
         removeAll();
@@ -77,15 +88,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     @Override
     public Iterable<MarkProperties> getAllMarkProperties(Iterable<String> tagsToFilterFor) {
-
-        // TODO: ensure mark templates are loaded
-
         // TODO: synchronization
-        if (markPropertiesById.isEmpty()) {
-            domainObjectFactory.loadAllMarkProperties(v -> markTemplatesById.get(v))
-                    .forEach(m -> markPropertiesById.put(m.getId(), m));
-        }
-
         return markPropertiesById.values().stream().filter(m -> containsAny(m.getTags(), tagsToFilterFor))
                 .filter(getSecurityService()::hasCurrentUserReadPermission)
                 .collect(Collectors.toList());
@@ -101,9 +104,8 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
 
     @Override
-    public Iterable<MarkTemplate> getAllMarkTemplates(Iterable<String> tagsToFilterFor) {
-        // TODO Auto-generated method stub
-        return null;
+    public Iterable<MarkTemplate> getAllMarkTemplates() {
+        return markTemplatesById.values();
     }
 
     @Override
@@ -136,8 +138,8 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
                 properties.getType()).withTags(tags).build();
 
         // TODO: synchronization
-        markPropertiesById.put(markProperties.getId(), markProperties);
         mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
+        markPropertiesById.put(markProperties.getId(), markProperties);
         return null;
     }
 
@@ -181,27 +183,27 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
 
     @Override
-    public MarkTemplate createMarkTemplate(CommonMarkProperties properties, Iterable<String> tags) {
+    public MarkTemplate createMarkTemplate(CommonMarkProperties properties) {
         final UUID idOfNewMarkTemplate = UUID.randomUUID();
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.MARK_TEMPLATE, MarkTemplate.getTypeRelativeObjectIdentifier(idOfNewMarkTemplate),
                 idOfNewMarkTemplate + "/" + properties.getName(), () -> {
-                    apply(s -> s.internalCreateMarkTemplate(idOfNewMarkTemplate, properties, tags));
+                    apply(s -> s.internalCreateMarkTemplate(idOfNewMarkTemplate, properties));
                     return getMarkTemplateById(idOfNewMarkTemplate);
                 });
     }
     
     @Override
-    public Void internalCreateMarkTemplate(UUID idOfNewMarkTemplate, CommonMarkProperties properties,
-            Iterable<String> tags) {
-        // TODO Auto-generated method stub
+    public Void internalCreateMarkTemplate(UUID idOfNewMarkTemplate, CommonMarkProperties properties) {
+        MarkTemplate markTemplate = new MarkTemplateImpl(idOfNewMarkTemplate, properties);
+        mongoObjectFactory.storeMarkTemplate(markTemplate);
+        markTemplatesById.put(markTemplate.getId(), markTemplate);
         return null;
     }
     
     @Override
     public MarkTemplate getMarkTemplateById(UUID id) {
-        // TODO Auto-generated method stub
-        return null;
+        return markTemplatesById.get(id);
     }
 
     @Override

@@ -23,7 +23,7 @@ public interface SharedSailingData {
     
     Iterable<MarkProperties> getAllMarkProperties(Iterable<String> tagsToFilterFor);
     
-    Iterable<MarkTemplate> getAllMarkTemplates(Iterable<String> tagsToFilterFor);
+    Iterable<MarkTemplate> getAllMarkTemplates();
     
     Iterable<CourseTemplate> getAllCourseTemplates(Iterable<String> tagsToFilterFor);
 
@@ -41,7 +41,7 @@ public interface SharedSailingData {
      */
     void setTrackingDeviceIdentifierForMarkProperties(MarkProperties markProperties, DeviceIdentifier deviceIdentifier);
     
-    MarkTemplate createMarkTemplate(CommonMarkProperties properties, Iterable<String> tags);
+    MarkTemplate createMarkTemplate(CommonMarkProperties properties);
     
     MarkTemplate getMarkTemplateById(UUID id);
     
