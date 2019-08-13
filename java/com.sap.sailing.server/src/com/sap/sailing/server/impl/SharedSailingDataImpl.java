@@ -34,6 +34,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationWithResultWithIdWrapper;
@@ -239,8 +240,8 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     @Override
     public void recordUsage(MarkTemplate markTemplate, MarkProperties markProperties) {
-        // TODO Auto-generated method stub
-
+        markProperties.getLastUsedTemplate().put(markTemplate, new MillisecondsTimePoint(System.currentTimeMillis()));
+        mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
     }
 
     @Override
