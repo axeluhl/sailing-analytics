@@ -37,6 +37,7 @@ import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.BetterCheckboxCell;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -79,6 +80,7 @@ public class MarkTemplatePanel extends FlowPanel {
         buttonAndFilterPanel.addCreateAction(stringMessages.add(), new Command() {
             @Override
             public void execute() {
+                openEditMarkTemplateDialog(new MarkTemplateDTO());
                 // TODO add action
             }
         });
@@ -233,7 +235,7 @@ public class MarkTemplatePanel extends FlowPanel {
         Column<MarkTemplateDTO, String> colorColumn = new Column<MarkTemplateDTO, String>(new TextCell()) {
             @Override
             public String getValue(MarkTemplateDTO markTemplate) {
-                return markTemplate.getColor().getAsHtml();
+                return markTemplate.getColor() != null ? markTemplate.getColor().getAsHtml() : "";
             }
         };
         // shape
@@ -254,7 +256,7 @@ public class MarkTemplatePanel extends FlowPanel {
         Column<MarkTemplateDTO, String> typeColumn = new Column<MarkTemplateDTO, String>(new TextCell()) {
             @Override
             public String getValue(MarkTemplateDTO markTemplate) {
-                return markTemplate.getType().name();
+                return markTemplate.getType() != null ? markTemplate.getType().name() : "";
             }
         };
 
@@ -295,6 +297,40 @@ public class MarkTemplatePanel extends FlowPanel {
 
     public void refreshMarkTemplates() {
         loadMarkTemplates();
+    }
+
+    void openEditMarkTemplateDialog(final MarkTemplateDTO originalMarkTemplate) {
+        final MarkTemplateEditDialog dialog = new MarkTemplateEditDialog(stringMessages, originalMarkTemplate,
+                new DialogCallback<MarkTemplateDTO>() {
+                    @Override
+                    public void ok(MarkTemplateDTO markTemplate) {
+                        sailingService.addOrUpdateMarkTemplate(markTemplate, new AsyncCallback<MarkTemplateDTO>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter
+                                        .reportError("Error trying to update mark template: " + caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(MarkTemplateDTO updatedMarkTemplate) {
+                                int editedMarkTemplateIndex = filterableMarkTemplates.indexOf(originalMarkTemplate);
+                                filterableMarkTemplates.remove(originalMarkTemplate);
+                                if (editedMarkTemplateIndex >= 0) {
+                                    filterableMarkTemplates.add(editedMarkTemplateIndex, updatedMarkTemplate);
+                                } else {
+                                    filterableMarkTemplates.add(updatedMarkTemplate);
+                                }
+                                markTemplateListDataProvider.refresh();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                });
+        dialog.ensureDebugId("MarkTemplateEditDialog");
+        dialog.show();
     }
 
 }
