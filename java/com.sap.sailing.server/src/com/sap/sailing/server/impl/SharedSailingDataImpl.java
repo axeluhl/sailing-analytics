@@ -87,6 +87,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         }
 
         return markPropertiesById.values().stream().filter(m -> containsAny(m.getTags(), tagsToFilterFor))
+                .filter(getSecurityService()::hasCurrentUserReadPermission)
                 .collect(Collectors.toList());
     }
 
@@ -156,7 +157,11 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     @Override
     public MarkProperties getMarkPropertiesById(UUID id) {
-        return markPropertiesById.get(id);
+        final MarkProperties markProperties = markPropertiesById.get(id);
+        if (markProperties != null) {
+            getSecurityService().checkCurrentUserReadPermission(markProperties);
+        }
+        return markProperties;
     }
 
     @Override
