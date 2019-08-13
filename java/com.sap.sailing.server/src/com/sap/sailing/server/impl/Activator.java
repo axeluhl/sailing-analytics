@@ -34,12 +34,14 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.DoubleVectorFixMongoHandlerImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMongoHandlerImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMovingMongoHandlerImpl;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStoreSupplier;
+import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
 import com.sap.sailing.server.RacingEventServiceMXBean;
@@ -109,6 +111,8 @@ public class Activator implements BundleActivator {
     private ServiceTracker<MailService, MailService> mailServiceTracker;
 
     private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+
+    private SharedSailingDataImpl sharedSailingData;
     
     public Activator() {
         clearPersistentCompetitors = Boolean
@@ -236,6 +240,13 @@ public class Activator implements BundleActivator {
         // this code block is not run, and the test case can inject some other type of finder
         // instead.
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
+        
+        sharedSailingData = new SharedSailingDataImpl(PersistenceFactory.INSTANCE
+                .getDefaultDomainObjectFactory(), PersistenceFactory.INSTANCE
+                .getDefaultMongoObjectFactory(serviceFinderFactory), serviceFinderFactory, securityServiceTracker);
+        registrations.add(context.registerService(SharedSailingData.class, sharedSailingData, /* properties */ null));
+        registrations.add(context.registerService(ClearStateTestSupport.class, sharedSailingData, /* properties */ null));
+        registrations.add(context.registerService(Replicable.class, sharedSailingData, /* properties */ null));
 
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors,
                 serviceFinderFactory, trackedRegattaListener, notificationService,

@@ -31,6 +31,7 @@ import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
@@ -55,11 +56,11 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     public SharedSailingDataImpl(final DomainObjectFactory domainObjectFactory,
             final MongoObjectFactory mongoObjectFactory,
-            TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder,
+            TypeBasedServiceFinderFactory serviceFinderFactory,
             ServiceTracker<SecurityService, SecurityService> securityServiceTracker) {
         this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
-        this.deviceIdentifierServiceFinder = deviceIdentifierServiceFinder;
+        this.deviceIdentifierServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
         this.securityServiceTracker = securityServiceTracker;
 
         load();
