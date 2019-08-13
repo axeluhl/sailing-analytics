@@ -2662,9 +2662,20 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         //load map of last used templates
         final BasicDBObject lastUsedTemplateObject = dbObject.get(FieldNames.MARK_PROPERTIES_USED_TEMPLATE,
                 BasicDBObject.class);
-        final Map<?, ?> mapLastUsedTemplate = lastUsedTemplateObject.toMap();
-        final Map<MarkTemplate, TimePoint> lastUsedTemplate = mapLastUsedTemplate.entrySet().stream().collect(Collectors
-                .toMap(k -> markTemplateResolver.apply(UUID.fromString(k.toString())), v -> parseTimePoint(v)));
+        @SuppressWarnings("unchecked")
+        final Map<Object, Object> mapLastUsedTemplate = lastUsedTemplateObject.toMap();
+
+        final Map<MarkTemplate, TimePoint> lastUsedTemplate = new HashMap<>();
+        for (Map.Entry<Object, Object> e : mapLastUsedTemplate.entrySet()) {
+            MarkTemplate markTemplate = markTemplateResolver.apply(UUID.fromString(e.getKey().toString()));
+            if (markTemplate != null) {
+                lastUsedTemplate.put(markTemplate, parseTimePoint(e.getValue()));
+            }
+            else {
+                logger.warning(String.format("Could not resolve MarkTemplate with id %s for MarkProperties %s.",
+                        e.getKey().toString(), id));
+            }
+        }
         builder.withLastUsedTemplate(lastUsedTemplate);
 
         //load map of last used roles
