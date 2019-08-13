@@ -1,6 +1,13 @@
 package com.sap.sailing.domain.coursetemplate;
 
+import java.util.UUID;
+
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.NamedWithUUID;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
  * A {@link Course} can be created from this template. The template defines {@link MarkTemplate}s,
@@ -27,7 +34,7 @@ import com.sap.sse.common.NamedWithUUID;
  * @author Axel Uhl (d043530)
  *
  */
-public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUID, HasTags {
+public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUID, HasTags, WithQualifiedObjectIdentifier {
     /**
      * The templates for all the marks that shall be made available in the regatta when applying this template. All
      * marks required to construct the waypoint sequence must be produced from this set of mark templates. There may be
@@ -55,4 +62,18 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
      *            limitation.
      */
     Iterable<WaypointTemplate> getWaypoints(int numberOfLaps);
+    
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(UUID courseTemplateUUID) {
+        return new TypeRelativeObjectIdentifier(courseTemplateUUID.toString());
+    }
+    
+    @Override
+    default QualifiedObjectIdentifier getIdentifier() {
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier(getId()));
+    }
+    
+    @Override
+    default HasPermissions getPermissionType() {
+        return SecuredDomainType.COURSE_TEMPLATE;
+    }
 }

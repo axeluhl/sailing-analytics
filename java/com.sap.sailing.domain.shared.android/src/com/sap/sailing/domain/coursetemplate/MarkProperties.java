@@ -1,14 +1,20 @@
 package com.sap.sailing.domain.coursetemplate;
 
 import java.util.Map;
+import java.util.UUID;
 
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.NamedWithUUID;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
  * Stores properties that can be applied to a mark in the context of an event or a regatta, including the mark's own
@@ -35,7 +41,7 @@ import com.sap.sse.common.TimePoint;
  * @author Axel Uhl (d043530)
  *
  */
-public interface MarkProperties extends CommonMarkPropertiesWithOptionalPositioning, NamedWithUUID, HasTags {
+public interface MarkProperties extends CommonMarkPropertiesWithOptionalPositioning, NamedWithUUID, HasTags, WithQualifiedObjectIdentifier {
     void setColor(Color color);
 
     void setShape(String shape);
@@ -68,4 +74,18 @@ public interface MarkProperties extends CommonMarkPropertiesWithOptionalPosition
     Map<MarkTemplate, TimePoint> getLastUsedTemplate();
 
     Map<String, TimePoint> getLastUsedRole();
+    
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(UUID markPropertiesUUID) {
+        return new TypeRelativeObjectIdentifier(markPropertiesUUID.toString());
+    }
+    
+    @Override
+    default QualifiedObjectIdentifier getIdentifier() {
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier(getId()));
+    }
+    
+    @Override
+    default HasPermissions getPermissionType() {
+        return SecuredDomainType.MARK_PROPERTIES;
+    }
 }
