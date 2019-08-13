@@ -25,6 +25,7 @@ import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBuilder;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
+import com.sap.sailing.domain.coursetemplate.impl.CourseTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -51,6 +52,8 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     private final Map<UUID, MarkProperties> markPropertiesById = new ConcurrentHashMap<>();
     private final Map<UUID, MarkTemplate> markTemplatesById = new ConcurrentHashMap<>();
+    private final Map<UUID, CourseTemplate> courseTemplatesById = new ConcurrentHashMap<>();
+
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
     private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
 
@@ -67,11 +70,14 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
     
     private void load() {
-        // load mark templates before mark properties
+        // load mark templates before mark properties and course templates
         domainObjectFactory.loadAllMarkTemplates().forEach(m -> markTemplatesById.put(m.getId(), m));
 
         domainObjectFactory.loadAllMarkProperties(v -> markTemplatesById.get(v))
                 .forEach(m -> markPropertiesById.put(m.getId(), m));
+
+        domainObjectFactory.loadAllCourseTemplates(m -> markTemplatesById.get(m))
+                .forEach(c -> courseTemplatesById.put(c.getId(), c));
     }
 
     @Override
@@ -112,8 +118,8 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     @Override
     public Iterable<CourseTemplate> getAllCourseTemplates(Iterable<String> tagsToFilterFor) {
-        // TODO Auto-generated method stub
-        return null;
+        return courseTemplatesById.values().stream().filter(getSecurityService()::hasCurrentUserReadPermission)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -227,14 +233,21 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     public Void internalCreateCourseTemplate(UUID idOfNewCourseTemplate, String courseTemplateName, Iterable<MarkTemplate> marks,
             Iterable<WaypointTemplate> waypoints, int zeroBasedIndexOfRepeatablePartStart,
             int zeroBasedIndexOfRepeatablePartEnd, Iterable<String> tags) {
-        // TODO Auto-generated method stub
+        final CourseTemplate courseTemplate = new CourseTemplateImpl(idOfNewCourseTemplate, courseTemplateName, marks,
+                waypoints,
+                zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd);
+        mongoObjectFactory.storeCourseTemplate(courseTemplate);
+        courseTemplatesById.put(courseTemplate.getId(), courseTemplate);
         return null;
     }
     
     @Override
     public CourseTemplate getCourseTemplateById(UUID id) {
-        // TODO Auto-generated method stub
-        return null;
+        final CourseTemplate courseTemplate = courseTemplatesById.get(id);
+        if (courseTemplate != null) {
+            getSecurityService().checkCurrentUserReadPermission(courseTemplate);
+        }
+        return courseTemplate;
     }
 
     @Override
@@ -245,7 +258,6 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
         return null;
     }
-
 
     @Override
     public void recordUsage(MarkTemplate markTemplate, MarkProperties markProperties) {
@@ -295,7 +307,12 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     
     @Override
     public Void internalDeleteCourseTemplate(UUID courseTemplateUUID) {
-        // TODO Auto-generated method stub
+        if (this.courseTemplatesById.remove(courseTemplateUUID) != null) {
+            mongoObjectFactory.removeCourseTemplate(courseTemplateUUID);
+        } else {
+            throw new NullPointerException(
+                    String.format("Did not find a course template with ID %s", courseTemplateUUID));
+        }
         return null;
     }
 
