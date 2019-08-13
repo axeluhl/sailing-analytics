@@ -339,6 +339,7 @@ import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.sharding.ShardingContext;
+import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
@@ -668,6 +669,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     deviceIdentifierStringSerializationHandlerTracker;
     
     private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+
+    private final ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker;
     
     private final com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory tractracMongoObjectFactory;
 
@@ -711,6 +714,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         Activator activator = Activator.getInstance();
         quickRanksLiveCache = new QuickRanksLiveCache(this);
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
+        sharedSailingDataTracker = ServiceTrackerFactory.createAndOpen(context, SharedSailingData.class);
         windFinderTrackerFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, WindFinderTrackerFactory.class);
         replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
         resultUrlRegistryServiceTracker = ServiceTrackerFactory.createAndOpen(context, ResultUrlRegistry.class);
@@ -2684,6 +2688,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     protected RacingEventService getService() {
         try {
             return racingEventServiceTracker.waitForService(0);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } // grab the service
+    }
+
+    protected SharedSailingData getSharedSailingData() {
+        try {
+            return sharedSailingDataTracker.waitForService(0);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } // grab the service
