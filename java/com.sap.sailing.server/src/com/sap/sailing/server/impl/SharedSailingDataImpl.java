@@ -14,6 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import org.osgi.util.tracker.ServiceTracker;
+
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
@@ -35,6 +37,7 @@ import com.sap.sse.replication.OperationsToMasterSender;
 import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.ClearStateTestSupport;
 
 public class SharedSailingDataImpl implements ReplicatingSharedSailingData, ClearStateTestSupport {
@@ -45,14 +48,16 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     private final Map<UUID, MarkProperties> markPropertiesById = new ConcurrentHashMap<>();
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
+    private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
 
     public SharedSailingDataImpl(final DomainObjectFactory domainObjectFactory,
             final MongoObjectFactory mongoObjectFactory,
-            TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder) {
+            TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder,
+            ServiceTracker<SecurityService, SecurityService> securityServiceTracker) {
         this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
         this.deviceIdentifierServiceFinder = deviceIdentifierServiceFinder;
-
+        this.securityServiceTracker = securityServiceTracker;
     }
     
     @Override
@@ -62,6 +67,10 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     private void removeAll() {
         markPropertiesById.clear();
+    }
+    
+    public SecurityService getSecurityService() {
+        return securityServiceTracker.getService();
     }
 
     @Override
