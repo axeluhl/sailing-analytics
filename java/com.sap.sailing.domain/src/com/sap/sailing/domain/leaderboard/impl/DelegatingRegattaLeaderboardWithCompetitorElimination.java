@@ -495,4 +495,11 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     public void deregisterBoats(Iterable<Boat> boats) {
         getFullLeaderboard().deregisterBoats(boats);
     }
+
+    @Override
+    public Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
+            Set<RaceColumn> discardedRaceColumns, Supplier<Double> totalPointsProvider) {
+        return getFullLeaderboard().getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns,
+                totalPointsProvider);
+    }
 }

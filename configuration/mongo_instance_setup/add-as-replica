@@ -11,7 +11,11 @@ REPLICA_SET_PRIORITY=$(ec2-metadata | grep REPLICA_SET_PRIORITY | sed -e 's/^use
 if [ -z "$REPLICA_SET_PRIORITY" ]; then
   REPLICA_SET_PRIORITY=1
 fi
+REPLICA_SET_VOTES=$(ec2-metadata | grep REPLICA_SET_VOTES | sed -e 's/^user-data: //' | sed -e 's/^REPLICA_SET_VOTES=//')
+if [ -z "$REPLICA_SET_VOTES" ]; then
+  REPLICA_SET_VOTES=0
+fi
 if [ \! -z "REPLICA_SET_PRIMARY" ]; then
   IP=$(ec2-metadata -o | sed -e 's/^local-ipv4: //')
-  echo "rs.add({host: \"$IP:27017\", priority: $REPLICA_SET_PRIORITY})" | mongo "mongodb://$REPLICA_SET_PRIMARY/?replicaSet=$REPLICA_SET_NAME&retryWrites=true"
+  echo "rs.add({host: \"$IP:27017\", priority: $REPLICA_SET_PRIORITY, votes: $REPLICA_SET_VOTES})" | mongo "mongodb://$REPLICA_SET_PRIMARY/?replicaSet=$REPLICA_SET_NAME&retryWrites=true"
 fi

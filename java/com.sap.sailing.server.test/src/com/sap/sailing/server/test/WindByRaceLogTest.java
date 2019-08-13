@@ -115,8 +115,8 @@ public class WindByRaceLogTest {
         Competitor competitor = masterDomainFactory.getOrCreateCompetitor("GER 61", "Sailor", "S", Color.RED, "noone@nowhere.de", null, new TeamImpl("Sailor",
                 (List<PersonImpl>) Arrays.asList(new PersonImpl[] { new PersonImpl("Sailor 1", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null)}),
                 new PersonImpl("Sailor 2", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null)),
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
-        DynamicBoat boat = (DynamicBoat) masterDomainFactory.getOrCreateBoat("boat", "GER 61", boatClass, "GER 61", null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
+        DynamicBoat boat = (DynamicBoat) masterDomainFactory.getOrCreateBoat("boat", "GER 61", boatClass, "GER 61", null, /* storePersistently */ true);
         return new CompetitorWithBoatImpl(competitor, boat);
     }
     

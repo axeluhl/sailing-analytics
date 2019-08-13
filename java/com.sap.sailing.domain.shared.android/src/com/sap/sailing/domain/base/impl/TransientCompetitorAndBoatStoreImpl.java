@@ -99,10 +99,10 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
     }
 
     private DynamicCompetitor createCompetitor(Serializable id, String name, String shortName, Color displayColor, String email, URI flagImage,
-            DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
+            DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, boolean storePersistently) {
         DynamicCompetitor result = new CompetitorImpl(id, name, shortName, displayColor, email, flagImage, team,
                 timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
-        addNewCompetitor(result);
+        addNewCompetitor(result, storePersistently);
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "Created competitor "+name+" with ID "+id, new Exception("Here is where it happened"));
         }
@@ -130,8 +130,13 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
      * {@link IllegalArgumentException} will be thrown. This is necessary because there is a rule in place saying each
      * competitor entity can be represented in the scope of the VM by at most one Java {@link Competitor} object, and
      * replacing an object in this store would leave us with at least two.
+     * 
+     * @param storePersistently
+     *            ignored here; only subclasses may deal with persistence. If this flag is {@code false}, a subclass
+     *            shall not store the competitor persistently because it can assume that the competitor object has just
+     *            been loaded from the persistent store.
      */
-    protected void addNewCompetitor(DynamicCompetitor competitor) {
+    protected void addNewCompetitor(DynamicCompetitor competitor, boolean storePersistently) {
         LockUtil.lockForWrite(lock);
         try {
             final Competitor existingCompetitorWithEqualId = competitorCache.put(competitor.getId(), competitor);
@@ -158,7 +163,7 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
     @Override
     public DynamicCompetitor getOrCreateCompetitor(Serializable competitorId, String name, String shortName, Color displayColor, String email,
             URI flagImage, DynamicTeam team, Double timeOnTimeFactor,
-            Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
+            Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, boolean storePersistently) {
         DynamicCompetitor result = getExistingCompetitorById(competitorId); // avoid synchronization for successful read access
         if (result == null) {
             LockUtil.lockForWrite(lock);
@@ -166,14 +171,14 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
                 result = getExistingCompetitorById(competitorId); // try again, now while holding the write lock
                 if (result == null) {
                     result = createCompetitor(competitorId, name, shortName, displayColor, email, flagImage, team,
-                            timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
+                            timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, /* storePersistently */ storePersistently);
                 }
             } finally {
                 LockUtil.unlockAfterWrite(lock);
             }
         } else if (isCompetitorToUpdateDuringGetOrCreate(result)) {
             updateCompetitor(result.getId().toString(), name, shortName, displayColor, email, team.getNationality(),
-                    team.getImage(), flagImage, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
+                    team.getImage(), flagImage, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, /* storePersistently */ storePersistently);
             competitorNoLongerToUpdateDuringGetOrCreate(result);
         }
         return result;
@@ -323,7 +328,7 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
     @Override
     public Competitor updateCompetitor(String idAsString, String newName, String newShortName, Color newDisplayColor, String newEmail,
             Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
-            Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String newSearchTag) {
+            Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String newSearchTag, boolean storePersistently) {
         DynamicCompetitor competitor = getExistingCompetitorByIdAsString(idAsString);
         if (competitor != null) {
             LockUtil.lockForWrite(lock);
@@ -398,24 +403,24 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
     @Override
     public void addNewCompetitors(Iterable<DynamicCompetitor> competitors) {
         for (DynamicCompetitor competitor : competitors) {
-            addNewCompetitor(competitor);
+            addNewCompetitor(competitor, /* storePersistently */ true);
         }
     }
 
     @Override
     public void addNewCompetitorsWithBoat(Iterable<DynamicCompetitorWithBoat> competitors) {
         for (DynamicCompetitorWithBoat competitor : competitors) {
-            addNewBoat(competitor.getBoat()); // create the boat before the competitor because the competitor references the boat
-            addNewCompetitor(competitor);
+            addNewBoat(competitor.getBoat(), /* storePersistently */ true); // create the boat before the competitor because the competitor references the boat
+            addNewCompetitor(competitor, /* storePersistently */ true);
         }
     }
 
     private DynamicCompetitorWithBoat createCompetitorWithBoat(Serializable id, String name, String shortName, Color displayColor, String email, URI flagImage,
-            DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
+            DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat, boolean storePersistently) {
         DynamicCompetitorWithBoat competitor = new CompetitorWithBoatImpl(id, name, shortName, displayColor, email, flagImage, team,
                 timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
-        addNewBoat(boat); // create the boat before the competitor because the competitor references the boat
-        addNewCompetitor(competitor);
+        addNewBoat(boat, /* storePersistently */ storePersistently); // create the boat before the competitor because the competitor references the boat
+        addNewCompetitor(competitor, /* storePersistently */ storePersistently);
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "Created competitor "+name+" with ID "+id, new Exception("Here is where it happened"));
         }
@@ -425,7 +430,7 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
     @Override
     public DynamicCompetitorWithBoat getOrCreateCompetitorWithBoat(Serializable competitorId, String name, String shortName, Color displayColor, String email,
             URI flagImage, DynamicTeam team, Double timeOnTimeFactor,
-            Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
+            Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat, boolean storePersistently) {
         DynamicCompetitorWithBoat result = null; 
         result = getExistingCompetitorWithBoatById(competitorId); // avoid synchronization for successful read access
         if (result == null) {
@@ -434,7 +439,7 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
                 result = getExistingCompetitorWithBoatById(competitorId); // try again, now while holding the write lock
                 if (result == null) {
                     result = createCompetitorWithBoat(competitorId, name, shortName, displayColor, email, flagImage, team,
-                            timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
+                            timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat, /* storePersistently */ storePersistently);
                 }
             } finally {
                 LockUtil.unlockAfterWrite(lock);
@@ -442,7 +447,7 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
         } else if (isCompetitorToUpdateDuringGetOrCreate(result)) {
             assert result.getBoat() == boat;
             updateCompetitor(result.getId().toString(), name, shortName, displayColor, email, team.getNationality(),
-                    team.getImage(), flagImage, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
+                    team.getImage(), flagImage, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, /* storePersistently */ storePersistently);
             competitorNoLongerToUpdateDuringGetOrCreate(result);
         }
         return result;
@@ -460,9 +465,9 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
         boatUpdateListeners.remove(listener);
     }
 
-    private DynamicBoat createBoat(Serializable id, String name, BoatClass boatClass, String sailID, Color color) {
+    private DynamicBoat createBoat(Serializable id, String name, BoatClass boatClass, String sailID, Color color, boolean storePersistently) {
         DynamicBoat boat = new BoatImpl(id, name, boatClass, sailID, color);
-        addNewBoat(boat);
+        addNewBoat(boat, /* storePersistently */ storePersistently);
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "Created boat "+name+" with ID "+id, new Exception("Here is where it happened"));
         }
@@ -474,7 +479,7 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
      * {@link #getExistingBoatById(Serializable)}. Subclasses may override in case they need to take additional
      * measures such as durably storing the boat. Overriding implementations must call this implementation.
      */
-    protected void addNewBoat(DynamicBoat boat) {
+    protected void addNewBoat(DynamicBoat boat, boolean storePersistently) {
         LockUtil.lockForWrite(lock);
         try {
             final Boat existingBoatWithEqualId = boatCache.put(boat.getId(), boat);
@@ -494,14 +499,14 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
     }
 
     @Override
-    public DynamicBoat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color) {
+    public DynamicBoat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color, boolean storePersistently) {
         DynamicBoat result = getExistingBoatById(id); // avoid synchronization for successful read access
         if (result == null) {
             LockUtil.lockForWrite(lock);
             try {
                 result = getExistingBoatById(id); // try again, now while holding the write lock
                 if (result == null) {
-                    result = createBoat(id, name, boatClass, sailId, color);
+                    result = createBoat(id, name, boatClass, sailId, color, storePersistently);
                 }
             } finally {
                 LockUtil.unlockAfterWrite(lock);

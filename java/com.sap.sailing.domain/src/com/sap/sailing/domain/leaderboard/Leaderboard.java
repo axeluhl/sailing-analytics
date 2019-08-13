@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
@@ -538,6 +539,15 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      */
     Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
             Set<RaceColumn> discardedRaceColumns);
+
+    /**
+     * Same as {@link #getNetPoints(Competitor, RaceColumn, TimePoint, Set)}, only that a supplier for
+     * the total points for the {@code competitor} in column {@code raceColumn} at time point {@code timePoint}
+     * is provided. This helps if a caller also needs to determine the total points anyway, saving redundant
+     * calculations.
+     */
+    Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
+            Set<RaceColumn> discardedRaceColumns, Supplier<Double> totalPointsProvider);
 
     TimePoint getNowMinusDelay();
     

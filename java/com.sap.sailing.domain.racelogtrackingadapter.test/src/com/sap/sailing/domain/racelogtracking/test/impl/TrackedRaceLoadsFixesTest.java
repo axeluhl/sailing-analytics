@@ -52,8 +52,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
     private final Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
     private final Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null,
-            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-    private final Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null);
+            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true);
+    private final Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null, /* storePersistently */ true);
     private final Course course =  new CourseImpl("course", Arrays.asList(new WaypointImpl(mark), new WaypointImpl(mark2)));
 
     private RaceDefinition raceDefinition;
