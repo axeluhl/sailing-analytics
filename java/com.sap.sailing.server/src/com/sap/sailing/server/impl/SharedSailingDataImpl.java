@@ -1,6 +1,14 @@
 package com.sap.sailing.server.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -20,6 +28,13 @@ import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongo
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.Util;
+import com.sap.sse.replication.OperationExecutionListener;
+import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.OperationWithResultWithIdWrapper;
+import com.sap.sse.replication.OperationsToMasterSender;
+import com.sap.sse.replication.OperationsToMasterSendingQueue;
+import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.util.ClearStateTestSupport;
 
 public class SharedSailingDataImpl implements ReplicatingSharedSailingData, ClearStateTestSupport {
@@ -42,6 +57,10 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     
     @Override
     public void clearState() throws Exception {
+        removeAll();
+    }
+
+    private void removeAll() {
         markPropertiesById.clear();
     }
 
@@ -172,5 +191,122 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         // TODO Auto-generated method stub
 
     }
+    
+    // Replication related methods and fields
+    private final ConcurrentHashMap<OperationExecutionListener<ReplicatingSharedSailingData>, OperationExecutionListener<ReplicatingSharedSailingData>> operationExecutionListeners = new ConcurrentHashMap<>();
+    private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
+    private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
+    private final Set<OperationWithResultWithIdWrapper<ReplicatingSharedSailingData, ?>> operationsSentToMasterForReplication = new HashSet<>();
+    private ReplicationMasterDescriptor master;
+    
+    /**
+     * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable.
+     * The {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
+     * {@link OperationsToMasterSendingQueue#scheduleForSending(OperationWithResult, OperationsToMasterSender)}
+     * method.
+     */
+    private OperationsToMasterSendingQueue unsentOperationsToMasterSender;
 
+    
+
+    @Override
+    public Serializable getId() {
+        return getClass().getName();
+    }
+
+    @Override
+    public ReplicationMasterDescriptor getMasterDescriptor() {
+        return master;
+    }
+
+    @Override
+    public void startedReplicatingFrom(ReplicationMasterDescriptor master) {
+        this.master = master;
+    }
+
+    @Override
+    public void stoppedReplicatingFrom(ReplicationMasterDescriptor master) {
+        this.master = null;
+    }
+
+    @Override
+    public Iterable<OperationExecutionListener<ReplicatingSharedSailingData>> getOperationExecutionListeners() {
+        return operationExecutionListeners.keySet();
+    }
+
+    @Override
+    public void addOperationExecutionListener(
+            OperationExecutionListener<ReplicatingSharedSailingData> listener) {
+        this.operationExecutionListeners.put(listener, listener);
+    }
+
+    @Override
+    public void removeOperationExecutionListener(
+            OperationExecutionListener<ReplicatingSharedSailingData> listener) {
+        this.operationExecutionListeners.remove(listener);
+    }
+
+    @Override
+    public boolean isCurrentlyFillingFromInitialLoad() {
+        return currentlyFillingFromInitialLoad.get();
+    }
+
+    @Override
+    public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
+        this.currentlyFillingFromInitialLoad.set(currentlyFillingFromInitialLoad);
+    }
+
+    @Override
+    public boolean isCurrentlyApplyingOperationReceivedFromMaster() {
+        return currentlyApplyingOperationReceivedFromMaster.get();
+    }
+
+    @Override
+    public void setCurrentlyApplyingOperationReceivedFromMaster(boolean currentlyApplyingOperationReceivedFromMaster) {
+        this.currentlyApplyingOperationReceivedFromMaster.set(currentlyApplyingOperationReceivedFromMaster);
+    }
+
+    @Override
+    public void addOperationSentToMasterForReplication(
+            OperationWithResultWithIdWrapper<ReplicatingSharedSailingData, ?> operationWithResultWithIdWrapper) {
+        this.operationsSentToMasterForReplication.add(operationWithResultWithIdWrapper);
+    }
+
+    @Override
+    public boolean hasSentOperationToMaster(
+            OperationWithResult<ReplicatingSharedSailingData, ?> operation) {
+        return operationsSentToMasterForReplication.remove(operation);
+    }
+
+    @Override
+    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
+        return new ObjectInputStream(is);
+    }
+
+    @Override
+    public synchronized void initiallyFillFromInternal(ObjectInputStream is)
+            throws IOException, ClassNotFoundException, InterruptedException {
+    }
+
+    @Override
+    public void serializeForInitialReplicationInternal(ObjectOutputStream objectOutputStream) throws IOException {
+    }
+
+    @Override
+    public synchronized void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
+        removeAll();
+    }
+
+    @Override
+    public void setUnsentOperationToMasterSender(OperationsToMasterSendingQueue service) {
+        this.unsentOperationsToMasterSender = service;
+    }
+
+    @Override
+    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
+            OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+        if (unsentOperationsToMasterSender != null) {
+            unsentOperationsToMasterSender.scheduleForSending(operationWithResult, sender);
+        }
+    }
 }
