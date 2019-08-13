@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -244,8 +245,13 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     @Override
     public Map<MarkProperties, TimePoint> getUsedMarkProperties(MarkTemplate markTemplate) {
-        // TODO Auto-generated method stub
-        return null;
+        final Map<MarkProperties, TimePoint> recordedUsage = new HashMap<>();
+        for (final MarkProperties mp : markPropertiesById.values()) {
+            if (mp.getLastUsedTemplate().containsKey(markTemplate)) {
+                recordedUsage.put(mp, mp.getLastUsedTemplate().get(markTemplate));
+            }
+        }
+        return recordedUsage;
     }
 
     @Override
