@@ -49,7 +49,7 @@ public class DeviceConfigurationWithSecurityDTO extends DeviceConfigurationDTO i
     }
 
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredDomainType.RACE_MANAGER_APP_DEVICE_CONFIGURATION;
     }
 

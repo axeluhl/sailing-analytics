@@ -4,5 +4,5 @@ import com.sap.sse.common.Named;
 
 public interface WithQualifiedObjectIdentifier extends Named {
     QualifiedObjectIdentifier getIdentifier();
-    HasPermissions getType();
+    HasPermissions getPermissionType();
 }

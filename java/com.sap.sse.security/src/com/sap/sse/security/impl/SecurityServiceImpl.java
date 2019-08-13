@@ -2223,26 +2223,26 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public boolean hasCurrentUserReadPermission(WithQualifiedObjectIdentifier object) {
         return object == null ? true :
-            SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(DefaultActions.READ, object));
+            SecurityUtils.getSubject().isPermitted(object.getPermissionType().getStringPermissionForObject(DefaultActions.READ, object));
     }
 
     @Override
     public boolean hasCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object) {
         return object == null ? true :
-            SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(DefaultActions.UPDATE, object));
+            SecurityUtils.getSubject().isPermitted(object.getPermissionType().getStringPermissionForObject(DefaultActions.UPDATE, object));
     }
 
     @Override
     public boolean hasCurrentUserDeletePermission(WithQualifiedObjectIdentifier object) {
         return object == null ? true :
-            SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(DefaultActions.DELETE, object));
+            SecurityUtils.getSubject().isPermitted(object.getPermissionType().getStringPermissionForObject(DefaultActions.DELETE, object));
     }
 
     public boolean hasCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
         boolean isPermitted = true;
         if (object != null) {
             for (int i = 0; i < actions.length; i++) {
-                isPermitted &= SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(actions[i], object));
+                isPermitted &= SecurityUtils.getSubject().isPermitted(object.getPermissionType().getStringPermissionForObject(actions[i], object));
             }
         }
         return isPermitted;
@@ -2264,21 +2264,21 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void checkCurrentUserReadPermission(WithQualifiedObjectIdentifier object) {
         if (object != null) {
-            SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(DefaultActions.READ, object));
+            SecurityUtils.getSubject().checkPermission(object.getPermissionType().getStringPermissionForObject(DefaultActions.READ, object));
         }
     }
 
     @Override
     public void checkCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object) {
         if (object != null) {
-            SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(DefaultActions.UPDATE, object));
+            SecurityUtils.getSubject().checkPermission(object.getPermissionType().getStringPermissionForObject(DefaultActions.UPDATE, object));
         }
     }
 
     @Override
     public void checkCurrentUserDeletePermission(WithQualifiedObjectIdentifier object) {
         if (object != null) {
-            SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(DefaultActions.DELETE, object));
+            SecurityUtils.getSubject().checkPermission(object.getPermissionType().getStringPermissionForObject(DefaultActions.DELETE, object));
         }
     }
 
@@ -2293,7 +2293,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public void checkCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
         if (object != null) {
             for (int i = 0; i < actions.length; i++) {
-                SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(actions[i], object));
+                SecurityUtils.getSubject().checkPermission(object.getPermissionType().getStringPermissionForObject(actions[i], object));
             }
         }
     }
@@ -2304,7 +2304,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             boolean isPermitted = false;
             for (int i = 0; i < actions.length; i++) {
                 if (SecurityUtils.getSubject()
-                        .isPermitted(object.getType().getStringPermissionForObject(actions[i], object))) {
+                        .isPermitted(object.getPermissionType().getStringPermissionForObject(actions[i], object))) {
                     isPermitted = true;
                     break;
                 }

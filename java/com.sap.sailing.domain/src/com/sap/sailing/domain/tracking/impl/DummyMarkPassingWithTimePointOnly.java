@@ -128,7 +128,7 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
             }
 
             @Override
-            public HasPermissions getType() {
+            public HasPermissions getPermissionType() {
                 return null;
             }
         };

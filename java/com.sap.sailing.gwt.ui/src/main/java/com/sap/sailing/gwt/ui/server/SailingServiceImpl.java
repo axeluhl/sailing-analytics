@@ -6182,7 +6182,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public void createOrUpdateDeviceConfiguration(DeviceConfigurationDTO configurationDTO) {
         if (getService().getDeviceConfigurationById(configurationDTO.id) == null) {
             final DeviceConfiguration configuration = convertToDeviceConfiguration(configurationDTO);
-            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(configuration.getType(),
+            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(configuration.getPermissionType(),
                     configuration.getIdentifier().getTypeRelativeObjectIdentifier(), configuration.getName(),
                     new Action() {
                         @Override
