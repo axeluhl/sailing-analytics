@@ -26,4 +26,9 @@ public interface ReplicatingSharedSailingData extends SharedSailingData,
     Void internalSetTrackingDeviceIdentifierForMarkProperties(UUID markPropertiesUUID, DeviceIdentifier deviceIdentifier);
     
     Void internalSetFixedPositionForMarkProperties(UUID markPropertiesUUID, Position position);
+
+    Void internalDeleteMarkProperties(UUID markPropertiesUUID);
+
+    Void internalDeleteCourseTemplate(UUID courseTemplateUUID);
+
 }

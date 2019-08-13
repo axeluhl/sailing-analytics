@@ -256,22 +256,36 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     @Override
     public void deleteMarkProperties(MarkProperties markProperties) {
+        final UUID id = markProperties.getId();
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(markProperties,
+                () -> apply(s -> s.internalDeleteMarkProperties(id)));
+    }
+
+    @Override
+    public Void internalDeleteMarkProperties(UUID markPropertiesUUID) {
         // TODO: synchronization
-        if (this.markPropertiesById.remove(markProperties.getId()) != null) {
-            mongoObjectFactory.removeMarkProperties(markProperties.getId());
+        if (this.markPropertiesById.remove(markPropertiesUUID) != null) {
+            mongoObjectFactory.removeMarkProperties(markPropertiesUUID);
         } else {
             throw new NullPointerException(
-                    String.format("Did not find a mark properties with ID %s", markProperties.getId()));
+                    String.format("Did not find a mark properties with ID %s", markPropertiesUUID));
         }
-
+        return null;
     }
 
     @Override
     public void deleteCourseTemplate(CourseTemplate courseTemplate) {
-        // TODO Auto-generated method stub
-
+        final UUID id = courseTemplate.getId();
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(courseTemplate,
+                () -> apply(s -> s.internalDeleteCourseTemplate(id)));
     }
     
+    @Override
+    public Void internalDeleteCourseTemplate(UUID courseTemplateUUID) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
     // Replication related methods and fields
     private final ConcurrentHashMap<OperationExecutionListener<ReplicatingSharedSailingData>, OperationExecutionListener<ReplicatingSharedSailingData>> operationExecutionListeners = new ConcurrentHashMap<>();
     private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
