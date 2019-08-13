@@ -6,16 +6,16 @@ import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 
 public class WaypointTemplateImpl implements WaypointTemplate {
     private final PassingInstruction passingInstruction;
-    private final ControlPointTemplate controlPoint;
+    private final ControlPointTemplate controlPointTemplate;
     
     public WaypointTemplateImpl(ControlPointTemplate controlPoint, PassingInstruction passingInstruction) {
         this.passingInstruction = passingInstruction;
-        this.controlPoint = controlPoint;
+        this.controlPointTemplate = controlPoint;
     }
 
     @Override
-    public ControlPointTemplate getControlPoint() {
-        return controlPoint;
+    public ControlPointTemplate getControlPointTemplate() {
+        return controlPointTemplate;
     }
 
     @Override

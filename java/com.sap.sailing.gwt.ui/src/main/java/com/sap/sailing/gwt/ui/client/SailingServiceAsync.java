@@ -108,6 +108,7 @@ import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -1120,4 +1121,8 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void existsTracTracConfigurationForCurrentUser(String jsonUrl, AsyncCallback<Boolean> callback);
 
     void getTrackedRaceIsUsingMarkPassingCalculator(RegattaAndRaceIdentifier regattaNameAndRaceName, AsyncCallback<Boolean> callback);
+
+    void getMarkTemplates(AsyncCallback<Iterable<MarkTemplateDTO>> callback);
+
+    void addOrUpdateMarkTemplate(MarkTemplateDTO markTemplate, AsyncCallback<MarkTemplateDTO> asyncCallback);
 }

@@ -304,6 +304,9 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
+import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
+import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesImpl;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
@@ -339,6 +342,7 @@ import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.sharding.ShardingContext;
+import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
@@ -469,6 +473,7 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
 import com.sap.sailing.manage2sail.RaceResultDescriptor;
@@ -668,6 +673,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     deviceIdentifierStringSerializationHandlerTracker;
     
     private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+
+    private final ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker;
     
     private final com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory tractracMongoObjectFactory;
 
@@ -711,6 +718,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         Activator activator = Activator.getInstance();
         quickRanksLiveCache = new QuickRanksLiveCache(this);
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
+        sharedSailingDataTracker = ServiceTrackerFactory.createAndOpen(context, SharedSailingData.class);
         windFinderTrackerFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, WindFinderTrackerFactory.class);
         replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
         resultUrlRegistryServiceTracker = ServiceTrackerFactory.createAndOpen(context, ResultUrlRegistry.class);
@@ -2684,6 +2692,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     protected RacingEventService getService() {
         try {
             return racingEventServiceTracker.waitForService(0);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } // grab the service
+    }
+
+    protected SharedSailingData getSharedSailingData() {
+        try {
+            return sharedSailingDataTracker.waitForService(0);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } // grab the service
@@ -9308,5 +9324,37 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public boolean getTrackedRaceIsUsingMarkPassingCalculator(RegattaAndRaceIdentifier regattaNameAndRaceName) {
         return getExistingTrackedRace(regattaNameAndRaceName).isUsingMarkPassingCalculator();
+    }
+
+    @Override
+    public Iterable<MarkTemplateDTO> getMarkTemplates() {
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
+                getSharedSailingData().getAllMarkTemplates(), m -> convertToMarkTemplateDTO(m));
+    }
+
+    private MarkTemplateDTO convertToMarkTemplateDTO(MarkTemplate markTemplate) {
+        final MarkTemplateDTO markTemplateDTO = new MarkTemplateDTO(markTemplate.getId(), markTemplate.getName(),
+                markTemplate.getShortName(),
+                markTemplate.getColor(), markTemplate.getShape(), markTemplate.getPattern(), markTemplate.getType());
+
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), markTemplateDTO, markTemplate.getIdentifier());
+        return markTemplateDTO;
+    }
+
+    @Override
+    public MarkTemplateDTO addOrUpdateMarkTemplate(MarkTemplateDTO markTemplate) {
+        final UUID markTemplateUUID = UUID.randomUUID();
+        final MarkTemplate mTemplate = getSecurityService()
+                .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                        SecuredDomainType.MARK_TEMPLATE,
+                        MarkTemplate.getTypeRelativeObjectIdentifier(markTemplateUUID), markTemplate.getName(),
+                        () -> getSharedSailingData()
+                                .createMarkTemplate(convertDtoToCommonMarkProperties(markTemplateUUID, markTemplate)));
+        return convertToMarkTemplateDTO(mTemplate);
+    }
+
+    private CommonMarkProperties convertDtoToCommonMarkProperties(UUID markTemplateUUID, MarkTemplateDTO markTemplate) {
+        return new MarkPropertiesImpl(markTemplateUUID, markTemplate.getName(), markTemplate.getShortName(),
+                markTemplate.getColor(), markTemplate.getShape(), markTemplate.getPattern(), markTemplate.getType());
     }
 }

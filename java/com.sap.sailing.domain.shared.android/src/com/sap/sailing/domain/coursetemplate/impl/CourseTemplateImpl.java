@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
@@ -24,6 +25,8 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     
     private final Map<MarkTemplate, String> associatedRoles = new HashMap<>();
 
+    private Iterable<String> tags = new ArrayList<>();
+
     /**
      * The index into {@link #waypoints} of the first waypoint that is to be cloned for repetitive laps.
      * -1 means no repeatable part.
@@ -36,13 +39,19 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
      */
     private final int zeroBasedIndexOfRepeatablePartEnd;
     
+    /** Creates a course template with a random UUID. */
     public CourseTemplateImpl(String name, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints) {
-        this(name, marks, waypoints, -1, -1); // no repeatable part
+        this(UUID.randomUUID(), name, marks, waypoints);
+    }
+
+    public CourseTemplateImpl(UUID id, String name, Iterable<MarkTemplate> marks,
+            Iterable<WaypointTemplate> waypoints) {
+        this(id, name, marks, waypoints, -1, -1); // no repeatable part
     }
     
-    public CourseTemplateImpl(String name, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
+    public CourseTemplateImpl(UUID id, String name, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
             int zeroBasedIndexOfRepeatablePartStart, int zeroBasedIndexOfRepeatablePartEnd) {
-        super(name);
+        super(name, id);
         if ((zeroBasedIndexOfRepeatablePartEnd == -1) != (zeroBasedIndexOfRepeatablePartStart == -1)) {
             throw new IllegalArgumentException("Either both, start and end of repeatable sub-sequence indices must be -1 or none: "+
                     zeroBasedIndexOfRepeatablePartStart+".."+zeroBasedIndexOfRepeatablePartEnd);
@@ -67,7 +76,7 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
      */
     private void validateWaypointsAgainstMarks() {
         for (final WaypointTemplate waypoint : waypoints) {
-            for (final MarkTemplate mark : waypoint.getControlPoint().getMarks()) {
+            for (final MarkTemplate mark : waypoint.getControlPointTemplate().getMarks()) {
                 if (!Util.contains(marks, mark)) {
                     throw new IllegalArgumentException("Mark "+mark+" used by waypoint template "+
                             waypoint+" in course template "+this+" is not provided in the collection of marks");
@@ -121,6 +130,7 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
         return hasRepeatablePart() ? new Pair<>(zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd)
                 : null;
     }
+    
 
     @Override
     public Map<MarkTemplate, String> getAssociatedRoles() {
@@ -130,5 +140,14 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     public void setAssociatedRoles(Map<MarkTemplate, String> associatedRoles) {
         this.associatedRoles.clear();
         this.associatedRoles.putAll(associatedRoles);
+    }
+
+    @Override
+    public Iterable<String> getTags() {
+        return this.tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
     }
 }

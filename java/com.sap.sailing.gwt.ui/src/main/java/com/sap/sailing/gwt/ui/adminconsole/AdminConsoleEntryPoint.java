@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
+import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkTemplatePanel;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
@@ -452,6 +453,22 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<FileStoragePanel>(fileStoragePanel),
                 getStringMessages().fileStorage(), SecuredSecurityTypes.SERVER.getPermissionForObject(
                         SecuredSecurityTypes.ServerActions.CONFIGURE_FILE_STORAGE, serverInfo));
+
+        /* COURSE CREATION */
+        final HorizontalTabLayoutPanel courseCreationTabPanel = panel
+                .addVerticalTab(getStringMessages().courseCreation(), "CourseCreationTab");
+
+        final MarkTemplatePanel markTemplatePanel = new MarkTemplatePanel(getSailingService(), this,
+                getStringMessages(), getUserService());
+        panel.addToTabPanel(courseCreationTabPanel,
+                new DefaultRefreshableAdminConsolePanel<MarkTemplatePanel>(markTemplatePanel) {
+            @Override
+            public void refreshAfterBecomingVisible() {
+                        markTemplatePanel.refreshMarkTemplates();
+            }
+                }, getStringMessages().markTemplates(),
+                SecuredDomainType.MARK_TEMPLATE.getPermission(DefaultActions.MUTATION_ACTIONS));
+
         panel.initUI();
         fillRegattas();
         fillLeaderboardGroups();

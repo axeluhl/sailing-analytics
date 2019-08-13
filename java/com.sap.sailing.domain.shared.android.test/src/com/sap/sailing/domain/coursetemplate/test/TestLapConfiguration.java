@@ -7,6 +7,7 @@ import static org.junit.Assume.assumeNoException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +43,7 @@ public class TestLapConfiguration {
         gateRight = new MarkTemplateImpl("Leeward Gate Starboard", "4s", /* color */ null, /* shape */ null, /* pattern */ null, MarkType.BUOY);
         startFinish = new ControlPointTemplateImpl("Start/Finish", Arrays.asList(startBoat, pin));
         gate = new ControlPointTemplateImpl("Leeward Gate", Arrays.asList(gateLeft, gateRight));
-        courseTemplate = new CourseTemplateImpl("L",
+        courseTemplate = new CourseTemplateImpl(UUID.randomUUID(), "L",
                 /* marks */ Arrays.asList(startBoat, pin, top, gateLeft, gateRight),
                 /* waypoints */ Arrays.asList(new WaypointTemplateImpl(startFinish, PassingInstruction.Line),
                                               new WaypointTemplateImpl(top, PassingInstruction.Port),
@@ -65,7 +66,7 @@ public class TestLapConfiguration {
         assertEquals(expected.size(), Util.size(waypointsOfOneLapper));
         final List<ControlPointTemplate> controlPoints = new ArrayList<>();
         for (final WaypointTemplate waypoint : waypointsOfOneLapper) {
-            controlPoints.add(waypoint.getControlPoint());
+            controlPoints.add(waypoint.getControlPointTemplate());
         }
         assertEquals(expected, controlPoints);
     }
