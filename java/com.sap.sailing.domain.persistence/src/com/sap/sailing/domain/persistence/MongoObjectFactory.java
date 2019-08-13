@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
+import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
@@ -220,4 +221,8 @@ public interface MongoObjectFactory {
 
     /** Removes a {@link MarkProperties} object from the database. */
     void removeMarkProperties(UUID markPropertiesId);
+
+    void storeMarkTemplate(MarkTemplate markTemplate);
+
+    void removeMarkTemplate(UUID markTemplateId);
 }

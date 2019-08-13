@@ -23,7 +23,7 @@ public interface SharedSailingData {
     
     Iterable<MarkProperties> getAllMarkProperties(Iterable<String> tagsToFilterFor);
     
-    Iterable<MarkTemplate> getAllMarkTemplates(Iterable<String> tagsToFilterFor);
+    Iterable<MarkTemplate> getAllMarkTemplates();
     
     Iterable<CourseTemplate> getAllCourseTemplates(Iterable<String> tagsToFilterFor);
 
@@ -41,14 +41,14 @@ public interface SharedSailingData {
      */
     void setTrackingDeviceIdentifierForMarkProperties(MarkProperties markProperties, DeviceIdentifier deviceIdentifier);
     
-    MarkTemplate createMarkTemplate(CommonMarkProperties properties, Iterable<String> tags);
+    MarkTemplate createMarkTemplate(CommonMarkProperties properties);
     
     MarkTemplate getMarkTemplateById(UUID id);
     
     /**
      * @param waypoints the waypoints in their defined order (iteration order equals order of waypoints in course)
      */
-    CourseTemplate createCourseTemplate(Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
+    CourseTemplate createCourseTemplate(String courseTemplateName, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
             int zeroBasedIndexOfRepeatablePartStart, int zeroBasedIndexOfRepeatablePartEnd, Iterable<String> tags);
     
     CourseTemplate getCourseTemplateById(UUID id);

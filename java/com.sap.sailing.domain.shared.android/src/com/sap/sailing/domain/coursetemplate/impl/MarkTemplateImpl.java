@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.MarkType;
+import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.NamedWithUUIDImpl;
@@ -34,6 +35,15 @@ public class MarkTemplateImpl extends NamedWithUUIDImpl implements MarkTemplate 
         this.type = type;
     }
     
+    public MarkTemplateImpl(UUID id, CommonMarkProperties commonMarkProperties) {
+        super(commonMarkProperties.getName(), id);
+        this.shortName = commonMarkProperties.getShortName();
+        this.color = commonMarkProperties.getColor();
+        this.shape = commonMarkProperties.getShape();
+        this.pattern = commonMarkProperties.getPattern();
+        this.type = commonMarkProperties.getType();
+    }
+
     @Override
     public Iterable<MarkTemplate> getMarks() {
         return Collections.singleton(this);

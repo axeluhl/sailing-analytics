@@ -103,7 +103,9 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
+import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -1340,7 +1342,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry,
                     new UpdateOptions().upsert(true));
         } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-            logger.log(Level.WARNING, "Could not mark properties because device identifier could not be stored.", e);
+            logger.log(Level.WARNING, "Could not load mark properties because device identifier could not be stored.",
+                    e);
         }
     }
 
@@ -1349,18 +1352,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             MarkProperties markProperties) throws TransformationException, NoCorrespondingServiceRegisteredException {
         final Document result = new Document();
         result.put(FieldNames.MARK_PROPERTIES_ID.name(), markProperties.getId().toString());
-        if (markProperties.getColor() != null) {
-            result.put(FieldNames.MARK_PROPERTIES_COLOR.name(), markProperties.getColor().getAsHtml());
-        }
+        storeCommonMarkProperties(markProperties, result);
 
         if (markProperties.getFixedPosition() != null) {
             result.put(FieldNames.MARK_PROPERTIES_FIXED_POSITION.name(),
                     storePosition(markProperties.getFixedPosition()));
         }
-        result.put(FieldNames.MARK_PROPERTIES_NAME.name(), markProperties.getName());
-        result.put(FieldNames.MARK_PROPERTIES_PATTERN.name(), markProperties.getPattern());
-        result.put(FieldNames.MARK_PROPERTIES_SHAPE.name(), markProperties.getShape());
-        result.put(FieldNames.MARK_PROPERTIES_SHORT_NAME.name(), markProperties.getShortName());
 
         BasicDBList tags = new BasicDBList();
         markProperties.getTags().forEach(tags::add);
@@ -1369,8 +1366,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER.name(),
                 storeDeviceId(deviceIdentifierServiceFinder, markProperties.getTrackingDeviceIdentifier()));
 
-        result.put(FieldNames.MARK_PROPERTIES_TYPE.name(),
-                markProperties.getType() == null ? null : markProperties.getType().name());
 
         Map<String, Long> lastUsedTemplateMap = markProperties.getLastUsedTemplate().entrySet().stream()
                 .collect(Collectors.toMap(k -> k.getKey().getId().toString(), v -> v.getValue().asMillis()));
@@ -1380,6 +1375,19 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 .collect(Collectors.toMap(k -> k.getKey(), v -> v.getValue().asMillis()));
         result.put(FieldNames.MARK_PROPERTIES_USED_ROLE.name(), new BasicDBObject(lastUsedRoleMap));
         return result;
+    }
+
+    private void storeCommonMarkProperties(CommonMarkProperties markProperties, final Document result) {
+        if (markProperties.getColor() != null) {
+            result.put(FieldNames.COMMON_MARK_PROPERTIES_COLOR.name(), markProperties.getColor().getAsHtml());
+        }
+
+        result.put(FieldNames.COMMON_MARK_PROPERTIES_NAME.name(), markProperties.getName());
+        result.put(FieldNames.COMMON_MARK_PROPERTIES_PATTERN.name(), markProperties.getPattern());
+        result.put(FieldNames.COMMON_MARK_PROPERTIES_SHAPE.name(), markProperties.getShape());
+        result.put(FieldNames.COMMON_MARK_PROPERTIES_SHORT_NAME.name(), markProperties.getShortName());
+        result.put(FieldNames.COMMON_MARK_PROPERTIES_TYPE.name(),
+                markProperties.getType() == null ? null : markProperties.getType().name());
     }
 
     @Override
@@ -1867,4 +1875,29 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public void storeMarkTemplate(MarkTemplate markTemplate) {
+        final MongoCollection<Document> collection = database.getCollection(CollectionNames.MARK_TEMPLATES.name());
+        final Document query = new Document(FieldNames.MARK_TEMPLATE_ID.name(), markTemplate.getId().toString());
+
+        final Document entry = storeMarkTemplateToDocument(markTemplate);
+        collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry,
+                new UpdateOptions().upsert(true));
+    }
+
+    private Document storeMarkTemplateToDocument(MarkTemplate markTemplate) {
+        final Document result = new Document(FieldNames.MARK_TEMPLATE_ID.name(), markTemplate.getId().toString());
+        storeCommonMarkProperties(markTemplate, result);
+        return result;
+    }
+
+    @Override
+    public void removeMarkTemplate(UUID markTemplateId) {
+        final MongoCollection<Document> configurationsCollections = database
+                .getCollection(CollectionNames.MARK_TEMPLATES.name());
+        final Document query = new Document(FieldNames.MARK_TEMPLATE_ID.name(), markTemplateId.toString());
+        configurationsCollections.deleteOne(query);
+    }
+
 }

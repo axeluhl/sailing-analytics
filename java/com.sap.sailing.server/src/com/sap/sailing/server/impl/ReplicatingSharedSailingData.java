@@ -17,14 +17,20 @@ public interface ReplicatingSharedSailingData extends SharedSailingData,
     Void internalCreateMarkProperties(UUID idOfNewMarkProperties, CommonMarkProperties properties,
             Iterable<String> tags);
     
-    Void internalCreateMarkTemplate(UUID idOfNewMarkTemplate, CommonMarkProperties properties,
-            Iterable<String> tags);
+    Void internalCreateMarkTemplate(UUID idOfNewMarkTemplate, CommonMarkProperties properties);
     
-    Void internalCreateCourseTemplate(UUID idOfNewCourseTemplate, Iterable<MarkTemplate> marks,
+    Void internalCreateCourseTemplate(UUID idOfNewCourseTemplate, String courseTemplateName, Iterable<MarkTemplate> marks,
             Iterable<WaypointTemplate> waypoints, int zeroBasedIndexOfRepeatablePartStart,
             int zeroBasedIndexOfRepeatablePartEnd, Iterable<String> tags);
     
     Void internalSetTrackingDeviceIdentifierForMarkProperties(UUID markPropertiesUUID, DeviceIdentifier deviceIdentifier);
     
     Void internalSetFixedPositionForMarkProperties(UUID markPropertiesUUID, Position position);
+
+    Void internalDeleteMarkProperties(UUID markPropertiesUUID);
+
+    Void internalDeleteCourseTemplate(UUID courseTemplateUUID);
+
+    Void internalRecordUsage(UUID markTemplateId, UUID markPropertiesId);
+
 }

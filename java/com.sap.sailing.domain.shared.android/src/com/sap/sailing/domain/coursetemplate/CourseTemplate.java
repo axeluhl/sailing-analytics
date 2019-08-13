@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.coursetemplate;
 
+import java.util.Map;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.security.SecuredDomainType;
@@ -42,7 +43,7 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
      * waypoint sequence but, e.g., as proposals for spare or alternative marks. For example, templates for alternative
      * marks for the windward mark may be returned to quickly accommodate for wind shifts.
      */
-    Iterable<MarkTemplate> getMarks();
+    Iterable<MarkTemplate> getMarkTemplates();
 
     /**
      * Returns a sequence of {@link WaypointTemplate}s that can be use to construct a course. If this course template
@@ -61,7 +62,9 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
      *            repetitions of the repeatable part is usually one less than the number of laps, therefore this
      *            limitation.
      */
-    Iterable<WaypointTemplate> getWaypoints(int numberOfLaps);
+    Iterable<WaypointTemplate> getWaypointTemplates(int numberOfLaps);
+
+    Map<MarkTemplate, String> getAssociatedRoles();
     
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(UUID courseTemplateUUID) {
         return new TypeRelativeObjectIdentifier(courseTemplateUUID.toString());
