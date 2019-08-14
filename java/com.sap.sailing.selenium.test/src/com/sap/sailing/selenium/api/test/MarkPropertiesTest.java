@@ -6,6 +6,8 @@ import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -55,6 +57,24 @@ public class MarkPropertiesTest extends AbstractSeleniumTest {
 
         MarkProperties foundMarkProperties = markPropertiesApi.getMarkProperties(ctx, createdMarkProperties.getId());
         assertDefaultValues(foundMarkProperties);
+    }
+
+    @Test
+    public void createSeveralMarkPropertiesAndGetAll() {
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        MarkProperties markProperties1 = markPropertiesApi.createMarkProperties(ctx, MARK_PROPERTIES_NAME,
+                MARK_PROPERTIES_SHORTNAME, null, MARK_PROPERTIES_COLOR, MARK_PROPERTIES_SHAPE, MARK_PROPERTIES_PATTERN,
+                MARK_PROPERTIES_TYPE);
+        MarkProperties markProperties2 = markPropertiesApi.createMarkProperties(ctx, MARK_PROPERTIES_NAME,
+                MARK_PROPERTIES_SHORTNAME, null, MARK_PROPERTIES_COLOR, MARK_PROPERTIES_SHAPE, MARK_PROPERTIES_PATTERN,
+                MARK_PROPERTIES_TYPE);
+
+        List<String> tags = new ArrayList<>();
+        tags.add("tag1");
+        Iterable<MarkProperties> markPropertiesResult = markPropertiesApi.getAllMarkProperties(ctx, tags);
+        for (MarkProperties markProperties : markPropertiesResult) {
+            System.out.println("UUID: " + markProperties.getId());
+        }
     }
 
     private void assertDefaultValues(MarkProperties markProperties) {

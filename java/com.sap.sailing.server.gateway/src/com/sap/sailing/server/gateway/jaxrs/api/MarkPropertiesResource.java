@@ -1,6 +1,7 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import javax.ws.rs.DELETE;
@@ -15,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
@@ -43,8 +45,15 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response getMarkProperties() throws Exception {
-        return Response.status(Status.NOT_IMPLEMENTED).build();
+    public Response getMarkProperties(@QueryParam("tag") List<String> tags) throws Exception {
+        Iterable<MarkProperties> markPropertiesList = getSharedSailingData().getAllMarkProperties(tags);
+        JSONArray result = new JSONArray();
+        JsonSerializer<MarkProperties> markPropertiesSerializer = new MarkPropertiesJsonSerializer();
+        for (MarkProperties markProperties : markPropertiesList) {
+            result.add(markPropertiesSerializer.serialize(markProperties));
+        }
+        final String json = result.toJSONString();
+        return Response.ok(json).build();
     }
 
     @GET

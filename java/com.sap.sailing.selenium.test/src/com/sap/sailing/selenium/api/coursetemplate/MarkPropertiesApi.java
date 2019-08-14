@@ -1,9 +1,12 @@
 package com.sap.sailing.selenium.api.coursetemplate;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
@@ -39,6 +42,19 @@ public class MarkPropertiesApi {
     public MarkProperties getMarkProperties(final ApiContext ctx, final UUID id) {
         JSONObject result = ctx.get(MARK_PROPERTIES + "/" + id.toString());
         return new MarkProperties(result);
+    }
+
+    public Iterable<MarkProperties> getAllMarkProperties(final ApiContext ctx, final Iterable<String> tags) {
+        // FIXME: multiple query parameters with the same key sould be passed but cannot be put into Map<String,
+        // String>. Should use Map<String, Iterator<String>>. Will be fixed in bug4942.
+        final Map<String, String> queryParams = new TreeMap<>();
+        for (String tag : tags) {
+            queryParams.put("tag", tag);
+        }
+        JSONArray markPropertiesArray = ctx.get(MARK_PROPERTIES, queryParams);
+        List<MarkProperties> result = new ArrayList<>();
+        markPropertiesArray.stream().map(o -> (JSONObject) o).map(MarkProperties::new).forEach(result::add);
+        return result;
     }
 
     public void deleteMarkProperties(final ApiContext ctx, final UUID id) {
