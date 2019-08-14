@@ -2,6 +2,7 @@ package com.sap.sailing.selenium.api.coursetemplate;
 
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
 
 import org.json.simple.JSONObject;
 
@@ -32,6 +33,11 @@ public class MarkPropertiesApi {
         queryParams.put(PARAM_PATTERN, pattern);
         queryParams.put(PARAM_MARKTYPE, markType);
         JSONObject result = ctx.post(MARK_PROPERTIES, queryParams);
+        return new MarkProperties(result);
+    }
+
+    public MarkProperties getMarkProperties(final ApiContext ctx, final UUID id) {
+        JSONObject result = ctx.get(MARK_PROPERTIES + "/" + id.toString());
         return new MarkProperties(result);
     }
 }

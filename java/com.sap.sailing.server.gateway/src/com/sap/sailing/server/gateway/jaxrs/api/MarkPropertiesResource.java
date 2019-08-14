@@ -37,6 +37,10 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
                 .type(MediaType.TEXT_PLAIN).build();
     }
 
+    private Response getMarkPropertiesNotFoundErrorResponse() {
+        return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getMarkProperties() throws Exception {
@@ -46,8 +50,15 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
     @GET
     @Path("{markPositionId}")
     @Produces("application/json;charset=UTF-8")
-    public Response getMarkProperties(@PathParam("markPositionId") UUID markPositionId) throws Exception {
-        return Response.status(Status.NOT_IMPLEMENTED).build();
+    public Response getMarkProperties(@PathParam("markPositionId") String markPositionId) throws Exception {
+        MarkProperties markProperties = getSharedSailingData().getMarkPropertiesById(UUID.fromString(markPositionId));
+        if (markProperties == null) {
+            return getMarkPropertiesNotFoundErrorResponse();
+        }
+        JsonSerializer<MarkProperties> markPropertiesSerializer = new MarkPropertiesJsonSerializer();
+        final JSONObject serializedMarkedProperties = markPropertiesSerializer.serialize(markProperties);
+        final String json = serializedMarkedProperties.toJSONString();
+        return Response.ok(json).build();
     }
 
     @POST

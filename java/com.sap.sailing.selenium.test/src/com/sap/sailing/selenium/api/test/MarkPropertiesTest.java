@@ -34,9 +34,29 @@ public class MarkPropertiesTest extends AbstractSeleniumTest {
         MarkProperties markProperties = markPropertiesApi.createMarkProperties(ctx, markPropertiesName,
                 markPropertiesShortName, deviceUuid.toString(), "#FF0000", "shape", "pattern", "STARTBOAT");
         assertNotNull("read: no MarkProperties returnded", markProperties);
-        assertNotNull("read: MarkProperties.id is missing");
+        assertNotNull("read: MarkProperties.id is missing", markProperties.getId());
         assertEquals("read: MarkProperties.name is different", markPropertiesName, markProperties.getName());
         assertEquals("read: MarkProperties.shortName is different", markPropertiesShortName,
                 markProperties.getShortName());
     }
+
+    @Test
+    public void createAndGetMarkPropertiesWithoutDeviceUuidTest() {
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final String markPropertiesName = "testname";
+        final String markPropertiesShortName = "testshortname";
+        MarkProperties createdMarkProperties = markPropertiesApi.createMarkProperties(ctx, markPropertiesName,
+                markPropertiesShortName, null, "#FF0000", "shape", "pattern", "STARTBOAT");
+        assertNotNull("create: no MarkProperties returnded", createdMarkProperties);
+        assertNotNull("create: MarkProperties.id is missing", createdMarkProperties.getId());
+
+        MarkProperties foundMarkProperties = markPropertiesApi.getMarkProperties(ctx, createdMarkProperties.getId());
+        assertNotNull("read: no MarkProperties returnded", foundMarkProperties);
+        assertNotNull("read: MarkProperties.id is missing", foundMarkProperties.getId());
+        assertEquals("read: MarkProperties.name is different", markPropertiesName, foundMarkProperties.getName());
+        assertEquals("read: MarkProperties.shortName is different", markPropertiesShortName,
+                foundMarkProperties.getShortName());
+
+    }
+
 }

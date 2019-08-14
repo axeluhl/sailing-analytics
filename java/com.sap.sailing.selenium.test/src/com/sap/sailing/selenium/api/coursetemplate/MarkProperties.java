@@ -23,7 +23,8 @@ public class MarkProperties extends JsonWrapper {
     }
 
     public UUID getId() {
-        return UUID.fromString(get(FIELD_ID));
+        final String uuid = get(FIELD_ID);
+        return uuid != null ? UUID.fromString(uuid) : null;
     }
 
     public String getName() {
