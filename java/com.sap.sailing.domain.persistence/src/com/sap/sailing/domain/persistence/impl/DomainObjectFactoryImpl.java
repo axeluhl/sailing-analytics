@@ -3128,37 +3128,32 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         // load master data
         final UUID id = UUID.fromString(dbObject.getString(FieldNames.COURSE_TEMPLATE_ID.name()));
         final String name = dbObject.getString(FieldNames.COURSE_TEMPLATE_NAME.name());
-
-        // load associated roles
-        final BasicDBList associatedRolesDbObject = dbObject.get(FieldNames.COURSE_TEMPLATE_ASSOCIATED_ROLES.name(),
-                BasicDBList.class);
-        final Map<MarkTemplate, String> associatedRoles = new HashMap<>();
-        for (Object obj : associatedRolesDbObject) {
-            BasicDBObject bdo = (BasicDBObject) obj;
-            for (String key : bdo.keySet()) {
-                final String roleName = bdo.get(key).toString();
-                final MarkTemplate markTemplate = markTemplateResolver.apply(UUID.fromString(key));
-                if (markTemplate != null) {
-                    associatedRoles.put(markTemplate, roleName);
-                } else {
-                    logger.warning(
-                            String.format("Could not resolve MarkTemplate with id %s for CourseTemplate %s.", key, id));
-                }
-            }
-        }
-
-        // load mark templates
+        
+        // load mark templates and associated roles
         final BasicDBList markTemplatesList = dbObject.get(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATES.name(),
                 BasicDBList.class);
         final Set<MarkTemplate> markTemplates = new HashSet<>();
-        for (Object key : markTemplatesList) {
-            final MarkTemplate markTemplate = markTemplateResolver.apply(UUID.fromString(key.toString()));
-            if (markTemplate != null) {
-                markTemplates.add(markTemplate);
+        final Map<MarkTemplate, String> associatedRoles = new HashMap<>();
+        for (Object entry : markTemplatesList) {
+            if (entry instanceof BasicDBObject) {
+                final BasicDBObject entryObject = (BasicDBObject) entry;
+                final UUID markTemplateUUID = UUID.fromString(entryObject.getString(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ID.name()));
+                final MarkTemplate markTemplate = markTemplateResolver.apply(
+                        markTemplateUUID);
+                if (markTemplate != null) {
+                    markTemplates.add(markTemplate);
+                    final String roleOrNull = entryObject.getString(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ROLE.name());
+                    if (roleOrNull != null) {
+                        associatedRoles.put(markTemplate, roleOrNull);
+                    }
+                } else {
+                    logger.warning(
+                            String.format("Could not resolve MarkTemplate with id %s for CourseTemplate %s.",
+                                    markTemplateUUID, id));
+                }
             } else {
                 logger.warning(
-                        String.format("Could not resolve MarkTemplate with id %s for CourseTemplate %s.",
-                                key.toString(), id));
+                        String.format("Unexpected entry for MarkTemplate found for CourseTemplate %s.", id));
             }
         }
         
@@ -3197,7 +3192,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
         // load master data
         final String name = bdo.getString(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_NAME.name());
-        final String id = bdo.getString(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_ID.name());
 
         // load mark templates for control point
         final BasicDBList markTemplatesDbList = (BasicDBList) bdo
@@ -3223,11 +3217,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         // create MarkTemplate or MarkTemplatePairImpl
         final ControlPointTemplate controlPointTemplate;
         if (markTemplates.size() == 2) {
-            controlPointTemplate = new MarkPairTemplateImpl(UUID.fromString(id), name, markTemplates.get(0),
+            controlPointTemplate = new MarkPairTemplateImpl(name, markTemplates.get(0),
                     markTemplates.get(1));
         } else {
             controlPointTemplate = markTemplates.get(0);
-
         }
         return new WaypointTemplateImpl(controlPointTemplate, passingInstruction);
     }

@@ -1918,6 +1918,19 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         // store master data
         result.put(FieldNames.COURSE_TEMPLATE_ID.name(), courseTemplate.getId());
         result.put(FieldNames.COURSE_TEMPLATE_NAME.name(), courseTemplate.getName());
+        
+        // store mark template list including role names for those who have one defined
+        final BasicDBList markTemplates = new BasicDBList();
+        courseTemplate.getMarkTemplates().forEach(m -> {
+            final BasicDBObject markTemplateObject = new BasicDBObject(
+                    FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ID.name(), m.getId().toString());
+            final String role = courseTemplate.getAssociatedRoles().get(m);
+            if (role != null) {
+                markTemplateObject.append(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ROLE.name(), role);
+            }
+            markTemplates.add(markTemplateObject);
+        });
+        result.put(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATES.name(), markTemplates);
 
         // store waypoint templates
         final BasicDBList waypointTemplates = new BasicDBList();
@@ -1927,20 +1940,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
         result.put(FieldNames.COURSE_TEMPLATE_WAYPOINTS.name(), waypointTemplates);
 
-        // associated roles
-        final BasicDBList associatedRoles = new BasicDBList();
-        courseTemplate.getAssociatedRoles().entrySet()
-                .forEach(e -> associatedRoles.add(new BasicDBObject(e.getKey().getId().toString(), e.getValue())));
-        result.put(FieldNames.COURSE_TEMPLATE_ASSOCIATED_ROLES.name(), associatedRoles);
-
-        // mark templates
-        final BasicDBList markTemplates = new BasicDBList();
-        courseTemplate.getMarkTemplates().forEach(m -> markTemplates.add(m.getId().toString()));
-        result.put(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATES.name(), markTemplates);
-
         // tags
         final BasicDBList tags = new BasicDBList();
-        courseTemplate.getTags().forEach(t -> tags.add(t));
+        courseTemplate.getTags().forEach(tags::add);
         result.put(FieldNames.COURSE_TEMPLATE_TAGS.name(), tags);
 
         // repeatable part
@@ -1957,8 +1959,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         waypointTemplateObject.put(FieldNames.WAYPOINT_TEMPLATE_PASSINGINSTRUCTION.name(),
                 getPassingInstructions(waypointTemplate.getPassingInstruction()));
 
-        waypointTemplateObject.put(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_ID.name(),
-                waypointTemplate.getControlPointTemplate().getId().toString());
         waypointTemplateObject.put(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_NAME.name(),
                 waypointTemplate.getControlPointTemplate().getName());
 
