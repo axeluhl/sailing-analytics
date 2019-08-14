@@ -1356,7 +1356,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.MARK_PROPERTIES_ID.name(), markProperties.getId().toString());
         storeCommonMarkProperties(markProperties, result);
 
-        if (markProperties.getFixedPosition() != null) {
+        final Position fixedPositionOrNull = markProperties.getFixedPosition();
+        if (fixedPositionOrNull != null) {
             result.put(FieldNames.MARK_PROPERTIES_FIXED_POSITION.name(),
                     storePosition(markProperties.getFixedPosition()));
         }
@@ -1365,9 +1366,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         markProperties.getTags().forEach(tags::add);
         result.put(FieldNames.MARK_PROPERTIES_TAGS.name(), tags);
 
-        result.put(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER.name(),
-                storeDeviceId(deviceIdentifierServiceFinder, markProperties.getTrackingDeviceIdentifier()));
-
+        final DeviceIdentifier trackingDeviceIdentifierOrNull = markProperties.getTrackingDeviceIdentifier();
+        if (trackingDeviceIdentifierOrNull != null) {
+            result.put(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER.name(),
+                    storeDeviceId(deviceIdentifierServiceFinder, trackingDeviceIdentifierOrNull));
+        }
 
         Map<String, Long> lastUsedTemplateMap = markProperties.getLastUsedTemplate().entrySet().stream()
                 .collect(Collectors.toMap(k -> k.getKey().getId().toString(), v -> v.getValue().asMillis()));
