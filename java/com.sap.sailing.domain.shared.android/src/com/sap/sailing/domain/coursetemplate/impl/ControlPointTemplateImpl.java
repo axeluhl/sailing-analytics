@@ -6,9 +6,9 @@ import java.util.Set;
 import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.impl.NamedWithUUIDImpl;
+import com.sap.sse.common.impl.NamedImpl;
 
-public class ControlPointTemplateImpl extends NamedWithUUIDImpl implements ControlPointTemplate {
+public class ControlPointTemplateImpl extends NamedImpl implements ControlPointTemplate {
     private static final long serialVersionUID = 5150679935881533985L;
     private final Iterable<MarkTemplate> marks;
     

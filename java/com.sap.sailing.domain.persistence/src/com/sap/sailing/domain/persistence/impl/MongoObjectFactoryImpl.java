@@ -1957,8 +1957,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         waypointTemplateObject.put(FieldNames.WAYPOINT_TEMPLATE_PASSINGINSTRUCTION.name(),
                 getPassingInstructions(waypointTemplate.getPassingInstruction()));
 
-        waypointTemplateObject.put(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_ID.name(),
-                waypointTemplate.getControlPointTemplate().getId().toString());
         waypointTemplateObject.put(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_NAME.name(),
                 waypointTemplate.getControlPointTemplate().getName());
 

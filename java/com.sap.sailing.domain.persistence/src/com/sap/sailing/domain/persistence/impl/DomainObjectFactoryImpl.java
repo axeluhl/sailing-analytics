@@ -3197,7 +3197,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
         // load master data
         final String name = bdo.getString(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_NAME.name());
-        final String id = bdo.getString(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_ID.name());
 
         // load mark templates for control point
         final BasicDBList markTemplatesDbList = (BasicDBList) bdo
@@ -3223,7 +3222,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         // create MarkTemplate or MarkTemplatePairImpl
         final ControlPointTemplate controlPointTemplate;
         if (markTemplates.size() == 2) {
-            controlPointTemplate = new MarkPairTemplateImpl(UUID.fromString(id), name, markTemplates.get(0),
+            controlPointTemplate = new MarkPairTemplateImpl(name, markTemplates.get(0),
                     markTemplates.get(1));
         } else {
             controlPointTemplate = markTemplates.get(0);

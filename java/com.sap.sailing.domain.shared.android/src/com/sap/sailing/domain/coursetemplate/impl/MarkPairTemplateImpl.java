@@ -1,25 +1,18 @@
 package com.sap.sailing.domain.coursetemplate.impl;
 
 import java.util.Arrays;
-import java.util.UUID;
 
 import com.sap.sailing.domain.coursetemplate.MarkPairTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
-import com.sap.sse.common.impl.NamedWithUUIDImpl;
+import com.sap.sse.common.impl.NamedImpl;
 
-public class MarkPairTemplateImpl extends NamedWithUUIDImpl implements MarkPairTemplate {
+public class MarkPairTemplateImpl extends NamedImpl implements MarkPairTemplate {
     private static final long serialVersionUID = -4966456947099578789L;
     private final MarkTemplate left;
     private final MarkTemplate right;
-    
+
     public MarkPairTemplateImpl(String name, MarkTemplate left, MarkTemplate right) {
         super(name);
-        this.left = left;
-        this.right = right;
-    }
-
-    public MarkPairTemplateImpl(UUID id, String name, MarkTemplate left, MarkTemplate right) {
-        super(name, id);
         this.left = left;
         this.right = right;
     }
