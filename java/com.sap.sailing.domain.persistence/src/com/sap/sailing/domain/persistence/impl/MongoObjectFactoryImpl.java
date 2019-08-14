@@ -1921,6 +1921,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         // store master data
         result.put(FieldNames.COURSE_TEMPLATE_ID.name(), courseTemplate.getId());
         result.put(FieldNames.COURSE_TEMPLATE_NAME.name(), courseTemplate.getName());
+        final URL optionalImageURL = courseTemplate.getOptionalImageURL();
+        if (optionalImageURL != null) {
+            result.put(FieldNames.COURSE_TEMPLATE_IMAGE_URL.name(), optionalImageURL.toExternalForm());
+        }
         
         // store mark template list including role names for those who have one defined
         final BasicDBList markTemplates = new BasicDBList();

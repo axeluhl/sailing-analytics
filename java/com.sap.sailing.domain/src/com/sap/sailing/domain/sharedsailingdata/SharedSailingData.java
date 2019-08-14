@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.sharedsailingdata;
 
+import java.net.URL;
 import java.util.Map;
 import java.util.UUID;
 
@@ -49,7 +50,7 @@ public interface SharedSailingData {
      * @param waypoints the waypoints in their defined order (iteration order equals order of waypoints in course)
      */
     CourseTemplate createCourseTemplate(String courseTemplateName, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
-            int zeroBasedIndexOfRepeatablePartStart, int zeroBasedIndexOfRepeatablePartEnd, Iterable<String> tags);
+            int zeroBasedIndexOfRepeatablePartStart, int zeroBasedIndexOfRepeatablePartEnd, Iterable<String> tags, URL optionalImageURL);
     
     CourseTemplate getCourseTemplateById(UUID id);
     

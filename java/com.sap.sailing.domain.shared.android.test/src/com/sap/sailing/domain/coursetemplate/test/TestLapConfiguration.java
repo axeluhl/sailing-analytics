@@ -50,6 +50,7 @@ public class TestLapConfiguration {
                                               new WaypointTemplateImpl(gate, PassingInstruction.Gate),
                                               new WaypointTemplateImpl(top, PassingInstruction.Port),
                                               new WaypointTemplateImpl(startFinish, PassingInstruction.Line)),
+                /* optionaImageURL */ null,
                 /* zeroBasedIndexOfRepeatablePartStart */ 1,
                 /* zeroBasedIndexOfRepeatablePartEnd */ 3);
     }
@@ -93,7 +94,8 @@ public class TestLapConfiguration {
         try {
             courseTemplate = new CourseTemplateImpl("Test",
                     /* marks */ Arrays.asList(startBoat),
-                    /* waypoints */ Arrays.asList(new WaypointTemplateImpl(startFinish, PassingInstruction.Line)));
+                    /* waypoints */ Arrays.asList(new WaypointTemplateImpl(startFinish, PassingInstruction.Line)),
+                    /* optionaImageURL */ null);
             fail("Expected an IllegalArgumentException due to missing mark <pin> but it wasn't thrown");
         } catch (IllegalArgumentException e) {
             // expected
@@ -106,7 +108,8 @@ public class TestLapConfiguration {
         pin = new MarkTemplateImpl("Pin End", "Pin", /* color */ null, /* shape */ null, /* pattern */ null, MarkType.BUOY);
         startFinish = new ControlPointTemplateImpl("Start/Finish", Arrays.asList(startBoat, pin));
         courseTemplate = new CourseTemplateImpl("Test", /* marks */ Arrays.asList(startBoat, pin),
-                /* waypoints */ Arrays.asList(new WaypointTemplateImpl(startFinish, PassingInstruction.Line)));
+                /* waypoints */ Arrays.asList(new WaypointTemplateImpl(startFinish, PassingInstruction.Line)),
+                /* optionaImageURL */ null);
         try {
             courseTemplate.getWaypointTemplates(0);
         } catch (IllegalArgumentException e) {
