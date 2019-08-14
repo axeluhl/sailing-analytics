@@ -54,14 +54,33 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
 
     private static final boolean DONT_FIRE_EVENTS = false;
 
-    private static final Validator<MediaTrack> MEDIA_TRACK_VALIDATOR = new Validator<MediaTrack>() {
+    protected static class MediaTrackValidator implements Validator<MediaTrack> {
+        private final StringMessages stringMessages;
 
-        @Override
-        public String getErrorMessage(MediaTrack valueToValidate) {
-            return null;
+        public MediaTrackValidator(StringMessages stringMessages) {
+            this.stringMessages = stringMessages;
         }
 
-    };
+        @Override
+        public String getErrorMessage(MediaTrack media) {
+            String errorMessage = null;
+
+            if (media.url == null || media.url.trim().isEmpty()) {
+                errorMessage = stringMessages.pleaseEnterNonEmptyUrl();
+            } else if (media.title == null || media.title.trim().isEmpty()) {
+                errorMessage = stringMessages.pleaseEnterA(stringMessages.title());
+            } else if (media.mimeType == null) {
+                errorMessage = stringMessages.pleaseEnterA(stringMessages.mimeType());
+            } else if (media.startTime == null) {
+                errorMessage = stringMessages.pleaseEnterA(stringMessages.startTime());
+            } else if (media.duration == null) {
+                errorMessage = stringMessages.pleaseEnterA(stringMessages.duration());
+            }
+
+            return errorMessage;
+        }
+
+    }
 
     protected final StringMessages stringMessages;
 
@@ -82,6 +101,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
     private Label infoLabelLabel;
 
     final private RegattaAndRaceIdentifier raceIdentifier;
+    final private Set<RegattaAndRaceIdentifier> assignedRaces;
 
     final private MediaServiceAsync mediaService;
 
@@ -91,31 +111,142 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
     private Button defaultTimeButton;
 
     private SimpleBusyIndicator busyIndicator;
-    boolean manuallyEditedStartTime = false;
+
+    private String lastCheckedUrl;
+
+    private boolean manuallyEditedStartTime = false;
 
     public NewMediaDialog(MediaServiceAsync mediaService, TimePoint defaultStartTime, StringMessages stringMessages,
             RegattaAndRaceIdentifier raceIdentifier, FileStorageServiceConnectionTestObservable storageServiceConnection,
             DialogCallback<MediaTrack> dialogCallback) {
-        super(stringMessages.addMediaTrack(), "", stringMessages.ok(), stringMessages.cancel(), MEDIA_TRACK_VALIDATOR,
-                dialogCallback);
+        super(stringMessages.addMediaTrack(), "", stringMessages.ok(), stringMessages.cancel(),
+                new MediaTrackValidator(stringMessages), dialogCallback);
         this.defaultStartTime = defaultStartTime != null ? defaultStartTime : MillisecondsTimePoint.now();
         this.stringMessages = stringMessages;
         this.raceIdentifier = raceIdentifier;
+        this.assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
+        this.assignedRaces.add(raceIdentifier);
         this.mediaService = mediaService;
+
+        urlBox = new URLFieldWithFileUpload(stringMessages, false);
+        urlBox.addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        validateAndUpdate();
+                    }
+                });
+            }
+        });
+        titleBox = createTextBox(null);
+        titleBox.addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                validateAndUpdate();
+            }
+        });
+        startTimeBox = new DateAndTimeInput(Accuracy.MILLISECONDS);
+        startTimeBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Date> event) {
+                manuallyEditedStartTime = true;
+                mediaTrack.startTime = new MillisecondsTimePoint(event.getValue());
+                validateAndUpdate();
+            }
+        });
+        defaultTimeButton = new Button(StringMessages.INSTANCE.resetStartTimeToDefault());
+        defaultTimeButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                manuallyEditedStartTime = true;
+                mediaTrack.startTime = defaultStartTime;
+                refreshUI();
+                validateAndUpdate();
+            }
+        });
+        durationBox = createTextBox(null);
+        durationBox.addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                String duration = durationBox.getValue();
+                if (duration != null && !duration.trim().isEmpty()) {
+                    mediaTrack.duration = TimeFormatUtil.hrsMinSecToMilliSeconds(duration);
+                } else {
+                    mediaTrack.duration = null;
+                }
+                validateAndUpdate();
+            }
+        });
+
         storageServiceConnection.registerObserver(this);
     }
 
     @Override
     protected MediaTrack getResult() {
-        mediaTrack.title = titleBox.getValue();
+        updateFromUrl();
         connectMediaWithRace();
         return mediaTrack;
     }
-
+    
     protected void connectMediaWithRace() {
-        Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
-        assignedRaces.add(this.raceIdentifier);
         mediaTrack.assignedRaces = assignedRaces;
+    }
+
+    protected void updateFromUrl() {
+        String url = urlBox.getValue();
+        if (url != null && !url.isEmpty()) {
+            boolean urlChanged = !url.equals(lastCheckedUrl);
+            lastCheckedUrl = url;
+            if (urlChanged) {
+                remoteMp4WasStarted = false;
+                remoteMp4WasFinished = false;
+                manuallyEditedStartTime = false;
+
+                String youtubeId = YoutubeApi.getIdByUrl(url);
+                if (youtubeId != null) {
+                    mediaTrack.url = youtubeId;
+                    mediaTrack.mimeType = MimeType.youtube;
+                    mediaService.checkYoutubeMetadata(youtubeId, new AsyncCallback<VideoMetadataDTO>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            infoLabel.setWidget(new Label(caught.getMessage()));
+                        }
+                        @Override
+                        public void onSuccess(VideoMetadataDTO result) {
+                            if (result.isDownloadable()) {
+                                mediaTrack.duration = result.getDuration();
+                                mediaTrack.title = result.getMessage();
+                                refreshUI();
+                            } else {
+                                infoLabel.setWidget(new Label(result.getMessage()));
+                            }
+                        }
+                    });
+                } else {
+                    mediaTrack.url = url;
+                    loadMediaDuration();
+                    AnchorElement anchor = Document.get().createAnchorElement();
+                    anchor.setHref(url);
+                    //remove trailing / as well
+                    String lastPathSegment = anchor.getPropertyString("pathname").substring(1);
+                    int dotPos = lastPathSegment.lastIndexOf('.');
+                    if (dotPos >= 0) {
+                        mediaTrack.title = lastPathSegment.substring(0, dotPos);
+                        String fileEnding = lastPathSegment.substring(dotPos + 1).toLowerCase();
+                        mediaTrack.mimeType = MimeType.byName(fileEnding);
+                        if (MimeType.mp4.equals(mediaTrack.mimeType)) {
+                            processMp4(mediaTrack);
+                        }
+                    } else {
+                        mediaTrack.title = mediaTrack.url;
+                        mediaTrack.mimeType = null;
+                    }
+                }
+                refreshUI();
+            }
+        }
     }
 
     //used for audio only tracks, using native mediaelement to determine time
@@ -156,127 +287,28 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         Grid formGrid = new Grid(6, 2);
         formGrid.setCellSpacing(3);
         formGrid.setWidget(0, 0, new Label(stringMessages.url() + ":"));
-        urlBox = new URLFieldWithFileUpload(stringMessages, false);
-        urlBox.addValueChangeHandler(new ValueChangeHandler<String>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                    @Override
-                    public void execute() {
-                        manuallyEditedStartTime = false;
-                        updateFromUrl();
-                    }
-                });
-            }
-        });
         formGrid.setWidget(0, 1, urlBox);
         formGrid.setWidget(1, 0, new Label(stringMessages.name() + ":"));
-        titleBox = createTextBox(null);
         formGrid.setWidget(1, 1, titleBox);
+
         infoLabelLabel = new Label();
         formGrid.setWidget(2, 0, infoLabelLabel);
         infoLabel = new SimplePanel();
         infoLabel.setWidget(new Label(""));
         formGrid.setWidget(2, 1, infoLabel);
         formGrid.setWidget(3, 0, new Label(stringMessages.startTime() + ":"));
-        
-        startTimeBox = new DateAndTimeInput(Accuracy.MILLISECONDS);
+
         FlowPanel startTimePanel = new FlowPanel();
         startTimePanel.add(startTimeBox);
-        startTimeBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Date> event) {
-                manuallyEditedStartTime = true;
-                mediaTrack.startTime = new MillisecondsTimePoint(event.getValue());
-            }
-        });
-        
-        defaultTimeButton = new Button(StringMessages.INSTANCE.resetStartTimeToDefault());
-        defaultTimeButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                manuallyEditedStartTime = true;
-                mediaTrack.startTime = defaultStartTime;
-                refreshUI();
-            }
-        });
         startTimePanel.add(defaultTimeButton);
         formGrid.setWidget(3, 1, startTimePanel);
+
         formGrid.setWidget(4, 0, new Label(stringMessages.duration() + ":"));
-        durationBox = createTextBox(null);
-        durationBox.addValueChangeHandler(new ValueChangeHandler<String>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                String duration = durationBox.getValue();
-                if (duration != null && !duration.trim().isEmpty()) {
-                    mediaTrack.duration = TimeFormatUtil.hrsMinSecToMilliSeconds(duration);
-                } else {
-                    mediaTrack.duration = null;
-                }
-            }
-        });
         formGrid.setWidget(4, 1, durationBox);
         busyIndicator = new SimpleBusyIndicator();
         formGrid.setWidget(5, 0, busyIndicator);
         mainPanel.add(formGrid);
         return mainPanel;
-    }
-
-    protected void updateFromUrl() {
-        String url = urlBox.getValue();
-        String youtubeId = YoutubeApi.getIdByUrl(url);
-        if (youtubeId != null) {
-            mediaTrack.url = youtubeId;
-            mediaTrack.mimeType = MimeType.youtube;
-            loadYoutubeMetadata();
-        } else {
-            mediaTrack.url = url;
-            loadMediaDuration();
-            AnchorElement anchor = Document.get().createAnchorElement();
-            anchor.setHref(url);
-            //remove trailing / as well
-            String lastPathSegment = anchor.getPropertyString("pathname").substring(1);
-            int dotPos = lastPathSegment.lastIndexOf('.');
-            if (dotPos >= 0) {
-                mediaTrack.title = lastPathSegment.substring(0, dotPos);
-                String fileEnding = lastPathSegment.substring(dotPos + 1).toLowerCase();
-                mediaTrack.mimeType = MimeType.byName(fileEnding);
-            } else {
-                mediaTrack.title = mediaTrack.url;
-                mediaTrack.mimeType = null;
-            }
-        }
-        remoteMp4WasStarted = false;
-        remoteMp4WasFinished = false;
-        refreshUI();
-        if (!remoteMp4WasStarted && MimeType.mp4.equals(mediaTrack.mimeType)) {
-            processMp4(mediaTrack);
-        } else {
-            loadMediaDuration();
-        }
-    }
-
-    private void loadYoutubeMetadata() {
-        if(mediaTrack.url != null && !mediaTrack.url.isEmpty()) {
-            mediaService.checkYoutubeMetadata(mediaTrack.url, new AsyncCallback<VideoMetadataDTO>() {
-                
-                @Override
-                public void onFailure(Throwable caught) {
-                    infoLabel.setWidget(new Label(caught.getMessage()));
-                }
-                
-                @Override
-                public void onSuccess(VideoMetadataDTO result) {
-                    if (result.isDownloadable()) {
-                        mediaTrack.duration = result.getDuration();
-                        mediaTrack.title = result.getMessage();
-                        refreshUI();
-                    } else {
-                        infoLabel.setWidget(new Label(result.getMessage()));
-                    }
-                }
-            });
-        }
     }
 
     private String sliceBefore(String lastPathSegment, String slicer) {
@@ -343,7 +375,6 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                 busyIndicator.setBusy(false);
                 remoteMp4WasFinished = true;
                 manualMimeTypeSelection(caught.getMessage(), mediaTrack);
-                loadMediaDuration();
             }
         });
     }
