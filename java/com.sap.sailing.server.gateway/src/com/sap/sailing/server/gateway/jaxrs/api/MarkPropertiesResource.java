@@ -96,13 +96,18 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
     @PUT
     @Path("{markPositionId}")
     @Produces("application/json;charset=UTF-8")
-    public Response updateMarkProperties(@PathParam("markPositionId") UUID madkPositionId) throws Exception {
+    public Response updateMarkProperties(@PathParam("markPositionId") String markPositionId) throws Exception {
         return Response.status(Status.NOT_IMPLEMENTED).build();
     }
 
     @DELETE
     @Path("{markPositionId}")
-    public Response deleteMarkProperties(@PathParam("markPositionId") UUID madkPositionId) throws Exception {
-        return Response.status(Status.NOT_IMPLEMENTED).build();
+    public Response deleteMarkProperties(@PathParam("markPositionId") String markPositionId) throws Exception {
+        MarkProperties markProperties = getSharedSailingData().getMarkPropertiesById(UUID.fromString(markPositionId));
+        if (markProperties == null) {
+            return getMarkPropertiesNotFoundErrorResponse();
+        }
+        getSharedSailingData().deleteMarkProperties(markProperties);
+        return Response.ok().build();
     }
 }

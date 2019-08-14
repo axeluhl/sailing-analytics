@@ -40,4 +40,8 @@ public class MarkPropertiesApi {
         JSONObject result = ctx.get(MARK_PROPERTIES + "/" + id.toString());
         return new MarkProperties(result);
     }
+
+    public void deleteMarkProperties(final ApiContext ctx, final UUID id) {
+        ctx.delete(MARK_PROPERTIES + "/" + id.toString());
+    }
 }

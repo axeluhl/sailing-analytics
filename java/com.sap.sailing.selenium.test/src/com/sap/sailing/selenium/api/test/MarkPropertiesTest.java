@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
+import com.sap.sailing.selenium.api.core.HttpException;
 import com.sap.sailing.selenium.api.coursetemplate.MarkProperties;
 import com.sap.sailing.selenium.api.coursetemplate.MarkPropertiesApi;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
@@ -66,5 +67,18 @@ public class MarkPropertiesTest extends AbstractSeleniumTest {
         assertEquals("read: MarkProperties.pattern is different", MARK_PROPERTIES_PATTERN, markProperties.getPattern());
         assertEquals("read: MarkProperties.type is different", MARK_PROPERTIES_TYPE,
                 markProperties.getMarkType().name());
+    }
+
+    @Test(expected = HttpException.NotFound.class)
+    public void createAndDeleteMarkPropertiesTest() {
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        MarkProperties createdMarkProperties = markPropertiesApi.createMarkProperties(ctx, MARK_PROPERTIES_NAME,
+                MARK_PROPERTIES_SHORTNAME, null, MARK_PROPERTIES_COLOR, MARK_PROPERTIES_SHAPE, MARK_PROPERTIES_PATTERN,
+                MARK_PROPERTIES_TYPE);
+        assertNotNull("create: no MarkProperties returnded", createdMarkProperties);
+        assertNotNull("create: MarkProperties.id is missing", createdMarkProperties.getId());
+
+        markPropertiesApi.deleteMarkProperties(ctx, createdMarkProperties.getId());
+        markPropertiesApi.getMarkProperties(ctx, createdMarkProperties.getId());
     }
 }
