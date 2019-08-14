@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.coursetemplate;
 
+import java.net.URL;
 import java.util.Map;
 import java.util.UUID;
 
@@ -65,6 +66,8 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
     Iterable<WaypointTemplate> getWaypointTemplates(int numberOfLaps);
 
     Map<MarkTemplate, String> getAssociatedRoles();
+    
+    URL getOptionalImageURL();
     
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(UUID courseTemplateUUID) {
         return new TypeRelativeObjectIdentifier(courseTemplateUUID.toString());

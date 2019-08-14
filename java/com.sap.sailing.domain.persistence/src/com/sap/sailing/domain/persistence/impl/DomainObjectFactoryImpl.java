@@ -3128,6 +3128,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         // load master data
         final UUID id = UUID.fromString(dbObject.getString(FieldNames.COURSE_TEMPLATE_ID.name()));
         final String name = dbObject.getString(FieldNames.COURSE_TEMPLATE_NAME.name());
+        final String imageURLString = dbObject.getString(FieldNames.COURSE_TEMPLATE_IMAGE_URL.name());
+        URL optionaImageURL = null;
+        if (imageURLString != null) {
+            try {
+                optionaImageURL = new URL(imageURLString);
+            } catch (MalformedURLException e) {
+                logger.warning(String.format("Error parsing image URL %s for course template %s", imageURLString, id));
+            }
+        }
         
         // load mark templates and associated roles
         final BasicDBList markTemplatesList = dbObject.get(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATES.name(),
@@ -3178,8 +3187,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
 
         final CourseTemplateImpl courseTemplateImpl = new CourseTemplateImpl(id, name, markTemplates, waypointTemplates,
-                zeroBasedIndexOfRepeatablePartStart,
-                zeroBasedIndexOfRepeatablePartEnd);
+                optionaImageURL, zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd);
         courseTemplateImpl.setTags(tags);
         return courseTemplateImpl;
     }

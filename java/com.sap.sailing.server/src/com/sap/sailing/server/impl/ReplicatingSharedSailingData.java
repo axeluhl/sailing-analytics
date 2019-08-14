@@ -1,5 +1,6 @@
 package com.sap.sailing.server.impl;
 
+import java.net.URL;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
@@ -21,7 +22,7 @@ public interface ReplicatingSharedSailingData extends SharedSailingData,
     
     Void internalCreateCourseTemplate(UUID idOfNewCourseTemplate, String courseTemplateName, Iterable<MarkTemplate> marks,
             Iterable<WaypointTemplate> waypoints, int zeroBasedIndexOfRepeatablePartStart,
-            int zeroBasedIndexOfRepeatablePartEnd, Iterable<String> tags);
+            int zeroBasedIndexOfRepeatablePartEnd, Iterable<String> tags, URL optionalImageURL);
     
     Void internalSetTrackingDeviceIdentifierForMarkProperties(UUID markPropertiesUUID, DeviceIdentifier deviceIdentifier);
     

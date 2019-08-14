@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -217,14 +218,14 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     @Override
     public CourseTemplate createCourseTemplate(String courseTemplateName, Iterable<MarkTemplate> marks,
             Iterable<WaypointTemplate> waypoints, int zeroBasedIndexOfRepeatablePartStart,
-            int zeroBasedIndexOfRepeatablePartEnd, Iterable<String> tags) {
+            int zeroBasedIndexOfRepeatablePartEnd, Iterable<String> tags, URL optionalImageURL) {
         final UUID idOfNewCourseTemplate = UUID.randomUUID();
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.COURSE_TEMPLATE,
                 CourseTemplate.getTypeRelativeObjectIdentifier(idOfNewCourseTemplate),
                 idOfNewCourseTemplate + "/" + courseTemplateName, () -> {
                     apply(s -> s.internalCreateCourseTemplate(idOfNewCourseTemplate, courseTemplateName, marks,
-                            waypoints, zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd, tags));
+                            waypoints, zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd, tags, optionalImageURL));
                     return getCourseTemplateById(idOfNewCourseTemplate);
                 });
     }
@@ -232,9 +233,9 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     @Override
     public Void internalCreateCourseTemplate(UUID idOfNewCourseTemplate, String courseTemplateName, Iterable<MarkTemplate> marks,
             Iterable<WaypointTemplate> waypoints, int zeroBasedIndexOfRepeatablePartStart,
-            int zeroBasedIndexOfRepeatablePartEnd, Iterable<String> tags) {
+            int zeroBasedIndexOfRepeatablePartEnd, Iterable<String> tags, URL optionalImageURL) {
         final CourseTemplate courseTemplate = new CourseTemplateImpl(idOfNewCourseTemplate, courseTemplateName, marks,
-                waypoints,
+                waypoints, optionalImageURL,
                 zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd);
         mongoObjectFactory.storeCourseTemplate(courseTemplate);
         courseTemplatesById.put(courseTemplate.getId(), courseTemplate);
