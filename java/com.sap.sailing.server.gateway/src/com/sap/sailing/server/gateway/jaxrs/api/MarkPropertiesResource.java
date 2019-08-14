@@ -19,7 +19,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
-import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesImpl;
+import com.sap.sailing.domain.coursetemplate.MarkPropertiesBuilder;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.Color;
@@ -60,11 +60,14 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
                 return getBadMarkPropertiesValidationErrorResponse(String.format("invalid color %s", iae.getMessage()));
             }
         }
-        MarkProperties markProperties = new MarkPropertiesImpl(name, shortName, color, "test", "", MarkType.STARTBOAT);
-        final DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
-        markProperties.setTrackingDeviceIdentifier(device);
-
-        markProperties = this.getSharedSailingData().createMarkProperties(markProperties, new ArrayList<String>());
+        MarkPropertiesBuilder markPropertiesBuilder = new MarkPropertiesBuilder(null, name, shortName, color, "test",
+                "", MarkType.STARTBOAT);
+        if (deviceUuid != null && deviceUuid.length() > 0) {
+            final DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
+            markPropertiesBuilder.withDeviceId(device);
+        }
+        MarkProperties markProperties = this.getSharedSailingData().createMarkProperties(markPropertiesBuilder.build(),
+                new ArrayList<String>());
         return Response.status(Response.Status.OK).build();
     }
 
