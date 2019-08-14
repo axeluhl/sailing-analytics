@@ -112,8 +112,25 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
     @PUT
     @Path("{markPositionId}")
     @Produces("application/json;charset=UTF-8")
-    public Response updateMarkProperties(@PathParam("markPositionId") String markPositionId) throws Exception {
-        return Response.status(Status.NOT_IMPLEMENTED).build();
+    public Response updateMarkProperties(@PathParam("markPositionId") String markPositionId,
+            @QueryParam("deviceUuid") String deviceUuid, @QueryParam("latDeg") Double latDeg,
+            @QueryParam("lonDeg") Double lonDeg) throws Exception {
+        MarkProperties markProperties = getSharedSailingData().getMarkPropertiesById(UUID.fromString(markPositionId));
+        if (markProperties == null) {
+            return getMarkPropertiesNotFoundErrorResponse();
+        }
+        if (deviceUuid != null && deviceUuid.length() > 0) {
+            final DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
+            getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(markProperties, device);
+        }
+        if (latDeg != null && lonDeg != null) {
+            final Position fixedPosition = new DegreePosition(latDeg, lonDeg);
+            getSharedSailingData().setFixedPositionForMarkProperties(markProperties, fixedPosition);
+        }
+        JsonSerializer<MarkProperties> markPropertiesSerializer = new MarkPropertiesJsonSerializer();
+        final JSONObject serializedMarkedProperties = markPropertiesSerializer.serialize(markProperties);
+        final String json = serializedMarkedProperties.toJSONString();
+        return Response.ok(json).build();
     }
 
     @DELETE

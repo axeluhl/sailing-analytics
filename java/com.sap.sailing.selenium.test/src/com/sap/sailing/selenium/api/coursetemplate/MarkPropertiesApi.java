@@ -47,6 +47,19 @@ public class MarkPropertiesApi {
         return new MarkProperties(result);
     }
 
+    public MarkProperties updateMarkProperties(final ApiContext ctx, final UUID id, final UUID deviceUuid,
+            final Double latDeg, final Double lonDeg) {
+        final Map<String, String> queryParams = new TreeMap<>();
+        if (deviceUuid != null) {
+            queryParams.put(PARAM_DEVICEUUID, deviceUuid.toString());
+        }
+        queryParams.put(PARAM_FIXED_POSITION_LATDEG, latDeg != null ? latDeg.toString() : null);
+        queryParams.put(PARAM_FIXED_POSITION_LONDEG, latDeg != null ? lonDeg.toString() : null);
+
+        JSONObject result = ctx.put(MARK_PROPERTIES + "/" + id.toString(), queryParams, null);
+        return new MarkProperties(result);
+    }
+
     public MarkProperties getMarkProperties(final ApiContext ctx, final UUID id) {
         JSONObject result = ctx.get(MARK_PROPERTIES + "/" + id.toString());
         return new MarkProperties(result);
