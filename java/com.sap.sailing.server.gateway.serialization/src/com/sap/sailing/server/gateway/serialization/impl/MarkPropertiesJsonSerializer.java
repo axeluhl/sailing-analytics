@@ -15,6 +15,8 @@ public class MarkPropertiesJsonSerializer implements JsonSerializer<MarkProperti
     private static final String FIELD_SHAPE = "shape";
     private static final String FIELD_PATTERN = "pattern";
     private static final String FIELD_MARKTYPE = "markType";
+    private static final String FIELD_FIXED_POSITION_LATDEG = "latDeg";
+    private static final String FIELD_FIXED_POSITION_LONDEG = "lonDeg";
 
     @Override
     public JSONObject serialize(MarkProperties markProperties) {
@@ -27,6 +29,13 @@ public class MarkPropertiesJsonSerializer implements JsonSerializer<MarkProperti
         result.put(FIELD_PATTERN, markProperties.getPattern());
         result.put(FIELD_MARKTYPE, markProperties.getType());
         result.put(FIELD_HAS_DEVICEUUID, markProperties.getTrackingDeviceIdentifier() != null);
+        if (markProperties.getFixedPosition() != null) {
+            result.put(FIELD_FIXED_POSITION_LATDEG, markProperties.getFixedPosition().getLatDeg());
+            result.put(FIELD_FIXED_POSITION_LONDEG, markProperties.getFixedPosition().getLngDeg());
+        } else {
+            result.put(FIELD_FIXED_POSITION_LATDEG, null);
+            result.put(FIELD_FIXED_POSITION_LONDEG, null);
+        }
         return result;
     }
 

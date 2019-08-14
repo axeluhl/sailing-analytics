@@ -29,6 +29,8 @@ public class MarkPropertiesTest extends AbstractSeleniumTest {
     private static final String MARK_PROPERTIES_PATTERN = "pattern";
     private static final String MARK_PROPERTIES_TYPE = "STARTBOAT";
     private static final List<String> MARK_PROPERTIES_TAGS;
+    private static final Double MARK_PROPERTIES_LATDEG = 41.456;
+    private static final Double MARK_PROPERTIES_LONDEG = 9.123;
 
     static {
         final List<String> tags = new ArrayList<>();
@@ -49,7 +51,7 @@ public class MarkPropertiesTest extends AbstractSeleniumTest {
         final UUID deviceUuid = randomUUID();
         MarkProperties markProperties = markPropertiesApi.createMarkProperties(ctx, MARK_PROPERTIES_NAME,
                 MARK_PROPERTIES_SHORTNAME, deviceUuid.toString(), MARK_PROPERTIES_COLOR, "shape", "pattern",
-                MARK_PROPERTIES_TYPE, MARK_PROPERTIES_TAGS);
+                MARK_PROPERTIES_TYPE, MARK_PROPERTIES_TAGS, MARK_PROPERTIES_LATDEG, MARK_PROPERTIES_LONDEG);
         assertNotNull("read: no MarkProperties returnded", markProperties);
         assertDefaultValues(markProperties);
     }
@@ -59,7 +61,7 @@ public class MarkPropertiesTest extends AbstractSeleniumTest {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         MarkProperties createdMarkProperties = markPropertiesApi.createMarkProperties(ctx, MARK_PROPERTIES_NAME,
                 MARK_PROPERTIES_SHORTNAME, null, MARK_PROPERTIES_COLOR, MARK_PROPERTIES_SHAPE, MARK_PROPERTIES_PATTERN,
-                MARK_PROPERTIES_TYPE, MARK_PROPERTIES_TAGS);
+                MARK_PROPERTIES_TYPE, MARK_PROPERTIES_TAGS, MARK_PROPERTIES_LATDEG, MARK_PROPERTIES_LONDEG);
         assertNotNull("create: no MarkProperties returnded", createdMarkProperties);
         assertNotNull("create: MarkProperties.id is missing", createdMarkProperties.getId());
 
@@ -72,10 +74,10 @@ public class MarkPropertiesTest extends AbstractSeleniumTest {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         MarkProperties markProperties1 = markPropertiesApi.createMarkProperties(ctx, MARK_PROPERTIES_NAME,
                 MARK_PROPERTIES_SHORTNAME, null, MARK_PROPERTIES_COLOR, MARK_PROPERTIES_SHAPE, MARK_PROPERTIES_PATTERN,
-                MARK_PROPERTIES_TYPE, MARK_PROPERTIES_TAGS);
+                MARK_PROPERTIES_TYPE, MARK_PROPERTIES_TAGS, MARK_PROPERTIES_LATDEG, MARK_PROPERTIES_LONDEG);
         MarkProperties markProperties2 = markPropertiesApi.createMarkProperties(ctx, MARK_PROPERTIES_NAME,
                 MARK_PROPERTIES_SHORTNAME, null, MARK_PROPERTIES_COLOR, MARK_PROPERTIES_SHAPE, MARK_PROPERTIES_PATTERN,
-                MARK_PROPERTIES_TYPE, MARK_PROPERTIES_TAGS);
+                MARK_PROPERTIES_TYPE, MARK_PROPERTIES_TAGS, MARK_PROPERTIES_LATDEG, MARK_PROPERTIES_LONDEG);
 
         final Iterable<MarkProperties> markPropertiesResult = markPropertiesApi.getAllMarkProperties(ctx,
                 MARK_PROPERTIES_TAGS);
@@ -95,6 +97,8 @@ public class MarkPropertiesTest extends AbstractSeleniumTest {
         assertEquals("read: MarkProperties.pattern is different", MARK_PROPERTIES_PATTERN, markProperties.getPattern());
         assertEquals("read: MarkProperties.type is different", MARK_PROPERTIES_TYPE,
                 markProperties.getMarkType().name());
+        assertEquals("read: MarkProperties.latDeg is different", MARK_PROPERTIES_LATDEG, markProperties.getLatDeg());
+        assertEquals("read: MarkProperties.lonDeg is different", MARK_PROPERTIES_LONDEG, markProperties.getLonDeg());
     }
 
     @Test(expected = HttpException.NotFound.class)
@@ -102,7 +106,7 @@ public class MarkPropertiesTest extends AbstractSeleniumTest {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         MarkProperties createdMarkProperties = markPropertiesApi.createMarkProperties(ctx, MARK_PROPERTIES_NAME,
                 MARK_PROPERTIES_SHORTNAME, null, MARK_PROPERTIES_COLOR, MARK_PROPERTIES_SHAPE, MARK_PROPERTIES_PATTERN,
-                MARK_PROPERTIES_TYPE, MARK_PROPERTIES_TAGS);
+                MARK_PROPERTIES_TYPE, MARK_PROPERTIES_TAGS, MARK_PROPERTIES_LATDEG, MARK_PROPERTIES_LONDEG);
         assertNotNull("create: no MarkProperties returnded", createdMarkProperties);
         assertNotNull("create: MarkProperties.id is missing", createdMarkProperties.getId());
 

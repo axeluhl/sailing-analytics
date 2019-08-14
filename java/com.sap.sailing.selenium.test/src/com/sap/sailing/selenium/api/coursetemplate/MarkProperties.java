@@ -17,6 +17,8 @@ public class MarkProperties extends JsonWrapper {
     private static final String FIELD_SHAPE = "shape";
     private static final String FIELD_PATTERN = "pattern";
     private static final String FIELD_MARKTYPE = "markType";
+    private static final String FIELD_FIXED_POSITION_LATDEG = "latDeg";
+    private static final String FIELD_FIXED_POSITION_LONDEG = "lonDeg";
 
     public MarkProperties(JSONObject json) {
         super(json);
@@ -54,5 +56,13 @@ public class MarkProperties extends JsonWrapper {
 
     public Boolean hasDevice() {
         return get(FIELD_HAS_DEVICEUUID);
+    }
+
+    public Double getLatDeg() {
+        return get(FIELD_FIXED_POSITION_LATDEG);
+    }
+
+    public Double getLonDeg() {
+        return get(FIELD_FIXED_POSITION_LONDEG);
     }
 }

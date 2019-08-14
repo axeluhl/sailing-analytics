@@ -22,10 +22,12 @@ public class MarkPropertiesApi {
     private static final String PARAM_PATTERN = "pattern";
     private static final String PARAM_MARKTYPE = "markType";
     private static final String PARAM_TAG = "tag";
+    private static final String PARAM_FIXED_POSITION_LATDEG = "latDeg";
+    private static final String PARAM_FIXED_POSITION_LONDEG = "lonDeg";
 
     public MarkProperties createMarkProperties(final ApiContext ctx, final String name, final String shortName,
             final String deviceUuid, final String color, final String shape, final String pattern,
-            final String markType, final Iterable<String> tags) {
+            final String markType, final Iterable<String> tags, final Double latDeg, final Double lonDeg) {
         final Map<String, String> queryParams = new TreeMap<>();
         queryParams.put(PARAM_NAME, name);
         queryParams.put(PARAM_SHORTNAME, shortName);
@@ -36,6 +38,8 @@ public class MarkPropertiesApi {
         queryParams.put(PARAM_SHAPE, shape);
         queryParams.put(PARAM_PATTERN, pattern);
         queryParams.put(PARAM_MARKTYPE, markType);
+        queryParams.put(PARAM_FIXED_POSITION_LATDEG, latDeg != null ? latDeg.toString() : null);
+        queryParams.put(PARAM_FIXED_POSITION_LONDEG, latDeg != null ? lonDeg.toString() : null);
         for (String tag : tags) {
             queryParams.put(PARAM_TAG, tag);
         }

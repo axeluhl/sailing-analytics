@@ -20,6 +20,8 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MarkType;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBuilder;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
@@ -75,7 +77,8 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
             @QueryParam("shortName") final String shortName, @QueryParam("deviceUuid") String deviceUuid,
             @QueryParam("color") String rgbColor, @QueryParam("shape") String shape,
             @QueryParam("pattern") String pattern, @QueryParam("markType") final String markType,
-            @QueryParam("tag") List<String> tags) throws Exception {
+            @QueryParam("tag") List<String> tags, @QueryParam("latDeg") Double latDeg,
+            @QueryParam("lonDeg") Double lonDeg) throws Exception {
         Color color = null;
         if (rgbColor != null && rgbColor.length() > 0) {
             try {
@@ -95,6 +98,10 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         if (deviceUuid != null && deviceUuid.length() > 0) {
             final DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
             getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(createdMarkProperties, device);
+        }
+        if (latDeg != null && lonDeg != null) {
+            final Position fixedPosition = new DegreePosition(latDeg, lonDeg);
+            getSharedSailingData().setFixedPositionForMarkProperties(createdMarkProperties, fixedPosition);
         }
         JsonSerializer<MarkProperties> markPropertiesSerializer = new MarkPropertiesJsonSerializer();
         final JSONObject serializedMarkedProperties = markPropertiesSerializer.serialize(createdMarkProperties);
