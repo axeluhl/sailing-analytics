@@ -51,7 +51,8 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     public Response createMarkProperties(@QueryParam("name") final String name,
             @QueryParam("shortName") final String shortName, @QueryParam("deviceUuid") String deviceUuid,
-            @QueryParam("color") String rgbColor) throws Exception {
+            @QueryParam("color") String rgbColor, @QueryParam("shape") String shape,
+            @QueryParam("pattern") String pattern, @QueryParam("markType") final String markType) throws Exception {
         Color color = null;
         if (rgbColor != null && rgbColor.length() > 0) {
             try {
@@ -60,8 +61,12 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
                 return getBadMarkPropertiesValidationErrorResponse(String.format("invalid color %s", iae.getMessage()));
             }
         }
-        MarkPropertiesBuilder markPropertiesBuilder = new MarkPropertiesBuilder(null, name, shortName, color, "test",
-                "", MarkType.STARTBOAT);
+        MarkType type = null;
+        if (markType != null && markType.length() > 0) {
+            type = MarkType.valueOf(markType);
+        }
+        MarkPropertiesBuilder markPropertiesBuilder = new MarkPropertiesBuilder(/* id */ null, name, shortName, color,
+                shape, pattern, type);
         if (deviceUuid != null && deviceUuid.length() > 0) {
             final DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
             markPropertiesBuilder.withDeviceId(device);

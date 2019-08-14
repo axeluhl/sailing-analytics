@@ -23,9 +23,10 @@ public class MarkPropertiesTest extends AbstractSeleniumTest {
     }
 
     @Test
-    public void createMarkPropertyTest() {
+    public void createMarkPropertyWithDeviceUuidTest() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         final UUID deviceUuid = randomUUID();
-        markPropertiesApi.createMarkProperties(ctx, "test", "test", deviceUuid.toString());
+        markPropertiesApi.createMarkProperties(ctx, "test", "testshort", deviceUuid.toString(), "#FF0000", "shape",
+                "pattern", "STARTBOAT");
     }
 }
