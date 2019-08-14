@@ -32,6 +32,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.gwt.ui.adminconsole.EventDialog.FileStorageServiceConnectionTestObservable;
+import com.sap.sailing.gwt.ui.adminconsole.EventDialog.FileStorageServiceConnectionTestObserver;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback;
@@ -40,6 +42,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
+import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
@@ -47,7 +50,7 @@ import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
 import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
+public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileStorageServiceConnectionTestObserver {
 
     private static final boolean DONT_FIRE_EVENTS = false;
 
@@ -64,7 +67,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
     protected MediaTrack mediaTrack = new MediaTrack();
 
-    private TextBox urlBox;
+    private URLFieldWithFileUpload urlBox;
 
     private TextBox titleBox;
 
@@ -91,13 +94,15 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     boolean manuallyEditedStartTime = false;
 
     public NewMediaDialog(MediaServiceAsync mediaService, TimePoint defaultStartTime, StringMessages stringMessages,
-            RegattaAndRaceIdentifier raceIdentifier, DialogCallback<MediaTrack> dialogCallback) {
+            RegattaAndRaceIdentifier raceIdentifier, FileStorageServiceConnectionTestObservable storageServiceConnection,
+            DialogCallback<MediaTrack> dialogCallback) {
         super(stringMessages.addMediaTrack(), "", stringMessages.ok(), stringMessages.cancel(), MEDIA_TRACK_VALIDATOR,
                 dialogCallback);
         this.defaultStartTime = defaultStartTime != null ? defaultStartTime : MillisecondsTimePoint.now();
         this.stringMessages = stringMessages;
         this.raceIdentifier = raceIdentifier;
         this.mediaService = mediaService;
+        storageServiceConnection.registerObserver(this);
     }
 
     @Override
@@ -151,10 +156,10 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         Grid formGrid = new Grid(6, 2);
         formGrid.setCellSpacing(3);
         formGrid.setWidget(0, 0, new Label(stringMessages.url() + ":"));
-        urlBox = createTextBox(null);
-        urlBox.addChangeHandler(new ChangeHandler() {
+        urlBox = new URLFieldWithFileUpload(stringMessages, false);
+        urlBox.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
-            public void onChange(ChangeEvent event) {
+            public void onValueChange(ValueChangeEvent<String> event) {
                 Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                     @Override
                     public void execute() {
@@ -312,6 +317,11 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         } else {
             durationBox.setText("");
         }
+    }
+
+    @Override
+    public void onFileStorageServiceTestPassed() {
+        urlBox.setUploadEnabled(true);
     }
 
     private void processMp4(MediaTrack mediaTrack) {
