@@ -32,8 +32,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.gwt.ui.adminconsole.EventDialog.FileStorageServiceConnectionTestObservable;
-import com.sap.sailing.gwt.ui.adminconsole.EventDialog.FileStorageServiceConnectionTestObserver;
+import com.sap.sailing.gwt.ui.adminconsole.FileStorageServiceConnectionTestObservable;
+import com.sap.sailing.gwt.ui.adminconsole.FileStorageServiceConnectionTestObservable.FileStorageServiceConnectionTestObserver;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback;
@@ -445,6 +445,6 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
 
     @Override
     protected FocusWidget getInitialFocusWidget() {
-        return urlBox;
+        return urlBox.getInitialFocusWidget();
     }
 }
