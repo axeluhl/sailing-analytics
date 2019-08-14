@@ -36,6 +36,7 @@ public class RestApiApplication extends Application {
         classes.add(UserGroupsResource.class);
         classes.add(StatusResource.class);
         classes.add(TrackedEventsResource.class);
+        classes.add(TrackingDevicesResource.class);
         
         // Exception Mappers
         classes.add(ShiroAuthorizationExceptionTo401ResponseMapper.class);

@@ -23,6 +23,11 @@
 				<div class="innerContent">
 		    <h2 class="articleSubheadline">August 2019</h2>
                     <ul class="bulletList">
+                        <li>New API endpoints were added to get the status of tracking devices. By now, just the last received GPS fix is returned in the status.
+                            Under /sailingserver/api/v1/tracking_devices/[deviceUUID] the status of smartphone tracking devices can be read by using the device's UUID.
+                            /sailingserver/api/v1/regattas/[regattaName]/tracking_devices the status for all tracking devices associated to a regatta is returned.
+                            While the first requires the non public device UUID to be included in the request, the latter requires a user to have UPDATE permission for the regatta in question.
+                        </li>
                         <li>Added a filter to hide all elements the current user is not allowed to edit. The filter can 
                             be applied for each table in the AdminConsole and is active per default.
                         </li>

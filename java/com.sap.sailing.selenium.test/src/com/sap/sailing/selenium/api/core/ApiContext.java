@@ -112,7 +112,7 @@ public class ApiContext {
             String error = "API POST request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
                     + e.getResponse().getEntity(String.class);
             logger.severe(error);
-            throw new RuntimeException(error);
+            throw HttpException.forResponse(e.getResponse(), error).orElse(e);
         }
         return (R) JSONValue.parse(result);
     }
@@ -141,7 +141,7 @@ public class ApiContext {
             String error = "API POST request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
                     + e.getResponse().getEntity(String.class);
             logger.severe(error);
-            throw new RuntimeException(error);
+            throw HttpException.forResponse(e.getResponse(), error).orElse(e);
         }
         return (R) JSONValue.parse(result);
     }
@@ -167,7 +167,7 @@ public class ApiContext {
             String error = "API POST request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
                     + e.getResponse().getEntity(String.class);
             logger.severe(error);
-            throw new RuntimeException(error);
+            throw HttpException.forResponse(e.getResponse(), error).orElse(e);
         }
         return (R) JSONValue.parse(result);
     }
@@ -193,7 +193,7 @@ public class ApiContext {
             String error = "API PUT request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
                     + e.getResponse().getEntity(String.class);
             logger.severe(error);
-            throw new RuntimeException(error);
+            throw HttpException.forResponse(e.getResponse(), error).orElse(e);
         }
         return (R) JSONValue.parse(result);
     }
@@ -212,7 +212,7 @@ public class ApiContext {
             String error = "API DELETE request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
                     + e.getResponse().getEntity(String.class);
             logger.severe(error);
-            throw new RuntimeException(error);
+            throw HttpException.forResponse(e.getResponse(), error).orElse(e);
         }
     }
 
@@ -256,7 +256,7 @@ public class ApiContext {
                 String error = "API GET request " + url + " failed (rc=" + rc + "): "
                         + e.getResponse().getEntity(String.class);
                 logger.severe(error);
-                throw new RuntimeException(error);
+                throw HttpException.forResponse(e.getResponse(), error).orElse(e);
             }
         }
         return JSONValue.parse(result);
