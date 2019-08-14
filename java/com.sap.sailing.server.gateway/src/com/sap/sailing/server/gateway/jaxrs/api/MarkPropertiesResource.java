@@ -1,6 +1,5 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -75,7 +74,8 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
     public Response createMarkProperties(@QueryParam("name") final String name,
             @QueryParam("shortName") final String shortName, @QueryParam("deviceUuid") String deviceUuid,
             @QueryParam("color") String rgbColor, @QueryParam("shape") String shape,
-            @QueryParam("pattern") String pattern, @QueryParam("markType") final String markType) throws Exception {
+            @QueryParam("pattern") String pattern, @QueryParam("markType") final String markType,
+            @QueryParam("tag") List<String> tags) throws Exception {
         Color color = null;
         if (rgbColor != null && rgbColor.length() > 0) {
             try {
@@ -91,7 +91,7 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         final MarkPropertiesBuilder markPropertiesBuilder = new MarkPropertiesBuilder(/* id */ null, name, shortName,
                 color, shape, pattern, type);
         final MarkProperties createdMarkProperties = getSharedSailingData()
-                .createMarkProperties(markPropertiesBuilder.build(), new ArrayList<String>());
+                .createMarkProperties(markPropertiesBuilder.build(), tags);
         if (deviceUuid != null && deviceUuid.length() > 0) {
             final DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
             getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(createdMarkProperties, device);

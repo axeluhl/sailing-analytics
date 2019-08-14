@@ -21,10 +21,11 @@ public class MarkPropertiesApi {
     private static final String PARAM_SHAPE = "shape";
     private static final String PARAM_PATTERN = "pattern";
     private static final String PARAM_MARKTYPE = "markType";
+    private static final String PARAM_TAG = "tag";
 
     public MarkProperties createMarkProperties(final ApiContext ctx, final String name, final String shortName,
             final String deviceUuid, final String color, final String shape, final String pattern,
-            final String markType) {
+            final String markType, final Iterable<String> tags) {
         final Map<String, String> queryParams = new TreeMap<>();
         queryParams.put(PARAM_NAME, name);
         queryParams.put(PARAM_SHORTNAME, shortName);
@@ -35,6 +36,9 @@ public class MarkPropertiesApi {
         queryParams.put(PARAM_SHAPE, shape);
         queryParams.put(PARAM_PATTERN, pattern);
         queryParams.put(PARAM_MARKTYPE, markType);
+        for (String tag : tags) {
+            queryParams.put(PARAM_TAG, tag);
+        }
         JSONObject result = ctx.post(MARK_PROPERTIES, queryParams);
         return new MarkProperties(result);
     }
@@ -49,7 +53,7 @@ public class MarkPropertiesApi {
         // String>. Should use Map<String, Iterator<String>>. Will be fixed in bug4942.
         final Map<String, String> queryParams = new TreeMap<>();
         for (String tag : tags) {
-            queryParams.put("tag", tag);
+            queryParams.put(PARAM_TAG, tag);
         }
         JSONArray markPropertiesArray = ctx.get(MARK_PROPERTIES, queryParams);
         List<MarkProperties> result = new ArrayList<>();
