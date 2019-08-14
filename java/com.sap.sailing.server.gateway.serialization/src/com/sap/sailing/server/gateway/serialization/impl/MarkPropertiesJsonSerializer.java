@@ -7,6 +7,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class MarkPropertiesJsonSerializer implements JsonSerializer<MarkProperties> {
 
+    private static final String FIELD_ID = "id";
     private static final String FIELD_NAME = "name";
     private static final String FIELD_SHORTNAME = "shortName";
     private static final String FIELD_HAS_DEVICEUUID = "hasDeviceUuid";
@@ -18,6 +19,7 @@ public class MarkPropertiesJsonSerializer implements JsonSerializer<MarkProperti
     @Override
     public JSONObject serialize(MarkProperties markProperties) {
         JSONObject result = new JSONObject();
+        result.put(FIELD_ID, markProperties.getId().toString());
         result.put(FIELD_NAME, markProperties.getName());
         result.put(FIELD_SHORTNAME, markProperties.getShortName());
         result.put(FIELD_COLOR, markProperties.getColor() != null ? markProperties.getColor().getAsHtml() : null);
