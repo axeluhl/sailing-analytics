@@ -24,7 +24,6 @@ public class MarkPropertiesJsonSerializer implements JsonSerializer<MarkProperti
         result.put(FIELD_SHORTNAME, markProperties.getShortName());
         result.put(FIELD_COLOR, markProperties.getColor() != null ? markProperties.getColor().getAsHtml() : null);
         result.put(FIELD_SHAPE, markProperties.getShape());
-        result.put(FIELD_SHAPE, markProperties.getPattern());
         result.put(FIELD_PATTERN, markProperties.getPattern());
         result.put(FIELD_MARKTYPE, markProperties.getType());
         result.put(FIELD_HAS_DEVICEUUID, markProperties.getTrackingDeviceIdentifier() != null);

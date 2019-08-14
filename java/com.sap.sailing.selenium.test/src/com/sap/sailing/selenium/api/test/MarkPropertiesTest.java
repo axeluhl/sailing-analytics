@@ -18,6 +18,13 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class MarkPropertiesTest extends AbstractSeleniumTest {
 
+    private static final String MARK_PROPERTIES_NAME = "testname";
+    private static final String MARK_PROPERTIES_SHORTNAME = "testshortname";
+    private static final String MARK_PROPERTIES_COLOR = "#FF0000";
+    private static final String MARK_PROPERTIES_SHAPE = "shape";
+    private static final String MARK_PROPERTIES_PATTERN = "pattern";
+    private static final String MARK_PROPERTIES_TYPE = "STARTBOAT";
+
     private final MarkPropertiesApi markPropertiesApi = new MarkPropertiesApi();
 
     @Before
@@ -28,35 +35,36 @@ public class MarkPropertiesTest extends AbstractSeleniumTest {
     @Test
     public void createMarkPropertyWithDeviceUuidTest() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
-        final String markPropertiesName = "testname";
-        final String markPropertiesShortName = "testshortname";
         final UUID deviceUuid = randomUUID();
-        MarkProperties markProperties = markPropertiesApi.createMarkProperties(ctx, markPropertiesName,
-                markPropertiesShortName, deviceUuid.toString(), "#FF0000", "shape", "pattern", "STARTBOAT");
+        MarkProperties markProperties = markPropertiesApi.createMarkProperties(ctx, MARK_PROPERTIES_NAME,
+                MARK_PROPERTIES_SHORTNAME, deviceUuid.toString(), MARK_PROPERTIES_COLOR, "shape", "pattern",
+                MARK_PROPERTIES_TYPE);
         assertNotNull("read: no MarkProperties returnded", markProperties);
-        assertNotNull("read: MarkProperties.id is missing", markProperties.getId());
-        assertEquals("read: MarkProperties.name is different", markPropertiesName, markProperties.getName());
-        assertEquals("read: MarkProperties.shortName is different", markPropertiesShortName,
-                markProperties.getShortName());
+        assertDefaultValues(markProperties);
     }
 
     @Test
     public void createAndGetMarkPropertiesWithoutDeviceUuidTest() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
-        final String markPropertiesName = "testname";
-        final String markPropertiesShortName = "testshortname";
-        MarkProperties createdMarkProperties = markPropertiesApi.createMarkProperties(ctx, markPropertiesName,
-                markPropertiesShortName, null, "#FF0000", "shape", "pattern", "STARTBOAT");
+        MarkProperties createdMarkProperties = markPropertiesApi.createMarkProperties(ctx, MARK_PROPERTIES_NAME,
+                MARK_PROPERTIES_SHORTNAME, null, MARK_PROPERTIES_COLOR, MARK_PROPERTIES_SHAPE, MARK_PROPERTIES_PATTERN,
+                MARK_PROPERTIES_TYPE);
         assertNotNull("create: no MarkProperties returnded", createdMarkProperties);
         assertNotNull("create: MarkProperties.id is missing", createdMarkProperties.getId());
 
         MarkProperties foundMarkProperties = markPropertiesApi.getMarkProperties(ctx, createdMarkProperties.getId());
-        assertNotNull("read: no MarkProperties returnded", foundMarkProperties);
-        assertNotNull("read: MarkProperties.id is missing", foundMarkProperties.getId());
-        assertEquals("read: MarkProperties.name is different", markPropertiesName, foundMarkProperties.getName());
-        assertEquals("read: MarkProperties.shortName is different", markPropertiesShortName,
-                foundMarkProperties.getShortName());
-
+        assertDefaultValues(foundMarkProperties);
     }
 
+    private void assertDefaultValues(MarkProperties markProperties) {
+        assertNotNull("read: MarkProperties.id is missing", markProperties.getId());
+        assertEquals("read: MarkProperties.name is different", MARK_PROPERTIES_NAME, markProperties.getName());
+        assertEquals("read: MarkProperties.shortName is different", MARK_PROPERTIES_SHORTNAME,
+                markProperties.getShortName());
+        assertEquals("read: MarkProperties.color is different", MARK_PROPERTIES_COLOR, markProperties.getColor());
+        assertEquals("read: MarkProperties.shape is different", MARK_PROPERTIES_SHAPE, markProperties.getShape());
+        assertEquals("read: MarkProperties.pattern is different", MARK_PROPERTIES_PATTERN, markProperties.getPattern());
+        assertEquals("read: MarkProperties.type is different", MARK_PROPERTIES_TYPE,
+                markProperties.getMarkType().name());
+    }
 }
