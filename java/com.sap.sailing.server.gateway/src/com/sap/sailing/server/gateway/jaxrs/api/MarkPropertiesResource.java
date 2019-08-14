@@ -15,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MarkType;
@@ -22,6 +23,8 @@ import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBuilder;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.MarkPropertiesJsonSerializer;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.RGBColor;
 import com.sun.jersey.api.client.ClientResponse.Status;
@@ -65,15 +68,18 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         if (markType != null && markType.length() > 0) {
             type = MarkType.valueOf(markType);
         }
-        MarkPropertiesBuilder markPropertiesBuilder = new MarkPropertiesBuilder(/* id */ null, name, shortName, color,
-                shape, pattern, type);
+        final MarkPropertiesBuilder markPropertiesBuilder = new MarkPropertiesBuilder(/* id */ null, name, shortName,
+                color, shape, pattern, type);
+        final MarkProperties createdMarkProperties = getSharedSailingData()
+                .createMarkProperties(markPropertiesBuilder.build(), new ArrayList<String>());
         if (deviceUuid != null && deviceUuid.length() > 0) {
             final DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
-            markPropertiesBuilder.withDeviceId(device);
+            getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(createdMarkProperties, device);
         }
-        MarkProperties markProperties = this.getSharedSailingData().createMarkProperties(markPropertiesBuilder.build(),
-                new ArrayList<String>());
-        return Response.status(Response.Status.OK).build();
+        JsonSerializer<MarkProperties> markPropertiesSerializer = new MarkPropertiesJsonSerializer();
+        final JSONObject serializedMarkedProperties = markPropertiesSerializer.serialize(createdMarkProperties);
+        final String json = serializedMarkedProperties.toJSONString();
+        return Response.ok(json).build();
     }
 
     @PUT
