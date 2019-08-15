@@ -61,8 +61,8 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
     @GET
     @Path("{markPositionId}")
     @Produces("application/json;charset=UTF-8")
-    public Response getMarkProperties(@PathParam("markPositionId") String markPositionId) throws Exception {
-        MarkProperties markProperties = getSharedSailingData().getMarkPropertiesById(UUID.fromString(markPositionId));
+    public Response getMarkProperties(@PathParam("markPositionId") String markPropertiesId) throws Exception {
+        MarkProperties markProperties = getSharedSailingData().getMarkPropertiesById(UUID.fromString(markPropertiesId));
         if (markProperties == null) {
             return getMarkPropertiesNotFoundErrorResponse();
         }
