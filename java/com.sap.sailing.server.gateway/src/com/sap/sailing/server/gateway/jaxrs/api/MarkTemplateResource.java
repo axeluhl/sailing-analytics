@@ -2,12 +2,12 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.util.UUID;
 
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -66,10 +66,10 @@ public class MarkTemplateResource extends AbstractSailingServerResource {
 
     @POST
     @Produces("application/json;charset=UTF-8")
-    public Response createMarkTemplate(@QueryParam("name") final String name,
-            @QueryParam("shortName") final String shortName, @QueryParam("color") String rgbColor,
-            @QueryParam("shape") String shape, @QueryParam("pattern") String pattern,
-            @QueryParam("markType") final String markType) throws Exception {
+    public Response createMarkTemplate(@FormParam("name") final String name,
+            @FormParam("shortName") final String shortName, @FormParam("color") String rgbColor,
+            @FormParam("shape") String shape, @FormParam("pattern") String pattern,
+            @FormParam("markType") final String markType) throws Exception {
         Color color = null;
         if (rgbColor != null && rgbColor.length() > 0) {
             try {

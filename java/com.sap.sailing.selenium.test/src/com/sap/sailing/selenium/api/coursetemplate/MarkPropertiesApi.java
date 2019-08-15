@@ -28,35 +28,36 @@ public class MarkPropertiesApi {
     public MarkProperties createMarkProperties(final ApiContext ctx, final String name, final String shortName,
             final String deviceUuid, final String color, final String shape, final String pattern,
             final String markType, final Iterable<String> tags, final Double latDeg, final Double lonDeg) {
-        final Map<String, String> queryParams = new TreeMap<>();
-        queryParams.put(PARAM_NAME, name);
-        queryParams.put(PARAM_SHORTNAME, shortName);
+        final Map<String, String> formParams = new TreeMap<>();
+        formParams.put(PARAM_NAME, name);
+        formParams.put(PARAM_SHORTNAME, shortName);
         if (deviceUuid != null) {
-            queryParams.put(PARAM_DEVICEUUID, deviceUuid);
+            formParams.put(PARAM_DEVICEUUID, deviceUuid);
         }
-        queryParams.put(PARAM_COLOR, color);
-        queryParams.put(PARAM_SHAPE, shape);
-        queryParams.put(PARAM_PATTERN, pattern);
-        queryParams.put(PARAM_MARKTYPE, markType);
-        queryParams.put(PARAM_FIXED_POSITION_LATDEG, latDeg != null ? latDeg.toString() : null);
-        queryParams.put(PARAM_FIXED_POSITION_LONDEG, latDeg != null ? lonDeg.toString() : null);
+        formParams.put(PARAM_COLOR, color);
+        formParams.put(PARAM_SHAPE, shape);
+        formParams.put(PARAM_PATTERN, pattern);
+        formParams.put(PARAM_MARKTYPE, markType);
+        formParams.put(PARAM_FIXED_POSITION_LATDEG, latDeg != null ? latDeg.toString() : null);
+        formParams.put(PARAM_FIXED_POSITION_LONDEG, latDeg != null ? lonDeg.toString() : null);
         for (String tag : tags) {
-            queryParams.put(PARAM_TAG, tag);
+            formParams.put(PARAM_TAG, tag);
         }
-        JSONObject result = ctx.post(MARK_PROPERTIES, queryParams);
+        JSONObject result = ctx.post(MARK_PROPERTIES, null, formParams);
         return new MarkProperties(result);
     }
 
     public MarkProperties updateMarkProperties(final ApiContext ctx, final UUID id, final UUID deviceUuid,
             final Double latDeg, final Double lonDeg) {
-        final Map<String, String> queryParams = new TreeMap<>();
+        final Map<String, String> formParams = new TreeMap<>();
         if (deviceUuid != null) {
-            queryParams.put(PARAM_DEVICEUUID, deviceUuid.toString());
+            formParams.put(PARAM_DEVICEUUID, deviceUuid.toString());
         }
-        queryParams.put(PARAM_FIXED_POSITION_LATDEG, latDeg != null ? latDeg.toString() : null);
-        queryParams.put(PARAM_FIXED_POSITION_LONDEG, latDeg != null ? lonDeg.toString() : null);
+        formParams.put(PARAM_FIXED_POSITION_LATDEG, latDeg != null ? latDeg.toString() : null);
+        formParams.put(PARAM_FIXED_POSITION_LONDEG, latDeg != null ? lonDeg.toString() : null);
 
-        JSONObject result = ctx.put(MARK_PROPERTIES + "/" + id.toString(), queryParams, null);
+        // FIXME: add ApiContext.put with formParams. Do it in bug4942.
+        JSONObject result = null; // ctx.put(MARK_PROPERTIES + "/" + id.toString(), null, formParams);
         return new MarkProperties(result);
     }
 

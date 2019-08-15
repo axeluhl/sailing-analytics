@@ -24,14 +24,14 @@ public class MarkTemplateApi {
 
     public MarkTemplate createMarkTemplate(final ApiContext ctx, final String name, final String shortName,
             final String color, final String shape, final String pattern, final String markType) {
-        final Map<String, String> queryParams = new TreeMap<>();
-        queryParams.put(PARAM_NAME, name);
-        queryParams.put(PARAM_SHORTNAME, shortName);
-        queryParams.put(PARAM_COLOR, color);
-        queryParams.put(PARAM_SHAPE, shape);
-        queryParams.put(PARAM_PATTERN, pattern);
-        queryParams.put(PARAM_MARKTYPE, markType);
-        JSONObject result = ctx.post(MARK_TEMPLATES, queryParams);
+        final Map<String, String> formParams = new TreeMap<>();
+        formParams.put(PARAM_NAME, name);
+        formParams.put(PARAM_SHORTNAME, shortName);
+        formParams.put(PARAM_COLOR, color);
+        formParams.put(PARAM_SHAPE, shape);
+        formParams.put(PARAM_PATTERN, pattern);
+        formParams.put(PARAM_MARKTYPE, markType);
+        JSONObject result = ctx.post(MARK_TEMPLATES, null, formParams);
         return new MarkTemplate(result);
     }
 

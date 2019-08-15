@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -73,12 +74,11 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
 
     @POST
     @Produces("application/json;charset=UTF-8")
-    public Response createMarkProperties(@QueryParam("name") final String name,
-            @QueryParam("shortName") final String shortName, @QueryParam("deviceUuid") String deviceUuid,
-            @QueryParam("color") String rgbColor, @QueryParam("shape") String shape,
-            @QueryParam("pattern") String pattern, @QueryParam("markType") final String markType,
-            @QueryParam("tag") List<String> tags, @QueryParam("latDeg") Double latDeg,
-            @QueryParam("lonDeg") Double lonDeg) throws Exception {
+    public Response createMarkProperties(@FormParam("name") final String name,
+            @FormParam("shortName") final String shortName, @FormParam("deviceUuid") String deviceUuid,
+            @FormParam("color") String rgbColor, @FormParam("shape") String shape, @FormParam("pattern") String pattern,
+            @FormParam("markType") final String markType, @FormParam("tag") List<String> tags,
+            @FormParam("latDeg") Double latDeg, @FormParam("lonDeg") Double lonDeg) throws Exception {
         Color color = null;
         if (rgbColor != null && rgbColor.length() > 0) {
             try {
@@ -113,8 +113,8 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
     @Path("{markPositionId}")
     @Produces("application/json;charset=UTF-8")
     public Response updateMarkProperties(@PathParam("markPositionId") String markPositionId,
-            @QueryParam("deviceUuid") String deviceUuid, @QueryParam("latDeg") Double latDeg,
-            @QueryParam("lonDeg") Double lonDeg) throws Exception {
+            @FormParam("deviceUuid") String deviceUuid, @FormParam("latDeg") Double latDeg,
+            @FormParam("lonDeg") Double lonDeg) throws Exception {
         MarkProperties markProperties = getSharedSailingData().getMarkPropertiesById(UUID.fromString(markPositionId));
         if (markProperties == null) {
             return getMarkPropertiesNotFoundErrorResponse();
