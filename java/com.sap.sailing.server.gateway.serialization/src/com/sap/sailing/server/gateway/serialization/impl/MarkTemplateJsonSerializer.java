@@ -18,13 +18,13 @@ public class MarkTemplateJsonSerializer implements JsonSerializer<MarkTemplate> 
     @Override
     public JSONObject serialize(MarkTemplate markTemplate) {
         JSONObject result = new JSONObject();
-        result.put(FIELD_ID, markTemplate.getId());
+        result.put(FIELD_ID, markTemplate.getId().toString());
         result.put(FIELD_NAME, markTemplate.getName());
         result.put(FIELD_SHORTNAME, markTemplate.getShortName());
         result.put(FIELD_COLOR, markTemplate.getColor() != null ? markTemplate.getColor().getAsHtml() : null);
         result.put(FIELD_SHAPE, markTemplate.getShape());
         result.put(FIELD_PATTERN, markTemplate.getPattern());
-        result.put(FIELD_MARKTYPE, markTemplate.getPattern());
+        result.put(FIELD_MARKTYPE, markTemplate.getType());
         return result;
     }
 

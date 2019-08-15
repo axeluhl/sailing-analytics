@@ -40,10 +40,10 @@ public class MarkTemplateResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getMarkTemplates() throws Exception {
-        Iterable<MarkTemplate> markPropertiesList = getSharedSailingData().getAllMarkTemplates();
+        Iterable<MarkTemplate> markTemplateList = getSharedSailingData().getAllMarkTemplates();
         JSONArray result = new JSONArray();
         JsonSerializer<MarkTemplate> markTemplateSerializer = new MarkTemplateJsonSerializer();
-        for (MarkTemplate markTemplates : markPropertiesList) {
+        for (MarkTemplate markTemplates : markTemplateList) {
             result.add(markTemplateSerializer.serialize(markTemplates));
         }
         final String json = result.toJSONString();
