@@ -56,15 +56,15 @@ public class CourseTemplateJsonDeserializer implements JsonDeserializer<CourseTe
         final Map<MarkTemplate, String> roles = new HashMap<>();
         final JSONArray allMarkTemplatesJSON = (JSONArray) json.get(CourseTemplateJsonSerializer.FIELD_ALL_MARK_TEMPLATES);
         for (Object markTemplateWihtOptionalRoleNameObject : allMarkTemplatesJSON) {
-            final JSONObject markTemplateWihtOptionalRoleName = (JSONObject) markTemplateWihtOptionalRoleNameObject;
+            final JSONObject markTemplateWithOptionalRoleName = (JSONObject) markTemplateWihtOptionalRoleNameObject;
             final UUID markTemplateUUID = UUID.fromString(
-                    (String) markTemplateWihtOptionalRoleName.get(MarkTemplateJsonSerializer.FIELD_ID));
+                    (String) markTemplateWithOptionalRoleName.get(MarkTemplateJsonSerializer.FIELD_ID));
             final MarkTemplate resolvedMarkTemplate = markTemplateResolver.apply(markTemplateUUID);
             if (resolvedMarkTemplate == null) {
                 throw new JsonDeserializationException("Mark template wiht ID " + markTemplateUUID + " can't be resolved");
             }
             allMarkTemplatesById.put(markTemplateUUID, resolvedMarkTemplate);
-            String roleName = (String) markTemplateWihtOptionalRoleName.get(CourseTemplateJsonSerializer.FIELD_ASSOCIATED_ROLE);
+            String roleName = (String) markTemplateWithOptionalRoleName.get(CourseTemplateJsonSerializer.FIELD_ASSOCIATED_ROLE);
             if (roleName != null && !roleName.isEmpty()) {
                 roles.put(resolvedMarkTemplate, roleName);
             }
