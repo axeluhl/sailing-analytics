@@ -9,6 +9,7 @@ import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicableWithObjectInputStream;
 
@@ -21,8 +22,8 @@ public interface ReplicatingSharedSailingData extends SharedSailingData,
     Void internalCreateMarkTemplate(UUID idOfNewMarkTemplate, CommonMarkProperties properties);
     
     Void internalCreateCourseTemplate(UUID idOfNewCourseTemplate, String courseTemplateName, Iterable<MarkTemplate> marks,
-            Iterable<WaypointTemplate> waypoints, int zeroBasedIndexOfRepeatablePartStart,
-            int zeroBasedIndexOfRepeatablePartEnd, Iterable<String> tags, URL optionalImageURL);
+            Iterable<WaypointTemplate> waypoints, Pair<Integer, Integer> optionalRepeatablePart,
+            Iterable<String> tags, URL optionalImageURL);
     
     Void internalSetTrackingDeviceIdentifierForMarkProperties(UUID markPropertiesUUID, DeviceIdentifier deviceIdentifier);
     

@@ -74,6 +74,13 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
         this.zeroBasedIndexOfRepeatablePartEnd = zeroBasedIndexOfRepeatablePartEnd;
         validateWaypointsAgainstMarks();
     }
+    
+    public CourseTemplateImpl(UUID id, String name, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
+            URL optionalImageURL, Pair<Integer, Integer> optionalRepeatablePart) {
+        this(id, name, marks, waypoints, optionalImageURL,
+                optionalRepeatablePart == null ? -1 : optionalRepeatablePart.getA(),
+                optionalRepeatablePart == null ? -1 : optionalRepeatablePart.getB());
+    }
 
     /**
      * Throws an {@link IllegalArgumentException} in case a waypoint from {@link #waypoints} uses a mark template that
