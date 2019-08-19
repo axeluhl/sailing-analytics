@@ -7,7 +7,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class MarkTemplateJsonSerializer implements JsonSerializer<MarkTemplate> {
 
-    private static final String FIELD_ID = "id";
+    public static final String FIELD_ID = "id";
     private static final String FIELD_NAME = "name";
     private static final String FIELD_SHORTNAME = "shortName";
     private static final String FIELD_COLOR = "color";

@@ -3,7 +3,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.coursetemplate.CourseTemplate;
+import com.sap.sailing.domain.coursetemplate.CourseTemplate;import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Util.Pair;
 
@@ -18,14 +18,15 @@ public class CourseTemplateJsonSerializer implements JsonSerializer<CourseTempla
     public static final String FIELD_PASSING_INSTRUCTION = "passingInstruction";
     public static final String FIELD_CONTROL_POINT_NAME = "controlPointName";
     public static final String FIELD_MARK_TEMPLATE_IDS = "markTemplateIds";
-    public static final String FIELD_MARK_TEMPLATE_ID = "markTemplateId";
     public static final String FIELD_ASSOCIATED_ROLE = "associatedRole";
     public static final String FIELD_OPTIONAL_REPEATABLE_PART = "optionalRepeatablePart";
     
     private final JsonSerializer<Pair<Integer, Integer>> repeatablePartJsonSerializer;
+    private final JsonSerializer<MarkTemplate> markTemplateJsonSerializer;
     
     public CourseTemplateJsonSerializer() {
         repeatablePartJsonSerializer = new RepeatablePartJsonSerializer();
+        markTemplateJsonSerializer = new MarkTemplateJsonSerializer();
     }
 
     @Override
@@ -41,8 +42,7 @@ public class CourseTemplateJsonSerializer implements JsonSerializer<CourseTempla
         
         final JSONArray allMarkTemplates = new JSONArray();
         courseTemplate.getMarkTemplates().forEach(mt -> {
-            final JSONObject markTemplateEntry = new JSONObject();
-            markTemplateEntry.put(FIELD_MARK_TEMPLATE_ID, mt.getId().toString());
+            final JSONObject markTemplateEntry = markTemplateJsonSerializer.serialize(mt);
             final String associatedRoleOrNull = courseTemplate.getAssociatedRoles().get(mt);
             if (associatedRoleOrNull != null) {
                 markTemplateEntry.put(FIELD_ASSOCIATED_ROLE, associatedRoleOrNull);

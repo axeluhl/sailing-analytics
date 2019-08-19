@@ -23,6 +23,7 @@ import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseTemplateJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.MarkTemplateJsonSerializer;
 import com.sap.sse.common.Util.Pair;
 
 public class CourseTemplateJsonDeserializer implements JsonDeserializer<CourseTemplate> {
@@ -57,7 +58,7 @@ public class CourseTemplateJsonDeserializer implements JsonDeserializer<CourseTe
         for (Object markTemplateWihtOptionalRoleNameObject : allMarkTemplatesJSON) {
             final JSONObject markTemplateWihtOptionalRoleName = (JSONObject) markTemplateWihtOptionalRoleNameObject;
             final UUID markTemplateUUID = UUID.fromString(
-                    (String) markTemplateWihtOptionalRoleName.get(CourseTemplateJsonSerializer.FIELD_MARK_TEMPLATE_ID));
+                    (String) markTemplateWihtOptionalRoleName.get(MarkTemplateJsonSerializer.FIELD_ID));
             final MarkTemplate resolvedMarkTemplate = markTemplateResolver.apply(markTemplateUUID);
             if (resolvedMarkTemplate == null) {
                 throw new JsonDeserializationException("Mark template wiht ID " + markTemplateUUID + " can't be resolved");
