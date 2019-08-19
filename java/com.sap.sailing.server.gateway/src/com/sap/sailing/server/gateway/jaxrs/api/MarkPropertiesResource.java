@@ -59,9 +59,9 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
     }
 
     @GET
-    @Path("{markPositionId}")
+    @Path("{markPropertiesId}")
     @Produces("application/json;charset=UTF-8")
-    public Response getMarkProperties(@PathParam("markPositionId") String markPropertiesId) throws Exception {
+    public Response getMarkProperties(@PathParam("markPropertiesId") String markPropertiesId) throws Exception {
         MarkProperties markProperties = getSharedSailingData().getMarkPropertiesById(UUID.fromString(markPropertiesId));
         if (markProperties == null) {
             return getMarkPropertiesNotFoundErrorResponse();
@@ -110,12 +110,12 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
     }
 
     @PUT
-    @Path("{markPositionId}")
+    @Path("{markPropertiesId}")
     @Produces("application/json;charset=UTF-8")
-    public Response updateMarkProperties(@PathParam("markPositionId") String markPositionId,
+    public Response updateMarkProperties(@PathParam("markPropertiesId") String markPropertiesId,
             @FormParam("deviceUuid") String deviceUuid, @FormParam("latDeg") Double latDeg,
             @FormParam("lonDeg") Double lonDeg) throws Exception {
-        MarkProperties markProperties = getSharedSailingData().getMarkPropertiesById(UUID.fromString(markPositionId));
+        MarkProperties markProperties = getSharedSailingData().getMarkPropertiesById(UUID.fromString(markPropertiesId));
         if (markProperties == null) {
             return getMarkPropertiesNotFoundErrorResponse();
         }
@@ -134,9 +134,9 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
     }
 
     @DELETE
-    @Path("{markPositionId}")
-    public Response deleteMarkProperties(@PathParam("markPositionId") String markPositionId) throws Exception {
-        MarkProperties markProperties = getSharedSailingData().getMarkPropertiesById(UUID.fromString(markPositionId));
+    @Path("{markPropertiesId}")
+    public Response deleteMarkProperties(@PathParam("markPropertiesId") String markPropertiesId) throws Exception {
+        MarkProperties markProperties = getSharedSailingData().getMarkPropertiesById(UUID.fromString(markPropertiesId));
         if (markProperties == null) {
             return getMarkPropertiesNotFoundErrorResponse();
         }
