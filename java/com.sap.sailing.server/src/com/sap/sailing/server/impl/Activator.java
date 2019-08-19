@@ -137,8 +137,7 @@ public class Activator implements BundleActivator {
                         // only continue once we have the service, as some of the services require it to start properly
                         securityServiceTracker.waitForService(0);
                         internalStartBundle(context);
-                    } catch (InterruptedException | MalformedObjectNameException | InstanceAlreadyExistsException
-                            | MBeanRegistrationException | NotCompliantMBeanException | MalformedURLException e) {
+                    } catch (Exception e) {
                         logger.log(Level.SEVERE, "Could not start RacingEvent service properly", e);
                     }
                 };
