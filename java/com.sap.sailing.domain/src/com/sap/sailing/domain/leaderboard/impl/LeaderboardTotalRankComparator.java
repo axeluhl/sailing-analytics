@@ -94,8 +94,10 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
             this.discardedRaceColumnsPerCompetitor.put(competitor, discardedRaceColumns);
             for (RaceColumn raceColumn : raceColumnsToConsider) {
                 Pair<Competitor, RaceColumn> key = new Util.Pair<Competitor, RaceColumn>(competitor, raceColumn);
-                netPointsCache.put(key, leaderboard.getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns));
-                totalPointsCache.put(key, leaderboard.getTotalPoints(competitor, raceColumn, timePoint));
+                final Double totalPoints = leaderboard.getTotalPoints(competitor, raceColumn, timePoint);
+                netPointsCache.put(key, leaderboard.getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns,
+                        /* total points provider */ ()->totalPoints));
+                totalPointsCache.put(key, totalPoints);
             }
         }
     }

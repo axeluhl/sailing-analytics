@@ -10,6 +10,7 @@ The scoring itself allows to choose between using the simpler provided ToT/ToD s
 
 Currently the calculation for a constructed course with set TWAs does work with matching values to the official ORC tools and M2S. The internal calculations follow the ideas provided in the ORC pascal code, many calculating parts are using the predicted velocity value instead of the allowance.
 The calculation involves the following implemented parts:
+
 - get Allowances for Leg with TWA
 - get Lagrange interpolated Allowance for TWA/TWS
 - get Allowances for whole Course out of leg parts
@@ -21,6 +22,7 @@ The last two stated points have currently some issues regarding the accuracy of 
 
 ### Mixed Course
 The next step is to extend the properties of an ORCPerformanceCurveLeg to not only be defined as a leg with a specified TWA and an fixed allowance calculated with Lagrange but also be defined as a leg as a predefined course.
+
 - [ ] Add enums for predefined courses
 - [ ] Add or change ORCPerformanceCurveLeg implementation (and interface)
 - [ ] Adapt ORCPerformanceCurveImpl to handle Legs with predefined allowances
@@ -33,9 +35,10 @@ After the functionality for the different course possibilities is added, there n
 This problem should be resolved by the usage of the RaceLog and by the usage of an adapter pattern to match the information given from a TrackedRace to the ORCPerformanceCurveCourse.
 
 For this purpose there are the following subtasks:
+
 - [ ] UML for this concept
-- [ ] create RaceLogEvent for TWA/Length information per Leg. This task additionally consists out of some design decisions regarding the revokability of events.
-- [ ] create RaceLogEventAnalyzer for this Event
+- [x] create RaceLogEvent for TWA/Length information per Leg. This task additionally consists out of some design decisions regarding the revokability of events.
+- [x] create RaceLogEventAnalyzer for this Event *currently focussed on these tasks*
 - [ ] implement logic to get TWA/Length from a TrackedLeg
 - [ ] implement logic wether to use information from RaceLog or automatic generated from TrackedLeg
 - [ ] implement Listener on RaceLog
