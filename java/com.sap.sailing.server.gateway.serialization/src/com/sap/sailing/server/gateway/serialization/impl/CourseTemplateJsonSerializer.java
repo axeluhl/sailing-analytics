@@ -47,7 +47,7 @@ public class CourseTemplateJsonSerializer implements JsonSerializer<CourseTempla
             if (associatedRoleOrNull != null) {
                 markTemplateEntry.put(FIELD_ASSOCIATED_ROLE, associatedRoleOrNull);
             }
-            allMarkTemplates.add(mt.getId().toString());
+            allMarkTemplates.add(markTemplateEntry);
         });
         result.put(FIELD_ALL_MARK_TEMPLATES, allMarkTemplates);
         
