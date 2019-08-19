@@ -31,8 +31,8 @@ public interface MarkPairTemplate extends ControlPointTemplate {
 
         public MarkPairTemplate create(String name, MarkTemplate left, MarkTemplate right) {
             MarkPairTemplate markPairTemplate = new MarkPairTemplateImpl(name, left, right);
-            // usage of putIfAbsent ensures recycling of identical MarkPairTemplate instances in the CourseTemplate
-            return markPairs.putIfAbsent(markPairTemplate, markPairTemplate);
+            // usage of computeIfAbsent ensures recycling of identical MarkPairTemplate instances in the CourseTemplate
+            return markPairs.computeIfAbsent(markPairTemplate, mpt -> mpt);
         }
     }
 }
