@@ -19,6 +19,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CourseTemplateJsonDeserializer;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseTemplateJsonSerializer;
@@ -28,9 +30,11 @@ import com.sun.jersey.api.client.ClientResponse.Status;
 public class CourseTemplateResource extends AbstractSailingServerResource {
     
     private final JsonSerializer<CourseTemplate> courseTemplateSerializer;
+    private final JsonDeserializer<CourseTemplate> courseTemplateDeserializer;
     
     public CourseTemplateResource() {
         courseTemplateSerializer = new CourseTemplateJsonSerializer();
+        courseTemplateDeserializer = new CourseTemplateJsonDeserializer(getSharedSailingData()::getMarkTemplateById);
     }
 
     private Response getBadCourseTemplateValidationErrorResponse(String errorText) {
