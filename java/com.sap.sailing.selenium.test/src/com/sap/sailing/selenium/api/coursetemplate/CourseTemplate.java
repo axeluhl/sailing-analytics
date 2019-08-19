@@ -93,14 +93,17 @@ public class CourseTemplate extends JsonWrapper {
         this.roleMapping = roleMapping;
         this.waypoints = waypoints;
         this.tags = tags;
+        
+        getJson().put(FIELD_NAME, name);
 
-        JSONArray markTemplatesJSON = new JSONArray();
+        final JSONArray markTemplatesJSON = new JSONArray();
         allMarkTemplates.forEach(mt -> {
             final JSONObject markTemplateEntry = mt.getJson();
             final String roleOrNull = roleMapping.get(mt);
             if (roleOrNull != null) {
                 markTemplateEntry.put(FIELD_ASSOCIATED_ROLE, roleOrNull);
             }
+            markTemplatesJSON.add(markTemplateEntry);
         });
         getJson().put(FIELD_ALL_MARK_TEMPLATES, markTemplatesJSON);
         final JSONArray waypointsJSON = new JSONArray();

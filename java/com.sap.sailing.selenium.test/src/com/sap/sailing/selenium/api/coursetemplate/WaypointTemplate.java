@@ -19,11 +19,12 @@ public class WaypointTemplate extends JsonWrapper {
     private final Iterable<MarkTemplate> marks;
     private final PassingInstruction passingInstruction;
 
-    public WaypointTemplate(PassingInstruction passingInstruction, Iterable<MarkTemplate> marks) {
+    public WaypointTemplate(String name, PassingInstruction passingInstruction, Iterable<MarkTemplate> marks) {
         super(new JSONObject());
         this.passingInstruction = passingInstruction;
         this.marks = marks;
-        getJson().put(FIELD_CONTROL_POINT_NAME, passingInstruction.name());
+        getJson().put(FIELD_CONTROL_POINT_NAME, name);
+        getJson().put(FIELD_PASSING_INSTRUCTION, passingInstruction.name());
         final JSONArray markIds = new JSONArray();
         marks.forEach(mt -> markIds.add(mt.getId().toString()));
         getJson().put(FIELD_MARK_TEMPLATE_IDS, markIds);
