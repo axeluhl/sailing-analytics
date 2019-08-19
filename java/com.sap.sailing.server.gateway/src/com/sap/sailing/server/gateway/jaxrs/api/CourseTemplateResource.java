@@ -17,6 +17,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -76,8 +77,24 @@ public class CourseTemplateResource extends AbstractSailingServerResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces("application/json;charset=UTF-8")
     public Response createCourseTemplate(String json) throws Exception {
-        // TODO implement
-        String jsonResult = "";
+        if (json == null || json.isEmpty()) {
+            getBadCourseTemplateValidationErrorResponse("Course template is required to be given as json object");
+        }
+        final Object parsedObject = new JSONParser().parse(json);
+        if (parsedObject == null || !(parsedObject instanceof JSONObject)) {
+            getBadCourseTemplateValidationErrorResponse("Course template is required to be given as json object");
+        }
+        final CourseTemplate deserializedCourseTemplate = courseTemplateDeserializer
+                .deserialize((JSONObject) parsedObject);
+        final CourseTemplate createdCourseTemplate = getSharedSailingData().createCourseTemplate(
+                deserializedCourseTemplate.getName(), deserializedCourseTemplate.getMarkTemplates(),
+                deserializedCourseTemplate.getWaypointTemplates(1),
+                // TODO change to one optional repeatable part param
+                deserializedCourseTemplate.getRepeatablePart().getA(),
+                deserializedCourseTemplate.getRepeatablePart().getA(), deserializedCourseTemplate.getTags(),
+                deserializedCourseTemplate.getOptionalImageURL());
+        final JSONObject serializedMarkedProperties = courseTemplateSerializer.serialize(createdCourseTemplate);
+        final String jsonResult = serializedMarkedProperties.toJSONString();
         return Response.ok(jsonResult).build();
     }
 
