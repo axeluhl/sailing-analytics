@@ -27,7 +27,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseTemplateJsonSerializer;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
-@Path("/v1/coursetemplate")
+@Path("/v1/coursetemplates")
 public class CourseTemplateResource extends AbstractSailingServerResource {
     
     private final JsonSerializer<CourseTemplate> courseTemplateSerializer;
