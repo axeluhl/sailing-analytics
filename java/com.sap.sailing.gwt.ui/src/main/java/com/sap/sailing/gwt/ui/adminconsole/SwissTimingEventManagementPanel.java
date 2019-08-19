@@ -200,7 +200,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         raceTable.setWidth("300px");
         raceList = new ListDataProvider<SwissTimingRaceRecordDTO>();
         filterablePanelEvents = new LabeledAbstractFilterablePanel<SwissTimingRaceRecordDTO>(lblFilterEvents,
-                availableSwissTimingRaces, raceList) {
+                availableSwissTimingRaces, raceList, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(SwissTimingRaceRecordDTO t) {
                 List<String> strings = new ArrayList<>();

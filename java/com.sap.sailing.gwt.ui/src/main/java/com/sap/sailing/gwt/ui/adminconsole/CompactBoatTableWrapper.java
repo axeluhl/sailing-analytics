@@ -132,7 +132,7 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
                 return comparator.compare(o1.getIdAsString(), o2.getIdAsString());
             }
         });
-        filterField = new CustomizableFilterablePanel<BoatDTO>(new ArrayList<>(), getDataProvider()) {
+        filterField = new CustomizableFilterablePanel<BoatDTO>(new ArrayList<>(), getDataProvider(), stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(BoatDTO boat) {
                 List<String> string = new ArrayList<String>();

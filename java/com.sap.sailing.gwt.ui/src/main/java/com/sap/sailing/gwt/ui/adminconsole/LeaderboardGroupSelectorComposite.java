@@ -145,7 +145,7 @@ public class LeaderboardGroupSelectorComposite extends Composite implements HasV
         availableLeaderboardGroupsProvider.addDataDisplay(availableLeaderboardGroupsTable);
         availableLeaderboardGroupsFilterablePanel = new LabeledAbstractFilterablePanel<LeaderboardGroupDTO>(
                 new Label(stringMessages.filterLeaderboardGroupsByName()),
-                Collections.<LeaderboardGroupDTO> emptyList(), availableLeaderboardGroupsProvider) {
+                Collections.<LeaderboardGroupDTO> emptyList(), availableLeaderboardGroupsProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(LeaderboardGroupDTO t) {
                 List<String> result = new ArrayList<>();

@@ -451,7 +451,7 @@ public class SmartphoneTrackingEventManagementPanel
                                     @Override
                                     public void cancel() {
                                     }
-                                }).show();                                    
+                                                    }, userService).show();
                             }
                             
                             @Override
@@ -935,7 +935,7 @@ public class SmartphoneTrackingEventManagementPanel
         final String raceName = LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName) ? raceColumnName : raceColumnName + ", " + fleetName;
         ShowCompetitorToBoatMappingsDialog dialog = new ShowCompetitorToBoatMappingsDialog(sailingService, 
                 stringMessages, errorReporter, selectedLeaderboardName, raceColumnName, fleetName, 
-                raceName);
+                raceName, userService);
         dialog.center();
     }
 
