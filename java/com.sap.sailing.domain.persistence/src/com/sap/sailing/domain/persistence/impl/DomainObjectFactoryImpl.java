@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -205,12 +206,13 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
+import com.sap.sailing.domain.coursetemplate.MarkPairTemplate;
+import com.sap.sailing.domain.coursetemplate.MarkPairTemplate.MarkPairTemplateFactory;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBuilder;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.impl.CourseTemplateImpl;
-import com.sap.sailing.domain.coursetemplate.impl.MarkPairTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
@@ -3170,9 +3172,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final BasicDBList waypointTemplatesList = dbObject.get(FieldNames.COURSE_TEMPLATE_WAYPOINTS.name(),
                 BasicDBList.class);
         final List<WaypointTemplate> waypointTemplates = new ArrayList<>();
+        final MarkPairTemplateFactory markPairTemplateFactory = new MarkPairTemplateFactory();
         for (final Object o : waypointTemplatesList) {
             final BasicDBObject bdo = (BasicDBObject) o;
-            waypointTemplates.add(loadWaypointTemplate(bdo, markTemplateResolver));
+            waypointTemplates.add(loadWaypointTemplate(bdo, markTemplateResolver, markPairTemplateFactory::create));
         }
 
         // load repeatable parts
@@ -3193,7 +3196,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private WaypointTemplate loadWaypointTemplate(BasicDBObject bdo,
-            Function<UUID, MarkTemplate> markTemplateResolver) {
+            Function<UUID, MarkTemplate> markTemplateResolver,
+            BiFunction<String, List<MarkTemplate>, MarkPairTemplate> markPairResolver) {
         // load passing instruction
         final PassingInstruction passingInstruction = PassingInstruction
                 .valueOf(bdo.get(FieldNames.WAYPOINT_TEMPLATE_PASSINGINSTRUCTION.name()).toString());
@@ -3225,8 +3229,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         // create MarkTemplate or MarkTemplatePairImpl
         final ControlPointTemplate controlPointTemplate;
         if (markTemplates.size() == 2) {
-            controlPointTemplate = new MarkPairTemplateImpl(name, markTemplates.get(0),
-                    markTemplates.get(1));
+            controlPointTemplate = markPairResolver.apply(name, markTemplates);
         } else {
             controlPointTemplate = markTemplates.get(0);
         }

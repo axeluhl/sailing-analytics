@@ -15,11 +15,10 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
-import com.sap.sailing.domain.coursetemplate.MarkPairTemplate;
+import com.sap.sailing.domain.coursetemplate.MarkPairTemplate.MarkPairTemplateFactory;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.impl.CourseTemplateImpl;
-import com.sap.sailing.domain.coursetemplate.impl.MarkPairTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -71,7 +70,7 @@ public class CourseTemplateJsonDeserializer implements JsonDeserializer<CourseTe
         }
         
         final List<WaypointTemplate> waypoints = new ArrayList<>();
-        final Map<MarkPairTemplate, MarkPairTemplate> markPairs = new HashMap<>();
+        final MarkPairTemplateFactory markPairTemplateFactory = new MarkPairTemplateFactory();
         final JSONArray waypointsJSON = (JSONArray) json.get(CourseTemplateJsonSerializer.FIELD_WAYPOINTS);
         for (Object waypointObject : waypointsJSON) {
             final JSONObject waypointJSON = (JSONObject) waypointObject;
@@ -88,10 +87,9 @@ public class CourseTemplateJsonDeserializer implements JsonDeserializer<CourseTe
             if (resolvedMarkTemplates.size() == 1) {
                 controlPointTemplate = resolvedMarkTemplates.get(0);
             } else if (resolvedMarkTemplates.size() == 2) {
-                final String controlPointName = (String) waypointJSON.get(CourseTemplateJsonSerializer.FIELD_CONTROL_POINT_NAME);
-                MarkPairTemplate markPairTemplate = new MarkPairTemplateImpl(controlPointName, resolvedMarkTemplates.get(0), resolvedMarkTemplates.get(1));
-                // usage of putIfAbsent ensures recycling of identical MarkPairTemplate instances in the CourseTemplate
-                controlPointTemplate = markPairs.putIfAbsent(markPairTemplate, markPairTemplate);
+                controlPointTemplate = markPairTemplateFactory.create(
+                        (String) waypointJSON.get(CourseTemplateJsonSerializer.FIELD_CONTROL_POINT_NAME),
+                        resolvedMarkTemplates);
             } else {
                 throw new JsonDeserializationException("Unexpected number of marks found for waypoint");
             }
