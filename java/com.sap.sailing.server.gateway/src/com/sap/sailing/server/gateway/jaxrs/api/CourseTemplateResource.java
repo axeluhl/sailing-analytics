@@ -31,11 +31,13 @@ import com.sun.jersey.api.client.ClientResponse.Status;
 public class CourseTemplateResource extends AbstractSailingServerResource {
     
     private final JsonSerializer<CourseTemplate> courseTemplateSerializer;
-    private final JsonDeserializer<CourseTemplate> courseTemplateDeserializer;
     
     public CourseTemplateResource() {
         courseTemplateSerializer = new CourseTemplateJsonSerializer();
-        courseTemplateDeserializer = new CourseTemplateJsonDeserializer(getSharedSailingData()::getMarkTemplateById);
+    }
+    
+    private JsonDeserializer<CourseTemplate> getCourseTemplateDeserializer() {
+        return new CourseTemplateJsonDeserializer(getSharedSailingData()::getMarkTemplateById);
     }
 
     private Response getBadCourseTemplateValidationErrorResponse(String errorText) {
@@ -84,7 +86,7 @@ public class CourseTemplateResource extends AbstractSailingServerResource {
         if (parsedObject == null || !(parsedObject instanceof JSONObject)) {
             getBadCourseTemplateValidationErrorResponse("Course template is required to be given as json object");
         }
-        final CourseTemplate deserializedCourseTemplate = courseTemplateDeserializer
+        final CourseTemplate deserializedCourseTemplate = getCourseTemplateDeserializer()
                 .deserialize((JSONObject) parsedObject);
         final CourseTemplate createdCourseTemplate = getSharedSailingData().createCourseTemplate(
                 deserializedCourseTemplate.getName(), deserializedCourseTemplate.getMarkTemplates(),
