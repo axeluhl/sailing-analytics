@@ -105,7 +105,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
                 tableRes);
         final ListDataProvider<AccountWithSecurityDTO> filteredAccounts = new ListDataProvider<>();
         filterAccountsPanel = new LabeledAbstractFilterablePanel<AccountWithSecurityDTO>(
-                new Label(stringMessages.igtimiAccounts()), Collections.emptyList(), filteredAccounts) {
+                new Label(stringMessages.igtimiAccounts()), Collections.emptyList(), filteredAccounts, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(AccountWithSecurityDTO t) {
                 Set<String> strings = Collections.singleton(t.getEmail());
@@ -124,6 +124,8 @@ public class IgtimiAccountsPanel extends FlowPanel {
                 .getSelectionModel();
 
         final Panel controlsPanel = new HorizontalPanel();
+        filterAccountsPanel
+                .setCheckboxEnabledFilter(account -> userService.hasPermission(account, DefaultActions.UPDATE));
         controlsPanel.add(filterAccountsPanel);
 
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,

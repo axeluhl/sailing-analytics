@@ -652,7 +652,8 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         final String raceName = LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName) ? raceColumnName
                 : raceColumnName + ", " + fleetName;
         ShowCompetitorToBoatMappingsDialog dialog = new ShowCompetitorToBoatMappingsDialog(sailingService,
-                stringMessages, errorReporter, selectedLeaderboardName, raceColumnName, fleetName, raceName);
+                stringMessages, errorReporter, selectedLeaderboardName, raceColumnName, fleetName, raceName,
+                userService);
         dialog.center();
     }
 

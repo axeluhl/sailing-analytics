@@ -119,7 +119,7 @@ public class WildcardPermissionWithSecurityDTOTableWrapper extends
         // filter field configuration
         filterField = new LabeledAbstractFilterablePanel<WildcardPermissionWithSecurityDTO>(
                 new Label(stringMessages.filterPermission()), new ArrayList<WildcardPermissionWithSecurityDTO>(),
-                dataProvider) {
+                dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(WildcardPermissionWithSecurityDTO t) {
                 List<String> string = new ArrayList<String>();
@@ -133,6 +133,8 @@ public class WildcardPermissionWithSecurityDTOTableWrapper extends
             }
         };
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
+        filterField
+                .setCheckboxEnabledFilter(permission -> userService.hasPermission(permission, DefaultActions.UPDATE));
 
         mainPanel.insert(filterField, 0);
 

@@ -102,7 +102,7 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
         this.competitorImportMatcher = competitorImportMatcherParam;
         filterablePanelCompetitorDescriptor = new LabeledAbstractFilterablePanel<CompetitorDescriptor>(
                 new Label(stringMessages.filterImportedCompetitorsByNameSailRaceFleet()),
-                new ArrayList<CompetitorDescriptor>(), dataProvider) {
+                new ArrayList<CompetitorDescriptor>(), dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(CompetitorDescriptor competitorDescriptor) {
                 List<String> string = new ArrayList<String>();
