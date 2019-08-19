@@ -43,8 +43,9 @@ public class CourseTemplate extends JsonWrapper {
         super(json);
         name = get(FIELD_NAME);
         id = UUID.fromString(get(FIELD_ID));
+        final String imageUrlStringOrNull = get(FIELD_OPTIONAL_IMAGE_URL);
         try {
-            this.optionalImageURL = new URL(get(FIELD_OPTIONAL_IMAGE_URL));
+            this.optionalImageURL = imageUrlStringOrNull == null ? null : new URL(imageUrlStringOrNull);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -69,7 +70,7 @@ public class CourseTemplate extends JsonWrapper {
         allMarkTemplates = markTemplatesById.values();
         final List<WaypointTemplate> waypoints = new ArrayList<WaypointTemplate>();
         JSONArray waypointsJSON = get(FIELD_WAYPOINTS);
-        waypointsJSON.forEach(wpObject -> waypoints.add(new WaypointTemplate(json, markTemplatesById::get)));
+        waypointsJSON.forEach(wpObject -> waypoints.add(new WaypointTemplate((JSONObject)wpObject, markTemplatesById::get)));
         this.waypoints = waypoints;
         final JSONObject repeatablePartJSON = get(FIELD_OPTIONAL_REPEATABLE_PART);
         if (repeatablePartJSON != null) {

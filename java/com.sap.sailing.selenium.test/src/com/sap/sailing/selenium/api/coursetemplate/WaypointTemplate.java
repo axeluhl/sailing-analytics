@@ -1,9 +1,9 @@
 package com.sap.sailing.selenium.api.coursetemplate;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -33,8 +33,8 @@ public class WaypointTemplate extends JsonWrapper {
     public WaypointTemplate(JSONObject json, Function<UUID, MarkTemplate> markTemplateResolver) {
         super(json);
         final JSONArray markIds = get(FIELD_MARK_TEMPLATE_IDS);
-        final List<MarkTemplate> marks = new ArrayList<>();
-        markIds.forEach(idObject -> marks.add(markTemplateResolver.apply(UUID.fromString(idObject.toString()))));
+        final List<MarkTemplate> marks = markIds.stream().map(idObject -> UUID.fromString(idObject.toString()))
+                .map(markTemplateResolver::apply).collect(Collectors.toList());
         this.marks = marks;
         passingInstruction = PassingInstruction.valueOf(get(FIELD_PASSING_INSTRUCTION));
     }
