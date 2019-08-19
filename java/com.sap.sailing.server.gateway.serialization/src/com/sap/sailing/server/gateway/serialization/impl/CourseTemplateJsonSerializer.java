@@ -21,8 +21,12 @@ public class CourseTemplateJsonSerializer implements JsonSerializer<CourseTempla
     public static final String FIELD_MARK_TEMPLATE_ID = "markTemplateId";
     public static final String FIELD_ASSOCIATED_ROLE = "associatedRole";
     public static final String FIELD_OPTIONAL_REPEATABLE_PART = "optionalRepeatablePart";
-    public static final String FIELD_REPEATABLE_PART_START = "zeroBasedIndexOfRepeatablePartStart";
-    public static final String FIELD_REPEATABLE_PART_END = "zeroBasedIndexOfRepeatablePartEnd";
+    
+    private final JsonSerializer<Pair<Integer, Integer>> repeatablePartJsonSerializer;
+    
+    public CourseTemplateJsonSerializer() {
+        repeatablePartJsonSerializer = new RepeatablePartJsonSerializer();
+    }
 
     @Override
     public JSONObject serialize(CourseTemplate courseTemplate) {
@@ -61,11 +65,8 @@ public class CourseTemplateJsonSerializer implements JsonSerializer<CourseTempla
         result.put(FIELD_WAYPOINTS, waypoints);
         
         if (courseTemplate.hasRepeatablePart()) {
-            final Pair<Integer, Integer> repeatablePart = courseTemplate.getRepeatablePart();
-            final JSONObject repeatablePartJSON = new JSONObject();
-            repeatablePartJSON.put(FIELD_REPEATABLE_PART_START, repeatablePart.getA());
-            repeatablePartJSON.put(FIELD_REPEATABLE_PART_END, repeatablePart.getB());
-            result.put(FIELD_OPTIONAL_REPEATABLE_PART, repeatablePartJSON);
+            result.put(FIELD_OPTIONAL_REPEATABLE_PART,
+                    repeatablePartJsonSerializer.serialize(courseTemplate.getRepeatablePart()));
         }
         
         return result;
