@@ -90,7 +90,7 @@ public class MarkTemplatePanel extends FlowPanel {
         buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
 
         this.filterableMarkTemplates = new LabeledAbstractFilterablePanel<MarkTemplateDTO>(lblFilterRaces,
-                allMarkTemplates, markTemplateListDataProvider) {
+                allMarkTemplates, markTemplateListDataProvider, stringMessages) {
             @Override
             public List<String> getSearchableStrings(MarkTemplateDTO t) {
                 List<String> strings = new ArrayList<String>();
