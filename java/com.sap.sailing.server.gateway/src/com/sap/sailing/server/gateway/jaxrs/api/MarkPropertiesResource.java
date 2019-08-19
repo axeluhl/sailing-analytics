@@ -35,6 +35,12 @@ import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/v1/markproperties")
 public class MarkPropertiesResource extends AbstractSailingServerResource {
+    
+    private final JsonSerializer<MarkProperties> markPropertiesSerializer;
+    
+    public MarkPropertiesResource() {
+        markPropertiesSerializer = new MarkPropertiesJsonSerializer();
+    }
 
     private Response getBadMarkPropertiesValidationErrorResponse(String errorText) {
         return Response.status(Status.BAD_REQUEST).entity(StringEscapeUtils.escapeHtml(errorText) + ".")
@@ -50,7 +56,6 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
     public Response getMarkProperties(@QueryParam("tag") List<String> tags) throws Exception {
         Iterable<MarkProperties> markPropertiesList = getSharedSailingData().getAllMarkProperties(tags);
         JSONArray result = new JSONArray();
-        JsonSerializer<MarkProperties> markPropertiesSerializer = new MarkPropertiesJsonSerializer();
         for (MarkProperties markProperties : markPropertiesList) {
             result.add(markPropertiesSerializer.serialize(markProperties));
         }
@@ -66,7 +71,6 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         if (markProperties == null) {
             return getMarkPropertiesNotFoundErrorResponse();
         }
-        JsonSerializer<MarkProperties> markPropertiesSerializer = new MarkPropertiesJsonSerializer();
         final JSONObject serializedMarkedProperties = markPropertiesSerializer.serialize(markProperties);
         final String json = serializedMarkedProperties.toJSONString();
         return Response.ok(json).build();
@@ -103,7 +107,6 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
             final Position fixedPosition = new DegreePosition(latDeg, lonDeg);
             getSharedSailingData().setFixedPositionForMarkProperties(createdMarkProperties, fixedPosition);
         }
-        JsonSerializer<MarkProperties> markPropertiesSerializer = new MarkPropertiesJsonSerializer();
         final JSONObject serializedMarkedProperties = markPropertiesSerializer.serialize(createdMarkProperties);
         final String json = serializedMarkedProperties.toJSONString();
         return Response.ok(json).build();
@@ -127,7 +130,6 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
             final Position fixedPosition = new DegreePosition(latDeg, lonDeg);
             getSharedSailingData().setFixedPositionForMarkProperties(markProperties, fixedPosition);
         }
-        JsonSerializer<MarkProperties> markPropertiesSerializer = new MarkPropertiesJsonSerializer();
         final JSONObject serializedMarkedProperties = markPropertiesSerializer.serialize(markProperties);
         final String json = serializedMarkedProperties.toJSONString();
         return Response.ok(json).build();
