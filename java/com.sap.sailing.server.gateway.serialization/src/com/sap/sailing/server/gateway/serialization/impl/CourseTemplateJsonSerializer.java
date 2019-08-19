@@ -1,22 +1,72 @@
 package com.sap.sailing.server.gateway.serialization.impl;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.common.Util.Pair;
 
 public class CourseTemplateJsonSerializer implements JsonSerializer<CourseTemplate> {
 
-    private static final String FIELD_ID = "id";
-    private static final String FIELD_NAME = "name";
+    public static final String FIELD_ID = "id";
+    public static final String FIELD_NAME = "name";
+    public static final String FIELD_TAGS = "tags";
+    public static final String FIELD_OPTIONAL_IMAGE_URL = "optionalImageURL";
+    public static final String FIELD_ALL_MARK_TEMPLATES = "allMarkTemplates";
+    public static final String FIELD_WAYPOINTS = "waypoints";
+    public static final String FIELD_PASSING_INSTRUCTION = "passingInstruction";
+    public static final String FIELD_CONTROL_POINT_NAME = "controlPointName";
+    public static final String FIELD_MARK_TEMPLATE_IDS = "markTemplateIds";
+    public static final String FIELD_MARK_TEMPLATE_ID = "markTemplateId";
+    public static final String FIELD_ASSOCIATED_ROLE = "associatedRole";
+    public static final String FIELD_OPTIONAL_REPEATABLE_PART = "optionalRepeatablePart";
+    public static final String FIELD_REPEATABLE_PART_START = "zeroBasedIndexOfRepeatablePartStart";
+    public static final String FIELD_REPEATABLE_PART_END = "zeroBasedIndexOfRepeatablePartEnd";
 
     @Override
-    public JSONObject serialize(CourseTemplate markProperties) {
-        JSONObject result = new JSONObject();
-        result.put(FIELD_ID, markProperties.getId().toString());
-        result.put(FIELD_NAME, markProperties.getName());
+    public JSONObject serialize(CourseTemplate courseTemplate) {
+        final JSONObject result = new JSONObject();
+        result.put(FIELD_ID, courseTemplate.getId().toString());
+        result.put(FIELD_NAME, courseTemplate.getName());
+        result.put(FIELD_OPTIONAL_IMAGE_URL, courseTemplate.getOptionalImageURL());
         
-        // TODO more...
+        final JSONArray tags = new JSONArray();
+        courseTemplate.getTags().forEach(tags::add);
+        result.put(FIELD_TAGS, tags);
+        
+        final JSONArray allMarkTemplates = new JSONArray();
+        courseTemplate.getMarkTemplates().forEach(mt -> {
+            final JSONObject markTemplateEntry = new JSONObject();
+            markTemplateEntry.put(FIELD_MARK_TEMPLATE_ID, mt.getId().toString());
+            final String associatedRoleOrNull = courseTemplate.getAssociatedRoles().get(mt);
+            if (associatedRoleOrNull != null) {
+                markTemplateEntry.put(FIELD_ASSOCIATED_ROLE, associatedRoleOrNull);
+            }
+            allMarkTemplates.add(mt.getId().toString());
+        });
+        result.put(FIELD_ALL_MARK_TEMPLATES, allMarkTemplates);
+        
+        final JSONArray waypoints = new JSONArray();
+        courseTemplate.getWaypointTemplates(1).forEach(wp -> {
+            final JSONObject waypointEntry = new JSONObject();
+            
+            waypointEntry.put(FIELD_PASSING_INSTRUCTION, wp.getPassingInstruction().name());
+            final JSONArray markTemplateIDs = new JSONArray();
+            wp.getControlPointTemplate().getMarks().forEach(mt -> markTemplateIDs.add(mt.getId().toString()));
+            waypointEntry.put(FIELD_MARK_TEMPLATE_IDS, markTemplateIDs);
+            waypointEntry.put(FIELD_CONTROL_POINT_NAME, wp.getControlPointTemplate().getName());
+            waypoints.add(waypointEntry);
+        });
+        result.put(FIELD_WAYPOINTS, waypoints);
+        
+        if (courseTemplate.hasRepeatablePart()) {
+            final Pair<Integer, Integer> repeatablePart = courseTemplate.getRepeatablePart();
+            final JSONObject repeatablePartJSON = new JSONObject();
+            repeatablePartJSON.put(FIELD_REPEATABLE_PART_START, repeatablePart.getA());
+            repeatablePartJSON.put(FIELD_REPEATABLE_PART_END, repeatablePart.getB());
+            result.put(FIELD_OPTIONAL_REPEATABLE_PART, repeatablePartJSON);
+        }
         
         return result;
     }
