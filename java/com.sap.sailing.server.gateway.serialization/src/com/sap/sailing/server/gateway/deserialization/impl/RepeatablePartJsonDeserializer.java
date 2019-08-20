@@ -12,10 +12,10 @@ public class RepeatablePartJsonDeserializer implements JsonDeserializer<Repeatab
 
     @Override
     public RepeatablePart deserialize(JSONObject json) throws JsonDeserializationException {
-        final Integer zeroBasedIndexOfRepeatablePartStart = Integer
-                .valueOf((String) json.get(RepeatablePartJsonSerializer.FIELD_REPEATABLE_PART_START));
-        final Integer zeroBasedIndexOfRepeatablePartEnd = Integer
-                .valueOf((String) json.get(RepeatablePartJsonSerializer.FIELD_REPEATABLE_PART_END));
+        final Integer zeroBasedIndexOfRepeatablePartStart = ((Number) json
+                .get(RepeatablePartJsonSerializer.FIELD_REPEATABLE_PART_START)).intValue();
+        final Integer zeroBasedIndexOfRepeatablePartEnd = ((Number) json
+                .get(RepeatablePartJsonSerializer.FIELD_REPEATABLE_PART_END)).intValue();
         return new RepeatablePartImpl(zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd);
     }
 }
