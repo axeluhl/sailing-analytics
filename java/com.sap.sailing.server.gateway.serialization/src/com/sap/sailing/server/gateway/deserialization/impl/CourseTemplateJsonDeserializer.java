@@ -108,8 +108,8 @@ public class CourseTemplateJsonDeserializer implements JsonDeserializer<CourseTe
             optionalRepeatablePart = repeatablePartJsonDeserializer.deserialize(repeatablePartJSON);
         }
         
-        CourseTemplateImpl courseTemplate = new CourseTemplateImpl(null, courseTemplateName, allMarkTemplatesById.values(), waypoints, optionalImageURL, optionalRepeatablePart);
-        courseTemplate.setAssociatedRoles(roles);
+        final CourseTemplateImpl courseTemplate = new CourseTemplateImpl(null, courseTemplateName,
+                allMarkTemplatesById.values(), waypoints, roles, optionalImageURL, optionalRepeatablePart);
         courseTemplate.setTags(tags);
         return courseTemplate;
     }

@@ -3198,7 +3198,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
 
         final CourseTemplateImpl courseTemplateImpl = new CourseTemplateImpl(id, name, markTemplates, waypointTemplates,
-                optionaImageURL, optionalRepeatablePart);
+                associatedRoles, optionaImageURL, optionalRepeatablePart);
         courseTemplateImpl.setTags(tags);
         return courseTemplateImpl;
     }

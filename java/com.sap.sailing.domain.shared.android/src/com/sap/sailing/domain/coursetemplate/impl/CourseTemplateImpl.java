@@ -23,7 +23,7 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     
     private final ArrayList<WaypointTemplate> waypoints;
     
-    private final Map<MarkTemplate, String> associatedRoles = new HashMap<>();
+    private final Map<MarkTemplate, String> associatedRoles;
 
     private Iterable<String> tags = new ArrayList<>();
     
@@ -34,17 +34,17 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     
     /** Creates a course template with a random UUID. */
     public CourseTemplateImpl(String name, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
-            URL optionalImageURL) {
-        this(UUID.randomUUID(), name, marks, waypoints, optionalImageURL);
+            Map<MarkTemplate, String> associatedRoles, URL optionalImageURL) {
+        this(UUID.randomUUID(), name, marks, waypoints, associatedRoles, optionalImageURL);
     }
 
     public CourseTemplateImpl(UUID id, String name, Iterable<MarkTemplate> marks,
-            Iterable<WaypointTemplate> waypoints, URL optionalImageURL) {
-        this(id, name, marks, waypoints, optionalImageURL, /* optionalRepeatablePart */ null);
+            Iterable<WaypointTemplate> waypoints, Map<MarkTemplate, String> associatedRoles, URL optionalImageURL) {
+        this(id, name, marks, waypoints, associatedRoles, optionalImageURL, /* optionalRepeatablePart */ null);
     }
     
     public CourseTemplateImpl(UUID id, String name, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
-            URL optionalImageURL, RepeatablePart optionalRepeatablePart) {
+            Map<MarkTemplate, String> associatedRoles, URL optionalImageURL, RepeatablePart optionalRepeatablePart) {
         super(name, id);
         if (optionalRepeatablePart != null) {
             optionalRepeatablePart.validateRepeatablePartForSequence(waypoints);
@@ -56,6 +56,7 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
         this.marks = theMarks;
         this.optionalImageURL = optionalImageURL;
         this.optionalRepeatablePart = optionalRepeatablePart;
+        this.associatedRoles = new HashMap<>(associatedRoles);
         validateWaypointsAgainstMarks();
     }
 

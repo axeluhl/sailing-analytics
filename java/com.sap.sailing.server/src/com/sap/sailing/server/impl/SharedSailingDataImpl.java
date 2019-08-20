@@ -218,25 +218,47 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     @Override
     public CourseTemplate createCourseTemplate(String courseTemplateName, Iterable<MarkTemplate> marks,
-            Iterable<WaypointTemplate> waypoints, RepeatablePart optionalRepeatablePart, Iterable<String> tags,
-            URL optionalImageURL) {
+            Iterable<WaypointTemplate> waypoints, Map<MarkTemplate, String> associatedRoles,
+            RepeatablePart optionalRepeatablePart, Iterable<String> tags, URL optionalImageURL) {
+        final Set<MarkTemplate> marksInSequence = new HashSet<>();
+        for (WaypointTemplate waypoint : waypoints) {
+            Util.addAll(waypoint.getControlPointTemplate().getMarks(), marksInSequence);
+        }
+        if (!Util.containsAll(marks, marksInSequence)) {
+            throw new IllegalArgumentException("All marks contained in the sequence are expected to be part of the course template");
+        }
+        final Map<MarkTemplate, String> effectiveAssociatedRoles = new HashMap<>();
+        final Set<String> alreadyUsedRoles = new HashSet<>();
+        for (MarkTemplate markTemplate : marksInSequence) {
+            String roleNameForMarkInSequence = associatedRoles.get(markTemplate);
+            if (roleNameForMarkInSequence == null) {
+                roleNameForMarkInSequence = markTemplate.getShortName();
+            }
+            if (alreadyUsedRoles.add(roleNameForMarkInSequence)) {
+                throw new IllegalArgumentException(
+                        "Role name " + roleNameForMarkInSequence + " can't be used twice in a course template");
+            }
+            effectiveAssociatedRoles.put(markTemplate, roleNameForMarkInSequence);
+        }
+        
         final UUID idOfNewCourseTemplate = UUID.randomUUID();
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.COURSE_TEMPLATE,
                 CourseTemplate.getTypeRelativeObjectIdentifier(idOfNewCourseTemplate),
                 idOfNewCourseTemplate + "/" + courseTemplateName, () -> {
                     apply(s -> s.internalCreateCourseTemplate(idOfNewCourseTemplate, courseTemplateName, marks,
-                            waypoints, optionalRepeatablePart, tags, optionalImageURL));
+                            waypoints, effectiveAssociatedRoles, optionalRepeatablePart, tags, optionalImageURL));
                     return getCourseTemplateById(idOfNewCourseTemplate);
                 });
     }
     
     @Override
-    public Void internalCreateCourseTemplate(UUID idOfNewCourseTemplate, String courseTemplateName, Iterable<MarkTemplate> marks,
-            Iterable<WaypointTemplate> waypoints, RepeatablePart optionalRepeatablePart,
-            Iterable<String> tags, URL optionalImageURL) {
+    public Void internalCreateCourseTemplate(UUID idOfNewCourseTemplate, String courseTemplateName,
+            Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
+            Map<MarkTemplate, String> associatedRoles, RepeatablePart optionalRepeatablePart, Iterable<String> tags,
+            URL optionalImageURL) {
         final CourseTemplate courseTemplate = new CourseTemplateImpl(idOfNewCourseTemplate, courseTemplateName, marks,
-                waypoints, optionalImageURL, optionalRepeatablePart);
+                waypoints, associatedRoles, optionalImageURL, optionalRepeatablePart);
         mongoObjectFactory.storeCourseTemplate(courseTemplate);
         courseTemplatesById.put(courseTemplate.getId(), courseTemplate);
         return null;
