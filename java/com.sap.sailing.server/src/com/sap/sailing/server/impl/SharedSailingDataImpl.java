@@ -25,6 +25,7 @@ import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBuilder;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.impl.CourseTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateImpl;
@@ -35,7 +36,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
@@ -218,7 +218,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     @Override
     public CourseTemplate createCourseTemplate(String courseTemplateName, Iterable<MarkTemplate> marks,
-            Iterable<WaypointTemplate> waypoints, Pair<Integer, Integer> optionalRepeatablePart, Iterable<String> tags,
+            Iterable<WaypointTemplate> waypoints, RepeatablePart optionalRepeatablePart, Iterable<String> tags,
             URL optionalImageURL) {
         final UUID idOfNewCourseTemplate = UUID.randomUUID();
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
@@ -233,7 +233,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     
     @Override
     public Void internalCreateCourseTemplate(UUID idOfNewCourseTemplate, String courseTemplateName, Iterable<MarkTemplate> marks,
-            Iterable<WaypointTemplate> waypoints, Pair<Integer, Integer> optionalRepeatablePart,
+            Iterable<WaypointTemplate> waypoints, RepeatablePart optionalRepeatablePart,
             Iterable<String> tags, URL optionalImageURL) {
         final CourseTemplate courseTemplate = new CourseTemplateImpl(idOfNewCourseTemplate, courseTemplateName, marks,
                 waypoints, optionalImageURL, optionalRepeatablePart);

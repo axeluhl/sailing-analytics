@@ -3,9 +3,10 @@ package com.sap.sailing.server.gateway.serialization.impl;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.coursetemplate.CourseTemplate;import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.CourseTemplate;
+import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sse.common.Util.Pair;
 
 public class CourseTemplateJsonSerializer implements JsonSerializer<CourseTemplate> {
 
@@ -21,7 +22,7 @@ public class CourseTemplateJsonSerializer implements JsonSerializer<CourseTempla
     public static final String FIELD_ASSOCIATED_ROLE = "associatedRole";
     public static final String FIELD_OPTIONAL_REPEATABLE_PART = "optionalRepeatablePart";
     
-    private final JsonSerializer<Pair<Integer, Integer>> repeatablePartJsonSerializer;
+    private final JsonSerializer<RepeatablePart> repeatablePartJsonSerializer;
     private final JsonSerializer<MarkTemplate> markTemplateJsonSerializer;
     
     public CourseTemplateJsonSerializer() {

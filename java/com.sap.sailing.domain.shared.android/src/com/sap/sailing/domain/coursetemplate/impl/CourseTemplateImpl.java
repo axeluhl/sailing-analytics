@@ -4,7 +4,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,9 +11,9 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.NamedWithUUIDImpl;
 
 public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTemplate {
@@ -30,17 +29,8 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     
     private final URL optionalImageURL;
 
-    /**
-     * The index into {@link #waypoints} of the first waypoint that is to be cloned for repetitive laps.
-     * -1 means no repeatable part.
-     */
-    private final int zeroBasedIndexOfRepeatablePartStart;
+    private final RepeatablePart optionalRepeatablePart;
 
-    /**
-     * The index into {@link #waypoints} of the first waypoint that comes after the sub-sequence to be cloned for
-     * repetitive laps. -1 means no repeatable part.
-     */
-    private final int zeroBasedIndexOfRepeatablePartEnd;
     
     /** Creates a course template with a random UUID. */
     public CourseTemplateImpl(String name, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
@@ -50,19 +40,14 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
 
     public CourseTemplateImpl(UUID id, String name, Iterable<MarkTemplate> marks,
             Iterable<WaypointTemplate> waypoints, URL optionalImageURL) {
-        this(id, name, marks, waypoints, optionalImageURL, -1, -1); // no repeatable part
+        this(id, name, marks, waypoints, optionalImageURL, /* optionalRepeatablePart */ null);
     }
     
     public CourseTemplateImpl(UUID id, String name, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
-            URL optionalImageURL, int zeroBasedIndexOfRepeatablePartStart, int zeroBasedIndexOfRepeatablePartEnd) {
+            URL optionalImageURL, RepeatablePart optionalRepeatablePart) {
         super(name, id);
-        if ((zeroBasedIndexOfRepeatablePartEnd == -1) != (zeroBasedIndexOfRepeatablePartStart == -1)) {
-            throw new IllegalArgumentException("Either both, start and end of repeatable sub-sequence indices must be -1 or none: "+
-                    zeroBasedIndexOfRepeatablePartStart+".."+zeroBasedIndexOfRepeatablePartEnd);
-        }
-        if (zeroBasedIndexOfRepeatablePartStart > zeroBasedIndexOfRepeatablePartEnd) {
-            throw new IllegalArgumentException("A repeatable part must span a positive number of waypoints. It doesn't: "+
-                    zeroBasedIndexOfRepeatablePartStart+".."+zeroBasedIndexOfRepeatablePartEnd);
+        if (optionalRepeatablePart != null) {
+            optionalRepeatablePart.validateRepeatablePartForSequence(waypoints);
         }
         final Set<MarkTemplate> theMarks = new HashSet<>();
         Util.addAll(marks, theMarks);
@@ -70,16 +55,8 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
         Util.addAll(waypoints, this.waypoints);
         this.marks = theMarks;
         this.optionalImageURL = optionalImageURL;
-        this.zeroBasedIndexOfRepeatablePartStart = zeroBasedIndexOfRepeatablePartStart;
-        this.zeroBasedIndexOfRepeatablePartEnd = zeroBasedIndexOfRepeatablePartEnd;
+        this.optionalRepeatablePart = optionalRepeatablePart;
         validateWaypointsAgainstMarks();
-    }
-    
-    public CourseTemplateImpl(UUID id, String name, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
-            URL optionalImageURL, Pair<Integer, Integer> optionalRepeatablePart) {
-        this(id, name, marks, waypoints, optionalImageURL,
-                optionalRepeatablePart == null ? -1 : optionalRepeatablePart.getA(),
-                optionalRepeatablePart == null ? -1 : optionalRepeatablePart.getB());
     }
 
     /**
@@ -110,37 +87,16 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
             if (numberOfLaps < 1) {
                 throw new IllegalArgumentException("The course template "+this+" has a repeatable part, hence the number of laps needs to be at least 1.");
             }
-            final List<WaypointTemplate> resultList = new LinkedList<>();
-            for (int i=0; i<waypoints.size(); i++) {
-                if (i == zeroBasedIndexOfRepeatablePartStart) {
-                    for (int lap=1; lap<numberOfLaps; lap++) {
-                        for (i=zeroBasedIndexOfRepeatablePartStart; i<zeroBasedIndexOfRepeatablePartEnd; i++) {
-                            resultList.add(waypoints.get(i));
-                        }
-                    }
-                    i = zeroBasedIndexOfRepeatablePartEnd; // make sure to skip in case of only one lap
-                }
-                // special case: repeatable part ends at end of waypoint list:
-                if (i<waypoints.size()) {
-                    resultList.add(waypoints.get(i));
-                }
-            }
-            result = resultList;
+            result = optionalRepeatablePart.createSequence(numberOfLaps, waypoints);
         } else {
             result = waypoints;
         }
         return result;
     }
-
-    @Override
-    public boolean hasRepeatablePart() {
-        return zeroBasedIndexOfRepeatablePartEnd != -1;
-    }
     
     @Override
-    public Pair<Integer, Integer> getRepeatablePart() {
-        return hasRepeatablePart() ? new Pair<>(zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd)
-                : null;
+    public RepeatablePart getRepeatablePart() {
+        return optionalRepeatablePart;
     }
     
 

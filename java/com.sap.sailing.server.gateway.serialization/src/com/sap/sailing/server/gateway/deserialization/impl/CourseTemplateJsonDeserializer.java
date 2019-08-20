@@ -17,6 +17,7 @@ import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkPairTemplate.MarkPairTemplateFactory;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.impl.CourseTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
@@ -24,12 +25,11 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseTemplateJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkTemplateJsonSerializer;
-import com.sap.sse.common.Util.Pair;
 
 public class CourseTemplateJsonDeserializer implements JsonDeserializer<CourseTemplate> {
 
     private final Function<UUID, MarkTemplate> markTemplateResolver;
-    private final JsonDeserializer<Pair<Integer, Integer>> repeatablePartJsonDeserializer;
+    private final JsonDeserializer<RepeatablePart> repeatablePartJsonDeserializer;
 
     public CourseTemplateJsonDeserializer(Function<UUID, MarkTemplate> markTemplateResolver) {
         this.markTemplateResolver = markTemplateResolver;
@@ -101,7 +101,7 @@ public class CourseTemplateJsonDeserializer implements JsonDeserializer<CourseTe
         }
         
         final JSONObject repeatablePartJSON = (JSONObject) json.get(CourseTemplateJsonSerializer.FIELD_OPTIONAL_REPEATABLE_PART);
-        final Pair<Integer, Integer> optionalRepeatablePart;
+        final RepeatablePart optionalRepeatablePart;
         if (repeatablePartJSON == null) {
             optionalRepeatablePart = null;
         } else {

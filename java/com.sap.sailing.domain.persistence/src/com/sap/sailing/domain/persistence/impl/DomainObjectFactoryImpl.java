@@ -211,9 +211,11 @@ import com.sap.sailing.domain.coursetemplate.MarkPairTemplate.MarkPairTemplateFa
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBuilder;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.impl.CourseTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateImpl;
+import com.sap.sailing.domain.coursetemplate.impl.RepeatablePartImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.EventResolver;
@@ -3180,8 +3182,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
         // load repeatable parts
         final BasicDBObject dbRepPart = (BasicDBObject) dbObject.get(FieldNames.COURSE_TEMPLATE_REPEATABLE_PART.name());
-        final int zeroBasedIndexOfRepeatablePartStart = dbRepPart.getInt(FieldNames.REPEATABLE_PART_START.name());
-        final int zeroBasedIndexOfRepeatablePartEnd = dbRepPart.getInt(FieldNames.REPEATABLE_PART_END.name());
+        final RepeatablePart optionalRepeatablePart;
+        if (dbRepPart == null) {
+            optionalRepeatablePart = null;
+        } else {
+            final int zeroBasedIndexOfRepeatablePartStart = dbRepPart.getInt(FieldNames.REPEATABLE_PART_START.name());
+            final int zeroBasedIndexOfRepeatablePartEnd = dbRepPart.getInt(FieldNames.REPEATABLE_PART_END.name());
+            optionalRepeatablePart = new RepeatablePartImpl(zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd);
+        }
 
         // load tags
         final BasicDBList tagsDbObject = (BasicDBList) dbObject.get(FieldNames.COURSE_TEMPLATE_TAGS.name());
@@ -3190,7 +3198,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
 
         final CourseTemplateImpl courseTemplateImpl = new CourseTemplateImpl(id, name, markTemplates, waypointTemplates,
-                optionaImageURL, zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd);
+                optionaImageURL, optionalRepeatablePart);
         courseTemplateImpl.setTags(tags);
         return courseTemplateImpl;
     }

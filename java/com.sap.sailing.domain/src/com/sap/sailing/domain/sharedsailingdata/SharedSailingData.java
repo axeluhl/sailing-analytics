@@ -10,9 +10,9 @@ import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -51,7 +51,7 @@ public interface SharedSailingData {
      * @param waypoints the waypoints in their defined order (iteration order equals order of waypoints in course)
      */
     CourseTemplate createCourseTemplate(String courseTemplateName, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
-            Pair<Integer, Integer> optionalRepeatablePart, Iterable<String> tags, URL optionalImageURL);
+            RepeatablePart optionalRepeatablePart, Iterable<String> tags, URL optionalImageURL);
     
     CourseTemplate getCourseTemplateById(UUID id);
     

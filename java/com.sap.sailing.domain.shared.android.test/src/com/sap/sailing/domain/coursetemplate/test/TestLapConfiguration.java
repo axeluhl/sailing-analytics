@@ -21,6 +21,7 @@ import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.impl.ControlPointTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.CourseTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateImpl;
+import com.sap.sailing.domain.coursetemplate.impl.RepeatablePartImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
 import com.sap.sse.common.Util;
 
@@ -51,8 +52,8 @@ public class TestLapConfiguration {
                                               new WaypointTemplateImpl(top, PassingInstruction.Port),
                                               new WaypointTemplateImpl(startFinish, PassingInstruction.Line)),
                 /* optionaImageURL */ null,
-                /* zeroBasedIndexOfRepeatablePartStart */ 1,
-                /* zeroBasedIndexOfRepeatablePartEnd */ 3);
+                new RepeatablePartImpl(/* zeroBasedIndexOfRepeatablePartStart */ 1,
+                        /* zeroBasedIndexOfRepeatablePartEnd */ 3));
     }
     
     @Test

@@ -1977,8 +1977,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     private BasicDBObject storeRepeatablePart(CourseTemplate courseTemplate) {
         final BasicDBObject repeatablePart = new BasicDBObject();
-        repeatablePart.put(FieldNames.REPEATABLE_PART_START.name(), courseTemplate.getRepeatablePart().getA());
-        repeatablePart.put(FieldNames.REPEATABLE_PART_END.name(), courseTemplate.getRepeatablePart().getB());
+        repeatablePart.put(FieldNames.REPEATABLE_PART_START.name(),
+                courseTemplate.getRepeatablePart().getZeroBasedIndexOfRepeatablePartStart());
+        repeatablePart.put(FieldNames.REPEATABLE_PART_END.name(),
+                courseTemplate.getRepeatablePart().getZeroBasedIndexOfRepeatablePartEnd());
         return repeatablePart;
     }
 

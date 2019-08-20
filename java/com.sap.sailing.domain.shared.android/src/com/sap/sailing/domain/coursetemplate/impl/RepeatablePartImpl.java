@@ -1,0 +1,32 @@
+package com.sap.sailing.domain.coursetemplate.impl;
+
+import com.sap.sailing.domain.coursetemplate.RepeatablePart;
+
+public class RepeatablePartImpl implements RepeatablePart {
+    private final int zeroBasedIndexOfRepeatablePartStart;
+
+    private final int zeroBasedIndexOfRepeatablePartEnd;
+
+    public RepeatablePartImpl(int zeroBasedIndexOfRepeatablePartStart, int zeroBasedIndexOfRepeatablePartEnd) {
+        super();
+        if (zeroBasedIndexOfRepeatablePartStart <0 || zeroBasedIndexOfRepeatablePartEnd < 0) {
+            throw new IllegalArgumentException("No negative indices are possible for the repeatable part.");
+        }
+        if (zeroBasedIndexOfRepeatablePartStart > zeroBasedIndexOfRepeatablePartEnd) {
+            throw new IllegalArgumentException(
+                    "The start of the repeatable part needs to be less or equal to the end.");
+        }
+        this.zeroBasedIndexOfRepeatablePartStart = zeroBasedIndexOfRepeatablePartStart;
+        this.zeroBasedIndexOfRepeatablePartEnd = zeroBasedIndexOfRepeatablePartEnd;
+    }
+
+    @Override
+    public int getZeroBasedIndexOfRepeatablePartStart() {
+        return zeroBasedIndexOfRepeatablePartStart;
+    }
+
+    @Override
+    public int getZeroBasedIndexOfRepeatablePartEnd() {
+        return zeroBasedIndexOfRepeatablePartEnd;
+    }
+}
