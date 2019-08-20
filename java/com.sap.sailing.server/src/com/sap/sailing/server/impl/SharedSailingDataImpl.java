@@ -234,7 +234,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
             if (roleNameForMarkInSequence == null) {
                 roleNameForMarkInSequence = markTemplate.getShortName();
             }
-            if (alreadyUsedRoles.add(roleNameForMarkInSequence)) {
+            if (!alreadyUsedRoles.add(roleNameForMarkInSequence)) {
                 throw new IllegalArgumentException(
                         "Role name " + roleNameForMarkInSequence + " can't be used twice in a course template");
             }
