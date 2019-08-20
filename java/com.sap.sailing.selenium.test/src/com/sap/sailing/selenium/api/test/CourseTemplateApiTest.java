@@ -25,7 +25,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
-public class CourseTemplateTest extends AbstractSeleniumTest {
+public class CourseTemplateApiTest extends AbstractSeleniumTest {
 
     private final MarkTemplateApi markTemplateApi = new MarkTemplateApi();
     private final CourseTemplateApi courseTemplateApi = new CourseTemplateApi();
