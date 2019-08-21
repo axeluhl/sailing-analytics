@@ -108,6 +108,7 @@ import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sse.common.CountryCode;
@@ -1130,4 +1131,8 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void addOrUpdateMarkProperties(MarkPropertiesDTO markProperties, AsyncCallback<MarkPropertiesDTO> asyncCallback);
 
     void getMarkProperties(AsyncCallback<Iterable<MarkPropertiesDTO>> asyncCallback);
+
+    void getCourseTemplates(AsyncCallback<Iterable<CourseTemplateDTO>> asyncCallback);
+
+    void createCourseTemplate(CourseTemplateDTO courseTemplate, AsyncCallback<CourseTemplateDTO> asyncCallback);
 }

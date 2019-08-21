@@ -52,6 +52,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import java.util.zip.GZIPInputStream;
 
@@ -306,8 +307,10 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
+import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesImpl;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
@@ -477,8 +480,10 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CommonMarkPropertiesDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.WaypointTemplateDTO;
 import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
 import com.sap.sailing.manage2sail.RaceResultDescriptor;
@@ -9414,5 +9419,40 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 markProperties.getType());
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), markPropertiesDto, markProperties.getIdentifier());
         return markPropertiesDto;
+    }
+
+    @Override
+    public Iterable<CourseTemplateDTO> getCourseTemplates() {
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
+                getSharedSailingData().getAllCourseTemplates(), m -> convertToCourseTemplateDTO(m));
+    }
+
+    public CourseTemplateDTO convertToCourseTemplateDTO(CourseTemplate courseTemplate) {
+        final Map<MarkTemplateDTO, String> convertedAssociatedRoles = courseTemplate.getAssociatedRoles().entrySet()
+                .stream()
+                .collect(Collectors.toMap(k -> convertToMarkTemplateDTO(k.getKey()), v -> v.getValue()));
+        final List<MarkTemplateDTO> convertedMarkTemplates = StreamSupport.stream(courseTemplate.getMarkTemplates().spliterator(), false)
+                .map(this::convertToMarkTemplateDTO).collect(Collectors.toList());
+        final List<WaypointTemplateDTO> convertedWaypointTemplates = StreamSupport
+                .stream(courseTemplate.getWaypointTemplates(1).spliterator(), false)
+                .map(this::convertToWaypointTemplateDTO).collect(Collectors.toList());
+        return new CourseTemplateDTO(courseTemplate.getId(), courseTemplate.getName(),
+                convertedMarkTemplates,
+                convertedWaypointTemplates,
+                convertedAssociatedRoles,
+                "" + courseTemplate.getOptionalImageURL());
+    }
+
+    private WaypointTemplateDTO convertToWaypointTemplateDTO(WaypointTemplate waypointTemplate) {
+        return new WaypointTemplateDTO(
+                StreamSupport.stream(waypointTemplate.getControlPointTemplate().getMarks().spliterator(), false)
+                        .map(this::convertToMarkTemplateDTO).collect(Collectors.toList()),
+                waypointTemplate.getPassingInstruction());
+    }
+
+    @Override
+    public CourseTemplateDTO createCourseTemplate(CourseTemplateDTO courseTemplate) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
