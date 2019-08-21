@@ -38,17 +38,17 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
                     public String getErrorMessage(MarkTemplateDTO valueToValidate) {
                         String result = null;
                         boolean invalidName = valueToValidate.getName() == null || valueToValidate.getName().isEmpty();
-                        boolean invalidColor = valueToValidate.getMarkProperties().getColor() == null;
-                        boolean invalidMarkType = valueToValidate.getMarkProperties().getType() == null;
+                        boolean invalidColor = valueToValidate.getCommonMarkProperties().getColor() == null;
+                        boolean invalidMarkType = valueToValidate.getCommonMarkProperties().getType() == null;
                         if (invalidName) {
                             result = stringMessages.pleaseEnterAName();
                         } else if (invalidColor) {
                             result = stringMessages.pleaseEnterAValidValueFor(stringMessages.color(), "");
                         } else if (invalidMarkType) {
                             result = stringMessages.pleaseEnterAValidValueFor(stringMessages.type(), "");
-                        } else if (valueToValidate.getMarkProperties().getColor() != null
-                                && valueToValidate.getMarkProperties().getColor() instanceof InvalidColor) {
-                            result = valueToValidate.getMarkProperties().getColor().getAsHtml();
+                        } else if (valueToValidate.getCommonMarkProperties().getColor() != null
+                                && valueToValidate.getCommonMarkProperties().getColor() instanceof InvalidColor) {
+                            result = valueToValidate.getCommonMarkProperties().getColor().getAsHtml();
                         }
                         return result;
                     }
@@ -64,16 +64,16 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
         this.markTypeSuggestBox = createSuggestBox(oracle);
 
         this.nameTextBox = createTextBox(markTemplateToEdit.getName());
-        this.shortNameTextBox = createTextBox(markTemplateToEdit.getMarkProperties().getShortName());
-        this.shapeTextBox = createTextBox(markTemplateToEdit.getMarkProperties().getShape());
-        this.patternTextBox = createTextBox(markTemplateToEdit.getMarkProperties().getPattern());
-        this.markTypeSuggestBox.setValue(markTemplateToEdit.getMarkProperties().getType() != null
-                ? markTemplateToEdit.getMarkProperties().getType().name()
+        this.shortNameTextBox = createTextBox(markTemplateToEdit.getCommonMarkProperties().getShortName());
+        this.shapeTextBox = createTextBox(markTemplateToEdit.getCommonMarkProperties().getShape());
+        this.patternTextBox = createTextBox(markTemplateToEdit.getCommonMarkProperties().getPattern());
+        this.markTypeSuggestBox.setValue(markTemplateToEdit.getCommonMarkProperties().getType() != null
+                ? markTemplateToEdit.getCommonMarkProperties().getType().name()
                 : "");
 
-        if (markTemplateToEdit.getMarkProperties().getColor() != null) {
-            this.displayColorTextBox = createTextBox(markTemplateToEdit.getMarkProperties().getColor() == null ? ""
-                    : markTemplateToEdit.getMarkProperties().getColor().getAsHtml());
+        if (markTemplateToEdit.getCommonMarkProperties().getColor() != null) {
+            this.displayColorTextBox = createTextBox(markTemplateToEdit.getCommonMarkProperties().getColor() == null ? ""
+                    : markTemplateToEdit.getCommonMarkProperties().getColor().getAsHtml());
         } else {
             this.displayColorTextBox = createTextBox("");
         }

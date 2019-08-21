@@ -41,17 +41,17 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
                     public String getErrorMessage(MarkPropertiesDTO valueToValidate) {
                         String result = null;
                         boolean invalidName = valueToValidate.getName() == null || valueToValidate.getName().isEmpty();
-                        boolean invalidColor = valueToValidate.getMarkProperties().getColor() == null;
-                        boolean invalidMarkType = valueToValidate.getMarkProperties().getType() == null;
+                        boolean invalidColor = valueToValidate.getCommonMarkProperties().getColor() == null;
+                        boolean invalidMarkType = valueToValidate.getCommonMarkProperties().getType() == null;
                         if (invalidName) {
                             result = stringMessages.pleaseEnterAName();
                         } else if (invalidColor) {
                             result = stringMessages.pleaseEnterAValidValueFor(stringMessages.color(), "");
                         } else if (invalidMarkType) {
                             result = stringMessages.pleaseEnterAValidValueFor(stringMessages.type(), "");
-                        } else if (valueToValidate.getMarkProperties().getColor() != null
-                                && valueToValidate.getMarkProperties().getColor() instanceof InvalidColor) {
-                            result = valueToValidate.getMarkProperties().getColor().getAsHtml();
+                        } else if (valueToValidate.getCommonMarkProperties().getColor() != null
+                                && valueToValidate.getCommonMarkProperties().getColor() instanceof InvalidColor) {
+                            result = valueToValidate.getCommonMarkProperties().getColor().getAsHtml();
                         }
                         return result;
                     }
@@ -67,16 +67,16 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
         this.markTypeSuggestBox = createSuggestBox(oracle);
 
         this.nameTextBox = createTextBox(markPropertiesToEdit.getName());
-        this.shortNameTextBox = createTextBox(markPropertiesToEdit.getMarkProperties().getShortName());
-        this.shapeTextBox = createTextBox(markPropertiesToEdit.getMarkProperties().getShape());
-        this.patternTextBox = createTextBox(markPropertiesToEdit.getMarkProperties().getPattern());
-        this.markTypeSuggestBox.setValue(markPropertiesToEdit.getMarkProperties().getType() != null
-                ? markPropertiesToEdit.getMarkProperties().getType().name()
+        this.shortNameTextBox = createTextBox(markPropertiesToEdit.getCommonMarkProperties().getShortName());
+        this.shapeTextBox = createTextBox(markPropertiesToEdit.getCommonMarkProperties().getShape());
+        this.patternTextBox = createTextBox(markPropertiesToEdit.getCommonMarkProperties().getPattern());
+        this.markTypeSuggestBox.setValue(markPropertiesToEdit.getCommonMarkProperties().getType() != null
+                ? markPropertiesToEdit.getCommonMarkProperties().getType().name()
                 : "");
 
-        if (markPropertiesToEdit.getMarkProperties().getColor() != null) {
-            this.displayColorTextBox = createTextBox(markPropertiesToEdit.getMarkProperties().getColor() == null ? ""
-                    : markPropertiesToEdit.getMarkProperties().getColor().getAsHtml());
+        if (markPropertiesToEdit.getCommonMarkProperties().getColor() != null) {
+            this.displayColorTextBox = createTextBox(markPropertiesToEdit.getCommonMarkProperties().getColor() == null ? ""
+                    : markPropertiesToEdit.getCommonMarkProperties().getColor().getAsHtml());
         } else {
             this.displayColorTextBox = createTextBox("");
         }

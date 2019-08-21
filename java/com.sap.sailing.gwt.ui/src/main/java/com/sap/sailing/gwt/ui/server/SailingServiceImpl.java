@@ -9355,7 +9355,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         MarkTemplate.getTypeRelativeObjectIdentifier(markTemplateUUID), markTemplate.getName(),
                         () -> getSharedSailingData()
                                 .createMarkTemplate(convertDtoToCommonMarkProperties(markTemplateUUID,
-                                        markTemplate.getMarkProperties())));
+                                        markTemplate.getCommonMarkProperties())));
         return convertToMarkTemplateDTO(mTemplate);
     }
 
@@ -9376,7 +9376,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         if (createdOrUpdatedMarkProperties != null) {
             getSecurityService().checkCurrentUserUpdatePermission(createdOrUpdatedMarkProperties);
             getSharedSailingData().updateMarkProperties(markProperties.getUuid(),
-                    convertDtoToCommonMarkProperties(markProperties.getUuid(), markProperties.getMarkProperties()),
+                    convertDtoToCommonMarkProperties(markProperties.getUuid(), markProperties.getCommonMarkProperties()),
                     markProperties.getPosition(), convertDtoToDeviceIdentifier(markProperties.getDeviceIdentifier()),
                     markProperties.getTags());
             createdOrUpdatedMarkProperties = getSharedSailingData().getMarkPropertiesById(createdOrUpdatedMarkProperties.getId());
@@ -9388,7 +9388,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                             markProperties.getName(),
                             () -> getSharedSailingData()
                                     .createMarkProperties(convertDtoToCommonMarkProperties(markProperties.getUuid(),
-                                            markProperties.getMarkProperties()), markProperties.getTags()));
+                                            markProperties.getCommonMarkProperties()), markProperties.getTags()));
         }
         return convertToMarkPropertiesDTO(createdOrUpdatedMarkProperties);
     }
