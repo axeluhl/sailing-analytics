@@ -120,6 +120,12 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     @Override
     public Iterable<CourseTemplate> getAllCourseTemplates(Iterable<String> tagsToFilterFor) {
+        return courseTemplatesById.values().stream().filter(c -> containsAny(c.getTags(), tagsToFilterFor))
+                .filter(getSecurityService()::hasCurrentUserReadPermission).collect(Collectors.toList());
+    }
+
+    @Override
+    public Iterable<CourseTemplate> getAllCourseTemplates() {
         return courseTemplatesById.values().stream().filter(getSecurityService()::hasCurrentUserReadPermission)
                 .collect(Collectors.toList());
     }
