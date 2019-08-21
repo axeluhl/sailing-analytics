@@ -2270,8 +2270,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String markTemplates();
     String filterMarkPropertiesByName();
     String markProperties();
-
     String filterCourseTemplateByName();
-
     String courseTemplates();
+    String markTemplate();
+    String markTemplate2Optional();
+
+    String pleaseSelectAValidPassingInstruction();
+
+    String pleaseSelectAValidMarkTemplate();
 }

@@ -11,6 +11,10 @@ public class WaypointTemplateDTO {
 
     private PassingInstruction passingInstruction;
 
+    public WaypointTemplateDTO() {
+
+    }
+
     public WaypointTemplateDTO(Iterable<MarkTemplateDTO> markTemplatesForControlPoint,
             PassingInstruction passingInstruction) {
         super();

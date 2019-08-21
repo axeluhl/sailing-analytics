@@ -278,7 +278,8 @@ public class CourseTemplatePanel extends FlowPanel {
     }
 
     void openEditCourseTemplateDialog(final CourseTemplateDTO originalCourseTemplate) {
-        final CourseTemplateEditDialog dialog = new CourseTemplateEditDialog(stringMessages, originalCourseTemplate,
+        final CourseTemplateEditDialog dialog = new CourseTemplateEditDialog(sailingService, stringMessages,
+                originalCourseTemplate,
                 new DialogCallback<CourseTemplateDTO>() {
                     @Override
                     public void ok(CourseTemplateDTO courseTemplate) {
