@@ -4,8 +4,9 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sse.common.Color;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
-public class CommonMarkPropertiesDTO implements Serializable {
+public class CommonMarkPropertiesDTO extends NamedDTO implements Serializable {
     private static final long serialVersionUID = 1458294751819986667L;
 
     private String shortName;
@@ -18,9 +19,9 @@ public class CommonMarkPropertiesDTO implements Serializable {
         // GWT serialization
     }
 
-    public CommonMarkPropertiesDTO(String shortName, Color color, String shape, String pattern,
+    public CommonMarkPropertiesDTO(String name, String shortName, Color color, String shape, String pattern,
             MarkType type) {
-        super();
+        super(name);
         this.shortName = shortName;
         this.color = color;
         this.shape = shape;

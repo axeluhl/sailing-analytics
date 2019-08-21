@@ -335,6 +335,7 @@ import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
+import com.sap.sailing.domain.racelogtracking.PlaceHolderDeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
@@ -475,6 +476,7 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.CommonMarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sailing.manage2sail.EventResultDescriptor;
@@ -9352,21 +9354,43 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         SecuredDomainType.MARK_TEMPLATE,
                         MarkTemplate.getTypeRelativeObjectIdentifier(markTemplateUUID), markTemplate.getName(),
                         () -> getSharedSailingData()
-                                .createMarkTemplate(convertDtoToCommonMarkProperties(markTemplateUUID, markTemplate)));
+                                .createMarkTemplate(convertDtoToCommonMarkProperties(markTemplateUUID,
+                                        markTemplate.getMarkProperties())));
         return convertToMarkTemplateDTO(mTemplate);
     }
 
-    private CommonMarkProperties convertDtoToCommonMarkProperties(UUID markTemplateUUID, MarkTemplateDTO markTemplate) {
-        return new MarkPropertiesImpl(markTemplateUUID, markTemplate.getName(),
-                markTemplate.getMarkProperties().getShortName(),
-                markTemplate.getMarkProperties().getColor(), markTemplate.getMarkProperties().getShape(),
-                markTemplate.getMarkProperties().getPattern(), markTemplate.getMarkProperties().getType());
+    private CommonMarkProperties convertDtoToCommonMarkProperties(UUID markTemplateUUID,
+            CommonMarkPropertiesDTO markProperties) {
+        return new MarkPropertiesImpl(markTemplateUUID, markProperties.getName(), markProperties.getShortName(),
+                markProperties.getColor(), markProperties.getShape(), markProperties.getPattern(),
+                markProperties.getType());
+    }
+
+    private DeviceIdentifier convertDtoToDeviceIdentifier(DeviceIdentifierDTO deviceIdentifier) {
+        return new PlaceHolderDeviceIdentifier(deviceIdentifier.deviceType, deviceIdentifier.deviceId);
     }
 
     @Override
     public MarkPropertiesDTO addOrUpdateMarkProperties(MarkPropertiesDTO markProperties) {
-        // TODO Auto-generated method stub
-        return null;
+        MarkProperties createdOrUpdatedMarkProperties = getSharedSailingData().getMarkPropertiesById(markProperties.getUuid());
+        if (createdOrUpdatedMarkProperties != null) {
+            getSecurityService().checkCurrentUserUpdatePermission(createdOrUpdatedMarkProperties);
+            getSharedSailingData().updateMarkProperties(markProperties.getUuid(),
+                    convertDtoToCommonMarkProperties(markProperties.getUuid(), markProperties.getMarkProperties()),
+                    markProperties.getPosition(), convertDtoToDeviceIdentifier(markProperties.getDeviceIdentifier()),
+                    markProperties.getTags());
+            createdOrUpdatedMarkProperties = getSharedSailingData().getMarkPropertiesById(createdOrUpdatedMarkProperties.getId());
+        } else {
+
+            createdOrUpdatedMarkProperties = getSecurityService()
+                    .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.MARK_PROPERTIES,
+                            MarkTemplate.getTypeRelativeObjectIdentifier(markProperties.getUuid()),
+                            markProperties.getName(),
+                            () -> getSharedSailingData()
+                                    .createMarkProperties(convertDtoToCommonMarkProperties(markProperties.getUuid(),
+                                            markProperties.getMarkProperties()), markProperties.getTags()));
+        }
+        return convertToMarkPropertiesDTO(createdOrUpdatedMarkProperties);
     }
 
     @Override

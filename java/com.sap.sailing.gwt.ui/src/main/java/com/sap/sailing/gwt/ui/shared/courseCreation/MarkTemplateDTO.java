@@ -30,7 +30,7 @@ public class MarkTemplateDTO extends NamedDTO implements SecuredDTO {
             MarkType type) {
         super(name);
         this.uuid = uuid;
-        markProperties = new CommonMarkPropertiesDTO(shortName, color, shape, pattern, type);
+        markProperties = new CommonMarkPropertiesDTO(name, shortName, color, shape, pattern, type);
     }
 
     @Override

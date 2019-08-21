@@ -43,7 +43,7 @@ public class MarkPropertiesDTO extends NamedDTO implements SecuredDTO {
         this.deviceIdentifier = deviceIdentifier;
         this.position = position;
         Util.addAll(tags, this.tags);
-        markProperties = new CommonMarkPropertiesDTO(shortName, color, shape, pattern, type);
+        markProperties = new CommonMarkPropertiesDTO(name, shortName, color, shape, pattern, type);
     }
 
     @Override
