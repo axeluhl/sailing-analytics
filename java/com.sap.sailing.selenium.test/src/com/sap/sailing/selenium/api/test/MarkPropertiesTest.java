@@ -95,7 +95,7 @@ public class MarkPropertiesTest extends AbstractSeleniumTest {
                 MARK_PROPERTIES_SHORTNAME, null, MARK_PROPERTIES_COLOR, MARK_PROPERTIES_SHAPE, MARK_PROPERTIES_PATTERN,
                 MARK_PROPERTIES_TYPE, MARK_PROPERTIES_TAGS, MARK_PROPERTIES_LATDEG, MARK_PROPERTIES_LONDEG);
         final UUID deviceUuid = randomUUID();
-        MarkProperties updatedMarkProperties = markPropertiesApi.updateMarkProperties(ctx,
+        MarkProperties updatedMarkProperties = markPropertiesApi.updateMarkPropertiesPositioning(ctx,
                 createdMarkProperties.getId(), deviceUuid, 1.0, 2.0);
         assertTrue("read: MarkProperties.latDeg is different", 1.0 == updatedMarkProperties.getLatDeg().doubleValue());
         assertTrue("read: MarkProperties.lonDeg is different", 2.0 == updatedMarkProperties.getLonDeg().doubleValue());

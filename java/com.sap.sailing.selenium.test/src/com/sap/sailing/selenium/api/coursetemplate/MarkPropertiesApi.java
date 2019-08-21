@@ -14,6 +14,7 @@ import com.sap.sailing.selenium.api.core.ApiContext;
 public class MarkPropertiesApi {
 
     private static final String MARK_PROPERTIES = "/api/v1/markproperties";
+    private static final String POSITIONING = "/positioning";
     private static final String PARAM_NAME = "name";
     private static final String PARAM_SHORTNAME = "shortName";
     private static final String PARAM_DEVICEUUID = "deviceUuid";
@@ -47,7 +48,7 @@ public class MarkPropertiesApi {
         return new MarkProperties(result);
     }
 
-    public MarkProperties updateMarkProperties(final ApiContext ctx, final UUID id, final UUID deviceUuid,
+    public MarkProperties updateMarkPropertiesPositioning(final ApiContext ctx, final UUID id, final UUID deviceUuid,
             final Double latDeg, final Double lonDeg) {
         final Map<String, String> formParams = new TreeMap<>();
         if (deviceUuid != null) {
@@ -56,8 +57,31 @@ public class MarkPropertiesApi {
         formParams.put(PARAM_FIXED_POSITION_LATDEG, latDeg != null ? latDeg.toString() : null);
         formParams.put(PARAM_FIXED_POSITION_LONDEG, latDeg != null ? lonDeg.toString() : null);
 
-        // FIXME: add ApiContext.put with formParams. Do it in bug4942.
-        JSONObject result = null; // ctx.put(MARK_PROPERTIES + "/" + id.toString(), null, formParams);
+        JSONObject result = ctx.put(MARK_PROPERTIES + "/" + id.toString() + POSITIONING, null, formParams);
+        return new MarkProperties(result);
+    }
+
+    public MarkProperties updateMarkProperties(final ApiContext ctx, final UUID id, final String name,
+            final String shortName, final String deviceUuid, final String color, final String shape,
+            final String pattern, final String markType, final Iterable<String> tags, final Double latDeg,
+            final Double lonDeg) {
+        final Map<String, String> formParams = new TreeMap<>();
+        formParams.put(PARAM_NAME, name);
+        formParams.put(PARAM_SHORTNAME, shortName);
+        if (deviceUuid != null) {
+            formParams.put(PARAM_DEVICEUUID, deviceUuid);
+        }
+        formParams.put(PARAM_COLOR, color);
+        formParams.put(PARAM_SHAPE, shape);
+        formParams.put(PARAM_PATTERN, pattern);
+        formParams.put(PARAM_MARKTYPE, markType);
+        formParams.put(PARAM_FIXED_POSITION_LATDEG, latDeg != null ? latDeg.toString() : null);
+        formParams.put(PARAM_FIXED_POSITION_LONDEG, latDeg != null ? lonDeg.toString() : null);
+        for (String tag : tags) {
+            formParams.put(PARAM_TAG, tag);
+        }
+
+        JSONObject result = ctx.put(MARK_PROPERTIES + "/" + id.toString(), null, formParams);
         return new MarkProperties(result);
     }
 
