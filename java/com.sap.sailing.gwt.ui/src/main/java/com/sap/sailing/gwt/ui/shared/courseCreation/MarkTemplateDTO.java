@@ -24,6 +24,7 @@ public class MarkTemplateDTO extends NamedDTO implements SecuredDTO {
 
     /** GWT constructor */
     public MarkTemplateDTO() {
+        commonMarkProperties = new CommonMarkPropertiesDTO();
     }
 
     public MarkTemplateDTO(UUID uuid, String name, String shortName, Color color, String shape, String pattern,

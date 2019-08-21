@@ -34,6 +34,7 @@ public class MarkPropertiesDTO extends NamedDTO implements SecuredDTO {
 
     /** GWT constructor */
     public MarkPropertiesDTO() {
+        commonMarkProperties = new CommonMarkPropertiesDTO();
     }
 
     public MarkPropertiesDTO(UUID uuid, String name, Iterable<String> tags, DeviceIdentifierDTO deviceIdentifier,

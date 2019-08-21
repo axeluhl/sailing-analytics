@@ -9400,11 +9400,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private MarkPropertiesDTO convertToMarkPropertiesDTO(MarkProperties markProperties) {
-        final DeviceIdentifierDTO deviceIdentifier = new DeviceIdentifierDTO(
+        final DeviceIdentifierDTO deviceIdentifier = markProperties.getTrackingDeviceIdentifier() != null
+                ? new DeviceIdentifierDTO(
                 markProperties.getTrackingDeviceIdentifier().getIdentifierType(),
-                markProperties.getTrackingDeviceIdentifier().getStringRepresentation());
-        final RadianPosition position = new RadianPosition(markProperties.getFixedPosition().getLatRad(),
-                markProperties.getFixedPosition().getLngRad());
+                        markProperties.getTrackingDeviceIdentifier().getStringRepresentation())
+                : null;
+        final RadianPosition position = markProperties.getFixedPosition() != null ? new RadianPosition(
+                markProperties.getFixedPosition().getLatRad(), markProperties.getFixedPosition().getLngRad()) : null;
         final MarkPropertiesDTO markPropertiesDto = new MarkPropertiesDTO(markProperties.getId(),
                 markProperties.getName(), markProperties.getTags(), deviceIdentifier, position,
                 markProperties.getShortName(),
