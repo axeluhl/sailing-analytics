@@ -4,8 +4,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.MediaElement;
@@ -132,18 +130,14 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         urlBox.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                    @Override
-                    public void execute() {
-                        validateAndUpdate();
-                    }
-                });
+                validateAndUpdate();
             }
         });
         titleBox = createTextBox(null);
         titleBox.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
+                mediaTrack.title = titleBox.getValue();
                 validateAndUpdate();
             }
         });
@@ -162,7 +156,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
             public void onClick(ClickEvent event) {
                 manuallyEditedStartTime = true;
                 mediaTrack.startTime = defaultStartTime;
-                refreshUI();
+                refreshUI(); // Force UI update
                 validateAndUpdate();
             }
         });
@@ -172,7 +166,11 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
             public void onValueChange(ValueChangeEvent<String> event) {
                 String duration = durationBox.getValue();
                 if (duration != null && !duration.trim().isEmpty()) {
-                    mediaTrack.duration = TimeFormatUtil.hrsMinSecToMilliSeconds(duration);
+                    try {
+                        mediaTrack.duration = TimeFormatUtil.hrsMinSecToMilliSeconds(duration);
+                    } catch (NumberFormatException e) {
+                        mediaTrack.duration = null;
+                    }
                 } else {
                     mediaTrack.duration = null;
                 }
@@ -204,6 +202,10 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                 remoteMp4WasFinished = false;
                 manuallyEditedStartTime = false;
 
+                if (mediaTrack.startTime == null) {
+                    mediaTrack.startTime = defaultStartTime;
+                }
+
                 String youtubeId = YoutubeApi.getIdByUrl(url);
                 if (youtubeId != null) {
                     mediaTrack.url = youtubeId;
@@ -226,7 +228,6 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                     });
                 } else {
                     mediaTrack.url = url;
-                    loadMediaDuration();
                     AnchorElement anchor = Document.get().createAnchorElement();
                     anchor.setHref(url);
                     //remove trailing / as well
@@ -238,6 +239,8 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                         mediaTrack.mimeType = MimeType.byName(fileEnding);
                         if (MimeType.mp4.equals(mediaTrack.mimeType)) {
                             processMp4(mediaTrack);
+                        } else {
+                            loadMediaDuration();
                         }
                     } else {
                         mediaTrack.title = mediaTrack.url;
@@ -279,6 +282,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
             mediaTrack.duration = null;
         }
         refreshUI();
+        validateAndUpdate();
     }
 
     @Override
@@ -342,12 +346,11 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                 infoLabel.setWidget(new Label(mediaTrack.typeToString()));
             }
         }
-        TimePoint startTime = mediaTrack.startTime != null ? mediaTrack.startTime : defaultStartTime; 
-        startTimeBox.setValue(startTime == null ? null : startTime.asDate());
+        startTimeBox.setValue(mediaTrack.startTime == null ? null : mediaTrack.startTime.asDate(), DONT_FIRE_EVENTS);
         if (mediaTrack.duration != null) {
-            durationBox.setText(TimeFormatUtil.durationToHrsMinSec(mediaTrack.duration));
+            durationBox.setValue(TimeFormatUtil.durationToHrsMinSec(mediaTrack.duration), DONT_FIRE_EVENTS);
         } else {
-            durationBox.setText("");
+            durationBox.setValue("", DONT_FIRE_EVENTS);
         }
     }
 
@@ -446,11 +449,15 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
             manualMimeTypeSelection(result.getMessage(), mediaTrack);
         } else {
             mediaTrack.duration = result.getDuration();
+            if (mediaTrack.duration == null) {
+                loadMediaDuration(); // Attempt duration detection with audio channel
+            }
             mediaTrack.mimeType = result.isSpherical() ? MimeType.mp4panorama : MimeType.mp4;
             if (result.getRecordStartedTime() != null && !manuallyEditedStartTime) {
                 mediaTrack.startTime = new MillisecondsTimePoint(result.getRecordStartedTime());
             }
             refreshUI();
+            validateAndUpdate();
         }
     }
 
