@@ -125,6 +125,12 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
 
     @Override
+    public Iterable<MarkProperties> getAllMarkProperties() {
+        return markPropertiesById.values().stream().filter(getSecurityService()::hasCurrentUserReadPermission)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public MarkProperties createMarkProperties(CommonMarkProperties properties, Iterable<String> tags) {
         final UUID idOfNewMarkProperties = UUID.randomUUID();
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(

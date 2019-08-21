@@ -14,6 +14,10 @@ public class CommonMarkPropertiesDTO implements Serializable {
     private String pattern;
     private MarkType type;
 
+    protected CommonMarkPropertiesDTO() {
+        // GWT serialization
+    }
+
     public CommonMarkPropertiesDTO(String shortName, Color color, String shape, String pattern,
             MarkType type) {
         super();

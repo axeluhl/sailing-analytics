@@ -2267,6 +2267,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String protestTimeInMinutes();
     String courseCreation();
     String filterMarkTemplateByName();
-
     String markTemplates();
+    String filterMarkPropertiesByName();
+    String markProperties();
 }

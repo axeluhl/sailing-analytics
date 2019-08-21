@@ -278,6 +278,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.PolarSheetsXYDiagramDataImpl;
+import com.sap.sailing.domain.common.impl.RadianPosition;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -305,6 +306,7 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
+import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesImpl;
 import com.sap.sailing.domain.igtimiadapter.Account;
@@ -473,6 +475,7 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
@@ -9358,5 +9361,32 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 markTemplate.getMarkProperties().getShortName(),
                 markTemplate.getMarkProperties().getColor(), markTemplate.getMarkProperties().getShape(),
                 markTemplate.getMarkProperties().getPattern(), markTemplate.getMarkProperties().getType());
+    }
+
+    @Override
+    public MarkPropertiesDTO addOrUpdateMarkProperties(MarkPropertiesDTO markProperties) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Iterable<MarkPropertiesDTO> getMarkProperties() {
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
+                getSharedSailingData().getAllMarkProperties(), m -> convertToMarkPropertiesDTO(m));
+    }
+
+    private MarkPropertiesDTO convertToMarkPropertiesDTO(MarkProperties markProperties) {
+        final DeviceIdentifierDTO deviceIdentifier = new DeviceIdentifierDTO(
+                markProperties.getTrackingDeviceIdentifier().getIdentifierType(),
+                markProperties.getTrackingDeviceIdentifier().getStringRepresentation());
+        final RadianPosition position = new RadianPosition(markProperties.getFixedPosition().getLatRad(),
+                markProperties.getFixedPosition().getLngRad());
+        final MarkPropertiesDTO markPropertiesDto = new MarkPropertiesDTO(markProperties.getId(),
+                markProperties.getName(), markProperties.getTags(), deviceIdentifier, position,
+                markProperties.getShortName(),
+                markProperties.getColor(), markProperties.getShape(), markProperties.getPattern(),
+                markProperties.getType());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), markPropertiesDto, markProperties.getIdentifier());
+        return markPropertiesDto;
     }
 }

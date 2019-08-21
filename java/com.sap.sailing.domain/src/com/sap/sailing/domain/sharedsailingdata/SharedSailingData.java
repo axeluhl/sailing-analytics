@@ -71,4 +71,6 @@ public interface SharedSailingData {
     void deleteMarkProperties(MarkProperties markProperties);
     
     void deleteCourseTemplate(CourseTemplate courseTemplate);
+
+    Iterable<MarkProperties> getAllMarkProperties();
 }

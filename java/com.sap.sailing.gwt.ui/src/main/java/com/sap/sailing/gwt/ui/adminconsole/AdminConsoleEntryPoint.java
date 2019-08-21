@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
+import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkPropertiesPanel;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkTemplatePanel;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
@@ -468,6 +469,17 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
             }
                 }, getStringMessages().markTemplates(),
                 SecuredDomainType.MARK_TEMPLATE.getPermission(DefaultActions.MUTATION_ACTIONS));
+
+        final MarkPropertiesPanel markPropertiesPanel = new MarkPropertiesPanel(getSailingService(), this,
+                getStringMessages(), getUserService());
+        panel.addToTabPanel(courseCreationTabPanel,
+                new DefaultRefreshableAdminConsolePanel<MarkPropertiesPanel>(markPropertiesPanel) {
+                    @Override
+                    public void refreshAfterBecomingVisible() {
+                        markPropertiesPanel.refreshMarkProperties();
+                    }
+                }, getStringMessages().markProperties(),
+                SecuredDomainType.MARK_PROPERTIES.getPermission(DefaultActions.MUTATION_ACTIONS));
 
         panel.initUI();
         fillRegattas();
