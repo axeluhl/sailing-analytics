@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.TextCell;
@@ -31,11 +34,14 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
 
     private final TextBox nameTextBox;
+    private final TextBox urlTextBox;
     private final StringMessages stringMessages;
     private final Button addWaypointTemplate;
 
     private CellTable<WaypointTemplateDTO> waypointTemplatesTable;
     private Collection<WaypointTemplateDTO> waypointTemplates = new ArrayList<>();
+
+    private final UUID currentUuid;
 
     public CourseTemplateEditDialog(final SailingServiceAsync sailingService, final StringMessages stringMessages,
             CourseTemplateDTO courseTemplateToEdit, DialogCallback<CourseTemplateDTO> callback) {
@@ -43,6 +49,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                 stringMessages.cancel(), new Validator<CourseTemplateDTO>() {
                     @Override
                     public String getErrorMessage(CourseTemplateDTO valueToValidate) {
+                        GWT.log("validating.");
                         String result = null;
                         boolean invalidName = valueToValidate.getName() == null || valueToValidate.getName().isEmpty();
                         if (invalidName) {
@@ -51,10 +58,12 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                         return result;
                     }
                 }, /* animationEnabled */true, callback);
+        this.currentUuid = courseTemplateToEdit.getUuid();
         this.ensureDebugId("CourseTemplateToEditEditDialog");
         this.stringMessages = stringMessages;
 
         this.nameTextBox = createTextBox(courseTemplateToEdit.getName());
+        this.urlTextBox = createTextBox(courseTemplateToEdit.getOptionalImageUrl().orElse(""));
 
         addWaypointTemplate = new Button(stringMessages.add());
         addWaypointTemplate.addClickHandler(c -> {
@@ -85,6 +94,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         waypointTemplates.addAll(courseTemplateToEdit.getWaypointTemplates());
         refreshWaypointsTable();
         nameTextBox.addKeyUpHandler(e -> validateAndUpdate());
+        urlTextBox.addKeyUpHandler(e -> validateAndUpdate());
     }
 
     private void refreshWaypointsTable() {
@@ -116,16 +126,25 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
     @Override
     protected CourseTemplateDTO getResult() {
         // TODO: implement
-        return new CourseTemplateDTO();
+        final UUID id = currentUuid == null ? UUID.randomUUID() : currentUuid;
+        final Iterable<MarkTemplateDTO> markTemplates = new ArrayList<MarkTemplateDTO>();
+        final Map<MarkTemplateDTO, String> associatedRoles = new HashMap<MarkTemplateDTO, String>();
+        final String optionalUrl = urlTextBox.getText() != null && !urlTextBox.getText().isEmpty()
+                ? urlTextBox.getText()
+                : null;
+        return new CourseTemplateDTO(id, nameTextBox.getValue(), markTemplates, waypointTemplates, associatedRoles,
+                optionalUrl);
     }
 
     @Override
     protected Widget getAdditionalWidget() {
-        Grid result = new Grid(6, 2);
+        Grid result = new Grid(3, 2);
         result.setWidget(0, 0, new Label(stringMessages.name()));
         result.setWidget(0, 1, nameTextBox);
-        result.setWidget(1, 0, addWaypointTemplate);
-        result.setWidget(1, 1, waypointTemplatesTable);
+        result.setWidget(1, 0, new Label(stringMessages.url()));
+        result.setWidget(1, 1, urlTextBox);
+        result.setWidget(2, 0, addWaypointTemplate);
+        result.setWidget(2, 1, waypointTemplatesTable);
         return result;
     }
 
