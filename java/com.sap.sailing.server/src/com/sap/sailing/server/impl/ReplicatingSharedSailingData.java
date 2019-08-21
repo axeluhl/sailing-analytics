@@ -20,6 +20,9 @@ public interface ReplicatingSharedSailingData extends SharedSailingData,
     Void internalCreateMarkProperties(UUID idOfNewMarkProperties, CommonMarkProperties properties,
             Iterable<String> tags);
     
+    Void internalUpdateMarkProperties(UUID idOfNewMarkProperties, CommonMarkProperties properties, Position position,
+            DeviceIdentifier deviceIdentifier, Iterable<String> tags);
+
     Void internalCreateMarkTemplate(UUID idOfNewMarkTemplate, CommonMarkProperties properties);
     
     Void internalCreateCourseTemplate(UUID idOfNewCourseTemplate, String courseTemplateName,

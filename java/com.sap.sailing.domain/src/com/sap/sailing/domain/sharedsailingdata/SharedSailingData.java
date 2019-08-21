@@ -31,6 +31,9 @@ public interface SharedSailingData {
 
     MarkProperties createMarkProperties(CommonMarkProperties properties, Iterable<String> tags);
     
+    MarkProperties updateMarkProperties(UUID uuid, CommonMarkProperties properties, Position position,
+            DeviceIdentifier deviceIdentifier, Iterable<String> tags);
+
     /**
      * This overrides a previously set fixed position or associated tracking device.
      */
