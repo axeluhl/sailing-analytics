@@ -108,6 +108,8 @@ public class MarkTemplatePanel extends FlowPanel {
         createMarkTemplatesTable(userService);
         filterableMarkTemplates.getTextBox().ensureDebugId("MarkTemplatesFilterTextBox");
         buttonAndFilterPanel.addUnsecuredWidget(filterableMarkTemplates);
+        filterableMarkTemplates
+                .setCheckboxEnabledFilter(event -> userService.hasPermission(event, DefaultActions.UPDATE));
     }
 
     public void loadMarkTemplates() {
