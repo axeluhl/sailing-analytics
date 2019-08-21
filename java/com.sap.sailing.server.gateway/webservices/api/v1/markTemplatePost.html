@@ -9,7 +9,7 @@
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
-<h2>URL: /api/v1/markTemplates</h2>
+<h2>URL: /api/v1/marktemplates</h2>
 
 <b>Description:</b>
 <p>The service creates a new mark template.</p>
@@ -20,16 +20,26 @@
         <td>REST</td>
     </tr>
     <tr>
+        <td>Input format:</td>
+        <td>Form</td>
+    </tr>
+    <tr>
         <td>Output format:</td>
         <td>Json</td>
     </tr>
     <tr>
         <td>Mandatory parameters:</td>
-        <td>TBD</td>
+        <td>name: the name to set</td>
     </tr>
     <tr>
         <td>Optional parameters:</td>
-        <td>TBD<br>
+        <td>shortName: the short name to set. If not given, the short name defaults to the name.<br>
+            tag: Multi value specifying an optional set of tags.
+            markType: One of [BUOY, CAMERABOAT, STARTBOAT, UMPIREBOAT, LANDMARK, FINISHBOAT]<br>
+            color: RGB color value. Either of the hex color patterns: #RRGGBB, #RGB, RRGGBB, RGB<br>
+            shape: For marks with BUOY type, this may be specified as one of [CYLINDER, CONICAL]<br>
+            pattern: For marks with BUOY type, this may be specified as CHECKERED
+        </td>
     </tr>
     <tr>
         <td>Request method:</td>

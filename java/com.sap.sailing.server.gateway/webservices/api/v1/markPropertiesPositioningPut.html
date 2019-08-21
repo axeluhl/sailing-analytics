@@ -9,10 +9,10 @@
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
-<h2>URL: /api/v1/markproperties/{markPropertiesId}</h2>
+<h2>URL: /api/v1/markproperties/{markPropertiesId}/positioning</h2>
 
 <b>Description:</b>
-<p>The service gets mark properties.</p>
+<p>The service updates mark properties' positioning information.</p>
 <br/>
 <table>
     <tr>
@@ -20,24 +20,32 @@
         <td>REST</td>
     </tr>
     <tr>
+        <td>Input format:</td>
+        <td>Form</td>
+    </tr>
+    <tr>
         <td>Output format:</td>
         <td>Json</td>
     </tr>
     <tr>
         <td>Mandatory parameters:</td>
-        <td>None</td>
+        <td>One of the following positioning information is required: <br>
+            deviceUuid: A valid device UUID. This binds the device ID as tracking device for the mark properties. All previously set positioning information is removed.<br>
+            latDeg, lonDeg: A valid position. This binds the given position for the mark properties. All previously set positioning information is removed.<br>
+        </td>
     </tr>
     <tr>
         <td>Optional parameters:</td>
-        <td>None<br>
+        <td>None
+        </td>
     </tr>
     <tr>
         <td>Request method:</td>
-        <td>GET</td>
+        <td>PUT</td>
     </tr>
     <tr>
         <td>Example:</td>
-        <td><a href="http://www.sapsailing.com/sailingserver/api/v1/markproperties/dc77e3d1-d405-435e-8699-ce7245a6fd4a">http://www.sapsailing.com/sailingserver/api/v1/markproperties/dc77e3d1-d405-435e-8699-ce7245a6fd4a</a></td>
+        <td><a href="http://www.sapsailing.com/sailingserver/api/v1/markproperties/dc77e3d1-d405-435e-8699-ce7245a6fd4a/positioning">http://www.sapsailing.com/sailingserver/api/v1/markproperties/dc77e3d1-d405-435e-8699-ce7245a6fd4a/positioning</a></td>
     </tr>
 </table>
 <div style="height: 1em;"></div>

@@ -9,7 +9,7 @@
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
-<h2>URL: /api/v1/markProperties</h2>
+<h2>URL: /api/v1/markproperties</h2>
 
 <b>Description:</b>
 <p>The service creates new mark properties.</p>
@@ -24,12 +24,24 @@
         <td>Json</td>
     </tr>
     <tr>
+        <td>Input format:</td>
+        <td>Form</td>
+    </tr>
+    <tr>
         <td>Mandatory parameters:</td>
-        <td>TBD</td>
+        <td>name: the name to set</td>
     </tr>
     <tr>
         <td>Optional parameters:</td>
-        <td>TBD<br>
+        <td>shortName: the short name to set. If not given, the short name defaults to the name.<br>
+            tag: Multi value specifying an optional set of tags.
+            markType: One of [BUOY, CAMERABOAT, STARTBOAT, UMPIREBOAT, LANDMARK, FINISHBOAT]<br>
+            color: RGB color value. Either of the hex color patterns: #RRGGBB, #RGB, RRGGBB, RGB<br>
+            shape: For marks with BUOY type, this may be specified as one of [CYLINDER, CONICAL]<br>
+            pattern: For marks with BUOY type, this may be specified as CHECKERED<br>
+            Positioning parameters. None or one of the following may be specified:<br>
+            deviceUuid: A valid device UUID. This binds the device ID as tracking device for the mark properties.<br>
+            latDeg, lonDeg: A valid position. This binds the given position for the mark properties.<br>
     </tr>
     <tr>
         <td>Request method:</td>
