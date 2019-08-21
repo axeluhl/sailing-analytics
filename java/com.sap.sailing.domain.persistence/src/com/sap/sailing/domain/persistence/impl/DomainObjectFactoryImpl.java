@@ -2653,7 +2653,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 Document.class);
         final Position fixedPosition = positionDocument == null ? null : loadPosition(positionDocument);
 
-        final BasicDBList tagsList = dbObject.get(FieldNames.MARK_PROPERTIES_TAGS.name(), BasicDBList.class);
+        final ArrayList<?> tagsList = dbObject.get(FieldNames.MARK_PROPERTIES_TAGS.name(), ArrayList.class);
         final Collection<String> tags = tagsList.stream().map(t -> t.toString()).collect(Collectors.toList());
 
         //all mandatory data are loaded -> create builder 
@@ -2673,10 +2673,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
 
         //load map of last used templates
-        final BasicDBObject lastUsedTemplateObject = dbObject.get(FieldNames.MARK_PROPERTIES_USED_TEMPLATE.name(),
-                BasicDBObject.class);
-        @SuppressWarnings("unchecked")
-        final Map<Object, Object> mapLastUsedTemplate = lastUsedTemplateObject.toMap();
+        final Document lastUsedTemplateObject = dbObject.get(FieldNames.MARK_PROPERTIES_USED_TEMPLATE.name(),
+                Document.class);
+
+        final Map<Object, Object> mapLastUsedTemplate = new HashMap<>();
+        lastUsedTemplateObject.forEach((k, v) -> mapLastUsedTemplate.put(k, v));
 
         final Map<MarkTemplate, TimePoint> lastUsedTemplate = new HashMap<>();
         for (Map.Entry<Object, Object> e : mapLastUsedTemplate.entrySet()) {
@@ -2692,9 +2693,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         builder.withLastUsedTemplate(lastUsedTemplate);
 
         //load map of last used roles
-        final BasicDBObject lastUsedRoleObject = dbObject.get(FieldNames.MARK_PROPERTIES_USED_ROLE.name(),
-                BasicDBObject.class);
-        final Map<?, ?> mapUsedRole = lastUsedRoleObject.toMap();
+        final Document lastUsedRoleObject = dbObject.get(FieldNames.MARK_PROPERTIES_USED_ROLE.name(), Document.class);
+        final Map<Object, Object> mapUsedRole = new HashMap<>();
+        lastUsedRoleObject.forEach((k, v) -> mapUsedRole.put(k, v));
         final Map<String, TimePoint> lastUsedRole = mapUsedRole.entrySet().stream()
                 .collect(Collectors.toMap(k -> k.toString(), v -> parseTimePoint(v)));
         builder.withLastUsedRole(lastUsedRole);
