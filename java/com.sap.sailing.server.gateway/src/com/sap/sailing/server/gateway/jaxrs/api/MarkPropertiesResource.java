@@ -83,6 +83,16 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
             @FormParam("color") String rgbColor, @FormParam("shape") String shape, @FormParam("pattern") String pattern,
             @FormParam("markType") final String markType, @FormParam("tag") List<String> tags,
             @FormParam("latDeg") Double latDeg, @FormParam("lonDeg") Double lonDeg) throws Exception {
+        if (name == null || name.isEmpty()) {
+            return getBadMarkPropertiesValidationErrorResponse("name must be given");
+        }
+        final String effectiveShortName;
+        if (shortName == null || shortName.isEmpty()) {
+            effectiveShortName = name;
+        } else {
+            effectiveShortName = shortName;
+        }
+        
         Color color = null;
         if (rgbColor != null && rgbColor.length() > 0) {
             try {
@@ -95,7 +105,7 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         if (markType != null && markType.length() > 0) {
             type = MarkType.valueOf(markType);
         }
-        final MarkPropertiesBuilder markPropertiesBuilder = new MarkPropertiesBuilder(/* id */ null, name, shortName,
+        final MarkPropertiesBuilder markPropertiesBuilder = new MarkPropertiesBuilder(/* id */ null, name, effectiveShortName,
                 color, shape, pattern, type);
         final MarkProperties createdMarkProperties = getSharedSailingData()
                 .createMarkProperties(markPropertiesBuilder.build(), tags);
@@ -113,15 +123,70 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
     }
 
     @PUT
-    @Path("{markPropertiesId}")
+    @Path("{markPropertiesId}/positioning")
     @Produces("application/json;charset=UTF-8")
-    public Response updateMarkProperties(@PathParam("markPropertiesId") String markPropertiesId,
+    public Response updateMarkPropertiesPositioning(@PathParam("markPropertiesId") String markPropertiesId,
             @FormParam("deviceUuid") String deviceUuid, @FormParam("latDeg") Double latDeg,
             @FormParam("lonDeg") Double lonDeg) throws Exception {
-        MarkProperties markProperties = getSharedSailingData().getMarkPropertiesById(UUID.fromString(markPropertiesId));
+        final MarkProperties markProperties = getSharedSailingData().getMarkPropertiesById(UUID.fromString(markPropertiesId));
         if (markProperties == null) {
             return getMarkPropertiesNotFoundErrorResponse();
         }
+        if (deviceUuid != null && deviceUuid.length() > 0) {
+            final DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
+            getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(markProperties, device);
+        }
+        if (latDeg != null && lonDeg != null) {
+            final Position fixedPosition = new DegreePosition(latDeg, lonDeg);
+            getSharedSailingData().setFixedPositionForMarkProperties(markProperties, fixedPosition);
+        }
+        final JSONObject serializedMarkedProperties = markPropertiesSerializer.serialize(markProperties);
+        final String json = serializedMarkedProperties.toJSONString();
+        return Response.ok(json).build();
+    }
+
+    @PUT
+    @Path("{markPropertiesId}")
+    @Produces("application/json;charset=UTF-8")
+    public Response updateMarkProperties(@PathParam("markPropertiesId") String markPropertiesId,
+            @FormParam("name") final String name,
+            @FormParam("shortName") final String shortName,
+            @FormParam("color") String rgbColor, @FormParam("shape") String shape, @FormParam("pattern") String pattern,
+            @FormParam("markType") final String markType, @FormParam("tag") List<String> tags,
+            @FormParam("deviceUuid") String deviceUuid, @FormParam("latDeg") Double latDeg,
+            @FormParam("lonDeg") Double lonDeg) throws Exception {
+        final UUID markPropertiesUUID = UUID.fromString(markPropertiesId);
+        final MarkProperties markProperties = getSharedSailingData().getMarkPropertiesById(markPropertiesUUID);
+        if (markProperties == null) {
+            return getMarkPropertiesNotFoundErrorResponse();
+        }
+        
+        if (name == null || name.isEmpty()) {
+            return getBadMarkPropertiesValidationErrorResponse("name must be given");
+        }
+        final String effectiveShortName;
+        if (shortName == null || shortName.isEmpty()) {
+            effectiveShortName = name;
+        } else {
+            effectiveShortName = shortName;
+        }
+        
+        Color color = null;
+        if (rgbColor != null && rgbColor.length() > 0) {
+            try {
+                color = new RGBColor(rgbColor);
+            } catch (IllegalArgumentException iae) {
+                return getBadMarkPropertiesValidationErrorResponse(String.format("invalid color %s", iae.getMessage()));
+            }
+        }
+        MarkType type = null;
+        if (markType != null && markType.length() > 0) {
+            type = MarkType.valueOf(markType);
+        }
+        final MarkPropertiesBuilder markPropertiesBuilder = new MarkPropertiesBuilder(/* id */ null, name, effectiveShortName,
+                color, shape, pattern, type);
+        getSharedSailingData().updateMarkProperties(markPropertiesUUID, markPropertiesBuilder.build(), null, null, tags);
+        
         if (deviceUuid != null && deviceUuid.length() > 0) {
             final DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
             getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(markProperties, device);

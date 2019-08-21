@@ -70,6 +70,16 @@ public class MarkTemplateResource extends AbstractSailingServerResource {
             @FormParam("shortName") final String shortName, @FormParam("color") String rgbColor,
             @FormParam("shape") String shape, @FormParam("pattern") String pattern,
             @FormParam("markType") final String markType) throws Exception {
+        if (name == null || name.isEmpty()) {
+            return getBadMarkTemplateValidationErrorResponse("name must be given");
+        }
+        final String effectiveShortName;
+        if (shortName == null || shortName.isEmpty()) {
+            effectiveShortName = name;
+        } else {
+            effectiveShortName = shortName;
+        }
+        
         Color color = null;
         if (rgbColor != null && rgbColor.length() > 0) {
             try {
@@ -83,7 +93,7 @@ public class MarkTemplateResource extends AbstractSailingServerResource {
             type = MarkType.valueOf(markType);
         }
 
-        final MarkTemplate markTemplate = new MarkTemplateImpl(name, shortName, color, shape, pattern, type);
+        final MarkTemplate markTemplate = new MarkTemplateImpl(name, effectiveShortName, color, shape, pattern, type);
         final MarkTemplate createdMarkTemplate = getSharedSailingData().createMarkTemplate(markTemplate);
         JsonSerializer<MarkTemplate> markTemplateSerializer = new MarkTemplateJsonSerializer();
         final JSONObject serializedMarkedTemplate = markTemplateSerializer.serialize(createdMarkTemplate);
