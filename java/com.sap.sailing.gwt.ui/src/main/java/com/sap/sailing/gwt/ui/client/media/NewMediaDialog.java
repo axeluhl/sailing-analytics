@@ -221,6 +221,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                                 mediaTrack.duration = result.getDuration();
                                 mediaTrack.title = result.getMessage();
                                 refreshUI();
+                                validateAndUpdate();
                             } else {
                                 infoLabel.setWidget(new Label(result.getMessage()));
                             }
