@@ -282,7 +282,7 @@ public class MarkPropertiesPanel extends FlowPanel {
 
         SecuredDTOOwnerColumn.configureOwnerColumns(markPropertiesTable, sortHandler, stringMessages);
 
-        final HasPermissions type = SecuredDomainType.MARK_TEMPLATE;
+        final HasPermissions type = SecuredDomainType.MARK_PROPERTIES;
 
         final AccessControlledActionsColumn<MarkPropertiesDTO, DefaultActionsImagesBarCell> actionsColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
