@@ -267,7 +267,6 @@ public class MarkTemplatePanel extends FlowPanel {
             }
         });
 
-        markTemplateTable.addColumn(idColumn, stringMessages.id());
         markTemplateTable.addColumn(nameColumn, stringMessages.name());
         markTemplateTable.addColumn(shortNameColumn, stringMessages.shortName());
         markTemplateTable.addColumn(colorColumn, stringMessages.color());
@@ -291,6 +290,7 @@ public class MarkTemplatePanel extends FlowPanel {
         actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 markTemplate -> configACL.openDialog(markTemplate));
+        markTemplateTable.addColumn(idColumn, stringMessages.id());
         markTemplateTable.addColumn(actionsColumn, stringMessages.actions());
 
     }
