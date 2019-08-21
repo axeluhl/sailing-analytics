@@ -55,8 +55,8 @@ public class CourseTemplateJsonDeserializer implements JsonDeserializer<CourseTe
         final Map<UUID, MarkTemplate> allMarkTemplatesById = new HashMap<UUID, MarkTemplate>();
         final Map<MarkTemplate, String> roles = new HashMap<>();
         final JSONArray allMarkTemplatesJSON = (JSONArray) json.get(CourseTemplateJsonSerializer.FIELD_ALL_MARK_TEMPLATES);
-        for (Object markTemplateWihtOptionalRoleNameObject : allMarkTemplatesJSON) {
-            final JSONObject markTemplateWithOptionalRoleName = (JSONObject) markTemplateWihtOptionalRoleNameObject;
+        for (Object markTemplateWithOptionalRoleNameObject : allMarkTemplatesJSON) {
+            final JSONObject markTemplateWithOptionalRoleName = (JSONObject) markTemplateWithOptionalRoleNameObject;
             final UUID markTemplateUUID = UUID.fromString(
                     (String) markTemplateWithOptionalRoleName.get(MarkTemplateJsonSerializer.FIELD_ID));
             final MarkTemplate resolvedMarkTemplate = markTemplateResolver.apply(markTemplateUUID);
