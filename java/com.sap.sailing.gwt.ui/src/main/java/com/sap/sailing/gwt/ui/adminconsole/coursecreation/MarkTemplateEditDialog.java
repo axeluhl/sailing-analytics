@@ -38,17 +38,17 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
                     public String getErrorMessage(MarkTemplateDTO valueToValidate) {
                         String result = null;
                         boolean invalidName = valueToValidate.getName() == null || valueToValidate.getName().isEmpty();
-                        boolean invalidColor = valueToValidate.getColor() == null;
-                        boolean invalidMarkType = valueToValidate.getType() == null;
+                        boolean invalidColor = valueToValidate.getMarkProperties().getColor() == null;
+                        boolean invalidMarkType = valueToValidate.getMarkProperties().getType() == null;
                         if (invalidName) {
                             result = stringMessages.pleaseEnterAName();
                         } else if (invalidColor) {
                             result = stringMessages.pleaseEnterAValidValueFor(stringMessages.color(), "");
                         } else if (invalidMarkType) {
                             result = stringMessages.pleaseEnterAValidValueFor(stringMessages.type(), "");
-                        } else if (valueToValidate.getColor() != null
-                                && valueToValidate.getColor() instanceof InvalidColor) {
-                            result = valueToValidate.getColor().getAsHtml();
+                        } else if (valueToValidate.getMarkProperties().getColor() != null
+                                && valueToValidate.getMarkProperties().getColor() instanceof InvalidColor) {
+                            result = valueToValidate.getMarkProperties().getColor().getAsHtml();
                         }
                         return result;
                     }
@@ -64,15 +64,16 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
         this.markTypeSuggestBox = createSuggestBox(oracle);
 
         this.nameTextBox = createTextBox(markTemplateToEdit.getName());
-        this.shortNameTextBox = createTextBox(markTemplateToEdit.getShortName());
-        this.shapeTextBox = createTextBox(markTemplateToEdit.getShape());
-        this.patternTextBox = createTextBox(markTemplateToEdit.getPattern());
-        this.markTypeSuggestBox
-                .setValue(markTemplateToEdit.getType() != null ? markTemplateToEdit.getType().name() : "");
+        this.shortNameTextBox = createTextBox(markTemplateToEdit.getMarkProperties().getShortName());
+        this.shapeTextBox = createTextBox(markTemplateToEdit.getMarkProperties().getShape());
+        this.patternTextBox = createTextBox(markTemplateToEdit.getMarkProperties().getPattern());
+        this.markTypeSuggestBox.setValue(markTemplateToEdit.getMarkProperties().getType() != null
+                ? markTemplateToEdit.getMarkProperties().getType().name()
+                : "");
 
-        if (markTemplateToEdit.getColor() != null) {
-            this.displayColorTextBox = createTextBox(
-                    markTemplateToEdit.getColor() == null ? "" : markTemplateToEdit.getColor().getAsHtml());
+        if (markTemplateToEdit.getMarkProperties().getColor() != null) {
+            this.displayColorTextBox = createTextBox(markTemplateToEdit.getMarkProperties().getColor() == null ? ""
+                    : markTemplateToEdit.getMarkProperties().getColor().getAsHtml());
         } else {
             this.displayColorTextBox = createTextBox("");
         }

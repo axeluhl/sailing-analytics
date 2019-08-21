@@ -9354,7 +9354,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private CommonMarkProperties convertDtoToCommonMarkProperties(UUID markTemplateUUID, MarkTemplateDTO markTemplate) {
-        return new MarkPropertiesImpl(markTemplateUUID, markTemplate.getName(), markTemplate.getShortName(),
-                markTemplate.getColor(), markTemplate.getShape(), markTemplate.getPattern(), markTemplate.getType());
+        return new MarkPropertiesImpl(markTemplateUUID, markTemplate.getName(),
+                markTemplate.getMarkProperties().getShortName(),
+                markTemplate.getMarkProperties().getColor(), markTemplate.getMarkProperties().getShape(),
+                markTemplate.getMarkProperties().getPattern(), markTemplate.getMarkProperties().getType());
     }
 }

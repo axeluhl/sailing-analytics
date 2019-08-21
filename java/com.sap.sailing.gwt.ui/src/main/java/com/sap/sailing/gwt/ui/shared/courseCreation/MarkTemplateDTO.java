@@ -18,11 +18,7 @@ public class MarkTemplateDTO extends NamedDTO implements SecuredDTO {
     private static final long serialVersionUID = -9092124519699246140L;
 
     private UUID uuid;
-    private String shortName;
-    private Color color;
-    private String shape;
-    private String pattern;
-    private MarkType type;
+    private CommonMarkPropertiesDTO markProperties;
 
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
 
@@ -34,11 +30,7 @@ public class MarkTemplateDTO extends NamedDTO implements SecuredDTO {
             MarkType type) {
         super(name);
         this.uuid = uuid;
-        this.shortName = shortName;
-        this.color = color;
-        this.shape = shape;
-        this.pattern = pattern;
-        this.type = type;
+        markProperties = new CommonMarkPropertiesDTO(shortName, color, shape, pattern, type);
     }
 
     @Override
@@ -83,24 +75,8 @@ public class MarkTemplateDTO extends NamedDTO implements SecuredDTO {
         return uuid;
     }
 
-    public String getShortName() {
-        return shortName;
-    }
-
-    public Color getColor() {
-        return color;
-    }
-
-    public String getShape() {
-        return shape;
-    }
-
-    public String getPattern() {
-        return pattern;
-    }
-
-    public MarkType getType() {
-        return type;
+    public CommonMarkPropertiesDTO getMarkProperties() {
+        return markProperties;
     }
 
 }

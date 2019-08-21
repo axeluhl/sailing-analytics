@@ -95,7 +95,7 @@ public class MarkTemplatePanel extends FlowPanel {
             public List<String> getSearchableStrings(MarkTemplateDTO t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.getName());
-                strings.add(t.getShortName());
+                strings.add(t.getMarkProperties().getShortName());
                 strings.add(t.getUuid().toString());
                 return strings;
             }
@@ -230,35 +230,39 @@ public class MarkTemplatePanel extends FlowPanel {
         Column<MarkTemplateDTO, String> shortNameColumn = new Column<MarkTemplateDTO, String>(new TextCell()) {
             @Override
             public String getValue(MarkTemplateDTO markTemplate) {
-                return markTemplate.getShortName();
+                return markTemplate.getMarkProperties().getShortName();
             }
         };
         // color
         Column<MarkTemplateDTO, String> colorColumn = new Column<MarkTemplateDTO, String>(new TextCell()) {
             @Override
             public String getValue(MarkTemplateDTO markTemplate) {
-                return markTemplate.getColor() != null ? markTemplate.getColor().getAsHtml() : "";
+                return markTemplate.getMarkProperties().getColor() != null
+                        ? markTemplate.getMarkProperties().getColor().getAsHtml()
+                        : "";
             }
         };
         // shape
         Column<MarkTemplateDTO, String> shapeColumn = new Column<MarkTemplateDTO, String>(new TextCell()) {
             @Override
             public String getValue(MarkTemplateDTO markTemplate) {
-                return markTemplate.getShape();
+                return markTemplate.getMarkProperties().getShape();
             }
         };
         // pattern
         Column<MarkTemplateDTO, String> patternColumn = new Column<MarkTemplateDTO, String>(new TextCell()) {
             @Override
             public String getValue(MarkTemplateDTO markTemplate) {
-                return markTemplate.getPattern();
+                return markTemplate.getMarkProperties().getPattern();
             }
         };
         // mark type
         Column<MarkTemplateDTO, String> typeColumn = new Column<MarkTemplateDTO, String>(new TextCell()) {
             @Override
             public String getValue(MarkTemplateDTO markTemplate) {
-                return markTemplate.getType() != null ? markTemplate.getType().name() : "";
+                return markTemplate.getMarkProperties().getType() != null
+                        ? markTemplate.getMarkProperties().getType().name()
+                        : "";
             }
         };
 
