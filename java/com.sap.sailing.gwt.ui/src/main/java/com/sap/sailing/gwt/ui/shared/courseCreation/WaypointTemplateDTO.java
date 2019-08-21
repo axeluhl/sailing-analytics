@@ -12,7 +12,7 @@ public class WaypointTemplateDTO implements Serializable{
     // using concrete type ArrayList because of GWT serialization
     private ArrayList<MarkTemplateDTO> markTemplatesForControlPoint = new ArrayList<>();
 
-    private PassingInstruction passingInstruction;
+    private String passingInstruction;
 
     public WaypointTemplateDTO() {
 
@@ -22,7 +22,7 @@ public class WaypointTemplateDTO implements Serializable{
             PassingInstruction passingInstruction) {
         super();
         Util.addAll(markTemplatesForControlPoint, this.markTemplatesForControlPoint);
-        this.passingInstruction = passingInstruction;
+        this.passingInstruction = passingInstruction.name();
     }
 
     public ArrayList<MarkTemplateDTO> getMarkTemplatesForControlPoint() {
@@ -30,7 +30,7 @@ public class WaypointTemplateDTO implements Serializable{
     }
 
     public PassingInstruction getPassingInstruction() {
-        return passingInstruction;
+        return PassingInstruction.valueOf(passingInstruction);
     }
 
 }
