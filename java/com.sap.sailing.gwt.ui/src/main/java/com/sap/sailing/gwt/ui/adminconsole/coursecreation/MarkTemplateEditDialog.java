@@ -1,17 +1,15 @@
 package com.sap.sailing.gwt.ui.adminconsole.coursecreation;
 
-import java.util.Collection;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import com.google.gwt.core.client.GWT;
+import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
-import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -26,8 +24,7 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
     private final TextBox shortNameTextBox;
     private final TextBox shapeTextBox;
     private final TextBox patternTextBox;
-    // TODO: use dropdown ui element
-    private final SuggestBox markTypeSuggestBox;
+    private final ValueListBox<MarkType> markTypeValueListBox;
     private final StringMessages stringMessages;
 
     public MarkTemplateEditDialog(final StringMessages stringMessages, MarkTemplateDTO markTemplateToEdit,
@@ -50,21 +47,30 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
         this.ensureDebugId("MarkTemplateToEditEditDialog");
         this.stringMessages = stringMessages;
 
-        final MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
-        final Collection<String> markTypeStrings = Stream.of(MarkType.values()).map(MarkType::name)
-                .collect(Collectors.toList());
-        oracle.addAll(markTypeStrings);
-        oracle.setDefaultSuggestionsFromText(markTypeStrings);
-        this.markTypeSuggestBox = createSuggestBox(oracle);
+        this.markTypeValueListBox = new ValueListBox<>(new Renderer<MarkType>() {
+
+            @Override
+            public String render(MarkType object) {
+                return object == null ? "" : object.name();
+            }
+
+            @Override
+            public void render(MarkType object, Appendable appendable) throws IOException {
+                appendable.append(render(object));
+
+            }
+        });
 
         this.nameTextBox = createTextBox(markTemplateToEdit.getName());
         this.shortNameTextBox = createTextBox(markTemplateToEdit.getCommonMarkProperties().getShortName());
         this.shapeTextBox = createTextBox(markTemplateToEdit.getCommonMarkProperties().getShape());
         this.patternTextBox = createTextBox(markTemplateToEdit.getCommonMarkProperties().getPattern());
-        this.markTypeSuggestBox.setValue(markTemplateToEdit.getCommonMarkProperties().getType() != null
-                ? markTemplateToEdit.getCommonMarkProperties().getType().name()
-                : "");
+        this.markTypeValueListBox.setValue(markTemplateToEdit.getCommonMarkProperties().getType() != null
+                ? markTemplateToEdit.getCommonMarkProperties().getType()
+                : MarkType.values()[0]);
+        markTypeValueListBox.setAcceptableValues(Arrays.asList(MarkType.values()));
 
+        markTypeValueListBox.addValueChangeHandler(v -> validateAndUpdate());
         if (markTemplateToEdit.getCommonMarkProperties().getColor() != null) {
             this.displayColorTextBox = createTextBox(markTemplateToEdit.getCommonMarkProperties().getColor() == null ? ""
                     : markTemplateToEdit.getCommonMarkProperties().getColor().getAsHtml());
@@ -126,14 +132,9 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
                 color = new InvalidColor(iae);
             }
         }
-        MarkType markType = null;
-        try {
-            markType = markTypeSuggestBox.getValue().isEmpty() ? null : MarkType.valueOf(markTypeSuggestBox.getValue());
-        } catch (IllegalArgumentException e) {
-            GWT.log("Invalid mark type " + markTypeSuggestBox.getValue());
-        }
         MarkTemplateDTO markTemplate = new MarkTemplateDTO(UUID.randomUUID(), nameTextBox.getValue(),
-                shortNameTextBox.getValue(), color, shapeTextBox.getText(), patternTextBox.getText(), markType);
+                shortNameTextBox.getValue(), color, shapeTextBox.getText(), patternTextBox.getText(),
+                markTypeValueListBox.getValue());
         return markTemplate;
     }
 
@@ -151,7 +152,7 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
         result.setWidget(4, 0, new Label(stringMessages.pattern()));
         result.setWidget(4, 1, patternTextBox);
         result.setWidget(5, 0, new Label(stringMessages.type()));
-        result.setWidget(5, 1, markTypeSuggestBox);
+        result.setWidget(5, 1, markTypeValueListBox);
         return result;
     }
 
