@@ -65,6 +65,8 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
      */
     Iterable<WaypointTemplate> getWaypointTemplates(int numberOfLaps);
 
+    Iterable<WaypointTemplate> getWaypointTemplates();
+
     Map<MarkTemplate, String> getAssociatedRoles();
     
     URL getOptionalImageURL();
