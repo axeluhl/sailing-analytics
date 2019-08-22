@@ -14,6 +14,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
+import com.sap.sailing.gwt.ui.shared.racemap.Pattern;
+import com.sap.sailing.gwt.ui.shared.racemap.Shape;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -22,10 +24,12 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
     private final TextBox nameTextBox;
     private final TextBox displayColorTextBox;
     private final TextBox shortNameTextBox;
-    private final TextBox shapeTextBox;
-    private final TextBox patternTextBox;
     private final ValueListBox<MarkType> markTypeValueListBox;
+    private final ValueListBox<Pattern> patternValueListBox;
+    private final ValueListBox<Shape> shapeValueListBox;
     private final StringMessages stringMessages;
+    private Label labelShape;
+    private Label labelPattern;
 
     public MarkTemplateEditDialog(final StringMessages stringMessages, MarkTemplateDTO markTemplateToEdit,
             DialogCallback<MarkTemplateDTO> callback) {
@@ -47,6 +51,31 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
         this.ensureDebugId("MarkTemplateToEditEditDialog");
         this.stringMessages = stringMessages;
 
+        labelPattern = new Label(stringMessages.pattern());
+        this.patternValueListBox = new ValueListBox<>(new Renderer<Pattern>() {
+            @Override
+            public String render(Pattern object) {
+                return object != null ? object.name() : "";
+            }
+
+            @Override
+            public void render(Pattern object, Appendable appendable) throws IOException {
+                appendable.append(render(object));
+            }
+        });
+
+        labelShape = new Label(stringMessages.shape());
+        this.shapeValueListBox = new ValueListBox<>(new Renderer<Shape>() {
+            @Override
+            public String render(Shape object) {
+                return object != null ? object.name() : "";
+            }
+
+            @Override
+            public void render(Shape object, Appendable appendable) throws IOException {
+                appendable.append(render(object));
+            }
+        });
         this.markTypeValueListBox = new ValueListBox<>(new Renderer<MarkType>() {
 
             @Override
@@ -63,20 +92,37 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
 
         this.nameTextBox = createTextBox(markTemplateToEdit.getName());
         this.shortNameTextBox = createTextBox(markTemplateToEdit.getCommonMarkProperties().getShortName());
-        this.shapeTextBox = createTextBox(markTemplateToEdit.getCommonMarkProperties().getShape());
-        this.patternTextBox = createTextBox(markTemplateToEdit.getCommonMarkProperties().getPattern());
         this.markTypeValueListBox.setValue(markTemplateToEdit.getCommonMarkProperties().getType() != null
                 ? markTemplateToEdit.getCommonMarkProperties().getType()
                 : MarkType.values()[0]);
         markTypeValueListBox.setAcceptableValues(Arrays.asList(MarkType.values()));
 
-        markTypeValueListBox.addValueChangeHandler(v -> validateAndUpdate());
+        markTypeValueListBox.addValueChangeHandler(v -> handleMarkTypeChange());
         if (markTemplateToEdit.getCommonMarkProperties().getColor() != null) {
-            this.displayColorTextBox = createTextBox(markTemplateToEdit.getCommonMarkProperties().getColor() == null ? ""
-                    : markTemplateToEdit.getCommonMarkProperties().getColor().getAsHtml());
+            this.displayColorTextBox = createTextBox(
+                    markTemplateToEdit.getCommonMarkProperties().getColor() == null ? ""
+                            : markTemplateToEdit.getCommonMarkProperties().getColor().getAsHtml());
         } else {
             this.displayColorTextBox = createTextBox("");
         }
+
+        shapeValueListBox.setValue(null);
+        shapeValueListBox.setAcceptableValues(Arrays.asList(Shape.values()));
+        patternValueListBox.setValue(null);
+        patternValueListBox.setAcceptableValues(Arrays.asList(Pattern.values()));
+
+        handleMarkTypeChange();
+    }
+
+    private void handleMarkTypeChange() {
+        final boolean isBuoy = markTypeValueListBox.getValue() == MarkType.BUOY;
+
+        shapeValueListBox.setVisible(isBuoy);
+        patternValueListBox.setVisible(isBuoy);
+        labelShape.setVisible(isBuoy);
+        labelPattern.setVisible(isBuoy);
+
+        validateAndUpdate();
     }
 
     @Override
@@ -133,7 +179,9 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
             }
         }
         MarkTemplateDTO markTemplate = new MarkTemplateDTO(UUID.randomUUID(), nameTextBox.getValue(),
-                shortNameTextBox.getValue(), color, shapeTextBox.getText(), patternTextBox.getText(),
+                shortNameTextBox.getValue(), color,
+                shapeValueListBox.getValue() == null ? "" : shapeValueListBox.getValue().name(),
+                patternValueListBox.getValue() == null ? "" : patternValueListBox.getValue().name(),
                 markTypeValueListBox.getValue());
         return markTemplate;
     }
@@ -147,10 +195,10 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
         result.setWidget(1, 1, shortNameTextBox);
         result.setWidget(2, 0, new Label(stringMessages.color()));
         result.setWidget(2, 1, displayColorTextBox);
-        result.setWidget(3, 0, new Label(stringMessages.shape()));
-        result.setWidget(3, 1, shapeTextBox);
-        result.setWidget(4, 0, new Label(stringMessages.pattern()));
-        result.setWidget(4, 1, patternTextBox);
+        result.setWidget(3, 0, labelShape);
+        result.setWidget(3, 1, shapeValueListBox);
+        result.setWidget(4, 0, labelPattern);
+        result.setWidget(4, 1, patternValueListBox);
         result.setWidget(5, 0, new Label(stringMessages.type()));
         result.setWidget(5, 1, markTypeValueListBox);
         return result;
