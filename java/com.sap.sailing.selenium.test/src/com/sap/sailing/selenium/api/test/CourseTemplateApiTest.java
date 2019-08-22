@@ -100,14 +100,14 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
     
     @Test
     public void createCourseTemplateWithInvalidRepeatablePartTest() {
-        final Pair<Integer, Integer> repeatablePart = new Pair<>(1, 5);
+        final Pair<Integer, Integer> repeatablePart = new Pair<>(1, 6);
         final CourseTemplate courseTemplateToSave = constructCourseTemplate(repeatablePart);
         
         try {
             courseTemplateApi.createCourseTemplate(ctx, courseTemplateToSave);
             fail();
         } catch (Exception e) {
-            assertTrue(e.getMessage().contains("Repeatable part (1, 5) is out of range for sequence of length 5"));
+            assertTrue(e.getMessage().contains("Repeatable part (1, 6) is out of range for sequence of length 5"));
         }
     }
     
