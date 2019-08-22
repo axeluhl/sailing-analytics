@@ -9486,7 +9486,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public CourseTemplateDTO createCourseTemplate(CourseTemplateDTO courseTemplate) {
+    public CourseTemplateDTO createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate) {
+        CourseTemplate existingCourseTemplate = getSharedSailingData().getCourseTemplateById(courseTemplate.getUuid());
         URL optionalImageURL = null;
         try {
             optionalImageURL = courseTemplate.getOptionalImageUrl().isPresent()
@@ -9496,18 +9497,28 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             throw new IllegalArgumentException(
                     String.format("Invalid URL: %s", courseTemplate.getOptionalImageUrl().get()));
         }
-        final List<MarkTemplate> marks = courseTemplate.getMarkTemplates().stream().map(t -> getSharedSailingData().getMarkTemplateById(t.getUuid()))
-                .collect(Collectors.toList());
-        final MarkPairTemplateFactory markPairTemplateFactory = new MarkPairTemplateFactory();
-        final List<WaypointTemplate> waypoints = courseTemplate.getWaypointTemplates().stream()
-                .map(wp -> convertToWaypointTemplate(wp, markPairTemplateFactory)).collect(Collectors.toList());
-        final Map<MarkTemplate, String> associatedRoles = courseTemplate.getAssociatedRoles().entrySet().stream()
-                .collect(Collectors.toMap(k -> getSharedSailingData().getMarkTemplateById(k.getKey().getUuid()),
-                        Entry::getValue));
-        final RepeatablePart optionalRepeatablePart = courseTemplate.getRepeatablePart() != null
-                ? convertToRepeatablePart(courseTemplate.getRepeatablePart())
-                : null;
-        return convertToCourseTemplateDTO(getSharedSailingData().createCourseTemplate(courseTemplate.getName(), marks,
-                waypoints, associatedRoles, optionalRepeatablePart, courseTemplate.getTags(), optionalImageURL));
+
+        final CourseTemplateDTO result;
+        if (existingCourseTemplate != null) {
+            getSecurityService().checkCurrentUserUpdatePermission(existingCourseTemplate);
+            result = convertToCourseTemplateDTO(getSharedSailingData().updateCourseTemplate(courseTemplate.getUuid(),
+                    courseTemplate.getName(), optionalImageURL, courseTemplate.getTags()));
+        } else {
+            final List<MarkTemplate> marks = courseTemplate.getMarkTemplates().stream()
+                    .map(t -> getSharedSailingData().getMarkTemplateById(t.getUuid())).collect(Collectors.toList());
+            final MarkPairTemplateFactory markPairTemplateFactory = new MarkPairTemplateFactory();
+            final List<WaypointTemplate> waypoints = courseTemplate.getWaypointTemplates().stream()
+                    .map(wp -> convertToWaypointTemplate(wp, markPairTemplateFactory)).collect(Collectors.toList());
+            final Map<MarkTemplate, String> associatedRoles = courseTemplate.getAssociatedRoles().entrySet().stream()
+                    .collect(Collectors.toMap(k -> getSharedSailingData().getMarkTemplateById(k.getKey().getUuid()),
+                            Entry::getValue));
+            final RepeatablePart optionalRepeatablePart = courseTemplate.getRepeatablePart() != null
+                    ? convertToRepeatablePart(courseTemplate.getRepeatablePart())
+                    : null;
+            result = convertToCourseTemplateDTO(
+                    getSharedSailingData().createCourseTemplate(courseTemplate.getName(), marks, waypoints,
+                            associatedRoles, optionalRepeatablePart, courseTemplate.getTags(), optionalImageURL));
+        }
+        return result;
     }
 }

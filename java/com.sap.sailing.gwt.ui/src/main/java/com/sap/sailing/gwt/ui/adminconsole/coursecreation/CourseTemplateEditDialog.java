@@ -48,7 +48,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
     private final StringListEditorComposite tagsEditor;
 
     public CourseTemplateEditDialog(final SailingServiceAsync sailingService, final StringMessages stringMessages,
-            CourseTemplateDTO courseTemplateToEdit, DialogCallback<CourseTemplateDTO> callback) {
+            CourseTemplateDTO courseTemplateToEdit, DialogCallback<CourseTemplateDTO> callback, final boolean isNew) {
         super(stringMessages.edit() + " " + stringMessages.courseTemplates(), null, stringMessages.ok(),
                 stringMessages.cancel(), new Validator<CourseTemplateDTO>() {
                     @Override
@@ -103,6 +103,8 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         tagsEditor = new StringListEditorComposite(courseTemplateToEdit.getTags(), stringMessages,
                 stringMessages.edit(stringMessages.tags()), IconResources.INSTANCE.removeIcon(),
                 Collections.emptyList(), stringMessages.tag());
+
+        this.addWaypointTemplate.setEnabled(isNew);
     }
 
     private void refreshWaypointsTable() {

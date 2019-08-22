@@ -1,6 +1,7 @@
 package com.sap.sailing.server.impl;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
 
@@ -39,5 +40,7 @@ public interface ReplicatingSharedSailingData extends SharedSailingData,
     Void internalDeleteCourseTemplate(UUID courseTemplateUUID);
 
     Void internalRecordUsage(UUID markTemplateId, UUID markPropertiesId);
+
+    Void internalUpdateCourseTemplate(UUID uuid, String name, URL optionalImageURL, ArrayList<String> tags);
 
 }

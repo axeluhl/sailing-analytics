@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -157,8 +158,8 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         }
 
         getSecurityService().checkCurrentUserUpdatePermission(markPropertiesById.get(uuid));
-        internalUpdateMarkProperties(uuid, properties, position, deviceIdentifier, tags);
-        return markPropertiesById.get(uuid);
+        apply(s -> internalUpdateMarkProperties(uuid, properties, position, deviceIdentifier, tags));
+        return getMarkPropertiesById(uuid);
     }
 
     @Override
@@ -296,13 +297,34 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
 
     @Override
+    public CourseTemplate updateCourseTemplate(UUID uuid, String name, URL optionalImageURL, ArrayList<String> tags) {
+        getSecurityService().checkCurrentUserUpdatePermission(courseTemplatesById.get(uuid));
+        apply(s -> internalUpdateCourseTemplate(uuid, name, optionalImageURL, tags));
+        return getCourseTemplateById(uuid);
+    }
+
+    @Override
+    public Void internalUpdateCourseTemplate(UUID uuid, String name, URL optionalImageURL,
+            ArrayList<String> tags) {
+        CourseTemplate existingCourseTemplate = courseTemplatesById.get(uuid);
+        CourseTemplateImpl courseTemplate = new CourseTemplateImpl(uuid, name,
+                existingCourseTemplate.getMarkTemplates(), existingCourseTemplate.getWaypointTemplates(),
+                existingCourseTemplate.getAssociatedRoles(), optionalImageURL,
+                existingCourseTemplate.getRepeatablePart());
+        courseTemplate.setTags(tags);
+
+        mongoObjectFactory.storeCourseTemplate(courseTemplate);
+        courseTemplatesById.put(courseTemplate.getId(), courseTemplate);
+        return null;
+    }
+
+    @Override
     public Void internalCreateCourseTemplate(UUID idOfNewCourseTemplate, String courseTemplateName,
             Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
             Map<MarkTemplate, String> associatedRoles, RepeatablePart optionalRepeatablePart, Iterable<String> tags,
             URL optionalImageURL) {
         final CourseTemplateImpl courseTemplate = new CourseTemplateImpl(idOfNewCourseTemplate, courseTemplateName,
-                marks,
-                waypoints, associatedRoles, optionalImageURL, optionalRepeatablePart);
+                marks, waypoints, associatedRoles, optionalImageURL, optionalRepeatablePart);
         courseTemplate.setTags(tags);
         mongoObjectFactory.storeCourseTemplate(courseTemplate);
         courseTemplatesById.put(courseTemplate.getId(), courseTemplate);
