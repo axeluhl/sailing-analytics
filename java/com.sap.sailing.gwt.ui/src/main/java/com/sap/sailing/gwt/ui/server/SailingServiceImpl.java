@@ -9468,6 +9468,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 waypointTemplate.getPassingInstruction());
     }
 
+    @Override
+    public void removeCourseTemplate(UUID uuid) {
+        getSharedSailingData().deleteCourseTemplate(getSharedSailingData().getCourseTemplateById(uuid));
+    }
+
     private WaypointTemplate convertToWaypointTemplate(WaypointTemplateDTO waypointTemplate, final MarkPairTemplateFactory markPairTemplateFactory) {
         final List<MarkTemplate> resolvedMarkTemplates = waypointTemplate.getMarkTemplatesForControlPoint().stream()
                 .map(t -> getSharedSailingData().getMarkTemplateById(t.getUuid())).collect(Collectors.toList());

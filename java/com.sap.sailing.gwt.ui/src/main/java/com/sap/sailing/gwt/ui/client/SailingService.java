@@ -1199,4 +1199,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     Iterable<CourseTemplateDTO> getCourseTemplates();
 
     CourseTemplateDTO createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate);
+
+    void removeCourseTemplate(UUID uuid);
 }
