@@ -80,6 +80,11 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
         return marks;
     }
 
+    @Override
+    public Iterable<WaypointTemplate> getWaypointTemplates() {
+        return waypoints;
+    }
+
     // TODO move to CourseTemplateConfigurations
     @Override
     public Iterable<WaypointTemplate> getWaypointTemplates(int numberOfLaps) {

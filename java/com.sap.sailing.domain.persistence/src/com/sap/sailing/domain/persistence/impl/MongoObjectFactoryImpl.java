@@ -1943,7 +1943,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
         // store waypoint templates
         final BasicDBList waypointTemplates = new BasicDBList();
-        for (WaypointTemplate waypointTemplate : courseTemplate.getWaypointTemplates(1)) {
+        for (WaypointTemplate waypointTemplate : courseTemplate.getWaypointTemplates()) {
             BasicDBObject waypointTemplateObject = storeWaypointTemplate(waypointTemplate);
             waypointTemplates.add(waypointTemplateObject);
         }

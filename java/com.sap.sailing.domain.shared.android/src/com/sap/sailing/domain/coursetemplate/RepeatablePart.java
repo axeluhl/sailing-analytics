@@ -28,19 +28,13 @@ public interface RepeatablePart {
     int getZeroBasedIndexOfRepeatablePartEnd();
 
     /**
-     * From the {@code sequenceWithRepeatablePart} a sequence is created with the number of laps based on the
-     * {@link #getZeroBasedIndexOfRepeatablePartStart()} and {@link #getZeroBasedIndexOfRepeatablePartEnd()} of this
-     * Repeatable part. The sequence is constructed using the following algorithm:
-     * <ul>
-     * <li>Part with 0<= index < {@link #getZeroBasedIndexOfRepeatablePartStart()}. In case,
-     * {@link #getZeroBasedIndexOfRepeatablePartStart()} == 0, this part is empty.</li>
-     * <li>Part with {@link #getZeroBasedIndexOfRepeatablePartStart()} <= index <=
-     * {@link #getZeroBasedIndexOfRepeatablePartEnd()}. In case, {@link #getZeroBasedIndexOfRepeatablePartStart()} ==
-     * {@link #getZeroBasedIndexOfRepeatablePartEnd()}, this part is just one item having the index of both, start and
-     * end.</li>
-     * <li>Part with {@link #getZeroBasedIndexOfRepeatablePartEnd()} < index <= last entry. In case,
-     * {@link #getZeroBasedIndexOfRepeatablePartEnd()} == last entry, this part is empty.</li>
-     * </ul>
+     * Returns a sequence of waypoints (T) that can be use to construct a course. If this course template
+     * defines a repeatable waypoint sub-sequence, the {@code numberOfLaps} parameter is used to decide how many times
+     * to repeat this sub-sequence. Typically, the repeatable sub-sequence will be repeated one times fewer than the
+     * {@code numberOfLaps}. For example, in a typical windward-leeward "L" course we would have
+     * {@code Start/Finish, [1, 4p/4s], 1, Start/Finish}. For an "L1" course with only one lap, we'd like to have
+     * {@code Start/Finish, 1, Start/Finish}, so the repeatable sub-sequence, enclosed by the brackets in the example
+     * above, will occur zero times. For an "L2" the repeatable sub-sequence will occur once, and so on.
      * 
      * @throws IllegalArgumentException
      *             in case the given {@code sequenceWithRepeatablePart} contains less or equal elements to
@@ -63,13 +57,13 @@ public interface RepeatablePart {
             result.add(sequenceWithRepeatablePartAsList.get(i));
         }
         // Repeatable part of the sequence
-        for (int lap = 0; lap < laps; lap++) {
-            for (int i = zeroBasedIndexOfRepeatablePartStart; i <= zeroBasedIndexOfRepeatablePartEnd; i++) {
+        for (int lap = 1; lap < laps; lap++) {
+            for (int i = zeroBasedIndexOfRepeatablePartStart; i < zeroBasedIndexOfRepeatablePartEnd; i++) {
                 result.add(sequenceWithRepeatablePartAsList.get(i));
             }
         }
         // Non-repeatable end of the sequence
-        for (int i = zeroBasedIndexOfRepeatablePartEnd + 1; i < sequenceLength; i++) {
+        for (int i = zeroBasedIndexOfRepeatablePartEnd; i < sequenceLength; i++) {
             result.add(sequenceWithRepeatablePartAsList.get(i));
         }
         return result;
@@ -87,7 +81,7 @@ public interface RepeatablePart {
         final int zeroBasedIndexOfRepeatablePartEnd = getZeroBasedIndexOfRepeatablePartEnd();
 
         final int sequenceLength = Util.size(sequenceWithRepeatablePart);
-        if (sequenceLength <= zeroBasedIndexOfRepeatablePartEnd) {
+        if (sequenceLength < zeroBasedIndexOfRepeatablePartEnd) {
             throw new IllegalArgumentException("Repeatable part (" + getZeroBasedIndexOfRepeatablePartStart() + ", "
                     + zeroBasedIndexOfRepeatablePartEnd + ") is out of range for sequence of length " + sequenceLength);
         }

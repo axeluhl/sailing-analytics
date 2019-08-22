@@ -53,7 +53,7 @@ public class CourseTemplateJsonSerializer implements JsonSerializer<CourseTempla
         result.put(FIELD_ALL_MARK_TEMPLATES, allMarkTemplates);
         
         final JSONArray waypoints = new JSONArray();
-        courseTemplate.getWaypointTemplates(1).forEach(wp -> {
+        courseTemplate.getWaypointTemplates().forEach(wp -> {
             final JSONObject waypointEntry = new JSONObject();
             
             waypointEntry.put(FIELD_PASSING_INSTRUCTION, wp.getPassingInstruction().name());

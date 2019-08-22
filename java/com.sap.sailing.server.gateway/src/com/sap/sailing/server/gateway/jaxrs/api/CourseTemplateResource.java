@@ -90,7 +90,7 @@ public class CourseTemplateResource extends AbstractSailingServerResource {
                 .deserialize((JSONObject) parsedObject);
         final CourseTemplate createdCourseTemplate = getSharedSailingData().createCourseTemplate(
                 deserializedCourseTemplate.getName(), deserializedCourseTemplate.getMarkTemplates(),
-                deserializedCourseTemplate.getWaypointTemplates(1), deserializedCourseTemplate.getAssociatedRoles(),
+                deserializedCourseTemplate.getWaypointTemplates(), deserializedCourseTemplate.getAssociatedRoles(),
                 deserializedCourseTemplate.getRepeatablePart(), deserializedCourseTemplate.getTags(),
                 deserializedCourseTemplate.getOptionalImageURL());
         final JSONObject serializedMarkedProperties = courseTemplateSerializer.serialize(createdCourseTemplate);

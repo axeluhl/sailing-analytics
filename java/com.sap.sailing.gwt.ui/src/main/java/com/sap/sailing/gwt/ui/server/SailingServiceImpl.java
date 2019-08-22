@@ -9434,7 +9434,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final List<MarkTemplateDTO> convertedMarkTemplates = StreamSupport.stream(courseTemplate.getMarkTemplates().spliterator(), false)
                 .map(this::convertToMarkTemplateDTO).collect(Collectors.toList());
         final List<WaypointTemplateDTO> convertedWaypointTemplates = StreamSupport
-                .stream(courseTemplate.getWaypointTemplates(1).spliterator(), false)
+                .stream(courseTemplate.getWaypointTemplates().spliterator(), false)
                 .map(this::convertToWaypointTemplateDTO).collect(Collectors.toList());
         return new CourseTemplateDTO(courseTemplate.getId(), courseTemplate.getName(),
                 convertedMarkTemplates,
