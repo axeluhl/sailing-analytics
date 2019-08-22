@@ -1921,7 +1921,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         final Document result = new Document();
 
         // store master data
-        result.put(FieldNames.COURSE_TEMPLATE_ID.name(), courseTemplate.getId());
+        result.put(FieldNames.COURSE_TEMPLATE_ID.name(), courseTemplate.getId().toString());
         result.put(FieldNames.COURSE_TEMPLATE_NAME.name(), courseTemplate.getName());
         final URL optionalImageURL = courseTemplate.getOptionalImageURL();
         if (optionalImageURL != null) {

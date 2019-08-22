@@ -36,7 +36,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoException;
 import com.mongodb.MongoNamespace;
@@ -3137,23 +3136,23 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final UUID id = UUID.fromString(dbObject.getString(FieldNames.COURSE_TEMPLATE_ID.name()));
         final String name = dbObject.getString(FieldNames.COURSE_TEMPLATE_NAME.name());
         final String imageURLString = dbObject.getString(FieldNames.COURSE_TEMPLATE_IMAGE_URL.name());
-        URL optionaImageURL = null;
+        URL optionalImageURL = null;
         if (imageURLString != null) {
             try {
-                optionaImageURL = new URL(imageURLString);
+                optionalImageURL = new URL(imageURLString);
             } catch (MalformedURLException e) {
                 logger.warning(String.format("Error parsing image URL %s for course template %s", imageURLString, id));
             }
         }
         
         // load mark templates and associated roles
-        final BasicDBList markTemplatesList = dbObject.get(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATES.name(),
-                BasicDBList.class);
+        final ArrayList<?> markTemplatesList = dbObject.get(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATES.name(),
+                ArrayList.class);
         final Set<MarkTemplate> markTemplates = new HashSet<>();
         final Map<MarkTemplate, String> associatedRoles = new HashMap<>();
         for (Object entry : markTemplatesList) {
-            if (entry instanceof BasicDBObject) {
-                final BasicDBObject entryObject = (BasicDBObject) entry;
+            if (entry instanceof Document) {
+                final Document entryObject = (Document) entry;
                 final UUID markTemplateUUID = UUID.fromString(entryObject.getString(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ID.name()));
                 final MarkTemplate markTemplate = markTemplateResolver.apply(
                         markTemplateUUID);
@@ -3164,24 +3163,27 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         associatedRoles.put(markTemplate, roleOrNull);
                     }
                 } else {
-                    logger.warning(
-                            String.format("Could not resolve MarkTemplate with id %s for CourseTemplate %s.",
-                                    markTemplateUUID, id));
+                    logger.warning(String.format("Could not resolve MarkTemplate with id %s for CourseTemplate %s.",
+                            markTemplateUUID, id));
                 }
             } else {
-                logger.warning(
-                        String.format("Unexpected entry for MarkTemplate found for CourseTemplate %s.", id));
+                logger.warning(String.format("Unexpected entry for MarkTemplate found for CourseTemplate %s.", id));
             }
         }
         
         // load waypoints
-        final BasicDBList waypointTemplatesList = dbObject.get(FieldNames.COURSE_TEMPLATE_WAYPOINTS.name(),
-                BasicDBList.class);
+        final ArrayList<?> waypointTemplatesList = dbObject.get(FieldNames.COURSE_TEMPLATE_WAYPOINTS.name(),
+                ArrayList.class);
         final List<WaypointTemplate> waypointTemplates = new ArrayList<>();
         final MarkPairTemplateFactory markPairTemplateFactory = new MarkPairTemplateFactory();
         for (final Object o : waypointTemplatesList) {
-            final BasicDBObject bdo = (BasicDBObject) o;
+            if (o instanceof Document) {
+
+                final Document bdo = (Document) o;
             waypointTemplates.add(loadWaypointTemplate(bdo, markTemplateResolver, markPairTemplateFactory::create));
+            } else {
+                logger.warning(String.format("Could not load document  for CourseTemplate %s.", id));
+            }
         }
 
         // load repeatable parts
@@ -3196,18 +3198,18 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
 
         // load tags
-        final BasicDBList tagsDbObject = (BasicDBList) dbObject.get(FieldNames.COURSE_TEMPLATE_TAGS.name());
+        final ArrayList<?> tagsDbObject = dbObject.get(FieldNames.COURSE_TEMPLATE_TAGS.name(), ArrayList.class);
         final List<String> tags = new ArrayList<>();
         tagsDbObject.forEach(t -> tags.add(t.toString()));
 
 
         final CourseTemplateImpl courseTemplateImpl = new CourseTemplateImpl(id, name, markTemplates, waypointTemplates,
-                associatedRoles, optionaImageURL, optionalRepeatablePart);
+                associatedRoles, optionalImageURL, optionalRepeatablePart);
         courseTemplateImpl.setTags(tags);
         return courseTemplateImpl;
     }
 
-    private WaypointTemplate loadWaypointTemplate(BasicDBObject bdo,
+    private WaypointTemplate loadWaypointTemplate(Document bdo,
             Function<UUID, MarkTemplate> markTemplateResolver,
             BiFunction<String, List<MarkTemplate>, MarkPairTemplate> markPairResolver) {
         // load passing instruction
@@ -3218,12 +3220,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final String name = bdo.getString(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_NAME.name());
 
         // load mark templates for control point
-        final BasicDBList markTemplatesDbList = (BasicDBList) bdo
-                .get(FieldNames.WAYPOINT_TEMPLATE_MARK_TEMPLATES.name());
+        final ArrayList<?> markTemplateUUIDsDbList = bdo.get(FieldNames.WAYPOINT_TEMPLATE_MARK_TEMPLATES.name(),
+                ArrayList.class);
         boolean hasParsingError = false;
 
         final List<MarkTemplate> markTemplates = new ArrayList<>();
-        for (Object obj : markTemplatesDbList) {
+        for (Object obj : markTemplateUUIDsDbList) {
             final MarkTemplate markTemplate = markTemplateResolver.apply(UUID.fromString(obj.toString()));
             if (markTemplate == null) {
                 logger.warning(String.format("Could not resolve MarkTemplate with id %s for WaypointTemplate.",
