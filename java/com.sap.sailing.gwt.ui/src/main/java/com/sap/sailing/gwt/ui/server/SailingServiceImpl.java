@@ -9529,4 +9529,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
         return result;
     }
+
+    @Override
+    public void removeMarkProperties(UUID uuid) {
+        getSharedSailingData().deleteMarkProperties(getSharedSailingData().getMarkPropertiesById(uuid));
+    }
 }
