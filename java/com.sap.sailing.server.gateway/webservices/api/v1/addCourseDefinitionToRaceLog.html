@@ -12,7 +12,7 @@
 <h2>URL: /api/v1/mark/addCourseDefinitionToRaceLog</h2>
 
 <b>Description:</b>
-<p>Allows to create a Coursedefinition that is then inserted into the racelog</p>
+<p>Allows to create a Course definition that is then inserted into the race log of a specified race</p>
 <br/>
 <table>
     <tr>
@@ -40,6 +40,8 @@
                 <li>marks (required): List of UUIDs of the relevant marks. May specify one or two marks. Marks with the given ID are required to already exist in the specific regatta.</li>
             </ul>
         </td>
+    </tr>
+    <tr>
         <td>Optional parameters:</td>
         <td>courseOriginatingTemplateId: UUID of an existing course template that is defined to be the source of the control point sequence.
         </td>
