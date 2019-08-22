@@ -18,6 +18,8 @@ public class MarkImpl extends NamedImpl implements Mark {
     private final MarkType type;
     private final String shortName;
     private final Serializable id;
+    private final Serializable originatingMarkTemplateId;
+    private final Serializable originatingMarkPropertiesId;
 
     public MarkImpl(String name) {
         this(name, name);
@@ -28,10 +30,11 @@ public class MarkImpl extends NamedImpl implements Mark {
     }
 
     public MarkImpl(Serializable id, String name, MarkType type, Color color, String shape, String pattern) {
-        this(id, name, /* use name as short name, too, by default */ name, type, color, shape, pattern);
+        this(id, name, /* use name as short name, too, by default */ name, type, color, shape, pattern, null, null);
     }
-    
-    public MarkImpl(Serializable id, String name, String shortName, MarkType type, Color color, String shape, String pattern) {
+
+    public MarkImpl(Serializable id, String name, String shortName, MarkType type, Color color, String shape,
+            String pattern, Serializable originatingMarkTemplateId, Serializable originatingMarkPropertiesId) {
         super(name);
         this.shortName = shortName;
         this.id = id;
@@ -39,6 +42,8 @@ public class MarkImpl extends NamedImpl implements Mark {
         this.color = color;
         this.shape = shape;
         this.pattern = pattern;
+        this.originatingMarkTemplateId = originatingMarkTemplateId;
+        this.originatingMarkPropertiesId = originatingMarkPropertiesId;
     }
 
     @Override
@@ -82,6 +87,16 @@ public class MarkImpl extends NamedImpl implements Mark {
     @Override
     public String getShortName() {
         return shortName;
+    }
+
+    @Override
+    public Serializable getOriginatingMarkTemplateIdOrNull() {
+        return originatingMarkTemplateId;
+    }
+
+    @Override
+    public Serializable getOriginatingMarkPropertiesIdOrNull() {
+        return originatingMarkPropertiesId;
     }
 
     public String toString() {

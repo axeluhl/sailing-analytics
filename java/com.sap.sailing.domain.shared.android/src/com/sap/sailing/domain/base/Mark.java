@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.base;
 
-import java.util.UUID;
+import java.io.Serializable;
 
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sse.common.IsManagedByCache;
@@ -14,9 +14,8 @@ import com.sap.sse.common.IsManagedByCache;
  * 
  */
 public interface Mark extends CommonMarkProperties, ControlPoint, IsManagedByCache<SharedDomainFactory> {
-    
-    default UUID getMarkTemplateIdOrNull() {
-        // FIXME implement handling of mark template references
-        return null;
-    }
+
+    Serializable getOriginatingMarkTemplateIdOrNull();
+
+    Serializable getOriginatingMarkPropertiesIdOrNull();
 }
