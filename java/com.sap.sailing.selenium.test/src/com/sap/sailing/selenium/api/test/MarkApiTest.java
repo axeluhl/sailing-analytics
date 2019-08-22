@@ -7,6 +7,8 @@ import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
 import static java.lang.System.currentTimeMillis;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.UUID;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -57,7 +59,20 @@ public class MarkApiTest extends AbstractSeleniumTest {
         final Regatta regatta = regattaApi.getRegatta(ctx, EVENT_NAME);
         final Mark mark = markApi.addMarkToRegatta(ctx, regatta.getName(), "Startboat");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, EVENT_NAME, null, 1)[0];
-        markApi.addMarkFix(ctx, EVENT_NAME, race.getRaceName(), "Default", mark.getMarkId(), 9.12, .599,
+        markApi.addMarkFix(ctx, EVENT_NAME, race.getRaceName(), "Default", mark.getMarkId(), /* markTemplateId */ null,
+                /* markPropertiesId */ null, 9.12, .599, currentTimeMillis());
+    }
+
+    @Test
+    public void testAddMarkFixWithMarkTemplateAndMarkProperties() {
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+
+        eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "default");
+        final Regatta regatta = regattaApi.getRegatta(ctx, EVENT_NAME);
+        final Mark mark = markApi.addMarkToRegatta(ctx, regatta.getName(), "Startboat");
+        final RaceColumn race = regattaApi.addRaceColumn(ctx, EVENT_NAME, null, 1)[0];
+        markApi.addMarkFix(ctx, EVENT_NAME, race.getRaceName(), "Default", mark.getMarkId(),
+                /* markTemplateId */ UUID.randomUUID(), /* markPropertiesId */ UUID.randomUUID(), 9.12, .599,
                 currentTimeMillis());
     }
 

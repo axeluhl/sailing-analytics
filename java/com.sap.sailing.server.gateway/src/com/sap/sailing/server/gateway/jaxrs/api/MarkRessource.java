@@ -83,6 +83,8 @@ public class MarkRessource extends AbstractSailingServerResource {
     private static final String REGATTA_NAME = "regattaName";
     private static final String MARK_NAME = "markName";
     private static final String MARK_SHORT_NAME = "markShortName";
+    private static final String MARK_ORIGINATING_MARK_TEMPLATE_ID = "markOriginatingMarkTemplateId";
+    private static final String MARK_ORIGINATING_MARK_PROPERTIES_ID = "markOriginatingMarkPropertiesId";
 
     @POST
     @Path("/addMarkToRegatta")
@@ -93,8 +95,17 @@ public class MarkRessource extends AbstractSailingServerResource {
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
         String markName = (String) requestObject.get(MARK_NAME);
         String markShortName = (String) requestObject.get(MARK_SHORT_NAME);
+        String originatingMarkTemplateIdAsString = (String) requestObject.get(MARK_ORIGINATING_MARK_TEMPLATE_ID);
+        String originatingMarkPropertiesIdAsString = (String) requestObject.get(MARK_ORIGINATING_MARK_PROPERTIES_ID);
         UUID markId = UUID.randomUUID();
-        Mark mark = getService().getBaseDomainFactory().getOrCreateMark(markId, markName, markShortName);
+        UUID originatingMarkTemplateId = originatingMarkTemplateIdAsString != null
+                ? UUID.fromString(originatingMarkTemplateIdAsString)
+                : null;
+        UUID originatingMarkPropertiesId = originatingMarkPropertiesIdAsString != null
+                ? UUID.fromString(originatingMarkPropertiesIdAsString)
+                : null;
+        Mark mark = getService().getBaseDomainFactory().getOrCreateMark(markId, markName, markShortName,
+                originatingMarkTemplateId, originatingMarkPropertiesId);
         String regattaName = (String) requestObject.get(REGATTA_NAME);
         Regatta regatta = getService().getRegattaByName(regattaName);
         Response response;
