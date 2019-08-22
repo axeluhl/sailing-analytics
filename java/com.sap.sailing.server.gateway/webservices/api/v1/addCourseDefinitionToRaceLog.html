@@ -24,13 +24,32 @@
         <td>Json</td>
     </tr>
     <tr>
+        <td>Intput format:</td>
+        <td>Json</td>
+    </tr>
+    <tr>
         <td>Request method:</td>
         <td>POST</td>
     </tr>
     <tr>
+        <td>Mandatory parameters:</td>
+        <td>leaderboardName, fleetName, raceColumnName: the definition of the tracked race for which to set the course<br>
+            controlPoints: An ordered sequence of control points that form the layout of the course. For each control point, the following properties can be specified:
+            <ul>
+                <li>passingInstruction (required): For single mark waypoints, this can be one of [None, Port, Starboard, Single_Unknown, FixedBearing]. For mark pairs, this can be one of [None, Gate, Line, Offset].</li>
+                <li>marks (required): List of UUIDs of the relevant marks. May specify one or two marks. Marks with the given ID are required to already exist in the specific regatta.</li>
+            </ul>
+        </td>
+        <td>Optional parameters:</td>
+        <td>courseOriginatingTemplateId: UUID of an existing course template that is defined to be the source of the control point sequence.
+        </td>
+    </tr>
+    <tr>
         <td>Examples:</td>
         <td>
-            Request: {
+            Request:
+            <pre>
+            {
                 "fleetName":"Default",
                 "leaderboardName":"test",
                 "courseOriginatingTemplateId":"dc77e3d1-d405-435e-8699-ce7245a6fd4a",
@@ -74,6 +93,7 @@
                     }
                 ]
             }
+            </pre>
             Response: Status 200 if changed
         </td>
     </tr>
