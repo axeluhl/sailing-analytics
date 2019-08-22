@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,6 +43,7 @@ public class CourseImpl extends RenamableImpl implements Course {
     private final List<Waypoint> waypoints;
     private final Map<Waypoint, Integer> waypointIndexes;
     private final List<Leg> legs;
+    private final UUID originatingCourseTemplateId;
     private transient Set<CourseListener> listeners;
     private transient NamedReentrantReadWriteLock lock;
     
@@ -53,7 +55,12 @@ public class CourseImpl extends RenamableImpl implements Course {
     private final Serializable updateMonitor;
     
     public CourseImpl(String name, Iterable<Waypoint> waypoints) {
+        this(name, waypoints, /* originatingCourseTemplateId */ null);
+    }
+
+    public CourseImpl(String name, Iterable<Waypoint> waypoints, UUID originatingCourseTemplateId) {
         super(name);
+        this.originatingCourseTemplateId = originatingCourseTemplateId;
         updateMonitor = ""+new Random().nextDouble(); 
         lock = new NamedReentrantReadWriteLock("lock for CourseImpl "+name,
                 /* fair */ true); // if non-fair, course update may need to wait forever for many concurrent readers
@@ -387,5 +394,10 @@ public class CourseImpl extends RenamableImpl implements Course {
                 }
             }
         }
+    }
+
+    @Override
+    public UUID getOriginatingCourseTemplateIdOrNull() {
+        return originatingCourseTemplateId;
     }
 }

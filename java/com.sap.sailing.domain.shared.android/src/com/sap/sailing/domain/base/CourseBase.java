@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.sap.sse.common.Named;
 
@@ -47,4 +48,10 @@ public interface CourseBase extends Named {
     void removeWaypoint(int zeroBasedPosition);
 
     Leg getFirstLeg();
+
+    /**
+     * @return the id of the course template that was used to create this course.
+     */
+    UUID getOriginatingCourseTemplateIdOrNull();
+
 }

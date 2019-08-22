@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseBase;
@@ -15,9 +16,16 @@ public class CourseDataImpl extends NamedImpl implements CourseBase {
     
     private final List<Waypoint> waypoints;
 
+    private final UUID originatingCourseTemplateId; 
+
     public CourseDataImpl(String name) {
+        this(name, null);
+    }
+
+    public CourseDataImpl(String name, UUID originatingCourseTemplateId) {
         super(name);
         this.waypoints = new ArrayList<Waypoint>();
+        this.originatingCourseTemplateId = originatingCourseTemplateId;
     }
 
     @Override
@@ -71,6 +79,11 @@ public class CourseDataImpl extends NamedImpl implements CourseBase {
     @Override
     public Leg getFirstLeg() {
         return null;
+    }
+
+    @Override
+    public UUID getOriginatingCourseTemplateIdOrNull() {
+        return originatingCourseTemplateId;
     }
 
 }
