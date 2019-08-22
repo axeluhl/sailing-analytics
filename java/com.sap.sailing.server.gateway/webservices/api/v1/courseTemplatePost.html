@@ -46,7 +46,12 @@
     </tr>
     <tr>
         <td>Optional parameters:</td>
-        <td>TBD
+        <td>optionalImageURL: URL pointing to the desired course template image<br>
+            optionalRepeatablePart: JSON object that if given defines the part of the sequence that can be repeated in lap. The following properties must be given:
+            <ul>
+                <li>zeroBasedIndexOfRepeatablePartStart (required): offset of the first waypoint to include in the repeatable part. Must not be out of range for 0 &lt;= i &lt; count(waypoints).</li>
+                <li>zeroBasedIndexOfRepeatablePartEnd (required): offset of the last waypoint to include in the repeatable part. Must not be out of range for 0 &lt;= i &lt; count(waypoints) and must be &gt;= zeroBasedIndexOfRepeatablePartStart.</li>
+            </ul>
         </td>
     </tr>
     <tr>
@@ -57,9 +62,10 @@
         <td>Example:</td>
         <td><a href="http://www.sapsailing.com/sailingserver/api/v1/coursetemplates">http://www.sapsailing.com/sailingserver/api/v1/coursetemplates</a><br>
             Example payload:<br>
-            <code>
+            <pre>
 {
     "name": "my-special-course-template",
+    "optionalImageURL": "http:\/\/www.sapsailing.com\/my-course-image.jpeg",
     "allMarkTemplates": [
         {
             "id": "9e6061d1-9217-4624-b464-8e2749d6e1c8",
@@ -118,9 +124,13 @@
             ]
         }
     ],
+    "optionalRepeatablePart": {
+        "zeroBasedIndexOfRepeatablePartStart": 1,
+        "zeroBasedIndexOfRepeatablePartEnd": 2
+    },
     "tags": ["tag1", "tag2"]
 }
-</code>
+</pre>
         </td>
     </tr>
 </table>
