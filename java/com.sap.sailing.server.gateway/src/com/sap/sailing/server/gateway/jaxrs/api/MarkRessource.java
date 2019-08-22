@@ -85,6 +85,7 @@ public class MarkRessource extends AbstractSailingServerResource {
     private static final String MARK_SHORT_NAME = "markShortName";
     private static final String MARK_ORIGINATING_MARK_TEMPLATE_ID = "markOriginatingMarkTemplateId";
     private static final String MARK_ORIGINATING_MARK_PROPERTIES_ID = "markOriginatingMarkPropertiesId";
+    private static final String COURSE_ORIGINATING_TEMPLATE_ID = "courseOriginatingTemplateId";
 
     @POST
     @Path("/addMarkToRegatta")
@@ -188,6 +189,8 @@ public class MarkRessource extends AbstractSailingServerResource {
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
         String leaderboardName = (String) requestObject.get(LEADERBOARD_NAME);
+        String originatingCourseTemplateIdAsString = (String) requestObject.get(COURSE_ORIGINATING_TEMPLATE_ID);
+        UUID originatingCourseTemplateId = originatingCourseTemplateIdAsString != null ? UUID.fromString(originatingCourseTemplateIdAsString) : null;
         SecurityUtils.getSubject().checkPermission(
                 SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
                         Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
@@ -233,7 +236,7 @@ public class MarkRessource extends AbstractSailingServerResource {
                         passing));
             }
         }
-        Course course = new CourseImpl(courseName, lastPublishedCourse.getWaypoints());
+        Course course = new CourseImpl(courseName, lastPublishedCourse.getWaypoints(), originatingCourseTemplateId);
         try {
             course.update(controlPoints, getService().getBaseDomainFactory());
         } catch (Exception e) {
