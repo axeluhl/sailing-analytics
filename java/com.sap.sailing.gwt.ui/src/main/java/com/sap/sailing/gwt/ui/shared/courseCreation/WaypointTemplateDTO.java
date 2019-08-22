@@ -13,16 +13,18 @@ public class WaypointTemplateDTO implements Serializable{
     private ArrayList<MarkTemplateDTO> markTemplatesForControlPoint = new ArrayList<>();
 
     private String passingInstruction;
+    private String name;
 
     public WaypointTemplateDTO() {
 
     }
 
-    public WaypointTemplateDTO(Iterable<MarkTemplateDTO> markTemplatesForControlPoint,
+    public WaypointTemplateDTO(String name, Iterable<MarkTemplateDTO> markTemplatesForControlPoint,
             PassingInstruction passingInstruction) {
         super();
         Util.addAll(markTemplatesForControlPoint, this.markTemplatesForControlPoint);
         this.passingInstruction = passingInstruction.name();
+        this.name = name;
     }
 
     public ArrayList<MarkTemplateDTO> getMarkTemplatesForControlPoint() {
@@ -31,6 +33,10 @@ public class WaypointTemplateDTO implements Serializable{
 
     public PassingInstruction getPassingInstruction() {
         return PassingInstruction.valueOf(passingInstruction);
+    }
+
+    public String getName() {
+        return name;
     }
 
 }

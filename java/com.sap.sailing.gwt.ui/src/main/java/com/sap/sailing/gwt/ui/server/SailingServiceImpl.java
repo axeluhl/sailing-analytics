@@ -9459,7 +9459,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private WaypointTemplateDTO convertToWaypointTemplateDTO(WaypointTemplate waypointTemplate) {
-        return new WaypointTemplateDTO(
+        return new WaypointTemplateDTO(waypointTemplate.getControlPointTemplate().getName(),
                 StreamSupport.stream(waypointTemplate.getControlPointTemplate().getMarks().spliterator(), false)
                         .map(this::convertToMarkTemplateDTO).collect(Collectors.toList()),
                 waypointTemplate.getPassingInstruction());
@@ -9467,7 +9467,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     private WaypointTemplate convertToWaypointTemplate(WaypointTemplateDTO waypointTemplate) {
         return new WaypointTemplateImpl(
-                new ControlPointTemplateImpl("", waypointTemplate.getMarkTemplatesForControlPoint().stream()
+                new ControlPointTemplateImpl(waypointTemplate.getName(),
+                        waypointTemplate.getMarkTemplatesForControlPoint().stream()
                         .map(this::convertToMarkTemplate).collect(Collectors.toList())),
                 waypointTemplate.getPassingInstruction());
     }

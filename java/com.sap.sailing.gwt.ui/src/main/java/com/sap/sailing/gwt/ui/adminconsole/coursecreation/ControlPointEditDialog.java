@@ -1,11 +1,16 @@
 package com.sap.sailing.gwt.ui.adminconsole.coursecreation;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.Optional;
 
+import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.ControlPointEditDialog.ControlPointEditDTO;
@@ -18,10 +23,15 @@ public class ControlPointEditDialog extends DataEntryDialog<ControlPointEditDTO>
     private final StringMessages stringMessages;
 
     private final SuggestBox suggestMarkTemplate1;
-    private final SuggestBox suggestMarkTemplate2Optional;
-    private final SuggestBox suggestPassingInstruction;
+    private final SuggestBox suggestMarkTemplate2;
+
+    private final ValueListBox<PassingInstruction> markPassingInstructionChooser;
+    private final TextBox textControlPointName;
 
     private MarkTemplateSuggestOracle markTemplateOracle;
+
+    private Label labelMarkTemplate2;
+    private Label labelControlPointName;
 
     public ControlPointEditDialog(final SailingServiceAsync sailingServiceAsync, final StringMessages stringMessages,
             ControlPointEditDTO courseTemplateToEdit, DialogCallback<ControlPointEditDTO> callback) {
@@ -48,21 +58,45 @@ public class ControlPointEditDialog extends DataEntryDialog<ControlPointEditDTO>
         this.ensureDebugId("CourseTemplateToEditEditDialog");
         this.stringMessages = stringMessages;
 
+        labelMarkTemplate2 = new Label(stringMessages.markTemplate2());
+        labelControlPointName = new Label(stringMessages.name());
+
         markTemplateOracle = new MarkTemplateSuggestOracle(sailingServiceAsync, stringMessages);
         suggestMarkTemplate1 = new SuggestBox(markTemplateOracle);
-        suggestMarkTemplate2Optional = new SuggestBox(markTemplateOracle);
+        suggestMarkTemplate2 = new SuggestBox(markTemplateOracle);
 
-        suggestPassingInstruction = new SuggestBox(new PassingInstructionSuggestOracle());
-
-        suggestPassingInstruction.getValueBox().addChangeHandler(e -> validateAndUpdate());
-        suggestPassingInstruction.getValueBox().addKeyUpHandler(e -> validateAndUpdate());
-        suggestPassingInstruction.getValueBox().addBlurHandler(e -> validateAndUpdate());
-        suggestMarkTemplate2Optional.getValueBox().addChangeHandler(e -> validateAndUpdate());
-        suggestMarkTemplate2Optional.getValueBox().addKeyUpHandler(e -> validateAndUpdate());
-        suggestMarkTemplate2Optional.getValueBox().addBlurHandler(e -> validateAndUpdate());
+        suggestMarkTemplate2.getValueBox().addChangeHandler(e -> validateAndUpdate());
+        suggestMarkTemplate2.getValueBox().addKeyUpHandler(e -> validateAndUpdate());
+        suggestMarkTemplate2.getValueBox().addBlurHandler(e -> validateAndUpdate());
         suggestMarkTemplate1.getValueBox().addChangeHandler(e -> validateAndUpdate());
         suggestMarkTemplate1.getValueBox().addKeyUpHandler(e -> validateAndUpdate());
         suggestMarkTemplate1.getValueBox().addBlurHandler(e -> validateAndUpdate());
+        
+        markPassingInstructionChooser = new ValueListBox<>(new Renderer<PassingInstruction>() {
+            @Override
+            public String render(PassingInstruction object) {
+                return object == null ? "" : object.name();
+            }
+
+            @Override
+            public void render(PassingInstruction object, Appendable appendable) throws IOException {
+                appendable.append(render(object));
+            }
+        });
+
+        textControlPointName = new TextBox();
+        markPassingInstructionChooser.setValue(PassingInstruction.relevantValues()[0]);
+        markPassingInstructionChooser.setAcceptableValues(Arrays.asList(PassingInstruction.relevantValues()));
+        markPassingInstructionChooser.addValueChangeHandler(v -> handlePassingInstructionChange());
+        handlePassingInstructionChange();
+    }
+
+    private void handlePassingInstructionChange() {
+        final boolean doubleMarkPassing = markPassingInstructionChooser.getValue().applicability[0] == 2;
+        suggestMarkTemplate2.setVisible(doubleMarkPassing);
+        labelMarkTemplate2.setVisible(doubleMarkPassing);
+        textControlPointName.setVisible(doubleMarkPassing);
+        validateAndUpdate();
     }
 
     @Override
@@ -72,27 +106,23 @@ public class ControlPointEditDialog extends DataEntryDialog<ControlPointEditDTO>
 
     @Override
     protected ControlPointEditDTO getResult() {
-        PassingInstruction passingInstruction = null;
-        try {
-            passingInstruction = PassingInstruction.valueOfIgnoringCase(suggestPassingInstruction.getValue());
-        } catch (IllegalArgumentException e) {
-            // use null -> fail during validation
-        }
-
         final MarkTemplateDTO markTemplate1 = markTemplateOracle.fromString(suggestMarkTemplate1.getValue());
-        final MarkTemplateDTO markTemplate2 = markTemplateOracle.fromString(suggestMarkTemplate2Optional.getValue());
-        return new ControlPointEditDTO(markTemplate1, markTemplate2, passingInstruction);
+        final MarkTemplateDTO markTemplate2 = markTemplateOracle.fromString(suggestMarkTemplate2.getValue());
+        return new ControlPointEditDTO(markTemplate1, markTemplate2, markPassingInstructionChooser.getValue(),
+                textControlPointName.getText());
     }
 
     @Override
     protected Widget getAdditionalWidget() {
-        final Grid result = new Grid(3, 2);
-        result.setWidget(0, 0, new Label(stringMessages.markTemplate()));
-        result.setWidget(0, 1, suggestMarkTemplate1);
-        result.setWidget(1, 0, new Label(stringMessages.markTemplate2Optional()));
-        result.setWidget(1, 1, suggestMarkTemplate2Optional);
-        result.setWidget(2, 0, new Label(stringMessages.passingInstructions()));
-        result.setWidget(2, 1, suggestPassingInstruction);
+        final Grid result = new Grid(4, 2);
+        result.setWidget(0, 0, new Label(stringMessages.passingInstructions()));
+        result.setWidget(0, 1, markPassingInstructionChooser);
+        result.setWidget(1, 0, new Label(stringMessages.markTemplate()));
+        result.setWidget(1, 1, suggestMarkTemplate1);
+        result.setWidget(2, 0, labelMarkTemplate2);
+        result.setWidget(2, 1, suggestMarkTemplate2);
+        result.setWidget(3, 0, labelControlPointName);
+        result.setWidget(3, 1, textControlPointName);
         return result;
     }
 
@@ -100,15 +130,17 @@ public class ControlPointEditDialog extends DataEntryDialog<ControlPointEditDTO>
         private MarkTemplateDTO markTemplate1;
         private Optional<MarkTemplateDTO> markTemplate2;
         private PassingInstruction passingInstruction;
+        private Optional<String> name;
 
         public ControlPointEditDTO() {
 
         }
 
         public ControlPointEditDTO(MarkTemplateDTO markTemplate1, MarkTemplateDTO markTemplate2,
-                PassingInstruction passingInstruction) {
+                PassingInstruction passingInstruction, String optionalName) {
             super();
             this.markTemplate1 = markTemplate1;
+            this.name = Optional.ofNullable(optionalName);
             this.markTemplate2 = Optional.ofNullable(markTemplate2);
             this.passingInstruction = passingInstruction;
         }
@@ -124,6 +156,11 @@ public class ControlPointEditDialog extends DataEntryDialog<ControlPointEditDTO>
         public PassingInstruction getPassingInstruction() {
             return passingInstruction;
         }
+
+        public Optional<String> getName() {
+            return name;
+        }
+
     }
 
 }
