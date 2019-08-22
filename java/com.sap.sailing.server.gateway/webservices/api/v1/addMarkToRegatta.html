@@ -20,6 +20,10 @@
         <td>REST</td>
     </tr>
     <tr>
+        <td>Intput format:</td>
+        <td>Json</td>
+    </tr>
+    <tr>
         <td>Output format:</td>
         <td>Json</td>
     </tr>
@@ -28,18 +32,37 @@
         <td>POST</td>
     </tr>
     <tr>
+        <td>Mandatory parameters:</td>
+        <td>regattaName: the name of the regatta to add the mark to.<br>
+            markName: the name of the mark to add.
+        </td>
+    </tr>
+    <tr>
+        <td>Optional parameters:</td>
+        <td>markShortName: short name of the mark to create. Defaults to the name if not given.<br>
+            originatingMarkTemplateId: UUID of an existing mark template on which the mark is based on<br>
+            originatingMarkPropertiesId: UUID of existing mark properties on which the mark is based on<br>
+        </td>
+    </tr>
+    <tr>
         <td>Examples:</td>
         <td>
-            Request: {
+            Request:
+            <pre>
+            {
                 "markName":"MyMark",
                 "markShortName":"MM",
-                "markOriginatingMarkTemplateId":"305ffb4b-c23d-42a1-be45-f76a2bad8fab",
-                "markOriginatingMarkPropertiesId":"dc77e3d1-d405-435e-8699-ce7245a6fd4a",
+                "originatingMarkTemplateId":"305ffb4b-c23d-42a1-be45-f76a2bad8fab",
+                "originatingMarkPropertiesId":"dc77e3d1-d405-435e-8699-ce7245a6fd4a",
                 "regattaName":"test"
             }
-            Response: {
+            </pre>
+            Response:
+            <pre>
+            {
                 "markId":uuidOfGeneratedMark
             }
+            </pre>
         </td>
     </tr>
 </table>

@@ -167,8 +167,8 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public Mark getOrCreateMark(Serializable id, String name, String shortName, Serializable originatingMarkTemplateId,
-            Serializable originatingMarkPropertiesId) {
+    public Mark getOrCreateMark(Serializable id, String name, String shortName, UUID originatingMarkTemplateId,
+            UUID originatingMarkPropertiesId) {
         return getOrCreateMark(id, name, shortName, /* type */ null, /* color */ null, /* shape */ null,
                 /* pattern */ null, originatingMarkTemplateId, originatingMarkPropertiesId);
     }
@@ -190,8 +190,8 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
 
     @Override
     public Mark getOrCreateMark(Serializable id, String name, String shortName, MarkType type, Color color,
-            String shape, String pattern, Serializable originatingMarkTemplateId,
-            Serializable originatingMarkPropertiesId) {
+            String shape, String pattern, UUID originatingMarkTemplateId,
+            UUID originatingMarkPropertiesId) {
         Mark result = markCache.get(id);
         if (result == null) {
             result = new MarkImpl(id, name, type, color, shape, pattern, originatingMarkTemplateId,

@@ -2273,10 +2273,13 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String filterCourseTemplateByName();
     String courseTemplates();
     String markTemplate();
-
     String markTemplate2();
-
     String pleaseSelectAValidPassingInstruction();
-
     String pleaseSelectAValidMarkTemplate();
+    String doYouReallyWantToRemoveCourseTemplate(String name);
+    String couldNotRemoveCourseTemplate(String message);
+
+    String doYouReallyWantToRemoveMarkProperties(String name);
+
+    String couldNotRemoveMarkProperties(String message);
 }

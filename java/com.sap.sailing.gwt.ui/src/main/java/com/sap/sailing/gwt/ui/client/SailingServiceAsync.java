@@ -1134,5 +1134,9 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void getCourseTemplates(AsyncCallback<Iterable<CourseTemplateDTO>> asyncCallback);
 
-    void createCourseTemplate(CourseTemplateDTO courseTemplate, AsyncCallback<CourseTemplateDTO> asyncCallback);
+    void createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate, AsyncCallback<CourseTemplateDTO> asyncCallback);
+
+    void removeCourseTemplate(UUID uuid, AsyncCallback<Void> asyncCallback);
+
+    void removeMarkProperties(UUID uuid, AsyncCallback<Void> asyncCallback);
 }

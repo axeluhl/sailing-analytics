@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base.impl;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.UUID;
 
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
@@ -18,8 +19,8 @@ public class MarkImpl extends NamedImpl implements Mark {
     private final MarkType type;
     private final String shortName;
     private final Serializable id;
-    private final Serializable originatingMarkTemplateId;
-    private final Serializable originatingMarkPropertiesId;
+    private final UUID originatingMarkTemplateId;
+    private final UUID originatingMarkPropertiesId;
 
     public MarkImpl(String name) {
         this(name, name);
@@ -30,17 +31,18 @@ public class MarkImpl extends NamedImpl implements Mark {
     }
 
     public MarkImpl(Serializable id, String name, MarkType type, Color color, String shape, String pattern) {
-        this(id, name, /* use name as short name, too, by default */ name, type, color, shape, pattern, null, null);
+        this(id, name, /* use name as short name, too, by default */ name, type, color, shape, pattern,
+                /* originatingMarkTemplateId */ null, /* originatingMarkPropertiesId */ null);
     }
 
     public MarkImpl(Serializable id, String name, MarkType type, Color color, String shape, String pattern,
-            Serializable originatingMarkTemplateId, Serializable originatingMarkPropertiesId) {
+            UUID originatingMarkTemplateId, UUID originatingMarkPropertiesId) {
         this(id, name, /* use name as short name, too, by default */ name, type, color, shape, pattern,
                 originatingMarkTemplateId, originatingMarkPropertiesId);
     }
 
     public MarkImpl(Serializable id, String name, String shortName, MarkType type, Color color, String shape,
-            String pattern, Serializable originatingMarkTemplateId, Serializable originatingMarkPropertiesId) {
+            String pattern, UUID originatingMarkTemplateId, UUID originatingMarkPropertiesId) {
         super(name);
         this.shortName = shortName;
         this.id = id;
@@ -96,12 +98,12 @@ public class MarkImpl extends NamedImpl implements Mark {
     }
 
     @Override
-    public Serializable getOriginatingMarkTemplateIdOrNull() {
+    public UUID getOriginatingMarkTemplateIdOrNull() {
         return originatingMarkTemplateId;
     }
 
     @Override
-    public Serializable getOriginatingMarkPropertiesIdOrNull() {
+    public UUID getOriginatingMarkPropertiesIdOrNull() {
         return originatingMarkPropertiesId;
     }
 

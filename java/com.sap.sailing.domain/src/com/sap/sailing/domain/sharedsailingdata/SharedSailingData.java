@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.sharedsailingdata;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
 
@@ -78,4 +79,6 @@ public interface SharedSailingData {
     Iterable<MarkProperties> getAllMarkProperties();
 
     Iterable<CourseTemplate> getAllCourseTemplates();
+
+    CourseTemplate updateCourseTemplate(UUID uuid, String name, URL optionalImageURL, ArrayList<String> tags);
 }

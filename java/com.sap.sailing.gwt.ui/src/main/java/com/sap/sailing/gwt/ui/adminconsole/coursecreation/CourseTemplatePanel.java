@@ -1,8 +1,12 @@
 package com.sap.sailing.gwt.ui.adminconsole.coursecreation;
 
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
 import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP;
+import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_DELETE;
+import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_UPDATE;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -19,6 +23,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -80,8 +85,7 @@ public class CourseTemplatePanel extends FlowPanel {
         buttonAndFilterPanel.addCreateAction(stringMessages.add(), new Command() {
             @Override
             public void execute() {
-                openEditCourseTemplateDialog(new CourseTemplateDTO());
-                // TODO add action
+                openEditCourseTemplateDialog(new CourseTemplateDTO(), true);
             }
         });
 
@@ -273,6 +277,23 @@ public class CourseTemplatePanel extends FlowPanel {
         final EditACLDialog.DialogConfig<CourseTemplateDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, courseTemplate -> courseTemplate.getAccessControlList(),
                 stringMessages);
+        actionsColumn.addAction(ACTION_DELETE, DELETE, e -> {
+            if (Window.confirm(stringMessages.doYouReallyWantToRemoveCourseTemplate(e.getName()))) {
+                sailingService.removeCourseTemplate(e.getUuid(), new AsyncCallback<Void>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.couldNotRemoveCourseTemplate(caught.getMessage()));
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        refreshCourseTemplates();
+                    }
+                });
+            }
+        });
+        actionsColumn.addAction(ACTION_UPDATE, UPDATE, e -> openEditCourseTemplateDialog(e, false));
         actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 courseTemplate -> configACL.openDialog(courseTemplate));
@@ -285,13 +306,13 @@ public class CourseTemplatePanel extends FlowPanel {
         loadCourseTemplates();
     }
 
-    void openEditCourseTemplateDialog(final CourseTemplateDTO originalCourseTemplate) {
+    void openEditCourseTemplateDialog(final CourseTemplateDTO originalCourseTemplate, final boolean isNew) {
         final CourseTemplateEditDialog dialog = new CourseTemplateEditDialog(sailingService, stringMessages,
                 originalCourseTemplate,
                 new DialogCallback<CourseTemplateDTO>() {
                     @Override
                     public void ok(CourseTemplateDTO courseTemplate) {
-                        sailingService.createCourseTemplate(courseTemplate,
+                        sailingService.createOrUpdateCourseTemplate(courseTemplate,
                                 new AsyncCallback<CourseTemplateDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -319,7 +340,7 @@ public class CourseTemplatePanel extends FlowPanel {
                     @Override
                     public void cancel() {
                     }
-                });
+                }, isNew);
         dialog.ensureDebugId("CourseTemplateEditDialog");
         dialog.show();
     }

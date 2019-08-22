@@ -83,9 +83,10 @@ public class MarkResource extends AbstractSailingServerResource {
     private static final String REGATTA_NAME = "regattaName";
     private static final String MARK_NAME = "markName";
     private static final String MARK_SHORT_NAME = "markShortName";
-    private static final String MARK_ORIGINATING_MARK_TEMPLATE_ID = "markOriginatingMarkTemplateId";
-    private static final String MARK_ORIGINATING_MARK_PROPERTIES_ID = "markOriginatingMarkPropertiesId";
-    private static final String COURSE_ORIGINATING_TEMPLATE_ID = "courseOriginatingTemplateId";
+    private static final String CONTROL_POINT_NAME = "controlPointName";
+    private static final String ORIGINATING_MARK_TEMPLATE_ID = "originatingMarkTemplateId";
+    private static final String ORIGINATING_MARK_PROPERTIES_ID = "originatingMarkPropertiesId";
+    private static final String ORIGINATING_COURSE_TEMPLATE_ID = "originatingCourseTemplateId";
 
     @POST
     @Path("/addMarkToRegatta")
@@ -96,8 +97,8 @@ public class MarkResource extends AbstractSailingServerResource {
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
         String markName = (String) requestObject.get(MARK_NAME);
         String markShortName = (String) requestObject.get(MARK_SHORT_NAME);
-        String originatingMarkTemplateIdAsString = (String) requestObject.get(MARK_ORIGINATING_MARK_TEMPLATE_ID);
-        String originatingMarkPropertiesIdAsString = (String) requestObject.get(MARK_ORIGINATING_MARK_PROPERTIES_ID);
+        String originatingMarkTemplateIdAsString = (String) requestObject.get(ORIGINATING_MARK_TEMPLATE_ID);
+        String originatingMarkPropertiesIdAsString = (String) requestObject.get(ORIGINATING_MARK_PROPERTIES_ID);
         UUID markId = UUID.randomUUID();
         UUID originatingMarkTemplateId = originatingMarkTemplateIdAsString != null
                 ? UUID.fromString(originatingMarkTemplateIdAsString)
@@ -189,7 +190,7 @@ public class MarkResource extends AbstractSailingServerResource {
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
         String leaderboardName = (String) requestObject.get(LEADERBOARD_NAME);
-        String originatingCourseTemplateIdAsString = (String) requestObject.get(COURSE_ORIGINATING_TEMPLATE_ID);
+        String originatingCourseTemplateIdAsString = (String) requestObject.get(ORIGINATING_COURSE_TEMPLATE_ID);
         UUID originatingCourseTemplateId = originatingCourseTemplateIdAsString != null ? UUID.fromString(originatingCourseTemplateIdAsString) : null;
         SecurityUtils.getSubject().checkPermission(
                 SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
@@ -231,8 +232,12 @@ public class MarkResource extends AbstractSailingServerResource {
                 if (markB == null) {
                     throw new IllegalStateException("Could not resolve mark " + markB);
                 }
+                String controlPointName = (String) controlPointRaw.get(CONTROL_POINT_NAME);
+                if (controlPointName == null || controlPointName.isEmpty()) {
+                    controlPointName = markA.getName() + "-" + markB.getName();
+                }
                 controlPoints.add(new Pair<>(
-                        new ControlPointWithTwoMarksImpl(markA, markB, markA.getName() + "-" + markB.getName()),
+                        new ControlPointWithTwoMarksImpl(markA, markB, controlPointName),
                         passing));
             }
         }
