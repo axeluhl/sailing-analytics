@@ -300,8 +300,10 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
             Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
             Map<MarkTemplate, String> associatedRoles, RepeatablePart optionalRepeatablePart, Iterable<String> tags,
             URL optionalImageURL) {
-        final CourseTemplate courseTemplate = new CourseTemplateImpl(idOfNewCourseTemplate, courseTemplateName, marks,
+        final CourseTemplateImpl courseTemplate = new CourseTemplateImpl(idOfNewCourseTemplate, courseTemplateName,
+                marks,
                 waypoints, associatedRoles, optionalImageURL, optionalRepeatablePart);
+        courseTemplate.setTags(tags);
         mongoObjectFactory.storeCourseTemplate(courseTemplate);
         courseTemplatesById.put(courseTemplate.getId(), courseTemplate);
         return null;
