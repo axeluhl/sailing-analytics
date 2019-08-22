@@ -1,8 +1,10 @@
 package com.sap.sailing.gwt.ui.adminconsole.coursecreation;
 
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
 import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP;
+import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_UPDATE;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -301,6 +303,7 @@ public class MarkPropertiesPanel extends FlowPanel {
         final EditACLDialog.DialogConfig<MarkPropertiesDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, markProperties -> markProperties.getAccessControlList(),
                 stringMessages);
+        actionsColumn.addAction(ACTION_UPDATE, UPDATE, this::openEditMarkPropertiesDialog);
         actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 markProperties -> configACL.openDialog(markProperties));
@@ -320,14 +323,13 @@ public class MarkPropertiesPanel extends FlowPanel {
                     public void ok(MarkPropertiesDTO markProperties) {
                         sailingService.addOrUpdateMarkProperties(markProperties,
                                 new AsyncCallback<MarkPropertiesDTO>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter
-                                                .reportError("Error trying to update mark properties: "
-                                                        + caught.getMessage());
-                            }
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        errorReporter.reportError(
+                                                "Error trying to update mark properties: " + caught.getMessage());
+                                    }
 
-                            @Override
+                                    @Override
                                     public void onSuccess(MarkPropertiesDTO updatedMarkProperties) {
                                         int editedMarkPropertiesIndex = filterableMarkProperties
                                                 .indexOf(originalMarkProperties);
@@ -335,12 +337,12 @@ public class MarkPropertiesPanel extends FlowPanel {
                                         if (editedMarkPropertiesIndex >= 0) {
                                             filterableMarkProperties.add(editedMarkPropertiesIndex,
                                                     updatedMarkProperties);
-                                } else {
+                                        } else {
                                             filterableMarkProperties.add(updatedMarkProperties);
-                                }
-                                markPropertiesListDataProvider.refresh();
-                            }
-                        });
+                                        }
+                                        markPropertiesListDataProvider.refresh();
+                                    }
+                                });
                     }
 
                     @Override

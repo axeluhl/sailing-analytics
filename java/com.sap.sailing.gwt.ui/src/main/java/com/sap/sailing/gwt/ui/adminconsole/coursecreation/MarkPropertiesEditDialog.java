@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole.coursecreation;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -37,6 +39,8 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
     private final Label labelPattern;
     private final StringListEditorComposite tagsEditor;
 
+    private final UUID id;
+
     public MarkPropertiesEditDialog(final StringMessages stringMessages, MarkPropertiesDTO markPropertiesToEdit,
             DialogCallback<MarkPropertiesDTO> callback) {
         super(stringMessages.edit() + " " + stringMessages.markProperties(), null, stringMessages.ok(),
@@ -55,6 +59,7 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
                     }
                 }, /* animationEnabled */true, callback);
         this.ensureDebugId("MarkPropertiesToEditEditDialog");
+        id = markPropertiesToEdit.getUuid();
         this.stringMessages = stringMessages;
 
         this.markTypeValueListBox = new ValueListBox<>(new Renderer<MarkType>() {
@@ -98,12 +103,15 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
 
         this.nameTextBox = createTextBox(markPropertiesToEdit.getName());
         this.shortNameTextBox = createTextBox(markPropertiesToEdit.getCommonMarkProperties().getShortName());
+
+        // setup mark selection
         this.markTypeValueListBox.setValue(markPropertiesToEdit.getCommonMarkProperties().getType() != null
                 ? markPropertiesToEdit.getCommonMarkProperties().getType()
                 : MarkType.values()[0]);
         markTypeValueListBox.setAcceptableValues(Arrays.asList(MarkType.values()));
         markTypeValueListBox.addValueChangeHandler(v -> handleMarkTypeChange());
 
+        // setup display color textbox
         if (markPropertiesToEdit.getCommonMarkProperties().getColor() != null) {
             this.displayColorTextBox = createTextBox(
                     markPropertiesToEdit.getCommonMarkProperties().getColor() == null ? ""
@@ -112,11 +120,25 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
             this.displayColorTextBox = createTextBox("");
         }
 
-        shapeValueListBox.setValue(null);
-        shapeValueListBox.setAcceptableValues(Arrays.asList(Shape.values()));
-        patternValueListBox.setValue(null);
-        patternValueListBox.setAcceptableValues(Arrays.asList(Pattern.values()));
+        // setup shape selection
+        final String loadedShape = markPropertiesToEdit.getCommonMarkProperties().getShape();
+        if (loadedShape != null && !loadedShape.isEmpty()) {
+            shapeValueListBox.setValue(Shape.valueOf(loadedShape));
+        }
+        final Collection<Shape> shapeValues = new ArrayList<>(Arrays.asList(Shape.values()));
+        shapeValues.add(null);
+        shapeValueListBox.setAcceptableValues(shapeValues);
 
+        // setup pattern selection
+        final String loadedPattern = markPropertiesToEdit.getCommonMarkProperties().getPattern();
+        if (loadedPattern != null && !loadedPattern.isEmpty()) {
+            patternValueListBox.setValue(Pattern.valueOf(loadedPattern));
+        }
+        final Collection<Pattern> patternValues = new ArrayList<>(Arrays.asList(Pattern.values()));
+        patternValues.add(null);
+        patternValueListBox.setAcceptableValues(patternValues);
+
+        // setup tag editor
         tagsEditor = new StringListEditorComposite(markPropertiesToEdit.getTags(), stringMessages,
                 stringMessages.edit(stringMessages.tags()), IconResources.INSTANCE.removeIcon(),
                 Collections.emptyList(), stringMessages.tag());
@@ -189,7 +211,7 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
             }
         }
         // TODO: device identifier, position
-        final MarkPropertiesDTO markProperties = new MarkPropertiesDTO(UUID.randomUUID(), nameTextBox.getValue(),
+        final MarkPropertiesDTO markProperties = new MarkPropertiesDTO(id, nameTextBox.getValue(),
                 tagsEditor.getValue(), new DeviceIdentifierDTO(null, null), new RadianPosition(0, 0),
                 shortNameTextBox.getValue(), color,
                 shapeValueListBox.getValue() == null ? "" : shapeValueListBox.getValue().name(),
