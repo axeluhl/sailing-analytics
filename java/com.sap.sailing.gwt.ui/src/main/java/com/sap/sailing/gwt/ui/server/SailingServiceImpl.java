@@ -307,14 +307,14 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
+import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
+import com.sap.sailing.domain.coursetemplate.MarkPairTemplate.MarkPairTemplateFactory;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
-import com.sap.sailing.domain.coursetemplate.impl.ControlPointTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesImpl;
-import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.RepeatablePartImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
 import com.sap.sailing.domain.igtimiadapter.Account;
@@ -9465,19 +9465,19 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 waypointTemplate.getPassingInstruction());
     }
 
-    private WaypointTemplate convertToWaypointTemplate(WaypointTemplateDTO waypointTemplate) {
-        return new WaypointTemplateImpl(
-                new ControlPointTemplateImpl(waypointTemplate.getName(),
-                        waypointTemplate.getMarkTemplatesForControlPoint().stream()
-                        .map(this::convertToMarkTemplate).collect(Collectors.toList())),
-                waypointTemplate.getPassingInstruction());
-    }
-
-    private MarkTemplate convertToMarkTemplate(MarkTemplateDTO markTemplate) {
-        return new MarkTemplateImpl(markTemplate.getUuid(), markTemplate.getName(),
-                markTemplate.getCommonMarkProperties().getShortName(),
-                markTemplate.getCommonMarkProperties().getColor(), markTemplate.getCommonMarkProperties().getShape(),
-                markTemplate.getCommonMarkProperties().getPattern(), markTemplate.getCommonMarkProperties().getType());
+    private WaypointTemplate convertToWaypointTemplate(WaypointTemplateDTO waypointTemplate, final MarkPairTemplateFactory markPairTemplateFactory) {
+        final List<MarkTemplate> resolvedMarkTemplates = waypointTemplate.getMarkTemplatesForControlPoint().stream()
+                .map(t -> getSharedSailingData().getMarkTemplateById(t.getUuid())).collect(Collectors.toList());
+        final ControlPointTemplate controlPointTemplate;
+        if (resolvedMarkTemplates.size() == 1) {
+            controlPointTemplate = resolvedMarkTemplates.get(0);
+        } else if (resolvedMarkTemplates.size() == 2) {
+            controlPointTemplate = markPairTemplateFactory.create(waypointTemplate.getName(), resolvedMarkTemplates);
+        } else {
+            throw new IllegalArgumentException("Waypoints must contain one or two marks");
+        }
+        
+        return new WaypointTemplateImpl(controlPointTemplate, waypointTemplate.getPassingInstruction());
     }
 
     private RepeatablePart convertToRepeatablePart(RepeatablePartDTO repeatablePart) {
@@ -9496,12 +9496,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             throw new IllegalArgumentException(
                     String.format("Invalid URL: %s", courseTemplate.getOptionalImageUrl().get()));
         }
-        final List<MarkTemplate> marks = courseTemplate.getMarkTemplates().stream().map(this::convertToMarkTemplate)
+        final List<MarkTemplate> marks = courseTemplate.getMarkTemplates().stream().map(t -> getSharedSailingData().getMarkTemplateById(t.getUuid()))
                 .collect(Collectors.toList());
+        final MarkPairTemplateFactory markPairTemplateFactory = new MarkPairTemplateFactory();
         final List<WaypointTemplate> waypoints = courseTemplate.getWaypointTemplates().stream()
-                .map(this::convertToWaypointTemplate).collect(Collectors.toList());
+                .map(wp -> convertToWaypointTemplate(wp, markPairTemplateFactory)).collect(Collectors.toList());
         final Map<MarkTemplate, String> associatedRoles = courseTemplate.getAssociatedRoles().entrySet().stream()
-                .collect(Collectors.toMap(k -> convertToMarkTemplate(k.getKey()), Entry::getValue));
+                .collect(Collectors.toMap(k -> getSharedSailingData().getMarkTemplateById(k.getKey().getUuid()),
+                        Entry::getValue));
         final RepeatablePart optionalRepeatablePart = courseTemplate.getRepeatablePart() != null
                 ? convertToRepeatablePart(courseTemplate.getRepeatablePart())
                 : null;
