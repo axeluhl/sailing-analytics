@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.ui.adminconsole.coursecreation;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.UUID;
 
 import com.google.gwt.text.shared.Renderer;
@@ -21,6 +21,8 @@ import com.sap.sailing.gwt.ui.shared.racemap.Pattern;
 import com.sap.sailing.gwt.ui.shared.racemap.Shape;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.RGBColor;
+import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO> {
@@ -31,8 +33,9 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
     private final ValueListBox<Pattern> patternValueListBox;
     private final ValueListBox<Shape> shapeValueListBox;
     private final StringMessages stringMessages;
-    private Label labelShape;
-    private Label labelPattern;
+    private final Label labelShape;
+    private final Label labelPattern;
+    private final StringListEditorComposite tagsEditor;
 
     public MarkPropertiesEditDialog(final StringMessages stringMessages, MarkPropertiesDTO markPropertiesToEdit,
             DialogCallback<MarkPropertiesDTO> callback) {
@@ -114,6 +117,10 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
         patternValueListBox.setValue(null);
         patternValueListBox.setAcceptableValues(Arrays.asList(Pattern.values()));
 
+        tagsEditor = new StringListEditorComposite(markPropertiesToEdit.getTags(), stringMessages,
+                stringMessages.edit(stringMessages.tags()), IconResources.INSTANCE.removeIcon(),
+                Collections.emptyList(), stringMessages.tag());
+
         handleMarkTypeChange();
     }
 
@@ -181,9 +188,9 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
                 color = new InvalidColor(iae);
             }
         }
-        // TODO: tags, device identifier, position
-        MarkPropertiesDTO markProperties = new MarkPropertiesDTO(UUID.randomUUID(), nameTextBox.getValue(),
-                new ArrayList<String>(), new DeviceIdentifierDTO(null, null), new RadianPosition(0, 0),
+        // TODO: device identifier, position
+        final MarkPropertiesDTO markProperties = new MarkPropertiesDTO(UUID.randomUUID(), nameTextBox.getValue(),
+                tagsEditor.getValue(), new DeviceIdentifierDTO(null, null), new RadianPosition(0, 0),
                 shortNameTextBox.getValue(), color,
                 shapeValueListBox.getValue() == null ? "" : shapeValueListBox.getValue().name(),
                 patternValueListBox.getValue() == null ? "" : patternValueListBox.getValue().name(),
@@ -193,7 +200,7 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
 
     @Override
     protected Widget getAdditionalWidget() {
-        Grid result = new Grid(6, 2);
+        Grid result = new Grid(7, 2);
         result.setWidget(0, 0, new Label(stringMessages.name()));
         result.setWidget(0, 1, nameTextBox);
         result.setWidget(1, 0, new Label(stringMessages.shortName()));
@@ -206,6 +213,8 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
         result.setWidget(4, 1, patternValueListBox);
         result.setWidget(5, 0, new Label(stringMessages.type()));
         result.setWidget(5, 1, markTypeValueListBox);
+        result.setWidget(6, 0, new Label(stringMessages.tags()));
+        result.setWidget(6, 1, tagsEditor);
         return result;
     }
 

@@ -178,7 +178,7 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
                 color = new InvalidColor(iae);
             }
         }
-        MarkTemplateDTO markTemplate = new MarkTemplateDTO(UUID.randomUUID(), nameTextBox.getValue(),
+        final MarkTemplateDTO markTemplate = new MarkTemplateDTO(UUID.randomUUID(), nameTextBox.getValue(),
                 shortNameTextBox.getValue(), color,
                 shapeValueListBox.getValue() == null ? "" : shapeValueListBox.getValue().name(),
                 patternValueListBox.getValue() == null ? "" : patternValueListBox.getValue().name(),
