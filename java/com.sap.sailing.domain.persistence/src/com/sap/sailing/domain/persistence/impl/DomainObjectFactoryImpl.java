@@ -1879,8 +1879,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId,
             List<Competitor> competitors, Document dbObject) {
         String courseName = (String) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN_NAME.name());
+        UUID courseOriginatingTemplateId = (UUID) dbObject.get(FieldNames.RACE_LOG_COURSE_ORIGINATING_TEMPLATE_ID.name());
         Pair<CourseBase, Boolean> courseData = loadCourseData((Iterable<?>) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN.name()),
-                courseName);
+                courseName, courseOriginatingTemplateId);
         final String courseDesignerModeName = (String) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGNER_MODE.name());
         final CourseDesignerMode courseDesignerMode = courseDesignerModeName == null ? null
                 : CourseDesignerMode.valueOf(courseDesignerModeName);
@@ -2380,12 +2381,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *         been edited "in place" to describe the migration that has happened
      */
     @SuppressWarnings("deprecation") // Used to migrate from PASSINGSIDE to the new PASSINGINSTRUCTIONS
-    private Pair<CourseBase, Boolean> loadCourseData(Iterable<?> dbCourseList, String courseName) {
+    private Pair<CourseBase, Boolean> loadCourseData(Iterable<?> dbCourseList, String courseName, UUID originatingCourseTemplateId) {
         boolean migrated = false;
         if (courseName == null) {
             courseName = "Course";
         }
-        CourseBase courseData = new CourseDataImpl(courseName);
+        CourseBase courseData = new CourseDataImpl(courseName, originatingCourseTemplateId);
         int i = 0;
         for (Object object : dbCourseList) {
             Document dbObject = (Document) object;
