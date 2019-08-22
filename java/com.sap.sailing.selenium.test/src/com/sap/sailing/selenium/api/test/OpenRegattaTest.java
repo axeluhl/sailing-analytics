@@ -100,8 +100,8 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
         final Mark mark1 = markApi.addMarkToRegatta(ownerCtx, EVENT_NAME, "FirstMark");
 
         final Double longitude = 9.12, latitude = .599;
-        markApi.addMarkFix(ownerCtx, EVENT_NAME, race.getRaceName(), "Default", mark1.getMarkId(), longitude, latitude,
-                currentTimeMillis());
+        markApi.addMarkFix(ownerCtx, EVENT_NAME, race.getRaceName(), "Default", mark1.getMarkId(), null, null,
+                longitude, latitude, currentTimeMillis());
     }
 
 }
