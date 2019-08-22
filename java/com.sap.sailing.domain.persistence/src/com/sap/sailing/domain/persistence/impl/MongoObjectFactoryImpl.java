@@ -1331,6 +1331,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.MARK_PATTERN.name(), mark.getPattern());
         result.put(FieldNames.MARK_SHAPE.name(), mark.getShape());
         result.put(FieldNames.MARK_TYPE.name(), mark.getType() == null ? null : mark.getType().name());
+        result.put(FieldNames.MARK_ORIGINATING_MARK_TEMPLATE_ID.name(), mark.getOriginatingMarkTemplateIdOrNull());
+        result.put(FieldNames.MARK_ORIGINATING_MARK_PROPERTIES_ID.name(), mark.getOriginatingMarkPropertiesIdOrNull());
         return result;
     }
 

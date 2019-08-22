@@ -2502,9 +2502,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String markPattern = (String) dbObject.get(FieldNames.MARK_PATTERN.name());
         String markShape = (String) dbObject.get(FieldNames.MARK_SHAPE.name());
         Object markTypeRaw = dbObject.get(FieldNames.MARK_TYPE.name());
+        Serializable markOriginatingMarkTemplateId = (Serializable) dbObject.get(FieldNames.MARK_ORIGINATING_MARK_TEMPLATE_ID.name());
+        Serializable markOriginatingMarkPropertiesId = (Serializable) dbObject.get(FieldNames.MARK_ORIGINATING_MARK_PROPERTIES_ID.name());
         MarkType markType = markTypeRaw == null ? null : MarkType.valueOf((String) markTypeRaw);
 
-        Mark mark = baseDomainFactory.getOrCreateMark(markId, markName, markShortName, markType, markColor, markShape, markPattern);
+        Mark mark = baseDomainFactory.getOrCreateMark(markId, markName, markShortName, markType, markColor, markShape,
+                markPattern, markOriginatingMarkTemplateId, markOriginatingMarkPropertiesId);
         return mark;
     }
 

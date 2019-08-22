@@ -179,7 +179,20 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         }
         return result;
     }
-    
+
+    @Override
+    public Mark getOrCreateMark(Serializable id, String name, String shortName, MarkType type, Color color,
+            String shape, String pattern, Serializable originatingMarkTemplateId,
+            Serializable originatingMarkPropertiesId) {
+        Mark result = markCache.get(id);
+        if (result == null) {
+            result = new MarkImpl(id, name, type, color, shape, pattern, originatingMarkTemplateId,
+                    originatingMarkPropertiesId);
+            cacheMark(id, result);
+        }
+        return result;
+    }
+
     @Override
     public Mark getOrCreateMark(String toStringRepresentationOfID, String name, String shortName,
             MarkType type, Color color, String shape, String pattern) {

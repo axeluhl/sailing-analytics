@@ -45,7 +45,10 @@ public interface SharedDomainFactory extends CompetitorFactory, BoatFactory {
      * and <code>shape</code> as its {@link Mark#getShape()}.
      */
     Mark getOrCreateMark(Serializable id, String name, String shortName, MarkType type, Color color, String shape, String pattern);
-    
+
+    Mark getOrCreateMark(Serializable id, String name, String shortName, MarkType type, Color color, String shape,
+            String pattern, Serializable originatingMarkTemplateId, Serializable originatingMarkPropertiesId);
+
     /**
      * @param shortName TODO
      * @see #getOrCreateMark(String, String, String)
