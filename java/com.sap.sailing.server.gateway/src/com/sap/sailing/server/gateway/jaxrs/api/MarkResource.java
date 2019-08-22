@@ -83,6 +83,7 @@ public class MarkResource extends AbstractSailingServerResource {
     private static final String REGATTA_NAME = "regattaName";
     private static final String MARK_NAME = "markName";
     private static final String MARK_SHORT_NAME = "markShortName";
+    private static final String CONTROL_POINT_NAME = "controlPointName";
     private static final String MARK_ORIGINATING_MARK_TEMPLATE_ID = "markOriginatingMarkTemplateId";
     private static final String MARK_ORIGINATING_MARK_PROPERTIES_ID = "markOriginatingMarkPropertiesId";
     private static final String COURSE_ORIGINATING_TEMPLATE_ID = "courseOriginatingTemplateId";
@@ -231,8 +232,12 @@ public class MarkResource extends AbstractSailingServerResource {
                 if (markB == null) {
                     throw new IllegalStateException("Could not resolve mark " + markB);
                 }
+                String controlPointName = (String) controlPointRaw.get(CONTROL_POINT_NAME);
+                if (controlPointName == null || controlPointName.isEmpty()) {
+                    controlPointName = markA.getName() + "-" + markB.getName();
+                }
                 controlPoints.add(new Pair<>(
-                        new ControlPointWithTwoMarksImpl(markA, markB, markA.getName() + "-" + markB.getName()),
+                        new ControlPointWithTwoMarksImpl(markA, markB, controlPointName),
                         passing));
             }
         }

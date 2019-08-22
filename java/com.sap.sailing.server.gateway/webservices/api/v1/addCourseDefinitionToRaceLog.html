@@ -38,6 +38,7 @@
             <ul>
                 <li>passingInstruction (required): For single mark waypoints, this can be one of [None, Port, Starboard, Single_Unknown, FixedBearing]. For mark pairs, this can be one of [None, Gate, Line, Offset].</li>
                 <li>marks (required): List of UUIDs of the relevant marks. May specify one or two marks. Marks with the given ID are required to already exist in the specific regatta.</li>
+                <li>controlPointName (optional): for mark pairs (control point with two marks), the name may be specified. If no name is given, one is inferred from the mark names.</li>
             </ul>
         </td>
     </tr>
@@ -58,7 +59,8 @@
                 "raceColumnName":"R1",
                 "controlPoints": [
                     {
-                        "passingInstruction":"Gate", 
+                        "passingInstruction":"Gate",
+                        "controlPointName", "Start\/Finish",
                         "marks":["305ffb4b-c23d-42a1-be45-f76a2bad8fab", "305ffb4b-c23d-42a1-be45-123123123123"]
                     },
                     {
@@ -91,6 +93,7 @@
                     },
                     {
                         "passingInstruction":"None", 
+                        "controlPointName", "Start\/Finish",
                         "marks":["305ffb4b-c23d-42a1-be45-f76a2bad8fab", "305ffb4b-c23d-42a1-be45-123123123123"]
                     }
                 ]
