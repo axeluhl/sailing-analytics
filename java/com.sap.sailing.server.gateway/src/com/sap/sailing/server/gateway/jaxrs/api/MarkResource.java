@@ -72,7 +72,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 @Path("/v1/mark")
-public class MarkRessource extends AbstractSailingServerResource {
+public class MarkResource extends AbstractSailingServerResource {
     private static final String TIME_MILLIS = "timeMillis";
     private static final String LAT_DEG = "latDeg";
     private static final String LON_DEG = "lonDeg";
