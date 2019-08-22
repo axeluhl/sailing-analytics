@@ -70,6 +70,7 @@ public class TestStoringAndLoadingRaceORCLegDataEvent extends AbstractMongoDBTes
         logIdentifier = mock(RaceLogIdentifier.class);
         when(logIdentifier.getIdentifier()).thenReturn(
                 new com.sap.sse.common.Util.Triple<String, String, String>("a", "b", UUID.randomUUID().toString()));
+        DomainFactory.INSTANCE.getCompetitorAndBoatStore().clearCompetitors();
     }
 
     @Test
