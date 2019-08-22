@@ -9442,9 +9442,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final List<WaypointTemplateDTO> convertedWaypointTemplates = StreamSupport
                 .stream(courseTemplate.getWaypointTemplates().spliterator(), false)
                 .map(this::convertToWaypointTemplateDTO).collect(Collectors.toList());
-        return new CourseTemplateDTO(courseTemplate.getId(), courseTemplate.getName(), convertedMarkTemplates,
+        final CourseTemplateDTO result = new CourseTemplateDTO(courseTemplate.getId(), courseTemplate.getName(),
+                convertedMarkTemplates,
                 convertedWaypointTemplates, convertedAssociatedRoles, "" + courseTemplate.getOptionalImageURL(),
                 courseTemplate.getTags(), convertToRepeatablePartDTO(courseTemplate.getRepeatablePart()));
+
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), result, courseTemplate.getIdentifier());
+        return result;
     }
 
     private RepeatablePartDTO convertToRepeatablePartDTO(RepeatablePart repeatablePart) {
