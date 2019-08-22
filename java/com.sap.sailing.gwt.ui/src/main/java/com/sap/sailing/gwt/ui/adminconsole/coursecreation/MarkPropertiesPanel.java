@@ -265,6 +265,13 @@ public class MarkPropertiesPanel extends FlowPanel {
                         : "";
             }
         };
+        // tags
+        Column<MarkPropertiesDTO, String> tagsColumn = new Column<MarkPropertiesDTO, String>(new TextCell()) {
+            @Override
+            public String getValue(MarkPropertiesDTO courseTemplate) {
+                return String.join(", ", courseTemplate.getTags());
+            }
+        };
 
         nameColumn.setSortable(true);
         sortHandler.setComparator(nameColumn, new Comparator<MarkPropertiesDTO>() {
@@ -279,6 +286,7 @@ public class MarkPropertiesPanel extends FlowPanel {
         markPropertiesTable.addColumn(shapeColumn, stringMessages.shape());
         markPropertiesTable.addColumn(patternColumn, stringMessages.pattern());
         markPropertiesTable.addColumn(typeColumn, stringMessages.type());
+        markPropertiesTable.addColumn(tagsColumn, stringMessages.tags());
 
         SecuredDTOOwnerColumn.configureOwnerColumns(markPropertiesTable, sortHandler, stringMessages);
 

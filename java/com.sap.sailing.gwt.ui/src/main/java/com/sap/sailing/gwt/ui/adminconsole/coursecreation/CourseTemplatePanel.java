@@ -232,6 +232,13 @@ public class CourseTemplatePanel extends FlowPanel {
                 return courseTemplate.getOptionalImageUrl().orElse("");
             }
         };
+        // tags
+        Column<CourseTemplateDTO, String> tagsColumn = new Column<CourseTemplateDTO, String>(new TextCell()) {
+            @Override
+            public String getValue(CourseTemplateDTO courseTemplate) {
+                return String.join(", ", courseTemplate.getTags());
+            }
+        };
         // # Waypoint Templates
         Column<CourseTemplateDTO, String> waypointTemplateCountColumn = new Column<CourseTemplateDTO, String>(
                 new TextCell()) {
@@ -250,6 +257,7 @@ public class CourseTemplatePanel extends FlowPanel {
 
         courseTemplateTable.addColumn(nameColumn, stringMessages.name());
         courseTemplateTable.addColumn(urlColumn, stringMessages.url());
+        courseTemplateTable.addColumn(tagsColumn, stringMessages.tags());
         courseTemplateTable.addColumn(waypointTemplateCountColumn, stringMessages.waypoints());
 
         SecuredDTOOwnerColumn.configureOwnerColumns(courseTemplateTable, sortHandler, stringMessages);
