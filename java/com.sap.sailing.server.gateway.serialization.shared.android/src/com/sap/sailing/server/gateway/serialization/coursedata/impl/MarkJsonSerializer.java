@@ -15,6 +15,8 @@ public class MarkJsonSerializer extends BaseControlPointJsonSerializer implement
     public static final String FIELD_SHAPE = "shape";
     public static final String FIELD_TYPE = "type";
     public static final String FIELD_SHORT_NAME = "shortName";
+    public static final String FIELD_ORIGINATING_MARK_TEMPLATE_ID = "originatingMarkTemplateId";
+    public static final String FIELD_ORIGINATING_MARK_PROPERTIES_ID = "originatingMarkPropertiesId";
 
     @Override
     protected String getClassFieldValue() {
@@ -40,6 +42,12 @@ public class MarkJsonSerializer extends BaseControlPointJsonSerializer implement
         }
         if (mark.getShortName() != null) {
             result.put(FIELD_SHORT_NAME, mark.getShortName());
+        }
+        if (mark.getOriginatingMarkTemplateIdOrNull() != null) {
+            result.put(FIELD_ORIGINATING_MARK_TEMPLATE_ID, mark.getOriginatingMarkTemplateIdOrNull().toString());
+        }
+        if (mark.getOriginatingMarkPropertiesIdOrNull() != null) {
+            result.put(FIELD_ORIGINATING_MARK_PROPERTIES_ID, mark.getOriginatingMarkPropertiesIdOrNull().toString());
         }
         return result;
     }
