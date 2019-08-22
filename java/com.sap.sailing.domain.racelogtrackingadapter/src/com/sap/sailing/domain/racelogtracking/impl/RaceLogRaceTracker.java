@@ -288,7 +288,8 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
             courseBase = new CourseDataImpl("Default course for " + raceName);
             logger.log(Level.FINE, "Using empty course in creation of race " + raceName);
         }
-        final Course course = new CourseImpl(courseBase.getName() == null ? raceName + " course" : courseBase.getName(), courseBase.getWaypoints());
+        final Course course = new CourseImpl(courseBase.getName() == null ? raceName + " course" : courseBase.getName(),
+                courseBase.getWaypoints(), courseBase.getOriginatingCourseTemplateIdOrNull());
         if (raceColumn.getTrackedRace(fleet) != null) {
             if (event != null) {
                 try {
