@@ -27,7 +27,9 @@ import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.WaypointTemplateDTO;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
+import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO> {
@@ -42,6 +44,8 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
     private Collection<WaypointTemplateDTO> waypointTemplates = new ArrayList<>();
 
     private final UUID currentUuid;
+
+    private final StringListEditorComposite tagsEditor;
 
     public CourseTemplateEditDialog(final SailingServiceAsync sailingService, final StringMessages stringMessages,
             CourseTemplateDTO courseTemplateToEdit, DialogCallback<CourseTemplateDTO> callback) {
@@ -95,6 +99,10 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         refreshWaypointsTable();
         nameTextBox.addKeyUpHandler(e -> validateAndUpdate());
         urlTextBox.addKeyUpHandler(e -> validateAndUpdate());
+
+        tagsEditor = new StringListEditorComposite(courseTemplateToEdit.getTags(), stringMessages,
+                stringMessages.edit(stringMessages.tags()), IconResources.INSTANCE.removeIcon(),
+                Collections.emptyList(), stringMessages.tag());
     }
 
     private void refreshWaypointsTable() {
@@ -135,21 +143,22 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
 
         waypointTemplates.stream().map(WaypointTemplateDTO::getMarkTemplatesForControlPoint)
                 .forEach(markTemplates::addAll);
-        // TODO: tags
         // TODO: repeatable part
         return new CourseTemplateDTO(id, nameTextBox.getValue(), markTemplates, waypointTemplates, associatedRoles,
-                optionalUrl, new ArrayList<>(), null);
+                optionalUrl, tagsEditor.getValue(), null);
     }
 
     @Override
     protected Widget getAdditionalWidget() {
-        Grid result = new Grid(3, 2);
+        Grid result = new Grid(4, 2);
         result.setWidget(0, 0, new Label(stringMessages.name()));
         result.setWidget(0, 1, nameTextBox);
         result.setWidget(1, 0, new Label(stringMessages.url()));
         result.setWidget(1, 1, urlTextBox);
         result.setWidget(2, 0, addWaypointTemplate);
         result.setWidget(2, 1, waypointTemplatesTable);
+        result.setWidget(3, 0, new Label(stringMessages.tags()));
+        result.setWidget(3, 1, tagsEditor);
         return result;
     }
 
