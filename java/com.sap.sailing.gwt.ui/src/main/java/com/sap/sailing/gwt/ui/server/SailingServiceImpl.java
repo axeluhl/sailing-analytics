@@ -9442,9 +9442,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final List<WaypointTemplateDTO> convertedWaypointTemplates = StreamSupport
                 .stream(courseTemplate.getWaypointTemplates().spliterator(), false)
                 .map(this::convertToWaypointTemplateDTO).collect(Collectors.toList());
+        // convert optional image url
+        final String optionalImageURL = courseTemplate.getOptionalImageURL() != null
+                ? courseTemplate.getOptionalImageURL().toExternalForm()
+                : null;
         final CourseTemplateDTO result = new CourseTemplateDTO(courseTemplate.getId(), courseTemplate.getName(),
-                convertedMarkTemplates,
-                convertedWaypointTemplates, convertedAssociatedRoles, "" + courseTemplate.getOptionalImageURL(),
+                convertedMarkTemplates, convertedWaypointTemplates, convertedAssociatedRoles, optionalImageURL,
                 courseTemplate.getTags(), convertToRepeatablePartDTO(courseTemplate.getRepeatablePart()));
 
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), result, courseTemplate.getIdentifier());
