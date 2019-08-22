@@ -33,6 +33,12 @@ public class MarkImpl extends NamedImpl implements Mark {
         this(id, name, /* use name as short name, too, by default */ name, type, color, shape, pattern, null, null);
     }
 
+    public MarkImpl(Serializable id, String name, MarkType type, Color color, String shape, String pattern,
+            Serializable originatingMarkTemplateId, Serializable originatingMarkPropertiesId) {
+        this(id, name, /* use name as short name, too, by default */ name, type, color, shape, pattern,
+                originatingMarkTemplateId, originatingMarkPropertiesId);
+    }
+
     public MarkImpl(Serializable id, String name, String shortName, MarkType type, Color color, String shape,
             String pattern, Serializable originatingMarkTemplateId, Serializable originatingMarkPropertiesId) {
         super(name);
