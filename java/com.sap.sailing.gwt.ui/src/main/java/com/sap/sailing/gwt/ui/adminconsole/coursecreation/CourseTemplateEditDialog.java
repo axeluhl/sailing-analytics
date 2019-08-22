@@ -49,7 +49,6 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                 stringMessages.cancel(), new Validator<CourseTemplateDTO>() {
                     @Override
                     public String getErrorMessage(CourseTemplateDTO valueToValidate) {
-                        GWT.log("validating.");
                         String result = null;
                         boolean invalidName = valueToValidate.getName() == null || valueToValidate.getName().isEmpty();
                         if (invalidName) {

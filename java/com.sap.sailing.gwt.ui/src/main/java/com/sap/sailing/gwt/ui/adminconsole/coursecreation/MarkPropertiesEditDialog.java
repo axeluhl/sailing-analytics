@@ -41,17 +41,11 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
                     public String getErrorMessage(MarkPropertiesDTO valueToValidate) {
                         String result = null;
                         boolean invalidName = valueToValidate.getName() == null || valueToValidate.getName().isEmpty();
-                        boolean invalidColor = valueToValidate.getCommonMarkProperties().getColor() == null;
                         boolean invalidMarkType = valueToValidate.getCommonMarkProperties().getType() == null;
                         if (invalidName) {
                             result = stringMessages.pleaseEnterAName();
-                        } else if (invalidColor) {
-                            result = stringMessages.pleaseEnterAValidValueFor(stringMessages.color(), "");
                         } else if (invalidMarkType) {
                             result = stringMessages.pleaseEnterAValidValueFor(stringMessages.type(), "");
-                        } else if (valueToValidate.getCommonMarkProperties().getColor() != null
-                                && valueToValidate.getCommonMarkProperties().getColor() instanceof InvalidColor) {
-                            result = valueToValidate.getCommonMarkProperties().getColor().getAsHtml();
                         }
                         return result;
                     }
