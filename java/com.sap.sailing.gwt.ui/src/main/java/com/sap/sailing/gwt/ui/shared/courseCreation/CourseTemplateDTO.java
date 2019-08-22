@@ -27,9 +27,11 @@ public class CourseTemplateDTO extends NamedDTO implements SecuredDTO {
     private ArrayList<MarkTemplateDTO> markTemplates = new ArrayList<>();
     private ArrayList<WaypointTemplateDTO> waypointTemplates = new ArrayList<>();
     private HashMap<MarkTemplateDTO, String> associatedRoles = new HashMap<>();
+    private ArrayList<String> tags = new ArrayList<>();
 
     private String optionalImageUrl;
 
+    private RepeatablePartDTO repeatablePart;
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
     
     public CourseTemplateDTO() {
@@ -38,13 +40,15 @@ public class CourseTemplateDTO extends NamedDTO implements SecuredDTO {
 
     public CourseTemplateDTO(UUID uuid, String name, Iterable<MarkTemplateDTO> markTemplates,
             Iterable<WaypointTemplateDTO> waypointTemplates, Map<MarkTemplateDTO, String> associatedRoles,
-            String optionalImageUrl) {
+            String optionalImageUrl, Iterable<String> tags, RepeatablePartDTO repeatablePart) {
         super(name);
         this.uuid = uuid;
         Util.addAll(markTemplates, this.markTemplates);
         Util.addAll(waypointTemplates, this.waypointTemplates);
         this.associatedRoles.putAll(this.associatedRoles);
         this.optionalImageUrl = optionalImageUrl;
+        Util.addAll(tags, this.tags);
+        this.repeatablePart = repeatablePart;
     }
 
     @Override
@@ -105,5 +109,11 @@ public class CourseTemplateDTO extends NamedDTO implements SecuredDTO {
         return Optional.ofNullable(optionalImageUrl);
     }
     
-    
+    public ArrayList<String> getTags() {
+        return tags;
+    }
+
+    public RepeatablePartDTO getRepeatablePart() {
+        return repeatablePart;
+    }
 }

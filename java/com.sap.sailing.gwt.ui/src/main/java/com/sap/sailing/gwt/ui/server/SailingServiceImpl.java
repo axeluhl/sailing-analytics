@@ -310,8 +310,13 @@ import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
+import com.sap.sailing.domain.coursetemplate.impl.ControlPointTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesImpl;
+import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateImpl;
+import com.sap.sailing.domain.coursetemplate.impl.RepeatablePartImpl;
+import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
@@ -483,6 +488,7 @@ import com.sap.sailing.gwt.ui.shared.courseCreation.CommonMarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.RepeatablePartDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.WaypointTemplateDTO;
 import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
@@ -9429,18 +9435,23 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     public CourseTemplateDTO convertToCourseTemplateDTO(CourseTemplate courseTemplate) {
         final Map<MarkTemplateDTO, String> convertedAssociatedRoles = courseTemplate.getAssociatedRoles().entrySet()
-                .stream()
-                .collect(Collectors.toMap(k -> convertToMarkTemplateDTO(k.getKey()), v -> v.getValue()));
-        final List<MarkTemplateDTO> convertedMarkTemplates = StreamSupport.stream(courseTemplate.getMarkTemplates().spliterator(), false)
-                .map(this::convertToMarkTemplateDTO).collect(Collectors.toList());
+                .stream().collect(Collectors.toMap(k -> convertToMarkTemplateDTO(k.getKey()), v -> v.getValue()));
+        final List<MarkTemplateDTO> convertedMarkTemplates = StreamSupport
+                .stream(courseTemplate.getMarkTemplates().spliterator(), false).map(this::convertToMarkTemplateDTO)
+                .collect(Collectors.toList());
         final List<WaypointTemplateDTO> convertedWaypointTemplates = StreamSupport
                 .stream(courseTemplate.getWaypointTemplates().spliterator(), false)
                 .map(this::convertToWaypointTemplateDTO).collect(Collectors.toList());
-        return new CourseTemplateDTO(courseTemplate.getId(), courseTemplate.getName(),
-                convertedMarkTemplates,
-                convertedWaypointTemplates,
-                convertedAssociatedRoles,
-                "" + courseTemplate.getOptionalImageURL());
+        return new CourseTemplateDTO(courseTemplate.getId(), courseTemplate.getName(), convertedMarkTemplates,
+                convertedWaypointTemplates, convertedAssociatedRoles, "" + courseTemplate.getOptionalImageURL(),
+                courseTemplate.getTags(), convertToRepeatablePartDTO(courseTemplate.getRepeatablePart()));
+    }
+
+    private RepeatablePartDTO convertToRepeatablePartDTO(RepeatablePart repeatablePart) {
+        return repeatablePart != null
+                ? new RepeatablePartDTO(repeatablePart.getZeroBasedIndexOfRepeatablePartStart(),
+                        repeatablePart.getZeroBasedIndexOfRepeatablePartEnd())
+                : null;
     }
 
     private WaypointTemplateDTO convertToWaypointTemplateDTO(WaypointTemplate waypointTemplate) {
@@ -9450,9 +9461,46 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 waypointTemplate.getPassingInstruction());
     }
 
+    private WaypointTemplate convertToWaypointTemplate(WaypointTemplateDTO waypointTemplate) {
+        return new WaypointTemplateImpl(
+                new ControlPointTemplateImpl("", waypointTemplate.getMarkTemplatesForControlPoint().stream()
+                        .map(this::convertToMarkTemplate).collect(Collectors.toList())),
+                waypointTemplate.getPassingInstruction());
+    }
+
+    private MarkTemplate convertToMarkTemplate(MarkTemplateDTO markTemplate) {
+        return new MarkTemplateImpl(markTemplate.getUuid(), markTemplate.getName(),
+                markTemplate.getCommonMarkProperties().getShortName(),
+                markTemplate.getCommonMarkProperties().getColor(), markTemplate.getCommonMarkProperties().getShape(),
+                markTemplate.getCommonMarkProperties().getPattern(), markTemplate.getCommonMarkProperties().getType());
+    }
+
+    private RepeatablePart convertToRepeatablePart(RepeatablePartDTO repeatablePart) {
+        return new RepeatablePartImpl(repeatablePart.getZeroBasedIndexOfRepeatablePartStart(),
+                repeatablePart.getZeroBasedIndexOfRepeatablePartEnd());
+    }
+
     @Override
     public CourseTemplateDTO createCourseTemplate(CourseTemplateDTO courseTemplate) {
-        // TODO Auto-generated method stub
-        return null;
+        URL optionalImageURL = null;
+        try {
+            optionalImageURL = courseTemplate.getOptionalImageUrl().isPresent()
+                    ? new URL(courseTemplate.getOptionalImageUrl().get())
+                    : null;
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException(
+                    String.format("Invalid URL: %s", courseTemplate.getOptionalImageUrl().get()));
+        }
+        final List<MarkTemplate> marks = courseTemplate.getMarkTemplates().stream().map(this::convertToMarkTemplate)
+                .collect(Collectors.toList());
+        final List<WaypointTemplate> waypoints = courseTemplate.getWaypointTemplates().stream()
+                .map(this::convertToWaypointTemplate).collect(Collectors.toList());
+        final Map<MarkTemplate, String> associatedRoles = courseTemplate.getAssociatedRoles().entrySet().stream()
+                .collect(Collectors.toMap(k -> convertToMarkTemplate(k.getKey()), Entry::getValue));
+        final RepeatablePart optionalRepeatablePart = courseTemplate.getRepeatablePart() != null
+                ? convertToRepeatablePart(courseTemplate.getRepeatablePart())
+                : null;
+        return convertToCourseTemplateDTO(getSharedSailingData().createCourseTemplate(courseTemplate.getName(), marks,
+                waypoints, associatedRoles, optionalRepeatablePart, courseTemplate.getTags(), optionalImageURL));
     }
 }

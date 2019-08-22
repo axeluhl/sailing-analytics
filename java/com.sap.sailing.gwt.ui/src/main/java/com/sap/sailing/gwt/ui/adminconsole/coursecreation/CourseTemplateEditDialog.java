@@ -127,13 +127,18 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
     protected CourseTemplateDTO getResult() {
         // TODO: implement
         final UUID id = currentUuid == null ? UUID.randomUUID() : currentUuid;
-        final Iterable<MarkTemplateDTO> markTemplates = new ArrayList<MarkTemplateDTO>();
+        final ArrayList<MarkTemplateDTO> markTemplates = new ArrayList<MarkTemplateDTO>();
         final Map<MarkTemplateDTO, String> associatedRoles = new HashMap<MarkTemplateDTO, String>();
         final String optionalUrl = urlTextBox.getText() != null && !urlTextBox.getText().isEmpty()
                 ? urlTextBox.getText()
                 : null;
+
+        waypointTemplates.stream().map(WaypointTemplateDTO::getMarkTemplatesForControlPoint)
+                .forEach(markTemplates::addAll);
+        // TODO: tags
+        // TODO: repeatable part
         return new CourseTemplateDTO(id, nameTextBox.getValue(), markTemplates, waypointTemplates, associatedRoles,
-                optionalUrl);
+                optionalUrl, new ArrayList<>(), null);
     }
 
     @Override
