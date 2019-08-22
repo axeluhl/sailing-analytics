@@ -38,6 +38,7 @@ public interface SharedDomainFactory extends CompetitorFactory, BoatFactory {
     Mark getOrCreateMark(String toStringRepresentationOfID, String name, String shortName);
 
     Mark getOrCreateMark(Serializable id, String name, String shortName);
+    Mark getOrCreateMark(Serializable id, String name, String shortName, Serializable originatingMarkTemplateId, Serializable originatingMarkPropertiesId);
 
     /**
      * If the single mark with ID <code>id</code> already exists, it is returned. Its color may differ from <code>color</code>
