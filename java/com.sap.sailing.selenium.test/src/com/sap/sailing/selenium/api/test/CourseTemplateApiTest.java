@@ -60,6 +60,7 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
                 new WaypointTemplate("Start/End", PassingInstruction.Line, Arrays.asList(sb, pe)),
                 new WaypointTemplate(null, PassingInstruction.Port, Arrays.asList(b1)),
                 new WaypointTemplate(null, PassingInstruction.Gate, Arrays.asList(b4p, b4s)),
+                new WaypointTemplate(null, PassingInstruction.Port, Arrays.asList(b1)),
                 new WaypointTemplate("Start/End", PassingInstruction.Line, Arrays.asList(sb, pe)));
     }
 
@@ -89,7 +90,7 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
 
     @Test
     public void createCourseTemplateWithRepeatablePartTest() {
-        final Pair<Integer, Integer> repeatablePart = new Pair<>(1, 2);
+        final Pair<Integer, Integer> repeatablePart = new Pair<>(1, 3);
         final CourseTemplate courseTemplateToSave = constructCourseTemplate(repeatablePart);
         
         final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(ctx, courseTemplateToSave);
@@ -106,7 +107,7 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
             courseTemplateApi.createCourseTemplate(ctx, courseTemplateToSave);
             fail();
         } catch (Exception e) {
-            assertTrue(e.getMessage().contains("Repeatable part (1, 5) is out of range for sequence of length 4"));
+            assertTrue(e.getMessage().contains("Repeatable part (1, 5) is out of range for sequence of length 5"));
         }
     }
     

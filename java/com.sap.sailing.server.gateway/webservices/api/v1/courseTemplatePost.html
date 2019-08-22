@@ -50,7 +50,7 @@
             optionalRepeatablePart: JSON object that if given defines the part of the sequence that can be repeated in lap. The following properties must be given:
             <ul>
                 <li>zeroBasedIndexOfRepeatablePartStart (required): offset of the first waypoint to include in the repeatable part. Must not be out of range for 0 &lt;= i &lt; count(waypoints).</li>
-                <li>zeroBasedIndexOfRepeatablePartEnd (required): offset of the last waypoint to include in the repeatable part. Must not be out of range for 0 &lt;= i &lt; count(waypoints) and must be &gt;= zeroBasedIndexOfRepeatablePartStart.</li>
+                <li>zeroBasedIndexOfRepeatablePartEnd (required): offset of the first waypoint that comes after the repeatable part. Must not be out of range for 1 &lt;= i &lt;= count(waypoints) and must be &gt; zeroBasedIndexOfRepeatablePartStart.</li>
             </ul>
         </td>
     </tr>
@@ -116,6 +116,13 @@
             ]
         },
         {
+            "controlPointName": null,
+            "passingInstruction": "Port",
+            "markTemplateIds": [
+                "46186c8e-335e-4c90-8b2d-7cd5ca6d304c"
+            ]
+        },
+        {
             "controlPointName": "Start\/End",
             "passingInstruction": "Line",
             "markTemplateIds": [
@@ -126,7 +133,7 @@
     ],
     "optionalRepeatablePart": {
         "zeroBasedIndexOfRepeatablePartStart": 1,
-        "zeroBasedIndexOfRepeatablePartEnd": 2
+        "zeroBasedIndexOfRepeatablePartEnd": 3
     },
     "tags": ["tag1", "tag2"]
 }
