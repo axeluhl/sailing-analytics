@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.abstractlog.regatta.impl;
 
+import com.sap.sailing.domain.abstractlog.orc.ORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
@@ -62,5 +63,9 @@ public class BaseRegattaLogEventVisitor implements RegattaLogEventVisitor {
 
     @Override
     public void visit(RegattaLogDefineMarkEvent event) {
+    }
+
+    @Override
+    public void visit(ORCCertificateAssignmentEvent event) {
     }
 }

@@ -11,11 +11,11 @@ import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sse.common.TimePoint;
 
-public class ORCCertificateAssignmentEventImpl extends AbstractLogEventImpl<ORCCertificate> implements ORCCertificateAssignmentEvent{
+public class ORCCertificateAssignmentEventImpl extends AbstractLogEventImpl<RegattaLogEventVisitor> implements ORCCertificateAssignmentEvent {
 
     private ORCCertificate certificate;
     private Competitor competitor;
-    
+
     public ORCCertificateAssignmentEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, Serializable pId, ORCCertificate certificate, Competitor competitor) {
         super(createdAt, logicalTimePoint, author, pId);
@@ -36,15 +36,8 @@ public class ORCCertificateAssignmentEventImpl extends AbstractLogEventImpl<ORCC
     }
 
     @Override
-    public void accept(ORCCertificate visitor) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
     public Competitor getCompetitor() {
-        // TODO Auto-generated method stub
-        return null;
+        return competitor;
     }
 
 }

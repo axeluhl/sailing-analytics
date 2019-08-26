@@ -27,6 +27,7 @@ import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.orc.ORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.ORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
@@ -1813,10 +1814,21 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
     }
     
-    @SuppressWarnings("unused")
-    private Document storeORCCertificate(ORCCertificate certificate) {
+    private Document createORCCertificateObject(ORCCertificate certificate) {
         Document result = new Document(FieldNames.ORC_CERTIFICATE.name(), certificate.getSailnumber());
         // TODO
         return result;
+    }
+    
+    private Document createCompetitorObject(Competitor competitor) {
+        Document result = null;
+        //TODO
+        return result;
+    }
+
+    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeIdentifier, ORCCertificateAssignmentEvent event) {
+        Document result = createBasicRegattaLogEventDBObject(event);
+        result.append(FieldNames.COMPETITOR.name(), createCompetitorObject(event.getCompetitor()));
+        result.append(FieldNames.ORC_CERTIFICATE.name(), createORCCertificateObject(event.getCertificate()));
     }
 }
