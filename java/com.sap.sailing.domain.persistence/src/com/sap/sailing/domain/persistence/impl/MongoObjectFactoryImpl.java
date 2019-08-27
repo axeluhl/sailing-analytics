@@ -102,6 +102,7 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
+import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -1815,8 +1816,32 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
     
     private Document createORCCertificateObject(ORCCertificate certificate) {
-        Document result = new Document(FieldNames.ORC_CERTIFICATE.name(), certificate.getSailnumber());
-        // TODO
+        Document result = new Document(FieldNames.ORC_CERTIFICATE_SAILNUMBER.name(), certificate.getSailnumber());
+        result.append(FieldNames.ORC_CERTIFICATE_GPH.name(), certificate.getGPH());
+        result.append(FieldNames.ORC_CERTIFICATE_CDL.name(), certificate.getCDL());
+
+        Document beatAngles = new Document();
+        Document runAngles = new Document();
+        Document beatAllowances = new Document();
+        Document runAllowances = new Document();
+        Document beatVMGPredictions = new Document();
+        Document runVMGPredictions = new Document();
+        for (Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
+            String key = Double.toString(tws.getKnots());
+            beatAngles.append(key, certificate.getBeatAngles().get(tws).getDegrees());
+            runAngles.append(key, certificate.getRunAngles().get(tws).getDegrees());
+            beatAllowances.append(key, certificate.getBeatAllowances().get(tws).asSeconds());
+            runAllowances.append(key, certificate.getRunAllowances().get(tws).asSeconds());
+            beatVMGPredictions.append(key, certificate.getBeatVMGPredictions().get(tws).getKnots());
+            runVMGPredictions.append(key, certificate.getRunVMGPredictions().get(tws).getKnots());
+        }
+        
+        result.append(FieldNames.ORC_CERTIFICATE_BEAT_ANGLES.name(), beatAngles);
+        result.append(FieldNames.ORC_CERTIFICATE_RUN_ANGLES.name(), runAngles);
+        result.append(FieldNames.ORC_CERTIFICATE_BEAT_ALLOWANCES.name(), beatAllowances);
+        result.append(FieldNames.ORC_CERTIFICATE_RUN_ALLOWANCES.name(), runAllowances);
+        result.append(FieldNames.ORC_CERTIFICATE_BEAT_VMG_PREDICTIONS.name(), beatVMGPredictions);
+        result.append(FieldNames.ORC_CERTIFICATE_RUN_VMG_PREDICTIONS.name(), runVMGPredictions);
         return result;
     }
     
@@ -1830,5 +1855,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document result = createBasicRegattaLogEventDBObject(event);
         result.append(FieldNames.COMPETITOR.name(), createCompetitorObject(event.getCompetitor()));
         result.append(FieldNames.ORC_CERTIFICATE.name(), createORCCertificateObject(event.getCertificate()));
+        storeRegattaLogEvent(regattaLikeIdentifier, result);
     }
 }

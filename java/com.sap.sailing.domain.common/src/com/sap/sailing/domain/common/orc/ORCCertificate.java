@@ -58,7 +58,7 @@ public interface ORCCertificate extends Serializable {
     public double getCDL();
     
     /**
-     * Returns a Map of allowances (in sec/nm) for different wind speeds to use for a {@link ORCPerformanceCurve} rating
+     * Returns a Map of speed predictions (in knots) for different wind speeds to use for a {@link ORCPerformanceCurve} rating
      * in a race, where the upwind and the downwind part both conrtibute 50% to the total course.
      * 
      * @return Map with elements of type wind {@link Speed} as keys and {@link Duration}s equaling a time allowance per
@@ -67,7 +67,7 @@ public interface ORCCertificate extends Serializable {
     public Map<Speed, Speed> getWindwardLeewardSpeedPrediction();
     
     /**
-     * Returns a Map of allowances (in sec/nm) for different wind speeds to use for a {@link ORCPerformanceCurve} rating
+     * Returns a Map of speed predictions (in knots) for different wind speeds to use for a {@link ORCPerformanceCurve} rating
      * in a race, where the course resembles a circular figure.
      * 
      * @return Map with elements of type wind {@link Speed} as keys and {@link Duration}s equaling a time allowance per
@@ -76,7 +76,7 @@ public interface ORCCertificate extends Serializable {
     public Map<Speed, Speed> getCircularRandomSpeedPredictions();
     
     /**
-     * Returns a Map of allowances (in sec/nm) for different wind speeds to use for a {@link ORCPerformanceCurve} rating
+     * Returns a Map of speed predictions (in knots) for different wind speeds to use for a {@link ORCPerformanceCurve} rating
      * in a race, where the race is a long distance offshore/coastal race.
      * 
      * @return Map with elements of type wind {@link Speed} as keys and {@link Duration}s equaling a time allowance per
@@ -85,7 +85,7 @@ public interface ORCCertificate extends Serializable {
     public Map<Speed, Speed> getLongDistanceSpeedPredictions();
     
     /**
-     * Returns a Map of allowances (in sec/nm) for different wind speeds to use for a {@link ORCPerformanceCurve} rating
+     * Returns a Map of speed predictions (in knots) for different wind speeds to use for a {@link ORCPerformanceCurve} rating
      * in a race, where the competitor doesn't use any spinnaker.
      * 
      * @return Map with elements of type wind {@link Speed} as keys and {@link Duration}s equaling a time allowance per
