@@ -1815,6 +1815,48 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
     }
     
+    private String speedToKnotsString(Speed speed) {
+        String result = null;
+        if (speed.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[0])) {
+            result = FieldNames.ORC_CERTIFICATE_TWS_6KT.name();
+        } else if (speed.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[1])) {
+            result = FieldNames.ORC_CERTIFICATE_TWS_8KT.name();
+        } else if (speed.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[2])) {
+            result = FieldNames.ORC_CERTIFICATE_TWS_10KT.name();
+        } else if (speed.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[3])) {
+            result = FieldNames.ORC_CERTIFICATE_TWS_12KT.name();
+        } else if (speed.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[4])) {
+            result = FieldNames.ORC_CERTIFICATE_TWS_14KT.name();
+        } else if (speed.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[5])) {
+            result = FieldNames.ORC_CERTIFICATE_TWS_16KT.name();
+        } else if (speed.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[6])) {
+            result = FieldNames.ORC_CERTIFICATE_TWS_20KT.name();
+        }
+        return result;
+    }
+    
+    private String bearingToDegreeString(Bearing bearing) {
+        String result = null;
+        if(bearing.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES[0])) {
+            result = FieldNames.ORC_CERTIFICATE_R52_PREDICTION.name();
+        } else if (bearing.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES[1])) {
+            result = FieldNames.ORC_CERTIFICATE_R60_PREDICTION.name();
+        } else if (bearing.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES[2])) {
+            result = FieldNames.ORC_CERTIFICATE_R75_PREDICTION.name();
+        } else if (bearing.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES[3])) {
+            result = FieldNames.ORC_CERTIFICATE_R90_PREDICTION.name();
+        } else if (bearing.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES[4])) {
+            result = FieldNames.ORC_CERTIFICATE_R110_PREDICTION.name();
+        } else if (bearing.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES[5])) {
+            result = FieldNames.ORC_CERTIFICATE_R120_PREDICTION.name();
+        } else if (bearing.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES[6])) {
+            result = FieldNames.ORC_CERTIFICATE_R135_PREDICTION.name();
+        } else if (bearing.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES[7])) {
+            result = FieldNames.ORC_CERTIFICATE_R150_PREDICTION.name();
+        }
+        return result;
+    }
+    
     private Document createORCCertificateObject(ORCCertificate certificate) {
         Document result = new Document(FieldNames.ORC_CERTIFICATE_SAILNUMBER.name(), certificate.getSailnumber());
         result.append(FieldNames.ORC_CERTIFICATE_GPH.name(), certificate.getGPH());
@@ -1826,14 +1868,29 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document runAllowances = new Document();
         Document beatVMGPredictions = new Document();
         Document runVMGPredictions = new Document();
+        Document windwardLeewardPredictions = new Document();
+        Document circularRandomPredictions = new Document();
+        Document longDistancePredictions = new Document();
+        Document nonSpinnakerPredictions = new Document();
+        Document velocityPredictionsPerTrueWindSpeedAndAngle = new Document();
         for (Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
-            String key = Double.toString(tws.getKnots());
-            beatAngles.append(key, certificate.getBeatAngles().get(tws).getDegrees());
-            runAngles.append(key, certificate.getRunAngles().get(tws).getDegrees());
-            beatAllowances.append(key, certificate.getBeatAllowances().get(tws).asSeconds());
-            runAllowances.append(key, certificate.getRunAllowances().get(tws).asSeconds());
-            beatVMGPredictions.append(key, certificate.getBeatVMGPredictions().get(tws).getKnots());
-            runVMGPredictions.append(key, certificate.getRunVMGPredictions().get(tws).getKnots());
+            String keyTWS = speedToKnotsString(tws);
+            Document velocityPredictionsPerTrueWindAngle = new Document();
+            beatAngles.append(keyTWS, certificate.getBeatAngles().get(tws).getDegrees());
+            runAngles.append(keyTWS, certificate.getRunAngles().get(tws).getDegrees());
+            beatAllowances.append(keyTWS, certificate.getBeatAllowances().get(tws).asSeconds());
+            runAllowances.append(keyTWS, certificate.getRunAllowances().get(tws).asSeconds());
+            beatVMGPredictions.append(keyTWS, certificate.getBeatVMGPredictions().get(tws).getKnots());
+            runVMGPredictions.append(keyTWS, certificate.getRunVMGPredictions().get(tws).getKnots());
+            windwardLeewardPredictions.append(keyTWS, certificate.getWindwardLeewardSpeedPrediction().get(tws).getKnots());
+            circularRandomPredictions.append(keyTWS, certificate.getCircularRandomSpeedPredictions().get(tws).getKnots());
+            longDistancePredictions.append(keyTWS, certificate.getLongDistanceSpeedPredictions().get(tws).getKnots());
+            nonSpinnakerPredictions.append(keyTWS, certificate.getNonSpinnakerSpeedPredictions().get(tws).getKnots());
+            for (Bearing twa : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES) {
+                String keyTWA = bearingToDegreeString(twa);
+                velocityPredictionsPerTrueWindAngle.append(keyTWA, certificate.getVelocityPredictionPerTrueWindSpeedAndAngle().get(tws).get(twa).getKnots());
+            }
+            velocityPredictionsPerTrueWindSpeedAndAngle.append(keyTWS, velocityPredictionsPerTrueWindAngle);
         }
         
         result.append(FieldNames.ORC_CERTIFICATE_BEAT_ANGLES.name(), beatAngles);
@@ -1842,19 +1899,17 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.append(FieldNames.ORC_CERTIFICATE_RUN_ALLOWANCES.name(), runAllowances);
         result.append(FieldNames.ORC_CERTIFICATE_BEAT_VMG_PREDICTIONS.name(), beatVMGPredictions);
         result.append(FieldNames.ORC_CERTIFICATE_RUN_VMG_PREDICTIONS.name(), runVMGPredictions);
-        return result;
-    }
-    
-    private Document createCompetitorObject(Competitor competitor) {
-        Document result = null;
-        //TODO
+        result.append(FieldNames.ORC_CERTIFICATE_WINDWARD_LEEWARD_PREDICTIONS.name(), windwardLeewardPredictions);
+        result.append(FieldNames.ORC_CERTIFICATE_CIRCULAR_RANDOM_PREDICTIONS.name(), circularRandomPredictions);
+        result.append(FieldNames.ORC_CERTIFICATE_LONG_DISTANCE_PREDICTIONS.name(), longDistancePredictions);
+        result.append(FieldNames.ORC_CERTIFICATE_NON_SPINNAKER_PREDICTIONS.name(), nonSpinnakerPredictions);
         return result;
     }
 
     public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeIdentifier, ORCCertificateAssignmentEvent event) {
-        Document result = createBasicRegattaLogEventDBObject(event);
-        result.append(FieldNames.COMPETITOR.name(), createCompetitorObject(event.getCompetitor()));
-        result.append(FieldNames.ORC_CERTIFICATE.name(), createORCCertificateObject(event.getCertificate()));
-        storeRegattaLogEvent(regattaLikeIdentifier, result);
+        Document document = createBasicRegattaLogEventDBObject(event);
+        document.append(FieldNames.COMPETITOR_ID.name(), event.getCompetitor().getId());
+        document.append(FieldNames.ORC_CERTIFICATE.name(), createORCCertificateObject(event.getCertificate()));
+        storeRegattaLogEvent(regattaLikeIdentifier, document);
     }
 }
