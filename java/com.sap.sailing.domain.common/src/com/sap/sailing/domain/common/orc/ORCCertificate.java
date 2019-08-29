@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 
@@ -44,6 +45,11 @@ public interface ORCCertificate extends Serializable {
     public String getSailnumber();
     
     /**
+     * Returns the boatclass of the {@link Competitor} which this certificate belongs to.
+     */
+    public String getBoatclass();
+    
+    /**
      * Returns the GPH value for the {@link Competitor}. The GPH value represents the overall performance of the boat.
      * The value itself is again an allowance (in seconds per nautical mile) and could be used as a ToD Factor.
      * Most of the times it is used to divide a big fleet into similar fast divisions.
@@ -56,6 +62,11 @@ public interface ORCCertificate extends Serializable {
      * The higher the value, the higher the overall performance, it is measured in meters.
      */
     public double getCDL();
+    
+    /**
+     * Returns the LOA (length over all) of the {@link Competitor} boat which this certificate belongs to.
+     */
+    public Distance getLengthOverAll();
     
     /**
      * Returns a Map of speed predictions (in knots) for different wind speeds to use for a {@link ORCPerformanceCurve} rating

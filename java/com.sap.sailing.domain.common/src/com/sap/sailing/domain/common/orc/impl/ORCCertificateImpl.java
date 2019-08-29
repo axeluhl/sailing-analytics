@@ -29,6 +29,9 @@ public class ORCCertificateImpl implements ORCCertificate {
     /**
      * Equals the column heading of the allowances table of an ORC certificate. The speeds are set by the offshore
      * racing congress. The speeds occur in the array in ascending order.
+     * 
+     * There are references in the persistance module. If the values change, there will be an adjustment needed
+     * in {@link MongoObjectFactoryImpl.speedToKnotsString}.
      */
     public static final Speed[] ALLOWANCES_TRUE_WIND_SPEEDS = { new KnotSpeedImpl(6), new KnotSpeedImpl(8),
             new KnotSpeedImpl(10), new KnotSpeedImpl(12), new KnotSpeedImpl(14), new KnotSpeedImpl(16),
@@ -37,6 +40,9 @@ public class ORCCertificateImpl implements ORCCertificate {
     /**
      * Equals the line heading of the allowances table of an ORC certificate. The true wind angles are set by the
      * offshore racing congress. The angles occur in the array in ascending order.
+     * 
+     * There are references in the persistance module. If the values change, there will be an adjustment needed
+     * in {@link MongoObjectFactoryImpl.bearingToDegreeString}.
      */
     public static final Bearing[] ALLOWANCES_TRUE_WIND_ANGLES = { new DegreeBearingImpl(52), new DegreeBearingImpl(60),
             new DegreeBearingImpl(75), new DegreeBearingImpl(90), new DegreeBearingImpl(110),
@@ -177,7 +183,7 @@ public class ORCCertificateImpl implements ORCCertificate {
 
     // TODO Comment on Constructor
     public ORCCertificateImpl(String sailnumber, String boatclass, Distance length, Duration gph,
-            Double cdl, Map<Speed, Map<Bearing, Speed>> timeAllowancesPerTrueWindSpeedAndAngle,
+            Double cdl, Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle,
             Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
             Map<Speed, Duration> beatAllowancePerTrueWindSpeed, Map<Speed, Bearing> runAngles,
             Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed, Map<Speed, Duration> runAllowancePerTrueWindSpeed) {
@@ -187,7 +193,7 @@ public class ORCCertificateImpl implements ORCCertificate {
         this.gph = gph;
         this.cdl = cdl;
         this.velocityPredictionPerTrueWindSpeedAndAngle = Collections
-                .unmodifiableMap(timeAllowancesPerTrueWindSpeedAndAngle);
+                .unmodifiableMap(velocityPredictionsPerTrueWindSpeedAndAngle);
         this.beatAngles = Collections.unmodifiableMap(beatAngles);
         this.beatVMGPredictionPerTrueWindSpeed = Collections.unmodifiableMap(beatVMGPredictionPerTrueWindSpeed);
         this.beatAllowancePerTrueWindSpeed = Collections.unmodifiableMap(beatAllowancePerTrueWindSpeed);
@@ -252,10 +258,12 @@ public class ORCCertificateImpl implements ORCCertificate {
         return sailnumber;
     }
 
+    @Override
     public String getBoatclass() {
         return boatclass;
     }
 
+    @Override
     public Distance getLengthOverAll() {
         return lengthOverAll;
     }

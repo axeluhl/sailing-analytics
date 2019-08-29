@@ -1815,7 +1815,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
     }
     
-    private String speedToKnotsString(Speed speed) {
+    static String speedToKnotsString(Speed speed) {
         String result = null;
         if (speed.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[0])) {
             result = FieldNames.ORC_CERTIFICATE_TWS_6KT.name();
@@ -1835,7 +1835,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
     
-    private String bearingToDegreeString(Bearing bearing) {
+    static String bearingToDegreeString(Bearing bearing) {
         String result = null;
         if(bearing.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES[0])) {
             result = FieldNames.ORC_CERTIFICATE_R52_PREDICTION.name();
@@ -1859,9 +1859,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     
     private Document createORCCertificateObject(ORCCertificate certificate) {
         Document result = new Document(FieldNames.ORC_CERTIFICATE_SAILNUMBER.name(), certificate.getSailnumber());
+        result.append(FieldNames.ORC_CERTIFICATE_BOATCLASS.name(), certificate.getBoatclass());
         result.append(FieldNames.ORC_CERTIFICATE_GPH.name(), certificate.getGPH());
         result.append(FieldNames.ORC_CERTIFICATE_CDL.name(), certificate.getCDL());
-
+        result.append(FieldNames.ORC_CERTIFICATE_LENGTH.name(), certificate.getLengthOverAll().getMeters());
+        
         Document beatAngles = new Document();
         Document runAngles = new Document();
         Document beatAllowances = new Document();
@@ -1903,6 +1905,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.append(FieldNames.ORC_CERTIFICATE_CIRCULAR_RANDOM_PREDICTIONS.name(), circularRandomPredictions);
         result.append(FieldNames.ORC_CERTIFICATE_LONG_DISTANCE_PREDICTIONS.name(), longDistancePredictions);
         result.append(FieldNames.ORC_CERTIFICATE_NON_SPINNAKER_PREDICTIONS.name(), nonSpinnakerPredictions);
+        result.append(FieldNames.ORC_CERTIFICATE_TWA_SPEED_PREDICTIONS.name(), velocityPredictionsPerTrueWindSpeedAndAngle);
         return result;
     }
 
