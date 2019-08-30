@@ -2264,7 +2264,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
                 beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
                 runAllowancePerTrueWindSpeed);
-        Competitor competitor = null; //TODO change API to transfer only competitor id?
+        Competitor competitor = null; //TODO change API to transfer only competitor id? Otherwise there would be a
         return new ORCCertificateAssignmentEventImpl(createdAt, logicalTimePoint, author, id, certificate, competitor);
     }
 

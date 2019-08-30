@@ -51,10 +51,10 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
     public ORCCertificateImporterJSON(InputStream in) throws IOException, ParseException {
         Map<String, Object> result = new HashMap<>();
         String defaultEncoding = "UTF-8";
-        BOMInputStream bOMInputStream = new BOMInputStream(in);
-        ByteOrderMark bom = bOMInputStream.getBOM();
+        BOMInputStream bomInputStream = new BOMInputStream(in);
+        ByteOrderMark bom = bomInputStream.getBOM();
         String charsetName = bom == null ? defaultEncoding : bom.getCharsetName();
-        InputStreamReader reader = new InputStreamReader(new BufferedInputStream(bOMInputStream), charsetName);
+        InputStreamReader reader = new InputStreamReader(new BufferedInputStream(bomInputStream), charsetName);
         JSONObject parsedJson = (JSONObject) new JSONParser().parse(reader);
         JSONArray dataArray = (JSONArray) parsedJson.get("rms");
         for (int i = 0; i < dataArray.size(); i++) {

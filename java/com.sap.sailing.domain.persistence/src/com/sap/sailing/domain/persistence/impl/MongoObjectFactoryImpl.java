@@ -1911,7 +1911,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeIdentifier, ORCCertificateAssignmentEvent event) {
         Document document = createBasicRegattaLogEventDBObject(event);
-        document.append(FieldNames.COMPETITOR_ID.name(), event.getCompetitor().getId());
+        document.append(FieldNames.COMPETITOR_ID.name(), event.getCompetitorID());
+        //TODO: What is the best practice? Save UUID of competitor object to not safe the whole competitor object redundantly in different scopes?
         document.append(FieldNames.ORC_CERTIFICATE.name(), createORCCertificateObject(event.getCertificate()));
         storeRegattaLogEvent(regattaLikeIdentifier, document);
     }

@@ -14,15 +14,22 @@ import com.sap.sse.common.TimePoint;
 public class ORCCertificateAssignmentEventImpl extends AbstractLogEventImpl<RegattaLogEventVisitor> implements ORCCertificateAssignmentEvent {
 
     private ORCCertificate certificate;
-    private Competitor competitor;
+    private Serializable competitorID;
 
     public ORCCertificateAssignmentEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, Serializable pId, ORCCertificate certificate, Competitor competitor) {
         super(createdAt, logicalTimePoint, author, pId);
         this.certificate = certificate;
-        this.competitor = competitor;
+        this.competitorID = competitor.getId();
     }
 
+    public ORCCertificateAssignmentEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Serializable pId, ORCCertificate certificate, Serializable competitorID) {
+        super(createdAt, logicalTimePoint, author, pId);
+        this.certificate = certificate;
+        this.competitorID = competitorID;
+    }
+    
     private static final long serialVersionUID = -3186019736784868848L;
 
     @Override
@@ -36,8 +43,8 @@ public class ORCCertificateAssignmentEventImpl extends AbstractLogEventImpl<Rega
     }
 
     @Override
-    public Competitor getCompetitor() {
-        return competitor;
+    public Serializable getCompetitorID() {
+        return competitorID;
     }
 
 }

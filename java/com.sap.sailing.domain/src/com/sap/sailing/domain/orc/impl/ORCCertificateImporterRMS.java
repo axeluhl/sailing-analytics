@@ -1,8 +1,12 @@
 package com.sap.sailing.domain.orc.impl;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -11,6 +15,15 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.io.ByteOrderMark;
+import org.apache.commons.io.input.BOMInputStream;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+import com.sap.sailing.domain.common.orc.ORCCertificate;
+import com.sap.sailing.domain.orc.ORCCertificateImporter;
 
 /**
  * Represents a file in format {@code .rms} which is a simple ASCII file format, column-based, with fixed-width columns,
@@ -27,12 +40,11 @@ import java.util.regex.Pattern;
  * corresponding to the array indices can be queried.
  * 
  * @author Axel Uhl (d043530)
+ * @author Daniel Lisunkin (i505543)
  *
  */
 
-// TODO Is not implementing ORCCertificateImporter interface. Important to do, if further usage with performance curve is intended.
-
-public class ORCCertificateImporterRMS {
+public class ORCCertificateImporterRMS implements ORCCertificateImporter {
     private static final String NAME_OF_LAST_LEFT_ALIGNED_COLUMN_HEADER = "HH:MM:SS";
     
     private final LinkedHashMap<String, Integer> columnNamesAndWidths;
@@ -55,6 +67,24 @@ public class ORCCertificateImporterRMS {
     
     public ORCCertificateImporterRMS(Reader reader) throws IOException {
         final BufferedReader br = new BufferedReader(reader);
+        columnNamesAndWidths = readColumnWidthsFromFirstLine(br.readLine());
+        final String fileIdColumnName = columnNamesAndWidths.keySet().iterator().next();
+        certificateValuesByFileId = new HashMap<>();
+        String line;
+        while ((line = br.readLine()) != null) {
+            final Map<String, String> parsedLine = parseLine(line);
+            certificateValuesByFileId.put(parsedLine.get(fileIdColumnName), parsedLine);
+        }
+    }
+    
+    public ORCCertificateImporterRMS(InputStream in) throws IOException {
+        String defaultEncoding = "UTF-8";
+        BOMInputStream bomInputStream = new BOMInputStream(in);
+        ByteOrderMark bom = bomInputStream.getBOM();
+        String charsetName = bom == null ? defaultEncoding : bom.getCharsetName();
+        InputStreamReader reader = new InputStreamReader(new BufferedInputStream(bomInputStream), charsetName);
+        BufferedReader br = new BufferedReader(reader);
+        
         columnNamesAndWidths = readColumnWidthsFromFirstLine(br.readLine());
         final String fileIdColumnName = columnNamesAndWidths.keySet().iterator().next();
         certificateValuesByFileId = new HashMap<>();
@@ -116,5 +146,17 @@ public class ORCCertificateImporterRMS {
     
     public ORCCertificateValues getValuesForFileId(String fileId) {
         return certificateValuesByFileId.containsKey(fileId) ? new ORCCertificateValues(fileId) : null;
+    }
+
+    @Override
+    public ORCCertificate getCertificate(String sailnumber) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Map<String, ORCCertificate> getCertificates(String[] sailnumbers) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
