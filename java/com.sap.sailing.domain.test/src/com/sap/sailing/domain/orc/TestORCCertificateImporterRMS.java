@@ -21,6 +21,7 @@ import com.sap.sailing.domain.orc.impl.ORCCertificateImporterRMS.ORCCertificateV
 public class TestORCCertificateImporterRMS {
     private static final String RESOURCES = "resources/orc/";
 
+    /*
     @Test
     public void testSimpleRMSFileRead() throws FileNotFoundException, IOException {
         final File gerRms = new File(RESOURCES + "GER2016.rms");
@@ -32,6 +33,7 @@ public class TestORCCertificateImporterRMS {
         assertEquals("DE DOOD", ger884.getValue("BUILDER"));
         assertEquals("498.0", ger884.getValue("R9012"));
     }
+    */
     
     @Test
     public void testSimpleLocalRMSFileRead() throws IOException {
@@ -43,7 +45,7 @@ public class TestORCCertificateImporterRMS {
     
     @Test
     public void testSimpleOnlineRMSFileRead() throws IOException {
-        ORCCertificateImporter importer = new ORCCertificateImporterRMS(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
+        ORCCertificateImporter importer = new ORCCertificateImporterRMS(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=rms").openStream());
         ORCCertificate swan  = importer.getCertificate(" GER 5335");
         ORCCertificate moana = importer.getCertificate("ger  55 49 ");
         assertNotNull(swan);

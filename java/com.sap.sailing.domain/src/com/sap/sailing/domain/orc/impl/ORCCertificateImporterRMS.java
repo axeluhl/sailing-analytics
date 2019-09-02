@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -18,12 +17,16 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.input.BOMInputStream;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
+import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 import com.sap.sailing.domain.orc.ORCCertificateImporter;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
+import com.sap.sse.common.impl.SecondsDurationImpl;
 
 /**
  * Represents a file in format {@code .rms} which is a simple ASCII file format, column-based, with fixed-width columns,
@@ -46,22 +49,22 @@ import com.sap.sailing.domain.orc.ORCCertificateImporter;
 
 public class ORCCertificateImporterRMS implements ORCCertificateImporter {
     private static final String NAME_OF_LAST_LEFT_ALIGNED_COLUMN_HEADER = "HH:MM:SS";
-    
-    private final LinkedHashMap<String, Integer> columnNamesAndWidths;
-    
-    private final Map<String, Map<String, String>> certificateValuesByFileId;
-    
-    public class ORCCertificateValues {
-        private final String fileId;
 
-        public ORCCertificateValues(String fileId) {
+    private final LinkedHashMap<String, Integer> columnNamesAndWidths;
+
+    private final Map<String, Map<String, String>> certificateValuesBySailnumber;
+
+    public class ORCCertificateValues {
+        private final String sailnumber;
+
+        public ORCCertificateValues(String sailnumber) {
             super();
-            this.fileId = fileId;
+            this.sailnumber = sailnumber;
         }
-        
+
         public String getValue(String columnName) {
             assert columnNamesAndWidths.containsKey(columnName);
-            return certificateValuesByFileId.get(fileId).get(columnName);
+            return certificateValuesBySailnumber.get(sailnumber).get(columnName);
         }
     }
     
@@ -69,11 +72,13 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
         final BufferedReader br = new BufferedReader(reader);
         columnNamesAndWidths = readColumnWidthsFromFirstLine(br.readLine());
         final String fileIdColumnName = columnNamesAndWidths.keySet().iterator().next();
-        certificateValuesByFileId = new HashMap<>();
+        final String sailnumberColumnName = columnNamesAndWidths.keySet().iterator().next();
+        certificateValuesBySailnumber = new HashMap<>();
         String line;
+        
         while ((line = br.readLine()) != null) {
             final Map<String, String> parsedLine = parseLine(line);
-            certificateValuesByFileId.put(parsedLine.get(fileIdColumnName), parsedLine);
+            certificateValuesBySailnumber.put(parsedLine.get(sailnumberColumnName).replaceAll(" ", "").toUpperCase(), parsedLine);
         }
     }
     
@@ -84,15 +89,18 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
         String charsetName = bom == null ? defaultEncoding : bom.getCharsetName();
         InputStreamReader reader = new InputStreamReader(new BufferedInputStream(bomInputStream), charsetName);
         BufferedReader br = new BufferedReader(reader);
-        
         columnNamesAndWidths = readColumnWidthsFromFirstLine(br.readLine());
         final String fileIdColumnName = columnNamesAndWidths.keySet().iterator().next();
-        certificateValuesByFileId = new HashMap<>();
+        final String sailnumberColumnName = columnNamesAndWidths.keySet().iterator().next();
+        certificateValuesBySailnumber = new HashMap<>();
         String line;
+        
         while ((line = br.readLine()) != null) {
             final Map<String, String> parsedLine = parseLine(line);
-            certificateValuesByFileId.put(parsedLine.get(fileIdColumnName), parsedLine);
+            certificateValuesBySailnumber.put(parsedLine.get(sailnumberColumnName).replaceAll(" ", "").toUpperCase(), parsedLine);
         }
+        
+        br.close();
     }
     
     private Map<String, String> parseLine(final String line) {
@@ -140,18 +148,37 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
         return Collections.unmodifiableSet(columnNamesAndWidths.keySet());
     }
     
-    public Set<String> getFileIds() {
-        return Collections.unmodifiableSet(certificateValuesByFileId.keySet());
-    }
-    
-    public ORCCertificateValues getValuesForFileId(String fileId) {
-        return certificateValuesByFileId.containsKey(fileId) ? new ORCCertificateValues(fileId) : null;
+    public Set<String> getSailnumbers() {
+        return Collections.unmodifiableSet(certificateValuesBySailnumber.keySet());
     }
 
+    public ORCCertificateValues getValuesForSailnumber(String sailnumber) {
+        String searchString = sailnumber.replaceAll(" ", "").toUpperCase();
+        return certificateValuesBySailnumber.containsKey(searchString) ? new ORCCertificateValues(searchString) : null;
+    }
+    
     @Override
     public ORCCertificate getCertificate(String sailnumber) {
-        // TODO Auto-generated method stub
-        return null;
+        String searchString = sailnumber.replaceAll(" ", "").toUpperCase();
+        ORCCertificateValues certificateValues = getValuesForSailnumber(searchString);
+        String boatclass = certificateValues.getValue("TYPE");
+        Distance length  = new MeterDistance(Double.parseDouble(certificateValues.getValue("LOA")));
+        Duration gph     = new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue("GPH")));
+        Double cdl       = Double.parseDouble(certificateValues.getValue("CDL"));
+        Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle = new HashMap<>();
+        Map<Speed, Bearing> beatAngles = new HashMap<>();
+        Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed = new HashMap<>();
+        Map<Speed, Duration> beatAllowancePerTrueWindSpeed = new HashMap<>();
+        Map<Speed, Bearing> runAngles = new HashMap<>();
+        Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed = new HashMap<>();
+        Map<Speed, Duration> runAllowancePerTrueWindSpeed = new HashMap<>();
+        
+        
+        
+        return new ORCCertificateImpl(searchString, boatclass, length, gph, cdl,
+                velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
+                beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
+                runAllowancePerTrueWindSpeed);
     }
 
     @Override

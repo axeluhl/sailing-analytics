@@ -76,7 +76,7 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
         Double cdl       = null;
         Map<Speed, Bearing> beatAngles = new HashMap<>();
         Map<Speed, Bearing> gybeAngles = new HashMap<>();
-        Map<Speed, Map<Bearing, Speed>> speedPredictionPerTrueWindSpeedAndAngle = new HashMap<>();
+        Map<Speed, Map<Bearing, Speed>> velocityPredictionPerTrueWindSpeedAndAngle = new HashMap<>();
         Map<Bearing, Map<Speed, Duration>> allowanceDurationsPerTrueWindAngleAndSpeed = new HashMap<>();        //per nautical mile
         Map<String, Map<Speed, Duration>> predefinedAllowanceDurationsPerTrueWindSpeed = new HashMap<>();       //per nautical mile
         String searchString = sailnumber.replaceAll(" ", "").toUpperCase();
@@ -147,11 +147,11 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
             }
         } 
         for (Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
-            speedPredictionPerTrueWindSpeedAndAngle.put(tws, new HashMap<>());
+            velocityPredictionPerTrueWindSpeedAndAngle.put(tws, new HashMap<>());
         }
         for (Bearing keyTWA : allowanceDurationsPerTrueWindAngleAndSpeed.keySet()) {
             for (Speed keyTWS : allowanceDurationsPerTrueWindAngleAndSpeed.get(keyTWA).keySet()) {
-                speedPredictionPerTrueWindSpeedAndAngle.get(keyTWS).put(keyTWA,
+                velocityPredictionPerTrueWindSpeedAndAngle.get(keyTWS).put(keyTWA,
                         ORCCertificateImpl.NAUTICAL_MILE.inTime(allowanceDurationsPerTrueWindAngleAndSpeed.get(keyTWA).get(keyTWS)));
             }
         }
@@ -159,13 +159,16 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
         final Map<Speed, Duration> beatAllowancePerTrueWindSpeed = new HashMap<>();
         final Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed = new HashMap<>();
         final Map<Speed, Duration> runAllowancePerTrueWindSpeed = new HashMap<>();
-        for (final Speed tws : speedPredictionPerTrueWindSpeedAndAngle.keySet()) {
+        for (final Speed tws : velocityPredictionPerTrueWindSpeedAndAngle.keySet()) {
             beatVMGPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(BEAT).get(tws)));
             beatAllowancePerTrueWindSpeed.put(tws, predefinedAllowanceDurationsPerTrueWindSpeed.get(BEAT).get(tws));
             runVMGPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(RUN).get(tws)));
             runAllowancePerTrueWindSpeed.put(tws, predefinedAllowanceDurationsPerTrueWindSpeed.get(RUN).get(tws));
         }
-        return new ORCCertificateImpl(searchString, boatclass, length, gph, cdl, speedPredictionPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed, gybeAngles, runVMGPredictionPerTrueWindSpeed, runAllowancePerTrueWindSpeed);
+        return new ORCCertificateImpl(searchString, boatclass, length, gph, cdl,
+                velocityPredictionPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
+                beatAllowancePerTrueWindSpeed, gybeAngles, runVMGPredictionPerTrueWindSpeed,
+                runAllowancePerTrueWindSpeed);
     }
 
     /**
