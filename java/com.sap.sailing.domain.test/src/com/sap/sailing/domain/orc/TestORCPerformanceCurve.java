@@ -25,11 +25,14 @@ import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveCourseImpl;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.orc.impl.ORCCertificateImporterJSON;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveImpl;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
@@ -246,6 +249,19 @@ public class TestORCPerformanceCurve {
         new ORCPerformanceCurveImpl(certificateBank, alturaCourse);
         new ORCPerformanceCurveImpl(certificateHaspa, alturaCourse);
         new ORCPerformanceCurveImpl(certificateHalbtrocken, alturaCourse);
+    }
+    
+    // Tests for the calculations with a more complex course which contains some special leg types. (circular random or other)
+    @Test
+    public void testComplexCourse() throws FunctionEvaluationException {
+        List<ORCPerformanceCurveLeg> list = new ArrayList<>();
+        list.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(2), new DegreeBearingImpl(0)));
+        list.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(2), ORCPerformanceCurveLegTypes.CIRCULAR_RANDOM));
+        ORCPerformanceCurveCourse complexCourse = new ORCPerformanceCurveCourseImpl(list);
+        
+        ORCCertificate certificateMoana = importerLocal.getCertificate("GER 5549");
+        ORCPerformanceCurve performanceCurveMoana = new ORCPerformanceCurveImpl(certificateMoana, complexCourse);
+        //TODO get ReferenceValues
     }
     
 }
