@@ -42,6 +42,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.controls.GenericListBox;
 import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
 import com.sap.sse.gwt.client.controls.IntegerBox;
@@ -67,6 +68,8 @@ public abstract class DataEntryDialog<T> {
     private final DockPanel buttonPanel;
     private final FlowPanel rightButtonPanel;
     private final FlowPanel leftButtonPanel;
+    private final AsyncActionsExecutor validationExecutor;
+    private static final String VALIDATION_ACTION_CATEGORY = "validation";
     
     private boolean dialogInInvalidState = false;
 
@@ -75,6 +78,10 @@ public abstract class DataEntryDialog<T> {
          * @return <code>null</code> in case the <code>valueToValidate</code> is valid; a user-readable error message otherwise
          */
         String getErrorMessage(T valueToValidate);
+        
+        default void validate(T valueToValidate, AsyncCallback<String> callback, AsyncActionsExecutor validationExecutor) {
+            validationExecutor.execute(cb->cb.onSuccess(getErrorMessage(valueToValidate)), VALIDATION_ACTION_CATEGORY, callback);
+        }
     }
     
     public static interface DialogCallback<T> {
@@ -107,6 +114,7 @@ public abstract class DataEntryDialog<T> {
      */
     public DataEntryDialog(String title, String message, String okButtonName, String cancelButtonName,
             Validator<T> validator, boolean animationEnabled, final DialogCallback<T> callback) {
+        validationExecutor = new AsyncActionsExecutor();
         dateEntryDialog = new DialogBox();
         dateEntryDialog.setText(title);
         dateEntryDialog.setGlassEnabled(true);
@@ -153,37 +161,61 @@ public abstract class DataEntryDialog<T> {
         dateEntryDialog.setWidget(dialogFPanel);
         okButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                dateEntryDialog.hide();
-                if (callback != null) {
-                    callback.ok(getResult());
-                }
+                // wait for any outstanding validation request and check last validation result; call OK only if the pending validation was OK
+                ifLastValidationRequestSuccesssful(()->{
+                    dateEntryDialog.hide();
+                    if (callback != null) {
+                        callback.ok(getResult());
+                    }
+                });
             }
         });
     }
     
+    /**
+     * If the {@link #validationExecutor} has no more pending actions and the last validation was successful,
+     * call {@code callback}. If an action is still pending in the {@link #validationExecutor}, wait until no more
+     * action is pending and invoke {@code callback} if the last validation state was OK.
+     */
+    protected void ifLastValidationRequestSuccesssful(Runnable callback) {
+        // TODO Auto-generated method stub
+        
+    }
+
     public void setValidator(Validator<T> validator) {
         this.validator = validator;
     }
     
-    protected boolean validateAndUpdate() {
-        String errorMessage = null;
+    protected void validateAndUpdate() {
         T result = getResult();
         if (validator != null) {
-            errorMessage = validator.getErrorMessage(result);
+            validator.validate(result, new AsyncCallback<String>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    onSuccess(caught.getMessage());
+                }
+
+                /**
+                 * Note: if {@code errorMessage} is not {@code null}, the method name "onSuccess" is a bit misleading
+                 * because it notifies an error condition.
+                 */
+                @Override
+                public void onSuccess(String errorMessage) {
+                    boolean invalidState = errorMessage != null && !errorMessage.isEmpty();
+                    if (invalidState != dialogInInvalidState) {
+                        dialogInInvalidState = invalidState;
+                        onInvalidStateChanged(invalidState);
+                    }
+                    if (!invalidState) {
+                        getStatusLabel().setText("");
+                        onChange(result);
+                    } else {
+                        getStatusLabel().setText(errorMessage);
+                        getStatusLabel().setStyleName("errorLabel");
+                    }
+                }
+            }, validationExecutor);
         }
-        boolean invalidState = errorMessage != null && !errorMessage.isEmpty();
-        if (invalidState != dialogInInvalidState) {
-            dialogInInvalidState = invalidState;
-            onInvalidStateChanged(invalidState);
-        }
-        if (!invalidState) {
-            getStatusLabel().setText("");
-            onChange(result);
-        } else {
-            getStatusLabel().setText(errorMessage);
-            getStatusLabel().setStyleName("errorLabel");
-        }
-        return !invalidState;
     }
 
     /**
