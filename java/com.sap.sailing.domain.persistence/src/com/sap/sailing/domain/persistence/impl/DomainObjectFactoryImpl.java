@@ -2026,7 +2026,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         int legNr = (int) dbObject.get(FieldNames.ORC_LEG_NR.name()); //TODO Nullhandling
         Bearing twa = new DegreeBearingImpl((double) dbObject.get(FieldNames.ORC_LEG_TWA.name()));
         Distance length = new NauticalMileDistance((double) dbObject.get(FieldNames.ORC_LEG_LENGTH.name()));
-        return new RaceLogORCLegDataEventImpl(logicalTimePoint, logicalTimePoint, author, id, passId, legNr, twa, length);
+        return new RaceLogORCLegDataEventImpl(createdAt, logicalTimePoint, author, id, passId, legNr, twa, length);
     }
 
     @Override

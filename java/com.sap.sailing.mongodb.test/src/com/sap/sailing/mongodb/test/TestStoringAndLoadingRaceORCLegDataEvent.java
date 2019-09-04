@@ -41,17 +41,15 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 /**
  * 
  * @author Daniel Lisunkin (i505543)
- *
+ 
  */
 public class TestStoringAndLoadingRaceORCLegDataEvent extends AbstractMongoDBTest {
 
-    protected TimePoint expectedEventTime = new MillisecondsTimePoint(42);
+    protected TimePoint expectedEventTime = new MillisecondsTimePoint(750);
     protected Serializable expectedId = UUID.randomUUID();
     protected List<Competitor> expectedInvolvedBoats = Collections.emptyList();
     protected int expectedPassId = 42;
     private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
-
-    private final static BoatClass boatClass = new BoatClassImpl("505", /* typicallyStartsUpwind */ true);
 
     protected MongoObjectFactoryImpl mongoFactory = (MongoObjectFactoryImpl) PersistenceFactory.INSTANCE
             .getMongoObjectFactory(getMongoService(), new MockSmartphoneImeiServiceFinderFactory());
@@ -75,8 +73,6 @@ public class TestStoringAndLoadingRaceORCLegDataEvent extends AbstractMongoDBTes
 
     @Test
     public void test() {
-        boolean isDisplayed = true;
-
         RaceLogORCLegDataEvent expectedEvent = new RaceLogORCLegDataEventImpl(MillisecondsTimePoint.now(), expectedEventTime, author,
                 expectedId, expectedPassId, 0, new DegreeBearingImpl(60), new NauticalMileDistance(1));
 
