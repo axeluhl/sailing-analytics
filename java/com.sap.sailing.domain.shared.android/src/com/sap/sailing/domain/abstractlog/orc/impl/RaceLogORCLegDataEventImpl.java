@@ -6,6 +6,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventImpl;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
@@ -17,13 +18,15 @@ public class RaceLogORCLegDataEventImpl extends RaceLogEventImpl implements Race
     private final int legNr;
     private final Bearing twa;
     private final Distance length;
+    private final ORCPerformanceCurveLegTypes type;
 
     public RaceLogORCLegDataEventImpl(TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author,
-            Serializable pId, int pPassId, int legNr, Bearing twa, Distance length) {
+            Serializable pId, int pPassId, int legNr, Bearing twa, Distance length, ORCPerformanceCurveLegTypes type) {
         super(createdAt, logicalTimePoint, author, pId, pPassId);
         this.legNr = legNr;
         this.twa = twa;
         this.length = length;
+        this.type = type;
     }
 
     @Override
@@ -49,5 +52,10 @@ public class RaceLogORCLegDataEventImpl extends RaceLogEventImpl implements Race
     @Override
     public Bearing getTwa() {
         return twa;
+    }
+
+    @Override
+    public ORCPerformanceCurveLegTypes getType() {
+        return type;
     }
 }

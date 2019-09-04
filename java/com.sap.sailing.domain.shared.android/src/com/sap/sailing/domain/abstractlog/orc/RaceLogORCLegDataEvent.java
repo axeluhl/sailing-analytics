@@ -3,6 +3,7 @@ package com.sap.sailing.domain.abstractlog.orc;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 
@@ -15,6 +16,8 @@ import com.sap.sse.common.Distance;
  */
 public interface RaceLogORCLegDataEvent extends RaceLogEvent {
 
+    public ORCPerformanceCurveLegTypes getType();
+    
     public Distance getLength();
 
     public Bearing getTwa();

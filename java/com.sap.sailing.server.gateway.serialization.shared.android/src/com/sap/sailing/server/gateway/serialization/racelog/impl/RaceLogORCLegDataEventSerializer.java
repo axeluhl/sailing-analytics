@@ -19,6 +19,7 @@ public class RaceLogORCLegDataEventSerializer extends BaseRaceLogEventSerializer
     public static final String ORC_LEG_NR = "legNr";
     public static final String ORC_LEG_TWA = "twa";
     public static final String ORC_LEG_LENGTH = "length";
+    public static final String ORC_LEG_TYPE = "type";
     
     public RaceLogORCLegDataEventSerializer(JsonSerializer<Competitor> competitorSerializer) {
         super(competitorSerializer);
@@ -31,6 +32,7 @@ public class RaceLogORCLegDataEventSerializer extends BaseRaceLogEventSerializer
         result.put(ORC_LEG_NR, legData.getLegNr());
         result.put(ORC_LEG_LENGTH, legData.getLength().getNauticalMiles());
         result.put(ORC_LEG_TWA, legData.getTwa().getDegrees());
+        result.put(ORC_LEG_TYPE, legData.getType().name());
         return result;
     }
 

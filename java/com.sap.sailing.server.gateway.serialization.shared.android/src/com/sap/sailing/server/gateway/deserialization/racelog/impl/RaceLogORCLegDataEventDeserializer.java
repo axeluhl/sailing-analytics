@@ -11,6 +11,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogORCLegDataEventSerializer;
@@ -37,7 +38,8 @@ public class RaceLogORCLegDataEventDeserializer extends BaseRaceLogEventDeserial
         int legNr = (int) object.get(RaceLogORCLegDataEventSerializer.ORC_LEG_LENGTH);
         Bearing twa = new DegreeBearingImpl((double) object.get(RaceLogORCLegDataEventSerializer.ORC_LEG_TWA));
         Distance length = new NauticalMileDistance((double) object.get(RaceLogORCLegDataEventSerializer.ORC_LEG_LENGTH));
-        return new RaceLogORCLegDataEventImpl(createdAt, timePoint, author, id, passId, legNr, twa, length);
+        ORCPerformanceCurveLegTypes type = ORCPerformanceCurveLegTypes.valueOf((String) object.get(RaceLogORCLegDataEventSerializer.ORC_LEG_TYPE));
+        return new RaceLogORCLegDataEventImpl(createdAt, timePoint, author, id, passId, legNr, twa, length, type);
     }
 
 }

@@ -27,6 +27,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
@@ -72,13 +73,15 @@ public class TestStoringAndLoadingRaceORCLegDataEvent extends AbstractMongoDBTes
     @Test
     public void test() {
         RaceLogORCLegDataEvent expectedEvent = new RaceLogORCLegDataEventImpl(MillisecondsTimePoint.now(), expectedEventTime, author,
-                expectedId, expectedPassId, 0, new DegreeBearingImpl(60), new NauticalMileDistance(1));
+                expectedId, expectedPassId, 0, new DegreeBearingImpl(60), new NauticalMileDistance(1), ORCPerformanceCurveLegTypes.CIRCULAR_RANDOM);
 
         Document dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RaceLogORCLegDataEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(expectedEvent.getTwa(), actualEvent.getTwa());
+        assertEquals(expectedEvent.getLength(), actualEvent.getLength());
+        assertEquals(expectedEvent.getType(), actualEvent.getType());
     }
 
     public void assertBaseFields(RaceLogEvent expectedEvent, RaceLogEvent actualEvent) {
