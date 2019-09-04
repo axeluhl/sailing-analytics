@@ -43,6 +43,8 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
     private Map<String, Object> data;
     private static final String RUN = "Run";
     private static final String BEAT = "Beat";
+    private static final String CIRCULAR_RANDOM = "CR";
+    private static final String NON_SPINNAKER = "NS";
 
     /**
      * Receives an {@link InputStream} from different possible sources (web, local file, ...) and does parse the
@@ -130,7 +132,8 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
                             case "R120":
                             case "R135":
                             case "R150":
-                                allowanceDurationsPerTrueWindAngleAndSpeed.put(new DegreeBearingImpl(Integer.parseInt(((String) aKey).substring(1))), twsMap);
+                                allowanceDurationsPerTrueWindAngleAndSpeed.put(
+                                        new DegreeBearingImpl(Integer.parseInt(((String) aKey).substring(1))), twsMap);
                                 break;
                             case BEAT:
                             case RUN:
@@ -152,23 +155,33 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
         for (Bearing keyTWA : allowanceDurationsPerTrueWindAngleAndSpeed.keySet()) {
             for (Speed keyTWS : allowanceDurationsPerTrueWindAngleAndSpeed.get(keyTWA).keySet()) {
                 velocityPredictionPerTrueWindSpeedAndAngle.get(keyTWS).put(keyTWA,
-                        ORCCertificateImpl.NAUTICAL_MILE.inTime(allowanceDurationsPerTrueWindAngleAndSpeed.get(keyTWA).get(keyTWS)));
+                        ORCCertificateImpl.NAUTICAL_MILE
+                        .inTime(allowanceDurationsPerTrueWindAngleAndSpeed.get(keyTWA).get(keyTWS)));
             }
         }
         final Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed = new HashMap<>();
         final Map<Speed, Duration> beatAllowancePerTrueWindSpeed = new HashMap<>();
         final Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed = new HashMap<>();
         final Map<Speed, Duration> runAllowancePerTrueWindSpeed = new HashMap<>();
+        final Map<Speed, Speed> circularRandomSpeedPredictionPerTrueWindSpeed = new HashMap<>();
+        final Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed = new HashMap<>();
         for (final Speed tws : velocityPredictionPerTrueWindSpeedAndAngle.keySet()) {
-            beatVMGPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(BEAT).get(tws)));
+            beatVMGPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE
+                    .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(BEAT).get(tws)));
             beatAllowancePerTrueWindSpeed.put(tws, predefinedAllowanceDurationsPerTrueWindSpeed.get(BEAT).get(tws));
-            runVMGPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(RUN).get(tws)));
+            runVMGPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE
+                    .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(RUN).get(tws)));
             runAllowancePerTrueWindSpeed.put(tws, predefinedAllowanceDurationsPerTrueWindSpeed.get(RUN).get(tws));
+            circularRandomSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE
+                    .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(CIRCULAR_RANDOM).get(tws)));
+            nonSpinnakerSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE
+                    .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(NON_SPINNAKER).get(tws)));
         }
         return new ORCCertificateImpl(searchString, boatclass, length, gph, cdl,
                 velocityPredictionPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
                 beatAllowancePerTrueWindSpeed, gybeAngles, runVMGPredictionPerTrueWindSpeed,
-                runAllowancePerTrueWindSpeed);
+                runAllowancePerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
+                nonSpinnakerSpeedPredictionPerTrueWindSpeed);
     }
 
     /**

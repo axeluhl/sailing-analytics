@@ -180,13 +180,19 @@ public class ORCCertificateImpl implements ORCCertificate {
      * {@link #velocityPredictionPerTrueWindSpeedAndAngle}.
      */
     private final Map<Speed, Duration> runAllowancePerTrueWindSpeed;
+    
+    private final Map<Speed, Speed> circularRandomSpeedPredictionsPerTrueWindSpeed;
+    
+    private final Map<Speed, Speed> nonSpinnakerSpeedPredictionsPerTrueWindSpeed;
 
     // TODO Comment on Constructor
     public ORCCertificateImpl(String sailnumber, String boatclass, Distance length, Duration gph,
             Double cdl, Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle,
             Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
             Map<Speed, Duration> beatAllowancePerTrueWindSpeed, Map<Speed, Bearing> runAngles,
-            Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed, Map<Speed, Duration> runAllowancePerTrueWindSpeed) {
+            Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed, Map<Speed, Duration> runAllowancePerTrueWindSpeed,
+            Map<Speed, Speed> circularRandomSpeedPredictionsPerTrueWindSpeed,
+            Map<Speed, Speed> nonSpinnakerSpeedPredictionsPerTrueWindSpeed) {
         this.sailnumber = sailnumber;
         this.boatclass = boatclass;
         this.lengthOverAll = length;
@@ -200,6 +206,8 @@ public class ORCCertificateImpl implements ORCCertificate {
         this.runAngles = Collections.unmodifiableMap(runAngles);
         this.runVMGPredictionPerTrueWindSpeed = Collections.unmodifiableMap(runVMGPredictionPerTrueWindSpeed);
         this.runAllowancePerTrueWindSpeed = Collections.unmodifiableMap(runAllowancePerTrueWindSpeed);
+        this.circularRandomSpeedPredictionsPerTrueWindSpeed = Collections.unmodifiableMap(circularRandomSpeedPredictionsPerTrueWindSpeed);
+        this.nonSpinnakerSpeedPredictionsPerTrueWindSpeed = Collections.unmodifiableMap(nonSpinnakerSpeedPredictionsPerTrueWindSpeed);
     }
 
     @Override
@@ -221,8 +229,7 @@ public class ORCCertificateImpl implements ORCCertificate {
 
     @Override
     public Map<Speed, Speed> getCircularRandomSpeedPredictions() {
-        // TODO Circular Random Allowances currently not saved in this class and need to be given by the importer
-        return null;
+        return circularRandomSpeedPredictionsPerTrueWindSpeed;
     }
 
     @Override
@@ -249,8 +256,7 @@ public class ORCCertificateImpl implements ORCCertificate {
 
     @Override
     public Map<Speed, Speed> getNonSpinnakerSpeedPredictions() {
-        // TODO Non Spinnaker Allowances currently not saved in this class and need to be given by the importer
-        return null;
+        return nonSpinnakerSpeedPredictionsPerTrueWindSpeed;
     }
 
     @Override

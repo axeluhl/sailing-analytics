@@ -186,6 +186,22 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
                                     leg.getTwa()).getDuration(leg.getLength()));
                 }
             }
+        } else if (leg.getType().equals(ORCPerformanceCurveLegTypes.CIRCULAR_RANDOM)) {
+            for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
+                result.put(tws, certificate.getCircularRandomSpeedPredictions().get(tws).getDuration(leg.getLength()));
+            }
+        } else if (leg.getType().equals(ORCPerformanceCurveLegTypes.LONG_DISTANCE)) {
+            for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
+                result.put(tws, certificate.getLongDistanceSpeedPredictions().get(tws).getDuration(leg.getLength()));
+            }
+        } else if (leg.getType().equals(ORCPerformanceCurveLegTypes.WINDWARD_LEEWARD)) {
+            for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
+                result.put(tws, certificate.getWindwardLeewardSpeedPrediction().get(tws).getDuration(leg.getLength()));
+            }
+        } else if (leg.getType().equals(ORCPerformanceCurveLegTypes.NON_SPINNAKER)) {
+            for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
+                result.put(tws, certificate.getNonSpinnakerSpeedPredictions().get(tws).getDuration(leg.getLength()));
+            }
         }
         return result;
     }

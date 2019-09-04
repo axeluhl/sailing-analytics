@@ -2234,6 +2234,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Map<Speed, Bearing> runAngles = new HashMap<>();
         Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed = new HashMap<>();
         Map<Speed, Duration> runAllowancePerTrueWindSpeed = new HashMap<>();
+        Map<Speed, Speed> circularRandomSpeedPredictionPerTrueWindSpeed = new HashMap<>();
+        Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed = new HashMap<>();
         
         for (Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
             String twsKey = MongoObjectFactoryImpl.speedToKnotsString(tws);
@@ -2249,7 +2251,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     ((Document) dbObject.get(FieldNames.ORC_CERTIFICATE_RUN_VMG_PREDICTIONS.name())).getDouble(twsKey)));
             runAllowancePerTrueWindSpeed.put(tws, new SecondsDurationImpl(
                     ((Document) dbObject.get(FieldNames.ORC_CERTIFICATE_RUN_ALLOWANCES.name())).getDouble(twsKey)));
-        
+            circularRandomSpeedPredictionPerTrueWindSpeed.put(tws, new KnotSpeedImpl(
+                    ((Document) dbObject.get(FieldNames.ORC_CERTIFICATE_CIRCULAR_RANDOM_SPEED_PREDICTIONS.name())).getDouble(twsKey)));
+            nonSpinnakerSpeedPredictionPerTrueWindSpeed.put(tws, new KnotSpeedImpl(
+                    ((Document) dbObject.get(FieldNames.ORC_CERTIFICATE_NON_SPINNAKER_SPEED_PREDICTIONS.name())).getDouble(twsKey)));
+            
             Map<Bearing, Speed> velocityPredictionAtCurrentTrueWindSpeedPerTrueWindAngle = new HashMap<>();
             for (Bearing twa : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES) {
                 String twaKey = MongoObjectFactoryImpl.bearingToDegreeString(twa);
@@ -2263,7 +2269,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         ORCCertificate certificate = new ORCCertificateImpl(sailnumber, boatclass, length, gph, cdl,
                 velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
                 beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
-                runAllowancePerTrueWindSpeed);
+                runAllowancePerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
+                nonSpinnakerSpeedPredictionPerTrueWindSpeed);
         Serializable competitorId = (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name());
         return new RaceLogORCCertificateAssignmentEventImpl(createdAt, logicalTimePoint, author, id, certificate, competitorId);
     }

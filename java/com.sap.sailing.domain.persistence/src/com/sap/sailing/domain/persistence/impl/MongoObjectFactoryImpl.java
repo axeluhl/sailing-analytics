@@ -1901,10 +1901,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.append(FieldNames.ORC_CERTIFICATE_RUN_ALLOWANCES.name(), runAllowances);
         result.append(FieldNames.ORC_CERTIFICATE_BEAT_VMG_PREDICTIONS.name(), beatVMGPredictions);
         result.append(FieldNames.ORC_CERTIFICATE_RUN_VMG_PREDICTIONS.name(), runVMGPredictions);
-        result.append(FieldNames.ORC_CERTIFICATE_WINDWARD_LEEWARD_PREDICTIONS.name(), windwardLeewardPredictions);
-        result.append(FieldNames.ORC_CERTIFICATE_CIRCULAR_RANDOM_PREDICTIONS.name(), circularRandomPredictions);
-        result.append(FieldNames.ORC_CERTIFICATE_LONG_DISTANCE_PREDICTIONS.name(), longDistancePredictions);
-        result.append(FieldNames.ORC_CERTIFICATE_NON_SPINNAKER_PREDICTIONS.name(), nonSpinnakerPredictions);
+        result.append(FieldNames.ORC_CERTIFICATE_CIRCULAR_RANDOM_SPEED_PREDICTIONS.name(), circularRandomPredictions);
+        result.append(FieldNames.ORC_CERTIFICATE_NON_SPINNAKER_SPEED_PREDICTIONS.name(), nonSpinnakerPredictions);
         result.append(FieldNames.ORC_CERTIFICATE_TWA_SPEED_PREDICTIONS.name(), velocityPredictionsPerTrueWindSpeedAndAngle);
         return result;
     }
