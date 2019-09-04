@@ -301,7 +301,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         });
         
         filterField = new LabeledAbstractFilterablePanel<CompetitorDTO>(new Label(getStringMessages().filterCompetitors()),
-                new ArrayList<CompetitorDTO>(), dataProvider) {
+                new ArrayList<CompetitorDTO>(), dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(CompetitorDTO t) {
                 List<String> string = new ArrayList<String>();
@@ -321,6 +321,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 return table;
             }
         };
+        filterField.setCheckboxEnabledFilter(comp -> userService.hasPermission(comp, DefaultActions.UPDATE));
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         
         // CompetitorTableEditFeatures

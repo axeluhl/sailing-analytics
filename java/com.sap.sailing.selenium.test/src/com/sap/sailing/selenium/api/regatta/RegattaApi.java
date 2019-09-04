@@ -4,9 +4,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.openqa.selenium.TimeoutException;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
 
@@ -19,6 +21,7 @@ public class RegattaApi {
     private static final String ADD = "/add";
     private static final String ADD_RACE_COLUMN_URL = "/addracecolumns";
     private static final String LIST_COMPETITORS = "/competitors";
+    private static final String TRACKING_DEVICES = "/tracking_devices";
 
     public Regatta getRegatta(ApiContext ctx, String regattaName) {
         return new Regatta(ctx.get(REGATTAS + "/" + regattaName));
@@ -26,6 +29,26 @@ public class RegattaApi {
 
     public RegattaRaces getRegattaRaces(ApiContext ctx, String regattaName) {
         return new RegattaRaces(ctx.get(REGATTAS + "/" + regattaName + LIST_REGATTA_RACES));
+    }
+
+    public RegattaRaces getRegattaRaces(ApiContext ctx, String regattaName, Predicate<RegattaRaces> predicateToCheck)
+            throws TimeoutException {
+        for (int i = 0; i < 20; i++) {
+            final RegattaRaces regattaRaces = getRegattaRaces(ctx, regattaName);
+            if (predicateToCheck.test(regattaRaces)) {
+                return regattaRaces;
+            }
+            if (i == 19) {
+                // skip unnecessary 500ms wait
+                break;
+            }
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                throw new TimeoutException(e);
+            }
+        }
+        throw new TimeoutException("Expected condition failed, 20 tries, waited for 10 seconds.");
     }
 
     public Competitor createAndAddCompetitor(ApiContext ctx, String regattaName, String boatclass,
@@ -96,5 +119,9 @@ public class RegattaApi {
         queryParams.put("secret", secret.orElse(null));
         ctx.post(url, queryParams);
     }
-
+    
+    public RegattaDeviceStatus getTrackingDeviceStatus(ApiContext ctx, String regattaName) {
+        final String url = REGATTAS + "/" + regattaName + TRACKING_DEVICES;
+        return new RegattaDeviceStatus(ctx.get(url));
+    }
 }

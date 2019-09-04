@@ -80,7 +80,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         this.userManagementService = userService.getUserManagementService();
         rolesListDataProvider = new ListDataProvider<>();
         filterablePanelRoleDefinitions = new LabeledAbstractFilterablePanel<RoleDefinitionDTO>(new Label(stringMessages.filterRoles()), new ArrayList<>(),
-                rolesListDataProvider) {
+                rolesListDataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(RoleDefinitionDTO roleDefinition) {
                 return Arrays.asList(roleDefinition.getName(), roleDefinition.getId().toString(), roleDefinition.getPermissions().toString());
@@ -91,6 +91,8 @@ public class RoleDefinitionsPanel extends VerticalPanel {
                 return roleDefinitionsTable;
             }
         };
+        filterablePanelRoleDefinitions
+                .setCheckboxEnabledFilter(role -> userService.hasPermission(role, DefaultActions.UPDATE));
         roleDefinitionsTable = createRoleDefinitionsTable(tableResources);
         roleDefinitionsTable.ensureDebugId("RolesCellTable");
         filterablePanelRoleDefinitions.getTextBox().ensureDebugId("RolesFilterTextBox");

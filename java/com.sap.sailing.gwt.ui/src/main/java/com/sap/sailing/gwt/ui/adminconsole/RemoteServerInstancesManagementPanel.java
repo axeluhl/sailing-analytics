@@ -70,7 +70,7 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
         serverDataProvider = new ListDataProvider<RemoteSailingServerReferenceDTO>();
         filteredServerTablePanel = new LabeledAbstractFilterablePanel<RemoteSailingServerReferenceDTO>(
                 new Label(stringMessages.filterBy() + ":"), Collections.<RemoteSailingServerReferenceDTO> emptyList(),
-                serverDataProvider) {
+                serverDataProvider, stringMessages) {
             @Override
             public List<String> getSearchableStrings(RemoteSailingServerReferenceDTO t) {
                 List<String> strings = new ArrayList<String>();
