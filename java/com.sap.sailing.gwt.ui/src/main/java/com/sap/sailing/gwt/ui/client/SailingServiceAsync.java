@@ -105,6 +105,7 @@ import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
+import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
@@ -528,11 +529,11 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer,
             AsyncCallback<RemoteSailingServerReferenceDTO> callback);
 
-    void getResultImportUrls(String resultProviderName, AsyncCallback<List<String>> callback);
+    void getResultImportUrls(String resultProviderName, AsyncCallback<List<UrlDTO>> callback);
 
-    void removeResultImportURLs(String resultProviderName, Set<String> toRemove, AsyncCallback<Void> callback);
+    void removeResultImportURLs(String resultProviderName, Set<UrlDTO> toRemove, AsyncCallback<Void> callback);
 
-    void addResultImportUrl(String resultProviderName, String url, AsyncCallback<Void> callback);
+    void addResultImportUrl(String resultProviderName, UrlDTO url, AsyncCallback<Void> callback);
 
     void getUrlResultProviderNamesAndOptionalSampleURL(AsyncCallback<List<Pair<String, String>>> callback);
 

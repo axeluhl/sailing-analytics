@@ -118,6 +118,7 @@ import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
+import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
@@ -479,12 +480,12 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     RemoteSailingServerReferenceDTO addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer)
             throws UnauthorizedException, Exception;
 
-    List<String> getResultImportUrls(String resultProviderName) throws UnauthorizedException;
+    List<UrlDTO> getResultImportUrls(String resultProviderName) throws UnauthorizedException;
 
-    void removeResultImportURLs(String resultProviderName, Set<String> toRemove)
+    void removeResultImportURLs(String resultProviderName, Set<UrlDTO> toRemove)
             throws UnauthorizedException, Exception;
 
-    void addResultImportUrl(String resultProviderName, String url) throws UnauthorizedException, Exception;
+    void addResultImportUrl(String resultProviderName, UrlDTO url) throws UnauthorizedException, Exception;
 
     void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
             String comment) throws UnauthorizedException;

@@ -464,6 +464,7 @@ import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
+import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
@@ -5208,43 +5209,49 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public List<String> getResultImportUrls(String resultProviderName) {
-        final List<String> result = new ArrayList<String>();
+    public List<UrlDTO> getResultImportUrls(String resultProviderName) {
+        final List<UrlDTO> result = new ArrayList<>();
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
         ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
         if (urlBasedScoreCorrectionProvider != null) {
+            SecurityService securityService = getSecurityService();
             Iterable<URL> allUrlsReadableBySubject = resultUrlRegistry.getResultUrls(resultProviderName);
             for (URL url : allUrlsReadableBySubject) {
-                result.add(url.toString());
+                QualifiedObjectIdentifier objId = SecuredDomainType.RESULT_IMPORT_URL.getQualifiedObjectIdentifier(
+                        new TypeRelativeObjectIdentifier(urlBasedScoreCorrectionProvider.getName(), url.toString()));
+                UrlDTO urlDTO = new UrlDTO(url.toString());
+                SecurityDTOUtil.addSecurityInformation(securityService, urlDTO, objId);
+                result.add(urlDTO);
             }
         }
         return result;
     }
 
     @Override
-    public void removeResultImportURLs(String resultProviderName, Set<String> toRemove) throws Exception {
+    public void removeResultImportURLs(String resultProviderName, Set<UrlDTO> toRemove) throws Exception {
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
         ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
         if (urlBasedScoreCorrectionProvider != null) {
-            for (String urlToRemove : toRemove) {
+            for (UrlDTO urlToRemove : toRemove) {
                 getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(
                         SecuredDomainType.RESULT_IMPORT_URL.getQualifiedObjectIdentifier(
                                 new TypeRelativeObjectIdentifier(urlBasedScoreCorrectionProvider.getName(),
-                                        urlToRemove)),
-                        () -> resultUrlRegistry.unregisterResultUrl(resultProviderName, new URL(urlToRemove)));
+                                        urlToRemove.getUrl())),
+                        () -> resultUrlRegistry.unregisterResultUrl(resultProviderName, new URL(urlToRemove.getUrl())));
             }
         }
     }
 
     @Override
-    public void addResultImportUrl(String resultProviderName, String url) throws Exception {
+    public void addResultImportUrl(String resultProviderName, UrlDTO url) throws Exception {
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
         if (urlBasedScoreCorrectionProvider != null) {
             ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
             getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredDomainType.RESULT_IMPORT_URL,
-                    new TypeRelativeObjectIdentifier(urlBasedScoreCorrectionProvider.getName(), url), url,
-                    () -> resultUrlRegistry.registerResultUrl(resultProviderName, new URL(url)));
+                    new TypeRelativeObjectIdentifier(urlBasedScoreCorrectionProvider.getName(),
+                            url.getUrl().toString()), url.getUrl().toString(),
+                    () -> resultUrlRegistry.registerResultUrl(resultProviderName, new URL(url.getUrl())));
         }
     }
 
