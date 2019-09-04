@@ -40,7 +40,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * 
- * @author I505543
+ * @author Daniel Lisunkin (i505543)
  *
  */
 public class TestStoringAndLoadingRaceORCLegDataEvent extends AbstractMongoDBTest {

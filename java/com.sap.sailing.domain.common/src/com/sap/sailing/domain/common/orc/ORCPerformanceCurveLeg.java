@@ -10,4 +10,6 @@ public interface ORCPerformanceCurveLeg {
     Bearing getTwa();
     
     String toString();
+    
+    ORCPerformanceCurveLegTypes getType();
 }
