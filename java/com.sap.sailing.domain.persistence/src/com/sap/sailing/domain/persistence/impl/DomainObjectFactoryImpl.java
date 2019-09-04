@@ -44,9 +44,9 @@ import com.mongodb.client.model.RenameCollectionOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
-import com.sap.sailing.domain.abstractlog.orc.ORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
-import com.sap.sailing.domain.abstractlog.orc.impl.ORCCertificateAssignmentEventImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
@@ -2113,7 +2113,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRegattaLogDefineMarkEvent(createdAt, author, logicalTimePoint, id, dbObject);
         } else if (eventClass.equals(RegattaLogRevokeEvent.class.getSimpleName())) {
             return loadRegattaLogRevokeEvent(createdAt, author, logicalTimePoint, id, dbObject);
-        } else if (eventClass.equals(ORCCertificateAssignmentEvent.class.getSimpleName())) {
+        } else if (eventClass.equals(RegattaLogORCCertificateAssignmentEvent.class.getSimpleName())) {
             return loadRegattaLogORCCertificateAssignmentEvent(createdAt, author, logicalTimePoint, id, dbObject);
         }
         throw new IllegalStateException(String.format("Unknown RegattaLogEvent type %s", eventClass));
@@ -2219,7 +2219,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         .storeRegattaLogEvent(regattaLogIdentifier, result));
     }
     
-    private ORCCertificateAssignmentEvent loadRegattaLogORCCertificateAssignmentEvent(TimePoint createdAt,
+    private RegattaLogORCCertificateAssignmentEvent loadRegattaLogORCCertificateAssignmentEvent(TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Document dbObject) {
         String sailnumber = dbObject.getString(FieldNames.ORC_CERTIFICATE_SAILNUMBER.name());
         String boatclass = dbObject.getString(FieldNames.ORC_CERTIFICATE_BOATCLASS.name());
@@ -2265,7 +2265,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
                 runAllowancePerTrueWindSpeed);
         Serializable competitorId = (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name());
-        return new ORCCertificateAssignmentEventImpl(createdAt, logicalTimePoint, author, id, certificate, competitorId);
+        return new RaceLogORCCertificateAssignmentEventImpl(createdAt, logicalTimePoint, author, id, certificate, competitorId);
     }
 
     /**

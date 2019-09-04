@@ -2,7 +2,7 @@ package com.sap.sailing.domain.persistence.impl;
 
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.abstractlog.orc.ORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
@@ -93,7 +93,7 @@ public class MongoRegattaLogStoreVisitor implements RegattaLogEventVisitor {
     }
 
     @Override
-    public void visit(ORCCertificateAssignmentEvent event) {
+    public void visit(RegattaLogORCCertificateAssignmentEvent event) {
         mongoObjectFactory.storeRegattaLogEvent(regattaLikeIdentifier, event);
         
     }

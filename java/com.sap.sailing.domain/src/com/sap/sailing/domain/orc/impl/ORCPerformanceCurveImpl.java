@@ -55,7 +55,7 @@ import com.sap.sse.common.util.CubicSpline.SplineBoundaryCondition;
  * 
  */
 public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurve {
-    private static final Logger logger = Logger.getLogger(ORCPerformanceCurveImpl.class.getName()); // TODO Daniel wants to add some logging!
+    private static final Logger logger = Logger.getLogger(ORCPerformanceCurveImpl.class.getName());
     private static final long serialVersionUID = 4113356173492168453L;
 
     /**

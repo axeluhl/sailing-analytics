@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.abstractlog.regatta;
 
-import com.sap.sailing.domain.abstractlog.orc.ORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceBoatMappingEvent;
@@ -39,5 +39,5 @@ public interface RegattaLogEventVisitor {
 
     void visit(RegattaLogDefineMarkEvent event);
 
-    void visit(ORCCertificateAssignmentEvent event);
+    void visit(RegattaLogORCCertificateAssignmentEvent event);
 }

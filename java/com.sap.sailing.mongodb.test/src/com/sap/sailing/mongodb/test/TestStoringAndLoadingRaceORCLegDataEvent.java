@@ -39,9 +39,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
- * 
  * @author Daniel Lisunkin (i505543)
- 
  */
 public class TestStoringAndLoadingRaceORCLegDataEvent extends AbstractMongoDBTest {
 
