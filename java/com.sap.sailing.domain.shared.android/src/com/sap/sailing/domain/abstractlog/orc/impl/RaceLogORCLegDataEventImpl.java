@@ -3,14 +3,14 @@ package com.sap.sailing.domain.abstractlog.orc.impl;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.orc.ORCLegDataEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventImpl;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 
-public class ORCLegDataEventImpl extends RaceLogEventImpl implements ORCLegDataEvent {
+public class RaceLogORCLegDataEventImpl extends RaceLogEventImpl implements RaceLogORCLegDataEvent {
 
     private static final long serialVersionUID = -5063350268001993185L;
     
@@ -18,7 +18,7 @@ public class ORCLegDataEventImpl extends RaceLogEventImpl implements ORCLegDataE
     private final Bearing twa;
     private final Distance length;
 
-    public ORCLegDataEventImpl(TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author,
+    public RaceLogORCLegDataEventImpl(TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             Serializable pId, int pPassId, int legNr, Bearing twa, Distance length) {
         super(createdAt, logicalTimePoint, author, pId, pPassId);
         this.legNr = legNr;

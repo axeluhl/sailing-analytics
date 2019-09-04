@@ -13,7 +13,7 @@ import com.sap.sse.common.Distance;
  * 
  * @author Daniel Lisunkin (i505543)
  */
-public interface ORCLegDataEvent extends RaceLogEvent {
+public interface RaceLogORCLegDataEvent extends RaceLogEvent {
 
     public Distance getLength();
 

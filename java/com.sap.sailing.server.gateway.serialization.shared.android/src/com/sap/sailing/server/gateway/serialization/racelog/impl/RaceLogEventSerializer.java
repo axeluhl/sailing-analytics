@@ -2,7 +2,7 @@ package com.sap.sailing.server.gateway.serialization.racelog.impl;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.abstractlog.orc.ORCLegDataEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
@@ -307,7 +307,7 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
     }
     
     @Override
-    public void visit(ORCLegDataEvent event) {
+    public void visit(RaceLogORCLegDataEvent event) {
         chosenSerializer = orcLegDataEventSerializer;
     }
 }

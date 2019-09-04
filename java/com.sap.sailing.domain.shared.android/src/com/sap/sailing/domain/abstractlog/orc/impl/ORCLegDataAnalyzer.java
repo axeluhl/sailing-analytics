@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.abstractlog.orc.impl;
 
-import com.sap.sailing.domain.abstractlog.orc.ORCLegDataEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
@@ -17,10 +17,10 @@ public class ORCLegDataAnalyzer extends RaceLogAnalyzer<ORCLegDataAnalyzerResult
     @Override
     protected ORCLegDataAnalyzerResult performAnalysis() {
         for (RaceLogEvent event : getAllEventsDescending()) {
-            if (event instanceof ORCLegDataEvent) {
-                Bearing twa = ((ORCLegDataEvent) event).getTwa();
-                Distance length = ((ORCLegDataEvent) event).getLength();
-                int legNr = ((ORCLegDataEvent) event).getLegNr();
+            if (event instanceof RaceLogORCLegDataEvent) {
+                Bearing twa = ((RaceLogORCLegDataEvent) event).getTwa();
+                Distance length = ((RaceLogORCLegDataEvent) event).getLength();
+                int legNr = ((RaceLogORCLegDataEvent) event).getLegNr();
                 return new ORCLegDataAnalyzerResult(length, twa, legNr);
             }
         }

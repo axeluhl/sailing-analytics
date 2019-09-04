@@ -28,7 +28,7 @@ import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.orc.ORCCertificateAssignmentEvent;
-import com.sap.sailing.domain.abstractlog.orc.ORCLegDataEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
@@ -991,15 +991,17 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
     
-    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, ORCLegDataEvent event) {
+    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogORCLegDataEvent event) {
         Document result = new Document();
         storeRaceLogIdentifier(raceLogIdentifier, result);
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeORCLegDataEvent(event));
         return result;
     }
 
-    private Object storeORCLegDataEvent(ORCLegDataEvent event) {
+    private Object storeORCLegDataEvent(RaceLogORCLegDataEvent event) {
         Document result = new Document();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCLegDataEvent.class.getSimpleName());
         result.put(FieldNames.ORC_LEG_NR.name(), event.getLegNr()); // TODO Null handling
         result.put(FieldNames.ORC_LEG_LENGTH.name(), event.getLength().getNauticalMiles());
         result.put(FieldNames.ORC_LEG_TWA.name(), event.getTwa().getDegrees());
@@ -1241,7 +1243,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(finishPositioningListChangedEvent, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFinishPositioningListChangedEvent.class.getSimpleName());
         result.put(FieldNames.RACE_LOG_POSITIONED_COMPETITORS.name(), storePositionedCompetitors(finishPositioningListChangedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
-
         return result;
     }
 
@@ -1250,7 +1251,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(finishPositioningConfirmedEvent, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFinishPositioningConfirmedEvent.class.getSimpleName());
         result.put(FieldNames.RACE_LOG_POSITIONED_COMPETITORS.name(), storePositionedCompetitors(finishPositioningConfirmedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
-
         return result;
     }
     

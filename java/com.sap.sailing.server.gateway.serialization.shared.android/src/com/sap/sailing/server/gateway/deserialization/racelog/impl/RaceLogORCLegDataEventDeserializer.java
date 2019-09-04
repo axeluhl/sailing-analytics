@@ -6,7 +6,7 @@ import java.util.List;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.orc.impl.ORCLegDataEventImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
@@ -20,7 +20,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
- * Deserializer for {@link com.sap.sailing.domain.abstractlog.orc.ORCLegDataEvent ORCLegDataEvent}.
+ * Deserializer for {@link com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent ORCLegDataEvent}.
  * 
  * @author Daniel Lisunkin (I505543)
  */
@@ -37,7 +37,7 @@ public class RaceLogORCLegDataEventDeserializer extends BaseRaceLogEventDeserial
         int legNr = (int) object.get(RaceLogORCLegDataEventSerializer.ORC_LEG_LENGTH);
         Bearing twa = new DegreeBearingImpl((double) object.get(RaceLogORCLegDataEventSerializer.ORC_LEG_TWA));
         Distance length = new NauticalMileDistance((double) object.get(RaceLogORCLegDataEventSerializer.ORC_LEG_LENGTH));
-        return new ORCLegDataEventImpl(createdAt, timePoint, author, id, passId, legNr, twa, length);
+        return new RaceLogORCLegDataEventImpl(createdAt, timePoint, author, id, passId, legNr, twa, length);
     }
 
 }
