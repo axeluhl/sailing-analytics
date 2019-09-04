@@ -19,8 +19,8 @@ import org.junit.Test;
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
-import com.sap.sailing.domain.abstractlog.orc.ORCLegDataEvent;
-import com.sap.sailing.domain.abstractlog.orc.impl.ORCLegDataEventImpl;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -77,11 +77,11 @@ public class TestStoringAndLoadingRaceORCLegDataEvent extends AbstractMongoDBTes
     public void test() {
         boolean isDisplayed = true;
 
-        ORCLegDataEvent expectedEvent = new ORCLegDataEventImpl(MillisecondsTimePoint.now(), expectedEventTime, author,
+        RaceLogORCLegDataEvent expectedEvent = new RaceLogORCLegDataEventImpl(MillisecondsTimePoint.now(), expectedEventTime, author,
                 expectedId, expectedPassId, 0, new DegreeBearingImpl(60), new NauticalMileDistance(1));
 
         Document dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
-        ORCLegDataEvent actualEvent = loadEvent(dbObject);
+        RaceLogORCLegDataEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(expectedEvent.getTwa(), actualEvent.getTwa());

@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
-import com.sap.sailing.domain.abstractlog.orc.ORCLegDataEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
@@ -147,7 +147,7 @@ public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisit
     }
     
     @Override
-    public void visit(ORCLegDataEvent event) {
+    public void visit(RaceLogORCLegDataEvent event) {
         notifyListenerAboutEventAdded(event);
     }
 }

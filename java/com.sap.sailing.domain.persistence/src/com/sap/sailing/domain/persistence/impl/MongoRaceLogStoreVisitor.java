@@ -4,7 +4,7 @@ import java.util.logging.Logger;
 
 import org.bson.Document;
 
-import com.sap.sailing.domain.abstractlog.orc.ORCLegDataEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
@@ -191,7 +191,7 @@ public class MongoRaceLogStoreVisitor implements RaceLogEventVisitor {
     }
 
     @Override
-    public void visit(ORCLegDataEvent event) {
+    public void visit(RaceLogORCLegDataEvent event) {
         Document object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         mongoObjectFactory.storeRaceLogEventEvent(object);
     }

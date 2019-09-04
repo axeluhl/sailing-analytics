@@ -45,9 +45,9 @@ import com.mongodb.client.result.DeleteResult;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.orc.ORCCertificateAssignmentEvent;
-import com.sap.sailing.domain.abstractlog.orc.ORCLegDataEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.impl.ORCCertificateAssignmentEventImpl;
-import com.sap.sailing.domain.abstractlog.orc.impl.ORCLegDataEventImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -1629,7 +1629,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     competitors, dbObject);
         } else if (eventClass.equals(RaceLogTagEvent.class.getSimpleName())) {
             resultEvent = loadRaceLogTagEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
-        } else if (eventClass.equals(ORCLegDataEvent.class.getSimpleName())) {
+        } else if (eventClass.equals(RaceLogORCLegDataEvent.class.getSimpleName())) {
             resultEvent = loadRaceLogORCLegDataEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
         } else {
             throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
@@ -2021,12 +2021,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return new RaceLogRaceStatusEventImpl(createdAt, logicalTimePoint, author, id, passId, nextStatus);
     }
     
-    private ORCLegDataEvent loadRaceLogORCLegDataEvent(TimePoint createdAt, AbstractLogEventAuthor author,
+    private RaceLogORCLegDataEvent loadRaceLogORCLegDataEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, Integer passId, Document dbObject) {
         int legNr = (int) dbObject.get(FieldNames.ORC_LEG_NR.name()); //TODO Nullhandling
         Bearing twa = new DegreeBearingImpl((double) dbObject.get(FieldNames.ORC_LEG_TWA.name()));
         Distance length = new NauticalMileDistance((double) dbObject.get(FieldNames.ORC_LEG_LENGTH.name()));
-        return new ORCLegDataEventImpl(logicalTimePoint, logicalTimePoint, author, id, passId, legNr, twa, length);
+        return new RaceLogORCLegDataEventImpl(logicalTimePoint, logicalTimePoint, author, id, passId, legNr, twa, length);
     }
 
     @Override
