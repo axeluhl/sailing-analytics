@@ -112,6 +112,11 @@ public class AsyncActionsExecutor {
         this.timePointOfFirstExecutorInit = MillisecondsTimePoint.now(); // triggering duration to reset
     }
     
+    /**
+     * If there are no calls for the {@code category} whose results are still outstanding, the {@code callback}
+     * is invoked immediately. Otherwise, the {@code callback} is stored and will be invoked once there are
+     * no more outstanding responses for the {@code category}.
+     */
     public void runAfterLastActionReturned(String category, Runnable callback) {
         if (getNumberOfPendingActionsPerType(category) == 0) {
             callback.run();
@@ -120,6 +125,11 @@ public class AsyncActionsExecutor {
         }
     }
     
+    /**
+     * If there are no calls for this executor whose results are still outstanding, the {@code callback}
+     * is invoked immediately. Otherwise, the {@code callback} is stored and will be invoked once there are
+     * no more outstanding responses for this executor.
+     */
     public void runAfterLastActionReturned(Runnable callback) {
         if (getNumberOfPendingActions() == 0) {
             callback.run();

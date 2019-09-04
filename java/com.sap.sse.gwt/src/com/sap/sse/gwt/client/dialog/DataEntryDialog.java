@@ -178,8 +178,11 @@ public abstract class DataEntryDialog<T> {
      * action is pending and invoke {@code callback} if the last validation state was OK.
      */
     protected void ifLastValidationRequestSuccesssful(Runnable callback) {
-        // TODO Auto-generated method stub
-        
+        validationExecutor.runAfterLastActionReturned(VALIDATION_ACTION_CATEGORY, ()->{
+            if (!dialogInInvalidState) {
+                callback.run();
+            }
+        });
     }
 
     public void setValidator(Validator<T> validator) {
