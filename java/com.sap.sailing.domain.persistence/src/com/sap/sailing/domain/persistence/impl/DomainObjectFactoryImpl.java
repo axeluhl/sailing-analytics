@@ -46,7 +46,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
-import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCCertificateAssignmentEventImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RegattaLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
@@ -2024,10 +2024,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     private RaceLogORCLegDataEvent loadRaceLogORCLegDataEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, Integer passId, Document dbObject) {
-        int legNr = (int) dbObject.get(FieldNames.ORC_LEG_NR.name()); //TODO Nullhandling
-        Bearing twa = new DegreeBearingImpl((double) dbObject.get(FieldNames.ORC_LEG_TWA.name()));
-        Distance length = new NauticalMileDistance((double) dbObject.get(FieldNames.ORC_LEG_LENGTH.name()));
-        ORCPerformanceCurveLegTypes type = ORCPerformanceCurveLegTypes.valueOf(dbObject.getString(FieldNames.ORC_LEG_TYPE.name()));
+        final int legNr = ((Number) dbObject.get(FieldNames.ORC_LEG_NR.name())).intValue();
+        final Bearing twa = new DegreeBearingImpl(((Number) dbObject.get(FieldNames.ORC_LEG_TWA_IN_DEG.name())).doubleValue());
+        final Distance length = new NauticalMileDistance(((Number) dbObject.get(FieldNames.ORC_LEG_LENGTH_IN_NAUTICAL_MILES.name())).doubleValue());
+        final ORCPerformanceCurveLegTypes type = ORCPerformanceCurveLegTypes.valueOf(dbObject.getString(FieldNames.ORC_LEG_TYPE.name()));
         return new RaceLogORCLegDataEventImpl(createdAt, logicalTimePoint, author, id, passId, legNr, twa, length, type);
     }
 
@@ -2274,7 +2274,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 runAllowancePerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
                 nonSpinnakerSpeedPredictionPerTrueWindSpeed);
         Serializable competitorId = (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name());
-        return new RaceLogORCCertificateAssignmentEventImpl(createdAt, logicalTimePoint, author, id, certificate, competitorId);
+        return new RegattaLogORCCertificateAssignmentEventImpl(createdAt, logicalTimePoint, author, id, certificate, competitorId);
     }
 
     /**

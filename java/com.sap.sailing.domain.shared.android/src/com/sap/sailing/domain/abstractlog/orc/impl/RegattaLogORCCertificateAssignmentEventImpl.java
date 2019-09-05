@@ -7,23 +7,22 @@ import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sse.common.TimePoint;
 
-public class RaceLogORCCertificateAssignmentEventImpl extends AbstractLogEventImpl<RegattaLogEventVisitor> implements RegattaLogORCCertificateAssignmentEvent {
+public class RegattaLogORCCertificateAssignmentEventImpl extends AbstractLogEventImpl<RegattaLogEventVisitor> implements RegattaLogORCCertificateAssignmentEvent {
 
     private ORCCertificate certificate;
     private Serializable competitorID;
 
-    public RaceLogORCCertificateAssignmentEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
+    public RegattaLogORCCertificateAssignmentEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, Serializable pId, ORCCertificate certificate, Competitor competitor) {
         super(createdAt, logicalTimePoint, author, pId);
         this.certificate = certificate;
         this.competitorID = competitor.getId();
     }
 
-    public RaceLogORCCertificateAssignmentEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
+    public RegattaLogORCCertificateAssignmentEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, Serializable pId, ORCCertificate certificate, Serializable competitorID) {
         super(createdAt, logicalTimePoint, author, pId);
         this.certificate = certificate;

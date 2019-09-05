@@ -118,7 +118,7 @@ public enum FieldNames {
     /** @deprecated Replaced by CONTROLPOINTWITHTWOMARKS_RIGHT, still used to migrate old races*/ @Deprecated GATE_RIGHT,
     
    //ORC Leg fields
-    ORC_LEG_NR, ORC_LEG_LENGTH, ORC_LEG_TWA, ORC_LEG_TYPE,
+    ORC_LEG_NR, ORC_LEG_LENGTH_IN_NAUTICAL_MILES, ORC_LEG_TWA_IN_DEG, ORC_LEG_TYPE,
 
     // regatta log
     // did not reuse RACE_LOG* types, as this would require handling old versions of all events

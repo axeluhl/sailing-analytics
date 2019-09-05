@@ -35,10 +35,10 @@ public class RaceLogORCLegDataEventDeserializer extends BaseRaceLogEventDeserial
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
-        int legNr = ((Number) object.get(RaceLogORCLegDataEventSerializer.ORC_LEG_NR)).intValue();
-        Bearing twa = new DegreeBearingImpl(((Number) object.get(RaceLogORCLegDataEventSerializer.ORC_LEG_TWA)).doubleValue());
-        Distance length = new NauticalMileDistance(((Number) object.get(RaceLogORCLegDataEventSerializer.ORC_LEG_LENGTH)).doubleValue());
-        ORCPerformanceCurveLegTypes type = ORCPerformanceCurveLegTypes.valueOf((String) object.get(RaceLogORCLegDataEventSerializer.ORC_LEG_TYPE));
+        final int legNr = ((Number) object.get(RaceLogORCLegDataEventSerializer.ORC_LEG_NR)).intValue();
+        final Bearing twa = new DegreeBearingImpl(((Number) object.get(RaceLogORCLegDataEventSerializer.ORC_LEG_TWA)).doubleValue());
+        final Distance length = new NauticalMileDistance(((Number) object.get(RaceLogORCLegDataEventSerializer.ORC_LEG_LENGTH)).doubleValue());
+        final ORCPerformanceCurveLegTypes type = ORCPerformanceCurveLegTypes.valueOf((String) object.get(RaceLogORCLegDataEventSerializer.ORC_LEG_TYPE));
         return new RaceLogORCLegDataEventImpl(createdAt, timePoint, author, id, passId, legNr, twa, length, type);
     }
 
