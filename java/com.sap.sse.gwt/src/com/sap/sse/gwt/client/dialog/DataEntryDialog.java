@@ -73,6 +73,7 @@ public abstract class DataEntryDialog<T> {
     
     private boolean dialogInInvalidState = false;
 
+    @FunctionalInterface
     public static interface Validator<T> {
         /**
          * @return <code>null</code> in case the <code>valueToValidate</code> is valid; a user-readable error message otherwise
