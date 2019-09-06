@@ -44,8 +44,10 @@ import com.mongodb.client.model.RenameCollectionOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RegattaLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
@@ -1510,7 +1512,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private List<RaceLogEvent> loadRaceLogEvents(RaceLog targetRaceLog, Document query) {
+    private List<RaceLogEvent> loadRaceLogEvents(RaceLog targetRaceLog, Document query) throws JsonDeserializationException, ParseException {
         List<RaceLogEvent> result = new ArrayList<>();
         MongoCollection<Document> raceLog = database.getCollection(CollectionNames.RACE_LOGS.name());
         for (Document o : raceLog.find(query)) {
@@ -1539,7 +1541,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *         updating this object into the RACE_LOGS collection then because only the caller knows the key surrounding
      *         the event object passed to this method.
      */
-    public Pair<RaceLogEvent, Optional<Document>> loadRaceLogEvent(Document dbObject) {
+    public Pair<RaceLogEvent, Optional<Document>> loadRaceLogEvent(Document dbObject) throws JsonDeserializationException, ParseException {
         TimePoint logicalTimePoint = loadTimePoint(dbObject);
         TimePoint createdAt = loadTimePoint(dbObject, FieldNames.RACE_LOG_EVENT_CREATED_AT);
         Serializable id = (Serializable) dbObject.get(FieldNames.RACE_LOG_EVENT_ID.name());
@@ -1628,6 +1630,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             resultEvent = loadRaceLogTagEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
         } else if (eventClass.equals(RaceLogORCLegDataEvent.class.getSimpleName())) {
             resultEvent = loadRaceLogORCLegDataEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
+        } else if (eventClass.equals(RaceLogORCCertificateAssignmentEvent.class.getSimpleName())) {
+            resultEvent = loadRaceLogORCCertificateAssignmentEvent(createdAt, author, logicalTimePoint, passId, passId, dbObject);
         } else {
             throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
         }
@@ -2025,6 +2029,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final Distance length = new NauticalMileDistance(((Number) dbObject.get(FieldNames.ORC_LEG_LENGTH_IN_NAUTICAL_MILES.name())).doubleValue());
         final ORCPerformanceCurveLegTypes type = ORCPerformanceCurveLegTypes.valueOf(dbObject.getString(FieldNames.ORC_LEG_TYPE.name()));
         return new RaceLogORCLegDataEventImpl(createdAt, logicalTimePoint, author, id, passId, legNr, twa, length, type);
+    }
+
+    private RaceLogORCCertificateAssignmentEvent loadRaceLogORCCertificateAssignmentEvent(TimePoint createdAt,
+            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, int passId, Document dbObject)
+            throws JsonDeserializationException, ParseException {
+        final Document certificateDbObject = (Document) dbObject.get(FieldNames.ORC_CERTIFICATE.name());
+        final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
+        JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(certificateDbObject.toJson(writerSettings)));
+        final ORCCertificate certificate = new ORCCertificateJsonDeserializer().deserialize(json); 
+        Serializable competitorId = (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name());
+        return new RaceLogORCCertificateAssignmentEventImpl(createdAt, logicalTimePoint, author, id, passId, certificate, competitorId);
     }
 
     @Override

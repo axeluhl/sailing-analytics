@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.bson.Document;
+import org.json.simple.parser.ParseException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,6 +33,7 @@ import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
@@ -69,7 +71,7 @@ public class TestStoringAndLoadingRaceORCLegDataEvent extends AbstractMongoDBTes
     }
 
     @Test
-    public void test() {
+    public void test() throws JsonDeserializationException, ParseException {
         RaceLogORCLegDataEvent expectedEvent = new RaceLogORCLegDataEventImpl(MillisecondsTimePoint.now(), expectedEventTime, author,
                 expectedId, expectedPassId, 0, new DegreeBearingImpl(60), new NauticalMileDistance(1), ORCPerformanceCurveLegTypes.CIRCULAR_RANDOM);
 
@@ -93,16 +95,17 @@ public class TestStoringAndLoadingRaceORCLegDataEvent extends AbstractMongoDBTes
 
     /**
      * Will always wait a couple of milliseconds to ensure that {@link RaceLogEvent#getCreatedAt()} has passed.
+     * @throws ParseException 
+     * @throws JsonDeserializationException 
      */
     @SuppressWarnings("unchecked")
-    private <T extends RaceLogEvent> T loadEvent(Document dbObject) {
+    private <T extends RaceLogEvent> T loadEvent(Document dbObject) throws JsonDeserializationException, ParseException {
         try {
             Thread.sleep(2);
         } catch (InterruptedException ie) {
             fail(ie.toString());
         }
-        RaceLogEvent dbEvent = domainFactory.loadRaceLogEvent((Document) dbObject.get(FieldNames.RACE_LOG_EVENT.name()))
-                .getA();
+        RaceLogEvent dbEvent = domainFactory.loadRaceLogEvent((Document) dbObject.get(FieldNames.RACE_LOG_EVENT.name())).getA();
         T actualEvent = (T) dbEvent;
         return actualEvent;
     }
