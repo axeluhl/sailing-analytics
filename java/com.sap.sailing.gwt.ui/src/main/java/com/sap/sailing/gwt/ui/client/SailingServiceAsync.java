@@ -533,7 +533,9 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void removeResultImportURLs(String resultProviderName, Set<UrlDTO> toRemove, AsyncCallback<Void> callback);
 
-    void addResultImportUrl(String resultProviderName, UrlDTO url, AsyncCallback<Void> callback);
+    void addResultImportUrl(String resultProviderName, UrlDTO urlDTO, AsyncCallback<Void> callback);
+
+    void validateResultImportUrl(String resultProviderName, UrlDTO urlDTO, AsyncCallback<Void> callback);
 
     void getUrlResultProviderNamesAndOptionalSampleURL(AsyncCallback<List<Pair<String, String>>> callback);
 

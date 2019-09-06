@@ -5230,7 +5230,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public void removeResultImportURLs(String resultProviderName, Set<UrlDTO> toRemove) throws Exception {
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
-        ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
+        ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry(); //TODO Unresolved urls
         if (urlBasedScoreCorrectionProvider != null) {
             for (UrlDTO urlToRemove : toRemove) {
                 getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(
@@ -5243,16 +5243,35 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public void addResultImportUrl(String resultProviderName, UrlDTO url) throws Exception {
+    public void addResultImportUrl(String resultProviderName, UrlDTO urlDTO) throws Exception {
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
         if (urlBasedScoreCorrectionProvider != null) {
             ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
             getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredDomainType.RESULT_IMPORT_URL,
                     new TypeRelativeObjectIdentifier(urlBasedScoreCorrectionProvider.getName(),
-                            url.getUrl().toString()), url.getUrl().toString(),
-                    () -> resultUrlRegistry.registerResultUrl(resultProviderName, new URL(url.getUrl())));
+                            urlDTO.getUrl().toString()), urlDTO.getUrl().toString(),
+                    () -> resultUrlRegistry.registerResultUrl(resultProviderName, new URL(urlDTO.getUrl())));
         }
+    }
+
+    @Override
+    public void validateResultImportUrl(String resultProviderName, UrlDTO urlDTO) throws IllegalArgumentException {
+        if (urlDTO == null || urlDTO.getUrl() == null || urlDTO.getUrl().isEmpty()) {
+            throw new IllegalArgumentException("No URL given.");
+        }
+        ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
+        URL url = null;
+        try {
+            url = new URL(urlDTO.getUrl()); //TODO Check if exists?
+            return;
+        } catch (MalformedURLException e) {
+            //TODO Find better way to determine if url is invalid
+            //TODO Resolve id or short name
+            
+            //TODO Check if exists?
+        }
+        return;
     }
 
     private ResultUrlRegistry getResultUrlRegistry() {
