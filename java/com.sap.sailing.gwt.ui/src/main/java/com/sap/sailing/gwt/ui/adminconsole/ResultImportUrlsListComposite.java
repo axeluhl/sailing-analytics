@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -52,7 +53,6 @@ public class ResultImportUrlsListComposite extends Composite {
 
         final CaptionPanel captionPanel = new CaptionPanel(stringMessages.resultImportUrls());
         final VerticalPanel panel = new VerticalPanel();
-        // panel.setSpacing(10); //TODO css
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,
                 SecuredDomainType.RESULT_IMPORT_URL);
 
@@ -126,45 +126,29 @@ public class ResultImportUrlsListComposite extends Composite {
     }
 
     private void addUrl() {
-        TextfieldEntryDialog dialog = new TextfieldEntryDialog(stringMessages.addResultImportUrl(),
-                stringMessages.addResultImportUrl(), stringMessages.add(), stringMessages.cancel(), "http://",
-                new DataEntryDialog.Validator<String>() {
+        new ResultImportUrlAddDialog(getSelectedProviderName(), sailingService, stringMessages,
+                new DataEntryDialog.DialogCallback<UrlDTO>() {
                     @Override
-                    public String getErrorMessage(String valueToValidate) {
-                        if (valueToValidate == null || valueToValidate.length() == 0) {
-                            return stringMessages.pleaseEnterNonEmptyUrl();
-                        } // TODO Validate
-                        return null;
-                    }
-                }, new DataEntryDialog.DialogCallback<String>() {
-                    @Override
-                    public void ok(String url) {
-                        String providerName = getSelectedProviderName();
-                        UrlDTO urlDTO = new UrlDTO(url); // TODO Security data
-
-                        sailingService.addResultImportUrl(providerName, urlDTO, new AsyncCallback<Void>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter
-                                        .reportError(stringMessages.errorAddingResultImportUrl(caught.getMessage()));
-                            }
-
+                    public void ok(UrlDTO url) {
+                        sailingService.addResultImportUrl(getSelectedProviderName(), url, new AsyncCallback<Void>() {
                             @Override
                             public void onSuccess(Void result) {
                                 Notification.notify(stringMessages.successfullyUpdatedResultImportUrls(),
                                         NotificationType.INFO);
                                 updateTable();
                             }
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter
+                                        .reportError(stringMessages.errorAddingResultImportUrl(caught.getMessage()));
+                            }
                         });
                     }
-
                     @Override
                     public void cancel() {
-                        // Cancelled by user do nothing.
+                        // Cancelled by user. Do nothing.
                     }
-                });
-        dialog.getEntryField().setVisibleLength(120);
-        dialog.show();
+                }).show();
     }
 
     private void removeUrls(Set<UrlDTO> set) {

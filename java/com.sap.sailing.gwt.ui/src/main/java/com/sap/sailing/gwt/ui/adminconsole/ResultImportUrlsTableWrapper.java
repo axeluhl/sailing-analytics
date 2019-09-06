@@ -43,7 +43,8 @@ public class ResultImportUrlsTableWrapper<S extends RefreshableSelectionModel<Ur
         super(sailingService, stringMessages, errorReporter, true, false, new UrlDTOEntityIdentityComparator());
 
         TextColumn<UrlDTO> urlColumn = new AbstractSortableTextColumn<UrlDTO>(
-                url -> url.getUrl()); // TODO Styling
+                url -> url.getUrl());
+        urlColumn.setSortable(true);
         urlColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
 
         AccessControlledActionsColumn<UrlDTO, DefaultActionsImagesBarCell> actionsColumn = AccessControlledActionsColumn
