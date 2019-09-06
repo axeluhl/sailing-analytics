@@ -32,7 +32,6 @@ public class RaceLogDenoteForTrackingEventDeserializer extends BaseRaceLogEventD
     	BoatClass boatClass = domainFactory.getOrCreateBoatClass(
     			(String) object.get(RaceLogDenoteForTrackingEventSerializer.FIELD_BOAT_CLASS));
     	Serializable raceId = (Serializable) object.get(RaceLogDenoteForTrackingEventSerializer.FIELD_RACE_ID);
-        
         return new RaceLogDenoteForTrackingEventImpl(createdAt, timePoint, author, id, passId, raceName, boatClass, raceId);
     }
 }

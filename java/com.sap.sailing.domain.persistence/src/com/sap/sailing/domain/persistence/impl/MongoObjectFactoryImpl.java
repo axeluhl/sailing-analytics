@@ -27,8 +27,9 @@ import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
+import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
@@ -102,7 +103,6 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
-import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -129,6 +129,7 @@ import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerialize
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorWithBoatRefJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.ORCCertificateJsonSerializer;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -998,11 +999,27 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    private Object storeORCLegDataEvent(RaceLogORCLegDataEvent event) {
+    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogORCCertificateAssignmentEvent event) {
+        Document result = new Document();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeORCCertificateAssignmentEvent(event));
+        return result;
+    }
+
+    private Document storeORCCertificateAssignmentEvent(RaceLogORCCertificateAssignmentEvent event) {
         Document result = new Document();
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCLegDataEvent.class.getSimpleName());
-        result.put(FieldNames.ORC_LEG_NR.name(), event.getLegNr()); // TODO Null handling
+        result.append(FieldNames.COMPETITOR_ID.name(), event.getCompetitorID());
+        result.append(FieldNames.ORC_CERTIFICATE.name(), createORCCertificateObject(event.getCertificate()));
+        return result;
+    }
+
+    private Document storeORCLegDataEvent(RaceLogORCLegDataEvent event) {
+        Document result = new Document();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCLegDataEvent.class.getSimpleName());
+        result.put(FieldNames.ORC_LEG_NR.name(), event.getLegNr());
         result.put(FieldNames.ORC_LEG_LENGTH_IN_NAUTICAL_MILES.name(), event.getLength().getNauticalMiles());
         result.put(FieldNames.ORC_LEG_TWA_IN_DEG.name(), event.getTwa().getDegrees());
         result.put(FieldNames.ORC_LEG_TYPE.name(), event.getType().name());
@@ -1816,95 +1833,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
     }
     
-    static String speedToKnotsString(Speed speed) {
-        String result = null;
-        if (speed.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[0])) {
-            result = FieldNames.ORC_CERTIFICATE_TWS_6KT.name();
-        } else if (speed.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[1])) {
-            result = FieldNames.ORC_CERTIFICATE_TWS_8KT.name();
-        } else if (speed.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[2])) {
-            result = FieldNames.ORC_CERTIFICATE_TWS_10KT.name();
-        } else if (speed.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[3])) {
-            result = FieldNames.ORC_CERTIFICATE_TWS_12KT.name();
-        } else if (speed.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[4])) {
-            result = FieldNames.ORC_CERTIFICATE_TWS_14KT.name();
-        } else if (speed.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[5])) {
-            result = FieldNames.ORC_CERTIFICATE_TWS_16KT.name();
-        } else if (speed.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[6])) {
-            result = FieldNames.ORC_CERTIFICATE_TWS_20KT.name();
-        }
-        return result;
-    }
-    
-    static String bearingToDegreeString(Bearing bearing) {
-        String result = null;
-        if(bearing.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES[0])) {
-            result = FieldNames.ORC_CERTIFICATE_R52_PREDICTION.name();
-        } else if (bearing.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES[1])) {
-            result = FieldNames.ORC_CERTIFICATE_R60_PREDICTION.name();
-        } else if (bearing.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES[2])) {
-            result = FieldNames.ORC_CERTIFICATE_R75_PREDICTION.name();
-        } else if (bearing.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES[3])) {
-            result = FieldNames.ORC_CERTIFICATE_R90_PREDICTION.name();
-        } else if (bearing.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES[4])) {
-            result = FieldNames.ORC_CERTIFICATE_R110_PREDICTION.name();
-        } else if (bearing.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES[5])) {
-            result = FieldNames.ORC_CERTIFICATE_R120_PREDICTION.name();
-        } else if (bearing.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES[6])) {
-            result = FieldNames.ORC_CERTIFICATE_R135_PREDICTION.name();
-        } else if (bearing.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES[7])) {
-            result = FieldNames.ORC_CERTIFICATE_R150_PREDICTION.name();
-        }
-        return result;
-    }
-    
     private Document createORCCertificateObject(ORCCertificate certificate) {
-        Document result = new Document(FieldNames.ORC_CERTIFICATE_SAILNUMBER.name(), certificate.getSailnumber());
-        result.append(FieldNames.ORC_CERTIFICATE_BOATCLASS.name(), certificate.getBoatclass());
-        result.append(FieldNames.ORC_CERTIFICATE_GPH.name(), certificate.getGPH());
-        result.append(FieldNames.ORC_CERTIFICATE_CDL.name(), certificate.getCDL());
-        result.append(FieldNames.ORC_CERTIFICATE_LENGTH.name(), certificate.getLengthOverAll().getMeters());
-        
-        Document beatAngles = new Document();
-        Document runAngles = new Document();
-        Document beatAllowances = new Document();
-        Document runAllowances = new Document();
-        Document beatVMGPredictions = new Document();
-        Document runVMGPredictions = new Document();
-        Document windwardLeewardPredictions = new Document();
-        Document circularRandomPredictions = new Document();
-        Document longDistancePredictions = new Document();
-        Document nonSpinnakerPredictions = new Document();
-        Document velocityPredictionsPerTrueWindSpeedAndAngle = new Document();
-        for (Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
-            String keyTWS = speedToKnotsString(tws);
-            Document velocityPredictionsPerTrueWindAngle = new Document();
-            beatAngles.append(keyTWS, certificate.getBeatAngles().get(tws).getDegrees());
-            runAngles.append(keyTWS, certificate.getRunAngles().get(tws).getDegrees());
-            beatAllowances.append(keyTWS, certificate.getBeatAllowances().get(tws).asSeconds());
-            runAllowances.append(keyTWS, certificate.getRunAllowances().get(tws).asSeconds());
-            beatVMGPredictions.append(keyTWS, certificate.getBeatVMGPredictions().get(tws).getKnots());
-            runVMGPredictions.append(keyTWS, certificate.getRunVMGPredictions().get(tws).getKnots());
-            windwardLeewardPredictions.append(keyTWS, certificate.getWindwardLeewardSpeedPrediction().get(tws).getKnots());
-            circularRandomPredictions.append(keyTWS, certificate.getCircularRandomSpeedPredictions().get(tws).getKnots());
-            longDistancePredictions.append(keyTWS, certificate.getLongDistanceSpeedPredictions().get(tws).getKnots());
-            nonSpinnakerPredictions.append(keyTWS, certificate.getNonSpinnakerSpeedPredictions().get(tws).getKnots());
-            for (Bearing twa : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES) {
-                String keyTWA = bearingToDegreeString(twa);
-                velocityPredictionsPerTrueWindAngle.append(keyTWA, certificate.getVelocityPredictionPerTrueWindSpeedAndAngle().get(tws).get(twa).getKnots());
-            }
-            velocityPredictionsPerTrueWindSpeedAndAngle.append(keyTWS, velocityPredictionsPerTrueWindAngle);
-        }
-        
-        result.append(FieldNames.ORC_CERTIFICATE_BEAT_ANGLES.name(), beatAngles);
-        result.append(FieldNames.ORC_CERTIFICATE_RUN_ANGLES.name(), runAngles);
-        result.append(FieldNames.ORC_CERTIFICATE_BEAT_ALLOWANCES.name(), beatAllowances);
-        result.append(FieldNames.ORC_CERTIFICATE_RUN_ALLOWANCES.name(), runAllowances);
-        result.append(FieldNames.ORC_CERTIFICATE_BEAT_VMG_PREDICTIONS.name(), beatVMGPredictions);
-        result.append(FieldNames.ORC_CERTIFICATE_RUN_VMG_PREDICTIONS.name(), runVMGPredictions);
-        result.append(FieldNames.ORC_CERTIFICATE_CIRCULAR_RANDOM_SPEED_PREDICTIONS.name(), circularRandomPredictions);
-        result.append(FieldNames.ORC_CERTIFICATE_NON_SPINNAKER_SPEED_PREDICTIONS.name(), nonSpinnakerPredictions);
-        result.append(FieldNames.ORC_CERTIFICATE_TWA_SPEED_PREDICTIONS.name(), velocityPredictionsPerTrueWindSpeedAndAngle);
+        final ORCCertificateJsonSerializer serializer = new ORCCertificateJsonSerializer();
+        final Document result = Document.parse(serializer.serialize(certificate).toString());
         return result;
     }
 
