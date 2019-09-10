@@ -5,7 +5,7 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.common.impl.SecondsDurationImpl;
 
 public abstract class AbstractSpeedImpl implements Speed {
 
@@ -28,7 +28,7 @@ public abstract class AbstractSpeedImpl implements Speed {
     
     @Override
     public Duration getDuration(Distance distance) {
-        return distance == null ? null : new MillisecondsDurationImpl((long) (1000 * distance.getMeters() / getMetersPerSecond()));
+        return distance == null ? null : new SecondsDurationImpl(distance.getMeters() / getMetersPerSecond());
     }
 
     @Override

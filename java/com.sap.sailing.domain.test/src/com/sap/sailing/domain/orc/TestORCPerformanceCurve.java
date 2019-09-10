@@ -190,7 +190,7 @@ public class TestORCPerformanceCurve {
        // Test for corner case and if the algorithm reacts to the boundaries of 6 and 20 kts.
        assertEquals( 6.0    , performanceCurveMoana.getImpliedWind(Duration.ONE_HOUR.times(24)).getKnots(), accuracy);
        assertEquals(20.0    , performanceCurveMoana.getImpliedWind(Duration.ONE_HOUR.divide(24)).getKnots(), accuracy);
-       assertEquals(performanceCurveMilan.getAllowancePerCourse(new KnotSpeedImpl(12.80881)).asSeconds(), Duration.ONE_HOUR.asSeconds(), accuracy); 
+       assertEquals(1.0, performanceCurveMilan.getAllowancePerCourse(new KnotSpeedImpl(12.80881)).asHours(), accuracy); 
        // scratch sheets and implied wind as calculated by Altura for course1 and 1:00:00 / 1:30:00 time sailed, respectively:
        //               6kts    8kts    10kts   12kts   14kts   16kts   20kts   implied wind    Altura          ORC Scorer      ORC PCS Test    SAP
        // Milan:        675.2   539.5   473.1   437.6   412.7   388.8   350.8                   12.8091135      12.80881        12.80881        12.809089

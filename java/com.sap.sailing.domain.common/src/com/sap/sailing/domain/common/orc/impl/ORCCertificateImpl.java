@@ -13,6 +13,7 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.impl.DegreeBearingImpl;
+import com.sap.sse.common.impl.SecondsDurationImpl;
 
 //TODO Finish this comment.
 /**
@@ -220,9 +221,10 @@ public class ORCCertificateImpl implements ORCCertificate {
         final Map<Speed, Speed> result = new HashMap<>();
         for (final Speed tws : ALLOWANCES_TRUE_WIND_SPEEDS) {
             // gets the Allowance for Beat&Run at the given TWS divided by 2
-            Duration allowance = beatVMGPredictionPerTrueWindSpeed.get(tws).getDuration(NAUTICAL_MILE)
+            final Duration allowancePerNauticalMile = beatVMGPredictionPerTrueWindSpeed.get(tws).getDuration(NAUTICAL_MILE)
                     .plus(runVMGPredictionPerTrueWindSpeed.get(tws).getDuration(NAUTICAL_MILE)).divide(2);
-            result.put(tws, NAUTICAL_MILE.inTime(allowance));
+            final Duration allowancePerNauticalMileRoundedToOneDecimal = new SecondsDurationImpl(((double) Math.round(allowancePerNauticalMile.asSeconds()*10.0))/10.0);
+            result.put(tws, NAUTICAL_MILE.inTime(allowancePerNauticalMileRoundedToOneDecimal));
         }
         return result;
     }
@@ -236,20 +238,21 @@ public class ORCCertificateImpl implements ORCCertificate {
     public Map<Speed, Speed> getLongDistanceSpeedPredictions() {
         final Map<Speed, Speed> result = new HashMap<>();
         for (final Entry<Speed, Map<Bearing, Double>> twsEntry : perCentOfAllowancesForLongDistancePC.entrySet()) {
-            Duration allowance = Duration.NULL;
+            Duration allowancePerNauticalMile = Duration.NULL;
             for (Entry<Bearing, Double> twaEntry : twsEntry.getValue().entrySet()) {
                 if (twaEntry.getKey().equals(UPWIND_TWA)) {
-                    allowance = allowance.plus(beatVMGPredictionPerTrueWindSpeed.get(twsEntry.getKey())
+                    allowancePerNauticalMile = allowancePerNauticalMile.plus(beatVMGPredictionPerTrueWindSpeed.get(twsEntry.getKey())
                             .getDuration(NAUTICAL_MILE).times(twaEntry.getValue()));
                 } else if (twaEntry.getKey().equals(DOWNWIND_TWA)) {
-                    allowance = allowance.plus(runVMGPredictionPerTrueWindSpeed.get(twsEntry.getKey())
+                    allowancePerNauticalMile = allowancePerNauticalMile.plus(runVMGPredictionPerTrueWindSpeed.get(twsEntry.getKey())
                             .getDuration(NAUTICAL_MILE).times(twaEntry.getValue()));
                 } else {
-                    allowance = allowance.plus(velocityPredictionPerTrueWindSpeedAndAngle.get(twsEntry.getKey())
+                    allowancePerNauticalMile = allowancePerNauticalMile.plus(velocityPredictionPerTrueWindSpeedAndAngle.get(twsEntry.getKey())
                             .get(twaEntry.getKey()).getDuration(NAUTICAL_MILE).times(twaEntry.getValue()));
                 }
             }
-            result.put(twsEntry.getKey(), NAUTICAL_MILE.inTime(allowance));
+            final Duration allowancePerNauticalMileRoundedToOneDecimal = new SecondsDurationImpl(((double) Math.round(allowancePerNauticalMile.asSeconds()*10.0))/10.0);
+            result.put(twsEntry.getKey(), NAUTICAL_MILE.inTime(allowancePerNauticalMileRoundedToOneDecimal));
         }
         return result;
     }

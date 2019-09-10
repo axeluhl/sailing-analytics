@@ -25,7 +25,6 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
-import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 import com.sap.sailing.domain.orc.ORCPerformanceCurve;
 import com.sap.sse.common.Bearing;
@@ -138,8 +137,6 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      * order is guaranteed to deliver the true wind speed keys in the order of ascending wind speeds.
      */
     public LinkedHashMap<Speed, Duration> createAllowancesPerCourse(ORCCertificate certificate) throws FunctionEvaluationException  {
-            
-            
         final LinkedHashMap<Speed, Duration> result = new LinkedHashMap<>();
         final Map<ORCPerformanceCurveLeg, Map<Speed, Duration>> allowancesPerLeg = new HashMap<>();
         for (final ORCPerformanceCurveLeg leg : course.getLegs()) {
@@ -169,7 +166,8 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         Map<Speed, Duration> runAllowancePerTrueWindSpeed = certificate.getRunAllowances();
         final Map<Speed, Duration> result = new HashMap<>();
         
-        if(leg.getType().equals(ORCPerformanceCurveLegTypes.TWA)) {
+        switch (leg.getType()) {
+        case TWA:
             for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
                 // Case switching on TWA (0. TWA == 0; 1. TWA < Beat; 2. Beat < TWA < Gybe; 3. Gybe < TWA; 4. TWA == 180)
                 if (leg.getTwa().compareTo(beatAngles.get(tws)) <= 0) {
@@ -186,22 +184,27 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
                                     leg.getTwa()).getDuration(leg.getLength()));
                 }
             }
-        } else if (leg.getType().equals(ORCPerformanceCurveLegTypes.CIRCULAR_RANDOM)) {
+            break;
+        case CIRCULAR_RANDOM:
             for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
                 result.put(tws, certificate.getCircularRandomSpeedPredictions().get(tws).getDuration(leg.getLength()));
             }
-        } else if (leg.getType().equals(ORCPerformanceCurveLegTypes.LONG_DISTANCE)) {
+            break;
+        case LONG_DISTANCE:
             for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
                 result.put(tws, certificate.getLongDistanceSpeedPredictions().get(tws).getDuration(leg.getLength()));
             }
-        } else if (leg.getType().equals(ORCPerformanceCurveLegTypes.WINDWARD_LEEWARD)) {
+            break;
+        case WINDWARD_LEEWARD:
             for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
                 result.put(tws, certificate.getWindwardLeewardSpeedPrediction().get(tws).getDuration(leg.getLength()));
             }
-        } else if (leg.getType().equals(ORCPerformanceCurveLegTypes.NON_SPINNAKER)) {
+            break;
+        case NON_SPINNAKER:
             for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
                 result.put(tws, certificate.getNonSpinnakerSpeedPredictions().get(tws).getDuration(leg.getLength()));
             }
+            break;
         }
         return result;
     }
