@@ -458,8 +458,8 @@ public class RaceBoardPanel
             componentsForSideBySideViewer.add(editMarkPositionPanel);
         }
         mediaPlayerManagerComponent = new MediaPlayerManagerComponent(this, getComponentContext(), mediaPlayerLifecycle,
-                selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages,
-                errorReporter, userAgent, this, mediaPlayerSettings, raceDTO);
+                sailingService, selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService,
+                stringMessages, errorReporter, userAgent, this, mediaPlayerSettings, raceDTO);
 
         final LeaderboardWithSecurityFetcher asyncFetcher = new LeaderboardWithSecurityFetcher() {
             @Override

@@ -115,9 +115,7 @@ public class AsyncActionsExecutor {
     
     public int getNumberOfPendingActionsPerType(String type) {
         int result = 0;
-        if (actionsPerTypeCounter != null) {
-            result = actionsPerTypeCounter.get(type);
-        }
+        result = actionsPerTypeCounter.getOrDefault(type, 0);
         return result;
     }
     
