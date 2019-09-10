@@ -44,10 +44,12 @@ import com.mongodb.client.model.RenameCollectionOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
-import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
+import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RegattaLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -194,16 +196,13 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
-import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -254,13 +253,13 @@ import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJs
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.deserialization.impl.LegacyCompetitorWithContainedBoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RegattaConfigurationJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.ORCCertificateJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
-import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.TypeBasedServiceFinder;
@@ -274,7 +273,6 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
-import com.sap.sse.common.impl.SecondsDurationImpl;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.shared.media.ImageDescriptor;
@@ -1514,7 +1512,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private List<RaceLogEvent> loadRaceLogEvents(RaceLog targetRaceLog, Document query) {
+    private List<RaceLogEvent> loadRaceLogEvents(RaceLog targetRaceLog, Document query) throws JsonDeserializationException, ParseException {
         List<RaceLogEvent> result = new ArrayList<>();
         MongoCollection<Document> raceLog = database.getCollection(CollectionNames.RACE_LOGS.name());
         for (Document o : raceLog.find(query)) {
@@ -1543,7 +1541,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *         updating this object into the RACE_LOGS collection then because only the caller knows the key surrounding
      *         the event object passed to this method.
      */
-    public Pair<RaceLogEvent, Optional<Document>> loadRaceLogEvent(Document dbObject) {
+    public Pair<RaceLogEvent, Optional<Document>> loadRaceLogEvent(Document dbObject) throws JsonDeserializationException, ParseException {
         TimePoint logicalTimePoint = loadTimePoint(dbObject);
         TimePoint createdAt = loadTimePoint(dbObject, FieldNames.RACE_LOG_EVENT_CREATED_AT);
         Serializable id = (Serializable) dbObject.get(FieldNames.RACE_LOG_EVENT_ID.name());
@@ -1632,6 +1630,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             resultEvent = loadRaceLogTagEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
         } else if (eventClass.equals(RaceLogORCLegDataEvent.class.getSimpleName())) {
             resultEvent = loadRaceLogORCLegDataEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
+        } else if (eventClass.equals(RaceLogORCCertificateAssignmentEvent.class.getSimpleName())) {
+            resultEvent = loadRaceLogORCCertificateAssignmentEvent(createdAt, author, logicalTimePoint, passId, passId, dbObject);
         } else {
             throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
         }
@@ -2024,11 +2024,22 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     private RaceLogORCLegDataEvent loadRaceLogORCLegDataEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, Integer passId, Document dbObject) {
-        int legNr = (int) dbObject.get(FieldNames.ORC_LEG_NR.name()); //TODO Nullhandling
-        Bearing twa = new DegreeBearingImpl((double) dbObject.get(FieldNames.ORC_LEG_TWA.name()));
-        Distance length = new NauticalMileDistance((double) dbObject.get(FieldNames.ORC_LEG_LENGTH.name()));
-        ORCPerformanceCurveLegTypes type = ORCPerformanceCurveLegTypes.valueOf(dbObject.getString(FieldNames.ORC_LEG_TYPE.name()));
+        final int legNr = ((Number) dbObject.get(FieldNames.ORC_LEG_NR.name())).intValue();
+        final Bearing twa = new DegreeBearingImpl(((Number) dbObject.get(FieldNames.ORC_LEG_TWA_IN_DEG.name())).doubleValue());
+        final Distance length = new NauticalMileDistance(((Number) dbObject.get(FieldNames.ORC_LEG_LENGTH_IN_NAUTICAL_MILES.name())).doubleValue());
+        final ORCPerformanceCurveLegTypes type = ORCPerformanceCurveLegTypes.valueOf(dbObject.getString(FieldNames.ORC_LEG_TYPE.name()));
         return new RaceLogORCLegDataEventImpl(createdAt, logicalTimePoint, author, id, passId, legNr, twa, length, type);
+    }
+
+    private RaceLogORCCertificateAssignmentEvent loadRaceLogORCCertificateAssignmentEvent(TimePoint createdAt,
+            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, int passId, Document dbObject)
+            throws JsonDeserializationException, ParseException {
+        final Document certificateDbObject = (Document) dbObject.get(FieldNames.ORC_CERTIFICATE.name());
+        final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
+        JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(certificateDbObject.toJson(writerSettings)));
+        final ORCCertificate certificate = new ORCCertificateJsonDeserializer().deserialize(json); 
+        Serializable competitorId = (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name());
+        return new RaceLogORCCertificateAssignmentEventImpl(createdAt, logicalTimePoint, author, id, passId, certificate, competitorId);
     }
 
     @Override
@@ -2048,7 +2059,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private void loadRegattaLogEvents(RegattaLog targetRegattaLog, Document query,
-            RegattaLikeIdentifier regattaLogIdentifier) {
+            RegattaLikeIdentifier regattaLogIdentifier) throws JsonDeserializationException, ParseException {
         MongoCollection<Document> collection = database.getCollection(CollectionNames.REGATTA_LOGS.name());
         for (Document o : collection.find(query)) {
             try {
@@ -2062,7 +2073,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
     }
 
-    private RegattaLogEvent loadRegattaLogEvent(Document o, RegattaLikeIdentifier regattaLogIdentifier) {
+    private RegattaLogEvent loadRegattaLogEvent(Document o, RegattaLikeIdentifier regattaLogIdentifier)
+            throws JsonDeserializationException, ParseException {
         Document dbObject = (Document) o.get(FieldNames.REGATTA_LOG_EVENT.name());
         TimePoint logicalTimePoint = loadTimePoint(dbObject);
         TimePoint createdAt = loadTimePoint(dbObject, FieldNames.REGATTA_LOG_EVENT_CREATED_AT);
@@ -2222,59 +2234,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private RegattaLogORCCertificateAssignmentEvent loadRegattaLogORCCertificateAssignmentEvent(TimePoint createdAt,
-            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Document dbObject) {
-        String sailnumber = dbObject.getString(FieldNames.ORC_CERTIFICATE_SAILNUMBER.name());
-        String boatclass = dbObject.getString(FieldNames.ORC_CERTIFICATE_BOATCLASS.name());
-        Distance length = new MeterDistance(dbObject.getDouble(FieldNames.ORC_CERTIFICATE_LENGTH.name()));
-        Duration gph = new SecondsDurationImpl(dbObject.getDouble(FieldNames.ORC_CERTIFICATE_GPH.name()));
-        Double cdl = dbObject.getDouble(FieldNames.ORC_CERTIFICATE_CDL.name());
-        
-        Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle = new HashMap<>();
-        Map<Speed, Bearing> beatAngles = new HashMap<>();
-        Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed = new HashMap<>();
-        Map<Speed, Duration> beatAllowancePerTrueWindSpeed = new HashMap<>();
-        Map<Speed, Bearing> runAngles = new HashMap<>();
-        Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed = new HashMap<>();
-        Map<Speed, Duration> runAllowancePerTrueWindSpeed = new HashMap<>();
-        Map<Speed, Speed> circularRandomSpeedPredictionPerTrueWindSpeed = new HashMap<>();
-        Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed = new HashMap<>();
-        
-        for (Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
-            String twsKey = MongoObjectFactoryImpl.speedToKnotsString(tws);
-            beatAngles.put(tws, new DegreeBearingImpl(
-                    ((Document) dbObject.get(FieldNames.ORC_CERTIFICATE_BEAT_ANGLES.name())).getDouble(twsKey)));
-            beatVMGPredictionPerTrueWindSpeed.put(tws, new KnotSpeedImpl(
-                    ((Document) dbObject.get(FieldNames.ORC_CERTIFICATE_BEAT_VMG_PREDICTIONS.name())).getDouble(twsKey)));
-            beatAllowancePerTrueWindSpeed.put(tws, new SecondsDurationImpl(
-                    ((Document) dbObject.get(FieldNames.ORC_CERTIFICATE_BEAT_ALLOWANCES.name())).getDouble(twsKey)));
-            runAngles.put(tws, new DegreeBearingImpl(
-                    ((Document) dbObject.get(FieldNames.ORC_CERTIFICATE_RUN_ANGLES.name())).getDouble(twsKey)));
-            runVMGPredictionPerTrueWindSpeed.put(tws, new KnotSpeedImpl(
-                    ((Document) dbObject.get(FieldNames.ORC_CERTIFICATE_RUN_VMG_PREDICTIONS.name())).getDouble(twsKey)));
-            runAllowancePerTrueWindSpeed.put(tws, new SecondsDurationImpl(
-                    ((Document) dbObject.get(FieldNames.ORC_CERTIFICATE_RUN_ALLOWANCES.name())).getDouble(twsKey)));
-            circularRandomSpeedPredictionPerTrueWindSpeed.put(tws, new KnotSpeedImpl(
-                    ((Document) dbObject.get(FieldNames.ORC_CERTIFICATE_CIRCULAR_RANDOM_SPEED_PREDICTIONS.name())).getDouble(twsKey)));
-            nonSpinnakerSpeedPredictionPerTrueWindSpeed.put(tws, new KnotSpeedImpl(
-                    ((Document) dbObject.get(FieldNames.ORC_CERTIFICATE_NON_SPINNAKER_SPEED_PREDICTIONS.name())).getDouble(twsKey)));
-            
-            Map<Bearing, Speed> velocityPredictionAtCurrentTrueWindSpeedPerTrueWindAngle = new HashMap<>();
-            for (Bearing twa : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES) {
-                String twaKey = MongoObjectFactoryImpl.bearingToDegreeString(twa);
-                velocityPredictionAtCurrentTrueWindSpeedPerTrueWindAngle.put(twa, new KnotSpeedImpl(
-                        ((Document) ((Document) dbObject.get(FieldNames.ORC_CERTIFICATE_TWA_SPEED_PREDICTIONS.name()))
-                                .get(twaKey)).getDouble(twsKey)));
-            }
-            velocityPredictionsPerTrueWindSpeedAndAngle.put(tws, velocityPredictionAtCurrentTrueWindSpeedPerTrueWindAngle);
-        }
-        
-        ORCCertificate certificate = new ORCCertificateImpl(sailnumber, boatclass, length, gph, cdl,
-                velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
-                beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
-                runAllowancePerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
-                nonSpinnakerSpeedPredictionPerTrueWindSpeed);
+            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Document dbObject)
+            throws JsonDeserializationException, ParseException {
+        final Document certificateDbObject = (Document) dbObject.get(FieldNames.ORC_CERTIFICATE.name());
+        final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
+        JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(certificateDbObject.toJson(writerSettings)));
+        final ORCCertificate certificate = new ORCCertificateJsonDeserializer().deserialize(json); 
         Serializable competitorId = (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name());
-        return new RaceLogORCCertificateAssignmentEventImpl(createdAt, logicalTimePoint, author, id, certificate, competitorId);
+        return new RegattaLogORCCertificateAssignmentEventImpl(createdAt, logicalTimePoint, author, id, certificate, competitorId);
     }
 
     /**

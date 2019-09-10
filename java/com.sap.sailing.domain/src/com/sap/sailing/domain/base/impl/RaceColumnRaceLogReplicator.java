@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base.impl;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
@@ -173,6 +174,10 @@ public class RaceColumnRaceLogReplicator implements RaceLogEventVisitor, Seriali
     @Override
     public void visit(RaceLogORCLegDataEvent event) {
         notifyOnAdd(event);
-        
+    }
+
+    @Override
+    public void visit(RaceLogORCCertificateAssignmentEvent event) {
+        notifyOnAdd(event);
     }
 }

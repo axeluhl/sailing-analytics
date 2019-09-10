@@ -17,8 +17,8 @@ public class RaceLogORCLegDataEventSerializer extends BaseRaceLogEventSerializer
 
     public static final String VALUE_CLASS = RaceLogORCLegDataEvent.class.getSimpleName();
     public static final String ORC_LEG_NR = "legNr";
-    public static final String ORC_LEG_TWA = "twa";
-    public static final String ORC_LEG_LENGTH = "length";
+    public static final String ORC_LEG_TWA = "twaDeg";
+    public static final String ORC_LEG_LENGTH = "lengthNauticalMiles";
     public static final String ORC_LEG_TYPE = "type";
     
     public RaceLogORCLegDataEventSerializer(JsonSerializer<Competitor> competitorSerializer) {
