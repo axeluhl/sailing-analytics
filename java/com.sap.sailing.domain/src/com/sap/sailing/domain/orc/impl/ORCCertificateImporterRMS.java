@@ -61,6 +61,8 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
     private static final String RUN_ANGLE = "DA";
     private static final String BEAT_ALLOWANCE = "UP";
     private static final String BEAT_ANGLE = "UA";
+    private static final String WINDWARD_LEEWARD = "WL";
+    private static final String LONG_DISTANCE = "OC";
     private static final String CIRCULAR_RANDOM = "CR";
     private static final String NON_SPINNAKER = "NSP";
 
@@ -178,19 +180,21 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
     public ORCCertificate getCertificate(String sailnumber) {
         String searchString = sailnumber.replaceAll(" ", "").toUpperCase();
         ORCCertificateValues certificateValues = getValuesForSailnumber(searchString);
-        String boatclass = certificateValues.getValue(BOATCLASS);
-        Distance length  = new MeterDistance(Double.parseDouble(certificateValues.getValue(LENGTH)));
-        Duration gph     = new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(GPH)));
-        Double cdl       = Double.parseDouble(certificateValues.getValue(CDL));
-        Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle = new HashMap<>();
-        Map<Speed, Bearing> beatAngles = new HashMap<>();
-        Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed = new HashMap<>();
-        Map<Speed, Duration> beatAllowancePerTrueWindSpeed = new HashMap<>();
-        Map<Speed, Bearing> runAngles = new HashMap<>();
-        Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed = new HashMap<>();
-        Map<Speed, Duration> runAllowancePerTrueWindSpeed = new HashMap<>();
-        Map<Speed, Speed> circularRandomSpeedPredictionPerTrueWindSpeed = new HashMap<>();
-        Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed = new HashMap<>();
+        final String boatclass = certificateValues.getValue(BOATCLASS);
+        final Distance length  = new MeterDistance(Double.parseDouble(certificateValues.getValue(LENGTH)));
+        final Duration gph     = new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(GPH)));
+        final Double cdl       = Double.parseDouble(certificateValues.getValue(CDL));
+        final Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle = new HashMap<>();
+        final Map<Speed, Bearing> beatAngles = new HashMap<>();
+        final Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed = new HashMap<>();
+        final Map<Speed, Duration> beatAllowancePerTrueWindSpeed = new HashMap<>();
+        final Map<Speed, Bearing> runAngles = new HashMap<>();
+        final Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed = new HashMap<>();
+        final Map<Speed, Duration> runAllowancePerTrueWindSpeed = new HashMap<>();
+        final Map<Speed, Speed> windwardLeewardSpeedPredictionPerTrueWindSpeed = new HashMap<>();
+        final Map<Speed, Speed> longDistanceSpeedPredictionPerTrueWindSpeed = new HashMap<>();
+        final Map<Speed, Speed> circularRandomSpeedPredictionPerTrueWindSpeed = new HashMap<>();
+        final Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed = new HashMap<>();
         
         for (Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
             String windSpeed = Integer.toString((int) tws.getKnots());
@@ -198,6 +202,8 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
             String beatAllowanceKey = BEAT_ALLOWANCE + windSpeed;
             String runAngleKey = RUN_ANGLE + windSpeed;
             String runAllowanceKey = RUN_ALLOWANCE + windSpeed;
+            String windwardLeewardKey = WINDWARD_LEEWARD + windSpeed;
+            String longDistanceKey = LONG_DISTANCE + windSpeed;
             String circularRandomKey = CIRCULAR_RANDOM + windSpeed;
             String nonSpinnakerKey = NON_SPINNAKER + windSpeed;
             beatAngles.put(tws, new DegreeBearingImpl(Double.parseDouble(certificateValues.getValue(beatAngleKey))));
@@ -206,6 +212,10 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
             runAngles.put(tws, new DegreeBearingImpl(Double.parseDouble(certificateValues.getValue(runAngleKey))));
             runAllowancePerTrueWindSpeed.put(tws, new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(runAllowanceKey))));
             runVMGPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(runAllowancePerTrueWindSpeed.get(tws)));
+            windwardLeewardSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(
+                    new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(windwardLeewardKey)))));
+            longDistanceSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(
+                    new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(longDistanceKey)))));
             circularRandomSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(
                     new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(circularRandomKey)))));
             nonSpinnakerSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE.inTime(
@@ -222,7 +232,8 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
         return new ORCCertificateImpl(searchString, boatclass, length, gph, cdl,
                 velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
                 beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
-                runAllowancePerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
+                runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
+                longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
                 nonSpinnakerSpeedPredictionPerTrueWindSpeed);
     }
 

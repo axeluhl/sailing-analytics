@@ -43,6 +43,8 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
     private Map<String, Object> data;
     private static final String RUN = "Run";
     private static final String BEAT = "Beat";
+    private static final String WINDWARD_LEEWARD = "WL";
+    private static final String LONG_DISTANCE = "OC";
     private static final String CIRCULAR_RANDOM = "CR";
     private static final String NON_SPINNAKER = "NS";
 
@@ -163,6 +165,8 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
         final Map<Speed, Duration> beatAllowancePerTrueWindSpeed = new HashMap<>();
         final Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed = new HashMap<>();
         final Map<Speed, Duration> runAllowancePerTrueWindSpeed = new HashMap<>();
+        final Map<Speed, Speed> windwardLeewardSpeedPredictionPerTrueWindSpeed = new HashMap<>();
+        final Map<Speed, Speed> longDistanceSpeedPredictionPerTrueWindSpeed = new HashMap<>();
         final Map<Speed, Speed> circularRandomSpeedPredictionPerTrueWindSpeed = new HashMap<>();
         final Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed = new HashMap<>();
         for (final Speed tws : velocityPredictionPerTrueWindSpeedAndAngle.keySet()) {
@@ -172,6 +176,10 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
             runVMGPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE
                     .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(RUN).get(tws)));
             runAllowancePerTrueWindSpeed.put(tws, predefinedAllowanceDurationsPerTrueWindSpeed.get(RUN).get(tws));
+            windwardLeewardSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE
+                    .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(WINDWARD_LEEWARD).get(tws)));
+            longDistanceSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE
+                    .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(LONG_DISTANCE).get(tws)));
             circularRandomSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE
                     .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(CIRCULAR_RANDOM).get(tws)));
             nonSpinnakerSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE
@@ -180,7 +188,8 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
         return new ORCCertificateImpl(searchString, boatclass, length, gph, cdl,
                 velocityPredictionPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
                 beatAllowancePerTrueWindSpeed, gybeAngles, runVMGPredictionPerTrueWindSpeed,
-                runAllowancePerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
+                runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
+                longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
                 nonSpinnakerSpeedPredictionPerTrueWindSpeed);
     }
 

@@ -1,9 +1,7 @@
 package com.sap.sailing.domain.common.orc.impl;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
@@ -13,7 +11,6 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.impl.DegreeBearingImpl;
-import com.sap.sse.common.impl.SecondsDurationImpl;
 
 //TODO Finish this comment.
 /**
@@ -52,83 +49,6 @@ public class ORCCertificateImpl implements ORCCertificate {
     public final static Distance NAUTICAL_MILE = new NauticalMileDistance(1);
     
     public final static double PI = 3.14159265358979;
-
-    /**
-     * Equals the percentages of accounted allowances at a given speed for the Coastal / Long Distance Performance Curve
-     * metric. Details can be found on: https://orc.org/index.asp?id=32. TWA keys of 0deg represent upwind, TWA keys of
-     * 180deg represent downwind.
-     */
-    private static final Bearing UPWIND_TWA = new DegreeBearingImpl(0);
-    private static final Bearing DOWNWIND_TWA = new DegreeBearingImpl(180);
-    private static final Map<Speed, Map<Bearing, Double>> perCentOfAllowancesForLongDistancePC;
-    static {
-        Map<Speed, Map<Bearing, Double>> result = new HashMap<>();
-        Map<Bearing, Double> map6kt = new HashMap<>();
-        Map<Bearing, Double> map8kt = new HashMap<>();
-        Map<Bearing, Double> map10kt = new HashMap<>();
-        Map<Bearing, Double> map12kt = new HashMap<>();
-        Map<Bearing, Double> map14kt = new HashMap<>();
-        Map<Bearing, Double> map16kt = new HashMap<>();
-        Map<Bearing, Double> map20kt = new HashMap<>();
-
-        map6kt.put(UPWIND_TWA, 0.45); // representing upwind
-        map6kt.put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.0);
-        map6kt.put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.0);
-        map6kt.put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.0);
-        map6kt.put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.0);
-        map6kt.put(DOWNWIND_TWA, 0.55); // representing downwind
-
-        map8kt.put(UPWIND_TWA, 0.40);
-        map8kt.put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.05);
-        map8kt.put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.05);
-        map8kt.put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.05);
-        map8kt.put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.05);
-        map8kt.put(DOWNWIND_TWA, 0.40);
-
-        map10kt.put(UPWIND_TWA, 0.35);
-        map10kt.put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.10);
-        map10kt.put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.075);
-        map10kt.put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.10);
-        map10kt.put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.10);
-        map10kt.put(DOWNWIND_TWA, 0.275);
-
-        map12kt.put(UPWIND_TWA, 0.30);
-        map12kt.put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.15);
-        map12kt.put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.10);
-        map12kt.put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.15);
-        map12kt.put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.15);
-        map12kt.put(DOWNWIND_TWA, 0.15);
-
-        map14kt.put(UPWIND_TWA, 0.25);
-        map14kt.put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.175);
-        map14kt.put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.125);
-        map14kt.put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.175);
-        map14kt.put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.15);
-        map14kt.put(DOWNWIND_TWA, 0.125);
-
-        map16kt.put(UPWIND_TWA, 0.20);
-        map16kt.put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.20);
-        map16kt.put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.15);
-        map16kt.put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.20);
-        map16kt.put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.15);
-        map16kt.put(DOWNWIND_TWA, 0.10);
-
-        map20kt.put(UPWIND_TWA, 0.10);
-        map20kt.put(ALLOWANCES_TRUE_WIND_ANGLES[1], 0.25);
-        map20kt.put(ALLOWANCES_TRUE_WIND_ANGLES[3], 0.20);
-        map20kt.put(ALLOWANCES_TRUE_WIND_ANGLES[5], 0.25);
-        map20kt.put(ALLOWANCES_TRUE_WIND_ANGLES[7], 0.10);
-        map20kt.put(DOWNWIND_TWA, 0.10);
-
-        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[0], Collections.unmodifiableMap(map6kt));
-        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[1], Collections.unmodifiableMap(map8kt));
-        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[2], Collections.unmodifiableMap(map10kt));
-        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[3], Collections.unmodifiableMap(map12kt));
-        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[4], Collections.unmodifiableMap(map14kt));
-        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[5], Collections.unmodifiableMap(map16kt));
-        result.put(ALLOWANCES_TRUE_WIND_SPEEDS[6], Collections.unmodifiableMap(map20kt));
-        perCentOfAllowancesForLongDistancePC = Collections.unmodifiableMap(result);
-    }
 
     /**
      * 
@@ -182,9 +102,13 @@ public class ORCCertificateImpl implements ORCCertificate {
      */
     private final Map<Speed, Duration> runAllowancePerTrueWindSpeed;
     
-    private final Map<Speed, Speed> circularRandomSpeedPredictionsPerTrueWindSpeed;
+    private final Map<Speed, Speed> windwardLeewardSpeedPredictionPerTrueWindSpeed;
     
-    private final Map<Speed, Speed> nonSpinnakerSpeedPredictionsPerTrueWindSpeed;
+    private final Map<Speed, Speed> longDistanceSpeedPredictionPerTrueWindSpeed;
+    
+    private final Map<Speed, Speed> circularRandomSpeedPredictionPerTrueWindSpeed;
+    
+    private final Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed;
 
     // TODO Comment on Constructor
     public ORCCertificateImpl(String sailnumber, String boatclass, Distance length, Duration gph,
@@ -192,6 +116,8 @@ public class ORCCertificateImpl implements ORCCertificate {
             Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
             Map<Speed, Duration> beatAllowancePerTrueWindSpeed, Map<Speed, Bearing> runAngles,
             Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed, Map<Speed, Duration> runAllowancePerTrueWindSpeed,
+            Map<Speed, Speed> windwardLeewardSpeedPredictionsPerTrueWindSpeed,
+            Map<Speed, Speed> longDistanceSpeedPredictionsPerTrueWindSpeed,
             Map<Speed, Speed> circularRandomSpeedPredictionsPerTrueWindSpeed,
             Map<Speed, Speed> nonSpinnakerSpeedPredictionsPerTrueWindSpeed) {
         this.sailnumber = sailnumber;
@@ -207,8 +133,10 @@ public class ORCCertificateImpl implements ORCCertificate {
         this.runAngles = Collections.unmodifiableMap(runAngles);
         this.runVMGPredictionPerTrueWindSpeed = Collections.unmodifiableMap(runVMGPredictionPerTrueWindSpeed);
         this.runAllowancePerTrueWindSpeed = Collections.unmodifiableMap(runAllowancePerTrueWindSpeed);
-        this.circularRandomSpeedPredictionsPerTrueWindSpeed = Collections.unmodifiableMap(circularRandomSpeedPredictionsPerTrueWindSpeed);
-        this.nonSpinnakerSpeedPredictionsPerTrueWindSpeed = Collections.unmodifiableMap(nonSpinnakerSpeedPredictionsPerTrueWindSpeed);
+        this.windwardLeewardSpeedPredictionPerTrueWindSpeed = Collections.unmodifiableMap(windwardLeewardSpeedPredictionsPerTrueWindSpeed);
+        this.longDistanceSpeedPredictionPerTrueWindSpeed = Collections.unmodifiableMap(longDistanceSpeedPredictionsPerTrueWindSpeed);
+        this.circularRandomSpeedPredictionPerTrueWindSpeed = Collections.unmodifiableMap(circularRandomSpeedPredictionsPerTrueWindSpeed);
+        this.nonSpinnakerSpeedPredictionPerTrueWindSpeed = Collections.unmodifiableMap(nonSpinnakerSpeedPredictionsPerTrueWindSpeed);
     }
 
     @Override
@@ -216,50 +144,28 @@ public class ORCCertificateImpl implements ORCCertificate {
         return gph.asSeconds();
     }
 
+    // Please do not try to calculate these combined allowances and instead use the provided values from the certificate.
+    // The values from the certificate are calculated with more accurate base data (via the velocity prediction program)
+    // and rounded afterwards. Those values aren't provided to the public, so there is no possibility to get the same
+    // level of accuracy.
     @Override
     public Map<Speed, Speed> getWindwardLeewardSpeedPrediction() {
-        final Map<Speed, Speed> result = new HashMap<>();
-        for (final Speed tws : ALLOWANCES_TRUE_WIND_SPEEDS) {
-            // gets the Allowance for Beat&Run at the given TWS divided by 2
-            final Duration allowancePerNauticalMile = beatVMGPredictionPerTrueWindSpeed.get(tws).getDuration(NAUTICAL_MILE)
-                    .plus(runVMGPredictionPerTrueWindSpeed.get(tws).getDuration(NAUTICAL_MILE)).divide(2);
-            final Duration allowancePerNauticalMileRoundedToOneDecimal = new SecondsDurationImpl(((double) Math.round(allowancePerNauticalMile.asSeconds()*10.0))/10.0);
-            result.put(tws, NAUTICAL_MILE.inTime(allowancePerNauticalMileRoundedToOneDecimal));
-        }
-        return result;
+        return windwardLeewardSpeedPredictionPerTrueWindSpeed;
     }
 
     @Override
     public Map<Speed, Speed> getCircularRandomSpeedPredictions() {
-        return circularRandomSpeedPredictionsPerTrueWindSpeed;
+        return circularRandomSpeedPredictionPerTrueWindSpeed;
     }
 
     @Override
     public Map<Speed, Speed> getLongDistanceSpeedPredictions() {
-        final Map<Speed, Speed> result = new HashMap<>();
-        for (final Entry<Speed, Map<Bearing, Double>> twsEntry : perCentOfAllowancesForLongDistancePC.entrySet()) {
-            Duration allowancePerNauticalMile = Duration.NULL;
-            for (Entry<Bearing, Double> twaEntry : twsEntry.getValue().entrySet()) {
-                if (twaEntry.getKey().equals(UPWIND_TWA)) {
-                    allowancePerNauticalMile = allowancePerNauticalMile.plus(beatVMGPredictionPerTrueWindSpeed.get(twsEntry.getKey())
-                            .getDuration(NAUTICAL_MILE).times(twaEntry.getValue()));
-                } else if (twaEntry.getKey().equals(DOWNWIND_TWA)) {
-                    allowancePerNauticalMile = allowancePerNauticalMile.plus(runVMGPredictionPerTrueWindSpeed.get(twsEntry.getKey())
-                            .getDuration(NAUTICAL_MILE).times(twaEntry.getValue()));
-                } else {
-                    allowancePerNauticalMile = allowancePerNauticalMile.plus(velocityPredictionPerTrueWindSpeedAndAngle.get(twsEntry.getKey())
-                            .get(twaEntry.getKey()).getDuration(NAUTICAL_MILE).times(twaEntry.getValue()));
-                }
-            }
-            final Duration allowancePerNauticalMileRoundedToOneDecimal = new SecondsDurationImpl(((double) Math.round(allowancePerNauticalMile.asSeconds()*10.0))/10.0);
-            result.put(twsEntry.getKey(), NAUTICAL_MILE.inTime(allowancePerNauticalMileRoundedToOneDecimal));
-        }
-        return result;
+        return longDistanceSpeedPredictionPerTrueWindSpeed;
     }
 
     @Override
     public Map<Speed, Speed> getNonSpinnakerSpeedPredictions() {
-        return nonSpinnakerSpeedPredictionsPerTrueWindSpeed;
+        return nonSpinnakerSpeedPredictionPerTrueWindSpeed;
     }
 
     @Override

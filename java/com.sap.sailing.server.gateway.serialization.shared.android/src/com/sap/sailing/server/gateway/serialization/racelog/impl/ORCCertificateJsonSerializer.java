@@ -15,6 +15,8 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
     public static final String ORC_CERTIFICATE_RUN_ALLOWANCES = "runAllowances";
     public static final String ORC_CERTIFICATE_BEAT_VMG_PREDICTIONS = "beatVmgPredictions";
     public static final String ORC_CERTIFICATE_RUN_VMG_PREDICTIONS = "runVmgPredictions";
+    public static final String ORC_CERTIFICATE_WINDWARD_LEEWARD_SPEED_PREDICTIONS = "windwardLeewardSpeedPredictions";
+    public static final String ORC_CERTIFICATE_LONG_DISTANCE_SPEED_PREDICTIONS = "longDistanceSpeedPredictions";
     public static final String ORC_CERTIFICATE_CIRCULAR_RANDOM_SPEED_PREDICTIONS = "circularRandomSpeedPredictions";
     public static final String ORC_CERTIFICATE_NON_SPINNAKER_SPEED_PREDICTIONS = "nonSpinnakerSpeedPredictions";
     public static final String ORC_CERTIFICATE_TWA_SPEED_PREDICTIONS = "twaSpeedPredictions";
@@ -85,6 +87,8 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
         result.put(ORC_CERTIFICATE_RUN_ALLOWANCES, runAllowances);
         result.put(ORC_CERTIFICATE_BEAT_VMG_PREDICTIONS, beatVMGPredictions);
         result.put(ORC_CERTIFICATE_RUN_VMG_PREDICTIONS, runVMGPredictions);
+        result.put(ORC_CERTIFICATE_WINDWARD_LEEWARD_SPEED_PREDICTIONS, windwardLeewardPredictions);
+        result.put(ORC_CERTIFICATE_LONG_DISTANCE_SPEED_PREDICTIONS, longDistancePredictions);
         result.put(ORC_CERTIFICATE_CIRCULAR_RANDOM_SPEED_PREDICTIONS, circularRandomPredictions);
         result.put(ORC_CERTIFICATE_NON_SPINNAKER_SPEED_PREDICTIONS, nonSpinnakerPredictions);
         result.put(ORC_CERTIFICATE_TWA_SPEED_PREDICTIONS, velocityPredictionsPerTrueWindSpeedAndAngle);

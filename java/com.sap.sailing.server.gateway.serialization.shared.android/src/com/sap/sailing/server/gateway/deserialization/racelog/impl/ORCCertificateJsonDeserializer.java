@@ -38,6 +38,8 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
         Map<Speed, Bearing> runAngles = new HashMap<>();
         Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed = new HashMap<>();
         Map<Speed, Duration> runAllowancePerTrueWindSpeed = new HashMap<>();
+        Map<Speed, Speed> windwardLeewardSpeedPredictionPerTrueWindSpeed = new HashMap<>();
+        Map<Speed, Speed> longDistanceSpeedPredictionPerTrueWindSpeed = new HashMap<>();
         Map<Speed, Speed> circularRandomSpeedPredictionPerTrueWindSpeed = new HashMap<>();
         Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed = new HashMap<>();
         for (Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
@@ -62,6 +64,14 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
             runAllowancePerTrueWindSpeed.put(tws, new SecondsDurationImpl(
                     ((Number) ((JSONObject) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_RUN_ALLOWANCES))
                             .get(twsKey)).doubleValue()));
+            windwardLeewardSpeedPredictionPerTrueWindSpeed.put(tws,
+                    new KnotSpeedImpl(((Number) ((JSONObject) json
+                            .get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_WINDWARD_LEEWARD_SPEED_PREDICTIONS))
+                            .get(twsKey)).doubleValue()));
+            longDistanceSpeedPredictionPerTrueWindSpeed.put(tws,
+                    new KnotSpeedImpl(((Number) ((JSONObject) json
+                            .get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_LONG_DISTANCE_SPEED_PREDICTIONS))
+                            .get(twsKey)).doubleValue()));
             circularRandomSpeedPredictionPerTrueWindSpeed.put(tws,
                     new KnotSpeedImpl(((Number) ((JSONObject) json
                             .get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_CIRCULAR_RANDOM_SPEED_PREDICTIONS))
@@ -85,7 +95,8 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
         final ORCCertificate certificate = new ORCCertificateImpl(sailnumber, boatclass, length, gph, cdl,
                 velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
                 beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
-                runAllowancePerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
+                runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
+                longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
                 nonSpinnakerSpeedPredictionPerTrueWindSpeed);
         return certificate;
     }
