@@ -22,8 +22,6 @@ import com.sap.sse.common.TimePoint;
 public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
     private static final long serialVersionUID = -7814822523533929816L;
 
-    public final static RankingMetricConstructor CONSTRUCTOR = ORCPerformanceCurveRankingMetric::new;
-    
     /**
      * This field contains a map of all current certificates used for calculation in this {@link TrackedRace}. Each
      * participating {@link Competitor} with one {@link Boat} has only one currently active {@link ORCCertificate}.

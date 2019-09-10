@@ -44,10 +44,12 @@ public interface ORCPerformanceCurve {
      * often called "Scratchboat" and is often the fastest boat (by GPH) in the field.
      * 
      * @param referenceBoat
-     * @param sailedDurationPerNauticalMile
-     * @return
+     *            the "scratch boat" (in ORC terms) against whose performance curve to apply the implied wind calculated
+     *            with {@code this} performance curve for the duration sailed ({@code durationToCompleteCourse}). This
+     *            "converts" this performance curve's implied wind to a "calculated time" that is in the "time system"
+     *            or "terms" of the {@code referenceBoat}.
      */
-    Duration getCalculatedTime(ORCPerformanceCurve referenceBoat, Duration sailedDurationPerNauticalMile) throws MaxIterationsExceededException, FunctionEvaluationException;
+    Duration getCalculatedTime(ORCPerformanceCurve referenceBoat, Duration durationToCompleteCourse) throws MaxIterationsExceededException, FunctionEvaluationException;
  
     /**
      * The duration that the boat represented by this performance curve is predicted to take to sail the
@@ -56,7 +58,6 @@ public interface ORCPerformanceCurve {
     Duration getAllowancePerCourse(Speed trueWindSpeed) throws ArgumentOutsideDomainException;
     
     /**
-     * 
      * @return the {@link ORCPerformanceCurve}, which is the sailed part of the whole course this PerformanceCurve was
      *         created for
      */
