@@ -1009,7 +1009,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private Document storeORCCertificateAssignmentEvent(RaceLogORCCertificateAssignmentEvent event) {
         Document result = new Document();
         storeRaceLogEventProperties(event, result);
-        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCLegDataEvent.class.getSimpleName());
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCCertificateAssignmentEvent.class.getSimpleName());
         result.append(FieldNames.COMPETITOR_ID.name(), event.getCompetitorID());
         result.append(FieldNames.ORC_CERTIFICATE.name(), createORCCertificateObject(event.getCertificate()));
         return result;

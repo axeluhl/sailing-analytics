@@ -76,8 +76,8 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
                 String twaKey = ORCCertificateJsonSerializer.bearingToDegreeString(twa);
                 velocityPredictionAtCurrentTrueWindSpeedPerTrueWindAngle.put(twa,
                         new KnotSpeedImpl(((Number) ((JSONObject) ((JSONObject) json
-                                .get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_TWA_SPEED_PREDICTIONS)).get(twaKey))
-                                        .get(twsKey)).doubleValue()));
+                                .get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_TWA_SPEED_PREDICTIONS)).get(twsKey))
+                                        .get(twaKey)).doubleValue()));
             }
             velocityPredictionsPerTrueWindSpeedAndAngle.put(tws,
                     velocityPredictionAtCurrentTrueWindSpeedPerTrueWindAngle);
