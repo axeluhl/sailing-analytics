@@ -1,23 +1,25 @@
 package com.sap.sailing.server.interfaces;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
-import com.sap.sailing.domain.coursetemplate.CourseTemplateConfiguration;
-import com.sap.sailing.domain.coursetemplate.CourseWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
+import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.WithOptionalRepeatablePart;
@@ -29,7 +31,9 @@ import com.sap.sse.common.TimePoint;
  * @author Axel Uhl (d043530)
  *
  */
-public interface CourseAndMarkMappingFactory {
+public interface CourseAndMarkConfigurationFactory {
+    // TODO do we still need this?
+    // You can create a CourseConfiguration from the CourseTemplate, update the lap count and create the Course from this.
     Course createCourse(CourseTemplate courseTemplate, int numberOfLaps);
 
     /**
@@ -45,6 +49,8 @@ public interface CourseAndMarkMappingFactory {
      * In addition, the given {@link CourseTemplate} needs to provide a repeatable part.
      * 
      */
+    // TODO do we still need this?
+    // You can create a CourseConfiguration from the Course, update tha lap count and save back to solve this.
     void updateCourse(Course courseToUpdate, CourseTemplate courseTemplate, int numberOfLaps);
 
     /**
@@ -65,14 +71,29 @@ public interface CourseAndMarkMappingFactory {
      * currently has.
      */
     MarkTemplate getOrCreateMarkTemplate(MarkConfiguration markConfiguration);
+    
+    /**
+     * There are cases where a {@link MarkProperties} instance is required while editing a {@link CourseConfiguration} in the UI.
+     * This can e.g. be handy if tracking needs to get set up for via the user's mark inventory.
+     * 
+     * @return Replacement definition for the given {@link MarkConfiguration}
+     */
+    MarkPropertiesBasedMarkConfiguration createOrUpdateMarkProperties(MarkConfiguration markProperties);
+    
+    /**
+     * There are cases where a {@link Mark} is required while editing a {@link CourseConfiguration} in the UI.
+     * This can e.g. be handy if tracking needs to get set up while the course isn't ready to save.
+     * 
+     * @return Replacement definition for the given {@link MarkConfiguration}
+     */
+    RegattaMarkConfiguration createMark(Regatta regatta, MarkConfiguration markConfiguration);
 
     /**
-     * The {@link CourseWithMarkConfiguration} contains everything required to produce a new {@link CourseTemplate} from
-     * it: the {@link MarkTemplate}s can be obtained by mapping all
-     * {@link CourseWithMarkConfiguration#getMarkConfigurations() mark configurations} through
-     * {@link #getOrCreateMarkTemplate(MarkConfiguration)}. The {@link WithOptionalRepeatablePart repeatable part
-     * specification} is obtained immediately from the {@link CourseWithMarkConfiguration}. For each
-     * {@link CourseWithMarkConfiguration#getWaypoints() waypoint configuration} of the
+     * The {@link CourseConfiguration} contains everything required to produce a new {@link CourseTemplate} from it: the
+     * {@link MarkTemplate}s can be obtained by mapping all {@link CourseConfiguration#getAllMarks() mark
+     * configurations} through {@link #getOrCreateMarkTemplate(MarkConfiguration)}. The
+     * {@link WithOptionalRepeatablePart repeatable part specification} is obtained immediately from the
+     * {@link CourseConfiguration}. For each {@link CourseConfiguration#getWaypoints() waypoint configuration} of the
      * {@code courseWithMarkConfiguration}, a {@link WaypointTemplate} is created where the {@link MarkTemplate}s
      * referenced by these {@link WaypointTemplates} are those obtained by
      * {@link #getOrCreateMarkTemplate(MarkConfiguration)} for the respective {@link MarkConfiguration} objects used in
@@ -80,23 +101,22 @@ public interface CourseAndMarkMappingFactory {
      * 
      * @param name
      *            the name of the new course template; returned by calling
-     *            {@link CourseWithMarkConfiguration#getOptionalCourseTemplate()
+     *            {@link CourseConfiguration#getOptionalCourseTemplate()
      *            getOptionalCourseTemplate()}.{@link CourseTemplate#getName() getName()} on the result of this method.
      * @return a course with its mark configurations and a {@link CourseTemplate} returned by
-     *         {@link CourseWithMarkConfiguration#getOptionalCourseTemplate()} that is always valid, never {@code null}.
-     *         All {@link MarkConfiguration} objects in the result all have a valid
+     *         {@link CourseConfiguration#getOptionalCourseTemplate()} that is always valid, never {@code null}. All
+     *         {@link MarkConfiguration} objects in the result all have a valid
      *         {@link MarkConfiguration#getOptionalMarkTemplate() mark template} that is part of the
-     *         {@link CourseTemplate} obtained from {@link CourseWithMarkConfiguration#getOptionalCourseTemplate()}.
+     *         {@link CourseTemplate} obtained from {@link CourseConfiguration#getOptionalCourseTemplate()}.
      */
-    CourseWithMarkConfiguration createCourseTemplateAndUpdatedConfiguration(String name,
-            CourseWithMarkConfiguration courseWithMarkConfiguration);
+    CourseConfiguration createCourseTemplateAndUpdatedConfiguration(String name,
+            CourseConfiguration courseWithMarkConfiguration);
 
-    // TODO is a markPropertiesFilter appropriate here from a client's perspective?
-    CourseTemplateConfiguration createMappingForCourseTemplate(Regatta regatta, CourseTemplate courseTemplate,
-            Predicate<MarkProperties> markPropertiesFilter, Iterable<String> tagsToFilterMarkProperties);
+    CourseConfiguration createCourseConfigurationFromTemplate(CourseTemplate courseTemplate, Regatta optionalRegatta,
+            Iterable<String> tagsToFilterMarkProperties);
 
-    List<MarkConfiguration> createSuggestionsForMarkTemplate(Regatta regatta, MarkTemplate markTemplate,
-            Predicate<MarkProperties> markPropertiesFilter, Iterable<String> tagsToFilterMarkProperties);
+    List<MarkProperties> createMarkPropertiesSuggestionsForMarkConfiguration(Regatta optionalRegatta,
+            MarkConfiguration markConfiguration, Iterable<String> tagsToFilterMarkProperties);
 
     // TODO Do we need to loosely couple creation of DefineMarkEvents for the Regatta
     /**
@@ -109,8 +129,7 @@ public interface CourseAndMarkMappingFactory {
      *            for {@link RegattaLogDefineMarkEvent}s and the {@link RegattaLogDeviceMappingEvent}s.
      * @return the sequence of waypoints, obtained by expanding the
      */
-    CourseBase createCourseFromMappingAndDefineMarksAsNeeded(Regatta regatta,
-            CourseWithMarkConfiguration courseTemplateMappingWithMarkTemplateMappings,
-            int lapCount,
+    CourseBase createCourseFromConfigurationAndDefineMarksAsNeeded(Regatta regatta,
+            CourseConfiguration courseConfiguration, int lapCount,
             TimePoint timePointForDefinitionOfMarksAndDeviceMappings, AbstractLogEventAuthor author);
 }

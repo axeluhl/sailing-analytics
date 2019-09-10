@@ -221,7 +221,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserial
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResultBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
-import com.sap.sailing.server.interfaces.CourseAndMarkMappingFactory;
+import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
 import com.sap.sailing.server.interfaces.DataImportLockWithProgress;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.SimulationService;
@@ -553,7 +553,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
 
-    private final CourseAndMarkMappingFactory courseAndMarkMappingFactory;
+    private final CourseAndMarkConfigurationFactory courseAndMarkConfigurationFactory;
 
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
@@ -803,7 +803,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             }
         });
         this.dataImportLock = new DataImportLockWithProgress();
-        this.courseAndMarkMappingFactory = new CourseAndMarkMappingFactoryImpl();
+        this.courseAndMarkConfigurationFactory = new CourseAndMarkConfigurationFactoryImpl();
         remoteSailingServerSet = new RemoteSailingServerSet(scheduler, baseDomainFactory);
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         regattasByNameLock = new NamedReentrantReadWriteLock("regattasByName for " + this, /* fair */false);
@@ -4660,8 +4660,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
     
     @Override
-    public CourseAndMarkMappingFactory getCourseAndMarkMappingFactory() {
-        return courseAndMarkMappingFactory;
+    public CourseAndMarkConfigurationFactory getCourseAndMarkConfigurationFactory() {
+        return courseAndMarkConfigurationFactory;
     }
 
     public void setUnsentOperationToMasterSender(OperationsToMasterSendingQueue service) {

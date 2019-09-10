@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.coursetemplate;
 
+import java.util.Map;
+
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Mark;
 
@@ -16,10 +18,10 @@ import com.sap.sailing.domain.base.Mark;
  * {@link CourseTemplate} returned by {@link #getOptionalCourseTemplate()} leads to breaking this connection
  * such that {@link #getOptionalCourseTemplate()} from that point on will return {@code null}.<p>
  * 
- * The configuration for all marks are returned by {@link #getMarkConfigurations()} because when pushing
+ * The configuration for all marks are returned by {@link #getAllMarks()} because when pushing
  * this to a Regatta the marks for all these configurations have to be established.
  */
-public interface CourseWithMarkConfiguration extends WithOptionalRepeatablePart {
+public interface CourseConfiguration extends WithOptionalRepeatablePart {
     /**
      * If this course configuration has been obtained from a {@link CourseTemplate} without modifying the sequence of
      * waypoints and their mapping to {@link MarkTemplate}s, this method will return that {@link CourseTemplate}. In all
@@ -28,20 +30,40 @@ public interface CourseWithMarkConfiguration extends WithOptionalRepeatablePart 
      */
     CourseTemplate getOptionalCourseTemplate();
     
-    Iterable<MarkConfiguration> getMarkConfigurations();
+    /**
+     * Returns all marks that are part of this course configuration. This consists of:
+     * <ul>
+     * <li>All {@link MarkConfiguration} that are used by at least one {@link WaypointWithMarkConfiguration}.</li>
+     * <li>Any additional {@link MarkConfiguration} that is intended to be used as a spare mark.</li>
+     * </ul>
+     */
+    Iterable<MarkConfiguration> getAllMarks();
 
     /**
      * The waypoint sequence, without lap repetitions, with {@link MarkConfiguration configuration information}
      * for the marks used. All {@link MarkConfiguration} objects referenced are part of the result of
-     * {@link #getMarkConfigurations()}.
+     * {@link #getAllMarks()}.
      */
     Iterable<WaypointWithMarkConfiguration> getWaypoints();
+    
+    /**
+     * Returns all {@link MarkConfiguration MarkConfigurations} that are part of the {@link CourseConfiguration} and
+     * have a role name explicitly associated.
+     */
+    Map<MarkConfiguration, String> getAssociatedRoles();
+    
+    /**
+     * A {@link CourseConfiguration} having a {@link RepeatablePart} can optionally also specify a number of laps.
+     * Depending on the use-case this can be omitted (saving a course template) or is required (creating a regatta
+     * course).
+     */
+    Integer getNumberOfLaps();
 
     /**
      * The waypoint sequence with lap count applied. If this course configuration has no {@link #hasRepeatablePart()
      * repeatable part}, the result is the same as that of {@link #getWaypoints()}. The result has
      * {@link MarkConfiguration configuration information} for the marks used. All {@link MarkConfiguration} objects
-     * referenced are part of the result of {@link #getMarkConfigurations()}.
+     * referenced are part of the result of {@link #getAllMarks()}.
      */
     Iterable<WaypointWithMarkConfiguration> getWaypoints(int numberOfLaps);
 }

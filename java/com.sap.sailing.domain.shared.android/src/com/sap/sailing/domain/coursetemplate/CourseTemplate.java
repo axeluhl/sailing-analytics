@@ -56,7 +56,7 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
      * above, will occur zero times. For an "L2" the repeatable sub-sequence will occur once, and so on. However, an
      * implementation is free to choose an interpretation of {@code numberOfLaps} that meets callers' expectations.
      * 
-     * @param numberOfLaps TODO remove this parameter and return only the base waypoint sequence; move to {@link CourseWithMarkConfiguration}
+     * @param numberOfLaps TODO remove this parameter and return only the base waypoint sequence; move to {@link CourseConfiguration}
      *            if the course defines a repeatable part, the number of laps at least needs to be {@code 1} for the
      *            default implementation, and an {@link IllegalArgumentException} shall be thrown in case a value less
      *            than {@code 1} is used if this template specifies a repeatable part. Note again that the number of
