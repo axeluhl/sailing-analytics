@@ -277,10 +277,10 @@ public class TestORCPerformanceCurve {
         ORCPerformanceCurve performanceCurveHaspa        = new ORCPerformanceCurveImpl(certificateHaspa, complexCourse);
         ORCPerformanceCurve performanceCurveHalbtrocken  = new ORCPerformanceCurveImpl(certificateHalbtrocken, complexCourse);
         assertEquals(15.75777 , performanceCurveMilan      .getImpliedWind(Duration.ONE_HOUR.times(1.0)).getKnots(), accuracy);
-        assertEquals(15.42024 , performanceCurveBank       .getImpliedWind(Duration.ONE_HOUR.times(1.25)).getKnots(), accuracy);
+        assertEquals(15.27808 , performanceCurveBank       .getImpliedWind(Duration.ONE_HOUR.times(1.25)).getKnots(), accuracy);
         assertEquals(15.10141 , performanceCurveMoana      .getImpliedWind(Duration.ONE_HOUR.times(1.25)).getKnots(), accuracy);
         assertEquals(14.44527 , performanceCurveHaspa      .getImpliedWind(Duration.ONE_HOUR.times(1.25)).getKnots(), accuracy);
-        assertEquals(10.88791 , performanceCurveTutima     .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
+        assertEquals(10.86927 , performanceCurveTutima     .getImpliedWind(Duration.ONE_HOUR.times(1.5)).getKnots(), accuracy);
         assertEquals(9.13385  , performanceCurveHalbtrocken.getImpliedWind(Duration.ONE_HOUR.times(2.0)).getKnots(), accuracy);
     }
     
@@ -295,7 +295,7 @@ public class TestORCPerformanceCurve {
         list.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1), new DegreeBearingImpl(180)));
         ORCPerformanceCurveCourse complexCourse = new ORCPerformanceCurveCourseImpl(list);
         
-        double accuracy = 0.0001;
+        double accuracy = 0.00001;
         ORCCertificate certificateMoana          = importerLocal.getCertificate("GER 5549");
         ORCCertificate certificateMilan          = importerLocal.getCertificate("GER 7323");
         ORCCertificate certificateTutima         = importerLocal.getCertificate("GER 5609");
@@ -310,10 +310,10 @@ public class TestORCPerformanceCurve {
         ORCPerformanceCurve performanceCurveHalbtrocken  = new ORCPerformanceCurveImpl(certificateHalbtrocken, complexCourse);
         
         assertEquals(Duration.ONE_HOUR.times(1.0).asHours(), performanceCurveMilan.getAllowancePerCourse(new KnotSpeedImpl(15.75777)).asHours(), accuracy);
-        assertEquals(Duration.ONE_HOUR.times(1.25).asHours(), performanceCurveBank.getAllowancePerCourse(new KnotSpeedImpl(15.42024)).asHours(), accuracy);
+        assertEquals(Duration.ONE_HOUR.times(1.25).asHours(), performanceCurveBank.getAllowancePerCourse(new KnotSpeedImpl(15.27808)).asHours(), accuracy);
         assertEquals(Duration.ONE_HOUR.times(1.25).asHours(), performanceCurveMoana.getAllowancePerCourse(new KnotSpeedImpl(15.10141)).asHours(), accuracy);
         assertEquals(Duration.ONE_HOUR.times(1.25).asHours(), performanceCurveHaspa.getAllowancePerCourse(new KnotSpeedImpl(14.44527)).asHours(), accuracy);
-        assertEquals(Duration.ONE_HOUR.times(1.5).asHours(), performanceCurveTutima.getAllowancePerCourse(new KnotSpeedImpl(10.88791)).asHours(), accuracy);
+        assertEquals(Duration.ONE_HOUR.times(1.5).asHours(), performanceCurveTutima.getAllowancePerCourse(new KnotSpeedImpl(10.86927)).asHours(), accuracy);
         assertEquals(Duration.ONE_HOUR.times(2.0).asHours(), performanceCurveHalbtrocken.getAllowancePerCourse(new KnotSpeedImpl(9.13385)).asHours(), accuracy);
         
     }
