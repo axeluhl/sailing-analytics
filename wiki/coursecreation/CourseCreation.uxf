@@ -5,9 +5,9 @@
     <id>UMLClass</id>
     <coordinates>
       <x>672</x>
-      <y>553</y>
+      <y>539</y>
       <w>126</w>
-      <h>77</h>
+      <h>91</h>
     </coordinates>
     <panel_attributes>CommonMarkProperties
 --
@@ -15,6 +15,7 @@ color : Color
 shape : String
 pattern : String
 type : MarkType
+name : String
 shortName : String</panel_attributes>
     <additional_attributes/>
   </element>
@@ -144,7 +145,7 @@ bg=#ffb3b3</panel_attributes>
       <x>490</x>
       <y>357</y>
       <w>266</w>
-      <h>77</h>
+      <h>70</h>
     </coordinates>
     <panel_attributes>Course
 --
@@ -160,7 +161,7 @@ bg=#ffb3b3</panel_attributes>
       <x>497</x>
       <y>105</y>
       <w>273</w>
-      <h>98</h>
+      <h>91</h>
     </coordinates>
     <panel_attributes>CourseConfiguration
 --
@@ -168,9 +169,8 @@ waypoints : List&lt;WaypointWithMarkConfiguration&gt;
 associatedRoles : BiMap&lt;MarkConfiguration, String&gt;
 allMarks : Set&lt;MarkConfiguration&gt;
 courseTemplate : CourseTemplate
-numberOfLaps : Long
-repeatablePartStart : Int
-repeatablePartEnd : Int
+numberOfLaps : Integer
+optionalRegatta : Regatta
 bg=#c0ffb3</panel_attributes>
     <additional_attributes/>
   </element>
@@ -547,15 +547,14 @@ bg=#c0ffb3</panel_attributes>
       <x>497</x>
       <y>238</y>
       <w>266</w>
-      <h>77</h>
+      <h>70</h>
     </coordinates>
     <panel_attributes>Course Template
 --
 waypointTemplates : List&lt;WaypointTemplate&gt;
 associatedRoles : BiMap&lt;MarkTemplate, String&gt;
 markTemplates : Set&lt;MarkTemplate&gt;
-repeatablePartStart : Int
-repeatablePartEnd : Int
+defaultNumberOfLaps : Integer
 bg=#fffeb3</panel_attributes>
     <additional_attributes/>
   </element>
@@ -589,29 +588,29 @@ waypoints
     <id>Relation</id>
     <coordinates>
       <x>616</x>
-      <y>196</y>
+      <y>189</y>
       <w>98</w>
-      <h>56</h>
+      <h>63</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-
    
   courseTemplate
    0 .. 1</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;60.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
       <x>616</x>
-      <y>308</y>
+      <y>301</y>
       <w>98</w>
-      <h>63</h>
+      <h>70</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-
    0 .. 1
   courseTemplate
    </panel_attributes>
-    <additional_attributes>10.0;70.0;10.0;10.0</additional_attributes>
+    <additional_attributes>10.0;80.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
@@ -752,8 +751,7 @@ lastUsedTemplate</panel_attributes>
     <panel_attributes>&lt;&lt;interface&gt;&gt;
 WithOptionalRepeatablePart
 --
-hasRepeatablePart() : Boolean
-getRepeatablePart() : Pair&lt;Int,Int&gt;
+hasRepeatablePart() : boolean
 </panel_attributes>
     <additional_attributes/>
   </element>
@@ -818,5 +816,34 @@ bg=#c0ffb3</panel_attributes>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-
 2</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;470.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>917</x>
+      <y>315</y>
+      <w>196</w>
+      <h>49</h>
+    </coordinates>
+    <panel_attributes>RepeatablePart
+--
+zeroBasedIndexOfRepeatablePartStart : int
+zeroBasedIndexOfRepeatablePartEnd : int
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>833</x>
+      <y>287</y>
+      <w>98</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+
+0..1
+repeatablePart</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;80.0;120.0;80.0</additional_attributes>
   </element>
 </diagram>

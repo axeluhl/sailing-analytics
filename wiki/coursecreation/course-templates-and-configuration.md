@@ -91,12 +91,15 @@ When designing courses, the following aspects and data sources need to get inclu
     * Optional positioning information to be used upon mark creation
 * Regatta mark based configuration
     * Appearance is defined by mark. Changing is not supported which means in this case, a new mark needs to be defined in any supported way as replacement for new courses, while the old definition remains for old courses.
+    * Type is only available if the course is created in a regatta context
     * Optional positioning information (to update the regatta mark)
 * Mark properties based configuration
     * Appearance is defined by mark properties defaulting to the definition of the mark template if none is defined in the properties
+    * Optional positioning information to be used upon mark creation (defaults to the positioning information carried by the mark properties if not given)
 * Freestyle mark configuration
     * optional mark template reference
     * optional mark properties reference
+    * Optional positioning information to be used upon mark creation
 
 
 ## Rules for the construction of mark configurations
