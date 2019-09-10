@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.text.ParseException;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.declination.Declination;
@@ -14,6 +15,7 @@ import com.sap.sailing.declination.impl.ColoradoImporter;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+@Ignore("currently, http://magcalc.geomag.info/ seems down")
 public class ColoradoDeclinationServiceTest extends DeclinationServiceTest<ColoradoImporter> {
     @Override
     @Before
