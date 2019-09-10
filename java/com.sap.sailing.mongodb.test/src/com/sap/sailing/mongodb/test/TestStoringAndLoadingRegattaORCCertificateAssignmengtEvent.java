@@ -2,6 +2,7 @@ package com.sap.sailing.mongodb.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -12,9 +13,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.bson.Document;
 import org.json.simple.parser.ParseException;
@@ -39,6 +42,7 @@ import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -87,7 +91,14 @@ public class TestStoringAndLoadingRegattaORCCertificateAssignmengtEvent extends 
 
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(expectedEvent.getCompetitorID(), actualEvent.getCompetitorID());
-        assertEquals(expectedEvent.getCertificate(), actualEvent.getCertificate());
+        assertEquals(expectedEvent.getCertificate().getSailnumber(), actualEvent.getCertificate().getSailnumber());
+        assertEquals(expectedEvent.getCertificate().getGPH(), actualEvent.getCertificate().getGPH(), 0.00001);
+
+        List<Speed> expectedBeatVMGPredictions = new ArrayList<>(expectedEvent.getCertificate().getBeatVMGPredictions().values());
+        List<Double> expectedBeatVMGPredictionsInKnots = expectedBeatVMGPredictions.stream().map(s -> s.getKnots()).collect(Collectors.toList());
+        List<Speed> actualBeatVMGPredictions = new ArrayList<>(actualEvent.getCertificate().getBeatVMGPredictions().values());
+        List<Double> actualBeatVMGPredictionsInKnots = actualBeatVMGPredictions.stream().map(s -> s.getKnots()).collect(Collectors.toList());
+        assertTrue(expectedBeatVMGPredictionsInKnots.equals(actualBeatVMGPredictionsInKnots));
     }
 
     public void assertBaseFields(RaceLogEvent expectedEvent, RaceLogEvent actualEvent) {

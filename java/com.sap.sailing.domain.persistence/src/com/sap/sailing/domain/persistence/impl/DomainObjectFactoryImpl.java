@@ -1631,7 +1631,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         } else if (eventClass.equals(RaceLogORCLegDataEvent.class.getSimpleName())) {
             resultEvent = loadRaceLogORCLegDataEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
         } else if (eventClass.equals(RaceLogORCCertificateAssignmentEvent.class.getSimpleName())) {
-            resultEvent = loadRaceLogORCCertificateAssignmentEvent(createdAt, author, logicalTimePoint, passId, passId, dbObject);
+            resultEvent = loadRaceLogORCCertificateAssignmentEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
         } else {
             throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
         }
