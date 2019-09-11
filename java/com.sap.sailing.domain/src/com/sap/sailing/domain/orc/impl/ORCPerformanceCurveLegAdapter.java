@@ -41,4 +41,13 @@ public class ORCPerformanceCurveLegAdapter implements ORCPerformanceCurveLeg {
         return ORCPerformanceCurveLegTypes.TWA;
     }
 
+    @Override
+    public ORCPerformanceCurveLeg scale(final double share) {
+        return new ORCPerformanceCurveLegAdapter(trackedLeg) {
+            @Override
+            public Distance getLength() {
+                return ORCPerformanceCurveLegAdapter.this.getLength().scale(share);
+            }
+        };
+    }
 }

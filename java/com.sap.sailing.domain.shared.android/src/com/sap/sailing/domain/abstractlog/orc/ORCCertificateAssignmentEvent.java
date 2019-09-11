@@ -6,7 +6,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 
 public interface ORCCertificateAssignmentEvent<VisitorT> extends AbstractLogEvent<VisitorT> {
-    Serializable getCompetitorID();
+    Serializable getBoatId();
     
     ORCCertificate getCertificate();
 }

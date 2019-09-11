@@ -8,6 +8,7 @@ import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEve
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventData;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventDataImpl;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sse.common.TimePoint;
@@ -17,14 +18,14 @@ public class RaceLogORCCertificateAssignmentEventImpl extends BaseORCCertificate
     private final RaceLogEventData raceLogEventData;
 
     public RaceLogORCCertificateAssignmentEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
-            AbstractLogEventAuthor author, Serializable pId, int passId, ORCCertificate certificate, Competitor competitor) {
-        super(createdAt, logicalTimePoint, author, pId, certificate, competitor);
+            AbstractLogEventAuthor author, Serializable pId, int passId, ORCCertificate certificate, Boat boat) {
+        super(createdAt, logicalTimePoint, author, pId, certificate, boat);
         this.raceLogEventData = new RaceLogEventDataImpl(/* involvedBoats */ null, passId);
     }
 
     public RaceLogORCCertificateAssignmentEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
-            AbstractLogEventAuthor author, Serializable pId, int passId, ORCCertificate certificate, Serializable competitorID) {
-        super(createdAt, logicalTimePoint, author, pId, certificate, competitorID);
+            AbstractLogEventAuthor author, Serializable pId, int passId, ORCCertificate certificate, Serializable boatId) {
+        super(createdAt, logicalTimePoint, author, pId, certificate, boatId);
         this.raceLogEventData = new RaceLogEventDataImpl(/* involvedBoats */ null, passId);
     }
     

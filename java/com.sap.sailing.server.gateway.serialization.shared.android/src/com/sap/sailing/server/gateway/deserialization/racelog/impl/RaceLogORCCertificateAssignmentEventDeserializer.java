@@ -33,8 +33,8 @@ public class RaceLogORCCertificateAssignmentEventDeserializer extends BaseRaceLo
             AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
         final ORCCertificate certificate = new ORCCertificateJsonDeserializer().deserialize((JSONObject) object.get(RaceLogORCCertificateAssignmentEventSerializer.ORC_CERTIFICATE));
-        final Serializable competitorID = (Serializable) object.get(RaceLogORCCertificateAssignmentEventSerializer.ORC_COMPETITOR_ID);
-        return new RaceLogORCCertificateAssignmentEventImpl(createdAt, timePoint, author, id, passId, certificate, competitorID);
+        final Serializable boatId = (Serializable) object.get(RaceLogORCCertificateAssignmentEventSerializer.ORC_BOAT_ID);
+        return new RaceLogORCCertificateAssignmentEventImpl(createdAt, timePoint, author, id, passId, certificate, boatId);
     }
 
 }

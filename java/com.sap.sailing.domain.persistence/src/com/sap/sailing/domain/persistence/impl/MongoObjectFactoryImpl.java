@@ -1010,7 +1010,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document result = new Document();
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCCertificateAssignmentEvent.class.getSimpleName());
-        result.append(FieldNames.COMPETITOR_ID.name(), event.getCompetitorID());
+        result.append(FieldNames.COMPETITOR_ID.name(), event.getBoatId());
         result.append(FieldNames.ORC_CERTIFICATE.name(), createORCCertificateObject(event.getCertificate()));
         return result;
     }
@@ -1841,7 +1841,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeIdentifier, RegattaLogORCCertificateAssignmentEvent event) {
         Document document = createBasicRegattaLogEventDBObject(event);
-        document.append(FieldNames.COMPETITOR_ID.name(), event.getCompetitorID());
+        document.append(FieldNames.COMPETITOR_ID.name(), event.getBoatId());
         document.append(FieldNames.ORC_CERTIFICATE.name(), createORCCertificateObject(event.getCertificate()));
         storeRegattaLogEvent(regattaLikeIdentifier, document);
     }

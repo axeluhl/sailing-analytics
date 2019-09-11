@@ -28,6 +28,7 @@ import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.impl.PartialNavigableSetView;
 import com.sap.sailing.domain.tracking.impl.TrackImpl;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.Util;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 /**
@@ -281,9 +282,9 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
     }
 
     @Override
-    public void addAllListeners(HashSet<VisitorT> listeners) {
+    public void addAllListeners(Iterable<VisitorT> listeners) {
         synchronized (listeners) {
-            this.listeners.addAll(listeners);
+            Util.addAll(listeners, this.listeners);
         }
     }
 

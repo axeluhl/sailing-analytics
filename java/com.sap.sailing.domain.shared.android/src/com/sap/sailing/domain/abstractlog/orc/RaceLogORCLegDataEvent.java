@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.abstractlog.orc;
 
+import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
@@ -14,7 +15,7 @@ import com.sap.sse.common.Distance;
  * 
  * @author Daniel Lisunkin (i505543)
  */
-public interface RaceLogORCLegDataEvent extends RaceLogEvent {
+public interface RaceLogORCLegDataEvent extends RaceLogEvent, Revokable {
 
     public ORCPerformanceCurveLegTypes getType();
     

@@ -42,7 +42,7 @@ public class RegattaLogORCCertificateAssignmentEventImpl extends AbstractLogEven
     }
 
     @Override
-    public Serializable getCompetitorID() {
+    public Serializable getBoatId() {
         return competitorID;
     }
 

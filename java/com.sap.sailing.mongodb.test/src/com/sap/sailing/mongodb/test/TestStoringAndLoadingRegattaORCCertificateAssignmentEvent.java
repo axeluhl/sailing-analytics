@@ -2,7 +2,6 @@ package com.sap.sailing.mongodb.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -90,7 +89,7 @@ public class TestStoringAndLoadingRegattaORCCertificateAssignmentEvent extends A
         RaceLogORCCertificateAssignmentEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
-        assertEquals(expectedEvent.getCompetitorID(), actualEvent.getCompetitorID());
+        assertEquals(expectedEvent.getBoatId(), actualEvent.getBoatId());
         assertEquals(expectedEvent.getCertificate().getSailnumber(), actualEvent.getCertificate().getSailnumber());
         assertEquals(expectedEvent.getCertificate().getGPH(), actualEvent.getCertificate().getGPH(), 0.00001);
 

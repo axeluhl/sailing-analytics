@@ -45,7 +45,7 @@ public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse 
             List<ORCPerformanceCurveLeg> resultLegs = new ArrayList<>();
             resultLegs.addAll(legs.subList(0, lastFinishedLegOneBased));
             ORCPerformanceCurveLeg lastFinishedLeg = legs.get(lastFinishedLegOneBased);
-            resultLegs.add(new ORCPerformanceCurveLegImpl(lastFinishedLeg.getLength().scale(shareOfCurrentLeg), lastFinishedLeg.getTwa()));
+            resultLegs.add(lastFinishedLeg.scale(shareOfCurrentLeg));
             return new ORCPerformanceCurveCourseImpl(resultLegs);
         }
     }

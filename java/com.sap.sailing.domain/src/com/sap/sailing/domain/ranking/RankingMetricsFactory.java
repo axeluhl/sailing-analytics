@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.RankingMetrics;
+import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveRankingMetric;
 
 public final class RankingMetricsFactory {
     public static RankingMetrics getForClass(Class<? extends RankingMetric> c) {

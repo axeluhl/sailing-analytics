@@ -89,11 +89,10 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
     public ORCCertificateImporterRMS(Reader reader) throws IOException {
         final BufferedReader br = new BufferedReader(reader);
         columnNamesAndWidths = readColumnWidthsFromFirstLine(br.readLine());
-        final String fileIdColumnName = columnNamesAndWidths.keySet().iterator().next();
+        columnNamesAndWidths.keySet().iterator().next(); // the first column contains the IDs of the certificates
         final String sailnumberColumnName = columnNamesAndWidths.keySet().iterator().next();
         certificateValuesBySailnumber = new HashMap<>();
         String line;
-        
         while ((line = br.readLine()) != null) {
             final Map<String, String> parsedLine = parseLine(line);
             certificateValuesBySailnumber.put(parsedLine.get(sailnumberColumnName).replaceAll(" ", "").toUpperCase(), parsedLine);
@@ -109,8 +108,8 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
         BufferedReader br = new BufferedReader(reader);
         columnNamesAndWidths = readColumnWidthsFromFirstLine(br.readLine());
         Iterator<String> iterator = columnNamesAndWidths.keySet().iterator();
-        final String fileIdColumnName = iterator.next();                //the first column contains the IDs of the certificates
-        final String sailnumberColumnName = iterator.next();            //the second column contains the sail numbers, which are easier to use for identification
+        iterator.next();                                      // the first column contains the IDs of the certificates
+        final String sailnumberColumnName = iterator.next();  // the second column contains the sail numbers, which are easier to use for identification
         certificateValuesBySailnumber = new HashMap<>();
         String line;
         

@@ -33,6 +33,13 @@ public class ORCPerformanceCurveLegImpl implements ORCPerformanceCurveLeg {
     }
 
     @Override
+    public ORCPerformanceCurveLeg scale(double share) {
+        final Distance scaledLength = getLength().scale(share);
+        return getType() == ORCPerformanceCurveLegTypes.TWA ? new ORCPerformanceCurveLegImpl(scaledLength, getTwa()) :
+            new ORCPerformanceCurveLegImpl(scaledLength, getType());
+    }
+
+    @Override
     public String toString() {
         return "[length=" + length.getNauticalMiles() + "NM, "+(twa==null?type.name():"TWA=" + twa.getDegrees() + "°")+"]";
     }

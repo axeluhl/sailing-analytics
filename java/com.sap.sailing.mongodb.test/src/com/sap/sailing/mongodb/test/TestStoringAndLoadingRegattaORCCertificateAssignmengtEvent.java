@@ -30,9 +30,12 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.domain.base.impl.CompetitorImpl;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.orc.ORCCertificateImporter;
 import com.sap.sailing.domain.orc.impl.ORCCertificateImporterJSON;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
@@ -61,7 +64,7 @@ public class TestStoringAndLoadingRegattaORCCertificateAssignmengtEvent extends 
     protected List<Competitor> expectedInvolvedBoats = Collections.emptyList();
     protected int expectedPassId = 42;
     private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
-    private final Competitor competitor = new CompetitorImpl("comp", "Comp", "KYC", null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+    private final Boat boat = new BoatImpl(UUID.randomUUID(), "My Boat", new BoatClassImpl(BoatClassMasterdata._18Footer.getDisplayName(), BoatClassMasterdata._18Footer), "GER 18");
     
     protected MongoObjectFactoryImpl mongoFactory = (MongoObjectFactoryImpl) PersistenceFactory.INSTANCE
             .getMongoObjectFactory(getMongoService(), new MockSmartphoneImeiServiceFinderFactory());
@@ -84,13 +87,13 @@ public class TestStoringAndLoadingRegattaORCCertificateAssignmengtEvent extends 
     @Test
     public void test() throws JsonDeserializationException, ParseException {
         RaceLogORCCertificateAssignmentEvent expectedEvent = new RaceLogORCCertificateAssignmentEventImpl(MillisecondsTimePoint.now(), expectedEventTime, author,
-                expectedId, expectedPassId, importer.getCertificate("GER 5549"), competitor);
+                expectedId, expectedPassId, importer.getCertificate("GER 5549"), boat);
 
         Document dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RaceLogORCCertificateAssignmentEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
-        assertEquals(expectedEvent.getCompetitorID(), actualEvent.getCompetitorID());
+        assertEquals(expectedEvent.getBoatId(), actualEvent.getBoatId());
         assertEquals(expectedEvent.getCertificate().getSailnumber(), actualEvent.getCertificate().getSailnumber());
         assertEquals(expectedEvent.getCertificate().getGPH(), actualEvent.getCertificate().getGPH(), 0.00001);
 

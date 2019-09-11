@@ -5,7 +5,7 @@ import java.io.Serializable;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.ORCCertificateAssignmentEvent;
-import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sse.common.TimePoint;
 
@@ -13,20 +13,20 @@ public abstract class BaseORCCertificateAssignmentEventImpl<VisitorT> extends Ab
     private static final long serialVersionUID = -3186019736784868848L;
 
     private ORCCertificate certificate;
-    private Serializable competitorID;
+    private Serializable boatId;
 
     public BaseORCCertificateAssignmentEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
-            AbstractLogEventAuthor author, Serializable pId, ORCCertificate certificate, Competitor competitor) {
+            AbstractLogEventAuthor author, Serializable pId, ORCCertificate certificate, Boat boat) {
         super(createdAt, logicalTimePoint, author, pId);
         this.certificate = certificate;
-        this.competitorID = competitor.getId();
+        this.boatId = boat.getId();
     }
 
     public BaseORCCertificateAssignmentEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
-            AbstractLogEventAuthor author, Serializable pId, ORCCertificate certificate, Serializable competitorID) {
+            AbstractLogEventAuthor author, Serializable pId, ORCCertificate certificate, Serializable boatId) {
         super(createdAt, logicalTimePoint, author, pId);
         this.certificate = certificate;
-        this.competitorID = competitorID;
+        this.boatId = boatId;
     }
 
     @Override
@@ -35,7 +35,7 @@ public abstract class BaseORCCertificateAssignmentEventImpl<VisitorT> extends Ab
     }
 
     @Override
-    public Serializable getCompetitorID() {
-        return competitorID;
+    public Serializable getBoatId() {
+        return boatId;
     }
 }
