@@ -3,7 +3,6 @@ package com.sap.sse.common;
 import java.io.Serializable;
 
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
-import com.sap.sse.common.impl.SecondsDurationImpl;
 
 /**
  * A time duration that can be converted to various time units and that interoperates with {@link TimePoint}.
@@ -13,9 +12,9 @@ import com.sap.sse.common.impl.SecondsDurationImpl;
  */
 public interface Duration extends Serializable, Comparable<Duration> {
     
-    static final Duration NULL = new SecondsDurationImpl(0);
+    static final Duration NULL = new MillisecondsDurationImpl(0);
     static final Duration ONE_MILLISECOND = new MillisecondsDurationImpl(1);
-    static final Duration ONE_SECOND = new SecondsDurationImpl(1);
+    static final Duration ONE_SECOND = new MillisecondsDurationImpl(1000);
     static final Duration ONE_MINUTE = ONE_SECOND.times(60);
     static final Duration ONE_HOUR = ONE_MINUTE.times(60);
     static final Duration ONE_DAY = ONE_HOUR.times(24);
