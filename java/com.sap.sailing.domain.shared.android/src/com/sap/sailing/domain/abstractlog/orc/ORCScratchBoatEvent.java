@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.abstractlog.orc;
 
+import java.io.Serializable;
+
+import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 
-//TODO Implementation and decision whether the scratch boat should be set for a whole regatta or per race
-public interface ORCScratchBoatEvent extends RaceLogEvent {
-
+public interface ORCScratchBoatEvent extends RaceLogEvent, Revokable {
+    Serializable getCompetitorId();
 }

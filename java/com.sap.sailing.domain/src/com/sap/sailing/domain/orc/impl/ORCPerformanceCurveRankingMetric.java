@@ -6,8 +6,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import com.sap.sailing.domain.abstractlog.orc.ORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentFinder;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataAnalyzer;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentFinder;
@@ -24,6 +26,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.ranking.AbstractRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -113,6 +116,11 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
         };
     }
 
+    /**
+     * To be called if the set of logs attached to the {@link #getTrackedRace() tracked race} changes or any of those
+     * logs sees a {@link ORCCertificateAssignmentEvent} being added. As a result, the {@link #certificates} map is
+     * replaced by a new one that has the updated mapping of boats to their certificates.
+     */
     private void updateCertificatesFromLogs() {
         final Map<Boat, ORCCertificate> newCertificates = new HashMap<>();
         for (final RegattaLog regattaLog : getTrackedRace().getAttachedRegattaLogs()) {
@@ -122,6 +130,14 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
             newCertificates.putAll(new RaceLogORCCertificateAssignmentFinder(raceLog, boatsById).analyze());
         }
         certificates = newCertificates;
+    }
+    
+    private void updateCourseFromRaceLogs() {
+        final Map<Integer, ORCPerformanceCurveLeg> legsWithDefinitions = new HashMap<>();
+        for (final RaceLog raceLog : getTrackedRace().getAttachedRaceLogs()) {
+            legsWithDefinitions.putAll(new RaceLogORCLegDataAnalyzer(raceLog).analyze());
+        }
+        // TODO continue here, taking only those definitions up to the true number of legs in the race's course and fill the blanks with tracked leg adapters
     }
 
     @Override

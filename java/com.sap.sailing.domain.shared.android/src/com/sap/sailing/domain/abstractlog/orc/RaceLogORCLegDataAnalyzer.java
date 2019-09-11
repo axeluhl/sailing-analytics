@@ -1,9 +1,8 @@
-package com.sap.sailing.domain.abstractlog.orc.impl;
+package com.sap.sailing.domain.abstractlog.orc;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
@@ -21,9 +20,9 @@ import com.sap.sse.common.Distance;
  * @author Axel Uhl (D043530)
  *
  */
-public class ORCLegDataAnalyzer extends RaceLogAnalyzer<Map<Integer, ORCPerformanceCurveLeg>> {
+public class RaceLogORCLegDataAnalyzer extends RaceLogAnalyzer<Map<Integer, ORCPerformanceCurveLeg>> {
 
-    public ORCLegDataAnalyzer(RaceLog raceLog) {
+    public RaceLogORCLegDataAnalyzer(RaceLog raceLog) {
         super(raceLog);
     }
 
@@ -46,5 +45,4 @@ public class ORCLegDataAnalyzer extends RaceLogAnalyzer<Map<Integer, ORCPerforma
         }
         return result;
     }
-
 }
