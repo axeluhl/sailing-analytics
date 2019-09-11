@@ -331,6 +331,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         } else {
             actualRaceDuration = startOfRace.until(timePoint);
             for (Competitor competitor : getCompetitors()) {
+                // TODO bug5110: we cannot compute the following if at timePoint the position of either of the two competitors involved is unknown; we can, however, do this if timePoint is after the two finish mark passings, or if the competitorFarthestAhead has already finished at timePoint and the position of "competitor" is known.
                 final Duration predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead = getPredictedDurationToReachWindwardPositionOf(
                         competitor, competitorFarthestAhead, timePoint, cache);
                 final Duration totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead = predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead == null ? null
@@ -482,7 +483,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
     /**
      * Get's <code>who</code>'s current tracked leg at <code>timePoint</code>, or <code>null</code> if <code>who</code> hasn't
      * started at <code>timePoint</code> yet, or <code>who</code>'s tracked leg for the last leg if <code>who</code> has
-     * already finished the race at <code>timePoint</code> or 
+     * already finished the race at <code>timePoint</code>.
      */
     protected TrackedLegOfCompetitor getCurrentLegOrLastLegIfAlreadyFinished(Competitor who, TimePoint timePoint) {
         TrackedLegOfCompetitor currentLegWho = getTrackedRace().getCurrentLeg(who, timePoint);
@@ -531,8 +532,6 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                 // who's leg finishing time is known and is already reached at timePoint; we don't need to extrapolate
                 toEndOfLegOrTo = timePoint.until(whosLegFinishTime);
             } else {
-                assert getWindwardDistanceTraveled(legTo.getCompetitor(), isAssumedToHaveFinishedLeg(timePoint, legTo)?legTo.getFinishTime():timePoint, cache).compareTo(
-                        getWindwardDistanceTraveled(legWho.getCompetitor(), isAssumedToHaveFinishedLeg(timePoint, legWho)?legWho.getFinishTime():timePoint, cache)) >= 0;
                 // estimate who's leg finishing time by extrapolating with the average VMG (if available) or the current VMG
                 // (if no average VMG can currently be computed, e.g., because the time point is exactly at the leg start)
                 final Position positionOfEndOfLeg = getTrackedRace().getApproximatePosition(legWho.getLeg().getTo(), timePoint);
@@ -541,7 +540,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         } else {
             // competitor "to" is still in same leg; project "who" to "to"'s position using VMG
             final Position positionOfTo = getTrackedRace().getTrack(legTo.getCompetitor()).getEstimatedPosition(timePoint, /* extrapolate */ true);
-            toEndOfLegOrTo = getDurationToReach(positionOfTo, timePoint, legWho, cache);
+            toEndOfLegOrTo = positionOfTo == null ? null : getDurationToReach(positionOfTo, timePoint, legWho, cache);
         }
         return toEndOfLegOrTo;
     }
