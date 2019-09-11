@@ -676,7 +676,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      * missing, so asking whether a leg has been finished can be answered with {@code true} if the {@code timePoint}
      * is at of after that finish mark passing.
      */
-    private boolean isAssumedToHaveFinishedLeg(TimePoint timePoint, final TrackedLegOfCompetitor trackedLegOfCompetitor) {
+    protected boolean isAssumedToHaveFinishedLeg(TimePoint timePoint, final TrackedLegOfCompetitor trackedLegOfCompetitor) {
         final Waypoint legEndWaypoint = trackedLegOfCompetitor.getLeg().getTo();
         final MarkPassing markPassing = findMarkPassingForWaypointOrSuccessorAtOrBeforeTimePoint(timePoint,
                 trackedLegOfCompetitor, legEndWaypoint);
@@ -692,7 +692,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      * missing, so asking whether a leg has been started can be answered with {@code true} if the {@code timePoint}
      * is at of after that finish mark passing.
      */
-    private boolean isAssumedToHaveStartedLeg(TimePoint timePoint, final TrackedLegOfCompetitor trackedLegOfCompetitor) {
+    protected boolean isAssumedToHaveStartedLeg(TimePoint timePoint, final TrackedLegOfCompetitor trackedLegOfCompetitor) {
         final Waypoint legStartWaypoint = trackedLegOfCompetitor.getLeg().getFrom();
         final MarkPassing markPassing = findMarkPassingForWaypointOrSuccessorAtOrBeforeTimePoint(timePoint,
                 trackedLegOfCompetitor, legStartWaypoint);
