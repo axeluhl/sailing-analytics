@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.UUID;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -23,6 +24,7 @@ import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -36,6 +38,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TimedComparator;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
@@ -96,6 +99,12 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
                     result.add(new MarkPassingImpl(lastMarkPassingTimes.get(competitor), finish, competitor));
                     return result;
                 }
+                @Override
+                public Duration getTimeSailedSinceRaceStart(Competitor competitor, TimePoint timePoint) {
+                    final TimePoint timePointOfFinishMarkPassing = getMarkPassings(competitor).last().getTimePoint();
+                    final TimePoint to = timePointOfFinishMarkPassing.before(timePoint) ? timePointOfFinishMarkPassing : timePoint;
+                    return to.before(getStartOfRace()) ? null : getStartOfRace().until(to);
+                }
             };
             trackedRace.getRace().getCourse().addWaypoint(0, start);
             trackedRace.getRace().getCourse().addWaypoint(1, finish);
@@ -126,8 +135,9 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
         series.add(defaultSeries);
 
         Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName(regattaName, boatClass.getName()), boatClass,
-                /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */null, /* endDate */null, series, 
-                /* persistent */false, scoringScheme, "123", null, OneDesignRankingMetric::new);
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, /* startDate */null, /* endDate */null, series, 
+                /* persistent */false, scoringScheme, "123", null, OneDesignRankingMetric::new,
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
         return regatta;
     }
 
@@ -182,8 +192,9 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
         }
 
         Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass, 
-                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, series, 
-                /* persistent */ false, scoringScheme, "123", null, OneDesignRankingMetric::new);
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, /*startDate*/ null, /*endDate*/ null, series, 
+                /* persistent */ false, scoringScheme, "123", null, OneDesignRankingMetric::new,
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
         return regatta;
     }
     
@@ -228,8 +239,9 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
             }
         }
         Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass, 
-                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, series,
-                /* persistent */ false, scoringScheme, /* ID */ "123", /* course area */ null, OneDesignRankingMetric::new);
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, /*startDate*/ null, /*endDate*/ null, series,
+                /* persistent */ false, scoringScheme, /* ID */ "123", /* course area */ null,
+                OneDesignRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString());
         return regatta;
     }
 }

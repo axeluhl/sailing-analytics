@@ -10,7 +10,8 @@ Require-Bundle: com.sap.sse.gwt,
  com.sap.sse.datamining.shared,
  org.moxieapps.gwt.highcharts,
  com.google.gwt.servlet;bundle-version="2.8.2",
- com.google.gwt.user;bundle-version="2.8.2";resolution:=optional
+ com.google.gwt.user;bundle-version="2.8.2";resolution:=optional,
+ org.apache.shiro.core
 Export-Package: com.sap.sse.datamining.ui.client,
  com.sap.sse.datamining.ui.client.developer,
  com.sap.sse.datamining.ui.client.execution,

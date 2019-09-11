@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * The extended {@link LeaderboardDescriptorWithEliminations}'s
@@ -24,11 +25,11 @@ import com.sap.sse.gwt.client.ErrorReporter;
  *
  */
 public class RegattaLeaderboardWithEliminationsEditDialog extends RegattaLeaderboardWithEliminationsDialog {
-    public RegattaLeaderboardWithEliminationsEditDialog(SailingServiceAsync sailingService,
+    public RegattaLeaderboardWithEliminationsEditDialog(SailingServiceAsync sailingService, final UserService userService,
             Collection<StrippedLeaderboardDTO> otherExistingLeaderboards, Collection<RegattaDTO> existingRegattas,
             LeaderboardDescriptorWithEliminations leaderboardDescriptor, StringMessages stringMessages, ErrorReporter errorReporter,
             DialogCallback<LeaderboardDescriptorWithEliminations> callback) {
-        super(sailingService, stringMessages.editRegattaLeaderboard(), leaderboardDescriptor,
+        super(sailingService, userService, stringMessages.editRegattaLeaderboard(), leaderboardDescriptor,
                 existingRegattas, otherExistingLeaderboards, stringMessages,
                 errorReporter,
                 new RegattaLeaderboardWithEliminationsDialog.LeaderboardParameterValidator(stringMessages,

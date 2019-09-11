@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Locale;
 
 import org.junit.Test;
 
@@ -11,7 +12,12 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.replication.testsupport.AbstractServerWithSingleServiceReplicationTest;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.SecurityServiceImpl;
+import com.sap.sse.security.interfaces.AccessControlStore;
+import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
+import com.sap.sse.security.userstore.mongodb.PersistenceFactory;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class SecurityServiceInitialLoadTest extends AbstractServerWithSingleServiceReplicationTest<SecurityService, SecurityServiceImpl> {
@@ -26,10 +32,16 @@ public class SecurityServiceInitialLoadTest extends AbstractServerWithSingleServ
         super(new AbstractSecurityReplicationTest.SecurityServerReplicationTestSetUp() {
             @Override
             protected SecurityServiceImpl createNewMaster()
-                    throws MalformedURLException, IOException, InterruptedException, UserManagementException, MailException {
-                final SecurityServiceImpl newMaster = new SecurityServiceImpl(new UserStoreImpl(null, null)); // no persistence
-                newMaster.clearReplicaState();
-                newMaster.createSimpleUser(username, email, password, fullName, company, /* validationBaseURL */ null);
+                    throws MalformedURLException, IOException, InterruptedException, UserManagementException, MailException, UserGroupManagementException {
+                final UserStore userStore = new UserStoreImpl(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
+                        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), "TestDefaultTenant");
+                userStore.ensureDefaultRolesExist();
+                userStore.loadAndMigrateUsers();
+                final AccessControlStore accessControlStore = new AccessControlStoreImpl(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
+                        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), userStore);
+                final SecurityServiceImpl newMaster = new SecurityServiceImpl(userStore, accessControlStore);
+                newMaster.createSimpleUser(username, email, password, fullName, company,
+                        /* validationBaseURL */ Locale.ENGLISH, null, null);
                 accessToken = newMaster.createAccessToken(username);
                 return newMaster;
             }

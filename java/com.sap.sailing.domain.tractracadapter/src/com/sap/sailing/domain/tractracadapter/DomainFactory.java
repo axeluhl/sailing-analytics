@@ -37,6 +37,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -82,11 +83,12 @@ public interface DomainFactory {
 
     Sideline createSideline(String name, Iterable<TracTracControlPoint> controlPoints);
 
-    com.sap.sailing.domain.base.Boat getOrCreateBoat(Serializable boatId, String boatName, BoatClass boatClass, String sailId, Color boatColor);
+    com.sap.sailing.domain.base.Boat getOrCreateBoat(Serializable boatId, String boatName, BoatClass boatClass,
+            String sailId, Color boatColor, RaceTrackingHandler raceTrackingHandler);
 
     com.sap.sailing.domain.base.Competitor resolveCompetitor(ICompetitor competitor);
 
-    void updateCompetitor(ICompetitor competitor);
+    void updateCompetitor(ICompetitor competitor, RaceTrackingHandler raceTrackingHandler);
     
     /**
      * Looks up or, if not found, creates a {@link Nationality} object and re-uses <code>threeLetterIOCCode</code> also as the
@@ -139,15 +141,19 @@ public interface DomainFactory {
     TracTracRaceTracker createRaceTracker(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
             LeaderboardGroupResolver leaderboardGroupResolver,
-            RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
+            RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler)
             throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException;
 
     /**
      * Same as {@link #createRaceTracker(URL, URI, URI, URI, TimePoint, TimePoint, WindStore, TrackedRegattaRegistry)},
      * only that a predefined {@link Regatta} is used to hold the resulting races.
      */
-    RaceTracker createRaceTracker(Regatta regatta, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
-            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
+    RaceTracker createRaceTracker(Regatta regatta, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
+            LeaderboardGroupResolver leaderboardGroupResolver,
+            RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException,
             SubscriberInitializationException, IOException, InterruptedException;
 
@@ -172,7 +178,8 @@ public interface DomainFactory {
             Simulator simulator, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry,
             RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, IRace tractracRace,
             URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword,
-            IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm, long timeoutInMilliseconds);
+            IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler);
 
     /**
      * Creates a {@link RaceDefinition} from a TracTrac {@link IRace} and a domain {@link Course} definition. The
@@ -203,7 +210,8 @@ public interface DomainFactory {
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI, UUID tracTracEventUuid,
             String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings,
-            RaceLogResolver raceLogResolver, Consumer<DynamicTrackedRace> runBeforeExposingRace, IRace tractracRace);
+            RaceLogResolver raceLogResolver, Consumer<DynamicTrackedRace> runBeforeExposingRace, IRace tractracRace,
+            RaceTrackingHandler raceTrackingHandler);
 
     /**
      * The record may be for a single mark or a gate. If for a gate, the {@link ControlPointPositionData#getIndex()
@@ -221,7 +229,8 @@ public interface DomainFactory {
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, IRace tractracRace, WindStore windStore,
             long delayToLiveInMillis, Simulator simulator, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, 
             RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, URI courseDesignUpdateURI, 
-            String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean ignoreTracTracMarkPassings, long timeoutInMilliseconds, ReceiverType... types);
+            String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean ignoreTracTracMarkPassings, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler, ReceiverType... types);
 
     JSONService parseJSONURLWithRaceRecords(URL jsonURL, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 
@@ -238,7 +247,9 @@ public interface DomainFactory {
      */
     void updateCourseWaypoints(Course courseToUpdate, Iterable<Util.Pair<TracTracControlPoint, PassingInstruction>> controlPoints) throws PatchFailedException;
 
-    TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword);
+    TracTracConfiguration createTracTracConfiguration(String creatorName, String name, String jsonURL,
+            String liveDataURI, String storedDataURI, String courseDesignUpdateURI, String tracTracUsername,
+            String tracTracPassword);
 
     /**
      * Fetch the race definition for <code>race</code>. If the race definition hasn't been created yet, the call blocks
@@ -254,7 +265,7 @@ public interface DomainFactory {
     RaceDefinition getAndWaitForRaceDefinition(UUID raceId, long timeoutInMilliseconds);
 
     Map<Competitor, Boat> getOrCreateCompetitorsAndTheirBoats(DynamicTrackedRegatta trackedRegatta, LeaderboardGroupResolver LeaderboardGroupResolver,
-            IRace race, BoatClass defaultBoatClass);
+            IRace race, BoatClass defaultBoatClass, RaceTrackingHandler raceTrackingHandler);
 
     BoatClass resolveDominantBoatClassOfRace(IRace race);
     

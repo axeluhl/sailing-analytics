@@ -249,6 +249,11 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
             this.callerThread = callerThread;
         }
 
+        @Override
+        public Map<InheritableThreadLocal<Object>, Object> getThreadLocalValuesToInherit() {
+            return tracingGetHelper.getThreadLocalValuesToInherit();
+        }
+
         /**
          * Tries to update this task's update interval so as to re-used an already scheduled task for a given key.
          * The update can only be performed if the task hasn't read the update interval after it has been started.
@@ -292,6 +297,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
 
         @Override
         public V call() {
+            tracingGetHelper.setInheritableThreadLocalValues();
             try {
                 final U updateInterval;
                 final Set<Thread> locksPropagatedFromGettingThreads;
@@ -365,6 +371,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                         LockUtil.unpropagateLockSetFrom(callerThread);
                     }
                     gettingThreads.clear();
+                    tracingGetHelper.removeInheritableThreadLocalValues();
                 }
             } catch (Exception e) {
                 // cache won't be updated

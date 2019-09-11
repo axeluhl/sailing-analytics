@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
+
 import java.util.Date;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -11,13 +13,13 @@ import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.security.ui.client.UserService;
 
 public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
     private final DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(
@@ -27,14 +29,16 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
     private final DateTimeFormatRenderer durationFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat(PredefinedFormat.TIME_MEDIUM), TimeZone.createTimeZone(0));
 
+    private final UserService userService;
     private final Grid raceDataGrid;
+    private final Button setStartTimeButton;
     
-    public TrackedRacesManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
-        super(sailingService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ true, stringMessages);
-        
-        HorizontalPanel controlsPanel = new HorizontalPanel();
-        Button setStartTimeButton = new Button(stringMessages.setStartTimeReceived(), new ClickHandler() {
+    public TrackedRacesManagementPanel(final SailingServiceAsync sailingService, UserService userService,
+            ErrorReporter errorReporter, RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
+        super(sailingService, userService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ true,
+                stringMessages);
+        this.userService = userService;
+        this.setStartTimeButton = new Button(stringMessages.setStartTimeReceived(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 new SetStartTimeReceivedDialog(stringMessages, new DialogCallback<Date>() {
@@ -58,19 +62,17 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
                 }).show();
             }
         });
-        controlsPanel.add(setStartTimeButton);
-        selectedRaceContentPanel.add(controlsPanel);
+        this.selectedRaceContentPanel.add(setStartTimeButton);
 
-        raceDataGrid = new Grid(7, 2);
+        this.raceDataGrid = new Grid(7, 2);
+        this.raceDataGrid.setText(0, 0, stringMessages.startTime() + ":");
+        this.raceDataGrid.setText(1, 0, stringMessages.endTime() + ":");
+        this.raceDataGrid.setText(2, 0, stringMessages.finishingTime() + ":");
+        this.raceDataGrid.setText(3, 0, stringMessages.duration() + ":");
+        this.raceDataGrid.setText(4, 0, stringMessages.startOfTracking() + ":");
+        this.raceDataGrid.setText(5, 0, stringMessages.endOfTracking() + ":");
+        this.raceDataGrid.setText(6, 0, stringMessages.delayForLiveMode() + " (ms):");
         this.selectedRaceContentPanel.add(raceDataGrid);
-        
-        raceDataGrid.setText(0, 0, stringMessages.startTime()+":");
-        raceDataGrid.setText(1, 0, stringMessages.endTime()+":");
-        raceDataGrid.setText(2, 0, stringMessages.finishingTime()+":");
-        raceDataGrid.setText(3, 0, stringMessages.duration()+":");
-        raceDataGrid.setText(4, 0, stringMessages.startOfTracking()+":");
-        raceDataGrid.setText(5, 0, stringMessages.endOfTracking()+":");
-        raceDataGrid.setText(6, 0, stringMessages.delayForLiveMode()+" (ms):");
     }
 
     @Override
@@ -116,5 +118,6 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
                 raceDataGrid.setText(6, 1, "" + selectedRaceDTO.trackedRace.delayToLiveInMs);
             }
         }
+        setStartTimeButton.setVisible(selectedRaceDTO != null && userService.hasPermission(selectedRaceDTO, UPDATE));
     }
 }

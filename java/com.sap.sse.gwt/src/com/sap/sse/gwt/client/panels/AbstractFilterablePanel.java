@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -19,16 +22,17 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractKeywordFilter;
 import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.common.filter.Filter;
+import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 /**
  * This Panel contains a text box. Text entered into the text box filters the {@link CellTable} passed to the
- * constructor by adjusting the cell table's {@link ListDataProvider}'s contents using the {@link applyFilter(String,
- * List)} of the {@link AbstractListFilter} and then sorting the table again according the the sorting criteria
- * currently active (the sorting is the only reason why the {@link CellTable} actually needs to be known to an instance
- * of this class). To be initiated the method {@link #getSearchableStrings(Object)} has to be defined, which gets those
- * Strings from a <code>T</code> that should be considered when filtering, e.g. name or boatClass. The cell table can be
- * sorted independently from the text box (e.g., after adding new objects) by calling the method
+ * constructor by adjusting the cell table's {@link ListDataProvider}'s contents using the
+ * {@link AbstractListFilter#applyFilter(String, List)} and then sorting the table again according the the sorting
+ * criteria currently active (the sorting is the only reason why the {@link CellTable} actually needs to be known to an
+ * instance of this class). To be initiated the method {@link #getSearchableStrings(Object)} has to be defined, which
+ * gets those Strings from a <code>T</code> that should be considered when filtering, e.g. name or boatClass. The cell
+ * table can be sorted independently from the text box (e.g., after adding new objects) by calling the method
  * {@link #updateAll(Iterable)} which then runs the filter over the new selection.
  * <p>
  * 
@@ -48,8 +52,43 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     protected ListDataProvider<T> all;
     protected final ListDataProvider<T> filtered;
     protected final TextBox textBox;
+    protected final CheckBox checkbox;
     
     private final Set<Filter<T>> filters = new HashSet<>();
+    private final CheckboxEnablableFilter<T> checkboxFilter;
+
+    private boolean added = false;
+
+    static class CheckboxEnablableFilter<T> implements Filter<T> {
+
+        private final CheckBox checkbox;
+        private Filter<T> filterToApply;
+
+        public CheckboxEnablableFilter(CheckBox checkbox) {
+            this.checkbox = checkbox;
+        }
+
+        @Override
+        public boolean matches(T object) {
+            if (filterToApply == null) {
+                return true;
+            }
+            if (!this.checkbox.getValue()) {
+                return true;
+            }
+            return filterToApply.matches(object);
+        }
+
+        @Override
+        public String getName() {
+            return filterToApply.getName();
+        }
+
+        public void setFilterToApply(Filter<T> filterToApply) {
+            this.filterToApply = filterToApply;
+        }
+
+    }
 
     protected final AbstractKeywordFilter<T> filterer = new AbstractKeywordFilter<T>() {
         @Override
@@ -71,13 +110,18 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      *            normal circumstances the text box will be empty in this case, not making filtering any stricter.
      */
     public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered,
-            boolean drawTextBox) {
+            boolean drawTextBox, final StringMessages stringMessages) {
         filters.add(filterer);
         setSpacing(5);
         this.all = new ListDataProvider<>();
         this.filtered = filtered;
         this.textBox = new TextBox();
         this.textBox.ensureDebugId("FilterTextBox");
+        // TODO: i18n
+        this.checkbox = new CheckBox(stringMessages.hideElementsWithoutUpdateRights());
+        checkbox.setValue(true);
+        checkboxFilter = new CheckboxEnablableFilter<>(checkbox);
+        filters.add(checkboxFilter);
         this.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         setAll(all);
         if (drawTextBox) {
@@ -85,8 +129,9 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         }
     }
 
-    public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered) {
-        this(all, filtered, /* show default filter text box */ true);
+    public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered,
+            final StringMessages stringMessages) {
+        this(all, filtered, /* show default filter text box */ true, stringMessages);
     }
 
     private void setAll(Iterable<? extends T> all) {
@@ -175,8 +220,10 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     public void filter() {
         filtered.getList().clear();
         retainElementsInFilteredThatPassFilter();
-        filtered.flush();
-        sort();
+        Scheduler.get().scheduleFinally(()->{
+            filtered.flush();
+            sort();
+        });
     }
     
 
@@ -218,8 +265,42 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         });
     }
 
+    public void addDefaultCheckBoxIfNecessary() {
+        if (!added) {
+            add(getCheckBox());
+            getCheckBox().addClickHandler(e -> filter());
+            added = true;
+        }
+    }
+
+    public void search(String searchString) {
+        getTextBox().setText(searchString);
+        filterer.setKeywords(Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(searchString));
+        filter();
+    }
+
     public TextBox getTextBox() {
         return textBox;
+    }
+
+    public CheckBox getCheckBox() {
+        return checkbox;
+    }
+
+    public void setCheckboxEnabledFilter(Function<T, Boolean> filterFunction) {
+
+        this.checkboxFilter.setFilterToApply(new Filter<T>() {
+            @Override
+            public boolean matches(T object) {
+                return filterFunction.apply(object);
+            }
+
+            @Override
+            public String getName() {
+                return "Update Permission Filter";
+            }
+        });
+        addDefaultCheckBoxIfNecessary();
     }
 
     public Iterable<T> getAll() {

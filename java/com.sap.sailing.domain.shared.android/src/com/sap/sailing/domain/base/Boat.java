@@ -4,12 +4,13 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.NamedWithID;
 import com.sap.sse.datamining.annotations.Dimension;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
  * The boat being sailed by a competitor.
  *
  */
-public interface Boat extends NamedWithID, IsManagedByCache<SharedDomainFactory> {
+public interface Boat extends NamedWithID, IsManagedByCache<SharedDomainFactory>, WithQualifiedObjectIdentifier {
     BoatClass getBoatClass();   
     
     @Dimension(messageKey="SailID")

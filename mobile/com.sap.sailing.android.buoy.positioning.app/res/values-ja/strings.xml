@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><resources>
+
+    
+    
+    
+    
+    <string name="course_type">"コースタイプ"</string>
+    <string name="marks">"マーク"</string>
+    <string name="set_position">"位置設定"</string>
+    <string name="set_position_disabled_gps">"GPS を有効にして\n位置を設定"</string>
+    <string name="set_position_no_gps_yet">"GPS 接続を待機中"</string>
+    <string name="reset_position">"位置リセット"</string>
+    <string name="getting_marks">"レースマークを取得中…"</string>
+    <string name="set">"設定済"</string>
+    <string name="unknown">"N/A"</string>
+    <string name="not_set">"未設定"</string>
+    <string name="mark_list_accuracy">"(精度は約 %1$sm)"</string>
+    <string name="accuracy_detail">"/ GPS 位置"</string>
+    <string name="distance_detail">"旧ブイまで"</string>
+    
+    
+    <string name="accuracy">"GPS 精度"</string>
+    <string name="distance">"旧ブイまでの距離"</string>
+    <string name="position_set">"位置が設定されました"</string>
+    <string name="no_information">"情報なし"</string>
+    <string name="title_activity_settings">@string/settings</string>
+    <string name="error_message_no_position">"デバイスをマークの近くに置き、\'位置設定\' を押してマーク位置を設定します。示された位置が十分良いかどうかを判定するために精度フラグを使用します。GPS を有効にするか、GPS が利用可能になるまで待機してください。"</string>
+    <string name="action_settings">@string/settings</string>
+    <string name="settings">"設定"</string>
+
+    <string name="server">"ポーリング"</string>
+    <string name="server_sync_settings">"ポーリング間隔 (秒)"</string>
+
+    <string name="options_menu_checkout">"チェックアウト"</string>
+    <string name="checkout_warning_message">"ログアウトしますか。マークにアクセスするには指定された QR コードで再ログインする必要があります。"</string>
+
+    <string name="no_marks_message">"マークがありません"</string>
+
+</resources>

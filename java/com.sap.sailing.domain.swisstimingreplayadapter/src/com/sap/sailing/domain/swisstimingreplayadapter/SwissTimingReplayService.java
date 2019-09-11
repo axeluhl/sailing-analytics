@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingRaceConfig;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 
@@ -45,7 +46,8 @@ public interface SwissTimingReplayService {
      */
     void loadRaceData(RegattaIdentifier regattaToAddTo, String link, String raceName, String raceID,
             String boatClassName, TrackerManager trackerManager, TrackedRegattaRegistry trackedRegattaRegistry,
-            boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore)
+            boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            RaceTrackingHandler raceTrackingHandler)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**

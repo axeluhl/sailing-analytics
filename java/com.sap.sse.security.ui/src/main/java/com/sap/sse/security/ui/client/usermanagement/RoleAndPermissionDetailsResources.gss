@@ -1,0 +1,10 @@
+.enterRoleNameSuggest {
+    max-width: 8em;
+    margin-right: 5px;
+}
+
+.enterPermissionSuggest {
+    max-width: 30em;
+    width: 30em;
+    margin-right: 5px;
+}

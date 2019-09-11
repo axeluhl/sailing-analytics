@@ -19,30 +19,38 @@ public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
     private static final int qrCodeSize = 320;
 
     private class DeviceConfigurationQRIdentifierWidget extends BaseQRIdentifierWidget {
-        private final TextBox identifierBox;
+        private final TextBox configNameBox;
+        private final TextBox configIdBox;
         private final StringMessages stringMessages;
         private final String accessToken;
         
-        public DeviceConfigurationQRIdentifierWidget(String identifier, String accessToken, StringMessages stringMessages) {
+        public DeviceConfigurationQRIdentifierWidget(String uuidAsString, String configName, String accessToken, StringMessages stringMessages) {
             super(qrCodeSize, stringMessages);
             this.accessToken = accessToken;
-            identifierBox = new TextBox();
-            identifierBox.setValue(identifier);
-            identifierBox.setReadOnly(true);
-            identifierBox.setVisibleLength(40);
-            inputGrid.resize(2, 2);
-            inputGrid.setWidget(1, 0, new Label("Identifier:"));
-            inputGrid.setWidget(1, 1, identifierBox);
+            configNameBox = new TextBox();
+            configNameBox.setValue(configName);
+            configNameBox.setReadOnly(true);
+            configNameBox.setVisibleLength(40);
+            inputGrid.resize(3, 2);
+            inputGrid.setWidget(1, 0, new Label(stringMessages.name()));
+            inputGrid.setWidget(1, 1, configNameBox);
+            configIdBox = new TextBox();
+            configIdBox.setValue(uuidAsString);
+            configIdBox.setReadOnly(true);
+            configIdBox.setVisibleLength(40);
+            inputGrid.setWidget(2, 0, new Label(stringMessages.id()));
+            inputGrid.setWidget(2, 1, configIdBox);
             this.stringMessages = stringMessages;
         }
         
         @Override
         protected String generateEncodedQRCodeContent() {
-            if (identifierBox.getValue().contains("#")) {
+            if (configNameBox.getValue().contains("#")) {
                 Notification.notify(stringMessages.notCapableOfGeneratingACodeForIdentifier(), NotificationType.ERROR);
-            } else if (!identifierBox.getValue().isEmpty() && !serverBox.getValue().isEmpty()) {
+            } else if (!configNameBox.getValue().isEmpty() && !serverBox.getValue().isEmpty()) {
                 String apkUrl = getServerUrlWithoutFinalSlash() + rcAppApkPath;
-                return DeviceConfigurationQRCodeUtils.composeQRContent(URL.encodeQueryString(identifierBox.getValue()), apkUrl, URL.encodeQueryString(accessToken));
+                return DeviceConfigurationQRCodeUtils.composeQRContent(URL.encodeQueryString(configNameBox.getValue()), apkUrl,
+                        URL.encodeQueryString(accessToken), URL.encodeQueryString(configIdBox.getValue()));
             }
             return null;
         }   
@@ -50,8 +58,8 @@ public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
     
     private final DeviceConfigurationQRIdentifierWidget widget;
     
-    public DeviceConfigurationQRIdentifierDialog(String identifier, StringMessages stringMessages, String accessToken) {
-        widget = new DeviceConfigurationQRIdentifierWidget(identifier, accessToken, stringMessages);
+    public DeviceConfigurationQRIdentifierDialog(String uuidAsString, String configName, StringMessages stringMessages, String accessToken) {
+        widget = new DeviceConfigurationQRIdentifierWidget(uuidAsString, configName, accessToken, stringMessages);
         Button exitButton = new Button(stringMessages.close());
         exitButton.addClickHandler(new ClickHandler() {
             @Override
@@ -59,10 +67,8 @@ public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
                 hide();
             }
         });
-        
         HorizontalPanel actionPanel = new HorizontalPanel();
         actionPanel.add(exitButton);
-        
         VerticalPanel panel = new VerticalPanel();
         panel.add(widget);
         panel.add(actionPanel);

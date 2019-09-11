@@ -13,6 +13,8 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 
 public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
     private static final long serialVersionUID = -5494669910047887984L;
@@ -118,6 +120,16 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
             @Override
             public String getShortInfo() {
                 return getShortName();
+            }
+
+            @Override
+            public QualifiedObjectIdentifier getIdentifier() {
+                return null;
+            }
+
+            @Override
+            public HasPermissions getType() {
+                return null;
             }
         };
     }

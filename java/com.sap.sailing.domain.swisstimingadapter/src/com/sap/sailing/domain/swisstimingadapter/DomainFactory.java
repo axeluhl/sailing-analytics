@@ -22,6 +22,7 @@ import com.sap.sailing.domain.swisstimingadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
@@ -45,17 +46,21 @@ public interface DomainFactory {
 
     Nationality getOrCreateNationality(String threeLetterIOCCode);
 
-    Pair<Competitor, Boat> createCompetitorWithoutID(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, String raceId, BoatClass boatClass);
+    Pair<Competitor, Boat> createCompetitorWithoutID(com.sap.sailing.domain.swisstimingadapter.Competitor competitor,
+            String raceId, BoatClass boatClass, RaceTrackingHandler raceTrackingHandler);
 
-    Pair<Competitor, Boat> createCompetitorWithID(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, BoatClass boatClass);
+    Pair<Competitor, Boat> createCompetitorWithID(com.sap.sailing.domain.swisstimingadapter.Competitor competitor,
+            BoatClass boatClass, RaceTrackingHandler raceTrackHandler);
 
-    Pair<Competitor, Boat> createCompetitorWithoutID(String competitorId, String threeLetterIOCCode, String name, String raceId, BoatClass boatClass);
+    Pair<Competitor, Boat> createCompetitorWithoutID(String competitorId, String threeLetterIOCCode, String name,
+            String raceId, BoatClass boatClass, RaceTrackingHandler raceTrackingHandler);
     
     String getCompetitorID(String boatID, RaceType raceType);
 
     String getCompetitorID(String boatID, BoatClass boatClass);
 
-    RaceDefinition createRaceDefinition(Regatta regatta, Race race, StartList startList, com.sap.sailing.domain.swisstimingadapter.Course course);
+    RaceDefinition createRaceDefinition(Regatta regatta, Race race, StartList startList, com.sap.sailing.domain.swisstimingadapter.Course course,
+            RaceTrackingHandler raceTrackingHandler);
 
     com.sap.sailing.domain.base.Mark getOrCreateMark(Serializable trackerID, String description);
     
@@ -77,7 +82,8 @@ public interface DomainFactory {
     ControlPoint getOrCreateControlPoint(String description, Iterable<Serializable> deviceIds, MarkType markType);
 
     RaceDefinition createRaceDefinition(Regatta regatta, String swissTimingRaceID, Map<Competitor, Boat> competitorsAndBoats,
-            List<ControlPoint> courseDefinition, String raceName, String raceIdForRaceDefinition);
+            List<ControlPoint> courseDefinition, String raceName, String raceIdForRaceDefinition,
+            RaceTrackingHandler raceTrackingHandler);
 
     /**
      * Adds update handlers that forward events about a race, such as start time changes, course changes

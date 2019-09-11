@@ -72,6 +72,7 @@ import com.sap.sailing.domain.tracking.WindSummary;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
+import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -209,7 +210,8 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void recordFix(Competitor competitor, GPSFixMoving fix, boolean onlyWhenInTrackingTimeInterval) {
+    public boolean recordFix(Competitor competitor, GPSFixMoving fix, boolean onlyWhenInTrackingTimeInterval) {
+        return false;
     }
 
     @Override
@@ -929,4 +931,14 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public WindSummary getWindSummary() {
         return null;
     }
+
+    @Override
+    public PolarDataService getPolarDataService() {
+        return null;
+    }
+
+    @Override
+    public void setWindEstimation(IncrementalWindEstimation windEstimation) {
+    }
+
 }

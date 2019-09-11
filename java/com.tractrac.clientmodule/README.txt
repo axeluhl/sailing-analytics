@@ -17,6 +17,73 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+************* TracAPI 3.12.4 ***************
+********************************************
+This is a final version. It fixes some bugs. It keeps the backward compatibility.
+
+
+Release date: 19/07/2019
+Build number: 0579368
+
+ 1) Bugs
+
+ - The IRaceCompetitor.getMetadata() was not updated in live (Reported by Jorge Piera, 13/07/2019)
+ - The IEventSubscriber.start() can throw a NullPointerException when it is created from an
+ MTB file (Reported by Alex Uhl, 16/07/2019)
+
+********************************************
+************* TracAPI 3.12.3 ***************
+********************************************
+This is a final version. It adds a some features. It keeps the backward compatibility.
+
+
+Release date: 30/05/2019
+Build number: 7a3b63b1
+
+ 1) Features
+
+ - Adding the methods IRaceCompetitor.getOfficialRank() and IRaceCompetitor.getOfficialFinishTime()
+  (Requested by Martin Frosch, 29/05/2019)
+
+ 2)
+
+********************************************
+************* TracAPI 3.12.2 ***************
+********************************************
+This is a final version. It adds a some features. It keeps the backward compatibility.
+
+
+Release date: 29/05/2019
+Build number: e939148b
+
+ 1) Features
+
+ - Adding some extra values to the RaceCompetitorStatusType (Requested by Martin Frosch,
+ 28/05/2019)
+
+ 2) Bugs
+
+********************************************
+************* TracAPI 3.12.1 ***************
+********************************************
+This is a final version. It fixes bugs in the implementation and it adds a some features.
+It keeps the backward compatibility.
+
+It keeps the backward compatibility:
+
+Release date: 10/05/2019
+Build number: c547c9b
+
+ 1) Features
+
+ - When a race is loaded from a file, the percentage of loaded data was inaccurate
+ and to fix this issue the MTB reader has been reimplemented. Now the reading time
+ is faster (Requested by André Borud, 07/05/2019)
+
+ 2) Bugs
+
+
+********************************************
 ************* TracAPI 3.12.0 ***************
 ********************************************
 This is a final version. It changes the enumerate RaceStatusType,

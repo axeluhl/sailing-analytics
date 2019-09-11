@@ -184,7 +184,9 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         // let the time panel always return to "live" mode.
         final TimePanel<TimePanelSettings> timePanel = new TimePanel<TimePanelSettings>(null, null,
                 timer, timeRangeWithZoomProvider, getStringMessages(), /* canReplayWhileLive */ false,
-                /* isScreenLargeEnoughToOfferChartSupport set to true iff wind chart will be displayed */ raceboardPerspectiveSettings.isShowWindChart(), getUserService()) {
+                /* isScreenLargeEnoughToOfferChartSupport set to true iff wind chart will be displayed */ raceboardPerspectiveSettings
+                        .isShowWindChart(),
+                getUserService(), /*TODO: raceDTO is needed for permission check*/null) {
             protected boolean isLiveModeToBeMadePossible() {
                 return true;
             }

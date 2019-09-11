@@ -2,11 +2,8 @@ package com.sap.sailing.server.trackfiles.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -44,7 +41,6 @@ public class TrackFileExporterImpl implements TrackFileExporter {
     @Override
     public void writeAllData(List<TrackFilesDataSource> data, TrackFilesFormat format, List<TrackedRace> races,
             boolean dataBeforeAfter, boolean rawFixes, final ZipOutputStream out) throws IOException {
-
         WriteZipCallback callback = new WriteZipCallback() {
             @Override
             public synchronized void write(ZipEntry entry, byte[] data) throws IOException {
@@ -53,7 +49,6 @@ public class TrackFileExporterImpl implements TrackFileExporter {
                 out.closeEntry();
             }
         };
-
         List<WriteRaceDataCallable> callables = new ArrayList<>();
         ExecutorService executor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
         List<String> errors = new ArrayList<>();
@@ -64,32 +59,7 @@ public class TrackFileExporterImpl implements TrackFileExporter {
                 callables.add(callable);
             }
         }
-
-        List<Future<Void>> results = Collections.<Future<Void>> emptyList();
-
-        try {
-            results = executor.invokeAll(callables);
-        } catch (InterruptedException e) {
-            errors.add(e.getMessage());
-            log.log(Level.WARNING, "Error exporting race: " + e.getMessage());
-            e.printStackTrace();
-        }
-
-        for (Future<Void> result : results) {
-            try {
-                result.get();
-            } catch (ExecutionException e) {
-                Throwable t = e.getCause();
-                errors.add(t.getMessage());
-                log.log(Level.WARNING, "Error exporting race: " + t.getMessage());
-                t.printStackTrace();
-            } catch (InterruptedException e) {
-                errors.add(e.getMessage());
-                log.log(Level.WARNING, "Error exporting race: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
-
+        ThreadPoolUtil.INSTANCE.invokeAllAndLogExceptions(executor, Level.WARNING, "Error exporting race: %s", callables);
         if (errors.size() > 0) {
             StringBuilder sb = new StringBuilder();
             for (String error : errors) {
@@ -100,7 +70,6 @@ public class TrackFileExporterImpl implements TrackFileExporter {
                 callback.write(new ZipEntry("ERRORS"), sb.toString().getBytes());
             } catch (Exception e) {
                 log.log(Level.WARNING, "Error exporting race: " + e.getMessage());
-                e.printStackTrace();
             }
 
         }

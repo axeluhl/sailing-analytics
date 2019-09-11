@@ -16,8 +16,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.autoplay.client.resources.LeaderboardTableResourcesSixty;
-import com.sap.sailing.gwt.ui.client.shared.controls.FlushableSortedCellTableWithStylableHeaders;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel.LeaderBoardStyle;
+import com.sap.sse.gwt.client.celltable.FlushableSortedCellTableWithStylableHeaders;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 
 public class SixtyInchLeaderboardStyle implements LeaderBoardStyle {

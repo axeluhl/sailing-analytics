@@ -230,6 +230,8 @@ public class TrackedLegImpl implements TrackedLeg {
         } else {
             Set<WindSource> windSourcesToExclude = new HashSet<>(getTrackedRace().getWindSourcesToExclude());
             windSourcesToExclude.addAll(getTrackedRace().getWindSources(WindSourceType.TRACK_BASED_ESTIMATION));
+            //TODO review and confirm that maneuver based estimation shall be used for wind on leg determination
+//            windSourcesToExclude.addAll(getTrackedRace().getWindSources(WindSourceType.MANEUVER_BASED_ESTIMATION));
             wind = getWind(middleOfLeg, at, windSourcesToExclude);
         }
         return wind;
@@ -481,7 +483,8 @@ public class TrackedLegImpl implements TrackedLeg {
         return getAbsoluteWindwardDistance(fromPos, toPos, middle, WindPositionMode.LEG_MIDDLE, cache);
     }
 
-    Distance getWindwardDistance(final Position pos1, final Position pos2, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+    @Override
+    public Distance getWindwardDistance(final Position pos1, final Position pos2, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         Distance result;
         if (pos1 == null || pos2 == null) {
             result = null;

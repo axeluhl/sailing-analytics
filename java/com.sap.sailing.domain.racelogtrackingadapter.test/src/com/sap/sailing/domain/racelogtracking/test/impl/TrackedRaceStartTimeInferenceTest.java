@@ -33,6 +33,7 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -63,8 +64,8 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
     public void testStartTimeInferencePrecedenceOrder() throws TransformationException,
             NoCorrespondingServiceRegisteredException, InterruptedException {
         Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null,
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true);
+        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null, /* storePersistently */ true);
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(comp, boat);
         competitorsAndBoats.put(comp2, boat2);
@@ -77,7 +78,9 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
 
         TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, 
-                /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */ null, /* endDate */null, null, null, "a", null));
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /* startDate */ null, /* endDate */null, null, null, "a", null,
+                /* registrationLinkSecret */ UUID.randomUUID().toString()));
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
                 /* useMarkPassingCalculator */ false,
@@ -140,8 +143,8 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
     public void testStartTimeChangeNotificationForFirstUpdateThroughRaceLog() throws TransformationException,
             NoCorrespondingServiceRegisteredException, InterruptedException {
         Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null,
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true);
+        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null, /* storePersistently */ true);
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(comp, boat);
         competitorsAndBoats.put(comp2, boat2);
@@ -153,7 +156,9 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, competitorsAndBoats);
         TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, 
-                /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */ null, /* endDate */null, null, null, "a", null));
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /* startDate */ null, /* endDate */null, null, null, "a", null,
+                /* registrationLinkSecret */ UUID.randomUUID().toString()));
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
                 /* useMarkPassingCalculator */ false,
@@ -182,8 +187,8 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
     public void testStartTimeChangeNotificationForFirstUpdateThroughStartMarkPassing() throws TransformationException,
             NoCorrespondingServiceRegisteredException, InterruptedException {
         Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null,
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true);
+        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null, /* storePersistently */ true);
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(comp, boat);
         competitorsAndBoats.put(comp2, boat2);
@@ -195,7 +200,9 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, competitorsAndBoats);
         TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, 
-                /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */ null, /* endDate */null, null, null, "a", null));
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /* startDate */ null, /* endDate */null, null, null, "a", null,
+                /* registrationLinkSecret */ UUID.randomUUID().toString()));
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
                 /* useMarkPassingCalculator */ false,
@@ -227,8 +234,8 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
     public void testStartAndEndTrackingTimeInferencePrecedenceOrderTriggersListener() throws TransformationException,
             NoCorrespondingServiceRegisteredException, InterruptedException {
         Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null,
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true);
+        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null, /* storePersistently */ true);
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(comp, boat);
         competitorsAndBoats.put(comp2, boat2);
@@ -240,7 +247,9 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, competitorsAndBoats);
         TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass,
-                /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */ null, /* endDate */null, null, null, "a", null));
+                /* canBoatsOfCompetitorsChangePerRace */ true,  CompetitorRegistrationType.CLOSED,
+                /* startDate */ null, /* endDate */null, null, null, "a", null,
+                /* registrationLinkSecret */ UUID.randomUUID().toString()));
         assertTrue(regatta.getRegatta().useStartTimeInference());
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
@@ -341,8 +350,8 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
     public void testStartAndEndOfTrackingTimeChangeNotificationForFirstUpdateThroughRaceLog() throws TransformationException,
             NoCorrespondingServiceRegisteredException, InterruptedException {
         Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null,
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true);
+        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null, /* storePersistently */ true);
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(comp, boat);
         competitorsAndBoats.put(comp2, boat2);
@@ -354,7 +363,9 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, competitorsAndBoats);
         TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, 
-                /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */null, /* endDate */null, null, null, "a", null));
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /* startDate */null, /* endDate */null, null, null, "a", null,
+                /* registrationLinkSecret */ UUID.randomUUID().toString()));
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
                 /* useMarkPassingCalculator */ false,

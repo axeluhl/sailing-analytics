@@ -30,7 +30,7 @@ echo "$features"
 feature_xml_files=$(for i in $features; do echo "${GIT_ROOT}/java/$i/feature.xml"; done)
 echo "$feature_xml_files"
 # Determine the bundles with a specific configuration in the .product file:
-autostart_bundles=$(cat "$1" | grep "plugin id=.* startLevel=" | sed -e 's/^.* id="\(.*\)" autoStart="\(.*\)" startLevel="\([0-9]*\)".*$/\1 \3 \2/')
+autostart_bundles=$(cat "$1" | grep "plugin id=.* startLevel=" | sed -e 's/^.* id="\(.*\)" autoStart="\(.*\)" startLevel="\([0-9-]*\)".*$/\1 \3 \2/')
 echo ' *** Autostart Bundles ***'
 echo "$autostart_bundles"
 # These autostart bundles need to be updated accordingly in the .launch configuration
@@ -45,7 +45,7 @@ for feature in $features; do
     echo "$bundles_in_feature"
     for bundle in $bundles_in_feature; do
         # find out whether we have a non-default configuration for the bundle
-        echo "$autostart_bundles" | grep -q '^'${bundle}' [^ ]* [^ ]*$'
+        echo "$autostart_bundles" | grep -q '^'${bundle}' [^ ]* true$'
         if [ "$?" == "0" ]; then
             # found a configuration for the bundle
             echo ' *** Found a non-default configuration for bundle '${bundle}' ***'

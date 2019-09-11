@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.SimplePrincipalCollection;
+
 import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
@@ -21,6 +24,14 @@ import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 
 public class IgtimiWindTracker extends AbstractWindTracker implements WindTracker {
     private static final Logger logger = Logger.getLogger(IgtimiWindTracker.class.getName());
@@ -31,7 +42,8 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
     private boolean stopping;
 
     protected IgtimiWindTracker(final DynamicTrackedRace trackedRace, final IgtimiConnectionFactory connectionFactory,
-            final IgtimiWindTrackerFactory windTrackerFactory, final boolean correctByDeclination) throws Exception {
+            final IgtimiWindTrackerFactory windTrackerFactory, final boolean correctByDeclination,
+            SecurityService optionalSecurityService) throws Exception {
         super(trackedRace);
         this.windTrackerFactory = windTrackerFactory;
         liveConnectionsAndDeviceSerialNumber = new HashMap<>();
@@ -42,27 +54,82 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                 synchronized (IgtimiWindTracker.this) {
                     Iterable<Account> accounts = connectionFactory.getAllAccounts();
                     for (Account account : accounts) {
-                        try {
-                            if (!stopping) {
-                                IgtimiConnection connection = connectionFactory.connect(account);
-                                Iterable<String> devicesWeShouldListenTo = connection.getWindDevices();
+                        if (isPermittedToUseAccount(optionalSecurityService, trackedRace, account)) {
+                            try {
                                 if (!stopping) {
-                                    LiveDataConnection liveConnection = connection.getOrCreateLiveConnection(devicesWeShouldListenTo);
-                                    IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(correctByDeclination ? DeclinationService.INSTANCE : null);
-                                    liveConnection.addListener(windReceiver);
-                                    windReceiver.addListener(new WindListenerSendingToTrackedRace(Collections.singleton(getTrackedRace()), windTrackerFactory));
-                                    liveConnectionsAndDeviceSerialNumber.put(liveConnection, new Util.Triple<Iterable<String>, Account, IgtimiWindReceiver>(
-                                            devicesWeShouldListenTo, account, windReceiver));
+                                    IgtimiConnection connection = connectionFactory.connect(account);
+                                    Iterable<String> devicesWeShouldListenTo = connection.getWindDevices();
+                                    if (!stopping) {
+                                        LiveDataConnection liveConnection = connection.getOrCreateLiveConnection(devicesWeShouldListenTo);
+                                        IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(correctByDeclination ? DeclinationService.INSTANCE : null);
+                                        liveConnection.addListener(windReceiver);
+                                        windReceiver.addListener(new WindListenerSendingToTrackedRace(Collections.singleton(getTrackedRace()), windTrackerFactory));
+                                        liveConnectionsAndDeviceSerialNumber.put(liveConnection, new Util.Triple<Iterable<String>, Account, IgtimiWindReceiver>(
+                                                devicesWeShouldListenTo, account, windReceiver));
+                                    }
                                 }
+                            } catch (Exception e) {
+                                logger.log(Level.SEVERE, "Exception trying to start Igtimi wind tracker for race "
+                                        + getTrackedRace().getRace().getName() + " for account " + account);
                             }
-                        } catch (Exception e) {
-                            logger.log(Level.SEVERE, "Exception trying to start Igtimi wind tracker for race "
-                                    + getTrackedRace().getRace().getName() + " for account " + account);
                         }
                     }
                 }
             }
+
         }.start();
+    }
+
+    private boolean isPermittedToUseAccount(SecurityService optionalSecurityService,
+            final DynamicTrackedRace trackedRace, Account account) {
+        final boolean isPermittedToUseAccount;
+        final WildcardPermission permissionToCheck = account.getIdentifier().getPermission(DefaultActions.READ);
+        final String stringPermissionToCheck = permissionToCheck.toString();
+        if (optionalSecurityService == null || SecurityUtils.getSubject().isPermitted(stringPermissionToCheck)) {
+            isPermittedToUseAccount = true;
+        } else if (!SecurityUtils.getSubject().isAuthenticated()) {
+            // This is most probably a server reload where no security information is available
+            final OwnershipAnnotation ownershipOfRace = optionalSecurityService.getOwnership(trackedRace.getIdentifier());
+            final User userOwnerOfRace = ownershipOfRace == null ? null
+                    : ownershipOfRace.getAnnotation().getUserOwner();
+            if (userOwnerOfRace != null && SecurityUtils.getSecurityManager().isPermitted(
+                    new SimplePrincipalCollection(userOwnerOfRace.getName(), userOwnerOfRace.getName()),
+                    stringPermissionToCheck)) {
+                // The user owner of the TrackedRace would be permitted to use this Account
+                isPermittedToUseAccount = true;
+            } else {
+                final UserGroup groupOwner = ownershipOfRace == null ? null
+                        : ownershipOfRace.getAnnotation().getTenantOwner();
+                if (groupOwner != null) {
+                    if (groupOwner.equals(optionalSecurityService.getDefaultTenant())) {
+                        // It is assumed to be an auto-migration case
+                        isPermittedToUseAccount = true;
+                    } else {
+                        final User allUser = optionalSecurityService.getAllUser();
+                        Iterable<UserGroup> userGroupsOfAllUser = allUser == null ? Collections.emptySet()
+                                : optionalSecurityService.getUserGroupsOfUser(allUser);
+                        final OwnershipAnnotation ownershipOfAccount = optionalSecurityService
+                                .getOwnership(account.getIdentifier());
+                        final AccessControlListAnnotation aclOfAccount = optionalSecurityService
+                                .getAccessControlList(account.getIdentifier());
+                        // Checks if the permission would be granted by the group owner 
+                        if (PermissionChecker.isPermitted(permissionToCheck, null, Collections.singleton(groupOwner),
+                                allUser, userGroupsOfAllUser,
+                                ownershipOfAccount == null ? null : ownershipOfAccount.getAnnotation(),
+                                aclOfAccount == null ? null : aclOfAccount.getAnnotation())) {
+                            isPermittedToUseAccount = true;
+                        } else {
+                            isPermittedToUseAccount = false;
+                        }
+                    }
+                } else {
+                    isPermittedToUseAccount = false;
+                }
+            }
+        } else {
+            isPermittedToUseAccount = false;
+        }
+        return isPermittedToUseAccount;
     }
 
     public static TimePoint getReceivingEndTime(DynamicTrackedRace trackedRace) {

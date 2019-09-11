@@ -33,11 +33,17 @@ import org.scribe.model.Verb;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 
+import com.sap.sse.security.interfaces.Credential;
+import com.sap.sse.security.interfaces.OAuthToken;
+import com.sap.sse.security.interfaces.Social;
+import com.sap.sse.security.interfaces.SocialSettingsKeys;
 import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
-// GWT has similar class. 
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 
-public class OAuthRealm extends AbstractUserStoreBasedRealm {
+public class OAuthRealm extends AbstractCompositeAuthorizingRealm {
     private static final Logger logger = Logger.getLogger(OAuthRealm.class.getName());
     
     public OAuthRealm() {
@@ -180,8 +186,12 @@ public class OAuthRealm extends AbstractUserStoreBasedRealm {
         User user = getUserStore().getUserByName(socialname);
         if (user == null) {
             try {
+                UserGroup tenant = getUserStore().createUserGroup(UUID.randomUUID(), socialname + "-tenant");
+                getAccessControlStore().setOwnership(tenant.getIdentifier(), user, tenant, tenant.getName());
                 user = getUserStore().createUser(socialname, socialUser.getProperty(Social.EMAIL.name()), socialUser);
-            } catch (UserManagementException e) {
+                tenant.add(user);
+                getUserStore().updateUserGroup(tenant);
+            } catch (UserManagementException | UserGroupManagementException e) {
                 throw new AuthenticationException(e.getMessage());
             }
         }

@@ -1,6 +1,6 @@
 package com.sap.sse.security.ui.userprofile.shared.userdetails;
 
-import com.sap.sse.security.ui.shared.UserDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
 
 /**
  * View definition of the user profile details page. This view is used to implement desktop and mobile views using a
@@ -15,7 +15,7 @@ public interface UserDetailsView {
     void clearPasswordFields();
     
     public interface Presenter {
-        void handleSaveChangesRequest(String fullName, String company, String locale);
+        void handleSaveChangesRequest(String fullName, String company, String locale, String defaultTenantIdAsString);
         void handleEmailChangeRequest(String email);
         void handlePasswordChangeRequest(String oldPassword, String newPassword, String newPasswordConfirmation);
     }

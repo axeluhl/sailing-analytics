@@ -11,5 +11,6 @@ Require-Bundle: com.sap.sailing.simulator;bundle-version="1.0.0",
  com.sap.sailing.domain.common;bundle-version="1.0.0",
  com.sap.sailing.server;bundle-version="1.0.0",
  com.sap.sailing.domain.tractracadapter,
- com.sap.sse.common
+ com.sap.sse.common,
+ com.sap.sse.security.common
 Automatic-Module-Name: com.sap.sailing.simulator.test

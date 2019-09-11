@@ -3,9 +3,9 @@ package com.sap.sse.security.ui.authentication;
 import java.util.function.Consumer;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * Interface which provides common methods used for authentication management.
@@ -61,7 +61,8 @@ public interface AuthenticationManager {
      */
     void logout();
     
-    void updateUserProperties(String fullName, String company, String localeName, AsyncCallback<Void> callback);
+    void updateUserProperties(String fullName, String company, String localeName, String defaultTenantIdAsString,
+            AsyncCallback<UserDTO> callback);
     
     /**
      * Provide the {@link AuthenticationContext} for the current user 

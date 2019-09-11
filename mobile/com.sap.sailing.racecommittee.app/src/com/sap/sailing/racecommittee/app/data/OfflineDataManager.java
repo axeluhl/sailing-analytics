@@ -28,7 +28,6 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
@@ -165,9 +164,9 @@ public class OfflineDataManager extends DataManager {
         Mark m2 = new MarkImpl("Green");
         Mark m3 = new MarkImpl("White");
 
-        dataStore.addMark(m1);
-        dataStore.addMark(m2);
-        dataStore.addMark(m3);
+        dataStore.addMark(raceGroup, m1);
+        dataStore.addMark(raceGroup, m2);
+        dataStore.addMark(raceGroup, m3);
     }
 
     @Override
@@ -225,7 +224,7 @@ public class OfflineDataManager extends DataManager {
         return new ImmediateDataLoaderCallbacks<Collection<Mark>>(context, callback, new Callable<Collection<Mark>>() {
             @Override
             public Collection<Mark> call() throws Exception {
-                return dataStore.getMarks();
+                return dataStore.getMarks(managedRace.getRaceGroup());
             }
         });
     }
@@ -278,7 +277,7 @@ public class OfflineDataManager extends DataManager {
 
     @Override
     public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(
-            DeviceConfigurationIdentifier identifier, LoadClient<DeviceConfiguration> callback) {
+            String deviceConfigurationName, UUID deviceConfigurationUuid, LoadClient<DeviceConfiguration> callback) {
         return new ImmediateDataLoaderCallbacks<DeviceConfiguration>(context, callback,
                 new Callable<DeviceConfiguration>() {
                     @Override

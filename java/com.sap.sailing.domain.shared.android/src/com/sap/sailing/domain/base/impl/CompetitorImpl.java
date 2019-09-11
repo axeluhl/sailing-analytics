@@ -11,9 +11,13 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorChangeListener;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 public class CompetitorImpl implements DynamicCompetitor {
     private static final long serialVersionUID = 294603681016643157L;
@@ -41,6 +45,14 @@ public class CompetitorImpl implements DynamicCompetitor {
         this.timeOnDistanceAllowancePerNauticalMile = timeOnDistanceAllowancePerNauticalMile;
         this.searchTag = searchTag;
         this.listeners = new HashSet<CompetitorChangeListener>();
+    }
+
+    private Object writeReplace() {
+        if (CompetitorSerializationCustomizer.getCurrentCustomizer().removalOfPersonalDataNecessary(this)) {
+            return new CompetitorImpl(id, name, shortName, color, /* email */ null, flagImage, team, timeOnTimeFactor,
+                    timeOnDistanceAllowancePerNauticalMile, searchTag);
+        }
+        return this;
     }
     
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
@@ -119,7 +131,7 @@ public class CompetitorImpl implements DynamicCompetitor {
     public Competitor resolve(SharedDomainFactory domainFactory) {
         Competitor result = domainFactory
                 .getOrCreateCompetitor(getId(), getName(), getShortName(), getColor(), getEmail(), getFlagImage(), getTeam(),
-                        getTimeOnTimeFactor(), getTimeOnDistanceAllowancePerNauticalMile(), searchTag);
+                        getTimeOnTimeFactor(), getTimeOnDistanceAllowancePerNauticalMile(), searchTag, /* storePersistently */ true);
         return result;
     }
 
@@ -241,6 +253,24 @@ public class CompetitorImpl implements DynamicCompetitor {
                 listener.timeOnDistanceAllowancePerNauticalMileChanged(oldTimeOnDistanceAllowancePerNauticalMile, timeOnDistanceAllowancePerNauticalMile);
             }
         }
+    }
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    @Override
+    public HasPermissions getType() {
+        return SecuredDomainType.COMPETITOR;
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(getId());
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(Serializable id) {
+        return new TypeRelativeObjectIdentifier(id.toString());
     }
 
 }

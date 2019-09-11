@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.impl.Simulator;
@@ -52,7 +53,8 @@ public interface TracTracAdapter {
     RaceHandle addTracTracRace(TrackerManager trackerManager, URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             long timeoutInMilliseconds, String tracTracUsername, String tracTracPassword, String raceStatus,
-            String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, int timeoutInMillis)
+            String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, int timeoutInMillis,
+            RaceTrackingHandler raceTrackingHandler)
                     throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
@@ -72,14 +74,13 @@ public interface TracTracAdapter {
      *            described above will be created and used.
      * @param offsetToStartTimeOfSimulatedRace
      *            if non-<code>null</code>, the {@link Simulator} will be used with this duration as start offset
-     * @param trackWind TODO
-     * @param correctWindDirectionByMagneticDeclination TODO
      */
     RaceHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, URL paramURL,
             URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint trackingStartTime,
             TimePoint trackingEndTime, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             long timeoutForReceivingRaceDefinitionInMilliseconds, Duration offsetToStartTimeOfSimulatedRace,  boolean useInternalMarkPassingAlgorithm,
-            String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination)
+            String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination,
+            RaceTrackingHandler raceTrackingHandler)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
@@ -100,7 +101,8 @@ public interface TracTracAdapter {
 
     RaceRecord getSingleTracTracRaceRecord(URL jsonURL, String raceId, boolean loadClientParams) throws Exception;
 
-    TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI,
+    TracTracConfiguration createTracTracConfiguration(String creatorName, String name, String jsonURL,
+            String liveDataURI,
             String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword);
 
 }

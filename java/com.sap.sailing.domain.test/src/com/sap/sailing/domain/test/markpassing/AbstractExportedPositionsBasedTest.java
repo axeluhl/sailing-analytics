@@ -87,12 +87,13 @@ public abstract class AbstractExportedPositionsBasedTest {
         }
         final Course course = createCourse(marksByName);
         final Regatta regatta = new RegattaImpl((String) competitorPositionsJson.get("regatta"), boatClass,
-                /* canBoatsOfCompetitorsChangePerRace */ false, /* startDate */ null, /* endDate */ null,
+                /* canBoatsOfCompetitorsChangePerRace */ false, null, /* startDate */ null, /* endDate */ null,
                 Collections.singleton(new SeriesImpl("Default", /* isMedal */ false,
                         /* isFleetsCanRunInParallel */ true, Collections.singleton(new FleetImpl("Default")),
                         /* raceColumnNames */ Collections.singleton("R1"), /* trackedRegattaRegistry */ null)),
                 /* persistent */ false, new LowPoint(), UUID.randomUUID(),
-                new CourseAreaImpl("CourseArea", UUID.randomUUID()), OneDesignRankingMetric::new);
+                new CourseAreaImpl("CourseArea", UUID.randomUUID()), OneDesignRankingMetric::new,
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
         final DynamicTrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
         final Map<CompetitorWithBoat, Iterable<GPSFixMoving>> competitorsAndTheirTracks = createCompetitorsAndTheirTracks(competitorPositionsJson, boatClass);
         final Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();

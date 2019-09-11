@@ -20,9 +20,12 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.sharding.ShardingType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -91,25 +94,29 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         }
         return jsonLeaderboard;
     }
-    
-    protected void writeCompetitorBaseData(JSONObject jsonCompetitor, CompetitorDTO competitor, LeaderboardDTO leaderboard) {
-        jsonCompetitor.put("name", competitor.getName());
-        jsonCompetitor.put("shortName", competitor.getShortName());
-        final String displayName = leaderboard.getDisplayName(competitor);
-        jsonCompetitor.put("displayName", displayName == null ? competitor.getName() : displayName);
+
+    protected void writeCompetitorBaseData(JSONObject jsonCompetitor, CompetitorDTO competitor, LeaderboardDTO leaderboard, boolean competitorAndBoatIdsOnly) {
         jsonCompetitor.put("id", competitor.getIdAsString());
-        jsonCompetitor.put("sailID", competitor.hasBoat() ? ((CompetitorWithBoatDTO) competitor).getSailID() : null);  // only for backward compatibility
-        jsonCompetitor.put("nationality", competitor.getThreeLetterIocCountryCode());
-        jsonCompetitor.put("countryCode", competitor.getTwoLetterIsoCountryCode());
+        if (!competitorAndBoatIdsOnly) {
+            jsonCompetitor.put("name", competitor.getName());
+            jsonCompetitor.put("shortName", competitor.getShortName());
+            final String displayName = leaderboard.getDisplayName(competitor);
+            jsonCompetitor.put("displayName", displayName == null ? competitor.getName() : displayName);
+            jsonCompetitor.put("sailID", competitor.hasBoat() ? ((CompetitorWithBoatDTO) competitor).getSailID() : null);  // only for backward compatibility
+            jsonCompetitor.put("nationality", competitor.getThreeLetterIocCountryCode());
+            jsonCompetitor.put("countryCode", competitor.getTwoLetterIsoCountryCode());
+        }
     }
 
-    protected void writeBoatData(JSONObject jsonBoat, BoatDTO boat) {
-        jsonBoat.put("name", boat.getName());
-        jsonBoat.put("displayName", boat.getDisplayName());
+    protected void writeBoatData(JSONObject jsonBoat, BoatDTO boat, boolean competitorAndBoatIdsOnly) {
         jsonBoat.put("id", boat.getIdAsString());
-        jsonBoat.put("sailId", boat.getSailId());
-        jsonBoat.put("boatClass", boat.getBoatClass().getName());
-        jsonBoat.put("color", boat.getColor() != null ? boat.getColor().toString() : null);
+        if (!competitorAndBoatIdsOnly) {
+            jsonBoat.put("name", boat.getName());
+            jsonBoat.put("displayName", boat.getDisplayName());
+            jsonBoat.put("sailId", boat.getSailId());
+            jsonBoat.put("boatClass", boat.getBoatClass().getName());
+            jsonBoat.put("color", boat.getColor() != null ? boat.getColor().toString() : null);
+        }
     }
 
     protected void writeCommonLeaderboardData(JSONObject jsonLeaderboard, Leaderboard leaderboard,
@@ -120,6 +127,16 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.getTime() : null);
         jsonLeaderboard.put("resultState", resultState.name());
         jsonLeaderboard.put("type", leaderboard.getLeaderboardType().name());
+        jsonLeaderboard.put("shardingLeaderboardName", ShardingType.LEADERBOARDNAME.encodeIfNeeded(leaderboard.getName()));
+        ResultDiscardingRule resultDiscardingRule = leaderboard.getResultDiscardingRule();
+        if (resultDiscardingRule instanceof ThresholdBasedResultDiscardingRule) {
+            final ThresholdBasedResultDiscardingRule thresholdBasedResultDiscardingRule = (ThresholdBasedResultDiscardingRule) resultDiscardingRule;
+            JSONArray discardIndices = new JSONArray();
+            jsonLeaderboard.put("discardIndexResultsStartingWithHowManyRaces", discardIndices);
+            for (int index : thresholdBasedResultDiscardingRule.getDiscardIndexResultsStartingWithHowManyRaces()) {
+                discardIndices.add(index);
+            }
+        }
         if (leaderboard instanceof RegattaLeaderboard) {
             RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
             jsonLeaderboard.put("canBoatsOfCompetitorsChangePerRace", regattaLeaderboard.getRegatta().canBoatsOfCompetitorsChangePerRace());
@@ -192,15 +209,19 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
 
     protected abstract JSONObject getLeaderboardJson(Leaderboard leaderboard, TimePoint resultTimePoint,
             ResultStates resultState, Integer maxCompetitorsCount, List<String> raceColumnNames,
-            List<String> raceDetailNames) throws NoWindException, InterruptedException, ExecutionException;
+            List<String> raceDetailNames, boolean competitorAndBoatIdsOnly,
+            List<String> showOnlyActiveRacesForCompetitorIds)
+            throws NoWindException, InterruptedException, ExecutionException;
 
     protected JSONObject getLeaderboardJson(ResultStates resultState, Integer maxCompetitorsCount,
             TimePoint requestTimePoint, Leaderboard leaderboard, TimePoint timePoint, List<String> raceColumnNames,
-            List<String> raceDetailNames) throws NoWindException, InterruptedException, ExecutionException {
+            List<String> raceDetailNames, boolean competitorAndBoatIdsOnly,
+            List<String> showOnlyActiveRacesForCompetitorIds)
+            throws NoWindException, InterruptedException, ExecutionException {
         final JSONObject jsonLeaderboard;
         if (timePoint != null || resultState == ResultStates.Live) {
             jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount,
-                    raceColumnNames, raceDetailNames);
+                    raceColumnNames, raceDetailNames, competitorAndBoatIdsOnly, showOnlyActiveRacesForCompetitorIds);
         } else {
             jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount);
         }

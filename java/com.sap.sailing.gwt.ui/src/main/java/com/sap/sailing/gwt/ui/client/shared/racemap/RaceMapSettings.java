@@ -207,6 +207,31 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     }
 
     /**
+     * copy constructor that produces a new settings object that equals the one passed as argument but takes the
+     * showSimulationOverlay from the second parameter
+     */
+    public RaceMapSettings(RaceMapSettings settings, boolean showSimulationOverlay) {
+        this(/* zoomSettings */ settings.getZoomSettings(),
+                /* <br> helpLinesSettings */ settings.getHelpLinesSettings(),
+                /* transparentHoverlines */ settings.getTransparentHoverlines(),
+                /* hoverlineStrokeWeight */ settings.getHoverlineStrokeWeight(),
+                /* tailLengthInMilliseconds */ settings.getTailLengthInMilliseconds(),
+                /* <br> windUp */ settings.isWindUp(),
+                /* buoyZoneRadius */ settings.getBuoyZoneRadius(),
+                /* showOnlySelectedCompetitors */ settings.isShowOnlySelectedCompetitors(),
+                /* showSelectedCompetitorsInfo */ settings.isShowSelectedCompetitorsInfo(),
+                /* showWindStreamletColors */ settings.isShowWindStreamletColors(),
+                /* showWindStreamletOverlay */ settings.isShowWindStreamletOverlay(),
+                /* showSimulationOverlay */ showSimulationOverlay,
+                /* <br> showMapControls */ settings.isShowMapControls(),
+                /* maneuverTypesToShow */ settings.getManeuverTypesToShow(),
+                /* showDouglasPeuckerPoints */ settings.isShowDouglasPeuckerPoints(),
+                /* showEstimatedDuration */ settings.isShowEstimatedDuration(),
+                /* startCountDownFontSizeScaling */ settings.getStartCountDownFontSizeScaling(),
+                /* showManeuverLossLineVisualization */ settings.isShowManeuverLossVisualization());
+    }
+
+    /**
      * @return 0 if the tails are not visible {@link #getTailLengthInMilliseconds()} otherwise
      */
     public long getEffectiveTailLengthInMilliseconds() {

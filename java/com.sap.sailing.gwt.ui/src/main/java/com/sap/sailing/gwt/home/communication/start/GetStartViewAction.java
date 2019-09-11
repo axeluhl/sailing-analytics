@@ -47,7 +47,8 @@ public class GetStartViewAction implements SailingAction<StartViewDTO>, IsClient
     public StartViewDTO execute(SailingDispatchContext context) {
         EventStageCandidateCalculator stageCandidateCalculator = new EventStageCandidateCalculator();
         RecentEventsCalculator recentEventsCalculator = new RecentEventsCalculator();
-        HomeServiceUtil.forAllPublicEvents(context.getRacingEventService(), context.getRequest(), stageCandidateCalculator, recentEventsCalculator);
+        HomeServiceUtil.forAllPublicEventsWithReadPermission(context.getRacingEventService(), context.getRequest(),
+                context.getSecurityService(), stageCandidateCalculator, recentEventsCalculator);
         StartViewDTO result = new StartViewDTO();
         int count = 0;
         for (Pair<StageEventType, EventHolder> pair : stageCandidateCalculator.getFeaturedEvents()) {

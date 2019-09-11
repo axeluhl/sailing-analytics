@@ -51,7 +51,6 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceColumnListenerWithDefaultAction;
-import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
@@ -64,6 +63,7 @@ import com.sap.sailing.domain.tracking.AbstractRaceTrackerBaseImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -99,15 +99,18 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     private final TrackedRegattaRegistry trackedRegattaRegistry;
 
     private volatile DynamicTrackedRace trackedRace;
+    private final RaceTrackingHandler raceTrackingHandler;
 
     public RaceLogRaceTracker(DynamicTrackedRegatta regatta, RaceLogConnectivityParams params, WindStore windStore,
-            RaceLogResolver raceLogResolver, RaceLogConnectivityParams connectivityParams, TrackedRegattaRegistry trackedRegattaRegistry) {
+            RaceLogResolver raceLogResolver, RaceLogConnectivityParams connectivityParams,
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceTrackingHandler raceTrackingHandler) {
         super(connectivityParams);
         this.trackedRegattaRegistry = trackedRegattaRegistry;
         this.params = params;
         this.windStore = windStore;
         this.trackedRegatta = regatta;
         this.raceLogResolver = raceLogResolver;
+        this.raceTrackingHandler = raceTrackingHandler;
 
         // add log listeners
         for (AbstractLog<?, ?> log : params.getLogHierarchy()) {
@@ -299,18 +302,32 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
         }
         Map<Competitor, Boat> competitorsAndTheirBoats = raceColumn.getAllCompetitorsAndTheirBoats(params.getFleet());
         Serializable raceId = denoteEvent.getRaceId();
-        final RaceDefinition raceDef = new RaceDefinitionImpl(raceName, course, boatClass, competitorsAndTheirBoats, raceId);
-        Iterable<Sideline> sidelines = Collections.<Sideline> emptyList();
-        // set race definition, so race is linked to leaderboard automatically
-        trackedRegatta.getRegatta().addRace(raceDef);
-        raceColumn.setRaceIdentifier(fleet, trackedRegatta.getRegatta().getRaceIdentifier(raceDef));
-        trackedRace = trackedRegatta.createTrackedRace(raceDef, sidelines, windStore,
-                params.getDelayToLiveInMillis(), WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
-                boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true, raceLogResolver,
-                /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());
-        notifyRaceCreationListeners();
-        logger.info(String.format("Started tracking race-log race (%s)", raceLog));
-        // this wakes up all waiting race handles
+        try {
+            final RaceDefinition raceDef = raceTrackingHandler.createRaceDefinition(trackedRegatta.getRegatta(), raceName, course,
+                    boatClass, competitorsAndTheirBoats, raceId);
+            Iterable<Sideline> sidelines = Collections.<Sideline> emptyList();
+            // set race definition, so race is linked to leaderboard automatically
+            trackedRegatta.getRegatta().addRace(raceDef);
+            raceColumn.setRaceIdentifier(fleet, trackedRegatta.getRegatta().getRaceIdentifier(raceDef));
+            trackedRace = raceTrackingHandler.createTrackedRace(trackedRegatta, raceDef, sidelines, windStore,
+                    params.getDelayToLiveInMillis(), WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
+                    boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true, raceLogResolver,
+                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());
+            notifyRaceCreationListeners();
+            logger.info(String.format("Started tracking race-log race (%s)", raceLog));
+            // this wakes up all waiting race handles
+        } catch (Exception exception) {
+            logger.log(Level.WARNING,
+                    "Error while creating race " + raceName + " for retatta " + trackedRegatta.getRegatta(), exception);
+            try {
+                trackedRegattaRegistry.stopTracker(trackedRegatta.getRegatta(), this);
+            } catch (Exception e) {
+                logger.log(Level.INFO,
+                        "Something else went wrong while trying to notify the TrackedRegattaRegistry that the race "
+                                + " could not be added to the the regatta " + trackedRegatta.getRegatta(),
+                                e);
+            }
+        }
         synchronized (this) {
             this.notifyAll();
         }

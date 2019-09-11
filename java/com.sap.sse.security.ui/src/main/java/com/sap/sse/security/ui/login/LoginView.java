@@ -85,7 +85,8 @@ public class LoginView extends Composite {
                     if (!result.getRedirectURL().equals("")) {
                         Window.Location.replace(result.getRedirectURL());
                     } else  {
-                        Notification.notify(stringMessages.loggedIn(result.getUserDTO().getName()), NotificationType.INFO);
+                        Notification.notify(stringMessages.loggedIn(result.getUserDTO().getA().getName()),
+                                NotificationType.INFO);
                     }
                 } else {
                     if (SuccessInfo.FAILED_TO_LOGIN.equals(result.getMessage())) {

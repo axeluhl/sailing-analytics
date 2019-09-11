@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
+import com.sap.sse.security.ui.client.UserService;
 
 public class ItemToMapToDeviceSelectionPanel implements IsWidget {
     private final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> competitorTable;
@@ -33,13 +34,13 @@ public class ItemToMapToDeviceSelectionPanel implements IsWidget {
         void onSelectionChange(MarkDTO mark);
     }
 
-    public ItemToMapToDeviceSelectionPanel(SailingServiceAsync sailingService, StringMessages stringMessages,
+    public ItemToMapToDeviceSelectionPanel(SailingServiceAsync sailingService, final UserService userService, StringMessages stringMessages,
             ErrorReporter errorReporter, final SelectionChangedHandler handler, MappableToDevice selected) {
         this.selected = selected;
         this.errorReporter = errorReporter;
-        competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ false,
+        competitorTable = new CompetitorTableWrapper<>(sailingService, userService, stringMessages, errorReporter, /* multiSelection */ false,
                 /* enablePager */ true, /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
-        boatTable = new BoatTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true, /* allowActions */ false);
+        boatTable = new BoatTableWrapper<>(sailingService, userService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true, /* allowActions */ false);
         markTable = new MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>>(/* multiSelection */ false, sailingService,
                 stringMessages, errorReporter);
         competitorTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {

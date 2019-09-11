@@ -1,6 +1,9 @@
 package com.sap.sse.security.ui.shared;
 
+import com.sap.sse.security.shared.dto.AccountDTO;
+
 public class UsernamePasswordAccountDTO extends AccountDTO {
+    private static final long serialVersionUID = 1L;
 
     private static final String LABEL = "Simple";
     

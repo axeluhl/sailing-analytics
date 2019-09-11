@@ -29,7 +29,8 @@ public interface TrackerManager {
      *            if -1 then loading doesn't time out; otherwise, if the {@link RaceDefinition} hasn't been received
      *            after so many milliseconds then the tracker will be {@link RaceTracker#stop(boolean) stopped}.
      */
-    RaceHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, long timeoutInMilliseconds)
+    RaceHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
 }

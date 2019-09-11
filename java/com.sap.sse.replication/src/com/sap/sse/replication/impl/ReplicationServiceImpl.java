@@ -634,7 +634,9 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
                     + master.getExchangeName());
             replicatorThread.start();
             logger.info("Started replicator thread");
-            final InputStream is = initialLoadURL.openStream();
+            final URLConnection initialLoadConnection = HttpUrlConnectionHelper
+                    .redirectConnectionWithBearerToken(initialLoadURL, master.getBearerToken());
+            final InputStream is = (InputStream) initialLoadConnection.getContent();
             final InputStreamReader queueNameReader = new InputStreamReader(is);
             final String queueName = new BufferedReader(queueNameReader).readLine();
             queueNameReader.close();
@@ -684,7 +686,8 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
             ClassNotFoundException {
         URL replicationRegistrationRequestURL = master.getReplicationRegistrationRequestURL(getServerIdentifier(),
                 ServerInfo.getBuildVersion());
-        final URLConnection registrationRequestConnection = HttpUrlConnectionHelper.redirectConnection(replicationRegistrationRequestURL);
+        final URLConnection registrationRequestConnection = HttpUrlConnectionHelper
+                .redirectConnectionWithBearerToken(replicationRegistrationRequestURL, master.getBearerToken());
         final InputStream content = (InputStream) registrationRequestConnection.getContent();
         final StringBuilder uuid = new StringBuilder();
         final byte[] buf = new byte[256];
@@ -708,7 +711,8 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
             URL replicationDeRegistrationRequestURL = master
                     .getReplicationDeRegistrationRequestURL(getServerIdentifier());
             logger.info("Unregistering replica from master "+master+" using URL "+replicationDeRegistrationRequestURL);
-            final URLConnection deregistrationRequestConnection = HttpUrlConnectionHelper.redirectConnection(replicationDeRegistrationRequestURL);
+            final URLConnection deregistrationRequestConnection = HttpUrlConnectionHelper
+                    .redirectConnectionWithBearerToken(replicationDeRegistrationRequestURL, master.getBearerToken());
             StringBuilder uuid = new StringBuilder();
             InputStream content = (InputStream) deregistrationRequestConnection.getContent();
             byte[] buf = new byte[256];
@@ -822,9 +826,10 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
 
     @Override
     public ReplicationMasterDescriptor createReplicationMasterDescriptor(String messagingHostname, String hostname,
-            String exchangeName, int servletPort, int messagingPort, String queueName,
+            String exchangeName, int servletPort, int messagingPort, String queueName, String bearerToken,
             Iterable<Replicable<?, ?>> replicables) {
-        return new ReplicationMasterDescriptorImpl(messagingHostname, exchangeName, messagingPort, queueName, hostname, servletPort, replicables);
+        return new ReplicationMasterDescriptorImpl(messagingHostname, exchangeName, messagingPort, queueName, hostname,
+                servletPort, bearerToken, replicables);
     }
 
     @Override

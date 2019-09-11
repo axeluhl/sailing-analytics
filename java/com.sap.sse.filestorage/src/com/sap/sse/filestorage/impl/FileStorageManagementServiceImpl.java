@@ -132,7 +132,7 @@ public class FileStorageManagementServiceImpl implements ReplicableFileStorageMa
 
     @Override
     public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        return new ObjectInputStreamResolvingAgainstFileStorageServiceResolver(is, serviceResolver);
+        return new ObjectInputStreamResolvingAgainstFileStorageServiceResolver(is, serviceResolver, null);
     }
 
     @Override

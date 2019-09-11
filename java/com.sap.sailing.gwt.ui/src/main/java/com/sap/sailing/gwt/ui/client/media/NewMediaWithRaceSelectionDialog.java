@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.adminconsole.AssignRacesToMediaDialog;
+import com.sap.sailing.gwt.ui.adminconsole.FileStorageServiceConnectionTestObservable;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
@@ -15,6 +16,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.security.ui.client.UserService;
 
 public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
 
@@ -30,15 +32,20 @@ public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
 
     private AssignRacesToMediaDialog racesForMediaDialog;
 
+    private UserService userService;
+
     public NewMediaWithRaceSelectionDialog(MediaServiceAsync mediaService, TimePoint defaultStartTime,
-            StringMessages stringMessages, SailingServiceAsync sailingService, ErrorReporter errorReporter,
+            StringMessages stringMessages, SailingServiceAsync sailingService, UserService userService,
+            ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, Set<RegattasDisplayer> regattasDisplayers,
+            FileStorageServiceConnectionTestObservable storageServiceConnection,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<MediaTrack> dialogCallback) {
-        super(mediaService, defaultStartTime, stringMessages, null, dialogCallback);
+        super(mediaService, defaultStartTime, stringMessages, null, storageServiceConnection, dialogCallback);
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
         this.regattasDisplayers = regattasDisplayers;
+        this.userService = userService;
     }
 
     @Override
@@ -47,7 +54,8 @@ public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
     }
 
     private Widget racesForMedia() {
-        racesForMediaDialog = new AssignRacesToMediaDialog(sailingService, mediaTrack, errorReporter, regattaRefresher,
+        racesForMediaDialog = new AssignRacesToMediaDialog(sailingService, userService, mediaTrack, errorReporter,
+                regattaRefresher,
                 stringMessages, null, new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
 
                     @Override

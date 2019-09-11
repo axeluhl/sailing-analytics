@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserManagementService;
@@ -22,7 +23,6 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.shared.oauthlogin.OAuthLogin;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class OAuthLoginEntryPoint implements EntryPoint, UserChangeEventHandler {
     private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);

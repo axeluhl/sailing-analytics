@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.security.ui.client.UserService;
 
 public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends DataEntryDialog<Collection<TypedDeviceMappingDTO>> {
 
@@ -39,7 +40,7 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
     private BoatDTO boatToSelect;
     private boolean inInstableTransitionState = false;
 
-    public AbstractRegattaLogSensorDataAddMappingsDialog(SailingServiceAsync sailingService,
+    public AbstractRegattaLogSensorDataAddMappingsDialog(final SailingServiceAsync sailingService, final UserService userService,
             final ErrorReporter errorReporter, final StringMessages stringMessages, String leaderboardName,
             DialogCallback<Collection<TypedDeviceMappingDTO>> callback) {
         super(stringMessages.add(stringMessages.deviceMappings()), stringMessages.add(stringMessages.deviceMappings()),
@@ -58,9 +59,9 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
         deviceIdTable.getSelectionModel().addSelectionChangeHandler(
                 event -> deviceSelectionChanged(deviceIdTable.getSelectionModel().getSelectedObject()));
 
-        boatTable = new BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>>(sailingService, stringMessages,
+        boatTable = new BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>>(sailingService, userService, stringMessages,
                 errorReporter, /* multiSelection */ false, /* enable Pager */ true, /* allowActions */ false);
-        competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
+        competitorTable = new CompetitorTableWrapper<>(sailingService, userService, stringMessages, errorReporter,
                 /* multiSelection */ false, /* enablePager */ true, /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
 
         boatTable.getSelectionModel().addSelectionChangeHandler(event -> {

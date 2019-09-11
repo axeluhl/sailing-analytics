@@ -266,13 +266,11 @@
     <string name="race_started">Gestartet %s</string>
     <string name="race_finished">Beendet %s</string>
     <string name="wind">Wind</string>
-    <string name="wind_display">dd</string>
     <string name="flags_abandon">Abbrechen</string>
     <string name="flags_recall">Rückruf</string>
     <string name="flags_course">Kurs</string>
     <string name="flags_more">Zieleinlauf</string>
     <string name="flags_postpone">Verschieben</string>
-    <string name="flags_dependent_races">von abhängigen Rennen</string>
     <string name="wind_info">%2$s / %1$f kn</string>
     <string name="url_google_geocoder">http://maps.googleapis.com/maps/api/geocode/json?address=</string>
     <string name="urlpart_google_geocoder_sensor">\?sensor=true</string>

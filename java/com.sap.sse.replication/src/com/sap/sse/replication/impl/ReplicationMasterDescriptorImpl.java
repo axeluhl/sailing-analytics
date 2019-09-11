@@ -41,6 +41,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     private final String messagingHostname;
     private final int messagingPort;
     private final String queueName;
+    private final String bearerToken;
     private final Iterable<Replicable<?, ?>> replicables;
 
     private QueueingConsumer consumer;
@@ -68,15 +69,21 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
      *            may mean that the master also sends operations for replicables that a particular replica hasn't
      *            registered for. Replicas shall silently drop operations for such replicables that they haven't
      *            requested replication for.
+     * @param bearerToken
+     *            for servers that do not allow unauthenticated registration of replicas, a valid bearer token needs to
+     *            be given as authentication mechanism. The user associated with the given bearer token needs to have
+     *            all required permissions on the remote server to set up replicas, otherwise the request will fail.
      */
     public ReplicationMasterDescriptorImpl(String messagingHostname, String exchangeName, int messagingPort,
-            String queueName, String masterServletHostname, int servletPort, Iterable<Replicable<?, ?>> replicables) {
+            String queueName, String masterServletHostname, int servletPort, String bearerToken,
+            Iterable<Replicable<?, ?>> replicables) {
         this.masterServletHostname = masterServletHostname;
         this.messagingHostname = messagingHostname;
         this.servletPort = servletPort;
         this.messagingPort = messagingPort;
         this.exchangeName = exchangeName;
         this.queueName = queueName;
+        this.bearerToken = bearerToken;
         this.consumer = null;
         this.replicables = replicables;
     }
@@ -269,6 +276,11 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     @Override
     public String getExchangeName() {
         return exchangeName;
+    }
+    
+    @Override
+    public String getBearerToken() {
+        return bearerToken;
     }
 
     public String toString() {

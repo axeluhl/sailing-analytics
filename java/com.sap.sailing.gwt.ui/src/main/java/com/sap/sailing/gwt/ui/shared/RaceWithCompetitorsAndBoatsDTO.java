@@ -24,11 +24,6 @@ public class RaceWithCompetitorsAndBoatsDTO extends RaceDTO {
         this.competitorsAndBoats = competitorsAndBoats;
     }
 
-    public RaceWithCompetitorsAndBoatsDTO(RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorDTO, BoatDTO> competitorsAndBoats) {
-        super(raceIdentifier);
-        this.competitorsAndBoats = competitorsAndBoats;
-    }
-
     public Map<CompetitorDTO, BoatDTO> getCompetitorsAndBoats() {
         return competitorsAndBoats;
     }

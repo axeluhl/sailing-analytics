@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -46,6 +47,12 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.shared.UserGroupManagementException;
+import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class OfflineSerializationTest extends AbstractSerializationTest {
     private static final Logger logger = Logger.getLogger(OfflineSerializationTest.class.getName());
@@ -94,6 +101,34 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         int[] intArray = new int[] { 5, 8 };
         int[] clone = cloneBySerialization(intArray, receiverDomainFactory);
         assertTrue(Arrays.equals(intArray, clone));
+    }
+    
+    @Test
+    public void testSerializingUserStore() throws UserGroupManagementException, UserManagementException, ClassNotFoundException, IOException {
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl((srlid)->null);
+        UserStore userStore = new UserStoreImpl("defaultTenant");
+        userStore.clear();
+        UserGroup defaultTenant = userStore.createUserGroup(UUID.randomUUID(), "admin-tenant");
+        User user = userStore.createUser("admin", "");
+        defaultTenant.add(user);
+        userStore.updateUserGroup(defaultTenant);
+        user.getDefaultTenantMap().put("testserver", defaultTenant);
+        userStore.updateUser(user);
+
+        {
+            User admin = userStore.getUserByName("admin");
+            UserGroup adminTenant = admin.getDefaultTenant("testserver");
+            assertTrue(adminTenant.contains(admin));
+            assertTrue(Util.contains(admin.getUserGroups(), adminTenant));
+        }
+        UserStore deserializedUserStore = cloneBySerialization(userStore, receiverDomainFactory);
+        assertNotNull(deserializedUserStore);
+        {
+            User admin = deserializedUserStore.getUserByName("admin");
+            UserGroup adminTenant = admin.getDefaultTenant("testserver");
+            assertTrue(adminTenant.contains(admin));
+            assertTrue(Util.contains(admin.getUserGroups(), adminTenant));
+        }
     }
 
     @Test

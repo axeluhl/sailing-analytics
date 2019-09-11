@@ -2,7 +2,9 @@ package com.sap.sailing.resultimport;
 
 import java.net.URL;
 
-public interface ResultUrlProvider {
+import com.sap.sse.common.Named;
+
+public interface ResultUrlProvider extends Named {
     /**
      * The URLs configured for this provider
      */
@@ -14,4 +16,5 @@ public interface ResultUrlProvider {
      * for this provider. May return <code>null</code>.
      */
     String getOptionalSampleURL();
+
 }

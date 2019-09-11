@@ -4,6 +4,7 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
 import com.sap.sse.security.ui.authentication.AuthenticationManager.SuccessCallback;
 import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoPlace;
@@ -12,7 +13,6 @@ import com.sap.sse.security.ui.authentication.signin.SignInPlace;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class CreateAccountActivity extends AbstractActivity implements CreateAccountView.Presenter {
 

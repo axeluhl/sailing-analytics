@@ -44,18 +44,9 @@
     <string name="error_could_not_complete_operation_on_server_try_again">Konnte Operation nicht durchführen. Bitte versuchen Sie es noch einmal.</string>
     <string name="error_sending_team_image_to_server">Fehler: Konnte Team-Foto nicht an den server senden.</string>
     <string name="regatta_starts_in">Regatta beginnt in:</string>
-    <plurals name="hour">
-        <item quantity="one">Stunde</item>
-        <item quantity="other">Stunden</item>
-    </plurals>
-    <plurals name="minute">
-        <item quantity="one">Minute</item>
-        <item quantity="other">Minuten</item>
-    </plurals>
-    <plurals name="day">
-        <item quantity="one">Tag</item>
-        <item quantity="other">Tage</item>
-    </plurals>
+    <string name="hours">Stunden:</string>
+    <string name="minutes">Minuten:</string>
+    <string name="days">Tage:</string>
     <string name="please_listen_to_announcements">Bitte achten Sie auf die Durchsagen</string>
     <string name="no_qr_code">Sie haben keinen QR-Code?</string>
     <string name="scan_qr">QR-Code scannen</string>

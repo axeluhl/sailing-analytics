@@ -223,7 +223,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
                 // We only saw broken data in files having a boat column.
                 final String boatToken = lineContentTokens[boatColumnIndex];
                 if (!BOAT_CHECK_PATTERN.matcher(boatToken).matches()) {
-                    logger.warning("Error, skipping line nr " + lineNr + " in file " + filename + ", not a boat id: " + boatToken);
+                    logger.warning("Error, skipping line #" + lineNr + " in file " + filename + ", not a boat id: " + boatToken);
                     return;
                 }
             }
@@ -233,7 +233,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
             }
         } catch (Exception e) {
             logger.warning(
-                    "Error parsing line nr " + lineNr + " in file " + filename + " with exception: " + e.getMessage());
+                    "Error parsing line #" + lineNr + " in file " + filename + " with exception: " + e.getMessage());
         }
     }
 

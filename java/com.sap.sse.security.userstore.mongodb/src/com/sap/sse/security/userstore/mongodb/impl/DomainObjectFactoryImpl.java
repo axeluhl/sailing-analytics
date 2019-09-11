@@ -3,10 +3,13 @@ package com.sap.sse.security.userstore.mongodb.impl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,13 +18,31 @@ import org.bson.types.Binary;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.sap.sse.security.Social;
-import com.sap.sse.security.User;
+import com.sap.sse.common.Util;
+import com.sap.sse.security.interfaces.Social;
+import com.sap.sse.security.interfaces.UserImpl;
+import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
+import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.RoleDefinitionImpl;
 import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.UserGroupProvider;
+import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
+import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
+import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.userstore.mongodb.DomainObjectFactory;
+import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
@@ -31,39 +52,209 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     public DomainObjectFactoryImpl(MongoDatabase db) {
         this.db = db;
     }
-
+    
     @Override
-    public Iterable<User> loadAllUsers() {
-        ArrayList<User> result = new ArrayList<>();
+    public Iterable<AccessControlListAnnotation> loadAllAccessControlLists(UserStore userStore) {
+        ArrayList<AccessControlListAnnotation> result = new ArrayList<>();
+        MongoCollection<org.bson.Document> aclCollection = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
+        try {
+            for (Document o : aclCollection.find()) {
+                result.add(loadAccessControlList(o, userStore));
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load ACLs.");
+            logger.log(Level.SEVERE, "loadAllAccessControlLists", e);
+        }
+        return result;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private AccessControlListAnnotation loadAccessControlList(Document aclDBObject, UserStore userStore) {
+        final QualifiedObjectIdentifier id = QualifiedObjectIdentifierImpl
+                .fromDBWithoutEscaping((String) aclDBObject.get(FieldNames.AccessControlList.OBJECT_ID.name()));
+        final String displayName = (String) aclDBObject.get(FieldNames.AccessControlList.OBJECT_DISPLAY_NAME.name());
+        List<Object> dbPermissionMap = ((List<Object>) aclDBObject.get(FieldNames.AccessControlList.PERMISSION_MAP.name()));
+        Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
+        for (Object dbPermissionMapEntryO : dbPermissionMap) {
+            Document dbPermissionMapEntry = (Document) dbPermissionMapEntryO;
+            final UUID userGroupKey = (UUID) dbPermissionMapEntry.get(FieldNames.AccessControlList.PERMISSION_MAP_USER_GROUP_ID.name());
+            final UserGroup userGroup = userStore.getUserGroup(userGroupKey);
+            Set<String> actions = new HashSet<>();
+            for (Object o : (List<Object>) dbPermissionMapEntry.get(FieldNames.AccessControlList.PERMISSION_MAP_ACTIONS.name())) {
+                actions.add(o.toString());
+            }
+            permissionMap.put(userGroup, actions);
+        }
+        AccessControlListAnnotation result = new AccessControlListAnnotation(new AccessControlList(permissionMap), id,
+                displayName);
+        return result;
+    }
+    
+    @Override
+    public Iterable<OwnershipAnnotation> loadAllOwnerships(UserStore userStore) {
+        ArrayList<OwnershipAnnotation> result = new ArrayList<>();
+        MongoCollection<org.bson.Document> ownershipCollection = db.getCollection(CollectionNames.OWNERSHIPS.name());
+        try {
+            for (Document o : ownershipCollection.find()) {
+                result.add(loadOwnership(o, userStore));
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load ownerships.");
+            logger.log(Level.SEVERE, "loadAllOwnerships", e);
+        }
+        return result;
+    }
+    
+    private OwnershipAnnotation loadOwnership(Document ownershipDBObject, UserStore userStore) {
+        String escapedId = (String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_ID.name());
+        final QualifiedObjectIdentifier idOfOwnedObject = QualifiedObjectIdentifierImpl.fromDBWithoutEscaping(escapedId);
+        final String displayNameOfOwnedObject = (String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_DISPLAY_NAME.name());
+        final String userOwnerName = (String) ownershipDBObject.get(FieldNames.Ownership.OWNER_USERNAME.name());
+        final UUID tenantOwnerId = (UUID) ownershipDBObject.get(FieldNames.Ownership.TENANT_OWNER_ID.name());
+        final User userOwner = userStore.getUserByName(userOwnerName);
+        final UserGroup tenantOwner = userStore.getUserGroup(tenantOwnerId);
+        return new OwnershipAnnotation(new Ownership(userOwner, tenantOwner), idOfOwnedObject, displayNameOfOwnedObject);
+    }
+    
+    @Override
+    public Iterable<RoleDefinition> loadAllRoleDefinitions() {
+        ArrayList<RoleDefinition> result = new ArrayList<>();
+        MongoCollection<org.bson.Document> roleCollection = db.getCollection(CollectionNames.ROLES.name());
+        try {
+            for (Document o : roleCollection.find()) {
+                result.add(loadRoleDefinition(o));
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load role definitions.");
+            logger.log(Level.SEVERE, "loadAllRoleDefinitions", e);
+        }
+        return result;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private RoleDefinition loadRoleDefinition(Document roleDefinitionDBObject) {
+        final String id = (String) roleDefinitionDBObject.get(FieldNames.Role.ID.name());
+        final String displayName = (String) roleDefinitionDBObject.get(FieldNames.Role.NAME.name());
+        final Set<WildcardPermission> permissions = new HashSet<>();
+        for (Object o : (List<Object>) (roleDefinitionDBObject.get(FieldNames.Role.PERMISSIONS.name()))) {
+            permissions.add(new WildcardPermission(o.toString()));
+        }
+        return new RoleDefinitionImpl(UUID.fromString(id), displayName, permissions);
+    }
+    
+    @Override
+    public Iterable<UserGroup> loadAllUserGroupsAndTenantsWithProxyUsers(
+            Map<UUID, RoleDefinition> roleDefinitionsById) {
+        Set<UserGroup> userGroups = new HashSet<>();
+        MongoCollection<org.bson.Document> userGroupCollection = db.getCollection(CollectionNames.USER_GROUPS.name());
+        try {
+            for (Document o : userGroupCollection.find()) {
+                final UserGroup userGroup = loadUserGroupWithProxyUsers(o, roleDefinitionsById);
+                userGroups.add(userGroup);
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load user groups.");
+            logger.log(Level.SEVERE, "loadAllUserGroups", e);
+        }
+        return userGroups;
+    }
+    
+    private UserGroup loadUserGroupWithProxyUsers(Document groupDBObject, Map<UUID, RoleDefinition> roleDefinitionsById) {
+        final UUID id = (UUID) groupDBObject.get(FieldNames.UserGroup.ID.name());
+        final String name = (String) groupDBObject.get(FieldNames.UserGroup.NAME.name());
+        Set<User> users = new HashSet<>();
+        @SuppressWarnings("unchecked")
+        List<Object> usersO = (List<Object>) groupDBObject.get(FieldNames.UserGroup.USERNAMES.name());
+        if (usersO != null) {
+            for (Object o : usersO) {
+                users.add(new UserProxy((String) o));
+            }
+        }
+        final Map<RoleDefinition, Boolean> roleDefinitionMap = new HashMap<>();
+        @SuppressWarnings("unchecked")
+        List<Object> dbRoleDefinitionMap = (List<Object>) groupDBObject
+                .get(FieldNames.UserGroup.ROLE_DEFINITION_MAP.name());
+        if (dbRoleDefinitionMap != null) {
+            for (Object roleDefO : dbRoleDefinitionMap) {
+                final Document roleDefEntry = (Document) roleDefO;
+                final UUID roleDefId = roleDefEntry.get(FieldNames.UserGroup.ROLE_DEFINITION_MAP_ROLE_ID.name(),
+                        UUID.class);
+                final Boolean forAll = roleDefEntry.getBoolean(FieldNames.UserGroup.ROLE_DEFINITION_MAP_FOR_ALL.name());
+                roleDefinitionMap.put(roleDefinitionsById.get(roleDefId), forAll);
+            }
+        }
+        return new UserGroupImpl(id, name, users, roleDefinitionMap);
+    }
+
+    /**
+     * @param defaultTenantForRoleMigration
+     *            when a string-based role is found on the user object it will be mapped to a {@link Role} object
+     *            pointing to an equal-named {@link RoleDefinition} from the {@code roleDefinitionsById} map, with a
+     *            {@link Role#getQualifiedForTenant() tenant qualification} as defined by this parameter; if this
+     *            parameter is {@code null}, role migration will throw an exception.
+     * @param userGroups
+     *            the user groups to resolve tenant IDs against for users' default tenants as well as role tenant qualifiers
+     * @return the user objects returned have a fully resolved default tenant as well as fully-resolved role tenant/user
+     *         qualifiers; the {@link Tenant} objects passed in the {@code tenants} map may still have an empty user
+     *         group that is filled later.
+     */
+    @Override
+    public Iterable<User> loadAllUsers(
+            Map<UUID, RoleDefinition> roleDefinitionsById, RoleMigrationConverter roleMigrationConverter,
+            Map<UUID, UserGroup> userGroups, UserGroupProvider userGroupProvider) throws UserManagementException {
+        Map<String, User> result = new HashMap<>();
         MongoCollection<org.bson.Document> userCollection = db.getCollection(CollectionNames.USERS.name());
         try {
             for (Document o : userCollection.find()) {
-                result.add(loadUser(o));
+                User userWithProxyRoleUserQualifier = loadUserWithProxyRoleUserQualifiers(o, roleDefinitionsById,
+                        roleMigrationConverter, userGroups, userGroupProvider);
+                result.put(userWithProxyRoleUserQualifier.getName(), userWithProxyRoleUserQualifier);
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load users.");
             logger.log(Level.SEVERE, "loadAllUsers", e);
         }
-        return result;
+        resolveRoleUserQualifiers(result);
+        return result.values();
     }
     
-    @Override
-    public User loadUser(String name) {
-        User result;
-        Document query = new Document();
-        query.put(FieldNames.User.NAME.name(), name);
-        MongoCollection<org.bson.Document> userCollection = db.getCollection(CollectionNames.USERS.name());
-        Document userDBObject = userCollection.find(query).first();
-        if (userDBObject != null) {
-            result = loadUser(userDBObject);
-        } else {
-            result = null;
+    private void resolveRoleUserQualifiers(Map<String, User> users) throws UserManagementException {
+        for (final User user : users.values()) {
+            final Set<Role> userRoles = new HashSet<>();
+            Util.addAll(user.getRoles(), userRoles); // avoid concurrent modification exception
+            for (final Role roleWithUserQualifierProxy : userRoles) {
+                final User userQualifierProxy = roleWithUserQualifierProxy.getQualifiedForUser();
+                if (userQualifierProxy != null) {
+                    final User resolvedUserQualifier = users.get(userQualifierProxy.getName());
+                    if (resolvedUserQualifier == null) {
+                        throw new UserManagementException("Unable to resolve user named "+userQualifierProxy.getName()+
+                                " which serves as a role qualifier for role "+roleWithUserQualifierProxy.getName()+
+                                " for user "+user.getName());
+                    }
+                    user.removeRole(roleWithUserQualifierProxy);
+                    user.addRole(new Role(roleWithUserQualifierProxy.getRoleDefinition(),
+                            roleWithUserQualifierProxy.getQualifiedForTenant(), resolvedUserQualifier));
+                }
+            }
         }
-        return result;
     }
-    
-    private User loadUser(Document userDBObject) {
-        final String name = (String) userDBObject.get(FieldNames.User.NAME.name());
+
+    /**
+     * @param defaultTenantForRoleMigration
+     *            when a string-based role is found on the user object it will be mapped to a {@link Role} object
+     *            pointing to an equal-named {@link RoleDefinition} from the {@code roleDefinitionsById} map, with a
+     *            {@link Role#getQualifiedForTenant() tenant qualification} as defined by this parameter; if this
+     *            parameter is {@code null}, role migration will throw an exception.
+     * @param tenants
+     *            the tenants to resolve tenant IDs against for users' default tenants as well as role tenant qualifiers
+     * @return the user objects returned have dummy objects for their {@link UserImpl#getRoles() roles'}
+     *         {@link Role#getQualifiedForUser() user qualifier} where only the username is set properly to identify the
+     *         user in the calling method where ultimately all users will be known.
+     */
+    private User loadUserWithProxyRoleUserQualifiers(Document userDBObject,
+            Map<UUID, RoleDefinition> roleDefinitionsById, RoleMigrationConverter roleMigrationConverter,
+            Map<UUID, UserGroup> tenants, UserGroupProvider userGroupProvider) {
+        final String username = (String) userDBObject.get(FieldNames.User.NAME.name());
         final String email = (String) userDBObject.get(FieldNames.User.EMAIL.name());
         final String fullName = (String) userDBObject.get(FieldNames.User.FULLNAME.name());
         final String company = (String) userDBObject.get(FieldNames.User.COMPANY.name());
@@ -72,12 +263,42 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Boolean emailValidated = (Boolean) userDBObject.get(FieldNames.User.EMAIL_VALIDATED.name());
         String passwordResetSecret = (String) userDBObject.get(FieldNames.User.PASSWORD_RESET_SECRET.name());
         String validationSecret = (String) userDBObject.get(FieldNames.User.VALIDATION_SECRET.name());
-        Set<String> roles = new HashSet<String>();
-        Set<String> permissions = new HashSet<String>();
-        Iterable<?> rolesO = (Iterable<?>) userDBObject.get(FieldNames.User.ROLES.name());
+        Set<Role> roles = new HashSet<>();
+        Set<String> permissions = new HashSet<>();
+        List<?> rolesO = (List<?>) userDBObject.get(FieldNames.User.ROLE_IDS.name());
+        boolean rolesMigrated = false; // if a role needs migration, user needs an update in the DB
         if (rolesO != null) {
             for (Object o : rolesO) {
-                roles.add((String) o);
+                final Role role = loadRoleWithProxyUserQualifier((Document) o, roleDefinitionsById, tenants);
+                if (role != null) {
+                    roles.add(role);
+                } else {
+                    logger.warning("Role with ID "+o+" that used to be assigned to user "+username+" not found");
+                }
+            }
+        } else {
+            // migration of old name-based, non-entity roles:
+            // try to find an equal-named role in the set of role definitions and create a role
+            // that is qualified by the default tenant; for this a default tenant must exist because
+            // otherwise a user would obtain global rights by means of migration which must not happen.
+            logger.info("Migrating roles of user "+username);
+            List<?> roleNames = (List<?>) userDBObject.get("ROLES");
+            if (roleNames != null) {
+                logger.info("Found old roles "+roleNames+" for user "+username);
+                for (Object o : roleNames) {
+                    final Role convertedRole = roleMigrationConverter.convert(o.toString(), username);
+                    if (convertedRole != null) {
+                        logger.info("Found role "+convertedRole.getRoleDefinition()+" for old role "+o.toString()+" for user "+username);
+                        // we do not do role associations, to stay similar as before, meaning that all admins can
+                        // edit the roles. Without this we would need to determine which admin (if
+                        // multiple present) should own this association.
+                        roles.add(convertedRole);
+                        rolesMigrated = true;
+                    }else {
+                        logger.warning("Role " + o.toString() + " for user " + username
+                                + " not found during migration. User will no longer be in this role.");
+                    }
+                }
             }
         }
         Iterable<?> permissionsO = (Iterable<?>) userDBObject.get(FieldNames.User.PERMISSIONS.name());
@@ -86,16 +307,52 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 permissions.add((String) o);
             }
         }
+
+        final Map<String, UserGroup> defaultTenant = new ConcurrentHashMap<>();
+        final List<?> defaultTenantIds = (List<?>) userDBObject.get(FieldNames.User.DEFAULT_TENANT_IDS.name());
+        if (defaultTenantIds != null) {
+            for (Object singleDefaultTenant : defaultTenantIds) {
+                Document singleDefaultTenantObj = (Document) singleDefaultTenant;
+                String serverName = singleDefaultTenantObj.getString(FieldNames.User.DEFAULT_TENANT_SERVER.name());
+                UUID groupId = (UUID) singleDefaultTenantObj.get(FieldNames.User.DEFAULT_TENANT_GROUP.name());
+                UserGroup tenantOfGroup = tenants.get(groupId);
+                if (tenantOfGroup == null) {
+                    logger.warning("Couldn't find tenant for user " + username + ". The tenant was identified by ID "
+                            + groupId + " but no tenant with that ID was found");
+                } else {
+                    defaultTenant.put(serverName, tenantOfGroup);
+                }
+            }
+        }
         Document accountsMap = (Document) userDBObject.get(FieldNames.User.ACCOUNTS.name());
         Map<AccountType, Account> accounts = createAccountMapFromdDBObject(accountsMap);
-        User result = new User(name, email, fullName, company, locale, emailValidated==null?false:emailValidated, passwordResetSecret, validationSecret, accounts.values());
-        for (String role : roles) {
+        User result = new UserImpl(username, email, fullName, company, locale,
+                emailValidated == null ? false : emailValidated, passwordResetSecret, validationSecret, defaultTenant,
+                accounts.values(), userGroupProvider);
+        for (final Role role : roles) {
             result.addRole(role);
         }
         for (String permission : permissions) {
-            result.addPermission(permission);
+            result.addPermission(new WildcardPermission(permission));
+        }
+        if (rolesMigrated) {
+            // update the user object after roles have been migrated;
+            // the default tenant is only a dummy object but should be sufficient
+            // for the DB update because, as for the read process, the write process
+            // is also only interested in the object's ID
+            new MongoObjectFactoryImpl(db).storeUser(result);
         }
         return result;
+    }
+
+    private Role loadRoleWithProxyUserQualifier(Document rolesO, Map<UUID, RoleDefinition> roleDefinitionsById,
+            Map<UUID, UserGroup> userGroups) {
+        final RoleDefinition roleDefinition = roleDefinitionsById.get(rolesO.get(FieldNames.Role.ID.name()));
+        final UUID qualifyingTenantId = (UUID) rolesO.get(FieldNames.Role.QUALIFYING_TENANT_ID.name());
+        final UserGroup qualifyingTenant = qualifyingTenantId == null ? null : userGroups.get(qualifyingTenantId);
+        final User proxyQualifyingUser = rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()) == null ? null
+                : new UserProxy((String) rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()));
+        return new Role(roleDefinition, qualifyingTenant, proxyQualifyingUser);
     }
 
     private Map<AccountType, Account> createAccountMapFromdDBObject(Document accountsMap) {

@@ -9,11 +9,21 @@ import java.util.UUID;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.shared.dto.SecurityInformationDTO;
 
-public class EventDTO extends EventBaseDTO {
+public class EventDTO extends EventBaseDTO implements SecuredDTO {
     private static final long serialVersionUID = -7100030301376959817L;
+
+    private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
 
     private Date currentServerTime;
 
@@ -81,7 +91,7 @@ public class EventDTO extends EventBaseDTO {
     public AbstractLeaderboardDTO getLeaderboardByName(String leaderboardName) {
         for (LeaderboardGroupDTO leaderboardGroup : this.getLeaderboardGroups()) {
             for (StrippedLeaderboardDTO leaderboardDTO : leaderboardGroup.getLeaderboards()) {
-                if(leaderboardName.equals(leaderboardDTO.name)) {
+                if(leaderboardName.equals(leaderboardDTO.getName())) {
                     return leaderboardDTO;
                 }
             }
@@ -141,4 +151,39 @@ public class EventDTO extends EventBaseDTO {
             Util.addAll(windFinderSpots, this.allWindFinderSpotIdsUsedByEvent);
         }
     }
+
+    @Override
+    public final AccessControlListDTO getAccessControlList() {
+        return securityInformation.getAccessControlList();
+    }
+
+    @Override
+    public final OwnershipDTO getOwnership() {
+        return securityInformation.getOwnership();
+    }
+
+    @Override
+    public final void setAccessControlList(final AccessControlListDTO accessControlList) {
+        this.securityInformation.setAccessControlList(accessControlList);
+    }
+
+    @Override
+    public final void setOwnership(final OwnershipDTO ownership) {
+        this.securityInformation.setOwnership(ownership);
+    }
+    
+    @Override
+    public HasPermissions getType() {
+        return SecuredDomainType.EVENT;
+    }
+    
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return new TypeRelativeObjectIdentifier(getId().toString());
+    }
+
 }

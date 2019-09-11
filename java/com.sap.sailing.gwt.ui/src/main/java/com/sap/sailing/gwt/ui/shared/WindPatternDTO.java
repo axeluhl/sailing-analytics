@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
-import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.gwt.ui.simulator.windpattern.WindPattern;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 public class WindPatternDTO extends NamedDTO {
 

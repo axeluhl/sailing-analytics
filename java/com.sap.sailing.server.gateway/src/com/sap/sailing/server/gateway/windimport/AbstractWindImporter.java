@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.fileupload.FileItem;
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -22,6 +23,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImporter.WindImportResult.RaceEntry;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 public abstract class AbstractWindImporter {
     public static class UploadRequest {
@@ -138,6 +140,8 @@ public abstract class AbstractWindImporter {
         if (uploadRequest.races.size() > 0) {
             for (RegattaAndRaceIdentifier raceEntry : uploadRequest.races) {
                 DynamicTrackedRace trackedRace = service.getTrackedRace(raceEntry);
+                SecurityUtils.getSubject()
+                        .checkPermission(trackedRace.getIdentifier().getStringPermission(DefaultActions.UPDATE));
                 if (trackedRace != null) {
                     trackedRaces.add(trackedRace);
                 }
@@ -145,7 +149,11 @@ public abstract class AbstractWindImporter {
         } else {
             for (Regatta regatta : service.getAllRegattas()) {
                 for (RaceDefinition raceDefinition : regatta.getAllRaces()) {
-                    trackedRaces.add(service.getTrackedRegatta(regatta).getTrackedRace(raceDefinition));
+                    final DynamicTrackedRace trackedRace = service.getTrackedRegatta(regatta).getTrackedRace(raceDefinition);
+                    if (SecurityUtils.getSubject()
+                            .isPermitted(trackedRace.getIdentifier().getStringPermission(DefaultActions.UPDATE))) {
+                        trackedRaces.add(trackedRace);
+                    }
                 }
             }
         }

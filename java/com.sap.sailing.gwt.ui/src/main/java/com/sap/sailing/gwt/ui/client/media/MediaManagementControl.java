@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class MediaManagementControl extends AbstractMediaSelectionControl implements CloseHandler<PopupPanel> {
@@ -44,8 +45,8 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
     }
 
     public void show() {
-        Collection<MediaTrack> videoTracks = new ArrayList<>();
-        Collection<MediaTrack> audioTracks = new ArrayList<>();
+        Collection<MediaTrackWithSecurityDTO> videoTracks = new ArrayList<>();
+        Collection<MediaTrackWithSecurityDTO> audioTracks = new ArrayList<>();
         filterGivenMediaTracksTo(videoTracks, audioTracks, mediaPlayerManager.getAssignedMediaTracks());
         filterGivenMediaTracksTo(videoTracks, audioTracks, mediaPlayerManager.getOverlappingMediaTracks());
         Panel grid = new VerticalPanel();
@@ -59,7 +60,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
     private void addNewMediaButtonsTo(Panel grid) {
         HorizontalPanel controlButtons = new HorizontalPanel();
         controlButtons.setWidth("100%");
-        if (mediaPlayerManager.allowsEditing()) {
+        if (mediaPlayerManager.allowsCreating()) {
             Button addButton = new Button(stringMessages.add(), new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -80,28 +81,28 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
         grid.add(controlButtons);
     }
 
-    private void addVideoTracksToGridPanel(Collection<MediaTrack> videoTracks, Panel grid) {
+    private void addVideoTracksToGridPanel(Collection<MediaTrackWithSecurityDTO> videoTracks, Panel grid) {
         if (!videoTracks.isEmpty()) {
             grid.add(new Label(stringMessages.videos()));
-            for (MediaTrack videoTrack : videoTracks) {
+            for (MediaTrackWithSecurityDTO videoTrack : videoTracks) {
                 grid.add(createVideoOptions(videoTrack, mediaPlayerManager.getPlayingVideoTracks()));
             }
         }
     }
 
-    private void addAudioTracksToGridPanel(Collection<MediaTrack> audioTracks, Panel grid) {
+    private void addAudioTracksToGridPanel(Collection<MediaTrackWithSecurityDTO> audioTracks, Panel grid) {
         if (!audioTracks.isEmpty()) {
             grid.add(new Label(stringMessages.audioFiles()));
             grid.add(createAudioButton(null));
-            for (MediaTrack audioTrack : audioTracks) {
+            for (MediaTrackWithSecurityDTO audioTrack : audioTracks) {
                 grid.add(createAudioButton(audioTrack));
             }
         }
     }
 
-    private void filterGivenMediaTracksTo(Collection<MediaTrack> videoTracks,
-            Collection<MediaTrack> audioTracks, Iterable<MediaTrack> source) {
-        for (MediaTrack mediaTrack : source) {
+    private void filterGivenMediaTracksTo(Collection<MediaTrackWithSecurityDTO> videoTracks,
+            Collection<MediaTrackWithSecurityDTO> audioTracks, Iterable<MediaTrackWithSecurityDTO> source) {
+        for (MediaTrackWithSecurityDTO mediaTrack : source) {
             if (mediaTrack.mimeType == null) {
                 videoTracks.add(mediaTrack); // allow user to remove this strange artifact
             } else {
@@ -119,7 +120,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
         }
     }
 
-    private Widget createVideoOptions(final MediaTrack videoTrack, Set<MediaTrack> selectedVideos) {
+    private Widget createVideoOptions(final MediaTrackWithSecurityDTO videoTrack, Set<MediaTrack> selectedVideos) {
         CheckBox videoCheckBox = new CheckBox(videoTrack.title);
         videoCheckBoxes.put(videoTrack, videoCheckBox);
         videoCheckBox.setTitle(videoTrack.toString());
@@ -136,7 +137,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
             }
         });
 
-        if (mediaPlayerManager.allowsEditing()) {
+        if (mediaPlayerManager.allowsEditing(videoTrack)) {
             HorizontalPanel panel = new HorizontalPanel();
             panel.setWidth("100%");
             panel.add(videoCheckBox);
@@ -156,7 +157,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
 
     }
 
-    private ToggleButton createConnectButton(final MediaTrack videoTrack) {
+    private ToggleButton createConnectButton(final MediaTrackWithSecurityDTO videoTrack) {
         final ToggleButton connectButton = new ToggleButton();
         connectButton.setValue(videoTrack.assignedRaces
                 .contains(mediaPlayerManager.getCurrentRace()));
@@ -180,7 +181,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
         videoCheckBox.setEnabled(enable);
     }
     
-    private void disconnectVideoFromRace(final MediaTrack videoTrack, final ToggleButton connectButton) {
+    private void disconnectVideoFromRace(final MediaTrackWithSecurityDTO videoTrack, final ToggleButton connectButton) {
         videoTrack.assignedRaces.remove(mediaPlayerManager.getCurrentRace());
         mediaPlayerManager.getMediaService().updateRace(videoTrack, new AsyncCallback<Void>() {
 
@@ -214,7 +215,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
         });
     }
 
-    private Button createDeleteButton(final MediaTrack videoTrack) {
+    private Button createDeleteButton(final MediaTrackWithSecurityDTO videoTrack) {
         Button deleteButton = new Button("X", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -226,9 +227,9 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
         return deleteButton;
     }
 
-    private Widget createAudioButton(final MediaTrack audioTrack) {
-        String label = audioTrack != null ? audioTrack.title : "Sound off";
-        String title = audioTrack != null ? audioTrack.toString() : "Turn off all sound channels.";
+    private Widget createAudioButton(final MediaTrackWithSecurityDTO audioTrack) {
+        String label = audioTrack != null ? audioTrack.title : stringMessages.soundOff();
+        String title = audioTrack != null ? audioTrack.toString() : stringMessages.turnOffAllSoundChannels();
         RadioButton audioButton = new RadioButton("group-name", label);
         audioButton.setTitle(title);
         audioButton.setValue(audioTrack == mediaPlayerManager.getPlayingAudioTrack());
@@ -236,7 +237,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> changeEvent) {
                 if (changeEvent.getValue()) {
-                    Set<MediaTrack> currentlyPlaying = mediaPlayerManager.getPlayingAudioTrack();
+                    Set<MediaTrackWithSecurityDTO> currentlyPlaying = mediaPlayerManager.getPlayingAudioTrack();
                     if (audioTrack == null) {
                         currentlyPlaying.forEach(mediaPlayerManager::closeFloatingPlayer);
                     } else {
@@ -246,11 +247,10 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
             }
         });
 
-        if (mediaPlayerManager.allowsEditing() && audioTrack != null) {
+        if (mediaPlayerManager.allowsEditing(audioTrack) && audioTrack != null) {
             HorizontalPanel panel = new HorizontalPanel();
             panel.setWidth("100%");
             panel.add(audioButton);
-
             Button deleteButton = createDeleteButton(audioTrack);
             panel.add(deleteButton);
             panel.setCellHorizontalAlignment(deleteButton, HasHorizontalAlignment.ALIGN_RIGHT);

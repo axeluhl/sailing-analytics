@@ -18,7 +18,6 @@ import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedRegattaDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEventsDTO;
-import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.server.impl.preferences.model.SailorProfilePreference;
 import com.sap.sailing.server.impl.preferences.model.SailorProfilePreferences;
 import com.sap.sse.common.Util;
@@ -100,12 +99,12 @@ public class GetEventsForSailorProfileAction implements SailingAction<SailorProf
                         }
 
                         // skip, if the regatta is not part of this event (e.g. shared leaderboard group)
-                        if (!HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
+                        if (!leaderboard.isPartOfEvent(event)) {
 
                             // skip, if overall leaderboard is not part of this event, don't skip if this is a regatta
                             // during an event which is not part of an overall leaderboard
                             if (leaderboardGroup.hasOverallLeaderboard()
-                                    && !HomeServiceUtil.isPartOfEvent(event, leaderboardGroup.getOverallLeaderboard()))
+                                    && !leaderboardGroup.getOverallLeaderboard().isPartOfEvent(event))
                                 continue;
                         }
 

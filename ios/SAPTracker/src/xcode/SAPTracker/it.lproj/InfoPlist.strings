@@ -1,0 +1,15 @@
+/* InfoPlist.strings
+    SAPTracker
+  
+    Created by Raimund Wege on 04.11.16.
+    Copyright © 2016 com.sap.sailing. All rights reserved. */
+"NSLocationAlwaysUsageDescription" = "Per tracciare l'intera gara il tuo telefono deve continuare il tracciamento anche quando disattivi o blocchi lo schermo per risparmiare la batteria ed evitare di arrestare involontariamente il processo di tracciamento.";
+
+"NSLocationWhenInUseUsageDescription" = "Per tracciare l'intera gara il tuo telefono deve continuare il tracciamento anche quando disattivi o blocchi lo schermo per risparmiare la batteria ed evitare di arrestare involontariamente il processo di tracciamento.";
+
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "Per tracciare l'intera gara il tuo telefono deve continuare il tracciamento anche quando disattivi o blocchi lo schermo per risparmiare la batteria ed evitare di arrestare involontariamente il processo di tracciamento.";
+
+"NSCameraUsageDescription" = "La fotocamera deve eseguire un check-in utilizzando il codice QR.";
+
+"NSPhotoLibraryUsageDescription" = "Per sostituire la foto della squadra, l'app richiede l'accesso alla galleria.";
+

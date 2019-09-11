@@ -3,6 +3,7 @@ package com.sap.sailing.domain.swisstimingadapter.impl;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 
 public class SwissTimingConfigurationImpl implements SwissTimingConfiguration {
+    private static final long serialVersionUID = 1L;
     private final String name;
     private final String jsonURL;
     private final String hostname;
@@ -10,8 +11,10 @@ public class SwissTimingConfigurationImpl implements SwissTimingConfiguration {
     private final String updateURL;
     private final String updateUsername;
     private final String updatePassword;
+    private String creatorName;
     
-    public SwissTimingConfigurationImpl(String name, String jsonURL, String hostname, Integer port, String updateURL, String updateUsername, String updatePassword) {
+    public SwissTimingConfigurationImpl(String name, String jsonURL, String hostname, Integer port, String updateURL,
+            String updateUsername, String updatePassword, String creatorName) {
         super();
         this.name = name;
         this.jsonURL = jsonURL;
@@ -20,6 +23,12 @@ public class SwissTimingConfigurationImpl implements SwissTimingConfiguration {
         this.updateURL = updateURL;
         this.updateUsername = updateUsername;
         this.updatePassword = updatePassword;
+        this.creatorName = creatorName;
+    }
+
+    @Override
+    public String getCreatorName() {
+        return creatorName;
     }
 
     @Override

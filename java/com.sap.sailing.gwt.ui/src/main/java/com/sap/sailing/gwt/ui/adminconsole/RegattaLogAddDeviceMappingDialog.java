@@ -37,6 +37,7 @@ import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
 import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.security.ui.client.UserService;
 
 public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTimeBox<DeviceMappingDTO> {
     private final String leaderboardName;
@@ -52,10 +53,12 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
     protected final ItemToMapToDeviceSelectionPanel itemSelectionPanel;
     protected final SailingServiceAsync sailingService;
     protected Grid entryGrid;
+    private String regattaRegisterSecret;
 
-    public RegattaLogAddDeviceMappingDialog(SailingServiceAsync sailingService, final ErrorReporter errorReporter,
-            final StringMessages stringMessages, String leaderboardName, DialogCallback<DeviceMappingDTO> callback,
-            final DeviceMappingDTO mapping, final MailInvitationType mailInvitationType) {
+    public RegattaLogAddDeviceMappingDialog(SailingServiceAsync sailingService, final UserService userService, final ErrorReporter errorReporter,
+            final StringMessages stringMessages, String leaderboardName, String regattaRegisterSecret, final MailInvitationType mailInvitationType,
+            DialogCallback<DeviceMappingDTO> callback,
+            final DeviceMappingDTO mapping) {
         super(stringMessages.add(stringMessages.deviceMappings()), stringMessages.add(stringMessages.deviceMappings()),
                 stringMessages.add(), stringMessages.cancel(), new DataEntryDialog.Validator<DeviceMappingDTO>() {
                     @Override
@@ -86,7 +89,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
                 }, true, callback);
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
-
+        this.regattaRegisterSecret = regattaRegisterSecret;
         from = createDateTimeBox(new Date(), Accuracy.SECONDS);
         from.setValue(null);
         to = createDateTimeBox(new Date(), Accuracy.SECONDS);
@@ -114,7 +117,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
             }
         });
         deviceId = createTextBox("");
-        itemSelectionPanel = new ItemToMapToDeviceSelectionPanel(sailingService, stringMessages, errorReporter,
+        itemSelectionPanel = new ItemToMapToDeviceSelectionPanel(sailingService, userService, stringMessages, errorReporter,
                 new SelectionChangedHandler() {
                     @Override
                     public void onSelectionChange(MarkDTO mark) {
@@ -216,7 +219,8 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
 
                 final String eventIdAsString = events.getValue().id.toString();
                 String url = DeviceMappingConstants.getDeviceMappingForRegattaLogUrl(baseUrlWithoutTrailingSlash,
-                        eventIdAsString, leaderboardName, mappedItemType, mappedItemId, GwtUrlHelper.INSTANCE);
+                        eventIdAsString, leaderboardName, mappedItemType, mappedItemId, regattaRegisterSecret,
+                        GwtUrlHelper.INSTANCE);
                 if (mailInvitationType == MailInvitationType.LEGACY) {
                     // URL is already legacy
                 } else if (mailInvitationType == MailInvitationType.SailInsight1) {

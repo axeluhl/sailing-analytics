@@ -27,6 +27,7 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * This is the UI wizard to be executed after
@@ -41,6 +42,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 public class ExpeditionAllInOneAfterImportHandler {
     
     private final SailingServiceAsync sailingService;
+    private final UserService userService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final String leaderboardGroupName;
@@ -58,11 +60,12 @@ public class ExpeditionAllInOneAfterImportHandler {
     public ExpeditionAllInOneAfterImportHandler(UUID eventId, String regattaName, String leaderboardName,
             String leaderboardGroupName, List<Triple<String,  String, String>> raceEntries,
             List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
-            Iterable<TimePoint> startTimes, final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
+            Iterable<TimePoint> startTimes, final SailingServiceAsync sailingService, final UserService userService, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
         this.leaderboardGroupName = leaderboardGroupName;
         this.sensorImporterType = sensorImporterType;
         this.sailingService = sailingService;
+        this.userService = userService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.raceEntries = raceEntries;
@@ -106,19 +109,19 @@ public class ExpeditionAllInOneAfterImportHandler {
     }
     
     private class RegattaLogCompetitorRegistrationAndSelectionDialog extends RegattaLogCompetitorRegistrationDialog {
-        public RegattaLogCompetitorRegistrationAndSelectionDialog(String boatClass, SailingServiceAsync sailingService,
+        public RegattaLogCompetitorRegistrationAndSelectionDialog(String boatClass, SailingServiceAsync sailingService, final UserService userService,
                 StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName,
                 boolean canBoatsOfCompetitorsChangePerRace) {
-            this(boatClass, sailingService, stringMessages, errorReporter, editable, leaderboardName,
+            this(boatClass, sailingService, userService, stringMessages, errorReporter, editable, leaderboardName,
                     canBoatsOfCompetitorsChangePerRace, new ValidatorForCompetitorRegistrationDialog(stringMessages),
                     new CallbackForCompetitorRegistrationDialog());
         }
         
-        public RegattaLogCompetitorRegistrationAndSelectionDialog(String boatClass, SailingServiceAsync sailingService,
+        public RegattaLogCompetitorRegistrationAndSelectionDialog(String boatClass, SailingServiceAsync sailingService, final UserService userService,
                 StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName,
                 boolean canBoatsOfCompetitorsChangePerRace, ValidatorForCompetitorRegistrationDialog validator,
                 CallbackForCompetitorRegistrationDialog callback) {
-            super(boatClass, sailingService, stringMessages, errorReporter, editable, leaderboardName,
+            super(boatClass, sailingService, userService, stringMessages, errorReporter, editable, leaderboardName,
                     canBoatsOfCompetitorsChangePerRace, validator, callback);
             validator.setCompetitorRegistrationsPanel(competitorRegistrationsPanel);
             callback.setCompetitorRegistrationsPanel(competitorRegistrationsPanel);
@@ -173,7 +176,7 @@ public class ExpeditionAllInOneAfterImportHandler {
 
     private void showCompetitorRegistration() {
         new RegattaLogCompetitorRegistrationAndSelectionDialog(regatta.boatClass == null ? null : regatta.boatClass.getName(),
-                sailingService, stringMessages, errorReporter, true, leaderboard.getName(),
+                sailingService, userService, stringMessages, errorReporter, true, leaderboard.getName(),
                 leaderboard.canBoatsOfCompetitorsChangePerRace).show();
     }
     
@@ -184,7 +187,7 @@ public class ExpeditionAllInOneAfterImportHandler {
             final CompetitorDTO competitor = mappedCompetitors.iterator().next();
             saveCompetitorGPSMapping(mappedCompetitors, Collections.singleton(new DeviceMappingDTO(deviceIdentifierDTO, deviceIdentifierDTO.from, deviceIdentifierDTO.to, competitor, null)));
         } else {
-            new RegattaLogFixesAddMappingsDialog(sailingService, errorReporter, stringMessages,
+            new RegattaLogFixesAddMappingsDialog(sailingService, userService, errorReporter, stringMessages,
                     leaderboard.getName(), gpsFixesDeviceIDs,
                     new CancelImportDialogCallback<Collection<DeviceMappingDTO>>() {
                 
@@ -209,7 +212,7 @@ public class ExpeditionAllInOneAfterImportHandler {
             final CompetitorDTO competitor = mappedCompetitors.iterator().next();
             saveCompetitorSensorFixMapping(Collections.singleton(new TypedDeviceMappingDTO(deviceIdentifierDTO, deviceIdentifierDTO.from, deviceIdentifierDTO.to, competitor, null, sensorImporterType)));
         } else if (sensorFixesDeviceIDs.size() > 0) {
-            new RegattaLogSensorDataAddMappingsDialog(sailingService, errorReporter, stringMessages, leaderboard.getName(),
+            new RegattaLogSensorDataAddMappingsDialog(sailingService, userService, errorReporter, stringMessages, leaderboard.getName(),
                     sensorFixesDeviceIDs, sensorImporterType,
                     new CancelImportDialogCallback<Collection<TypedDeviceMappingDTO>>() {
     
@@ -239,7 +242,7 @@ public class ExpeditionAllInOneAfterImportHandler {
             String raceColumnName = race.getB();
             String fleetName= race.getC();
             racesToStopAndStartTrackingFor.add(new RegattaNameAndRaceName(regattaName, raceName));
-            leaderboardRaceColumnFleetNames.add(new Triple<>(leaderboard.name, raceColumnName, fleetName));
+            leaderboardRaceColumnFleetNames.add(new Triple<>(leaderboard.getName(), raceColumnName, fleetName));
             raceNames.add(new Pair<String, String>(raceName, raceColumnName));
         }
         

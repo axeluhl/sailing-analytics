@@ -20,9 +20,11 @@ public interface DynamicTrackedRace extends TrackedRace {
     /**
      * Records a position and speed and course over ground fix for a competitor, but only if the fix's {@link GPSFixMoving#getTimePoint()}
      * is within this race's {@link #getStartOfTracking() start} and {@link #getEndOfTracking() end} of tracking time interval.
+     * 
+     * @return {@code true} if and only if the fix was actually added to the competitor's track
      */
-    default void recordFix(Competitor competitor, GPSFixMoving fix) {
-        recordFix(competitor, fix, /* onlyWhenInTrackingTimeInterval */ true);
+    default boolean recordFix(Competitor competitor, GPSFixMoving fix) {
+        return recordFix(competitor, fix, /* onlyWhenInTrackingTimeInterval */ true);
     }
 
     /**
@@ -31,8 +33,10 @@ public interface DynamicTrackedRace extends TrackedRace {
      * {@link GPSFixMoving#getTimePoint()} is within this race's {@link #getStartOfTracking() start} and
      * {@link #getEndOfTracking() end} of tracking time interval. If {@code onlyWhenInTrackingTimeInterval} is
      * {@code false}, the fix is recorded regardless of this race's tracking times interval.
+     * 
+     * @return {@code true} if and only if the fix was actually added to the competitor's track
      */
-    void recordFix(Competitor competitor, GPSFixMoving fix, boolean onlyWhenInTrackingTimeInterval);
+    boolean recordFix(Competitor competitor, GPSFixMoving fix, boolean onlyWhenInTrackingTimeInterval);
     
     /**
      * Records a position fix for a mark, but only if the fix's {@link GPSFixMoving#getTimePoint()} is within this
@@ -62,14 +66,6 @@ public interface DynamicTrackedRace extends TrackedRace {
         return recordWind(wind, windSource, /* applyFilter */ true);
     }
     
-    /**
-     * Like {@link #recordWind(Wind, WindSource)}, only that filtering may be disabled by setting
-     * <code>applyFilter</code> to <code>false</code>.
-     */
-    boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter);
-
-    void removeWind(Wind wind, WindSource windSource);
-
     /**
      * The raw, updating feed of a single competitor participating in this race
      */

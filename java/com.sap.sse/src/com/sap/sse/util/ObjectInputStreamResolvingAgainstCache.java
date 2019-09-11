@@ -29,7 +29,13 @@ import com.sap.sse.common.IsManagedByCache;
  * 
  */
 public abstract class ObjectInputStreamResolvingAgainstCache<C> extends ObjectInputStream {
+    public interface ResolveListener {
+        void onNewObject(Object result);
+        void onResolvedObject(Object result);
+    }
+
     private final C cache;
+    private ResolveListener resolveListener;
 
     /**
      * Package protected on purpose; instances to be created using a factory method on the {@link Replicable}. This
@@ -37,10 +43,12 @@ public abstract class ObjectInputStreamResolvingAgainstCache<C> extends ObjectIn
      * 
      * @param cache must not be {@code null}
      */
-    protected ObjectInputStreamResolvingAgainstCache(InputStream in, C cache) throws IOException {
+    protected ObjectInputStreamResolvingAgainstCache(InputStream in, C cache, ResolveListener resolveListener)
+            throws IOException {
         super(in);
         assert cache != null;
         this.cache = cache;
+        this.resolveListener = resolveListener;
         enableResolveObject(true);
     }
 
@@ -66,6 +74,13 @@ public abstract class ObjectInputStreamResolvingAgainstCache<C> extends ObjectIn
             result = castResult;
         } else {
             result = o;
+        }
+        if (resolveListener != null) {
+            if (o == result) {
+                resolveListener.onResolvedObject(result);
+            } else {
+                resolveListener.onNewObject(result);
+            }
         }
         return result;
     }

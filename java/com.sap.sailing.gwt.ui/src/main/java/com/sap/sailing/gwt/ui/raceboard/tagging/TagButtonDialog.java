@@ -20,16 +20,16 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.domain.common.dto.TagDTO;
-import com.sap.sailing.gwt.ui.adminconsole.ImagesBarColumn;
-import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigImagesBarCell;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.celltable.ImagesBarCell;
+import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
@@ -42,8 +42,6 @@ public class TagButtonDialog extends DialogBox {
      * {@link TagButtonDialog}.
      */
     private class EditTagButtonsImagesBarCell extends ImagesBarCell {
-        public static final String ACTION_REMOVE = "ACTION_REMOVE";
-        public static final String ACTION_EDIT = "ACTION_EDIT";
         private final StringMessages stringMessages;
 
         public EditTagButtonsImagesBarCell(StringMessages stringMessages) {
@@ -53,8 +51,8 @@ public class TagButtonDialog extends DialogBox {
         @Override
         protected Iterable<ImageSpec> getImageSpecs() {
             return Arrays.asList(
-                    new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())),
-                    new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(),
+                    new ImageSpec(DefaultActions.UPDATE.name(), stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())),
+                    new ImageSpec(DefaultActions.DELETE.name(), stringMessages.actionRemove(),
                             makeImagePrototype(IconResources.INSTANCE.removeIcon())));
         }
     }
@@ -207,7 +205,7 @@ public class TagButtonDialog extends DialogBox {
         actionsColumn.setFieldUpdater(new FieldUpdater<TagButton, String>() {
             @Override
             public void update(int index, TagButton button, String value) {
-                if (LeaderboardConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
+                if (DefaultActions.DELETE.name().equals(value)) {
                     new ConfirmationDialog(stringMessages, stringMessages.tagButtonConfirmDeletionHeading(),
                             stringMessages.tagButtonConfirmDeletion(button.getTag()), (confirmed) -> {
                                 if (confirmed) {
@@ -218,7 +216,7 @@ public class TagButtonDialog extends DialogBox {
                                 }
                                 center();
                             });
-                } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT.equals(value)) {
+                } else if (DefaultActions.UPDATE.name().equals(value)) {
                     selectedTagButton = button;
                     inputPanel.setTag(button.getTag());
                     inputPanel.setImageURL(button.getImageURL());

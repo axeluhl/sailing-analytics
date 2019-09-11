@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -45,7 +46,6 @@ import com.sap.sse.common.ObscuringIterable;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
@@ -60,7 +60,7 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
  *
  */
 public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardWithCache
-        implements Leaderboard, RaceColumnListener {
+        implements RaceColumnListener {
     private static final long serialVersionUID = 330156778603279333L;
 
     static final Double DOUBLE_0 = new Double(0);
@@ -467,11 +467,17 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     @Override
     public Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
             Set<RaceColumn> discardedRaceColumns) {
+        return getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns, ()->getTotalPoints(competitor, raceColumn, timePoint));
+    }
+    
+    @Override
+    public Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
+            Set<RaceColumn> discardedRaceColumns, Supplier<Double> totalPointsProvider) {
         Double result;
         if (isDiscarded(competitor, raceColumn, timePoint, discardedRaceColumns)) {
             result = 0.0;
         } else {
-            final Double totalPoints = getTotalPoints(competitor, raceColumn, timePoint);
+            final Double totalPoints = totalPointsProvider.get();
             if (totalPoints == null) {
                 result = null;
             } else {
@@ -935,18 +941,6 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     @Override
     public NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher() {
         return new NumberOfCompetitorsFetcherImpl();
-    }
-
-    @Override
-    public Pair<RaceColumn, Fleet> getRaceColumnAndFleet(TrackedRace trackedRace) {
-        for (final RaceColumn raceColumn : getRaceColumns()) {
-            for (final Fleet fleet : raceColumn.getFleets()) {
-                if (raceColumn.getTrackedRace(fleet) == trackedRace) {
-                    return new Pair<>(raceColumn, fleet);
-                }
-            }
-        }
-        return null;
     }
 
     @Override

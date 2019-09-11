@@ -18,7 +18,8 @@ public class CourseAndCompetitorCopyOperation {
     final private ErrorReporter errorReporter;
     final private SailingServiceAsync sailingService;
 
-    public CourseAndCompetitorCopyOperation(Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesToCopyTo,
+    public CourseAndCompetitorCopyOperation(
+            Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesToCopyTo,
             boolean copyCourse, boolean copyCompetitors, Integer priority, SailingServiceAsync sailingService, ErrorReporter errorReporter) {
         this.raceLogsToCopyTo = racesToCopyTo;
         this.copyCourse = copyCourse;
@@ -39,7 +40,7 @@ public class CourseAndCompetitorCopyOperation {
     public boolean copyCompetitors() {
         return copyCompetitors;
     }
-    
+
     public Integer getPriority() {
         return priority;
     }
@@ -57,10 +58,12 @@ public class CourseAndCompetitorCopyOperation {
         return new Util.Triple<String, String, String>(leaderboardName, race.getA().getName(), race.getB().getName());
     }
 
-    public void perform(String leaderboardName, RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleetDTO,
+    public void perform(String leaderboardName,
+            RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleetDTO,
             final Runnable onSuccessCallback) {
         Triple<String, String, String> fromTriple = toTriple(leaderboardName, raceColumnDTOAndFleetDTO);
         Set<Triple<String, String, String>> toRacelogs = convertToRacelogs(leaderboardName);
+
         if (copyCourse) {
             sailingService.copyCourseToOtherRaceLogs(fromTriple, toRacelogs, getPriority(), new AsyncCallback<Void>() {
                 @Override
@@ -76,6 +79,7 @@ public class CourseAndCompetitorCopyOperation {
                 }
             });
         }
+
         if (copyCompetitors) {
             sailingService.copyCompetitorsToOtherRaceLogs(fromTriple, toRacelogs, new AsyncCallback<Void>() {
                 @Override
@@ -85,6 +89,7 @@ public class CourseAndCompetitorCopyOperation {
 
                 @Override
                 public void onSuccess(Void result) {
+
                 }
             });
         }

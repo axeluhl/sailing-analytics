@@ -44,9 +44,10 @@ public class ConfidenceBasedWindAveragerImpl<RelativeTo> extends
     @Override
     public WindWithConfidence<RelativeTo> getAverage(
             Iterator<? extends HasConfidenceAndIsScalable<ScalableWind, Wind, RelativeTo>> values, RelativeTo at) {
+        final WindWithConfidence<RelativeTo> result;
         boolean atLeastOneFixWasMarkedToUseSpeed = false;
         if (values == null || !values.hasNext()) {
-            return null;
+            result = null;
         } else {
             ScalableWind numerator = null;
             double confidenceSum = 0;
@@ -74,18 +75,23 @@ public class ConfidenceBasedWindAveragerImpl<RelativeTo> extends
             }
             // TODO consider greater variance to reduce the confidence
             double newConfidence = confidenceSum / count;
-            Wind preResult = numerator.divide(confidenceSum);
-            // if only values with useSpeed=false were aggregated, use the original result, otherwise compute
-            // separate speed average:
-            Wind result;
-            if (!atLeastOneFixWasMarkedToUseSpeed) {
-                result = preResult;
+            if (confidenceSum == 0) {
+                result = null;
             } else {
-                result = new WindImpl(preResult.getPosition(), preResult.getTimePoint(), new KnotSpeedWithBearingImpl(
-                    knotSum / speedConfidenceSum, preResult.getBearing()));
+                Wind preResult = numerator.divide(confidenceSum);
+                // if only values with useSpeed=false were aggregated, use the original result, otherwise compute
+                // separate speed average:
+                Wind windResult;
+                if (!atLeastOneFixWasMarkedToUseSpeed) {
+                    windResult = preResult;
+                } else {
+                    windResult = new WindImpl(preResult.getPosition(), preResult.getTimePoint(), new KnotSpeedWithBearingImpl(
+                        knotSum / speedConfidenceSum, preResult.getBearing()));
+                }
+                result = new WindWithConfidenceImpl<RelativeTo>(windResult, newConfidence, at, atLeastOneFixWasMarkedToUseSpeed);
             }
-            return new WindWithConfidenceImpl<RelativeTo>(result, newConfidence, at, atLeastOneFixWasMarkedToUseSpeed);
         }
+        return result;
     }
 
 }

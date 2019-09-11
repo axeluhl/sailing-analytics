@@ -197,7 +197,6 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
                     public Duration getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead() {
                         return getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead();
                     }
-                    
                 };
             }
 

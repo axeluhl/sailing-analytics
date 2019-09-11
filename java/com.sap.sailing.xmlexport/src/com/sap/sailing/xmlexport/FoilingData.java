@@ -33,6 +33,7 @@ import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.security.SecurityService;
 
 public class FoilingData {
 
@@ -40,12 +41,15 @@ public class FoilingData {
     private final HttpServletResponse res;
     private final RacingEventService service;
     private final boolean useProvidedLeaderboard;
+    private SecurityService securityService;
 	
-	public FoilingData(HttpServletRequest req, HttpServletResponse res, RacingEventService service) {
+    public FoilingData(HttpServletRequest req, HttpServletResponse res, RacingEventService service,
+            final SecurityService securityService) {
 		this.req = req;
 		this.res = res;
 		this.service = service;
 		this.useProvidedLeaderboard = false;
+        this.securityService = securityService;
 	}
 	
     public String getAttribute(String name) {
@@ -64,6 +68,7 @@ public class FoilingData {
                 throw new ServletException("Use the name= parameter to specify the leaderboard");
             }
             leaderboard = getService().getLeaderboardByName(leaderboardName); 
+            securityService.checkCurrentUserReadPermission(leaderboard);
             if (leaderboard == null) {
                 throw new ServletException("Leaderboard " + leaderboardName + " not found.");
             }

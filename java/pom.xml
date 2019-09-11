@@ -91,6 +91,7 @@
         <module>com.sap.sse.datamining</module>
         <module>com.sap.sse.datamining.shared</module>
         <module>com.sap.sse.datamining.ui</module>
+        <module>com.sap.sse.security.interface</module>
         <module>com.sap.sse.security</module>
         <module>com.sap.sse.security.persistence</module>
         <module>com.sap.sse.security.persistence.test</module>
@@ -118,6 +119,7 @@
         <module>com.sap.sailing.domain.windfinderadapter</module>
         <module>com.sap.sailing.domain.windfinderadapter.test</module>
         <module>com.sap.sailing.domain.igtimiadapter</module>
+        <module>com.sap.sailing.domain.igtimiadapter.gateway</module>
         <module>com.sap.sailing.domain.igtimiadapter.persistence</module>
         <module>com.sap.sailing.domain.racelogtrackingadapter</module>
         <module>com.sap.sailing.domain.racelogtrackingadapter.testsupport</module>
@@ -172,6 +174,7 @@
         <module>com.sap.sse.gwt.test</module>
         <module>com.sap.sse.datamining.test</module>
         <module>com.sap.sse.security.replication.test</module>
+        <module>com.sap.sse.security.testsupport</module>
         <module>com.sap.sse.security.test</module>
         <module>com.sap.sse.operationaltransformation.test</module>
         <module>com.sap.sse.common.test</module>
@@ -216,6 +219,9 @@
         <module>com.sap.sailing.selenium.test</module>
         <module>com.sap.sailing.feature.p2build</module>
         <module>com.sap.sailing.polars</module>
+        <module>com.sap.sailing.windestimation</module>
+		<module>com.sap.sailing.windestimation.lab</module>
+		<module>com.sap.sailing.windestimation.test</module>
         <module>com.sap.sailing.polars.datamining</module>
         <module>com.sap.sailing.polars.datamining.shared</module>
         <module>com.sap.sailing.polars.test</module>
@@ -510,7 +516,7 @@
         <!-- GWT version detected from dependencyManagement -->
         <execution>
           <configuration>
-            <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2560m -Djava.io.tmpdir=${env.TMP}</extraJvmArgs>
+            <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2560m -Djava.io.tmpdir=${env.TMP} -Dgwt.watchFileChanges=false</extraJvmArgs>
              <fragmentCount>4</fragmentCount>
             <!--
             <userAgents>chrome</userAgents>

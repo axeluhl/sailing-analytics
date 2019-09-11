@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import org.apache.shiro.authz.UnauthorizedException;
+
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
@@ -22,57 +24,62 @@ import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
 
 public interface DataMiningService extends RemoteService {
 
-    Date getComponentsChangedTimepoint();
+    Date getComponentsChangedTimepoint() throws UnauthorizedException;
 
-    FunctionDTO getIdentityFunction(String localeInfoName);
-    HashSet<FunctionDTO> getAllStatistics(String localeInfoName);
+    FunctionDTO getIdentityFunction(String localeInfoName) throws UnauthorizedException;
+
+    HashSet<FunctionDTO> getAllStatistics(String localeInfoName) throws UnauthorizedException;
 
     HashSet<FunctionDTO> getStatisticsFor(DataRetrieverChainDefinitionDTO retrieverChainDefinition,
-            String localeInfoName);
-    
-    HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitions(String localeInfoName);
+            String localeInfoName) throws UnauthorizedException;
+
+    HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitions(String localeInfoName)
+            throws UnauthorizedException;
 
     HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitionsFor(FunctionDTO extractionFunction,
-            String localeInfoName);
+            String localeInfoName) throws UnauthorizedException;
 
     HashSet<FunctionDTO> getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO,
-            String localeInfoName);
+            String localeInfoName) throws UnauthorizedException;
 
     ReducedDimensionsDTO getReducedDimensionsMappedByLevelFor(
-            DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName);
+            DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName)
+            throws UnauthorizedException;
 
-    ArrayList<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitions(String localeName);
+    ArrayList<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitions(String localeName)
+            throws UnauthorizedException;
 
     ArrayList<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate,
-            String localeInfoName);
+            String localeInfoName) throws UnauthorizedException;
 
     QueryResultDTO<HashSet<Object>> getDimensionValuesFor(DataMiningSession session,
             DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, DataRetrieverLevelDTO retrieverLevel,
             HashSet<FunctionDTO> dimensionDTOs, HashMap<DataRetrieverLevelDTO, SerializableSettings> retrieverSettings,
             HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO,
-            String localeInfoName);
+            String localeInfoName) throws UnauthorizedException;
 
     <ResultType extends Serializable> QueryResultDTO<ResultType> runQuery(DataMiningSession session,
-            ModifiableStatisticQueryDefinitionDTO queryDefinition);
+            ModifiableStatisticQueryDefinitionDTO queryDefinition) throws UnauthorizedException;
 
-    HashSet<PredefinedQueryIdentifier> getPredefinedQueryIdentifiers();
-    
+    HashSet<PredefinedQueryIdentifier> getPredefinedQueryIdentifiers() throws UnauthorizedException;
+
     ModifiableStatisticQueryDefinitionDTO getPredefinedQueryDefinition(PredefinedQueryIdentifier identifier,
-            String localeInfoName);
+            String localeInfoName) throws UnauthorizedException;
 
     <ResultType extends Serializable> QueryResultDTO<ResultType> runPredefinedQuery(DataMiningSession session,
-            PredefinedQueryIdentifier identifier, String localeInfoName);
-    
+            PredefinedQueryIdentifier identifier, String localeInfoName) throws UnauthorizedException;
+
     ModifiableStatisticQueryDefinitionDTO localize(ModifiableStatisticQueryDefinitionDTO queryDefinition,
-            String localeInfoName);
+            String localeInfoName) throws UnauthorizedException;
 
-    SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy();
+    SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy() throws UnauthorizedException;
 
-    ArrayList<StoredDataMiningQueryDTOImpl> retrieveStoredQueries();
+    ArrayList<StoredDataMiningQueryDTOImpl> retrieveStoredQueries() throws UnauthorizedException;
 
-    StoredDataMiningQueryDTOImpl updateOrCreateStoredQuery(StoredDataMiningQueryDTOImpl query);
+    StoredDataMiningQueryDTOImpl updateOrCreateStoredQuery(StoredDataMiningQueryDTOImpl query)
+            throws UnauthorizedException;
 
-    StoredDataMiningQueryDTOImpl removeStoredQuery(StoredDataMiningQueryDTOImpl query);
+    StoredDataMiningQueryDTOImpl removeStoredQuery(StoredDataMiningQueryDTOImpl query) throws UnauthorizedException;
 
-    ModifiableStatisticQueryDefinitionDTO getDeserializedQuery(String serializedQuery);
+    ModifiableStatisticQueryDefinitionDTO getDeserializedQuery(String serializedQuery) throws UnauthorizedException;
 }

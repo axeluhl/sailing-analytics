@@ -45,7 +45,12 @@ public class GetSeriesStatisticsAction implements SailingAction<ResultWithTTL<Ev
     public ResultWithTTL<EventStatisticsDTO> execute(SailingDispatchContext context) throws DispatchException {
         StatisticsCalculator statisticsCalculator = new StatisticsCalculator(context.getTrackedRaceStatisticsCache());
         final LeaderboardGroup leaderboardGroupByID = context.getRacingEventService().getLeaderboardGroupByID(seriesLeaderboardGroupId);
-        leaderboardGroupByID.getLeaderboards().forEach(statisticsCalculator::addLeaderboard);
+        context.getSecurityService().checkCurrentUserReadPermission(leaderboardGroupByID);
+        leaderboardGroupByID.getLeaderboards().forEach(t -> {
+            if (context.getSecurityService().hasCurrentUserReadPermission(t)) {
+                statisticsCalculator.addLeaderboard(t);
+            }
+        });
         return statisticsCalculator.getResult();
     }
 

@@ -23,7 +23,6 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
-import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -38,6 +37,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdent
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.PlaceHolderDeviceIdentifierJsonHandler;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 7704668926551060433L;
@@ -71,7 +71,6 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
                     String.format("Missing parameter '%s'.", RaceLogServletConstants.PARAMS_LEADERBOARD_NAME));
             return;
         }
-        SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Permission.Mode.UPDATE, leaderboardName));
 
         String raceColumnName = request.getParameter(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME);
         if (raceColumnName == null) {
@@ -95,6 +94,8 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "Leaderboard "+StringEscapeUtils.escapeHtml(leaderboardName)+" not found.");
             return;
         }
+        SecurityUtils.getSubject()
+                .checkPermission(leaderboard.getIdentifier().getStringPermission(DefaultActions.UPDATE));
 
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         if (raceColumn == null) {

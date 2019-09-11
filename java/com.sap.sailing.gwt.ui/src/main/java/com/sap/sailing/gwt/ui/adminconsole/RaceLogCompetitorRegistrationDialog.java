@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.security.ui.client.UserService;
 
 public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegistrationDialog {
 
@@ -95,19 +96,19 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
         }
     }
 
-    public RaceLogCompetitorRegistrationDialog(String boatClass, SailingServiceAsync sailingService,
+    public RaceLogCompetitorRegistrationDialog(String boatClass, SailingServiceAsync sailingService, final UserService userService,
             StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace,
             String raceColumnName, String fleetName, List<FleetDTO> fleets,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback) {
-        this(sailingService, stringMessages, errorReporter, editable, callback, leaderboardName, canBoatsOfCompetitorsChangePerRace, boatClass,
+        this(sailingService, userService, stringMessages, errorReporter, editable, callback, leaderboardName, canBoatsOfCompetitorsChangePerRace, boatClass,
                 raceColumnName, fleetName, fleets, new Validator(stringMessages));
     }
     
-    public RaceLogCompetitorRegistrationDialog(SailingServiceAsync sailingService, StringMessages stringMessages,
+    public RaceLogCompetitorRegistrationDialog(SailingServiceAsync sailingService, final UserService userService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean editable,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback,
             String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, String raceColumnName, String fleetName, List<FleetDTO> fleets, Validator validator) {
-        super(sailingService, stringMessages, errorReporter, editable, callback, leaderboardName, 
+        super(sailingService, userService, stringMessages, errorReporter, editable, callback, leaderboardName, 
                 canBoatsOfCompetitorsChangePerRace, boatClass, 
                 canBoatsOfCompetitorsChangePerRace ? stringMessages.actionContinueToBoatAssignment() : stringMessages.save(), validator);
         this.errorReporter = errorReporter;

@@ -30,6 +30,7 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -84,6 +85,7 @@ import com.sap.sailing.domain.tracking.WindSummary;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
+import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -223,7 +225,8 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void recordFix(Competitor competitor, GPSFixMoving fix, boolean onlyWhenInTrackingTimesInterval) {
+    public boolean recordFix(Competitor competitor, GPSFixMoving fix, boolean onlyWhenInTrackingTimesInterval) {
+        return false;
     }
 
     @Override
@@ -343,6 +346,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     @Override
                     public boolean canBoatsOfCompetitorsChangePerRace() {
                         return false;
+                    }
+
+                    @Override
+                    public CompetitorRegistrationType getCompetitorRegistrationType() {
+                        return CompetitorRegistrationType.CLOSED;
                     }
 
                     @Override
@@ -590,6 +598,19 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public void setFleetsCanRunInParallelToTrue() {
+                    }
+
+                    @Override
+                    public String getRegistrationLinkSecret() {
+                        return null;
+                    }
+
+                    @Override
+                    public void setRegistrationLinkSecret(String registrationLinkSecret) {
+                    }
+
+                    @Override
+                    public void setCompetitorRegistrationType(CompetitorRegistrationType competitorRegistrationType) {
                     }
                 };
             }
@@ -1233,4 +1254,14 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public WindSummary getWindSummary() {
         return null;
     }
+
+    @Override
+    public PolarDataService getPolarDataService() {
+        return null;
+    }
+
+    @Override
+    public void setWindEstimation(IncrementalWindEstimation windEstimation) {
+    }
+
 }

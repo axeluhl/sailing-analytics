@@ -24,6 +24,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.UpdateOptions;
 import com.sap.sailing.domain.common.DeviceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -186,7 +187,9 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
      * Store fixes in batches, reducing metadata storage update.
      */
     @Override
-    public <FixT extends Timed> void storeFixes(DeviceIdentifier device, Iterable<FixT> fixes) {
+    public <FixT extends Timed> Iterable<RegattaAndRaceIdentifier> storeFixes(DeviceIdentifier device,
+            Iterable<FixT> fixes) {
+        Set<RegattaAndRaceIdentifier> maneuverChanged = new HashSet<>();
         if (!Util.isEmpty(fixes)) {
             try {
                 final Object dbDeviceId = storeDeviceId(deviceServiceFinder, device);
@@ -231,8 +234,9 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
                 logger.log(Level.WARNING, "Could not store fix in MongoDB");
                 e.printStackTrace();
             }
-            notifyListeners(device, fixes);
+            Util.addAll(notifyListeners(device, fixes), maneuverChanged);
         }
+        return maneuverChanged;
     }
 
     @Override
@@ -240,17 +244,22 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         storeFixes(device, Collections.singletonList(fix));
     }
 
-    private <FixT extends Timed> void notifyListeners(DeviceIdentifier device, Iterable<FixT> fixes) {
+    private <FixT extends Timed> Iterable<RegattaAndRaceIdentifier> notifyListeners(DeviceIdentifier device,
+            Iterable<FixT> fixes) {
+        Set<RegattaAndRaceIdentifier> raceWithChangedManeuver = new HashSet<>();
         @SuppressWarnings({ "unchecked", "rawtypes" })
+        final Map<DeviceIdentifier, Set<FixReceivedListener<FixT>>> listenersWithFixType = (Map) listeners;
         final Set<FixReceivedListener<FixT>> listenersToInform = LockUtil.executeWithReadLockAndResult(listenersLock, () -> {
             return new HashSet<>(Util.<DeviceIdentifier, Set<FixReceivedListener<FixT>>> get(
-                    (Map) listeners, device, Collections.emptySet()));
+                    listenersWithFixType, device, Collections.emptySet()));
         });
         for (FixT fix : fixes) {
             for (FixReceivedListener<FixT> listener : listenersToInform) {
-                listener.fixReceived(device, fix);
+                final Iterable<RegattaAndRaceIdentifier> racesWithManeuverChangeFromListener = listener.fixReceived(device, fix);
+                Util.addAll(racesWithManeuverChangeFromListener, raceWithChangedManeuver);
             }
         }
+        return raceWithChangedManeuver;
     }
 
     @Override

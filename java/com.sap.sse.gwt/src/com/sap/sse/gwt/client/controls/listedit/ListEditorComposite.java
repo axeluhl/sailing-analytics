@@ -40,7 +40,7 @@ import com.sap.sse.common.Util;
  */
 public class ListEditorComposite<ValueType> extends Composite implements HasValue<Iterable<ValueType>> {
 
-    private final ListEditorUiStrategy<ValueType> activeUi;
+    protected final ListEditorUiStrategy<ValueType> activeUi;
 
     private List<ValueType> values;
 

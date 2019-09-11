@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -26,6 +27,8 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Shows the currently tracked events/races in a table. Updated if subscribed as an {@link RegattasDisplayer}, e.g., with
@@ -41,10 +44,10 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     private boolean actionButtonsEnabled;
 
     public TrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
-            final SailingServiceAsync sailingService,
+            final SailingServiceAsync sailingService, UserService userService,
             final ErrorReporter errorReporter,
             final RegattaRefresher regattaRefresher, final StringMessages stringMessages, boolean hasMultiSelection, boolean actionButtonsEnabled) {
-        super(parent, context, sailingService, errorReporter, regattaRefresher, stringMessages, hasMultiSelection);
+        super(parent, context, sailingService, errorReporter, regattaRefresher, stringMessages, hasMultiSelection, userService);
         this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
         this.actionButtonsEnabled = actionButtonsEnabled;
         createUI();
@@ -175,12 +178,30 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
                 btnRemoveRace.setText(stringMessages.remove());
                 btnUntrack.setEnabled(false);
                 btnExport.setEnabled(false);
+                btnSetDelayToLive.setEnabled(false);
             } else {
-                btnRemoveRace.setEnabled(true);
-                final int numberOfItemsSelected = refreshableSelectionModel.getSelectedSet().size();
+                final int numberOfItemsSelected = selectedRaces.size();
                 btnRemoveRace.setText(numberOfItemsSelected <= 1 ? stringMessages.remove() : stringMessages.removeNumber(numberOfItemsSelected));
-                btnUntrack.setEnabled(true);
-                btnExport.setEnabled(true);
+
+                boolean canUpdateAll = true;
+                boolean canDeleteAll = true;
+                boolean canExportAll = true;
+                for (RaceDTO race : selectedRaces) {
+                    if (!userService.hasPermission(race, DefaultActions.UPDATE)) {
+                        canUpdateAll = false;
+                    }
+                    if (!userService.hasPermission(race, DefaultActions.DELETE)) {
+                        canDeleteAll = false;
+                    }
+                    if (!userService.hasPermission(race, SecuredDomainType.TrackedRaceActions.EXPORT)) {
+                        canExportAll = false;
+                    }
+
+                }
+                btnSetDelayToLive.setEnabled(canUpdateAll);
+                btnRemoveRace.setEnabled(canDeleteAll);
+                btnUntrack.setEnabled(canUpdateAll);
+                btnExport.setEnabled(canExportAll);
             }
         }
     }

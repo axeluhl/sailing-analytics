@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.fileupload.FileItem;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -80,7 +81,8 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
                     result.put(JSON_FILE_NAME, fileName);
                     result.put(JSON_FILE_URI, fileUri.toString());
                 }
-            } catch (IOException | OperationFailedException | InvalidPropertiesException | NoCorrespondingServiceRegisteredException e) {
+            } catch (IOException | OperationFailedException | InvalidPropertiesException
+                    | NoCorrespondingServiceRegisteredException | UnauthorizedException e) {
                 final String errorMessage = "Could not store file"+ (e.getMessage()==null?"":(": " + e.getMessage()));
                 logger.log(Level.WARNING, "Could not store file", e);
                 result.put("status", Status.INTERNAL_SERVER_ERROR.name());

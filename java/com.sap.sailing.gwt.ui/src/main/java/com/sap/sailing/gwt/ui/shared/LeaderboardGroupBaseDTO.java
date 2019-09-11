@@ -3,16 +3,22 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.dto.NamedDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sse.common.WithID;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
 
-public class LeaderboardGroupBaseDTO extends NamedDTO implements IsSerializable {
-    private static final long serialVersionUID = -9023865026348923430L;
+public class LeaderboardGroupBaseDTO extends NamedSecuredObjectDTO implements WithID, IsSerializable {
+    
+    private static final long serialVersionUID = -4276452763988957L;
     private UUID id;
     public String description;
     private String displayName;
     private boolean hasOverallLeaderboard;
 
-    LeaderboardGroupBaseDTO() {} // for deserialization
+    protected LeaderboardGroupBaseDTO() {} // for deserialization
     
     public LeaderboardGroupBaseDTO(UUID id, String name, String displayName) {
         super(name);
@@ -45,4 +51,19 @@ public class LeaderboardGroupBaseDTO extends NamedDTO implements IsSerializable 
     public void setHasOverallLeaderboard(boolean hasOverallLeaderboard) {
         this.hasOverallLeaderboard = hasOverallLeaderboard;
     }
+    
+    @Override
+    public HasPermissions getType() {
+        return SecuredDomainType.LEADERBOARD_GROUP;
+    }
+    
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return new TypeRelativeObjectIdentifier(id.toString());
+    }
+
 }

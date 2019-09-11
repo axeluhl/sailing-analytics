@@ -19,6 +19,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImporter.UploadRequest;
@@ -44,6 +45,9 @@ public abstract class AbstractWindImportServlet extends SailingServerHttpServlet
         WindImportResult windImportResult = new WindImportResult();
         try {
             UploadRequest uploadRequest = readRequest(request);
+            for (RegattaAndRaceIdentifier trackedRace : uploadRequest.races) {
+                getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
+            }
             importer.importWindForUploadRequest(getService(), windImportResult, uploadRequest);
             // Use text/html to prevent browsers from wrapping the response body,
             // see "Handling File Upload Responses in GWT" at http://www.artofsolving.com/node/50

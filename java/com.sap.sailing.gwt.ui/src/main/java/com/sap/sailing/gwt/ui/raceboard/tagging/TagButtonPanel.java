@@ -53,7 +53,7 @@ public class TagButtonPanel extends FlowPanel {
 
     /**
      * Loads all {@link TagButton tag-buttons} of {@link UserService#getCurrentUser() current user} from
-     * {@link com.sap.sse.security.UserStore UserStore} and displays them.
+     * {@link com.sap.sse.security.interfaces.UserStore UserStore} and displays them.
      */
     protected void loadAllTagButtons() {
         tagButtonsPanel.clear();
@@ -89,7 +89,7 @@ public class TagButtonPanel extends FlowPanel {
 
     /**
      * Stores {@link TaggingPanel#getTagButtons() local copy} of {@link TagButton tag-buttons} of the
-     * {@link UserService#getCurrentUser() current user} in {@link com.sap.sse.security.UserStore UserStore}.
+     * {@link UserService#getCurrentUser() current user} in {@link com.sap.sse.security.interfaces.UserStore UserStore}.
      */
     protected void storeAllTagButtons() {
         TagButtonJsonDeSerializer serializer = new TagButtonJsonDeSerializer();

@@ -4,7 +4,9 @@ import java.util.Date;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.Select;
 
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
@@ -35,6 +37,9 @@ public class RegattaCreateDialogPO extends DataEntryDialogPO {
     @FindBy(how = BySeleniumId.class, using = "AddSeriesButton")
     private WebElement addSeriesButton;
     
+    @FindBy(how = BySeleniumId.class, using = "CompetitorRegistrationTypeListBox")
+    private WebElement competitorRegistrationTypeListBox;
+    
     public RegattaCreateDialogPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
@@ -46,6 +51,12 @@ public class RegattaCreateDialogPO extends DataEntryDialogPO {
     public void setBoatClass(String boatClass) {
         this.boatClassTextBox.clear();
         this.boatClassTextBox.sendKeys(boatClass);
+    }
+    
+    public void setCompetitorRegistrationType(CompetitorRegistrationType competitorRegistrationType) {
+        if (competitorRegistrationTypeListBox.isEnabled()) {
+            new Select(competitorRegistrationTypeListBox).selectByIndex(competitorRegistrationType.ordinal());
+        }
     }
     
     public void setEventAndCourseArea(String event, String courseArea) {

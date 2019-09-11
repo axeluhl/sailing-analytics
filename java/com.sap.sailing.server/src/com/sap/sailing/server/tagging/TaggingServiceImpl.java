@@ -3,10 +3,7 @@ package com.sap.sailing.server.tagging;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
-import org.apache.shiro.subject.Subject;
-import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
@@ -18,32 +15,27 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.dto.TagDTO;
-import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
 import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
 import com.sap.sailing.domain.common.tagging.TagAlreadyExistsException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.impl.Activator;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.TaggingService;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.util.ServiceTrackerFactory;
+import com.sap.sse.security.shared.impl.User;
 
 public class TaggingServiceImpl implements TaggingService {
 
-    private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
     private final RacingEventService racingService;
     private final TagDTODeSerializer serializer;
 
     public TaggingServiceImpl(RacingEventService racingService) {
         this.racingService = racingService;
         serializer = new TagDTODeSerializer();
-        securityServiceTracker = ServiceTrackerFactory.createAndOpen(Activator.getContext(), SecurityService.class);
     }
 
     /**
@@ -53,42 +45,26 @@ public class TaggingServiceImpl implements TaggingService {
      * @return username of current user
      */
     private String getCurrentUsername() throws AuthorizationException {
-        Object principal = SecurityUtils.getSubject().getPrincipal();
-        if (principal == null) {
+        User user = getSecurityService().getCurrentUser();
+        if (user == null) {
             throw new AuthorizationException();
         }
-        return principal.toString();
+        return user.getName();
     }
 
     /**
      * Returns instance of {@link SecurityService} to access the user store.
      * 
      * @return instance of {@link SecurityService}
-     * @throws ServiceNotFoundException
      */
-    private SecurityService getSecurityService() throws ServiceNotFoundException {
-        SecurityService securityService;
-        // securityServiceTracker is null in non-OSGi environment (local JUnit tests) => use static reference of
-        // security service, otherwise use OSGi service tracker
-        if (securityServiceTracker != null) {
-            securityService = securityServiceTracker.getService();
-        } else {
-            securityService = com.sap.sse.security.impl.Activator.getSecurityService();
-        }
-        if (securityService == null) {
-            throw new ServiceNotFoundException("Security service not found!");
-        }
-        return securityService;
+    private SecurityService getSecurityService() {
+        return racingService.getSecurityService();
     }
 
     private void addPublicTag(String leaderboardName, String raceColumnName, String fleetName, String tag,
             String comment, String imageURL, String resizedImageURL, TimePoint raceTimepoint)
             throws RaceLogNotFoundException, TagAlreadyExistsException {
-        // TODO: As soon as permission-vertical branch got merged into master, apply
-        // new permission system at this permission check (see bug 4104, comment 9)
-        // functionality: Check if user has the permission to add RaceLogEvents to RaceLog.
-        SecurityUtils.getSubject()
-                .checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
+        getSecurityService().checkCurrentUserUpdatePermission(racingService.getLeaderboardByName(leaderboardName));
         RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog == null) {
             throw new RaceLogNotFoundException();
@@ -125,6 +101,7 @@ public class TaggingServiceImpl implements TaggingService {
 
     private void removePublicTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag)
             throws AuthorizationException, NotRevokableException, RaceLogNotFoundException {
+        getSecurityService().checkCurrentUserUpdatePermission(racingService.getLeaderboardByName(leaderboardName));
         RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog == null) {
             throw new RaceLogNotFoundException();
@@ -134,26 +111,17 @@ public class TaggingServiceImpl implements TaggingService {
         for (RaceLogTagEvent tagEvent : foundTagEvents) {
             if (tagEvent.getRevokedAt() != null) {
                 continue;
-            } else if (tagEvent.getTag().equals(tag.getTag()) && tagEvent.getComment().equals(tag.getComment())
-                    && tagEvent.getImageURL().equals(tag.getImageURL())
-                    && tagEvent.getUsername().equals(tag.getUsername())
-                    && tagEvent.getLogicalTimePoint().equals(tag.getRaceTimepoint())) {
-
-                // TODO: As soon as permission-vertical branch got merged into master, apply
-                // new permission system at this permission check (see bug 4104, comment 9)
-                // functionality: Check if user has the permission to delete tag from RaceLog (same user or
-                // admin).
-                Subject subject = SecurityUtils.getSubject();
-                subject.checkPermission(
-                        Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
-                if (!((subject.getPrincipal() != null && subject.getPrincipal().equals(tag.getUsername()))
-                        || subject.hasRole("admin"))) {
-                    throw new AuthorizationException();
-                }
+            } else if (tagEventEqualsTagDTO(tagEvent, tag)) {
                 raceLog.revokeEvent(tagEvent.getAuthor(), tagEvent, "Revoked");
                 break;
             }
         }
+    }
+
+    private boolean tagEventEqualsTagDTO(RaceLogTagEvent tagEvent, TagDTO tag) {
+        return tagEvent.getTag().equals(tag.getTag()) && tagEvent.getComment().equals(tag.getComment())
+                && tagEvent.getImageURL().equals(tag.getImageURL()) && tagEvent.getUsername().equals(tag.getUsername())
+                && tagEvent.getLogicalTimePoint().equals(tag.getRaceTimepoint());
     }
 
     private void removePrivateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag)
@@ -238,26 +206,26 @@ public class TaggingServiceImpl implements TaggingService {
     public List<TagDTO> getTags(Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, TimePoint searchSince,
             boolean returnRevokedTags) throws RaceLogNotFoundException, ServiceNotFoundException {
         final List<TagDTO> result = new ArrayList<TagDTO>();
-        Util.addAll(getPublicTags(raceColumn.getRaceLog(fleet), searchSince, returnRevokedTags), result);
-        try {
-            Util.addAll(getPrivateTags(leaderboard.getName(), raceColumn.getName(), fleet.getName()), result);
-        } catch (AuthorizationException e) {
-            // user is not logged in, may fail while unit testing because no user is logged in
+        if (getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
+            extractPublicTagsFromLogInternal(raceColumn.getRaceLog(fleet), searchSince, returnRevokedTags, result);
         }
+        Util.addAll(getPrivateTags(leaderboard.getName(), raceColumn.getName(), fleet.getName()), result);
         return result;
     }
 
     @Override
     public List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName,
             TimePoint searchSince, boolean returnRevokedTags) throws RaceLogNotFoundException {
-        RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
-        return getPublicTags(raceLog, searchSince, returnRevokedTags);
+        final List<TagDTO> result = new ArrayList<TagDTO>();
+        if (getSecurityService().hasCurrentUserReadPermission(racingService.getLeaderboardByName(leaderboardName))) {
+            RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
+            extractPublicTagsFromLogInternal(raceLog, searchSince, returnRevokedTags, result);
+        }
+        return result;
     }
 
-    @Override
-    public List<TagDTO> getPublicTags(RaceLog raceLog, TimePoint searchSince, boolean returnRevokedTags)
-            throws RaceLogNotFoundException {
-        final List<TagDTO> result = new ArrayList<TagDTO>();
+    private void extractPublicTagsFromLogInternal(RaceLog raceLog, TimePoint searchSince, boolean returnRevokedTags,
+            final List<TagDTO> result) {
         if (raceLog == null) {
             throw new RaceLogNotFoundException();
         }
@@ -276,28 +244,18 @@ public class TaggingServiceImpl implements TaggingService {
                 }
             }
         }
-        return result;
     }
 
     @Override
     public List<TagDTO> getPublicTags(RegattaAndRaceIdentifier raceIdentifier, TimePoint searchSince) {
+        Leaderboard leaderBoard = racingService.getLeaderboardByName(raceIdentifier.getRegattaName());
+        getSecurityService().checkCurrentUserReadPermission(leaderBoard);
+
         final List<TagDTO> result = new ArrayList<TagDTO>();
         TrackedRace trackedRace = racingService.getExistingTrackedRace(raceIdentifier);
         Iterable<RaceLog> raceLogs = trackedRace.getAttachedRaceLogs();
         for (RaceLog raceLog : raceLogs) {
-            ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(racingService, raceLog);
-            Iterable<RaceLogTagEvent> foundTagEvents = raceState.getTagEvents();
-            for (RaceLogTagEvent tagEvent : foundTagEvents) {
-                if ((searchSince == null && tagEvent.getRevokedAt() == null)
-                        || (searchSince != null && tagEvent.getRevokedAt() == null
-                                && tagEvent.getCreatedAt().after(searchSince))
-                        || (searchSince != null && tagEvent.getRevokedAt() != null
-                                && tagEvent.getRevokedAt().after(searchSince))) {
-                    result.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(),
-                            tagEvent.getResizedImageURL(), true, tagEvent.getUsername(), tagEvent.getLogicalTimePoint(),
-                            tagEvent.getCreatedAt(), tagEvent.getRevokedAt()));
-                }
-            }
+            extractPublicTagsFromLogInternal(raceLog, searchSince, false, result);
         }
         return result;
     }
@@ -306,7 +264,7 @@ public class TaggingServiceImpl implements TaggingService {
     public List<TagDTO> getPrivateTags(String leaderboardName, String raceColumnName, String fleetName)
             throws AuthorizationException, ServiceNotFoundException {
         final List<TagDTO> result = new ArrayList<TagDTO>();
-        if (SecurityUtils.getSubject().getPrincipal() != null) {
+        if (getSecurityService().getCurrentUser() != null) {
             String key = serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName);
             String privateTagsJson = getSecurityService().getPreference(getCurrentUsername(), key);
             List<TagDTO> privateTags = serializer.deserializeTags(privateTagsJson);

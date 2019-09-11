@@ -63,7 +63,7 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
         RegattaStructureManagementPanelPO regattaStructure = adminConsole.goToRegattaStructure();
         regattaStructure.createRegatta(bmwCupDescriptor);
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
+        tracTracEvents.addConnectionAndListTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setReggataForTracking(bmwCupDescriptor);
         tracTracEvents.setTrackSettings(false, false, false);
         tracTracEvents.startTrackingForRace(this.trackableRace);
@@ -81,7 +81,7 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
         RegattaStructureManagementPanelPO regattaStructure = adminConsole.goToRegattaStructure();
         regattaStructure.createRegatta(new RegattaDescriptor(BMW_CUP_EVENT, BMW_CUP_BOAT_CLASS));
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
+        tracTracEvents.addConnectionAndListTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setReggataForTracking(DEFAULT_REGATTA);
         tracTracEvents.setTrackSettings(false, false, false);
         tracTracEvents.startTrackingForRacesAndAcceptDefaultRegattaWarning(this.trackableRace);
@@ -96,7 +96,7 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
         regattaStructure.createRegatta(bmwCupDescriptor);
         regattaStructure.createRegatta(idm2013Descriptor);
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
+        tracTracEvents.addConnectionAndListTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setReggataForTracking(idm2013Descriptor);
         tracTracEvents.setTrackSettings(false, false, false);
         tracTracEvents.startTrackingForRaceAndAwaitBoatClassError(this.trackableRace, IDM_2013_BOAT_CLASS);

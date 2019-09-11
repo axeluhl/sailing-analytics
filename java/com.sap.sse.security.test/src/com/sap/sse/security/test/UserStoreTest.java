@@ -6,20 +6,25 @@ import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.security.UserStore;
+import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class UserStoreTest {
-    private final UserStore userStore = new UserStoreImpl(null, null);
+    private final UserStore userStore;
     private final String username = "abc";
     private final String email = "e@mail.com";
     private final String accessToken = "ak";
     private final String prefKey = "pk";
     private final String prefValue = "pv";
     
+    public UserStoreTest() throws UserGroupManagementException, UserManagementException {
+        userStore = new UserStoreImpl(null, null, "TestDefaultTenant");
+    }
+    
     @Before
-    public void setUp() throws UserManagementException {
+    public void setUp() throws UserManagementException, UserGroupManagementException {
         userStore.createUser(username, email);
         userStore.setAccessToken(username, accessToken);
         userStore.setPreference(username, prefKey, prefValue);
@@ -35,8 +40,8 @@ public class UserStoreTest {
     }
 
     @Test
-    public void testUpdate() throws UserManagementException {
-        UserStore newUserStore = new UserStoreImpl(null, null);
+    public void testUpdate() throws UserManagementException, UserGroupManagementException {
+        UserStore newUserStore = new UserStoreImpl(null, null, "TestDefaultTenant");
         newUserStore.replaceContentsFrom(userStore);
         assertEquals(prefValue, newUserStore.getPreference(username, prefKey));
         assertEquals(username, newUserStore.getUserByAccessToken(accessToken).getName());

@@ -9,6 +9,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -39,6 +40,7 @@ import com.sap.sailing.server.gateway.serialization.racegroup.impl.SeriesWithRow
 import com.sap.sailing.server.gateway.serialization.racegroup.impl.SeriesWithRowsOfRaceGroupSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogSerializer;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 4510175441769759252L;
@@ -73,9 +75,16 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
         final Set<Regatta> regattasForWhichRegattaLeaderboardsWereAdded = new HashSet<>();
         for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
             if (filterCourseArea.equals(leaderboard.getDefaultCourseArea())) {
+                SecurityUtils.getSubject()
+                        .checkPermission(leaderboard.getIdentifier().getStringPermission(DefaultActions.READ));
                 if (leaderboard instanceof RegattaLeaderboard && !(leaderboard instanceof RegattaLeaderboardWithEliminations)) {
                     result.add(serializer.serialize(raceGroupFactory.convert((RegattaLeaderboard) leaderboard)));
-                    regattasForWhichRegattaLeaderboardsWereAdded.add(((RegattaLeaderboard) leaderboard).getRegatta());
+
+                    final Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
+                    SecurityUtils.getSubject()
+                            .checkPermission(regatta.getIdentifier().getStringPermission(DefaultActions.READ));
+
+                    regattasForWhichRegattaLeaderboardsWereAdded.add(regatta);
                 } else if (leaderboard instanceof FlexibleLeaderboard) {
                     result.add(serializer.serialize(raceGroupFactory.convert((FlexibleLeaderboard) leaderboard)));
                 }

@@ -53,7 +53,7 @@ public class TagsResource extends AbstractSailingServerResource {
 
     /**
      * Loads public tags from {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog} and private tags from
-     * {@link com.sap.sse.security.UserStore UserStore} in case current user is logged in. Only loads tags when
+     * {@link com.sap.sse.security.interfaces.UserStore UserStore} in case current user is logged in. Only loads tags when
      * parameters <code>leaderboardName</code>, <code>raceColumnName</code> and <code>fleetName</code> can identify
      * {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog}.
      * 

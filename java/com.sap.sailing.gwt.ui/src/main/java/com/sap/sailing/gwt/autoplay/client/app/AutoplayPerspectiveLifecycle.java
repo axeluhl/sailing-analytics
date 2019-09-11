@@ -21,7 +21,9 @@ public class AutoplayPerspectiveLifecycle extends AbstractPerspectiveLifecycle<A
     public AutoplayPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, UserService userService, Iterable<DetailType> availableDetailTypes) {
         leaderboardLifecycle = new LeaderboardWithZoomingPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE, availableDetailTypes);
         //As we cannot know, if Bravo data is available later on, we will offer DetailTypes, that might be relevant despite not having data for them yet
-        raceboardLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE, DetailType.getAutoplayDetailTypesForChart(), userService, availableDetailTypes);
+        raceboardLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE,
+                DetailType.getAutoplayDetailTypesForChart(), userService, availableDetailTypes,
+                /* TODO: raceDTO is needed for permission check */null);
         addLifeCycle(leaderboardLifecycle);
         addLifeCycle(raceboardLifecycle);
     }

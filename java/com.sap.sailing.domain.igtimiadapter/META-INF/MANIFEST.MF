@@ -18,12 +18,14 @@ Require-Bundle: org.json.simple;bundle-version="1.1.0",
  com.sap.sse.common,
  com.sap.sse,
  com.sap.sse.security,
- com.sun.xml.bind.jaxb-impl;bundle-version="2.3.0"
-Import-Package: javax.ws.rs;version="1.1.1",
- javax.ws.rs.core;version="1.1.1",
- javax.ws.rs.ext;version="1.1.1",
+ com.sap.sse.security.common
+Import-Package: com.sap.sse.security.shared,
  javax.xml.bind,
  org.apache.commons.lang,
+ org.apache.shiro,
+ org.apache.shiro.authz,
+ org.apache.shiro.mgt,
+ org.apache.shiro.subject,
  org.codehaus.jackson.jaxrs;version="1.9.13",
  org.eclipse.jetty.client;version="9.4.8",
  org.eclipse.jetty.io;version="9.4.8",
@@ -35,10 +37,11 @@ Import-Package: javax.ws.rs;version="1.1.1",
  org.eclipse.jetty.websocket.api.extensions;version="9.4.8",
  org.eclipse.jetty.websocket.client;version="9.4.8",
  org.eclipse.jetty.websocket.common;version="9.4.8",
- org.osgi.framework;version="1.7.0"
-Web-ContextPath: /igtimi
+ org.osgi.framework;version="1.7.0",
+ org.osgi.util.tracker;version="1.5.1"
 Bundle-Activator: com.sap.sailing.domain.igtimiadapter.impl.Activator
 Export-Package: com.sap.sailing.domain.igtimiadapter,
  com.sap.sailing.domain.igtimiadapter.datatypes,
+ com.sap.sailing.domain.igtimiadapter.impl;x-friends:="com.sap.sailing.domain.igtimiadapter.gateway",
  com.sap.sailing.domain.igtimiadapter.shared
 Automatic-Module-Name: com.sap.sailing.domain.igtimiadapter

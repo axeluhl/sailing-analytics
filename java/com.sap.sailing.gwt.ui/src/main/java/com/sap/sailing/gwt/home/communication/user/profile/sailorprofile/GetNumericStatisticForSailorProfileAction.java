@@ -29,7 +29,6 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileN
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType.StatisticType;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO.SingleEntry;
-import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.server.impl.preferences.model.SailorProfilePreference;
 import com.sap.sailing.server.impl.preferences.model.SailorProfilePreferences;
 import com.sap.sse.common.Distance;
@@ -97,7 +96,7 @@ public class GetNumericStatisticForSailorProfileAction
                             continue;
                         }
                         // skip, if the leaderboard is not part of this event (e.g. shared leaderboard group)
-                        if (!HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
+                        if (!leaderboard.isPartOfEvent(event)) {
                             continue;
                         }
                         for (TrackedRace tr : leaderboard.getTrackedRaces()) {

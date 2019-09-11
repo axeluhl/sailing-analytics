@@ -41,6 +41,7 @@ import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
@@ -53,6 +54,7 @@ import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.impl.NonCachingMarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
+import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -61,6 +63,10 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -77,7 +83,8 @@ import com.sap.sse.common.Util.Pair;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomainFactory> {
+public interface TrackedRace
+        extends Serializable, IsManagedByCache<SharedDomainFactory>, WithQualifiedObjectIdentifier {
     final Duration START_TRACKING_THIS_MUCH_BEFORE_RACE_START = Duration.ONE_MINUTE.times(5);
     final Duration STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH = Duration.ONE_SECOND.times(30);
 
@@ -994,6 +1001,18 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     TargetTimeInfo getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException, NoWindException;
 
     /**
+     * Determine the time sailed for the {@code competitor} at {@code timePoint} in this race. This ignores whether or
+     * not the race has recorded a start mark passing for the {@code competitor}. If no finish mark passing is found
+     * either, the duration between the {@link #getStartOfRace() race start time} and {@code timePoint} is returned;
+     * otherwise the duration between the {@link #getStartOfRace() race start time} and the time when the
+     * {@code competitor} finished the race. If there is no mark passing for {@code competitor} for the last waypoint or
+     * no {@link TrackedRace#getStartOfRace()} is known, {@code null} is returned.
+     */
+    default Duration getTimeSailedSinceRaceStart(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    /**
      * Calculates the estimated distance it takes a competitor to sail the race, from start to finish.
      * 
      * @param timepoint
@@ -1132,10 +1151,58 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode,
             WindLegTypeAndLegBearingCache cache);
 
+    boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter);
+
+    void removeWind(Wind wind, WindSource windSource);
+
+    /**
+     * Gets polar service which is currently set in this tracked race instance.
+     * @see #setPolarDataService(PolarDataService)
+     */
+    PolarDataService getPolarDataService();
+
+    /**
+     * Sets wind estimation for this tracked race instance. The previous wind estimation with its wind source and wind
+     * track are completely removed from this tracked race instance. If not {@code null}, the wind estimation is set and
+     * configured accordingly so that it gets supplied by maneuver detector with new maneuvers in order to produce a
+     * wind track with estimated wind. An appropriate wind source of type
+     * {@link WindSourceType#MANEUVER_BASED_ESTIMATION} with corresponding wind track is added to the tracked race. If
+     * {@code null}, the wind estimation will be disabled for the tracked race. After the call of this method, maneuver
+     * cache and wind cache will be reset and its recalculation will be triggered.
+     */
+    void setWindEstimation(IncrementalWindEstimation windEstimation);
+
     /**
      * Obtains a quick, rough summary of the wind conditions during this race, based on a few wind samples at the
      * beginning, in the middle and at the end of the race. This is summarized in a min and max wind speed as well
      * as a single average wind direction.
      */
     WindSummary getWindSummary();
+    
+    @Override
+    default QualifiedObjectIdentifier getIdentifier() {
+        return getIdentifier(getRaceIdentifier());
+    }
+    
+    public static QualifiedObjectIdentifier getIdentifier(RegattaAndRaceIdentifier regattaAndRaceId) {
+        return getSecuredDomainType().getQualifiedObjectIdentifier(regattaAndRaceId.getTypeRelativeObjectIdentifier());
+    }
+
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getRaceIdentifier().getTypeRelativeObjectIdentifier();
+    }
+
+    @Override
+    default String getName() {
+        return getRaceIdentifier().getRaceName() + "@" + getRaceIdentifier().getRegattaName();
+    }
+
+    @Override
+    default HasPermissions getType() {
+        return getSecuredDomainType();
+    }
+    
+    public static HasPermissions getSecuredDomainType() {
+        return SecuredDomainType.TRACKED_RACE;
+    }
 }

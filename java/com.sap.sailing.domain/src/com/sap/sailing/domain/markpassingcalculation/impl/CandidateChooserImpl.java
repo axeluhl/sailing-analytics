@@ -242,6 +242,15 @@ public class CandidateChooserImpl implements CandidateChooser {
                         result = Double.compare(o1.getProbability(), o2.getProbability());
                         if (result == 0) {
                             result = o2.getClass().getSimpleName().compareTo(o1.getClass().getSimpleName());
+                            if (result == 0) {
+                                result = Util.compareToWithNull(o1.getWaypoint()==null?null:o1.getWaypoint().getId().toString(),
+                                        o2.getWaypoint()==null?null:o2.getWaypoint().getId().toString(), /* nullIsLess */ true);
+                                if (result == 0) {
+                                    // last resort: try object identity hash code which is not guaranteed to be
+                                    // different for distinct objects, but it's highly likely
+                                    result = Integer.compare(System.identityHashCode(o1), System.identityHashCode(o2));
+                                }
+                            }
                         }
                     }
                 }
@@ -474,7 +483,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     public void setFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint, TimePoint t) {
         LockUtil.lockForWrite(perCompetitorLocks.get(c));
         try {
-            Candidate fixedCan = new CandidateImpl(zeroBasedIndexOfWaypoint + 1, t, 1, Util.get(race.getRace().getCourse().getWaypoints(), zeroBasedIndexOfWaypoint));
+            Candidate fixedCan = new CandidateForFixedMarkPassingImpl(zeroBasedIndexOfWaypoint + 1, t, 1, Util.get(race.getRace().getCourse().getWaypoints(), zeroBasedIndexOfWaypoint));
             NavigableSet<Candidate> fixed = fixedPassings.get(c);
             if (fixed != null) { // can only set the mark passing if the competitor is still part of this race
                 if (!fixed.add(fixedCan)) {
@@ -775,25 +784,32 @@ public class CandidateChooserImpl implements CandidateChooser {
      */
     private Distance getIgnoreDueToTimingInducedEstimatedSpeeds(Competitor c, Candidate c1, Candidate c2) {
         final boolean ignore;
+        final Distance totalGreatCircleDistance;
         assert c1.getOneBasedIndexOfWaypoint() < c2.getOneBasedIndexOfWaypoint();
         assert c2 != end;
-        final TimePoint middleOfc1Andc2 = new MillisecondsTimePoint(c1.getTimePoint().plus(c2.getTimePoint().asMillis()).asMillis() / 2);
-        Waypoint first = getFirstWaypoint(c1);
-        final Waypoint second = c2.getWaypoint();
-        final Distance totalGreatCircleDistance = getMinimumTotalGreatCircleDistanceBetweenWaypoints(first, second, middleOfc1Andc2);
-        if (totalGreatCircleDistance == null) {
-            ignore = true; // no distance known; cannot tell, so ignore the edge
+        if (c1.getTimePoint() == null || c2.getTimePoint() == null) {
+            // cannot compute a distance in case of unknown timings; ignore the edge
+            ignore = true;
+            totalGreatCircleDistance = null;
         } else {
-            // Computing the distance traveled can be quite expensive, especially for candidates very far apart.
-            // As a quick approximation let's look at how long the time between the candidates was and relate that to the minimum distance
-            // between the waypoints. This leads to a speed estimation; if we take the minimum distance times two, we
-            // get an upper bound for a reasonable distance sailed between the waypoints and therefore an estimation
-            // for the maximum speed at which the competitor would have had to sail:
-            Speed estimatedMaxSpeed = totalGreatCircleDistance.scale(2).inTime(c1.getTimePoint().until(c2.getTimePoint()));
-            final double estimatedMinSpeedBasedProbability = Math.max(0, estimatedMaxSpeed.divide(MINIMUM_REASONABLE_SPEED));
-            final double estimatedMaxSpeedBasedProbability = Math.max(0, MAXIMUM_REASONABLE_SPEED.divide(estimatedMaxSpeed));
-            final double estimatedSpeedBasedProbabilityMinimum = Math.min(estimatedMaxSpeedBasedProbability, estimatedMinSpeedBasedProbability);
-            ignore = estimatedSpeedBasedProbabilityMinimum < MINIMUM_PROBABILITY;
+            final TimePoint middleOfc1Andc2 = new MillisecondsTimePoint(c1.getTimePoint().plus(c2.getTimePoint().asMillis()).asMillis() / 2);
+            Waypoint first = getFirstWaypoint(c1);
+            final Waypoint second = c2.getWaypoint();
+            totalGreatCircleDistance = getMinimumTotalGreatCircleDistanceBetweenWaypoints(first, second, middleOfc1Andc2);
+            if (totalGreatCircleDistance == null) {
+                ignore = true; // no distance known; cannot tell, so ignore the edge
+            } else {
+                // Computing the distance traveled can be quite expensive, especially for candidates very far apart.
+                // As a quick approximation let's look at how long the time between the candidates was and relate that to the minimum distance
+                // between the waypoints. This leads to a speed estimation; if we take the minimum distance times two, we
+                // get an upper bound for a reasonable distance sailed between the waypoints and therefore an estimation
+                // for the maximum speed at which the competitor would have had to sail:
+                Speed estimatedMaxSpeed = totalGreatCircleDistance.scale(2).inTime(c1.getTimePoint().until(c2.getTimePoint()));
+                final double estimatedMinSpeedBasedProbability = Math.max(0, estimatedMaxSpeed.divide(MINIMUM_REASONABLE_SPEED));
+                final double estimatedMaxSpeedBasedProbability = Math.max(0, MAXIMUM_REASONABLE_SPEED.divide(estimatedMaxSpeed));
+                final double estimatedSpeedBasedProbabilityMinimum = Math.min(estimatedMaxSpeedBasedProbability, estimatedMinSpeedBasedProbability);
+                ignore = estimatedSpeedBasedProbabilityMinimum < MINIMUM_PROBABILITY;
+            }
         }
         return ignore ? null : totalGreatCircleDistance;
     }

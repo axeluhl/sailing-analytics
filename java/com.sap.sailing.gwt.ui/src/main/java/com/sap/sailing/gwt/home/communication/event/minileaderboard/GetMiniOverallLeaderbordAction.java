@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.home.communication.SailingAction;
@@ -63,11 +64,16 @@ public class GetMiniOverallLeaderbordAction implements SailingAction<ResultWithT
     @GwtIncompatible
     public ResultWithTTL<GetMiniLeaderboardDTO> execute(SailingDispatchContext context) {
         LeaderboardGroup leaderboardGroup = context.getRacingEventService().getLeaderboardGroupByID(leaderboardGroupUUID);
+        context.getSecurityService().checkCurrentUserReadPermission(leaderboardGroup);
         if(leaderboardGroup == null) {
             throw new RuntimeException("Invalid leaderboardGroupID");
         }
         Event event = HomeServiceUtil.determineBestMatchingEvent(context.getRacingEventService(), leaderboardGroup);
-        LeaderboardContext lctx = new LeaderboardContext(context, event, event.getLeaderboardGroups(), leaderboardGroup.getOverallLeaderboard());
+        context.getSecurityService().checkCurrentUserReadPermission(event);
+        Leaderboard overallLeaderBoard = leaderboardGroup.getOverallLeaderboard();
+        context.getSecurityService().checkCurrentUserReadPermission(overallLeaderBoard);
+        LeaderboardContext lctx = new LeaderboardContext(context, event, event.getLeaderboardGroups(),
+                overallLeaderBoard);
         return lctx.calculateMiniLeaderboard(context.getRacingEventService(), limit);
         
     }

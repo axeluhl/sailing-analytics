@@ -13,6 +13,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParameters;
@@ -117,18 +118,21 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
             RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver,
-            long timeoutInMilliseconds) throws URISyntaxException, CreateModelException,
-            SubscriberInitializationException, IOException, InterruptedException {
+            long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler) throws URISyntaxException,
+            CreateModelException, SubscriberInitializationException, IOException, InterruptedException {
         RaceTracker tracker = domainFactory.createRaceTracker(raceLogStore, regattaLogStore, windStore,
-                trackedRegattaRegistry, raceLogResolver, leaderboardGroupResolver, this, timeoutInMilliseconds);
+                trackedRegattaRegistry, raceLogResolver, leaderboardGroupResolver, this, timeoutInMilliseconds,
+                raceTrackingHandler);
         return tracker;
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
-            WindStore windStore, RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds) throws Exception {
+            WindStore windStore, RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver,
+            long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler) throws Exception {
         RaceTracker tracker = domainFactory.createRaceTracker(regatta, raceLogStore, regattaLogStore, windStore,
-                trackedRegattaRegistry, raceLogResolver, leaderboardGroupResolver, this, timeoutInMilliseconds);
+                trackedRegattaRegistry, raceLogResolver, leaderboardGroupResolver, this, timeoutInMilliseconds,
+                raceTrackingHandler);
         return tracker;
     }
 

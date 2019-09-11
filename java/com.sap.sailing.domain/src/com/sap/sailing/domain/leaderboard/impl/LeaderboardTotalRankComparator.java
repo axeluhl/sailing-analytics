@@ -55,6 +55,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     private final ScoringScheme scoringScheme;
     private final Map<Util.Pair<Competitor, RaceColumn>, Double> netPointsCache;
     private final Map<Util.Pair<Competitor, RaceColumn>, Double> totalPointsCache;
+    private final Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor;
     private final boolean nullScoresAreBetter;
     private final TimePoint timePoint;
     
@@ -84,15 +85,19 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         this.timePoint = timePoint;
         this.scoringScheme = scoringScheme;
         this.nullScoresAreBetter = nullScoresAreBetter;
-        netPointsCache = new HashMap<Util.Pair<Competitor, RaceColumn>, Double>();
-        totalPointsCache = new HashMap<Util.Pair<Competitor, RaceColumn>, Double>();
+        netPointsCache = new HashMap<>();
+        totalPointsCache = new HashMap<>();
+        discardedRaceColumnsPerCompetitor = new HashMap<>();
         for (Competitor competitor : leaderboard.getCompetitors()) {
             Set<RaceColumn> discardedRaceColumns = leaderboard.getResultDiscardingRule().getDiscardedRaceColumns(
                     competitor, leaderboard, raceColumnsToConsider, timePoint);
+            this.discardedRaceColumnsPerCompetitor.put(competitor, discardedRaceColumns);
             for (RaceColumn raceColumn : raceColumnsToConsider) {
                 Pair<Competitor, RaceColumn> key = new Util.Pair<Competitor, RaceColumn>(competitor, raceColumn);
-                netPointsCache.put(key, leaderboard.getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns));
-                totalPointsCache.put(key, leaderboard.getTotalPoints(competitor, raceColumn, timePoint));
+                final Double totalPoints = leaderboard.getTotalPoints(competitor, raceColumn, timePoint);
+                netPointsCache.put(key, leaderboard.getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns,
+                        /* total points provider */ ()->totalPoints));
+                totalPointsCache.put(key, totalPoints);
             }
         }
     }
@@ -240,7 +245,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                         if (result == 0) {
                             result = compareByMedalRaceScore(o1MedalRaceScore, o2MedalRaceScore);
                             if (result == 0) {
-                                result = compareByBetterScore(o1, Collections.unmodifiableList(o1Scores), o2, Collections.unmodifiableList(o2Scores), timePoint);
+                                result = compareByBetterScore(o1, Collections.unmodifiableList(o1TotalPoints), o2, Collections.unmodifiableList(o2TotalPoints), timePoint);
                                 if (result == 0) {
                                     // compare by last race:
                                     result = scoringScheme.compareByLastRace(o1TotalPoints, o2TotalPoints, nullScoresAreBetter, o1, o2);
@@ -469,13 +474,22 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     }
 
     /**
-     * Assuming both competitors scored in the same number of races, and assuming they scored the same net score,
-     * break the tie according to the {@link #scoringScheme scoring scheme} set for this comparator.
-     * @see ScoringScheme#compareByBetterScore(Competitor, List, Competitor, List, boolean, TimePoint, Leaderboard)
+     * Assuming both competitors scored in the same number of races, and assuming they scored the same net score, break
+     * the tie according to the {@link #scoringScheme scoring scheme} set for this comparator.
+     * 
+     * @see ScoringScheme#compareByBetterScore(Competitor, List, Competitor, List, boolean, TimePoint, Leaderboard, Map)
+     * 
+     * @param o1Scores
+     *            the scores of each race for competitor {@code o1}, including the scores of races that may be
+     *            discarded, with their original score
+     * @param o2Scores
+     *            the scores of each race for competitor {@code o2}, including the scores of races that may be
+     *            discarded, with their original score
      */
     protected int compareByBetterScore(Competitor o1, List<Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2,
             List<Util.Pair<RaceColumn, Double>> o2Scores, TimePoint timePoint) {
-        return scoringScheme.compareByBetterScore(o1, o1Scores, o2, o2Scores, nullScoresAreBetter, timePoint, leaderboard);
+        return scoringScheme.compareByBetterScore(o1, o1Scores, o2, o2Scores, nullScoresAreBetter, timePoint, leaderboard,
+                Collections.unmodifiableMap(discardedRaceColumnsPerCompetitor));
     }
     
     /**

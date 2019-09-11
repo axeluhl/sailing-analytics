@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -20,7 +21,10 @@ import com.sap.sse.mail.replication.testsupport.AbstractMailServiceReplicationTe
 import com.sap.sse.replication.testsupport.AbstractServerWithMultipleServicesReplicationTest;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.SecurityServiceImpl;
+import com.sap.sse.security.interfaces.AccessControlStore;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 /**
@@ -47,21 +51,31 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
     private class SecurityServerReplicationTestSetUp extends
             AbstractSecurityReplicationTest.SecurityServerReplicationTestSetUp {
         @Override
-        protected SecurityServiceImpl createNewMaster() throws MalformedURLException, IOException, InterruptedException {
+        protected SecurityServiceImpl createNewMaster() throws MalformedURLException, IOException, InterruptedException, UserGroupManagementException, UserManagementException {
             @SuppressWarnings("unchecked")
             ServiceTracker<MailService, MailService> trackerMock = mock(ServiceTracker.class);
             doReturn(masterMailService).when(trackerMock).getService();
-            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, new UserStoreImpl());
-            result.clearReplicaState();
+            final UserStoreImpl userStore = new UserStoreImpl("TestDefaultTenant");
+            userStore.ensureDefaultRolesExist();
+            userStore.loadAndMigrateUsers();
+            final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
+            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore);
+            result.initialize();
             return result;
         }
 
         @Override
-        protected SecurityServiceImpl createNewReplica() {
+        protected SecurityServiceImpl createNewReplica() throws UserGroupManagementException, UserManagementException, MalformedURLException, IOException, InterruptedException {
             @SuppressWarnings("unchecked")
             ServiceTracker<MailService, MailService> trackerMock = mock(ServiceTracker.class);
             doReturn(replicaMailService).when(trackerMock).getService();
-            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, new UserStoreImpl());
+            final UserStoreImpl userStore = new UserStoreImpl("TestDefaultTenant");
+            final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
+            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore);
+            userStore.ensureDefaultRolesExist();
+            userStore.ensureDefaultTenantExists();
+            result.initialize();
+            result.clearReplicaState();
             return result;
         }
     }
@@ -89,26 +103,21 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
      */
     @Test
     public void triggerEmailSendByAddingUserOnMaster()
-            throws UserManagementException, MailException, IllegalAccessException, InterruptedException {
+            throws UserManagementException, MailException, IllegalAccessException, InterruptedException, UserGroupManagementException {
         //TODO IllegalStateExceptions thrown, probably because the two replication services per instance share the
         //same message queue, but don't know about each other (unlike actual OSGi setup, where there is only
         //one replication service per instance that nows all Replicables)
         SecurityService masterSecurityService = securitySetUp.getMaster();
-
         final String username = "Ernie";
         final String email = "ernie@sesame-street.com";
         final String password = "BertMyFriend";
         final String validationBaseURL = null; //so that validation email is not sent        
-        
         masterSecurityService.createSimpleUser(username, email, password, 
-                /* fullName */ null, /* company */ null, validationBaseURL);
-
+                /* fullName */ null, /* company */ null, Locale.ENGLISH, validationBaseURL, null);
         masterSecurityService.sendMail(username, "subject", "body");
-        
         securitySetUp.getReplicaReplicator().waitUntilQueueIsEmpty();
         mailSetUp.getReplicaReplicator().waitUntilQueueIsEmpty();
         Thread.sleep(3000);
-
         assertThat("mail was not sent on replica",
                 AbstractMailServiceReplicationTest.numberOfMailsSent.get(replicaMailService), equalTo(null));
         assertThat("mail was sent on master",
@@ -123,23 +132,18 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
     @Test
     @Ignore
     public void triggerEmailSendByAddingUserOnReplica()
-            throws UserManagementException, MailException, IllegalAccessException, InterruptedException {
+            throws UserManagementException, MailException, IllegalAccessException, InterruptedException, UserGroupManagementException {
         SecurityService replicaSecurityService = securitySetUp.getReplica();
-
         final String username = "Ernie";
         final String email = "ernie@sesame-street.com";
         final String password = "BertMyFriend";
         final String validationBaseURL = null; //so that validation email is not sent        
-        
         replicaSecurityService.createSimpleUser(username, email, password,
-                /* fullName */ null, /* company */ null, validationBaseURL);
-
+                /* fullName */ null, /* company */ null, Locale.ENGLISH, validationBaseURL, null);
         replicaSecurityService.sendMail(username, "subject", "body");
-        
         securitySetUp.getReplicaReplicator().waitUntilQueueIsEmpty();
         mailSetUp.getReplicaReplicator().waitUntilQueueIsEmpty();
         Thread.sleep(3000);
-
         assertThat("mail was not sent on replica",
                 AbstractMailServiceReplicationTest.numberOfMailsSent.get(replicaMailService), equalTo(null));
         assertThat("mail was sent on master",

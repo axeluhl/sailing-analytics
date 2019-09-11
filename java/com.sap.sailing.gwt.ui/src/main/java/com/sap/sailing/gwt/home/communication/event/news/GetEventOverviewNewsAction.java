@@ -73,7 +73,7 @@ public class GetEventOverviewNewsAction implements SailingAction<ResultWithTTL<L
     @Override
     @GwtIncompatible
     public ResultWithTTL<ListResult<NewsEntryDTO>> execute(final SailingDispatchContext context) {
-        return EventActionUtil.withLiveRaceOrDefaultSchedule(context, eventId, new CalculationWithEvent<ListResult<NewsEntryDTO>>() {
+        return EventActionUtil.withLiveRaceOrDefaultScheduleWithReadPermissions(context, eventId, new CalculationWithEvent<ListResult<NewsEntryDTO>>() {
             @Override
             public ResultWithTTL<ListResult<NewsEntryDTO>> calculateWithEvent(Event event) {
                 return new ResultWithTTL<>(Duration.ONE_MINUTE.times(2), new ListResult<NewsEntryDTO>(getNews(context, event)));

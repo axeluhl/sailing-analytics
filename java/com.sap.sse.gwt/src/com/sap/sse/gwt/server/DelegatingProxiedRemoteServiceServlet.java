@@ -3,6 +3,8 @@ package com.sap.sse.gwt.server;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.rpc.RpcTokenException;
@@ -14,6 +16,8 @@ import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.sap.sse.common.TimePoint;
 
 public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemoteServiceServlet {
+    private static final Logger logger = Logger.getLogger(DelegatingProxiedRemoteServiceServlet.class.getName())
+            ;
     private static final long serialVersionUID = -5543378343472849437L;
 
     /**
@@ -73,6 +77,7 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
         } catch (InvocationTargetException e) {
             // Try to encode the caught exception
             Throwable cause = e.getCause();
+            logger.log(Level.SEVERE, "Uncaught exception, forwarded to client", cause);
             responsePayload = RPC.encodeResponseForFailure(serviceMethod, cause, serializationPolicy, flags);
         }
         return responsePayload;

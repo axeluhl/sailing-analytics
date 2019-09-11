@@ -9,5 +9,10 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.sap.sse.mongodb,
  org.mongodb.mongo-java-driver;bundle-version="3.6.4"
 Export-Package: com.sap.sailing.domain.igtimiadapter.persistence
-Import-Package: org.osgi.framework
+Import-Package: com.sap.sailing.domain.common.security,
+ com.sap.sse.security,
+ com.sap.sse.security.shared,
+ com.sap.sse.util,
+ org.osgi.framework,
+ org.osgi.util.tracker;version="1.5.1"
 Bundle-Activator: com.sap.sailing.domain.igtimiadapter.persistence.impl.Activator

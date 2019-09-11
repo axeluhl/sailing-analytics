@@ -20,7 +20,6 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
-import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.gwt.home.communication.event.LiveRaceDTO;
 import com.sap.sailing.gwt.home.communication.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
@@ -42,6 +41,7 @@ import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.SortingOrder;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceListColumnFactory {

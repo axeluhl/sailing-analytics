@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -87,9 +88,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -120,6 +119,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorWithBoatRefJsonSerializer;
@@ -144,8 +144,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final MongoDatabase database;
     private final CompetitorWithBoatRefJsonSerializer competitorWithBoatRefSerializer = CompetitorWithBoatRefJsonSerializer.create();
-    private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
-    private final BoatJsonSerializer boatSerializer = BoatJsonSerializer.create();
+    private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create(
+            /* serialize boat */ true, /* serializeNonPublicCompetitorFields */ true, /* verboseBoatClassSerializer */ false);
+    private final BoatJsonSerializer boatSerializer = new BoatJsonSerializer(new BoatClassJsonSerializer(/* verbose */ false));
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
     private final TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> raceTrackingConnectivityParamsServiceFinder;
 
@@ -243,15 +244,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     public MongoCollection<Document> getGPSFixCollection() {
         MongoCollection<Document> gpsFixCollection = database.getCollection(CollectionNames.GPS_FIXES.name());
-        
         // Removes old indexes not needed anymore
         dropIndexSafe(gpsFixCollection, "DEVICE_ID.DEVICE_TYPE_SPECIFIC_ID_1_GPSFIX.TIME_AS_MILLIS_1");
         dropIndexSafe(gpsFixCollection, "DEVICE_ID_1_GPSFIX.TIME_AS_MILLIS_1");
-        
         Document index = new Document();
-        index.put(FieldNames.DEVICE_ID.name(), 1);
         index.put(FieldNames.TIME_AS_MILLIS.name(), 1);
-        gpsFixCollection.createIndex(index);
+        index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE.name(), 1);
+        index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), 1);
+        index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_STRING_REPRESENTATION.name(), 1);
+        gpsFixCollection.createIndex(index, new IndexOptions().name("fixbytimeanddev"));
         return gpsFixCollection;
     }
     
@@ -718,6 +719,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbRegatta.put(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name(), regatta.useStartTimeInference());
         dbRegatta.put(FieldNames.REGATTA_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES.name(), regatta.isControlTrackingFromStartAndFinishTimes());
         dbRegatta.put(FieldNames.REGATTA_CAN_BOATS_OF_COMPETITORS_CHANGE_PER_RACE.name(), regatta.canBoatsOfCompetitorsChangePerRace());
+        dbRegatta.put(FieldNames.REGATTA_COMPETITOR_REGISTRATION_TYPE.name(), regatta.getCompetitorRegistrationType().name());
+        dbRegatta.put(FieldNames.REGATTA_REGISTRATION_LINK_SECRET.name(), regatta.getRegistrationLinkSecret());
         dbRegatta.put(FieldNames.REGATTA_RANKING_METRIC.name(), storeRankingMetric(regatta));
         boolean success = false;
         final int MAX_TRIES = 3;
@@ -1051,7 +1054,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogDenoteForTrackingEvent.class.getSimpleName());
         result.put(FieldNames.RACE_NAME.name(), event.getRaceName());
-        result.put(FieldNames.BOAT_CLASS_NAME.name(), event.getBoatClass().getName());
+        result.put(FieldNames.BOAT_CLASS_NAME.name(), event.getBoatClass()==null?null:event.getBoatClass().getName());
         result.put(FieldNames.RACE_ID.name(), event.getRaceId());
         return result;
     }
@@ -1447,29 +1450,19 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).deleteOne(query);
     }
 
+    /**
+     * Lets the {@link DeviceConfigurationJsonSerializer} create a JSON-serialized copy of the {@code configuration} and
+     * adds as a key field the stringified configuration's UUID as a field named
+     * {@link FieldNames#CONFIGURATION_ID_AS_STRING}. This field will be redundant to the serializer's copy of the ID field.
+     */
     @Override
-    public void storeDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration) {
+    public void storeDeviceConfiguration(DeviceConfiguration configuration) {
         MongoCollection<Document> configurationsCollections = database.getCollection(CollectionNames.CONFIGURATIONS.name());
-        
+        final Document configDocument = createDeviceConfigurationObject(configuration);
+        configDocument.put(FieldNames.CONFIGURATION_ID_AS_STRING.name(), configuration.getId().toString());
         Document query = new Document();
-        query.put(FieldNames.CONFIGURATION_MATCHER_ID.name(), matcher.getMatcherIdentifier());
-        
-        Document entryObject = new Document();
-        entryObject.put(FieldNames.CONFIGURATION_MATCHER_ID.name(), matcher.getMatcherIdentifier());
-        entryObject.put(FieldNames.CONFIGURATION_MATCHER.name(), createDeviceConfigurationMatcherObject(matcher));
-        entryObject.put(FieldNames.CONFIGURATION_CONFIG.name(), createDeviceConfigurationObject(configuration));
-        
-        configurationsCollections.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entryObject, new UpdateOptions().upsert(true));
-    }
-
-    private Document createDeviceConfigurationMatcherObject(DeviceConfigurationMatcher matcher) {
-        Document matcherObject = new Document();
-        if (matcher instanceof DeviceConfigurationMatcherSingle) {
-            BasicDBList client = new BasicDBList();
-            client.add(((DeviceConfigurationMatcherSingle)matcher).getClientIdentifier());
-            matcherObject.put(FieldNames.CONFIGURATION_MATCHER_CLIENTS.name(), client);
-        }
-        return matcherObject;
+        query.put(FieldNames.CONFIGURATION_ID_AS_STRING.name(), configuration.getId().toString());
+        configurationsCollections.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, configDocument, new UpdateOptions().upsert(true));
     }
 
     private Document createDeviceConfigurationObject(DeviceConfiguration configuration) {
@@ -1480,10 +1473,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void removeDeviceConfiguration(DeviceConfigurationMatcher matcher) {
+    public void removeDeviceConfiguration(UUID id) {
         MongoCollection<Document> configurationsCollections = database.getCollection(CollectionNames.CONFIGURATIONS.name());
-        Document query = new Document();
-        query.put(FieldNames.CONFIGURATION_MATCHER_ID.name(), matcher.getMatcherIdentifier());
+        Document query = new Document(FieldNames.CONFIGURATION_ID_AS_STRING.name(), id.toString());
         configurationsCollections.deleteOne(query);
     }
 

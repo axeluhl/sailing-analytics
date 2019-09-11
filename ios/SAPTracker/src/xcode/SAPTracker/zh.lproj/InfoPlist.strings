@@ -1,0 +1,15 @@
+/* InfoPlist.strings
+    SAPTracker
+  
+    Created by Raimund Wege on 04.11.16.
+    Copyright © 2016 com.sap.sailing. All rights reserved. */
+"NSLocationAlwaysUsageDescription" = "为了跟踪整轮比赛，手机还需要在关闭或锁定屏幕以节省电量并避免无意中停止跟踪流程时继续跟踪。";
+
+"NSLocationWhenInUseUsageDescription" = "为了跟踪整轮比赛，手机还需要在关闭或锁定屏幕以节省电量并避免无意中停止跟踪流程时继续跟踪。";
+
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "为了跟踪整轮比赛，手机还需要在关闭或锁定屏幕以节省电量并避免无意中停止跟踪流程时继续跟踪。";
+
+"NSCameraUsageDescription" = "照相机需要使用二维码执行签到。";
+
+"NSPhotoLibraryUsageDescription" = "要替换船队照片，应用需要访问照片库。";
+

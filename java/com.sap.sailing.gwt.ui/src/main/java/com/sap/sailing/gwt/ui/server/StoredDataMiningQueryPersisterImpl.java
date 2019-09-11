@@ -17,7 +17,7 @@ import com.sap.sse.datamining.shared.dto.StoredDataMiningQueryDTO;
 import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
 import com.sap.sse.gwt.dispatch.shared.exceptions.ServerDispatchException;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.User;
+import com.sap.sse.security.shared.impl.User;
 
 /** Implementation of {@link StoredDataMiningQueryPersister}. */
 public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQueryPersister {
@@ -26,6 +26,7 @@ public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQuery
 
     public StoredDataMiningQueryPersisterImpl(SecurityService securityService) {
         this.securityService = securityService;
+
     }
 
     /** @return all {@link StoredDataMiningQueryDTO}s the user has stored in his user store. */
@@ -47,7 +48,6 @@ public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQuery
     /** Updates or creates a new stored query and returns it. */
     @Override
     public StoredDataMiningQueryDTO updateOrCreateStoredQuery(StoredDataMiningQueryDTO query) {
-
         StoredDataMiningQueryPreferences prefs = getPreferenceForCurrentUser(
                 SailingPreferences.STORED_DATAMINING_QUERY_PREFERENCES);
 

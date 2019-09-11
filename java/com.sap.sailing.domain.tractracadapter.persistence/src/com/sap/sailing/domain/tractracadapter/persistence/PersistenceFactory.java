@@ -8,4 +8,6 @@ public interface PersistenceFactory {
     PersistenceFactory INSTANCE = new PersistenceFactoryImpl();
     
     DomainObjectFactory createDomainObjectFactory(MongoDatabase db, DomainFactory tracTracDomainFactory);
+    
+    MongoObjectFactory createMongoObjectFactory(MongoDatabase db);
 }

@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
+import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.common.PassingInstruction;
@@ -57,7 +58,13 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
     private IRaceSubscriber raceSubscriber;
     private final Collection<Receiver> receivers;
 
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(3 * 60 * 1000);
+    /**
+     * Making this a method rule allows subclasses to adjust the timeout if required
+     */
+    @Rule
+    public TestRule getTimeoutRule() {
+        return Timeout.millis(3 * 60 * 1000);
+    }
 
     protected AbstractTracTracLiveTest() throws URISyntaxException, MalformedURLException {
         receivers = new HashSet<Receiver>();

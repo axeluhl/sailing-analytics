@@ -254,7 +254,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
 
     @Override
     protected BulkScoreCorrectionDTO getResult() {
-        BulkScoreCorrectionDTO result = new BulkScoreCorrectionDTO(leaderboard.name);
+        BulkScoreCorrectionDTO result = new BulkScoreCorrectionDTO(leaderboard.getName());
         for (CompetitorDTO competitor : leaderboard.competitors) {
             for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
                 Util.Pair<CompetitorDTO, RaceColumnDTO> key = new Util.Pair<>(competitor, raceColumn);

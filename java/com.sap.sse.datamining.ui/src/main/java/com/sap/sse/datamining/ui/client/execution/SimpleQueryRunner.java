@@ -69,6 +69,7 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
         this.resultsPresenter = resultsPresenter;
 
         runButton = new Button(getDataMiningStringMessages().run());
+        runButton.ensureDebugId("RunDataminingQueryButton");
         runButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

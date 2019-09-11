@@ -208,7 +208,6 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
 
     private void refreshData() {
         Intent intent = new Intent(AppConstants.INTENT_ACTION_RESET);
-        intent.putExtra(AppConstants.EXTRA_FORCE_REFRESH, true);
         BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 
@@ -267,7 +266,7 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
                         url.setText(pref.getServerBaseURL());
                     }
                     final EditText device_id = (EditText) view.findViewById(R.id.device_id);
-                    device_id.setText(pref.getDeviceIdentifier(null));
+                    device_id.setText(pref.getDeviceConfigurationName(null));
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
                     builder.setView(view);
@@ -352,10 +351,7 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
 
         if (resultCode == CommonStatusCodes.SUCCESS && data != null) {
             Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
-            if (QRHelper.with(getActivity()).saveData(barcode.displayValue)) {
-                BroadcastManager.getInstance(getActivity())
-                        .addIntent(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN));
-            }
+            QRHelper.with(getActivity()).saveData(barcode.displayValue);
         } else {
             Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
         }

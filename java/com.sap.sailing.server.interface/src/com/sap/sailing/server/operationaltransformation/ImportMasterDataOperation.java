@@ -25,7 +25,6 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
@@ -34,6 +33,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
+import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixImpl;
@@ -67,6 +67,10 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 
 public class ImportMasterDataOperation extends
         AbstractRacingEventServiceOperation<MasterDataImportObjectCreationCountImpl> {
@@ -87,18 +91,29 @@ public class ImportMasterDataOperation extends
 
     private DataImportProgress progress;
 
+    private User user;
+
+    private UserGroup tenant;
+
     public ImportMasterDataOperation(TopLevelMasterData topLevelMasterData, UUID importOperationId, boolean override,
-            MasterDataImportObjectCreationCountImpl existingCreationCount) {
+            MasterDataImportObjectCreationCountImpl existingCreationCount, User user, UserGroup tenant) {
+
         this.creationCount = new MasterDataImportObjectCreationCountImpl();
         this.creationCount.add(existingCreationCount);
         this.masterData = topLevelMasterData;
         this.override = override;
         this.importOperationId = importOperationId;
+        this.user = user;
+        this.tenant = tenant;
     }
 
     @Override
     public MasterDataImportObjectCreationCountImpl internalApplyTo(RacingEventService toState) throws Exception {
         final DataImportLockWithProgress dataImportLock = toState.getDataImportLock();
+        SecurityService securityService = toState.getSecurityService();
+        if (securityService == null) {
+            throw new IllegalStateException("Cannot import data, security service could not be resolved");
+        }
         this.progress = dataImportLock.getProgress(importOperationId);
         progress.setCurrentSubProgress(DataImportSubProgress.IMPORT_WAIT);
         LockUtil.lockForWrite(dataImportLock);
@@ -108,7 +123,7 @@ public class ImportMasterDataOperation extends
             int numOfGroupsToImport = masterData.getLeaderboardGroups().size();
             int i = 0;
             for (LeaderboardGroup leaderboardGroup : masterData.getLeaderboardGroups()) {
-                createLeaderboardGroupWithAllRelatedObjects(toState, leaderboardGroup);
+                createLeaderboardGroupWithAllRelatedObjects(toState, leaderboardGroup, securityService);
                 i++;
                 progress.setCurrentSubProgressPct((double) i / numOfGroupsToImport);
             }
@@ -134,7 +149,13 @@ public class ImportMasterDataOperation extends
             if (masterData.getDeviceConfigurations() != null) {
                 importDeviceConfigurations(toState);
             }
-            toState.mediaTracksImported(masterData.getFilteredMediaTracks(), creationCount, override);
+            
+            Collection<MediaTrack> allMediaTracksToImport = masterData.getFilteredMediaTracks();
+            for (MediaTrack trackToImport : allMediaTracksToImport) {
+                ensureOwnership(trackToImport.getIdentifier(), securityService);
+            }
+            toState.mediaTracksImported(allMediaTracksToImport, creationCount, override);
+
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
             return creationCount;
         } catch (Exception e) {
@@ -146,26 +167,23 @@ public class ImportMasterDataOperation extends
     }
 
     private void importDeviceConfigurations(RacingEventService toState) {
-        Map<DeviceConfigurationMatcher, DeviceConfiguration> existingConfigs = toState.getAllDeviceConfigurations();
-        Set<DeviceConfigurationMatcher> existingKeys = existingConfigs.keySet();
-        Map<DeviceConfigurationMatcher, DeviceConfiguration> newConfigs = masterData.getDeviceConfigurations();
-        for(Entry<DeviceConfigurationMatcher, DeviceConfiguration> entry : newConfigs.entrySet()) {
-            DeviceConfigurationMatcher key = entry.getKey();
-            DeviceConfiguration value = entry.getValue();
-            if (existingKeys.contains(key)) {
+        Iterable<DeviceConfiguration> newConfigs = masterData.getDeviceConfigurations();
+        for (DeviceConfiguration config : newConfigs) {
+            if (toState.getDeviceConfigurationById(config.getId()) != null) {
                 if (override) {
                     logger.info(String.format(
-                            "Device configuration [%s] already exists. Overwrite because override flag is set.",
-                            key.getMatcherIdentifier()));
-                    toState.removeDeviceConfiguration(key);
-                    toState.createOrUpdateDeviceConfiguration(key, value);
+                            "Device configuration [%s] with name \"%s\" already exists. Overwrite because override flag is set.",
+                            config.getId(), config.getName()));
+                    toState.removeDeviceConfiguration(config.getId());
+                    toState.createOrUpdateDeviceConfiguration(config);
+                    // FIXME ownership here!
                 } else {
                     logger.info(String
-                            .format("Device configuration [%s] already exists. Not overwriting because override flag is not set.",
-                                    key.getMatcherIdentifier()));
+                            .format("Device configuration [%s] with name \"%s\" already exists. Not overwriting because override flag is not set.",
+                                    config.getId(), config.getName()));
                 }
             } else {
-                toState.createOrUpdateDeviceConfiguration(key, value);
+                toState.createOrUpdateDeviceConfiguration(config);
             }
         }
     }
@@ -224,11 +242,11 @@ public class ImportMasterDataOperation extends
     }
 
     private void createLeaderboardGroupWithAllRelatedObjects(final RacingEventService toState,
-            LeaderboardGroup leaderboardGroup) {
+            LeaderboardGroup leaderboardGroup, SecurityService securityService) {
         Map<String, Leaderboard> existingLeaderboards = toState.getLeaderboards();
         List<String> leaderboardNames = new ArrayList<String>();
-        createCourseAreasAndEvents(toState, leaderboardGroup);
-        createRegattas(toState, leaderboardGroup);
+        createCourseAreasAndEvents(toState, leaderboardGroup, securityService);
+        createRegattas(toState, leaderboardGroup, securityService);
         for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
             leaderboardNames.add(leaderboard.getName());
             if (existingLeaderboards.containsKey(leaderboard.getName())) {
@@ -259,6 +277,7 @@ public class ImportMasterDataOperation extends
                 toState.addLeaderboard(leaderboard);
                 storeRaceLogEvents(leaderboard, toState.getMongoObjectFactory(), toState.getDomainObjectFactory(), override);
                 storeRegattaLogEvents(leaderboard, toState.getMongoObjectFactory(), toState.getDomainObjectFactory(), override);
+                ensureOwnership(leaderboard.getIdentifier(), securityService);
                 creationCount.addOneLeaderboard(leaderboard.getName());
                 relinkTrackedRacesIfPossible(toState, leaderboard);
                 toState.updateStoredLeaderboard(leaderboard);
@@ -276,6 +295,10 @@ public class ImportMasterDataOperation extends
         if (existingLeaderboardGroup == null) {
             toState.addLeaderboardGroupWithoutReplication(leaderboardGroup);
             creationCount.addOneLeaderboardGroup(leaderboardGroup.getName());
+            if (leaderboardGroup.getOverallLeaderboard() != null) {
+                ensureOwnership(leaderboardGroup.getOverallLeaderboard().getIdentifier(), securityService);
+            }
+            ensureOwnership(leaderboardGroup.getIdentifier(), securityService);
         } else {
             logger.info(String.format("Leaderboard Group with name %1$s already exists and hasn't been overridden.",
                     leaderboardGroup.getName()));
@@ -449,7 +472,8 @@ public class ImportMasterDataOperation extends
         }
     }
 
-    private void createRegattas(RacingEventService toState, LeaderboardGroup leaderboardGroup) {
+    private void createRegattas(RacingEventService toState, LeaderboardGroup leaderboardGroup,
+            SecurityService securityService) {
         Iterable<Leaderboard> leaderboards = leaderboardGroup.getLeaderboards();
         for (Leaderboard leaderboard : leaderboards) {
             if (leaderboard instanceof RegattaLeaderboard) {
@@ -520,14 +544,15 @@ public class ImportMasterDataOperation extends
                         }
                     }
                 }
+                ensureOwnership(regatta.getIdentifier(), securityService);
                 creationCount.addOneRegatta(regatta.getId().toString());
             }
         }
-
     }
 
 
-    private void createCourseAreasAndEvents(RacingEventService toState, LeaderboardGroup leaderboardGroup) {
+    private void createCourseAreasAndEvents(RacingEventService toState, LeaderboardGroup leaderboardGroup,
+            SecurityService securityService) {
         for (Event event : masterData.getEventForLeaderboardGroup().get(leaderboardGroup)) {
             UUID id = event.getId();
             Event existingEvent = toState.getEvent(id);
@@ -539,12 +564,19 @@ public class ImportMasterDataOperation extends
             }
             if (existingEvent == null) {
                 toState.addEventWithoutReplication(event);
+                ensureOwnership(event.getIdentifier(), securityService);
                 creationCount.addOneEvent(event.getId().toString());
             } else {
                 logger.info(String.format("Event with name %1$s already exists and hasn't been overridden.",
                         event.getName()));
             }
         }
+    }
+
+    private void ensureOwnership(QualifiedObjectIdentifier identifier, SecurityService securityService) {
+        logger.info( "Adopting " + identifier + " from Masterdataimport to " + user.getName() +
+                " and group " + (tenant==null?"null":tenant.getName()));
+        securityService.setOwnershipIfNotSet(identifier, user, tenant);
     }
 
     @Override

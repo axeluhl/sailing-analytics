@@ -11,6 +11,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
+import com.sap.sse.security.SecurityService;
 
 public class IgtimiWindTrackerFactory implements WindTrackerFactory {
     private static final Logger logger = Logger.getLogger(IgtimiWindTrackerFactory.class.getName());
@@ -24,9 +25,10 @@ public class IgtimiWindTrackerFactory implements WindTrackerFactory {
 
     @Override
     public WindTracker createWindTracker(DynamicTrackedRegatta trackedRegatta, RaceDefinition race,
-            boolean correctByDeclination) throws Exception {
+            boolean correctByDeclination, SecurityService optionalSecurityService) throws Exception {
         DynamicTrackedRace trackedRace = trackedRegatta.getTrackedRace(race);
-        IgtimiWindTracker windTracker = new IgtimiWindTracker(trackedRace, connectionFactory, this, correctByDeclination);
+        IgtimiWindTracker windTracker = new IgtimiWindTracker(trackedRace, connectionFactory, this,
+                correctByDeclination, optionalSecurityService);
         trackersForRace.put(race, windTracker);
         return windTracker;
     }

@@ -162,7 +162,7 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         final Integer protestTimeDurationInMinutes = originalConfiguration.defaultProtestTimeDuration == null ? null :
             (int) originalConfiguration.defaultProtestTimeDuration.asMinutes();
         protestTimeInMinutesTextBox = createIntegerBox(protestTimeDurationInMinutes, 3);
-        grid.setWidget(gridRow, 0, new Label(stringMessages.protestTime()));
+        grid.setWidget(gridRow, 0, new Label(stringMessages.protestTimeInMinutes()));
         grid.setWidget(gridRow, 1, protestTimeInMinutesTextBox);
     }
 

@@ -16,6 +16,7 @@ public interface EditSailorProfileDetailsView extends IsWidget {
         SailorProfilesCompetitorSelectionPresenter getCompetitorPresenter();
 
         PlaceController getPlaceController();
+
     }
 
     void setEntry(SailorProfileDTO entry);

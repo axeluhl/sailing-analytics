@@ -15,7 +15,7 @@ public interface TaggingPanelResources extends CellList.Resources, CellTable.Res
     @Source("com/sap/sailing/gwt/ui/client/images/share.png")
     ImageResource shareIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/images/edit.png")
+    @Source("com/sap/sse/gwt/client/images/edit.png")
     ImageResource editIcon();
 
     @Source("com/sap/sse/gwt/client/images/remove.png")

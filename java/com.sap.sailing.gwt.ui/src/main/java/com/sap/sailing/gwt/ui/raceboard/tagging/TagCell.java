@@ -215,7 +215,8 @@ public class TagCell extends AbstractCell<TagDTO> {
                             stringMessages.tagEditTag(), tagCellTemplate.icon(resources.editIcon().getSafeUri()));
                 }
                 if (tag.getUsername().equals(userService.getCurrentUser().getName())
-                        || userService.getCurrentUser().hasRole("admin")) {
+                        // FIXME doesn't work with permission-vertical anymore
+                        /* || userService.getCurrentUser().hasRole("admin") */) {
                     deleteButton = tagCellTemplate.button(style.tagActionButton() + " " + style.tagDeleteButton(),
                             stringMessages.tagDeleteTag(), tagCellTemplate.icon(resources.deleteIcon().getSafeUri()));
                 }
@@ -236,7 +237,7 @@ public class TagCell extends AbstractCell<TagDTO> {
     /**
      * Asks user for confirmation if user presses the delete button on the {@link TagCell}. If user confirms deletion,
      * {@link TagDTO tag} will be deleted from {@link TaggingPanel} including
-     * {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog} or {@link com.sap.sse.security.UserStore
+     * {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog} or {@link com.sap.sse.security.interfaces.UserStore
      * UserStore}, depending on where the tag is saved. Also allows users to edit {@link TagDTO tags}, by putting
      * {@link TaggingPanel} into state {@link TaggingPanel.State#EDIT_TAG edit} when user presses the edit button.
      */

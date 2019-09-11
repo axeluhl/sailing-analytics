@@ -19,7 +19,7 @@ public class MongoClientURITest {
     }
 
     @Test
-    public void testSpecifigConnectionOptions() {
+    public void testSpecificConnectionOptions() {
         MongoDBConfiguration config = new MongoDBConfiguration("mongodb://humba:12345/mydb?replicaset=rs0&readpreference=primary");
         assertEquals("humba", config.getHostname());
         assertEquals(12345, config.getPort());

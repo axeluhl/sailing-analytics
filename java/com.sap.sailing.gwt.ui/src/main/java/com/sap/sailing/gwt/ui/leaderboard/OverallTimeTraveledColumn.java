@@ -9,14 +9,14 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
-import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.DataExtractor;
+import com.sap.sse.common.InvertibleComparator;
+import com.sap.sse.common.impl.InvertibleComparatorAdapter;
+import com.sap.sse.gwt.client.celltable.AbstractSortableColumnWithMinMax;
 
 public class OverallTimeTraveledColumn extends ExpandableSortableColumn<String> implements HasStringAndDoubleValue<LeaderboardRowDTO> {
     
@@ -50,7 +50,6 @@ public class OverallTimeTraveledColumn extends ExpandableSortableColumn<String> 
             LeaderboardPanel<?> leaderboardPanel, StringMessages stringConstants, String detailHeaderStyle,
             String detailColumnStyle) {
         Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new HashMap<>();
-
         result.put(DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS,
                 new TotalTimeColumn(DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, new TotalTimeSailedUpwindInSeconds(),
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
@@ -60,7 +59,6 @@ public class OverallTimeTraveledColumn extends ExpandableSortableColumn<String> 
         result.put(DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS,
                 new TotalTimeColumn(DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS, new TotalTimeSailedReachingInSeconds(),
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
-
         return result;
     }
     

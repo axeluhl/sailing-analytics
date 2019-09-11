@@ -360,8 +360,8 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
                 new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
                         /* dateOfBirth */ null, "This is Rigo, the coach")),
-                        /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-        DynamicBoat boat = (DynamicBoat) domainFactory.getOrCreateBoat("boat", "Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null, null);
+                        /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true);
+        DynamicBoat boat = (DynamicBoat) domainFactory.getOrCreateBoat("boat", "Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null, null, /* storePersistently */ true);
         CompetitorWithBoat competitorWithBoat = new CompetitorWithBoatImpl(competitor, boat);
         TrackedRace raceWithOneCompetitor1 = new MockedTrackedRaceWithFixedRank(competitorWithBoat, /* rank */ 1, /* started */ true);
         TrackedRace raceWithOneCompetitor2 = new MockedTrackedRaceWithFixedRank(competitorWithBoat, /* rank */ 2, /* started */ true);

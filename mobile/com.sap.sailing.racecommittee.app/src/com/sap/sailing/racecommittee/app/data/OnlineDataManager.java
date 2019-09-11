@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -22,9 +23,9 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.impl.RaceColumnFactorImpl;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -110,9 +111,9 @@ public class OnlineDataManager extends DataManager {
         }
     }
 
-    public void addMarks(Collection<Mark> marks) {
+    public void addMarks(RaceGroup raceGroup, Collection<Mark> marks) {
         for (Mark mark : marks) {
-            dataStore.addMark(mark);
+            dataStore.addMark(raceGroup, mark);
         }
     }
 
@@ -204,7 +205,7 @@ public class OnlineDataManager extends DataManager {
                 ExLog.i(context, TAG, "Creating marks-OnlineDataLoader " + id);
                 JsonDeserializer<Mark> markDeserializer = new MarkDeserializer(domainFactory);
                 DataParser<Collection<Mark>> parser = new MarksDataParser(markDeserializer);
-                DataHandler<Collection<Mark>> handler = new MarksDataHandler(OnlineDataManager.this);
+                DataHandler<Collection<Mark>> handler = new MarksDataHandler(OnlineDataManager.this, managedRace.getRaceGroup());
 
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
                 // no parameter encoding required here; the UrlHelper.generateUrl call uses Url.Builder which handles
@@ -338,7 +339,7 @@ public class OnlineDataManager extends DataManager {
 
     @Override
     public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(
-            final DeviceConfigurationIdentifier identifier, LoadClient<DeviceConfiguration> callback) {
+            final String deviceConfigurationName, UUID deviceConfigurationUuid, LoadClient<DeviceConfiguration> callback) {
         return new DataLoaderCallbacks<>(callback, new LoaderCreator<DeviceConfiguration>() {
             @Override
             public Loader<DataLoaderResult<DeviceConfiguration>> create(int id, Bundle args) throws Exception {
@@ -346,11 +347,14 @@ public class OnlineDataManager extends DataManager {
                 DataHandler<DeviceConfiguration> handler = new NullDataHandler<DeviceConfiguration>();
                 DataParser<DeviceConfiguration> parser = new DeviceConfigurationParser(
                         DeviceConfigurationJsonDeserializer.create());
-                String encodedIdentifier = identifier.getClientIdentifier();
                 List<Util.Pair<String, Object>> params = new ArrayList<>();
-                params.add(new Util.Pair<String, Object>("client", encodedIdentifier));
-                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/configuration",
-                        params);
+                if (deviceConfigurationName != null) {
+                    params.add(new Util.Pair<String, Object>("client", deviceConfigurationName));
+                }
+                if (deviceConfigurationUuid != null) {
+                    params.add(new Util.Pair<String, Object>("uuid", deviceConfigurationUuid.toString()));
+                }
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/configuration", params);
                 return new OnlineDataLoader<>(context, url, parser, handler);
             }
         }, getContext());

@@ -22,7 +22,6 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -56,12 +55,12 @@ public class TopLevelMasterData implements Serializable {
     private final Set<WindTrackMasterData> windTrackMasterData;
     private final Map<LeaderboardGroup, Set<Event>> eventForLeaderboardGroup;
     private final Map<DeviceIdentifier, Set<Timed>> raceLogTrackingFixes;
-    private final Map<DeviceConfigurationMatcher, DeviceConfiguration> deviceConfigurations;
+    private final Iterable<DeviceConfiguration> deviceConfigurations;
 
     public TopLevelMasterData(final Set<LeaderboardGroup> groupsToExport, final Iterable<Event> allEvents,
             final Map<String, Regatta> regattaForRaceIdString, final Iterable<MediaTrack> allMediaTracks,
             SensorFixStore sensorFixStore, boolean exportWind,
-            Map<DeviceConfigurationMatcher, DeviceConfiguration> deviceConfigurations) {
+            Iterable<DeviceConfiguration> raceManagerDeviceConfigurations) {
         this.raceIdStringsForRegatta = convertToRaceIdStringsForRegattaMap(regattaForRaceIdString);
         this.leaderboardGroups = groupsToExport;
         this.raceLogTrackingFixes = getAllRelevantRaceLogTrackingFixes(sensorFixStore);
@@ -70,7 +69,7 @@ public class TopLevelMasterData implements Serializable {
         } else {
             this.windTrackMasterData = new HashSet<WindTrackMasterData>();
         }
-        this.deviceConfigurations = deviceConfigurations;
+        this.deviceConfigurations = raceManagerDeviceConfigurations;
         this.eventForLeaderboardGroup = createEventMap(groupsToExport, allEvents);
         this.filteredMediaTracks = new HashSet<MediaTrack>();
         filterMediaTracks(allMediaTracks, this.filteredMediaTracks);
@@ -315,7 +314,7 @@ public class TopLevelMasterData implements Serializable {
         return raceLogTrackingFixes;
     }
 
-    public Map<DeviceConfigurationMatcher, DeviceConfiguration> getDeviceConfigurations() {
+    public Iterable<DeviceConfiguration> getDeviceConfigurations() {
         return deviceConfigurations;
     }
 }

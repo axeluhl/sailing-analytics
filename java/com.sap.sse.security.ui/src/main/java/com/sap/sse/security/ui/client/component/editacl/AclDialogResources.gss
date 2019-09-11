@@ -1,0 +1,20 @@
+.allowedActionsTable, .deniedActionsTable {
+    margin: 0 3px inherit 2px;
+    display: inline;
+}
+
+.additionalWidget {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.userGroupTextBox {
+    min-width: 200px;
+    margin-bottom: 5px;
+}
+
+.dialogHeader {
+    display: inline-block;
+    margin-right: 10px;
+    margin-left: 5px;
+}

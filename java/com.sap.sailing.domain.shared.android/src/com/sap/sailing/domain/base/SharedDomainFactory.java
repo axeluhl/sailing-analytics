@@ -1,11 +1,9 @@
 package com.sap.sailing.domain.base;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sse.common.Color;
@@ -100,11 +98,6 @@ public interface SharedDomainFactory extends CompetitorFactory, BoatFactory {
      * Gets the {@link CourseArea} with passed id; if there is no such {@link CourseArea} <code>null</code> will be returned.
      */
     CourseArea getExistingCourseAreaById(Serializable courseAreaId);
-    
-    /**
-     * Hm.
-     */
-    DeviceConfigurationMatcher getOrCreateDeviceConfigurationMatcher(List<String> clientIdentifiers);
     
     Mark getExistingMarkByIdAsString(String toStringRepresentationOfID);
     

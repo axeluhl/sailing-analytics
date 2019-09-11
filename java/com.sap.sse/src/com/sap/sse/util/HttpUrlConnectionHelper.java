@@ -5,6 +5,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.function.Consumer;
 
 import com.sap.sse.common.Duration;
 
@@ -15,13 +16,49 @@ public class HttpUrlConnectionHelper {
      * Redirects the connection using the <code>Location</code> header. Make sure to set
      * the timeout if you expect the response to take longer.
      */
-    public static URLConnection redirectConnection(URL url, Duration timeout) throws MalformedURLException, IOException {
+    public static URLConnection redirectConnection(URL url, Duration timeout,
+            Consumer<URLConnection> preConnectionModifier) throws MalformedURLException, IOException {
+        return redirectConnection(url, timeout, /* optional request method */ null, preConnectionModifier);
+    }
+    
+    /**
+     * Redirects the connection using the <code>Location</code> header.
+     */
+    public static URLConnection redirectConnectionWithBearerToken(URL url, String optionalBearerToken) throws MalformedURLException, IOException {
+        return redirectConnectionWithBearerToken(url, Duration.ONE_MINUTE.times(10), optionalBearerToken);
+    }
+    
+    /**
+     * Redirects the connection using the <code>Location</code> header. Make sure to set
+     * the timeout if you expect the response to take longer.
+     */
+    public static URLConnection redirectConnectionWithBearerToken(URL url, Duration timeout, String optionalBearerToken)
+            throws MalformedURLException, IOException {
+        return redirectConnection(url, timeout, t -> {
+            if (optionalBearerToken != null && !optionalBearerToken.isEmpty()) {
+                t.setRequestProperty("Authorization", "Bearer " + optionalBearerToken);
+            }
+        });
+    }
+    
+    /**
+     * Redirects the connection using the <code>Location</code> header. Make sure to set
+     * the timeout if you expect the response to take longer.
+     */
+    public static URLConnection redirectConnection(URL url, Duration timeout, String optionalRequestMethod,
+            Consumer<URLConnection> preConnectionModifier) throws MalformedURLException, IOException {
         URLConnection urlConnection = null;
         URL nextUrl = url;
         for (int counterOfRedirects = 0; counterOfRedirects <= HTTP_MAX_REDIRECTS; counterOfRedirects++) {
             urlConnection = nextUrl.openConnection();
             urlConnection.setRequestProperty("User-Agent", "Mozilla/5.0...");
+            if (preConnectionModifier != null) {
+                preConnectionModifier.accept(urlConnection);
+            }
             urlConnection.setDoOutput(true);
+            if (optionalRequestMethod != null) {
+                ((HttpURLConnection)urlConnection).setRequestMethod(optionalRequestMethod);
+            }
             urlConnection.setReadTimeout((int) timeout.asMillis());
             if (urlConnection instanceof HttpURLConnection) {
                 final HttpURLConnection connection = (HttpURLConnection) urlConnection;
@@ -42,6 +79,10 @@ public class HttpUrlConnectionHelper {
     }
     
     public static URLConnection redirectConnection(URL url) throws MalformedURLException, IOException {
-        return redirectConnection(url, Duration.ONE_MINUTE.times(10));
+        return redirectConnection(url, Duration.ONE_MINUTE.times(10), null);
+    }
+    
+    public static URLConnection redirectConnection(URL url, String optionalRequestMethod) throws MalformedURLException, IOException {
+        return redirectConnection(url, Duration.ONE_MINUTE.times(10), optionalRequestMethod, null);
     }
 }

@@ -51,6 +51,7 @@ The app has to receive the following information:
     * ``competitor-id`` (so the app can register the device for the correct competitor)
     * ``boat-id`` (so the app can register the device for the correct boat)
     * ``mark-id`` (so the app can register the device for the correct mark)
+* ``secret`` (optional regattasecret, so the app can register in managed scenarios without every user owning an account)
 
 This information is represented in a URL with one of the following structures:
 
@@ -76,6 +77,7 @@ http://<host>/tracking/checkin
 ```
 
 **Additional Notes:**
+* If the call is not made with a bearertoken linked to a user with correct permissions, it is necessary to use the additional parameter "secret", that should contain the regattasecret. If it is correct,further permission checks will be skipped for this call.
 * The URL is **only symbolic**. Requesting it will for now result in a 404. In the future, it might be used to redirect to the .apk, play store or app store in case the app is not installed.
 * The variable-length leaderboard name is problematic when thinking about length restrictions in QRCodes anyway. We will have to think about URL-shortening anyhow, so legible parameter names were chosen instead of short ones (e.g. ``event_id=`` instead of ``e=``)
 * The app has to get event and competitor data by performing additional REST API calls

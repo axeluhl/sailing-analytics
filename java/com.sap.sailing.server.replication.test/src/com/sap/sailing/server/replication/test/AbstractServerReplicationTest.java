@@ -56,7 +56,7 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
                     @Override public CompetitorAndBoatStore getCompetitorAndBoatStore() { return getBaseDomainFactory().getCompetitorAndBoatStore(); }
                 };
             }, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE, null, null, /* sailingNotificationService */ null,
-                    /* trackedRaceStatisticsCache */ null, /* restoreTrackedRaces */ false);
+                    /* trackedRaceStatisticsCache */ null, /* restoreTrackedRaces */ false, null);
         }
 
         @Override
@@ -76,7 +76,7 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
                         };
                     }, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE,
                     /* serviceFinderFactory */ null, null, /* sailingNotificationService */ null,
-                    /* trackedRaceStatisticsCache */ null, /* restoreTrackedRaces */ false);
+                    /* trackedRaceStatisticsCache */ null, /* restoreTrackedRaces */ false, null);
         }
     }
 }

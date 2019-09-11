@@ -1,8 +1,13 @@
 package com.sap.sailing.domain.tracking;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -14,9 +19,12 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.tracking.impl.CombinedWindTrackImpl;
+import com.sap.sailing.domain.tracking.impl.DummyWindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.LegMiddleWindTrackImpl;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+
+import difflib.PatchFailedException;
 
 
 public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
@@ -46,7 +54,7 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
      * intra-leg computations are done dynamically based on wind information, selecting a different wind information
      * source can alter the intra-leg results. See {@link #currentWindSource}.
      */
-    protected final ConcurrentMap<WindSource, WindTrack> windTracks;
+    protected transient ConcurrentMap<WindSource, WindTrack> windTracks;
     
     protected final RaceDefinition race;
     
@@ -90,15 +98,22 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
                 combinedWindTrack = new CombinedWindTrackImpl(this, WindSourceType.COMBINED.getBaseConfidence());
             }
             result = combinedWindTrack;
-        } else if (windSource.getType() == WindSourceType.LEG_MIDDLE && windSource instanceof WindSourceWithAdditionalID) {
+        } else if (windSource.getType() == WindSourceType.LEG_MIDDLE
+                && windSource instanceof WindSourceWithAdditionalID) {
             result = getLegMiddleWindTrack((WindSourceWithAdditionalID) windSource);
         } else {
             synchronized (windTracks) {
                 result = windTracks.get(windSource);
                 if (result == null) {
-                    result = createWindTrack(windSource,
-                            delayForWindEstimationCacheInvalidation == -1 ? getMillisecondsOverWhichToAverageWind() / 2
-                                    : delayForWindEstimationCacheInvalidation);
+                    if (windSource.getType() == WindSourceType.MANEUVER_BASED_ESTIMATION) {
+                        // wind track of wind estimation gets unavailable only in one case: wind estimation was detached
+                        // but it is still running. Hence, return dummy track to complete to finish the run.
+                        result = new DummyWindTrackImpl();
+                    } else {
+                        result = createWindTrack(windSource,
+                                delayForWindEstimationCacheInvalidation == -1 ? getMillisecondsOverWhichToAverageWind() / 2
+                                        : delayForWindEstimationCacheInvalidation);
+                    }
                 }
             }
         }
@@ -178,4 +193,37 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
     protected NamedReentrantReadWriteLock getSerializationLock() {
         return serializationLock;
     }
+    
+    /**
+     * For serialization, maneuver based estimation wind track should be removed because its replication is redundant.
+     * The wind estimation track is calculated automatically when maneuver cache recalculation is triggered. Due to the
+     * custom deserialization of maneuver cache, this is always the case, also if replication is performed. Furthermore,
+     * it might introduce issues in context of already running wind estimation.
+     */
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        LockUtil.lockForWrite(getSerializationLock());
+        try {
+            s.defaultWriteObject();
+            Map<WindSource, WindTrack> windTracksToSerialize = new HashMap<>();
+            synchronized (this.windTracks) {
+                for (Entry<WindSource, WindTrack> entry : windTracks.entrySet()) {
+                    if (entry.getKey().getType() != WindSourceType.MANEUVER_BASED_ESTIMATION) {
+                        windTracksToSerialize.put(entry.getKey(), entry.getValue());
+                    }
+                }
+            }
+            s.writeObject(windTracksToSerialize);
+        } finally {
+            LockUtil.unlockAfterWrite(getSerializationLock());
+        }
+    }
+
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException, PatchFailedException {
+        ois.defaultReadObject();
+        @SuppressWarnings("unchecked")
+        Map<WindSource, WindTrack> windTracks = (Map<WindSource, WindTrack>) ois.readObject();
+        this.windTracks = new ConcurrentHashMap<>(windTracks);
+    }
+
+    
 }

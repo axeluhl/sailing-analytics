@@ -8,13 +8,14 @@ import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.Renamable;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.media.ImageSize;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.shared.media.WithMedia;
 
 /**
  * Base interface for an Event consisting of all static information, which might be shared
  * by the server and an Android application.
  */
-public interface EventBase extends NamedWithID, WithDescription, Renamable, WithMedia {
+public interface EventBase extends NamedWithID, WithDescription, Renamable, WithMedia, WithQualifiedObjectIdentifier {
 
     void setDescription(String description);
     

@@ -58,7 +58,7 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
     static class MasterReplicationDescriptorMock extends ReplicationMasterDescriptorImpl {
 
         public MasterReplicationDescriptorMock(String messagingHost, String hostname, String exchangeName, int servletPort, int messagingPort, Iterable<Replicable<?, ?>> replicables) {
-            super(messagingHost, exchangeName, messagingPort, UUID.randomUUID().toString(), hostname, servletPort, replicables);
+            super(messagingHost, exchangeName, messagingPort, UUID.randomUUID().toString(), hostname, servletPort, /* bearerToken */ null, replicables);
         }
         
         public static MasterReplicationDescriptorMock from(ReplicationMasterDescriptor obj) {

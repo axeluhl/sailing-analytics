@@ -39,6 +39,7 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * The UI form to upload data for expedition all in one import.
@@ -48,7 +49,7 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
 
     private final RegattaSuggestOracle regattaOracle;
 
-    public ExpeditionAllInOneImportPanel(final StringMessages stringMessages, final SailingServiceAsync sailingService,
+    public ExpeditionAllInOneImportPanel(final StringMessages stringMessages, final SailingServiceAsync sailingService, final UserService userService,
             final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher) {
         final FormPanel formPanel = new FormPanel();
         final BusyIndicator busyIndicator = new SimpleBusyIndicator();
@@ -159,7 +160,7 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
                 new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
                         response.getLeaderboardName(), response.getLeaderboardGroupName(), response.getRaceEntries(),
                         response.getGpsDeviceIds(), response.getSensorDeviceIds(), response.getSensorFixImporterType(),
-                        response.getStartTimes(), sailingService,
+                        response.getStartTimes(), sailingService, userService,
                         errorReporter, stringMessages);
                 regattaRefresher.fillRegattas();
             } else {

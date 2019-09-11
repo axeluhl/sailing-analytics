@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Testsupport
+Bundle-SymbolicName: com.sap.sse.security.testsupport
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Automatic-Module-Name: com.sap.sse.security.testsupport
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: com.sap.sse.security,
+ org.mockito.mockito-core;bundle-version="1.10.14",
+ com.sap.sse.common
+Export-Package: com.sap.sse.security.testsupport

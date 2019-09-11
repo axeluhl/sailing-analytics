@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.MediaSynchPlayer;
 import com.sap.sse.common.TimePoint;
@@ -43,7 +43,7 @@ public class VideoYoutubePlayer extends AbstractMediaPlayer implements MediaSync
 
     private final List<DeferredAction> deferredActions = new ArrayList<DeferredAction>();
 
-    public VideoYoutubePlayer(final MediaTrack videoTrack, TimePoint raceStartTime, Timer raceTimer) {
+    public VideoYoutubePlayer(final MediaTrackWithSecurityDTO videoTrack, TimePoint raceStartTime, Timer raceTimer) {
         super(videoTrack);
         this.raceTimer = raceTimer;
         this.raceStartTime = raceStartTime;

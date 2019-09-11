@@ -679,7 +679,7 @@ public class PenaltyFragment extends BaseFragment
             }
         }
         competitor.setMergeState(MergeState.OK);
-        CompetitorResultWithIdImpl item = new CompetitorResultWithIdImpl(0, getBoat(competitor.getCompetitorId()), competitor);
+        CompetitorResultWithIdImpl item = new CompetitorResultWithIdImpl(0, competitor);
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
         builder.setTitle(CompetitorUtils.getDisplayName(item));
         final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), item,

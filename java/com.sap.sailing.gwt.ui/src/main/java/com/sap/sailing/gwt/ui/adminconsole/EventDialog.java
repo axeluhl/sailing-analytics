@@ -12,8 +12,6 @@ import java.util.UUID;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.i18n.client.LocaleInfo;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
@@ -39,10 +37,8 @@ import com.sap.sse.gwt.client.controls.listedit.GenericStringListEditorComposite
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
-import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
-import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
 
 public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDTO> {
     protected StringMessages stringMessages;
@@ -61,7 +57,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     protected ImagesListComposite imagesListComposite;
     protected VideosListComposite videosListComposite;
     protected ExternalLinksComposite externalLinksComposite;
-    private final FileStorageServiceConnectionTestObservable storageServiceAvailable = new FileStorageServiceConnectionTestObservable();
+    private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
     
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
@@ -134,7 +130,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
             StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
             Iterable<LeaderboardGroupDTO> leaderboardGroupsOfEvent, DialogCallback<EventDTO> callback) {
         super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
-        testFileStorageService(sailingService);
+        this.storageServiceAvailable = new FileStorageServiceConnectionTestObservable(sailingService);
         this.stringMessages = stringMessages;
         this.availableLeaderboardGroupsByName = new HashMap<>();
         for (final LeaderboardGroupDTO lgDTO : availableLeaderboardGroups) {
@@ -231,7 +227,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         formGrid.setWidget(rowIndex++, 1, startDateBox);
         formGrid.setWidget(rowIndex, 0, new Label(stringMessages.endDate() + ":"));
         formGrid.setWidget(rowIndex++, 1, endDateBox);
-        formGrid.setWidget(rowIndex, 0, new Label(stringMessages.isPublic() + ":"));
+        formGrid.setWidget(rowIndex, 0, new Label(stringMessages.isListedOnHomepage() + ":"));
         formGrid.setWidget(rowIndex++, 1, isPublicCheckBox);
         formGrid.setWidget(rowIndex, 0, new Label(stringMessages.eventBaseURL() + ":"));
         formGrid.setWidget(rowIndex++, 1, baseURLEntryField);
@@ -267,73 +263,4 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     protected FocusWidget getInitialFocusWidget() {
         return nameEntryField;
     }
-
-    // used for ImageDialog and VideoDialog to inform user that upload is not possible
-    // without needing to try it first
-    private void testFileStorageService(FileStorageManagementGwtServiceAsync sailingService) {
-        sailingService.testFileStorageServiceProperties(null, LocaleInfo.getCurrentLocale().getLocaleName(),
-                new AsyncCallback<FileStorageServicePropertyErrorsDTO>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                    }
-
-                    @Override
-                    public void onSuccess(FileStorageServicePropertyErrorsDTO result) {
-                        if (result == null) {
-                            storageServiceAvailable.testPassed();
-                        }
-                    }
-                });
-    }
-    
-    /**
-     * The only purpose of this class is to hold the value of the response of the {@link EventDialog#testFileStorageService(FileStorageManagementGwtServiceAsync)} method
-     * It will notify all registered observers on a change and directly after the registration, if the value is already true
-     * The value of this will only change from false to true, so the value can also be seen as an alreadyChanged value
-     * If the test fails, the value will not change due its lifetime
-     * 
-     * @author Robin Fleige (D067799)
-     */
-    public class FileStorageServiceConnectionTestObservable {
-        private List<FileStorageServiceConnectionTestObserver> observer = new ArrayList<>();
-        private boolean value;
-        
-        public FileStorageServiceConnectionTestObservable() {
-            value = false;
-        }
-        
-        public void testPassed() {
-            value = true;
-            for (FileStorageServiceConnectionTestObserver observer : this.observer) {
-                observer.onFileStorageServiceTestPassed();
-            }
-        }
-        
-        public boolean getValue() {
-            return value;
-        }
-        
-        public void registerObserver(FileStorageServiceConnectionTestObserver observer) {
-            this.observer.add(observer);
-            if (value) {
-                observer.onFileStorageServiceTestPassed();
-            }
-        }
-
-        public void unregisterObserver(FileStorageServiceConnectionTestObserver observer) {
-            this.observer.remove(observer);
-        }
-    }
-    
-    /**
-     * The only use of this interface is to get notified if the response of the {@link EventDialog#testFileStorageService(FileStorageManagementGwtServiceAsync)} method arrives
-     * Also see {@link EventDialog.FileStorageServiceConnectionTestObservable}
-     * 
-     * @author Robin Fleige (D067799)
-     */
-    public interface FileStorageServiceConnectionTestObserver {
-        void onFileStorageServiceTestPassed();
-    }
-
 }

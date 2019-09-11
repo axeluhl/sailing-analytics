@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +34,7 @@ import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -55,7 +57,7 @@ public class StatisticsTest {
     private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
     private final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", "c", null, null, null, null,
             /* timeOnTimeFactor */ null,
-            /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+            /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
     private final Boat boat = new BoatImpl("boat", "b", boatClass, "DE 12345");
     private final Mark mark1 = DomainFactory.INSTANCE.getOrCreateMark("mark1");
     private final Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
@@ -70,8 +72,9 @@ public class StatisticsTest {
     @Before
     public void setUp() {
         regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
-                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, false,
-                /* startDate */ null, /* endDate */null, null, null, "a", null));
+                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, false, 
+                CompetitorRegistrationType.CLOSED, /* startDate */ null, /* endDate */null, null, null, "a", null,
+                /* registrationLinkSecret */ UUID.randomUUID().toString()));
 
         final Course course = new CourseImpl("course",
                 Arrays.asList(new Waypoint[] { waypoint1, waypoint2, waypoint3 }));

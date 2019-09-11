@@ -25,7 +25,7 @@ toolchains.xml      text eol=lf
 *.gradle            text
 *.java              text
 *.properties        text
-*.launch            text
+*.launch            text eol=lf
 MANIFEST.MF         text
 .project            text
 .classpath          text
@@ -49,3 +49,4 @@ translation_v2.json text eol=lf
 *.pptx              -text
 *.xlsx              -text
 *.pdf               -text
+*.target            -text eol=lf

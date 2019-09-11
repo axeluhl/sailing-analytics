@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Wrapper for {@link SharedPreferences} for all hidden and non-hidden preferences and state variables.
@@ -157,13 +158,18 @@ public class AppPreferences {
         return RacingProcedureType.valueOf(defaultStartProcedureType);
     }
 
-    public String getDeviceIdentifier() {
-        return getDeviceIdentifier(Secure.getString(context.getContentResolver(), Secure.ANDROID_ID));
+    public String getDeviceConfigurationName() {
+        return getDeviceConfigurationName(Secure.getString(context.getContentResolver(), Secure.ANDROID_ID));
     }
 
-    public String getDeviceIdentifier(String defaultValue) {
+    public String getDeviceConfigurationName(String defaultValue) {
         String identifier = helper.getString(key(R.string.preference_identifier_key), "");
         return TextUtils.isEmpty(identifier) ? defaultValue : identifier;
+    }
+
+    public UUID getDeviceConfigurationUuid() {
+        final String uuidAsString = helper.getString(key(R.string.preference_config_uuid_key), "");
+        return TextUtils.isEmpty(uuidAsString) ? null : UUID.fromString(uuidAsString);
     }
 
     public boolean getGateStartHasAdditionalGolfDownTime() {
@@ -517,30 +523,9 @@ public class AppPreferences {
                 context.getResources().getInteger(R.integer.preference_protest_time_duration_default));
     }
 
-    public int getProtestTimeDurationInMinutesCustom() {
-        return helper.getInt(context.getString(R.string.preference_protest_time_duration_custom_key), -1);
-    }
-
-    public boolean isDefaultProtestTimeCustomEditable() {
-        return helper.getBoolean(context.getString(R.string.preference_protest_time_duration_custom_editable_key),
-                context.getResources().getBoolean(R.bool.preference_protest_time_duration_custom_editable_default));
-    }
-
     public void setDefaultProtestTimeDurationInMinutes(int protestTimeInMinutes) {
         helper.getEditor()
                 .putInt(context.getString(R.string.preference_protest_time_duration_key), protestTimeInMinutes)
-                .commit();
-    }
-
-    public void setDefaultProtestTimeDurationInMinutesCustom(int protestTimeInMinutest) {
-        helper.getEditor()
-                .putInt(context.getString(R.string.preference_protest_time_duration_custom_key), protestTimeInMinutest)
-                .commit();
-    }
-
-    public void setDefaultProtestTimeDurationInMinutesCustomEditable(boolean editable) {
-        helper.getEditor()
-                .putBoolean(context.getString(R.string.preference_protest_time_duration_custom_editable_key), editable)
                 .commit();
     }
 

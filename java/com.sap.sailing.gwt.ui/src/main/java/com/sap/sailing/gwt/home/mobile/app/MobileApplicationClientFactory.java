@@ -4,6 +4,7 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
@@ -25,6 +26,7 @@ import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetCl
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetView;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetViewImpl;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.ClientFactoryWithDispatchAndErrorAndUserService;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
@@ -46,27 +48,34 @@ public class MobileApplicationClientFactory extends
     private final MobilePlacesNavigator navigator;
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private final AuthenticationManager authenticationManager;
+    private final SailingServiceAsync sailingService;
 
-    public MobileApplicationClientFactory(boolean isStandaloneServer) {
-        this(new SimpleEventBus(), isStandaloneServer);
+    public MobileApplicationClientFactory(boolean isStandaloneServer, SailingServiceAsync sailingService) {
+        this(new SimpleEventBus(), isStandaloneServer, sailingService);
     }
 
-    private MobileApplicationClientFactory(SimpleEventBus eventBus, boolean isStandaloneServer) {
-        this(eventBus, new PlaceController(eventBus), isStandaloneServer);
+    private MobileApplicationClientFactory(SimpleEventBus eventBus, boolean isStandaloneServer,
+            SailingServiceAsync sailingService) {
+        this(eventBus, new PlaceController(eventBus), isStandaloneServer, sailingService);
     }
 
-    private MobileApplicationClientFactory(EventBus eventBus, PlaceController placeController, boolean isStandaloneServer) {
-        this(eventBus, placeController, new MobilePlacesNavigator(placeController, isStandaloneServer));
+    private MobileApplicationClientFactory(EventBus eventBus, PlaceController placeController,
+            boolean isStandaloneServer, SailingServiceAsync sailingService) {
+        this(eventBus, placeController, new MobilePlacesNavigator(placeController, isStandaloneServer), sailingService);
     }
 
-    private MobileApplicationClientFactory(EventBus eventBus, PlaceController placeController, MobilePlacesNavigator navigator) {
-        this(new MobileApplicationView(navigator, eventBus), eventBus, placeController, navigator);
+    private MobileApplicationClientFactory(EventBus eventBus, PlaceController placeController,
+            MobilePlacesNavigator navigator, SailingServiceAsync sailingService) {
+        this(new MobileApplicationView(navigator, eventBus), eventBus, placeController, navigator, sailingService);
     }
 
     public MobileApplicationClientFactory(final MobileApplicationView root, EventBus eventBus,
-            PlaceController placeController, final MobilePlacesNavigator navigator) {
+            PlaceController placeController, final MobilePlacesNavigator navigator,
+            SailingServiceAsync sailingService) {
         super(root, eventBus, placeController);
         this.navigator = navigator;
+        this.sailingService = sailingService;
+        getUserService().addKnownHasPermissions(SecuredDomainType.getAllInstances());
         this.authenticationManager = new AuthenticationManagerImpl(this, eventBus, getNavigator()
                 .getMailVerifiedConfirmationNavigation().getFullQualifiedUrl(), getNavigator()
                 .getPasswordResetNavigation().getFullQualifiedUrl());
@@ -137,5 +146,10 @@ public class MobileApplicationClientFactory extends
     @Override
     public PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(String username) {
         return getNavigator().getPasswordResettedConfirmationNavigation(username);
+    }
+
+    @Override
+    public SailingServiceAsync getSailingService() {
+        return sailingService;
     }
 }
