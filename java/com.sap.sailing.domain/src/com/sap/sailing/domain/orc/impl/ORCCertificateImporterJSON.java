@@ -98,7 +98,7 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
                     boatclass = (String) entry.getValue();
                     break;
                 case "GPH":    
-                    gph = Duration.ONE_SECOND.times(((Number) entry.getValue()).doubleValue());
+                    gph = new SecondsDurationImpl(((Number) entry.getValue()).doubleValue());
                     break;
                 case "CDL":
                     cdl = ((Number) entry.getValue()).doubleValue();

@@ -13,9 +13,14 @@ import com.sap.sse.common.impl.SecondsDurationImpl;
  */
 public interface Duration extends Serializable, Comparable<Duration> {
     
-    static final Duration NULL = new SecondsDurationImpl(0);
+    /**
+     * This NULL {@link Duration} is defined as a {@link MillisecondsDurationImpl}, therefore it is only accurate up to
+     * full milliseconds. If a higher accuracy for calculations is needed (like in the case of
+     * {@link ORCPerformanceCurve}), it is recommended to use a new {@link SecondsDurationImpl} object instead.
+     */
+    static final Duration NULL = new MillisecondsDurationImpl(0);
     static final Duration ONE_MILLISECOND = new MillisecondsDurationImpl(1);
-    static final Duration ONE_SECOND = new SecondsDurationImpl(1);
+    static final Duration ONE_SECOND = new MillisecondsDurationImpl(1000);
     static final Duration ONE_MINUTE = ONE_SECOND.times(60);
     static final Duration ONE_HOUR = ONE_MINUTE.times(60);
     static final Duration ONE_DAY = ONE_HOUR.times(24);
