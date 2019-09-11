@@ -35,11 +35,13 @@ public interface ORCPerformanceCurveCourse {
     /**
      * @param lastFinishedLegOneBased
      *            equals the index of the last fully completed leg. (e.g. 0 for no finished legs, 1 for 1 finished leg,
-     *            ...
-     * @param perCentOfCurrentLeg
-     *            sets the percentage of the lastFinishedLegOneBased + 1 that will be included in the returning object
+     *            ...)
+     * @param shareOfCurrentLeg
+     *            sets the ratio of the lastFinishedLegOneBased + 1 that will be included in the returning object;
+     *            values have to be between {@code [0..1]} where 0 means the leg has not been started, and 1 means
+     *            it is fully contained in the course.
      * @return new object of an implementing instance of this class which is perhaps a smaller part of the current
      *         object. Same idea as the substring method for Strings.
      */
-    ORCPerformanceCurveCourse subcourse(int lastFinishedLegOneBased, double perCentOfCurrentLeg);
+    ORCPerformanceCurveCourse subcourse(int lastFinishedLegOneBased, double shareOfCurrentLeg);
 }

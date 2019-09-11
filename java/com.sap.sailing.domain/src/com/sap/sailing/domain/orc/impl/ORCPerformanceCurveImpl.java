@@ -143,11 +143,11 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             allowancesPerLeg.put(leg, createAllowancePerLeg(leg, certificate));
         }
         for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
-            double allowancePerTws = 0.0;
+            Duration allowancePerTws = new SecondsDurationImpl(0);
             for (final Entry<ORCPerformanceCurveLeg, Map<Speed, Duration>> entry : allowancesPerLeg.entrySet()) {
-                allowancePerTws += Math.abs(entry.getValue().get(tws).asSeconds());
+                allowancePerTws = allowancePerTws.plus(entry.getValue().get(tws));
             }
-            result.put(tws, new SecondsDurationImpl(allowancePerTws));
+            result.put(tws, allowancePerTws);
         }
         return result;
     }

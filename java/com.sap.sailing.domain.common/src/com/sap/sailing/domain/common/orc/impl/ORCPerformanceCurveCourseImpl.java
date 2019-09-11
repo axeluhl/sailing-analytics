@@ -37,7 +37,7 @@ public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse 
     }
 
     @Override
-    public ORCPerformanceCurveCourse subcourse(int lastFinishedLegOneBased, double perCentOfCurrentLeg) {
+    public ORCPerformanceCurveCourse subcourse(int lastFinishedLegOneBased, double shareOfCurrentLeg) {
         // does function for empty courses, returns again empty course
         if (lastFinishedLegOneBased >= legs.size()) {
             return this;
@@ -45,7 +45,7 @@ public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse 
             List<ORCPerformanceCurveLeg> resultLegs = new ArrayList<>();
             resultLegs.addAll(legs.subList(0, lastFinishedLegOneBased));
             ORCPerformanceCurveLeg lastFinishedLeg = legs.get(lastFinishedLegOneBased);
-            resultLegs.add(new ORCPerformanceCurveLegImpl(lastFinishedLeg.getLength().scale(perCentOfCurrentLeg), lastFinishedLeg.getTwa()));
+            resultLegs.add(new ORCPerformanceCurveLegImpl(lastFinishedLeg.getLength().scale(shareOfCurrentLeg), lastFinishedLeg.getTwa()));
             return new ORCPerformanceCurveCourseImpl(resultLegs);
         }
     }
