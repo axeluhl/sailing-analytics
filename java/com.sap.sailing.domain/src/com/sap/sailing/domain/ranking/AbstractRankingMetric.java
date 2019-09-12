@@ -191,7 +191,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                 result = null;
             } else if (result == null) {
                 result = AbstractRankingMetric.this.getCompetitorFarthestAheadInLeg(getTrackedRace().getTrackedLeg(leg), timePoint, cache);
-                competitorFarthestAheadInLeg.put(leg, result);
+                competitorFarthestAheadInLeg.put(leg, result == null ? NULL_COMPETITOR : result);
             }
             return result;
         }
@@ -331,6 +331,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         } else {
             actualRaceDuration = startOfRace.until(timePoint);
             for (Competitor competitor : getCompetitors()) {
+                // TODO bug5110: we cannot compute the following if at timePoint the position of either of the two competitors involved is unknown; we can, however, do this if timePoint is after the two finish mark passings, or if the competitorFarthestAhead has already finished at timePoint and the position of "competitor" is known.
                 final Duration predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead = getPredictedDurationToReachWindwardPositionOf(
                         competitor, competitorFarthestAhead, timePoint, cache);
                 final Duration totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead = predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead == null ? null
@@ -443,8 +444,8 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                 getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legTo.getTrackedLeg().getLeg().getFrom());
         final Duration result;
         if (legWho == null || legTo == null ||
-                !(legWho.hasStartedLeg(timePoint) || legWho.hasFinishedLeg(timePoint)) ||
-                !(legTo.hasStartedLeg(timePoint) || legTo.hasFinishedLeg(timePoint))) {
+                !(isAssumedToHaveStartedLeg(timePoint, legWho) || isAssumedToHaveFinishedLeg(timePoint, legWho)) ||
+                !(isAssumedToHaveStartedLeg(timePoint, legTo) || isAssumedToHaveFinishedLeg(timePoint, legTo))) {
             result = null;
         } else {
             final Competitor who = legWho.getCompetitor();
@@ -453,7 +454,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                 // the same competitor requires no time to reach its own position; it's already there;
                 // however, if the competitor has already finished the leg at or before timePoint, the duration will
                 // have to be negative, even if who==to
-                if (legWho.hasFinishedLeg(timePoint)) {
+                if (isAssumedToHaveFinishedLeg(timePoint, legWho)) {
                     result = timePoint.until(legWho.getFinishTime());
                 } else {
                     result = Duration.NULL;
@@ -482,7 +483,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
     /**
      * Get's <code>who</code>'s current tracked leg at <code>timePoint</code>, or <code>null</code> if <code>who</code> hasn't
      * started at <code>timePoint</code> yet, or <code>who</code>'s tracked leg for the last leg if <code>who</code> has
-     * already finished the race at <code>timePoint</code> or 
+     * already finished the race at <code>timePoint</code>.
      */
     protected TrackedLegOfCompetitor getCurrentLegOrLastLegIfAlreadyFinished(Competitor who, TimePoint timePoint) {
         TrackedLegOfCompetitor currentLegWho = getTrackedRace().getCurrentLeg(who, timePoint);
@@ -491,7 +492,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
             if (lastWaypoint != null && getTrackedRace().getRace().getCourse().getNumberOfWaypoints() > 1) { // could be an empty course
                 final TrackedLeg lastTrackedLeg = getTrackedRace().getTrackedLegFinishingAt(lastWaypoint);
                 TrackedLegOfCompetitor whosLastTrackedLeg = lastTrackedLeg.getTrackedLeg(who);
-                if (whosLastTrackedLeg.hasFinishedLeg(timePoint)) {
+                if (isAssumedToHaveFinishedLeg(timePoint, whosLastTrackedLeg)) {
                     currentLegWho = whosLastTrackedLeg;
                 }
             }
@@ -521,18 +522,16 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      */
     protected Duration getPredictedDurationToEndOfLegOrTo(TimePoint timePoint, final TrackedLegOfCompetitor legWho, final TrackedLegOfCompetitor legTo,
             WindLegTypeAndLegBearingCache cache) {
-        assert legWho.hasStartedLeg(timePoint) || legWho.hasFinishedLeg(timePoint);
-        assert legTo.hasStartedLeg(timePoint) || legTo.hasFinishedLeg(timePoint);
+        assert isAssumedToHaveStartedLeg(timePoint, legWho) || isAssumedToHaveFinishedLeg(timePoint, legWho);
+        assert isAssumedToHaveStartedLeg(timePoint, legTo) || isAssumedToHaveFinishedLeg(timePoint, legTo);
         final Duration toEndOfLegOrTo;
-        if (legTo.hasFinishedLeg(timePoint)) {
+        if (isAssumedToHaveFinishedLeg(timePoint, legTo)) {
             // calculate actual time it takes who to reach the end of the leg starting at timePoint:
             final TimePoint whosLegFinishTime = legWho.getFinishTime();
             if (whosLegFinishTime != null && !whosLegFinishTime.after(timePoint)) {
                 // who's leg finishing time is known and is already reached at timePoint; we don't need to extrapolate
                 toEndOfLegOrTo = timePoint.until(whosLegFinishTime);
             } else {
-                assert getWindwardDistanceTraveled(legTo.getCompetitor(), legTo.hasFinishedLeg(timePoint)?legTo.getFinishTime():timePoint, cache).compareTo(
-                        getWindwardDistanceTraveled(legWho.getCompetitor(), legWho.hasFinishedLeg(timePoint)?legWho.getFinishTime():timePoint, cache)) >= 0;
                 // estimate who's leg finishing time by extrapolating with the average VMG (if available) or the current VMG
                 // (if no average VMG can currently be computed, e.g., because the time point is exactly at the leg start)
                 final Position positionOfEndOfLeg = getTrackedRace().getApproximatePosition(legWho.getLeg().getTo(), timePoint);
@@ -541,7 +540,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         } else {
             // competitor "to" is still in same leg; project "who" to "to"'s position using VMG
             final Position positionOfTo = getTrackedRace().getTrack(legTo.getCompetitor()).getEstimatedPosition(timePoint, /* extrapolate */ true);
-            toEndOfLegOrTo = getDurationToReach(positionOfTo, timePoint, legWho, cache);
+            toEndOfLegOrTo = positionOfTo == null ? null : getDurationToReach(positionOfTo, timePoint, legWho, cache);
         }
         return toEndOfLegOrTo;
     }
@@ -628,8 +627,8 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                     count = count || trackedLeg.getLeg().getFrom() == from;
                     if (count) {
                         final TrackedLegOfCompetitor trackedLegOfCompetitor = trackedLeg.getTrackedLeg(competitor);
-                        if (trackedLegOfCompetitor.hasStartedLeg(timePoint)) {
-                            if (!trackedLegOfCompetitor.hasFinishedLeg(timePoint)) {
+                        if (isAssumedToHaveStartedLeg(timePoint, trackedLegOfCompetitor)) {
+                            if (!isAssumedToHaveFinishedLeg(timePoint, trackedLegOfCompetitor)) {
                                 // partial distance sailed:
                                 final Position estimatedPosition = getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */ true);
                                 if (estimatedPosition != null) {
@@ -666,6 +665,58 @@ public abstract class AbstractRankingMetric implements RankingMetric {
             result = d;
         }
         return result;
+    }
+
+    /**
+     * The {@link Competitor} of the {@code trackedLegOfCompetitor} is assumed to have started the leg specified by
+     * {@code trackedLegOfCompetitor} if the competitor has a mark passing for the leg's end waypoint or any waypoint
+     * of the course thereafter that is at or before {@code timePoint}. This assumes the possibility that mark passings
+     * may be missing for in-between waypoints. In particular, it is possible that a finish mark passing has been
+     * derived from an official finishing time even though mark passings in between or even the entire track are
+     * missing, so asking whether a leg has been finished can be answered with {@code true} if the {@code timePoint}
+     * is at of after that finish mark passing.
+     */
+    protected boolean isAssumedToHaveFinishedLeg(TimePoint timePoint, final TrackedLegOfCompetitor trackedLegOfCompetitor) {
+        final Waypoint legEndWaypoint = trackedLegOfCompetitor.getLeg().getTo();
+        final MarkPassing markPassing = findMarkPassingForWaypointOrSuccessorAtOrBeforeTimePoint(timePoint,
+                trackedLegOfCompetitor, legEndWaypoint);
+        return markPassing != null;
+    }
+
+    /**
+     * The {@link Competitor} of the {@code trackedLegOfCompetitor} is assumed to have started the leg specified by
+     * {@code trackedLegOfCompetitor} if the competitor has a mark passing for the leg's start waypoint or any waypoint
+     * of the course thereafter that is at or before {@code timePoint}. This assumes the possibility that mark passings
+     * may be missing for in-between waypoints. In particular, it is possible that a finish mark passing has been
+     * derived from an official finishing time even though mark passings in between or even the entire track are
+     * missing, so asking whether a leg has been started can be answered with {@code true} if the {@code timePoint}
+     * is at of after that finish mark passing.
+     */
+    protected boolean isAssumedToHaveStartedLeg(TimePoint timePoint, final TrackedLegOfCompetitor trackedLegOfCompetitor) {
+        final Waypoint legStartWaypoint = trackedLegOfCompetitor.getLeg().getFrom();
+        final MarkPassing markPassing = findMarkPassingForWaypointOrSuccessorAtOrBeforeTimePoint(timePoint,
+                trackedLegOfCompetitor, legStartWaypoint);
+        return markPassing != null;
+    }
+
+    private MarkPassing findMarkPassingForWaypointOrSuccessorAtOrBeforeTimePoint(TimePoint timePoint,
+            final TrackedLegOfCompetitor trackedLegOfCompetitor, final Waypoint legStartWaypoint) {
+        final Iterable<Waypoint> waypoints = getTrackedRace().getRace().getCourse().getWaypoints();
+        boolean checkForMarkPassing = false;
+        MarkPassing markPassing = null;
+        for (final Waypoint waypoint : waypoints) {
+            if (waypoint == legStartWaypoint) {
+                checkForMarkPassing = true; // from here on, check for mark passings for the waypoint
+            }
+            if (checkForMarkPassing) {
+                final MarkPassing markPassingCandidate = getTrackedRace().getMarkPassing(trackedLegOfCompetitor.getCompetitor(), waypoint);
+                if (markPassingCandidate != null && !markPassingCandidate.getTimePoint().after(timePoint)) {
+                    markPassing = markPassingCandidate;
+                    break;
+                }
+            }
+        }
+        return markPassing;
     }
 
     /**
