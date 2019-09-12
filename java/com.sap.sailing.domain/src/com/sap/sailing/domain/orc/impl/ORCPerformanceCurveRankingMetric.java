@@ -64,31 +64,35 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
         updateCertificatesFromLogs();
         certificatesFromRaceLogUpdater = createCertificatesFromRaceLogUpdater();
         certificatesFromRegattaLogUpdater = createCertificatesFromRegattaLogUpdater();
-        trackedRace.addListener(new AbstractRaceChangeListener() {
-            @Override
-            public void regattaLogAttached(RegattaLog regattaLog) {
-                regattaLog.addListener(certificatesFromRegattaLogUpdater);
-                updateCertificatesFromLogs();
-            }
-
-            @Override
-            public void raceLogAttached(RaceLog raceLog) {
-                raceLog.addListener(certificatesFromRaceLogUpdater);
-                updateCertificatesFromLogs();
-            }
-
-            @Override
-            public void raceLogDetached(RaceLog raceLog) {
-                raceLog.removeListener(certificatesFromRaceLogUpdater);
-                updateCertificatesFromLogs();
-            }
-        });
+        if (trackedRace != null) {
+            trackedRace.addListener(new AbstractRaceChangeListener() {
+                @Override
+                public void regattaLogAttached(RegattaLog regattaLog) {
+                    regattaLog.addListener(certificatesFromRegattaLogUpdater);
+                    updateCertificatesFromLogs();
+                }
+    
+                @Override
+                public void raceLogAttached(RaceLog raceLog) {
+                    raceLog.addListener(certificatesFromRaceLogUpdater);
+                    updateCertificatesFromLogs();
+                }
+    
+                @Override
+                public void raceLogDetached(RaceLog raceLog) {
+                    raceLog.removeListener(certificatesFromRaceLogUpdater);
+                    updateCertificatesFromLogs();
+                }
+            });
+        }
     }
     
     private Map<Serializable, Boat> initBoatsById() {
         final Map<Serializable, Boat> result = new HashMap<>();
-        for (final Boat boat : getTrackedRace().getTrackedRegatta().getRegatta().getAllBoats()) {
-            result.put(boat.getId(), boat);
+        if (getTrackedRace() != null) {
+            for (final Boat boat : getTrackedRace().getTrackedRegatta().getRegatta().getAllBoats()) {
+                result.put(boat.getId(), boat);
+            }
         }
         return result;
     }
@@ -123,11 +127,13 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
      */
     private void updateCertificatesFromLogs() {
         final Map<Boat, ORCCertificate> newCertificates = new HashMap<>();
-        for (final RegattaLog regattaLog : getTrackedRace().getAttachedRegattaLogs()) {
-            newCertificates.putAll(new RegattaLogORCCertificateAssignmentFinder(regattaLog, boatsById).analyze());
-        }
-        for (final RaceLog raceLog : getTrackedRace().getAttachedRaceLogs()) {
-            newCertificates.putAll(new RaceLogORCCertificateAssignmentFinder(raceLog, boatsById).analyze());
+        if (getTrackedRace() != null) {
+            for (final RegattaLog regattaLog : getTrackedRace().getAttachedRegattaLogs()) {
+                newCertificates.putAll(new RegattaLogORCCertificateAssignmentFinder(regattaLog, boatsById).analyze());
+            }
+            for (final RaceLog raceLog : getTrackedRace().getAttachedRaceLogs()) {
+                newCertificates.putAll(new RaceLogORCCertificateAssignmentFinder(raceLog, boatsById).analyze());
+            }
         }
         certificates = newCertificates;
     }
