@@ -191,7 +191,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                 result = null;
             } else if (result == null) {
                 result = AbstractRankingMetric.this.getCompetitorFarthestAheadInLeg(getTrackedRace().getTrackedLeg(leg), timePoint, cache);
-                competitorFarthestAheadInLeg.put(leg, result);
+                competitorFarthestAheadInLeg.put(leg, result == null ? NULL_COMPETITOR : result);
             }
             return result;
         }
