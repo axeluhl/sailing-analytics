@@ -2167,7 +2167,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
         @Override
         public void finishingTimeChanged(TimePoint oldFinishingTime, TimePoint newFinishingTime) {
-            //TODO Implement
+            // no-op
         }
 
         @Override
