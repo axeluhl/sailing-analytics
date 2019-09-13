@@ -3,47 +3,27 @@ package com.sap.sailing.domain.abstractlog.orc.impl;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
-import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sse.common.TimePoint;
 
-public class RegattaLogORCCertificateAssignmentEventImpl extends AbstractLogEventImpl<RegattaLogEventVisitor> implements RegattaLogORCCertificateAssignmentEvent {
-
-    private ORCCertificate certificate;
-    private Serializable competitorID;
-
+public class RegattaLogORCCertificateAssignmentEventImpl extends BaseORCCertificateAssignmentEventImpl<RegattaLogEventVisitor> implements RegattaLogORCCertificateAssignmentEvent {
+    private static final long serialVersionUID = -3186019736784868848L;
+    
     public RegattaLogORCCertificateAssignmentEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
-            AbstractLogEventAuthor author, Serializable pId, ORCCertificate certificate, Competitor competitor) {
-        super(createdAt, logicalTimePoint, author, pId);
-        this.certificate = certificate;
-        this.competitorID = competitor.getId();
+            AbstractLogEventAuthor author, Serializable pId, ORCCertificate certificate, Boat boat) {
+        super(createdAt, logicalTimePoint, author, pId, certificate, boat);
     }
 
     public RegattaLogORCCertificateAssignmentEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
-            AbstractLogEventAuthor author, Serializable pId, ORCCertificate certificate, Serializable competitorID) {
-        super(createdAt, logicalTimePoint, author, pId);
-        this.certificate = certificate;
-        this.competitorID = competitorID;
+            AbstractLogEventAuthor author, Serializable pId, ORCCertificate certificate, Serializable boatId) {
+        super(createdAt, logicalTimePoint, author, pId, certificate, boatId);
     }
     
-    private static final long serialVersionUID = -3186019736784868848L;
-
     @Override
     public void accept(RegattaLogEventVisitor visitor) {
         visitor.visit(this);
     }
-
-    @Override
-    public ORCCertificate getCertificate() {
-        return certificate;
-    }
-
-    @Override
-    public Serializable getBoatId() {
-        return competitorID;
-    }
-
 }

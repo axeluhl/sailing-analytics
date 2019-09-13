@@ -3044,7 +3044,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     @Override
     public Iterable<RegattaLog> getAttachedRegattaLogs() {
-        return new HashSet<>(attachedRegattaLogs.values());
+        return attachedRegattaLogs == null ? Collections.emptySet() : new HashSet<>(attachedRegattaLogs.values());
     }
 
     @Override
@@ -3801,7 +3801,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     @Override
     public Iterable<RaceLog> getAttachedRaceLogs() {
-        return new HashSet<>(attachedRaceLogs.values());
+        return attachedRaceLogs == null ? Collections.emptySet() : new HashSet<>(attachedRaceLogs.values());
     }
     
     @Override

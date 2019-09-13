@@ -192,4 +192,8 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
         // TODO Auto-generated method stub
         return null;
     }
+
+    public ORCCertificate getCertificate(Boat boat) {
+        return certificates.get(boat);
+    }
 }
