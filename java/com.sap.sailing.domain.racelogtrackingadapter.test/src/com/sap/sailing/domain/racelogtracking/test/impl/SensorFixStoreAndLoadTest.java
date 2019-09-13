@@ -125,14 +125,14 @@ public class SensorFixStoreAndLoadTest {
     protected RegattaLog regattaLog;
     protected SensorFixStore store;
     protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null,
-            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
     protected final Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null, null,
-            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
     private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
-    protected final Boat boat1 = DomainFactory.INSTANCE.getOrCreateBoat("Boat1", "Boat1", boatClass, "GER 1", null);
-    protected final Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("Boat2", "Boat2", boatClass, "GER 2", null);
+    protected final Boat boat1 = DomainFactory.INSTANCE.getOrCreateBoat("Boat1", "Boat1", boatClass, "GER 1", null, /* storePersistently */ true);
+    protected final Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("Boat2", "Boat2", boatClass, "GER 2", null, /* storePersistently */ true);
     private final Competitor compNotPartOfRace = DomainFactory.INSTANCE.getOrCreateCompetitor("comp3", "comp3", null, null, null, null,
-            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
     protected final Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
 

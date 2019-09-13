@@ -108,7 +108,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         regattaListDataProvider = new ListDataProvider<RegattaDTO>();
         
         filterablePanelRegattas = new LabeledAbstractFilterablePanel<RegattaDTO>(filterRegattasLabel, allRegattas,
-                regattaListDataProvider) {
+                regattaListDataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(RegattaDTO t) {
                 List<String> string = new ArrayList<String>();
@@ -129,6 +129,8 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         regattaTable.ensureDebugId("RegattasCellTable");
         refreshableRegattaMultiSelectionModel = (RefreshableMultiSelectionModel<RegattaDTO>) regattaTable.getSelectionModel();
         regattaTable.setVisible(false);
+        filterablePanelRegattas
+                .setCheckboxEnabledFilter(regatta -> userService.hasPermission(regatta, DefaultActions.UPDATE));
         panel.add(filterablePanelRegattas);
 
         panel.add(regattaTable);

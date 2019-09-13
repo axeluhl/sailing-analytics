@@ -119,6 +119,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorWithBoatRefJsonSerializer;
@@ -143,8 +144,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final MongoDatabase database;
     private final CompetitorWithBoatRefJsonSerializer competitorWithBoatRefSerializer = CompetitorWithBoatRefJsonSerializer.create();
-    private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create(/* serialize boat */ true, /* serializeNonPublicCompetitorFields */ true);
-    private final BoatJsonSerializer boatSerializer = BoatJsonSerializer.create();
+    private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create(
+            /* serialize boat */ true, /* serializeNonPublicCompetitorFields */ true, /* verboseBoatClassSerializer */ false);
+    private final BoatJsonSerializer boatSerializer = new BoatJsonSerializer(new BoatClassJsonSerializer(/* verbose */ false));
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
     private final TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> raceTrackingConnectivityParamsServiceFinder;
 
@@ -242,15 +244,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     public MongoCollection<Document> getGPSFixCollection() {
         MongoCollection<Document> gpsFixCollection = database.getCollection(CollectionNames.GPS_FIXES.name());
-        
         // Removes old indexes not needed anymore
         dropIndexSafe(gpsFixCollection, "DEVICE_ID.DEVICE_TYPE_SPECIFIC_ID_1_GPSFIX.TIME_AS_MILLIS_1");
         dropIndexSafe(gpsFixCollection, "DEVICE_ID_1_GPSFIX.TIME_AS_MILLIS_1");
-        
         Document index = new Document();
-        index.put(FieldNames.DEVICE_ID.name(), 1);
         index.put(FieldNames.TIME_AS_MILLIS.name(), 1);
-        gpsFixCollection.createIndex(index);
+        index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE.name(), 1);
+        index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), 1);
+        index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_STRING_REPRESENTATION.name(), 1);
+        gpsFixCollection.createIndex(index, new IndexOptions().name("fixbytimeanddev"));
         return gpsFixCollection;
     }
     

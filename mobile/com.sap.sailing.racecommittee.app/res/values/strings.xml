@@ -349,8 +349,8 @@
     <string name="flag_ap_desc">Postpone upcoming races</string>
     <string name="flag_ap_alpha_desc">Postpone, no more racing today</string>
     <string name="flag_ap_hotel_desc">Postpone, more information ashore</string>
-    <string name="flag_ap_alpha"><![CDATA[AP & Alpha]]></string>
-    <string name="flag_ap_hotel"><![CDATA[AP & Hotel]]></string>
+    <string name="flag_ap_alpha">AP &amp; Alpha</string>
+    <string name="flag_ap_hotel">AP &amp; Hotel</string>
     <string name="flag_xray">Xray</string>
     <string name="flag_xray_desc">Individual Recall</string>
     <string name="flag_first_subst">1st Sub</string>
@@ -358,8 +358,8 @@
     <string name="flag_blue">Blue</string>
     <string name="flag_blue_desc">Begin Finish Phase</string>
     <string name="flag_november_desc">Abandon all started races</string>
-    <string name="flag_november_alpha"><![CDATA[November & Alpha]]></string>
-    <string name="flag_november_hotel"><![CDATA[November & Hotel]]></string>
+    <string name="flag_november_alpha">"November &amp; Alpha"</string>
+    <string name="flag_november_hotel">"November &amp; Hotel"</string>
     <string name="flag_november_alpha_desc">Abandon, no more racing today</string>
     <string name="flag_november_hotel_desc">Abandon, more information ashore</string>
     <string name="race_reset_confirm">Reset Race</string>

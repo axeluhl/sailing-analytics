@@ -4,10 +4,28 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
+         <h5 class="articleSubheadline">July 2019</h5>
+         <ul class="bulletList">
+            <li>A new wind source that estimates true wind direction and speed from maneuvers is available.
+                It has been trained using machine learning techniques, based on approximately 12 million
+                maneuvers that the SAP Sailing Analytics have tracked and classified so far. It is intended
+                to serve as a fallback wind source in case the wind direction is not being made available
+                to a tracked race in any other way (entry through the Race Manager app, the web page or
+                estimated based on the first upwind leg's direction). Therefore, the confidence level has
+                been set fairly low, hence this wind source will always be outweighed by any real wind
+                sensor out on the course, but it will help "bootstrap" true wind direction which then
+                also helps the already existing wind direction estimation that clusters the tracks of
+                a race into upwind and downwind, then by the tacks the boats are on and then averages
+                the COG values to obtain a TWD approximation. With the new maneuver-based wind source
+                this other estimation will be able to infer wind directions in more cases.</li>
+         </ul>
+
          <h5 class="articleSubheadline">June 2019</h5>
          <ul class="bulletList">
             <li>The combined wind arrow on the top left of the map now switches through three states:
                 wind visualization off, wind visualization on, wind visualization on with color.</li>
+            <li>The SAP Sailing Analytics are now also available in <em>Italian</em>; see, e.g.,
+            	<a href="/gwt/Home.html?locale=it">here</a>.</li>
          </ul>
 
          <h5 class="articleSubheadline">May 2019</h5>

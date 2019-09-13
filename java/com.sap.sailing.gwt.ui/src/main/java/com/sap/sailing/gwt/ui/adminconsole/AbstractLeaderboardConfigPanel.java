@@ -61,6 +61,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.NamedDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
@@ -184,7 +185,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         leaderboardTable = new FlushableCellTable<StrippedLeaderboardDTOWithSecurity>(/* pageSize */10000, tableRes);
         filterLeaderboardPanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTOWithSecurity>(lblFilterEvents,
-                availableLeaderboardList, filteredLeaderboardList) {
+                availableLeaderboardList, filteredLeaderboardList, stringMessages) {
             @Override
             public List<String> getSearchableStrings(StrippedLeaderboardDTOWithSecurity t) {
                 List<String> strings = new ArrayList<String>();
@@ -199,6 +200,8 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
             }
         };
         filterLeaderboardPanel.getTextBox().ensureDebugId("LeaderboardsFilterTextBox");
+        filterLeaderboardPanel
+                .setCheckboxEnabledFilter(leaderboard -> userService.hasPermission(leaderboard, DefaultActions.UPDATE));
 
         leaderboardsPanel.add(filterLeaderboardPanel);
         leaderboardTable.ensureDebugId("AvailableLeaderboardsTable");

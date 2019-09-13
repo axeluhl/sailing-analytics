@@ -140,7 +140,7 @@ public class SwissTimingConnectionTableWrapper extends
 
         filterField = new LabeledAbstractFilterablePanel<SwissTimingConfigurationWithSecurityDTO>(
                 new Label(stringMessagesClient.filterSwissTimingConnections()),
-                new ArrayList<SwissTimingConfigurationWithSecurityDTO>(), dataProvider) {
+                new ArrayList<SwissTimingConfigurationWithSecurityDTO>(), dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(SwissTimingConfigurationWithSecurityDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -166,6 +166,8 @@ public class SwissTimingConnectionTableWrapper extends
                 return table;
             }
         };
+        filterField
+                .setCheckboxEnabledFilter(connection -> userService.hasPermission(connection, DefaultActions.UPDATE));
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(swissTimingConectionColumnListHandler);

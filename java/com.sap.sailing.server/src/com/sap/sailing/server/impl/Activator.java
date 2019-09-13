@@ -41,11 +41,13 @@ import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMovingMong
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStoreSupplier;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
+import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
 import com.sap.sailing.server.RacingEventServiceMXBean;
 import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreferences;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
 import com.sap.sailing.server.impl.preferences.model.SailorProfilePreferences;
 import com.sap.sailing.server.impl.preferences.model.StoredDataMiningQueryPreferences;
+import com.sap.sailing.server.impl.preferences.model.TrackedEventPreferences;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.notification.impl.SailingNotificationServiceImpl;
 import com.sap.sailing.server.security.SailingViewerRole;
@@ -95,6 +97,8 @@ public class Activator implements BundleActivator {
     private ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService> masterDataImportClassLoaderServiceTracker;
 
     private ServiceTracker<PolarDataService, PolarDataService> polarDataServiceTracker;
+    
+    private ServiceTracker<WindEstimationFactoryService, WindEstimationFactoryService> windEstimationFactoryServiceTrack;
 
     private OSGiBasedTrackedRegattaListener trackedRegattaListener;
 
@@ -129,8 +133,7 @@ public class Activator implements BundleActivator {
                         // only continue once we have the service, as some of the services require it to start properly
                         securityServiceTracker.waitForService(0);
                         internalStartBundle(context);
-                    } catch (InterruptedException | MalformedObjectNameException | InstanceAlreadyExistsException
-                            | MBeanRegistrationException | NotCompliantMBeanException | MalformedURLException e) {
+                    } catch (Exception e) {
                         logger.log(Level.SEVERE, "Could not start RacingEvent service properly", e);
                     }
                 };
@@ -153,12 +156,15 @@ public class Activator implements BundleActivator {
                 properties));
         properties.put(PreferenceConverter.KEY_PARAMETER_NAME, StoredDataMiningQueryPreferences.PREF_NAME);
         registrations.add(context.registerService(PreferenceConverter.class,
-                new GenericJSONPreferenceConverter<>(() -> new StoredDataMiningQueryPreferences()), properties));
+                new GenericJSONPreferenceConverter<>(StoredDataMiningQueryPreferences::new), properties));
         properties.put(PreferenceConverter.KEY_PARAMETER_NAME, SailorProfilePreferences.PREF_NAME);
         registrations.add(context.registerService(PreferenceConverter.class,
                 new GenericJSONPreferenceConverter<>(
                         () -> new SailorProfilePreferences(racingEventService.getCompetitorAndBoatStore())),
                 properties));
+        properties.put(PreferenceConverter.KEY_PARAMETER_NAME, TrackedEventPreferences.PREF_NAME);
+        registrations.add(context.registerService(PreferenceConverter.class,
+                new GenericJSONPreferenceConverter<>(TrackedEventPreferences::new), properties));
     }
 
     public static BundleContext getContext() {
@@ -197,60 +203,50 @@ public class Activator implements BundleActivator {
             InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException {
         mailQueue = new ExecutorMailQueue(mailServiceTracker);
         notificationService = new SailingNotificationServiceImpl(context, mailQueue);
-
         trackedRegattaListener = new OSGiBasedTrackedRegattaListener(context);
-
         registrations.add(context.registerService(HasPermissionsProvider.class,
                 (HasPermissionsProvider) SecuredDomainType::getAllInstances, null));
-        
         registrations.add(context.registerService(SecurityInitializationCustomizer.class,
                 (SecurityInitializationCustomizer) securityService -> {
                     final RoleDefinition sailingViewerRoleDefinition = securityService.getOrCreateRoleDefinitionFromPrototype(SailingViewerRole.getInstance());
                     if (securityService.isInitialOrMigration()) {
-                        
                         // The server is initially set to be public by adding sailing_viewer role to the server group
                         // with forAll=true
                         securityService.putRoleDefinitionToUserGroup(securityService.getDefaultTenant(),
                                 sailingViewerRoleDefinition, true);
-                        
                         // sailing_viewer role is publicly readable
                         securityService.addToAccessControlList(sailingViewerRoleDefinition.getIdentifier(), null, DefaultActions.READ.name());
                     }
                 }, null));
-
         final TrackedRaceStatisticsCache trackedRaceStatisticsCache = new TrackedRaceStatisticsCacheImpl();
         registrations.add(context.registerService(TrackedRaceStatisticsCache.class.getName(),
                 trackedRaceStatisticsCache, null));
         registrations.add(context.registerService(TrackedRegattaListener.class.getName(),
                 trackedRaceStatisticsCache, null));
-
         // At this point the OSGi resolver is used as device type service finder.
         // In the case that we are not in an OSGi context (e.g. running a JUnit test instead),
         // this code block is not run, and the test case can inject some other type of finder
         // instead.
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
-
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors,
                 serviceFinderFactory, trackedRegattaListener, notificationService,
                 trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker);
         notificationService.setRacingEventService(racingEventService);
-
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,
                 new MasterDataImportClassLoaderServiceTrackerCustomizer(context, racingEventService));
         masterDataImportClassLoaderServiceTracker.open();
-
         polarDataServiceTracker = new ServiceTracker<PolarDataService, PolarDataService>(context,
                 PolarDataService.class,
                 new PolarDataServiceTrackerCustomizer(context, racingEventService));
         polarDataServiceTracker.open();
-
+        windEstimationFactoryServiceTrack = new ServiceTracker<WindEstimationFactoryService, WindEstimationFactoryService>(context,
+                WindEstimationFactoryService.class, new WindEstimationFactoryServiceTrackerCustomizer(context, racingEventService));
+        windEstimationFactoryServiceTrack.open();
         // register the racing service in the OSGi registry
         racingEventService.setBundleContext(context);
-        context.registerService(MongoObjectFactory.class, racingEventService.getMongoObjectFactory(),
-                /* properties */ null);
-        context.registerService(DomainObjectFactory.class, racingEventService.getDomainObjectFactory(),
-                /* properties */ null);
+        context.registerService(MongoObjectFactory.class, racingEventService.getMongoObjectFactory(), /* properties */ null);
+        context.registerService(DomainObjectFactory.class, racingEventService.getDomainObjectFactory(), /* properties */ null);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
         replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name,
                 racingEventService.getId().toString());
@@ -296,7 +292,6 @@ public class Activator implements BundleActivator {
         mbs.registerMBean(mbean, mBeanName);
         logger.log(Level.INFO, "Started " + context.getBundle().getSymbolicName()
                 + ". Character encoding: " + Charset.defaultCharset());
-
         // do initial setup/migration logic
         racingEventService.ensureOwnerships();
     }
@@ -360,6 +355,42 @@ public class Activator implements BundleActivator {
         public void removedService(ServiceReference<PolarDataService> reference, PolarDataService service) {
             racingEventService.unsetPolarDataService(service);
         }
+    }
+    
+    private class WindEstimationFactoryServiceTrackerCustomizer
+            implements ServiceTrackerCustomizer<WindEstimationFactoryService, WindEstimationFactoryService> {
+        private final BundleContext context;
+        private final RacingEventServiceImpl racingEventService;
 
+        public WindEstimationFactoryServiceTrackerCustomizer(BundleContext context,
+                RacingEventServiceImpl racingEventService) {
+            this.context = context;
+            this.racingEventService = racingEventService;
+        }
+
+        @Override
+        public WindEstimationFactoryService addingService(ServiceReference<WindEstimationFactoryService> reference) {
+            WindEstimationFactoryService service = context.getService(reference);
+            service.addWindEstimationModelsChangedListenerAndReceiveUpdate(windEstimationReady -> {
+                // setting the wind estimation factory service to null here in case it becomes
+                // unavailable is the reason we may not need a specific implementation of
+                // removedService(...) here. Yet, just to be on the safe side, we'll also
+                // set the wind estimation factory service to null there. Maybe the service
+                // is de-registered without shutting the service down...
+                racingEventService.setWindEstimationFactoryService(windEstimationReady ? service : null);
+            });
+            return service;
+        }
+
+        @Override
+        public void modifiedService(ServiceReference<WindEstimationFactoryService> reference,
+                WindEstimationFactoryService service) {
+        }
+
+        @Override
+        public void removedService(ServiceReference<WindEstimationFactoryService> reference,
+                WindEstimationFactoryService service) {
+            racingEventService.setWindEstimationFactoryService(null);
+        }
     }
 }

@@ -35,6 +35,6 @@ public interface Candidate extends Comparable<CandidateImpl>, Timed {
      */
     Double getProbability();
 
-    int compareTo(Candidate arg0);
+    int compareTo(Candidate other);
     
 }

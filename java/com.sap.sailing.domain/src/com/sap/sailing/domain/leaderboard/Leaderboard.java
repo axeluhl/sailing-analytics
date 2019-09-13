@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
@@ -539,6 +540,15 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
             Set<RaceColumn> discardedRaceColumns);
 
+    /**
+     * Same as {@link #getNetPoints(Competitor, RaceColumn, TimePoint, Set)}, only that a supplier for
+     * the total points for the {@code competitor} in column {@code raceColumn} at time point {@code timePoint}
+     * is provided. This helps if a caller also needs to determine the total points anyway, saving redundant
+     * calculations.
+     */
+    Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
+            Set<RaceColumn> discardedRaceColumns, Supplier<Double> totalPointsProvider);
+
     TimePoint getNowMinusDelay();
     
     /**
@@ -655,4 +665,11 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
         }
         return result;
     }
+
+    /**
+     * @return a map whose keys contain different averaging time spans, e.g., 5s, 30s, and 60s, and whose values contain
+     *         a pair with the average leaderboard computation time for all computation requests not older than the time
+     *         given as the key, and as the second pair component the number of computations in that time period.
+     */
+    Map<Duration, Pair<Duration, Integer>> getComputationTimeStatistics();
 }

@@ -100,4 +100,6 @@ public interface StringMessages extends Messages {
     String whatsNewDialogMessage();
     String showChangelog();
 
+    String hideElementsWithoutUpdateRights();
+
 }

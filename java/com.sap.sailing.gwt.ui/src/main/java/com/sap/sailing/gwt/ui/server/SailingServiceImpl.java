@@ -5210,19 +5210,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public List<String> getResultImportUrls(String resultProviderName) {
-        List<String> result = new ArrayList<String>();
+        final List<String> result = new ArrayList<String>();
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
         ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
         if (urlBasedScoreCorrectionProvider != null) {
-            Iterable<URL> allUrls = resultUrlRegistry.getResultUrls(resultProviderName);
-            final Subject subject = SecurityUtils.getSubject();
-            for (URL url : allUrls) {
-                if (subject
-                        .isPermitted(SecuredDomainType.RESULT_IMPORT_URL.getStringPermissionForTypeRelativeIdentifier(
-                                DefaultActions.READ, new TypeRelativeObjectIdentifier(
-                                        urlBasedScoreCorrectionProvider.getName(), url.toString())))) {
-                    result.add(url.toString());
-                }
+            Iterable<URL> allUrlsReadableBySubject = resultUrlRegistry.getResultUrls(resultProviderName);
+            for (URL url : allUrlsReadableBySubject) {
+                result.add(url.toString());
             }
         }
         return result;
@@ -5943,7 +5937,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                                     competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),
                                     team, competitor.getTimeOnTimeFactor(),
                                     competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag(),
-                                    boat));
+                                    boat, /* storePersistently */ true));
         } else {
             SecurityUtils.getSubject().checkPermission(SecuredDomainType.COMPETITOR.getStringPermissionForTypeRelativeIdentifier(
                     DefaultActions.UPDATE, CompetitorImpl.getTypeRelativeObjectIdentifier(competitor.getId())));
@@ -5980,7 +5974,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                                     competitor.getShortName(), competitor.getColor(), competitor.getEmail(),
                                     competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),
                                     team, competitor.getTimeOnTimeFactor(),
-                                    competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag()));
+                                    competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag(), /* storePersistently */ true));
         } else {
             SecurityUtils.getSubject().checkPermission(
                     SecuredDomainType.COMPETITOR.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
@@ -6085,7 +6079,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(boat.getBoatClass().getName());
             result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredDomainType.BOAT, BoatImpl.getTypeRelativeObjectIdentifier(boatUUID), boat.getName(),
-                    () -> getBaseDomainFactory().getOrCreateBoat(boatUUID, boat.getName(), boatClass, boat.getSailId(), boat.getColor()));
+                    () -> getBaseDomainFactory().getOrCreateBoat(boatUUID, boat.getName(), boatClass, boat.getSailId(), boat.getColor(), /* storePersistently */ true));
         } else {
             SecurityUtils.getSubject().checkPermission(
                     SecuredDomainType.BOAT.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
@@ -9310,5 +9304,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
         }
         return result;
+    }
+
+    @Override
+    public boolean getTrackedRaceIsUsingMarkPassingCalculator(RegattaAndRaceIdentifier regattaNameAndRaceName) {
+        return getExistingTrackedRace(regattaNameAndRaceName).isUsingMarkPassingCalculator();
     }
 }

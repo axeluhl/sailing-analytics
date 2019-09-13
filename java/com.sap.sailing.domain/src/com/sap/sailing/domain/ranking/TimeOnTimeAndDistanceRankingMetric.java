@@ -112,7 +112,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
         final boolean fastestCompetitorHasStartedLeg;
         if (fastestCompetitorInLeg != null) {
             final TrackedLegOfCompetitor trackedLegOfFastestCompetitorInLeg = trackedLeg.getTrackedLeg(fastestCompetitorInLeg);
-            fastestCompetitorHasStartedLeg = trackedLegOfFastestCompetitorInLeg.hasStartedLeg(timePoint);
+            fastestCompetitorHasStartedLeg = isAssumedToHaveStartedLeg(timePoint, trackedLegOfFastestCompetitorInLeg);
             final Distance totalWindwardDistanceLegLeaderTraveledUpToTimePointOrLegEnd;
             final TimePoint startOfRace = getTrackedRace().getStartOfRace();
             final Position positionOfFastestBoatInLegAtTimePointOrLegEnd;

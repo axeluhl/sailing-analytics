@@ -429,7 +429,7 @@ public class Util {
      * <code>null</code> is permissible for both, <code>o1</code> and <code>o2</code>, where a <code>null</code> value
      * is considered less than a non-null value if <code>nullIsLess</code> is <code>true</code>, greater otherwise.
      */
-    public static <T> int compareToWithNull(Comparable<T> o1, T o2, boolean nullIsLess) {
+    public static <T extends Comparable<T>> int compareToWithNull(T o1, T o2, boolean nullIsLess) {
         final int result;
         if (o1 == null) {
             if (o2 == null) {
@@ -495,9 +495,9 @@ public class Util {
      * Removes {@code value} from all sets contained as values in {@code map}. If a set is emptied by this removal it is
      * removed from the map. No synchronization / concurrency control effort is made. This is the caller's obligation.
      */
-    public static <K, V> void removeFromAllValueSets(Map<K, Set<V>> map, V value) {
-        for (final Iterator<Entry<K, Set<V>>> i=map.entrySet().iterator(); i.hasNext(); ) {
-            final Entry<K, Set<V>> e = i.next();
+    public static <K, V, S extends Set<V>> void removeFromAllValueSets(Map<K, S> map, V value) {
+        for (final Iterator<Entry<K, S>> i=map.entrySet().iterator(); i.hasNext(); ) {
+            final Entry<K, S> e = i.next();
             e.getValue().remove(value);
             if (e.getValue().isEmpty()) {
                 i.remove();
@@ -512,8 +512,8 @@ public class Util {
      * 
      * @return {@code true} if the {@code value} was contained in the set for {@code key} and was removed successfully
      */
-    public static <K, V> boolean removeFromValueSet(Map<K, Set<V>> map, K key, V value) {
-        final Set<V> valuesPerKey = map.get(key);
+    public static <K, V, S extends Set<V>> boolean removeFromValueSet(Map<K, S> map, K key, V value) {
+        final S valuesPerKey = map.get(key);
         final boolean removed;
         if (valuesPerKey != null) {
             removed = valuesPerKey.remove(value);

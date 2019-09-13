@@ -391,7 +391,13 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             if (userByName == null) {
                 throw new UserManagementException("user '" + username + "' not found.");
             }
-            getSecurityService().addUserToUserGroup(tenant, userByName);
+            if (getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionsWithQualification(
+                    tenant.getRoleDefinitionMap().keySet(), new Ownership(null, tenant))) {
+                getSecurityService().addUserToUserGroup(tenant, userByName);
+            } else {
+                throw new UnauthorizedException(
+                        "Current user does not have all the meta permissions of the user group the user would be added to");
+            }
         } else {
             throw new UnauthorizedException("Not permitted to add user to group");
         }

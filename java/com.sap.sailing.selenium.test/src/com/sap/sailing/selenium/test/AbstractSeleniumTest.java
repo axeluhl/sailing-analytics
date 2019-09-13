@@ -76,11 +76,12 @@ public abstract class AbstractSeleniumTest {
      * <p></p>
      * 
      * @param contextRoot
+     * @param headless if true, page inits are not required for some kind of tests (e.g. Rest-API)
      * 
      * @return
      *   <code>true</code> if the state was reseted successfully and <code>false</code> otherwise.
      */
-    protected void clearState(String contextRoot) {
+    protected void clearState(String contextRoot, boolean headless) {
         logger.info("clearing server state");
         try {
             URL url = new URL(contextRoot + CLEAR_STATE_URL);
@@ -93,37 +94,50 @@ public abstract class AbstractSeleniumTest {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
-        
-        // To be able to access LocalStorage we need to load a page having the target origin
-        getWebDriver().get(contextRoot);
-        
-        final String notificationTimeoutKey = "sse.notification.customTimeOutInSeconds";
-        final String notificationTimeoutValue = Integer.toString(PageObject.DEFAULT_WAIT_TIMEOUT_SECONDS);
-        if (getWebDriver() instanceof WebStorage) {
-            // clear local storage
-            final WebStorage webStorage = (WebStorage)getWebDriver();
-            webStorage.getLocalStorage().clear();
-            
-            // extending the timeout of notifications to 100s to prevent timing failures
-            webStorage.getLocalStorage().setItem(notificationTimeoutKey,
-                    notificationTimeoutValue);
-        } else {
-            // Fallback solution for IE
-            ((JavascriptExecutor)getWebDriver()).executeScript("window.localStorage.clear();");
-            ((JavascriptExecutor) getWebDriver()).executeScript("window.localStorage.setItem(\""
-                    + notificationTimeoutKey + "\", \"" + notificationTimeoutValue + "\");");
-        }
-        
-        try {
-            // In IE 11 we sometimes see the problem that IE somehow automatically changes the zoom level to 75%.
-            // Selenium tests with InternetExplorerDriver fail if the zoom level is not set to 100% due to the fact that coordinates determined aren't correct.
-            // With this we enforce a zoom level of 100% before running a test.
-            // To make this work correctly you also need to set InternetExplorerDriver.IGNORE_ZOOM_SETTING to true (this should be pre-configured in local-test-environment.xml when activating IE driver)
-            getWebDriver().findElement(By.tagName("html")).sendKeys(Keys.chord(Keys.CONTROL, "0"));
-        } catch (Exception e) {
+
+        if (!headless) {
+            // To be able to access LocalStorage we need to load a page having the target origin
+            getWebDriver().get(contextRoot);
+
+            final String notificationTimeoutKey = "sse.notification.customTimeOutInSeconds";
+            final String notificationTimeoutValue = Integer.toString(PageObject.DEFAULT_WAIT_TIMEOUT_SECONDS);
+            if (getWebDriver() instanceof WebStorage) {
+                // clear local storage
+                final WebStorage webStorage = (WebStorage) getWebDriver();
+                webStorage.getLocalStorage().clear();
+                // extending the timeout of notifications to 100s to prevent timing failures
+                webStorage.getLocalStorage().setItem(notificationTimeoutKey, notificationTimeoutValue);
+            } else {
+                // Fallback solution for IE
+                ((JavascriptExecutor) getWebDriver()).executeScript("window.localStorage.clear();");
+                ((JavascriptExecutor) getWebDriver()).executeScript("window.localStorage.setItem(\""
+                        + notificationTimeoutKey + "\", \"" + notificationTimeoutValue + "\");");
+            }
+
+            try {
+                // In IE 11 we sometimes see the problem that IE somehow automatically changes the zoom level to 75%.
+                // Selenium tests with InternetExplorerDriver fail if the zoom level is not set to 100% due to the fact
+                // that coordinates determined aren't correct.
+                // With this we enforce a zoom level of 100% before running a test.
+                // To make this work correctly you also need to set InternetExplorerDriver.IGNORE_ZOOM_SETTING to true
+                // (this should be pre-configured in local-test-environment.xml when activating IE driver)
+                getWebDriver().findElement(By.tagName("html")).sendKeys(Keys.chord(Keys.CONTROL, "0"));
+            } catch (Exception e) {
+            }
         }
     }
-    
+
+    /**
+     * Resets the state for running tests in a clean state. In most cases of UI test also the state of the web page
+     * needs to get resetted. In some other cases (e.g. only Rest-API calls are involved in the test, an initialization
+     * of the webpage is not requirered. If so the method {@link clearState([contextroot], false)} can be called.
+     * 
+     * @param contextRoot
+     */
+    protected void clearState(String contextRoot) {
+        clearState(contextRoot, false);
+    }
+
     protected void setUpAuthenticatedSession(WebDriver webDriver) {
         // To be able to set a cookie we need to load a page having the target origin
         webDriver.get(getContextRoot());

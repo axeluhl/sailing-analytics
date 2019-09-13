@@ -16,6 +16,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Allows an administrator to view the boats assigned to the competitors of a race.
@@ -36,7 +37,8 @@ public class CompetitorToBoatMappingsViewPanel extends SimplePanel {
     private final RefreshableSelectionModel<CompetitorDTO> refreshableCompetitorSelectionModel;
 
     public CompetitorToBoatMappingsViewPanel(final SailingServiceAsync sailingService, final StringMessages stringMessages,
-            final ErrorReporter errorReporter, final String leaderboardName, final String raceColumnName, final String fleetName) {
+            final ErrorReporter errorReporter, final String leaderboardName, final String raceColumnName,
+            final String fleetName, UserService userService) {
         super();
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -44,7 +46,8 @@ public class CompetitorToBoatMappingsViewPanel extends SimplePanel {
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
         this.errorReporter = errorReporter;
-        this.competitorTable = new CompactCompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
+        this.competitorTable = new CompactCompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
+                /* multiSelection */ false, /* enablePager */ true, userService);
         this.boatTable = new CompactBoatTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
         refreshableCompetitorSelectionModel = competitorTable.getSelectionModel();
         refreshableCompetitorSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {

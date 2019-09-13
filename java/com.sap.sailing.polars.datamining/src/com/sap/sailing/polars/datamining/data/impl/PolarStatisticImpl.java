@@ -110,6 +110,10 @@ public class PolarStatisticImpl implements PolarStatistic {
             for (WindSource trackBasedSource : trackBasedSources) {
                 windSourcesToExclude.add(trackBasedSource);
             }
+            Iterable<WindSource> maneuverBasedSources = race.getWindSources(WindSourceType.MANEUVER_BASED_ESTIMATION);
+            for (WindSource maneuverBasedSource : maneuverBasedSources) {
+                windSourcesToExclude.add(maneuverBasedSource);
+            }
             Iterable<WindSource> rcSources = race.getWindSources(WindSourceType.RACECOMMITTEE);
             for (WindSource rcSource : rcSources) {
                 windSourcesToExclude.add(rcSource);

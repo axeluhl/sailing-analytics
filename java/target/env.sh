@@ -62,7 +62,7 @@ fi
 # same channel the master is using in its REPLICATION_CHANNEL variable
 
 if [ -n "$AUTO_REPLICATE" ]; then
-  REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener
+  REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener,com.sap.sailing.windestimation.integration.WindEstimationFactoryServiceImpl
 fi
 # Host where the master Java instance is running
 # Make sure firewall configurations allow access
@@ -160,7 +160,7 @@ else
   export JAVA_8_ARGS="-XX:ThreadPriorityPolicy=2 -XX:+UseG1GC ${LOGGING_ARGS}"
   JAVA_VERSION_SPECIFIC_ARGS=$JAVA_8_ARGS
 fi
-ADDITIONAL_JAVA_ARGS="$JAVA_VERSION_SPECIFIC_ARGS $ADDITIONAL_JAVA_ARGS -Dpersistentcompetitors.clear=false -Drestore.tracked.races=true -XX:MaxGCPauseMillis=500"
+ADDITIONAL_JAVA_ARGS="$JAVA_VERSION_SPECIFIC_ARGS $ADDITIONAL_JAVA_ARGS -Dpersistentcompetitors.clear=false -Drestore.tracked.races=true -Dpolardata.source.url=https://www.sapsailing.com -Dwindestimation.source.url=https://www.sapsailing.com -XX:MaxGCPauseMillis=500"
 echo ADDITIONAL_JAVA_ARGS=${ADDITIONAL_JAVA_ARGS}
 ON_AMAZON=`command -v ec2-metadata`
 

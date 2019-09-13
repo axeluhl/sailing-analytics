@@ -65,6 +65,7 @@ import com.sap.sailing.domain.tracking.WindSummary;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
+import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -776,4 +777,24 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public WindSummary getWindSummary() {
         return null;
     }
+
+    @Override
+    public boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter) {
+        return false;
+    }
+
+    @Override
+    public void removeWind(Wind wind, WindSource windSource) {
+        
+    }
+
+    @Override
+    public PolarDataService getPolarDataService() {
+        return null;
+    }
+
+    @Override
+    public void setWindEstimation(IncrementalWindEstimation windEstimation) {
+    }
+
 }

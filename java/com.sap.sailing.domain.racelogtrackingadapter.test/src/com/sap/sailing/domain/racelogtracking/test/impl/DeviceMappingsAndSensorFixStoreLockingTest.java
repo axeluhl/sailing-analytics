@@ -32,7 +32,7 @@ public class DeviceMappingsAndSensorFixStoreLockingTest extends AbstractGPSFixSt
     @Test
     public void deviceMappingsAndSensorFixStoreShouldNotCauseADeadlock() {
         final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null,
-                null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+                null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
         final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
         final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
         

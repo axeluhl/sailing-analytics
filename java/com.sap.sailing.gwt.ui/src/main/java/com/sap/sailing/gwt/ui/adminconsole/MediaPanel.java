@@ -107,6 +107,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
     private ListDataProvider<MediaTrackWithSecurityDTO> mediaTrackListDataProvider = new ListDataProvider<>();
     private Date latestDate;
     private RefreshableMultiSelectionModel<MediaTrackWithSecurityDTO> refreshableSelectionModel;
+    private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
 
     public MediaPanel(Set<RegattasDisplayer> regattasDisplayers, SailingServiceAsync sailingService,
             RegattaRefresher regattaRefresher, MediaServiceAsync mediaService, ErrorReporter errorReporter,
@@ -118,6 +119,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         this.mediaService = mediaService;  
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
+        this.storageServiceAvailable = new FileStorageServiceConnectionTestObservable(sailingService);
         AccessControlledButtonPanel buttonAndFilterPanel = new AccessControlledButtonPanel(userService,
                 SecuredDomainType.MEDIA_TRACK);
         add(buttonAndFilterPanel);
@@ -173,7 +175,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
 
         this.filterableMediaTracks = new LabeledAbstractFilterablePanel<MediaTrackWithSecurityDTO>(lblFilterRaces,
                 allMediaTracks,
-                mediaTrackListDataProvider) {
+                mediaTrackListDataProvider, stringMessages) {
             @Override
             public List<String> getSearchableStrings(MediaTrackWithSecurityDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -194,6 +196,8 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         };
         createMediaTracksTable(userService);
         filterableMediaTracks.getTextBox().ensureDebugId("MediaTracksFilterTextBox");
+        filterableMediaTracks
+                .setCheckboxEnabledFilter(mediaTrack -> userService.hasPermission(mediaTrack, DefaultActions.UPDATE));
         buttonAndFilterPanel.addUnsecuredWidget(filterableMediaTracks);
 
         refreshableSelectionModel.addSelectionChangeHandler(new Handler() {
@@ -609,7 +613,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
     private void addUrlMediaTrack() {
         NewMediaWithRaceSelectionDialog dialog = new NewMediaWithRaceSelectionDialog(mediaService,
                 getDefaultStartTime(), stringMessages, sailingService, userService, errorReporter, regattaRefresher,
-                regattasDisplayers, new DialogCallback<MediaTrack>() {
+                regattasDisplayers, storageServiceAvailable, new DialogCallback<MediaTrack>() {
 
                     @Override
                     public void cancel() {

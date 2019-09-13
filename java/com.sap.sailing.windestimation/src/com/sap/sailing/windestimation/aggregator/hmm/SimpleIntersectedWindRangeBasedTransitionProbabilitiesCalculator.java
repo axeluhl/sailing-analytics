@@ -1,0 +1,33 @@
+package com.sap.sailing.windestimation.aggregator.hmm;
+
+import com.sap.sailing.windestimation.data.ManeuverForEstimation;
+import com.sap.sse.common.Bearing;
+
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
+public class SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator<GL extends GraphLevelBase<GL>>
+        extends IntersectedWindRangeBasedTransitionProbabilitiesCalculator<GL> {
+
+    public SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator(
+            boolean propagateIntersectedWindRangeOfHeadupAndBearAway) {
+        super(propagateIntersectedWindRangeOfHeadupAndBearAway);
+    }
+
+    @Override
+    protected WindCourseRange getJibeWindRange(ManeuverForEstimation maneuver) {
+        Bearing middleCourse = maneuver.getMiddleCourse();
+        WindCourseRange windRange = new WindCourseRange(middleCourse.getDegrees(), 0);
+        return windRange;
+    }
+
+    @Override
+    protected WindCourseRange getTackWindRange(ManeuverForEstimation maneuver) {
+        Bearing middleCourse = maneuver.getMiddleCourse();
+        WindCourseRange windRange = new WindCourseRange(middleCourse.reverse().getDegrees(), 0);
+        return windRange;
+    }
+
+}

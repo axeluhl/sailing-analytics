@@ -92,7 +92,7 @@ public class RaceColumnReloadTest {
         Boat boat = new BoatImpl("61", "GER 61", boatClass, "GER 61");
         CompetitorWithBoat comp = masterDomainFactory.getOrCreateCompetitorWithBoat("GER 61", "Team", "T", Color.RED, "noone@nowhere.de",
                 null, new TeamImpl("Team", Arrays.asList(sailor), coach),
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, (DynamicBoat) boat);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, (DynamicBoat) boat, /* storePersistently */ true);
         service.apply(new CreateFlexibleLeaderboard(leaderboardName, "Test", new int[] { 1, 2 }, new LowPoint(), null));
         raceColumn = service.apply(new AddColumnToLeaderboard("R1", leaderboardName, false));
 

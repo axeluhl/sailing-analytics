@@ -47,6 +47,16 @@ public class LowPointTieBreakBasedOnLastSeriesOnly extends LowPoint {
         };
     }
 
+    /**
+     * This rule also considers discarded results when breaking a tie based on "better score."
+     * 
+     * @return {@code true}
+     */
+    @Override
+    protected boolean isConsiderDiscardedScoresDuringBetterScoreTieBreak() {
+        return true;
+    }
+
     private boolean isFromLastNonMedalSeries(Pair<RaceColumn, Double> raceColumnAndNetPoints) {
         final RaceColumn raceColumn = raceColumnAndNetPoints.getA();
         final boolean result;

@@ -23,7 +23,7 @@ shift
 
 # -------
 
-IMAGE_TAGS=$(curl -s -H "Authorization: JWT ${TOKEN}" https://hub.docker.com/v2/repositories/${REPO}/tags/?page_size=1000 | jq -r '.results|.[]|.name')
+IMAGE_TAGS=$(curl -s -H "Authorization: JWT ${TOKEN}" https://cloud.docker.com/v2/repositories/${REPO}/tags/?page_size=1000 | jq -r '.results|.[]|.name')
 for j in ${IMAGE_TAGS}
 do
   if [ "$#" = "0" ]; then
