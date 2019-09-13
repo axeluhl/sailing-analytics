@@ -1,50 +1,40 @@
 package com.sap.sailing.domain.common.orc.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
-import com.sap.sse.common.Distance;
+import com.sap.sse.common.Util;
 
 public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse {
-    private final List<ORCPerformanceCurveLeg> legs;
-    private final Distance totalLength;
+    private final Iterable<ORCPerformanceCurveLeg> legs;
 
-    public ORCPerformanceCurveCourseImpl(List<ORCPerformanceCurveLeg> legs) {
-        this.legs = Collections.unmodifiableList(legs);
-        Distance myTotalLength = Distance.NULL;
-        for (ORCPerformanceCurveLeg leg : legs) {
-            myTotalLength = myTotalLength.add(leg.getLength());
-        }
-        totalLength = myTotalLength;
-    }
-
-    public ORCPerformanceCurveLeg getLeg(int i) {
-        return legs.get(i);
+    public ORCPerformanceCurveCourseImpl(Iterable<ORCPerformanceCurveLeg> legs) {
+        this.legs = legs;
     }
 
     @Override
-    public Distance getTotalLength() {
-        return totalLength;
-        
-    }
-
-    @Override
-    public List<ORCPerformanceCurveLeg> getLegs() {
+    public Iterable<ORCPerformanceCurveLeg> getLegs() {
         return legs;
     }
 
     @Override
     public ORCPerformanceCurveCourse subcourse(int lastFinishedLegOneBased, double shareOfCurrentLeg) {
         // does function for empty courses, returns again empty course
-        if (lastFinishedLegOneBased >= legs.size()) {
+        if (lastFinishedLegOneBased >= Util.size(legs)) {
             return this;
         } else {
             List<ORCPerformanceCurveLeg> resultLegs = new ArrayList<>();
-            resultLegs.addAll(legs.subList(0, lastFinishedLegOneBased));
-            ORCPerformanceCurveLeg lastFinishedLeg = legs.get(lastFinishedLegOneBased);
+            int count = 0;
+            ORCPerformanceCurveLeg lastFinishedLeg = null;
+            for (final ORCPerformanceCurveLeg leg : getLegs()) {
+                if (count++ >= lastFinishedLegOneBased) {
+                    lastFinishedLeg = leg;
+                    break;
+                }
+                resultLegs.add(leg);
+            }
             resultLegs.add(lastFinishedLeg.scale(shareOfCurrentLeg));
             return new ORCPerformanceCurveCourseImpl(resultLegs);
         }
@@ -52,6 +42,6 @@ public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse 
 
     @Override
     public String toString() {
-        return "[legs=" + legs + ", totalLength=" + totalLength + "]";
+        return "[legs=" + legs + ", totalLength=" + getTotalLength().getNauticalMiles() + "NM]";
     }
 }

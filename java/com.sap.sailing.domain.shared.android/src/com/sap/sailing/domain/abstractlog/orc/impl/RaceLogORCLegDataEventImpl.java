@@ -15,15 +15,15 @@ public class RaceLogORCLegDataEventImpl extends RaceLogEventImpl implements Race
 
     private static final long serialVersionUID = -5063350268001993185L;
     
-    private final int legNr;
+    private final int oneBasedLegNumber;
     private final Bearing twa;
     private final Distance length;
     private final ORCPerformanceCurveLegTypes type;
 
     public RaceLogORCLegDataEventImpl(TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author,
-            Serializable pId, int pPassId, int legNr, Bearing twa, Distance length, ORCPerformanceCurveLegTypes type) {
+            Serializable pId, int pPassId, int oneBasedLegNumber, Bearing twa, Distance length, ORCPerformanceCurveLegTypes type) {
         super(createdAt, logicalTimePoint, author, pId, pPassId);
-        this.legNr = legNr;
+        this.oneBasedLegNumber = oneBasedLegNumber;
         this.twa = twa;
         this.length = length;
         this.type = type;
@@ -36,12 +36,12 @@ public class RaceLogORCLegDataEventImpl extends RaceLogEventImpl implements Race
     
     @Override
     public String getShortInfo() {
-        return "ORCLegData, legNr= " + legNr + ", twa: " + twa.getDegrees() + ", length: " + length.getNauticalMiles();
+        return "ORCLegData, oneBasedLegNumber= " + oneBasedLegNumber + ", twa: " + twa.getDegrees() + ", length: " + length.getNauticalMiles();
     }
     
     @Override
-    public int getLegNr() {
-        return legNr;
+    public int getOneBasedLegNumber() {
+        return oneBasedLegNumber;
     }
     
     @Override

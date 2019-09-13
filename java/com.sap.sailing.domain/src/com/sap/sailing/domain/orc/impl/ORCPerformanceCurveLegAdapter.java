@@ -50,4 +50,9 @@ public class ORCPerformanceCurveLegAdapter implements ORCPerformanceCurveLeg {
             }
         };
     }
+
+    @Override
+    public String toString() {
+        return "ORCPerformanceCurveLegAdapter for "+trackedLeg.getLeg()+": length="+getLength().getNauticalMiles()+"NM, TWA="+getTwa();
+    }
 }

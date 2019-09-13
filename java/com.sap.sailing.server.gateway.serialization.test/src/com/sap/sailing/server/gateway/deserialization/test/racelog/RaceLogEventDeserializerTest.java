@@ -101,7 +101,7 @@ public class RaceLogEventDeserializerTest {
         assertEquals(originalEvent.getClass(), newEvent.getClass());
         assertEquals(originalEvent.getId(), newEvent.getId());
         assertEquals(originalEvent.getShortInfo(), newEvent.getShortInfo());
-        assertEquals(originalEvent.getLegNr(), newEvent.getLegNr());
+        assertEquals(originalEvent.getOneBasedLegNumber(), newEvent.getOneBasedLegNumber());
         assertEquals(originalEvent.getTwa(), newEvent.getTwa());
         assertEquals(originalEvent.getType(), newEvent.getType());
         assertEquals(originalEvent.getLength(), newEvent.getLength());

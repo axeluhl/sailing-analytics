@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.orc.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -13,8 +15,10 @@ import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataAnalyzer;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentFinder;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
@@ -27,6 +31,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
+import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveCourseImpl;
 import com.sap.sailing.domain.ranking.AbstractRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -37,6 +42,7 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
     private static final long serialVersionUID = -7814822523533929816L;
@@ -62,6 +68,7 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
         super(trackedRace);
         boatsById = initBoatsById();
         updateCertificatesFromLogs();
+        updateCourseFromRaceLogs();
         certificatesFromRaceLogUpdater = createCertificatesFromRaceLogUpdater();
         certificatesFromRegattaLogUpdater = createCertificatesFromRegattaLogUpdater();
         if (trackedRace != null) {
@@ -101,12 +108,19 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
         return new BaseRaceLogEventVisitor() {
             @Override
             public void visit(RaceLogORCLegDataEvent orcLegDataEventImpl) {
-                updateCertificatesFromLogs();
+                updateCourseFromRaceLogs();
             }
 
             @Override
             public void visit(RaceLogORCCertificateAssignmentEvent event) {
                 updateCertificatesFromLogs();
+            }
+
+            @Override
+            public void visit(RaceLogRevokeEvent event) {
+                if (event.getRevokedEventType().equals(RaceLogORCLegDataEventImpl.class.getName())) {
+                    updateCourseFromRaceLogs();
+                }
             }
         };
     }
@@ -143,7 +157,18 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
         for (final RaceLog raceLog : getTrackedRace().getAttachedRaceLogs()) {
             legsWithDefinitions.putAll(new RaceLogORCLegDataAnalyzer(raceLog).analyze());
         }
-        // TODO continue here, taking only those definitions up to the true number of legs in the race's course and fill the blanks with tracked leg adapters
+        final Iterable<Leg> legs = getTrackedRace().getRace().getCourse().getLegs();
+        int oneBasedLegNumber = 1;
+        final List<ORCPerformanceCurveLeg> performanceCurveLegs = new ArrayList<>(Util.size(legs));
+        for (final Leg leg : legs) {
+            performanceCurveLegs.add(legsWithDefinitions.computeIfAbsent(oneBasedLegNumber, i->new ORCPerformanceCurveLegAdapter(getTrackedRace().getTrackedLeg(leg))));
+            oneBasedLegNumber++;
+        }
+        totalCourse = new ORCPerformanceCurveCourseImpl(performanceCurveLegs);
+    }
+    
+    public ORCPerformanceCurveCourse getTotalCourse() {
+        return totalCourse;
     }
 
     @Override

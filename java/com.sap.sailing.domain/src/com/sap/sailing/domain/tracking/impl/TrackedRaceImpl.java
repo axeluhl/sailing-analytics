@@ -445,7 +445,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             RaceLogResolver raceLogResolver) {
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
         this.raceLogResolver = raceLogResolver;
-        rankingMetric = rankingMetricConstructor.apply(this);
         raceStates = new WeakHashMap<>();
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
         locksForMarkPassings = new ConcurrentHashMap<IdentityWrapper<Iterable<MarkPassing>>, NamedReentrantReadWriteLock>();
@@ -579,6 +578,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } catch (InterruptedException e) {
             logger.log(Level.SEVERE, "Waiting for loading from stores to finish was interrupted", e);
         }
+        rankingMetric = rankingMetricConstructor.apply(this);
     }
     
     @Override

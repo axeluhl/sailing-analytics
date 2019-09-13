@@ -22,7 +22,8 @@ public interface ORCPerformanceCurveCourse {
     
     /**
      * @return summed up {@link Distance} of all {@link ORCPerformanceCurveLeg}s of an implementing instance of this
-     *         class
+     *         class; {@code null} in case the length currently cannot be determined, e.g., because no explicit lengths
+     *         have been set and the positions of one or more waypoints are unknown.
      */
     default Distance getTotalLength() {
         Distance result = Distance.NULL;

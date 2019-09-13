@@ -23,6 +23,6 @@ public interface RaceLogORCLegDataEvent extends RaceLogEvent, Revokable {
 
     public Bearing getTwa();
 
-    public int getLegNr();
+    public int getOneBasedLegNumber();
 
 }

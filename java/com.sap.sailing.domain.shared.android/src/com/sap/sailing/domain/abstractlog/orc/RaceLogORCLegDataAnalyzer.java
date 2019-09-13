@@ -12,10 +12,10 @@ import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sse.common.Distance;
 
 /**
- * Returns a map with unique entries per {@link RaceLogORCLegDataEvent#getLegNr() leg number} where the
- * relevant valid leg data is converted to the {@link ORCPerformanceCurveLeg} data. Note that for legs
- * for which no entry is found no adapter to any tracked race or tracked leg is created implicitly. Only
- * entries with explicit race log events are returned.
+ * Returns a map with unique entries per {@link RaceLogORCLegDataEvent#getOneBasedLegNumber() one-based leg number}
+ * where the relevant valid leg data is converted to the {@link ORCPerformanceCurveLeg} data. Note that for legs for
+ * which no entry is found no adapter to any tracked race or tracked leg is created implicitly. Only entries with
+ * explicit race log events are returned.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -40,7 +40,7 @@ public class RaceLogORCLegDataAnalyzer extends RaceLogAnalyzer<Map<Integer, ORCP
                 } else {
                     leg = new ORCPerformanceCurveLegImpl(length, legDataEvent.getType());
                 }
-                result.put(legDataEvent.getLegNr(), leg);
+                result.put(legDataEvent.getOneBasedLegNumber(), leg);
             }
         }
         return result;
