@@ -69,7 +69,7 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
         boatsById = initBoatsById();
         updateCertificatesFromLogs();
         updateCourseFromRaceLogs();
-        certificatesFromRaceLogUpdater = createCertificatesFromRaceLogUpdater();
+        certificatesFromRaceLogUpdater = createCertificatesFromRaceLogAndCourseUpdater();
         certificatesFromRegattaLogUpdater = createCertificatesFromRegattaLogUpdater();
         if (trackedRace != null) {
             trackedRace.addListener(new AbstractRaceChangeListener() {
@@ -104,7 +104,7 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
         return result;
     }
 
-    private RaceLogEventVisitor createCertificatesFromRaceLogUpdater() {
+    private RaceLogEventVisitor createCertificatesFromRaceLogAndCourseUpdater() {
         return new BaseRaceLogEventVisitor() {
             @Override
             public void visit(RaceLogORCLegDataEvent orcLegDataEventImpl) {
@@ -154,17 +154,19 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
     
     private void updateCourseFromRaceLogs() {
         final Map<Integer, ORCPerformanceCurveLeg> legsWithDefinitions = new HashMap<>();
-        for (final RaceLog raceLog : getTrackedRace().getAttachedRaceLogs()) {
-            legsWithDefinitions.putAll(new RaceLogORCLegDataAnalyzer(raceLog).analyze());
+        if (getTrackedRace() != null) {
+            for (final RaceLog raceLog : getTrackedRace().getAttachedRaceLogs()) {
+                legsWithDefinitions.putAll(new RaceLogORCLegDataAnalyzer(raceLog).analyze());
+            }
+            final Iterable<Leg> legs = getTrackedRace().getRace().getCourse().getLegs();
+            int oneBasedLegNumber = 1;
+            final List<ORCPerformanceCurveLeg> performanceCurveLegs = new ArrayList<>(Util.size(legs));
+            for (final Leg leg : legs) {
+                performanceCurveLegs.add(legsWithDefinitions.computeIfAbsent(oneBasedLegNumber, i->new ORCPerformanceCurveLegAdapter(getTrackedRace().getTrackedLeg(leg))));
+                oneBasedLegNumber++;
+            }
+            totalCourse = new ORCPerformanceCurveCourseImpl(performanceCurveLegs);
         }
-        final Iterable<Leg> legs = getTrackedRace().getRace().getCourse().getLegs();
-        int oneBasedLegNumber = 1;
-        final List<ORCPerformanceCurveLeg> performanceCurveLegs = new ArrayList<>(Util.size(legs));
-        for (final Leg leg : legs) {
-            performanceCurveLegs.add(legsWithDefinitions.computeIfAbsent(oneBasedLegNumber, i->new ORCPerformanceCurveLegAdapter(getTrackedRace().getTrackedLeg(leg))));
-            oneBasedLegNumber++;
-        }
-        totalCourse = new ORCPerformanceCurveCourseImpl(performanceCurveLegs);
     }
     
     public ORCPerformanceCurveCourse getTotalCourse() {
