@@ -14,4 +14,6 @@ public interface FreestyleMarkConfiguration extends MarkConfiguration {
 
     @Override
     CommonMarkPropertiesWithOptionalPositioning getEffectiveProperties();
+
+    MarkProperties getOptionalMarkProperties();
 }
