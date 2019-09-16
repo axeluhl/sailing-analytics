@@ -97,8 +97,9 @@ When designing courses, the following aspects and data sources need to get inclu
     * Appearance is defined by mark properties defaulting to the definition of the mark template if none is defined in the properties
     * Optional positioning information to be used upon mark creation (defaults to the positioning information carried by the mark properties if not given)
 * Freestyle mark configuration
-    * optional mark template reference
-    * optional mark properties reference
+    * Appearance properties are required to be fully defined
+    * Optional mark template reference
+    * Optional mark properties reference
     * Optional positioning information to be used upon mark creation
 
 
