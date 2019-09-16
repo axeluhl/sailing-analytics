@@ -19,7 +19,6 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -358,11 +357,6 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         return new RankingInfoImpl(timePoint, result, competitorFarthestAhead);
     }
     
-    protected Comparator<Competitor> getComparatorByEstimatedCorrectedTimeWhenReachingCompetitorFarthestAhead(TimePoint timePoint) {
-        return getComparatorByEstimatedCorrectedTimeWhenReachingCompetitorFarthestAhead(
-                getRankingInfo(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint)).getCompetitorRankingInfo());
-    }
-
     protected Comparator<Competitor> getComparatorByEstimatedCorrectedTimeWhenReachingCompetitorFarthestAhead(
             final Function<Competitor, RankingMetric.CompetitorRankingInfo> rankingInfos) {
         return (c1, c2) -> rankingInfos.apply(c1).getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead()
