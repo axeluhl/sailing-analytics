@@ -15,7 +15,7 @@ public class CertificateAssignmentDialog extends DataEntryDialog<List<Competitor
     private final UserService userService;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
-    private final String leaderboardName;
+    private final String regattaName;
 
     protected static class CompetitorsValidator implements Validator<List<CompetitorWithBoatDTO>> {
         public CompetitorsValidator() {
@@ -28,14 +28,14 @@ public class CertificateAssignmentDialog extends DataEntryDialog<List<Competitor
         }
     }
         
-    public CertificateAssignmentDialog(final SailingServiceAsync sailingService, final UserService userService, String leaderboardName, final StringMessages stringMessages,
+    public CertificateAssignmentDialog(final SailingServiceAsync sailingService, final UserService userService, String regattaName, final StringMessages stringMessages,
             final ErrorReporter errorReporter, DialogCallback<List<CompetitorWithBoatDTO>> callback) {
         super(stringMessages.actionEditCompetitors(), null, stringMessages.ok(), stringMessages.cancel(), new CompetitorsValidator(), callback);
         this.sailingService = sailingService;
         this.userService = userService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        this.leaderboardName = leaderboardName;
+        this.regattaName = regattaName;
     }
 
     @Override
@@ -45,7 +45,7 @@ public class CertificateAssignmentDialog extends DataEntryDialog<List<Competitor
 
     @Override
     protected Widget getAdditionalWidget() {
-        BoatCertificatesPanel result = new BoatCertificatesPanel(stringMessages);
+        BoatCertificatesPanel result = new BoatCertificatesPanel(sailingService, userService, regattaName, stringMessages, errorReporter);
         //BoatPanel result = new BoatPanel(sailingService, userService, stringMessages, errorReporter);
         //CompetitorPanel result = new CompetitorPanel(sailingService, userService, leaderboardName, stringMessages, errorReporter);
 
