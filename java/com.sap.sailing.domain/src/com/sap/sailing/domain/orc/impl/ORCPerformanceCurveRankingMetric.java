@@ -14,6 +14,7 @@ import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.MaxIterationsExceededException;
 
 import com.sap.sailing.domain.abstractlog.orc.ORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.ORCScratchBoatEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentFinder;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataAnalyzer;
@@ -22,6 +23,7 @@ import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignment
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentFinder;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
@@ -43,6 +45,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -184,22 +187,64 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
         return totalCourse;
     }
 
+    private ORCPerformanceCurveCourse getPartialCourse(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        final ORCPerformanceCurveCourse result;
+        final Leg firstLeg = getTrackedRace().getRace().getCourse().getFirstLeg();
+        final TrackedLegOfCompetitor trackedLegOfCompetitor = getTrackedRace().getTrackedLeg(competitor, timePoint);
+        if (trackedLegOfCompetitor == null) {
+            if (getTrackedRace().getTrackedLeg(competitor, firstLeg).hasStartedLeg(timePoint)) {
+                // then we know the competitor has finished the race at timePoint
+                result = getTotalCourse();
+            } else {
+                // not started the race yet; return empty course
+                result = getTotalCourse().subcourse(0, 0);
+            }
+        } else {
+            final double shareOfCurrentLeg = 1.0
+                    - trackedLegOfCompetitor.getWindwardDistanceToGo(timePoint, WindPositionMode.LEG_MIDDLE, cache).divide(
+                            trackedLegOfCompetitor.getTrackedLeg().getWindwardDistance(timePoint, cache));
+            result = getTotalCourse().subcourse(getTrackedRace().getRace().getCourse().getIndexOfWaypoint(trackedLegOfCompetitor.getLeg().getFrom()), shareOfCurrentLeg);
+        }
+        return result;
+    }
+    
+    /**
+     * A "scratch boat" in the logic of ORC Performance Curve Scoring is used to map the official ranking criterion
+     * (implied wind) to a metric that is easier to grasp: calculated time. The scratch boat's
+     * {@link ORCPerformanceCurve performance curve} is used to map everybody else's implied wind to a duration spent
+     * sailing that can be compared to the duration sailed by the scratch boat.
+     * <p>
+     * 
+     * By default, we use the boat farthest ahead ("first ship home" when the race has finished) as the scratch boat,
+     * but other definitions are possible, such as greatest {@link ORCCertificate#getGPH() GPH value} or least
+     * {@link ORCCertificate#getCDL() CDL value}. An explicit selection can be made using the
+     * {@link ORCScratchBoatEvent} in the {@link RaceLog}. The event's {@link RaceLogEvent#getLogicalTimePoint() logical
+     * time point} determines starting when the {@link ORCScratchBoatEvent#getCompetitorId() scratch boat identified by
+     * the competitor ID in the event} shall be used.
+     * 
+     * TODO really use the logical time point? Can the scratch boat change across the race duration?
+     */
+    private Competitor getScratchBoat(TimePoint timePoint) {
+        // TODO Implement ORCPerformanceCurveRankingMetric.getScratchBoat(...)
+        return null;
+    }
+    
     /**
      * Implementation approach: compute the implied wind values for all competitors and base a comparator implementation
      * on those values.
      */
     @Override
     public Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
-        final Map<Competitor, Speed> impliedWindByCompetitor = getImpliedWindByCompetitor(timePoint);
+        final Map<Competitor, Speed> impliedWindByCompetitor = getImpliedWindByCompetitor(timePoint, cache);
         return (c1, c2)->Comparator.nullsLast((Speed impliedWindSpeed1, Speed impliedWindSpeed2)->impliedWindSpeed2.compareTo(impliedWindSpeed1)).
                 compare(impliedWindByCompetitor.get(c1), impliedWindByCompetitor.get(c2));
     }
 
-    private Map<Competitor, Speed> getImpliedWindByCompetitor(TimePoint timePoint) {
+    private Map<Competitor, Speed> getImpliedWindByCompetitor(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         final Map<Competitor, Speed> impliedWindByCompetitor = new HashMap<>();
         for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
             try {
-                impliedWindByCompetitor.put(competitor, getImpliedWind(competitor, timePoint));
+                impliedWindByCompetitor.put(competitor, getImpliedWind(competitor, timePoint, cache));
             } catch (MaxIterationsExceededException | FunctionEvaluationException e) {
                 // log and leave entry for competitor empty; this, together with a nullsLast comparator
                 // will sort such competitors towards "worse" ranks
@@ -210,9 +255,9 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
         return impliedWindByCompetitor;
     }
 
-    private Speed getImpliedWind(Competitor competitor, TimePoint timePoint) throws FunctionEvaluationException, MaxIterationsExceededException {
+    private Speed getImpliedWind(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) throws FunctionEvaluationException, MaxIterationsExceededException {
         final Speed result;
-        final ORCPerformanceCurveCourse competitorsPartialCourseAtTimePoint = getPartialCourse(competitor, timePoint);
+        final ORCPerformanceCurveCourse competitorsPartialCourseAtTimePoint = getPartialCourse(competitor, timePoint, cache);
         final ORCCertificate certificate = getCertificate(getTrackedRace().getBoatOfCompetitor(competitor));
         if (certificate != null) {
             final ORCPerformanceCurve performanceCurveForPartialCourse = new ORCPerformanceCurveImpl(certificate, competitorsPartialCourseAtTimePoint);
@@ -226,11 +271,6 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
             result = null;
         }
         return result;
-    }
-
-    private ORCPerformanceCurveCourse getPartialCourse(Competitor competitor, TimePoint timePoint) {
-        // TODO Implement ORCPerformanceCurveRankingMetric.getPartialCourse(...)
-        return null;
     }
 
     /**
@@ -257,7 +297,7 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
                 timePointForImpliedWind = timePoint;
             }
             try {
-                impliedWindByCompetitor.put(competitor, getImpliedWind(competitor, timePointForImpliedWind));
+                impliedWindByCompetitor.put(competitor, getImpliedWind(competitor, timePointForImpliedWind, cache));
             } catch (MaxIterationsExceededException | FunctionEvaluationException e) {
                 // log and leave entry for competitor empty; this, together with a nullsLast comparator
                 // will sort such competitors towards "worse" ranks

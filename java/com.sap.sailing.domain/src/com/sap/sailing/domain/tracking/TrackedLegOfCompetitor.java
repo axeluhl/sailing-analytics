@@ -72,7 +72,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * Same as {@link #getWindwardDistanceToGo(TimePoint, WindPositionMode)}, only that a cache for wind and leg
      * type / bearing can be passed.
      */
-    Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode legMiddle, WindLegTypeAndLegBearingCache cache);
+    Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
 
     /**
      * Computes an approximation for the average velocity made good (windward / leeward speed) of this leg's competitor at
