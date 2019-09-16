@@ -1,4 +1,4 @@
-package com.sap.sailing.server.impl;
+package com.sap.sailing.server.interfaces.coursetemplate;
 
 import java.util.List;
 import java.util.Map;
