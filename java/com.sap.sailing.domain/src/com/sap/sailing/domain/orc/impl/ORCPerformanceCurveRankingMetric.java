@@ -7,6 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.apache.commons.math.FunctionEvaluationException;
+import org.apache.commons.math.MaxIterationsExceededException;
 
 import com.sap.sailing.domain.abstractlog.orc.ORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
@@ -32,6 +37,7 @@ import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveCourseImpl;
+import com.sap.sailing.domain.orc.ORCPerformanceCurve;
 import com.sap.sailing.domain.ranking.AbstractRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -41,11 +47,13 @@ import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
     private static final long serialVersionUID = -7814822523533929816L;
+    private static final Logger logger = Logger.getLogger(ORCPerformanceCurveRankingMetric.class.getName());
 
     /**
      * This field contains a map of all current certificates used for calculation in this {@link TrackedRace}. Each
@@ -173,8 +181,46 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
         return totalCourse;
     }
 
+    /**
+     * Implementation approach: compute the implied wind values for all competitors and base a comparator implementation
+     * on those values.
+     */
     @Override
     public Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        final Map<Competitor, Speed> impliedWindByCompetitor = new HashMap<>();
+        for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
+            try {
+                impliedWindByCompetitor.put(competitor, getImpliedWind(competitor, timePoint));
+            } catch (MaxIterationsExceededException | FunctionEvaluationException e) {
+                // log and leave entry for competitor empty; this, together with a nullsLast comparator
+                // will sort such competitors towards "worse" ranks
+                logger.log(Level.WARNING, "Problem trying to determine ORC PCS implied wind for competitor "
+                        + competitor + " for time point " + timePoint, e);
+            }
+        }
+        return (c1, c2)->Comparator.nullsLast((Speed impliedWindSpeed1, Speed impliedWindSpeed2)->impliedWindSpeed2.compareTo(impliedWindSpeed1)).
+                compare(impliedWindByCompetitor.get(c1), impliedWindByCompetitor.get(c2));
+    }
+
+    private Speed getImpliedWind(Competitor competitor, TimePoint timePoint) throws FunctionEvaluationException, MaxIterationsExceededException {
+        final Speed result;
+        final ORCPerformanceCurveCourse competitorsPartialCourseAtTimePoint = getPartialCourse(competitor, timePoint);
+        final ORCCertificate certificate = getCertificate(getTrackedRace().getBoatOfCompetitor(competitor));
+        if (certificate != null) {
+            final ORCPerformanceCurve performanceCurveForPartialCourse = new ORCPerformanceCurveImpl(certificate, competitorsPartialCourseAtTimePoint);
+            final Duration timeSailedSinceRaceStart = getTrackedRace().getTimeSailedSinceRaceStart(competitor, timePoint);
+            if (timeSailedSinceRaceStart != null) {
+                result = performanceCurveForPartialCourse.getImpliedWind(timeSailedSinceRaceStart);
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    private ORCPerformanceCurveCourse getPartialCourse(Competitor competitor, TimePoint timePoint) {
         // TODO Auto-generated method stub
         return null;
     }

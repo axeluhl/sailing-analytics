@@ -24,18 +24,6 @@ import com.sap.sse.common.Speed;
  *
  */
 public interface ORCCertificate extends Serializable {
-
-    /*
-     * Returns a {@link ORCPerformanceCurve} for the competitor owning this {@link ORCCertificate}.
-     * 
-     * @param course
-     *            equals the {@link ORCPerformanceCurveCourse} (part of the whole course) sailed by the competitor upon
-     *            the point of this call.
-     * @return performance curve to calculate the implied wind for the boat and the sailed part of the course so the
-     *         performance can be compared with other competitors.
-     */
-    //public ORCPerformanceCurve getPerformanceCurve(ORCPerformanceCurveCourse course) throws FunctionEvaluationException;
-    
     /**
      * Returns the sailnumber of the {@link Competitor} which this certificate belongs to.
      * 
