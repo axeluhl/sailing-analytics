@@ -39,7 +39,6 @@ import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveCourseImpl;
 import com.sap.sailing.domain.orc.ORCPerformanceCurve;
 import com.sap.sailing.domain.ranking.AbstractRankingMetric;
-import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -102,6 +101,10 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
         }
     }
     
+    public ORCCertificate getCertificate(Boat boat) {
+        return certificates.get(boat);
+    }
+
     private Map<Serializable, Boat> initBoatsById() {
         final Map<Serializable, Boat> result = new HashMap<>();
         if (getTrackedRace() != null) {
@@ -187,6 +190,12 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
      */
     @Override
     public Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        final Map<Competitor, Speed> impliedWindByCompetitor = getImpliedWindByCompetitor(timePoint);
+        return (c1, c2)->Comparator.nullsLast((Speed impliedWindSpeed1, Speed impliedWindSpeed2)->impliedWindSpeed2.compareTo(impliedWindSpeed1)).
+                compare(impliedWindByCompetitor.get(c1), impliedWindByCompetitor.get(c2));
+    }
+
+    private Map<Competitor, Speed> getImpliedWindByCompetitor(TimePoint timePoint) {
         final Map<Competitor, Speed> impliedWindByCompetitor = new HashMap<>();
         for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
             try {
@@ -198,8 +207,7 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
                         + competitor + " for time point " + timePoint, e);
             }
         }
-        return (c1, c2)->Comparator.nullsLast((Speed impliedWindSpeed1, Speed impliedWindSpeed2)->impliedWindSpeed2.compareTo(impliedWindSpeed1)).
-                compare(impliedWindByCompetitor.get(c1), impliedWindByCompetitor.get(c2));
+        return impliedWindByCompetitor;
     }
 
     private Speed getImpliedWind(Competitor competitor, TimePoint timePoint) throws FunctionEvaluationException, MaxIterationsExceededException {
@@ -221,52 +229,103 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
     }
 
     private ORCPerformanceCurveCourse getPartialCourse(Competitor competitor, TimePoint timePoint) {
-        // TODO Auto-generated method stub
+        // TODO Implement ORCPerformanceCurveRankingMetric.getPartialCourse(...)
         return null;
     }
 
+    /**
+     * Determines the ranks in the leg identified by {@code trackedLeg}. The outcome depends on whether the competitors
+     * have started / finished the leg at {@code timePoint}. The following combinations have to be distinguished:
+     * <ol>
+     * <li>Both haven't started the leg yet at {@code timePoint}: both compare equal</li>
+     * <li>One has, one hasn't started the let yet at {@code timePoint}: the one that has started compares "better"
+     * (less)</li>
+     * <li>Both have started the leg at {@code timePoint}: their implied wind speeds at {@code timePoint} or the point
+     * in time when the respective competitor finished the leg---whichever is earlier---are compared. More means better
+     * (less in terms of the comparator returned).</li>
+     * </ol>
+     */
     @Override
     public Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint,
             WindLegTypeAndLegBearingCache cache) {
-        // TODO Auto-generated method stub
-        return null;
+        final Map<Competitor, Speed> impliedWindByCompetitor = new HashMap<>();
+        for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
+            final TimePoint timePointForImpliedWind;
+            if (trackedLeg.getTrackedLeg(competitor).hasFinishedLeg(timePoint)) {
+                timePointForImpliedWind = trackedLeg.getTrackedLeg(competitor).getFinishTime();
+            } else {
+                timePointForImpliedWind = timePoint;
+            }
+            try {
+                impliedWindByCompetitor.put(competitor, getImpliedWind(competitor, timePointForImpliedWind));
+            } catch (MaxIterationsExceededException | FunctionEvaluationException e) {
+                // log and leave entry for competitor empty; this, together with a nullsLast comparator
+                // will sort such competitors towards "worse" ranks
+                logger.log(Level.WARNING, "Problem trying to determine ORC PCS implied wind for competitor "
+                        + competitor + " for time point " + timePoint, e);
+            }
+        }
+        return (tloc1, tloc2)->{
+            final int result;
+            final boolean hasStarted1 = tloc1.hasStartedLeg(timePoint);
+            final boolean hasStarted2 = tloc2.hasStartedLeg(timePoint);
+            if (!hasStarted1) {
+                if (!hasStarted2) {
+                    // both haven't started; they are considered equal for the leg under consideration
+                    result = 0;
+                } else {
+                    // competitor 1 has not started the leg yet, competitor 2 has started the leg, so competitor
+                    // 1 is worse (greater) than 2
+                    result = 1;
+                }
+            } else {
+                if (!hasStarted2) {
+                    // competitor 1 has started the leg, competitor 2 hasn't, so competitor 1 is better (less)
+                    result = -1;
+                } else {
+                    // both have started; use timePoint or the respective leg finishing time, whichever comes first,
+                    // and determine the implied wind
+                    result = Comparator
+                            .nullsLast((Speed impliedWind1, Speed impliedWind2) -> impliedWind2.compareTo(impliedWind1))
+                            .compare(impliedWindByCompetitor.get(tloc1.getCompetitor()),
+                                    impliedWindByCompetitor.get(tloc2.getCompetitor()));
+                }
+            }
+            return result;
+        };
     }
 
     @Override
     public Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
-        // TODO Auto-generated method stub
+        // TODO Implement RankingMetric.getCorrectedTime(...)
         return null;
     }
 
     @Override
-    protected Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint,
-            TimePoint timePointOfTosPosition, WindLegTypeAndLegBearingCache cache) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    protected Duration getCalculatedTime(Competitor who, Supplier<Leg> leg, Supplier<Position> estimatedPosition,
-            Duration totalDurationSinceRaceStart, Distance totalWindwardDistanceTraveled) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor,
+    public Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor,
             WindLegTypeAndLegBearingCache cache) {
-        // TODO Auto-generated method stub
+        // TODO Implement RankingMetric.getGapToLeaderInOwnTime(...)
         return null;
     }
 
     @Override
     public Duration getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint,
             RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
-        // TODO Auto-generated method stub
+        // TODO Implement RankingMetric.getLegGapToLegLeaderInOwnTime(...)
         return null;
     }
 
-    public ORCCertificate getCertificate(Boat boat) {
-        return certificates.get(boat);
+    @Override
+    protected Duration getCalculatedTime(Competitor who, Supplier<Leg> leg, Supplier<Position> estimatedPosition,
+            Duration totalDurationSinceRaceStart, Distance totalWindwardDistanceTraveled) {
+        // TODO Implement AbstractRankingMetric.getCalculatedTime(...)
+        return null;
+    }
+
+    @Override
+    protected Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint,
+            TimePoint timePointOfTosPosition, WindLegTypeAndLegBearingCache cache) {
+        // TODO Implement AbstractRankingMetric.getDurationToReachAtEqualPerformance(...)
+        return null;
     }
 }

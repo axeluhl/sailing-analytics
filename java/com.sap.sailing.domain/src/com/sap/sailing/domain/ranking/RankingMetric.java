@@ -148,10 +148,6 @@ public interface RankingMetric extends Serializable {
 
     Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
-    default Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint) {
-        return getLegRankingComparator(trackedLeg, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
-    }
-
     Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
     /**
