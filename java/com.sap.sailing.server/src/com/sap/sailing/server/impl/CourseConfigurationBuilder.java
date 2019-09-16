@@ -43,15 +43,41 @@ public class CourseConfigurationBuilder {
     private RepeatablePart optionalRepeatablePart;
     private Integer numberOfLaps;
 
-    public CourseConfigurationBuilder(SharedSailingData sharedSailingData, Regatta optionalRegatta, CourseTemplate optionalCourseTemplate) {
+    public CourseConfigurationBuilder(SharedSailingData sharedSailingData, Regatta optionalRegatta,
+            CourseTemplate optionalCourseTemplate) {
         this.sharedSailingData = sharedSailingData;
         this.optionalRegatta = optionalRegatta;
         this.optionalCourseTemplate = optionalCourseTemplate;
     }
 
+    public MarkConfiguration addMarkConfiguration(UUID optionalMarkTemplateID, UUID optionalMarkPropertiesID,
+            UUID optionalMarkID, CommonMarkProperties commonMarkProperties) {
+        final MarkConfiguration result;
+        if (commonMarkProperties != null) {
+            if (optionalMarkID != null) {
+                throw new IllegalArgumentException(
+                        "Freestyle mark configurations may not reference an existing regatta mark");
+            }
+            result = addFreestyleMarkConfiguration(optionalMarkTemplateID, optionalMarkPropertiesID,
+                    commonMarkProperties);
+        } else if (optionalMarkID != null) {
+            result = addRegattaMarkConfiguration(optionalMarkID);
+        } else if (optionalMarkPropertiesID != null) {
+            result = addMarkPropertiesConfiguration(optionalMarkPropertiesID);
+        } else if (optionalMarkTemplateID != null) {
+            result = addMarkTemplateConfiguration(optionalMarkTemplateID);
+        } else {
+            throw new IllegalArgumentException(
+                    "Mark configuration could not be constructed due to missing specification");
+        }
+        return result;
+    }
+
     // TODO handle positioning information in all possible cases
     public MarkTemplateBasedMarkConfiguration addMarkTemplateConfiguration(UUID markTemplateID) {
-        // TODO: first try to resolve from the course template and then by ID using sharedSailingData. This allows users having access to a course template to use all mark templates being included even if they don't have explicit read permissions for those.
+        // TODO: first try to resolve from the course template and then by ID using sharedSailingData. This allows users
+        // having access to a course template to use all mark templates being included even if they don't have explicit
+        // read permissions for those.
         // TODO implement
         return null;
     }
@@ -59,7 +85,8 @@ public class CourseConfigurationBuilder {
     public MarkPropertiesBasedMarkConfiguration addMarkPropertiesConfiguration(UUID markPropertiesID) {
         final MarkProperties resolvedMarkProperties = sharedSailingData.getMarkPropertiesById(markPropertiesID);
         if (resolvedMarkProperties == null) {
-            throw new IllegalArgumentException("Mark properties with ID " + markPropertiesID + " could not be resolved");
+            throw new IllegalArgumentException(
+                    "Mark properties with ID " + markPropertiesID + " could not be resolved");
         }
         // TODO create MarkPropertiesBasedMarkConfiguration
         return null;
@@ -67,9 +94,13 @@ public class CourseConfigurationBuilder {
 
     public FreestyleMarkConfiguration addFreestyleMarkConfiguration(UUID optionalMarkTemplateID,
             UUID optionalMarkPropertiesID, CommonMarkProperties commonMarkProperties) {
-        // TODO: first try to resolve from the course template and then by ID using sharedSailingData. This allows users having access to a course template to use all mark templates being included even if they don't have explicit read permissions for those.
+        // TODO: first try to resolve from the course template and then by ID using sharedSailingData. This allows users
+        // having access to a course template to use all mark templates being included even if they don't have explicit
+        // read permissions for those.
         final MarkProperties resolvedMarkProperties = sharedSailingData.getMarkPropertiesById(optionalMarkPropertiesID);
-        // TODO decide if it is fine if we can't resolve a MarkTemplate or MarkProperties here because all appearance properties are available. This vcould potentially cause a lack of tracking information if the MarkProperties isn't available.
+        // TODO decide if it is fine if we can't resolve a MarkTemplate or MarkProperties here because all appearance
+        // properties are available. This vcould potentially cause a lack of tracking information if the MarkProperties
+        // isn't available.
         // TODO create FreestyleMarkConfiguration
         return null;
     }
@@ -97,26 +128,27 @@ public class CourseConfigurationBuilder {
         }
         // TODO implement
     }
-    
-    public void addWaypoint(MarkConfiguration leftMark, MarkConfiguration rightMark, String name, PassingInstruction passingInstruction) {
+
+    public void addWaypoint(MarkConfiguration leftMark, MarkConfiguration rightMark, String name,
+            PassingInstruction passingInstruction) {
         if (!markConfigurations.contains(leftMark) || !markConfigurations.contains(rightMark)) {
             throw new IllegalArgumentException();
         }
         // TODO ensure to reuse identical (left, right, name) mark pairs
         // TODO implement
     }
-    
+
     public void setRole(MarkConfiguration markConfiguration, String roleName) {
         if (!markConfigurations.contains(markConfiguration)) {
             throw new IllegalArgumentException();
         }
         // TODO implement
     }
-    
+
     public void setOptionalRepeatablePart(RepeatablePart optionalRepeatablePart) {
         this.optionalRepeatablePart = optionalRepeatablePart;
     }
-    
+
     public void setNumberOfLaps(Integer numberOfLaps) {
         this.numberOfLaps = numberOfLaps;
     }
