@@ -20,7 +20,7 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
-public class OneDesignRankingMetric extends AbstractRankingMetric {
+public class OneDesignRankingMetric extends NonPerformanceCurveRankingMetric {
     private static final long serialVersionUID = -8141113385324184349L;
     
     public OneDesignRankingMetric(TrackedRace trackedRace) {
@@ -164,7 +164,7 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
                     }
 
                     @Override
-                    public Duration getActualTime() {
+                    public Duration getActualRaceDuration() {
                         final TimePoint startOfRace = getTrackedRace().getStartOfRace();
                         final Duration result;
                         if (startOfRace == null) {
@@ -180,7 +180,7 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
                      */
                     @Override
                     public Duration getCorrectedTime() {
-                        return getActualTime();
+                        return getActualRaceDuration();
                     }
 
                     @Override

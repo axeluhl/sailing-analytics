@@ -61,7 +61,7 @@ public interface RankingMetric extends Serializable {
          * Usually the difference between {@link #timePoint} and the start of the race; <code>null</code> if the
          * race start time is not known.
          */
-        Duration getActualTime();
+        Duration getActualRaceDuration();
     
         /**
          * The corrected time for the {@link #competitor}, assuming the race ended at {@link #timePoint}. This
@@ -78,7 +78,7 @@ public interface RankingMetric extends Serializable {
         
         default Duration getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead() {
             final Duration estimatedActualDurationFromTimePointToCompetitorFarthestAhead = getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead();
-            final Duration actualTime = getActualTime();
+            final Duration actualTime = getActualRaceDuration();
             return actualTime == null ? null :
                 estimatedActualDurationFromTimePointToCompetitorFarthestAhead == null ? null :
                     actualTime.plus(estimatedActualDurationFromTimePointToCompetitorFarthestAhead);
@@ -114,19 +114,7 @@ public interface RankingMetric extends Serializable {
          */
         Competitor getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead();
 
-        /**
-         * Similar to {@link #getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead()}, but relative to a
-         * {@link Leg}. This will not consider any progress or position beyond the finishing of that <code>leg</code>.
-         * Instead, for those competitors who have already finished the leg, their
-         * {@link TrackedLegOfCompetitor#getFinishTime() finishing time} for the leg is used, and the distance traveled
-         * is normalized to the {@link TrackedLeg#getWindwardDistance() windward distance of the leg} at the
-         * {@link TrackedLeg#getReferenceTimePoint() reference time point}.
-         */
-        Competitor getLeaderInLegByCalculatedTime(Leg leg, WindLegTypeAndLegBearingCache cache);
-        
         Competitor getCompetitorFarthestAheadInLeg(Leg leg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
-
-        Duration getActualTimeFromRaceStartToReachFarthestAheadInLeg(Competitor competitor, Leg leg, WindLegTypeAndLegBearingCache cache);
     }
     
     public interface LegRankingInfo extends Timed, Serializable {

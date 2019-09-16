@@ -46,7 +46,7 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
  * @author Axel Uhl (D043530)
  *
  */
-public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
+public class TimeOnTimeAndDistanceRankingMetric extends NonPerformanceCurveRankingMetric {
     private static final long serialVersionUID = -2321904208518686420L;
 
     private final TimeOnTimeFactorMapping timeOnTimeFactor;
@@ -340,6 +340,8 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
     @Override
     public Duration getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint,
             RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+        assert rankingInfo instanceof NonPerformanceCurveRankingInfo;
+        final NonPerformanceCurveRankingInfo npcRankingInfo = (NonPerformanceCurveRankingInfo) rankingInfo;
         final Duration result;
         final Leg leg = trackedLegOfCompetitor.getLeg();
         if (getTrackedRace().getStartOfRace() == null || !trackedLegOfCompetitor.hasStartedLeg(timePoint)) {
@@ -357,10 +359,10 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
                 // leg may well be the race leader. However, if a competitor has finished the leg already, use the finishing time
                 // point for that competitor.
                 // leader in the leg is now the competitor with the least corrected time to reach the competitor farthest ahead in the leg
-                final Competitor legLeader = rankingInfo.getLeaderInLegByCalculatedTime(trackedLegOfCompetitor.getTrackedLeg().getLeg(), cache);
+                final Competitor legLeader = npcRankingInfo.getLeaderInLegByCalculatedTime(trackedLegOfCompetitor.getTrackedLeg().getLeg(), cache);
                 result = getGapToCompetitorInOwnTime(trackedLegOfCompetitor.getCompetitor(), legLeader,
-                        rankingInfo.getActualTimeFromRaceStartToReachFarthestAheadInLeg(trackedLegOfCompetitor.getCompetitor(), leg, cache),
-                        rankingInfo.getActualTimeFromRaceStartToReachFarthestAheadInLeg(legLeader, leg, cache),
+                        npcRankingInfo.getActualTimeFromRaceStartToReachFarthestAheadInLeg(trackedLegOfCompetitor.getCompetitor(), leg, cache),
+                        npcRankingInfo.getActualTimeFromRaceStartToReachFarthestAheadInLeg(legLeader, leg, cache),
                         windwardDistanceFarthestTraveledUntilFinishingLeg);
             }
         }
