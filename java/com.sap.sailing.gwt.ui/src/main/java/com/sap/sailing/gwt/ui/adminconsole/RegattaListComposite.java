@@ -30,6 +30,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
@@ -268,9 +269,20 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CERTIFICATES_UPDATE, regattaDTO -> {
+            CertificateAssignmentDialog certificateAssignmentDialog = new CertificateAssignmentDialog(sailingService, userService,
+                    regattaDTO.getName(), stringMessages, errorReporter,
+                    new DialogCallback<List<CompetitorWithBoatDTO>>() {
+                        @Override
+                        public void cancel() {
+                        }
 
-        // TODO add here functionality to action button
-        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CERTIFICATES_UPDATE, null);
+                        @Override
+                        public void ok(final List<CompetitorWithBoatDTO> result) {
+                        }
+                    });
+            certificateAssignmentDialog.show();
+        });
         
         table.addColumn(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getHeader());
         table.addColumn(regattaNameColumn, stringMessages.regattaName());
