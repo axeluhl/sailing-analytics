@@ -7,6 +7,7 @@ import java.util.UUID;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sse.common.Color;
@@ -28,6 +29,10 @@ public class MarkPropertiesImpl extends CommonMarkPropertiesImpl implements Mark
     public MarkPropertiesImpl(UUID id, String name, String shortName, Color color, String shape, String pattern,
             MarkType type) {
         super(id, name, shortName, color, shape, pattern, type);
+    }
+
+    public MarkPropertiesImpl(UUID id, final CommonMarkProperties commonMarkProperties) {
+        super(id, commonMarkProperties);
     }
 
     @Override

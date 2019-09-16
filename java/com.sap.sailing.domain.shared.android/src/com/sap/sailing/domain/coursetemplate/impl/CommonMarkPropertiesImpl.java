@@ -32,7 +32,16 @@ public abstract class CommonMarkPropertiesImpl extends NamedWithUUIDImpl impleme
         this.pattern = pattern;
         this.type = type;
     }
-    
+
+    public CommonMarkPropertiesImpl(UUID id, final CommonMarkProperties commonMarkProperties) {
+        super(commonMarkProperties.getName(), id);
+        this.shortName = commonMarkProperties.getShortName();
+        this.color = commonMarkProperties.getColor();
+        this.shape = commonMarkProperties.getShape();
+        this.pattern = commonMarkProperties.getPattern();
+        this.type = commonMarkProperties.getType();
+    }
+
     @Override
     public Color getColor() {
         return color;
