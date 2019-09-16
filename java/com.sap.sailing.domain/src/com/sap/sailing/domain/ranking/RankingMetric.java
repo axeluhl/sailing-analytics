@@ -117,6 +117,18 @@ public interface RankingMetric extends Serializable {
         Competitor getCompetitorFarthestAheadInLeg(Leg leg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
     }
     
+    public interface RankingInfoWithLegLeader extends RankingInfo {
+        /**
+         * Similar to {@link #getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead()}, but relative to a
+         * {@link Leg}. This will not consider any progress or position beyond the finishing of that <code>leg</code>.
+         * Instead, for those competitors who have already finished the leg, their
+         * {@link TrackedLegOfCompetitor#getFinishTime() finishing time} for the leg is used, and the distance traveled
+         * is normalized to the {@link TrackedLeg#getWindwardDistance() windward distance of the leg} at the
+         * {@link TrackedLeg#getReferenceTimePoint() reference time point}.
+         */
+        Competitor getLeaderInLegByCalculatedTime(Leg leg, WindLegTypeAndLegBearingCache cache);
+    }
+    
     public interface LegRankingInfo extends Timed, Serializable {
         /**
          * The time point for which this ranking information is valid

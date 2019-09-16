@@ -171,7 +171,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         }
     }
     
-    public abstract class AbstractRankingInfoWithCompetitorRankingInfoCache extends AbstractRankingInfo {
+    public abstract class AbstractRankingInfoWithCompetitorRankingInfoCache extends AbstractRankingInfo implements RankingInfoWithLegLeader {
         private static final long serialVersionUID = 4476276127292347825L;
 
         /**
@@ -214,6 +214,12 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         @Override
         public Competitor getCompetitorFarthestAhead() {
             return competitorFarthestAhead;
+        }
+
+        @Override
+        public Competitor getLeaderInLegByCalculatedTime(Leg leg, WindLegTypeAndLegBearingCache cache) {
+            final TrackedLeg trackedLeg = getTrackedRace().getTrackedLeg(leg);
+            return trackedLeg.getLeader(getTimePoint(), cache);
         }
     }
     
@@ -280,102 +286,6 @@ public abstract class AbstractRankingMetric implements RankingMetric {
     protected abstract Duration getCalculatedTime(Competitor who, Supplier<Leg> leg,
             Supplier<Position> estimatedPosition, Duration totalDurationSinceRaceStart,
             Distance totalWindwardDistanceTraveled);
-
-    /**
-     * Predicts how long <code>who</code> will take to reach competitor <code>to</code>'s position at
-     * <code>timePoint</code>, starting at <code>who</code>'s position at <code>timePoint</code>, assuming a continued
-     * performance for <code>who</code> that matches her average VMG on her current leg so far, and equal performance
-     * with <code>to</code> on any subsequent leg that <code>who</code> needs to travel to reach <code>to</code>'s
-     * position at <code>timePoint</code>. If <code>to</code> has already finished the race, the finish line position is
-     * where <code>who</code> needs to arrive.
-     * <p>
-     * If <code>to</code> is already in a later leg, <code>who</code>'s remaining duration to reach the end of her
-     * current leg is estimated using
-     * {@link TrackedLegOfCompetitor#getEstimatedTimeToNextMark(TimePoint, com.sap.sailing.domain.tracking.WindPositionMode)}
-     * ; then from the waypoint reached this way the
-     * {@link #getAbsoluteWindwardDistanceTraveled(Competitor, Waypoint, TimePoint) windward distance to competitor
-     * <code>to</code>} is determined and from this, using the handicaps for both competitors, <code>who</code> and
-     * <code>to</code>, their performance between the waypoint and <code>to</code>'s position at <code>timePoint</code>
-     * is equated, hence assuming that considering their handicaps, both competitors are doing equally well on this part
-     * of the course, meaning that <code>who</code> will not gain any (corrected) time on <code>to</code> during this
-     * period. From the equations, the duration it will take <code>who</code> to reach this position starting at the
-     * upcoming waypoint can be determined which is then added to the duration estimated to reach that upcoming waypoint
-     * (based on <code>who</code>'s average VMG in her current leg).
-     * <p>
-     * 
-     * If <code>who</code> and <code>to</code> are in the same leg, the windward distance is calculated, and
-     * <code>who</code>'s average VMG during the current leg is used to estimate the time until she reaches the position
-     * <code>to</code> had at <code>timePoint</code>.
-     * 
-     * Precondition: <code>who</code>'s windward / along-course position is behind that of <code>to</code>, or an
-     * {@link IllegalArgumentException} will be thrown.
-     * <p>
-     * 
-     * @return <code>null</code>, if either of the two competitors' current legs is <code>null</code>
-     */
-    protected Duration getPredictedDurationToReachWindwardPositionOf(Competitor who, Competitor to, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
-        final TrackedLegOfCompetitor currentLegWho = getCurrentLegOrLastLegIfAlreadyFinished(who, timePoint);
-        final TrackedLegOfCompetitor currentLegTo = getCurrentLegOrLastLegIfAlreadyFinished(to, timePoint);
-        final Duration result = getPredictedDurationToReachWindwardPositionOf(currentLegWho, currentLegTo, timePoint, cache);
-        return result;
-    }
-
-    /**
-     * Similar to
-     * {@link #getPredictedDurationToReachWindwardPositionOf(Competitor, Competitor, TimePoint, WindLegTypeAndLegBearingCache)},
-     * allowing the caller to specify the legs to consider for the two competitors. This way, the "to" competitor's
-     * leg may be set to one that is not necessarily the current leg at <code>timePoint</code>, enabling a comparison
-     * for a specific leg.
-     * <p>
-     * 
-     * The resulting duration may be negative if <code>legWho</code>'s competitor has reached the position in question
-     * before <code>timePoint</code>.
-     * <p>
-     * 
-     * Precondition: <code>legWho</code>'s leg is the same as or an earlier leg than <code>legTo</code>'s leg.
-     */
-    protected Duration getPredictedDurationToReachWindwardPositionOf(final TrackedLegOfCompetitor legWho, final TrackedLegOfCompetitor legTo,
-            TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
-        assert legWho == null || legTo == null ||
-                getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legWho.getTrackedLeg().getLeg().getFrom()) <=
-                getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legTo.getTrackedLeg().getLeg().getFrom());
-        final Duration result;
-        if (legWho == null || legTo == null ||
-                !(isAssumedToHaveStartedLeg(timePoint, legWho) || isAssumedToHaveFinishedLeg(timePoint, legWho)) ||
-                !(isAssumedToHaveStartedLeg(timePoint, legTo) || isAssumedToHaveFinishedLeg(timePoint, legTo))) {
-            result = null;
-        } else {
-            final Competitor who = legWho.getCompetitor();
-            final Competitor to = legTo.getCompetitor();
-            if (who == to) {
-                // the same competitor requires no time to reach its own position; it's already there;
-                // however, if the competitor has already finished the leg at or before timePoint, the duration will
-                // have to be negative, even if who==to
-                if (isAssumedToHaveFinishedLeg(timePoint, legWho)) {
-                    result = timePoint.until(legWho.getFinishTime());
-                } else {
-                    result = Duration.NULL;
-                }
-            } else {
-                assert getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legWho.getLeg().getFrom()) <= getTrackedRace()
-                        .getRace().getCourse().getIndexOfWaypoint(legTo.getLeg().getFrom());
-                final Duration toEndOfLegOrTo = getPredictedDurationToEndOfLegOrTo(timePoint, legWho, legWho.getTrackedLeg().getTrackedLeg(to), cache);
-                if (toEndOfLegOrTo == null) {
-                    result = null;
-                } else {
-                    final Duration durationForSubsequentLegsToReachAtEqualPerformance;
-                    if (legWho.getLeg() == legTo.getLeg()) {
-                        durationForSubsequentLegsToReachAtEqualPerformance = Duration.NULL;
-                    } else {
-                        durationForSubsequentLegsToReachAtEqualPerformance = getDurationToReachAtEqualPerformance(who, to,
-                                legWho.getLeg().getTo(), timePoint, cache);
-                    }
-                    result = durationForSubsequentLegsToReachAtEqualPerformance == null ? null : toEndOfLegOrTo.plus(durationForSubsequentLegsToReachAtEqualPerformance);
-                }
-            }
-        }
-        return result;
-    }
 
     /**
      * Get's <code>who</code>'s current tracked leg at <code>timePoint</code>, or <code>null</code> if <code>who</code> hasn't
@@ -454,22 +364,6 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                         windwardPositionToReachInWhosCurrentLeg, timePoint, WindPositionMode.LEG_MIDDLE));
         return toEndOfLegOrTo;
     }
-    
-    /**
-     * Computes the duration that <code>who</code> would take to reach <code>to</code>'s windward / along-track position
-     * at <code>timePoint</code>, starting at <code>fromWaypoint</code>, assuming the same corrected performance at
-     * which <code>to</code> sailed starting at <code>fromWaypoint</code> up to her current position.
-     * <p>
-     * 
-     * Precondition: competitor <code>to</code> has already passed <code>fromWaypoint</code>. If not, an
-     * {@link IllegalArgumentException} will be thrown.
-     * <p>
-     * 
-     * Implementations can validate this precondition using
-     * {@link #validateGetDurationToReachAtEqualPerformanceParameters(Competitor, Waypoint, TimePoint, MarkPassing)}.
-     */
-    protected abstract Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint,
-            TimePoint timePointOfTosPosition, WindLegTypeAndLegBearingCache cache);
     
     protected void validateGetDurationToReachAtEqualPerformanceParameters(Competitor to, Waypoint fromWaypoint,
             TimePoint timePointOfTosPosition, final MarkPassing whenToPassedFromWaypoint) {

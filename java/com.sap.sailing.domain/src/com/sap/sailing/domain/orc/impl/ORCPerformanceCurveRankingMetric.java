@@ -33,7 +33,6 @@ import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisito
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
@@ -74,6 +73,12 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
     
     private final RegattaLogEventVisitor certificatesFromRegattaLogUpdater;
     
+    /**
+     * TODO maybe it's a good idea to cache the {@link ORCPerformanceCurve} objects and implied wind speeds for all competitors involved in this object which serves as some sort of cache for ranking calculations for a single time point
+     * 
+     * @author Axel Uhl (d043530)
+     *
+     */
     private class ORCPerformanceCurveRankingInfo extends AbstractRankingInfoWithCompetitorRankingInfoCache {
         private static final long serialVersionUID = -3578498778702139675L;
         
@@ -437,28 +442,76 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
         return new ORCPerformanceCurveRankingInfo(timePoint, competitorRankingInfo);
     }
 
+    /**
+     * Uses the implied wind of the {@link RankingInfo#getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead()} and
+     * maps it to a time in {@code competitor}'s performance curve. This tells {@code competitor} in her own time what
+     * the time difference is to the boat leading in the race by implied wind.
+     */
     @Override
-    public Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor,
-            WindLegTypeAndLegBearingCache cache) {
+    public Duration getGapToLeaderInOwnTime(RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache) {
         assert rankingInfo instanceof ORCPerformanceCurveRankingInfo;
-        final ORCPerformanceCurveRankingInfo orcpcsRankingInfo = (ORCPerformanceCurveRankingInfo) rankingInfo;
-        // TODO Implement RankingMetric.getGapToLeaderInOwnTime(...)
-        return null;
+        Duration result;
+        final TimePoint startOfRace = getTrackedRace().getStartOfRace();
+        if (startOfRace != null) {
+            final Duration actualRaceDuration = startOfRace.until(rankingInfo.getTimePoint());
+            final Competitor leader = rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead();
+            try {
+                final ORCPerformanceCurve competitorPerformanceCurve = getPerformanceCurveForPartialCourse(competitor, rankingInfo.getTimePoint(), cache);
+                final Speed impliedWindOfLeader = getImpliedWind(leader, rankingInfo.getTimePoint(), cache);
+                final Duration allowanceForLeaderInCompetitorsPerformanceCurve = competitorPerformanceCurve.getAllowancePerCourse(impliedWindOfLeader);
+                result = actualRaceDuration.minus(allowanceForLeaderInCompetitorsPerformanceCurve);
+            } catch (FunctionEvaluationException | MaxIterationsExceededException e) {
+                logger.log(Level.WARNING, "Problem evaluating performance curve for competitor "+competitor+" for time point "+rankingInfo.getTimePoint(), e);
+                result = null;
+            }
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     @Override
     public Duration getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint,
             RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
         assert rankingInfo instanceof ORCPerformanceCurveRankingInfo;
-        final ORCPerformanceCurveRankingInfo orcpcsRankingInfo = (ORCPerformanceCurveRankingInfo) rankingInfo;
-        // TODO Implement RankingMetric.getLegGapToLegLeaderInOwnTime(...)
-        return null;
+        Duration result;
+        final TimePoint startOfRace = getTrackedRace().getStartOfRace();
+        if (trackedLegOfCompetitor.hasStartedLeg(timePoint) && startOfRace != null) {
+            final Duration actualRaceDurationForCompetitor = startOfRace.until(rankingInfo.getTimePoint());
+            final ORCPerformanceCurveRankingInfo orcpcsRankingInfo = (ORCPerformanceCurveRankingInfo) rankingInfo;
+            final Competitor legLeader = orcpcsRankingInfo.getLeaderInLegByCalculatedTime(trackedLegOfCompetitor.getLeg(), cache);
+            final Competitor competitor = trackedLegOfCompetitor.getCompetitor();
+            if (competitor == legLeader) {
+                result = Duration.NULL;
+            } else {
+                TimePoint timeForCompetitorImpliedWindCalculation;
+                try {
+                    timeForCompetitorImpliedWindCalculation = nowOrLegFinishTimeIfFinishedAtTimePoint(trackedLegOfCompetitor, timePoint, cache);
+                    final ORCPerformanceCurve competitorPerformanceCurveForLeg = getPerformanceCurveForPartialCourse(competitor, timeForCompetitorImpliedWindCalculation, cache);
+                    final TimePoint timeForLegLeaderImpliedWindCalculation = nowOrLegFinishTimeIfFinishedAtTimePoint(
+                            getTrackedRace().getTrackedLeg(legLeader, trackedLegOfCompetitor.getLeg()), timePoint, cache);
+                    final Speed legLeaderImpliedWindInOrAtEndOfLeg = getImpliedWind(legLeader, timeForLegLeaderImpliedWindCalculation, cache);
+                    final Duration correctedTimeOfLegLeaderInCompetitorsPerformanceCurve = competitorPerformanceCurveForLeg.getAllowancePerCourse(legLeaderImpliedWindInOrAtEndOfLeg);
+                    result = actualRaceDurationForCompetitor.minus(correctedTimeOfLegLeaderInCompetitorsPerformanceCurve);
+                } catch (FunctionEvaluationException | MaxIterationsExceededException e) {
+                    logger.log(Level.WARNING, "Problem with performance curve calculation for competitor "+competitor+" or "+legLeader, e);
+                    result = null;
+                }
+            }
+        } else {
+            result = null; // competitor didn't start leg yet at timePoint
+        }
+        return result;
     }
 
-    @Override
-    protected Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint,
-            TimePoint timePointOfTosPosition, WindLegTypeAndLegBearingCache cache) {
-        // TODO Implement AbstractRankingMetric.getDurationToReachAtEqualPerformance(...)
-        return null;
+    private TimePoint nowOrLegFinishTimeIfFinishedAtTimePoint(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint,
+            WindLegTypeAndLegBearingCache cache) throws FunctionEvaluationException {
+        final TimePoint timeForImpliedWindCalculation;
+        if (trackedLegOfCompetitor.hasFinishedLeg(timePoint)) {
+            timeForImpliedWindCalculation = trackedLegOfCompetitor.getFinishTime();
+        } else {
+            timeForImpliedWindCalculation = timePoint;
+        }
+        return timeForImpliedWindCalculation;
     }
 }
