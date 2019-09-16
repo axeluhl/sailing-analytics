@@ -7,12 +7,12 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class CommonMarkPropertiesJsonSerializer implements JsonSerializer<CommonMarkProperties> {
 
-    private static final String FIELD_NAME = "name";
-    private static final String FIELD_SHORTNAME = "shortName";
-    private static final String FIELD_COLOR = "color";
-    private static final String FIELD_SHAPE = "shape";
-    private static final String FIELD_PATTERN = "pattern";
-    private static final String FIELD_MARKTYPE = "markType";
+    public static final String FIELD_NAME = "name";
+    public static final String FIELD_SHORTNAME = "shortName";
+    public static final String FIELD_COLOR = "color";
+    public static final String FIELD_SHAPE = "shape";
+    public static final String FIELD_PATTERN = "pattern";
+    public static final String FIELD_MARKTYPE = "markType";
 
     @Override
     public JSONObject serialize(CommonMarkProperties commonMarkProperties) {
