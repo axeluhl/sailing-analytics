@@ -6,7 +6,7 @@
     <coordinates>
       <x>672</x>
       <y>539</y>
-      <w>126</w>
+      <w>112</w>
       <h>91</h>
     </coordinates>
     <panel_attributes>CommonMarkProperties
@@ -93,13 +93,13 @@ bg=#ffb3b3</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>728</x>
+      <x>756</x>
       <y>623</y>
-      <w>217</w>
+      <w>189</w>
       <h>63</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>290.0;10.0;290.0;40.0;10.0;40.0;10.0;70.0</additional_attributes>
+    <additional_attributes>250.0;10.0;250.0;40.0;10.0;40.0;10.0;70.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
@@ -338,14 +338,14 @@ bg=#c0ffb3</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>546</x>
+      <x>658</x>
       <y>903</y>
-      <w>329</w>
+      <w>217</w>
       <h>35</h>
     </coordinates>
     <panel_attributes>FreestlyeMarkConfiguration
 --
-freestyleProperties : CommonMarkPropertiesWithOptionalPositioning
+freestyleProperties : CommonMarkProperties
 bg=#c0ffb3</panel_attributes>
     <additional_attributes/>
   </element>
@@ -437,54 +437,29 @@ bg=#c0ffb3</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>539</x>
-      <y>735</y>
-      <w>238</w>
-      <h>49</h>
-    </coordinates>
-    <panel_attributes>CommonMarkPropertiesWithOptionalPositioning
---
-deviceIdentifier : DeviceIdentivier
-fixedPosition : FixedPosition
-</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>644</x>
-      <y>623</y>
-      <w>70</w>
-      <h>126</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>80.0;10.0;80.0;50.0;10.0;50.0;10.0;160.0</additional_attributes>
-  </element>
-  <element>
-    <id>UMLClass</id>
-    <coordinates>
-      <x>539</x>
+      <x>511</x>
       <y>812</y>
-      <w>238</w>
-      <h>42</h>
+      <w>273</w>
+      <h>63</h>
     </coordinates>
     <panel_attributes>MarkProperties
 --
 lastUsedTemplate : Map&lt;MarkTemplate, TimePoint&gt;
 lastUsedRole : Map&lt;String, Timepoint&gt;
+usedForRegattasOnServers : Map&lt;URL, Set&lt;RegattaIdentifier&gt;&gt;
 bg=#b3deff</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>644</x>
-      <y>777</y>
-      <w>21</w>
-      <h>49</h>
+      <x>658</x>
+      <y>623</y>
+      <w>56</w>
+      <h>203</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;50.0</additional_attributes>
+    <additional_attributes>60.0;10.0;60.0;50.0;10.0;50.0;10.0;270.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
@@ -695,22 +670,31 @@ controlPoint
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>770</x>
-      <y>756</y>
-      <w>161</w>
-      <h>35</h>
+      <x>777</x>
+      <y>595</y>
+      <w>154</w>
+      <h>196</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+
+
+
+
+
+
+
+
+
 effectiveProperties
 1</panel_attributes>
-    <additional_attributes>210.0;20.0;10.0;20.0</additional_attributes>
+    <additional_attributes>200.0;260.0;90.0;260.0;90.0;10.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>770</x>
+      <x>777</x>
       <y>707</y>
-      <w>147</w>
+      <w>140</w>
       <h>140</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-
@@ -724,21 +708,21 @@ effectiveProperties
  originatingMarkProperties
  0..1
 </panel_attributes>
-    <additional_attributes>30.0;10.0;30.0;180.0;10.0;180.0</additional_attributes>
+    <additional_attributes>20.0;10.0;20.0;180.0;10.0;180.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
       <x>420</x>
       <y>700</y>
-      <w>133</w>
+      <w>105</w>
       <h>161</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-
 
 0..1
 lastUsedTemplate</panel_attributes>
-    <additional_attributes>170.0;190.0;10.0;190.0;10.0;10.0</additional_attributes>
+    <additional_attributes>130.0;190.0;10.0;190.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
@@ -845,5 +829,34 @@ zeroBasedIndexOfRepeatablePartEnd : int
 0..1
 repeatablePart</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;80.0;120.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1232</x>
+      <y>623</y>
+      <w>126</w>
+      <h>49</h>
+    </coordinates>
+    <panel_attributes>Positioning
+--
+type: PositioningType
+position : Position</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1239</x>
+      <y>665</y>
+      <w>119</w>
+      <h>154</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+
+
+optionalPositioning
+0..1</panel_attributes>
+    <additional_attributes>10.0;160.0;150.0;160.0;150.0;10.0</additional_attributes>
   </element>
 </diagram>
