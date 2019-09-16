@@ -12,9 +12,6 @@ package com.sap.sailing.domain.coursetemplate;
 public interface MarkPropertiesBasedMarkConfiguration extends MarkConfiguration {
     MarkProperties getMarkProperties();
 
-    @Override
-    CommonMarkPropertiesWithOptionalPositioning getEffectiveProperties();
-
     /**
      * No need to store a {@link MarkProperties} object to the inventory; we are using an unmodified
      * {@link MarkProperties} object returned by {@link #getMarkProperties()} already.

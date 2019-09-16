@@ -1,19 +1,20 @@
 package com.sap.sailing.domain.coursetemplate.impl;
 
-import com.sap.sailing.domain.coursetemplate.CommonMarkPropertiesWithOptionalPositioning;
+import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.Positioning;
 
 public class FreestyleMarkConfigurationImpl extends MarkConfigurationImpl implements FreestyleMarkConfiguration {
     private static final long serialVersionUID = 8167307943855869321L;
 
     private final MarkProperties optionalMarkProperties;
-    private final CommonMarkPropertiesWithOptionalPositioning freestyleProperties;
+    private final CommonMarkProperties freestyleProperties;
 
     public FreestyleMarkConfigurationImpl(MarkTemplate optionalMarkTemplate, MarkProperties optionalMarkProperties,
-            CommonMarkPropertiesWithOptionalPositioning freestyleProperties) {
-        super(optionalMarkTemplate, /* storeToInventory */ false);
+            CommonMarkProperties freestyleProperties, Positioning optionalPositioning) {
+        super(optionalMarkTemplate, optionalPositioning, /* storeToInventory */ false);
         this.optionalMarkProperties = optionalMarkProperties;
         this.freestyleProperties = freestyleProperties;
     }
@@ -24,12 +25,12 @@ public class FreestyleMarkConfigurationImpl extends MarkConfigurationImpl implem
     }
 
     @Override
-    public CommonMarkPropertiesWithOptionalPositioning getFreestyleProperties() {
+    public CommonMarkProperties getFreestyleProperties() {
         return freestyleProperties;
     }
 
     @Override
-    public CommonMarkPropertiesWithOptionalPositioning getEffectiveProperties() {
+    public CommonMarkProperties getEffectiveProperties() {
         return freestyleProperties;
     }
 

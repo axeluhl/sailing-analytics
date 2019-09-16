@@ -9,7 +9,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.coursetemplate.CommonMarkPropertiesWithOptionalPositioning;
+import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
@@ -19,6 +19,7 @@ import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
@@ -58,7 +59,7 @@ public class CourseConfigurationBuilder {
     }
 
     public MarkConfiguration addMarkConfiguration(UUID optionalMarkTemplateID, UUID optionalMarkPropertiesID,
-            UUID optionalMarkID, CommonMarkPropertiesWithOptionalPositioning commonMarkProperties) {
+            UUID optionalMarkID, CommonMarkProperties commonMarkProperties, Positioning optionalPositioning) {
         final MarkConfiguration result;
         if (commonMarkProperties != null) {
             if (optionalMarkID != null) {
@@ -66,11 +67,11 @@ public class CourseConfigurationBuilder {
                         "Freestyle mark configurations may not reference an existing regatta mark");
             }
             result = addFreestyleMarkConfiguration(optionalMarkTemplateID, optionalMarkPropertiesID,
-                    commonMarkProperties);
+                    commonMarkProperties, optionalPositioning);
         } else if (optionalMarkID != null) {
-            result = addRegattaMarkConfiguration(optionalMarkID);
+            result = addRegattaMarkConfiguration(optionalMarkID, optionalPositioning);
         } else if (optionalMarkPropertiesID != null) {
-            result = addMarkPropertiesConfiguration(optionalMarkPropertiesID);
+            result = addMarkPropertiesConfiguration(optionalMarkPropertiesID, optionalPositioning);
         } else if (optionalMarkTemplateID != null) {
             result = addMarkTemplateConfiguration(optionalMarkTemplateID);
         } else {
@@ -110,34 +111,34 @@ public class CourseConfigurationBuilder {
         return resolvedMarkTemplate;
     }
 
-    public MarkPropertiesBasedMarkConfiguration addMarkPropertiesConfiguration(UUID markPropertiesID) {
+    public MarkPropertiesBasedMarkConfiguration addMarkPropertiesConfiguration(UUID markPropertiesID, Positioning optionalPositioning) {
         final MarkProperties resolvedMarkProperties = sharedSailingData.getMarkPropertiesById(markPropertiesID);
         if (resolvedMarkProperties == null) {
             throw new IllegalArgumentException(
                     "Mark properties with ID " + markPropertiesID + " could not be resolved");
         }
-        return new MarkPropertiesBasedMarkConfigurationImpl(resolvedMarkProperties);
+        return new MarkPropertiesBasedMarkConfigurationImpl(resolvedMarkProperties, optionalPositioning);
     }
 
     public FreestyleMarkConfiguration addFreestyleMarkConfiguration(UUID optionalMarkTemplateID,
-            UUID optionalMarkPropertiesID, CommonMarkPropertiesWithOptionalPositioning commonMarkProperties) {
+            UUID optionalMarkPropertiesID, CommonMarkProperties commonMarkProperties, Positioning optionalPositioning) {
         final MarkTemplate resolvedMarkTemplate = optionalMarkTemplateID == null ? null
                 : resolveMarkTemplateByID(optionalMarkTemplateID);
         final MarkProperties resolvedMarkProperties = sharedSailingData.getMarkPropertiesById(optionalMarkPropertiesID);
         // TODO decide if it is fine if we can't resolve a MarkTemplate or MarkProperties here because all appearance
         // properties are available. This vcould potentially cause a lack of tracking information if the MarkProperties
         // isn't available.
-        return new FreestyleMarkConfigurationImpl(resolvedMarkTemplate, resolvedMarkProperties, commonMarkProperties);
+        return new FreestyleMarkConfigurationImpl(resolvedMarkTemplate, resolvedMarkProperties, commonMarkProperties, optionalPositioning);
     }
 
-    public RegattaMarkConfiguration addRegattaMarkConfiguration(UUID markID) {
+    public RegattaMarkConfiguration addRegattaMarkConfiguration(UUID markID, Positioning optionalPositioning) {
         if (optionalRegatta == null) {
             throw new IllegalStateException();
         }
         for (RaceColumn raceColumn : optionalRegatta.getRaceColumns()) {
             for (Mark mark : raceColumn.getAvailableMarks()) {
                 if (mark.getId().equals(markID)) {
-                    return new RegattaMarkConfigurationImpl(mark);
+                    return new RegattaMarkConfigurationImpl(mark, optionalPositioning);
                 }
             }
         }

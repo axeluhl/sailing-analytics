@@ -1,7 +1,8 @@
 package com.sap.sailing.domain.coursetemplate.impl;
 
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.coursetemplate.CommonMarkPropertiesWithOptionalPositioning;
+import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
+import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 
 public class RegattaMarkConfigurationImpl extends MarkConfigurationImpl implements RegattaMarkConfiguration {
@@ -9,8 +10,8 @@ public class RegattaMarkConfigurationImpl extends MarkConfigurationImpl implemen
 
     private final Mark mark;
 
-    public RegattaMarkConfigurationImpl(Mark mark) {
-        super(/* optionalMarkTemplate */ null, /* storeToInventory */ false);
+    public RegattaMarkConfigurationImpl(Mark mark, Positioning optionalPositioning) {
+        super(/* optionalMarkTemplate */ null, optionalPositioning, /* storeToInventory */ false);
         this.mark = mark;
     }
 
@@ -25,8 +26,7 @@ public class RegattaMarkConfigurationImpl extends MarkConfigurationImpl implemen
     }
 
     @Override
-    public CommonMarkPropertiesWithOptionalPositioning getEffectiveProperties() {
-        // TODO implement
-        return null;
+    public CommonMarkProperties getEffectiveProperties() {
+        return mark;
     }
 }

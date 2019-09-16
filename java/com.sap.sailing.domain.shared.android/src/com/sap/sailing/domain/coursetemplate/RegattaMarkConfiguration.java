@@ -23,7 +23,4 @@ import com.sap.sailing.domain.base.Mark;
  */
 public interface RegattaMarkConfiguration extends MarkConfiguration {
     Mark getMark();
-
-    @Override
-    CommonMarkPropertiesWithOptionalPositioning getEffectiveProperties();
 }

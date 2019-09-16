@@ -36,7 +36,9 @@ import com.sap.sailing.domain.base.Mark;
 public interface MarkConfiguration extends ControlPointWithMarkConfiguration {
     MarkTemplate getOptionalMarkTemplate();
     
-    CommonMarkPropertiesWithOptionalPositioning getEffectiveProperties();
+    CommonMarkProperties getEffectiveProperties();
+    
+    Positioning getOptionalPositioning();
     
     boolean isStoreToInventory();
     
