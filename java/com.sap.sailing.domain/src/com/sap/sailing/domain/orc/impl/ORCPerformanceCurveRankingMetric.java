@@ -14,16 +14,16 @@ import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.MaxIterationsExceededException;
 
 import com.sap.sailing.domain.abstractlog.orc.ORCCertificateAssignmentEvent;
-import com.sap.sailing.domain.abstractlog.orc.ORCScratchBoatEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentFinder;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataAnalyzer;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatFinder;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentFinder;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
@@ -69,9 +69,17 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
     
     private final Map<Serializable, Boat> boatsById;
     
+    private final Map<Serializable, Competitor> competitorsById;
+    
     private final RaceLogEventVisitor certificatesFromRaceLogUpdater;
     
     private final RegattaLogEventVisitor certificatesFromRegattaLogUpdater;
+    
+    /**
+     * Updated by an observer pattern that watches all {@link RaceLog}s {@link TrackedRace#getAttachedRaceLogs() attached} to the
+     * {@link #getTrackedRace() tracked race} for occurrence and revocations of {@link RaceLogORCScratchBoatEvent}s.
+     */
+    private Competitor explicitScratchBoat;
     
     /**
      * TODO maybe it's a good idea to cache the {@link ORCPerformanceCurve} objects and implied wind speeds for all competitors involved in this object which serves as some sort of cache for ranking calculations for a single time point
@@ -86,14 +94,15 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
          * Uses the {@link ORCPerformanceCurveRankingMetric#getScratchBoat(TimePoint) scratch boat} as the "boat
          * farthest ahead." The default scratch boat is defined as such but may be overridden explicitly.
          */
-        public ORCPerformanceCurveRankingInfo(TimePoint timePoint, Map<Competitor, CompetitorRankingInfo> competitorRankingInfo) {
-            super(timePoint, competitorRankingInfo, getScratchBoat(timePoint));
+        public ORCPerformanceCurveRankingInfo(TimePoint timePoint, Map<Competitor, CompetitorRankingInfo> competitorRankingInfo, WindLegTypeAndLegBearingCache cache) {
+            super(timePoint, competitorRankingInfo, getScratchBoat(timePoint, cache));
         }
     }
     
     public ORCPerformanceCurveRankingMetric(TrackedRace trackedRace) {
         super(trackedRace);
         boatsById = initBoatsById();
+        competitorsById = initCompetitorsById();
         updateCertificatesFromLogs();
         updateCourseFromRaceLogs();
         certificatesFromRaceLogUpdater = createCertificatesFromRaceLogAndCourseUpdater();
@@ -110,12 +119,14 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
                 public void raceLogAttached(RaceLog raceLog) {
                     raceLog.addListener(certificatesFromRaceLogUpdater);
                     updateCertificatesFromLogs();
+                    updateScratchBoatFromLogs();
                 }
     
                 @Override
                 public void raceLogDetached(RaceLog raceLog) {
                     raceLog.removeListener(certificatesFromRaceLogUpdater);
                     updateCertificatesFromLogs();
+                    updateScratchBoatFromLogs();
                 }
             });
         }
@@ -130,6 +141,16 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
         if (getTrackedRace() != null) {
             for (final Boat boat : getTrackedRace().getTrackedRegatta().getRegatta().getAllBoats()) {
                 result.put(boat.getId(), boat);
+            }
+        }
+        return result;
+    }
+
+    private Map<Serializable, Competitor> initCompetitorsById() {
+        final Map<Serializable, Competitor> result = new HashMap<>();
+        if (getTrackedRace() != null) {
+            for (final Competitor competitor : getTrackedRace().getTrackedRegatta().getRegatta().getAllCompetitors()) {
+                result.put(competitor.getId(), competitor);
             }
         }
         return result;
@@ -163,6 +184,21 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
                 updateCertificatesFromLogs();
             }
         };
+    }
+
+    /**
+     * For now, we assume that there is only one scratch boat defined for this race and that it's independent of the
+     * pass. We pick the last ("greatest") valid event of type {@link RaceLogORCScratchBoatEvent}.
+     */
+    private void updateScratchBoatFromLogs() {
+        Competitor scratchBoatFromLog = null;
+        for (final RaceLog raceLog : getTrackedRace().getAttachedRaceLogs()) {
+            scratchBoatFromLog = new RaceLogORCScratchBoatFinder(raceLog, competitorsById).analyze();
+            if (scratchBoatFromLog != null) {
+                break;
+            }
+        }
+        explicitScratchBoat = scratchBoatFromLog;
     }
 
     /**
@@ -235,15 +271,19 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
      * By default, we use the boat farthest ahead ("first ship home" when the race has finished) as the scratch boat,
      * but other definitions are possible, such as greatest {@link ORCCertificate#getGPH() GPH value} or least
      * {@link ORCCertificate#getCDL() CDL value}. An explicit selection can be made using the
-     * {@link ORCScratchBoatEvent} in the {@link RaceLog}. The event's {@link RaceLogEvent#getLogicalTimePoint() logical
-     * time point} determines starting when the {@link ORCScratchBoatEvent#getCompetitorId() scratch boat identified by
-     * the competitor ID in the event} shall be used.
-     * 
-     * TODO really use the logical time point? Can the scratch boat change across the race duration?
+     * {@link RaceLogORCScratchBoatEvent} in the {@link RaceLog}. The last unrevoked event in the first {@link RaceLog}
+     * in which one is found is used. Only if none of the attached {@link RaceLog}s contains any unrevoked such event,
+     * the scratch boat is selected implicitly to be the boat farthest ahead (see
+     * {@link #getCompetitorFarthestAhead(TimePoint, WindLegTypeAndLegBearingCache)}).
      */
-    private Competitor getScratchBoat(TimePoint timePoint) {
-        // TODO Implement ORCPerformanceCurveRankingMetric.getScratchBoat(...)
-        return null;
+    private Competitor getScratchBoat(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        final Competitor result;
+        if (explicitScratchBoat != null) {
+            result = explicitScratchBoat;
+        } else {
+            result = getCompetitorFarthestAhead(timePoint, cache);
+        }
+        return result;
     }
     
     /**
@@ -365,7 +405,7 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
     @Override
     public Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         Duration result = null;
-        final Competitor scratchBoat = getScratchBoat(timePoint);
+        final Competitor scratchBoat = getScratchBoat(timePoint, cache);
         if (competitor == scratchBoat) {
             // the scratch boat's corrected time is its own time sailed
             result = getTrackedRace().getTimeSailedSinceRaceStart(competitor, timePoint);
@@ -439,7 +479,7 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
                         correctedTime));
             }
         }
-        return new ORCPerformanceCurveRankingInfo(timePoint, competitorRankingInfo);
+        return new ORCPerformanceCurveRankingInfo(timePoint, competitorRankingInfo, cache);
     }
 
     /**

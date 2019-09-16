@@ -2,6 +2,7 @@ package com.sap.sailing.domain.ranking;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -23,6 +25,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceRankComparator;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
@@ -233,6 +236,14 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         return trackedRace;
     }
 
+    protected Competitor getCompetitorFarthestAhead(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        Comparator<Competitor> oneDesignComparator = getWindwardDistanceTraveledComparator(timePoint, cache);
+        Competitor competitorFarthestAhead = StreamSupport
+                .stream(getCompetitors().spliterator(), /* parallel */true).
+                sorted(oneDesignComparator).findFirst().get();
+        return competitorFarthestAhead;
+    }
+    
     /**
      * The time from the {@link TrackedRace#getStartOfRace() race start} until <code>timePoint</code> or until
      * the point in time when <code>competitor</code> passed the finish mark, whichever comes first. If there is
@@ -389,6 +400,25 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      */
     protected Distance getWindwardDistanceTraveled(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         return getWindwardDistanceTraveled(competitor, getTrackedRace().getRace().getCourse().getFirstWaypoint(), timePoint, cache);
+    }
+
+    /**
+     * Constructs a comparator based on the results of
+     * {@link #getWindwardDistanceTraveled(Competitor, TimePoint, WindLegTypeAndLegBearingCache)} where competitors are
+     * "less" than other competitors ("better") if they are in a later leg or, if in the same leg, have a greater
+     * windward distance traveled. If both competitors have already finished the race, the finishing time is compared.
+     */
+    private Comparator<Competitor> getWindwardDistanceTraveledComparator(final TimePoint timePoint, final WindLegTypeAndLegBearingCache cache) {
+        final Map<Competitor, Distance> windwardDistanceTraveledPerCompetitor = new HashMap<>();
+        for (final Competitor competitor : getCompetitors()) {
+            windwardDistanceTraveledPerCompetitor.put(competitor, getWindwardDistanceTraveled(competitor, timePoint, cache));
+        }
+        return new AbstractRaceRankComparator<Distance>(getTrackedRace(), timePoint, /* lessIsBetter */ false) {
+            @Override
+            protected Distance getComparisonValueForSameLeg(Competitor competitor) {
+                return windwardDistanceTraveledPerCompetitor.get(competitor);
+            }
+        };
     }
 
     /**

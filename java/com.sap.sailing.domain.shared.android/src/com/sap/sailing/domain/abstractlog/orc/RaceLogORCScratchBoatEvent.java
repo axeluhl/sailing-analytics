@@ -5,6 +5,6 @@ import java.io.Serializable;
 import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 
-public interface ORCScratchBoatEvent extends RaceLogEvent, Revokable {
+public interface RaceLogORCScratchBoatEvent extends RaceLogEvent, Revokable {
     Serializable getCompetitorId();
 }

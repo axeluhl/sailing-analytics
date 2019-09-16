@@ -154,7 +154,7 @@ public class TestORCRankingMetricCollaborationWithRaceLogAndRegattaLog {
             assertTrue(leg instanceof ORCPerformanceCurveLegAdapter); // only adapters, no explicit leg specification anymore
         }
     }
-
+    
     @Test
     public void testHigherPriorityLegDefinitionInRaceLogWins() throws NotRevokableException {
         attachRaceLog();

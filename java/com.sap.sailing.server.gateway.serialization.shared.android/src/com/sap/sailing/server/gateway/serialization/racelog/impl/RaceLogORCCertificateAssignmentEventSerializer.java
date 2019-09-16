@@ -28,7 +28,7 @@ public class RaceLogORCCertificateAssignmentEventSerializer extends BaseRaceLogE
         RaceLogORCCertificateAssignmentEvent certificateAssignmentEvent = (RaceLogORCCertificateAssignmentEvent) object;
         JSONObject result = super.serialize(certificateAssignmentEvent);
         result.put(ORC_CERTIFICATE, new ORCCertificateJsonSerializer().serialize(certificateAssignmentEvent.getCertificate()));
-        result.put(ORC_BOAT_ID, certificateAssignmentEvent.getBoatId());
+        result.put(ORC_BOAT_ID, certificateAssignmentEvent.getBoatId().toString());
         return result;
     }
 

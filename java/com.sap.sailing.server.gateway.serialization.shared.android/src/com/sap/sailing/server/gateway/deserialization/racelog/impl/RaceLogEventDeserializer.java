@@ -89,7 +89,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
                 new RaceLogUseCompetitorsFromRaceLogEventDeserializer(competitorDeserializer),
                 new RaceLogEndOfTrackingEventDeserializer(competitorDeserializer),
                 new RaceLogTagEventDeserializer(competitorDeserializer),
-                new RaceLogORCLegDataEventDeserializer(competitorDeserializer));
+                new RaceLogORCLegDataEventDeserializer(competitorDeserializer),
+                new RaceLogORCScratchBoatEventDeserializer(competitorDeserializer));
     }
 
     protected final JsonDeserializer<RaceLogEvent> flagEventDeserializer;
@@ -117,6 +118,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
     protected final JsonDeserializer<RaceLogEvent> endOfTrackingDeserializer;
     protected final JsonDeserializer<RaceLogEvent> tagEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> orcLegDataEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> orcScratchBoatEventDeserializer;
 
     public RaceLogEventDeserializer(JsonDeserializer<RaceLogEvent> flagEventDeserializer,
             JsonDeserializer<RaceLogEvent> startTimeEventDeserializer,
@@ -141,7 +143,9 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             JsonDeserializer<RaceLogEvent> startOfTrackingEventDeserializer,
             JsonDeserializer<RaceLogEvent> useCompetitorsFromRaceLogDeserializer,
             JsonDeserializer<RaceLogEvent> endOfTrackingEventDeserializer,
-            JsonDeserializer<RaceLogEvent> tagEventDeserializer, JsonDeserializer<RaceLogEvent> orcLegDataEventDeserializer) {
+            JsonDeserializer<RaceLogEvent> tagEventDeserializer,
+            JsonDeserializer<RaceLogEvent> orcLegDataEventDeserializer,
+            JsonDeserializer<RaceLogEvent> orcScratchBoatEventDeserializer) {
         this.flagEventDeserializer = flagEventDeserializer;
         this.startTimeEventDeserializer = startTimeEventDeserializer;
         this.dependentStartTimeEventDeserializer = dependentStartTimeEventDeserializer;
@@ -167,6 +171,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
         this.useCompetitorsFromRaceLogDeserializer = useCompetitorsFromRaceLogDeserializer;
         this.tagEventDeserializer = tagEventDeserializer;
         this.orcLegDataEventDeserializer = orcLegDataEventDeserializer;
+        this.orcScratchBoatEventDeserializer = orcScratchBoatEventDeserializer;
     }
 
     protected JsonDeserializer<RaceLogEvent> getDeserializer(JSONObject object) throws JsonDeserializationException {
