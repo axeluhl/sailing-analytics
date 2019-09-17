@@ -48,8 +48,8 @@ public class ORCPerformanceCurveRankingTest extends OnlineTracTracBasedTest {
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
         super.setUp();
-        URI storedUri = new URI("file:///"+new File("resources/orc/worlds2019/5a516a0-69f7-0137-dd9c-60a44ce903c3.mtb").getCanonicalPath().replace('\\', '/'));
-        super.setUp(new URL("file:///"+new File("resources/orc/worlds2019/5a516a0-69f7-0137-dd9c-60a44ce903c3.txt").getCanonicalPath()),
+        URI storedUri = new URI("file:///"+new File("resources/orc/worlds2019/c5a516a0-69f7-0137-dd9c-60a44ce903c3.mtb").getCanonicalPath().replace('\\', '/'));
+        super.setUp(new URL("file:///"+new File("resources/orc/worlds2019/c5a516a0-69f7-0137-dd9c-60a44ce903c3.txt").getCanonicalPath()),
                 /* liveUri */ null, /* storedUri */ storedUri,
                 new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS, ReceiverType.MARKPOSITIONS, ReceiverType.RACECOURSE,
                         ReceiverType.RACESTARTFINISH });
