@@ -475,7 +475,7 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
                 competitorRankingInfo.put(competitor, new CompetitorRankingInfoImpl(
                         timePoint, competitor, getWindwardDistanceTraveled(competitor, timePoint, cache),
                         actualRaceDuration, correctedTime,
-                        actualRaceDuration.plus(correctedTime),
+                        correctedTime == null ? null : actualRaceDuration.plus(correctedTime),
                         correctedTime));
             }
         }
@@ -497,9 +497,13 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
             final Competitor leader = rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead();
             try {
                 final ORCPerformanceCurve competitorPerformanceCurve = getPerformanceCurveForPartialCourse(competitor, rankingInfo.getTimePoint(), cache);
-                final Speed impliedWindOfLeader = getImpliedWind(leader, rankingInfo.getTimePoint(), cache);
-                final Duration allowanceForLeaderInCompetitorsPerformanceCurve = competitorPerformanceCurve.getAllowancePerCourse(impliedWindOfLeader);
-                result = actualRaceDuration.minus(allowanceForLeaderInCompetitorsPerformanceCurve);
+                if (competitorPerformanceCurve == null) {
+                    result = null;
+                } else {
+                    final Speed impliedWindOfLeader = getImpliedWind(leader, rankingInfo.getTimePoint(), cache);
+                    final Duration allowanceForLeaderInCompetitorsPerformanceCurve = competitorPerformanceCurve.getAllowancePerCourse(impliedWindOfLeader);
+                    result = actualRaceDuration.minus(allowanceForLeaderInCompetitorsPerformanceCurve);
+                }
             } catch (FunctionEvaluationException | MaxIterationsExceededException e) {
                 logger.log(Level.WARNING, "Problem evaluating performance curve for competitor "+competitor+" for time point "+rankingInfo.getTimePoint(), e);
                 result = null;
