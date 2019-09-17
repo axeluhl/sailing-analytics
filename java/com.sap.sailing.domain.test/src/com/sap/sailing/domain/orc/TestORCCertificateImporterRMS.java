@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
-import com.sap.sailing.domain.orc.impl.ORCCertificateImporterRMS;
+import com.sap.sailing.domain.orc.impl.ORCCertificatesRmsImporter;
 
 public class TestORCCertificateImporterRMS {
     private static final String RESOURCES = "resources/orc/";
@@ -20,14 +20,14 @@ public class TestORCCertificateImporterRMS {
     @Test
     public void testSimpleLocalRMSFileRead() throws IOException {
         File fileGER = new File(RESOURCES + "GER2019.rms");
-        ORCCertificateImporter importer = new ORCCertificateImporterRMS(new FileInputStream(fileGER));
-        ORCCertificate milan = importer.getCertificate(" ger 7323");
+        ORCCertificatesCollection certificates = new ORCCertificatesRmsImporter().read(new FileInputStream(fileGER));
+        ORCCertificate milan = certificates.getCertificate(" ger 7323");
         assertNotNull(milan);
     }
     
     @Test
     public void testSimpleOnlineRMSFileRead() throws IOException {
-        ORCCertificateImporter importer = new ORCCertificateImporterRMS(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=rms").openStream());
+        ORCCertificatesCollection importer = new ORCCertificatesRmsImporter().read(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=rms").openStream());
         ORCCertificate swan  = importer.getCertificate(" GER 5335");
         ORCCertificate moana = importer.getCertificate("ger  55 49 ");
         assertNotNull(swan);

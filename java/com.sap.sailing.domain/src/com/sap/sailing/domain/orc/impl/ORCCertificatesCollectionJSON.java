@@ -1,19 +1,13 @@
 package com.sap.sailing.domain.orc.impl;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.io.ByteOrderMark;
-import org.apache.commons.io.input.BOMInputStream;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
@@ -37,7 +31,7 @@ import com.sap.sse.common.impl.SecondsDurationImpl;
  * @author Daniel Lisunkin (i505543)
  *
  */
-public class ORCCertificateImporterJSON extends AbstractORCCertificateImporter {
+public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollection {
     private Map<String, JSONObject> data;
     private static final String RUN = "Run";
     private static final String BEAT = "Beat";
@@ -50,20 +44,11 @@ public class ORCCertificateImporterJSON extends AbstractORCCertificateImporter {
      * Receives an {@link InputStream} from different possible sources (web, local file, ...) and does parse the
      * {@code .json} file.
      */
-    public ORCCertificateImporterJSON(InputStream in) throws IOException, ParseException {
-        Map<String, JSONObject> result = new HashMap<>();
-        String defaultEncoding = "UTF-8";
-        BOMInputStream bomInputStream = new BOMInputStream(in);
-        ByteOrderMark bom = bomInputStream.getBOM();
-        String charsetName = bom == null ? defaultEncoding : bom.getCharsetName();
-        InputStreamReader reader = new InputStreamReader(new BufferedInputStream(bomInputStream), charsetName);
-        JSONObject parsedJson = (JSONObject) new JSONParser().parse(reader);
-        JSONArray dataArray = (JSONArray) parsedJson.get("rms");
-        for (int i = 0; i < dataArray.size(); i++) {
-            JSONObject object = (JSONObject) dataArray.get(i);
-            result.put(getCanonicalizedSailNumber((String) object.get("SailNo")), object);
+    public ORCCertificatesCollectionJSON(Map<String, JSONObject> data) {
+        this.data = new HashMap<>();
+        for (final Entry<String, JSONObject> e : data.entrySet()) {
+            this.data.put(getCanonicalizedSailNumber(e.getKey()), e.getValue());
         }
-        data = result;
     }
 
     /**
@@ -204,5 +189,10 @@ public class ORCCertificateImporterJSON extends AbstractORCCertificateImporter {
         }
 
         return result;
+    }
+
+    @Override
+    public Iterable<String> getSailNumbers() {
+        return Collections.unmodifiableCollection(data.keySet());
     }
 }

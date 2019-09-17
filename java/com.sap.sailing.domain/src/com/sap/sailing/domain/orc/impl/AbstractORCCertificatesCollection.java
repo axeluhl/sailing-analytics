@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.orc.impl;
 
-import com.sap.sailing.domain.orc.ORCCertificateImporter;
+import com.sap.sailing.domain.orc.ORCCertificatesCollection;
 
-public abstract class AbstractORCCertificateImporter implements ORCCertificateImporter {
+public abstract class AbstractORCCertificatesCollection implements ORCCertificatesCollection {
     
     /**
      * From a sail number which may contain spaces, also redundantly and repeatedly, as well

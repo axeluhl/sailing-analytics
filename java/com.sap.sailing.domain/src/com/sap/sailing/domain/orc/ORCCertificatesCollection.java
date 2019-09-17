@@ -11,8 +11,13 @@ import com.sap.sailing.domain.common.orc.ORCCertificate;
  * @author Daniel Lisunkin (i505543)
  * 
  **/
-public interface ORCCertificateImporter {
-
+public interface ORCCertificatesCollection {
+    /**
+     * Tells the sail numbers that can be used as key in {@link #getCertificate(String)} and {@link #getCertificates(String[])}
+     * and for which certificates are available in this object.
+     */
+    Iterable<String> getSailNumbers();
+    
     /**
      * Creates an {@link ORCCertificate} object to a given sail number.
      * 

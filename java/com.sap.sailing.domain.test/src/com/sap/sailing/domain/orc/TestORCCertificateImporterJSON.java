@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
-import com.sap.sailing.domain.orc.impl.ORCCertificateImporterJSON;
+import com.sap.sailing.domain.orc.impl.ORCCertificatesJsonImporter;
 
 
 public class TestORCCertificateImporterJSON {
@@ -22,14 +22,14 @@ public class TestORCCertificateImporterJSON {
     @Test
     public void testSimpleLocalJSONFileRead() throws IOException, ParseException {
         File fileGER = new File(RESOURCES + "GER2019.json");
-        ORCCertificateImporter importer = new ORCCertificateImporterJSON(new FileInputStream(fileGER));
+        ORCCertificatesCollection importer = new ORCCertificatesJsonImporter().read(new FileInputStream(fileGER));
         ORCCertificate milan = importer.getCertificate(" ger 7323");
         assertNotNull(milan);
     }
     
     @Test
     public void testSimpleOnlineJSONFileRead() throws IOException, ParseException {
-        ORCCertificateImporter importer = new ORCCertificateImporterJSON(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
+        ORCCertificatesCollection importer = new ORCCertificatesJsonImporter().read(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
         ORCCertificate swan  = importer.getCertificate(" GER 5335");
         ORCCertificate moana = importer.getCertificate("ger  55 49 ");
         assertNotNull(swan);

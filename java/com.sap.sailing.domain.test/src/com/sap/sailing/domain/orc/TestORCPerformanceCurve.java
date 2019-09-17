@@ -29,7 +29,7 @@ import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveCourseImpl;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
-import com.sap.sailing.domain.orc.impl.ORCCertificateImporterJSON;
+import com.sap.sailing.domain.orc.impl.ORCCertificatesJsonImporter;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.DegreeBearingImpl;
@@ -45,8 +45,8 @@ public class TestORCPerformanceCurve {
     private final boolean collectErrors = true;
     
     private static ORCPerformanceCurveCourse alturaCourse;
-    private static ORCCertificateImporter importerLocal;
-    private static ORCCertificateImporter importerOnline;
+    private static ORCCertificatesCollection importerLocal;
+    private static ORCCertificatesCollection importerOnline;
     
     private static final String RESOURCES = "resources/orc/";
 
@@ -76,10 +76,10 @@ public class TestORCPerformanceCurve {
         
         // Local File:
         File fileGER = new File(RESOURCES + "GER2019.json");
-        importerLocal = new ORCCertificateImporterJSON(new FileInputStream(fileGER));
+        importerLocal = new ORCCertificatesJsonImporter().read(new FileInputStream(fileGER));
         
         // Online File:
-        importerOnline = new ORCCertificateImporterJSON(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
+        importerOnline = new ORCCertificatesJsonImporter().read(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
     }
     
     @Test
