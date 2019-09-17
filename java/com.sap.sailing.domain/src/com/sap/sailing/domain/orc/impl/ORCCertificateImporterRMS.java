@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,7 +22,6 @@ import org.apache.commons.io.input.BOMInputStream;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
-import com.sap.sailing.domain.orc.ORCCertificateImporter;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -50,7 +49,7 @@ import com.sap.sse.common.impl.SecondsDurationImpl;
  *
  */
 
-public class ORCCertificateImporterRMS implements ORCCertificateImporter {
+public class ORCCertificateImporterRMS extends AbstractORCCertificateImporter {
     //Codes used in the RMS document as column names for different information
     private static final String TWA_COURSES = "R";
     private static final String CDL = "CDL";
@@ -95,30 +94,22 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
         String line;
         while ((line = br.readLine()) != null) {
             final Map<String, String> parsedLine = parseLine(line);
-            certificateValuesBySailnumber.put(parsedLine.get(sailnumberColumnName).replaceAll(" ", "").toUpperCase(), parsedLine);
+            certificateValuesBySailnumber.put(getCanonicalizedSailNumber(parsedLine.get(sailnumberColumnName)), parsedLine);
         }
     }
     
     public ORCCertificateImporterRMS(InputStream in) throws IOException {
+        this(getReaderForInputStream(in));
+    }
+
+    private static BufferedReader getReaderForInputStream(InputStream in) throws IOException, UnsupportedEncodingException {
         String defaultEncoding = "UTF-8";
         BOMInputStream bomInputStream = new BOMInputStream(in);
         ByteOrderMark bom = bomInputStream.getBOM();
         String charsetName = bom == null ? defaultEncoding : bom.getCharsetName();
         InputStreamReader reader = new InputStreamReader(new BufferedInputStream(bomInputStream), charsetName);
         BufferedReader br = new BufferedReader(reader);
-        columnNamesAndWidths = readColumnWidthsFromFirstLine(br.readLine());
-        Iterator<String> iterator = columnNamesAndWidths.keySet().iterator();
-        iterator.next();                                      // the first column contains the IDs of the certificates
-        final String sailnumberColumnName = iterator.next();  // the second column contains the sail numbers, which are easier to use for identification
-        certificateValuesBySailnumber = new HashMap<>();
-        String line;
-        
-        while ((line = br.readLine()) != null) {
-            final Map<String, String> parsedLine = parseLine(line);
-            certificateValuesBySailnumber.put(parsedLine.get(sailnumberColumnName).replaceAll(" ", "").toUpperCase(), parsedLine);
-        }
-        
-        br.close();
+        return br;
     }
     
     private Map<String, String> parseLine(final String line) {
@@ -145,7 +136,6 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
                 splitBySpaceMode = true;
             }
             start = end;
-            
         }
         return result;
     }
@@ -171,13 +161,13 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
     }
 
     public ORCCertificateValues getValuesForSailnumber(String sailnumber) {
-        String searchString = sailnumber.replaceAll(" ", "").toUpperCase();
+        String searchString = getCanonicalizedSailNumber(sailnumber);
         return certificateValuesBySailnumber.containsKey(searchString) ? new ORCCertificateValues(searchString) : null;
     }
     
     @Override
     public ORCCertificate getCertificate(String sailnumber) {
-        String searchString = sailnumber.replaceAll(" ", "").toUpperCase();
+        String searchString = getCanonicalizedSailNumber(sailnumber);
         ORCCertificateValues certificateValues = getValuesForSailnumber(searchString);
         final String boatclass = certificateValues.getValue(BOATCLASS);
         final Distance length  = new MeterDistance(Double.parseDouble(certificateValues.getValue(LENGTH)));
@@ -194,7 +184,6 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
         final Map<Speed, Speed> longDistanceSpeedPredictionPerTrueWindSpeed = new HashMap<>();
         final Map<Speed, Speed> circularRandomSpeedPredictionPerTrueWindSpeed = new HashMap<>();
         final Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed = new HashMap<>();
-        
         for (Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
             String windSpeed = Integer.toString((int) tws.getKnots());
             String beatAngleKey = BEAT_ANGLE + windSpeed;
@@ -227,7 +216,6 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
             }
             velocityPredictionsPerTrueWindSpeedAndAngle.put(tws, velocityPredictionPerTrueWindAngle);
         }
-        
         return new ORCCertificateImpl(searchString, boatclass, length, gph, cdl,
                 velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
                 beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
@@ -239,7 +227,6 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
     @Override
     public Map<String, ORCCertificate> getCertificates(String[] sailnumbers) {
         Map<String, ORCCertificate> result = new HashMap<>();
-
         for (String sailnumber : sailnumbers) {
             result.put(sailnumber, getCertificate(sailnumber));
         }

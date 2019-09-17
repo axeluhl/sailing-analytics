@@ -532,11 +532,15 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
                 try {
                     timeForCompetitorImpliedWindCalculation = nowOrLegFinishTimeIfFinishedAtTimePoint(trackedLegOfCompetitor, timePoint, cache);
                     final ORCPerformanceCurve competitorPerformanceCurveForLeg = getPerformanceCurveForPartialCourse(competitor, timeForCompetitorImpliedWindCalculation, cache);
-                    final TimePoint timeForLegLeaderImpliedWindCalculation = nowOrLegFinishTimeIfFinishedAtTimePoint(
-                            getTrackedRace().getTrackedLeg(legLeader, trackedLegOfCompetitor.getLeg()), timePoint, cache);
-                    final Speed legLeaderImpliedWindInOrAtEndOfLeg = getImpliedWind(legLeader, timeForLegLeaderImpliedWindCalculation, cache);
-                    final Duration correctedTimeOfLegLeaderInCompetitorsPerformanceCurve = competitorPerformanceCurveForLeg.getAllowancePerCourse(legLeaderImpliedWindInOrAtEndOfLeg);
-                    result = actualRaceDurationForCompetitor.minus(correctedTimeOfLegLeaderInCompetitorsPerformanceCurve);
+                    if (competitorPerformanceCurveForLeg == null) {
+                        result = null;
+                    } else {
+                        final TimePoint timeForLegLeaderImpliedWindCalculation = nowOrLegFinishTimeIfFinishedAtTimePoint(
+                                getTrackedRace().getTrackedLeg(legLeader, trackedLegOfCompetitor.getLeg()), timePoint, cache);
+                        final Speed legLeaderImpliedWindInOrAtEndOfLeg = getImpliedWind(legLeader, timeForLegLeaderImpliedWindCalculation, cache);
+                        final Duration correctedTimeOfLegLeaderInCompetitorsPerformanceCurve = competitorPerformanceCurveForLeg.getAllowancePerCourse(legLeaderImpliedWindInOrAtEndOfLeg);
+                        result = actualRaceDurationForCompetitor.minus(correctedTimeOfLegLeaderInCompetitorsPerformanceCurve);
+                    }
                 } catch (FunctionEvaluationException | MaxIterationsExceededException e) {
                     logger.log(Level.WARNING, "Problem with performance curve calculation for competitor "+competitor+" or "+legLeader, e);
                     result = null;

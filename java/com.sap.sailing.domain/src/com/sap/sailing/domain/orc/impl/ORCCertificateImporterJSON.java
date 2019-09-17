@@ -18,7 +18,6 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
-import com.sap.sailing.domain.orc.ORCCertificateImporter;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -38,9 +37,8 @@ import com.sap.sse.common.impl.SecondsDurationImpl;
  * @author Daniel Lisunkin (i505543)
  *
  */
-public class ORCCertificateImporterJSON implements ORCCertificateImporter {
-
-    private Map<String, Object> data;
+public class ORCCertificateImporterJSON extends AbstractORCCertificateImporter {
+    private Map<String, JSONObject> data;
     private static final String RUN = "Run";
     private static final String BEAT = "Beat";
     private static final String WINDWARD_LEEWARD = "WL";
@@ -53,7 +51,7 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
      * {@code .json} file.
      */
     public ORCCertificateImporterJSON(InputStream in) throws IOException, ParseException {
-        Map<String, Object> result = new HashMap<>();
+        Map<String, JSONObject> result = new HashMap<>();
         String defaultEncoding = "UTF-8";
         BOMInputStream bomInputStream = new BOMInputStream(in);
         ByteOrderMark bom = bomInputStream.getBOM();
@@ -63,7 +61,7 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
         JSONArray dataArray = (JSONArray) parsedJson.get("rms");
         for (int i = 0; i < dataArray.size(); i++) {
             JSONObject object = (JSONObject) dataArray.get(i);
-            result.put(((String) object.get("SailNo")).replaceAll(" ", "").toUpperCase(), object);
+            result.put(getCanonicalizedSailNumber((String) object.get("SailNo")), object);
         }
         data = result;
     }
@@ -83,8 +81,8 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
         Map<Speed, Map<Bearing, Speed>> velocityPredictionPerTrueWindSpeedAndAngle = new HashMap<>();
         Map<Bearing, Map<Speed, Duration>> allowanceDurationsPerTrueWindAngleAndSpeed = new HashMap<>();        //per nautical mile
         Map<String, Map<Speed, Duration>> predefinedAllowanceDurationsPerTrueWindSpeed = new HashMap<>();       //per nautical mile
-        String searchString = sailnumber.replaceAll(" ", "").toUpperCase();
-        JSONObject object = (JSONObject) data.get(searchString);
+        String searchString = getCanonicalizedSailNumber(sailnumber);
+        JSONObject object = data.get(searchString);
         if (object == null) {
             //TODO Throw Exception for sailnumber not found. InvalidArgumentException?
             return null;
