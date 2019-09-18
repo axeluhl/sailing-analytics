@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
@@ -30,6 +31,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -41,10 +43,13 @@ import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
@@ -269,8 +274,10 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);
+        actionsColumn.addAction(RaceLogTrackingEventManagementImagesBarCell.ACTION_BOAT_REGISTRATIONS,
+                DefaultActions.UPDATE, this::handleBoatRegistration);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CERTIFICATES_UPDATE, regattaDTO -> {
-            CertificateAssignmentDialog certificateAssignmentDialog = new CertificateAssignmentDialog(sailingService, userService,
+            BoatCertificateAssignmentDialog certificateAssignmentDialog = new BoatCertificateAssignmentDialog(sailingService, userService,
                     regattaDTO.getName(), stringMessages, errorReporter,
                     new DialogCallback<List<CompetitorWithBoatDTO>>() {
                         @Override
@@ -407,6 +414,40 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         Util.addAll(regattas, newAllRegattas);
         allRegattas = newAllRegattas;
         filterablePanelRegattas.updateAll(allRegattas);
+    }
+    
+    private void handleBoatRegistration(StrippedLeaderboardDTOWithSecurity t) {
+        if (t.canBoatsOfCompetitorsChangePerRace) {
+            RegattaDTO regatta = getSelectedRegatta();
+            String boatClassName = regatta.boatClass.getName();
+
+            new RegattaLogBoatRegistrationDialog(boatClassName, sailingService, userService, stringMessages,
+                    errorReporter, /* editable */true, t.getName(), t.canBoatsOfCompetitorsChangePerRace,
+                    new DialogCallback<Set<BoatDTO>>() {
+                        @Override
+                        public void ok(Set<BoatDTO> registeredBoats) {
+                            sailingService.setBoatRegistrationsInRegattaLog(t.getName(), registeredBoats,
+                                    new AsyncCallback<Void>() {
+                                        @Override
+                                        public void onSuccess(Void result) {
+                                            // pass
+                                        }
+
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            errorReporter.reportError(
+                                                    "Could not save boat registrations: " + caught.getMessage());
+                                        }
+                                    });
+                        }
+
+                        @Override
+                        public void cancel() {
+                        }
+                    }).show();
+        } else {
+            Notification.notify(stringMessages.canNotRegisterBoats(), NotificationType.ERROR);
+        }
     }
 
     public List<RegattaDTO> getAllRegattas() {
