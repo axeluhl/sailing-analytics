@@ -1885,23 +1885,25 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
         // load associated roles
         final ArrayList<?> markList = dbObject.get(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES.name(), ArrayList.class);
-        for (final Object entry : markList) {
-            if (entry instanceof Document) {
-                final Document entryObject = (Document) entry;
-                final UUID markUUID = UUID
-                        .fromString(entryObject.getString(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_MARK_ID.name()));
-                final Mark mark = baseDomainFactory.getExistingMarkById(markUUID);
-                if (mark != null) {
-                    final String roleOrNull = entryObject
-                            .getString(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_ROLE.name());
-                    if (roleOrNull != null) {
-                        courseData.getA().addRoleMapping(mark, roleOrNull);
+        if (markList != null) {
+            for (final Object entry : markList) {
+                if (entry instanceof Document) {
+                    final Document entryObject = (Document) entry;
+                    final UUID markUUID = UUID.fromString(
+                            entryObject.getString(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_MARK_ID.name()));
+                    final Mark mark = baseDomainFactory.getExistingMarkById(markUUID);
+                    if (mark != null) {
+                        final String roleOrNull = entryObject
+                                .getString(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_ROLE.name());
+                        if (roleOrNull != null) {
+                            courseData.getA().addRoleMapping(mark, roleOrNull);
+                        }
+                    } else {
+                        logger.warning(String.format("Could not resolve mark with id %s for course %s.", markUUID, id));
                     }
                 } else {
-                    logger.warning(String.format("Could not resolve mark with id %s for course %s.", markUUID, id));
+                    logger.warning(String.format("Unexpected mark entry found for course %s.", id));
                 }
-            } else {
-                logger.warning(String.format("Unexpected mark entry found for course %s.", id));
             }
         }
 

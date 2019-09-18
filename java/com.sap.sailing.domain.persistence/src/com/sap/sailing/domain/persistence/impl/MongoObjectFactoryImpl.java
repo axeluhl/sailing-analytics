@@ -1240,7 +1240,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             roleMap.add(mapping);
         });
 
-        result.put(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES.name(), roleMap);
+        if (!roleMap.isEmpty()) {
+            result.put(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES.name(), roleMap);
+        }
         return result;
     }
     
