@@ -22,15 +22,15 @@ public class TestORCCertificateImporterJSON {
     public void testSimpleLocalJSONFileRead() throws IOException, ParseException {
         File fileGER = new File(RESOURCES + "GER2019.json");
         ORCCertificatesCollection importer = ORCCertificatesImporter.INSTANCE.read(new FileInputStream(fileGER));
-        ORCCertificate milan = importer.getCertificate(" ger 7323");
+        ORCCertificate milan = importer.getCertificateBySailNumber(" ger 7323");
         assertNotNull(milan);
     }
     
     @Test
     public void testSimpleOnlineJSONFileRead() throws IOException, ParseException {
         ORCCertificatesCollection importer = ORCCertificatesImporter.INSTANCE.read(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
-        ORCCertificate swan  = importer.getCertificate(" GER 5335");
-        ORCCertificate moana = importer.getCertificate("ger  55 49 ");
+        ORCCertificate swan  = importer.getCertificateBySailNumber(" GER 5335");
+        ORCCertificate moana = importer.getCertificateBySailNumber("ger  55 49 ");
         assertNotNull(swan);
         assertNotNull(moana);
         assertEquals(539.1, swan .getGPH(), 0.0000001);

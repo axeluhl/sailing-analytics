@@ -47,7 +47,12 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
     public ORCCertificatesCollectionJSON(Map<String, JSONObject> data) {
         this.data = new HashMap<>();
         for (final Entry<String, JSONObject> e : data.entrySet()) {
-            this.data.put(getCanonicalizedSailNumber(e.getKey()), e.getValue());
+            if (this.data.put(getCanonicalizedSailNumber(e.getKey()), e.getValue()) != null) {
+                throw new IllegalArgumentException(
+                        "Certificate sail numbers in collection not unique after canonicalization: " + e.getKey()
+                                + " is canonicalized to " + getCanonicalizedSailNumber(e.getKey())
+                                + " for which a certificate is already in the collection.");
+            }
         }
     }
 
@@ -56,7 +61,8 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
      * given key, the method returns {@link null}.
      */
     @Override
-    public ORCCertificate getCertificate(String sailnumber) {
+    public ORCCertificate getCertificateBySailNumber(String sailnumber) {
+        String boatName  = null;
         String boatclass = null;
         Distance length  = null;
         Duration gph     = null;
@@ -76,6 +82,9 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
             switch ((String) entry.getKey()) {
                 case "LOA":
                     length = new MeterDistance(((Number) entry.getValue()).doubleValue());
+                    break;
+                case "YachtName":
+                    boatName = entry.getValue().toString();
                     break;
                 case "Class":
                     boatclass = (String) entry.getValue();
@@ -168,27 +177,12 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
             nonSpinnakerSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE
                     .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(NON_SPINNAKER).get(tws)));
         }
-        return new ORCCertificateImpl(searchString, boatclass, length, gph, cdl,
-                velocityPredictionPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
-                beatAllowancePerTrueWindSpeed, gybeAngles, runVMGPredictionPerTrueWindSpeed,
-                runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
-                longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
-                nonSpinnakerSpeedPredictionPerTrueWindSpeed);
-    }
-
-    /**
-     * Returns a {@link Map} of {@link ORCCertificateImpl} keyed by the {@link String} sailnumbers, which were given as
-     * an input inside an array.
-     */
-    @Override
-    public Map<String, ORCCertificate> getCertificates(String[] sailnumbers) {
-        Map<String, ORCCertificate> result = new HashMap<>();
-
-        for (String sailnumber : sailnumbers) {
-            result.put(sailnumber, getCertificate(sailnumber));
-        }
-
-        return result;
+        return new ORCCertificateImpl(searchString, boatName, boatclass, length, gph,
+                cdl, velocityPredictionPerTrueWindSpeedAndAngle, beatAngles,
+                beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed, gybeAngles,
+                runVMGPredictionPerTrueWindSpeed, runAllowancePerTrueWindSpeed,
+                windwardLeewardSpeedPredictionPerTrueWindSpeed, longDistanceSpeedPredictionPerTrueWindSpeed,
+                circularRandomSpeedPredictionPerTrueWindSpeed, nonSpinnakerSpeedPredictionPerTrueWindSpeed);
     }
 
     @Override

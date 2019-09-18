@@ -24,6 +24,7 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
     @Override
     public ORCCertificate deserialize(JSONObject json) throws JsonDeserializationException {
         String sailnumber = (String) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_SAILNUMBER);
+        String boatName = (String) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_BOATNAME);
         String boatclass = (String) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_BOATCLASS);
         Distance length = new MeterDistance(
                 ((Number) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_LENGTH)).doubleValue());
@@ -92,12 +93,12 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
             velocityPredictionsPerTrueWindSpeedAndAngle.put(tws,
                     velocityPredictionAtCurrentTrueWindSpeedPerTrueWindAngle);
         }
-        final ORCCertificate certificate = new ORCCertificateImpl(sailnumber, boatclass, length, gph, cdl,
-                velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
-                beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
-                runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
-                longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
-                nonSpinnakerSpeedPredictionPerTrueWindSpeed);
+        final ORCCertificate certificate = new ORCCertificateImpl(sailnumber, boatName, boatclass, length, gph,
+                cdl, velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles,
+                beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed, runAngles,
+                runVMGPredictionPerTrueWindSpeed, runAllowancePerTrueWindSpeed,
+                windwardLeewardSpeedPredictionPerTrueWindSpeed, longDistanceSpeedPredictionPerTrueWindSpeed,
+                circularRandomSpeedPredictionPerTrueWindSpeed, nonSpinnakerSpeedPredictionPerTrueWindSpeed);
         return certificate;
     }
 }

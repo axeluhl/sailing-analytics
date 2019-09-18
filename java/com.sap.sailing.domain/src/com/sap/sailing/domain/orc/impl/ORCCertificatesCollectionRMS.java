@@ -44,6 +44,7 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
     private static final String GPH = "GPH";
     private static final String LENGTH = "LOA";
     private static final String BOATCLASS = "TYPE";
+    private static final String BOATNAME = "NAME";
     private static final String RUN_ALLOWANCE = "D";
     private static final String RUN_ANGLE = "DA";
     private static final String BEAT_ALLOWANCE = "UP";
@@ -79,16 +80,17 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
         return Collections.unmodifiableSet(certificateValuesBySailnumber.keySet());
     }
 
-    public ORCCertificateValues getValuesForSailnumber(String sailnumber) {
+    private ORCCertificateValues getValuesForSailnumber(String sailnumber) {
         String searchString = getCanonicalizedSailNumber(sailnumber);
         return certificateValuesBySailnumber.containsKey(searchString) ? new ORCCertificateValues(searchString) : null;
     }
     
     @Override
-    public ORCCertificate getCertificate(String sailnumber) {
+    public ORCCertificate getCertificateBySailNumber(String sailnumber) {
         String searchString = getCanonicalizedSailNumber(sailnumber);
         ORCCertificateValues certificateValues = getValuesForSailnumber(searchString);
         final String boatclass = certificateValues.getValue(BOATCLASS);
+        final String boatName = certificateValues.getValue(BOATNAME);
         final Distance length  = new MeterDistance(Double.parseDouble(certificateValues.getValue(LENGTH)));
         final Duration gph     = new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(GPH)));
         final Double cdl       = Double.parseDouble(certificateValues.getValue(CDL));
@@ -135,21 +137,12 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
             }
             velocityPredictionsPerTrueWindSpeedAndAngle.put(tws, velocityPredictionPerTrueWindAngle);
         }
-        return new ORCCertificateImpl(searchString, boatclass, length, gph, cdl,
-                velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
-                beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
-                runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
-                longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
-                nonSpinnakerSpeedPredictionPerTrueWindSpeed);
-    }
-
-    @Override
-    public Map<String, ORCCertificate> getCertificates(String[] sailnumbers) {
-        Map<String, ORCCertificate> result = new HashMap<>();
-        for (String sailnumber : sailnumbers) {
-            result.put(sailnumber, getCertificate(sailnumber));
-        }
-        return result;
+        return new ORCCertificateImpl(searchString, boatName, boatclass, length, gph,
+                cdl, velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles,
+                beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed, runAngles,
+                runVMGPredictionPerTrueWindSpeed, runAllowancePerTrueWindSpeed,
+                windwardLeewardSpeedPredictionPerTrueWindSpeed, longDistanceSpeedPredictionPerTrueWindSpeed,
+                circularRandomSpeedPredictionPerTrueWindSpeed, nonSpinnakerSpeedPredictionPerTrueWindSpeed);
     }
 
     @Override

@@ -13,7 +13,7 @@ import com.sap.sailing.domain.common.orc.ORCCertificate;
  **/
 public interface ORCCertificatesCollection {
     /**
-     * Tells the sail numbers that can be used as key in {@link #getCertificate(String)} and {@link #getCertificates(String[])}
+     * Tells the sail numbers that can be used as key in {@link #getCertificateBySailNumber(String)} and {@link #getCertificates(String[])}
      * and for which certificates are available in this object.
      */
     Iterable<String> getSailNumbers();
@@ -27,7 +27,13 @@ public interface ORCCertificatesCollection {
      * 'X41', ...) and a numerical identification code.
      * @return {@code null}, if there isn't any data for the given sailnumber. Otherwise an {@link ORCCertificate}.
      */
-    ORCCertificate getCertificate(String sailnumber);
+    ORCCertificate getCertificateBySailNumber(String sailnumber);
+    
+    ORCCertificate getCertificateByBoatName(String boatName);
+    
+    Iterable<String> getBoatNames();
+    
+    Iterable<ORCCertificate> getCertificates();
 
     /**
      * Creates an {@link Map} of {@link ORCCertificate} objects to the given sail numbers.
@@ -42,5 +48,4 @@ public interface ORCCertificatesCollection {
      *         {@code null}, if there isn't any data for the given sailnumber.
      */
     Map<String, ORCCertificate> getCertificates(String[] sailnumbers);
-
 }
