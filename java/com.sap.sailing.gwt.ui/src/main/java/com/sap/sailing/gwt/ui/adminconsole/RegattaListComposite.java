@@ -287,9 +287,8 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);
-        actionsColumn.addAction(RaceLogTrackingEventManagementImagesBarCell.ACTION_BOAT_REGISTRATIONS,
-                DefaultActions.UPDATE, this::handleBoatRegistration);
-        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CERTIFICATES_UPDATE, regattaDTO -> {
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_BOAT_REGISTRATIONS, UPDATE, this::handleBoatRegistration);
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CERTIFICATES_UPDATE, UPDATE, regattaDTO -> {
             BoatCertificateAssignmentDialog certificateAssignmentDialog = new BoatCertificateAssignmentDialog(sailingService, userService,
                     regattaDTO.getName(), stringMessages, errorReporter,
                     new DialogCallback<List<CompetitorWithBoatDTO>>() {
@@ -429,17 +428,16 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         filterablePanelRegattas.updateAll(allRegattas);
     }
     
-    private void handleBoatRegistration(StrippedLeaderboardDTOWithSecurity t) {
-        if (t.canBoatsOfCompetitorsChangePerRace) {
-            RegattaDTO regatta = getSelectedRegatta();
-            String boatClassName = regatta.boatClass.getName();
+    private void handleBoatRegistration(RegattaDTO regattaDTO) {
+        if (regattaDTO.canBoatsOfCompetitorsChangePerRace) {
+            String boatClassName = regattaDTO.boatClass.getName();
 
-            new RegattaLogBoatRegistrationDialog(boatClassName, sailingService, userService, stringMessages,
-                    errorReporter, /* editable */true, t.getName(), t.canBoatsOfCompetitorsChangePerRace,
+            new RegattaLogBoatRegistrationDialog(boatClassName, sailingService, null, stringMessages,
+                    errorReporter, /* editable */true, regattaDTO.getName(), regattaDTO.canBoatsOfCompetitorsChangePerRace,
                     new DialogCallback<Set<BoatDTO>>() {
                         @Override
                         public void ok(Set<BoatDTO> registeredBoats) {
-                            sailingService.setBoatRegistrationsInRegattaLog(t.getName(), registeredBoats,
+                            sailingService.setBoatRegistrationsInRegattaLog(regattaDTO.getName(), registeredBoats,
                                     new AsyncCallback<Void>() {
                                         @Override
                                         public void onSuccess(Void result) {
