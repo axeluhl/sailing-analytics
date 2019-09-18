@@ -13,6 +13,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -42,10 +43,10 @@ import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -200,7 +201,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         changedControlPoints.add(new Pair<>(wp2.getControlPoint(), wp2.getPassingInstructions()));
         changedControlPoints.add(new Pair<>(wp3.getControlPoint(), wp3.getPassingInstructions()));
         changedControlPoints.add(new Pair<>(wp4.getControlPoint(), wp4.getPassingInstructions()));
-        course.update(changedControlPoints, com.sap.sailing.domain.base.DomainFactory.INSTANCE);
+        course.update(changedControlPoints, new HashMap<>(), com.sap.sailing.domain.base.DomainFactory.INSTANCE);
         
         assertNotSame(wp1, Util.get(course.getWaypoints(), 0));
         assertSame(wp2, Util.get(course.getWaypoints(), 1));

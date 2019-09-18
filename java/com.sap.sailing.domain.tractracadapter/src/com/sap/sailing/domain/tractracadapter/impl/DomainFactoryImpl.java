@@ -194,7 +194,7 @@ public class DomainFactoryImpl implements DomainFactory {
             com.sap.sailing.domain.base.ControlPoint newDomainControlPoint = getOrCreateControlPoint(tractracControlPoint.getA());
             newDomainControlPoints.add(new com.sap.sse.common.Util.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>(newDomainControlPoint, tractracControlPoint.getB()));
         }
-        courseToUpdate.update(newDomainControlPoints, baseDomainFactory);
+        courseToUpdate.update(newDomainControlPoints, courseToUpdate.getAssociatedRoles(), baseDomainFactory);
     }
 
     @Override

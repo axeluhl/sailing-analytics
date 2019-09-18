@@ -1231,6 +1231,16 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_COURSE_DESIGNER_MODE.name(),
                 courseDesignChangedEvent.getCourseDesignerMode() == null ? null : courseDesignChangedEvent.getCourseDesignerMode().name());
         result.put(FieldNames.RACE_LOG_COURSE_DESIGN.name(), storeCourseBase(courseDesignChangedEvent.getCourseDesign()));
+
+        final BasicDBList roleMap = new BasicDBList();
+        courseDesignChangedEvent.getCourseDesign().getAssociatedRoles().forEach((mark, role) -> {
+            final Document mapping = new Document();
+            mapping.put(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_MARK_ID.name(), mark.getId().toString());
+            mapping.put(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_ROLE.name(), role);
+            roleMap.add(mapping);
+        });
+
+        result.put(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES.name(), roleMap);
         return result;
     }
     

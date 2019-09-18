@@ -1882,6 +1882,29 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         UUID courseOriginatingTemplateId = (UUID) dbObject.get(FieldNames.RACE_LOG_COURSE_ORIGINATING_TEMPLATE_ID.name());
         Pair<CourseBase, Boolean> courseData = loadCourseData((Iterable<?>) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN.name()),
                 courseName, courseOriginatingTemplateId);
+
+        // load associated roles
+        final ArrayList<?> markList = dbObject.get(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES.name(), ArrayList.class);
+        for (final Object entry : markList) {
+            if (entry instanceof Document) {
+                final Document entryObject = (Document) entry;
+                final UUID markUUID = UUID
+                        .fromString(entryObject.getString(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_MARK_ID.name()));
+                final Mark mark = baseDomainFactory.getExistingMarkById(markUUID);
+                if (mark != null) {
+                    final String roleOrNull = entryObject
+                            .getString(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_ROLE.name());
+                    if (roleOrNull != null) {
+                        courseData.getA().addRoleMapping(mark, roleOrNull);
+                    }
+                } else {
+                    logger.warning(String.format("Could not resolve mark with id %s for course %s.", markUUID, id));
+                }
+            } else {
+                logger.warning(String.format("Unexpected mark entry found for course %s.", id));
+            }
+        }
+
         final String courseDesignerModeName = (String) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGNER_MODE.name());
         final CourseDesignerMode courseDesignerMode = courseDesignerModeName == null ? null
                 : CourseDesignerMode.valueOf(courseDesignerModeName);
@@ -2381,7 +2404,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *         been edited "in place" to describe the migration that has happened
      */
     @SuppressWarnings("deprecation") // Used to migrate from PASSINGSIDE to the new PASSINGINSTRUCTIONS
-    private Pair<CourseBase, Boolean> loadCourseData(Iterable<?> dbCourseList, String courseName, UUID originatingCourseTemplateId) {
+    private Pair<CourseBase, Boolean> loadCourseData(Iterable<?> dbCourseList, String courseName,
+            UUID originatingCourseTemplateId) {
         boolean migrated = false;
         if (courseName == null) {
             courseName = "Course";

@@ -391,7 +391,7 @@ public class DomainFactoryImpl implements DomainFactory {
                     mark.getDeviceIds(), getMarkType(mark.getMarkType()), mark.getDescription());
             newDomainControlPoints.add(new com.sap.sse.common.Util.Pair<>(domainControlPoint, PassingInstruction.None));
         }
-        courseToUpdate.update(newDomainControlPoints, baseDomainFactory);
+        courseToUpdate.update(newDomainControlPoints, courseToUpdate.getAssociatedRoles(), baseDomainFactory);
     }
 
     @Override
