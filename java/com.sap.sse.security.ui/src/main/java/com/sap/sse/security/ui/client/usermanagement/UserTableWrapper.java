@@ -213,7 +213,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
             }
         };
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
-        filterField.setCheckboxEnabledFilter(user -> userService.hasPermission(user, DefaultActions.UPDATE));
+        filterField.setUpdatePermissionFilterForCheckbox(user -> userService.hasPermission(user, DefaultActions.UPDATE));
         
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(userColumnListHandler);

@@ -133,7 +133,7 @@ public class RoleWithSecurityDTOTableWrapper extends
                 return table;
             }
         };
-        filterField.setCheckboxEnabledFilter(role -> userService.hasPermission(role, DefaultActions.UPDATE));
+        filterField.setUpdatePermissionFilterForCheckbox(role -> userService.hasPermission(role, DefaultActions.UPDATE));
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
 
         mainPanel.insert(filterField, 0);

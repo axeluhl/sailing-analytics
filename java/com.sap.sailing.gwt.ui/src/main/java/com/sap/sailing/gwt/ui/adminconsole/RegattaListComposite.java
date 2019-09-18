@@ -129,12 +129,25 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         regattaTable.ensureDebugId("RegattasCellTable");
         refreshableRegattaMultiSelectionModel = (RefreshableMultiSelectionModel<RegattaDTO>) regattaTable.getSelectionModel();
         regattaTable.setVisible(false);
-        filterablePanelRegattas
-                .setCheckboxEnabledFilter(regatta -> userService.hasPermission(regatta, DefaultActions.UPDATE));
+        setUpdatePermissionFilter(userService);
         panel.add(filterablePanelRegattas);
 
         panel.add(regattaTable);
         initWidget(panel);
+    }
+
+    /**
+     * True {@link RegattaDTO}s as managed by this panel usually shall be filterable based on the user's
+     * permission to update. However, this panel may also be subclassed and used for objects that have not
+     * yet been committed to the server or for other reasons are lacking ownership / security information.
+     * Those subclasses should override this method to not set a filter.<p>
+     * 
+     * This implementation sets a filter that requires the user to have {@link DefaultActions#UPDATE} permission
+     * for the regatta in question.
+     */
+    protected void setUpdatePermissionFilter(final UserService userService) {
+        filterablePanelRegattas
+                .setUpdatePermissionFilterForCheckbox(regatta -> userService.hasPermission(regatta, DefaultActions.UPDATE));
     }
     
     public HandlerRegistration addSelectionChangeHandler(SelectionChangeEvent.Handler handler) {

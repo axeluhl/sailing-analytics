@@ -60,7 +60,6 @@ public interface StringMessages extends Messages {
     String minutes();
     String seconds();
     String milliseconds();
-    
     String run();
     String copyToClipboard();
     String code();
@@ -99,7 +98,5 @@ public interface StringMessages extends Messages {
     String whatsNewDialogTitle();
     String whatsNewDialogMessage();
     String showChangelog();
-
     String hideElementsWithoutUpdateRights();
-
 }
