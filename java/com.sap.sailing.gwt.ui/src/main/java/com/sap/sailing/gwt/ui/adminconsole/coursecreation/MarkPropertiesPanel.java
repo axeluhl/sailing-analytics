@@ -114,7 +114,7 @@ public class MarkPropertiesPanel extends FlowPanel {
         filterableMarkProperties.getTextBox().ensureDebugId("MarkPropertiesFilterTextBox");
         buttonAndFilterPanel.addUnsecuredWidget(filterableMarkProperties);
         filterableMarkProperties
-                .setCheckboxEnabledFilter(event -> userService.hasPermission(event, DefaultActions.UPDATE));
+                .setUpdatePermissionFilterForCheckbox(event -> userService.hasPermission(event, DefaultActions.UPDATE));
     }
 
     public void loadMarkProperties() {

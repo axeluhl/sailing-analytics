@@ -112,7 +112,7 @@ public class CourseTemplatePanel extends FlowPanel {
         filterableCourseTemplatePanel.getTextBox().ensureDebugId("CourseTemplateFilterTextBox");
         buttonAndFilterPanel.addUnsecuredWidget(filterableCourseTemplatePanel);
         filterableCourseTemplatePanel
-                .setCheckboxEnabledFilter(event -> userService.hasPermission(event, DefaultActions.UPDATE));
+                .setUpdatePermissionFilterForCheckbox(event -> userService.hasPermission(event, DefaultActions.UPDATE));
     }
 
     public void loadCourseTemplates() {
