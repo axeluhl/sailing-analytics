@@ -43,7 +43,7 @@ public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
         this.regattaName = regattaName;
         
         this.boatTable = new BoatCertificatesPanel(sailingService, userService, stringMessages, errorReporter);
-        this.refreshableCompetitorSelectionModel = (RefreshableMultiSelectionModel<CompetitorDTO>) boatTable.getSelectionModel();
+        this.refreshableCompetitorSelectionModel = null; //(RefreshableMultiSelectionModel<CompetitorDTO>) boatTable.getSelectionModel();
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setWidth("100%");
@@ -57,7 +57,7 @@ public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
         refreshButton.ensureDebugId("RefreshButton");
 
         final Button allowReloadButton = buttonPanel.addUnsecuredAction(stringMessages.allowReload(),
-                () -> boatTable.allowUpdate(refreshableCompetitorSelectionModel.getSelectedSet()));
+                null);//() -> boatTable.allowUpdate(refreshableCompetitorSelectionModel.getSelectedSet()));
         refreshableCompetitorSelectionModel.addSelectionChangeHandler(
                 event -> allowReloadButton.setEnabled(!refreshableCompetitorSelectionModel.getSelectedSet().isEmpty()));
         allowReloadButton.setEnabled(!refreshableCompetitorSelectionModel.getSelectedSet().isEmpty());
@@ -66,11 +66,11 @@ public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
         final Button addCompetitorButton = buttonPanel.addCreateAction(stringMessages.add(), null);
         addCompetitorButton.ensureDebugId("AddCompetitorButton");
         
-        buttonPanel.addUnsecuredAction(stringMessages.selectAll(), () -> {
+        buttonPanel.addUnsecuredAction(stringMessages.selectAll(), /*() -> {
             for (CompetitorDTO c : boatTable.getDataProvider().getList()) {
                 refreshableCompetitorSelectionModel.setSelected(c, true);
-            }
-        });
+            } 
+        }*/ null );
 
         // BUTTON - Import Competitors
         buttonPanel.addCreateAction(stringMessages.importCompetitors(), () -> {
