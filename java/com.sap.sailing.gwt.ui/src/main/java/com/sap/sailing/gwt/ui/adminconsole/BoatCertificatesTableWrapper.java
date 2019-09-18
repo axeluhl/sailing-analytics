@@ -149,6 +149,10 @@ public class BoatCertificatesTableWrapper<S extends RefreshableSelectionModel<Bo
             }
         });
         
+        filterField = null;
+        
+        /*
+        
         filterField = new LabeledAbstractFilterablePanel<BoatDTO>(new Label(getStringMessages().filterCompetitors()),
                 new ArrayList<BoatDTO>(), dataProvider, stringMessages) {
             @Override
@@ -215,9 +219,11 @@ public class BoatCertificatesTableWrapper<S extends RefreshableSelectionModel<Bo
         refreshCompetitorList(leaderboardName, null);
     }
     
+    */
     /**
      * @param leaderboardName If null, all existing competitors are loaded
      */
+        /*
     public void refreshCompetitorList(String leaderboardName, final Callback<Iterable<BoatDTO>,
             Throwable> callback) {
         final AsyncCallback<Iterable<BoatDTO>> myCallback = new AsyncCallback<Iterable<BoatDTO>>() {
@@ -354,9 +360,13 @@ public class BoatCertificatesTableWrapper<S extends RefreshableSelectionModel<Bo
         allowUpdate(Collections.singleton(competitor));
     }
 
+    */
+
     /**
      * This method makes rows grayed out with a tool tip
      */
+        
+        /*
     public void grayOutCompetitors(final List<CompetitorWithToolTipDTO> competitors) {
         table.addCellPreviewHandler((CellPreviewEvent<BoatDTO> event) -> {
             for (CompetitorWithToolTipDTO competitor : competitors) {
@@ -374,4 +384,5 @@ public class BoatCertificatesTableWrapper<S extends RefreshableSelectionModel<Bo
             return "";
         });
     }
-}
+    */
+} }
