@@ -13,10 +13,17 @@ import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
+import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
 import com.sap.sse.common.TimePoint;
 
 public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfigurationFactory {
+
+    private final SharedSailingData sharedSailingData;
+
+    public CourseAndMarkConfigurationFactoryImpl(SharedSailingData sharedSailingData) {
+        this.sharedSailingData = sharedSailingData;
+    }
 
     @Override
     public Course createCourse(CourseTemplate courseTemplate, int numberOfLaps) {
