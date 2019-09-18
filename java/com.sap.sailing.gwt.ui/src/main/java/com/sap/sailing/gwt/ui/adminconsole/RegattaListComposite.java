@@ -275,7 +275,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);
         actionsColumn.addAction(RaceLogTrackingEventManagementImagesBarCell.ACTION_BOAT_REGISTRATIONS,
-                DefaultActions.UPDATE, this::handleBoatRegistration);
+                DefaultActions.UPDATE, null); // this::handleBoatRegistration);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CERTIFICATES_UPDATE, regattaDTO -> {
             BoatCertificateAssignmentDialog certificateAssignmentDialog = new BoatCertificateAssignmentDialog(sailingService, userService,
                     regattaDTO.getName(), stringMessages, errorReporter,
@@ -418,10 +418,10 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     
     private void handleBoatRegistration(StrippedLeaderboardDTOWithSecurity t) {
         if (t.canBoatsOfCompetitorsChangePerRace) {
-            RegattaDTO regatta = getSelectedRegatta();
+            RegattaDTO regatta = null; //getSelectedRegattas();
             String boatClassName = regatta.boatClass.getName();
 
-            new RegattaLogBoatRegistrationDialog(boatClassName, sailingService, userService, stringMessages,
+            new RegattaLogBoatRegistrationDialog(boatClassName, sailingService, null, stringMessages,
                     errorReporter, /* editable */true, t.getName(), t.canBoatsOfCompetitorsChangePerRace,
                     new DialogCallback<Set<BoatDTO>>() {
                         @Override
