@@ -108,7 +108,7 @@ When designing courses, the following aspects and data sources need to get inclu
 ### Construction from course template
 
 * For each regatta mark, a mark configuration needs to be created.
-* If a mark was already mapped to a given role in an existing course, this is used. If there are multiple usages, the most recent ones is used. A mark can only be mapped to one role within one regatta to prevent information loss by mapping several "slots" of a course sequence to the same mark configuration.
+* If a mark was already mapped to a given role in an existing course, this is used. If there are multiple usages, the most recent one is used. A mark can only be mapped to one role within one regatta course to prevent information loss by mapping several "slots" of a course sequence to the same mark configuration.
 * Create mark configuration objects for all mark templates not existing in the regatta. Those are subsequently associated to the remaining roles.
 * For each role that remains unmapped (those ones a user unmapped manually or by side effects of editing the sequence), a new entry from the mark template is created and mapped to the role.
 * For each mark template based configuration referenced by a role, mark properties objects needs to be associated based on the last use of the mark properties for the role.
