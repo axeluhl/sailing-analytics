@@ -7,6 +7,6 @@ public abstract class AbstractDuration implements Duration {
 
     @Override
     public String toString() {
-        return String.format("%02d:%02d:%2.3f", ((int) asHours()), (((int) asMinutes()%60)), asSeconds()%60);
+        return String.format("%02d:%02d:%02.3f", ((int) asHours()), (((int) asMinutes()%60)), asSeconds()%60);
     }
 }

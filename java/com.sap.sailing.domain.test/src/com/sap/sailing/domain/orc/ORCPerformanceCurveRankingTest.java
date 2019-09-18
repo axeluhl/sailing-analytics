@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.orc;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
@@ -15,9 +14,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.UUID;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ErrorCollector;
 import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
 
@@ -48,6 +49,7 @@ import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveRankingMetric;
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
@@ -73,6 +75,25 @@ public class ORCPerformanceCurveRankingTest extends OnlineTracTracBasedTest {
     @Rule
     public TestRule getTimeoutRule() {
         return Timeout.millis(100 * 60 * 1000);
+    }
+    
+    @Rule
+    public ErrorCollector collector = new ErrorCollector();
+    
+    public void assertEquals(double a, double b, double accuracy) {
+        try {
+            Assert.assertEquals(a, b, accuracy);
+        } catch (AssertionError e) {
+            collector.addError(e);
+        }
+    }
+
+    public void assertEquals(String message, double a, double b, double accuracy) {
+        try {
+            Assert.assertEquals(message, a, b, accuracy);
+        } catch (AssertionError e) {
+            collector.addError(e);
+        }
     }
 
     public ORCPerformanceCurveRankingTest() throws MalformedURLException, URISyntaxException {
@@ -156,7 +177,7 @@ public class ORCPerformanceCurveRankingTest extends OnlineTracTracBasedTest {
         setFinishingTime("Dubrovnik", "2019-06-04T08:09:12+0200");
         setFinishingTime("Brava", "2019-06-04T07:54:14+0200");
         setFinishingTime("Alemaro", "2019-06-04T10:44:15+0200");
-        raceLog.add(new RaceLogORCScratchBoatEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, UUID.randomUUID(), /* passId */ 0, getCompetitor("Air is blue")));
+        raceLog.add(new RaceLogORCScratchBoatEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, UUID.randomUUID(), /* passId */ 0, getCompetitor("XIO")));
     }
     
     private void setFinishingTime(String boatName, String finishingTimeInISOFormat) throws ParseException {
@@ -175,11 +196,29 @@ public class ORCPerformanceCurveRankingTest extends OnlineTracTracBasedTest {
 
     @Test
     public void testBasicRankingMetricProperties() {
-        final SecondsDurationImpl scratchBoatDuration = new SecondsDurationImpl(14*3600 + 49*60 + 45);
-        assertEquals(scratchBoatDuration.asSeconds(),
-                rankingMetric.getCorrectedTime(getCompetitor("Air is blue"), MillisecondsTimePoint.now()).asSeconds(), 0.000001);
-        assertEquals(scratchBoatDuration.plus(new SecondsDurationImpl(9*60 + 49)).asSeconds(),
-                rankingMetric.getCorrectedTime(getCompetitor("XIO"), MillisecondsTimePoint.now()).asSeconds(), 0.000001);
+        final SecondsDurationImpl scratchBoatDuration = new SecondsDurationImpl(14*3600 + 44*60 + 45);
+        final Competitor winner = getCompetitor("Air is blue");
+        final Duration winnerCorrectedTime = rankingMetric.getCorrectedTime(winner, MillisecondsTimePoint.now());
+        assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Air is blue", 0, 0, 0);
+        assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "XIO", 0, 9, 49);
+        assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Generali (Assilina I", 0, 59, 13);
+        assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Altair 3", 1, 17, 2);
+        assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Synergy", 1, 19, 46);
+        assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Ex Officio", 2, 34, 49);
+        assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Luduan reloaded", 3, 11, 6);
+        assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "WB Seven", 3, 27, 53);
+        assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Maestro", 3, 29, 32);
+        assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "IRONFX", 3, 33, 20);
+        assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Dubrovnik", 4, 8, 36);
+        assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Brava", 4, 14, 41);
+        assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Alemaro", 6,28, 31);
+    }
+    
+    private void assertCorrectedTimeAtEnd(Duration scratchBoatDuration, Duration winnerCorrectedTime, String boatName, int hours, int minutes, int seconds) {
+        final Duration expectedCorrectedTime = winnerCorrectedTime.plus(new SecondsDurationImpl(3600*hours+60*minutes+seconds));
+        final Duration correctedTimeForNamedBoat = rankingMetric.getCorrectedTime(getCompetitor(boatName), MillisecondsTimePoint.now());
+        assertEquals("Expected corrected time "+expectedCorrectedTime+" but got "+correctedTimeForNamedBoat+" for "+boatName,
+                expectedCorrectedTime.asSeconds(), correctedTimeForNamedBoat.asSeconds(), 1.5);
     }
     
     private Competitor getCompetitor(String boatName) {
