@@ -35,7 +35,7 @@ public class NonCompetingCompetitorTest extends AbstractManeuverDetectionTestCas
     public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException, SubscriberInitializationException, CreateModelException {
         super.setUp();
         super.setUp(
-                new URL("http://dev.tractrac.com/events/event_20160222_ESSSTPeter_1473057208/5a265e70-519a-0134-dd23-10b11c4ed8fd.txt"),
+                new URL("http://skitrac.traclive.dk/events/event_20160222_ESSSTPeter/5a265e70-519a-0134-dd23-10b11c4ed8fd.txt"),
                 /* liveUri */null, /* storedUri */null, new ReceiverType[] { ReceiverType.MARKPASSINGS,
                         ReceiverType.MARKPOSITIONS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
     }
