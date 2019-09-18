@@ -205,7 +205,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         
         filterPanel.add(filterablePanelRaces);
         filterPanel.setCellVerticalAlignment(filterablePanelRaces, HasVerticalAlignment.ALIGN_MIDDLE);
-        filterablePanelRaces.setCheckboxEnabledFilter(race -> userService.hasPermission(race, DefaultActions.UPDATE));
+        filterablePanelRaces.setUpdatePermissionFilterForCheckbox(race -> userService.hasPermission(race, DefaultActions.UPDATE));
 
         refreshableSelectionModel = raceTableWrapper.getSelectionModel();
         setupTableColumns(stringMessages, raceTableWrapper.getColumnSortHandler());

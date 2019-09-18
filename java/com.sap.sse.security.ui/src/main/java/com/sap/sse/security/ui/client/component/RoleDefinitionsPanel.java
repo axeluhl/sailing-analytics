@@ -92,7 +92,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
             }
         };
         filterablePanelRoleDefinitions
-                .setCheckboxEnabledFilter(role -> userService.hasPermission(role, DefaultActions.UPDATE));
+                .setUpdatePermissionFilterForCheckbox(role -> userService.hasPermission(role, DefaultActions.UPDATE));
         roleDefinitionsTable = createRoleDefinitionsTable(tableResources);
         roleDefinitionsTable.ensureDebugId("RolesCellTable");
         filterablePanelRoleDefinitions.getTextBox().ensureDebugId("RolesFilterTextBox");

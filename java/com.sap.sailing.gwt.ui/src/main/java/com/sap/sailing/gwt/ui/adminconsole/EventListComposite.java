@@ -215,7 +215,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         panel.add(noEventsLabel);
         fillEvents();
         initWidget(panel);
-        filterTextbox.setCheckboxEnabledFilter(event -> userService.hasPermission(event, DefaultActions.UPDATE));
+        filterTextbox.setUpdatePermissionFilterForCheckbox(event -> userService.hasPermission(event, DefaultActions.UPDATE));
     }
 
     private CellTable<EventDTO> createEventTable(UserDTO user) {
