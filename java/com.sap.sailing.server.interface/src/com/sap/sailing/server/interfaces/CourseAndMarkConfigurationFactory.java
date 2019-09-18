@@ -115,6 +115,9 @@ public interface CourseAndMarkConfigurationFactory {
     CourseConfiguration createCourseConfigurationFromTemplate(CourseTemplate courseTemplate, Regatta optionalRegatta,
             Iterable<String> tagsToFilterMarkProperties);
 
+    CourseConfiguration createCourseConfigurationFromCourse(CourseBase course, Regatta regatta,
+            Iterable<String> tagsToFilterMarkProperties);
+
     List<MarkProperties> createMarkPropertiesSuggestionsForMarkConfiguration(Regatta optionalRegatta,
             MarkConfiguration markConfiguration, Iterable<String> tagsToFilterMarkProperties);
 

@@ -10,12 +10,15 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.ControlPointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
@@ -139,6 +142,43 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         }
         return new CourseConfigurationImpl(courseTemplate, allMarkConfigurations, resultingRoleMapping,
                 resultingWaypoints, courseTemplate.getRepeatablePart(), /* TODO numberOfLaps */ 2);
+    }
+    
+    @Override
+    public CourseConfiguration createCourseConfigurationFromCourse(CourseBase course,
+            Regatta regatta, Iterable<String> tagsToFilterMarkProperties) {
+        final Set<MarkConfiguration> allMarkConfigurations = new HashSet<>();
+        final Map<MarkTemplate, MarkConfiguration> markTemplateConfigurationCache = new HashMap<>();
+        
+        final RegattaMarkConfigurations regattaMarkConfigurations = new RegattaMarkConfigurations(/* TODO courseTemplate */ null, regatta);
+        allMarkConfigurations.addAll(regattaMarkConfigurations.regattaConfigurationsByMark.values());
+        markTemplateConfigurationCache.putAll(regattaMarkConfigurations.markConfigurationsByMarkTemplate);
+        
+        final Map<MarkConfiguration, String> resultingRoleMapping = new HashMap<>();
+        // TODO
+//        for (Entry<Mark, String> markWithRole : course.getAssociatedRoles().entrySet()) {
+//            resultingRoleMapping.put(regattaMarkConfigurations.regattaConfigurationsByMark.get(markWithRole.getKey()), markWithRole.getValue());
+//        }
+        
+        final List<WaypointWithMarkConfiguration> resultingWaypoints = new ArrayList<>();
+        // TODO reconstruct base course in case it is based on a template with repeatable parts
+        for (Waypoint waypoint : course.getWaypoints()) {
+            final ControlPoint controlPoint = waypoint.getControlPoint();
+            final ControlPointWithMarkConfiguration resultingControlPoint;
+            if (controlPoint instanceof Mark) {
+                final Mark mark = (Mark) controlPoint;
+                resultingControlPoint = regattaMarkConfigurations.regattaConfigurationsByMark.get(mark);
+            } else {
+                final ControlPointWithTwoMarks markPairTemplate = (ControlPointWithTwoMarks) controlPoint;
+                final MarkConfiguration left = regattaMarkConfigurations.regattaConfigurationsByMark.get(markPairTemplate.getLeft());
+                final MarkConfiguration right = regattaMarkConfigurations.regattaConfigurationsByMark.get(markPairTemplate.getRight());
+                resultingControlPoint = new MarkPairWithConfigurationImpl(markPairTemplate.getName(), right, left);
+            }
+            resultingWaypoints.add(new WaypointWithMarkConfigurationImpl(resultingControlPoint,
+                    waypoint.getPassingInstructions()));
+        }
+        return new CourseConfigurationImpl(/* TODO courseTemplate */ null, allMarkConfigurations, resultingRoleMapping,
+                resultingWaypoints, /* optionalRepeatablePart */ null, /* TODO numberOfLaps */ 2);
     }
 
     @Override
