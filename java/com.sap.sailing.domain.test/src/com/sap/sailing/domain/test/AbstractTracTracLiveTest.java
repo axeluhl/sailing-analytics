@@ -8,7 +8,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -72,12 +71,9 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
 
     /**
      * Default set-up for an STG training session in Weymouth, 2011
-     * @throws SubscriberInitializationException 
-     * @throws CreateModelException 
-     * @throws TimeOutException 
      */
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, SubscriberInitializationException, ParseException, CreateModelException {
+    public void setUp() throws Exception {
         final String eventID = "event_20110505_SailingTea";
         final String raceID = "bd8c778e-7c65-11e0-8236-406186cbf87c";
         setUp(getParamURL(eventID, raceID), /* liveURI */ null, /* storedURI */ null);

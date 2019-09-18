@@ -1,14 +1,14 @@
 package com.sap.sailing.domain.orc;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.text.ParseException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,10 +22,9 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveRankingMetric;
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.tractrac.model.lib.api.event.CreateModelException;
-import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 /**
  * See bug 5122; Test cases for {@link ORCPerformanceCurveRankingMetric}
@@ -46,7 +45,7 @@ public class ORCPerformanceCurveRankingTest extends OnlineTracTracBasedTest {
     }
 
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
+    public void setUp() throws Exception {
         super.setUp();
         URI storedUri = new URI("file:///"+new File("resources/orc/worlds2019/c5a516a0-69f7-0137-dd9c-60a44ce903c3.mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(new URL("file:///"+new File("resources/orc/worlds2019/c5a516a0-69f7-0137-dd9c-60a44ce903c3.txt").getCanonicalPath()),
@@ -55,6 +54,10 @@ public class ORCPerformanceCurveRankingTest extends OnlineTracTracBasedTest {
                         ReceiverType.RACESTARTFINISH });
         getTrackedRace().recordWind(new WindImpl(/* position */ new DegreePosition(44.37670797575265, 8.925960855558515), TIME_14_30_00,
                 new KnotSpeedWithBearingImpl(7.5, new DegreeBearingImpl(246).reverse())), new WindSourceImpl(WindSourceType.WEB));
+        final ORCCertificatesCollection certificates = ORCCertificatesImporter.INSTANCE.read(
+                getClass().getClassLoader().getResourceAsStream("resources/orc/worlds2019/orcWorlds2019ClassA.json"));
+        assertNotNull(certificates);
+        assertFalse(Util.isEmpty(certificates.getSailNumbers()));
     }
     
     @Test
