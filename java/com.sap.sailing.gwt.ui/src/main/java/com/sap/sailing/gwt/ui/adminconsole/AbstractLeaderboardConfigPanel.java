@@ -201,7 +201,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         };
         filterLeaderboardPanel.getTextBox().ensureDebugId("LeaderboardsFilterTextBox");
         filterLeaderboardPanel
-                .setCheckboxEnabledFilter(leaderboard -> userService.hasPermission(leaderboard, DefaultActions.UPDATE));
+                .setUpdatePermissionFilterForCheckbox(leaderboard -> userService.hasPermission(leaderboard, DefaultActions.UPDATE));
 
         leaderboardsPanel.add(filterLeaderboardPanel);
         leaderboardTable.ensureDebugId("AvailableLeaderboardsTable");

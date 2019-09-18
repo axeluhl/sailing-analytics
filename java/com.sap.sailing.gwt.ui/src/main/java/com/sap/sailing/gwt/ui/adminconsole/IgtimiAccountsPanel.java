@@ -125,7 +125,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
 
         final Panel controlsPanel = new HorizontalPanel();
         filterAccountsPanel
-                .setCheckboxEnabledFilter(account -> userService.hasPermission(account, DefaultActions.UPDATE));
+                .setUpdatePermissionFilterForCheckbox(account -> userService.hasPermission(account, DefaultActions.UPDATE));
         controlsPanel.add(filterAccountsPanel);
 
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,

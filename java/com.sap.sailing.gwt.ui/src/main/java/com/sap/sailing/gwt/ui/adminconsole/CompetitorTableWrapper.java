@@ -321,7 +321,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 return table;
             }
         };
-        filterField.setCheckboxEnabledFilter(comp -> userService.hasPermission(comp, DefaultActions.UPDATE));
+        filterField.setUpdatePermissionFilterForCheckbox(comp -> userService.hasPermission(comp, DefaultActions.UPDATE));
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         
         // CompetitorTableEditFeatures

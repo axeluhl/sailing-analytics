@@ -197,7 +197,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         createMediaTracksTable(userService);
         filterableMediaTracks.getTextBox().ensureDebugId("MediaTracksFilterTextBox");
         filterableMediaTracks
-                .setCheckboxEnabledFilter(mediaTrack -> userService.hasPermission(mediaTrack, DefaultActions.UPDATE));
+                .setUpdatePermissionFilterForCheckbox(mediaTrack -> userService.hasPermission(mediaTrack, DefaultActions.UPDATE));
         buttonAndFilterPanel.addUnsecuredWidget(filterableMediaTracks);
 
         refreshableSelectionModel.addSelectionChangeHandler(new Handler() {
