@@ -110,7 +110,7 @@ public class MarkEditDialog extends DataEntryDialog<MarkDTO> {
 
     @Override
     protected Widget getAdditionalWidget() {
-        Grid result = new Grid(6, 4);
+        Grid result = new Grid(7, 4);
         result.setWidget(0, 0, new Label(stringMessages.name()));
         result.setWidget(0, 1, name);
         result.setWidget(1, 0, new Label(stringMessages.shortName()));

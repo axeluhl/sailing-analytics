@@ -13,19 +13,21 @@ public class ControlPointWithTwoMarksImpl implements ControlPointWithTwoMarks {
     private final Mark right;
     private final String name;
     private final Serializable id;
+    private final String shortName;
     
     /**
      * @param name also used as ID for the mark; if you have a better ID, use {@link GateImpl(Serializable, Mark, Mark, String)} instead.
      */
-    public ControlPointWithTwoMarksImpl(Mark left, Mark right, String name) {
-        this(/* ID */ name, left, right, name);
+    public ControlPointWithTwoMarksImpl(Mark left, Mark right, String name, String shortName) {
+        this(/* ID */ name, left, right, name, shortName);
     }
     
-    public ControlPointWithTwoMarksImpl(Serializable id, Mark left, Mark right, String name) {
+    public ControlPointWithTwoMarksImpl(Serializable id, Mark left, Mark right, String name, String shortName) {
         this.id = id;
         this.left = left;
         this.right = right;
         this.name = name;
+        this.shortName = shortName;
     }
 
     @Override
@@ -59,5 +61,9 @@ public class ControlPointWithTwoMarksImpl implements ControlPointWithTwoMarks {
     @Override
     public Serializable getId() {
         return id;
+    }
+
+    public String getShortName() {
+        return shortName;
     }
 }

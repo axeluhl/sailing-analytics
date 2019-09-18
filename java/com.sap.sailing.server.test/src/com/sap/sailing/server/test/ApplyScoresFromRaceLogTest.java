@@ -120,7 +120,8 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         final Mark startboat = new MarkImpl("StartBoat");
         final Mark pin = new MarkImpl("Pin");
         final Mark windward = new MarkImpl("Windward");
-        final ControlPointWithTwoMarks startFinish = new ControlPointWithTwoMarksImpl(pin, startboat, "Start/Finish");
+        final ControlPointWithTwoMarks startFinish = new ControlPointWithTwoMarksImpl(pin, startboat, "Start/Finish",
+                "Start/Finish");
         final WaypointImpl start = new WaypointImpl(startFinish, PassingInstruction.Line);
         final WaypointImpl ww = new WaypointImpl(windward, PassingInstruction.Port);
         final WaypointImpl finish = new WaypointImpl(startFinish, PassingInstruction.Line);

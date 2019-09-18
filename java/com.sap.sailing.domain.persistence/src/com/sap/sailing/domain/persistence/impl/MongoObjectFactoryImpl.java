@@ -1319,6 +1319,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document result = new Document();
         result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_ID.name(), cpwtm.getId());
         result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_NAME.name(), cpwtm.getName());
+        result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_SHORT_NAME.name(), cpwtm.getShortName());
         result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_LEFT.name(), storeMark(cpwtm.getLeft()));
         result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_RIGHT.name(), storeMark(cpwtm.getRight()));
         return result;

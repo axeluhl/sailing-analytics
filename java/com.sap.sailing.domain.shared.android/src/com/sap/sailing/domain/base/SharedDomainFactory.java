@@ -59,9 +59,10 @@ public interface SharedDomainFactory extends CompetitorFactory, BoatFactory {
     /**
      * @param name also uses the name as the gate's ID; if you have a real ID, use {@link #createControlPointWithTwoMarks(Serializable, Mark, Mark, String)} instead
      */
-    ControlPointWithTwoMarks createControlPointWithTwoMarks(Mark left, Mark right, String name);
+    ControlPointWithTwoMarks createControlPointWithTwoMarks(Mark left, Mark right, String name, String shortName);
 
-    ControlPointWithTwoMarks createControlPointWithTwoMarks(Serializable id, Mark left, Mark right, String name);
+    ControlPointWithTwoMarks createControlPointWithTwoMarks(Serializable id, Mark left, Mark right, String name,
+            String shortName);
 
     /**
      * The waypoint created is weakly cached so that when requested again by
@@ -109,9 +110,11 @@ public interface SharedDomainFactory extends CompetitorFactory, BoatFactory {
     
     Mark getExistingMarkById(Serializable id);
     
-    ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(Serializable id, String name, Mark left, Mark right);
+    ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(Serializable id, String name, Mark left, Mark right,
+            String shortName);
     
-    ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(String id, String name, Mark left, Mark right);
+    ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(String id, String name, Mark left, Mark right,
+            String shortName);
     
     RaceLogResolver getRaceLogResolver();
 

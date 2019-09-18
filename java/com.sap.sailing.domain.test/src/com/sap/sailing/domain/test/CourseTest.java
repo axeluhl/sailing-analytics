@@ -207,17 +207,20 @@ public class CourseTest {
     @Test
     public void testWaypointDeleteWithSubsequentInsertInOnePatch() throws PatchFailedException {
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
-        final WaypointImpl rcBlackConical = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("RC"), new MarkImpl("Black Conical"), "RC-Black Conical"));
+        final WaypointImpl rcBlackConical = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("RC"),
+                new MarkImpl("Black Conical"), "RC-Black Conical", "RC-Black Conical"));
         waypoints.add(rcBlackConical);
         final WaypointImpl orange = new WaypointImpl(new MarkImpl("Orange"));
         waypoints.add(orange);
-        final WaypointImpl whiteGate = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("White L"), new MarkImpl("White R"), "White Gate"));
+        final WaypointImpl whiteGate = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("White L"),
+                new MarkImpl("White R"), "White Gate", "White Gate"));
         waypoints.add(whiteGate);
         final WaypointImpl red = new WaypointImpl(new MarkImpl("Red"));
         waypoints.add(red);
         final WaypointImpl yellow = new WaypointImpl(new MarkImpl("Yellow"));
         waypoints.add(yellow);
-        final WaypointImpl finishPoleCylinder = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("Finish Pole"), new MarkImpl("Cylinder"), "Finish Pole-Cylinder"));
+        final WaypointImpl finishPoleCylinder = new WaypointImpl(new ControlPointWithTwoMarksImpl(
+                new MarkImpl("Finish Pole"), new MarkImpl("Cylinder"), "Finish Pole-Cylinder", "Finish Pole-Cylinder"));
         waypoints.add(finishPoleCylinder);
         Course course = new CourseImpl("Race 24", waypoints);
         assertWaypointIndexes(course);

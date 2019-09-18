@@ -212,25 +212,26 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(Serializable id, String name, Mark left, Mark right) {
+    public ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(Serializable id, String name, Mark left,
+            Mark right, String shortName) {
         final ControlPointWithTwoMarks result;
         final ControlPointWithTwoMarks fromCache = controlPointWithTwoMarksCache.get(id);
         if (fromCache != null) {
             result = fromCache;
         } else {
-            result = createControlPointWithTwoMarks(id, left, right, name);
+            result = createControlPointWithTwoMarks(id, left, right, name, shortName);
         }
         return result;
     }
 
     @Override
     public ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(
-            String toStringRepresentationOfID, String name, Mark left, Mark right) {
+            String toStringRepresentationOfID, String name, Mark left, Mark right, String shortName) {
         Serializable id = toStringRepresentationOfID;
         if (controlPointWithTwoMarksIdCache.containsKey(toStringRepresentationOfID)) {
             id = controlPointWithTwoMarksIdCache.get(toStringRepresentationOfID);
         }
-        return getOrCreateControlPointWithTwoMarks(id, name, left, right);
+        return getOrCreateControlPointWithTwoMarks(id, name, left, right, shortName);
     }
 
     private void cacheMark(Serializable id, Mark result) {
@@ -239,13 +240,15 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public ControlPointWithTwoMarks createControlPointWithTwoMarks(Mark left, Mark right, String name) {
-       return createControlPointWithTwoMarks(name, left, right, name);
+    public ControlPointWithTwoMarks createControlPointWithTwoMarks(Mark left, Mark right, String name,
+            String shortName) {
+        return createControlPointWithTwoMarks(name, left, right, name, shortName);
     }
 
     @Override
-    public ControlPointWithTwoMarks createControlPointWithTwoMarks(Serializable id, Mark left, Mark right, String name) {
-        ControlPointWithTwoMarks result = new ControlPointWithTwoMarksImpl(id, left, right, name);
+    public ControlPointWithTwoMarks createControlPointWithTwoMarks(Serializable id, Mark left, Mark right, String name,
+            String shortName) {
+        ControlPointWithTwoMarks result = new ControlPointWithTwoMarksImpl(id, left, right, name, shortName);
         controlPointWithTwoMarksCache.put(id, result);
         controlPointWithTwoMarksIdCache.put(id.toString(), id);
         return result;

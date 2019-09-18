@@ -166,7 +166,8 @@ public class ExpeditionCourseInferrer {
             final Mark portMark, final Mark starboardMark) {
         logger.info("Creating start line in tracked race "+trackedRace.getRace().getName());
         final ControlPoint startLine = racingEventService.getBaseDomainFactory().getOrCreateControlPointWithTwoMarks(
-                UUID.randomUUID(), START_LINE_CONTROL_POINT_NAME, portMark, starboardMark);
+                UUID.randomUUID(), START_LINE_CONTROL_POINT_NAME, portMark, starboardMark,
+                START_LINE_CONTROL_POINT_NAME);
         final CourseBase course = new CourseDataImpl("Auto-Course "+trackedRace.getRace().getName());
         course.addWaypoint(0, new WaypointImpl(startLine, PassingInstruction.Line));
         final RaceLog raceLog = trackedRace.getAttachedRaceLogs().iterator().next();

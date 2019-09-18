@@ -2537,7 +2537,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             final Position leftPos =  positionFinder.find(left, timePoint);
             final Mark right = ((ControlPointWithTwoMarks) controlPoint).getRight();
             final Position rightPos = positionFinder.find(right, timePoint);
-            result = new GateDTO(controlPoint.getId().toString(), controlPoint.getName(), convertToMarkDTO(left, leftPos), convertToMarkDTO(right, rightPos)); 
+            result = new GateDTO(controlPoint.getId().toString(), controlPoint.getName(),
+                    convertToMarkDTO(left, leftPos), convertToMarkDTO(right, rightPos), controlPoint.getShortName());
         } else {
             Mark mark = controlPoint.getMarks().iterator().next();
             final Position position = positionFinder.find(mark, timePoint);
@@ -2555,7 +2556,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             GateDTO gateDTO = (GateDTO) dto;
             Mark left = (Mark) getOrCreateControlPoint(gateDTO.getLeft());
             Mark right = (Mark) getOrCreateControlPoint(gateDTO.getRight());
-            return baseDomainFactory.getOrCreateControlPointWithTwoMarks(idAsString, gateDTO.getName(), left, right);
+            return baseDomainFactory.getOrCreateControlPointWithTwoMarks(idAsString, gateDTO.getName(), left, right,
+                    gateDTO.getShortName());
         } else {
             MarkDTO markDTO = (MarkDTO) dto;
             return baseDomainFactory.getOrCreateMark(idAsString, dto.getName(), markDTO.getShortName(), markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);

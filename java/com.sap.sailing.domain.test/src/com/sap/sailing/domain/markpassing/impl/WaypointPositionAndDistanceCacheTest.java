@@ -65,7 +65,8 @@ public class WaypointPositionAndDistanceCacheTest {
         pinEnd = new MarkImpl("Pin End");
         startBoat = new MarkImpl("Start Boat");
         windward = new MarkImpl("Windward");
-        startFinish = new ControlPointWithTwoMarksImpl(UUID.randomUUID(), pinEnd, startBoat, "Start/Finish");
+        startFinish = new ControlPointWithTwoMarksImpl(UUID.randomUUID(), pinEnd, startBoat, "Start/Finish",
+                "Start/Finish");
         start = new WaypointImpl(startFinish);
         windwardWaypoint = new WaypointImpl(windward);
         finish = new WaypointImpl(startFinish);

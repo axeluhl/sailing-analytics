@@ -84,6 +84,7 @@ public class MarkResource extends AbstractSailingServerResource {
     private static final String MARK_NAME = "markName";
     private static final String MARK_SHORT_NAME = "markShortName";
     private static final String CONTROL_POINT_NAME = "controlPointName";
+    private static final String CONTROL_POINT_SHORT_NAME = "controlPointShortName";
     private static final String ORIGINATING_MARK_TEMPLATE_ID = "originatingMarkTemplateId";
     private static final String ORIGINATING_MARK_PROPERTIES_ID = "originatingMarkPropertiesId";
     private static final String ORIGINATING_COURSE_TEMPLATE_ID = "originatingCourseTemplateId";
@@ -236,9 +237,10 @@ public class MarkResource extends AbstractSailingServerResource {
                 if (controlPointName == null || controlPointName.isEmpty()) {
                     controlPointName = markA.getName() + "-" + markB.getName();
                 }
-                controlPoints.add(new Pair<>(
-                        new ControlPointWithTwoMarksImpl(markA, markB, controlPointName),
-                        passing));
+
+                String shortName = (String) controlPointRaw.get(CONTROL_POINT_SHORT_NAME);
+                controlPoints.add(new Pair<>(new ControlPointWithTwoMarksImpl(markA, markB, controlPointName,
+                        shortName == null ? controlPointName : shortName), passing));
             }
         }
         Course course = new CourseImpl(courseName, lastPublishedCourse.getWaypoints(), originatingCourseTemplateId);

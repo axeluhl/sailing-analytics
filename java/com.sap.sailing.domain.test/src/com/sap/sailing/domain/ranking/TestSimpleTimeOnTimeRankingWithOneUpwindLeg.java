@@ -90,7 +90,7 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
         // create a two-lap upwind/downwind course:
         MarkImpl left = new MarkImpl("Left lee gate buoy");
         MarkImpl right = new MarkImpl("Right lee gate buoy");
-        ControlPoint leeGate = new ControlPointWithTwoMarksImpl(left, right, "Lee Gate");
+        ControlPoint leeGate = new ControlPointWithTwoMarksImpl(left, right, "Lee Gate", "Lee Gate");
         Mark windwardMark = new MarkImpl("Windward mark");
         waypoints.add(new WaypointImpl(leeGate));
         waypoints.add(new WaypointImpl(windwardMark));

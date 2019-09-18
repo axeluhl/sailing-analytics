@@ -866,7 +866,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     getRaceLogTrackingAdapter().pingMark(regattaLog, pinEnd, new GPSFixImpl(pinEndPosition, timePointForMarkFixes), getService());
                     // TODO identify existing automatically-created equal-named marks and re-use. The "Auto..." pattern should be sufficiently unique for this application
                     final ControlPoint startLineControlPoint = getService().getBaseDomainFactory().getOrCreateControlPointWithTwoMarks(
-                            UUID.randomUUID(), "Auto "+waypointName+" Line", pinEnd, startBoat);
+                                    UUID.randomUUID(), "Auto " + waypointName + " Line", pinEnd, startBoat,
+                                    "Auto " + waypointName + " Line");
                     result = getService().getBaseDomainFactory().createWaypoint(startLineControlPoint, PassingInstruction.Line);
                 } else {
                     result = null;

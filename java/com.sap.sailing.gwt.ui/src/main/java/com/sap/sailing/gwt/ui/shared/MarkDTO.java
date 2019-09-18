@@ -20,13 +20,13 @@ public class MarkDTO extends ControlPointDTO implements MappableToDevice {
     MarkDTO() {}
     
     public MarkDTO(String idAsString, String name, String shortName, double latDeg, double lngDeg) {
-        super(idAsString, name);
+        super(idAsString, name, shortName);
         this.shortName = shortName;
         this.position = new DegreePosition(latDeg, lngDeg);
     }
 
     public MarkDTO(String idAsString, String name, String shortName) {
-        super(idAsString, name);
+        super(idAsString, name, shortName);
     }
     
     @Override

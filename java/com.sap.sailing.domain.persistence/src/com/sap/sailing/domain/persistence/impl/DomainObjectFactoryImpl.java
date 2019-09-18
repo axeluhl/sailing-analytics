@@ -2488,8 +2488,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             dbObject.remove(FieldNames.GATE_RIGHT.name());
         }
         Mark rightMark = loadMark(dbRight);
+        String shortName = (String) dbObject.get(FieldNames.CONTROLPOINTWITHTWOMARKS_SHORT_NAME.name());
+
+        if (shortName == null || shortName.isEmpty()) {
+            shortName = controlPointName;
+        }
         ControlPointWithTwoMarks gate = baseDomainFactory.createControlPointWithTwoMarks(controlPointId, leftMark,
-                rightMark, controlPointName);
+                rightMark, controlPointName, shortName);
         return gate;
     }
 
