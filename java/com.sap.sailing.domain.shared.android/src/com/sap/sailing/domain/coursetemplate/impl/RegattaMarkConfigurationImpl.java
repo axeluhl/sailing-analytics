@@ -2,6 +2,7 @@ package com.sap.sailing.domain.coursetemplate.impl;
 
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
+import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 
@@ -10,8 +11,8 @@ public class RegattaMarkConfigurationImpl extends MarkConfigurationImpl implemen
 
     private final Mark mark;
 
-    public RegattaMarkConfigurationImpl(Mark mark, Positioning optionalPositioning) {
-        super(/* optionalMarkTemplate */ null, optionalPositioning, /* storeToInventory */ false);
+    public RegattaMarkConfigurationImpl(Mark mark, Positioning optionalPositioning, MarkTemplate optionalMarkTemplate) {
+        super(optionalMarkTemplate, optionalPositioning, /* storeToInventory */ false);
         this.mark = mark;
     }
 

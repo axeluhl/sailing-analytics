@@ -12,6 +12,7 @@ import java.util.UUID;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
@@ -34,9 +35,10 @@ import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateBasedMarkConfigura
 import com.sap.sailing.domain.coursetemplate.impl.RegattaMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointWithMarkConfigurationImpl;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util;
 
 public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfigurationFactory {
     
@@ -97,40 +99,15 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         return null;
     }
     
-    private Pair<RegattaMarkConfiguration, MarkTemplate> createMarkConfigurationForRegattaMark(CourseTemplate courseTemplate,
-            Regatta regatta, Mark mark) {
-        MarkTemplate markTemplate = null;
-        final UUID markTemplateIdOrNull = mark.getOriginatingMarkTemplateIdOrNull();
-        if (markTemplateIdOrNull != null) {
-            // TODO first try to find it in the CourseTemplate
-            // TODO this call may fail and should not prevent the user from creating a course for a regatta
-            markTemplate = sharedSailingData.getMarkTemplateById(markTemplateIdOrNull);
-        }
-        // TODO get positioning
-        final RegattaMarkConfiguration regattaMarkConfiguration = new RegattaMarkConfigurationImpl(mark, /* TODO optionalPositioning */ null);
-        return new Pair<>(regattaMarkConfiguration, markTemplate);
-    }
-
     @Override
     public CourseConfiguration createCourseConfigurationFromTemplate(CourseTemplate courseTemplate,
             Regatta optionalRegatta, Iterable<String> tagsToFilterMarkProperties) {
         final Set<MarkConfiguration> allMarkConfigurations = new HashSet<>();
         final Map<MarkTemplate, MarkConfiguration> markTemplateConfigurationCache = new HashMap<>();
-        final Map<Mark, RegattaMarkConfiguration> regattaMarkConfigurationCache = new HashMap<>();
         if (optionalRegatta != null) {
-            for (RaceColumn raceColumn : optionalRegatta.getRaceColumns()) {
-                for (Mark mark : raceColumn.getAvailableMarks()) {
-                    regattaMarkConfigurationCache.computeIfAbsent(mark, m -> {
-                        final Pair<RegattaMarkConfiguration, MarkTemplate> configResult = createMarkConfigurationForRegattaMark(courseTemplate, optionalRegatta, m);
-                        // TODO calculate last use
-                        if (configResult.getB() != null) {
-                            markTemplateConfigurationCache.put(configResult.getB(), configResult.getA());
-                        }
-                        allMarkConfigurations.add(configResult.getA());
-                        return configResult.getA();
-                    });
-                }
-            }
+            RegattaMarkConfigurations regattaMarkConfigurations = new RegattaMarkConfigurations(courseTemplate, optionalRegatta);
+            allMarkConfigurations.addAll(regattaMarkConfigurations.regattaConfigurationsByMark.values());
+            markTemplateConfigurationCache.putAll(regattaMarkConfigurations.markConfigurationsByMarkTemplate);
         }
         for (MarkTemplate markTemplate : courseTemplate.getMarkTemplates()) {
             markTemplateConfigurationCache.computeIfAbsent(markTemplate, mt -> {
@@ -170,5 +147,96 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         // TODO Auto-generated method stub
         return null;
     }
+    
+    /**
+     * First tries to resolve from the course template and then by ID using sharedSailingData. This allows users having
+     * access to a course template to use all mark templates being included even if they don't have explicit read
+     * permissions for those.
+     */
+    private MarkTemplate resolveMarkTemplateByID(CourseTemplate courseTemplate, UUID markTemplateID) {
+        MarkTemplate resolvedMarkTemplate = null;
+        if (courseTemplate != null) {
+            for (MarkTemplate markTemplate : courseTemplate.getMarkTemplates()) {
+                if (markTemplate.getId().equals(markTemplateID)) {
+                    resolvedMarkTemplate = markTemplate;
+                    break;
+                }
+            }
+        }
+        if (resolvedMarkTemplate == null) {
+            // TODO this call may fail and should not prevent the user from creating a course for a regatta
+            resolvedMarkTemplate = sharedSailingData.getMarkTemplateById(markTemplateID);
+        }
+        return resolvedMarkTemplate;
+    }
 
+    private class RegattaMarkConfigurations {
+        final Map<MarkTemplate, RegattaMarkConfiguration> markConfigurationsByMarkTemplate = new HashMap<>();
+        final Map<Mark, RegattaMarkConfiguration> regattaConfigurationsByMark = new HashMap<>();
+        final Map<RegattaMarkConfiguration, TimePoint> lastUsages = new HashMap<>();
+
+        public RegattaMarkConfigurations(CourseTemplate courseTemplate, Regatta regatta) {
+            for (RaceColumn raceColumn : regatta.getRaceColumns()) {
+                for (Mark mark : raceColumn.getAvailableMarks()) {
+                    final RegattaMarkConfiguration regattaMarkConfiguration = regattaConfigurationsByMark
+                            .computeIfAbsent(mark,
+                                    m -> createMarkConfigurationForRegattaMark(courseTemplate, regatta, m));
+                    
+                    for (Fleet fleet : raceColumn.getFleets()) {
+                        final TrackedRace trackedRaceOrNull = raceColumn.getTrackedRace(fleet);
+                        if (Util.contains(raceColumn.getCourseMarks(), mark)) {
+                            TimePoint usage = null;
+                            if (trackedRaceOrNull != null) {
+                                usage = trackedRaceOrNull.getStartOfRace();
+                            }
+                            if (usage == null) {
+                                usage = trackedRaceOrNull.getStartOfTracking();
+                            }
+                            if (usage != null) {
+                                final TimePoint effectiveUsageTP = usage;
+                                lastUsages.compute(regattaMarkConfiguration,
+                                        (mc, existingTP) -> (existingTP == null || existingTP.before(effectiveUsageTP))
+                                                ? effectiveUsageTP
+                                                : existingTP);
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (Entry<Mark, RegattaMarkConfiguration> regattaMarkEntry : regattaConfigurationsByMark.entrySet()) {
+                final RegattaMarkConfiguration regattaMarkConfiguration = regattaMarkEntry.getValue();
+                final MarkTemplate associatedMarkTemplateOrNull = regattaMarkConfiguration.getOptionalMarkTemplate();
+                if (associatedMarkTemplateOrNull != null) {
+                    markConfigurationsByMarkTemplate.compute(associatedMarkTemplateOrNull, (mt, rmc) -> {
+                        if (rmc == null) {
+                            return regattaMarkConfiguration;
+                        }
+                        final TimePoint lastUsageOrNull = lastUsages.get(regattaMarkConfiguration);
+                        if (lastUsageOrNull == null) {
+                            return rmc;
+                        }
+                        final TimePoint lastUsageOfExistingOrNull = lastUsages.get(rmc);
+                        if (lastUsageOfExistingOrNull == null) {
+                            return regattaMarkConfiguration;
+                        }
+                        return lastUsageOrNull.after(lastUsageOfExistingOrNull) ? regattaMarkConfiguration : rmc;
+                    });
+                }
+            }
+        }
+
+        private RegattaMarkConfiguration createMarkConfigurationForRegattaMark(CourseTemplate courseTemplate,
+                Regatta regatta, Mark mark) {
+            MarkTemplate markTemplate = null;
+            final UUID markTemplateIdOrNull = mark.getOriginatingMarkTemplateIdOrNull();
+            if (markTemplateIdOrNull != null) {
+                markTemplate = resolveMarkTemplateByID(courseTemplate, markTemplateIdOrNull);
+            }
+            // TODO get positioning
+            final RegattaMarkConfiguration regattaMarkConfiguration = new RegattaMarkConfigurationImpl(mark,
+                    /* TODO optionalPositioning */ null, markTemplate);
+            return regattaMarkConfiguration;
+        }
+    }
 }

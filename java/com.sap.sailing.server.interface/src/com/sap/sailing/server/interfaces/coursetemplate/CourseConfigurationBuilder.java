@@ -138,7 +138,7 @@ public class CourseConfigurationBuilder {
         for (RaceColumn raceColumn : optionalRegatta.getRaceColumns()) {
             for (Mark mark : raceColumn.getAvailableMarks()) {
                 if (mark.getId().equals(markID)) {
-                    return new RegattaMarkConfigurationImpl(mark, optionalPositioning);
+                    return new RegattaMarkConfigurationImpl(mark, optionalPositioning, /* TODO optionalMarkTemplate */ null);
                 }
             }
         }
