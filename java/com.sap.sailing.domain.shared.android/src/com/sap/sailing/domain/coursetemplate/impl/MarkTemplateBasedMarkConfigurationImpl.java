@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.coursetemplate.impl;
 
-import com.sap.sailing.domain.coursetemplate.CommonMarkPropertiesWithOptionalPositioning;
+import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
 
@@ -13,9 +13,8 @@ public class MarkTemplateBasedMarkConfigurationImpl extends MarkConfigurationImp
     }
 
     @Override
-    public CommonMarkPropertiesWithOptionalPositioning getEffectiveProperties() {
-        // TODO implement
-        return null;
+    public CommonMarkProperties getEffectiveProperties() {
+        return getOptionalMarkTemplate();
     }
 
     @Override
