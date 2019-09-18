@@ -27,7 +27,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  */
 public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
     
-    private final CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> competitorTable;
+    private final BoatCertificatesPanel boatTable;
     private final RefreshableMultiSelectionModel<CompetitorDTO> refreshableCompetitorSelectionModel;
     private final String regattaName;
     
@@ -43,10 +43,8 @@ public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
         super();
         this.regattaName = regattaName;
         
-        //TODO change here to boat
-        this.competitorTable = new CompetitorTableWrapper<>(sailingService, userService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true, 
-                /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
-        this.refreshableCompetitorSelectionModel = (RefreshableMultiSelectionModel<CompetitorDTO>) competitorTable.getSelectionModel();
+        this.boatTable = new BoatCertificatesPanel(sailingService, userService, stringMessages, errorReporter);
+        this.refreshableCompetitorSelectionModel = (RefreshableMultiSelectionModel<CompetitorDTO>) boatTable.getSelectionModel();
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setWidth("100%");
@@ -60,7 +58,7 @@ public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
         refreshButton.ensureDebugId("RefreshButton");
 
         final Button allowReloadButton = buttonPanel.addUnsecuredAction(stringMessages.allowReload(),
-                () -> competitorTable.allowUpdate(refreshableCompetitorSelectionModel.getSelectedSet()));
+                () -> boatTable.allowUpdate(refreshableCompetitorSelectionModel.getSelectedSet()));
         refreshableCompetitorSelectionModel.addSelectionChangeHandler(
                 event -> allowReloadButton.setEnabled(!refreshableCompetitorSelectionModel.getSelectedSet().isEmpty()));
         allowReloadButton.setEnabled(!refreshableCompetitorSelectionModel.getSelectedSet().isEmpty());
@@ -70,7 +68,7 @@ public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
         addCompetitorButton.ensureDebugId("AddCompetitorButton");
         
         buttonPanel.addUnsecuredAction(stringMessages.selectAll(), () -> {
-            for (CompetitorDTO c : competitorTable.getDataProvider().getList()) {
+            for (CompetitorDTO c : boatTable.getDataProvider().getList()) {
                 refreshableCompetitorSelectionModel.setSelected(c, true);
             }
         });
@@ -109,7 +107,7 @@ public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
         }
 
         mainPanel.add(busyIndicator);
-        mainPanel.add(competitorTable);
+        mainPanel.add(boatTable);
         
         if (regattaName != null) {
             refreshBoatList();

@@ -10,7 +10,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.ui.client.UserService;
 
-public class CertificateAssignmentDialog extends DataEntryDialog<List<CompetitorWithBoatDTO>> {
+public class BoatCertificateAssignmentDialog extends DataEntryDialog<List<CompetitorWithBoatDTO>> {
     private final SailingServiceAsync sailingService;
     private final UserService userService;
     private final StringMessages stringMessages;
@@ -28,7 +28,7 @@ public class CertificateAssignmentDialog extends DataEntryDialog<List<Competitor
         }
     }
         
-    public CertificateAssignmentDialog(final SailingServiceAsync sailingService, final UserService userService, String regattaName, final StringMessages stringMessages,
+    public BoatCertificateAssignmentDialog(final SailingServiceAsync sailingService, final UserService userService, String regattaName, final StringMessages stringMessages,
             final ErrorReporter errorReporter, DialogCallback<List<CompetitorWithBoatDTO>> callback) {
         super(stringMessages.actionEditCompetitors(), null, stringMessages.ok(), stringMessages.cancel(), new CompetitorsValidator(), callback);
         this.sailingService = sailingService;
