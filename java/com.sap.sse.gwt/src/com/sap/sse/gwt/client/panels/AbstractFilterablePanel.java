@@ -117,7 +117,6 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         this.filtered = filtered;
         this.textBox = new TextBox();
         this.textBox.ensureDebugId("FilterTextBox");
-        // TODO: i18n
         this.checkbox = new CheckBox(stringMessages.hideElementsWithoutUpdateRights());
         checkbox.setValue(true);
         checkboxFilter = new CheckboxEnablableFilter<>(checkbox);
