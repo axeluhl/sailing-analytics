@@ -82,6 +82,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                                             : Collections.singletonList(editedObject.getMarkTemplate1());
                             waypointTemplates
                                     .add(new WaypointTemplateDTO(editedObject.getName().orElse(null),
+                                            editedObject.getShortName(),
                                             markTemplates, editedObject.getPassingInstruction()));
                             refreshWaypointsTable();
                         }

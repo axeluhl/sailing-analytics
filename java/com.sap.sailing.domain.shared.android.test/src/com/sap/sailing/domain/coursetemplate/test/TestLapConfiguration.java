@@ -43,8 +43,8 @@ public class TestLapConfiguration {
         top = new MarkTemplateImpl("Windward Mark", "1", /* color */ null, /* shape */ null, /* pattern */ null, MarkType.BUOY);
         gateLeft = new MarkTemplateImpl("Leeward Gate Port", "4p", /* color */ null, /* shape */ null, /* pattern */ null, MarkType.BUOY);
         gateRight = new MarkTemplateImpl("Leeward Gate Starboard", "4s", /* color */ null, /* shape */ null, /* pattern */ null, MarkType.BUOY);
-        startFinish = new MarkPairTemplateImpl("Start/Finish", startBoat, pin);
-        gate = new MarkPairTemplateImpl("Leeward Gate", gateLeft, gateRight);
+        startFinish = new MarkPairTemplateImpl("Start/Finish", "Start/Finish", startBoat, pin);
+        gate = new MarkPairTemplateImpl("Leeward Gate", "Leeward Gate", gateLeft, gateRight);
         courseTemplate = new CourseTemplateImpl(UUID.randomUUID(), "L",
                 /* marks */ Arrays.asList(startBoat, pin, top, gateLeft, gateRight),
                 /* waypoints */ Arrays.asList(new WaypointTemplateImpl(startFinish, PassingInstruction.Line),
@@ -93,7 +93,7 @@ public class TestLapConfiguration {
     public void testExceptionInCaseMarkIsMissing() {
         startBoat = new MarkTemplateImpl("Start Boat", "SB", /* color */ null, /* shape */ null, /* pattern */ null, MarkType.STARTBOAT);
         pin = new MarkTemplateImpl("Pin End", "Pin", /* color */ null, /* shape */ null, /* pattern */ null, MarkType.BUOY);
-        startFinish = new MarkPairTemplateImpl("Start/Finish", startBoat, pin);
+        startFinish = new MarkPairTemplateImpl("Start/Finish","Start/Finish", startBoat, pin);
         try {
             courseTemplate = new CourseTemplateImpl("Test",
                     /* marks */ Arrays.asList(startBoat),
@@ -110,7 +110,7 @@ public class TestLapConfiguration {
     public void testZeroLapsOkIfNoRepeatablePart() {
         startBoat = new MarkTemplateImpl("Start Boat", "SB", /* color */ null, /* shape */ null, /* pattern */ null, MarkType.STARTBOAT);
         pin = new MarkTemplateImpl("Pin End", "Pin", /* color */ null, /* shape */ null, /* pattern */ null, MarkType.BUOY);
-        startFinish = new MarkPairTemplateImpl("Start/Finish", startBoat, pin);
+        startFinish = new MarkPairTemplateImpl("Start/Finish", "Start/Finish", startBoat, pin);
         courseTemplate = new CourseTemplateImpl("Test", /* marks */ Arrays.asList(startBoat, pin),
                 /* waypoints */ Arrays.asList(new WaypointTemplateImpl(startFinish, PassingInstruction.Line)),
                 /* associatedRoles */ Collections.emptyMap(),

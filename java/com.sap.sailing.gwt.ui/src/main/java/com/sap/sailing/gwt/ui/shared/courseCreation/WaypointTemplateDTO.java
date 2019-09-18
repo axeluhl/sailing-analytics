@@ -14,14 +14,16 @@ public class WaypointTemplateDTO implements Serializable{
 
     private String passingInstruction;
     private String name;
+    private String shortName;
 
     public WaypointTemplateDTO() {
 
     }
 
-    public WaypointTemplateDTO(String name, Iterable<MarkTemplateDTO> markTemplatesForControlPoint,
+    public WaypointTemplateDTO(String name, String shortName, Iterable<MarkTemplateDTO> markTemplatesForControlPoint,
             PassingInstruction passingInstruction) {
         super();
+        this.shortName = shortName;
         Util.addAll(markTemplatesForControlPoint, this.markTemplatesForControlPoint);
         this.passingInstruction = passingInstruction.name();
         this.name = name;
@@ -37,6 +39,10 @@ public class WaypointTemplateDTO implements Serializable{
 
     public String getName() {
         return name;
+    }
+
+    public String getShortName() {
+        return shortName;
     }
 
 }

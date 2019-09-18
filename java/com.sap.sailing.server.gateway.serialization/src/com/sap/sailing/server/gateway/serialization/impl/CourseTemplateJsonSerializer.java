@@ -18,6 +18,7 @@ public class CourseTemplateJsonSerializer implements JsonSerializer<CourseTempla
     public static final String FIELD_WAYPOINTS = "waypoints";
     public static final String FIELD_PASSING_INSTRUCTION = "passingInstruction";
     public static final String FIELD_CONTROL_POINT_NAME = "controlPointName";
+    public static final String FIELD_CONTROL_POINT_SHORT_NAME = "controlPointShortName";
     public static final String FIELD_MARK_TEMPLATE_IDS = "markTemplateIds";
     public static final String FIELD_ASSOCIATED_ROLE = "associatedRole";
     public static final String FIELD_OPTIONAL_REPEATABLE_PART = "optionalRepeatablePart";
@@ -61,6 +62,7 @@ public class CourseTemplateJsonSerializer implements JsonSerializer<CourseTempla
             wp.getControlPointTemplate().getMarks().forEach(mt -> markTemplateIDs.add(mt.getId().toString()));
             waypointEntry.put(FIELD_MARK_TEMPLATE_IDS, markTemplateIDs);
             waypointEntry.put(FIELD_CONTROL_POINT_NAME, wp.getControlPointTemplate().getName());
+            waypointEntry.put(FIELD_CONTROL_POINT_SHORT_NAME, wp.getControlPointTemplate().getShortName());
             waypoints.add(waypointEntry);
         });
         result.put(FIELD_WAYPOINTS, waypoints);

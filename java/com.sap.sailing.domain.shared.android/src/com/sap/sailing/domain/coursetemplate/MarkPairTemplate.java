@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPairTemplateImpl;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * A template that can be used to construct a {@link ControlPointWithTwoMarks}.
@@ -25,12 +26,17 @@ public interface MarkPairTemplate extends ControlPointTemplate {
     public class MarkPairTemplateFactory {
         private final Map<MarkPairTemplate, MarkPairTemplate> markPairs = new HashMap<>();
 
-        public MarkPairTemplate create(String name, List<MarkTemplate> resolvedMarkTemplates) {
-            return create(name, resolvedMarkTemplates.get(0), resolvedMarkTemplates.get(1));
+        public MarkPairTemplate create(Pair<String, String> nameAndShortName,
+                List<MarkTemplate> resolvedMarkTemplates) {
+            return create(nameAndShortName.getA(), nameAndShortName.getB(), resolvedMarkTemplates);
         }
 
-        public MarkPairTemplate create(String name, MarkTemplate left, MarkTemplate right) {
-            MarkPairTemplate markPairTemplate = new MarkPairTemplateImpl(name, left, right);
+        public MarkPairTemplate create(String name, String shortName, List<MarkTemplate> resolvedMarkTemplates) {
+            return create(name, shortName, resolvedMarkTemplates.get(0), resolvedMarkTemplates.get(1));
+        }
+
+        public MarkPairTemplate create(String name, String shortName, MarkTemplate left, MarkTemplate right) {
+            MarkPairTemplate markPairTemplate = new MarkPairTemplateImpl(name, shortName, left, right);
             // usage of computeIfAbsent ensures recycling of identical MarkPairTemplate instances in the CourseTemplate
             return markPairs.computeIfAbsent(markPairTemplate, mpt -> mpt);
         }

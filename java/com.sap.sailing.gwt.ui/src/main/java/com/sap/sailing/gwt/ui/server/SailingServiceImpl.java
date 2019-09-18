@@ -9465,6 +9465,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     private WaypointTemplateDTO convertToWaypointTemplateDTO(WaypointTemplate waypointTemplate) {
         return new WaypointTemplateDTO(waypointTemplate.getControlPointTemplate().getName(),
+                waypointTemplate.getControlPointTemplate().getShortName(),
                 StreamSupport.stream(waypointTemplate.getControlPointTemplate().getMarks().spliterator(), false)
                         .map(this::convertToMarkTemplateDTO).collect(Collectors.toList()),
                 waypointTemplate.getPassingInstruction());
@@ -9482,7 +9483,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         if (resolvedMarkTemplates.size() == 1) {
             controlPointTemplate = resolvedMarkTemplates.get(0);
         } else if (resolvedMarkTemplates.size() == 2) {
-            controlPointTemplate = markPairTemplateFactory.create(waypointTemplate.getName(), resolvedMarkTemplates);
+            controlPointTemplate = markPairTemplateFactory.create(waypointTemplate.getName(),
+                    waypointTemplate.getShortName(), resolvedMarkTemplates);
         } else {
             throw new IllegalArgumentException("Waypoints must contain one or two marks");
         }

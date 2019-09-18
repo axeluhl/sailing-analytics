@@ -90,6 +90,7 @@ public class CourseTemplateJsonDeserializer implements JsonDeserializer<CourseTe
             } else if (resolvedMarkTemplates.size() == 2) {
                 controlPointTemplate = markPairTemplateFactory.create(
                         (String) waypointJSON.get(CourseTemplateJsonSerializer.FIELD_CONTROL_POINT_NAME),
+                        (String) waypointJSON.get(CourseTemplateJsonSerializer.FIELD_CONTROL_POINT_SHORT_NAME),
                         resolvedMarkTemplates);
             } else {
                 throw new JsonDeserializationException("Unexpected number of marks found for waypoint");

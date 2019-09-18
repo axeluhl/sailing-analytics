@@ -10,9 +10,11 @@ public class MarkPairTemplateImpl extends NamedImpl implements MarkPairTemplate 
     private static final long serialVersionUID = -4966456947099578789L;
     private final MarkTemplate left;
     private final MarkTemplate right;
+    private final String shortName;
 
-    public MarkPairTemplateImpl(String name, MarkTemplate left, MarkTemplate right) {
+    public MarkPairTemplateImpl(String name, String shortName, MarkTemplate left, MarkTemplate right) {
         super(name);
+        this.shortName = shortName;
         this.left = left;
         this.right = right;
     }
@@ -33,10 +35,16 @@ public class MarkPairTemplateImpl extends NamedImpl implements MarkPairTemplate 
     }
 
     @Override
+    public String getShortName() {
+        return shortName;
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
+        result = prime * result + ((getShortName() == null) ? 0 : getShortName().hashCode());
         result = prime * result + ((left == null) ? 0 : left.hashCode());
         result = prime * result + ((right == null) ? 0 : right.hashCode());
         return result;
@@ -55,6 +63,11 @@ public class MarkPairTemplateImpl extends NamedImpl implements MarkPairTemplate 
             if (other.getName() != null)
                 return false;
         } else if (!getName().equals(other.getName()))
+            return false;
+        if (getShortName() == null) {
+            if (other.getShortName() != null)
+                return false;
+        } else if (!getShortName().equals(other.getShortName()))
             return false;
         if (left == null) {
             if (other.left != null)

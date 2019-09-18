@@ -27,11 +27,13 @@ public class ControlPointEditDialog extends DataEntryDialog<ControlPointEditDTO>
 
     private final ValueListBox<PassingInstruction> markPassingInstructionChooser;
     private final TextBox textControlPointName;
+    private final TextBox textControlPointShortName;
 
     private MarkTemplateSuggestOracle markTemplateOracle;
 
     private Label labelMarkTemplate2;
     private Label labelControlPointName;
+    private Label labelControlPointShortName;
 
     public ControlPointEditDialog(final SailingServiceAsync sailingServiceAsync, final StringMessages stringMessages,
             ControlPointEditDTO courseTemplateToEdit, DialogCallback<ControlPointEditDTO> callback) {
@@ -60,6 +62,7 @@ public class ControlPointEditDialog extends DataEntryDialog<ControlPointEditDTO>
 
         labelMarkTemplate2 = new Label(stringMessages.markTemplate2());
         labelControlPointName = new Label(stringMessages.name());
+        labelControlPointShortName = new Label(stringMessages.shortName());
 
         markTemplateOracle = new MarkTemplateSuggestOracle(sailingServiceAsync, stringMessages);
         suggestMarkTemplate1 = new SuggestBox(markTemplateOracle);
@@ -85,6 +88,7 @@ public class ControlPointEditDialog extends DataEntryDialog<ControlPointEditDTO>
         });
 
         textControlPointName = new TextBox();
+        textControlPointShortName = new TextBox();
         markPassingInstructionChooser.setValue(PassingInstruction.relevantValues()[0]);
         markPassingInstructionChooser.setAcceptableValues(Arrays.asList(PassingInstruction.relevantValues()));
         markPassingInstructionChooser.addValueChangeHandler(v -> handlePassingInstructionChange());
@@ -109,12 +113,12 @@ public class ControlPointEditDialog extends DataEntryDialog<ControlPointEditDTO>
         final MarkTemplateDTO markTemplate1 = markTemplateOracle.fromString(suggestMarkTemplate1.getValue());
         final MarkTemplateDTO markTemplate2 = markTemplateOracle.fromString(suggestMarkTemplate2.getValue());
         return new ControlPointEditDTO(markTemplate1, markTemplate2, markPassingInstructionChooser.getValue(),
-                textControlPointName.getText());
+                textControlPointName.getText(), textControlPointShortName.getText());
     }
 
     @Override
     protected Widget getAdditionalWidget() {
-        final Grid result = new Grid(4, 2);
+        final Grid result = new Grid(5, 2);
         result.setWidget(0, 0, new Label(stringMessages.passingInstructions()));
         result.setWidget(0, 1, markPassingInstructionChooser);
         result.setWidget(1, 0, new Label(stringMessages.markTemplate()));
@@ -123,6 +127,8 @@ public class ControlPointEditDialog extends DataEntryDialog<ControlPointEditDTO>
         result.setWidget(2, 1, suggestMarkTemplate2);
         result.setWidget(3, 0, labelControlPointName);
         result.setWidget(3, 1, textControlPointName);
+        result.setWidget(4, 0, labelControlPointShortName);
+        result.setWidget(4, 1, textControlPointShortName);
         return result;
     }
 
@@ -131,18 +137,20 @@ public class ControlPointEditDialog extends DataEntryDialog<ControlPointEditDTO>
         private Optional<MarkTemplateDTO> markTemplate2;
         private PassingInstruction passingInstruction;
         private Optional<String> name;
+        private String shortName;
 
         public ControlPointEditDTO() {
 
         }
 
         public ControlPointEditDTO(MarkTemplateDTO markTemplate1, MarkTemplateDTO markTemplate2,
-                PassingInstruction passingInstruction, String optionalName) {
+                PassingInstruction passingInstruction, String optionalName, String shortName) {
             super();
             this.markTemplate1 = markTemplate1;
             this.name = Optional.ofNullable(optionalName);
             this.markTemplate2 = Optional.ofNullable(markTemplate2);
             this.passingInstruction = passingInstruction;
+            this.shortName = shortName;
         }
 
         public MarkTemplateDTO getMarkTemplate1() {
@@ -159,6 +167,10 @@ public class ControlPointEditDialog extends DataEntryDialog<ControlPointEditDTO>
 
         public Optional<String> getName() {
             return name;
+        }
+
+        public String getShortName() {
+            return shortName;
         }
 
     }

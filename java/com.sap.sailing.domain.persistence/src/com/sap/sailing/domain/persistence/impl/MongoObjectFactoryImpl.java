@@ -1974,6 +1974,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         waypointTemplateObject.put(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_NAME.name(),
                 waypointTemplate.getControlPointTemplate().getName());
 
+        waypointTemplateObject.put(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_SHORT_NAME.name(),
+                waypointTemplate.getControlPointTemplate().getShortName());
+
         final BasicDBList markTemplates = new BasicDBList();
         waypointTemplate.getControlPointTemplate().getMarks().forEach(m -> markTemplates.add(m.getId().toString()));
         waypointTemplateObject.put(FieldNames.WAYPOINT_TEMPLATE_MARK_TEMPLATES.name(), markTemplates);

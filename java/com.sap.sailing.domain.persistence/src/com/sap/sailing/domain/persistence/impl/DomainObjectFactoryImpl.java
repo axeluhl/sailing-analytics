@@ -3222,13 +3222,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private WaypointTemplate loadWaypointTemplate(Document bdo,
             Function<UUID, MarkTemplate> markTemplateResolver,
-            BiFunction<String, List<MarkTemplate>, MarkPairTemplate> markPairResolver) {
+            BiFunction<Pair<String, String>, List<MarkTemplate>, MarkPairTemplate> markPairResolver) {
         // load passing instruction
         final PassingInstruction passingInstruction = PassingInstruction
                 .valueOf(bdo.get(FieldNames.WAYPOINT_TEMPLATE_PASSINGINSTRUCTION.name()).toString());
 
         // load master data
         final String name = bdo.getString(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_NAME.name());
+        final String shortName = bdo.getString(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_SHORT_NAME.name());
 
         // load mark templates for control point
         final ArrayList<?> markTemplateUUIDsDbList = bdo.get(FieldNames.WAYPOINT_TEMPLATE_MARK_TEMPLATES.name(),
@@ -3254,7 +3255,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         // create MarkTemplate or MarkTemplatePairImpl
         final ControlPointTemplate controlPointTemplate;
         if (markTemplates.size() == 2) {
-            controlPointTemplate = markPairResolver.apply(name, markTemplates);
+            controlPointTemplate = markPairResolver.apply(new Pair<>(name, shortName), markTemplates);
         } else {
             controlPointTemplate = markTemplates.get(0);
         }
