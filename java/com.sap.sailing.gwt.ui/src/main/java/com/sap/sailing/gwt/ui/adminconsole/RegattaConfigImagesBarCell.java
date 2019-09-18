@@ -18,7 +18,8 @@ public class RegattaConfigImagesBarCell extends ImagesBarCell {
     public static final String ACTION_CHANGE_OWNERSHIP = DefaultActions.CHANGE_OWNERSHIP.name();
     public static final String ACTION_CHANGE_ACL = DefaultActions.CHANGE_ACL.name();
     public static final String ACTION_STOP_TRACKING = "ACTION_STOP_TRACKING";
-    public static final String ACTION_CERTIFICATES_UPDATE = "CERTIFICATES_UPDATE";
+    public static final String ACTION_CERTIFICATES_UPDATE = "ACTION_CERTIFICATES_UPDATE";
+    public static final String ACTION_BOAT_REGISTRATIONS = "ACTION_BOAT_REGISTRATIONS";
 
     private final StringMessages stringMessages;
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
@@ -49,6 +50,8 @@ public class RegattaConfigImagesBarCell extends ImagesBarCell {
                 makeImagePrototype(IconResources.INSTANCE.changeOwnershipIcon())));
         result.add(new ImageSpec(ACTION_CHANGE_ACL, stringMessages.actionChangeACL(),
                 makeImagePrototype(IconResources.INSTANCE.changeACLIcon())));
+        result.add(new ImageSpec(ACTION_BOAT_REGISTRATIONS, stringMessages.boatRegistrations(),
+                makeImagePrototype(IconResources.INSTANCE.boatRegistrations())));
         result.add(new ImageSpec(ACTION_CERTIFICATES_UPDATE, stringMessages.updateCertificates(),
                 makeImagePrototype(IconResources.INSTANCE.updateCertificatesIcon())));
         return result;
