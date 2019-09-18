@@ -32,8 +32,8 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
-import com.sap.sailing.domain.orc.ORCCertificateImporter;
-import com.sap.sailing.domain.orc.impl.ORCCertificateImporterJSON;
+import com.sap.sailing.domain.orc.ORCCertificatesCollection;
+import com.sap.sailing.domain.orc.impl.ORCCertificatesJsonImporter;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
@@ -69,7 +69,7 @@ public class TestStoringAndLoadingRegattaORCCertificateAssignmentEvent extends A
                     new MockSmartphoneImeiServiceFinderFactory());
 
     protected RaceLogIdentifier logIdentifier;
-    private ORCCertificateImporter importer;
+    private ORCCertificatesCollection importer;
 
     @Before
     public void setUp() throws FileNotFoundException, IOException, ParseException {
@@ -77,7 +77,7 @@ public class TestStoringAndLoadingRegattaORCCertificateAssignmentEvent extends A
         when(logIdentifier.getIdentifier()).thenReturn(
                 new com.sap.sse.common.Util.Triple<String, String, String>("a", "b", UUID.randomUUID().toString()));
         DomainFactory.INSTANCE.getCompetitorAndBoatStore().clearCompetitors();
-        importer = new ORCCertificateImporterJSON(new FileInputStream(new File("resources/GER2019.json")));
+        importer = new ORCCertificatesJsonImporter().read(new FileInputStream(new File("resources/GER2019.json")));
     }
 
     @Test

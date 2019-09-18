@@ -1,28 +1,15 @@
 package com.sap.sailing.domain.orc.impl;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.io.ByteOrderMark;
-import org.apache.commons.io.input.BOMInputStream;
 
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
-import com.sap.sailing.domain.orc.ORCCertificateImporter;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -50,8 +37,8 @@ import com.sap.sse.common.impl.SecondsDurationImpl;
  *
  */
 
-public class ORCCertificateImporterRMS implements ORCCertificateImporter {
-    //Codes used in the RMS document as column names for different information
+public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollection {
+    // Codes used in the RMS document as column names for different information
     private static final String TWA_COURSES = "R";
     private static final String CDL = "CDL";
     private static final String GPH = "GPH";
@@ -66,10 +53,6 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
     private static final String CIRCULAR_RANDOM = "CR";
     private static final String NON_SPINNAKER = "NSP";
 
-    private static final String NAME_OF_LAST_LEFT_ALIGNED_COLUMN_HEADER = "HH:MM:SS";
-
-    private final LinkedHashMap<String, Integer> columnNamesAndWidths;
-
     private final Map<String, Map<String, String>> certificateValuesBySailnumber;
 
     public class ORCCertificateValues {
@@ -81,89 +64,15 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
         }
 
         public String getValue(String columnName) {
-            assert columnNamesAndWidths.containsKey(columnName);
             return certificateValuesBySailnumber.get(sailnumber).get(columnName);
         }
     }
     
-    public ORCCertificateImporterRMS(Reader reader) throws IOException {
-        final BufferedReader br = new BufferedReader(reader);
-        columnNamesAndWidths = readColumnWidthsFromFirstLine(br.readLine());
-        columnNamesAndWidths.keySet().iterator().next(); // the first column contains the IDs of the certificates
-        final String sailnumberColumnName = columnNamesAndWidths.keySet().iterator().next();
-        certificateValuesBySailnumber = new HashMap<>();
-        String line;
-        while ((line = br.readLine()) != null) {
-            final Map<String, String> parsedLine = parseLine(line);
-            certificateValuesBySailnumber.put(parsedLine.get(sailnumberColumnName).replaceAll(" ", "").toUpperCase(), parsedLine);
+    public ORCCertificatesCollectionRMS(Map<String, Map<String, String>> certificateValuesBySailnumber) throws IOException {
+        this.certificateValuesBySailnumber = new HashMap<>();
+        for (final Entry<String, Map<String, String>> e : certificateValuesBySailnumber.entrySet()) {
+            this.certificateValuesBySailnumber.put(getCanonicalizedSailNumber(e.getKey()), e.getValue());
         }
-    }
-    
-    public ORCCertificateImporterRMS(InputStream in) throws IOException {
-        String defaultEncoding = "UTF-8";
-        BOMInputStream bomInputStream = new BOMInputStream(in);
-        ByteOrderMark bom = bomInputStream.getBOM();
-        String charsetName = bom == null ? defaultEncoding : bom.getCharsetName();
-        InputStreamReader reader = new InputStreamReader(new BufferedInputStream(bomInputStream), charsetName);
-        BufferedReader br = new BufferedReader(reader);
-        columnNamesAndWidths = readColumnWidthsFromFirstLine(br.readLine());
-        Iterator<String> iterator = columnNamesAndWidths.keySet().iterator();
-        iterator.next();                                      // the first column contains the IDs of the certificates
-        final String sailnumberColumnName = iterator.next();  // the second column contains the sail numbers, which are easier to use for identification
-        certificateValuesBySailnumber = new HashMap<>();
-        String line;
-        
-        while ((line = br.readLine()) != null) {
-            final Map<String, String> parsedLine = parseLine(line);
-            certificateValuesBySailnumber.put(parsedLine.get(sailnumberColumnName).replaceAll(" ", "").toUpperCase(), parsedLine);
-        }
-        
-        br.close();
-    }
-    
-    private Map<String, String> parseLine(final String line) {
-        assert columnNamesAndWidths != null;
-        final Map<String, String> result = new LinkedHashMap<>();
-        int start=0;
-        boolean splitBySpaceMode = false; // start using column names; switch to splitting by spaces when NAME_OF_LAST_LEFT_ALIGNED_COLUMN_HEADER has been found
-        for (final Entry<String, Integer> columnNameAndWidth : columnNamesAndWidths.entrySet()) {
-            final int end;
-            if (splitBySpaceMode) {
-                boolean foundSpace = false;
-                int i;
-                for (i=start; i<line.length() && (!foundSpace || line.charAt(i) == ' '); i++) {
-                    if (!foundSpace) {
-                        foundSpace = line.charAt(i) == ' ';
-                    }
-                }
-                end = i;
-            } else {
-                end = start+columnNameAndWidth.getValue();
-            }
-            result.put(columnNameAndWidth.getKey(), line.substring(start, end).trim());
-            if (columnNameAndWidth.getKey().equals(NAME_OF_LAST_LEFT_ALIGNED_COLUMN_HEADER)) {
-                splitBySpaceMode = true;
-            }
-            start = end;
-            
-        }
-        return result;
-    }
-
-    private LinkedHashMap<String, Integer> readColumnWidthsFromFirstLine(final String readLine) {
-        final LinkedHashMap<String, Integer> result = new LinkedHashMap<>();
-        final Pattern p = Pattern.compile("([^ ]+ *)");
-        final Matcher m = p.matcher(readLine);
-        int start = 0;
-        while (m.find(start)) {
-            result.put(m.group(1).trim(), m.group(1).length());
-            start += m.group(1).length();
-        }
-        return result;
-    }
-
-    public Set<String> getColumnNames() {
-        return Collections.unmodifiableSet(columnNamesAndWidths.keySet());
     }
     
     public Set<String> getSailnumbers() {
@@ -171,13 +80,13 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
     }
 
     public ORCCertificateValues getValuesForSailnumber(String sailnumber) {
-        String searchString = sailnumber.replaceAll(" ", "").toUpperCase();
+        String searchString = getCanonicalizedSailNumber(sailnumber);
         return certificateValuesBySailnumber.containsKey(searchString) ? new ORCCertificateValues(searchString) : null;
     }
     
     @Override
     public ORCCertificate getCertificate(String sailnumber) {
-        String searchString = sailnumber.replaceAll(" ", "").toUpperCase();
+        String searchString = getCanonicalizedSailNumber(sailnumber);
         ORCCertificateValues certificateValues = getValuesForSailnumber(searchString);
         final String boatclass = certificateValues.getValue(BOATCLASS);
         final Distance length  = new MeterDistance(Double.parseDouble(certificateValues.getValue(LENGTH)));
@@ -194,7 +103,6 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
         final Map<Speed, Speed> longDistanceSpeedPredictionPerTrueWindSpeed = new HashMap<>();
         final Map<Speed, Speed> circularRandomSpeedPredictionPerTrueWindSpeed = new HashMap<>();
         final Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed = new HashMap<>();
-        
         for (Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
             String windSpeed = Integer.toString((int) tws.getKnots());
             String beatAngleKey = BEAT_ANGLE + windSpeed;
@@ -227,7 +135,6 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
             }
             velocityPredictionsPerTrueWindSpeedAndAngle.put(tws, velocityPredictionPerTrueWindAngle);
         }
-        
         return new ORCCertificateImpl(searchString, boatclass, length, gph, cdl,
                 velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
                 beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
@@ -239,11 +146,14 @@ public class ORCCertificateImporterRMS implements ORCCertificateImporter {
     @Override
     public Map<String, ORCCertificate> getCertificates(String[] sailnumbers) {
         Map<String, ORCCertificate> result = new HashMap<>();
-
         for (String sailnumber : sailnumbers) {
             result.put(sailnumber, getCertificate(sailnumber));
         }
-
         return result;
+    }
+
+    @Override
+    public Iterable<String> getSailNumbers() {
+        return Collections.unmodifiableCollection(certificateValuesBySailnumber.keySet());
     }
 }
