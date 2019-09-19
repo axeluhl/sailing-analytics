@@ -9352,7 +9352,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     private MarkTemplateDTO convertToMarkTemplateDTO(MarkTemplate markTemplate) {
         final MarkTemplateDTO markTemplateDTO = new MarkTemplateDTO(markTemplate.getId(), markTemplate.getName(),
-                markTemplate.getShortName(),
+                markTemplate.getShortName() == null || markTemplate.getShortName().isEmpty() ? markTemplate.getName()
+                        : markTemplate.getShortName(),
                 markTemplate.getColor(), markTemplate.getShape(), markTemplate.getPattern(), markTemplate.getType());
 
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), markTemplateDTO, markTemplate.getIdentifier());
