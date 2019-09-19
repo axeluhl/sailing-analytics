@@ -18,6 +18,19 @@ public class ControlPointWithTwoMarksImpl implements ControlPointWithTwoMarks {
     /**
      * @param name also used as ID for the mark; if you have a better ID, use {@link GateImpl(Serializable, Mark, Mark, String)} instead.
      */
+
+    /** Use {@link #ControlPointWithTwoMarksImpl(Mark, Mark, String, String)} instead. */
+    @Deprecated
+    public ControlPointWithTwoMarksImpl(Mark left, Mark right, String name) {
+        this(/* ID */ name, left, right, name, name);
+    }
+
+    /** Use {@link #ControlPointWithTwoMarksImpl(Serializable, Mark, Mark, String, String)} instead. */
+    @Deprecated
+    public ControlPointWithTwoMarksImpl(Serializable id, Mark left, Mark right, String name) {
+        this(id, left, right, name, name);
+    }
+
     public ControlPointWithTwoMarksImpl(Mark left, Mark right, String name, String shortName) {
         this(/* ID */ name, left, right, name, shortName);
     }
