@@ -18,7 +18,9 @@ import org.json.simple.parser.JSONParser;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
+import com.sap.sailing.domain.coursetemplate.impl.CourseTemplateImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CourseConfigurationBuilder;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -37,8 +39,9 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         courseTemplateJsonSerializer = new CourseTemplateJsonSerializer();
     }
 
-    private JsonDeserializer<CourseConfiguration> getCourseConfigurationDeserializer() {
-        return new CourseConfigurationJsonDeserializer(this.getSharedSailingData());
+    private JsonDeserializer<CourseConfiguration> getCourseConfigurationDeserializer(final Regatta regatta,
+            final CourseTemplate courseTemplate) {
+        return new CourseConfigurationJsonDeserializer(this.getSharedSailingData(), regatta, courseTemplate);
     }
 
     private Response getBadRegattaErrorResponse(String regattaName) {
@@ -92,8 +95,10 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
             }
         }
 
-        // TODO: get CourseConfiguration of course template
-        CourseConfiguration courseConfiguration = null;
+        // TODO: build from coursetemplate?
+        CourseConfigurationBuilder builder = new CourseConfigurationBuilder(this.getSharedSailingData(), regatta,
+                courseTemplate);
+        CourseConfiguration courseConfiguration = builder.build();
 
         String jsonString = courseConfigurationJsonSerializer.serialize(courseConfiguration).toJSONString();
         return Response.ok(jsonString).build();
@@ -108,14 +113,6 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
             getBadCourseConfigurationValidationErrorResponse(
                     "Course configuration is required to be given as json object");
         }
-        final Object parsedObject = new JSONParser().parse(json);
-        if (parsedObject == null || !(parsedObject instanceof JSONObject)) {
-            getBadCourseConfigurationValidationErrorResponse(
-                    "Course configuration is required to be given as json object");
-        }
-        final CourseConfiguration courseConfiguration = getCourseConfigurationDeserializer()
-                .deserialize((JSONObject) parsedObject);
-
         Regatta regatta = null;
         if (regattaName != null) {
             regatta = findRegattaByName(regattaName);
@@ -124,8 +121,17 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
             }
         }
 
-        // TODO: create courseTemplate
-        CourseTemplate courseTemplate = null;
+        final Object parsedObject = new JSONParser().parse(json);
+        if (parsedObject == null || !(parsedObject instanceof JSONObject)) {
+            getBadCourseConfigurationValidationErrorResponse(
+                    "Course configuration is required to be given as json object");
+        }
+        final CourseConfiguration courseConfiguration = getCourseConfigurationDeserializer(regatta,
+                /* courseTemplate */ null).deserialize((JSONObject) parsedObject);
+
+        // TODO: create courseTemplate über new CourseTemplateImpl(...)?
+        CourseTemplate courseTemplate = null; //new CourseTemplateImpl();
+
         String jsonString = courseTemplateJsonSerializer.serialize(courseTemplate).toJSONString();
         return Response.ok(jsonString).build();
     }
