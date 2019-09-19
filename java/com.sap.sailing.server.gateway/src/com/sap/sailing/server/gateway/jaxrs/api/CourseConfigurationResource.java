@@ -16,6 +16,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
@@ -138,10 +139,40 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
                 /* courseTemplate */ null).deserialize((JSONObject) parsedObject);
 
         // TODO: name?
-        CourseConfiguration courseTemplate = getService().getCourseAndMarkConfigurationFactory()
+        final CourseConfiguration courseTemplate = getService().getCourseAndMarkConfigurationFactory()
                 .createCourseTemplateAndUpdatedConfiguration(/* name */ null, courseConfiguration);
         String jsonString = courseConfigurationJsonSerializer.serialize(courseTemplate).toJSONString();
         return Response.ok(jsonString).build();
     }
 
+    @POST
+    @Produces("application/json;charset=UTF-8")
+    @Path("createCourse/{regattaName}")
+    public Response createCourse(@PathParam("regattaName") String regattaName, String json) throws Exception {
+        if (json == null || json.isEmpty()) {
+            getBadCourseConfigurationValidationErrorResponse(
+                    "Course configuration is required to be given as json object");
+        }
+        Regatta regatta = null;
+        if (regattaName != null) {
+            regatta = findRegattaByName(regattaName);
+            if (regatta == null) {
+                return getBadRegattaErrorResponse(regattaName);
+            }
+        }
+
+        final Object parsedObject = new JSONParser().parse(json);
+        if (parsedObject == null || !(parsedObject instanceof JSONObject)) {
+            getBadCourseConfigurationValidationErrorResponse(
+                    "Course configuration is required to be given as json object");
+        }
+        final CourseConfiguration courseConfiguration = getCourseConfigurationDeserializer(regatta,
+                /* courseTemplate */ null).deserialize((JSONObject) parsedObject);
+
+        // TODO: parameters
+        CourseBase course = getService().getCourseAndMarkConfigurationFactory()
+                .createCourseFromConfigurationAndDefineMarksAsNeeded(regatta, courseConfiguration, /* lapCount */ 0,
+                        /* timePointForDefinitionOfMarksAndDeviceMappings */ null, /* author */ null);
+        return Response.ok().build();
+    }
 }
