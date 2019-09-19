@@ -86,11 +86,11 @@ public class MarkResource extends AbstractSailingServerResource {
     private static final String MARK_ID = "markId";
     private static final String REGATTA_NAME = "regattaName";
     private static final String MARK_NAME = "markName";
-    private static final String MARK_SHORT_NAME = "markShortName";
-    private static final String MARK_COLOR = "markColor";
-    private static final String MARK_PATTERN = "markPattern";
-    private static final String MARK_SHAPE = "markShape";
-    private static final String MARK_TYPE = "markType";
+    private static final String MARK_SHORT_NAME = "shortName";
+    private static final String MARK_COLOR = "color";
+    private static final String MARK_PATTERN = "pattern";
+    private static final String MARK_SHAPE = "shape";
+    private static final String MARK_TYPE = "type";
     private static final String CONTROL_POINT_NAME = "controlPointName";
     private static final String CONTROL_POINT_SHORT_NAME = "controlPointShortName";
     private static final String ORIGINATING_MARK_TEMPLATE_ID = "originatingMarkTemplateId";
