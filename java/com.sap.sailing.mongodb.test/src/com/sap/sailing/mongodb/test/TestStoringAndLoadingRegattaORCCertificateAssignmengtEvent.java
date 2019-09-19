@@ -87,7 +87,7 @@ public class TestStoringAndLoadingRegattaORCCertificateAssignmengtEvent extends 
     @Test
     public void test() throws JsonDeserializationException, ParseException {
         RaceLogORCCertificateAssignmentEvent expectedEvent = new RaceLogORCCertificateAssignmentEventImpl(MillisecondsTimePoint.now(), expectedEventTime, author,
-                expectedId, expectedPassId, importer.getCertificate("GER 5549"), boat);
+                expectedId, expectedPassId, importer.getCertificateBySailNumber("GER 5549"), boat);
 
         Document dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RaceLogORCCertificateAssignmentEvent actualEvent = loadEvent(dbObject);

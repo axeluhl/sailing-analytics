@@ -2,7 +2,7 @@ package com.sap.sse.common.impl;
 
 import com.sap.sse.common.Duration;
 
-public class MillisecondsDurationImpl implements Duration {
+public class MillisecondsDurationImpl extends AbstractDuration {
     private static final long serialVersionUID = -4257982564719184723L;
     private final long millis;
     
@@ -66,13 +66,6 @@ public class MillisecondsDurationImpl implements Duration {
         return asMillis() / Duration.ONE_DAY.asMillis();
     }
     
-    @Override
-    public String toString() {
-        StringBuffer result = new StringBuffer();
-        result.append(asSeconds()).append("s==").append(asMillis()).append("ms");
-        return result.toString();
-    }
-
     @Override
     public Duration minus(Duration duration) {
         return new MillisecondsDurationImpl(asMillis()-duration.asMillis());

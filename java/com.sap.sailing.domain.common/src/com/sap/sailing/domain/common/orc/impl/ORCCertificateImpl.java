@@ -3,8 +3,6 @@ package com.sap.sailing.domain.common.orc.impl;
 import java.util.Collections;
 import java.util.Map;
 
-import javax.xml.crypto.Data;
-
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
@@ -53,10 +51,8 @@ public class ORCCertificateImpl implements ORCCertificate {
     
     public final static double PI = 3.14159265358979;
 
-    /**
-     * 
-     */
     private final String sailnumber;
+    private final String boatName;
     private final String boatclass;
     private final Distance lengthOverAll;
     private final Duration gph;
@@ -115,16 +111,17 @@ public class ORCCertificateImpl implements ORCCertificate {
     private final Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed;
 
     // TODO Comment on Constructor
-    public ORCCertificateImpl(String sailnumber, String boatclass, Distance length, Duration gph, Double cdl, TimePoint issueDate,
-            Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle,
-            Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
-            Map<Speed, Duration> beatAllowancePerTrueWindSpeed, Map<Speed, Bearing> runAngles,
-            Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed, Map<Speed, Duration> runAllowancePerTrueWindSpeed,
+    public ORCCertificateImpl(String sailnumber, String boatName, String boatclass, Distance length,
+            Duration gph, Double cdl, TimePoint issueDate,
+            Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle, Map<Speed, Bearing> beatAngles,
+            Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed, Map<Speed, Duration> beatAllowancePerTrueWindSpeed,
+            Map<Speed, Bearing> runAngles, Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed,
+            Map<Speed, Duration> runAllowancePerTrueWindSpeed,
             Map<Speed, Speed> windwardLeewardSpeedPredictionsPerTrueWindSpeed,
             Map<Speed, Speed> longDistanceSpeedPredictionsPerTrueWindSpeed,
-            Map<Speed, Speed> circularRandomSpeedPredictionsPerTrueWindSpeed,
-            Map<Speed, Speed> nonSpinnakerSpeedPredictionsPerTrueWindSpeed) {
+            Map<Speed, Speed> circularRandomSpeedPredictionsPerTrueWindSpeed, Map<Speed, Speed> nonSpinnakerSpeedPredictionsPerTrueWindSpeed) {
         this.sailnumber = sailnumber;
+        this.boatName = boatName;
         this.boatclass = boatclass;
         this.lengthOverAll = length;
         this.gph = gph;
@@ -142,6 +139,11 @@ public class ORCCertificateImpl implements ORCCertificate {
         this.longDistanceSpeedPredictionPerTrueWindSpeed = Collections.unmodifiableMap(longDistanceSpeedPredictionsPerTrueWindSpeed);
         this.circularRandomSpeedPredictionPerTrueWindSpeed = Collections.unmodifiableMap(circularRandomSpeedPredictionsPerTrueWindSpeed);
         this.nonSpinnakerSpeedPredictionPerTrueWindSpeed = Collections.unmodifiableMap(nonSpinnakerSpeedPredictionsPerTrueWindSpeed);
+    }
+
+    @Override
+    public String getBoatName() {
+        return boatName;
     }
 
     @Override
@@ -227,9 +229,14 @@ public class ORCCertificateImpl implements ORCCertificate {
     public Map<Speed, Speed> getRunVMGPredictions() {
         return runVMGPredictionPerTrueWindSpeed;
     }
-
+    
     @Override
     public TimePoint getIssueDate() {
         return issueDate;
+    }
+    
+    @Override
+    public String toString() {
+        return ""+getSailnumber()+" / "+getBoatName() + " - Issued on: " + getIssueDate().asDate();
     }
 }

@@ -52,10 +52,10 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     protected ListDataProvider<T> all;
     protected final ListDataProvider<T> filtered;
     protected final TextBox textBox;
-    protected final CheckBox checkbox;
+    protected final CheckBox showOnlyObjectsWithUpdatePermissionCheckbox;
     
     private final Set<Filter<T>> filters = new HashSet<>();
-    private final CheckboxEnablableFilter<T> checkboxFilter;
+    private final CheckboxEnablableFilter<T> checkboxFilterForUpdatableObjectsOnly;
 
     private boolean added = false;
 
@@ -117,11 +117,10 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         this.filtered = filtered;
         this.textBox = new TextBox();
         this.textBox.ensureDebugId("FilterTextBox");
-        // TODO: i18n
-        this.checkbox = new CheckBox(stringMessages.hideElementsWithoutUpdateRights());
-        checkbox.setValue(true);
-        checkboxFilter = new CheckboxEnablableFilter<>(checkbox);
-        filters.add(checkboxFilter);
+        this.showOnlyObjectsWithUpdatePermissionCheckbox = new CheckBox(stringMessages.hideElementsWithoutUpdateRights());
+        showOnlyObjectsWithUpdatePermissionCheckbox.setValue(true);
+        checkboxFilterForUpdatableObjectsOnly = new CheckboxEnablableFilter<>(showOnlyObjectsWithUpdatePermissionCheckbox);
+        filters.add(checkboxFilterForUpdatableObjectsOnly);
         this.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         setAll(all);
         if (drawTextBox) {
@@ -284,12 +283,15 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     }
 
     public CheckBox getCheckBox() {
-        return checkbox;
+        return showOnlyObjectsWithUpdatePermissionCheckbox;
     }
 
-    public void setCheckboxEnabledFilter(Function<T, Boolean> filterFunction) {
-
-        this.checkboxFilter.setFilterToApply(new Filter<T>() {
+    /**
+     * Defines the filter function to apply when the {@link #showOnlyObjectsWithUpdatePermissionCheckbox} checkbox is
+     * ticked.
+     */
+    public void setUpdatePermissionFilterForCheckbox(Function<T, Boolean> filterFunction) {
+        this.checkboxFilterForUpdatableObjectsOnly.setFilterToApply(new Filter<T>() {
             @Override
             public boolean matches(T object) {
                 return filterFunction.apply(object);

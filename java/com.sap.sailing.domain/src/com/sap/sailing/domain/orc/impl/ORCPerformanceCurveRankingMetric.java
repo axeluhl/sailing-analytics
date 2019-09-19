@@ -32,7 +32,9 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
@@ -129,6 +131,17 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
                     updateScratchBoatFromLogs();
                 }
             });
+            trackedRace.getRace().getCourse().addCourseListener(new CourseListener() {
+                @Override
+                public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+                    updateCourseFromRaceLogs();
+                }
+                
+                @Override
+                public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+                    updateCourseFromRaceLogs();
+                }
+            });
         }
     }
     
@@ -172,7 +185,14 @@ public class ORCPerformanceCurveRankingMetric extends AbstractRankingMetric {
             public void visit(RaceLogRevokeEvent event) {
                 if (event.getRevokedEventType().equals(RaceLogORCLegDataEventImpl.class.getName())) {
                     updateCourseFromRaceLogs();
+                } else if (event.getRevokedEventType().equals(RaceLogORCLegDataEventImpl.class.getName())) {
+                    updateScratchBoatFromLogs();
                 }
+            }
+
+            @Override
+            public void visit(RaceLogORCScratchBoatEvent event) {
+                updateScratchBoatFromLogs();
             }
         };
     }

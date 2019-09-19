@@ -111,5 +111,7 @@ public interface ORCCertificate extends Serializable {
     public Map<Speed, Speed> getRunVMGPredictions();
     
     public Map<Speed, Map<Bearing, Speed>> getVelocityPredictionPerTrueWindSpeedAndAngle();
+
+    public String getBoatName();
     
 }

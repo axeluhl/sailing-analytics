@@ -21,6 +21,7 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
     public static final String ORC_CERTIFICATE_NON_SPINNAKER_SPEED_PREDICTIONS = "nonSpinnakerSpeedPredictions";
     public static final String ORC_CERTIFICATE_TWA_SPEED_PREDICTIONS = "twaSpeedPredictions";
     public static final String ORC_CERTIFICATE_SAILNUMBER = "sailNumber";
+    public static final String ORC_CERTIFICATE_BOATNAME = "boatName";
     public static final String ORC_CERTIFICATE_BOATCLASS = "boatClass";
     public static final String ORC_CERTIFICATE_GPH = "gph";
     public static final String ORC_CERTIFICATE_CDL = "cdl";
@@ -46,6 +47,7 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
     public JSONObject serialize(ORCCertificate certificate) {
         JSONObject result = new JSONObject();
         result.put(ORC_CERTIFICATE_SAILNUMBER, certificate.getSailnumber());
+        result.put(ORC_CERTIFICATE_BOATNAME, certificate.getBoatName());
         result.put(ORC_CERTIFICATE_BOATCLASS, certificate.getBoatclass());
         result.put(ORC_CERTIFICATE_GPH, certificate.getGPH());
         result.put(ORC_CERTIFICATE_CDL, certificate.getCDL());

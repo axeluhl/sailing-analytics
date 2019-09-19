@@ -134,7 +134,7 @@ public class WildcardPermissionWithSecurityDTOTableWrapper extends
         };
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         filterField
-                .setCheckboxEnabledFilter(permission -> userService.hasPermission(permission, DefaultActions.UPDATE));
+                .setUpdatePermissionFilterForCheckbox(permission -> userService.hasPermission(permission, DefaultActions.UPDATE));
 
         mainPanel.insert(filterField, 0);
 

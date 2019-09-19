@@ -32,7 +32,7 @@ public class NonCompetingCompetitorTest extends AbstractManeuverDetectionTestCas
     public void setUp() throws Exception {
         super.setUp();
         super.setUp(
-                new URL("http://dev.tractrac.com/events/event_20160222_ESSSTPeter_1473057208/5a265e70-519a-0134-dd23-10b11c4ed8fd.txt"),
+                new URL("http://skitrac.traclive.dk/events/event_20160222_ESSSTPeter/5a265e70-519a-0134-dd23-10b11c4ed8fd.txt"),
                 /* liveUri */null, /* storedUri */null, new ReceiverType[] { ReceiverType.MARKPASSINGS,
                         ReceiverType.MARKPOSITIONS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
     }
@@ -43,8 +43,8 @@ public class NonCompetingCompetitorTest extends AbstractManeuverDetectionTestCas
     @Test
     public void testNoNonCompetingCompetitors() throws ParseException, NoWindException {
     	for (final Entry<Competitor, Boat> competitorAndBoatEntry : getTrackedRace().getRace().getCompetitorsAndTheirBoats().entrySet()) {
-    		assertFalse(competitorAndBoatEntry.getKey().getName().startsWith("Ump"));
-    		assertSame(getDomainFactory().getOrCreateBoatClass("GC32"), competitorAndBoatEntry.getValue().getBoatClass());
+    	    assertFalse(competitorAndBoatEntry.getKey().getName().startsWith("Ump"));
+    	    assertSame(getDomainFactory().getOrCreateBoatClass("GC32"), competitorAndBoatEntry.getValue().getBoatClass());
     	}
     }
 }
