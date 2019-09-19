@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -45,6 +46,7 @@ import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
@@ -66,9 +68,11 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseJsonSe
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 @Path("/v1/mark")
@@ -83,12 +87,17 @@ public class MarkResource extends AbstractSailingServerResource {
     private static final String REGATTA_NAME = "regattaName";
     private static final String MARK_NAME = "markName";
     private static final String MARK_SHORT_NAME = "markShortName";
+    private static final String MARK_COLOR = "markColor";
+    private static final String MARK_PATTERN = "markPattern";
+    private static final String MARK_SHAPE = "markShape";
+    private static final String MARK_TYPE = "markType";
     private static final String CONTROL_POINT_NAME = "controlPointName";
     private static final String CONTROL_POINT_SHORT_NAME = "controlPointShortName";
     private static final String ORIGINATING_MARK_TEMPLATE_ID = "originatingMarkTemplateId";
     private static final String ORIGINATING_MARK_PROPERTIES_ID = "originatingMarkPropertiesId";
     private static final String ORIGINATING_COURSE_TEMPLATE_ID = "originatingCourseTemplateId";
 
+    private static final Logger LOG = Logger.getLogger(MarkResource.class.getName());
     @POST
     @Path("/addMarkToRegatta")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -98,8 +107,30 @@ public class MarkResource extends AbstractSailingServerResource {
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
         String markName = (String) requestObject.get(MARK_NAME);
         String markShortName = (String) requestObject.get(MARK_SHORT_NAME);
-        String originatingMarkTemplateIdAsString = (String) requestObject.get(ORIGINATING_MARK_TEMPLATE_ID);
-        String originatingMarkPropertiesIdAsString = (String) requestObject.get(ORIGINATING_MARK_PROPERTIES_ID);
+        final String originatingMarkTemplateIdAsString = (String) requestObject.get(ORIGINATING_MARK_TEMPLATE_ID);
+        final String originatingMarkPropertiesIdAsString = (String) requestObject.get(ORIGINATING_MARK_PROPERTIES_ID);
+        final String markColorStr = (String) requestObject.get(MARK_COLOR);
+        final String markPattern = (String) requestObject.get(MARK_PATTERN);
+        final String markShape = (String) requestObject.get(MARK_SHAPE);
+        final String markTypeStr = (String) requestObject.get(MARK_TYPE);
+        MarkType markType = null;
+        try {
+            markType = MarkType.valueOf(markTypeStr);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            // ignore since mark type value is optional
+            LOG.warning("Invalid mark type '" + markTypeStr + "' received via REST endpoint was ignored.");
+        }
+
+        Color markColor = null;
+        if (markColorStr != null && !markColorStr.isEmpty()) {
+            try {
+            markColor = new RGBColor(markColorStr);
+            } catch (IllegalArgumentException e) {
+                // ignore since mark type value is optional
+                LOG.warning("Invalid color '" + markColorStr + "' received via REST endpoint was ignored.");
+            }
+        }
+
         UUID markId = UUID.randomUUID();
         UUID originatingMarkTemplateId = originatingMarkTemplateIdAsString != null
                 ? UUID.fromString(originatingMarkTemplateIdAsString)
@@ -107,8 +138,8 @@ public class MarkResource extends AbstractSailingServerResource {
         UUID originatingMarkPropertiesId = originatingMarkPropertiesIdAsString != null
                 ? UUID.fromString(originatingMarkPropertiesIdAsString)
                 : null;
-        Mark mark = getService().getBaseDomainFactory().getOrCreateMark(markId, markName, markShortName,
-                originatingMarkTemplateId, originatingMarkPropertiesId);
+        final Mark mark = getService().getBaseDomainFactory().getOrCreateMark(markId, markName, markShortName, markType,
+                markColor, markShape, markPattern, originatingMarkTemplateId, originatingMarkPropertiesId);
         String regattaName = (String) requestObject.get(REGATTA_NAME);
         Regatta regatta = getService().getRegattaByName(regattaName);
         Response response;
