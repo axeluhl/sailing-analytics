@@ -208,6 +208,9 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     @Override
     public MarkProperties getMarkPropertiesById(UUID id) {
+        if (id == null) {
+            return null;
+        }
         final MarkProperties markProperties = markPropertiesById.get(id);
         if (markProperties != null) {
             getSecurityService().checkCurrentUserReadPermission(markProperties);
