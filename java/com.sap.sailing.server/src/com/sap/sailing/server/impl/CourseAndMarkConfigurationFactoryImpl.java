@@ -30,13 +30,13 @@ import com.sap.sailing.domain.coursetemplate.MarkPairTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
-import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.impl.CourseConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPairWithConfigurationImpl;
+import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesBasedMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateBasedMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.RegattaMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointWithMarkConfigurationImpl;
@@ -123,12 +123,21 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             allMarkConfigurations.addAll(regattaMarkConfigurations.regattaConfigurationsByMark.values());
             markTemplatesToMarkConfigurations.putAll(regattaMarkConfigurations.markConfigurationsByMarkTemplate);
         }
+        Map<MarkTemplate, MarkProperties> suggestedMappings = new MarkTemplatesMarkPropertiesAssociater()
+                .getSuggestions(courseTemplate.getAssociatedRoles(),
+                courseTemplate.getMarkTemplates(), sharedSailingData.getAllMarkProperties(tagsToFilterMarkProperties));
         for (MarkTemplate markTemplate : courseTemplate.getMarkTemplates()) {
             // For any MarkTemplate that wasn't resolved from the regatta, an explicit entry needs to get created
             markTemplatesToMarkConfigurations.computeIfAbsent(markTemplate, mt -> {
-                // TODO determine matching MarkProperties to associate
-                MarkTemplateBasedMarkConfiguration markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(
-                        markTemplate);
+
+                final MarkConfiguration markConfiguration;
+                // determine matching MarkProperties to associate
+                if (suggestedMappings.containsKey(markTemplate)) {
+                    MarkProperties mappedProperties = suggestedMappings.get(markTemplate);
+                    markConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(mappedProperties, null);
+                } else {
+                    markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(markTemplate);
+                }
                 allMarkConfigurations.add(markConfiguration);
                 return markConfiguration;
             });
@@ -261,11 +270,25 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 for (int i = optionalRepeatablePart.getZeroBasedIndexOfRepeatablePartStart(); i < optionalRepeatablePart
                         .getZeroBasedIndexOfRepeatablePartEnd(); i++) {
                     final WaypointTemplate waypointTemplate = Util.get(courseTemplateOrNull.getWaypointTemplates(), i);
+
+                    final Map<MarkTemplate, MarkProperties> suggestedMappings = new MarkTemplatesMarkPropertiesAssociater()
+                            .getSuggestions(course.getAssociatedRoles(),
+                                    waypointTemplate.getControlPointTemplate().getMarks(),
+                                    sharedSailingData.getAllMarkProperties(tagsToFilterMarkProperties), false);
+
                     for (MarkTemplate markTemplate : waypointTemplate.getControlPointTemplate().getMarks()) {
                         markTemplatesToMarkConfigurations.computeIfAbsent(markTemplate, mt -> {
-                            // TODO determine matching MarkProperties to associate
-                            MarkTemplateBasedMarkConfiguration markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(
-                                    markTemplate);
+
+                            final MarkConfiguration markConfiguration;
+                            // determine matching MarkProperties to associate
+                            if (suggestedMappings.containsKey(markTemplate)) {
+                                MarkProperties mappedProperties = suggestedMappings.get(markTemplate);
+                                markConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(mappedProperties,
+                                        null);
+                            } else {
+                                markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(markTemplate);
+                            }
+
                             allMarkConfigurations.add(markConfiguration);
                             resultingRoleMapping.put(markConfiguration,
                                     courseTemplateOrNull.getAssociatedRoles().get(mt));
@@ -309,6 +332,17 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
 
     private class MarkTemplatesMarkPropertiesAssociater {
 
+        public Map<MarkTemplate, MarkProperties> getSuggestions(Map<Mark, String> roleMappingFromCourseContext,
+                Iterable<MarkTemplate> markTemplates, Iterable<MarkProperties> filteredMarkPropertiesCandiates,
+                boolean dummy) {
+            Map<MarkTemplate, String> transformedRoleMapping = roleMappingFromCourseContext.entrySet().stream()
+                    .map(e -> new Pair<>(
+                            sharedSailingData.getMarkTemplateById(e.getKey().getOriginatingMarkTemplateIdOrNull()),
+                            e.getValue()))
+                    .filter(d -> d.getA() == null)
+                    .collect(Collectors.toMap(d -> d.getA(), d -> d.getB()));
+            return getSuggestions(transformedRoleMapping, markTemplates, filteredMarkPropertiesCandiates);
+        }
         public Map<MarkTemplate, MarkProperties> getSuggestions(Map<MarkTemplate, String> roleMappingFromCourseContext, Iterable<MarkTemplate> markTemplates,
                 Iterable<MarkProperties> filteredMarkPropertiesCandiates) {
 
