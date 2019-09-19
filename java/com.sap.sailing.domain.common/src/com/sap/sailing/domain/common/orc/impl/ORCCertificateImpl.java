@@ -112,9 +112,11 @@ public class ORCCertificateImpl implements ORCCertificate {
     
     private final Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed;
 
-    public ORCCertificateImpl(String idConsistingOfNatAuthCertNoAndBIN, String sailnumber, String boatName, String boatclass,
+    public ORCCertificateImpl(String idConsistingOfNatAuthCertNoAndBIN,
+            String sailnumber, String boatName, String boatclass,
             Distance length, Duration gph,
             Double cdl, TimePoint issueDate,
+            Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle, 
             Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
             Map<Speed, Duration> beatAllowancePerTrueWindSpeed, Map<Speed, Bearing> runAngles,
             Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed,

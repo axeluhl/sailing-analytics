@@ -147,10 +147,9 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
             }
             velocityPredictionsPerTrueWindSpeedAndAngle.put(tws, velocityPredictionPerTrueWindAngle);
         }
-        return new ORCCertificateImpl(certificateValues.getValue(NATCERTN_FILE_ID), searchString, boatName, boatclass, length,
-                gph, cdl, issueDate, velocityPredictionsPerTrueWindSpeedAndAngle,
-                beatAngles, beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed,
-                runAngles, runVMGPredictionPerTrueWindSpeed,
+        return new ORCCertificateImpl(certificateValues.getValue(NATCERTN_FILE_ID), searchString, boatName, boatclass,
+                length, gph, cdl, issueDate, velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
+                beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
                 runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
                 longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed, nonSpinnakerSpeedPredictionPerTrueWindSpeed);
     }

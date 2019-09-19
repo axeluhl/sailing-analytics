@@ -198,12 +198,12 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
             nonSpinnakerSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE
                     .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(NON_SPINNAKER).get(tws)));
         }
-        return new ORCCertificateImpl(natAuth+certNo+bin, searchString, boatName, boatclass, length,
-                gph, cdl, issueDate, velocityPredictionPerTrueWindSpeedAndAngle,
-                beatAngles, beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed,
-                gybeAngles, runVMGPredictionPerTrueWindSpeed,
+        return new ORCCertificateImpl(natAuth + certNo + bin, searchString, boatName, boatclass, length, gph, cdl,
+                issueDate, velocityPredictionPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
+                beatAllowancePerTrueWindSpeed, gybeAngles, runVMGPredictionPerTrueWindSpeed,
                 runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
-                longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed, nonSpinnakerSpeedPredictionPerTrueWindSpeed);
+                longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
+                nonSpinnakerSpeedPredictionPerTrueWindSpeed);
     }
 
     @Override
