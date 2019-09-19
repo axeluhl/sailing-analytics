@@ -23,6 +23,8 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 public class ORCCertificateImpl implements ORCCertificate {
 
     private static final long serialVersionUID = 8725162998514202782L;
+    
+    private final String idConsistingOfNatAuthCertNoAndBIN;
 
     /**
      * Equals the column heading of the allowances table of an ORC certificate. The speeds are set by the offshore
@@ -108,15 +110,18 @@ public class ORCCertificateImpl implements ORCCertificate {
     
     private final Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed;
 
-    public ORCCertificateImpl(String sailnumber, String boatName, String boatclass, Distance length,
-            Duration gph, Double cdl,
-            Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle, Map<Speed, Bearing> beatAngles,
-            Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed, Map<Speed, Duration> beatAllowancePerTrueWindSpeed,
-            Map<Speed, Bearing> runAngles, Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed,
+    public ORCCertificateImpl(String idConsistingOfNatAuthCertNoAndBIN, String sailnumber, String boatName, String boatclass,
+            Distance length, Duration gph,
+            Double cdl, Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle,
+            Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
+            Map<Speed, Duration> beatAllowancePerTrueWindSpeed, Map<Speed, Bearing> runAngles,
+            Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed,
             Map<Speed, Duration> runAllowancePerTrueWindSpeed,
             Map<Speed, Speed> windwardLeewardSpeedPredictionsPerTrueWindSpeed,
             Map<Speed, Speed> longDistanceSpeedPredictionsPerTrueWindSpeed,
-            Map<Speed, Speed> circularRandomSpeedPredictionsPerTrueWindSpeed, Map<Speed, Speed> nonSpinnakerSpeedPredictionsPerTrueWindSpeed) {
+            Map<Speed, Speed> circularRandomSpeedPredictionsPerTrueWindSpeed,
+            Map<Speed, Speed> nonSpinnakerSpeedPredictionsPerTrueWindSpeed) {
+        this.idConsistingOfNatAuthCertNoAndBIN = idConsistingOfNatAuthCertNoAndBIN;
         this.sailnumber = sailnumber;
         this.boatName = boatName;
         this.boatclass = boatclass;
@@ -135,6 +140,11 @@ public class ORCCertificateImpl implements ORCCertificate {
         this.longDistanceSpeedPredictionPerTrueWindSpeed = Collections.unmodifiableMap(longDistanceSpeedPredictionsPerTrueWindSpeed);
         this.circularRandomSpeedPredictionPerTrueWindSpeed = Collections.unmodifiableMap(circularRandomSpeedPredictionsPerTrueWindSpeed);
         this.nonSpinnakerSpeedPredictionPerTrueWindSpeed = Collections.unmodifiableMap(nonSpinnakerSpeedPredictionsPerTrueWindSpeed);
+    }
+
+    @Override
+    public String getId() {
+        return idConsistingOfNatAuthCertNoAndBIN;
     }
 
     @Override

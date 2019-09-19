@@ -93,12 +93,13 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
             velocityPredictionsPerTrueWindSpeedAndAngle.put(tws,
                     velocityPredictionAtCurrentTrueWindSpeedPerTrueWindAngle);
         }
-        final ORCCertificate certificate = new ORCCertificateImpl(sailnumber, boatName, boatclass, length, gph,
-                cdl, velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles,
-                beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed, runAngles,
-                runVMGPredictionPerTrueWindSpeed, runAllowancePerTrueWindSpeed,
-                windwardLeewardSpeedPredictionPerTrueWindSpeed, longDistanceSpeedPredictionPerTrueWindSpeed,
-                circularRandomSpeedPredictionPerTrueWindSpeed, nonSpinnakerSpeedPredictionPerTrueWindSpeed);
+        final String idConsistingOfNatAuthCertNoAndBIN = json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_ID).toString();
+        final ORCCertificate certificate = new ORCCertificateImpl(idConsistingOfNatAuthCertNoAndBIN, sailnumber, boatName, boatclass, length,
+                gph, cdl, velocityPredictionsPerTrueWindSpeedAndAngle,
+                beatAngles, beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed,
+                runAngles, runVMGPredictionPerTrueWindSpeed,
+                runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
+                longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed, nonSpinnakerSpeedPredictionPerTrueWindSpeed);
         return certificate;
     }
 }

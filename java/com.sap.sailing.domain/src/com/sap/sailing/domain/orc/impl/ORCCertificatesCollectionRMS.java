@@ -53,6 +53,7 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
     private static final String LONG_DISTANCE = "OC";
     private static final String CIRCULAR_RANDOM = "CR";
     private static final String NON_SPINNAKER = "NSP";
+    private static final String NATCERTN_FILE_ID = "NATCERTN.FILE_ID";
 
     private final Map<String, Map<String, String>> certificateValuesBySailnumber;
 
@@ -137,12 +138,12 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
             }
             velocityPredictionsPerTrueWindSpeedAndAngle.put(tws, velocityPredictionPerTrueWindAngle);
         }
-        return new ORCCertificateImpl(searchString, boatName, boatclass, length, gph,
-                cdl, velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles,
-                beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed, runAngles,
-                runVMGPredictionPerTrueWindSpeed, runAllowancePerTrueWindSpeed,
-                windwardLeewardSpeedPredictionPerTrueWindSpeed, longDistanceSpeedPredictionPerTrueWindSpeed,
-                circularRandomSpeedPredictionPerTrueWindSpeed, nonSpinnakerSpeedPredictionPerTrueWindSpeed);
+        return new ORCCertificateImpl(certificateValues.getValue(NATCERTN_FILE_ID), searchString, boatName, boatclass, length,
+                gph, cdl, velocityPredictionsPerTrueWindSpeedAndAngle,
+                beatAngles, beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed,
+                runAngles, runVMGPredictionPerTrueWindSpeed,
+                runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
+                longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed, nonSpinnakerSpeedPredictionPerTrueWindSpeed);
     }
 
     @Override

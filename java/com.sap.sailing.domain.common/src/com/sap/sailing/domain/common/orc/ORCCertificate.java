@@ -7,6 +7,7 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
+import com.sap.sse.common.WithID;
 
 /**
  * Represents semantically a real ORC certificate for a {@link Competitor}, which is used to rate different type of
@@ -17,13 +18,17 @@ import com.sap.sse.common.Speed;
  * too.
  * <p>
  * One implementing class provides all necessary functionalities to score the Competitors with a choosen
- * {@link RankingMetric}.
+ * {@link RankingMetric}.<p>
  * 
+ * The {@link WithID} interface is to be implemented such that a {@link String} is produced as the ID that
+ * contains the concatenation (without intermediate white space) of the {@code NatAuth}, the {@code CertNo}
+ * and the {@code BIN} fields, as provided as single fields in the JSON representation, and as provided
+ * in the concatenated form in the {@code NATCERTN.FILE_ID} column in the RMS format.
  * 
  * @author Daniel Lisunkin (i505543)
  *
  */
-public interface ORCCertificate extends Serializable {
+public interface ORCCertificate extends WithID, Serializable {
     /**
      * Returns the sailnumber of the {@link Competitor} which this certificate belongs to.
      * 

@@ -1,12 +1,15 @@
 package com.sap.sse.common.impl;
 
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util;
 
 public abstract class AbstractDuration implements Duration {
     private static final long serialVersionUID = -7217998647218524638L;
 
     @Override
     public String toString() {
-        return String.format("%02d:%02d:%06.3f", ((int) asHours()), (((int) asMinutes()%60)), asSeconds()%60);
+        return ""+Util.padPositiveValue((int) asHours(), 2, 0, /* round */ false)+":"+
+                Util.padPositiveValue(asMinutes()%60, 2, 0, /* round */ false)+":"+
+                Util.padPositiveValue(asSeconds()%60, 2, 3, /* round */ true);
     }
 }

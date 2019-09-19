@@ -78,8 +78,20 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
             //TODO Throw Exception for sailnumber not found. InvalidArgumentException?
             return null;
         }
+        String natAuth = null;
+        String bin = null;
+        String certNo = null;
         for (Entry<Object, Object> entry : object.entrySet()) {
             switch ((String) entry.getKey()) {
+                case "NatAuth":
+                    natAuth = entry.getValue().toString();
+                    break;
+                case "BIN":
+                    bin = entry.getValue().toString();
+                    break;
+                case "CertNo":
+                    certNo = entry.getValue().toString();
+                    break;
                 case "LOA":
                     length = new MeterDistance(((Number) entry.getValue()).doubleValue());
                     break;
@@ -177,12 +189,12 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
             nonSpinnakerSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE
                     .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(NON_SPINNAKER).get(tws)));
         }
-        return new ORCCertificateImpl(searchString, boatName, boatclass, length, gph,
-                cdl, velocityPredictionPerTrueWindSpeedAndAngle, beatAngles,
-                beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed, gybeAngles,
-                runVMGPredictionPerTrueWindSpeed, runAllowancePerTrueWindSpeed,
-                windwardLeewardSpeedPredictionPerTrueWindSpeed, longDistanceSpeedPredictionPerTrueWindSpeed,
-                circularRandomSpeedPredictionPerTrueWindSpeed, nonSpinnakerSpeedPredictionPerTrueWindSpeed);
+        return new ORCCertificateImpl(natAuth+certNo+bin, searchString, boatName, boatclass, length,
+                gph, cdl, velocityPredictionPerTrueWindSpeedAndAngle,
+                beatAngles, beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed,
+                gybeAngles, runVMGPredictionPerTrueWindSpeed,
+                runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
+                longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed, nonSpinnakerSpeedPredictionPerTrueWindSpeed);
     }
 
     @Override
