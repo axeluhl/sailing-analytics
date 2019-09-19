@@ -21,23 +21,19 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.CourseConfigurationBuilder;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseConfigurationJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.CourseTemplateJsonSerializer;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/v1/courseconfiguration")
 public class CourseConfigurationResource extends AbstractSailingServerResource {
 
     private final JsonSerializer<CourseConfiguration> courseConfigurationJsonSerializer;
-    private final JsonSerializer<CourseTemplate> courseTemplateJsonSerializer;
 
     public CourseConfigurationResource() {
         courseConfigurationJsonSerializer = new CourseConfigurationJsonSerializer();
-        courseTemplateJsonSerializer = new CourseTemplateJsonSerializer();
     }
 
     private JsonDeserializer<CourseConfiguration> getCourseConfigurationDeserializer(final Regatta regatta,
@@ -71,8 +67,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("getFromRegatta/{regattaName}")
-    public Response createCourseConfigurationForRegatta(@PathParam("regattaName") String regattaName,
+    @Path("getFromCourse/{regattaName}/{raceName}")
+    public Response createCourseConfigurationFromCourse(@PathParam("regattaName") String regattaName,
             @PathParam("raceName") String raceName) throws Exception {
         final Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -82,11 +78,10 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         if (race == null) {
             return getBadRaceErrorResponse(regattaName, raceName);
         }
-        final CourseConfigurationBuilder builder = new CourseConfigurationBuilder(this.getSharedSailingData(), regatta,
-                null);
+
         final Course course = race.getCourse();
-        // TODO
-        CourseConfiguration courseConfiguration = builder.build();
+        CourseConfiguration courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
+                .createCourseConfigurationFromCourse(course, regatta, /* tagsToFilterMarkProperties */ null);
 
         String jsonString = courseConfigurationJsonSerializer.serialize(courseConfiguration).toJSONString();
         return Response.ok(jsonString).build();
@@ -95,7 +90,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("getFromCourseTemplate/{courseTemplateId}")
-    public Response createCourseConfigurationForCourseTemplate(@PathParam("courseTemplateId") String courseTemplateId,
+    public Response createCourseConfigurationFromCourseTemplate(@PathParam("courseTemplateId") String courseTemplateId,
             @QueryParam("reagttaName") String regattaName) {
         final CourseTemplate courseTemplate = this.getSharedSailingData()
                 .getCourseTemplateById(UUID.fromString(courseTemplateId));
@@ -110,10 +105,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
             }
         }
 
-        CourseConfigurationBuilder builder = new CourseConfigurationBuilder(this.getSharedSailingData(), regatta,
-                courseTemplate);
-        // TODO: build from coursetemplate?
-        CourseConfiguration courseConfiguration = builder.build();
+        final CourseConfiguration courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
+                .createCourseConfigurationFromTemplate(courseTemplate, regatta, /* tagsToFilterMarkProperties */ null);
 
         String jsonString = courseConfigurationJsonSerializer.serialize(courseConfiguration).toJSONString();
         return Response.ok(jsonString).build();
@@ -144,10 +137,11 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         final CourseConfiguration courseConfiguration = getCourseConfigurationDeserializer(regatta,
                 /* courseTemplate */ null).deserialize((JSONObject) parsedObject);
 
-        // TODO: create courseTemplate über new CourseTemplateImpl(...)?
-        CourseTemplate courseTemplate = null; // new CourseTemplateImpl();
-
-        String jsonString = courseTemplateJsonSerializer.serialize(courseTemplate).toJSONString();
+        // TODO: name?
+        CourseConfiguration courseTemplate = getService().getCourseAndMarkConfigurationFactory()
+                .createCourseTemplateAndUpdatedConfiguration(/* name */ null, courseConfiguration);
+        String jsonString = courseConfigurationJsonSerializer.serialize(courseTemplate).toJSONString();
         return Response.ok(jsonString).build();
     }
+
 }

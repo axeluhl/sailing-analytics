@@ -23,6 +23,8 @@ import com.sap.sailing.server.gateway.serialization.impl.CourseConfigurationJson
 
 public class CourseConfigurationJsonDeserializer implements JsonDeserializer<CourseConfiguration> {
 
+    private static final String FIELD_MARK_CONFIGURATION_ID = "markConfigurationId";
+
     private final SharedSailingData sharedSailingData;
     private final CommonMarkPropertiesJsonDeserializer commonMarkPropertiesJsonDeserializer;
     private final JsonDeserializer<RepeatablePart> repeatablePartJsonDeserializer;
@@ -40,8 +42,6 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
 
     @Override
     public CourseConfiguration deserialize(JSONObject json) throws JsonDeserializationException {
-        // final String courseConfigurationName = (String) json.get(CourseConfigurationJsonSerializer.FIELD_NAME);
-
         CourseConfigurationBuilder builder = new CourseConfigurationBuilder(sharedSailingData, regatta, courseTemplate);
 
         final Map<UUID, MarkConfiguration> markConfigurationsByID = new HashMap<UUID, MarkConfiguration>();
@@ -64,8 +64,8 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
             if (roleName != null && !roleName.isEmpty()) {
                 builder.setRole(markConfiguration, roleName);
             }
-            // TODO: wichh ID???
-            markConfigurationsByID.put(UUID.randomUUID(), markConfiguration);
+            
+            markConfigurationsByID.put(UUID.fromString((String) markConfigurationJSON.get(FIELD_MARK_CONFIGURATION_ID)), markConfiguration);
         }
 
         final JSONArray wayPointsJSON = (JSONArray) json.get(CourseConfigurationJsonSerializer.FIELD_WAYPOINTS);
