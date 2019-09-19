@@ -222,7 +222,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                             validCourseTemplateUsage = false;
                             break;
                         }
-                        String roleForMark = null; // TODO course.getAssociatedRoles().get(mark);
+                        String roleForMark = course.getAssociatedRoles().get(mark);
                         if (roleForMark == null) {
                             roleForMark = mark.getShortName();
                         }
@@ -262,10 +262,11 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         } else {
             resultingRoleMapping = new HashMap<>();
             resultingWaypoints = new ArrayList<>();
-            // TODO
-//        for (Entry<Mark, String> markWithRole : course.getAssociatedRoles().entrySet()) {
-//            resultingRoleMapping.put(regattaMarkConfigurations.regattaConfigurationsByMark.get(markWithRole.getKey()), markWithRole.getValue());
-//        }
+            for (Entry<Mark, String> markWithRole : course.getAssociatedRoles().entrySet()) {
+                resultingRoleMapping.put(
+                        regattaMarkConfigurations.regattaConfigurationsByMark.get(markWithRole.getKey()),
+                        markWithRole.getValue());
+            }
             for (Waypoint waypoint : course.getWaypoints()) {
                 final ControlPoint controlPoint = waypoint.getControlPoint();
                 final ControlPointWithMarkConfiguration resultingControlPoint;
