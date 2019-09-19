@@ -15,10 +15,11 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
-import com.sap.sailing.domain.coursetemplate.impl.CourseTemplateImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseConfigurationBuilder;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseConfigurationJsonDeserializer;
@@ -50,6 +51,13 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
                 .type(MediaType.TEXT_PLAIN).build();
     }
 
+    private Response getBadRaceErrorResponse(String regattaName, String raceName) {
+        return Response.status(Status.NOT_FOUND)
+                .entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName)
+                        + "' for regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
+                .type(MediaType.TEXT_PLAIN).build();
+    }
+
     private Response getBadCourseTemplateErrorResponse(String courseTemplateId) {
         return Response.status(Status.NOT_FOUND).entity(
                 "Could not find a CourseTemplate with ID '" + StringEscapeUtils.escapeHtml(courseTemplateId) + "'.")
@@ -66,12 +74,19 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
     @Path("getFromRegatta/{regattaName}")
     public Response createCourseConfigurationForRegatta(@PathParam("regattaName") String regattaName,
             @PathParam("raceName") String raceName) throws Exception {
-        Regatta regatta = findRegattaByName(regattaName);
+        final Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             return getBadRegattaErrorResponse(regattaName);
         }
-        // TODO: get CourseConfiguration for regatta and race
-        CourseConfiguration courseConfiguration = null;
+        final RaceDefinition race = regatta.getRaceByName(raceName);
+        if (race == null) {
+            return getBadRaceErrorResponse(regattaName, raceName);
+        }
+        final CourseConfigurationBuilder builder = new CourseConfigurationBuilder(this.getSharedSailingData(), regatta,
+                null);
+        final Course course = race.getCourse();
+        // TODO
+        CourseConfiguration courseConfiguration = builder.build();
 
         String jsonString = courseConfigurationJsonSerializer.serialize(courseConfiguration).toJSONString();
         return Response.ok(jsonString).build();
@@ -95,9 +110,9 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
             }
         }
 
-        // TODO: build from coursetemplate?
         CourseConfigurationBuilder builder = new CourseConfigurationBuilder(this.getSharedSailingData(), regatta,
                 courseTemplate);
+        // TODO: build from coursetemplate?
         CourseConfiguration courseConfiguration = builder.build();
 
         String jsonString = courseConfigurationJsonSerializer.serialize(courseConfiguration).toJSONString();
@@ -130,7 +145,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
                 /* courseTemplate */ null).deserialize((JSONObject) parsedObject);
 
         // TODO: create courseTemplate über new CourseTemplateImpl(...)?
-        CourseTemplate courseTemplate = null; //new CourseTemplateImpl();
+        CourseTemplate courseTemplate = null; // new CourseTemplateImpl();
 
         String jsonString = courseTemplateJsonSerializer.serialize(courseTemplate).toJSONString();
         return Response.ok(jsonString).build();
