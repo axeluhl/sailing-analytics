@@ -26,6 +26,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sse.common.fileupload.FileUploadConstants;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 
@@ -66,8 +67,8 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 final JSONObject resultJson = parseAfterReplacingSurroundingPreElement(event.getResults()).isObject();
-                Notification.notify(stringMessages.removeResult(resultJson.get("status").isString().stringValue(),
-                        resultJson.get("message") == null ? "" : resultJson.get("message").isString().stringValue()), NotificationType.INFO);
+                Notification.notify(stringMessages.removeResult(resultJson.get(FileUploadConstants.STATUS).isString().stringValue(),
+                        resultJson.get(FileUploadConstants.MESSAGE) == null ? "" : resultJson.get(FileUploadConstants.MESSAGE).isString().stringValue()), NotificationType.INFO);
                 setURL("");
             }
         });
@@ -126,14 +127,14 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
                 String result = event.getResults();
                 JSONArray resultJson = parseAfterReplacingSurroundingPreElement(result).isArray();
                 if (resultJson != null) {
-                    if (resultJson.get(0).isObject().get("file_uri") != null) {
-                        uri = resultJson.get(0).isObject().get("file_uri").isString().stringValue();
+                    if (resultJson.get(0).isObject().get(FileUploadConstants.FILE_URI) != null) {
+                        uri = resultJson.get(0).isObject().get(FileUploadConstants.FILE_URI).isString().stringValue();
                         setValue(uri, true);
                         removeButton.setEnabled(true);
                         Notification.notify(stringMessages.uploadSuccessful(), NotificationType.SUCCESS);
                     } else {
-                        Notification.notify(stringMessages.fileUploadResult(resultJson.get(0).isObject().get("status").isString().stringValue(),
-                                resultJson.get(0).isObject().get("message").isString().stringValue()), NotificationType.ERROR);
+                        Notification.notify(stringMessages.fileUploadResult(resultJson.get(0).isObject().get(FileUploadConstants.STATUS).isString().stringValue(),
+                                resultJson.get(0).isObject().get(FileUploadConstants.MESSAGE).isString().stringValue()), NotificationType.ERROR);
                     }
                 }
             }
