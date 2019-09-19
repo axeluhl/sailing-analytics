@@ -3,6 +3,8 @@ package com.sap.sailing.domain.common.orc.impl;
 import java.util.Collections;
 import java.util.Map;
 
+import javax.xml.crypto.Data;
+
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
@@ -10,6 +12,7 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
 //TODO Finish this comment.
@@ -58,6 +61,7 @@ public class ORCCertificateImpl implements ORCCertificate {
     private final Distance lengthOverAll;
     private final Duration gph;
     private final Double cdl;
+    private final TimePoint issueDate;
 
     // TODO add meaningful Javadoc
     private final Map<Speed, Map<Bearing, Speed>> velocityPredictionPerTrueWindSpeedAndAngle;
@@ -111,8 +115,8 @@ public class ORCCertificateImpl implements ORCCertificate {
     private final Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed;
 
     // TODO Comment on Constructor
-    public ORCCertificateImpl(String sailnumber, String boatclass, Distance length, Duration gph,
-            Double cdl, Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle,
+    public ORCCertificateImpl(String sailnumber, String boatclass, Distance length, Duration gph, Double cdl, TimePoint issueDate,
+            Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle,
             Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
             Map<Speed, Duration> beatAllowancePerTrueWindSpeed, Map<Speed, Bearing> runAngles,
             Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed, Map<Speed, Duration> runAllowancePerTrueWindSpeed,
@@ -125,6 +129,7 @@ public class ORCCertificateImpl implements ORCCertificate {
         this.lengthOverAll = length;
         this.gph = gph;
         this.cdl = cdl;
+        this.issueDate = issueDate;
         this.velocityPredictionPerTrueWindSpeedAndAngle = Collections
                 .unmodifiableMap(velocityPredictionsPerTrueWindSpeedAndAngle);
         this.beatAngles = Collections.unmodifiableMap(beatAngles);
@@ -221,5 +226,10 @@ public class ORCCertificateImpl implements ORCCertificate {
     @Override
     public Map<Speed, Speed> getRunVMGPredictions() {
         return runVMGPredictionPerTrueWindSpeed;
+    }
+
+    @Override
+    public TimePoint getIssueDate() {
+        return issueDate;
     }
 }

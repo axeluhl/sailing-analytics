@@ -16,7 +16,9 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.SecondsDurationImpl;
 
 public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCertificate> {
@@ -31,6 +33,7 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
                 ((Number) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_GPH)).doubleValue());
         final Number cdlAsNumber = (Number) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_CDL);
         Double cdl = cdlAsNumber == null ? null : cdlAsNumber.doubleValue();
+        TimePoint issueDate = new MillisecondsTimePoint((long) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_ISSUE_DATE));
         Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle = new HashMap<>();
         Map<Speed, Bearing> beatAngles = new HashMap<>();
         Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed = new HashMap<>();
@@ -92,7 +95,7 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
             velocityPredictionsPerTrueWindSpeedAndAngle.put(tws,
                     velocityPredictionAtCurrentTrueWindSpeedPerTrueWindAngle);
         }
-        final ORCCertificate certificate = new ORCCertificateImpl(sailnumber, boatclass, length, gph, cdl,
+        final ORCCertificate certificate = new ORCCertificateImpl(sailnumber, boatclass, length, gph, cdl, issueDate,
                 velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
                 beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
                 runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,

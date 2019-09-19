@@ -25,6 +25,7 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
     public static final String ORC_CERTIFICATE_GPH = "gph";
     public static final String ORC_CERTIFICATE_CDL = "cdl";
     public static final String ORC_CERTIFICATE_LENGTH = "length";
+    public static final String ORC_CERTIFICATE_ISSUE_DATE = "issueDate";
     public static final String ORC_CERTIFICATE_TWS_6KT = "ORC_CERTIFICATE_TWS_6KT";
     public static final String ORC_CERTIFICATE_TWS_8KT = "ORC_CERTIFICATE_TWS_8KT";
     public static final String ORC_CERTIFICATE_TWS_10KT = "ORC_CERTIFICATE_TWS_10KT";
@@ -49,6 +50,7 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
         result.put(ORC_CERTIFICATE_GPH, certificate.getGPH());
         result.put(ORC_CERTIFICATE_CDL, certificate.getCDL());
         result.put(ORC_CERTIFICATE_LENGTH, certificate.getLengthOverAll().getMeters());
+        result.put(ORC_CERTIFICATE_ISSUE_DATE, certificate.getIssueDate().asMillis());
         
         JSONObject beatAngles = new JSONObject();
         JSONObject runAngles = new JSONObject();
