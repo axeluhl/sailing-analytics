@@ -76,6 +76,8 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
                 markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_ID,
                         regattaMarkConfiguration.getMark().getId().toString());
             }
+            markConfigurationsEntry.putAll(commonMarkPropertiesJsonSerializer
+                    .serialize(markConfiguration.getEffectiveProperties()));
 
             // TODO: associated role? markConfiguration.
             // TODO add optionalPositioning
