@@ -2,6 +2,7 @@ package com.sap.sailing.domain.orc.impl;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,7 +15,9 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.SecondsDurationImpl;
 
 /**
@@ -43,8 +46,9 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
     private static final String CDL = "CDL";
     private static final String GPH = "GPH";
     private static final String LENGTH = "LOA";
-    private static final String BOATCLASS = "TYPE";
     private static final String BOATNAME = "NAME";
+    private static final String BOATCLASS = "TYPE";
+    private static final String ISSUEDATE = "DD_MM_yyYY";
     private static final String RUN_ALLOWANCE = "D";
     private static final String RUN_ANGLE = "DA";
     private static final String BEAT_ALLOWANCE = "UP";
@@ -95,6 +99,11 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
         final Distance length  = new MeterDistance(Double.parseDouble(certificateValues.getValue(LENGTH)));
         final Duration gph     = new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(GPH)));
         final Double cdl       = Double.parseDouble(certificateValues.getValue(CDL));
+        String dateString = certificateValues.getValue(ISSUEDATE);
+        int yyYY = Integer.parseInt(dateString.substring(6));;
+        int mm = Integer.parseInt(dateString.substring(3,5));
+        int dd = Integer.parseInt(dateString.substring(0,2));
+        final TimePoint issueDate = new MillisecondsTimePoint(new GregorianCalendar(yyYY, mm, dd).getTime());
         final Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle = new HashMap<>();
         final Map<Speed, Bearing> beatAngles = new HashMap<>();
         final Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed = new HashMap<>();
@@ -139,7 +148,7 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
             velocityPredictionsPerTrueWindSpeedAndAngle.put(tws, velocityPredictionPerTrueWindAngle);
         }
         return new ORCCertificateImpl(certificateValues.getValue(NATCERTN_FILE_ID), searchString, boatName, boatclass, length,
-                gph, cdl, velocityPredictionsPerTrueWindSpeedAndAngle,
+                gph, cdl, issueDate, velocityPredictionsPerTrueWindSpeedAndAngle,
                 beatAngles, beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed,
                 runAngles, runVMGPredictionPerTrueWindSpeed,
                 runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,

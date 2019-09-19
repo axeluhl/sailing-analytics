@@ -10,6 +10,7 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
 //TODO Finish this comment.
@@ -58,6 +59,7 @@ public class ORCCertificateImpl implements ORCCertificate {
     private final Distance lengthOverAll;
     private final Duration gph;
     private final Double cdl;
+    private final TimePoint issueDate;
 
     // TODO add meaningful Javadoc
     private final Map<Speed, Map<Bearing, Speed>> velocityPredictionPerTrueWindSpeedAndAngle;
@@ -112,7 +114,7 @@ public class ORCCertificateImpl implements ORCCertificate {
 
     public ORCCertificateImpl(String idConsistingOfNatAuthCertNoAndBIN, String sailnumber, String boatName, String boatclass,
             Distance length, Duration gph,
-            Double cdl, Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle,
+            Double cdl, TimePoint issueDate,
             Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
             Map<Speed, Duration> beatAllowancePerTrueWindSpeed, Map<Speed, Bearing> runAngles,
             Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed,
@@ -128,6 +130,7 @@ public class ORCCertificateImpl implements ORCCertificate {
         this.lengthOverAll = length;
         this.gph = gph;
         this.cdl = cdl;
+        this.issueDate = issueDate;
         this.velocityPredictionPerTrueWindSpeedAndAngle = Collections
                 .unmodifiableMap(velocityPredictionsPerTrueWindSpeedAndAngle);
         this.beatAngles = Collections.unmodifiableMap(beatAngles);
@@ -237,7 +240,12 @@ public class ORCCertificateImpl implements ORCCertificate {
     }
     
     @Override
+    public TimePoint getIssueDate() {
+        return issueDate;
+    }
+    
+    @Override
     public String toString() {
-        return ""+getSailnumber()+" / "+getBoatName();
+        return ""+getSailnumber()+" / "+getBoatName() + " - Issued on: " + getIssueDate().asDate();
     }
 }

@@ -2,9 +2,12 @@ package com.sap.sailing.domain.orc.impl;
 
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.xml.bind.DatatypeConverter;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -16,7 +19,9 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.SecondsDurationImpl;
 
 /**
@@ -67,6 +72,7 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
         Distance length  = null;
         Duration gph     = null;
         Double cdl       = null;
+        TimePoint issueDate = null;
         Map<Speed, Bearing> beatAngles = new HashMap<>();
         Map<Speed, Bearing> gybeAngles = new HashMap<>();
         Map<Speed, Map<Bearing, Speed>> velocityPredictionPerTrueWindSpeedAndAngle = new HashMap<>();
@@ -106,6 +112,9 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                     break;
                 case "CDL":
                     cdl = ((Number) entry.getValue()).doubleValue();
+                case "IssueDate":
+                    Date date = DatatypeConverter.parseDateTime((String) entry.getValue()).getTime();
+                    issueDate = new MillisecondsTimePoint(date);
                 case "Allowances":
                     final JSONObject allowances = (JSONObject) object.get("Allowances");
                     for (final Object aKey : allowances.keySet()) {
@@ -190,7 +199,7 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                     .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(NON_SPINNAKER).get(tws)));
         }
         return new ORCCertificateImpl(natAuth+certNo+bin, searchString, boatName, boatclass, length,
-                gph, cdl, velocityPredictionPerTrueWindSpeedAndAngle,
+                gph, cdl, issueDate, velocityPredictionPerTrueWindSpeedAndAngle,
                 beatAngles, beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed,
                 gybeAngles, runVMGPredictionPerTrueWindSpeed,
                 runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,

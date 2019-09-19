@@ -7,6 +7,7 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
 
 /**
@@ -60,6 +61,11 @@ public interface ORCCertificate extends WithID, Serializable {
      * Returns the LOA (length over all) of the {@link Competitor} boat which this certificate belongs to.
      */
     public Distance getLengthOverAll();
+    
+    /**
+     * Returns the TimePoint when the certificate was issued by the national association. 
+     */
+    public TimePoint getIssueDate();
     
     /**
      * Returns a Map of speed predictions (in knots) for different wind speeds to use for a {@link ORCPerformanceCurve} rating
