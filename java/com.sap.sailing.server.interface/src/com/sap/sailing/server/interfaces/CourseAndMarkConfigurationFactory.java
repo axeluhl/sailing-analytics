@@ -54,15 +54,15 @@ public interface CourseAndMarkConfigurationFactory {
     void updateCourse(Course courseToUpdate, CourseTemplate courseTemplate, int numberOfLaps);
 
     /**
-     * {@link Course Courses} can optionally reference a {@link CourseTemplate} they were created from. This method can
+     * {@link CourseBase Courses} can optionally reference a {@link CourseTemplate} they were created from. This method can
      * be used to obtain the associated {@link CourseTemplate} for a given {@link Course}. Due to the fact that
-     * {@link CourseTemplate} can be deleted without updating the {@link Course}, references may be stale. In this case,
-     * the reference is handled equally to {@link Course Courses} without a reference.
+     * {@link CourseTemplate} can be deleted without updating the {@link CourseBase}, references may be stale. In this case,
+     * the reference is handled equally to {@link CourseBase Courses} without a reference.
      * 
-     * @return the {@link CourseTemplate} associated to the given {@link Course} or null if none is associated or a
+     * @return the {@link CourseTemplate} associated to the given {@link CourseBase} or null if none is associated or a
      *         reference could not be resolved.
      */
-    CourseTemplate resolveCourseTemplate(Course course);
+    CourseTemplate resolveCourseTemplate(CourseBase course);
 
     /**
      * If {@link MarkConfiguration#getOptionalMarkTemplate() markConfiguration.getOptionalMarkTemplate()} returns a
