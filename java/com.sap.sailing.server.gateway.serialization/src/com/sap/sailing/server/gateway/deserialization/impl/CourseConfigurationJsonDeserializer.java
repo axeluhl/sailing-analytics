@@ -14,7 +14,6 @@ import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseConfigurationJsonSerializer;
-//import com.sap.sailing.server.interfaces.coursetemplate.CourseConfigurationBuilder;
 
 public class CourseConfigurationJsonDeserializer implements JsonDeserializer<CourseConfiguration> {
 
@@ -31,7 +30,7 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
         final String courseConfigurationName = (String) json.get(CourseConfigurationJsonSerializer.FIELD_NAME);
         
         // TODO: how to get CourseConfigurationBuilder from com.sap.sailing.server.interfaces.coursetemplate (import leads in cyclic references???
-        //CourseConfigurationBuilder builder = new CourseConfigurationBuilder(sharedSailingData, null, null);
+        CourseConfigurationBuilder builder = new CourseConfigurationBuilder(sharedSailingData, null, null);
         
         final Map<Integer, MarkConfiguration> markConfigurations = new HashMap<Integer, MarkConfiguration>();
         final JSONArray allMarkConfigurationsJSON = (JSONArray) json.get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATIONS);
@@ -43,10 +42,10 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
             CommonMarkProperties commonMarkProperties = commonMarkPropertiesJsonDeserializer.deserialize(json);
             // TODO add optionalPositioning
             
-            //builder.addMarkConfiguration(UUID.fromString(markTemplateID), UUID.fromString(markPropertiesID), UUID.fromString(markID), commonMarkProperties, null);
+            builder.addMarkConfiguration(UUID.fromString(markTemplateID), UUID.fromString(markPropertiesID), UUID.fromString(markID), commonMarkProperties, null);
         }
         
-        return null; //builder.build();
+        return builder.build();
     }
 
 }
