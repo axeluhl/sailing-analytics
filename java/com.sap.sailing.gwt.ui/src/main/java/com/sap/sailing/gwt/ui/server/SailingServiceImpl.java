@@ -9397,7 +9397,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
             createdOrUpdatedMarkProperties = getSecurityService()
                     .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.MARK_PROPERTIES,
-                            MarkTemplate.getTypeRelativeObjectIdentifier(markProperties.getUuid()),
+                            MarkTemplate.getTypeRelativeObjectIdentifier(UUID.randomUUID()),
                             markProperties.getName(),
                             () -> getSharedSailingData()
                                     .createMarkProperties(convertDtoToCommonMarkProperties(markProperties.getUuid(),

@@ -248,6 +248,9 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     @Override
     public ControlPointWithTwoMarks createControlPointWithTwoMarks(Serializable id, Mark left, Mark right, String name,
             String shortName) {
+        if (shortName == null || shortName.isEmpty()) {
+            shortName = name;
+        }
         ControlPointWithTwoMarks result = new ControlPointWithTwoMarksImpl(id, left, right, name, shortName);
         controlPointWithTwoMarksCache.put(id, result);
         controlPointWithTwoMarksIdCache.put(id.toString(), id);
