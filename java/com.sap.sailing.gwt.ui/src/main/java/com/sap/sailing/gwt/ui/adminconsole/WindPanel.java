@@ -50,6 +50,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.WindImportConstants;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.RaceDTO;
@@ -89,10 +90,6 @@ import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
  *
  */
 public class WindPanel extends FormPanel implements RegattasDisplayer {
-
-    private static final String WIND_IMPORT_PARAMETER_RACES = "races";
-    private static final String EXPEDITON_IMPORT_PARAMETER_BOAT_ID = "boatId";
-    
     private static final String URL_SAILINGSERVER_EXPEDITION_IMPORT = "/../../sailingserver/expedition-import";
     private static final String URL_SAILINGSERVER_GRIB_IMPORT = "/../../sailingserver/grib-wind-import";
     private static final String URL_SAILINGSERVER_NMEA_IMPORT = "/../../sailingserver/nmea-wind-import";
@@ -447,7 +444,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer {
         if (multi) {
             fileUpload.getElement().setAttribute("multiple", "multiple");
         }
-        final Hidden hiddenRacesField = new Hidden(WIND_IMPORT_PARAMETER_RACES);
+        final Hidden hiddenRacesField = new Hidden(WindImportConstants.WIND_IMPORT_PARAMETER_RACES);
         formContentPanel.add(hiddenRacesField);
         formContentPanel.add(fileUpload);
         formContentPanel.add(submitButton);
@@ -462,8 +459,8 @@ public class WindPanel extends FormPanel implements RegattasDisplayer {
                         for (RaceDTO race : selectedRaces) {
                             RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
                             JSONObject raceEntry = new JSONObject();
-                            raceEntry.put("race", new JSONString(raceIdentifier.getRaceName()));
-                            raceEntry.put("regatta", new JSONString(raceIdentifier.getRegattaName()));
+                            raceEntry.put(WindImportConstants.WIND_IMPORT_PARAMETER_RACE_NAME, new JSONString(raceIdentifier.getRaceName()));
+                            raceEntry.put(WindImportConstants.WIND_IMPORT_PARAMETER_REGATTA_NAME, new JSONString(raceIdentifier.getRegattaName()));
                             raceSelection.set(raceSelection.size(), raceEntry);
                         }
                         hiddenRacesField.setValue(raceSelection.toString());
@@ -532,7 +529,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer {
         windImportContentPanel.add(importResultPanel);
 
         final TextBox boatIdTextBox = new TextBox();
-        boatIdTextBox.setName(EXPEDITON_IMPORT_PARAMETER_BOAT_ID);
+        boatIdTextBox.setName(WindImportConstants.EXPEDITON_IMPORT_PARAMETER_BOAT_ID);
         final Button submitButton = formAndFileUploadAndSubmitButton.getSubmitButton();
 
         final FileUpload fileUpload = formAndFileUploadAndSubmitButton.getFileUpload();

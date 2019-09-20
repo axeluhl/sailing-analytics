@@ -12,6 +12,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import com.sap.sailing.domain.common.orc.ORCCertificateSelection;
 import com.sap.sailing.domain.common.orc.ORCCertificateUploadConstants;
 import com.sap.sailing.server.gateway.deserialization.impl.ORCCertificateSelectionDeserializer;
 import com.sap.sailing.server.gateway.impl.AbstractFileUploadServlet;
@@ -37,6 +38,7 @@ public class ORCCertificateImportServlet extends AbstractFileUploadServlet {
         try {
             String regattaName = null;
             String raceName = null;
+            ORCCertificateSelection certificateSelection;
             List<Pair<String, FileItem>> files = new ArrayList<>();
             for (FileItem item : fileItems) {
                 if (!item.isFormField())
@@ -48,9 +50,8 @@ public class ORCCertificateImportServlet extends AbstractFileUploadServlet {
                         } else if (item.getFieldName().equals(ORCCertificateUploadConstants.RACE_NAME)) {
                             raceName = item.getString();
                         } else if (item.getFieldName().equals(ORCCertificateUploadConstants.CERTIFICATE_SELECTION)) {
-                            final Object certificateSelection = new ORCCertificateSelectionDeserializer()
+                            certificateSelection = new ORCCertificateSelectionDeserializer()
                                     .deserialize((JSONObject) new JSONParser().parse(item.getString()));
-                            // TODO continue with certificate selection processing here...
                         }
                     }
                 }

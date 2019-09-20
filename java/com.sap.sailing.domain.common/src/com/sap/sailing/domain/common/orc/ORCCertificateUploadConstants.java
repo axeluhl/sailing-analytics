@@ -11,4 +11,5 @@ public interface ORCCertificateUploadConstants {
     String RACE_NAME = "race_name";
     String BOAT_ID = "boat_id";
     String CERTIFICATE_SELECTION = "certificate_selection";
+    String CERTIFICATE_ID = "certificate_id";
 }
