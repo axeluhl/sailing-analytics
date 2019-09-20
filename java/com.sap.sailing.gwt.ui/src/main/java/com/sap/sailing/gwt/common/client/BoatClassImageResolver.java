@@ -132,6 +132,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.TECHNO_293.getDisplayName(), imageResources.Techno293Icon());
         boatClassIconsMap.put(BoatClassMasterdata.TECHNO_293_PLUS.getDisplayName(), imageResources.Techno293PlusIcon());
         boatClassIconsMap.put(BoatClassMasterdata.TEENY.getDisplayName(), imageResources.TeenyIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.TEMPEST.getDisplayName(), imageResources.TempestIcon());
         boatClassIconsMap.put(BoatClassMasterdata.TORNADO.getDisplayName(), imageResources.TornadoIcon());
         boatClassIconsMap.put(BoatClassMasterdata.TOM_28_MAX.getDisplayName(), imageResources.Tom28MaxIcon());
         boatClassIconsMap.put(BoatClassMasterdata.TP52.getDisplayName(), imageResources.TP52Icon());

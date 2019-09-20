@@ -119,6 +119,7 @@ public enum BoatClassMasterdata {
     TECHNO_293 ("Techno 293", true, 2.93, 0.79, BoatHullType.SURFERBOARD, false, "Techno-293", "Bic Techno 293", "Bic Techno-293", "Bic-Techno-293"),
     TECHNO_293_PLUS ("Techno 293 Plus", true, 2.93, 0.79, BoatHullType.SURFERBOARD, false, "Techno-293-Plus", "Techno 293+", "Bic Techno-293-Plus", "Bic Techno 293+", "Bic Techno 293 Plus"),
     TEENY ("Teeny", true, 3.15, 1.37, BoatHullType.MONOHULL, true),
+    TEMPEST ("Tempest", true, 6.66, 1.92, BoatHullType.MONOHULL, true),
     TORNADO ("Tornado Catamaran", true, 6.10, 3.02, BoatHullType.CATAMARAN, true, "Tornado", "Tornado Cat"),
     TOM_28_MAX ("Tom 28 MAX", true, 8.48, 2.48, BoatHullType.MONOHULL, true, "Tom 28"),
     TRIAS ("Trias", true, 9.20, 2.12, BoatHullType.MONOHULL, true),
