@@ -55,7 +55,7 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata.TOM_28_MAX, BoatClassMasterdata.DELPHIA_24, BoatClassMasterdata.RS200,
                 BoatClassMasterdata.RS400, BoatClassMasterdata.RS500, BoatClassMasterdata.RS800,
                 BoatClassMasterdata.SK_22, BoatClassMasterdata.STREAMLINE, BoatClassMasterdata.SWAN_45,
-                BoatClassMasterdata.TEENY, BoatClassMasterdata.X_99, BoatClassMasterdata.TRIAS,
+                BoatClassMasterdata.TEENY, BoatClassMasterdata.TEMPEST, BoatClassMasterdata.X_99, BoatClassMasterdata.TRIAS,
                 BoatClassMasterdata.VENT_D_OUEST, BoatClassMasterdata.FLYING_JUNIOR, BoatClassMasterdata.VAURIEN,
                 BoatClassMasterdata.VARIANTA);
         BoatClassVectorGraphics circle = new CircleVectorGraphics(BoatClassMasterdata.RUNNING);

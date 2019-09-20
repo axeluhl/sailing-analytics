@@ -356,6 +356,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource TeenyIcon();
     
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/TEMPEST.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource TempestIcon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/TORNADO.png")
     @ImageOptions(preventInlining = true)
     ImageResource TornadoIcon();
