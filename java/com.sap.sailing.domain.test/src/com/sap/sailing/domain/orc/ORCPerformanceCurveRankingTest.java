@@ -199,26 +199,27 @@ public class ORCPerformanceCurveRankingTest extends OnlineTracTracBasedTest {
         final SecondsDurationImpl scratchBoatDuration = new SecondsDurationImpl(14*3600 + 44*60 + 45);
         final Competitor winner = getCompetitor("Air is blue");
         final Duration winnerCorrectedTime = rankingMetric.getCorrectedTime(winner, MillisecondsTimePoint.now());
+        assertEquals(getTrackedRace().getTimeSailedSinceRaceStart(winner, MillisecondsTimePoint.now()).asSeconds(), winnerCorrectedTime.asSeconds(), 0.00001);
         assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Air is blue", 0, 0, 0);
         assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "XIO", 0, 9, 49);
         assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Generali (Assilina I", 0, 59, 13);
         assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Altair 3", 1, 17, 2);
         assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Synergy", 1, 19, 46);
-        assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Ex Officio", 2, 34, 49);
+        assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Ex Officio", 2, 35, 49);
         assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Luduan reloaded", 3, 11, 6);
         assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "WB Seven", 3, 27, 53);
         assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Maestro", 3, 29, 32);
         assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "IRONFX", 3, 33, 20);
         assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Dubrovnik", 4, 8, 36);
         assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Brava", 4, 14, 41);
-        assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Alemaro", 6,28, 31);
+        assertCorrectedTimeAtEnd(scratchBoatDuration, winnerCorrectedTime, "Alemaro", 6, 28, 31);
     }
     
     private void assertCorrectedTimeAtEnd(Duration scratchBoatDuration, Duration winnerCorrectedTime, String boatName, int hours, int minutes, int seconds) {
         final Duration expectedCorrectedTime = winnerCorrectedTime.plus(new SecondsDurationImpl(3600*hours+60*minutes+seconds));
         final Duration correctedTimeForNamedBoat = rankingMetric.getCorrectedTime(getCompetitor(boatName), MillisecondsTimePoint.now());
         assertEquals("Expected corrected time "+expectedCorrectedTime+" but got "+correctedTimeForNamedBoat+" for "+boatName,
-                expectedCorrectedTime.asSeconds(), correctedTimeForNamedBoat.asSeconds(), 1.5);
+                expectedCorrectedTime.asSeconds(), correctedTimeForNamedBoat.asSeconds(), 0.7);
     }
     
     private Competitor getCompetitor(String boatName) {
