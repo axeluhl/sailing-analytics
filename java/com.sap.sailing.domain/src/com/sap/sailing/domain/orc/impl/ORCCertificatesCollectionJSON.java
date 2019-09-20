@@ -112,9 +112,11 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                     break;
                 case "CDL":
                     cdl = ((Number) entry.getValue()).doubleValue();
+                    break;
                 case "IssueDate":
                     Date date = DatatypeConverter.parseDateTime((String) entry.getValue()).getTime();
                     issueDate = new MillisecondsTimePoint(date);
+                    break;
                 case "Allowances":
                     final JSONObject allowances = (JSONObject) object.get("Allowances");
                     for (final Object aKey : allowances.keySet()) {
