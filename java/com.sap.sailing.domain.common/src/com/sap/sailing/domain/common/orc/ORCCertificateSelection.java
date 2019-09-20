@@ -7,7 +7,8 @@ package com.sap.sailing.domain.common.orc;
  * <p>
  * 
  * Once provided from a document source, the zero or more certificates extracted from that source may be used to assign
- * certificates to boats. The boats are identified by their ID, and no more than one ID must be provided per boat ID.
+ * certificates to boats. The boats are identified by their ID, and no more than one {@link ORCCertificate#getId()
+ * certificate ID} must be provided per boat ID.
  * <p>
  * 
  * The certificates within the documents are identified by the {@code RefNo} field in case of a JSON document, or the
