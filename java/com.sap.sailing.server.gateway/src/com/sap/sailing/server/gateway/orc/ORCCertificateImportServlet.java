@@ -225,15 +225,26 @@ public class ORCCertificateImportServlet extends AbstractFileUploadServlet {
     private <LogT extends AbstractLog<LogEventT, VisitorT>, VisitorT, LogEventT extends AbstractLogEvent<VisitorT>> void createCertificateAssignments(
             LogT logToAddTo, LogEventConstructor<LogEventT, VisitorT> logEventConstructor,
             ORCCertificateSelection certificateSelection, Map<String, ORCCertificate> certificates,
-            HttpServletResponse resp) {
+            HttpServletResponse resp) throws IOException {
         final TimePoint now = MillisecondsTimePoint.now();
         final CompetitorAndBoatStore boatStore = getService().getCompetitorAndBoatStore();
         final AbstractLogEventAuthor serverAuthor = getService().getServerAuthor();
         for (final Entry<Serializable, String> mapping : certificateSelection.getCertificateIdsForBoatIds()) {
-            final LogEventT assignment = logEventConstructor.create(
-                    now, now, serverAuthor, UUID.randomUUID(), certificates.get(mapping.getValue()),
-                    boatStore.getExistingBoatById(mapping.getKey()));
-            logToAddTo.add(assignment);
+            final Boat boat = boatStore.getExistingBoatById(mapping.getKey());
+            if (boat == null) {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Couldn't find the boat with ID "+mapping.getKey());
+            } else {
+                final ORCCertificate certificate = certificates.get(mapping.getValue());
+                if (certificate == null) {
+                    resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Couldn't find the certificate with ID "+mapping.getValue()+
+                            " in the set of certificates provided: "+certificates.keySet());
+                } else {
+                    final LogEventT assignment = logEventConstructor.create(
+                            now, now, serverAuthor, UUID.randomUUID(), certificate,
+                            boat);
+                    logToAddTo.add(assignment);
+                }
+            }
         }
     }
 

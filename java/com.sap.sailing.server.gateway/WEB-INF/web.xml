@@ -102,14 +102,14 @@
 		<servlet-name>RCCompetitors</servlet-name>
 		<url-pattern>/rc/competitors</url-pattern>
 	</servlet-mapping>
-    <servlet>
-        <servlet-name>RCCompetitorsAndBoats</servlet-name>
-        <servlet-class>com.sap.sailing.server.gateway.impl.rc.CompetitorsAndBoatsJsonExportServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>RCCompetitorsAndBoats</servlet-name>
-        <url-pattern>/rc/competitorsAndBoats</url-pattern>
-    </servlet-mapping> 	
+        <servlet>
+            <servlet-name>RCCompetitorsAndBoats</servlet-name>
+            <servlet-class>com.sap.sailing.server.gateway.impl.rc.CompetitorsAndBoatsJsonExportServlet</servlet-class>
+        </servlet>
+        <servlet-mapping>
+            <servlet-name>RCCompetitorsAndBoats</servlet-name>
+            <url-pattern>/rc/competitorsAndBoats</url-pattern>
+        </servlet-mapping> 	
 	<!-- RACE COMMITTEE END -->
 	<servlet>
 		<servlet-name>ExpeditionThroughHttpPostServlet</servlet-name>
@@ -213,6 +213,14 @@
 		<servlet-name>FileUploadServlet</servlet-name>
 		<url-pattern>/fileupload</url-pattern>
 	</servlet-mapping>
+        <servlet>
+                <servlet-name>ORCCertificateImportServlet</servlet-name>
+                <servlet-class>com.sap.sailing.server.gateway.orc.ORCCertificateImportServlet</servlet-class>
+        </servlet>
+        <servlet-mapping>
+                <servlet-name>ORCCertificateImportServlet</servlet-name>
+                <url-pattern>/orc-certificate-import</url-pattern>
+        </servlet-mapping>
 	
     <servlet>
     	<servlet-name>Jersey REST API</servlet-name>
