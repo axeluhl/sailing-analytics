@@ -44,6 +44,7 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
     private static final String LONG_DISTANCE = "OC";
     private static final String CIRCULAR_RANDOM = "CR";
     private static final String NON_SPINNAKER = "NS";
+    private static final String EMPTY_CERT_NO = "      ";
 
     /**
      * Receives an {@link InputStream} from different possible sources (web, local file, ...) and does parse the
@@ -96,7 +97,7 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                     bin = entry.getValue().toString();
                     break;
                 case "CertNo":
-                    certNo = entry.getValue().toString();
+                    certNo = entry.getValue() == null ? EMPTY_CERT_NO : entry.getValue().toString();
                     break;
                 case "LOA":
                     length = new MeterDistance(((Number) entry.getValue()).doubleValue());
