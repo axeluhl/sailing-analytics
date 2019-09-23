@@ -11,6 +11,7 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
 //TODO Finish this comment.
@@ -248,6 +249,7 @@ public class ORCCertificateImpl implements ORCCertificate {
     
     @Override
     public String toString() {
-        return ""+getSailnumber()+" / "+getBoatName() + " - Issued on: " + getIssueDate().asDate();
+        return "ID \""+getId()+"\" for "+getSailnumber()+" / "+getBoatName() + " - Issued on: " + getIssueDate().asDate()+" with GPH "+
+                Util.padPositiveValue(getGPH(), 1, 1, /* round */ true);
     }
 }
