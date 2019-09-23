@@ -7,8 +7,11 @@ package com.sap.sailing.domain.common.orc;
  *
  */
 public interface ORCCertificateUploadConstants {
-    String REGATTA_NAME = "regatta_name";
-    String RACE_NAME = "race_name";
+    String REGATTA = "regatta";
+    String RACE = "race";
+    String LEADERBOARD = "leaderboard";
+    String RACE_COLUMN = "race_column";
+    String FLEET = "fleet";
     String BOAT_ID = "boat_id";
     String CERTIFICATE_SELECTION = "certificate_selection";
     String CERTIFICATE_ID = "certificate_id";
