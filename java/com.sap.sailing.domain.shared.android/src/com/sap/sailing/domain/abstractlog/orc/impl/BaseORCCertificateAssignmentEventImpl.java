@@ -38,4 +38,9 @@ public abstract class BaseORCCertificateAssignmentEventImpl<VisitorT> extends Ab
     public Serializable getBoatId() {
         return boatId;
     }
+
+    @Override
+    public String getShortInfo() {
+        return "Certificate "+getCertificate()+" for boat with ID "+getBoatId();
+    }
 }
