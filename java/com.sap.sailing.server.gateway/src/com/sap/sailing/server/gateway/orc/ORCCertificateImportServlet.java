@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.orc;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 /**
  * Servlet that processes uploaded ORC boat certificate files, can download certificates from URLs and can link
@@ -60,6 +62,11 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
  * linking of certificates to boats within the selected context (regatta / race) happens by identifying the certificate
  * by identifying the upload or download resource and within it the sail number, and by providing the boat ID to which
  * to link the certificate.
+ * <p>
+ * 
+ * Instead of or in addition to uploading certificate files, such documents can also be referenced as URLs by providing
+ * zero or more {@link ORCCertificateUploadConstants#CERTIFICATE_URLS} parameters that hold (obviously URL-encoded) URLs
+ * pointing to certificate documents in RMS or JSON format.
  * <p>
  * 
  * The context in which to assign the certificates can either be a {@link RegattaLog} or a {@link RaceLog}. The
@@ -99,6 +106,8 @@ public class ORCCertificateImportServlet extends AbstractFileUploadServlet {
                             raceColumnName = item.getString();
                         } else if (item.getFieldName().equals(ORCCertificateUploadConstants.FLEET)) {
                             fleetName = item.getString();
+                        } else if (item.getFieldName().equals(ORCCertificateUploadConstants.CERTIFICATE_URLS)) {
+                            certificates.putAll(parseCertificatesFromUrl(item.getString()));
                         } else if (item.getFieldName().equals(ORCCertificateUploadConstants.CERTIFICATE_SELECTION)) {
                             certificateSelection = new ORCCertificateSelectionDeserializer()
                                     .deserialize((JSONObject) new JSONParser().parse(item.getString()));
@@ -137,6 +146,16 @@ public class ORCCertificateImportServlet extends AbstractFileUploadServlet {
         } finally {
             resp.setContentType("text/html;charset=UTF-8");
         }
+    }
+
+    private Map<? extends String, ? extends ORCCertificate> parseCertificatesFromUrl(String urlAsString) throws IOException, ParseException {
+        final URL url = new URL(urlAsString);
+        final ORCCertificatesCollection certificates = ORCCertificatesImporter.INSTANCE.read(HttpUrlConnectionHelper.redirectConnection(url).getInputStream());
+        final Map<String, ORCCertificate> result = new HashMap<>();
+        for (final ORCCertificate certificate : certificates.getCertificates()) {
+            result.put(certificate.getId(), certificate);
+        }
+        return result;
     }
 
     private void createCertificateAssignmentsForLeaderboard(String leaderboardName,
