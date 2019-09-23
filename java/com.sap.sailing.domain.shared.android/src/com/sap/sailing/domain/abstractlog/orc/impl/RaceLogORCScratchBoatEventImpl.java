@@ -49,4 +49,9 @@ public class RaceLogORCScratchBoatEventImpl extends AbstractLogEventImpl<RaceLog
     public Serializable getCompetitorId() {
         return competitorId;
     }
+
+    @Override
+    public String getShortInfo() {
+        return "Setting scratch boat to competitor with ID "+getCompetitorId();
+    }
 }
