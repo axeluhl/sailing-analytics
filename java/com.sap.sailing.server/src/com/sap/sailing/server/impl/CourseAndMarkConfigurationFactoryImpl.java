@@ -1,6 +1,7 @@
 package com.sap.sailing.server.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -9,8 +10,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -36,9 +37,12 @@ import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkPairTemplate;
+import com.sap.sailing.domain.coursetemplate.MarkPairTemplate.MarkPairTemplateFactory;
+import com.sap.sailing.domain.coursetemplate.MarkPairWithConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
@@ -48,6 +52,7 @@ import com.sap.sailing.domain.coursetemplate.impl.MarkPairWithConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesBasedMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateBasedMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.RegattaMarkConfigurationImpl;
+import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointWithMarkConfigurationImpl;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -95,8 +100,83 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     @Override
     public CourseConfiguration createCourseTemplateAndUpdatedConfiguration(String name,
             CourseConfiguration courseWithMarkConfiguration) {
-        // TODO Auto-generated method stub
-        return null;
+        final Map<MarkConfiguration, MarkTemplate> markTemplatesByMarkConfigurations = new HashMap<>();
+        final Map<MarkConfiguration, MarkTemplateBasedMarkConfiguration> marksConfigurationsMapping = new HashMap<>();
+        for (MarkConfiguration markConfiguration : courseWithMarkConfiguration.getAllMarks()) {
+            final MarkTemplateBasedMarkConfiguration effectiveConfiguration;
+            if (markConfiguration instanceof MarkTemplateBasedMarkConfiguration) {
+                effectiveConfiguration = (MarkTemplateBasedMarkConfiguration) markConfiguration;
+            } else {
+                final MarkTemplate effectiveMarkTemplate = sharedSailingData.createMarkTemplate(markConfiguration.getEffectiveProperties());
+                effectiveConfiguration = new MarkTemplateBasedMarkConfigurationImpl(effectiveMarkTemplate, markConfiguration.getOptionalPositioning());
+                final MarkProperties markPropertiesOrNull;
+                if (markConfiguration instanceof RegattaMarkConfiguration) {
+                    final UUID markPropertiesIdOrNull = ((RegattaMarkConfiguration) markConfiguration).getMark().getOriginatingMarkPropertiesIdOrNull();
+                    // TODO this call may fail but should not
+                    // Discuss if in case a user can't read the referenced MarkProperties it should be ignored
+                    markPropertiesOrNull = markPropertiesIdOrNull == null ? null : sharedSailingData.getMarkPropertiesById(markPropertiesIdOrNull);
+                } else if (markConfiguration instanceof MarkPropertiesBasedMarkConfiguration) {
+                    markPropertiesOrNull = ((MarkPropertiesBasedMarkConfiguration) markConfiguration).getMarkProperties();
+                } else if (markConfiguration instanceof FreestyleMarkConfiguration) {
+                    markPropertiesOrNull = ((FreestyleMarkConfiguration) markConfiguration).getOptionalMarkProperties();
+                } else {
+                    // Should never happen but could in case a new MarkConfiguration type is defined
+                    throw new IllegalStateException("Unknown mark configuration type found");
+                }
+                if (markPropertiesOrNull != null) {
+                    sharedSailingData.recordUsage(effectiveMarkTemplate, markPropertiesOrNull);
+                }
+            }
+            markTemplatesByMarkConfigurations.put(markConfiguration, effectiveConfiguration.getOptionalMarkTemplate());
+            marksConfigurationsMapping.put(markConfiguration, effectiveConfiguration);
+        }
+
+        final Map<MarkConfiguration, String> associatedRolesInConfiguration = new HashMap<>();
+        final Map<MarkTemplate, String> associatedRolesInTemplate = new HashMap<>();
+        final List<WaypointTemplate> waypointTemplates = new ArrayList<>();
+        final List<WaypointWithMarkConfiguration> effectiveWaypoints = new ArrayList<>();
+        final MarkPairTemplateFactory markPairTemplateFactory = new MarkPairTemplateFactory();
+        final Function<MarkConfiguration, MarkTemplateBasedMarkConfiguration> markConfigurationMapper = mc -> {
+            final MarkTemplateBasedMarkConfiguration result = marksConfigurationsMapping.get(mc);
+            String roleName = courseWithMarkConfiguration.getAssociatedRoles().get(mc);
+            if (roleName == null) {
+                // ensure a defined role name for any MarkTemplate used in the CourseTemplate
+                roleName = result.getEffectiveProperties().getShortName();
+            }
+            associatedRolesInConfiguration.put(result, roleName);
+            associatedRolesInTemplate.put(result.getOptionalMarkTemplate(), roleName);
+            return result;
+        };
+        for (WaypointWithMarkConfiguration waypointWithMarkConfiguration : courseWithMarkConfiguration.getWaypoints()) {
+            final ControlPointWithMarkConfiguration controlPoint = waypointWithMarkConfiguration.getControlPoint();
+            final ControlPointWithMarkConfiguration effectiveControlPointConfiguration;
+            final ControlPointTemplate effectiveControlPointTemplate;
+            if (controlPoint instanceof MarkConfiguration) {
+                effectiveControlPointConfiguration = markConfigurationMapper.apply((MarkConfiguration)controlPoint);
+                effectiveControlPointTemplate = markTemplatesByMarkConfigurations.get(controlPoint);
+            } else {
+                final MarkPairWithConfiguration markPairTemplate = (MarkPairWithConfiguration) controlPoint;
+                final MarkConfiguration leftConfiguration = markConfigurationMapper.apply(markPairTemplate.getLeft());
+                final MarkTemplate leftTemplate = markTemplatesByMarkConfigurations.get(markPairTemplate.getLeft());
+                final MarkConfiguration rightConfiguration = markConfigurationMapper.apply(markPairTemplate.getRight());
+                final MarkTemplate rightTemplate = markTemplatesByMarkConfigurations.get(markPairTemplate.getRight());
+                // TODO reuse MarkPairWithConfigurationImpl
+                // TODO add shortName
+                effectiveControlPointConfiguration = new MarkPairWithConfigurationImpl(markPairTemplate.getName(), leftConfiguration, rightConfiguration);
+                effectiveControlPointTemplate = markPairTemplateFactory.create(markPairTemplate.getName(), /* TODO shortName */ null, leftTemplate, rightTemplate);
+            }
+            waypointTemplates.add(new WaypointTemplateImpl(effectiveControlPointTemplate, waypointWithMarkConfiguration.getPassingInstruction()));
+            effectiveWaypoints.add(new WaypointWithMarkConfigurationImpl(effectiveControlPointConfiguration, waypointWithMarkConfiguration.getPassingInstruction()));
+            // TODO create new role associations
+            // TODO define CourseTemplate based on marksByMarkConfigurations
+            // TODO construct resulting CourseConfiguration based on marksConfigurationsMapping
+        }
+        final CourseTemplate newCourseTemplate = sharedSailingData.createCourseTemplate(name, new HashSet<>(markTemplatesByMarkConfigurations.values()),
+                waypointTemplates, associatedRolesInTemplate, courseWithMarkConfiguration.getRepeatablePart(),
+                /* TODO tags */ Collections.emptySet(), /* TODO optionalImageURL */ null);
+        return new CourseConfigurationImpl(newCourseTemplate, new HashSet<>(marksConfigurationsMapping.values()),
+                associatedRolesInConfiguration, effectiveWaypoints, courseWithMarkConfiguration.getRepeatablePart(),
+                courseWithMarkConfiguration.getNumberOfLaps());
     }
 
     @Override
@@ -220,9 +300,10 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 // determine matching MarkProperties to associate
                 if (suggestedMappings.containsKey(markTemplate)) {
                     MarkProperties mappedProperties = suggestedMappings.get(markTemplate);
+                    // TODO specify positioning if available
                     markConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(mappedProperties, null);
                 } else {
-                    markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(markTemplate);
+                    markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(markTemplate, null);
                 }
                 allMarkConfigurations.add(markConfiguration);
                 return markConfiguration;
@@ -372,7 +453,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                                 markConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(mappedProperties,
                                         null);
                             } else {
-                                markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(markTemplate);
+                                markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(markTemplate, null);
                             }
 
                             allMarkConfigurations.add(markConfiguration);

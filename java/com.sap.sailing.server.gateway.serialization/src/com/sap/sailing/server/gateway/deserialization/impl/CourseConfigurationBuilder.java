@@ -87,7 +87,7 @@ public class CourseConfigurationBuilder {
         if (resolvedMarkTemplate == null) {
             throw new IllegalStateException("Mark template with ID " + markTemplateID + " could not be resolved");
         }
-        return new MarkTemplateBasedMarkConfigurationImpl(resolvedMarkTemplate);
+        return new MarkTemplateBasedMarkConfigurationImpl(resolvedMarkTemplate, /* optionalPositioning */ null);
     }
 
     /**

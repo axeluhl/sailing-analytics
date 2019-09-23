@@ -103,6 +103,7 @@ public interface CourseAndMarkConfigurationFactory {
      *            the name of the new course template; returned by calling
      *            {@link CourseConfiguration#getOptionalCourseTemplate()
      *            getOptionalCourseTemplate()}.{@link CourseTemplate#getName() getName()} on the result of this method.
+     * @param optionalRegatta TODO
      * @return a course with its mark configurations and a {@link CourseTemplate} returned by
      *         {@link CourseConfiguration#getOptionalCourseTemplate()} that is always valid, never {@code null}. All
      *         {@link MarkConfiguration} objects in the result all have a valid
