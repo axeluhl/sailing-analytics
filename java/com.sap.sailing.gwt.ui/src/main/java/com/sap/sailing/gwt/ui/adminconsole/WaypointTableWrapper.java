@@ -15,7 +15,6 @@ public class WaypointTableWrapper<S extends RefreshableSelectionModel<WaypointDT
             ErrorReporter errorReporter) {
         super(sailingService, stringMessages, errorReporter, multiSelection, true,
                 /* use equals/hashCode of WaypointDTO which maps to identity */ null);
-        
         TextColumn<WaypointDTO> nameColumn = new TextColumn<WaypointDTO>() {
             @Override
             public String getValue(WaypointDTO d) {
@@ -23,7 +22,6 @@ public class WaypointTableWrapper<S extends RefreshableSelectionModel<WaypointDT
             }
         };
         table.addColumn(nameColumn, stringMessages.controlPoint());
-        
         TextColumn<WaypointDTO> typeColumn = new TextColumn<WaypointDTO>() {
             @Override
             public String getValue(WaypointDTO w) {
@@ -38,7 +36,6 @@ public class WaypointTableWrapper<S extends RefreshableSelectionModel<WaypointDT
             }
         };
         table.addColumn(typeColumn, stringMessages.type());
-        
         TextColumn<WaypointDTO> passingInstructionsColumn = new TextColumn<WaypointDTO>() {
             @Override
             public String getValue(WaypointDTO waypoint) {

@@ -118,4 +118,7 @@ interface AdminConsoleResources extends ClientBundle {
     
     @Source("com/sap/sailing/gwt/ui/client/images/transparent.gif")
     ImageResource transparentGif();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/orc_pcs_leg.png")
+    ImageResource orcPcsDefineLegIcon();
 }

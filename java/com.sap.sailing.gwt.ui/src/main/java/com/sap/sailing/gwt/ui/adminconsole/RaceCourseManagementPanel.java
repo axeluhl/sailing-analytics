@@ -33,7 +33,6 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             RegattaRefresher regattaRefresher, final StringMessages stringMessages, final UserService userService) {
         super(sailingService, userService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ false,
                 stringMessages);
-        
         courseManagementWidget = new CourseManagementWidget(sailingService, errorReporter, stringMessages,
                 userService) {
             @Override
@@ -76,12 +75,9 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 }
             }
         };
-        
         FlowPanel courseManagementPanel = new FlowPanel();
         courseManagementPanel.add(courseManagementWidget);
-
         HorizontalPanel buttonsPanel = new HorizontalPanel();
-
         Button refreshBtn = new Button(stringMessages.refresh());
         refreshBtn.addClickHandler(new ClickHandler() {
                 @Override
@@ -89,9 +85,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                     courseManagementWidget.refresh();
                 }
         });
-        
         buttonsPanel.add(refreshBtn);
-        
         Button saveBtn = new Button(stringMessages.save());
         saveBtn.addClickHandler(new ClickHandler() {
                 @Override
@@ -99,11 +93,9 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                     courseManagementWidget.save();
                 }
             });
-        
         trackedRacesListComposite.getSelectionModel().addSelectionChangeHandler(h -> {
             saveBtn.setVisible(userService.hasPermission(selectedRaceDTO, DefaultActions.UPDATE));
         });
-
         buttonsPanel.add(saveBtn);
         this.selectedRaceContentPanel.add(courseManagementWidget);
         this.selectedRaceContentPanel.add(buttonsPanel);

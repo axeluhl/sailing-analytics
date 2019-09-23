@@ -2268,4 +2268,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String gateOpeningTime();
     String protestTimeInMinutes();
     String updateCertificates();
+    String actionDefineLegForOrcPcs();
 }

@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SetSelectionModel;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.adminconsole.WaypointCreationDialog.DefaultPassingInstructionProvider;
@@ -44,31 +45,24 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
-import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 
 public abstract class CourseManagementWidget implements IsWidget {
     protected final MarkTableWrapper<RefreshableMultiSelectionModel<MarkDTO>> marks;
     protected final ControlPointTableWrapper<RefreshableSingleSelectionModel<ControlPointDTO>> multiMarkControlPoints;
     protected final WaypointTableWrapper<RefreshableSingleSelectionModel<WaypointDTO>> waypoints;
-    
     protected final Grid mainPanel;
-    
     protected final SailingServiceAsync sailingService;
     protected final ErrorReporter errorReporter;
     protected final StringMessages stringMessages;
-    
     protected final HorizontalPanel waypointsBtnsPanel;
     protected final HorizontalPanel controlPointsBtnsPanel;
     protected final HorizontalPanel marksBtnsPanel;
-    
     protected final Button insertWaypointBefore;
     protected final Button insertWaypointAfter;
     protected final Button addControlPoint;
     private PassingInstruction lastSingleMarkPassingInstruction = PassingInstruction.Port; // the usual default
-    
     protected final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     private final UserService userService;
-    
     private SecuredDTO securedDtoForWaypointsPermissionCheck;
 
     @Override
@@ -82,25 +76,21 @@ public abstract class CourseManagementWidget implements IsWidget {
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.userService = userService;
-        
         mainPanel = new Grid(2, 3);
         mainPanel.setCellPadding(5);
         mainPanel.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
-        
         waypoints = new WaypointTableWrapper<RefreshableSingleSelectionModel<WaypointDTO>>(
                 /* multiSelection */ false, sailingService, stringMessages, errorReporter);
         multiMarkControlPoints = new ControlPointTableWrapper<RefreshableSingleSelectionModel<ControlPointDTO>>(
                 /* multiSelection */ false, sailingService, stringMessages, errorReporter);
         marks = new MarkTableWrapper<RefreshableMultiSelectionModel<MarkDTO>>(
                 /* multiSelection */ true, sailingService, stringMessages, errorReporter);
-        
         marks.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 markSelectionChanged();
             }
         });
-        
         CaptionPanel waypointsPanel = new CaptionPanel(stringMessages.waypoints());
         CaptionPanel controlPointsPanel = new CaptionPanel(stringMessages.twoMarkControlPoint());
         CaptionPanel marksPanel = new CaptionPanel(stringMessages.mark());
@@ -110,24 +100,22 @@ public abstract class CourseManagementWidget implements IsWidget {
         mainPanel.setWidget(0, 0, waypointsPanel);
         mainPanel.setWidget(0, 1, controlPointsPanel);
         mainPanel.setWidget(0, 2, marksPanel);
-        
         waypointsBtnsPanel = new HorizontalPanel();
         controlPointsBtnsPanel = new HorizontalPanel();
         marksBtnsPanel = new HorizontalPanel();
         mainPanel.setWidget(1, 0, waypointsBtnsPanel);
         mainPanel.setWidget(1, 1, controlPointsBtnsPanel);
         mainPanel.setWidget(1, 2, marksBtnsPanel);
-        
-        final AccessControlledActionsColumn<WaypointDTO, DefaultActionsImagesBarCell> waypointsActionColumn = create(
-                new DefaultActionsImagesBarCell(stringMessages), userService,
+        final AccessControlledActionsColumn<WaypointDTO, WaypointImagesBarCell> waypointsActionColumn = create(
+                new WaypointImagesBarCell(stringMessages), userService,
                 s -> securedDtoForWaypointsPermissionCheck);
-
-        // update permission for tracked race is required for deleting waypoints
+        // update permission for tracked race is required for deleting waypoints...
         waypointsActionColumn.addAction(DefaultActions.DELETE.name(), DefaultActions.UPDATE,
                 waypoint -> removeWaypoint(waypoint));
-
+        // ...as well as for setting any ORC PCS-related leg details:
+        waypointsActionColumn.addAction(WaypointImagesBarCell.ACTION_ORC_PCS_DEFINE_LEG, DefaultActions.UPDATE,
+                waypoint -> createOrcPcsLegEventForLegEndingAt(waypoint));
         waypoints.getTable().addColumn(waypointsActionColumn);
-        
         waypoints.getSelectionModel().addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -139,7 +127,6 @@ public abstract class CourseManagementWidget implements IsWidget {
                 updateWaypointButtons();
             }
         });
-        
         multiMarkControlPoints.getSelectionModel().addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -149,7 +136,6 @@ public abstract class CourseManagementWidget implements IsWidget {
                 }
             }
         });
-        
         insertWaypointBefore = new Button(stringMessages.insertWaypointBeforeSelected());
         insertWaypointBefore.addClickHandler(new ClickHandler() {
             @Override
@@ -168,7 +154,6 @@ public abstract class CourseManagementWidget implements IsWidget {
         });
         insertWaypointAfter.setEnabled(false);
         waypointsBtnsPanel.add(insertWaypointAfter);
-        
         addControlPoint = new Button(stringMessages.add(stringMessages.twoMarkControlPoint()));
         addControlPoint.addClickHandler(new ClickHandler() {
             @Override
@@ -179,6 +164,16 @@ public abstract class CourseManagementWidget implements IsWidget {
         controlPointsBtnsPanel.add(addControlPoint);
     }
     
+    /**
+     * Shows a dialog that allows the user to enter the details for a {@link RaceLogORCLegDataEvent}
+     * for the leg ending at {@code waypoint}.
+     * 
+     * TODO decide where to put the result; I suggest storing it temporarily in the result of this dialog and creating the RaceLogEvent(s) only once the dialog result is saved to the server
+     */
+    private void createOrcPcsLegEventForLegEndingAt(WaypointDTO waypoint) {
+        // TODO Auto-generated method stub
+    }
+
     protected void markSelectionChanged() {
     }
 
@@ -297,16 +292,16 @@ public abstract class CourseManagementWidget implements IsWidget {
 
                     @Override
                     public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
-                        updateWaypointsAndContorlPoints(raceCourseDTO, result);
+                        updateWaypointsAndControlPointsForSecuredObject(raceCourseDTO, result);
                     }
                 });
     }
 
     protected void updateWaypointsAndControlPoints(RaceCourseDTO raceCourseDTO, RaceDTO raceDTO) {
-        updateWaypointsAndContorlPoints(raceCourseDTO, raceDTO);
+        updateWaypointsAndControlPointsForSecuredObject(raceCourseDTO, raceDTO);
     }
 
-    private void updateWaypointsAndContorlPoints(RaceCourseDTO raceCourseDTO, SecuredDTO securedDTO) {
+    private void updateWaypointsAndControlPointsForSecuredObject(RaceCourseDTO raceCourseDTO, SecuredDTO securedDTO) {
         securedDtoForWaypointsPermissionCheck = securedDTO;
         waypoints.getDataProvider().getList().clear();
         multiMarkControlPoints.getDataProvider().getList().clear();

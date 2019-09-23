@@ -87,6 +87,7 @@ public class RaceLogTrackingCourseDefinitionDialog extends
         hp.add(priorityBox);
         return panel;
     }
+    
     @Override
     protected Result getResult() {
         return new Result(courseManagementWidget.createWaypointPairs(), priorityBox.getValue());

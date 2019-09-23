@@ -62,13 +62,11 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
             }
         });
         marksBtnsPanel.add(addMark);
-
         removeMark = new Button(stringMessages.remove(stringMessages.mark()));
         removeMark.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 Set<MarkDTO> marksToRemove = marks.getSelectionModel().getSelectedSet();
-
                 for (final MarkDTO markToRemove : marksToRemove) {
                     sailingService.revokeMarkDefinitionEventInRegattaLog(leaderboardName, markToRemove,
                             new AsyncCallback<Void>() {
@@ -86,10 +84,8 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                 }
             }
         });
-
         removeMark.setEnabled(false);
         marksBtnsPanel.add(removeMark);
-
         ImagesBarColumn<MarkDTO, RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell> actionColumn = new ImagesBarColumn<MarkDTO, RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell>(
                 new RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell(stringMessages));
         actionColumn.setFieldUpdater(new FieldUpdater<MarkDTO, String>() {
