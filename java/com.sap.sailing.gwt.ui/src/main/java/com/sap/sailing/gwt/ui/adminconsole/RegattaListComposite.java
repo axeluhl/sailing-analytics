@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
@@ -32,7 +31,6 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
@@ -47,8 +45,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.Notification;
-import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
@@ -82,6 +78,8 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     private final RegattaRefresher regattaRefresher;
     private final LabeledAbstractFilterablePanel<RegattaDTO> filterablePanelRegattas;
 
+    private final UserService userService;
+    
     private List<RegattaDTO> allRegattas;
 
     protected static AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
@@ -100,6 +98,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         this.regattaRefresher = regattaRefresher;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
+        this.userService = userService;
         allRegattas = new ArrayList<RegattaDTO>();
         
         final VerticalPanel panel = new VerticalPanel();
@@ -287,20 +286,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_BOAT_REGISTRATIONS, UPDATE, this::handleBoatRegistration);
-        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CERTIFICATES_UPDATE, UPDATE, regattaDTO -> {
-            BoatCertificateAssignmentDialog certificateAssignmentDialog = new BoatCertificateAssignmentDialog(sailingService, userService,
-                    regattaDTO.getName(), stringMessages, errorReporter,
-                    new DialogCallback<List<CompetitorWithBoatDTO>>() {
-                        @Override
-                        public void cancel() {
-                        }
-
-                        @Override
-                        public void ok(final List<CompetitorWithBoatDTO> result) {
-                        }
-                    });
-            certificateAssignmentDialog.show();
-        });
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CERTIFICATES_UPDATE, UPDATE, this::handleBoatCertificateAssignment);
         
         table.addColumn(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getHeader());
         table.addColumn(regattaNameColumn, stringMessages.regattaName());
@@ -427,37 +413,27 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         filterablePanelRegattas.updateAll(allRegattas);
     }
     
-    private void handleBoatRegistration(RegattaDTO regattaDTO) {
-        if (regattaDTO.canBoatsOfCompetitorsChangePerRace) {
-            String boatClassName = regattaDTO.boatClass.getName();
+    private void handleBoatRegistration(RegattaDTO regatta) {
+        // TODO add functionality
+    }
+    
+    private void handleBoatCertificateAssignment(RegattaDTO regatta) {
+        BoatCertificateAssignmentDialog dialog = new BoatCertificateAssignmentDialog(sailingService, userService,
+                regatta.getName(), stringMessages, errorReporter, new DialogCallback<List<BoatDTO>>() {
 
-            new RegattaLogBoatRegistrationDialog(boatClassName, sailingService, null, stringMessages,
-                    errorReporter, /* editable */true, regattaDTO.getName(), regattaDTO.canBoatsOfCompetitorsChangePerRace,
-                    new DialogCallback<Set<BoatDTO>>() {
-                        @Override
-                        public void ok(Set<BoatDTO> registeredBoats) {
-                            sailingService.setBoatRegistrationsInRegattaLog(regattaDTO.getName(), registeredBoats,
-                                    new AsyncCallback<Void>() {
-                                        @Override
-                                        public void onSuccess(Void result) {
-                                            // pass
-                                        }
+                    @Override
+                    public void ok(List<BoatDTO> editedObject) {
+                        // TODO Auto-generated method stub
+                        
+                    }
 
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                            errorReporter.reportError(
-                                                    "Could not save boat registrations: " + caught.getMessage());
-                                        }
-                                    });
-                        }
-
-                        @Override
-                        public void cancel() {
-                        }
-                    }).show();
-        } else {
-            Notification.notify(stringMessages.canNotRegisterBoats(), NotificationType.ERROR);
-        }
+                    @Override
+                    public void cancel() {
+                        // TODO Auto-generated method stub
+                        
+                    }
+        });
+        dialog.show();
     }
 
     public List<RegattaDTO> getAllRegattas() {

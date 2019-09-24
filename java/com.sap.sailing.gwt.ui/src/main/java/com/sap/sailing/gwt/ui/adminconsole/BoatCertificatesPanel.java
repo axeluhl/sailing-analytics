@@ -8,6 +8,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -26,10 +27,9 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  */
 public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
     
-    private final BoatCertificatesPanel boatTable;
-    private final RefreshableMultiSelectionModel<CompetitorDTO> refreshableCompetitorSelectionModel;
+    private final BoatPanel boatTable;
     private final String regattaName;
-    
+    private final Widget widget;
     private final BusyIndicator busyIndicator;
 
     public BoatCertificatesPanel(final SailingServiceAsync sailingService, final UserService userService, final StringMessages stringMessages,
@@ -42,8 +42,7 @@ public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
         super();
         this.regattaName = regattaName;
         
-        this.boatTable = new BoatCertificatesPanel(sailingService, userService, stringMessages, errorReporter);
-        this.refreshableCompetitorSelectionModel = null; //(RefreshableMultiSelectionModel<CompetitorDTO>) boatTable.getSelectionModel();
+        this.boatTable = new BoatPanel(sailingService, userService, stringMessages, errorReporter);
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setWidth("100%");
@@ -52,25 +51,12 @@ public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
         mainPanel.add(buttonPanel);
 
         // BUTTON - Refresh
-        final Button refreshButton = buttonPanel.addUnsecuredAction(stringMessages.refresh(),
-                this::refreshBoatList);
+        final Button refreshButton = buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::refreshBoatList);
         refreshButton.ensureDebugId("RefreshButton");
-
-        final Button allowReloadButton = buttonPanel.addUnsecuredAction(stringMessages.allowReload(),
-                null);//() -> boatTable.allowUpdate(refreshableCompetitorSelectionModel.getSelectedSet()));
-        refreshableCompetitorSelectionModel.addSelectionChangeHandler(
-                event -> allowReloadButton.setEnabled(!refreshableCompetitorSelectionModel.getSelectedSet().isEmpty()));
-        allowReloadButton.setEnabled(!refreshableCompetitorSelectionModel.getSelectedSet().isEmpty());
 
         // BUTTON - Add Competitors
         final Button addCompetitorButton = buttonPanel.addCreateAction(stringMessages.add(), null);
         addCompetitorButton.ensureDebugId("AddCompetitorButton");
-        
-        buttonPanel.addUnsecuredAction(stringMessages.selectAll(), /*() -> {
-            for (CompetitorDTO c : boatTable.getDataProvider().getList()) {
-                refreshableCompetitorSelectionModel.setSelected(c, true);
-            } 
-        }*/ null );
 
         // BUTTON - Import Competitors
         buttonPanel.addCreateAction(stringMessages.importCompetitors(), () -> {
@@ -95,22 +81,14 @@ public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
             });
         });
 
-        // only if this competitor panel is connected to a leaderboard, we want to enable invitations
-        if (regattaName != null) {
-            buttonPanel.addCreateAction(stringMessages.inviteSelectedCompetitors(), () -> {
-                final Set<CompetitorDTO> competitors = refreshableCompetitorSelectionModel.getSelectedSet();
-                final CompetitorInvitationHelper helper = new CompetitorInvitationHelper(sailingService, stringMessages,
-                        errorReporter);
-                helper.inviteCompetitors(competitors, regattaName);
-            });
-        }
-
         mainPanel.add(busyIndicator);
         mainPanel.add(boatTable);
         
         if (regattaName != null) {
             refreshBoatList();
         }
+        
+        this.widget = mainPanel;
     }
     
     private void refreshBoatList() {
@@ -121,6 +99,11 @@ public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
     public void setBusy(boolean isBusy) {
         // TODO Auto-generated method stub
         
+    }
+    
+    @Override
+    public Widget getWidget() {
+        return widget;
     }
 
 }
