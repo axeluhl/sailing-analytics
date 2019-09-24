@@ -169,9 +169,9 @@ public abstract class CourseManagementWidget implements IsWidget {
      * for the leg ending at {@code waypoint}.
      * 
      * TODO decide where to put the result; I suggest storing it temporarily in the result of this dialog and creating the RaceLogEvent(s) only once the dialog result is saved to the server
+     * There is already a {@link ORCLegEventCreationDialog}, which is currently unfinished.
      */
     private void createOrcPcsLegEventForLegEndingAt(WaypointDTO waypoint) {
-        // TODO Auto-generated method stub
     }
 
     protected void markSelectionChanged() {
