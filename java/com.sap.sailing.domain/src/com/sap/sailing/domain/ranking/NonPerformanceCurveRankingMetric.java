@@ -11,7 +11,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -20,7 +20,7 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
     private static final long serialVersionUID = 2647817114244817444L;
 
     public interface NonPerformanceCurveRankingInfo extends RankingInfoWithLegLeader {
-        Duration getActualTimeFromRaceStartToReachFarthestAheadInLeg(Competitor competitor, Leg leg, WindLegTypeAndLegBearingCache cache);
+        Duration getActualTimeFromRaceStartToReachFarthestAheadInLeg(Competitor competitor, Leg leg, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
     }
     
     public class NonPerformanceCurveRankingInfoImpl extends AbstractRankingInfoWithCompetitorRankingInfoCache implements NonPerformanceCurveRankingInfo {
@@ -31,7 +31,7 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
         }
 
         @Override
-        public Duration getActualTimeFromRaceStartToReachFarthestAheadInLeg(Competitor competitor, Leg leg, WindLegTypeAndLegBearingCache cache) {
+        public Duration getActualTimeFromRaceStartToReachFarthestAheadInLeg(Competitor competitor, Leg leg, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
             final Duration result;
             final TrackedLegOfCompetitor tloc = getTrackedRace().getTrackedLeg(competitor, getTimePoint());
             final Duration raceDurationAtTimePoint = getTrackedRace().getStartOfRace().until(getTimePoint());
@@ -57,7 +57,7 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
         super(trackedRace);
     }
 
-    public RankingMetric.RankingInfo getRankingInfo(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public RankingMetric.RankingInfo getRankingInfo(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Map<Competitor, RankingMetric.CompetitorRankingInfo> result = new HashMap<>();
         Competitor competitorFarthestAhead = getCompetitorFarthestAhead(timePoint, cache);
         final Distance totalWindwardDistanceTraveled = getWindwardDistanceTraveled(competitorFarthestAhead, timePoint, cache);
@@ -124,7 +124,7 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
      * 
      * @return <code>null</code>, if either of the two competitors' current legs is <code>null</code>
      */
-    protected Duration getPredictedDurationToReachWindwardPositionOf(Competitor who, Competitor to, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    protected Duration getPredictedDurationToReachWindwardPositionOf(Competitor who, Competitor to, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final TrackedLegOfCompetitor currentLegWho = getCurrentLegOrLastLegIfAlreadyFinished(who, timePoint);
         final TrackedLegOfCompetitor currentLegTo = getCurrentLegOrLastLegIfAlreadyFinished(to, timePoint);
         final Duration result = getPredictedDurationToReachWindwardPositionOf(currentLegWho, currentLegTo, timePoint, cache);
@@ -133,7 +133,7 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
 
     /**
      * Similar to
-     * {@link #getPredictedDurationToReachWindwardPositionOf(Competitor, Competitor, TimePoint, WindLegTypeAndLegBearingCache)},
+     * {@link #getPredictedDurationToReachWindwardPositionOf(Competitor, Competitor, TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)},
      * allowing the caller to specify the legs to consider for the two competitors. This way, the "to" competitor's
      * leg may be set to one that is not necessarily the current leg at <code>timePoint</code>, enabling a comparison
      * for a specific leg.
@@ -146,7 +146,7 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
      * Precondition: <code>legWho</code>'s leg is the same as or an earlier leg than <code>legTo</code>'s leg.
      */
     protected Duration getPredictedDurationToReachWindwardPositionOf(final TrackedLegOfCompetitor legWho, final TrackedLegOfCompetitor legTo,
-            TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+            TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         assert legWho == null || legTo == null ||
                 getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legWho.getTrackedLeg().getLeg().getFrom()) <=
                 getTrackedRace().getRace().getCourse().getIndexOfWaypoint(legTo.getTrackedLeg().getLeg().getFrom());
@@ -202,7 +202,7 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
      * {@link #validateGetDurationToReachAtEqualPerformanceParameters(Competitor, Waypoint, TimePoint, MarkPassing)}.
      */
     protected abstract Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint,
-            TimePoint timePointOfTosPosition, WindLegTypeAndLegBearingCache cache);
+            TimePoint timePointOfTosPosition, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
     
     protected Comparator<Competitor> getComparatorByEstimatedCorrectedTimeWhenReachingCompetitorFarthestAhead(
             final Function<Competitor, RankingMetric.CompetitorRankingInfo> rankingInfos) {

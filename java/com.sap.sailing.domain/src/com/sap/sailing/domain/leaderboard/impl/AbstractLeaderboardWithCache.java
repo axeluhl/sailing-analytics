@@ -81,7 +81,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
-import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.Bearing;
@@ -483,6 +483,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 }
             }
         }
+        final Map<Pair<RaceColumn, Competitor>, RankingInfo> rankingInfoCache = new HashMap<>();
         for (final Competitor competitor : this.getCompetitorsFromBestToWorst(timePoint)) {
             CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
             LeaderboardRowDTO row = new LeaderboardRowDTO();
@@ -497,14 +498,20 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             Map<String, Future<LeaderboardEntryDTO>> futuresForColumnName = new HashMap<String, Future<LeaderboardEntryDTO>>();
             final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint);
             for (final RaceColumn raceColumn : this.getRaceColumns()) {
+                final boolean computeLegDetails = namesOfRaceColumnsForWhichToLoadLegDetails != null &&
+                        namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName());
+                // if leg details are to be requested, the ranking info needs to be provided:
+                final RankingInfo rankingInfo = computeLegDetails ? rankingInfoCache.computeIfAbsent(new Pair<>(raceColumn, competitor),
+                        raceColumnAndCompetitor->{
+                            final TrackedRace trackedRace = raceColumnAndCompetitor.getA().getTrackedRace(raceColumnAndCompetitor.getB());
+                            return trackedRace==null?null:trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
+                        }) : null;
                 Future<LeaderboardEntryDTO> future = executor.submit(() -> {
-                        Entry entry = AbstractLeaderboardWithCache.this.getEntry(competitor, raceColumn, timePoint, discardedRaceColumns);
-                        return getLeaderboardEntryDTO(entry, raceColumn, competitor, timePoint,
-                                namesOfRaceColumnsForWhichToLoadLegDetails != null
-                                        && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn
-                                                .getName()), waitForLatestAnalyses, legRanksCache, baseDomainFactory,
-                                                fillTotalPointsUncorrected, cache);
-                    });
+                    Entry entry = AbstractLeaderboardWithCache.this.getEntry(competitor, raceColumn, timePoint, discardedRaceColumns);
+                    return getLeaderboardEntryDTO(entry, raceColumn, competitor, timePoint, computeLegDetails,
+                            rankingInfo, waitForLatestAnalyses, legRanksCache, baseDomainFactory,
+                            fillTotalPointsUncorrected, cache);
+                });
                 futuresForColumnName.put(raceColumn.getName(), future);
             }
             for (Map.Entry<String, Future<LeaderboardEntryDTO>> raceColumnNameAndFuture : futuresForColumnName.entrySet()) {
@@ -609,6 +616,11 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
     }
 
     /**
+     * @param rankingInfo
+     *            must be provided when {@code addLegDetails} is {@code true}; it may, however, be the case that there
+     *            is no {@link TrackedRace} for the {@code competitor} for which this entry shall be computed; in such
+     *            cases it is permissible to pass {@code null} for this parameter despite {@code addLegDetails} being
+     *            set.
      * @param waitForLatestAnalyses
      *            if <code>false</code>, this method is allowed to read the maneuver analysis results from a cache that
      *            may not reflect all data already received; otherwise, the method will always block for the latest
@@ -621,9 +633,9 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
      *            the correction was removed.
      */
     private LeaderboardEntryDTO getLeaderboardEntryDTO(Entry entry, RaceColumn raceColumn, Competitor competitor,
-            TimePoint timePoint, boolean addLegDetails, boolean waitForLatestAnalyses,
-            Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache, DomainFactory baseDomainFactory,
-            boolean fillTotalPointsUncorrected, WindLegTypeAndLegBearingCache cache) {
+            TimePoint timePoint, boolean addLegDetails, RankingInfo rankingInfo,
+            boolean waitForLatestAnalyses, Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache,
+            DomainFactory baseDomainFactory, boolean fillTotalPointsUncorrected, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         LeaderboardEntryDTO entryDTO = new LeaderboardEntryDTO();
         TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
         entryDTO.race = trackedRace == null ? null : trackedRace.getRaceIdentifier();
@@ -670,7 +682,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         }
         if (addLegDetails && trackedRace != null) {
             try {
-                final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
                 RaceDetails raceDetails = getRaceDetails(trackedRace, competitor, timePoint, waitForLatestAnalyses,
                         legRanksCache, rankingInfo, cache);
                 entryDTO.legDetails = raceDetails.getLegDetails();
@@ -848,7 +859,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
      */
     private RaceDetails getRaceDetails(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint,
             boolean waitForLatestAnalyses, Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache,
-            RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) throws InterruptedException, ExecutionException {
+            RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws InterruptedException, ExecutionException {
         final RaceDetails raceDetails;
         if (trackedRace.getEndOfTracking() != null && trackedRace.getEndOfTracking().compareTo(timePoint) < 0) {
             raceDetails = getRaceDetailsForEndOfTrackingFromCacheOrCalculateAndCache(trackedRace, competitor, legRanksCache, rankingInfo, cache);
@@ -860,7 +871,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
 
     private RaceDetails getRaceDetailsForEndOfTrackingFromCacheOrCalculateAndCache(final TrackedRace trackedRace,
             final Competitor competitor, final Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache,
-            RankingInfo rankingInfo, final WindLegTypeAndLegBearingCache cache) throws InterruptedException, ExecutionException {
+            RankingInfo rankingInfo, final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws InterruptedException, ExecutionException {
         final com.sap.sse.common.Util.Pair<TrackedRace, Competitor> key = new com.sap.sse.common.Util.Pair<TrackedRace, Competitor>(trackedRace, competitor);
         RunnableFuture<RaceDetails> raceDetails;
         final boolean needToRunRaceDetails; // when found in cache, another call to this method is already running it; else, it needs to be run here
@@ -899,7 +910,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
 
     private RaceDetails calculateRaceDetails(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint,
             boolean waitForLatestAnalyses, Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache,
-            WindLegTypeAndLegBearingCache cache, final RankingInfo rankingInfo) {
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache, final RankingInfo rankingInfo) {
         final List<LegEntryDTO> legDetails = new ArrayList<LegEntryDTO>();
         final Course course = trackedRace.getRace().getCourse();
         course.lockForRead(); // hold back any course re-configurations while looping over the legs
@@ -939,7 +950,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             return new RaceDetails(legDetails, windwardDistanceToCompetitorFarthestAhead, averageAbsoluteCrossTrackError, averageSignedCrossTrackError,
                     trackedRace.getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, competitor, cache),
                     trackedRace.getTimeSailedSinceRaceStart(competitor, timePoint),
-                    trackedRace.getRankingMetric().getCorrectedTime(competitor, timePoint),
+                    competitorRankingInfo == null ? null : competitorRankingInfo.getCorrectedTime(),
                     competitorRankingInfo == null ? null : competitorRankingInfo.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead());
         } finally {
             course.unlockAfterRead();
@@ -948,7 +959,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
 
     private LegEntryDTO createLegEntry(TrackedLegOfCompetitor trackedLeg, TimePoint timePoint,
             boolean waitForLatestAnalyses, Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache,
-            RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+            RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         LegEntryDTO result;
         final Duration time = trackedLeg.getTime(timePoint);
         if (trackedLeg == null || time == null) {
@@ -1147,7 +1158,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         return result;
     }
 
-    private Duration getGapAtEndOfPreviousLeg(TrackedLegOfCompetitor trackedLeg, final RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+    private Duration getGapAtEndOfPreviousLeg(TrackedLegOfCompetitor trackedLeg, final RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Duration result;
         final Course course = trackedLeg.getTrackedLeg().getTrackedRace().getRace().getCourse();
         // if trackedLeg is the first leg, compute the gap at the start of this leg; otherwise, compute gap

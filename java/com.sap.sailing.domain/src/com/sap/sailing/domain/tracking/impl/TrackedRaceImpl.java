@@ -142,7 +142,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRaceWithWindEssentials;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
-import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindSummary;
@@ -1489,7 +1489,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     @Override
-    public Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Competitor result = null;
         List<Competitor> ranks = getCompetitorsFromBestToWorst(timePoint, cache);
         if (ranks != null && !ranks.isEmpty()) {
@@ -1546,7 +1546,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint unadjustedTimePoint, WindLegTypeAndLegBearingCache cache) {
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint unadjustedTimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final TimePoint timePoint;
         // normalize the time point to get cache hits when asking for time points that are later than
         // the last time point affected by any event received for this tracked race
@@ -1607,7 +1607,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     @Override
     public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis,
-            WindLegTypeAndLegBearingCache cache)
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache)
             throws NoWindException {
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         TimePoint from = null;
@@ -1636,7 +1636,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint,
-            boolean waitForLatestAnalyses, WindLegTypeAndLegBearingCache cache) throws NoWindException {
+            boolean waitForLatestAnalyses, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         TimePoint from = null;
         lockForRead(markPassings);
@@ -2865,7 +2865,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint,
-            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final TrackedLegOfCompetitor trackedLeg = getTrackedLeg(competitor, timePoint);
         return trackedLeg == null ? null : trackedLeg.getWindwardDistanceToCompetitorFarthestAhead(timePoint, windPositionMode, rankingInfo, cache);
     }
@@ -3825,7 +3825,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint,
-            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         TrackedLegOfCompetitor trackedLeg = getTrackedLeg(competitor, timePoint);
         final SpeedWithBearing result;
         if (trackedLeg != null) {
@@ -3864,7 +3864,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      *            position, defaulting to the "COMBINED" wind source at the middle of the course. In particular, it then
      *            obviously makes no real sense to request {@link WindPositionMode#LEG_MIDDLE} because no leg is known.
      */
-    Wind getWind(WindPositionMode windPositionMode, TrackedLegImpl trackedLeg, Competitor competitor, TimePoint at, WindLegTypeAndLegBearingCache cache) {
+    Wind getWind(WindPositionMode windPositionMode, TrackedLegImpl trackedLeg, Competitor competitor, TimePoint at, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Wind wind;
         if (windPositionMode == WindPositionMode.EXACT) {
             wind = cache.getWind(this, competitor, at);

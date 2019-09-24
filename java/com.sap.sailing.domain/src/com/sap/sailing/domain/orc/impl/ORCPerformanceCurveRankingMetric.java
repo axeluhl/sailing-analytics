@@ -6,16 +6,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.math.FunctionEvaluationException;
-import org.apache.commons.math.MaxIterationsExceededException;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.orc.ORCPerformanceCurve;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
@@ -47,13 +47,13 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
      * time.
      */
     @Override
-    public Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Map<Competitor, Duration> correctedTimesByCompetitor = getCorrectedTimesByCompetitor(timePoint, cache);
         return (c1, c2)->Comparator.nullsLast((Duration correctedTime1, Duration correctedTime2)->correctedTime1.compareTo(correctedTime2)).
                 compare(correctedTimesByCompetitor.get(c1), correctedTimesByCompetitor.get(c2));
     }
 
-    private Map<Competitor, Duration> getCorrectedTimesByCompetitor(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    private Map<Competitor, Duration> getCorrectedTimesByCompetitor(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Map<Competitor, Duration> correctedTimesByCompetitor = new HashMap<>();
         for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
             correctedTimesByCompetitor.put(competitor, getCorrectedTime(competitor, timePoint, cache));
@@ -71,7 +71,7 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
      * racing at {@code timePoint}.
      */
     @Override
-    public Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Duration result;
         final Comparator<Competitor> comparatorByImpliedWind = super.getRaceRankingComparator(timePoint, cache);
         final Set<Competitor> competitors = new HashSet<>();
@@ -79,9 +79,10 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
         final Competitor leader = Collections.min(competitors, comparatorByImpliedWind); // use minimum because the comparator sorts "better" first
         if (leader != null) {
             try {
-                final ORCPerformanceCurve competitorPerformanceCurve = getPerformanceCurveForPartialCourse(competitor, timePoint, cache);
-                final Speed leaderImpliedWind = getImpliedWind(leader, timePoint, cache);
-                if (leaderImpliedWind != null) {
+                final Function<Competitor, ORCPerformanceCurve> performanceCurveSupplier = getPerformanceCurveSupplier(timePoint, cache);
+                final ORCPerformanceCurve competitorPerformanceCurve = cache.getPerformanceCurveForPartialCourse(competitor, performanceCurveSupplier);
+                final Speed leaderImpliedWind = cache.getImpliedWind(leader, getImpliedWindSupplier(timePoint, cache));
+                if (leaderImpliedWind != null && competitorPerformanceCurve != null) {
                     final Duration competitorAllowance = competitorPerformanceCurve.getAllowancePerCourse(leaderImpliedWind);
                     final Duration competitorElapsedTime = getTrackedRace().getTimeSailedSinceRaceStart(competitor, timePoint);
                     final Duration leaderElapsedTime = getTrackedRace().getTimeSailedSinceRaceStart(leader, timePoint);
@@ -94,7 +95,7 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
                 } else {
                     result = null;
                 }
-            } catch (FunctionEvaluationException | MaxIterationsExceededException e) {
+            } catch (FunctionEvaluationException e) {
                 logger.log(Level.WARNING, "Problem evaluating performance curve", e);
                 result = null;
             }

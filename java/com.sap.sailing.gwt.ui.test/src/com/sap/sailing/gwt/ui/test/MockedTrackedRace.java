@@ -65,7 +65,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
-import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindSummary;
@@ -503,7 +503,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint,
-            boolean waitForLatestAnalyses, WindLegTypeAndLegBearingCache cache) {
+            boolean waitForLatestAnalyses, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 
@@ -716,7 +716,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint,
-            boolean waitForLatestAnalyses, WindLegTypeAndLegBearingCache cache) {
+            boolean waitForLatestAnalyses, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 
@@ -795,17 +795,17 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     
     @Override
     public Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint,
-            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 
     @Override
-    public Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 
@@ -923,7 +923,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint,
-            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 

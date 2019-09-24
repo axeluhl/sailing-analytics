@@ -42,7 +42,7 @@ import com.sap.sailing.domain.tracking.MarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
-import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.Bearing;
@@ -118,7 +118,7 @@ public class TrackedLegImpl implements TrackedLeg {
     }
 
     @Override
-    public Competitor getLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public Competitor getLeader(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         List<TrackedLegOfCompetitor> byRank = getCompetitorTracksOrderedByRank(timePoint, cache);
         return byRank.get(0).getCompetitor();
     }
@@ -137,7 +137,7 @@ public class TrackedLegImpl implements TrackedLeg {
         return getCompetitorTracksOrderedByRank(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
     
-    List<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    List<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         List<TrackedLegOfCompetitor> rankedCompetitorList;
         rankedCompetitorList = competitorTracksOrderedByRank.get(timePoint);
         if (rankedCompetitorList != null) {
@@ -169,7 +169,7 @@ public class TrackedLegImpl implements TrackedLeg {
     }
     
     @Override
-    public LinkedHashMap<Competitor, Integer> getRanks(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public LinkedHashMap<Competitor, Integer> getRanks(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         List<TrackedLegOfCompetitor> orderedTrackedLegsOfCompetitors = getCompetitorTracksOrderedByRank(timePoint, cache);
         LinkedHashMap<Competitor, Integer> result = new LinkedHashMap<Competitor, Integer>();
         int i=1;
@@ -372,7 +372,7 @@ public class TrackedLegImpl implements TrackedLeg {
     
     @Override
     public Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at,
-            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Distance preResult = getWindwardDistance(pos1, pos2, at, windPositionMode, cache);
         final Distance result;
         if (preResult == null || preResult.getMeters() >= 0) {
@@ -390,23 +390,23 @@ public class TrackedLegImpl implements TrackedLeg {
     }
     
     @Override
-    public Distance getWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingCache cache) {
+    public Distance getWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final TimePoint referenceTimePoint = getReferenceTimePoint();
         return getWindwardDistanceFromLegStart(pos, referenceTimePoint, cache);
     }
 
-    private Distance getWindwardDistanceFromLegStart(Position pos, final TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    private Distance getWindwardDistanceFromLegStart(Position pos, final TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return getWindwardDistance(getTrackedRace().getApproximatePosition(getLeg().getFrom(), timePoint),
                 pos, timePoint, WindPositionMode.LEG_MIDDLE, cache);
     }
 
     @Override
-    public Distance getAbsoluteWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingCache cache) {
+    public Distance getAbsoluteWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final TimePoint referenceTimePoint = getReferenceTimePoint();
         return getAbsoluteWindwardDistanceFromLegStart(pos, referenceTimePoint, cache);
     }
 
-    private Distance getAbsoluteWindwardDistanceFromLegStart(Position pos, final TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    private Distance getAbsoluteWindwardDistanceFromLegStart(Position pos, final TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return getAbsoluteWindwardDistance(getTrackedRace().getApproximatePosition(getLeg().getFrom(), timePoint),
                 pos, timePoint, WindPositionMode.LEG_MIDDLE, cache);
     }
@@ -426,13 +426,13 @@ public class TrackedLegImpl implements TrackedLeg {
     }
     
     @Override
-    public Distance getWindwardDistance(WindLegTypeAndLegBearingCache cache) {
+    public Distance getWindwardDistance(WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final TimePoint middle = getReferenceTimePoint();
         return getWindwardDistance(middle, cache);
     }
 
     @Override
-    public Distance getAbsoluteWindwardDistance(WindLegTypeAndLegBearingCache cache) {
+    public Distance getAbsoluteWindwardDistance(WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final TimePoint middle = getReferenceTimePoint();
         return getAbsoluteWindwardDistance(middle, cache);
     }
@@ -470,21 +470,21 @@ public class TrackedLegImpl implements TrackedLeg {
     }
 
     @Override
-    public Distance getWindwardDistance(final TimePoint middle, WindLegTypeAndLegBearingCache cache) {
+    public Distance getWindwardDistance(final TimePoint middle, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Position fromPos = getTrackedRace().getApproximatePosition(getLeg().getFrom(), middle);
         final Position toPos = getTrackedRace().getApproximatePosition(getLeg().getTo(), middle);
         return getWindwardDistance(fromPos, toPos, middle, WindPositionMode.LEG_MIDDLE, cache);
     }
 
     @Override
-    public Distance getAbsoluteWindwardDistance(final TimePoint middle, WindLegTypeAndLegBearingCache cache) {
+    public Distance getAbsoluteWindwardDistance(final TimePoint middle, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Position fromPos = getTrackedRace().getApproximatePosition(getLeg().getFrom(), middle);
         final Position toPos = getTrackedRace().getApproximatePosition(getLeg().getTo(), middle);
         return getAbsoluteWindwardDistance(fromPos, toPos, middle, WindPositionMode.LEG_MIDDLE, cache);
     }
 
     @Override
-    public Distance getWindwardDistance(final Position pos1, final Position pos2, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+    public Distance getWindwardDistance(final Position pos1, final Position pos2, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Distance result;
         if (pos1 == null || pos2 == null) {
             result = null;

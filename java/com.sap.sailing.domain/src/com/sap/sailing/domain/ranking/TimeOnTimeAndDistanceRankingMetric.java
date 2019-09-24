@@ -15,7 +15,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -89,7 +89,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends NonPerformanceCurveRanki
      * along-course distance of the {@link #getTrackedRace() race's} course.
      */
     @Override
-    public Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final RankingMetric.RankingInfo rankingInfo = getRankingInfo(timePoint, cache);
         final Comparator<Duration> durationComparatorNullsLast = Comparator.nullsLast(Comparator.naturalOrder());
         return (c1, c2) -> {
@@ -103,7 +103,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends NonPerformanceCurveRanki
     }
 
     @Override
-    public Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         // competitors that have not yet started the leg will get a duration based on Long.MAX_VALUE
         final Map<Competitor, Duration> correctedTimesToReachFastestBoatsPositionAtTimePointOrEndOfLegMeasuredFromStartOfRace = new HashMap<>();
         final Competitor fastestCompetitorInLeg = getCompetitorFarthestAheadInLeg(trackedLeg, timePoint, cache);
@@ -170,7 +170,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends NonPerformanceCurveRanki
     }
 
     @Override
-    public Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Duration timeActuallySpent = getActualTimeSinceStartOfRace(competitor, timePoint);
         final Distance windwardDistanceSailed = getWindwardDistanceTraveled(competitor, timePoint, cache);
         return getCalculatedTime(competitor, ()->getTrackedRace().getCurrentLeg(competitor, timePoint).getLeg(),
@@ -205,7 +205,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends NonPerformanceCurveRanki
      * that of <code>to</code>.
      */
     @Override
-    protected Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint, TimePoint timePointOfTosPosition, WindLegTypeAndLegBearingCache cache) {
+    protected Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint, TimePoint timePointOfTosPosition, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final MarkPassing whenToPassedFromWaypoint = getTrackedRace().getMarkPassing(to, fromWaypoint);
         final Duration t_who;
         if (whenToPassedFromWaypoint == null) {
@@ -266,7 +266,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends NonPerformanceCurveRanki
      * </pre>
      */
     @Override
-    public Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache) {
+    public Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Duration result;
         // actual times and common distance:
         final Competitor leaderByCorrectedEstimatedTimeToCompetitorFarthestAhead = rankingInfo.getLeaderByCorrectedEstimatedTimeToCompetitorFarthestAhead();
@@ -339,7 +339,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends NonPerformanceCurveRanki
 
     @Override
     public Duration getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint,
-            RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+            RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         assert rankingInfo instanceof NonPerformanceCurveRankingInfo;
         final NonPerformanceCurveRankingInfo npcRankingInfo = (NonPerformanceCurveRankingInfo) rankingInfo;
         final Duration result;

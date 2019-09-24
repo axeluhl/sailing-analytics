@@ -23,7 +23,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceRankComparator;
 import com.sap.sse.common.Distance;
@@ -145,7 +145,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         private final TimePoint timePoint;
         
         /**
-         * Caches, on demand, the results of calls to {@link #getCompetitorFarthestAheadInLeg(Leg, TimePoint, WindLegTypeAndLegBearingCache)}.
+         * Caches, on demand, the results of calls to {@link #getCompetitorFarthestAheadInLeg(Leg, TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}.
          * <code>null</code> values are encoded as the {@link #NULL_COMPETITOR} and must be translated back to <code>null</code> before returning
          * to a caller outside of this class.
          */
@@ -162,7 +162,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         }
         
         @Override
-        public Competitor getCompetitorFarthestAheadInLeg(Leg leg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        public Competitor getCompetitorFarthestAheadInLeg(Leg leg, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
             Competitor result = competitorFarthestAheadInLeg.get(leg);
             if (result == NULL_COMPETITOR) {
                 result = null;
@@ -220,7 +220,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         }
 
         @Override
-        public Competitor getLeaderInLegByCalculatedTime(Leg leg, WindLegTypeAndLegBearingCache cache) {
+        public Competitor getLeaderInLegByCalculatedTime(Leg leg, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
             final TrackedLeg trackedLeg = getTrackedRace().getTrackedLeg(leg);
             return trackedLeg.getLeader(getTimePoint(), cache);
         }
@@ -236,7 +236,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         return trackedRace;
     }
 
-    protected Competitor getCompetitorFarthestAhead(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    protected Competitor getCompetitorFarthestAhead(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Comparator<Competitor> oneDesignComparator = getWindwardDistanceTraveledComparator(timePoint, cache);
         Competitor competitorFarthestAhead = StreamSupport
                 .stream(getCompetitors().spliterator(), /* parallel */true).
@@ -339,7 +339,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      * result is undefined.
      */
     protected Duration getPredictedDurationToEndOfLegOrTo(TimePoint timePoint, final TrackedLegOfCompetitor legWho, final TrackedLegOfCompetitor legTo,
-            WindLegTypeAndLegBearingCache cache) {
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         assert isAssumedToHaveStartedLeg(timePoint, legWho) || isAssumedToHaveFinishedLeg(timePoint, legWho);
         assert isAssumedToHaveStartedLeg(timePoint, legTo) || isAssumedToHaveFinishedLeg(timePoint, legTo);
         final Duration toEndOfLegOrTo;
@@ -364,7 +364,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
     }
 
     private Duration getDurationToReach(final Position windwardPositionToReachInWhosCurrentLeg, TimePoint timePoint,
-            final TrackedLegOfCompetitor whosLeg, WindLegTypeAndLegBearingCache cache) {
+            final TrackedLegOfCompetitor whosLeg, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Duration toEndOfLegOrTo;
         final Speed averageVMG = whosLeg.getAverageVelocityMadeGood(timePoint, cache);
         final Speed vmg = averageVMG == null || Double.isNaN(averageVMG.getKnots()) ?
@@ -398,17 +398,17 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      * time point for wind approximation is taken to be a reference time point selected based on the mark passings
      * for the respective leg's from/to waypoints.
      */
-    protected Distance getWindwardDistanceTraveled(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    protected Distance getWindwardDistanceTraveled(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return getWindwardDistanceTraveled(competitor, getTrackedRace().getRace().getCourse().getFirstWaypoint(), timePoint, cache);
     }
 
     /**
      * Constructs a comparator based on the results of
-     * {@link #getWindwardDistanceTraveled(Competitor, TimePoint, WindLegTypeAndLegBearingCache)} where competitors are
+     * {@link #getWindwardDistanceTraveled(Competitor, TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)} where competitors are
      * "less" than other competitors ("better") if they are in a later leg or, if in the same leg, have a greater
      * windward distance traveled. If both competitors have already finished the race, the finishing time is compared.
      */
-    private Comparator<Competitor> getWindwardDistanceTraveledComparator(final TimePoint timePoint, final WindLegTypeAndLegBearingCache cache) {
+    private Comparator<Competitor> getWindwardDistanceTraveledComparator(final TimePoint timePoint, final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Map<Competitor, Distance> windwardDistanceTraveledPerCompetitor = new HashMap<>();
         for (final Competitor competitor : getCompetitors()) {
             windwardDistanceTraveledPerCompetitor.put(competitor, getWindwardDistanceTraveled(competitor, timePoint, cache));
@@ -434,7 +434,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      * time point for wind approximation is taken to be a reference time point selected based on the mark passings
      * for the respective leg's from/to waypoints.
      */
-    protected Distance getWindwardDistanceTraveled(Competitor competitor, Waypoint from, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    protected Distance getWindwardDistanceTraveled(Competitor competitor, Waypoint from, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Distance result;
         if (from == null) {
             result = null;
@@ -545,7 +545,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      *         has already finished the leg at <code>timePoint</code>; or the competitor with the greatest windward
      *         distance traveled in the leg at <code>timePoint</code> otherwise
      */
-    protected Competitor getCompetitorFarthestAheadInLeg(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    protected Competitor getCompetitorFarthestAheadInLeg(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Competitor firstAroundMark = getFirstLegFinisherBefore(trackedLeg, timePoint);
         final Competitor result;
         if (firstAroundMark != null) {

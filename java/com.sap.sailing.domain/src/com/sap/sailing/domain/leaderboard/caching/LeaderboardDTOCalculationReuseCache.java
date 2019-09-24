@@ -1,7 +1,11 @@
 package com.sap.sailing.domain.leaderboard.caching;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
@@ -11,12 +15,20 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
+import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveCourseImpl;
+import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
+import com.sap.sailing.domain.orc.ORCPerformanceCurve;
+import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveByImpliedWindRankingMetric;
+import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveLegAdapter;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
@@ -39,7 +51,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * @author Axel Uhl (D043530)
  * 
  */
-public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBearingCache {
+public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBearingAndORCPerformanceCurveCache {
     /**
      * The reference time point for all queries to which values will be cached here. Queries that don't match this time point are
      * neither cached nor looked up in the cache.
@@ -63,6 +75,23 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
      * the leg's bearing at timePoint; <code>null</code> values are represented by {@link #NULL_BEARING}.
      */
     final ConcurrentHashMap<Leg, Bearing> legBearingCache;
+
+    /**
+     * The course for a race ranked by an {@link ORCPerformanceCurveByImpliedWindRankingMetric} metric or subclasses
+     * thereof. This course will have any tracked leg adapters replaced by fixed leg descriptions with a fixed TWA and
+     * distance as obtained upon the first call for the {@link #timePoint} from the underlying {@link TrackedRace}.
+     */
+    private ORCPerformanceCurveCourse totalCourse;
+
+    /**
+     * The scratch boat at {@link #timePoint}, once it has been requested, computed by a supplier that has
+     * to be provided to {@link #getScratchBoat(Supplier)}.
+     */
+    private Competitor scratchBoat;
+    
+    private final ConcurrentHashMap<Competitor, ORCPerformanceCurve> performanceCurvesPerCompetitor;
+    
+    private final ConcurrentHashMap<Competitor, Speed> impliedWindPerCompetitor;
     
     private static final Bearing NULL_BEARING = new DegreeBearingImpl(0);
 
@@ -70,6 +99,8 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
         legTypeCache = new ConcurrentHashMap<>();
         windCache = new ConcurrentHashMap<>();
         legBearingCache = new ConcurrentHashMap<>();
+        this.performanceCurvesPerCompetitor = new ConcurrentHashMap<>();
+        this.impliedWindPerCompetitor = new ConcurrentHashMap<>();
         this.timePoint = timePoint;
     }
     
@@ -117,5 +148,52 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
             result = null;
         }
         return result;
+    }
+
+    @Override
+    public ORCPerformanceCurveCourse getTotalCourse(Supplier<ORCPerformanceCurveCourse> totalCourseSupplier) {
+        if (totalCourse == null) {
+            totalCourse = fixORCPerformanceCurveCourse(totalCourseSupplier.get());
+        }
+        return totalCourse;
+    }
+
+    private ORCPerformanceCurveCourse fixORCPerformanceCurveCourse(ORCPerformanceCurveCourse course) {
+        final List<ORCPerformanceCurveLeg> legs = new ArrayList<>();
+        boolean changed = false;
+        for (final ORCPerformanceCurveLeg leg : course.getLegs()) {
+            if (leg instanceof ORCPerformanceCurveLegAdapter) {
+                legs.add(new ORCPerformanceCurveLegImpl(leg.getLength(), leg.getTwa()));
+                changed = true;
+            } else {
+                legs.add(leg);
+            }
+        }
+        final ORCPerformanceCurveCourse result;
+        if (changed) {
+            result = new ORCPerformanceCurveCourseImpl(legs);
+        } else {
+            result = course;
+        }
+        return result;
+    }
+
+    @Override
+    public Competitor getScratchBoat(Supplier<Competitor> scratchBoatSupplier) {
+        if (scratchBoat == null) {
+            scratchBoat = scratchBoatSupplier.get();
+        }
+        return scratchBoat;
+    }
+
+    @Override
+    public ORCPerformanceCurve getPerformanceCurveForPartialCourse(Competitor competitor,
+            Function<Competitor, ORCPerformanceCurve> performanceCurveSupplier) {
+        return performanceCurvesPerCompetitor.computeIfAbsent(competitor, performanceCurveSupplier);
+    }
+
+    @Override
+    public Speed getImpliedWind(Competitor competitor, Function<Competitor, Speed> impliedWindSupplier) {
+        return impliedWindPerCompetitor.computeIfAbsent(competitor, impliedWindSupplier);
     }
 }
