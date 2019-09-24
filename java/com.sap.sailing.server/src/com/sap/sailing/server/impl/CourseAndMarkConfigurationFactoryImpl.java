@@ -161,6 +161,10 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             associatedRolesInTemplate.put(result.getOptionalMarkTemplate(), roleName);
             return result;
         };
+        // Caches to allow reusing objects for mark pairs that are based on the same MarkPairWithConfiguration
+        final Map<MarkPairWithConfiguration, MarkPairTemplate> markPairTemplateCache = new HashMap<>();
+        final Map<MarkPairWithConfiguration, MarkPairWithConfiguration> markPairConfigurationCache = new HashMap<>();
+        
         for (WaypointWithMarkConfiguration waypointWithMarkConfiguration : courseWithMarkConfiguration.getWaypoints()) {
             final ControlPointWithMarkConfiguration controlPoint = waypointWithMarkConfiguration.getControlPoint();
             final ControlPointWithMarkConfiguration effectiveControlPointConfiguration;
@@ -174,16 +178,16 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 final MarkTemplate leftTemplate = markTemplatesByMarkConfigurations.get(markPairTemplate.getLeft());
                 final MarkConfiguration rightConfiguration = markConfigurationMapper.apply(markPairTemplate.getRight());
                 final MarkTemplate rightTemplate = markTemplatesByMarkConfigurations.get(markPairTemplate.getRight());
-                // TODO reuse MarkPairWithConfigurationImpl
                 // TODO add shortName
-                effectiveControlPointConfiguration = new MarkPairWithConfigurationImpl(markPairTemplate.getName(), leftConfiguration, rightConfiguration);
-                effectiveControlPointTemplate = markPairTemplateFactory.create(markPairTemplate.getName(), /* TODO shortName */ null, leftTemplate, rightTemplate);
+                effectiveControlPointConfiguration = markPairConfigurationCache.computeIfAbsent(markPairTemplate,
+                        mpt -> new MarkPairWithConfigurationImpl(markPairTemplate.getName(), leftConfiguration,
+                                rightConfiguration));
+                effectiveControlPointTemplate = markPairTemplateCache.computeIfAbsent(markPairTemplate,
+                        mpt -> markPairTemplateFactory.create(markPairTemplate.getName(), /* TODO shortName */ null,
+                                leftTemplate, rightTemplate));
             }
             waypointTemplates.add(new WaypointTemplateImpl(effectiveControlPointTemplate, waypointWithMarkConfiguration.getPassingInstruction()));
             effectiveWaypoints.add(new WaypointWithMarkConfigurationImpl(effectiveControlPointConfiguration, waypointWithMarkConfiguration.getPassingInstruction()));
-            // TODO create new role associations
-            // TODO define CourseTemplate based on marksByMarkConfigurations
-            // TODO construct resulting CourseConfiguration based on marksConfigurationsMapping
         }
         final CourseTemplate newCourseTemplate = sharedSailingData.createCourseTemplate(name, new HashSet<>(markTemplatesByMarkConfigurations.values()),
                 waypointTemplates, associatedRolesInTemplate, courseWithMarkConfiguration.getRepeatablePart(),
@@ -243,13 +247,13 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         } else {
             waypoints = courseConfiguration.getWaypoints();
         }
+        // Cache to allow reusing ControlPointWithTwoMarks objects that are based on the same MarkPairWithConfiguration
+        final Map<MarkPairWithConfiguration, ControlPointWithTwoMarks> markPairCache = new HashMap<>();
+        
         for (WaypointWithMarkConfiguration waypointWithMarkConfiguration : waypoints) {
             final ControlPointWithMarkConfiguration controlPointWithMarkConfiguration = waypointWithMarkConfiguration
                     .getControlPoint();
-            final int markCount = Util.size(controlPointWithMarkConfiguration.getMarkConfigurations());
-            final Function<Integer, Mark> markMapper = i -> {
-                final MarkConfiguration markConfiguration = Util
-                        .get(controlPointWithMarkConfiguration.getMarkConfigurations(), 0);
+            final Function<MarkConfiguration, Mark> markMapper = markConfiguration -> {
                 final Mark mark = marksByMarkConfigurations.get(markConfiguration);
                 if (mark == null) {
                     throw new IllegalStateException("Non declared mark found in waypoint sequence");
@@ -263,15 +267,20 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 return mark;
             };
 
-            if (markCount == 1) {
+            if (controlPointWithMarkConfiguration instanceof MarkConfiguration) {
+                final MarkConfiguration markConfiguration = (MarkConfiguration) controlPointWithMarkConfiguration;
                 course.addWaypoint(Util.size(course.getWaypoints()),
-                        new WaypointImpl(markMapper.apply(0), waypointWithMarkConfiguration.getPassingInstruction()));
+                        new WaypointImpl(markMapper.apply(markConfiguration), waypointWithMarkConfiguration.getPassingInstruction()));
             } else {
-                // TODO recycle control points
-                course.addWaypoint(Util.size(course.getWaypoints()), new WaypointImpl(
-                        new ControlPointWithTwoMarksImpl(UUID.randomUUID(), markMapper.apply(0), markMapper.apply(1),
-                                controlPointWithMarkConfiguration.getName(), /* TODO shortName */ null),
-                        waypointWithMarkConfiguration.getPassingInstruction()));
+                final ControlPointWithTwoMarks controlPoint = markPairCache
+                        .computeIfAbsent((MarkPairWithConfiguration) controlPointWithMarkConfiguration, mpwc -> {
+                            final Mark left = markMapper.apply(mpwc.getLeft());
+                            final Mark right = markMapper.apply(mpwc.getRight());
+                            return new ControlPointWithTwoMarksImpl(UUID.randomUUID(), left, right, mpwc.getName(),
+                                    /* TODO shortName */ null);
+                        });
+                course.addWaypoint(Util.size(course.getWaypoints()),
+                        new WaypointImpl(controlPoint, waypointWithMarkConfiguration.getPassingInstruction()));
             }
         }
         associatedRolesToSave.forEach(course::addRoleMapping);
