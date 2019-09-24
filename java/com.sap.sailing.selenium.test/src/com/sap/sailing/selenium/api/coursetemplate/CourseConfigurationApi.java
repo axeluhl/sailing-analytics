@@ -8,7 +8,7 @@ import com.sap.sailing.selenium.api.core.ApiContext;
 
 public class CourseConfigurationApi {
 
-    private static final String COURSE_CONFIGURATION = "/v1/courseconfiguration";
+    private static final String COURSE_CONFIGURATION = "/api/v1/courseconfiguration";
     private static final String FROM_COURSE = "/getFromCourse/";
     private static final String FROM_COURSE_TEMPLATE = "/getFromCourseTemplate/";
     private static final String TO_COURSE_TEMPLATE = "/createCourseTemplate";
@@ -16,10 +16,10 @@ public class CourseConfigurationApi {
 
     public CourseConfiguration createCourseConfigurationFromCourseTemplate(final ApiContext ctx,
             final UUID courseTemplateId, final String optionalRegattaName) {
-        final JSONObject result = ctx.get(
-                COURSE_CONFIGURATION + FROM_COURSE_TEMPLATE + courseTemplateId.toString() + optionalRegattaName != null
-                        ? "?regattaName=" + optionalRegattaName
-                        : "");
+        final String url = COURSE_CONFIGURATION + FROM_COURSE_TEMPLATE + courseTemplateId.toString() + (optionalRegattaName != null
+                ? "?regattaName=" + optionalRegattaName
+                : "");
+        final JSONObject result = ctx.get(url);
         return new CourseConfiguration(result);
     }
 
@@ -35,5 +35,10 @@ public class CourseConfigurationApi {
                 ? "?regattaName=" + optionalRegattaName
                 : "", null, courseConfiguration.getJson());
         return new CourseConfiguration(result);
+    }
+    
+    public JSONObject createCourse(final ApiContext ctx, final CourseConfiguration courseConfiguration, final String regattaName) {
+        final JSONObject result = ctx.post(COURSE_CONFIGURATION + TO_COURSE + regattaName, null);
+        return result;
     }
 }
