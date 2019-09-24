@@ -7,6 +7,8 @@ package com.sap.sailing.domain.common.orc;
  *
  */
 public interface ORCCertificateUploadConstants {
+    enum MappingResultStatus { OK, BOAT_NOT_FOUND, CERTIFICATE_NOT_FOUND };
+
     String REGATTA = "regatta";
     String RACE = "race";
     String LEADERBOARD = "leaderboard";
@@ -15,5 +17,8 @@ public interface ORCCertificateUploadConstants {
     String BOAT_ID = "boat_id";
     String CERTIFICATE_SELECTION = "certificate_selection";
     String CERTIFICATE_ID = "certificate_id";
-    Object CERTIFICATE_URLS = "certificate_url[]";
+    String CERTIFICATE_URLS = "certificate_url[]";
+    String MAPPINGS = "mappings";
+    String CERTIFICATES = "certificates";
+    String STATUS = "status";
 }

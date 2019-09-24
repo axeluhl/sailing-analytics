@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.shiro.SecurityUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -41,6 +42,7 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCCertificateSelection;
 import com.sap.sailing.domain.common.orc.ORCCertificateUploadConstants;
+import com.sap.sailing.domain.common.orc.ORCCertificateUploadConstants.MappingResultStatus;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.orc.ORCCertificatesCollection;
@@ -49,6 +51,7 @@ import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.deserialization.impl.ORCCertificateSelectionDeserializer;
 import com.sap.sailing.server.gateway.impl.AbstractFileUploadServlet;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.ORCCertificateJsonSerializer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.SessionUtils;
@@ -227,25 +230,55 @@ public class ORCCertificateImportServlet extends AbstractFileUploadServlet {
             ORCCertificateSelection certificateSelection, Map<String, ORCCertificate> certificates,
             HttpServletResponse resp) throws IOException {
         final TimePoint now = MillisecondsTimePoint.now();
+        int status = HttpServletResponse.SC_OK;
+        final Map<Serializable, ORCCertificateUploadConstants.MappingResultStatus> result = new HashMap<>();
         final CompetitorAndBoatStore boatStore = getService().getCompetitorAndBoatStore();
         final AbstractLogEventAuthor serverAuthor = getService().getServerAuthor();
         for (final Entry<Serializable, String> mapping : certificateSelection.getCertificateIdsForBoatIds()) {
             final Boat boat = boatStore.getExistingBoatById(mapping.getKey());
             if (boat == null) {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Couldn't find the boat with ID "+mapping.getKey());
+                status = HttpServletResponse.SC_NOT_FOUND;
+                result.put(mapping.getKey(), ORCCertificateUploadConstants.MappingResultStatus.BOAT_NOT_FOUND);
             } else {
                 final ORCCertificate certificate = certificates.get(mapping.getValue());
                 if (certificate == null) {
-                    resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Couldn't find the certificate with ID "+mapping.getValue()+
-                            " in the set of certificates provided: "+certificates.keySet());
+                    status = HttpServletResponse.SC_NOT_FOUND;
+                    result.put(mapping.getKey(), ORCCertificateUploadConstants.MappingResultStatus.CERTIFICATE_NOT_FOUND);
                 } else {
                     final LogEventT assignment = logEventConstructor.create(
                             now, now, serverAuthor, UUID.randomUUID(), certificate,
                             boat);
                     logToAddTo.add(assignment);
+                    result.put(mapping.getKey(), ORCCertificateUploadConstants.MappingResultStatus.OK);
                 }
             }
         }
+        writeResponse(status, result, certificateSelection, certificates, resp);
+    }
+
+    private void writeResponse(int status, Map<Serializable, ORCCertificateUploadConstants.MappingResultStatus> result,
+            ORCCertificateSelection certificateSelection, Map<String, ORCCertificate> certificates, HttpServletResponse resp) throws IOException {
+        resp.setStatus(status);
+        resp.setContentType("application/json;charset=UTF-8");
+        final JSONObject jsonResponse = new JSONObject();
+        final JSONArray mappings = new JSONArray();
+        for (final Entry<Serializable, MappingResultStatus> m : result.entrySet()) {
+            final JSONObject mapping = new JSONObject();
+            mapping.put(ORCCertificateUploadConstants.BOAT_ID, m.getKey().toString());
+            mapping.put(ORCCertificateUploadConstants.STATUS, m.getValue().name());
+            if (m.getValue() == MappingResultStatus.OK) {
+                mapping.put(ORCCertificateUploadConstants.CERTIFICATE_ID, certificateSelection.getCertificateIdForBoatId(m.getKey()));
+            }
+            mappings.add(mapping);
+        }
+        jsonResponse.put(ORCCertificateUploadConstants.MAPPINGS, mappings);
+        final ORCCertificateJsonSerializer certificateSerializer = new ORCCertificateJsonSerializer();
+        final JSONArray certificatesAsJson = new JSONArray();
+        for (final Entry<String, ORCCertificate> certificateById : certificates.entrySet()) {
+            certificatesAsJson.add(certificateSerializer.serialize(certificateById.getValue()));
+        }
+        jsonResponse.put(ORCCertificateUploadConstants.CERTIFICATES, certificatesAsJson);
+        resp.getWriter().write(jsonResponse.toJSONString());
     }
 
     private void createCertificateAssignmentsForRace(String regattaName, String raceName,

@@ -17,4 +17,9 @@ public class ORCCertificateSelectionImpl implements ORCCertificateSelection {
     public Iterable<Entry<Serializable, String>> getCertificateIdsForBoatIds() {
         return certificateIdsForBoatIds.entrySet();
     }
+
+    @Override
+    public String getCertificateIdForBoatId(Serializable boatId) {
+        return certificateIdsForBoatIds.get(boatId);
+    }
 }

@@ -23,4 +23,6 @@ public interface ORCCertificateSelection {
      * boat in the value of that entry. The result is never {@code null} but may be empty.
      */
     Iterable<Map.Entry<Serializable, String>> getCertificateIdsForBoatIds();
+    
+    String getCertificateIdForBoatId(Serializable boatId);
 }
