@@ -334,12 +334,17 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
     
     protected ORCPerformanceCurve getPerformanceCurveForPartialCourse(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) throws FunctionEvaluationException {
         final ORCPerformanceCurveCourse competitorsPartialCourseAtTimePoint = getPartialCourse(competitor, timePoint, cache);
-        final ORCCertificate certificate = getCertificate(getTrackedRace().getBoatOfCompetitor(competitor));
         final ORCPerformanceCurve performanceCurveForPartialCourse;
-        if (certificate != null) {
-            performanceCurveForPartialCourse = new ORCPerformanceCurveImpl(certificate, competitorsPartialCourseAtTimePoint);
-        } else {
+        if (competitorsPartialCourseAtTimePoint.getTotalLength().equals(Distance.NULL)) {
+            // can't compute a performance curve for an empty course
             performanceCurveForPartialCourse = null;
+        } else {
+            final ORCCertificate certificate = getCertificate(getTrackedRace().getBoatOfCompetitor(competitor));
+            if (certificate != null) {
+                performanceCurveForPartialCourse = new ORCPerformanceCurveImpl(certificate, competitorsPartialCourseAtTimePoint);
+            } else {
+                performanceCurveForPartialCourse = null;
+            }
         }
         return performanceCurveForPartialCourse;
     }
@@ -558,8 +563,12 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
                         final TimePoint timeForLegLeaderImpliedWindCalculation = nowOrLegFinishTimeIfFinishedAtTimePoint(
                                 getTrackedRace().getTrackedLeg(legLeader, trackedLegOfCompetitor.getLeg()), timePoint, cache);
                         final Speed legLeaderImpliedWindInOrAtEndOfLeg = getImpliedWind(legLeader, timeForLegLeaderImpliedWindCalculation, cache);
-                        final Duration correctedTimeOfLegLeaderInCompetitorsPerformanceCurve = competitorPerformanceCurveForLeg.getAllowancePerCourse(legLeaderImpliedWindInOrAtEndOfLeg);
-                        result = actualRaceDurationForCompetitor.minus(correctedTimeOfLegLeaderInCompetitorsPerformanceCurve);
+                        if (legLeaderImpliedWindInOrAtEndOfLeg != null) {
+                            final Duration correctedTimeOfLegLeaderInCompetitorsPerformanceCurve = competitorPerformanceCurveForLeg.getAllowancePerCourse(legLeaderImpliedWindInOrAtEndOfLeg);
+                            result = actualRaceDurationForCompetitor.minus(correctedTimeOfLegLeaderInCompetitorsPerformanceCurve);
+                        } else {
+                            result = null;
+                        }
                     }
                 } catch (FunctionEvaluationException | MaxIterationsExceededException e) {
                     logger.log(Level.WARNING, "Problem with performance curve calculation for competitor "+competitor+" or "+legLeader, e);
