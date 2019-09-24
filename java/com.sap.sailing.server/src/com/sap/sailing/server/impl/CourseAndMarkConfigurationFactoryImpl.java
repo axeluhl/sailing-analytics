@@ -11,6 +11,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -29,6 +31,9 @@ import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.DeviceIdentifier;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.ControlPointWithMarkConfiguration;
@@ -43,31 +48,40 @@ import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.impl.CourseConfigurationImpl;
+import com.sap.sailing.domain.coursetemplate.impl.FixedPositioningImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPairWithConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesBasedMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateBasedMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.RegattaMarkConfigurationImpl;
+import com.sap.sailing.domain.coursetemplate.impl.SavedDevicePositioningImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointWithMarkConfigurationImpl;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfigurationFactory {
 
+    private static final Logger log = Logger.getLogger(CourseAndMarkConfigurationFactoryImpl.class.getName());
+    
     private final SharedSailingData sharedSailingData;
+    private final SensorFixStore sensorFixStore;
 
-    public CourseAndMarkConfigurationFactoryImpl(SharedSailingData sharedSailingData) {
+    public CourseAndMarkConfigurationFactoryImpl(SharedSailingData sharedSailingData, SensorFixStore sensorFixStore) {
         this.sharedSailingData = sharedSailingData;
+        this.sensorFixStore = sensorFixStore;
     }
 
     @Override
@@ -300,8 +314,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 // determine matching MarkProperties to associate
                 if (suggestedMappings.containsKey(markTemplate)) {
                     MarkProperties mappedProperties = suggestedMappings.get(markTemplate);
-                    // TODO specify positioning if available
-                    markConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(mappedProperties, null);
+                    markConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(mappedProperties, getPositioningIfAvailable(mappedProperties));
                 } else {
                     markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(markTemplate, null);
                 }
@@ -451,7 +464,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                             if (suggestedMappings.containsKey(markTemplate)) {
                                 MarkProperties mappedProperties = suggestedMappings.get(markTemplate);
                                 markConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(mappedProperties,
-                                        null);
+                                        getPositioningIfAvailable(mappedProperties));
                             } else {
                                 markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(markTemplate, null);
                             }
@@ -495,6 +508,29 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
 
         return new CourseConfigurationImpl(courseTemplateOrNull, allMarkConfigurations, resultingRoleMapping,
                 resultingWaypoints, optionalRepeatablePart, numberOfLaps);
+    }
+    
+    private Positioning getPositioningIfAvailable(MarkProperties markProperties) {
+        final Position fixedPosition = markProperties.getFixedPosition();
+        if (fixedPosition != null) {
+            return new FixedPositioningImpl(fixedPosition);
+        }
+        final DeviceIdentifier trackingDeviceIdentifier = markProperties.getTrackingDeviceIdentifier();
+        if (trackingDeviceIdentifier != null) {
+            Position lastPositionOrNull = null;
+            try {
+                final Map<DeviceIdentifier, Timed> lastFixMap = sensorFixStore.getLastFix(Collections.singleton(trackingDeviceIdentifier));
+                final Timed lastFixOrNull = lastFixMap.get(trackingDeviceIdentifier);
+                if (lastFixOrNull instanceof GPSFix) {
+                    lastPositionOrNull = ((GPSFix)lastFixOrNull).getPosition();
+                }
+            } catch (Exception e) {
+                log.log(Level.WARNING,
+                        "Error shile trying to load last fix for tracking device associated to mark properties", e);
+            }
+            return new SavedDevicePositioningImpl(lastPositionOrNull);
+        }
+        return null;
     }
 
     private class MarkTemplatesMarkPropertiesAssociater {
