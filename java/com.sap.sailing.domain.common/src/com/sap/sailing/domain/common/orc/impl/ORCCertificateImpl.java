@@ -52,8 +52,6 @@ public class ORCCertificateImpl implements ORCCertificate {
 
     public final static Distance NAUTICAL_MILE = new NauticalMileDistance(1);
     
-    public final static double PI = 3.14159265358979;
-
     private final String sailnumber;
     private final String boatName;
     private final String boatclass;
