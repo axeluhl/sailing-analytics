@@ -2,18 +2,16 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import static com.sap.sailing.domain.common.security.SecuredDomainType.COMPETITOR;
 
-import java.util.Set;
-
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyDisplay;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
@@ -29,7 +27,6 @@ public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
     
     private final BoatPanel boatTable;
     private final String regattaName;
-    private final Widget widget;
     private final BusyIndicator busyIndicator;
 
     public BoatCertificatesPanel(final SailingServiceAsync sailingService, final UserService userService, final StringMessages stringMessages,
@@ -45,50 +42,53 @@ public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
         this.boatTable = new BoatPanel(sailingService, userService, stringMessages, errorReporter);
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         VerticalPanel mainPanel = new VerticalPanel();
-        mainPanel.setWidth("100%");
         this.setWidget(mainPanel);
-        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, COMPETITOR);
-        mainPanel.add(buttonPanel);
+        Grid tablesPanel = new Grid(1,2);
+        tablesPanel.setWidth("100%");
+        final AccessControlledButtonPanel topButtonPanel = new AccessControlledButtonPanel(userService, COMPETITOR);
+        final AccessControlledButtonPanel bottomButtonPanel = new AccessControlledButtonPanel(userService, COMPETITOR);
+        mainPanel.add(topButtonPanel);
+        mainPanel.add(tablesPanel);
+        mainPanel.add(bottomButtonPanel);
 
         // BUTTON - Refresh
-        final Button refreshButton = buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::refreshBoatList);
+        final Button refreshButton = topButtonPanel.addUnsecuredAction(stringMessages.refresh(), this::refreshBoatList);
         refreshButton.ensureDebugId("RefreshButton");
 
-        // BUTTON - Add Competitors
-        final Button addCompetitorButton = buttonPanel.addCreateAction(stringMessages.add(), null);
-        addCompetitorButton.ensureDebugId("AddCompetitorButton");
+        // BUTTON - Import Certificates
+        final Button importCertificatesButton = topButtonPanel.addCreateAction(stringMessages.importCertificates(), null);
+        importCertificatesButton.ensureDebugId("AddCompetitorButton");
 
-        // BUTTON - Import Competitors
-        buttonPanel.addCreateAction(stringMessages.importCompetitors(), () -> {
-            sailingService.getCompetitorProviderNames(new AsyncCallback<Iterable<String>>() {
-                @Override
-                public void onSuccess(Iterable<String> providerNames) {
-                    /*
-                    MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory = getMatchCompetitorsDialogFactory(
-                            sailingService, userService, stringMessages, errorReporter);
-                    CompetitorImportProviderSelectionDialog dialog = new CompetitorImportProviderSelectionDialog(
-                            matchCompetitorsDialogFactory, CompetitorPanel.this, providerNames, sailingService,
-                            stringMessages, errorReporter);
-                    dialog.show();
-                    */
-                }
+        // TABLE - Boats
+        VerticalPanel boatPanel = new VerticalPanel();
+        boatPanel.add(busyIndicator);
+        boatPanel.add(boatTable);
+        CaptionPanel boatCaptionPanel = new CaptionPanel("Boats");
+        boatCaptionPanel.add(boatPanel);
+        tablesPanel.setWidget(0, 0, boatCaptionPanel);
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter
-                            .reportError(stringMessages.errorLoadingCompetitorImportProviders(caught.getMessage()));
-                }
-            });
-        });
-
-        mainPanel.add(busyIndicator);
-        mainPanel.add(boatTable);
+        // TABLE - Certificates
+        tablesPanel.setWidget(0, 1, new CaptionPanel("Certificates"));
+        
+        // BUTTON - Link
+        final Button linkButton = bottomButtonPanel.addCreateAction("Link", null);
+        linkButton.ensureDebugId("LinkCertificateToBoatButton");
+        
+        // BUTTON - Unlink
+        final Button unlinkButton = bottomButtonPanel.addCreateAction("Unlink", null);
+        linkButton.ensureDebugId("UnlinkCertificateToBoatButton");
         
         if (regattaName != null) {
             refreshBoatList();
-        }
-        
-        this.widget = mainPanel;
+        }        
+    }
+    
+    private Widget getBoatTable() {
+        return null;
+    }
+    
+    private Widget getCertificatesTable() {
+        return null;
     }
     
     private void refreshBoatList() {
@@ -100,10 +100,4 @@ public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
         // TODO Auto-generated method stub
         
     }
-    
-    @Override
-    public Widget getWidget() {
-        return widget;
-    }
-
 }

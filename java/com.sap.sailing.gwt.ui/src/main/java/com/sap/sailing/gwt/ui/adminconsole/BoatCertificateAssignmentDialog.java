@@ -33,7 +33,7 @@ public class BoatCertificateAssignmentDialog extends DataEntryDialog<List<BoatDT
         
     public BoatCertificateAssignmentDialog(final SailingServiceAsync sailingService, UserService userService, String regattaName, final StringMessages stringMessages,
             final ErrorReporter errorReporter, DialogCallback<List<BoatDTO>> callback) {
-        super(stringMessages.actionEditCompetitors(), stringMessages.actionEditCompetitors(), stringMessages.ok(), stringMessages.cancel(), new BoatValidator(), callback);
+        super(stringMessages.actionEditCompetitors(), stringMessages.actionEditCompetitors(), stringMessages.save(), stringMessages.cancel(), new BoatValidator(), callback);
         this.sailingService = sailingService;
         this.userService = userService;
         this.stringMessages = stringMessages;
