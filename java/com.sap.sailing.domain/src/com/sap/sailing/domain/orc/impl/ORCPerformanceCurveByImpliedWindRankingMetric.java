@@ -494,6 +494,7 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
                 competitorRankingInfo.put(competitor, new CompetitorRankingInfoImpl(
                         timePoint, competitor, getWindwardDistanceTraveled(competitor, timePoint, cache),
                         actualRaceDuration, correctedTime,
+                        // FIXME the predicted duration to the boat farthest ahead; use the competitor's implied wind so far and compute its performance curve for the partial course of the boat farthest ahead; apply the current implied wind and take the delta between the resulting allowance and the time sailed so far
                         correctedTime == null ? null : actualRaceDuration.plus(correctedTime),
                         correctedTime));
             }
