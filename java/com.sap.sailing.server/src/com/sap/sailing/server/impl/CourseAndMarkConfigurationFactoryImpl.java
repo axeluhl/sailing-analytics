@@ -454,7 +454,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
 
         if (validCourseTemplateUsage) {
             resultingRoleMapping = roleMappingBasedOnCourseTemplate;
-            if (courseTemplateOrNull.hasRepeatablePart() && numberOfLaps == 1) {
+            if (courseTemplateOrNull != null && courseTemplateOrNull.hasRepeatablePart() && numberOfLaps == 1) {
                 // In case of just 1 lap, it is possible that MarkTemplates are left unmapped
                 for (int i = optionalRepeatablePart.getZeroBasedIndexOfRepeatablePartStart(); i < optionalRepeatablePart
                         .getZeroBasedIndexOfRepeatablePartEnd(); i++) {
@@ -486,8 +486,12 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     }
                 }
             }
-            resultingWaypoints = createWaypointConfigurationsWithMarkTemplateMapping(courseTemplateOrNull,
-                    markTemplatesToMarkConfigurations);
+            if (courseTemplateOrNull != null) {
+                resultingWaypoints = createWaypointConfigurationsWithMarkTemplateMapping(courseTemplateOrNull,
+                        markTemplatesToMarkConfigurations);
+            } else {
+                resultingWaypoints = new ArrayList<>();
+            }
         } else {
             resultingRoleMapping = new HashMap<>();
             resultingWaypoints = new ArrayList<>();

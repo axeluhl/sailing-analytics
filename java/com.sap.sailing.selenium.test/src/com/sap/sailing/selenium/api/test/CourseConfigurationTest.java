@@ -64,7 +64,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertNotNull(courseConfiguration);
     }
 
-    @Ignore
+    @Test
     public void testCreateCourseConfigurationFromCourse() {
         final String regattaName = "test";
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
@@ -86,14 +86,15 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
 
         courseConfigurationApi.createCourse(ctx, createSimpleCourseConfiguration(ctx), regattaName);
     }
-    
+
     @Test
     public void testCreateCourseTemplateFromCourseConfiguration() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
-        
-        courseConfigurationApi.createCourseTemplate(ctx, createSimpleCourseConfiguration(ctx), /* optionalRegattaName */ null);
+
+        courseConfigurationApi.createCourseTemplate(ctx, createSimpleCourseConfiguration(ctx),
+                /* optionalRegattaName */ null);
     }
-    
+
     private CourseConfiguration createSimpleCourseConfiguration(final ApiContext ctx) {
         List<MarkConfiguration> markConfigurations = new ArrayList<MarkConfiguration>();
         MarkTemplate markTemplate = markTemplateApi.createMarkTemplate(ctx, "test", "test", "#ffffff", "shape",
