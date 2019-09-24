@@ -25,6 +25,12 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseConfigurationJsonSerializer;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
@@ -32,9 +38,14 @@ import com.sun.jersey.api.client.ClientResponse.Status;
 public class CourseConfigurationResource extends AbstractSailingServerResource {
 
     private final JsonSerializer<CourseConfiguration> courseConfigurationJsonSerializer;
+    private final JsonSerializer<CourseBase> courseJsonSerializer;
 
     public CourseConfigurationResource() {
         courseConfigurationJsonSerializer = new CourseConfigurationJsonSerializer();
+        courseJsonSerializer = new CourseJsonSerializer(new CourseBaseJsonSerializer(
+                new WaypointJsonSerializer(new ControlPointJsonSerializer(new MarkJsonSerializer(),
+                        new GateJsonSerializer(new MarkJsonSerializer())))));
+        ;
     }
 
     private JsonDeserializer<CourseConfiguration> getCourseConfigurationDeserializer(final Regatta regatta,
@@ -173,6 +184,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         CourseBase course = getService().getCourseAndMarkConfigurationFactory()
                 .createCourseFromConfigurationAndDefineMarksAsNeeded(regatta, courseConfiguration, /* lapCount */ 0,
                         /* timePointForDefinitionOfMarksAndDeviceMappings */ null, /* author */ null);
-        return Response.ok().build();
+
+        return Response.ok(courseJsonSerializer.serialize(course)).build();
     }
 }
