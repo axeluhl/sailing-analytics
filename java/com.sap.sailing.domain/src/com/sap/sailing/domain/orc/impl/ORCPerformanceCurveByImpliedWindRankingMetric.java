@@ -494,12 +494,34 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
                 competitorRankingInfo.put(competitor, new CompetitorRankingInfoImpl(
                         timePoint, competitor, getWindwardDistanceTraveled(competitor, timePoint, cache),
                         actualRaceDuration, correctedTime,
-                        // FIXME the predicted duration to the boat farthest ahead; use the competitor's implied wind so far and compute its performance curve for the partial course of the boat farthest ahead; apply the current implied wind and take the delta between the resulting allowance and the time sailed so far
-                        correctedTime == null ? null : actualRaceDuration.plus(correctedTime),
+                        getEstimatedActualDurationToCompetitorFarthestAhead(competitor, timePoint, cache),
                         correctedTime));
             }
         }
         return new ORCPerformanceCurveRankingInfo(timePoint, competitorRankingInfo, cache);
+    }
+
+    /**
+     * Computes the predicted duration to the boat farthest ahead; use the competitor's implied wind so far and compute
+     * its performance curve for the partial course of the boat farthest ahead; apply the current implied wind and take
+     * the delta between the resulting allowance and the time sailed so far
+     */
+    private Duration getEstimatedActualDurationToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final Competitor competitorFarthestAhead = getCompetitorFarthestAhead(timePoint, cache);
+        final ORCPerformanceCurveCourse courseOfCompetitorFarthestAhead = getPartialCourse(competitorFarthestAhead, timePoint, cache);
+        ORCPerformanceCurve performanceCurveForCompetitorToPositionOfCompetitorFarthestAhread;
+        try {
+            performanceCurveForCompetitorToPositionOfCompetitorFarthestAhread = new ORCPerformanceCurveImpl(getCertificate(getTrackedRace().getBoatOfCompetitor(competitor)),
+                    courseOfCompetitorFarthestAhead);
+            final Speed competitorsCurrentImpliedWind = cache.getImpliedWind(competitorFarthestAhead, getImpliedWindSupplier(timePoint, cache));
+            final Duration allowanceToPositionOfBoatFarthestAhead = performanceCurveForCompetitorToPositionOfCompetitorFarthestAhread
+                    .getAllowancePerCourse(competitorsCurrentImpliedWind);
+            final Duration competitorElapsedTime = getTrackedRace().getTimeSailedSinceRaceStart(competitor, timePoint);
+            return allowanceToPositionOfBoatFarthestAhead.minus(competitorElapsedTime);
+        } catch (FunctionEvaluationException e) {
+            logger.log(Level.SEVERE, "Problem evaluating ORC PCS function", e);
+            return null;
+        }
     }
 
     /**
