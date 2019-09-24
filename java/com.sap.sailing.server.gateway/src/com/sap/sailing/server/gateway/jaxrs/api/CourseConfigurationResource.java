@@ -185,6 +185,6 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
                 .createCourseFromConfigurationAndDefineMarksAsNeeded(regatta, courseConfiguration, /* lapCount */ 0,
                         /* timePointForDefinitionOfMarksAndDeviceMappings */ null, /* author */ null);
 
-        return Response.ok(courseJsonSerializer.serialize(course)).build();
+        return Response.ok(courseJsonSerializer.serialize(course).toJSONString()).build();
     }
 }

@@ -1,5 +1,8 @@
 package com.sap.sailing.server.gateway.deserialization.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,9 +47,9 @@ public class CourseConfigurationBuilder {
     private final Regatta optionalRegatta;
     private final CourseTemplate optionalCourseTemplate;
     // TODO decide if we should combine markConfigurations and roleMapping to one field
-    private Set<MarkConfiguration> markConfigurations;
-    private Map<MarkConfiguration, String> associatedRoles;
-    private List<WaypointWithMarkConfiguration> waypoints;
+    private Set<MarkConfiguration> markConfigurations = new HashSet<>();
+    private Map<MarkConfiguration, String> associatedRoles = new HashMap<>();
+    private List<WaypointWithMarkConfiguration> waypoints = new ArrayList<>();;
     private RepeatablePart optionalRepeatablePart;
     private Integer numberOfLaps;
     private Map<MarkPairWithConfiguration, MarkPairWithConfiguration> markPairCache;
@@ -78,6 +81,7 @@ public class CourseConfigurationBuilder {
             throw new IllegalArgumentException(
                     "Mark configuration could not be constructed due to missing specification");
         }
+        markConfigurations.add(result);
         return result;
     }
 
@@ -87,7 +91,9 @@ public class CourseConfigurationBuilder {
         if (resolvedMarkTemplate == null) {
             throw new IllegalStateException("Mark template with ID " + markTemplateID + " could not be resolved");
         }
-        return new MarkTemplateBasedMarkConfigurationImpl(resolvedMarkTemplate, /* optionalPositioning */ null);
+        final MarkTemplateBasedMarkConfiguration result = new MarkTemplateBasedMarkConfigurationImpl(resolvedMarkTemplate, /* optionalPositioning */ null);
+        markConfigurations.add(result);
+        return result;
     }
 
     /**
@@ -117,7 +123,9 @@ public class CourseConfigurationBuilder {
             throw new IllegalArgumentException(
                     "Mark properties with ID " + markPropertiesID + " could not be resolved");
         }
-        return new MarkPropertiesBasedMarkConfigurationImpl(resolvedMarkProperties, optionalPositioning);
+        final MarkPropertiesBasedMarkConfiguration result = new MarkPropertiesBasedMarkConfigurationImpl(resolvedMarkProperties, optionalPositioning);
+        markConfigurations.add(result);
+        return result;
     }
 
     public FreestyleMarkConfiguration addFreestyleMarkConfiguration(UUID optionalMarkTemplateID,
@@ -128,7 +136,9 @@ public class CourseConfigurationBuilder {
         // TODO decide if it is fine if we can't resolve a MarkTemplate or MarkProperties here because all appearance
         // properties are available. This vcould potentially cause a lack of tracking information if the MarkProperties
         // isn't available.
-        return new FreestyleMarkConfigurationImpl(resolvedMarkTemplate, resolvedMarkProperties, commonMarkProperties, optionalPositioning);
+        final FreestyleMarkConfiguration result = new FreestyleMarkConfigurationImpl(resolvedMarkTemplate, resolvedMarkProperties, commonMarkProperties, optionalPositioning);
+        markConfigurations.add(result);
+        return result;
     }
 
     public RegattaMarkConfiguration addRegattaMarkConfiguration(UUID markID, Positioning optionalPositioning) {
@@ -138,7 +148,9 @@ public class CourseConfigurationBuilder {
         for (RaceColumn raceColumn : optionalRegatta.getRaceColumns()) {
             for (Mark mark : raceColumn.getAvailableMarks()) {
                 if (mark.getId().equals(markID)) {
-                    return new RegattaMarkConfigurationImpl(mark, optionalPositioning, /* TODO optionalMarkTemplate */ null);
+                    final RegattaMarkConfiguration result = new RegattaMarkConfigurationImpl(mark, optionalPositioning, /* TODO optionalMarkTemplate */ null);
+                    markConfigurations.add(result);
+                    return result;
                 }
             }
         }
