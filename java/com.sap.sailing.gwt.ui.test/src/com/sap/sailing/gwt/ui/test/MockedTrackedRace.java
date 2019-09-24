@@ -106,6 +106,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public TimePoint getFinishingTime() {
+        return null;
+    }
+
+    @Override
     public TimePoint getFinishedTime() {
         return null;
     }
@@ -833,6 +838,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad) {
+    }
+
+    @Override
+    public void setFinishingTime(TimePoint newFinishingTime) {
     }
 
     @Override

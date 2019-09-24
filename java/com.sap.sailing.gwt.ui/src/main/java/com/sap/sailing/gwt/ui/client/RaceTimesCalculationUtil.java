@@ -17,43 +17,38 @@ public class RaceTimesCalculationUtil {
         Date max = null;
 
         Date liveTimePoint = timer.getLiveTimePointAsDate();
-        switch (timer.getPlayMode()) {
-        case Live:
-            if (raceTimesInfo.startOfRace != null) {
-                // we have a race start time
-                if (raceTimesInfo.startOfRace.after(liveTimePoint)) {
-                    // race start is in the future
-                    min = new Date(Math.min(liveTimePoint.getTime(), raceTimesInfo.startOfRace.getTime() - MIN_TIME_BEFORE_RACE_START));
-                    max = new Date(raceTimesInfo.startOfRace.getTime() + MIN_TIME_AFTER_RACE_START);
-                } else {
-                    // race start was in the past
-                    min = new Date(raceTimesInfo.startOfRace.getTime() - MIN_TIME_BEFORE_RACE_START);
-                    max = new Date(liveTimePoint.getTime() + TIME_AFTER_LIVE);
-                }
-            } else {
-                // we have NO race start time
-                min = raceTimesInfo.startOfTracking;
-                max = new Date(liveTimePoint.getTime() + TIME_AFTER_LIVE);
-            }
-            break;
-        case Replay:
-            if (raceTimesInfo.startOfRace != null) {
-                min = new Date(raceTimesInfo.startOfRace.getTime() - MIN_TIME_BEFORE_RACE_START);
-            } else if (raceTimesInfo.startOfTracking != null) {
-                min = raceTimesInfo.startOfTracking;
-            }
-            if (raceTimesInfo.endOfRace != null) {
-                max = new Date(raceTimesInfo.endOfRace.getTime() + MAX_TIME_AFTER_RACE_END);
-            } else if (raceTimesInfo.newestTrackingEvent != null) {
-                max = raceTimesInfo.newestTrackingEvent;
-                if (raceTimesInfo.endOfTracking != null && raceTimesInfo.endOfTracking.before(raceTimesInfo.newestTrackingEvent)) {
-                    max = raceTimesInfo.endOfTracking;
-                }
-            } else if (raceTimesInfo.endOfTracking != null) {
+
+        // Range start / min
+        if (raceTimesInfo.startOfRace != null) {
+            // We have a start time
+            min = new Date(raceTimesInfo.startOfRace.getTime() - MIN_TIME_BEFORE_RACE_START);
+        } else if (raceTimesInfo.startOfTracking != null) {
+            // We at least have a start of tracking time
+            min = raceTimesInfo.startOfTracking;
+        }
+        if (min == null || liveTimePoint.before(min)){
+            // There is no start time or the start time is in the future
+            min = new Date(liveTimePoint.getTime());
+        }
+
+        // Range end / max
+        if (raceTimesInfo.raceFinishedTime != null) {
+            // We have a blue flag down event
+            max = new Date(raceTimesInfo.raceFinishedTime.getTime() + MAX_TIME_AFTER_RACE_END);
+        } else if (raceTimesInfo.endOfRace != null && raceTimesInfo.raceFinishingTime == null) {
+            // We have NO blue flag up event and we have an end of race time
+            max = new Date(raceTimesInfo.endOfRace.getTime() + MAX_TIME_AFTER_RACE_END);
+        } else {
+            // We have no end time so just keep playing until they are created
+            max = new Date(liveTimePoint.getTime() + TIME_AFTER_LIVE);
+        }
+        // If there are no end events or the additional offset exceeds end of tracking
+        if (raceTimesInfo.endOfTracking != null) {
+            if (max == null || max.after(raceTimesInfo.endOfTracking)) {
                 max = raceTimesInfo.endOfTracking;
             }
-            break;
         }
+
         return new Util.Pair<Date, Date>(min, max);
     }
 }

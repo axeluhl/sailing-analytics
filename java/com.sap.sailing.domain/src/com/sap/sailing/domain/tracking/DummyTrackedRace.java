@@ -94,6 +94,11 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
+    public TimePoint getFinishingTime() {
+        return null;
+    }
+
+    @Override
     public TimePoint getFinishedTime() {
         return null;
     }
