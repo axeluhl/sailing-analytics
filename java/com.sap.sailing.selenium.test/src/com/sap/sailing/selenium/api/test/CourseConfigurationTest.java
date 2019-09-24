@@ -60,7 +60,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
 
         CourseTemplate srcCourseTemplate = courseTemplateApi.createCourseTemplate(ctx, courseTemplate);
         CourseConfiguration courseConfiguration = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(
-                ctx, srcCourseTemplate.getId(), /* optionalRegattaName */ null);
+                ctx, srcCourseTemplate.getId(), /* optionalRegattaName */ null, /* tags */ null);
         assertNotNull(courseConfiguration);
     }
 
@@ -74,7 +74,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         LeaderboardApi.startRaceLogTracking(ctx, regattaName, race.getRaceName(), "Default");
 
         final String raceName = regattaName + " " + race.getRaceName() + " Default";
-        courseConfigurationApi.createCourseConfigurationFromCourse(ctx, regattaName, raceName);
+        courseConfigurationApi.createCourseConfigurationFromCourse(ctx, regattaName, raceName, /* tags */ null);
     }
 
     @Test
