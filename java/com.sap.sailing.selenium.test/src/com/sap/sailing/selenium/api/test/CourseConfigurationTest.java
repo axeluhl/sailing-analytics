@@ -51,8 +51,15 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 
         final List<MarkTemplate> markTemplates = new ArrayList<>();
+        MarkTemplate mt1 = markTemplateApi.createMarkTemplate(ctx, "mark template 1", "mt1", "#FFFFFF", "Cylinder", "Checkered", MarkType.BUOY.name());
+        markTemplates.add(mt1);
+        
         final Map<MarkTemplate, String> roleMapping = new HashMap<>();
+
         final List<WaypointTemplate> waypointTemplates = new ArrayList<>();
+        WaypointTemplate wpt1 = new WaypointTemplate("wpt1", PassingInstruction.FixedBearing, markTemplates);
+        waypointTemplates.add(wpt1);
+        
         final List<String> tags = new ArrayList<>();
         CourseTemplate courseTemplate = new CourseTemplate("test", markTemplates, roleMapping, waypointTemplates, null,
                 tags, null);

@@ -99,9 +99,10 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
                     .forEach(mc -> markConfigurationsToTempIdMap.get(mc).toString());
             waypointEntry.put(FIELD_WAYPOINT_MARK_CONFIGURATION_IDS, markConfigurationIDs);
             waypointEntry.put(FIELD_WAYPOINT_CONTROL_POINT_NAME, waypoint.getControlPoint().getName());
-            // waypointEntry.put(FIELD_WAYPOINT_CONTROL_POINT_SHORT_NAME, waypoint.getControlPoint().getShortName());
+            //waypointEntry.put(FIELD_WAYPOINT_CONTROL_POINT_SHORT_NAME, waypoint.getControlPoint().getShortName());
             waypoints.add(waypointEntry);
         }
+        result.put(FIELD_WAYPOINTS, waypoints);
 
         if (courseConfiguration.hasRepeatablePart()) {
             result.put(FIELD_OPTIONAL_REPEATABLE_PART,
