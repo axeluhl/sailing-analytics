@@ -271,13 +271,13 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
                 result = cache.getTotalCourse(()->getTotalCourse());
             } else {
                 // not started the race yet; return empty course
-                result = getTotalCourse().subcourse(0, 0);
+                result = cache.getTotalCourse(()->getTotalCourse()).subcourse(0, 0);
             }
         } else {
             final double shareOfCurrentLeg = 1.0
                     - trackedLegOfCompetitor.getWindwardDistanceToGo(timePoint, WindPositionMode.LEG_MIDDLE, cache).divide(
                             trackedLegOfCompetitor.getTrackedLeg().getWindwardDistance(timePoint, cache));
-            result = getTotalCourse().subcourse(getTrackedRace().getRace().getCourse().getIndexOfWaypoint(trackedLegOfCompetitor.getLeg().getFrom()), shareOfCurrentLeg);
+            result = cache.getTotalCourse(()->getTotalCourse()).subcourse(getTrackedRace().getRace().getCourse().getIndexOfWaypoint(trackedLegOfCompetitor.getLeg().getFrom()), shareOfCurrentLeg);
         }
         return result;
     }
