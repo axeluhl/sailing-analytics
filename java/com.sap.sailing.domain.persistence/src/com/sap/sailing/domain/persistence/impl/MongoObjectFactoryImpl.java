@@ -1857,7 +1857,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeIdentifier, RegattaLogORCCertificateAssignmentEvent event) {
         Document document = createBasicRegattaLogEventDBObject(event);
-        document.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogDeviceCompetitorMappingEvent.class.getSimpleName());
+        document.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogORCCertificateAssignmentEvent.class.getSimpleName());
         document.append(FieldNames.COMPETITOR_ID.name(), event.getBoatId());
         document.append(FieldNames.ORC_CERTIFICATE.name(), createORCCertificateObject(event.getCertificate()));
         storeRegattaLogEvent(regattaLikeIdentifier, document);
