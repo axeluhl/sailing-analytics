@@ -2077,7 +2077,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 if (event != null) {
                     targetRegattaLog.load(event);
                 }
-            } catch (IllegalStateException e) {
+            } catch (Exception e) {
                 logger.log(Level.SEVERE, "Couldn't load regatta log event " + o + ": " + e.getMessage(), e);
             }
         }
