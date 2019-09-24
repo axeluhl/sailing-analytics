@@ -16,6 +16,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -33,6 +34,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSeri
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseConfigurationJsonSerializer;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/v1/courseconfiguration")
@@ -181,10 +183,11 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         final CourseConfiguration courseConfiguration = getCourseConfigurationDeserializer(regatta,
                 /* courseTemplate */ null).deserialize((JSONObject) parsedObject);
 
-        // TODO: parameters
+        // TODO: clarify parameters
         CourseBase course = getService().getCourseAndMarkConfigurationFactory()
                 .createCourseFromConfigurationAndDefineMarksAsNeeded(regatta, courseConfiguration, /* lapCount */ 0,
-                        /* timePointForDefinitionOfMarksAndDeviceMappings */ null, /* author */ null);
+                        MillisecondsTimePoint.now(),
+                        new LogEventAuthorImpl(getService().getServerAuthor().getName(), 0));
 
         return Response.ok(courseJsonSerializer.serialize(course).toJSONString()).build();
     }
