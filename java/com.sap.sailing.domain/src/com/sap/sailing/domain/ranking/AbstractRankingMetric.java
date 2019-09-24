@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -283,21 +282,6 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         return getTrackedRace().getRace().getCompetitors();
     }
     
-    /**
-     * Not all implementations may need the leg and the estimated position; therefore, to avoid unnecessary
-     * calculations, {@link Supplier}s are expected instead of the values themselves, allowing for lazy on-demand
-     * calculation.
-     * 
-     * @param estimatedPosition
-     *            the position where the competitor <code>who</code> is when calculating the corrected time; some
-     *            ranking metrics may require this information to determine quickly how far within the current leg the
-     *            competitor has sailed. As others may not need it at all, the parameter is declared as a
-     *            {@link Supplier} which delays evaluation until it is needed or avoids it altogether.
-     */
-    protected abstract Duration getCalculatedTime(Competitor who, Supplier<Leg> leg,
-            Supplier<Position> estimatedPosition, Duration totalDurationSinceRaceStart,
-            Distance totalWindwardDistanceTraveled);
-
     /**
      * Get's <code>who</code>'s current tracked leg at <code>timePoint</code>, or <code>null</code> if <code>who</code> hasn't
      * started at <code>timePoint</code> yet, or <code>who</code>'s tracked leg for the last leg if <code>who</code> has

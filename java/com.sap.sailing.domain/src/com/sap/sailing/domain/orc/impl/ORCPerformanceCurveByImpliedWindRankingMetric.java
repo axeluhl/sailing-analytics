@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,7 +35,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
@@ -483,19 +481,6 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
                 return null;
             }
         };
-    }
-
-    @Override
-    protected Duration getCalculatedTime(Competitor who, Supplier<Leg> leg, Supplier<Position> estimatedPosition,
-            Duration totalDurationSinceRaceStart, Distance totalWindwardDistanceTraveled) {
-        final TimePoint startOfRace = getTrackedRace().getStartOfRace();
-        final Duration result;
-        if (startOfRace == null) {
-            result = null;
-        } else {
-            result = getCorrectedTime(who, startOfRace.plus(totalDurationSinceRaceStart));
-        }
-        return result;
     }
 
     @Override

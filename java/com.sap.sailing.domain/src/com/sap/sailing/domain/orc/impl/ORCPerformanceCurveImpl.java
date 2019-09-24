@@ -170,18 +170,18 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         case TWA:
             for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
                 // Case switching on TWA (0. TWA == 0; 1. TWA < Beat; 2. Beat < TWA < Gybe; 3. Gybe < TWA; 4. TWA == 180)
-                if (leg.getTwa().compareTo(beatAngles.get(tws)) <= 0) {
+                if (leg.getTwa().abs().compareTo(beatAngles.get(tws)) <= 0) {
                     // Case 0 & 1 - result = beatVMG * distance * cos(TWA)
-                    result.put(tws, beatAllowancePerTrueWindSpeed.get(tws).times(leg.getLength().getNauticalMiles()).times(Math.cos(leg.getTwa().getRadians())));
-                } else if (leg.getTwa().compareTo(runAngles.get(tws)) >= 0) {
+                    result.put(tws, beatAllowancePerTrueWindSpeed.get(tws).times(leg.getLength().getNauticalMiles()).times(Math.cos(leg.getTwa().abs().getRadians())));
+                } else if (leg.getTwa().abs().compareTo(runAngles.get(tws)) >= 0) {
                     // Case 3 & 4 - result = runVMG * distance * cos(TWA)
-                    result.put(tws, runAllowancePerTrueWindSpeed.get(tws).times(leg.getLength().getNauticalMiles()).times(Math.cos(Math.PI - leg.getTwa().getRadians())));
+                    result.put(tws, runAllowancePerTrueWindSpeed.get(tws).times(leg.getLength().getNauticalMiles()).times(Math.cos(Math.PI - leg.getTwa().abs().getRadians())));
                 } else {
                     // Case 2 - result is given through the laGrange Interpolation, between the Beat and Gybe Angles
                     result.put(tws,
                             getLagrangeSpeedPredictionForTrueWindSpeedAndAngle(twaAllowances, beatAngles,
                                     beatVMGPredictionPerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed, tws,
-                                    leg.getTwa()).getDuration(leg.getLength()));
+                                    leg.getTwa().abs()).getDuration(leg.getLength()));
                 }
             }
             break;

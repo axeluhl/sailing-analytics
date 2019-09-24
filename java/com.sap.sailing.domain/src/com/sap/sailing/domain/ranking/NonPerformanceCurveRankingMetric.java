@@ -4,10 +4,12 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -56,6 +58,21 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
     protected NonPerformanceCurveRankingMetric(TrackedRace trackedRace) {
         super(trackedRace);
     }
+    
+    /**
+     * Not all implementations may need the leg and the estimated position; therefore, to avoid unnecessary
+     * calculations, {@link Supplier}s are expected instead of the values themselves, allowing for lazy on-demand
+     * calculation.
+     * 
+     * @param estimatedPosition
+     *            the position where the competitor <code>who</code> is when calculating the corrected time; some
+     *            ranking metrics may require this information to determine quickly how far within the current leg the
+     *            competitor has sailed. As others may not need it at all, the parameter is declared as a
+     *            {@link Supplier} which delays evaluation until it is needed or avoids it altogether.
+     */
+    protected abstract Duration getCalculatedTime(Competitor who, Supplier<Leg> leg,
+            Supplier<Position> estimatedPosition, Duration totalDurationSinceRaceStart,
+            Distance totalWindwardDistanceTraveled);
 
     public RankingMetric.RankingInfo getRankingInfo(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Map<Competitor, RankingMetric.CompetitorRankingInfo> result = new HashMap<>();

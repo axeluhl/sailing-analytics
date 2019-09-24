@@ -85,7 +85,7 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
                 if (leaderImpliedWind != null && competitorPerformanceCurve != null) {
                     final Duration competitorAllowance = competitorPerformanceCurve.getAllowancePerCourse(leaderImpliedWind);
                     final Duration competitorElapsedTime = getTrackedRace().getTimeSailedSinceRaceStart(competitor, timePoint);
-                    final Duration leaderElapsedTime = getTrackedRace().getTimeSailedSinceRaceStart(leader, timePoint);
+                    final Duration leaderElapsedTime = getTrackedRace().getTimeSailedSinceRaceStart(leader, timePoint); // FIXME this should be redundant because the leader has elapsed=corrected
                     if (competitorElapsedTime != null && leaderElapsedTime != null) {
                         final Duration competitorDelta = competitorElapsedTime.minus(competitorAllowance);
                         result = leaderElapsedTime.plus(competitorDelta);
