@@ -57,7 +57,13 @@ public interface RaceChangeListener extends CourseListener {
      * passing-based start time inference is active or not.
      */
     void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace);
-    
+
+    /**
+     * Fired by a change in the {@link RaceState#getFinisingTime() finishing time} inferred
+     * from the race log.
+     */
+    void finishingTimeChanged(TimePoint oldFinishingTime, TimePoint newFinishingTime);
+
     /**
      * Fired when in any of the attached {@link RaceLog}s a {@link RaceLogRaceStatusEvent} or a {@link RaceLogPassChangeEvent}
      * or a {@link RaceLogRevokeEvent} has caused a change in the {@link RaceState#getFinishedTime() finished time} inferred
