@@ -256,7 +256,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         // Corner cases for Allowance > Allowance(20kt) or Allowance < Allowance(6kt)
         if (averageSpeedOnCourse.getKnots() >= predictedSpeedsInKnotsForTotalCourseByTrueWindSpeed[predictedSpeedsInKnotsForTotalCourseByTrueWindSpeed.length-1]) {
             result = ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS.length-1];
-        } else if (averageSpeedOnCourse.getKnots() <= predictedSpeedsInKnotsForTotalCourseByTrueWindSpeed[0]) {
+        } else if (averageSpeedOnCourse.equals(Speed.NULL) || averageSpeedOnCourse.getKnots() <= predictedSpeedsInKnotsForTotalCourseByTrueWindSpeed[0]) {
             result = ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[0];
         } else {
             // find the polynomial splined function that produces the durationToCompleteCourse within its validity range
