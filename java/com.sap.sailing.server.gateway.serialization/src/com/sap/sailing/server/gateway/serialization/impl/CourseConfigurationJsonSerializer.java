@@ -76,8 +76,8 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
                 markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_ID,
                         regattaMarkConfiguration.getMark().getId().toString());
             }
-            markConfigurationsEntry.putAll(commonMarkPropertiesJsonSerializer
-                    .serialize(markConfiguration.getEffectiveProperties()));
+            markConfigurationsEntry
+                    .putAll(commonMarkPropertiesJsonSerializer.serialize(markConfiguration.getEffectiveProperties()));
 
             // TODO: associated role? markConfiguration.
             // TODO add optionalPositioning
@@ -87,10 +87,10 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
         }
         result.put(FIELD_MARK_CONFIGURATIONS, markConfigurationsJSON);
 
-        // TODO: mit oder ohne laps?
         final JSONArray waypoints = new JSONArray();
-        for (final WaypointWithMarkConfiguration waypoint : courseConfiguration
-                .getWaypoints(courseConfiguration.getNumberOfLaps())) {
+        for (final WaypointWithMarkConfiguration waypoint : courseConfiguration.getNumberOfLaps() != null
+                ? courseConfiguration.getWaypoints(courseConfiguration.getNumberOfLaps())
+                : courseConfiguration.getWaypoints()) {
             final JSONObject waypointEntry = new JSONObject();
             waypointEntry.put(FIELD_WAYPOINT_PASSING_INSTRUCTION, waypoint.getPassingInstruction().name());
             final JSONArray markConfigurationIDs = new JSONArray();
