@@ -113,43 +113,7 @@ public class BoatWithCertificateTableWrapper<S extends RefreshableSelectionModel
                 return comparator.compare(o1.getSailId(), o2.getSailId());
             }
         });
-
-        Column<BoatDTO, SafeHtml> boatColorColumn = new ColorColumn<>(new ColorRetriever<BoatDTO>() {
-            @Override
-            public Color getColor(BoatDTO t) {
-                return t.getColor();
-            }
-        });
-        boatColorColumn.setSortable(true);
-        boatColumnListHandler.setComparator(boatColorColumn, new Comparator<BoatDTO>() {
-            @Override
-            public int compare(BoatDTO o1, BoatDTO o2) {
-                if (o1.getColor() == null) {
-                    if (o2.getColor() == null) {
-                        return 0;
-                    }
-                    return -1;
-                } else if (o2.getColor() == null) {
-                    return 1;
-                }
-                return o1.getColor().getAsHtml().compareTo(o2.getColor().getAsHtml());
-            }
-        });
         
-        TextColumn<BoatDTO> boatIdColumn = new TextColumn<BoatDTO>() {
-            @Override
-            public String getValue(BoatDTO boat) {
-                return boat.getIdAsString();
-            }
-        };
-        boatIdColumn.setSortable(true);
-        boatColumnListHandler.setComparator(boatIdColumn, new Comparator<BoatDTO>() {
-            @Override
-            public int compare(BoatDTO o1, BoatDTO o2) {
-                return new NaturalComparator(false).compare(o1.getIdAsString(), o2.getIdAsString());
-            }
-        });
-
         filterField = new LabeledAbstractFilterablePanel<BoatDTO>(new Label(stringMessages.filterBoats()),
                 new ArrayList<BoatDTO>(), dataProvider, stringMessages) {
             @Override
@@ -171,32 +135,21 @@ public class BoatWithCertificateTableWrapper<S extends RefreshableSelectionModel
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         
         // BoatTable edit features
-        final HasPermissions type = SecuredDomainType.BOAT;
         AccessControlledActionsColumn<BoatDTO, BoatConfigImagesBarCell> boatActionColumn = create(
                 new BoatConfigImagesBarCell(getStringMessages()), userService);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_UPDATE, HasPermissions.DefaultActions.UPDATE,
                 this::openEditBoatDialog);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_REFRESH, this::allowUpdate);
-        final DialogConfig<BoatDTO> editOwnerShipDialog = EditOwnershipDialog.create(
-                userService.getUserManagementService(), SecuredDomainType.BOAT, null, stringMessages);
-        boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
-                editOwnerShipDialog::openDialog);
-
-        final EditACLDialog.DialogConfig<BoatDTO> configACL = EditACLDialog
-                .create(userService.getUserManagementService(), type, null, stringMessages);
-        boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                configACL::openDialog);
 
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(boatColumnListHandler);
         table.addColumn(sailIdColumn, stringMessages.sailNumber());
         table.addColumn(boatNameColumn, stringMessages.name());
         table.addColumn(boatClassColumn, stringMessages.boatClass());
-        SecuredDTOOwnerColumn.configureOwnerColumns(table, getColumnSortHandler(), stringMessages);
         if (allowActions) {
             table.addColumn(boatActionColumn, stringMessages.actions());
         }
-        table.ensureDebugId("BoatsTable");
+        table.ensureDebugId("BoatsWithVertificateTable");
     }
     
     public Iterable<BoatDTO> getAllBoats() {
