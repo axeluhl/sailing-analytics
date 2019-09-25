@@ -147,8 +147,9 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         waypointTemplates.stream().map(WaypointTemplateDTO::getMarkTemplatesForControlPoint)
                 .forEach(markTemplates::addAll);
         // TODO: repeatable part
+        //TODO: default number of laps
         return new CourseTemplateDTO(id, nameTextBox.getValue(), markTemplates, waypointTemplates, associatedRoles,
-                optionalUrl, tagsEditor.getValue(), null);
+                optionalUrl, tagsEditor.getValue(), null, null);
     }
 
     @Override

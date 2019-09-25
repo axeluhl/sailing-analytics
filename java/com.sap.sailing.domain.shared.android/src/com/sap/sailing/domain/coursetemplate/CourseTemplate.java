@@ -70,6 +70,8 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
     Map<MarkTemplate, String> getAssociatedRoles();
     
     URL getOptionalImageURL();
+
+    Integer getDefaultNumberOfLaps();
     
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(UUID courseTemplateUUID) {
         return new TypeRelativeObjectIdentifier(courseTemplateUUID.toString());
@@ -84,4 +86,5 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
     default HasPermissions getPermissionType() {
         return SecuredDomainType.COURSE_TEMPLATE;
     }
+
 }

@@ -55,7 +55,8 @@ public class TestLapConfiguration {
                 /* associatedRoles */ Collections.emptyMap(),
                 /* optionaImageURL */ null,
                 new RepeatablePartImpl(/* zeroBasedIndexOfRepeatablePartStart */ 1,
-                        /* zeroBasedIndexOfRepeatablePartEnd */ 3));
+                        /* zeroBasedIndexOfRepeatablePartEnd */ 3),
+                /* Default Number of Laps */ 1);
     }
     
     @Test

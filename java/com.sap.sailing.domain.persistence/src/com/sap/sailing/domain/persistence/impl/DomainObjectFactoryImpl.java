@@ -3173,6 +3173,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final UUID id = UUID.fromString(dbObject.getString(FieldNames.COURSE_TEMPLATE_ID.name()));
         final String name = dbObject.getString(FieldNames.COURSE_TEMPLATE_NAME.name());
         final String imageURLString = dbObject.getString(FieldNames.COURSE_TEMPLATE_IMAGE_URL.name());
+        final Integer defaultNumberOfLaps = dbObject
+                .getInteger(FieldNames.COURSE_TEMPLATE_DEFAULT_NUMBER_OF_LAPS.name());
         URL optionalImageURL = null;
         if (imageURLString != null) {
             try {
@@ -3241,7 +3243,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
 
         final CourseTemplateImpl courseTemplateImpl = new CourseTemplateImpl(id, name, markTemplates, waypointTemplates,
-                associatedRoles, optionalImageURL, optionalRepeatablePart);
+                associatedRoles, optionalImageURL, optionalRepeatablePart, defaultNumberOfLaps);
         courseTemplateImpl.setTags(tags);
         return courseTemplateImpl;
     }

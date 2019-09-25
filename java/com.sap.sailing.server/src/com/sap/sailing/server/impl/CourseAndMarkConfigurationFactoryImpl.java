@@ -220,7 +220,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         }
         final CourseTemplate newCourseTemplate = sharedSailingData.createCourseTemplate(name, new HashSet<>(markTemplatesByMarkConfigurations.values()),
                 waypointTemplates, associatedRolesInTemplate, courseWithMarkConfiguration.getRepeatablePart(),
-                /* TODO tags */ Collections.emptySet(), /* TODO optionalImageURL */ null);
+                /* TODO tags */ Collections.emptySet(), /* TODO optionalImageURL */ null,
+                courseWithMarkConfiguration.getNumberOfLaps());
         return new CourseConfigurationImpl(newCourseTemplate,
                 new HashSet<>(marksConfigurationsMapping.values()),
                 associatedRolesInConfiguration, effectiveWaypoints, courseWithMarkConfiguration.getRepeatablePart(),

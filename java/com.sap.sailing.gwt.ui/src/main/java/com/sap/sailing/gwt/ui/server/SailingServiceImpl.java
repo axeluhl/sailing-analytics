@@ -9452,7 +9452,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 : null;
         final CourseTemplateDTO result = new CourseTemplateDTO(courseTemplate.getId(), courseTemplate.getName(),
                 convertedMarkTemplates, convertedWaypointTemplates, convertedAssociatedRoles, optionalImageURL,
-                courseTemplate.getTags(), convertToRepeatablePartDTO(courseTemplate.getRepeatablePart()));
+                courseTemplate.getTags(), convertToRepeatablePartDTO(courseTemplate.getRepeatablePart()),
+                courseTemplate.getDefaultNumberOfLaps());
 
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), result, courseTemplate.getIdentifier());
         return result;
@@ -9531,7 +9532,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     : null;
             result = convertToCourseTemplateDTO(
                     getSharedSailingData().createCourseTemplate(courseTemplate.getName(), marks, waypoints,
-                            associatedRoles, optionalRepeatablePart, courseTemplate.getTags(), optionalImageURL));
+                            associatedRoles, optionalRepeatablePart, courseTemplate.getTags(), optionalImageURL,
+                            courseTemplate.getDefaultNumberOfLaps()));
         }
         return result;
     }

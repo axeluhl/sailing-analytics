@@ -30,6 +30,8 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
 
     private final RepeatablePart optionalRepeatablePart;
 
+    private final Integer defaultNumberOfLaps;
+
     
     /** Creates a course template with a random UUID. */
     public CourseTemplateImpl(String name, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
@@ -39,12 +41,14 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
 
     public CourseTemplateImpl(UUID id, String name, Iterable<MarkTemplate> marks,
             Iterable<WaypointTemplate> waypoints, Map<MarkTemplate, String> associatedRoles, URL optionalImageURL) {
-        this(id, name, marks, waypoints, associatedRoles, optionalImageURL, /* optionalRepeatablePart */ null);
+        this(id, name, marks, waypoints, associatedRoles, optionalImageURL, /* optionalRepeatablePart */ null, null);
     }
     
     public CourseTemplateImpl(UUID id, String name, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
-            Map<MarkTemplate, String> associatedRoles, URL optionalImageURL, RepeatablePart optionalRepeatablePart) {
+            Map<MarkTemplate, String> associatedRoles, URL optionalImageURL, RepeatablePart optionalRepeatablePart,
+            Integer defaultNumberOfLaps) {
         super(name, id);
+        this.defaultNumberOfLaps = defaultNumberOfLaps;
         if (optionalRepeatablePart != null) {
             optionalRepeatablePart.validateRepeatablePartForSequence(waypoints);
         }
@@ -127,5 +131,10 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
 
     public void setTags(Iterable<String> tags) {
         this.tags = tags;
+    }
+
+    @Override
+    public Integer getDefaultNumberOfLaps() {
+        return defaultNumberOfLaps;
     }
 }

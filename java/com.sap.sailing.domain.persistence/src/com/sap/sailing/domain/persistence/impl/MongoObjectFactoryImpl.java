@@ -1938,6 +1938,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         // store master data
         result.put(FieldNames.COURSE_TEMPLATE_ID.name(), courseTemplate.getId().toString());
         result.put(FieldNames.COURSE_TEMPLATE_NAME.name(), courseTemplate.getName());
+        result.put(FieldNames.COURSE_TEMPLATE_DEFAULT_NUMBER_OF_LAPS.name(), courseTemplate.getDefaultNumberOfLaps());
         final URL optionalImageURL = courseTemplate.getOptionalImageURL();
         if (optionalImageURL != null) {
             result.put(FieldNames.COURSE_TEMPLATE_IMAGE_URL.name(), optionalImageURL.toExternalForm());

@@ -22,6 +22,7 @@ public class CourseTemplateJsonSerializer implements JsonSerializer<CourseTempla
     public static final String FIELD_MARK_TEMPLATE_IDS = "markTemplateIds";
     public static final String FIELD_ASSOCIATED_ROLE = "associatedRole";
     public static final String FIELD_OPTIONAL_REPEATABLE_PART = "optionalRepeatablePart";
+    public static final Object FIELD_DEFAULT_NUMBER_OF_LAPS = "defaultNumberOfLaps";
     
     private final JsonSerializer<RepeatablePart> repeatablePartJsonSerializer;
     private final JsonSerializer<MarkTemplate> markTemplateJsonSerializer;
@@ -37,6 +38,7 @@ public class CourseTemplateJsonSerializer implements JsonSerializer<CourseTempla
         result.put(FIELD_ID, courseTemplate.getId().toString());
         result.put(FIELD_NAME, courseTemplate.getName());
         result.put(FIELD_OPTIONAL_IMAGE_URL, courseTemplate.getOptionalImageURL());
+        result.put(FIELD_DEFAULT_NUMBER_OF_LAPS, courseTemplate.getDefaultNumberOfLaps());
         
         final JSONArray tags = new JSONArray();
         courseTemplate.getTags().forEach(tags::add);

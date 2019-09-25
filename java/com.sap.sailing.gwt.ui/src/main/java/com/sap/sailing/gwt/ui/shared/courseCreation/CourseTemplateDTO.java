@@ -33,6 +33,8 @@ public class CourseTemplateDTO extends NamedDTO implements SecuredDTO {
 
     private RepeatablePartDTO repeatablePart;
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
+
+    private Integer defaultNumberOfLaps;
     
     public CourseTemplateDTO() {
         // for GWT serialization
@@ -40,9 +42,11 @@ public class CourseTemplateDTO extends NamedDTO implements SecuredDTO {
 
     public CourseTemplateDTO(UUID uuid, String name, Iterable<MarkTemplateDTO> markTemplates,
             Iterable<WaypointTemplateDTO> waypointTemplates, Map<MarkTemplateDTO, String> associatedRoles,
-            String optionalImageUrl, Iterable<String> tags, RepeatablePartDTO repeatablePart) {
+            String optionalImageUrl, Iterable<String> tags, RepeatablePartDTO repeatablePart,
+            Integer defaultNumberOfLaps) {
         super(name);
         this.uuid = uuid;
+        this.defaultNumberOfLaps = defaultNumberOfLaps;
         Util.addAll(markTemplates, this.markTemplates);
         Util.addAll(waypointTemplates, this.waypointTemplates);
         this.associatedRoles.putAll(this.associatedRoles);
@@ -115,5 +119,9 @@ public class CourseTemplateDTO extends NamedDTO implements SecuredDTO {
 
     public RepeatablePartDTO getRepeatablePart() {
         return repeatablePart;
+    }
+
+    public Integer getDefaultNumberOfLaps() {
+        return defaultNumberOfLaps;
     }
 }

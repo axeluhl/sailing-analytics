@@ -55,7 +55,8 @@ public interface SharedSailingData {
      * @param waypoints the waypoints in their defined order (iteration order equals order of waypoints in course)
      */
     CourseTemplate createCourseTemplate(String courseTemplateName, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
-            Map<MarkTemplate, String> associatedRoles, RepeatablePart optionalRepeatablePart, Iterable<String> tags, URL optionalImageURL);
+            Map<MarkTemplate, String> associatedRoles, RepeatablePart optionalRepeatablePart, Iterable<String> tags,
+            URL optionalImageURL, Integer defaultNumberOfLaps);
     
     CourseTemplate getCourseTemplateById(UUID id);
     
