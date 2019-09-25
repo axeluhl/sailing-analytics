@@ -339,30 +339,46 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         if (optionalRegatta != null) {
             // If we have a regatta context, we first try to get all existing marks and their association to
             // MarkTemplates from the regatta
-            RegattaMarkConfigurations regattaMarkConfigurations = new RegattaMarkConfigurations(courseTemplate,
+            final RegattaMarkConfigurations regattaMarkConfigurations = new RegattaMarkConfigurations(courseTemplate,
                     optionalRegatta);
             allMarkConfigurations.addAll(regattaMarkConfigurations.regattaConfigurationsByMark.values());
             markTemplatesToMarkConfigurations.putAll(regattaMarkConfigurations.markConfigurationsByMarkTemplate);
         }
-        Map<MarkTemplate, MarkProperties> suggestedMappings = new MarkTemplatesMarkPropertiesAssociater()
-                .getSuggestions(courseTemplate.getAssociatedRoles(), courseTemplate.getMarkTemplates(),
-                        sharedSailingData.getAllMarkProperties(tagsToFilterMarkProperties));
         for (MarkTemplate markTemplate : courseTemplate.getMarkTemplates()) {
             // For any MarkTemplate that wasn't resolved from the regatta, an explicit entry needs to get created
             markTemplatesToMarkConfigurations.computeIfAbsent(markTemplate, mt -> {
 
-                final MarkConfiguration markConfiguration;
-                // determine matching MarkProperties to associate
-                if (suggestedMappings.containsKey(markTemplate)) {
-                    MarkProperties mappedProperties = suggestedMappings.get(markTemplate);
-                    markConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(mappedProperties, markTemplate, getPositioningIfAvailable(mappedProperties));
-                } else {
-                    markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(markTemplate, null);
-                }
+                final MarkConfiguration markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(markTemplate,
+                        null);
                 allMarkConfigurations.add(markConfiguration);
                 return markConfiguration;
             });
         }
+
+        // find candidates for replacement of mark configuration
+        final Map<MarkTemplate, MarkConfiguration> replacementCandidates = markTemplatesToMarkConfigurations
+                .entrySet().stream().filter(e -> e.getValue() instanceof MarkTemplateBasedMarkConfigurationImpl)
+                .collect(Collectors.toMap(s -> s.getKey(), s -> s.getValue()));
+
+        // determine matching MarkProperties to associate
+        final Map<MarkTemplate, MarkProperties> suggestedMappings = new MarkTemplatesMarkPropertiesAssociater()
+                .getSuggestions(courseTemplate.getAssociatedRoles(), replacementCandidates.keySet(),
+                        sharedSailingData.getAllMarkProperties(tagsToFilterMarkProperties));
+
+        // replace candidates if possible
+        for (Map.Entry<MarkTemplate, MarkConfiguration> entr : replacementCandidates.entrySet()) {
+            final MarkTemplate keyTemplate = entr.getKey();
+            if (suggestedMappings.containsKey(keyTemplate)) {
+                final MarkProperties suggestedPropertiesMapping = suggestedMappings.get(keyTemplate);
+                final MarkPropertiesBasedMarkConfigurationImpl newMarkPropertiesBasedConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(
+                        suggestedPropertiesMapping, keyTemplate, getPositioningIfAvailable(suggestedPropertiesMapping));
+
+                markTemplatesToMarkConfigurations.put(keyTemplate, newMarkPropertiesBasedConfiguration);
+                allMarkConfigurations.remove(entr.getValue());
+                allMarkConfigurations.add(newMarkPropertiesBasedConfiguration);
+            }
+        }
+
         final Map<MarkConfiguration, String> resultingRoleMapping = createRoleMappingWithMarkTemplateMapping(
                 courseTemplate, markTemplatesToMarkConfigurations);
         final List<WaypointWithMarkConfiguration> resultingWaypoints = createWaypointConfigurationsWithMarkTemplateMapping(
