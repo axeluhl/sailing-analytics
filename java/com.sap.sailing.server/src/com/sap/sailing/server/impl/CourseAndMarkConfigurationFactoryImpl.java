@@ -384,7 +384,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         final List<WaypointWithMarkConfiguration> resultingWaypoints = createWaypointConfigurationsWithMarkTemplateMapping(
                 courseTemplate, markTemplatesToMarkConfigurations);
         return new CourseConfigurationImpl(courseTemplate, allMarkConfigurations, resultingRoleMapping,
-                resultingWaypoints, courseTemplate.getRepeatablePart(), /* TODO numberOfLaps */ null,
+                resultingWaypoints, courseTemplate.getRepeatablePart(), courseTemplate.getDefaultNumberOfLaps(),
                 courseTemplate.getName());
     }
 
