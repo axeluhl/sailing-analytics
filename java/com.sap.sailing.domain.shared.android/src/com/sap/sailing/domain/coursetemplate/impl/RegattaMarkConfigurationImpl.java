@@ -17,6 +17,11 @@ public class RegattaMarkConfigurationImpl extends MarkConfigurationImpl implemen
     }
 
     @Override
+    public String getShortName() {
+        return mark.getShortName();
+    }
+
+    @Override
     public String getName() {
         return mark.getName();
     }

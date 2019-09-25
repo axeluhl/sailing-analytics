@@ -12,4 +12,6 @@ import com.sap.sse.common.Named;
  */
 public interface ControlPointWithMarkConfiguration extends Named {
     Iterable<MarkConfiguration> getMarkConfigurations();
+
+    String getShortName();
 }

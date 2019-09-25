@@ -96,9 +96,9 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
                 if (resolvedMarkConfigurations.size() == 1) {
                     builder.addWaypoint(resolvedMarkConfigurations.get(0), passingInstruction);
                 } else if (resolvedMarkConfigurations.size() == 2) {
-                    // TODO: name?
+                    // TODO: name, short name?
                     builder.addWaypoint(resolvedMarkConfigurations.get(0), resolvedMarkConfigurations.get(1),
-                            /* name */ null, passingInstruction);
+                            /* name */ null, passingInstruction, /* short name */ null);
                 } else {
                     throw new JsonDeserializationException(
                             "Unexpected number of mark configurations found for waypoint");

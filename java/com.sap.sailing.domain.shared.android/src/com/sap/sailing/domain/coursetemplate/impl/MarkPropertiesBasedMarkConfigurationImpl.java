@@ -18,6 +18,11 @@ public class MarkPropertiesBasedMarkConfigurationImpl extends MarkConfigurationI
     }
 
     @Override
+    public String getShortName() {
+        return markProperties.getShortName();
+    }
+
+    @Override
     public String getName() {
         return markProperties.getName();
     }

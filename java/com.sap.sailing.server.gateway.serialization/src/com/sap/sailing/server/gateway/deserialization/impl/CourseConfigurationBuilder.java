@@ -170,12 +170,12 @@ public class CourseConfigurationBuilder {
     }
 
     public void addWaypoint(MarkConfiguration leftMark, MarkConfiguration rightMark, String name,
-            PassingInstruction passingInstruction) {
+            PassingInstruction passingInstruction, String shortNameForMarkPair) {
         if (!markConfigurations.contains(leftMark) || !markConfigurations.contains(rightMark)) {
             throw new IllegalArgumentException();
         }
         final MarkPairWithConfiguration markPair = markPairCache
-                .computeIfAbsent(new MarkPairWithConfigurationImpl(name, rightMark, leftMark), mp -> mp);
+                .computeIfAbsent(new MarkPairWithConfigurationImpl(name, rightMark, leftMark, shortNameForMarkPair), mp -> mp);
         waypoints.add(new WaypointWithMarkConfigurationImpl(markPair, passingInstruction));
     }
 

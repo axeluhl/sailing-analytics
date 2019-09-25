@@ -10,10 +10,19 @@ public class MarkPairWithConfigurationImpl extends NamedImpl implements MarkPair
     private final MarkConfiguration right;
     private final MarkConfiguration left;
 
-    public MarkPairWithConfigurationImpl(String name, MarkConfiguration right, MarkConfiguration left) {
+    private final String shortName;
+
+    public MarkPairWithConfigurationImpl(String name, MarkConfiguration right, MarkConfiguration left,
+            String shortName) {
         super(name);
         this.right = right;
         this.left = left;
+        this.shortName = shortName;
+    }
+
+    @Override
+    public String getShortName() {
+        return this.shortName;
     }
 
     @Override

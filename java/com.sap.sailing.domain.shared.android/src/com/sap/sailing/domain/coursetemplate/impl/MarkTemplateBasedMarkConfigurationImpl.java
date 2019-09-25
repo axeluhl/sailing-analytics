@@ -23,4 +23,9 @@ public class MarkTemplateBasedMarkConfigurationImpl extends MarkConfigurationImp
         return getOptionalMarkTemplate().getName();
     }
 
+    @Override
+    public String getShortName() {
+        return getOptionalMarkTemplate().getShortName();
+    }
+
 }

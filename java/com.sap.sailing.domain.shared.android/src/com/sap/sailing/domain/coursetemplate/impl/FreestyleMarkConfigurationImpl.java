@@ -20,6 +20,11 @@ public class FreestyleMarkConfigurationImpl extends MarkConfigurationImpl implem
     }
 
     @Override
+    public String getShortName() {
+        return freestyleProperties.getShortName();
+    }
+
+    @Override
     public String getName() {
         return freestyleProperties.getName();
     }

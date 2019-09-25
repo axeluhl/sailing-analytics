@@ -207,12 +207,12 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 final MarkTemplate leftTemplate = markTemplatesByMarkConfigurations.get(markPairTemplate.getLeft());
                 final MarkConfiguration rightConfiguration = markConfigurationMapper.apply(markPairTemplate.getRight());
                 final MarkTemplate rightTemplate = markTemplatesByMarkConfigurations.get(markPairTemplate.getRight());
-                // TODO add shortName
                 effectiveControlPointConfiguration = markPairConfigurationCache.computeIfAbsent(markPairTemplate,
                         mpt -> new MarkPairWithConfigurationImpl(markPairTemplate.getName(), leftConfiguration,
-                                rightConfiguration));
+                                rightConfiguration, markPairTemplate.getShortName()));
                 effectiveControlPointTemplate = markPairTemplateCache.computeIfAbsent(markPairTemplate,
-                        mpt -> markPairTemplateFactory.create(markPairTemplate.getName(), /* TODO shortName */ null,
+                        mpt -> markPairTemplateFactory.create(markPairTemplate.getName(),
+                                markPairTemplate.getShortName(),
                                 leftTemplate, rightTemplate));
             }
             waypointTemplates.add(new WaypointTemplateImpl(effectiveControlPointTemplate, waypointWithMarkConfiguration.getPassingInstruction()));
@@ -392,7 +392,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 final MarkPairTemplate markPairTemplate = (MarkPairTemplate) controlPointTemplate;
                 final MarkConfiguration left = markTemplatesToMarkConfigurations.get(markPairTemplate.getLeft());
                 final MarkConfiguration right = markTemplatesToMarkConfigurations.get(markPairTemplate.getRight());
-                resultingControlPoint = new MarkPairWithConfigurationImpl(markPairTemplate.getName(), right, left);
+                resultingControlPoint = new MarkPairWithConfigurationImpl(markPairTemplate.getName(), right, left,
+                        markPairTemplate.getShortName());
             }
             resultingWaypoints.add(new WaypointWithMarkConfigurationImpl(resultingControlPoint,
                     waypointTemplate.getPassingInstruction()));
@@ -538,7 +539,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                             .get(markPairTemplate.getLeft());
                     final MarkConfiguration right = regattaMarkConfigurations.regattaConfigurationsByMark
                             .get(markPairTemplate.getRight());
-                    resultingControlPoint = new MarkPairWithConfigurationImpl(markPairTemplate.getName(), right, left);
+                    resultingControlPoint = new MarkPairWithConfigurationImpl(markPairTemplate.getName(), right, left,
+                            markPairTemplate.getShortName());
                 }
                 resultingWaypoints.add(new WaypointWithMarkConfigurationImpl(resultingControlPoint,
                         waypoint.getPassingInstructions()));
