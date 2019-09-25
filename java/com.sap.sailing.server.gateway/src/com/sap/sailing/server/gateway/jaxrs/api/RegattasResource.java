@@ -1626,6 +1626,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 JSONObject jsonRace = new JSONObject();
                 jsonRaces.add(jsonRace);
                 jsonRace.put("name", race.getName());
+                jsonRace.put("courseName", race.getCourse() != null ? race.getCourse().getName() : "");
                 jsonRace.put("id", race.getId().toString());
             }
             String json = jsonRaceResults.toJSONString();
