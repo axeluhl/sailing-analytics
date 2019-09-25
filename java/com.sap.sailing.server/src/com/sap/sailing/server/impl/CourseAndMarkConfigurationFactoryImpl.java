@@ -332,7 +332,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
 
     @Override
     public CourseConfiguration createCourseConfigurationFromTemplate(CourseTemplate courseTemplate,
-            Regatta optionalRegatta, Iterable<String> tagsToFilterMarkProperties, String courseConfigurationName) {
+            Regatta optionalRegatta, Iterable<String> tagsToFilterMarkProperties) {
         final Set<MarkConfiguration> allMarkConfigurations = new HashSet<>();
         final Map<MarkTemplate, MarkConfiguration> markTemplatesToMarkConfigurations = new HashMap<>();
         if (optionalRegatta != null) {
@@ -368,7 +368,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 courseTemplate, markTemplatesToMarkConfigurations);
         return new CourseConfigurationImpl(courseTemplate, allMarkConfigurations, resultingRoleMapping,
                 resultingWaypoints, courseTemplate.getRepeatablePart(), /* TODO numberOfLaps */ null,
-                courseConfigurationName);
+                courseTemplate.getName());
     }
 
     private Map<MarkConfiguration, String> createRoleMappingWithMarkTemplateMapping(CourseTemplate courseTemplate,
@@ -419,7 +419,6 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         boolean validCourseTemplateUsage = false;
         RepeatablePart optionalRepeatablePart = null;
         Integer numberOfLaps = null;
-        // TODO: use correct name
         final String name = course.getName();
         final Map<MarkTemplate, MarkConfiguration> markTemplatesToMarkConfigurations = new HashMap<>();
         final Map<MarkConfiguration, String> roleMappingBasedOnCourseTemplate = new HashMap<>();
