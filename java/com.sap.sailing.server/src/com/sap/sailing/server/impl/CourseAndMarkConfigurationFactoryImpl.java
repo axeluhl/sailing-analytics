@@ -355,29 +355,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             });
         }
 
-        // find candidates for replacement of mark configuration
-        final Map<MarkTemplate, MarkConfiguration> replacementCandidates = markTemplatesToMarkConfigurations
-                .entrySet().stream().filter(e -> e.getValue() instanceof MarkTemplateBasedMarkConfigurationImpl)
-                .collect(Collectors.toMap(s -> s.getKey(), s -> s.getValue()));
-
-        // determine matching MarkProperties to associate
-        final Map<MarkTemplate, MarkProperties> suggestedMappings = new MarkTemplatesMarkPropertiesAssociater()
-                .getSuggestions(courseTemplate.getAssociatedRoles(), replacementCandidates.keySet(),
-                        sharedSailingData.getAllMarkProperties(tagsToFilterMarkProperties));
-
-        // replace candidates if possible
-        for (Map.Entry<MarkTemplate, MarkConfiguration> entr : replacementCandidates.entrySet()) {
-            final MarkTemplate keyTemplate = entr.getKey();
-            if (suggestedMappings.containsKey(keyTemplate)) {
-                final MarkProperties suggestedPropertiesMapping = suggestedMappings.get(keyTemplate);
-                final MarkPropertiesBasedMarkConfigurationImpl newMarkPropertiesBasedConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(
-                        suggestedPropertiesMapping, keyTemplate, getPositioningIfAvailable(suggestedPropertiesMapping));
-
-                markTemplatesToMarkConfigurations.put(keyTemplate, newMarkPropertiesBasedConfiguration);
-                allMarkConfigurations.remove(entr.getValue());
-                allMarkConfigurations.add(newMarkPropertiesBasedConfiguration);
-            }
-        }
+        replaceTemplateBasedConfigurationCandidatesBySuggestedPropertiesBasedConfigurations(markTemplatesToMarkConfigurations, allMarkConfigurations, tagsToFilterMarkProperties,
+                courseTemplate.getAssociatedRoles());
 
         final Map<MarkConfiguration, String> resultingRoleMapping = createRoleMappingWithMarkTemplateMapping(
                 courseTemplate, markTemplatesToMarkConfigurations);
@@ -570,6 +549,34 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
 
         return new CourseConfigurationImpl(courseTemplateOrNull, allMarkConfigurations, resultingRoleMapping,
                 resultingWaypoints, optionalRepeatablePart, numberOfLaps, name);
+    }
+    
+        private void replaceTemplateBasedConfigurationCandidatesBySuggestedPropertiesBasedConfigurations(Map<MarkTemplate, MarkConfiguration> markTemplatesToMarkConfigurationsToReplace,
+            Set<MarkConfiguration> markConfigurationsToEdit, Iterable<String> tagsToFilterMarkProperties,
+            Map<MarkTemplate, String> associatedRoles) {
+        // find candidates for replacement of mark configuration
+        final Map<MarkTemplate, MarkConfiguration> replacementCandidates = markTemplatesToMarkConfigurationsToReplace.entrySet()
+                .stream().filter(e -> e.getValue() instanceof MarkTemplateBasedMarkConfigurationImpl)
+                .collect(Collectors.toMap(s -> s.getKey(), s -> s.getValue()));
+
+        // determine matching MarkProperties to associate
+        final Map<MarkTemplate, MarkProperties> suggestedMappings = new MarkTemplatesMarkPropertiesAssociater()
+                .getSuggestions(associatedRoles, replacementCandidates.keySet(),
+                        sharedSailingData.getAllMarkProperties(tagsToFilterMarkProperties));
+
+        // replace candidates if possible
+        for (Map.Entry<MarkTemplate, MarkConfiguration> entr : replacementCandidates.entrySet()) {
+            final MarkTemplate keyTemplate = entr.getKey();
+            if (suggestedMappings.containsKey(keyTemplate)) {
+                final MarkProperties suggestedPropertiesMapping = suggestedMappings.get(keyTemplate);
+                final MarkPropertiesBasedMarkConfigurationImpl newMarkPropertiesBasedConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(
+                        suggestedPropertiesMapping, keyTemplate, getPositioningIfAvailable(suggestedPropertiesMapping));
+
+                markTemplatesToMarkConfigurationsToReplace.put(keyTemplate, newMarkPropertiesBasedConfiguration);
+                markConfigurationsToEdit.remove(entr.getValue());
+                markConfigurationsToEdit.add(newMarkPropertiesBasedConfiguration);
+            }
+        }
     }
     
     private Positioning getPositioningIfAvailable(MarkProperties markProperties) {
