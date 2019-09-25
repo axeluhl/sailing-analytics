@@ -7,7 +7,6 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -27,7 +26,9 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
     
     private final BoatWithCertificateTableWrapper<RefreshableMultiSelectionModel<BoatDTO>> boatTable;
+    @SuppressWarnings("unused")
     private final RefreshableMultiSelectionModel<BoatDTO> refreshableBoatSelectionModel;
+    @SuppressWarnings("unused")
     private final String regattaName;
     private final BusyIndicator busyIndicator;
 
@@ -74,14 +75,6 @@ public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
         if (regattaName != null) {
             refreshBoatList();
         }        
-    }
-    
-    private Widget getBoatTable() {
-        return null;
-    }
-    
-    private Widget getCertificatesTable() {
-        return null;
     }
     
     private void refreshBoatList() {

@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
 import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
 
 import java.util.ArrayList;
@@ -19,11 +18,8 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -37,10 +33,6 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
-import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
-import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
-import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
-import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class BoatWithCertificateTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> extends TableWrapper<BoatDTO, S> {
     private final LabeledAbstractFilterablePanel<BoatDTO> filterField;
