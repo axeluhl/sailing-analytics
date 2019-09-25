@@ -55,6 +55,7 @@ import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.impl.CourseConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.FixedPositioningImpl;
+import com.sap.sailing.domain.coursetemplate.impl.FreestyleMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPairWithConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesBasedMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateBasedMarkConfigurationImpl;
@@ -115,30 +116,58 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     public CourseConfiguration createCourseTemplateAndUpdatedConfiguration(String name,
             CourseConfiguration courseWithMarkConfiguration) {
         final Map<MarkConfiguration, MarkTemplate> markTemplatesByMarkConfigurations = new HashMap<>();
-        final Map<MarkConfiguration, MarkTemplateBasedMarkConfiguration> marksConfigurationsMapping = new HashMap<>();
+        final Map<MarkConfiguration, MarkConfiguration> marksConfigurationsMapping = new HashMap<>();
         for (MarkConfiguration markConfiguration : courseWithMarkConfiguration.getAllMarks()) {
-            final MarkTemplateBasedMarkConfiguration effectiveConfiguration;
+            final MarkConfiguration effectiveConfiguration;
+            final MarkTemplate effectiveMarkTemplate;
             if (markConfiguration instanceof MarkTemplateBasedMarkConfiguration) {
                 effectiveConfiguration = (MarkTemplateBasedMarkConfiguration) markConfiguration;
+                effectiveMarkTemplate = effectiveConfiguration.getOptionalMarkTemplate();
             } else {
-                final MarkTemplate effectiveMarkTemplate = sharedSailingData.createMarkTemplate(markConfiguration.getEffectiveProperties());
-                effectiveConfiguration = new MarkTemplateBasedMarkConfigurationImpl(effectiveMarkTemplate, markConfiguration.getOptionalPositioning());
-                final MarkProperties markPropertiesOrNull;
+                effectiveMarkTemplate = sharedSailingData
+                        .createMarkTemplate(markConfiguration.getEffectiveProperties());
                 if (markConfiguration instanceof RegattaMarkConfiguration) {
-                    final UUID markPropertiesIdOrNull = ((RegattaMarkConfiguration) markConfiguration).getMark().getOriginatingMarkPropertiesIdOrNull();
-                    // TODO this call may fail but should not
-                    // Discuss if in case a user can't read the referenced MarkProperties it should be ignored
-                    markPropertiesOrNull = markPropertiesIdOrNull == null ? null : sharedSailingData.getMarkPropertiesById(markPropertiesIdOrNull);
+                    final Mark mark = ((RegattaMarkConfiguration) markConfiguration).getMark();
+                    final UUID markPropertiesIdOrNull = mark.getOriginatingMarkPropertiesIdOrNull();
+                    try {
+                        final MarkProperties markPropertiesOrNull = markPropertiesIdOrNull == null ? null
+                                : sharedSailingData.getMarkPropertiesById(markPropertiesIdOrNull);
+                        if (markPropertiesOrNull != null) {
+                            sharedSailingData.recordUsage(effectiveMarkTemplate, markPropertiesOrNull);
+                        }
+                    } catch (Exception e) {
+                        log.log(Level.WARNING, "Could not record usage for mark properties " + markPropertiesIdOrNull
+                                + " an mark template " + effectiveMarkTemplate.getId(), e);
+                    }
+                    // The configuration is used as is. We can't enrich the Mark with the newly created MarkTemplate.
+                    // In the UI, the regatta Mark still needs to be selected to ensure that all connections to regatta
+                    // Marks are unchanged when saving the course to a race afterwards.
+                    effectiveConfiguration = markConfiguration;
                 } else if (markConfiguration instanceof MarkPropertiesBasedMarkConfiguration) {
-                    markPropertiesOrNull = ((MarkPropertiesBasedMarkConfiguration) markConfiguration).getMarkProperties();
+                    // TODO in case an already references MarkTemplate has an identical appearance/name/shortName we
+                    // could skip the creation of a new MarkTemplate and use the existing instead.
+                    
+                    // In this case the appearance of the created MarkTemplate is identical to the MarkProperties it is
+                    // based on.
+                    final MarkProperties markProperties = ((MarkPropertiesBasedMarkConfiguration) markConfiguration)
+                            .getMarkProperties();
+                    effectiveConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(markProperties,
+                            effectiveMarkTemplate, markConfiguration.getOptionalPositioning());
+                    sharedSailingData.recordUsage(effectiveMarkTemplate, markProperties);
                 } else if (markConfiguration instanceof FreestyleMarkConfiguration) {
-                    markPropertiesOrNull = ((FreestyleMarkConfiguration) markConfiguration).getOptionalMarkProperties();
+                    final MarkProperties markPropertiesOrNull = ((FreestyleMarkConfiguration) markConfiguration)
+                            .getOptionalMarkProperties();
+                    if (markPropertiesOrNull != null) {
+                        sharedSailingData.recordUsage(effectiveMarkTemplate, markPropertiesOrNull);
+                        effectiveConfiguration = new FreestyleMarkConfigurationImpl(effectiveMarkTemplate,
+                                markPropertiesOrNull, effectiveMarkTemplate, markConfiguration.getOptionalPositioning());
+                    } else {
+                        effectiveConfiguration = new MarkTemplateBasedMarkConfigurationImpl(effectiveMarkTemplate,
+                                markConfiguration.getOptionalPositioning());
+                    }
                 } else {
                     // Should never happen but could in case a new MarkConfiguration type is defined
                     throw new IllegalStateException("Unknown mark configuration type found");
-                }
-                if (markPropertiesOrNull != null) {
-                    sharedSailingData.recordUsage(effectiveMarkTemplate, markPropertiesOrNull);
                 }
             }
             markTemplatesByMarkConfigurations.put(markConfiguration, effectiveConfiguration.getOptionalMarkTemplate());
@@ -150,8 +179,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         final List<WaypointTemplate> waypointTemplates = new ArrayList<>();
         final List<WaypointWithMarkConfiguration> effectiveWaypoints = new ArrayList<>();
         final MarkPairTemplateFactory markPairTemplateFactory = new MarkPairTemplateFactory();
-        final Function<MarkConfiguration, MarkTemplateBasedMarkConfiguration> markConfigurationMapper = mc -> {
-            final MarkTemplateBasedMarkConfiguration result = marksConfigurationsMapping.get(mc);
+        final Function<MarkConfiguration, MarkConfiguration> markConfigurationMapper = mc -> {
+            final MarkConfiguration result = marksConfigurationsMapping.get(mc);
             String roleName = courseWithMarkConfiguration.getAssociatedRoles().get(mc);
             if (roleName == null) {
                 // ensure a defined role name for any MarkTemplate used in the CourseTemplate
@@ -323,7 +352,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 // determine matching MarkProperties to associate
                 if (suggestedMappings.containsKey(markTemplate)) {
                     MarkProperties mappedProperties = suggestedMappings.get(markTemplate);
-                    markConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(mappedProperties, getPositioningIfAvailable(mappedProperties));
+                    markConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(mappedProperties, markTemplate, getPositioningIfAvailable(mappedProperties));
                 } else {
                     markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(markTemplate, null);
                 }
@@ -474,7 +503,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                             if (suggestedMappings.containsKey(markTemplate)) {
                                 MarkProperties mappedProperties = suggestedMappings.get(markTemplate);
                                 markConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(mappedProperties,
-                                        getPositioningIfAvailable(mappedProperties));
+                                        markTemplate, getPositioningIfAvailable(mappedProperties));
                             } else {
                                 markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(markTemplate, null);
                             }

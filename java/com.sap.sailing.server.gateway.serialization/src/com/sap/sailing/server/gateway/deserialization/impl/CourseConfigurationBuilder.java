@@ -74,7 +74,8 @@ public class CourseConfigurationBuilder {
         } else if (optionalMarkID != null) {
             result = addRegattaMarkConfiguration(optionalMarkID, optionalPositioning);
         } else if (optionalMarkPropertiesID != null) {
-            result = addMarkPropertiesConfiguration(optionalMarkPropertiesID, optionalPositioning);
+            result = addMarkPropertiesConfiguration(optionalMarkPropertiesID, optionalMarkTemplateID,
+                    optionalPositioning);
         } else if (optionalMarkTemplateID != null) {
             result = addMarkTemplateConfiguration(optionalMarkTemplateID);
         } else {
@@ -117,13 +118,16 @@ public class CourseConfigurationBuilder {
         return resolvedMarkTemplate;
     }
 
-    public MarkPropertiesBasedMarkConfiguration addMarkPropertiesConfiguration(UUID markPropertiesID, Positioning optionalPositioning) {
+    public MarkPropertiesBasedMarkConfiguration addMarkPropertiesConfiguration(UUID markPropertiesID, UUID optionalMarkTemplateID, Positioning optionalPositioning) {
         final MarkProperties resolvedMarkProperties = sharedSailingData.getMarkPropertiesById(markPropertiesID);
         if (resolvedMarkProperties == null) {
             throw new IllegalArgumentException(
                     "Mark properties with ID " + markPropertiesID + " could not be resolved");
         }
-        final MarkPropertiesBasedMarkConfiguration result = new MarkPropertiesBasedMarkConfigurationImpl(resolvedMarkProperties, optionalPositioning);
+        final MarkTemplate resolvedMarkTemplate = optionalMarkTemplateID == null ? null
+                : resolveMarkTemplateByID(optionalMarkTemplateID);
+        final MarkPropertiesBasedMarkConfiguration result = new MarkPropertiesBasedMarkConfigurationImpl(
+                resolvedMarkProperties, resolvedMarkTemplate, optionalPositioning);
         markConfigurations.add(result);
         return result;
     }

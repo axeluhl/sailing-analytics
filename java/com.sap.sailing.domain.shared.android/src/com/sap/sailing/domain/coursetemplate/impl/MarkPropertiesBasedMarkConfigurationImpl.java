@@ -3,6 +3,7 @@ package com.sap.sailing.domain.coursetemplate.impl;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.Positioning;
 
 public class MarkPropertiesBasedMarkConfigurationImpl extends MarkConfigurationImpl
@@ -11,8 +12,8 @@ public class MarkPropertiesBasedMarkConfigurationImpl extends MarkConfigurationI
 
     private final MarkProperties markProperties;
 
-    public MarkPropertiesBasedMarkConfigurationImpl(MarkProperties markProperties, Positioning optionalPositioning) {
-        super(/* optionalMarkTemplate */ null, optionalPositioning, /* storeToInventory */ false);
+    public MarkPropertiesBasedMarkConfigurationImpl(MarkProperties markProperties, MarkTemplate optionalMarkTemplate, Positioning optionalPositioning) {
+        super(optionalMarkTemplate, optionalPositioning, /* storeToInventory */ false);
         this.markProperties = markProperties;
     }
 
