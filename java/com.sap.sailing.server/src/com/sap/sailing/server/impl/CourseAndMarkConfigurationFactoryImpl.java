@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Course;
@@ -64,6 +65,8 @@ import com.sap.sailing.domain.coursetemplate.impl.SavedDevicePositioningImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointWithMarkConfigurationImpl;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
+import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
@@ -71,6 +74,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfigurationFactory {
@@ -79,10 +83,13 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     
     private final SharedSailingData sharedSailingData;
     private final SensorFixStore sensorFixStore;
+    private final RegattaLogStore regattaLogStore;
 
-    public CourseAndMarkConfigurationFactoryImpl(SharedSailingData sharedSailingData, SensorFixStore sensorFixStore) {
+    public CourseAndMarkConfigurationFactoryImpl(SharedSailingData sharedSailingData, SensorFixStore sensorFixStore,
+            RegattaLogStore regattaLogStore) {
         this.sharedSailingData = sharedSailingData;
         this.sensorFixStore = sensorFixStore;
+        this.regattaLogStore = regattaLogStore;
     }
 
     @Override
@@ -574,7 +581,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         }
     }
 
-        private void replaceTemplateBasedConfigurationCandidatesBySuggestedPropertiesBasedConfigurations(Map<MarkTemplate, MarkConfiguration> markTemplatesToMarkConfigurationsToReplace,
+    private void replaceTemplateBasedConfigurationCandidatesBySuggestedPropertiesBasedConfigurations(Map<MarkTemplate, MarkConfiguration> markTemplatesToMarkConfigurationsToReplace,
             Set<MarkConfiguration> markConfigurationsToEdit, Iterable<String> tagsToFilterMarkProperties,
             Map<MarkTemplate, String> associatedRoles) {
         // find candidates for replacement of mark configuration
@@ -601,7 +608,26 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             }
         }
     }
-    
+
+    @SuppressWarnings("unused")
+    private Positioning getPositioningIfAvailable(Regatta regatta, Mark mark) {
+        // TODO: retrieve positioning for mark from regatta log with RegattaLogDeviceMappingFinder
+        // filter by mark and find out if it is ping or track
+        final RegattaLog regattaLog = regattaLogStore.getRegattaLog(regatta.getRegattaLikeIdentifier(), false);
+        final Map<WithID, List<DeviceMappingWithRegattaLogEvent<WithID>>> deviceMappings = new RegattaLogDeviceMappingFinder<>(
+                regattaLog).analyze();
+
+        for(Map.Entry<WithID, List<DeviceMappingWithRegattaLogEvent<WithID>>> entry : deviceMappings.entrySet()) {
+            for (DeviceMappingWithRegattaLogEvent<WithID> event : entry.getValue()) {
+                // if (event.getDevice() instanceof PingDeviceIdentifier) {
+                // } else if (event.getDevice() instanceof TODO TrackDeviceIdentifier){
+                // }
+            }
+            entry.getValue().stream().filter(event -> event.getDevice().getIdentifierType().equals(null));
+        }            
+        return null;
+    }
+
     private Positioning getPositioningIfAvailable(MarkProperties markProperties) {
         final Position fixedPosition = markProperties.getFixedPosition();
         if (fixedPosition != null) {
