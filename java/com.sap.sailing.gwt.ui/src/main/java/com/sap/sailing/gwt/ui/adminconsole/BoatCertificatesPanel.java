@@ -5,13 +5,14 @@ import static com.sap.sailing.domain.common.security.SecuredDomainType.COMPETITO
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyDisplay;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
@@ -25,7 +26,8 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  */
 public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
     
-    private final BoatPanel boatTable;
+    private final BoatTableWrapper<RefreshableMultiSelectionModel<BoatDTO>> boatTable;
+    private final RefreshableMultiSelectionModel<BoatDTO> refreshableBoatSelectionModel;
     private final String regattaName;
     private final BusyIndicator busyIndicator;
 
@@ -39,17 +41,16 @@ public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
         super();
         this.regattaName = regattaName;
         
-        this.boatTable = new BoatPanel(sailingService, userService, stringMessages, errorReporter);
+        this.boatTable = new BoatTableWrapper<>(sailingService, userService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true, 100, true);
+        this.refreshableBoatSelectionModel = (RefreshableMultiSelectionModel<BoatDTO>) boatTable.getSelectionModel();
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
         Grid tablesPanel = new Grid(1,2);
         tablesPanel.setWidth("100%");
         final AccessControlledButtonPanel topButtonPanel = new AccessControlledButtonPanel(userService, COMPETITOR);
-        final AccessControlledButtonPanel bottomButtonPanel = new AccessControlledButtonPanel(userService, COMPETITOR);
         mainPanel.add(topButtonPanel);
         mainPanel.add(tablesPanel);
-        mainPanel.add(bottomButtonPanel);
 
         // BUTTON - Refresh
         final Button refreshButton = topButtonPanel.addUnsecuredAction(stringMessages.refresh(), this::refreshBoatList);
@@ -70,14 +71,6 @@ public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
         // TABLE - Certificates
         tablesPanel.setWidget(0, 1, new CaptionPanel("Certificates"));
         
-        // BUTTON - Link
-        final Button linkButton = bottomButtonPanel.addCreateAction("Link", null);
-        linkButton.ensureDebugId("LinkCertificateToBoatButton");
-        
-        // BUTTON - Unlink
-        final Button unlinkButton = bottomButtonPanel.addCreateAction("Unlink", null);
-        linkButton.ensureDebugId("UnlinkCertificateToBoatButton");
-        
         if (regattaName != null) {
             refreshBoatList();
         }        
@@ -92,7 +85,7 @@ public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
     }
     
     private void refreshBoatList() {
-        // TODO
+        boatTable.refreshBoatList(/* loadOnlyStandaloneBoats */ false, /* callback */ null);
     }
 
     @Override
