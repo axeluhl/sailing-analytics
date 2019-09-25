@@ -79,7 +79,7 @@ public class CourseConfigurationBuilder {
             result = addMarkPropertiesConfiguration(optionalMarkPropertiesID, optionalMarkTemplateID,
                     optionalPositioning);
         } else if (optionalMarkTemplateID != null) {
-            result = addMarkTemplateConfiguration(optionalMarkTemplateID);
+            result = addMarkTemplateConfiguration(optionalMarkTemplateID, optionalPositioning);
         } else {
             throw new IllegalArgumentException(
                     "Mark configuration could not be constructed due to missing specification");
@@ -88,13 +88,12 @@ public class CourseConfigurationBuilder {
         return result;
     }
 
-    // TODO handle positioning information in all possible cases
-    public MarkTemplateBasedMarkConfiguration addMarkTemplateConfiguration(UUID markTemplateID) {
+    public MarkTemplateBasedMarkConfiguration addMarkTemplateConfiguration(UUID markTemplateID, Positioning optionalPositioning) {
         final MarkTemplate resolvedMarkTemplate = resolveMarkTemplateByID(markTemplateID);
         if (resolvedMarkTemplate == null) {
             throw new IllegalStateException("Mark template with ID " + markTemplateID + " could not be resolved");
         }
-        final MarkTemplateBasedMarkConfiguration result = new MarkTemplateBasedMarkConfigurationImpl(resolvedMarkTemplate, /* optionalPositioning */ null);
+        final MarkTemplateBasedMarkConfiguration result = new MarkTemplateBasedMarkConfigurationImpl(resolvedMarkTemplate, optionalPositioning);
         markConfigurations.add(result);
         return result;
     }
@@ -154,7 +153,11 @@ public class CourseConfigurationBuilder {
         for (RaceColumn raceColumn : optionalRegatta.getRaceColumns()) {
             for (Mark mark : raceColumn.getAvailableMarks()) {
                 if (mark.getId().equals(markID)) {
-                    final RegattaMarkConfiguration result = new RegattaMarkConfigurationImpl(mark, optionalPositioning, /* TODO optionalMarkTemplate */ null);
+                    final UUID markTemplateIdOrNull = mark.getOriginatingMarkTemplateIdOrNull();
+                    final MarkTemplate markTemplateOrNull = markTemplateIdOrNull == null ? null
+                            : resolveMarkTemplateByID(markTemplateIdOrNull);
+                    final RegattaMarkConfiguration result = new RegattaMarkConfigurationImpl(mark, optionalPositioning,
+                            markTemplateOrNull);
                     markConfigurations.add(result);
                     return result;
                 }
