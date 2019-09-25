@@ -491,23 +491,11 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                         .getZeroBasedIndexOfRepeatablePartEnd(); i++) {
                     final WaypointTemplate waypointTemplate = Util.get(courseTemplateOrNull.getWaypointTemplates(), i);
 
-                    final Map<MarkTemplate, MarkProperties> suggestedMappings = new MarkTemplatesMarkPropertiesAssociater()
-                            .getSuggestions(course.getAssociatedRoles(),
-                                    waypointTemplate.getControlPointTemplate().getMarks(),
-                                    sharedSailingData.getAllMarkProperties(tagsToFilterMarkProperties), false);
-
-                    for (MarkTemplate markTemplate : waypointTemplate.getControlPointTemplate().getMarks()) {
+                    for (final MarkTemplate markTemplate : waypointTemplate.getControlPointTemplate().getMarks()) {
                         markTemplatesToMarkConfigurations.computeIfAbsent(markTemplate, mt -> {
 
-                            final MarkConfiguration markConfiguration;
-                            // determine matching MarkProperties to associate
-                            if (suggestedMappings.containsKey(markTemplate)) {
-                                MarkProperties mappedProperties = suggestedMappings.get(markTemplate);
-                                markConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(mappedProperties,
-                                        markTemplate, getPositioningIfAvailable(mappedProperties));
-                            } else {
-                                markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(markTemplate, null);
-                            }
+                            final MarkConfiguration markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(
+                                    markTemplate, null);
 
                             allMarkConfigurations.add(markConfiguration);
                             resultingRoleMapping.put(markConfiguration,
@@ -515,6 +503,10 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                             return markConfiguration;
                         });
                     }
+
+                    replaceTemplateBasedConfigurationCandidatesBySuggestedPropertiesBasedConfigurationsForRoleMapping(
+                            resultingRoleMapping, allMarkConfigurations, tagsToFilterMarkProperties,
+                            course.getAssociatedRoles());
                 }
             }
             resultingWaypoints = createWaypointConfigurationsWithMarkTemplateMapping(courseTemplateOrNull,
@@ -551,6 +543,37 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 resultingWaypoints, optionalRepeatablePart, numberOfLaps, name);
     }
     
+    private void replaceTemplateBasedConfigurationCandidatesBySuggestedPropertiesBasedConfigurationsForRoleMapping(
+            Map<MarkConfiguration, String> resultingRoleMapping, Set<MarkConfiguration> markConfigurationsToEdit,
+            Iterable<String> tagsToFilterMarkProperties, Map<Mark, String> associatedRoles) {
+        // find candidates for replacement of mark configuration
+        final Map<MarkConfiguration, String> replacementCandidates = resultingRoleMapping.entrySet().stream()
+                .filter(e -> e.getKey() instanceof MarkTemplateBasedMarkConfigurationImpl)
+                .collect(Collectors.toMap(s -> s.getKey(), s -> s.getValue()));
+
+        Set<MarkTemplate> associatedTemplates = replacementCandidates.entrySet().stream()
+                .map(e -> e.getKey().getOptionalMarkTemplate()).collect(Collectors.toSet());
+        // determine matching MarkProperties to associate
+        final Map<MarkTemplate, MarkProperties> suggestedMappings = new MarkTemplatesMarkPropertiesAssociater()
+                .getSuggestions(associatedRoles, associatedTemplates,
+                        sharedSailingData.getAllMarkProperties(tagsToFilterMarkProperties), false);
+
+        // replace candidates if possible
+        for (Map.Entry<MarkConfiguration, String> entr : replacementCandidates.entrySet()) {
+            final MarkTemplate keyTemplate = entr.getKey().getOptionalMarkTemplate();
+            if (suggestedMappings.containsKey(keyTemplate)) {
+                final MarkProperties suggestedPropertiesMapping = suggestedMappings.get(keyTemplate);
+                final MarkPropertiesBasedMarkConfigurationImpl newMarkPropertiesBasedConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(
+                        suggestedPropertiesMapping, keyTemplate, getPositioningIfAvailable(suggestedPropertiesMapping));
+
+                resultingRoleMapping.remove(entr.getKey());
+                resultingRoleMapping.put(newMarkPropertiesBasedConfiguration, entr.getValue());
+                markConfigurationsToEdit.remove(entr.getKey());
+                markConfigurationsToEdit.add(newMarkPropertiesBasedConfiguration);
+            }
+        }
+    }
+
         private void replaceTemplateBasedConfigurationCandidatesBySuggestedPropertiesBasedConfigurations(Map<MarkTemplate, MarkConfiguration> markTemplatesToMarkConfigurationsToReplace,
             Set<MarkConfiguration> markConfigurationsToEdit, Iterable<String> tagsToFilterMarkProperties,
             Map<MarkTemplate, String> associatedRoles) {
