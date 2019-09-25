@@ -383,12 +383,13 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 regatta);
         allMarkConfigurations.addAll(regattaMarkConfigurations.regattaConfigurationsByMark.values());
 
-        boolean validCourseTemplateUsage = true;
+        boolean validCourseTemplateUsage = false;
         RepeatablePart optionalRepeatablePart = null;
         Integer numberOfLaps = null;
         final Map<MarkTemplate, MarkConfiguration> markTemplatesToMarkConfigurations = new HashMap<>();
         final Map<MarkConfiguration, String> roleMappingBasedOnCourseTemplate = new HashMap<>();
         if (courseTemplateOrNull != null) {
+            validCourseTemplateUsage = true;
             final Iterable<WaypointTemplate> effectiveCourseSequence;
             if (courseTemplateOrNull.hasRepeatablePart()) {
                 optionalRepeatablePart = courseTemplateOrNull.getRepeatablePart();
@@ -454,7 +455,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
 
         if (validCourseTemplateUsage) {
             resultingRoleMapping = roleMappingBasedOnCourseTemplate;
-            if (courseTemplateOrNull != null && courseTemplateOrNull.hasRepeatablePart() && numberOfLaps == 1) {
+            if (courseTemplateOrNull.hasRepeatablePart() && numberOfLaps == 1) {
                 // In case of just 1 lap, it is possible that MarkTemplates are left unmapped
                 for (int i = optionalRepeatablePart.getZeroBasedIndexOfRepeatablePartStart(); i < optionalRepeatablePart
                         .getZeroBasedIndexOfRepeatablePartEnd(); i++) {
@@ -486,12 +487,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     }
                 }
             }
-            if (courseTemplateOrNull != null) {
-                resultingWaypoints = createWaypointConfigurationsWithMarkTemplateMapping(courseTemplateOrNull,
-                        markTemplatesToMarkConfigurations);
-            } else {
-                resultingWaypoints = new ArrayList<>();
-            }
+            resultingWaypoints = createWaypointConfigurationsWithMarkTemplateMapping(courseTemplateOrNull,
+                    markTemplatesToMarkConfigurations);
         } else {
             resultingRoleMapping = new HashMap<>();
             resultingWaypoints = new ArrayList<>();
