@@ -42,7 +42,9 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
 
     @Override
     public CourseConfiguration deserialize(JSONObject json) throws JsonDeserializationException {
-        CourseConfigurationBuilder builder = new CourseConfigurationBuilder(sharedSailingData, regatta, courseTemplate);
+        final String name = (String) json.get(CourseConfigurationJsonSerializer.FIELD_NAME);
+        CourseConfigurationBuilder builder = new CourseConfigurationBuilder(sharedSailingData, regatta, courseTemplate,
+                name);
 
         final Map<UUID, MarkConfiguration> markConfigurationsByID = new HashMap<UUID, MarkConfiguration>();
         final JSONArray markConfigurationsJSON = (JSONArray) json

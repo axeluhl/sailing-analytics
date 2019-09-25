@@ -46,6 +46,7 @@ public class CourseConfigurationBuilder {
     private final SharedSailingData sharedSailingData;
     private final Regatta optionalRegatta;
     private final CourseTemplate optionalCourseTemplate;
+    private final String name;
     // TODO decide if we should combine markConfigurations and roleMapping to one field
     private Set<MarkConfiguration> markConfigurations = new HashSet<>();
     private Map<MarkConfiguration, String> associatedRoles = new HashMap<>();
@@ -55,10 +56,11 @@ public class CourseConfigurationBuilder {
     private Map<MarkPairWithConfiguration, MarkPairWithConfiguration> markPairCache;
 
     public CourseConfigurationBuilder(SharedSailingData sharedSailingData, Regatta optionalRegatta,
-            CourseTemplate optionalCourseTemplate) {
+            CourseTemplate optionalCourseTemplate, String name) {
         this.sharedSailingData = sharedSailingData;
         this.optionalRegatta = optionalRegatta;
         this.optionalCourseTemplate = optionalCourseTemplate;
+        this.name = name;
     }
 
     public MarkConfiguration addMarkConfiguration(UUID optionalMarkTemplateID, UUID optionalMarkPropertiesID,
@@ -202,6 +204,6 @@ public class CourseConfigurationBuilder {
 
     public CourseConfiguration build() {
         return new CourseConfigurationImpl(optionalCourseTemplate, markConfigurations, associatedRoles, waypoints,
-                optionalRepeatablePart, numberOfLaps);
+                optionalRepeatablePart, numberOfLaps, name);
     }
 }

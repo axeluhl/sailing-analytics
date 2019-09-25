@@ -11,6 +11,7 @@ import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 
 public class CourseConfigurationImpl implements CourseConfiguration {
+    private static final long serialVersionUID = -41810982418755899L;
     
     private final CourseTemplate optionalCourseTemplate;
     // TODO decide if we should combine markConfigurations and roleMapping to one field
@@ -18,11 +19,13 @@ public class CourseConfigurationImpl implements CourseConfiguration {
     private final Map<MarkConfiguration, String> associatedRoles;
     private final List<WaypointWithMarkConfiguration> waypoints;
     private final RepeatablePart optionalRepeatablePart;
+    private final String name;
+
     private Integer numberOfLaps;
     
     public CourseConfigurationImpl(CourseTemplate optionalCourseTemplate, Set<MarkConfiguration> markConfigurations,
             Map<MarkConfiguration, String> associatedRoles, List<WaypointWithMarkConfiguration> waypoints,
-            RepeatablePart optionalRepeatablePart, Integer numberOfLaps) {
+            RepeatablePart optionalRepeatablePart, Integer numberOfLaps, String name) {
         super();
         this.optionalCourseTemplate = optionalCourseTemplate;
         this.markConfigurations = markConfigurations;
@@ -30,6 +33,7 @@ public class CourseConfigurationImpl implements CourseConfiguration {
         this.waypoints = waypoints;
         this.optionalRepeatablePart = optionalRepeatablePart;
         this.numberOfLaps = numberOfLaps;
+        this.name = name;
     }
 
     @Override
@@ -74,6 +78,11 @@ public class CourseConfigurationImpl implements CourseConfiguration {
             result = waypoints;
         }
         return result;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
     }
 
 }

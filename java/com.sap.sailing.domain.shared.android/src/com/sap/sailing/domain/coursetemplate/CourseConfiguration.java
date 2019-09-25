@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sse.common.Named;
 
 /**
  * A course that does not consist of {@link Mark}s existing in a regatta but instead is defined by
@@ -21,7 +22,7 @@ import com.sap.sailing.domain.base.Mark;
  * The configuration for all marks are returned by {@link #getAllMarks()} because when pushing
  * this to a Regatta the marks for all these configurations have to be established.
  */
-public interface CourseConfiguration extends WithOptionalRepeatablePart {
+public interface CourseConfiguration extends WithOptionalRepeatablePart, Named {
     /**
      * If this course configuration has been obtained from a {@link CourseTemplate} without modifying the sequence of
      * waypoints and their mapping to {@link MarkTemplate}s, this method will return that {@link CourseTemplate}. In all
