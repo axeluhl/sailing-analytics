@@ -265,7 +265,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 // TODO handle positioning (either explicit or defined by optionalMarkProperties)
             }
         }
-        CourseDataImpl course = new CourseDataImpl(/* TODO name */ null,
+        final CourseDataImpl course = new CourseDataImpl(courseConfiguration.getName(),
                 courseConfiguration.getOptionalCourseTemplate() == null ? null
                         : courseConfiguration.getOptionalCourseTemplate().getId());
 
