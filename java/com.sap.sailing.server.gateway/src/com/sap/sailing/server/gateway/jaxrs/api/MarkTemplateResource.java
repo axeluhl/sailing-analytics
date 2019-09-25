@@ -73,12 +73,7 @@ public class MarkTemplateResource extends AbstractSailingServerResource {
         if (name == null || name.isEmpty()) {
             return getBadMarkTemplateValidationErrorResponse("name must be given");
         }
-        final String effectiveShortName;
-        if (shortName == null || shortName.isEmpty()) {
-            effectiveShortName = name;
-        } else {
-            effectiveShortName = shortName;
-        }
+        final String effectiveShortName = shortName == null || shortName.isEmpty() ? name : shortName;
         
         Color color = null;
         if (rgbColor != null && rgbColor.length() > 0) {
