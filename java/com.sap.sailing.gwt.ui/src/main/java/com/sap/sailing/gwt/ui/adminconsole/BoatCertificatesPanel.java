@@ -26,7 +26,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  */
 public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
     
-    private final BoatTableWrapper<RefreshableMultiSelectionModel<BoatDTO>> boatTable;
+    private final BoatWithCertificateTableWrapper<RefreshableMultiSelectionModel<BoatDTO>> boatTable;
     private final RefreshableMultiSelectionModel<BoatDTO> refreshableBoatSelectionModel;
     private final String regattaName;
     private final BusyIndicator busyIndicator;
@@ -41,7 +41,7 @@ public class BoatCertificatesPanel extends SimplePanel implements BusyDisplay {
         super();
         this.regattaName = regattaName;
         
-        this.boatTable = new BoatTableWrapper<>(sailingService, userService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true, 100, true);
+        this.boatTable = new BoatWithCertificateTableWrapper<>(sailingService, userService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true, 100, true);
         this.refreshableBoatSelectionModel = (RefreshableMultiSelectionModel<BoatDTO>) boatTable.getSelectionModel();
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         VerticalPanel mainPanel = new VerticalPanel();
