@@ -637,7 +637,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             boolean waitForLatestAnalyses, Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache,
             DomainFactory baseDomainFactory, boolean fillTotalPointsUncorrected, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         LeaderboardEntryDTO entryDTO = new LeaderboardEntryDTO();
-        TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
+        final TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
         entryDTO.race = trackedRace == null ? null : trackedRace.getRaceIdentifier();
         Boat boat;
         if (trackedRace != null) {

@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -79,9 +79,9 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
         final Competitor leader = Collections.min(competitors, comparatorByImpliedWind); // use minimum because the comparator sorts "better" first
         if (leader != null) {
             try {
-                final Function<Competitor, ORCPerformanceCurve> performanceCurveSupplier = getPerformanceCurveSupplier(timePoint, cache);
-                final ORCPerformanceCurve competitorPerformanceCurve = cache.getPerformanceCurveForPartialCourse(competitor, performanceCurveSupplier);
-                final Speed leaderImpliedWind = cache.getImpliedWind(leader, getImpliedWindSupplier(timePoint, cache));
+                final BiFunction<TimePoint, Competitor, ORCPerformanceCurve> performanceCurveSupplier = getPerformanceCurveSupplier(cache);
+                final ORCPerformanceCurve competitorPerformanceCurve = cache.getPerformanceCurveForPartialCourse(timePoint, getTrackedRace(), competitor, performanceCurveSupplier);
+                final Speed leaderImpliedWind = cache.getImpliedWind(timePoint, getTrackedRace(), leader, getImpliedWindSupplier(cache));
                 if (leaderImpliedWind != null && competitorPerformanceCurve != null) {
                     final Duration competitorAllowance = competitorPerformanceCurve.getAllowancePerCourse(leaderImpliedWind);
                     final Duration competitorElapsedTime = getTrackedRace().getTimeSailedSinceRaceStart(competitor, timePoint);

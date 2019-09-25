@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -41,23 +42,23 @@ public class NoCachingWindLegTypeAndLegBearingCache implements WindLegTypeAndLeg
     }
 
     @Override
-    public ORCPerformanceCurveCourse getTotalCourse(Supplier<ORCPerformanceCurveCourse> totalCourseSupplier) {
+    public ORCPerformanceCurveCourse getTotalCourse(TrackedRace raceContext, Supplier<ORCPerformanceCurveCourse> totalCourseSupplier) {
         return totalCourseSupplier.get();
     }
 
     @Override
-    public Competitor getScratchBoat(Supplier<Competitor> scratchBoatSupplier) {
-        return scratchBoatSupplier.get();
+    public Competitor getScratchBoat(TimePoint timePoint, TrackedRace raceContext, Function<TimePoint, Competitor> scratchBoatSupplier) {
+        return scratchBoatSupplier.apply(timePoint);
     }
 
     @Override
-    public ORCPerformanceCurve getPerformanceCurveForPartialCourse(Competitor competitor,
-            Function<Competitor, ORCPerformanceCurve> performanceCurveSupplier) {
-        return performanceCurveSupplier.apply(competitor);
+    public ORCPerformanceCurve getPerformanceCurveForPartialCourse(TimePoint timePoint,
+            TrackedRace raceContext, Competitor competitor, BiFunction<TimePoint, Competitor, ORCPerformanceCurve> performanceCurveSupplier) {
+        return performanceCurveSupplier.apply(timePoint, competitor);
     }
 
     @Override
-    public Speed getImpliedWind(Competitor competitor, Function<Competitor, Speed> impliedWindSupplier) {
-        return impliedWindSupplier.apply(competitor);
+    public Speed getImpliedWind(TimePoint timePoint, TrackedRace raceContext, Competitor competitor, BiFunction<TimePoint, Competitor, Speed> impliedWindSupplier) {
+        return impliedWindSupplier.apply(timePoint, competitor);
     }
 }
