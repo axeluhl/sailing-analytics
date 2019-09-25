@@ -1056,6 +1056,35 @@ public class RegattasResource extends AbstractSailingServerResource {
         return response;
     }
 
+    /** gets the relevant times for multiple race names */
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/times")
+    public Response getMultiTimes(@PathParam("regattaname") String regattaName,
+            @QueryParam("racename") final List<String> raceNames, @QueryParam("secret") String regattaSecret) {
+        final JSONArray resultJson = new JSONArray();
+
+        Response response = null;
+        Regatta regatta = findRegattaByName(regattaName);
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            if (!getService().skipChecksDueToCorrectSecret(regattaName, regattaSecret)) {
+                getSecurityService().checkCurrentUserReadPermission(regatta);
+            }
+
+            for (String raceName : raceNames) {
+                RaceDefinition race = findRaceByName(regatta, raceName);
+                if (race != null) {
+                    resultJson.add(getRaceTimesJSONForRaceName(raceName, regatta));
+                }
+            }
+            String json = resultJson.toJSONString();
+            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        }
+        return response;
+    }
+
     /**
      * Gets the relevant times of the race.
      * 
@@ -1080,92 +1109,94 @@ public class RegattasResource extends AbstractSailingServerResource {
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
             } else {
-                TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-
-                JSONObject jsonRaceTimes = new JSONObject();
-                jsonRaceTimes.put("name", trackedRace.getRace().getName());
-                jsonRaceTimes.put("regatta", regatta.getName());
-
-                jsonRaceTimes.put("startOfRace-ms", trackedRace.getStartOfRace() == null ? null : trackedRace
-                        .getStartOfRace().asMillis());
-                jsonRaceTimes.put("startOfTracking-ms", trackedRace.getStartOfTracking() == null ? null : trackedRace
-                        .getStartOfTracking().asMillis());
-                jsonRaceTimes.put("newestTrackingEvent-ms", trackedRace.getTimePointOfNewestEvent() == null ? null
-                        : trackedRace.getTimePointOfNewestEvent().asMillis());
-                jsonRaceTimes.put("endOfTracking-ms", trackedRace.getEndOfTracking() == null ? null : trackedRace
-                        .getEndOfTracking().asMillis());
-                jsonRaceTimes.put("endOfRace-ms", trackedRace.getEndOfRace() == null ? null : trackedRace
-                        .getEndOfRace().asMillis());
-                jsonRaceTimes.put("delayToLive-ms", trackedRace.getDelayToLiveInMillis());
-
-                JSONArray jsonMarkPassingTimes = new JSONArray();
-                List<TimePoint> firstPassingTimepoints = new ArrayList<>();
-                Iterable<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>> markPassingsTimes = trackedRace
-                        .getMarkPassingsTimes();
-                synchronized (markPassingsTimes) {
-                    int numberOfWaypoints = Util.size(markPassingsTimes);
-                    int wayPointNumber = 1;
-                    for (com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>> markPassingTimes : markPassingsTimes) {
-                        JSONObject jsonMarkPassing = new JSONObject();
-                        String name = "M" + (wayPointNumber - 1);
-                        if (wayPointNumber == numberOfWaypoints) {
-                            name = "F";
-                        }
-                        jsonMarkPassing.put("name", name);
-                        com.sap.sse.common.Util.Pair<TimePoint, TimePoint> timesPair = markPassingTimes.getB();
-                        TimePoint firstPassingTime = timesPair.getA();
-                        TimePoint lastPassingTime = timesPair.getB();
-                        jsonMarkPassing.put("firstPassing-ms",
-                                firstPassingTime == null ? null : firstPassingTime.asMillis());
-                        jsonMarkPassing.put("lastPassing-ms",
-                                lastPassingTime == null ? null : lastPassingTime.asMillis());
-
-                        firstPassingTimepoints.add(firstPassingTime);
-
-                        jsonMarkPassingTimes.add(jsonMarkPassing);
-                        wayPointNumber++;
-                    }
-                }
-                jsonRaceTimes.put("markPassings", jsonMarkPassingTimes);
-
-                JSONArray jsonLegInfos = new JSONArray();
-                trackedRace.getRace().getCourse().lockForRead();
-                try {
-                    Iterable<TrackedLeg> trackedLegs = trackedRace.getTrackedLegs();
-                    int legNumber = 1;
-                    for (TrackedLeg trackedLeg : trackedLegs) {
-                        JSONObject jsonLegInfo = new JSONObject();
-                        jsonLegInfo.put("name", "L" + legNumber);
-
-                        try {
-                            TimePoint firstPassingTime = firstPassingTimepoints.get(legNumber - 1);
-                            if (firstPassingTime != null) {
-                                jsonLegInfo.put("type", trackedLeg.getLegType(firstPassingTime));
-                                jsonLegInfo.put(
-                                        "bearing-deg",
-                                        RoundingUtil.bearingDecimalFormatter.format(trackedLeg.getLegBearing(
-                                                firstPassingTime).getDegrees()));
-                            }
-                        } catch (NoWindException e) {
-                            // do nothing
-                        }
-                        jsonLegInfos.add(jsonLegInfo);
-
-                        legNumber++;
-                    }
-                } finally {
-                    trackedRace.getRace().getCourse().unlockAfterRead();
-                }
-                jsonRaceTimes.put("legs", jsonLegInfos);
-
-                Date now = new Date();
-                jsonRaceTimes.put("currentServerTime-ms", now.getTime());
+                JSONObject jsonRaceTimes = getRaceTimesJSONForRaceName(raceName, regatta);
 
                 String json = jsonRaceTimes.toJSONString();
-                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
+                        .build();
             }
         }
         return response;
+    }
+
+    private JSONObject getRaceTimesJSONForRaceName(String raceName, Regatta regatta) {
+        TrackedRace trackedRace = findTrackedRace(regatta.getName(), raceName);
+
+        JSONObject jsonRaceTimes = new JSONObject();
+        jsonRaceTimes.put("name", trackedRace.getRace().getName());
+        jsonRaceTimes.put("regatta", regatta.getName());
+
+        jsonRaceTimes.put("startOfRace-ms",
+                trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asMillis());
+        jsonRaceTimes.put("startOfTracking-ms",
+                trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asMillis());
+        jsonRaceTimes.put("newestTrackingEvent-ms", trackedRace.getTimePointOfNewestEvent() == null ? null
+                : trackedRace.getTimePointOfNewestEvent().asMillis());
+        jsonRaceTimes.put("endOfTracking-ms",
+                trackedRace.getEndOfTracking() == null ? null : trackedRace.getEndOfTracking().asMillis());
+        jsonRaceTimes.put("endOfRace-ms",
+                trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asMillis());
+        jsonRaceTimes.put("delayToLive-ms", trackedRace.getDelayToLiveInMillis());
+
+        JSONArray jsonMarkPassingTimes = new JSONArray();
+        List<TimePoint> firstPassingTimepoints = new ArrayList<>();
+        Iterable<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>> markPassingsTimes = trackedRace
+                .getMarkPassingsTimes();
+        synchronized (markPassingsTimes) {
+            int numberOfWaypoints = Util.size(markPassingsTimes);
+            int wayPointNumber = 1;
+            for (com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>> markPassingTimes : markPassingsTimes) {
+                JSONObject jsonMarkPassing = new JSONObject();
+                String name = "M" + (wayPointNumber - 1);
+                if (wayPointNumber == numberOfWaypoints) {
+                    name = "F";
+                }
+                jsonMarkPassing.put("name", name);
+                com.sap.sse.common.Util.Pair<TimePoint, TimePoint> timesPair = markPassingTimes.getB();
+                TimePoint firstPassingTime = timesPair.getA();
+                TimePoint lastPassingTime = timesPair.getB();
+                jsonMarkPassing.put("firstPassing-ms", firstPassingTime == null ? null : firstPassingTime.asMillis());
+                jsonMarkPassing.put("lastPassing-ms", lastPassingTime == null ? null : lastPassingTime.asMillis());
+
+                firstPassingTimepoints.add(firstPassingTime);
+
+                jsonMarkPassingTimes.add(jsonMarkPassing);
+                wayPointNumber++;
+            }
+        }
+        jsonRaceTimes.put("markPassings", jsonMarkPassingTimes);
+
+        JSONArray jsonLegInfos = new JSONArray();
+        trackedRace.getRace().getCourse().lockForRead();
+        try {
+            Iterable<TrackedLeg> trackedLegs = trackedRace.getTrackedLegs();
+            int legNumber = 1;
+            for (TrackedLeg trackedLeg : trackedLegs) {
+                JSONObject jsonLegInfo = new JSONObject();
+                jsonLegInfo.put("name", "L" + legNumber);
+
+                try {
+                    TimePoint firstPassingTime = firstPassingTimepoints.get(legNumber - 1);
+                    if (firstPassingTime != null) {
+                        jsonLegInfo.put("type", trackedLeg.getLegType(firstPassingTime));
+                        jsonLegInfo.put("bearing-deg", RoundingUtil.bearingDecimalFormatter
+                                .format(trackedLeg.getLegBearing(firstPassingTime).getDegrees()));
+                    }
+                } catch (NoWindException e) {
+                    // do nothing
+                }
+                jsonLegInfos.add(jsonLegInfo);
+
+                legNumber++;
+            }
+        } finally {
+            trackedRace.getRace().getCourse().unlockAfterRead();
+        }
+        jsonRaceTimes.put("legs", jsonLegInfos);
+
+        Date now = new Date();
+        jsonRaceTimes.put("currentServerTime-ms", now.getTime());
+        return jsonRaceTimes;
     }
 
     @GET
