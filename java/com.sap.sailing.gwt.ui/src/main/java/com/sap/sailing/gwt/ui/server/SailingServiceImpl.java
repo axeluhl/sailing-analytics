@@ -79,6 +79,10 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataAnalyzer;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEventFinder;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
@@ -281,6 +285,9 @@ import com.sap.sailing.domain.common.impl.PolarSheetsXYDiagramDataImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
+import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -7832,7 +7839,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     
     private Fleet getFleetByName(RaceColumn raceColumn, String fleetName) throws NotFoundException{
         Fleet fleet = raceColumn.getFleetByName(fleetName);
-        if (fleet == null){
+        if (fleet == null) {
             throw new NotFoundException("fleet with name "+fleetName+" not found");
         }
         return fleet;
@@ -9301,7 +9308,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     }
                 }
             }
-
         }
         return result;
     }
@@ -9309,5 +9315,116 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public boolean getTrackedRaceIsUsingMarkPassingCalculator(RegattaAndRaceIdentifier regattaNameAndRaceName) {
         return getExistingTrackedRace(regattaNameAndRaceName).isUsingMarkPassingCalculator();
+    }
+
+    @Override
+    public ORCPerformanceCurveLegImpl getLegGeometry(String leaderboardName, String raceColumnName, String fleetName, int zeroBasedLegIndex) {
+        ORCPerformanceCurveLegImpl result = null;
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            if (raceColumn != null) {
+                final Fleet fleet = raceColumn.getFleetByName(fleetName);
+                if (fleet != null) {
+                    final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                    if (trackedRace != null) {
+                        result = getLegGeometry(zeroBasedLegIndex, trackedRace);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public ORCPerformanceCurveLegImpl getLegGeometry(RegattaAndRaceIdentifier regattaNameAndRaceName, int zeroBasedLegIndex) {
+        final TrackedRace trackedRace = getExistingTrackedRace(regattaNameAndRaceName);
+        return getLegGeometry(zeroBasedLegIndex, trackedRace);
+    }
+
+    private ORCPerformanceCurveLegImpl getLegGeometry(int zeroBasedLegIndex, final TrackedRace trackedRace) {
+        final ORCPerformanceCurveLegImpl result;
+        if (trackedRace != null) {
+            final Leg leg = trackedRace.getRace().getCourse().getLeg(zeroBasedLegIndex);
+            final TrackedLeg trackedLeg = trackedRace.getTrackedLeg(leg);
+            final Distance distance = trackedLeg.getWindwardDistance();
+            Bearing twa;
+            try {
+                twa = trackedLeg.getTWA(trackedLeg.getReferenceTimePoint());
+            } catch (NoWindException e) {
+                twa = null;
+            }
+            result = new ORCPerformanceCurveLegImpl(distance, twa);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Map<Integer, ORCPerformanceCurveLegImpl> getORCPerformanceCurveLegInfo(String leaderboardName,
+            String raceColumnName, String fleetName) throws NotFoundException {
+        return getORCPerformanceCurveLegInfo(Collections.singleton(getRaceLog(leaderboardName, raceColumnName, fleetName)));
+    }
+    
+    private Map<Integer, ORCPerformanceCurveLegImpl> getORCPerformanceCurveLegInfo(Iterable<RaceLog> raceLogs) {
+        final Map<Integer, ORCPerformanceCurveLegImpl> result = new HashMap<>();
+        for (final RaceLog raceLog : raceLogs) {
+            for (final Entry<Integer, ORCPerformanceCurveLeg> e : new RaceLogORCLegDataAnalyzer(raceLog).analyze().entrySet()) {
+                if (e.getValue().getType() == ORCPerformanceCurveLegTypes.TWA) {
+                    result.put(e.getKey(), new ORCPerformanceCurveLegImpl(e.getValue().getLength(), e.getValue().getTwa()));
+                } else {
+                    result.put(e.getKey(), new ORCPerformanceCurveLegImpl(e.getValue().getLength(), e.getValue().getType()));
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Map<Integer, ORCPerformanceCurveLegImpl> getORCPerformanceCurveLegInfo(RegattaAndRaceIdentifier raceIdentifier) {
+        return getORCPerformanceCurveLegInfo(getTrackedRace(raceIdentifier).getAttachedRaceLogs());
+    }
+
+    @Override
+    public void setORCPerformanceCurveLegInfo(RegattaAndRaceIdentifier raceIdentifier,
+            Map<Integer, ORCPerformanceCurveLegImpl> legInfo) throws NotRevokableException {
+        setORCPerformanceCurveInfo(getExistingTrackedRace(raceIdentifier).getAttachedRaceLogs().iterator().next(), legInfo);
+    }
+
+    private void setORCPerformanceCurveInfo(RaceLog raceLog, Map<Integer, ORCPerformanceCurveLegImpl> legInfo) throws NotRevokableException {
+        final AbstractLogEventAuthor author = getService().getServerAuthor();
+        for (final Entry<Integer, RaceLogORCLegDataEvent> e : new RaceLogORCLegDataEventFinder(raceLog).analyze().entrySet()) {
+            assert e.getValue() != null;
+            final ORCPerformanceCurveLeg leg = RaceLogORCLegDataAnalyzer.createORCPerformanceCurveLeg(e.getValue());
+            final ORCPerformanceCurveLegImpl desiredLeg = legInfo.get(e.getKey());
+            final boolean explicitRevoke = legInfo.containsKey(e.getKey()) && legInfo.get(e.getKey()) == null;
+            if (Util.equalsWithNull(desiredLeg, leg)) {
+                assert desiredLeg != null;
+                // we already have what the client wants, namely either nothing found and an explicitRevoke was requested,
+                // or the desiredLeg matched with what the log has; remove the request from the legInfo, meaning it has been handled:
+                legInfo.remove(e.getKey());
+            } else {
+                // either we have an explicitRevoke and found a leg setting in the race log that therefore needs to be revoked,
+                // or the leg event found in the log does not match the desiredLeg for this index.
+                raceLog.revokeEvent(author, e.getValue());
+                // In case an explicit revoke was what was requested, we have handled the request:
+                if (explicitRevoke) {
+                    legInfo.remove(e.getKey());
+                }
+            }
+        }
+        // for the remaining legInfo entries we now have to create race log events:
+        final TimePoint now = MillisecondsTimePoint.now();
+        for (final Entry<Integer, ORCPerformanceCurveLegImpl> e : legInfo.entrySet()) {
+            raceLog.add(new RaceLogORCLegDataEventImpl(now, now, author, UUID.randomUUID(), /* pPassId */ 0, e.getKey(),
+                    e.getValue().getTwa(), e.getValue().getLength(), e.getValue().getType()));
+        }
+    }
+
+    @Override
+    public void setORCPerformanceCurveLegInfo(String leaderboardName, String raceColumnName, String fleetName,
+            Map<Integer, ORCPerformanceCurveLegImpl> legInfo) throws NotFoundException, NotRevokableException {
+        setORCPerformanceCurveInfo(getRaceLog(leaderboardName, raceColumnName, fleetName), legInfo);
     }
 }

@@ -2,9 +2,9 @@ package com.sap.sailing.domain.abstractlog.orc;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
@@ -29,20 +29,24 @@ public class RaceLogORCLegDataAnalyzer extends RaceLogAnalyzer<Map<Integer, ORCP
     @Override
     protected Map<Integer, ORCPerformanceCurveLeg> performAnalysis() {
         final Map<Integer, ORCPerformanceCurveLeg> result = new HashMap<>();
-        for (RaceLogEvent event : getLog().getUnrevokedEvents()) {
-            if (event instanceof RaceLogORCLegDataEvent) {
-                final RaceLogORCLegDataEvent legDataEvent = (RaceLogORCLegDataEvent) event;
-                final Distance length = legDataEvent.getLength();
-                final ORCPerformanceCurveLegTypes type = legDataEvent.getType();
-                final ORCPerformanceCurveLeg leg;
-                if (type == ORCPerformanceCurveLegTypes.TWA) {
-                    leg = new ORCPerformanceCurveLegImpl(length, legDataEvent.getTwa());
-                } else {
-                    leg = new ORCPerformanceCurveLegImpl(length, legDataEvent.getType());
-                }
-                result.put(legDataEvent.getOneBasedLegNumber(), leg);
-            }
+        for (Entry<Integer, RaceLogORCLegDataEvent> entry : new RaceLogORCLegDataEventFinder(getLog()).analyze().entrySet()) {
+            assert entry.getKey() == entry.getValue().getOneBasedLegNumber();
+            final RaceLogORCLegDataEvent legDataEvent = entry.getValue();
+            final ORCPerformanceCurveLeg leg = createORCPerformanceCurveLeg(legDataEvent);
+            result.put(legDataEvent.getOneBasedLegNumber(), leg);
         }
         return result;
+    }
+
+    public static ORCPerformanceCurveLeg createORCPerformanceCurveLeg(final RaceLogORCLegDataEvent legDataEvent) {
+        final Distance length = legDataEvent.getLength();
+        final ORCPerformanceCurveLegTypes type = legDataEvent.getType();
+        final ORCPerformanceCurveLeg leg;
+        if (type == ORCPerformanceCurveLegTypes.TWA) {
+            leg = new ORCPerformanceCurveLegImpl(length, legDataEvent.getTwa());
+        } else {
+            leg = new ORCPerformanceCurveLegImpl(length, legDataEvent.getType());
+        }
+        return leg;
     }
 }

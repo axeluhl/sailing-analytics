@@ -48,6 +48,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
@@ -1120,4 +1121,22 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void existsTracTracConfigurationForCurrentUser(String jsonUrl, AsyncCallback<Boolean> callback);
 
     void getTrackedRaceIsUsingMarkPassingCalculator(RegattaAndRaceIdentifier regattaNameAndRaceName, AsyncCallback<Boolean> callback);
+
+    void getLegGeometry(String leaderboardName, String raceColumnName, String fleetName, int zeroBasedLegIndex,
+            AsyncCallback<ORCPerformanceCurveLegImpl> callback);
+
+    void getLegGeometry(RegattaAndRaceIdentifier singleSelectedRace, int zeroBasedLegIndex, 
+            AsyncCallback<ORCPerformanceCurveLegImpl> callback);
+
+    void getORCPerformanceCurveLegInfo(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Map<Integer, ORCPerformanceCurveLegImpl>> asyncCallback);
+
+    void getORCPerformanceCurveLegInfo(RegattaAndRaceIdentifier singleSelectedRace,
+            AsyncCallback<Map<Integer, ORCPerformanceCurveLegImpl>> asyncCallback);
+
+    void setORCPerformanceCurveLegInfo(RegattaAndRaceIdentifier raceIdentifier,
+            Map<Integer, ORCPerformanceCurveLegImpl> legInfo, AsyncCallback<Void> callback);
+
+    void setORCPerformanceCurveLegInfo(String leaderboardName, String raceColumnName, String fleetName,
+            Map<Integer, ORCPerformanceCurveLegImpl> legInfo, AsyncCallback<Void> callback);
 }

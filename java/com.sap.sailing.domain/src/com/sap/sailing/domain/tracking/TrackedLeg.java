@@ -209,4 +209,13 @@ public interface TrackedLeg extends Serializable {
     Competitor getLeader(TimePoint timePoint);
 
     Competitor getLeader(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+
+    Bearing getTWA(TimePoint at) throws NoWindException;
+    
+    /**
+     * Same as {@link #getTWA(TimePoint) getTWA(}{@link #getReferenceTimePoint() getReferenceTimePoint())}.
+     */
+    default Bearing getTWA() throws NoWindException {
+        return getTWA(getReferenceTimePoint());
+    }
 }

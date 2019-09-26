@@ -96,7 +96,7 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
             } else {
                 raceDataGrid.setText(2, 1, "");
             }
-            if(selectedRaceDTO.startOfRace != null && selectedRaceDTO.endOfRace != null) {
+            if (selectedRaceDTO.startOfRace != null && selectedRaceDTO.endOfRace != null) {
                 Date duration = new Date(selectedRaceDTO.endOfRace.getTime() - selectedRaceDTO.startOfRace.getTime());
                 raceDataGrid.setText(3, 1, durationFormatter.render(duration));
             } else {

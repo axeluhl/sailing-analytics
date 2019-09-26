@@ -52,6 +52,7 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TrackedLegImpl implements TrackedLeg {
@@ -180,7 +181,7 @@ public class TrackedLegImpl implements TrackedLeg {
     }
     
     @Override
-    public LegType getLegType(TimePoint at) throws NoWindException {
+    public Bearing getTWA(TimePoint at) throws NoWindException {
         Wind wind = getWindOnLeg(at);
         if (wind == null) {
             throw new NoWindException("Need to know wind direction in race "+getTrackedRace().getRace().getName()+
@@ -188,12 +189,24 @@ public class TrackedLegImpl implements TrackedLeg {
                     " is an upwind or downwind leg");
         }
         Bearing legBearing = getLegBearing(at);
+        final Bearing result;
         if (legBearing != null) {
-            double deltaDeg = legBearing.getDifferenceTo(wind.getBearing()).getDegrees();
+            result = legBearing.getDifferenceTo(wind.getBearing());
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    @Override
+    public LegType getLegType(TimePoint at) throws NoWindException {
+        final Bearing twa = getTWA(at);
+        if (twa != null) {
+            double deltaDeg = twa.getDegrees();
             if (Math.abs(deltaDeg) < LegType.UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
                 return LegType.DOWNWIND;
             } else {
-                double deltaDegOpposite = legBearing.getDifferenceTo(wind.getBearing().reverse()).getDegrees();
+                double deltaDegOpposite = twa.getDifferenceTo(new DegreeBearingImpl(180)).getDegrees();
                 if (Math.abs(deltaDegOpposite) < LegType.UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
                     return LegType.UPWIND;
                 }

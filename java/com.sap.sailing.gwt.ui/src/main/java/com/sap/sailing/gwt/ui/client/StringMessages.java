@@ -2270,4 +2270,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String updateCertificates();
     String actionDefineLegForOrcPcs();
     String importCertificates();
+    String orcPerformanceCurveLeg();
+    String orcPerformanceCurveLegName(int i, String name);
+    String orcPerformanceCurveFetchTrackedLegGeometry();
+    String distanceInNauticalMiles();
+    String legTwaInDegrees();
+    String pleaseEnterADistance();
+    String pleaseEnterATwa();
 }

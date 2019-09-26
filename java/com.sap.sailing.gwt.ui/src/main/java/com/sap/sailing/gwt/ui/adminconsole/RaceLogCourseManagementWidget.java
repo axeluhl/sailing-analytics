@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.cell.client.FieldUpdater;
@@ -8,6 +9,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
@@ -120,7 +122,25 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
         });
         marks.getTable().addColumn(actionColumn);
     }
-    
+
+    /**
+     * We cannot update the course here really, but we can at least try to update the ORC PCS leg data.
+     */
+    @Override
+    protected void save() {
+        sailingService.setORCPerformanceCurveLegInfo(leaderboardName, raceColumnName, fleetName,
+                getORCPerformanceCurveLegInfoByOneBasedWaypointIndex(), new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(stringMessages.errorUpdatingRaceCourse(caught.getMessage()));
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+            }
+        });
+    }
+
     @Override
     protected void markSelectionChanged() {
         Set<MarkDTO> marksToRemove = marks.getSelectionModel().getSelectedSet();
@@ -146,11 +166,33 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
 
     @Override
     public void refresh() {
+        refreshCourse();
+        refreshMarks();
+    }
+
+    private void refreshORCPerformanceCurveLegs() {
+        sailingService.getORCPerformanceCurveLegInfo(leaderboardName, raceColumnName, fleetName,
+                new AsyncCallback<Map<Integer, ORCPerformanceCurveLegImpl>>() {
+                    @Override
+                    public void onSuccess(Map<Integer, ORCPerformanceCurveLegImpl> result) {
+                        refreshORCPerformanceCurveLegs(result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Could not load ORC Performance Curve leg information: " + caught.getMessage());
+                    }
+                });
+    }
+
+    private void refreshCourse() {
         sailingService.getLastCourseDefinitionInRaceLog(leaderboardName, raceColumnName, fleetName,
                 new AsyncCallback<RaceCourseDTO>() {
                     @Override
                     public void onSuccess(RaceCourseDTO result) {
                         updateWaypointsAndControlPoints(result, leaderboardName);
+                        // check for ORC PCS leg info only after the waypoints have been received
+                        refreshORCPerformanceCurveLegs();
                     }
 
                     @Override
@@ -158,7 +200,6 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                         errorReporter.reportError("Could not load course: " + caught.getMessage());
                     }
                 });
-        refreshMarks();
     }
 
     /**
@@ -177,5 +218,10 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                 errorReporter.reportError("Could not load marks: " + caught.getMessage());
             }
         });
+    }
+
+    @Override
+    protected LegGeometrySupplier getLegGeometrySupplier() {
+        return (zeroBasedLegIndex, callback)->sailingService.getLegGeometry(leaderboardName, raceColumnName, fleetName, zeroBasedLegIndex, callback);
     }
 }

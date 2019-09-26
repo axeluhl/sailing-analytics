@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -24,6 +25,8 @@ import com.google.gwt.view.client.SetSelectionModel;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
+import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.gwt.ui.adminconsole.WaypointCreationDialog.DefaultPassingInstructionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -41,6 +44,8 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.UserService;
@@ -64,6 +69,11 @@ public abstract class CourseManagementWidget implements IsWidget {
     protected final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     private final UserService userService;
     private SecuredDTO securedDtoForWaypointsPermissionCheck;
+    private final Map<WaypointDTO, ORCPerformanceCurveLegImpl> orcPerformanceCurveLegInfo;
+    
+    public static interface LegGeometrySupplier {
+        void getLegGeometry(int zeroBasedLegNumber, AsyncCallback<ORCPerformanceCurveLegImpl> callback);
+    }
 
     @Override
     public Widget asWidget() {
@@ -76,6 +86,7 @@ public abstract class CourseManagementWidget implements IsWidget {
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.userService = userService;
+        this.orcPerformanceCurveLegInfo = new HashMap<>();
         mainPanel = new Grid(2, 3);
         mainPanel.setCellPadding(5);
         mainPanel.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
@@ -107,7 +118,7 @@ public abstract class CourseManagementWidget implements IsWidget {
         mainPanel.setWidget(1, 1, controlPointsBtnsPanel);
         mainPanel.setWidget(1, 2, marksBtnsPanel);
         final AccessControlledActionsColumn<WaypointDTO, WaypointImagesBarCell> waypointsActionColumn = create(
-                new WaypointImagesBarCell(stringMessages), userService,
+                new WaypointImagesBarCell(stringMessages, waypoints.getDataProvider()), userService,
                 s -> securedDtoForWaypointsPermissionCheck);
         // update permission for tracked race is required for deleting waypoints...
         waypointsActionColumn.addAction(DefaultActions.DELETE.name(), DefaultActions.UPDATE,
@@ -164,6 +175,17 @@ public abstract class CourseManagementWidget implements IsWidget {
         controlPointsBtnsPanel.add(addControlPoint);
     }
     
+    abstract protected LegGeometrySupplier getLegGeometrySupplier();
+    
+    protected Map<Integer, ORCPerformanceCurveLegImpl> getORCPerformanceCurveLegInfoByOneBasedWaypointIndex() {
+        final List<WaypointDTO> waypointList = waypoints.getDataProvider().getList();
+        final Map<Integer, ORCPerformanceCurveLegImpl> result = new HashMap<>();
+        for (final Entry<WaypointDTO, ORCPerformanceCurveLegImpl> e : orcPerformanceCurveLegInfo.entrySet()) {
+            result.put(waypointList.indexOf(e.getKey())+1, e.getValue());
+        }
+        return result;
+    }
+    
     /**
      * Shows a dialog that allows the user to enter the details for a {@link RaceLogORCLegDataEvent}
      * for the leg ending at {@code waypoint}.
@@ -172,6 +194,35 @@ public abstract class CourseManagementWidget implements IsWidget {
      * There is already a {@link ORCLegEventCreationDialog}, which is currently unfinished.
      */
     private void createOrcPcsLegEventForLegEndingAt(WaypointDTO waypoint) {
+        new ORCPerformanceCurveLegDialog(stringMessages, waypoint, waypoints.getDataProvider(),
+                /* orcLegParametersSoFar */ null, getLegGeometrySupplier(),
+                new Validator<ORCPerformanceCurveLegImpl>() {
+             @Override
+             public String getErrorMessage(ORCPerformanceCurveLegImpl valueToValidate) {
+                    final String result;
+                    if (valueToValidate == null) {
+                        result = null; // empty is allowed
+                    } else {
+                        if (valueToValidate.getLength() == null) {
+                            result = stringMessages.pleaseEnterADistance();
+                        } else if (valueToValidate.getType() == ORCPerformanceCurveLegTypes.TWA && valueToValidate.getTwa() == null) {
+                            result = stringMessages.pleaseEnterATwa();
+                        } else {
+                            result = null;
+                        }
+                    }
+                    return result;
+             }
+        }, new DialogCallback<ORCPerformanceCurveLegImpl>() {
+            @Override
+            public void ok(ORCPerformanceCurveLegImpl legInfoForWaypoint) {
+                orcPerformanceCurveLegInfo.put(waypoint, legInfoForWaypoint);
+            }
+            
+            @Override
+            public void cancel() {
+            }
+        }).show();
     }
 
     protected void markSelectionChanged() {
@@ -281,7 +332,7 @@ public abstract class CourseManagementWidget implements IsWidget {
     }
 
     public void refresh(){};
-
+    
     protected void updateWaypointsAndControlPoints(RaceCourseDTO raceCourseDTO, String leaderboardName) {
         this.sailingService.getLeaderboardWithSecurity(leaderboardName,
                 new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
@@ -339,6 +390,21 @@ public abstract class CourseManagementWidget implements IsWidget {
         } else {
             insertWaypointBefore.setEnabled(false);
             insertWaypointAfter.setEnabled(false);
+        }
+    }
+
+    /**
+     * Assumes that {@link #waypoints} has a list of {@link WaypointDTO}s that are consistent with the numbering scheme
+     * of {@code oneBasedLegIndexAndFixedLegData}. The {@link #orcPerformanceCurveLegInfo} will be cleared and then
+     * filled with the {@link ORCPerformanceCurveLegImpl} objects, keyed by those {@link WaypointDTO}s from
+     * {@link #waypoints} that correspond with {@code oneBasedLegIndexAndFixedLegData} (understanding that the list
+     * indices starts counting at 0).
+     */
+    protected void refreshORCPerformanceCurveLegs(Map<Integer, ORCPerformanceCurveLegImpl> oneBasedLegIndexAndFixedLegData) {
+        orcPerformanceCurveLegInfo.clear();
+        final List<WaypointDTO> waypointList = waypoints.getDataProvider().getList();
+        for (final Entry<Integer, ORCPerformanceCurveLegImpl> e : oneBasedLegIndexAndFixedLegData.entrySet()) {
+            orcPerformanceCurveLegInfo.put(waypointList.get(e.getKey()-1), e.getValue());
         }
     }
 }
