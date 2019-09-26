@@ -113,7 +113,6 @@ import com.sap.sailing.domain.maneuverdetection.IncrementalManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.ShortTimeAfterLastHitCache;
 import com.sap.sailing.domain.maneuverdetection.impl.IncrementalManeuverDetectorImpl;
-import com.sap.sailing.domain.maneuverdetection.impl.LowGPSSamplingRateManeuverDetectorImpl;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -759,11 +758,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         Duration averageIntervalBetweenRawFixes = getTrack(competitor).getAverageIntervalBetweenRawFixes();
                         if (averageIntervalBetweenRawFixes != null) {
                             ManeuverDetector maneuverDetector;
-                            if (averageIntervalBetweenRawFixes.asSeconds() >= 30) {
-                                maneuverDetector = new LowGPSSamplingRateManeuverDetectorImpl(TrackedRaceImpl.this, competitor);
-                            } else {
+                            // FIXME The LowGPSSamplingRateManeuverDetectorImpl doesn't work very well; it recognizes many tacks only as bear-away and doesn't seem to have any noticeable benefits... See ORC Worlds 2019 ORC A Long Offshore
+//                            if (averageIntervalBetweenRawFixes.asSeconds() >= 30) {
+//                                maneuverDetector = new LowGPSSamplingRateManeuverDetectorImpl(TrackedRaceImpl.this, competitor);
+//                            } else {
                                 maneuverDetector = maneuverDetectorPerCompetitorCache.getValue(competitor);
-                            }
+//                            }
                             List<Maneuver> maneuvers = computeManeuvers(competitor, maneuverDetector);
                             return maneuvers;
                         } else {
