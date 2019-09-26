@@ -355,7 +355,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                             final Mark left = markMapper.apply(mpwc.getLeft());
                             final Mark right = markMapper.apply(mpwc.getRight());
                             return new ControlPointWithTwoMarksImpl(UUID.randomUUID(), left, right, mpwc.getName(),
-                                    /* TODO shortName */ null);
+                                    mpwc.getShortName());
                         });
                 course.addWaypoint(Util.size(course.getWaypoints()),
                         new WaypointImpl(controlPoint, waypointWithMarkConfiguration.getPassingInstruction()));
