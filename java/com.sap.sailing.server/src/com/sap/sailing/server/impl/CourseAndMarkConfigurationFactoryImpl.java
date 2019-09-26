@@ -644,15 +644,46 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         final Map<WithID, List<DeviceMappingWithRegattaLogEvent<WithID>>> deviceMappings = new RegattaLogDeviceMappingFinder<>(
                 regattaLog).analyze();
 
-        for(Map.Entry<WithID, List<DeviceMappingWithRegattaLogEvent<WithID>>> entry : deviceMappings.entrySet()) {
-            for (DeviceMappingWithRegattaLogEvent<WithID> event : entry.getValue()) {
-                // if (event.getDevice() instanceof PingDeviceIdentifier) {
-                // } else if (event.getDevice() instanceof TODO TrackDeviceIdentifier){
-                // }
+
+        final List<DeviceMappingWithRegattaLogEvent<WithID>> foundMappings = deviceMappings.get(mark);
+
+        final DeviceIdentifier identifier = findMostRecentOrOngoingMapping(foundMappings);
+
+        if (identifier != null) {
+            // TODO: use actual PingDeviceIdentifier class which can currently not be used easily and the bundle
+            // com.sap.sailing.domain.racelogtracking already has a dependency on com.sap.sailing.server
+            if ("PING".equals(identifier.getIdentifierType())) {
+                // TODO: handle ping
+
+            } else {
             }
-            entry.getValue().stream().filter(event -> event.getDevice().getIdentifierType().equals(null));
+        } else {
+            // TODO
         }            
         return null;
+    }
+
+    /**
+     * @return the device mapping from the set of {@code foundMappings} which is either ongoing or has the most recent
+     *         end time point
+     */
+    private DeviceIdentifier findMostRecentOrOngoingMapping(
+            final List<DeviceMappingWithRegattaLogEvent<WithID>> foundMappings) {
+        DeviceIdentifier identifier = null;
+        TimePoint identifierTP = new MillisecondsTimePoint(0);
+        if (foundMappings != null) {
+            for (DeviceMappingWithRegattaLogEvent<WithID> event : foundMappings) {
+
+                if (event.getTimeRange().hasOpenEnd()) {
+                    identifier = event.getDevice();
+                    break;
+                }
+                if (identifierTP.before(event.getTimeRange().to())) {
+                    identifierTP = event.getTimeRange().to();
+                }
+            }
+        }
+        return identifier;
     }
 
     private Positioning getPositioningIfAvailable(MarkProperties markProperties) {
