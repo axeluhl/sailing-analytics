@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
@@ -34,6 +35,7 @@ import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
@@ -73,6 +75,7 @@ import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
+import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
@@ -239,7 +242,9 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 /* Use the name of the course template for the course configuration as well */name);
     }
 
-    private void savePositioningToMark(Regatta regatta, Mark mark, Positioning optionalExplicitPositioning, MarkProperties optionalAssociatedMarkProperties) {
+    private void savePositioningToMark(Regatta regatta, Mark mark, Positioning optionalExplicitPositioning,
+            MarkProperties optionalAssociatedMarkProperties, TimePoint timePointForDefinitionOfMarksAndDeviceMappings,
+            AbstractLogEventAuthor author) {
         Position position = null;
         DeviceIdentifier deviceIdentifier = null;
         if (optionalExplicitPositioning != null) {
@@ -638,29 +643,39 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
 
     @SuppressWarnings("unused")
     private Positioning getPositioningIfAvailable(Regatta regatta, Mark mark) {
-        // TODO: retrieve positioning for mark from regatta log with RegattaLogDeviceMappingFinder
-        // filter by mark and find out if it is ping or track
         final RegattaLog regattaLog = regattaLogStore.getRegattaLog(regatta.getRegattaLikeIdentifier(), false);
         final Map<WithID, List<DeviceMappingWithRegattaLogEvent<WithID>>> deviceMappings = new RegattaLogDeviceMappingFinder<>(
                 regattaLog).analyze();
 
-
         final List<DeviceMappingWithRegattaLogEvent<WithID>> foundMappings = deviceMappings.get(mark);
-
         final DeviceIdentifier identifier = findMostRecentOrOngoingMapping(foundMappings);
 
+        final Positioning result;
         if (identifier != null) {
+            Position lastPosition = null;
+            try {
+                final Map<DeviceIdentifier, Timed> lastFix = sensorFixStore
+                        .getLastFix(Collections.singleton(identifier));
+
+                final Timed t = lastFix.get(identifier);
+                if (t instanceof GPSFix) {
+                    lastPosition = ((GPSFix) t).getPosition();
+                }
+            } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                log.log(Level.WARNING, "Could not load associated fix for regatta mark", e);
+            }
+
             // TODO: use actual PingDeviceIdentifier class which can currently not be used easily and the bundle
             // com.sap.sailing.domain.racelogtracking already has a dependency on com.sap.sailing.server
             if ("PING".equals(identifier.getIdentifierType())) {
-                // TODO: handle ping
-
+                result = new FixedPositioningImpl(lastPosition);
             } else {
+                result = new SavedDevicePositioningImpl(lastPosition);
             }
         } else {
-            // TODO
-        }            
-        return null;
+            result = null;
+        }
+        return result;
     }
 
     /**
