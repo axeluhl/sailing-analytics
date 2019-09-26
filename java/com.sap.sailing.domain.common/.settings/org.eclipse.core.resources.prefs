@@ -1,5 +1,6 @@
 eclipse.preferences.version=1
 encoding//src/com/sap/sailing/domain/common/AbstractPosition.java=UTF-8
+encoding//src/com/sap/sailing/domain/common/BoatClassMasterdata.java=UTF-8
 encoding//src/com/sap/sailing/domain/common/LegType.java=UTF-8
 encoding//src/com/sap/sailing/domain/common/Position.java=UTF-8
 encoding//src/com/sap/sailing/domain/common/confidence/impl/ConfidenceBasedAveragerImpl.java=utf-8
