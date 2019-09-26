@@ -973,9 +973,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             if (markTemplateIdOrNull != null) {
                 markTemplate = resolveMarkTemplateByID(courseTemplate, markTemplateIdOrNull);
             }
-            // TODO get positioning
             final RegattaMarkConfiguration regattaMarkConfiguration = new RegattaMarkConfigurationImpl(mark,
-                    /* TODO optionalPositioning */ null, markTemplate);
+                    getPositioningIfAvailable(regatta, mark), markTemplate);
             return regattaMarkConfiguration;
         }
     }
