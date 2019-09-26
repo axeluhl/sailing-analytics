@@ -806,7 +806,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         });
         this.dataImportLock = new DataImportLockWithProgress();
         this.courseAndMarkConfigurationFactory = new CourseAndMarkConfigurationFactoryImpl(sharedSailingData,
-                sensorFixStore, getRegattaLogStore());
+                sensorFixStore);
         remoteSailingServerSet = new RemoteSailingServerSet(scheduler, baseDomainFactory);
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         regattasByNameLock = new NamedReentrantReadWriteLock("regattasByName for " + this, /* fair */false);

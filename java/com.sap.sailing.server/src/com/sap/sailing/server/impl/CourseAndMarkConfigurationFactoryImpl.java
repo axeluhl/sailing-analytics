@@ -70,7 +70,6 @@ import com.sap.sailing.domain.coursetemplate.impl.WaypointWithMarkConfigurationI
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
-import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
@@ -88,13 +87,10 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     
     private final SharedSailingData sharedSailingData;
     private final SensorFixStore sensorFixStore;
-    private final RegattaLogStore regattaLogStore;
 
-    public CourseAndMarkConfigurationFactoryImpl(SharedSailingData sharedSailingData, SensorFixStore sensorFixStore,
-            RegattaLogStore regattaLogStore) {
+    public CourseAndMarkConfigurationFactoryImpl(SharedSailingData sharedSailingData, SensorFixStore sensorFixStore) {
         this.sharedSailingData = sharedSailingData;
         this.sensorFixStore = sensorFixStore;
-        this.regattaLogStore = regattaLogStore;
     }
 
     @Override
@@ -653,9 +649,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
 
     @SuppressWarnings("unused")
     private Positioning getPositioningIfAvailable(Regatta regatta, Mark mark) {
-        final RegattaLog regattaLog = regattaLogStore.getRegattaLog(regatta.getRegattaLikeIdentifier(), false);
         final Map<WithID, List<DeviceMappingWithRegattaLogEvent<WithID>>> deviceMappings = new RegattaLogDeviceMappingFinder<>(
-                regattaLog).analyze();
+                regatta.getRegattaLog()).analyze();
 
         final List<DeviceMappingWithRegattaLogEvent<WithID>> foundMappings = deviceMappings.get(mark);
         final DeviceIdentifier identifier = findMostRecentOrOngoingMapping(foundMappings);
