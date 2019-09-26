@@ -126,8 +126,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     }
 
     @Override
-    public CourseConfiguration createCourseTemplateAndUpdatedConfiguration(String name,
-            CourseConfiguration courseWithMarkConfiguration) {
+    public CourseConfiguration createCourseTemplateAndUpdatedConfiguration(CourseConfiguration courseWithMarkConfiguration) {
         final Map<MarkConfiguration, MarkTemplate> markTemplatesByMarkConfigurations = new HashMap<>();
         final Map<MarkConfiguration, MarkConfiguration> marksConfigurationsMapping = new HashMap<>();
         for (MarkConfiguration markConfiguration : courseWithMarkConfiguration.getAllMarks()) {
@@ -231,7 +230,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             waypointTemplates.add(new WaypointTemplateImpl(effectiveControlPointTemplate, waypointWithMarkConfiguration.getPassingInstruction()));
             effectiveWaypoints.add(new WaypointWithMarkConfigurationImpl(effectiveControlPointConfiguration, waypointWithMarkConfiguration.getPassingInstruction()));
         }
-        final CourseTemplate newCourseTemplate = sharedSailingData.createCourseTemplate(name, new HashSet<>(markTemplatesByMarkConfigurations.values()),
+        final CourseTemplate newCourseTemplate = sharedSailingData.createCourseTemplate(courseWithMarkConfiguration.getName(), new HashSet<>(markTemplatesByMarkConfigurations.values()),
                 waypointTemplates, associatedRolesInTemplate, courseWithMarkConfiguration.getRepeatablePart(),
                 /* TODO tags */ Collections.emptySet(), /* TODO optionalImageURL */ null,
                 courseWithMarkConfiguration.getNumberOfLaps());
@@ -239,7 +238,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 new HashSet<>(marksConfigurationsMapping.values()),
                 associatedRolesInConfiguration, effectiveWaypoints, courseWithMarkConfiguration.getRepeatablePart(),
                 courseWithMarkConfiguration.getNumberOfLaps(),
-                /* Use the name of the course template for the course configuration as well */name);
+                courseWithMarkConfiguration.getName());
     }
 
     private void savePositioningToMark(Regatta regatta, Mark mark, Positioning optionalExplicitPositioning,

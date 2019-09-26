@@ -153,9 +153,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         final CourseConfiguration courseConfiguration = getCourseConfigurationDeserializer(regatta,
                 /* courseTemplate */ null).deserialize((JSONObject) parsedObject);
 
-        // TODO: name?
         final CourseConfiguration courseTemplate = getService().getCourseAndMarkConfigurationFactory()
-                .createCourseTemplateAndUpdatedConfiguration(/* name */ null, courseConfiguration);
+                .createCourseTemplateAndUpdatedConfiguration(courseConfiguration);
         String jsonString = courseConfigurationJsonSerializer.serialize(courseTemplate).toJSONString();
         return Response.ok(jsonString).build();
     }
