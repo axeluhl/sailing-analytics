@@ -69,6 +69,7 @@ import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointWithMarkConfigurationImpl;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
+import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -670,9 +671,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 log.log(Level.WARNING, "Could not load associated fix for regatta mark", e);
             }
 
-            // TODO: use actual PingDeviceIdentifier class which can currently not be used easily and the bundle
-            // com.sap.sailing.domain.racelogtracking already has a dependency on com.sap.sailing.server
-            if ("PING".equals(identifier.getIdentifierType())) {
+            if (PingDeviceIdentifier.TYPE.equals(identifier.getIdentifierType())) {
                 result = new FixedPositioningImpl(lastPosition);
             } else {
                 result = new SavedDevicePositioningImpl(lastPosition);
