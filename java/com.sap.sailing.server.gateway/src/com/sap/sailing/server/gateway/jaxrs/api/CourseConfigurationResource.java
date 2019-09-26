@@ -20,9 +20,12 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
-import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
@@ -54,7 +57,6 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         courseJsonSerializer = new CourseJsonSerializer(new CourseBaseJsonSerializer(
                 new WaypointJsonSerializer(new ControlPointJsonSerializer(new MarkJsonSerializer(),
                         new GateJsonSerializer(new MarkJsonSerializer())))));
-        ;
     }
 
     private JsonDeserializer<CourseConfiguration> getCourseConfigurationDeserializer(final Regatta regatta) {
@@ -67,9 +69,10 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
                 .type(MediaType.TEXT_PLAIN).build();
     }
 
-    private Response getBadRaceErrorResponse(String regattaName, String raceName) {
+    private Response getBadRaceErrorResponse(String regattaName, String raceColumn, String fleet) {
         return Response.status(Status.NOT_FOUND)
-                .entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName)
+                .entity("Could not find a race with race column '" + StringEscapeUtils.escapeHtml(raceColumn)
+                        + "' and fleet '" + fleet
                         + "' for regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
                 .type(MediaType.TEXT_PLAIN).build();
     }
@@ -87,24 +90,40 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("getFromCourse/{regattaName}/{raceName}")
+    @Path("getFromCourse/{regattaName}/{raceColumn}/{fleet}")
     public Response createCourseConfigurationFromCourse(@PathParam("regattaName") String regattaName,
-            @PathParam("raceName") String raceName, @QueryParam("tag") List<String> tags) throws Exception {
+            @PathParam("raceColumn") String raceColumn, @PathParam("fleet") String fleet,
+            @QueryParam("tag") List<String> tags) throws Exception {
+
+        if (regattaName == null || raceColumn == null || fleet == null) {
+            return getBadCourseConfigurationValidationErrorResponse(
+                    "Course configuration is required to have a regatta name and a race name");
+        }
+
         final Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             return getBadRegattaErrorResponse(regattaName);
         }
-        final RaceDefinition race = regatta.getRaceByName(raceName);
-        if (race == null) {
-            return getBadRaceErrorResponse(regattaName, raceName);
+
+        final RaceColumn raceColumnByName = regatta.getRaceColumnByName(raceColumn);
+        final Fleet fleetByName = raceColumnByName.getFleetByName(fleet);
+
+        if (raceColumnByName == null || fleetByName == null) {
+            return getBadRaceErrorResponse(regattaName, raceColumn, fleet);
         }
 
-        final Course course = race.getCourse();
-        CourseConfiguration courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
-                .createCourseConfigurationFromCourse(course, regatta, tags);
+        final LastPublishedCourseDesignFinder courseDesginFinder = new LastPublishedCourseDesignFinder(
+                regatta.getRacelog(raceColumn, fleet), /* onlyCoursesWithValidWaypointList */ true);
+        final CourseBase courseBase = courseDesginFinder.analyze();
 
-        String jsonString = courseConfigurationJsonSerializer.serialize(courseConfiguration).toJSONString();
-        return Response.ok(jsonString).build();
+        if (courseBase == null) {
+            return Response.status(Status.NOT_FOUND).entity("No course found for given race.").build();
+        }
+
+        final CourseConfiguration courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
+                .createCourseConfigurationFromCourse(courseBase, regatta, tags);
+
+        return Response.ok(courseConfigurationJsonSerializer.serialize(courseConfiguration).toJSONString()).build();
     }
 
     @GET
@@ -139,7 +158,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
     @Path("createCourseTemplate")
     public Response createCourseTemplate(@QueryParam("regattaName") String regattaName, String json) throws Exception {
         if (json == null || json.isEmpty()) {
-            getBadCourseConfigurationValidationErrorResponse(
+            return getBadCourseConfigurationValidationErrorResponse(
                     "Course configuration is required to be given as json object");
         }
         Regatta regatta = null;
@@ -174,18 +193,30 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
 
     @POST
     @Produces("application/json;charset=UTF-8")
-    @Path("createCourse/{regattaName}")
-    public Response createCourse(@PathParam("regattaName") String regattaName, String json) throws Exception {
+    @Path("createCourse/{regattaName}/{raceColumn}/{fleet}")
+    public Response createCourse(@PathParam("regattaName") String regattaName,
+            @PathParam("raceColumn") String raceColumn, @PathParam("fleet") String fleet,
+            String json) throws Exception {
         if (json == null || json.isEmpty()) {
-            getBadCourseConfigurationValidationErrorResponse(
+            return getBadCourseConfigurationValidationErrorResponse(
                     "Course configuration is required to be given as json object");
         }
-        Regatta regatta = null;
-        if (regattaName != null) {
-            regatta = findRegattaByName(regattaName);
-            if (regatta == null) {
-                return getBadRegattaErrorResponse(regattaName);
-            }
+
+        if (regattaName == null || raceColumn == null || fleet == null) {
+            return getBadCourseConfigurationValidationErrorResponse(
+                    "Course configuration is required to have a regatta name and a race name");
+        }
+
+        final Regatta regatta = findRegattaByName(regattaName);
+        if (regatta == null) {
+            return getBadRegattaErrorResponse(regattaName);
+        }
+
+        final RaceColumn raceColumnByName = regatta.getRaceColumnByName(raceColumn);
+        final Fleet fleetByName = raceColumnByName.getFleetByName(fleet);
+
+        if (raceColumnByName == null || fleetByName == null) {
+            return getBadRaceErrorResponse(regattaName, raceColumn, fleet);
         }
 
         final Object parsedObject = new JSONParser().parse(json);
@@ -197,10 +228,13 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
                 .deserialize((JSONObject) parsedObject);
 
         // TODO: clarify parameters
-        CourseBase course = getService().getCourseAndMarkConfigurationFactory()
+        final CourseBase course = getService().getCourseAndMarkConfigurationFactory()
                 .createCourseFromConfigurationAndDefineMarksAsNeeded(regatta, courseConfiguration, /* lapCount */ 0,
                         MillisecondsTimePoint.now(),
                         new LogEventAuthorImpl(getService().getServerAuthor().getName(), 0));
+        final RaceLog raceLog = raceColumnByName.getRaceLog(fleetByName);
+        // TODO: clarify parameters
+        raceLog.add(new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(), null, 0, course, null));
 
         return Response.ok(courseJsonSerializer.serialize(course).toJSONString()).build();
     }
