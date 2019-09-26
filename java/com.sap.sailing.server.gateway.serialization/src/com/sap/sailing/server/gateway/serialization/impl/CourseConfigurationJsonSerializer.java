@@ -20,6 +20,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseConfiguration> {
 
     public static final String FIELD_NAME = "name";
+    public static final String FIELD_OPTIONAL_COURSE_TEMPLATE_UUID = "courseTemplateId";
     public static final String FIELD_MARK_CONFIGURATIONS = "markConfigurations";
     public static final String FIELD_MARK_CONFIGURATION_MARK_TEMPLATE_ID = "markTemplateId";
     public static final String FIELD_MARK_CONFIGURATION_MARK_PROPERTIES_ID = "markPropertiesId";
@@ -46,6 +47,10 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
     public JSONObject serialize(CourseConfiguration courseConfiguration) {
         final JSONObject result = new JSONObject();
         result.put(FIELD_NAME, courseConfiguration.getName());
+        if (courseConfiguration.getOptionalCourseTemplate() != null) {
+            result.put(FIELD_OPTIONAL_COURSE_TEMPLATE_UUID,
+                    courseConfiguration.getOptionalCourseTemplate().getId().toString());
+        }
 
         final Map<MarkConfiguration, UUID> markConfigurationsToTempIdMap = new HashMap<>();
         final JSONArray markConfigurationsJSON = new JSONArray();

@@ -51,9 +51,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         ;
     }
 
-    private JsonDeserializer<CourseConfiguration> getCourseConfigurationDeserializer(final Regatta regatta,
-            final CourseTemplate courseTemplate) {
-        return new CourseConfigurationJsonDeserializer(this.getSharedSailingData(), regatta, courseTemplate);
+    private JsonDeserializer<CourseConfiguration> getCourseConfigurationDeserializer(final Regatta regatta) {
+        return new CourseConfigurationJsonDeserializer(this.getSharedSailingData(), regatta);
     }
 
     private Response getBadRegattaErrorResponse(String regattaName) {
@@ -150,8 +149,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
             getBadCourseConfigurationValidationErrorResponse(
                     "Course configuration is required to be given as json object");
         }
-        final CourseConfiguration courseConfiguration = getCourseConfigurationDeserializer(regatta,
-                /* courseTemplate */ null).deserialize((JSONObject) parsedObject);
+        final CourseConfiguration courseConfiguration = getCourseConfigurationDeserializer(regatta)
+                .deserialize((JSONObject) parsedObject);
 
         final CourseConfiguration courseTemplate = getService().getCourseAndMarkConfigurationFactory()
                 .createCourseTemplateAndUpdatedConfiguration(courseConfiguration);
@@ -180,8 +179,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
             getBadCourseConfigurationValidationErrorResponse(
                     "Course configuration is required to be given as json object");
         }
-        final CourseConfiguration courseConfiguration = getCourseConfigurationDeserializer(regatta,
-                /* courseTemplate */ null).deserialize((JSONObject) parsedObject);
+        final CourseConfiguration courseConfiguration = getCourseConfigurationDeserializer(regatta)
+                .deserialize((JSONObject) parsedObject);
 
         // TODO: clarify parameters
         CourseBase course = getService().getCourseAndMarkConfigurationFactory()

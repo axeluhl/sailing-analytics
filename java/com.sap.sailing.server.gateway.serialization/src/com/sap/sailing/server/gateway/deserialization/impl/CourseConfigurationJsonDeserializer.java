@@ -29,21 +29,23 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
     private final CommonMarkPropertiesJsonDeserializer commonMarkPropertiesJsonDeserializer;
     private final JsonDeserializer<RepeatablePart> repeatablePartJsonDeserializer;
     private final Regatta regatta;
-    private final CourseTemplate courseTemplate;
 
-    public CourseConfigurationJsonDeserializer(final SharedSailingData sharedSailingData, final Regatta regatta,
-            final CourseTemplate courseTemplate) {
+    public CourseConfigurationJsonDeserializer(final SharedSailingData sharedSailingData, final Regatta regatta) {
         this.sharedSailingData = sharedSailingData;
         commonMarkPropertiesJsonDeserializer = new CommonMarkPropertiesJsonDeserializer();
         repeatablePartJsonDeserializer = new RepeatablePartJsonDeserializer();
         this.regatta = regatta;
-        this.courseTemplate = courseTemplate;
     }
 
     @Override
     public CourseConfiguration deserialize(JSONObject json) throws JsonDeserializationException {
         final String name = (String) json.get(CourseConfigurationJsonSerializer.FIELD_NAME);
-        CourseConfigurationBuilder builder = new CourseConfigurationBuilder(sharedSailingData, regatta, courseTemplate,
+        final String courseTemplateIdString = (String) json.get(CourseConfigurationJsonSerializer.FIELD_OPTIONAL_COURSE_TEMPLATE_UUID);
+        CourseTemplate optionalCourseTemplate = null;
+        if (courseTemplateIdString != null && !courseTemplateIdString.isEmpty()) {
+            optionalCourseTemplate = sharedSailingData.getCourseTemplateById(UUID.fromString(courseTemplateIdString));
+        }
+        CourseConfigurationBuilder builder = new CourseConfigurationBuilder(sharedSailingData, regatta, optionalCourseTemplate,
                 name);
 
         final Map<UUID, MarkConfiguration> markConfigurationsByID = new HashMap<UUID, MarkConfiguration>();
