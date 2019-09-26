@@ -1,6 +1,8 @@
-package com.sap.sailing.domain.racelogtracking;
+package com.sap.sailing.domain.racelogtracking.impl;
 
 import java.util.UUID;
+
+import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifier;
 
 public class PingDeviceIdentifierImpl implements PingDeviceIdentifier {
     private static final long serialVersionUID = -4049961972156611640L;
