@@ -1,5 +1,6 @@
 package com.sap.sailing.server.interfaces;
 
+import java.net.URL;
 import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -106,7 +107,8 @@ public interface CourseAndMarkConfigurationFactory {
      *         {@link MarkConfiguration#getOptionalMarkTemplate() mark template} that is part of the
      *         {@link CourseTemplate} obtained from {@link CourseConfiguration#getOptionalCourseTemplate()}.
      */
-    CourseConfiguration createCourseTemplateAndUpdatedConfiguration(CourseConfiguration courseWithMarkConfiguration);
+    CourseConfiguration createCourseTemplateAndUpdatedConfiguration(CourseConfiguration courseWithMarkConfiguration,
+            Iterable<String> tags, URL optionalImageUrl);
 
     CourseConfiguration createCourseConfigurationFromTemplate(CourseTemplate courseTemplate, Regatta optionalRegatta,
             Iterable<String> tagsToFilterMarkProperties);

@@ -1,5 +1,6 @@
 package com.sap.sailing.server.impl;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -126,7 +127,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     }
 
     @Override
-    public CourseConfiguration createCourseTemplateAndUpdatedConfiguration(CourseConfiguration courseWithMarkConfiguration) {
+    public CourseConfiguration createCourseTemplateAndUpdatedConfiguration(
+            CourseConfiguration courseWithMarkConfiguration, Iterable<String> tags, URL optionalImageUrl) {
         final Map<MarkConfiguration, MarkTemplate> markTemplatesByMarkConfigurations = new HashMap<>();
         final Map<MarkConfiguration, MarkConfiguration> marksConfigurationsMapping = new HashMap<>();
         for (MarkConfiguration markConfiguration : courseWithMarkConfiguration.getAllMarks()) {
@@ -232,7 +234,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         }
         final CourseTemplate newCourseTemplate = sharedSailingData.createCourseTemplate(courseWithMarkConfiguration.getName(), new HashSet<>(markTemplatesByMarkConfigurations.values()),
                 waypointTemplates, associatedRolesInTemplate, courseWithMarkConfiguration.getRepeatablePart(),
-                /* TODO tags */ Collections.emptySet(), /* TODO optionalImageURL */ null,
+                tags, optionalImageUrl,
                 courseWithMarkConfiguration.getNumberOfLaps());
         return new CourseConfigurationImpl(newCourseTemplate,
                 new HashSet<>(marksConfigurationsMapping.values()),
