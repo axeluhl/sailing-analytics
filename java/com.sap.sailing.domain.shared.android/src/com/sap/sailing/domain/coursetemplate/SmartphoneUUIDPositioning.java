@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.coursetemplate;
 
-public interface SmartphoneUUIDPositioning extends Positioning {
+import java.util.UUID;
 
+public interface SmartphoneUUIDPositioning extends Positioning {
+    UUID getDeviceUUID();
 }

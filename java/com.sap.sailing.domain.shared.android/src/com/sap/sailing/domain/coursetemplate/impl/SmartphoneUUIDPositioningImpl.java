@@ -14,6 +14,7 @@ public class SmartphoneUUIDPositioningImpl extends AbstractPositioningImpl imple
         this.deviceUUID = deviceUUID;
     }
 
+    @Override
     public UUID getDeviceUUID() {
         return deviceUUID;
     }
