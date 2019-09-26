@@ -26,14 +26,14 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
     public static final String FIELD_MARK_CONFIGURATION_MARK_PROPERTIES_ID = "markPropertiesId";
     public static final String FIELD_MARK_CONFIGURATION_MARK_ID = "markId";
     public static final String FIELD_MARK_CONFIGURATION_COMMON_MARK_PROPERTIES = "commonMarkProperties";
-    public static final Object FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE = "associatedRole";
-    public static final Object FIELD_WAYPOINTS = "waypoints";
-    public static final Object FIELD_WAYPOINT_CONTROL_POINT_NAME = "controlPointName";
-    public static final Object FIELD_WAYPOINT_CONTROL_POINT_SHORT_NAME = "controlPointShortName";
-    public static final Object FIELD_WAYPOINT_PASSING_INSTRUCTION = "passingInstruction";
-    public static final Object FIELD_WAYPOINT_MARK_CONFIGURATION_IDS = "markConfigurationIds";
-    public static final Object FIELD_OPTIONAL_REPEATABLE_PART = "optionalRepeatablePart";
-    public static final Object FIELD_NUMBER_OF_LAPS = "numberOfLaps";
+    public static final String FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE = "associatedRole";
+    public static final String FIELD_WAYPOINTS = "waypoints";
+    public static final String FIELD_WAYPOINT_CONTROL_POINT_NAME = "controlPointName";
+    public static final String FIELD_WAYPOINT_CONTROL_POINT_SHORT_NAME = "controlPointShortName";
+    public static final String FIELD_WAYPOINT_PASSING_INSTRUCTION = "passingInstruction";
+    public static final String FIELD_WAYPOINT_MARK_CONFIGURATION_IDS = "markConfigurationIds";
+    public static final String FIELD_OPTIONAL_REPEATABLE_PART = "optionalRepeatablePart";
+    public static final String FIELD_NUMBER_OF_LAPS = "numberOfLaps";
 
     private final JsonSerializer<RepeatablePart> repeatablePartJsonSerializer;
     private final JsonSerializer<CommonMarkProperties> commonMarkPropertiesJsonSerializer;
