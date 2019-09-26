@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
@@ -36,6 +37,7 @@ import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.ControlPointWithMarkConfiguration;
@@ -52,6 +54,7 @@ import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguratio
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.Positioning;
+import com.sap.sailing.domain.coursetemplate.Positioning.PositioningType;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.SmartphoneUUIDPositioning;
@@ -70,6 +73,7 @@ import com.sap.sailing.domain.coursetemplate.impl.WaypointWithMarkConfigurationI
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifier;
+import com.sap.sailing.domain.racelogtracking.impl.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -256,19 +260,46 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             position = optionalAssociatedMarkProperties.getFixedPosition();
             deviceIdentifier = optionalAssociatedMarkProperties.getTrackingDeviceIdentifier();
         }
-        // if (position != null) {
-        // // TODO: write fix to database and set device identifier
-        // // new Ping
-        // }
-        //
-        // if (deviceIdentifier != null) {
-        //
-        // // TODO get current positioning state for the given mark
-        // // TODO update positioning if it differs from the existing one
-        // regatta.getRegattaLog()
-        // .add(new RegattaLogDeviceMarkMappingEventImpl(timePointForDefinitionOfMarksAndDeviceMappings,
-        // author, mark, deviceIdentifier, timePointForDefinitionOfMarksAndDeviceMappings, null));
-        // }
+
+        if (position != null ^ deviceIdentifier != null) {
+            final Positioning latestPosition = getPositioningIfAvailable(regatta, mark);
+            if (position != null) {
+                if (latestPosition.getType() == PositioningType.Fixed
+                        && (latestPosition.getPosition() == null || latestPosition.getPosition().equals(position))) {
+                    final PingDeviceIdentifierImpl pingIdentifier = new PingDeviceIdentifierImpl(UUID.randomUUID());
+
+                    sensorFixStore.storeFix(pingIdentifier,
+                            new GPSFixImpl(position, timePointForDefinitionOfMarksAndDeviceMappings));
+
+                    regatta.getRegattaLog()
+                            .add(new RegattaLogDeviceMarkMappingEventImpl(
+                                    timePointForDefinitionOfMarksAndDeviceMappings, author, mark, deviceIdentifier,
+                                    timePointForDefinitionOfMarksAndDeviceMappings,
+                                    timePointForDefinitionOfMarksAndDeviceMappings));
+                }
+            }
+
+            else if (deviceIdentifier != null) {
+
+                // TODO get current positioning state for the given mark
+                // TODO update positioning if it differs from the existing one
+
+                // TODO device identifier der gleiche + intervall offen
+
+
+                if (latestPosition.getType() == PositioningType.Device && (latestPosition.getPosition() == null)) {
+                    // if (latestPosition instanceof GPSFix) {
+                    // GPSFix f = (GPSFix) latestPosition;
+                    // }
+
+                    regatta.getRegattaLog()
+                            .add(new RegattaLogDeviceMarkMappingEventImpl(
+                                    timePointForDefinitionOfMarksAndDeviceMappings, author, mark, deviceIdentifier,
+                                    timePointForDefinitionOfMarksAndDeviceMappings, null));
+
+                }
+            }
+        }
     }
 
     @Override
