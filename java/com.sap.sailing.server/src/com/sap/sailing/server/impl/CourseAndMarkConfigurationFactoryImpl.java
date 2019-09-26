@@ -138,8 +138,13 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 effectiveConfiguration = (MarkTemplateBasedMarkConfiguration) markConfiguration;
                 effectiveMarkTemplate = effectiveConfiguration.getOptionalMarkTemplate();
             } else {
-                effectiveMarkTemplate = sharedSailingData
-                        .createMarkTemplate(markConfiguration.getEffectiveProperties());
+                final MarkTemplate markTemplateOrNull = markConfiguration.getOptionalMarkTemplate();
+                if (markTemplateOrNull != null && markTemplateOrNull.hasEqualAppeareanceWith(markConfiguration.getEffectiveProperties())) {
+                    effectiveMarkTemplate = markTemplateOrNull;
+                } else {
+                    effectiveMarkTemplate = sharedSailingData
+                            .createMarkTemplate(markConfiguration.getEffectiveProperties());
+                }
                 if (markConfiguration instanceof RegattaMarkConfiguration) {
                     final Mark mark = ((RegattaMarkConfiguration) markConfiguration).getMark();
                     final UUID markPropertiesIdOrNull = mark.getOriginatingMarkPropertiesIdOrNull();
@@ -158,9 +163,6 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     // Marks are unchanged when saving the course to a race afterwards.
                     effectiveConfiguration = markConfiguration;
                 } else if (markConfiguration instanceof MarkPropertiesBasedMarkConfiguration) {
-                    // TODO in case an already references MarkTemplate has an identical appearance/name/shortName we
-                    // could skip the creation of a new MarkTemplate and use the existing instead.
-                    
                     // In this case the appearance of the created MarkTemplate is identical to the MarkProperties it is
                     // based on.
                     final MarkProperties markProperties = ((MarkPropertiesBasedMarkConfiguration) markConfiguration)
@@ -173,8 +175,13 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                             .getOptionalMarkProperties();
                     if (markPropertiesOrNull != null) {
                         sharedSailingData.recordUsage(effectiveMarkTemplate, markPropertiesOrNull);
-                        effectiveConfiguration = new FreestyleMarkConfigurationImpl(effectiveMarkTemplate,
-                                markPropertiesOrNull, effectiveMarkTemplate, markConfiguration.getOptionalPositioning());
+                        if (markPropertiesOrNull.hasEqualAppeareanceWith(effectiveMarkTemplate)) {
+                            effectiveConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(markPropertiesOrNull,
+                                    effectiveMarkTemplate, markConfiguration.getOptionalPositioning());
+                        } else {
+                            effectiveConfiguration = new FreestyleMarkConfigurationImpl(effectiveMarkTemplate,
+                                    markPropertiesOrNull, effectiveMarkTemplate, markConfiguration.getOptionalPositioning());
+                        }
                     } else {
                         effectiveConfiguration = new MarkTemplateBasedMarkConfigurationImpl(effectiveMarkTemplate,
                                 markConfiguration.getOptionalPositioning());
