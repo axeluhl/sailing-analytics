@@ -40,6 +40,7 @@ import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.ControlPointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
+import com.sap.sailing.domain.coursetemplate.FixedPositioning;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkPairTemplate;
@@ -52,6 +53,7 @@ import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
+import com.sap.sailing.domain.coursetemplate.SmartphoneUUIDPositioning;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.impl.CourseConfigurationImpl;
@@ -66,6 +68,7 @@ import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointWithMarkConfigurationImpl;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
+import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -236,6 +239,28 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 /* Use the name of the course template for the course configuration as well */name);
     }
 
+    private void savePositioningToMark(Regatta regatta, Mark mark, Positioning optionalExplicitPositioning, MarkProperties optionalAssociatedMarkProperties) {
+        Position position = null;
+        DeviceIdentifier deviceIdentifier = null;
+        if (optionalExplicitPositioning != null) {
+            if (optionalExplicitPositioning instanceof FixedPositioning) {
+                final FixedPositioning fixedPositioning = (FixedPositioning) optionalExplicitPositioning;
+                position = fixedPositioning.getPosition();
+            } else if (optionalExplicitPositioning instanceof SmartphoneUUIDPositioning) {
+                final SmartphoneUUIDPositioning smartphoneUUIDPositioning = (SmartphoneUUIDPositioning) optionalExplicitPositioning;
+                deviceIdentifier = new SmartphoneUUIDIdentifierImpl(smartphoneUUIDPositioning.getDeviceUUID());
+            }
+        }
+        if (optionalAssociatedMarkProperties != null && position == null && deviceIdentifier == null) {
+            position = optionalAssociatedMarkProperties.getFixedPosition();
+            deviceIdentifier = optionalAssociatedMarkProperties.getTrackingDeviceIdentifier();
+        }
+        if (position != null || deviceIdentifier != null) {
+            // TODO get current positioning state for the given mark
+            // TODO update positioning if it differs from the existing one
+        }
+    }
+
     @Override
     public CourseBase createCourseFromConfigurationAndDefineMarksAsNeeded(Regatta regatta,
             CourseConfiguration courseConfiguration, int lapCount,
@@ -244,9 +269,10 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         final RegattaLog regattaLog = regatta.getRegattaLog();
         for (MarkConfiguration markConfiguration : courseConfiguration.getAllMarks()) {
             if (markConfiguration instanceof RegattaMarkConfiguration) {
+                final Mark mark = ((RegattaMarkConfiguration) markConfiguration).getMark();
                 marksByMarkConfigurations.put(markConfiguration,
-                        ((RegattaMarkConfiguration) markConfiguration).getMark());
-                // TODO potentially update positioning
+                        mark);
+                savePositioningToMark(regatta, mark, markConfiguration.getOptionalPositioning(), null);
             } else {
                 final MarkTemplate optionalMarkTemplate = markConfiguration.getOptionalMarkTemplate();
                 final MarkProperties optionalMarkProperties;
@@ -269,7 +295,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 regattaLog.add(new RegattaLogDefineMarkEventImpl(timePointForDefinitionOfMarksAndDeviceMappings, author,
                         timePointForDefinitionOfMarksAndDeviceMappings, UUID.randomUUID(), markToCreate));
                 marksByMarkConfigurations.put(markConfiguration, markToCreate);
-                // TODO handle positioning (either explicit or defined by optionalMarkProperties)
+                
+                savePositioningToMark(regatta, markToCreate, markConfiguration.getOptionalPositioning(), optionalMarkProperties);
             }
         }
         final CourseDataImpl course = new CourseDataImpl(courseConfiguration.getName(),
