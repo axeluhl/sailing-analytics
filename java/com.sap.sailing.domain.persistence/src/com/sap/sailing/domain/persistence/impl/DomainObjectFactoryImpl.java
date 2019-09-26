@@ -2035,8 +2035,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RaceLogORCLegDataEvent loadRaceLogORCLegDataEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, Integer passId, Document dbObject) {
         final int legNr = ((Number) dbObject.get(FieldNames.ORC_LEG_NR.name())).intValue();
-        final Bearing twa = new DegreeBearingImpl(((Number) dbObject.get(FieldNames.ORC_LEG_TWA_IN_DEG.name())).doubleValue());
-        final Distance length = new NauticalMileDistance(((Number) dbObject.get(FieldNames.ORC_LEG_LENGTH_IN_NAUTICAL_MILES.name())).doubleValue());
+        final Number twaInDegrees = (Number) dbObject.get(FieldNames.ORC_LEG_TWA_IN_DEG.name());
+        final Bearing twa = twaInDegrees==null?null:new DegreeBearingImpl(twaInDegrees.doubleValue());
+        final Number lengthInNauticalMiles = (Number) dbObject.get(FieldNames.ORC_LEG_LENGTH_IN_NAUTICAL_MILES.name());
+        final Distance length = lengthInNauticalMiles==null?null:new NauticalMileDistance(lengthInNauticalMiles.doubleValue());
         final ORCPerformanceCurveLegTypes type = ORCPerformanceCurveLegTypes.valueOf(dbObject.getString(FieldNames.ORC_LEG_TYPE.name()));
         return new RaceLogORCLegDataEventImpl(createdAt, logicalTimePoint, author, id, passId, legNr, twa, length, type);
     }

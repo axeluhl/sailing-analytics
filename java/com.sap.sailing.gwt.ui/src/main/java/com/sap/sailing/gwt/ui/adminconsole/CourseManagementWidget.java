@@ -69,6 +69,10 @@ public abstract class CourseManagementWidget implements IsWidget {
     protected final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     private final UserService userService;
     private SecuredDTO securedDtoForWaypointsPermissionCheck;
+    
+    /**
+     * ORC performance curve leg info for the leg ending at the key waypoint
+     */
     private final Map<WaypointDTO, ORCPerformanceCurveLegImpl> orcPerformanceCurveLegInfo;
     
     public static interface LegGeometrySupplier {
@@ -181,7 +185,7 @@ public abstract class CourseManagementWidget implements IsWidget {
         final List<WaypointDTO> waypointList = waypoints.getDataProvider().getList();
         final Map<Integer, ORCPerformanceCurveLegImpl> result = new HashMap<>();
         for (final Entry<WaypointDTO, ORCPerformanceCurveLegImpl> e : orcPerformanceCurveLegInfo.entrySet()) {
-            result.put(waypointList.indexOf(e.getKey())+1, e.getValue());
+            result.put(waypointList.indexOf(e.getKey()), e.getValue());
         }
         return result;
     }
@@ -195,7 +199,7 @@ public abstract class CourseManagementWidget implements IsWidget {
      */
     private void createOrcPcsLegEventForLegEndingAt(WaypointDTO waypoint) {
         new ORCPerformanceCurveLegDialog(stringMessages, waypoint, waypoints.getDataProvider(),
-                /* orcLegParametersSoFar */ null, getLegGeometrySupplier(),
+                orcPerformanceCurveLegInfo.get(waypoint), getLegGeometrySupplier(),
                 new Validator<ORCPerformanceCurveLegImpl>() {
              @Override
              public String getErrorMessage(ORCPerformanceCurveLegImpl valueToValidate) {
@@ -397,14 +401,13 @@ public abstract class CourseManagementWidget implements IsWidget {
      * Assumes that {@link #waypoints} has a list of {@link WaypointDTO}s that are consistent with the numbering scheme
      * of {@code oneBasedLegIndexAndFixedLegData}. The {@link #orcPerformanceCurveLegInfo} will be cleared and then
      * filled with the {@link ORCPerformanceCurveLegImpl} objects, keyed by those {@link WaypointDTO}s from
-     * {@link #waypoints} that correspond with {@code oneBasedLegIndexAndFixedLegData} (understanding that the list
-     * indices starts counting at 0).
+     * {@link #waypoints} that correspond with {@code oneBasedLegIndexAndFixedLegData}.
      */
     protected void refreshORCPerformanceCurveLegs(Map<Integer, ORCPerformanceCurveLegImpl> oneBasedLegIndexAndFixedLegData) {
         orcPerformanceCurveLegInfo.clear();
         final List<WaypointDTO> waypointList = waypoints.getDataProvider().getList();
         for (final Entry<Integer, ORCPerformanceCurveLegImpl> e : oneBasedLegIndexAndFixedLegData.entrySet()) {
-            orcPerformanceCurveLegInfo.put(waypointList.get(e.getKey()-1), e.getValue());
+            orcPerformanceCurveLegInfo.put(waypointList.get(e.getKey()), e.getValue());
         }
     }
 }

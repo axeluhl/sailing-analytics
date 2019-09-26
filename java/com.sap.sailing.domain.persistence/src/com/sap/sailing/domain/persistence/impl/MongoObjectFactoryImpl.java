@@ -1036,8 +1036,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCLegDataEvent.class.getSimpleName());
         result.put(FieldNames.ORC_LEG_NR.name(), event.getOneBasedLegNumber());
-        result.put(FieldNames.ORC_LEG_LENGTH_IN_NAUTICAL_MILES.name(), event.getLength().getNauticalMiles());
-        result.put(FieldNames.ORC_LEG_TWA_IN_DEG.name(), event.getTwa().getDegrees());
+        result.put(FieldNames.ORC_LEG_LENGTH_IN_NAUTICAL_MILES.name(), event.getLength()==null?null:event.getLength().getNauticalMiles());
+        result.put(FieldNames.ORC_LEG_TWA_IN_DEG.name(), event.getTwa()==null?null:event.getTwa().getDegrees());
         result.put(FieldNames.ORC_LEG_TYPE.name(), event.getType().name());
         return result;
     }

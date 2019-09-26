@@ -101,7 +101,6 @@ public class ORCPerformanceCurveLegDialog extends DataEntryDialog<ORCPerformance
     
     private void updateFetchTrackingBasedDistanceAndTwaButtonEnabledState() {
         final boolean twaIsSelected = getSelectedLegType() == ORCPerformanceCurveLegTypes.TWA;
-        fetchTrackingBasedDistanceAndTwaButton.setEnabled(twaIsSelected);
         twaBox.setEnabled(twaIsSelected);
     }
 

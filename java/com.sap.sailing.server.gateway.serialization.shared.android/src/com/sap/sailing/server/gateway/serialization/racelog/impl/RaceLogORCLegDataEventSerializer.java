@@ -30,8 +30,8 @@ public class RaceLogORCLegDataEventSerializer extends BaseRaceLogEventSerializer
         RaceLogORCLegDataEvent legData = (RaceLogORCLegDataEvent) object;
         JSONObject result = super.serialize(legData);
         result.put(ORC_LEG_NR, legData.getOneBasedLegNumber());
-        result.put(ORC_LEG_LENGTH, legData.getLength().getNauticalMiles());
-        result.put(ORC_LEG_TWA, legData.getTwa().getDegrees());
+        result.put(ORC_LEG_LENGTH, legData.getLength()==null?null:legData.getLength().getNauticalMiles());
+        result.put(ORC_LEG_TWA, legData.getTwa()==null?null:legData.getTwa().getDegrees());
         result.put(ORC_LEG_TYPE, legData.getType().name());
         return result;
     }

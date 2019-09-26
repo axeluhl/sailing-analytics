@@ -36,7 +36,8 @@ public class RaceLogORCLegDataEventImpl extends RaceLogEventImpl implements Race
     
     @Override
     public String getShortInfo() {
-        return "ORCLegData, oneBasedLegNumber= " + oneBasedLegNumber + ", twa: " + twa.getDegrees() + ", length: " + length.getNauticalMiles();
+        return ""+getType()+" for leg #"+oneBasedLegNumber + (twa==null?"":(", twa: " + twa.getDegrees())) +
+                (length==null?"":(", length: " + length.getNauticalMiles()+"NM"));
     }
     
     @Override

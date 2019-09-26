@@ -19,9 +19,9 @@ public class ORCPerformanceCurveLegImpl_CustomFieldSerializer extends CustomFiel
     
     public static void serialize(SerializationStreamWriter streamWriter, ORCPerformanceCurveLegImpl instance)
             throws SerializationException {
-        streamWriter.writeString(instance.getType().name());
-        streamWriter.writeObject((Double) instance.getTwa().getDegrees());
-        streamWriter.writeObject((Double) instance.getLength().getNauticalMiles());
+        streamWriter.writeString(instance.getType()==null?null:instance.getType().name());
+        streamWriter.writeObject(instance.getTwa()==null?null:(Double) instance.getTwa().getDegrees());
+        streamWriter.writeObject(instance.getLength()==null?null:(Double) instance.getLength().getNauticalMiles());
     }
 
     @Override
@@ -37,7 +37,8 @@ public class ORCPerformanceCurveLegImpl_CustomFieldSerializer extends CustomFiel
 
     public static ORCPerformanceCurveLegImpl instantiate(SerializationStreamReader streamReader)
             throws SerializationException {
-        final ORCPerformanceCurveLegTypes type = ORCPerformanceCurveLegTypes.valueOf(streamReader.readString());
+        final String typeAsString = streamReader.readString();
+        final ORCPerformanceCurveLegTypes type = typeAsString == null ? null : ORCPerformanceCurveLegTypes.valueOf(typeAsString);
         final Double twaInDegrees = (Double) streamReader.readObject();
         final Double distanceInNauticalMiles = (Double) streamReader.readObject();
         return type == ORCPerformanceCurveLegTypes.TWA ? new ORCPerformanceCurveLegImpl(distanceInNauticalMiles==null?null:new NauticalMileDistance(distanceInNauticalMiles),
