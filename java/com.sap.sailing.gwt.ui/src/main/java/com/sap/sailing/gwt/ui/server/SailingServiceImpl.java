@@ -581,6 +581,7 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.SecondsDurationImpl;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.media.MediaTagConstants;
@@ -903,7 +904,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public SerializationDummy serializationDummy(PersonDTO dummy,
             CountryCode ccDummy, PreciseCompactPosition preciseCompactPosition,
-            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier) {
+            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, SecondsDurationImpl secondsDuration, KnotSpeedImpl knotSpeedImpl) {
         return null;
     }
 

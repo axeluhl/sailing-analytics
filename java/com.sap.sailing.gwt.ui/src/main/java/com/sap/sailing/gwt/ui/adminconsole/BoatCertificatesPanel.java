@@ -54,6 +54,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  * the GPH, Issue Date and identification information. To upload or import some certificates, there is an UploadForm.
  * 
  * @author Daniel Lisunkin (i505543)
+ * @author Axel Uhl (d043530)
  *
  */
 public class BoatCertificatesPanel extends SimplePanel {
@@ -317,6 +318,7 @@ public class BoatCertificatesPanel extends SimplePanel {
 
                     @Override
                     public void onSuccess(Map<String, ORCCertificate> result) {
+                        certificateAssignments.clear();
                         for (final Entry<String, ORCCertificate> e : result.entrySet()) {
                             final BoatDTO boat = boatsByIdAsString.get(e.getKey());
                             if (boat != null) {

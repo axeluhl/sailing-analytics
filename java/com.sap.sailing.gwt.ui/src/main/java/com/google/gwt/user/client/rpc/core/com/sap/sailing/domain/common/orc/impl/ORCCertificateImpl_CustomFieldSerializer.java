@@ -1,5 +1,6 @@
 package com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.common.orc.impl;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.CustomFieldSerializer;
@@ -31,17 +32,17 @@ public class ORCCertificateImpl_CustomFieldSerializer extends CustomFieldSeriali
         streamWriter.writeObject(instance.getGPH());
         streamWriter.writeDouble(instance.getCDL());
         streamWriter.writeObject(instance.getIssueDate());
-        streamWriter.writeObject(instance.getVelocityPredictionPerTrueWindSpeedAndAngle());
-        streamWriter.writeObject(instance.getBeatAngles());
-        streamWriter.writeObject(instance.getBeatVMGPredictions());
-        streamWriter.writeObject(instance.getBeatAllowances());
-        streamWriter.writeObject(instance.getRunAngles());
-        streamWriter.writeObject(instance.getRunVMGPredictions());
-        streamWriter.writeObject(instance.getRunAllowances());
-        streamWriter.writeObject(instance.getWindwardLeewardSpeedPrediction());
-        streamWriter.writeObject(instance.getLongDistanceSpeedPredictions());
-        streamWriter.writeObject(instance.getCircularRandomSpeedPredictions());
-        streamWriter.writeObject(instance.getNonSpinnakerSpeedPredictions());
+        streamWriter.writeObject(new HashMap<>(instance.getVelocityPredictionPerTrueWindSpeedAndAngle()));
+        streamWriter.writeObject(new HashMap<>(instance.getBeatAngles()));
+        streamWriter.writeObject(new HashMap<>(instance.getBeatVMGPredictions()));
+        streamWriter.writeObject(new HashMap<>(instance.getBeatAllowances()));
+        streamWriter.writeObject(new HashMap<>(instance.getRunAngles()));
+        streamWriter.writeObject(new HashMap<>(instance.getRunVMGPredictions()));
+        streamWriter.writeObject(new HashMap<>(instance.getRunAllowances()));
+        streamWriter.writeObject(new HashMap<>(instance.getWindwardLeewardSpeedPrediction()));
+        streamWriter.writeObject(new HashMap<>(instance.getLongDistanceSpeedPredictions()));
+        streamWriter.writeObject(new HashMap<>(instance.getCircularRandomSpeedPredictions()));
+        streamWriter.writeObject(new HashMap<>(instance.getNonSpinnakerSpeedPredictions()));
     }
 
     @Override

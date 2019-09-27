@@ -19,6 +19,7 @@ import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
@@ -102,6 +103,22 @@ public class CertificatesTableWrapper<S extends RefreshableSelectionModel<ORCCer
                 return comparator.compare(o1.getSailnumber(), o2.getSailnumber());
             }
         });
+        Column<ORCCertificate, SafeHtml> gphColumn = new Column<ORCCertificate, SafeHtml>(new SafeHtmlCell()) {
+            @Override
+            public SafeHtml getValue(ORCCertificate certificate) {
+                SafeHtmlBuilder sb = new SafeHtmlBuilder();
+                sb.appendEscaped(Util.padPositiveValue(certificate.getGPHInSecondsToTheMile(),
+                        /* digitsLeftOfDecimal */ 3, /* digitsRightOfDecimal */ 1, /* round */ true));
+                return sb.toSafeHtml();
+            }
+        };
+        gphColumn.setSortable(true);
+        certificateColumnListHandler.setComparator(gphColumn, new Comparator<ORCCertificate>() {
+            @Override
+            public int compare(ORCCertificate o1, ORCCertificate o2) {
+                return Double.compare(o1.getGPHInSecondsToTheMile(), o2.getGPHInSecondsToTheMile());
+            }
+        });
         Column<ORCCertificate, SafeHtml> issuingDateColumn = new Column<ORCCertificate, SafeHtml>(new SafeHtmlCell()) {
             @Override
             public SafeHtml getValue(ORCCertificate certificate) {
@@ -149,7 +166,8 @@ public class CertificatesTableWrapper<S extends RefreshableSelectionModel<ORCCer
         table.addColumn(certificateIdColumn, stringMessages.id());
         table.addColumn(boatClassColumn, stringMessages.boatClass());
         table.addColumn(boatNameColumn, stringMessages.name());
-        table.addColumn(issuingDateColumn, stringMessages.islinked());
+        table.addColumn(gphColumn, "GPH"); // no i18n required
+        table.addColumn(issuingDateColumn, stringMessages.certificateIssuingDate());
         table.addColumn(certificateActionColumn, stringMessages.actions());
         table.ensureDebugId("BoatsWithVertificateTable");
     }
