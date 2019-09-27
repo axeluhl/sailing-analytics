@@ -58,13 +58,13 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
             JSONObject markConfigurationsEntry = new JSONObject();
             if (markConfiguration.getOptionalMarkTemplate() != null) {
                 markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_TEMPLATE_ID,
-                        markConfiguration.getOptionalMarkTemplate().getId());
+                        markConfiguration.getOptionalMarkTemplate().getId().toString());
             }
             if (markConfiguration instanceof FreestyleMarkConfiguration) {
                 final FreestyleMarkConfiguration freeStyleMarkConfiguration = (FreestyleMarkConfiguration) markConfiguration;
                 if (freeStyleMarkConfiguration.getOptionalMarkProperties() != null) {
                     markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_PROPERTIES_ID,
-                            freeStyleMarkConfiguration.getOptionalMarkProperties());
+                            freeStyleMarkConfiguration.getOptionalMarkProperties().getId().toString());
                 }
                 markConfigurationsEntry.putAll(commonMarkPropertiesJsonSerializer
                         .serialize(freeStyleMarkConfiguration.getFreestyleProperties()));
@@ -99,9 +99,8 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
             final JSONObject waypointEntry = new JSONObject();
             waypointEntry.put(FIELD_WAYPOINT_PASSING_INSTRUCTION, waypoint.getPassingInstruction().name());
             final JSONArray markConfigurationIDs = new JSONArray();
-            // TODO: markConfigurationIds
             waypoint.getControlPoint().getMarkConfigurations()
-                    .forEach(mc -> markConfigurationsToTempIdMap.get(mc).toString());
+                    .forEach(mc -> markConfigurationIDs.add(markConfigurationsToTempIdMap.get(mc).toString()));
             waypointEntry.put(FIELD_WAYPOINT_MARK_CONFIGURATION_IDS, markConfigurationIDs);
             waypointEntry.put(FIELD_WAYPOINT_CONTROL_POINT_NAME, waypoint.getControlPoint().getName());
             //waypointEntry.put(FIELD_WAYPOINT_CONTROL_POINT_SHORT_NAME, waypoint.getControlPoint().getShortName());
