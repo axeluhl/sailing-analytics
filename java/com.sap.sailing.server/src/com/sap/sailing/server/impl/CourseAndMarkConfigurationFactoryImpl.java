@@ -211,6 +211,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             associatedRolesInTemplate.put(result.getOptionalMarkTemplate(), roleName);
             return result;
         };
+        // TODO record usages for MarkProperties by role name
         // Caches to allow reusing objects for mark pairs that are based on the same MarkPairWithConfiguration
         final Map<MarkPairWithConfiguration, MarkPairTemplate> markPairTemplateCache = new HashMap<>();
         final Map<MarkPairWithConfiguration, MarkPairWithConfiguration> markPairConfigurationCache = new HashMap<>();
@@ -401,6 +402,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             }
         }
         associatedRolesToSave.forEach(course::addRoleMapping);
+        // TODO record usages for MarkProperties by role name
         return course;
     }
 
