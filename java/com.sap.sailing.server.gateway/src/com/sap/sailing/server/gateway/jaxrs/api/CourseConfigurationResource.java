@@ -19,7 +19,6 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
@@ -27,6 +26,7 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -40,6 +40,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSeri
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseConfigurationJsonSerializer;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
@@ -227,14 +228,13 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         final CourseConfiguration courseConfiguration = getCourseConfigurationDeserializer(regatta)
                 .deserialize((JSONObject) parsedObject);
 
-        // TODO: clarify parameters
+        final TimePoint timestampForLogEntries = MillisecondsTimePoint.now();
         final CourseBase course = getService().getCourseAndMarkConfigurationFactory()
                 .createCourseFromConfigurationAndDefineMarksAsNeeded(regatta, courseConfiguration,
-                        MillisecondsTimePoint.now(),
-                        new LogEventAuthorImpl(getService().getServerAuthor().getName(), 0));
+                        timestampForLogEntries, getService().getServerAuthor());
         final RaceLog raceLog = raceColumnByName.getRaceLog(fleetByName);
-        // TODO: clarify parameters
-        raceLog.add(new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(), null, 0, course, null));
+        raceLog.add(new RaceLogCourseDesignChangedEventImpl(timestampForLogEntries, getService().getServerAuthor(),
+                raceLog.getCurrentPassId(), course, CourseDesignerMode.BY_MARKS));
 
         return Response.ok(courseJsonSerializer.serialize(course).toJSONString()).build();
     }
