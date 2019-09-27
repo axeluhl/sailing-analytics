@@ -120,7 +120,8 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
             builder.setOptionalRepeatablePart(optionalRepeatablePart);
         }
 
-        final Integer numberOfLaps = (Integer) json.get(CourseConfigurationJsonSerializer.FIELD_NUMBER_OF_LAPS);
+        final Number numberOfLapsNumber = (Number) json.get(CourseConfigurationJsonSerializer.FIELD_NUMBER_OF_LAPS);
+        final Integer numberOfLaps = numberOfLapsNumber == null ? null : numberOfLapsNumber.intValue();
         if (numberOfLaps != null) {
             builder.setNumberOfLaps(numberOfLaps);
         }
