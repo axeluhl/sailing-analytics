@@ -26,6 +26,7 @@ public class CourseTemplate extends JsonWrapper {
     private static final String FIELD_WAYPOINTS = "waypoints";
     private static final String FIELD_ASSOCIATED_ROLE = "associatedRole";
     private static final String FIELD_OPTIONAL_REPEATABLE_PART = "optionalRepeatablePart";
+    private static final String FIELD_DEFAULT_NUMBER_OF_LAPS = "defaultNumberOfLaps";
 
     private static final String FIELD_REPEATABLE_PART_START = "zeroBasedIndexOfRepeatablePartStart";
     private static final String FIELD_REPEATABLE_PART_END = "zeroBasedIndexOfRepeatablePartEnd";
@@ -34,6 +35,7 @@ public class CourseTemplate extends JsonWrapper {
     private final String name;
     private URL optionalImageURL;
     private final Pair<Integer, Integer> optionalRepeatablePart;
+    private final Integer defaultNumberOfLaps;
     private final Iterable<String> tags;
     private final Iterable<MarkTemplate> allMarkTemplates;
     private final Map<MarkTemplate, String> roleMapping;
@@ -49,6 +51,8 @@ public class CourseTemplate extends JsonWrapper {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+        final Number defaultNumberOfLapsNumber = get(FIELD_DEFAULT_NUMBER_OF_LAPS);
+        defaultNumberOfLaps = defaultNumberOfLapsNumber == null ? null : defaultNumberOfLapsNumber.intValue();
         JSONArray tagsJSON = get(FIELD_TAGS);
         if (tagsJSON == null) {
             tags = Collections.emptySet();
@@ -84,10 +88,11 @@ public class CourseTemplate extends JsonWrapper {
 
     public CourseTemplate(String name, List<MarkTemplate> allMarkTemplates, Map<MarkTemplate, String> roleMapping,
             Iterable<WaypointTemplate> waypoints, Pair<Integer, Integer> optionalRepeatablePart, Iterable<String> tags,
-            URL optionalImageURL) {
+            URL optionalImageURL, Integer defaultNumberOfLaps) {
         super(new JSONObject());
         this.optionalRepeatablePart = optionalRepeatablePart;
         this.optionalImageURL = optionalImageURL;
+        this.defaultNumberOfLaps = defaultNumberOfLaps;
         this.id = null;
         this.name = name;
         this.allMarkTemplates = allMarkTemplates;
@@ -122,6 +127,9 @@ public class CourseTemplate extends JsonWrapper {
         if (optionalImageURL != null) {
             getJson().put(FIELD_OPTIONAL_IMAGE_URL, optionalImageURL.toExternalForm());
         }
+        if (defaultNumberOfLaps != null) {
+            getJson().put(FIELD_DEFAULT_NUMBER_OF_LAPS, defaultNumberOfLaps);
+        }
     }
 
     public String getName() {
@@ -154,5 +162,9 @@ public class CourseTemplate extends JsonWrapper {
 
     public Pair<Integer, Integer> getOptionalRepeatablePart() {
         return optionalRepeatablePart;
+    }
+    
+    public Integer getDefaultNumberOfLaps() {
+        return defaultNumberOfLaps;
     }
 }

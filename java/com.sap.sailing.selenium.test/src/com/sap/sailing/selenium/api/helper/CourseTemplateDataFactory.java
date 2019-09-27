@@ -42,16 +42,16 @@ public class CourseTemplateDataFactory {
     }
     
     public CourseTemplate constructCourseTemplate() {
-        return constructCourseTemplate(null);
+        return constructCourseTemplate(null, null);
     }
     
-    public CourseTemplate constructCourseTemplate(Pair<Integer, Integer> optionalRepeatablePart) {
-        return this.constructCourseTemplate(optionalRepeatablePart, Collections.emptyMap());
+    public CourseTemplate constructCourseTemplate(Pair<Integer, Integer> optionalRepeatablePart, Integer defaultNumberOfLaps) {
+        return this.constructCourseTemplate(optionalRepeatablePart, defaultNumberOfLaps, Collections.emptyMap());
     }
     
-    public CourseTemplate constructCourseTemplate(Pair<Integer, Integer> optionalRepeatablePart, Map<MarkTemplate, String> associatedRoles) {
+    public CourseTemplate constructCourseTemplate(Pair<Integer, Integer> optionalRepeatablePart, Integer defaultNumberOfLaps, Map<MarkTemplate, String> associatedRoles) {
         return new CourseTemplate("my-special-course-template",
                 Arrays.asList(sb, pe, b1, b4s, b4p, spare), associatedRoles,
-                waypointSequence, optionalRepeatablePart, Collections.emptySet(), null);
+                waypointSequence, optionalRepeatablePart, Collections.emptySet(), null, defaultNumberOfLaps);
     }
 }

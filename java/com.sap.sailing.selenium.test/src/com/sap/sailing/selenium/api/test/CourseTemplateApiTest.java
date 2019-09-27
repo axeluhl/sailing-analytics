@@ -67,7 +67,7 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
     @Test
     public void createCourseTemplateWithRepeatablePartTest() {
         final Pair<Integer, Integer> repeatablePart = new Pair<>(1, 3);
-        final CourseTemplate courseTemplateToSave = ctdf.constructCourseTemplate(repeatablePart);
+        final CourseTemplate courseTemplateToSave = ctdf.constructCourseTemplate(repeatablePart, /* defaultNumberOfLaps */null);
         
         final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(ctx, courseTemplateToSave);
 
@@ -77,7 +77,7 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
     @Test
     public void createCourseTemplateWithInvalidRepeatablePartTest() {
         final Pair<Integer, Integer> repeatablePart = new Pair<>(1, 6);
-        final CourseTemplate courseTemplateToSave = ctdf.constructCourseTemplate(repeatablePart);
+        final CourseTemplate courseTemplateToSave = ctdf.constructCourseTemplate(repeatablePart, /* defaultNumberOfLaps */null);
         
         try {
             courseTemplateApi.createCourseTemplate(ctx, courseTemplateToSave);
@@ -97,7 +97,7 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
         associatedRoles.put(ctdf.b4p, "4p");
         
         final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(ctx,
-                ctdf.constructCourseTemplate(null, associatedRoles));
+                ctdf.constructCourseTemplate(null, /* defaultNumberOfLaps */null, associatedRoles));
         
         assertEquals(new HashSet<>(associatedRoles.values()),
                 new HashSet<>(createdCourseTemplate.getRoleMapping().values()));
@@ -121,7 +121,7 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
         associatedRoles.put(ctdf.b4p, "4p");
         
         final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(ctx,
-                ctdf.constructCourseTemplate(null, associatedRoles));
+                ctdf.constructCourseTemplate(null, /* defaultNumberOfLaps */null, associatedRoles));
         
         assertEquals(new HashSet<>(Arrays.asList(ctdf.sb.getShortName(), ctdf.pe.getShortName(), "1",
                 "4s", "4p")),
@@ -134,7 +134,7 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
         associatedRoles.put(ctdf.b4s, "4");
         associatedRoles.put(ctdf.b4p, "4");
         
-        final CourseTemplate courseTemplateToSave = ctdf.constructCourseTemplate(null, associatedRoles);
+        final CourseTemplate courseTemplateToSave = ctdf.constructCourseTemplate(null, /* defaultNumberOfLaps */null, associatedRoles);
         
         try {
             courseTemplateApi.createCourseTemplate(ctx, courseTemplateToSave);

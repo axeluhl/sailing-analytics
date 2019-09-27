@@ -62,7 +62,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         
         final List<String> tags = new ArrayList<>();
         CourseTemplate courseTemplate = new CourseTemplate("test", markTemplates, roleMapping, waypointTemplates, null,
-                tags, null);
+                tags, null, null);
 
         CourseTemplate srcCourseTemplate = courseTemplateApi.createCourseTemplate(ctx, courseTemplate);
         CourseConfiguration courseConfiguration = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(
