@@ -68,6 +68,9 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -82,6 +85,7 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataAnalyzer;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEventFinder;
+import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentFinder;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
@@ -285,6 +289,8 @@ import com.sap.sailing.domain.common.impl.PolarSheetsXYDiagramDataImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.orc.ORCCertificate;
+import com.sap.sailing.domain.common.orc.ORCCertificateUploadConstants;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
@@ -482,6 +488,8 @@ import com.sap.sailing.manage2sail.RaceResultDescriptor;
 import com.sap.sailing.manage2sail.RegattaResultDescriptor;
 import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.ORCCertificateJsonDeserializer;
 import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.SimulationService;
@@ -9437,4 +9445,37 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             Map<Integer, ORCPerformanceCurveLegImpl> legInfo) throws NotFoundException, NotRevokableException {
         setORCPerformanceCurveInfo(getRaceLog(leaderboardName, raceColumnName, fleetName), legInfo);
     }
+
+    @Override
+    public Collection<ORCCertificate> getCertificatesAndAssignments(String json) throws org.json.simple.parser.ParseException, JsonDeserializationException {
+        final JSONObject jsonObject = (JSONObject) new JSONParser().parse(json);
+        final JSONArray certificates = (JSONArray) jsonObject.get(ORCCertificateUploadConstants.CERTIFICATES);
+        final ORCCertificateJsonDeserializer deserializer = new ORCCertificateJsonDeserializer();
+        final List<ORCCertificate> result = new ArrayList<>();
+        for (final Object o : certificates) {
+            final JSONObject certificateJson = (JSONObject) o;
+            result.add(deserializer.deserialize(certificateJson));
+        }
+        return result;
+    }
+
+    @Override
+    public Map<String, ORCCertificate> getORCCertificateAssignmentsByBoatIdAsString(RegattaName regattaIdentifier) throws NotFoundException {
+        final Regatta regatta = getRegatta(regattaIdentifier);
+        if (regatta == null) {
+            throw new NotFoundException("Regatta named "+regattaIdentifier+" not found");
+        }
+        getService().getSecurityService().checkCurrentUserReadPermission(regatta);
+        final Map<String, ORCCertificate> result = new HashMap<>();
+        final Map<Serializable, Boat> boatsById = new HashMap<>();
+        for (final Boat boat : regatta.getAllBoats()) {
+            boatsById.put(boat.getId(), boat);
+        }
+        for (final Entry<Boat, ORCCertificate> e : new RegattaLogORCCertificateAssignmentFinder(regatta.getRegattaLog(), boatsById).analyze().entrySet()) {
+            result.put(e.getKey().getId().toString(), e.getValue());
+        }
+        return result;
+    }
+    
+    // TODO need the getORCCertificateAssignmentsByBoatIdAsString also for race level, probably specifically by race log (leaderboard/racecolumn/fleet)
 }

@@ -51,12 +51,14 @@ public interface ORCCertificate extends WithID, Serializable {
      */
     String getBoatclass();
     
+    Duration getGPH();
+
     /**
      * Returns the GPH value for the {@link Competitor}. The GPH value represents the overall performance of the boat.
      * The value itself is again an allowance (in seconds per nautical mile) and could be used as a ToD Factor.
      * Most of the times it is used to divide a big fleet into similar fast divisions.
      */
-    double getGPH();
+    double getGPHInSecondsToTheMile();
     
     /**
      * Returns the CDL (Class Division Length) value for the {@link Competitor}. This value is another (and newer) approach to rate the overall performance of different boats.

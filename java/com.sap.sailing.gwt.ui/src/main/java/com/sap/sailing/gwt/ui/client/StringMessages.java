@@ -2270,6 +2270,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String updateCertificates();
     String actionDefineLegForOrcPcs();
     String importCertificates();
+    String assignCertificates();
     String orcPerformanceCurveLeg();
     String orcPerformanceCurveLegName(int i, String name);
     String orcPerformanceCurveFetchTrackedLegGeometry();
@@ -2279,4 +2280,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pleaseEnterATwa();
     String enterURLsForCertificateDownload();
     String reallyChangeAssignedCertificateForBoat(String string);
+    String certificateURLs();
+    String errorObtainingCertificates(String message);
+    String errorAssigningCertificatesToBoats(String string);
+    String filterCertificates();
 }

@@ -288,7 +288,7 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
      * <p>
      * 
      * By default, we use the boat farthest ahead ("first ship home" when the race has finished) as the scratch boat,
-     * but other definitions are possible, such as greatest {@link ORCCertificate#getGPH() GPH value} or least
+     * but other definitions are possible, such as greatest {@link ORCCertificate#getGPHInSecondsToTheMile() GPH value} or least
      * {@link ORCCertificate#getCDL() CDL value}. An explicit selection can be made using the
      * {@link RaceLogORCScratchBoatEvent} in the {@link RaceLog}. The last unrevoked event in the first {@link RaceLog}
      * in which one is found is used. Only if none of the attached {@link RaceLog}s contains any unrevoked such event,

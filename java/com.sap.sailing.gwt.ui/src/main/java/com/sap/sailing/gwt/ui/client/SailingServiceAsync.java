@@ -48,6 +48,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
@@ -1141,4 +1142,8 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
             Map<Integer, ORCPerformanceCurveLegImpl> legInfo, AsyncCallback<Void> callback);
 
     void getBoatRegistrationsForRegatta(RegattaName regattaIdentifier, AsyncCallback<Collection<BoatDTO>> callback);
+    
+    void getCertificatesAndAssignments(String json, AsyncCallback<Collection<ORCCertificate>> callback);
+
+    void getORCCertificateAssignmentsByBoatIdAsString(RegattaName regattaIdentifier, AsyncCallback<Map<String, ORCCertificate>> asyncCallback);
 }

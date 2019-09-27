@@ -51,7 +51,7 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
         result.put(ORC_CERTIFICATE_SAILNUMBER, certificate.getSailnumber());
         result.put(ORC_CERTIFICATE_BOATNAME, certificate.getBoatName());
         result.put(ORC_CERTIFICATE_BOATCLASS, certificate.getBoatclass());
-        result.put(ORC_CERTIFICATE_GPH, certificate.getGPH());
+        result.put(ORC_CERTIFICATE_GPH, certificate.getGPHInSecondsToTheMile());
         result.put(ORC_CERTIFICATE_CDL, certificate.getCDL());
         result.put(ORC_CERTIFICATE_LENGTH, certificate.getLengthOverAll().getMeters());
         result.put(ORC_CERTIFICATE_ISSUE_DATE, certificate.getIssueDate().asMillis());

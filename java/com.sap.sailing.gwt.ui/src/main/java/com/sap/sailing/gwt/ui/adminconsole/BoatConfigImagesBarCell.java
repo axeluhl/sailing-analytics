@@ -14,7 +14,6 @@ public class BoatConfigImagesBarCell extends ImagesBarCell {
     static final String UNLINK = "UNLINK";
     static final String ACTION_CHANGE_OWNERSHIP = DefaultActions.CHANGE_OWNERSHIP.name();
     static final String ACTION_CHANGE_ACL = DefaultActions.CHANGE_ACL.name();
-    private final static AdminConsoleResources adminConsoleResources = GWT.create(AdminConsoleResources.class);
 
     private final StringMessages stringMessages;
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
@@ -34,6 +33,6 @@ public class BoatConfigImagesBarCell extends ImagesBarCell {
                         IconResources.INSTANCE.changeOwnershipIcon()),
                 new ImageSpec(ACTION_CHANGE_ACL, stringMessages.actionChangeACL(),
                         IconResources.INSTANCE.changeACLIcon()),
-                new ImageSpec(UNLINK, stringMessages.unlink(), adminConsoleResources.unlinkIcon()));
+                new ImageSpec(UNLINK, stringMessages.unlink(), resources.unlinkIcon()));
     }
 }

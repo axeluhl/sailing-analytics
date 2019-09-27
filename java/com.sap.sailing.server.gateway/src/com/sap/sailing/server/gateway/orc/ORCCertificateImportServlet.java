@@ -111,7 +111,7 @@ public class ORCCertificateImportServlet extends AbstractFileUploadServlet {
                             fleetName = item.getString();
                         } else if (item.getFieldName().equals(ORCCertificateUploadConstants.CERTIFICATE_URLS)) {
                             certificates.putAll(parseCertificatesFromUrl(item.getString()));
-                        } else if (item.getFieldName().equals(ORCCertificateUploadConstants.CERTIFICATE_SELECTION)) {
+                        } else if (item.getFieldName().equals(ORCCertificateUploadConstants.MAPPINGS)) {
                             certificateSelection = new ORCCertificateSelectionDeserializer()
                                     .deserialize((JSONObject) new JSONParser().parse(item.getString()));
                         }
@@ -124,9 +124,7 @@ public class ORCCertificateImportServlet extends AbstractFileUploadServlet {
                     }
                 }
             }
-            if (certificateSelection == null) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Certificate selection ("+ORCCertificateUploadConstants.CERTIFICATE_SELECTION+") is missing");
-            } else if (regattaName != null) {
+            if (regattaName != null) {
                 if (raceName == null) {
                     createCertificateAssignmentsForRegatta(regattaName, certificateSelection, certificates, resp);
                 } else {
@@ -234,22 +232,24 @@ public class ORCCertificateImportServlet extends AbstractFileUploadServlet {
         final Map<Serializable, ORCCertificateUploadConstants.MappingResultStatus> result = new HashMap<>();
         final CompetitorAndBoatStore boatStore = getService().getCompetitorAndBoatStore();
         final AbstractLogEventAuthor serverAuthor = getService().getServerAuthor();
-        for (final Entry<Serializable, String> mapping : certificateSelection.getCertificateIdsForBoatIds()) {
-            final Boat boat = boatStore.getExistingBoatById(mapping.getKey());
-            if (boat == null) {
-                status = HttpServletResponse.SC_NOT_FOUND;
-                result.put(mapping.getKey(), ORCCertificateUploadConstants.MappingResultStatus.BOAT_NOT_FOUND);
-            } else {
-                final ORCCertificate certificate = certificates.get(mapping.getValue());
-                if (certificate == null) {
+        if (certificateSelection != null) {
+            for (final Entry<Serializable, String> mapping : certificateSelection.getCertificateIdsForBoatIds()) {
+                final Boat boat = boatStore.getExistingBoatById(mapping.getKey());
+                if (boat == null) {
                     status = HttpServletResponse.SC_NOT_FOUND;
-                    result.put(mapping.getKey(), ORCCertificateUploadConstants.MappingResultStatus.CERTIFICATE_NOT_FOUND);
+                    result.put(mapping.getKey(), ORCCertificateUploadConstants.MappingResultStatus.BOAT_NOT_FOUND);
                 } else {
-                    final LogEventT assignment = logEventConstructor.create(
-                            now, now, serverAuthor, UUID.randomUUID(), certificate,
-                            boat);
-                    logToAddTo.add(assignment);
-                    result.put(mapping.getKey(), ORCCertificateUploadConstants.MappingResultStatus.OK);
+                    final ORCCertificate certificate = certificates.get(mapping.getValue());
+                    if (certificate == null) {
+                        status = HttpServletResponse.SC_NOT_FOUND;
+                        result.put(mapping.getKey(), ORCCertificateUploadConstants.MappingResultStatus.CERTIFICATE_NOT_FOUND);
+                    } else {
+                        final LogEventT assignment = logEventConstructor.create(
+                                now, now, serverAuthor, UUID.randomUUID(), certificate,
+                                boat);
+                        logToAddTo.add(assignment);
+                        result.put(mapping.getKey(), ORCCertificateUploadConstants.MappingResultStatus.OK);
+                    }
                 }
             }
         }
@@ -259,7 +259,9 @@ public class ORCCertificateImportServlet extends AbstractFileUploadServlet {
     private void writeResponse(int status, Map<Serializable, ORCCertificateUploadConstants.MappingResultStatus> result,
             ORCCertificateSelection certificateSelection, Map<String, ORCCertificate> certificates, HttpServletResponse resp) throws IOException {
         resp.setStatus(status);
-        resp.setContentType("application/json;charset=UTF-8");
+        // Use text/html to prevent browsers from wrapping the response body,
+        // see "Handling File Upload Responses in GWT" at http://www.artofsolving.com/node/50
+        resp.setContentType("text/html;charset=UTF-8");
         final JSONObject jsonResponse = new JSONObject();
         final JSONArray mappings = new JSONArray();
         for (final Entry<Serializable, MappingResultStatus> m : result.entrySet()) {

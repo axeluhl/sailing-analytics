@@ -56,6 +56,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
@@ -1222,4 +1223,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void setORCPerformanceCurveLegInfo(String leaderboardName, String raceColumnName, String fleetName, Map<Integer, ORCPerformanceCurveLegImpl> legInfo) throws NotFoundException, NotRevokableException;
 
     Collection<BoatDTO> getBoatRegistrationsForRegatta(RegattaName regattaIdentifier) throws NotFoundException;
+
+    Collection<ORCCertificate> getCertificatesAndAssignments(String json) throws Exception;
+
+    Map<String, ORCCertificate> getORCCertificateAssignmentsByBoatIdAsString(RegattaName regattaIdentifier) throws NotFoundException;
 }

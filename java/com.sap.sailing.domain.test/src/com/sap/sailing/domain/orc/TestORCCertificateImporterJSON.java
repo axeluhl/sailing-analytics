@@ -33,8 +33,8 @@ public class TestORCCertificateImporterJSON {
         ORCCertificate moana = importer.getCertificateBySailNumber("ger  55 49 ");
         assertNotNull(swan);
         assertNotNull(moana);
-        assertEquals(539.1, swan .getGPH(), 0.0000001);
-        assertEquals(490.4, moana.getGPH(), 0.0000001);
+        assertEquals(539.1, swan .getGPHInSecondsToTheMile(), 0.0000001);
+        assertEquals(490.4, moana.getGPHInSecondsToTheMile(), 0.0000001);
         assertEquals(862.2, swan .getWindwardLeewardSpeedPrediction().get(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[0]).getDuration(ORCCertificateImpl.NAUTICAL_MILE).asSeconds(), 0.1);
         assertEquals(788.2, moana.getWindwardLeewardSpeedPrediction().get(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[0]).getDuration(ORCCertificateImpl.NAUTICAL_MILE).asSeconds(), 0.1);
         assertEquals(861.0, swan .getLongDistanceSpeedPredictions().get(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[0]).getDuration(ORCCertificateImpl.NAUTICAL_MILE).asSeconds(), 0.1);

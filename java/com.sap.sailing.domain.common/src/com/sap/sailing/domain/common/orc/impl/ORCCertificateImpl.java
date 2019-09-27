@@ -14,16 +14,16 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
-//TODO Finish this comment.
 /**
- * For a {@link Competitor} https://orc.org/index.asp?id=23
+ * Holds an ORC boat certificate including various of the metrics found in it. Note that multiple different certificates
+ * for the same boat may exist, and they can be distinguished in particular using their {@link #getIssueDate() issuing
+ * date}.
  * 
  * @author Daniel Lisunkin (i505543)
  *
  */
 
 public class ORCCertificateImpl implements ORCCertificate {
-
     private static final long serialVersionUID = 8725162998514202782L;
     
     private final String idConsistingOfNatAuthCertNoAndBIN;
@@ -157,7 +157,12 @@ public class ORCCertificateImpl implements ORCCertificate {
     }
 
     @Override
-    public double getGPH() {
+    public Duration getGPH() {
+        return gph;
+    }
+    
+    @Override
+    public double getGPHInSecondsToTheMile() {
         return gph.asSeconds();
     }
 
@@ -248,6 +253,6 @@ public class ORCCertificateImpl implements ORCCertificate {
     @Override
     public String toString() {
         return "ID \""+getId()+"\" for "+getSailnumber()+" / "+getBoatName() + " - Issued on: " + getIssueDate().asDate()+" with GPH "+
-                Util.padPositiveValue(getGPH(), 1, 1, /* round */ true);
+                Util.padPositiveValue(getGPHInSecondsToTheMile(), 1, 1, /* round */ true);
     }
 }

@@ -4,6 +4,9 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 
 interface AdminConsoleResources extends ClientBundle {
+    @Source("com/sap/sailing/gwt/ui/client/images/magnifier.png")
+    ImageResource magnifierIcon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/settingsActionIcon.png")
     ImageResource settingsActionIcon();
 

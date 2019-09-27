@@ -103,7 +103,7 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                     length = new MeterDistance(((Number) entry.getValue()).doubleValue());
                     break;
                 case "YachtName":
-                    boatName = entry.getValue().toString();
+                    boatName = entry.getValue()==null?null:entry.getValue().toString();
                     break;
                 case "Class":
                     boatclass = (String) entry.getValue();
