@@ -2,6 +2,7 @@ package com.sap.sailing.selenium.api.test;
 
 import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
@@ -28,9 +29,12 @@ import com.sap.sailing.selenium.api.coursetemplate.WaypointTemplate;
 import com.sap.sailing.selenium.api.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
+import com.sap.sailing.selenium.api.helper.CourseTemplateDataFactory;
 import com.sap.sailing.selenium.api.regatta.RaceColumn;
 import com.sap.sailing.selenium.api.regatta.RegattaApi;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 public class CourseConfigurationTest extends AbstractSeleniumTest {
 
@@ -47,6 +51,39 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     }
 
     @Test
+    public void testCreateCourseFromCourseTemplateWithoutChanges() {
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+
+        final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(ctx);
+        
+        final Map<MarkTemplate, String> associatedRoles = new HashMap<>();
+        associatedRoles.put(ctdf.sb, "Startboat");
+        associatedRoles.put(ctdf.pe, "Pinend");
+        associatedRoles.put(ctdf.b1, "1");
+        associatedRoles.put(ctdf.b4s, "4s");
+        associatedRoles.put(ctdf.b4p, "4p");
+        
+        final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(ctx,
+                ctdf.constructCourseTemplate(new Pair<>(1, 3), 2, associatedRoles));
+        
+        CourseConfiguration courseConfiguration = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(
+                ctx, createdCourseTemplate.getId(), /* optionalRegattaName */ null, /* tags */ null);
+        
+        final String regattaName = "test";
+        eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
+        final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
+
+        courseConfigurationApi.createCourse(ctx, courseConfiguration, regattaName, race.getRaceName(), "Default");
+        CourseConfiguration createdCourseAsConfiguration = courseConfigurationApi.createCourseConfigurationFromCourse(ctx, regattaName, race.getRaceName(), "Default", null);
+        assertEquals(6, Util.size(createdCourseAsConfiguration.getMarkConfigurations()));
+        // TODO assert reference to CourseTemplate ID
+        // TODO assert course sequence
+        // TODO assert that for every Mark we get the correct originating MarkTemplate ID
+        // TODO assert that number of laps is correctly restored
+    }
+
+    @Test
+    @Ignore
     public void testCreateCourseConfigurationFromTemplate() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 
