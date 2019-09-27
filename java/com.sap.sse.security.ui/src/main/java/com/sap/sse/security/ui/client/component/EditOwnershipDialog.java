@@ -268,7 +268,6 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
     }
 
     public static class DialogConfig<T extends Named & SecuredDTO> {
-
         private final UserManagementServiceAsync userManagementService;
         private final Consumer<T> updateCallback;
         private final Function<T, QualifiedObjectIdentifier> identifierFactory;
@@ -293,8 +292,6 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
             final QualifiedObjectIdentifier identifier = securedObject.getIdentifier();
             final String permissionType = identifier.getTypeIdentifier();
             final String id = identifier.getTypeRelativeObjectIdentifier().toString();
-            // new EditOwnershipDialog(userManagementService, null, // securedObject.getOwnership(),
-            // StringMessages.INSTANCE, new EditOwnershipDialogCallback(securedObject), permissionType, id).show();
             new EditOwnershipDialog(userManagementService, securedObject.getOwnership(), StringMessages.INSTANCE,
                     new EditOwnershipDialogCallback(securedObject), permissionType, id).show();
         }

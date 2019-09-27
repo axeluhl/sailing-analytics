@@ -7830,6 +7830,16 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
+    public Collection<BoatDTO> getBoatRegistrationsForRegatta(RegattaName regattaIdentifier) throws NotFoundException {
+        final Regatta regatta = getRegatta(regattaIdentifier);
+        if (regatta == null) {
+            throw new NotFoundException("Regatta "+regattaIdentifier+" not found");
+        }
+        getSecurityService().checkCurrentUserReadPermission(regatta);
+        return convertToBoatDTOs(regatta.getAllBoats());
+    }
+
+    @Override
     public Boolean areCompetitorRegistrationsEnabledForRace(String leaderboardName, String raceColumnName,
             String fleetName) throws NotFoundException {
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);

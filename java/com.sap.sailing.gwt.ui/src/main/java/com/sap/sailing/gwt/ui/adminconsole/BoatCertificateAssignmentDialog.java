@@ -1,40 +1,34 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.List;
-
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.ui.client.UserService;
 
-public class BoatCertificateAssignmentDialog extends DataEntryDialog<List<BoatDTO>> {
+/**
+ * Shows a {@link BoatCertificatesPanel} in a dialog. The panel interacts with a servlet that receives uploaded
+ * certificate files, certificate download URLs, as well as certificate assignment specifications and returns a JSON
+ * object containing the certificates found and the assignment results. This dialog therefore has no result.
+ * 
+ * @author Daniel Lisunkin (i505543)
+ * @author Axel Uhl (D043530)
+ *
+ */
+public class BoatCertificateAssignmentDialog extends DataEntryDialog<Void> {
     
     private final BoatCertificatesPanel panel;
 
-    protected static class BoatValidator implements Validator<List<BoatDTO>> {
-        public BoatValidator() {
-            super();
-        }
-
-        @Override
-        public String getErrorMessage(List<BoatDTO> valueToValidate) {
-            return null;
-        }
-    }
-        
     public BoatCertificateAssignmentDialog(final SailingServiceAsync sailingService, UserService userService, String regattaName, final StringMessages stringMessages,
-            final ErrorReporter errorReporter, DialogCallback<List<BoatDTO>> callback) {
-        super(stringMessages.actionEditCompetitors(), stringMessages.actionEditCompetitors(), stringMessages.save(), stringMessages.cancel(), new BoatValidator(), callback);
-
-        
+            final ErrorReporter errorReporter, DialogCallback<Void> callback) {
+        super(stringMessages.actionEditCompetitors(), stringMessages.actionEditCompetitors(), stringMessages.close(), stringMessages.cancel(), /* validator */ null, callback);
         this.panel = new BoatCertificatesPanel(sailingService, userService, regattaName, stringMessages, errorReporter);
+        super.getCancelButton().removeFromParent();
     }
 
     @Override
-    protected List<BoatDTO> getResult() {
+    protected Void getResult() {
         return null;
     }
 

@@ -11,8 +11,10 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 public class BoatConfigImagesBarCell extends ImagesBarCell {
     static final String ACTION_UPDATE = DefaultActions.UPDATE.name();
     static final String ACTION_REFRESH = "ACTION_REFRESH";
-    public static final String ACTION_CHANGE_OWNERSHIP = DefaultActions.CHANGE_OWNERSHIP.name();
-    public static final String ACTION_CHANGE_ACL = DefaultActions.CHANGE_ACL.name();
+    static final String UNLINK = "UNLINK";
+    static final String ACTION_CHANGE_OWNERSHIP = DefaultActions.CHANGE_OWNERSHIP.name();
+    static final String ACTION_CHANGE_ACL = DefaultActions.CHANGE_ACL.name();
+    private final static AdminConsoleResources adminConsoleResources = GWT.create(AdminConsoleResources.class);
 
     private final StringMessages stringMessages;
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
@@ -31,6 +33,7 @@ public class BoatConfigImagesBarCell extends ImagesBarCell {
                 new ImageSpec(ACTION_CHANGE_OWNERSHIP, stringMessages.actionChangeOwnership(),
                         IconResources.INSTANCE.changeOwnershipIcon()),
                 new ImageSpec(ACTION_CHANGE_ACL, stringMessages.actionChangeACL(),
-                        IconResources.INSTANCE.changeACLIcon()));
+                        IconResources.INSTANCE.changeACLIcon()),
+                new ImageSpec(UNLINK, stringMessages.unlink(), adminConsoleResources.unlinkIcon()));
     }
 }

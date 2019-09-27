@@ -117,7 +117,6 @@ public class SmartphoneTrackingEventManagementPanel
         importContent.add(importWidget);
         importContent.add(deviceIdentifierTable);
         trackedRacesListComposite.addTrackedRaceChangeListener(new TrackedRaceChangedListener() {
-            
             @Override
             public void racesStoppedTracking(Iterable<? extends RegattaAndRaceIdentifier> regattaAndRaceIdentifiers) {
                 loadAndRefreshLeaderboard(getSelectedLeaderboard().getName()); 
@@ -128,7 +127,6 @@ public class SmartphoneTrackingEventManagementPanel
                 loadAndRefreshLeaderboard(getSelectedLeaderboard().getName()); 
             }
         });
-
         this.userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
@@ -169,7 +167,6 @@ public class SmartphoneTrackingEventManagementPanel
                 return new NaturalComparator(false).compare(o1.getName(), o2.getName());
             }
         });
-
         TextColumn<StrippedLeaderboardDTOWithSecurity> leaderboardDisplayNameColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
             @Override
             public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
@@ -184,7 +181,6 @@ public class SmartphoneTrackingEventManagementPanel
                         return new NaturalComparator(false).compare(o1.getDisplayName(), o2.getDisplayName());
                     }
                 });
-
         TextColumn<StrippedLeaderboardDTOWithSecurity> leaderboardCanBoatsOfCompetitorsChangePerRaceColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
             @Override
             public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
@@ -194,45 +190,32 @@ public class SmartphoneTrackingEventManagementPanel
         leaderboardCanBoatsOfCompetitorsChangePerRaceColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(leaderboardCanBoatsOfCompetitorsChangePerRaceColumn, (l1, l2)->
             Boolean.valueOf(l1.canBoatsOfCompetitorsChangePerRace).compareTo(Boolean.valueOf(l2.canBoatsOfCompetitorsChangePerRace)));
-
         final HasPermissions type = SecuredDomainType.EVENT;
-
         final EditOwnershipDialog.DialogConfig<StrippedLeaderboardDTOWithSecurity> configOwnership = EditOwnershipDialog
                 .create(userService.getUserManagementService(), type, leaderboard -> {
                 }, stringMessages);
-
         final EditACLDialog.DialogConfig<StrippedLeaderboardDTOWithSecurity> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, leaderboard -> leaderboard.getAccessControlList(),
                 stringMessages);
-
         final AccessControlledActionsColumn<StrippedLeaderboardDTOWithSecurity, RaceLogTrackingEventManagementImagesBarCell> leaderboardActionColumn = AccessControlledActionsColumn
                 .create(new RaceLogTrackingEventManagementImagesBarCell(stringMessages), userService);
-
         leaderboardActionColumn.addAction(
                 RaceLogTrackingEventManagementImagesBarCell.ACTION_DENOTE_FOR_RACELOG_TRACKING, DefaultActions.UPDATE,
                 this::denoteForRaceLogTracking);
-
         leaderboardActionColumn.addAction(RaceLogTrackingEventManagementImagesBarCell.ACTION_COMPETITOR_REGISTRATIONS,
                 DefaultActions.UPDATE, this::handleCompetitorRegistration);
-
         leaderboardActionColumn.addAction(RaceLogTrackingEventManagementImagesBarCell.ACTION_BOAT_REGISTRATIONS,
                 DefaultActions.UPDATE, this::handleBoatRegistration);
-
         leaderboardActionColumn.addAction(RaceLogTrackingEventManagementImagesBarCell.ACTION_MAP_DEVICES,
                 DefaultActions.UPDATE, this::handleDeviceMappings);
-
         leaderboardActionColumn.addAction(RaceLogTrackingEventManagementImagesBarCell.ACTION_INVITE_BUOY_TENDERS,
                 DefaultActions.UPDATE, t -> openChooseEventDialogAndSendMails(t.getName()));
-
         leaderboardActionColumn.addAction(RaceLogTrackingEventManagementImagesBarCell.ACTION_SHOW_REGATTA_LOG,
                 DefaultActions.UPDATE, t -> showRegattaLog());
-
         leaderboardActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.UPDATE,
                 configOwnership::openDialog);
-
         leaderboardActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.UPDATE,
                 configACL::openDialog);
-
         leaderboardTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
         leaderboardTable.addColumn(leaderboardNameColumn, stringMessages.name());
         leaderboardTable.addColumn(leaderboardDisplayNameColumn, stringMessages.displayName());

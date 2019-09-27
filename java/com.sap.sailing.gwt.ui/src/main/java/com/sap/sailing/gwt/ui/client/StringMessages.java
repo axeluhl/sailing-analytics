@@ -2277,4 +2277,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String legTwaInDegrees();
     String pleaseEnterADistance();
     String pleaseEnterATwa();
+    String enterURLsForCertificateDownload();
+    String reallyChangeAssignedCertificateForBoat(String string);
 }

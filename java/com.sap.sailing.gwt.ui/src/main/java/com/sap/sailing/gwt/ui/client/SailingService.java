@@ -1220,4 +1220,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      *             in case the race log cannot be found by the leaderboard, race column and fleet names provided
      */
     void setORCPerformanceCurveLegInfo(String leaderboardName, String raceColumnName, String fleetName, Map<Integer, ORCPerformanceCurveLegImpl> legInfo) throws NotFoundException, NotRevokableException;
+
+    Collection<BoatDTO> getBoatRegistrationsForRegatta(RegattaName regattaIdentifier) throws NotFoundException;
 }

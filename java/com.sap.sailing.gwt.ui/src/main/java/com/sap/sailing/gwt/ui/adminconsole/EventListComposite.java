@@ -130,17 +130,13 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         this.handleTabSelectable = handleTabSelectable;
         this.availableLeaderboardGroups = Collections.emptyList();
         this.allEvents = new ArrayList<EventDTO>();
-
         final VerticalPanel panel = new VerticalPanel();
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, EVENT);
         panel.add(buttonPanel);
-
         final Button refresh = buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::fillEvents);
         refresh.ensureDebugId("RefreshEventsButton");
-        
         final Button create = buttonPanel.addCreateAction(stringMessages.actionAddEvent(), this::openCreateEventDialog);
         create.ensureDebugId("CreateEventButton");
-
         final Button remove = buttonPanel.addRemoveAction(stringMessages.remove(), new Command() {
             @Override
             public void execute() {
@@ -150,7 +146,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
 
             private boolean askUserForConfirmation() {
-                if(refreshableEventSelectionModel.itemIsSelectedButNotVisible(eventTable.getVisibleItems())){
+                if (refreshableEventSelectionModel.itemIsSelectedButNotVisible(eventTable.getVisibleItems())){
                     final String eventNames = refreshableEventSelectionModel.getSelectedSet().stream()
                             .map(EventDTO::getName).collect(Collectors.joining("\n"));
                     return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleEvents(eventNames));
@@ -160,7 +156,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         });
         remove.setEnabled(false);
         remove.ensureDebugId("RemoveEventsButton");
-
         eventListDataProvider = new ListDataProvider<EventDTO>();
         filterTextbox = new LabeledAbstractFilterablePanel<EventDTO>(new Label(stringMessages.filterEventsByName()),
                 allEvents, eventListDataProvider, stringMessages) {
