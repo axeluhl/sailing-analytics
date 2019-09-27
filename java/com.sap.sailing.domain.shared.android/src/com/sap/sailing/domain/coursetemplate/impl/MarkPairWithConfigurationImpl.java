@@ -39,7 +39,7 @@ public class MarkPairWithConfigurationImpl extends NamedImpl implements MarkPair
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((left == null) ? 0 : getName().hashCode());
+        result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
         result = prime * result + ((left == null) ? 0 : left.hashCode());
         result = prime * result + ((right == null) ? 0 : right.hashCode());
         return result;
