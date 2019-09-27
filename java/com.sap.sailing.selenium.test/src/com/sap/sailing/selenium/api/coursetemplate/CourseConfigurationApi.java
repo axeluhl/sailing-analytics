@@ -32,8 +32,8 @@ public class CourseConfigurationApi {
     }
 
     public CourseConfiguration createCourseConfigurationFromCourse(final ApiContext ctx, final String regattaName,
-            final String raceName, final Iterable<String> tags) {
-        final String url = COURSE_CONFIGURATION + FROM_COURSE + regattaName + "/" + raceName;
+            final String raceColumn, String fleet, final Iterable<String> tags) {
+        final String url = COURSE_CONFIGURATION + FROM_COURSE + regattaName + "/" + raceColumn + "/" + fleet;
         final Map<String, String> queryParams = new TreeMap<>();
         if (tags != null) {
             for (String tag : tags) {

@@ -79,8 +79,8 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
         LeaderboardApi.startRaceLogTracking(ctx, regattaName, race.getRaceName(), "Default");
 
-        final String raceName = regattaName + " " + race.getRaceName() + " Default";
-        courseConfigurationApi.createCourseConfigurationFromCourse(ctx, regattaName, raceName, /* tags */ null);
+        courseConfigurationApi.createCourseConfigurationFromCourse(ctx, regattaName, race.getRaceName(), "Default",
+                /* tags */ null);
     }
 
     @Test
