@@ -313,8 +313,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
 
     @Override
     public CourseBase createCourseFromConfigurationAndDefineMarksAsNeeded(Regatta regatta,
-            CourseConfiguration courseConfiguration, int lapCount,
-            TimePoint timePointForDefinitionOfMarksAndDeviceMappings, AbstractLogEventAuthor author) {
+            CourseConfiguration courseConfiguration, TimePoint timePointForDefinitionOfMarksAndDeviceMappings,
+            AbstractLogEventAuthor author) {
         final Map<MarkConfiguration, Mark> marksByMarkConfigurations = new HashMap<>();
         final RegattaLog regattaLog = regatta.getRegattaLog();
         for (MarkConfiguration markConfiguration : courseConfiguration.getAllMarks()) {

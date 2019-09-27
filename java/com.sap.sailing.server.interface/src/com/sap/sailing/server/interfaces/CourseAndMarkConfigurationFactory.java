@@ -131,6 +131,6 @@ public interface CourseAndMarkConfigurationFactory {
      * @return the sequence of waypoints, obtained by expanding the
      */
     CourseBase createCourseFromConfigurationAndDefineMarksAsNeeded(Regatta regatta,
-            CourseConfiguration courseConfiguration, int lapCount,
-            TimePoint timePointForDefinitionOfMarksAndDeviceMappings, AbstractLogEventAuthor author);
+            CourseConfiguration courseConfiguration, TimePoint timePointForDefinitionOfMarksAndDeviceMappings,
+            AbstractLogEventAuthor author);
 }

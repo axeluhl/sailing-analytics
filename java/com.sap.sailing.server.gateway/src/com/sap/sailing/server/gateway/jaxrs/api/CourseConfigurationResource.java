@@ -229,7 +229,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
 
         // TODO: clarify parameters
         final CourseBase course = getService().getCourseAndMarkConfigurationFactory()
-                .createCourseFromConfigurationAndDefineMarksAsNeeded(regatta, courseConfiguration, /* lapCount */ 0,
+                .createCourseFromConfigurationAndDefineMarksAsNeeded(regatta, courseConfiguration,
                         MillisecondsTimePoint.now(),
                         new LogEventAuthorImpl(getService().getServerAuthor().getName(), 0));
         final RaceLog raceLog = raceColumnByName.getRaceLog(fleetByName);
