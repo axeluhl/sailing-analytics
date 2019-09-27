@@ -53,7 +53,7 @@ public class CourseConfigurationBuilder {
     private List<WaypointWithMarkConfiguration> waypoints = new ArrayList<>();;
     private RepeatablePart optionalRepeatablePart;
     private Integer numberOfLaps;
-    private Map<MarkPairWithConfiguration, MarkPairWithConfiguration> markPairCache;
+    private Map<MarkPairWithConfiguration, MarkPairWithConfiguration> markPairCache = new HashMap<>();
 
     public CourseConfigurationBuilder(SharedSailingData sharedSailingData, Regatta optionalRegatta,
             CourseTemplate optionalCourseTemplate, String name) {
