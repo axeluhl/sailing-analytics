@@ -89,8 +89,9 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
 
         final String regattaName = "test";
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
+        final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
 
-        courseConfigurationApi.createCourse(ctx, createSimpleCourseConfiguration(ctx), regattaName);
+        courseConfigurationApi.createCourse(ctx, createSimpleCourseConfiguration(ctx), regattaName, race.getRaceName(), "Default");
     }
 
     @Test
