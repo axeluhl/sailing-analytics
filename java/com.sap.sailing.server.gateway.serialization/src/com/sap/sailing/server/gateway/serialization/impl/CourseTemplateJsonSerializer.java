@@ -22,7 +22,7 @@ public class CourseTemplateJsonSerializer implements JsonSerializer<CourseTempla
     public static final String FIELD_MARK_TEMPLATE_IDS = "markTemplateIds";
     public static final String FIELD_ASSOCIATED_ROLE = "associatedRole";
     public static final String FIELD_OPTIONAL_REPEATABLE_PART = "optionalRepeatablePart";
-    public static final Object FIELD_DEFAULT_NUMBER_OF_LAPS = "defaultNumberOfLaps";
+    public static final String FIELD_DEFAULT_NUMBER_OF_LAPS = "defaultNumberOfLaps";
     
     private final JsonSerializer<RepeatablePart> repeatablePartJsonSerializer;
     private final JsonSerializer<MarkTemplate> markTemplateJsonSerializer;
