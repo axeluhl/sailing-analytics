@@ -8,9 +8,11 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
+import com.sap.sailing.domain.coursetemplate.ControlPointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.MarkPairWithConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
@@ -103,11 +105,15 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
             final JSONObject waypointEntry = new JSONObject();
             waypointEntry.put(FIELD_WAYPOINT_PASSING_INSTRUCTION, waypoint.getPassingInstruction().name());
             final JSONArray markConfigurationIDs = new JSONArray();
-            waypoint.getControlPoint().getMarkConfigurations()
+            final ControlPointWithMarkConfiguration controlPoint = waypoint.getControlPoint();
+            controlPoint.getMarkConfigurations()
                     .forEach(mc -> markConfigurationIDs.add(markConfigurationsToTempIdMap.get(mc).toString()));
             waypointEntry.put(FIELD_WAYPOINT_MARK_CONFIGURATION_IDS, markConfigurationIDs);
-            waypointEntry.put(FIELD_WAYPOINT_CONTROL_POINT_NAME, waypoint.getControlPoint().getName());
-            //waypointEntry.put(FIELD_WAYPOINT_CONTROL_POINT_SHORT_NAME, waypoint.getControlPoint().getShortName());
+            if (controlPoint instanceof MarkPairWithConfiguration) {
+                final MarkPairWithConfiguration markPairWithConfiguration = (MarkPairWithConfiguration) controlPoint;
+                waypointEntry.put(FIELD_WAYPOINT_CONTROL_POINT_NAME, markPairWithConfiguration.getName());
+                waypointEntry.put(FIELD_WAYPOINT_CONTROL_POINT_SHORT_NAME, markPairWithConfiguration.getShortName());
+            }
             waypoints.add(waypointEntry);
         }
         result.put(FIELD_WAYPOINTS, waypoints);
