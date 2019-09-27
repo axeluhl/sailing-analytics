@@ -2284,4 +2284,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorObtainingCertificates(String message);
     String errorAssigningCertificatesToBoats(String string);
     String filterCertificates();
+    String errorUnableToGetBoatsForRegatta(String regattaName, String message);
 }

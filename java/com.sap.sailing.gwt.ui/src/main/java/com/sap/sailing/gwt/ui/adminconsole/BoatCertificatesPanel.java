@@ -20,6 +20,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.Grid;
@@ -66,6 +67,8 @@ public class BoatCertificatesPanel extends SimplePanel {
     
     private final StringListEditorComposite urls;
     
+    private final FileUpload fileUpload;
+    
     /**
      * The hidden form fields that transmit the {@link ORCCertificateUploadConstants#CERTIFICATE_URLS} parameters
      * with the form submission. The contents are kept in sync with {@link #urls} by a value change handler on
@@ -97,6 +100,9 @@ public class BoatCertificatesPanel extends SimplePanel {
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         boatsByIdAsString = new HashMap<>();
+        fileUpload = new FileUpload();
+        fileUpload.getElement().setAttribute("multiple", "multiple");
+        fileUpload.setName(ORCCertificateUploadConstants.CERTIFICATES);
         certificateAssignments = new HashMap<>();
         this.regattaIdentifier = new RegattaName(regattaName);
         this.urls = new StringListEditorComposite(Collections.emptySet(), stringMessages, stringMessages.courseAreas(), IconResources.INSTANCE.removeIcon(),
@@ -131,6 +137,7 @@ public class BoatCertificatesPanel extends SimplePanel {
         mainPanel.add(urlsPanel);
         urlsPanel.add(new Label(stringMessages.certificateURLs()));
         urlsPanel.add(urls);
+        mainPanel.add(fileUpload);
         mainPanel.add(tablesPanel);
         // BUTTON - Refresh
         final Button refreshButton = topButtonPanel.addUnsecuredAction(stringMessages.refresh(), this::refresh);
@@ -292,7 +299,7 @@ public class BoatCertificatesPanel extends SimplePanel {
         sailingService.getBoatRegistrationsForRegatta(regattaIdentifier, new AsyncCallback<Collection<BoatDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Remote Procedure Call getBoats() - Failure: " + caught.getMessage());
+                errorReporter.reportError(stringMessages.errorUnableToGetBoatsForRegatta(regattaIdentifier.toString(), caught.getMessage()));
             }
 
             @Override
