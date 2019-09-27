@@ -23,8 +23,6 @@ import com.sap.sailing.server.gateway.serialization.impl.CourseConfigurationJson
 
 public class CourseConfigurationJsonDeserializer implements JsonDeserializer<CourseConfiguration> {
 
-    private static final String FIELD_MARK_CONFIGURATION_ID = "id";
-
     private final SharedSailingData sharedSailingData;
     private final CommonMarkPropertiesJsonDeserializer commonMarkPropertiesJsonDeserializer;
     private final JsonDeserializer<RepeatablePart> repeatablePartJsonDeserializer;
@@ -74,7 +72,8 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
                 }
 
                 markConfigurationsByID.put(
-                        UUID.fromString((String) markConfigurationJSON.get(FIELD_MARK_CONFIGURATION_ID)),
+                        UUID.fromString((String) markConfigurationJSON
+                                .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_ID)),
                         markConfiguration);
             }
         }

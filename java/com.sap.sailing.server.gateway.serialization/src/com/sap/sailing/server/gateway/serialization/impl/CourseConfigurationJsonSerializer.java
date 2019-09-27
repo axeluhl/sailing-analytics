@@ -34,6 +34,7 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
     public static final String FIELD_WAYPOINT_MARK_CONFIGURATION_IDS = "markConfigurationIds";
     public static final String FIELD_OPTIONAL_REPEATABLE_PART = "optionalRepeatablePart";
     public static final String FIELD_NUMBER_OF_LAPS = "numberOfLaps";
+    public static final String FIELD_MARK_CONFIGURATION_ID = "id";
 
     private final JsonSerializer<RepeatablePart> repeatablePartJsonSerializer;
     private final JsonSerializer<CommonMarkProperties> commonMarkPropertiesJsonSerializer;
@@ -56,6 +57,9 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
         final JSONArray markConfigurationsJSON = new JSONArray();
         for (final MarkConfiguration markConfiguration : courseConfiguration.getAllMarks()) {
             JSONObject markConfigurationsEntry = new JSONObject();
+            final UUID markConfigurationId = UUID.randomUUID();
+            markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_ID,
+                    markConfigurationId.toString());
             if (markConfiguration.getOptionalMarkTemplate() != null) {
                 markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_TEMPLATE_ID,
                         markConfiguration.getOptionalMarkTemplate().getId().toString());
@@ -86,7 +90,7 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
 
             // TODO: associated role? markConfiguration.
             // TODO add optionalPositioning
-            markConfigurationsToTempIdMap.put(markConfiguration, UUID.randomUUID());
+            markConfigurationsToTempIdMap.put(markConfiguration, markConfigurationId);
             markConfigurationsJSON.add(markConfigurationsEntry);
 
         }
