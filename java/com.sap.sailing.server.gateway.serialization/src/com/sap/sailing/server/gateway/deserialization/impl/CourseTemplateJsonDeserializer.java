@@ -109,8 +109,9 @@ public class CourseTemplateJsonDeserializer implements JsonDeserializer<CourseTe
             optionalRepeatablePart = repeatablePartJsonDeserializer.deserialize(repeatablePartJSON);
         }
         
-        final Integer defaultNumberOfLaps = (Integer) json
+        final Number defaultNumberOfLapsNumber = (Number) json
                 .get(CourseTemplateJsonSerializer.FIELD_DEFAULT_NUMBER_OF_LAPS);
+        final Integer defaultNumberOfLaps = defaultNumberOfLapsNumber == null ? null : defaultNumberOfLapsNumber.intValue();
 
         final CourseTemplateImpl courseTemplate = new CourseTemplateImpl(null, courseTemplateName,
                 allMarkTemplatesById.values(), waypoints, roles, optionalImageURL, optionalRepeatablePart,
