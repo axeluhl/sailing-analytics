@@ -9619,15 +9619,15 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     logToAddTo.add(assignment);
                 }
             }
-            for (final Entry<Serializable, AssignmentEventT> boatIdAndEventToRevoke : validCertificateAssignmentsInLogByBoatId.entrySet()) {
-                @SuppressWarnings("unchecked")
-                final LogEventT eventToRevoke = (LogEventT) boatIdAndEventToRevoke.getValue();
-                try {
-                    logToAddTo.revokeEvent(serverAuthor, eventToRevoke);
-                    removedCount++;
-                } catch (NotRevokableException e) {
-                    logger.severe("Couldn't revoke old certificate assignment event "+eventToRevoke+": "+e.getMessage());
-                }
+        }
+        for (final Entry<Serializable, AssignmentEventT> boatIdAndEventToRevoke : validCertificateAssignmentsInLogByBoatId.entrySet()) {
+            @SuppressWarnings("unchecked")
+            final LogEventT eventToRevoke = (LogEventT) boatIdAndEventToRevoke.getValue();
+            try {
+                logToAddTo.revokeEvent(serverAuthor, eventToRevoke);
+                removedCount++;
+            } catch (NotRevokableException e) {
+                logger.severe("Couldn't revoke old certificate assignment event "+eventToRevoke+": "+e.getMessage());
             }
         }
         return new Triple<>(insertedCount, replacedCount, removedCount);
