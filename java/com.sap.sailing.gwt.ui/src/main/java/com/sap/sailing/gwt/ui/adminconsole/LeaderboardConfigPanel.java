@@ -492,7 +492,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 return object.getA().getExplicitFactor() == null ? "" : object.getA().getExplicitFactor().toString();
             }
         };
-
         Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, Boolean> isMedalRaceCheckboxColumn = new Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, Boolean>(
                 new DisablableCheckboxCell(new IsEnabled() {
                     @Override
@@ -514,7 +513,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                     }
                 });
         isMedalRaceCheckboxColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-
         TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality> isLinkedRaceColumn = new TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
             @Override
             public String getValue(RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnAndFleetName) {
@@ -522,7 +520,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 return isTrackedRace ? stringMessages.yes() : stringMessages.no();
             }
         };
-
         final AccessControlledActionsColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality, LeaderboardRaceConfigImagesBarCell> actionsColumn = create(
                 new LeaderboardRaceConfigImagesBarCell(this, stringMessages), userService,
                 item -> getSelectedLeaderboard());
@@ -542,12 +539,10 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         actionsColumn.addAction(ACTION_SHOW_RACELOG, UPDATE, object -> showRaceLog(object.getA(), object.getB()));
         actionsColumn.addAction(ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS, UPDATE,
                 object -> editCompetitorToBoatMappings(object.getA(), object.getB()));
-
         racesTable.addColumn(isMedalRaceCheckboxColumn, stringMessages.medalRace());
         racesTable.addColumn(isLinkedRaceColumn, stringMessages.islinked());
         racesTable.addColumn(explicitFactorColumn, stringMessages.factor());
         racesTable.addColumn(actionsColumn, stringMessages.actions());
-
         racesTable.ensureDebugId("RacesCellTable");
     }
 

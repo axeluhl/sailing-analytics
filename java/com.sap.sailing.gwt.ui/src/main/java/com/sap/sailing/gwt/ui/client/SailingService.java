@@ -1225,13 +1225,14 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     void setORCPerformanceCurveLegInfo(String leaderboardName, String raceColumnName, String fleetName, Map<Integer, ORCPerformanceCurveLegImpl> legInfo) throws NotFoundException, NotRevokableException;
 
-    Collection<BoatDTO> getBoatRegistrationsForRegatta(RegattaName regattaIdentifier) throws NotFoundException;
+    Collection<BoatDTO> getBoatRegistrationsForRegatta(RegattaIdentifier regattaIdentifier) throws NotFoundException;
 
     Collection<ORCCertificate> getORCCertificates(String json) throws Exception;
 
-    Map<String, ORCCertificate> getORCCertificateAssignmentsByBoatIdAsString(RegattaName regattaIdentifier) throws NotFoundException;
+    Map<String, ORCCertificate> getORCCertificateAssignmentsByBoatIdAsString(RegattaIdentifier regattaIdentifier) throws NotFoundException;
     
-    Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(RegattaName regattaIdentifier, Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
+    Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(RegattaIdentifier regattaIdentifier,
+            Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
     
     Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(RegattaAndRaceIdentifier raceIdentifier, Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
 

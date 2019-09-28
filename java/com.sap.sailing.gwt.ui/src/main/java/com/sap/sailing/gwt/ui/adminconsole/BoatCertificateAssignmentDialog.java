@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.ui.client.UserService;
@@ -20,10 +21,11 @@ public class BoatCertificateAssignmentDialog extends DataEntryDialog<Void> {
     
     private final BoatCertificatesPanel panel;
 
-    public BoatCertificateAssignmentDialog(final SailingServiceAsync sailingService, UserService userService, String regattaName, final StringMessages stringMessages,
+    public BoatCertificateAssignmentDialog(final SailingServiceAsync sailingService, UserService userService,
+            RegattaDTO regatta, final StringMessages stringMessages,
             final ErrorReporter errorReporter, DialogCallback<Void> callback) {
         super(stringMessages.actionEditCompetitors(), stringMessages.actionEditCompetitors(), stringMessages.close(), stringMessages.cancel(), /* validator */ null, callback);
-        this.panel = new BoatCertificatesPanel(sailingService, userService, regattaName, stringMessages, errorReporter);
+        this.panel = new BoatCertificatesPanel(sailingService, userService, regatta, stringMessages, errorReporter);
         super.getCancelButton().removeFromParent();
     }
 

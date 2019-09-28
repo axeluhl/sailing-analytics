@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -31,12 +32,13 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.base.Boat;
-import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCCertificateUploadConstants;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
@@ -45,6 +47,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 
@@ -64,7 +67,7 @@ public class BoatCertificatesPanel extends SimplePanel {
     private final BusyIndicator busyIndicator;
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
-    private final RegattaName regattaIdentifier;
+    private final RegattaIdentifier regattaIdentifier;
     
     private final StringListEditorComposite urls;
     
@@ -97,12 +100,20 @@ public class BoatCertificatesPanel extends SimplePanel {
     
     private HandlerRegistration certificateTableSelectionHandlerRegistration;
     
-    public BoatCertificatesPanel(final SailingServiceAsync sailingService, final UserService userService, final String regattaName,
+    /**
+     * Checks that the user has permission to {@link DefaultActions#UPDATE} the regatta for which this
+     * panel shows the boats and certificates mappings. Only when this check returns {@code true} will the
+     * buttons for importing and assigning certificates be shown, and will the table allow for assignment
+     * changes.
+     */
+    private final Supplier<Boolean> regattaUpdatePermissionCheck;
+    
+    public BoatCertificatesPanel(final SailingServiceAsync sailingService, final UserService userService, final RegattaDTO regatta,
             final StringMessages stringMessages, final ErrorReporter errorReporter) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        this.regattaIdentifier = new RegattaName(regattaName);
+        this.regattaIdentifier = regatta.getRegattaIdentifier();
         this.certificateTableSelectionHandler = createCertificateTableSelectionHandler();
         boatsByIdAsString = new HashMap<>();
         fileUpload = new FileUpload();
@@ -125,7 +136,6 @@ public class BoatCertificatesPanel extends SimplePanel {
         form.addSubmitHandler(e->busyIndicator.setBusy(true));
         form.addSubmitCompleteHandler(e->formSubmitComplete(e));
         mainPanel = new VerticalPanel();
-        mainPanel.add(new Hidden(ORCCertificateUploadConstants.REGATTA, regattaName)); // TODO factor so this can also be used for RaceLog
         form.setWidget(mainPanel);
         this.setWidget(form);
         mainPanel.add(busyIndicator);
@@ -142,10 +152,12 @@ public class BoatCertificatesPanel extends SimplePanel {
         // BUTTON - Refresh
         final Button refreshButton = topButtonPanel.addUnsecuredAction(stringMessages.refresh(), this::refresh);
         refreshButton.ensureDebugId("RefreshButton");
-        // BUTTON - Import Certificates
-        final Button importCertificatesButton = topButtonPanel.addCreateAction(stringMessages.importCertificates(), this::importCertificates);
+        regattaUpdatePermissionCheck = ()->userService.hasPermission(regatta, DefaultActions.UPDATE);
+        final Button importCertificatesButton = topButtonPanel.addAction(stringMessages.importCertificates(),
+                regattaUpdatePermissionCheck, this::importCertificates);
         importCertificatesButton.ensureDebugId("ImportCertificatesButton");
-        final Button assignCertificatesButton = topButtonPanel.addCreateAction(stringMessages.assignCertificates(), this::assignCertificates);
+        final Button assignCertificatesButton = topButtonPanel.addAction(stringMessages.assignCertificates(), regattaUpdatePermissionCheck,
+                this::assignCertificates);
         assignCertificatesButton.ensureDebugId("AssignCertificatesButton");
         // TODO Add functionality to button and implement Form
         // TABLE - Boats
@@ -157,7 +169,7 @@ public class BoatCertificatesPanel extends SimplePanel {
         certificatesCaptionPanel.add(certificateTable);
         wireSelectionModels();
         tablesPanel.setWidget(0, 1, certificatesCaptionPanel);
-        if (regattaName != null) {
+        if (regatta != null) {
             refresh();
         }
     }
@@ -203,21 +215,38 @@ public class BoatCertificatesPanel extends SimplePanel {
             final ORCCertificate selectedCertificate = certificateTable.getSelectionModel().getSelectedObject();
             if (boat != null) {
                 final ORCCertificate assignedCertificate = certificateAssignments.get(boat);
-                if (selectedCertificate != null) {
-                    if (assignedCertificate == null || Window.confirm(stringMessages.reallyChangeAssignedCertificateForBoat(boat.toString()))) {
-                        assign(boat, selectedCertificate);
-                    } else if (assignedCertificate != null) {
-                        // re-adjust selection; the user did not confirm:
-                        temporarilyDeregisterCertificateTableSelectionHandler();
-                        certificateTable.getSelectionModel().setSelected(assignedCertificate, true);
+                if (regattaUpdatePermissionCheck.get()) { // is the user permitted to update the regatta at all?
+                    if (selectedCertificate != null) {
+                        if (assignedCertificate == null || Window.confirm(stringMessages.reallyChangeAssignedCertificateForBoat(boat.toString()))) {
+                            assign(boat, selectedCertificate);
+                        } else if (assignedCertificate != null) {
+                            // re-adjust selection; the user did not confirm:
+                            temporarilyDeregisterCertificateTableSelectionHandler();
+                            certificateTable.getSelectionModel().setSelected(assignedCertificate, true);
+                        }
+                    } else {
+                        if (assignedCertificate != null) {
+                            unlink(boat);
+                        }
                     }
                 } else {
-                    if (assignedCertificate != null) {
-                        unlink(boat);
+                    temporarilyDeregisterCertificateTableSelectionHandler();
+                    if (assignedCertificate == null) {
+                        if (selectedCertificate != null) {
+                            certificateTable.getSelectionModel().setSelected(selectedCertificate, false);
+                        }
+                    } else {
+                        certificateTable.getSelectionModel().setSelected(assignedCertificate, true);
                     }
                 }
             }
         };
+    }
+
+    public void setCertificateSelectionWithoutEventHandling(final ORCCertificate assignedCertificate) {
+        // re-adjust selection; the user did not confirm:
+        temporarilyDeregisterCertificateTableSelectionHandler();
+        certificateTable.getSelectionModel().setSelected(assignedCertificate, true);
     }
     private void wireSelectionModels() {
         boatTable.getSelectionModel().addSelectionChangeHandler(e->{
@@ -229,8 +258,7 @@ public class BoatCertificatesPanel extends SimplePanel {
                     certificateTable.getSelectionModel().setSelected(selectedCertificate, false);
                 }
             } else {
-                temporarilyDeregisterCertificateTableSelectionHandler();
-                certificateTable.getSelectionModel().setSelected(assignedCertificate, true);
+                setCertificateSelectionWithoutEventHandling(assignedCertificate);
             }
         });
         certificateTableSelectionHandlerRegistration = certificateTable.getSelectionModel().addSelectionChangeHandler(certificateTableSelectionHandler);
@@ -288,8 +316,9 @@ public class BoatCertificatesPanel extends SimplePanel {
         for (final Entry<BoatDTO, ORCCertificate> e : certificateAssignments.entrySet()) {
             certificatesByBoatIdAsString.put(e.getKey().getIdAsString(), e.getValue());
         }
-        sailingService.assignORCPerformanceCurveCertificates(regattaIdentifier, certificatesByBoatIdAsString, new AsyncCallback<Triple<Integer, Integer, Integer>>() {
-            @Override
+        sailingService.assignORCPerformanceCurveCertificates(regattaIdentifier, certificatesByBoatIdAsString,
+                new AsyncCallback<Triple<Integer, Integer, Integer>>() {
+                    @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(stringMessages.errorAssigningCertificates(caught.getMessage()));
             }

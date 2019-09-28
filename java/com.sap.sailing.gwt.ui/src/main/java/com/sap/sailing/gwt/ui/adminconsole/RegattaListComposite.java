@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.READ;
 import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
 
 import java.util.ArrayList;
@@ -268,7 +269,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 removeRegatta(regatta);
             }
         });
-        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CERTIFICATES_UPDATE, UPDATE, this::handleBoatCertificateAssignment);
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CERTIFICATES_UPDATE, READ, this::handleBoatCertificateAssignment);
         final DialogConfig<RegattaDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
                 regatta -> regattaRefresher.fillRegattas(), stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
@@ -405,7 +406,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     
     private void handleBoatCertificateAssignment(RegattaDTO regatta) {
         BoatCertificateAssignmentDialog dialog = new BoatCertificateAssignmentDialog(sailingService, userService,
-                regatta.getName(), stringMessages, errorReporter, /* callback */ null);
+                regatta, stringMessages, errorReporter, /* callback */ null);
         dialog.show();
     }
 

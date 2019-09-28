@@ -4179,8 +4179,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public Regatta getRegatta(RegattaName regattaIdentifier) {
-        final Regatta regattaByName = getService().getRegattaByName(regattaIdentifier.getRegattaName());
+    public Regatta getRegatta(RegattaName regattaName) {
+        final Regatta regattaByName = getService().getRegattaByName(regattaName.getRegattaName());
         getSecurityService().checkCurrentUserReadPermission(regattaByName);
         return regattaByName;
     }
@@ -7846,8 +7846,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public Collection<BoatDTO> getBoatRegistrationsForRegatta(RegattaName regattaIdentifier) throws NotFoundException {
-        final Regatta regatta = getRegatta(regattaIdentifier);
+    public Collection<BoatDTO> getBoatRegistrationsForRegatta(RegattaIdentifier regattaIdentifier) throws NotFoundException {
+        final Regatta regatta = (Regatta) regattaIdentifier.getRegatta(getService());
         if (regatta == null) {
             throw new NotFoundException("Regatta "+regattaIdentifier+" not found");
         }
@@ -9468,8 +9468,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public Map<String, ORCCertificate> getORCCertificateAssignmentsByBoatIdAsString(RegattaName regattaIdentifier) throws NotFoundException {
-        final Regatta regatta = getRegatta(regattaIdentifier);
+    public Map<String, ORCCertificate> getORCCertificateAssignmentsByBoatIdAsString(RegattaIdentifier regattaIdentifier) throws NotFoundException {
+        final Regatta regatta = (Regatta) regattaIdentifier.getRegatta(getService());
         if (regatta == null) {
             throw new NotFoundException("Regatta named "+regattaIdentifier+" not found");
         }
@@ -9540,11 +9540,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
     }
 
-    private Triple<Integer, Integer, Integer> createCertificateAssignmentsForRegatta(String regattaName,
+    private Triple<Integer, Integer, Integer> createCertificateAssignmentsForRegatta(RegattaIdentifier regattaIdentifier,
             Map<String, ORCCertificate> certificatesForBoatIdsAsString) throws IOException, NotFoundException {
-        final Regatta regatta = getService().getRegattaByName(regattaName);
+        final Regatta regatta = (Regatta) regattaIdentifier.getRegatta(getService());
         if (regatta == null) {
-            throw new NotFoundException("Regatta named "+regattaName+" not found");
+            throw new NotFoundException("Regatta named "+regattaIdentifier+" not found");
         } else {
             getService().getSecurityService().checkCurrentUserUpdatePermission(regatta);
             final RegattaLog regattaLog = regatta.getRegattaLog();
@@ -9640,9 +9640,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
     
     @Override
-    public Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(RegattaName regattaIdentifier,
+    public Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(RegattaIdentifier regattaIdentifier,
             Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException {
-        return createCertificateAssignmentsForRegatta(regattaIdentifier.getRegattaName(), certificatesForBoatsWithIdAsString);
+        return createCertificateAssignmentsForRegatta(regattaIdentifier, certificatesForBoatsWithIdAsString);
     }
 
     @Override
