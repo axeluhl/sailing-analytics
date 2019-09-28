@@ -140,7 +140,6 @@ public class BoatWithCertificateTableWrapper<S extends RefreshableSelectionModel
         AccessControlledActionsColumn<BoatDTO, BoatConfigImagesBarCell> boatActionColumn = create(
                 new BoatConfigImagesBarCell(getStringMessages()), userService);
         boatActionColumn.addAction(BoatConfigImagesBarCell.UNLINK, this::unlink);
-        // TODO Add Link/Unlink Button
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(boatColumnListHandler);
         table.addColumn(sailIdColumn, stringMessages.sailNumber());
@@ -171,5 +170,9 @@ public class BoatWithCertificateTableWrapper<S extends RefreshableSelectionModel
 
     private void unlink(final BoatDTO boat) {
         unlinkAction.accept(boat);
+    }
+    
+    public void refresh() {
+        filterField.filter();
     }
 }

@@ -12,10 +12,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -29,18 +29,17 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCCertificateUploadConstants;
-import com.sap.sailing.domain.common.orc.ORCCertificateUploadConstants.MappingResultStatus;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
-import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
@@ -91,21 +90,24 @@ public class BoatCertificatesPanel extends SimplePanel {
     
     private final VerticalPanel mainPanel;
     
-    private final Hidden certificateAssignmentsAsJSON;
-    
     private final StringMessages stringMessages;
+    
+    private final Handler certificateTableSelectionHandler;
+    
+    private HandlerRegistration certificateTableSelectionHandlerRegistration;
     
     public BoatCertificatesPanel(final SailingServiceAsync sailingService, final UserService userService, final String regattaName,
             final StringMessages stringMessages, final ErrorReporter errorReporter) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
+        this.regattaIdentifier = new RegattaName(regattaName);
+        this.certificateTableSelectionHandler = createCertificateTableSelectionHandler();
         boatsByIdAsString = new HashMap<>();
         fileUpload = new FileUpload();
         fileUpload.getElement().setAttribute("multiple", "multiple");
         fileUpload.setName(ORCCertificateUploadConstants.CERTIFICATES);
         certificateAssignments = new HashMap<>();
-        this.regattaIdentifier = new RegattaName(regattaName);
         this.urls = new StringListEditorComposite(Collections.emptySet(), stringMessages, stringMessages.courseAreas(), IconResources.INSTANCE.removeIcon(),
                 /* suggested values */ Collections.emptySet(), stringMessages.enterURLsForCertificateDownload());
         this.hiddenCertificateUrlsFields = new ArrayList<>();
@@ -116,16 +118,12 @@ public class BoatCertificatesPanel extends SimplePanel {
                 errorReporter, /* multiSelection */ false, /* enablePager */ true, TableWrapper.DEFAULT_PAGING_SIZE);
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         this.form = new FormPanel();
-        certificateAssignmentsAsJSON = new Hidden(ORCCertificateUploadConstants.MAPPINGS);
-        updateCertificateAssignmentsJSON();
         form.setAction(Window.Location.createUrlBuilder().setPath("/sailingserver/orc-certificate-import").buildString());
         form.setMethod(FormPanel.METHOD_POST);
-        form.add(certificateAssignmentsAsJSON);
         form.setEncoding(FormPanel.ENCODING_MULTIPART);
         form.addSubmitHandler(e->busyIndicator.setBusy(true));
         form.addSubmitCompleteHandler(e->formSubmitComplete(e));
         mainPanel = new VerticalPanel();
-        mainPanel.add(certificateAssignmentsAsJSON);
         mainPanel.add(new Hidden(ORCCertificateUploadConstants.REGATTA, regattaName)); // TODO factor so this can also be used for RaceLog
         form.setWidget(mainPanel);
         this.setWidget(form);
@@ -163,23 +161,11 @@ public class BoatCertificatesPanel extends SimplePanel {
         }
     }
 
-    private void updateCertificateAssignmentsJSON() {
-        final JSONObject certificateAssignmentsJson = new JSONObject();
-        final JSONArray assignmentsArray = new JSONArray();
-        for (final Entry<BoatDTO, ORCCertificate> e : certificateAssignments.entrySet()) {
-            final JSONObject assignmentJson = new JSONObject();
-            assignmentJson.put(ORCCertificateUploadConstants.BOAT_ID, new JSONString(e.getKey().getIdAsString()));
-            assignmentJson.put(ORCCertificateUploadConstants.CERTIFICATE_ID, new JSONString(e.getValue().getId()));
-        }
-        certificateAssignmentsJson.put(ORCCertificateUploadConstants.CERTIFICATE_SELECTION, assignmentsArray);
-        certificateAssignmentsAsJSON.setValue(certificateAssignmentsJson.toString());
-    }
-
     private void formSubmitComplete(SubmitCompleteEvent e) {
         try {
             final JSONObject json = (JSONObject) JSONParser.parseStrict(e.getResults());
             if (json.get(ORCCertificateUploadConstants.CERTIFICATES) != null) {
-                sailingService.getCertificatesAndAssignments(e.getResults(), new AsyncCallback<Collection<ORCCertificate>>() {
+                sailingService.getORCCertificates(e.getResults(), new AsyncCallback<Collection<ORCCertificate>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         busyIndicator.setBusy(false);
@@ -189,22 +175,10 @@ public class BoatCertificatesPanel extends SimplePanel {
                     @Override
                     public void onSuccess(Collection<ORCCertificate> result) {
                         busyIndicator.setBusy(false);
-                        certificateTable.setCertificates(result);
+                        temporarilyDeregisterCertificateTableSelectionHandler();
+                        certificateTable.addCertificates(result);
                     }
                 });
-                final JSONArray mappings = (JSONArray) json.get(ORCCertificateUploadConstants.MAPPINGS);
-                final Set<String> stringRepresentationsOfBoatsWithErrors = new HashSet<>();
-                for (int i=0; i<mappings.size(); i++) {
-                    final JSONObject mapping = (JSONObject) mappings.get(i);
-                    final String boatIdAsString = mapping.get(ORCCertificateUploadConstants.BOAT_ID).toString();
-                    final MappingResultStatus status = MappingResultStatus.valueOf(mapping.get(ORCCertificateUploadConstants.STATUS).toString());
-                    if (status != MappingResultStatus.OK) {
-                        stringRepresentationsOfBoatsWithErrors.add(boatsByIdAsString.get(boatIdAsString).toString());
-                    }
-                }
-                if (!stringRepresentationsOfBoatsWithErrors.isEmpty()) {
-                    Notification.notify(stringMessages.errorAssigningCertificatesToBoats(stringRepresentationsOfBoatsWithErrors.toString()), NotificationType.ERROR);
-                }
             } else {
                 Notification.notify(stringMessages.errorObtainingCertificates(ORCCertificateUploadConstants.CERTIFICATES), Notification.NotificationType.ERROR);
             }
@@ -216,29 +190,14 @@ public class BoatCertificatesPanel extends SimplePanel {
     public void unlink(BoatDTO boat) {
         final ORCCertificate associatedCertificate = certificateAssignments.remove(boat);
         if (associatedCertificate != null && certificateTable.getSelectionModel().isSelected(associatedCertificate)) {
+            temporarilyDeregisterCertificateTableSelectionHandler();
             certificateTable.getSelectionModel().setSelected(associatedCertificate, false);
         }
-        refreshInTable(boat);
+        boatTable.refresh();
     }
 
-    private void refreshInTable(BoatDTO boat) {
-        final List<BoatDTO> boatList = boatTable.getDataProvider().getList();
-        boatList.set(boatList.indexOf(boat), boat); // cause the table to refresh the boat item regarding linkedness state
-    }
-    
-    private void wireSelectionModels() {
-        boatTable.getSelectionModel().addSelectionChangeHandler(e->{
-            final ORCCertificate assignedCertificate = certificateAssignments.get(boatTable.getSelectionModel().getSelectedObject());
-            if (assignedCertificate == null) {
-                final ORCCertificate selectedCertificate = certificateTable.getSelectionModel().getSelectedObject();
-                if (selectedCertificate != null) {
-                    certificateTable.getSelectionModel().setSelected(selectedCertificate, false);
-                }
-            } else {
-                certificateTable.getSelectionModel().setSelected(assignedCertificate, true);
-            }
-        });
-        certificateTable.getSelectionModel().addSelectionChangeHandler(e->{
+    private Handler createCertificateTableSelectionHandler() {
+        return e->{
             final BoatDTO boat = boatTable.getSelectionModel().getSelectedObject();
             final ORCCertificate selectedCertificate = certificateTable.getSelectionModel().getSelectedObject();
             if (boat != null) {
@@ -246,6 +205,10 @@ public class BoatCertificatesPanel extends SimplePanel {
                 if (selectedCertificate != null) {
                     if (assignedCertificate == null || Window.confirm(stringMessages.reallyChangeAssignedCertificateForBoat(boat.toString()))) {
                         assign(boat, selectedCertificate);
+                    } else if (assignedCertificate != null) {
+                        // re-adjust selection; the user did not confirm:
+                        temporarilyDeregisterCertificateTableSelectionHandler();
+                        certificateTable.getSelectionModel().setSelected(assignedCertificate, true);
                     }
                 } else {
                     if (assignedCertificate != null) {
@@ -253,18 +216,47 @@ public class BoatCertificatesPanel extends SimplePanel {
                     }
                 }
             }
+        };
+    }
+    private void wireSelectionModels() {
+        boatTable.getSelectionModel().addSelectionChangeHandler(e->{
+            final ORCCertificate assignedCertificate = certificateAssignments.get(boatTable.getSelectionModel().getSelectedObject());
+            if (assignedCertificate == null) {
+                final ORCCertificate selectedCertificate = certificateTable.getSelectionModel().getSelectedObject();
+                if (selectedCertificate != null) {
+                    temporarilyDeregisterCertificateTableSelectionHandler();
+                    certificateTable.getSelectionModel().setSelected(selectedCertificate, false);
+                }
+            } else {
+                temporarilyDeregisterCertificateTableSelectionHandler();
+                certificateTable.getSelectionModel().setSelected(assignedCertificate, true);
+            }
         });
+        certificateTableSelectionHandlerRegistration = certificateTable.getSelectionModel().addSelectionChangeHandler(certificateTableSelectionHandler);
         urls.addValueChangeHandler(valueChangeEvent->{
             final Iterable<String> certificateUrls = valueChangeEvent.getValue();
             updateHiddenCertificateUrlsField(certificateUrls);
         });
-        // TODO Implement BoatCertificatesPanel.wireSelectionModels(...)
+    }
+    
+    private void temporarilyDeregisterCertificateTableSelectionHandler() {
+        if (certificateTableSelectionHandlerRegistration != null) {
+            certificateTableSelectionHandlerRegistration.removeHandler();
+            certificateTableSelectionHandlerRegistration = null;
+            // It is necessary to do this with the ScheduleDeferred() method,
+            // because the SelectionChangeEvent isn't fired directly after
+            // selection changes. So an remove of SelectionChangeHandler before
+            // the selection change and and new registration directly after it
+            // isn't possible.
+            Scheduler.get().scheduleDeferred(() -> certificateTableSelectionHandlerRegistration = certificateTable.getSelectionModel().
+                    addSelectionChangeHandler(certificateTableSelectionHandler));
+        }        
     }
 
     private void assign(BoatDTO boat, ORCCertificate selectedCertificate) {
         certificateAssignments.put(boat, selectedCertificate);
-        refreshInTable(boat);
-        updateCertificateAssignmentsJSON();
+        boatTable.getDataProvider().getList().set(boatTable.getDataProvider().getList().indexOf(boat), boat);
+        boatTable.refresh();
     }
 
     private void updateHiddenCertificateUrlsField(Iterable<String> certificateUrls) {
@@ -284,7 +276,6 @@ public class BoatCertificatesPanel extends SimplePanel {
      * takes place yet.
      */
     private void importCertificates() {
-        mainPanel.remove(certificateAssignmentsAsJSON);
         form.submit();
     }
 
@@ -292,8 +283,21 @@ public class BoatCertificatesPanel extends SimplePanel {
      * Submits the form including the {@link #certificateAssignmentsAsJSON} hidden field
      */
     private void assignCertificates() {
-        mainPanel.add(certificateAssignmentsAsJSON);
-        form.submit();
+        final Map<String, ORCCertificate> certificatesByBoatIdAsString = new HashMap<>();
+        for (final Entry<BoatDTO, ORCCertificate> e : certificateAssignments.entrySet()) {
+            certificatesByBoatIdAsString.put(e.getKey().getIdAsString(), e.getValue());
+        }
+        sailingService.assignORCPerformanceCurveCertificates(regattaIdentifier, certificatesByBoatIdAsString, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(stringMessages.errorAssigningCertificates(caught.getMessage()));
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                Notification.notify(stringMessages.ok(), Notification.NotificationType.INFO);
+            }
+        });
     }
 
     private void refresh() {
@@ -304,12 +308,11 @@ public class BoatCertificatesPanel extends SimplePanel {
             }
 
             @Override
-            public void onSuccess(Collection<BoatDTO> result) {
+            public void onSuccess(final Collection<BoatDTO> boatResults) {
                 boatsByIdAsString.clear();
-                for (final BoatDTO boat : result) {
+                for (final BoatDTO boat : boatResults) {
                     boatsByIdAsString.put(boat.getIdAsString(), boat);
                 }
-                boatTable.setBoats(result);
                 sailingService.getORCCertificateAssignmentsByBoatIdAsString(regattaIdentifier, new AsyncCallback<Map<String, ORCCertificate>>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -319,13 +322,17 @@ public class BoatCertificatesPanel extends SimplePanel {
                     @Override
                     public void onSuccess(Map<String, ORCCertificate> result) {
                         certificateAssignments.clear();
+                        final Set<BoatDTO> boatsToRefreshInTable = new HashSet<>();
                         for (final Entry<String, ORCCertificate> e : result.entrySet()) {
                             final BoatDTO boat = boatsByIdAsString.get(e.getKey());
                             if (boat != null) {
                                 certificateAssignments.put(boat, e.getValue());
+                                boatsToRefreshInTable.add(boat);
                             }
                         }
+                        temporarilyDeregisterCertificateTableSelectionHandler();
                         certificateTable.setCertificates(result.values());
+                        boatTable.setBoats(boatResults);
                     }
                 });
             }

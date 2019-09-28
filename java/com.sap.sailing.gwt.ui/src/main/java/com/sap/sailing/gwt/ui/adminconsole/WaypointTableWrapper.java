@@ -44,9 +44,4 @@ public class WaypointTableWrapper<S extends RefreshableSelectionModel<WaypointDT
         };
         table.addColumn(passingInstructionsColumn, stringMessages.passingInstructions());
     }
-    
-    @Override
-    public void refresh(Iterable<WaypointDTO> wayPoints) {
-        super.refresh(wayPoints);
-    }
 }

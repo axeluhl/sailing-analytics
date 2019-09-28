@@ -86,12 +86,15 @@ import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataAnalyzer;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEventFinder;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentFinder;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RegattaLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
@@ -148,6 +151,7 @@ import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogStartTrackin
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
@@ -641,6 +645,7 @@ import com.sap.sse.util.ImageConverter;
 import com.sap.sse.util.ImageConverter.ImageWithMetadata;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.ThreadPoolUtil;
+import com.sap.sse.util.impl.UUIDHelper;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
 
 
@@ -9448,7 +9453,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public Collection<ORCCertificate> getCertificatesAndAssignments(String json) throws org.json.simple.parser.ParseException, JsonDeserializationException {
+    public Collection<ORCCertificate> getORCCertificates(String json) throws org.json.simple.parser.ParseException, JsonDeserializationException {
         final JSONObject jsonObject = (JSONObject) new JSONParser().parse(json);
         final JSONArray certificates = (JSONArray) jsonObject.get(ORCCertificateUploadConstants.CERTIFICATES);
         final ORCCertificateJsonDeserializer deserializer = new ORCCertificateJsonDeserializer();
@@ -9477,6 +9482,135 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
         return result;
     }
+
+    private void createCertificateAssignmentsForRace(String regattaName, String raceName,
+            Map<String, ORCCertificate> certificatesForBoatIdsAsString) throws IOException, NotFoundException {
+        final RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
+        final TrackedRace trackedRace = getService().getTrackedRace(raceIdentifier);
+        if (trackedRace == null) {
+            throw new NotFoundException("Regatta named "+regattaName+" not found");
+        } else {
+            getService().getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
+            final RaceLog raceLog = trackedRace.getAttachedRaceLogs().iterator().next();
+            final LogEventConstructor<RaceLogEvent, RaceLogEventVisitor> logEventConstructor = createRaceLogEventConstructor();
+            createCertificateAssignments(raceLog, logEventConstructor, certificatesForBoatIdsAsString);
+        }
+    }
+
+    private void createCertificateAssignmentsForLeaderboard(String leaderboardName,
+            Map<String, ORCCertificate> certificatesForBoatIdsAsString) throws IOException, NotFoundException {
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null) {
+            throw new NotFoundException("Leaderboard named "+leaderboardName+" not found");
+        } else if (!(leaderboard instanceof LeaderboardThatHasRegattaLike)) {
+            throw new NotFoundException("Leaderboard named "+leaderboardName+" has no regatta log");
+        } else {
+            getService().getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
+            final RegattaLog regattaLog = ((LeaderboardThatHasRegattaLike) leaderboard).getRegattaLike().getRegattaLog();
+            final LogEventConstructor<RegattaLogEvent, RegattaLogEventVisitor> logEventConstructor = createRegattaLogEventConstructor();
+            createCertificateAssignments(regattaLog, logEventConstructor, certificatesForBoatIdsAsString);
+        }
+    }
+
+    private void createCertificateAssignmentsForRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+            Map<String, ORCCertificate> certificatesForBoatIdsAsString) throws IOException, NotFoundException {
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null) {
+            throw new NotFoundException("Leaderboard named "+leaderboardName+" not found");
+        } else {
+            getService().getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
+            if (leaderboard instanceof RegattaLeaderboard) {
+                getService().getSecurityService().checkCurrentUserUpdatePermission(((RegattaLeaderboard) leaderboard).getRegatta());
+            }
+            final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            if (raceColumn == null) {
+                throw new NotFoundException("Race column named "+raceColumnName+" not found in leaderboard named "+leaderboardName);
+            } else {
+                final Fleet fleet = raceColumn.getFleetByName(fleetName);
+                if (fleet == null) {
+                    throw new NotFoundException("Fleet "+fleetName+" not found in race column named "+raceColumnName+" in leaderboard named "+leaderboardName);
+                } else {
+                    final RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                    final LogEventConstructor<RaceLogEvent, RaceLogEventVisitor> logEventConstructor = createRaceLogEventConstructor();
+                    createCertificateAssignments(raceLog, logEventConstructor, certificatesForBoatIdsAsString);
+                }
+            }
+        }
+    }
+
+    private void createCertificateAssignmentsForRegatta(String regattaName,
+            Map<String, ORCCertificate> certificatesForBoatIdsAsString) throws IOException, NotFoundException {
+        final Regatta regatta = getService().getRegattaByName(regattaName);
+        if (regatta == null) {
+            throw new NotFoundException("Regatta named "+regattaName+" not found");
+        } else {
+            getService().getSecurityService().checkCurrentUserUpdatePermission(regatta);
+            final RegattaLog regattaLog = regatta.getRegattaLog();
+            final LogEventConstructor<RegattaLogEvent, RegattaLogEventVisitor> logEventConstructor = createRegattaLogEventConstructor();
+            createCertificateAssignments(regattaLog, logEventConstructor, certificatesForBoatIdsAsString);
+        }
+    }
+
+    private LogEventConstructor<RegattaLogEvent, RegattaLogEventVisitor> createRegattaLogEventConstructor() {
+        final LogEventConstructor<RegattaLogEvent, RegattaLogEventVisitor> logEventConstructor = (TimePoint createdAt, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Serializable pId, ORCCertificate certificate, Boat boat)->new RegattaLogORCCertificateAssignmentEventImpl(
+                    createdAt, logicalTimePoint, author, pId, certificate, boat);
+        return logEventConstructor;
+    }
     
-    // TODO need the getORCCertificateAssignmentsByBoatIdAsString also for race level, probably specifically by race log (leaderboard/racecolumn/fleet)
+    @FunctionalInterface
+    private static interface LogEventConstructor<LogEventT extends AbstractLogEvent<VisitorT>, VisitorT> {
+        LogEventT create(TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable pId, ORCCertificate certificate, Boat boat);
+    }
+
+    private <LogT extends AbstractLog<LogEventT, VisitorT>, VisitorT, LogEventT extends AbstractLogEvent<VisitorT>> void createCertificateAssignments(
+            LogT logToAddTo, LogEventConstructor<LogEventT, VisitorT> logEventConstructor,
+            Map<String, ORCCertificate> certificatesForBoatIdsAsString) throws IOException {
+        final TimePoint now = MillisecondsTimePoint.now();
+        final Map<Serializable, ORCCertificateUploadConstants.MappingResultStatus> result = new HashMap<>();
+        final CompetitorAndBoatStore boatStore = getService().getCompetitorAndBoatStore();
+        final AbstractLogEventAuthor serverAuthor = getService().getServerAuthor();
+        for (final Entry<String, ORCCertificate> mapping : certificatesForBoatIdsAsString.entrySet()) {
+            final Boat boat = boatStore.getExistingBoatById(UUIDHelper.tryUuidConversion(mapping.getKey()));
+            if (boat == null) {
+                result.put(mapping.getKey(), ORCCertificateUploadConstants.MappingResultStatus.BOAT_NOT_FOUND);
+            } else {
+                final ORCCertificate certificate = mapping.getValue();
+                final LogEventT assignment = logEventConstructor.create(now, now, serverAuthor, UUID.randomUUID(),
+                        certificate, boat);
+                logToAddTo.add(assignment);
+                result.put(mapping.getKey(), ORCCertificateUploadConstants.MappingResultStatus.OK);
+            }
+        }
+    }
+
+    private LogEventConstructor<RaceLogEvent, RaceLogEventVisitor> createRaceLogEventConstructor() {
+        return (TimePoint createdAt, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Serializable pId, ORCCertificate certificate, Boat boat)->new RaceLogORCCertificateAssignmentEventImpl(
+                    createdAt, logicalTimePoint, author, pId, /* passId */ 0, certificate, boat);
+    }
+    
+    @Override
+    public void assignORCPerformanceCurveCertificates(RegattaName regattaIdentifier,
+            Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException {
+        createCertificateAssignmentsForRegatta(regattaIdentifier.getRegattaName(), certificatesForBoatsWithIdAsString);
+    }
+
+    @Override
+    public void assignORCPerformanceCurveCertificates(String leaderboardName,
+            Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException {
+        createCertificateAssignmentsForLeaderboard(leaderboardName, certificatesForBoatsWithIdAsString);
+    }
+
+    @Override
+    public void assignORCPerformanceCurveCertificates(RegattaAndRaceIdentifier raceIdentifier,
+            Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException {
+        createCertificateAssignmentsForRace(raceIdentifier.getRegattaName(), raceIdentifier.getRaceName(), certificatesForBoatsWithIdAsString);
+    }
+
+    @Override
+    public void assignORCPerformanceCurveCertificates(String leaderboardName, String raceColumnName, String fleetName,
+            Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException {
+        createCertificateAssignmentsForRaceLog(leaderboardName, raceColumnName, fleetName, certificatesForBoatsWithIdAsString);
+    }
 }

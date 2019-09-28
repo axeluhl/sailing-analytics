@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -1226,7 +1227,17 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Collection<BoatDTO> getBoatRegistrationsForRegatta(RegattaName regattaIdentifier) throws NotFoundException;
 
-    Collection<ORCCertificate> getCertificatesAndAssignments(String json) throws Exception;
+    Collection<ORCCertificate> getORCCertificates(String json) throws Exception;
 
     Map<String, ORCCertificate> getORCCertificateAssignmentsByBoatIdAsString(RegattaName regattaIdentifier) throws NotFoundException;
+    
+    void assignORCPerformanceCurveCertificates(RegattaName regattaIdentifier, Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
+    
+    void assignORCPerformanceCurveCertificates(RegattaAndRaceIdentifier raceIdentifier, Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
+
+    void assignORCPerformanceCurveCertificates(String leaderboardName, String raceColumnName, String fleetName, Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
+
+    void assignORCPerformanceCurveCertificates(String leaderboardName,
+            Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
+
 }

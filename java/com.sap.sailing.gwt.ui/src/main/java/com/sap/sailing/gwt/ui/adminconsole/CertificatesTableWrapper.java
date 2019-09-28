@@ -3,7 +3,9 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -173,12 +175,25 @@ public class CertificatesTableWrapper<S extends RefreshableSelectionModel<ORCCer
     }
     
     protected void showCertificate(ORCCertificate certificate) {
-        Window.confirm("A certificate");
+        Window.confirm("Certificate: "+certificate);
         // TODO Implement CertificatesTableWrapper.showCertificate(...)
     }
 
     public void setCertificates(Collection<ORCCertificate> result) {
         filterField.updateAll(result);
+    }
+
+    public void addCertificates(Iterable<ORCCertificate> result) {
+        final Map<String, ORCCertificate> certificatesById = new HashMap<>();
+        for (final ORCCertificate certificate : filterField.getAll()) {
+            certificatesById.put(certificate.getId(), certificate);
+        }
+        for (final ORCCertificate certificate : result) {
+            if (certificatesById.get(certificate.getId()) != null) {
+                filterField.remove(certificate); // replace certificates with same ID by removing here and later adding
+            }
+        }
+        filterField.addAll(result);
     }
 
 }

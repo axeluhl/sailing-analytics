@@ -1,13 +1,10 @@
 package com.sap.sailing.server.gateway.orc;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.URL;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.UUID;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,47 +12,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.sap.sailing.domain.abstractlog.AbstractLog;
-import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
-import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCCertificateAssignmentEventImpl;
-import com.sap.sailing.domain.abstractlog.orc.impl.RegattaLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
-import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
-import com.sap.sailing.domain.base.Boat;
-import com.sap.sailing.domain.base.CompetitorAndBoatStore;
-import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
-import com.sap.sailing.domain.common.orc.ORCCertificateSelection;
 import com.sap.sailing.domain.common.orc.ORCCertificateUploadConstants;
-import com.sap.sailing.domain.common.orc.ORCCertificateUploadConstants.MappingResultStatus;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.orc.ORCCertificatesCollection;
 import com.sap.sailing.domain.orc.ORCCertificatesImporter;
-import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
-import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.gateway.deserialization.impl.ORCCertificateSelectionDeserializer;
 import com.sap.sailing.server.gateway.impl.AbstractFileUploadServlet;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.ORCCertificateJsonSerializer;
-import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.security.SessionUtils;
-import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
 /**
@@ -88,217 +58,54 @@ public class ORCCertificateImportServlet extends AbstractFileUploadServlet {
 
     @Override
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String regattaName = null;
-        String raceName = null;
-        String leaderboardName = null;
-        String raceColumnName = null;
-        String fleetName = null;
         try {
-            ORCCertificateSelection certificateSelection = null;
-            final Map<String, ORCCertificate> certificates = new HashMap<>();
+            final Set<ORCCertificate> certificates = new HashSet<>();
             for (FileItem item : fileItems) {
                 if (item.isFormField()) {
                     if (item.getFieldName() != null) {
-                        if (item.getFieldName().equals(ORCCertificateUploadConstants.REGATTA)) {
-                            regattaName = item.getString();
-                        } else if (item.getFieldName().equals(ORCCertificateUploadConstants.RACE)) {
-                            raceName = item.getString();
-                        } else if (item.getFieldName().equals(ORCCertificateUploadConstants.LEADERBOARD)) {
-                            leaderboardName = item.getString();
-                        } else if (item.getFieldName().equals(ORCCertificateUploadConstants.RACE_COLUMN)) {
-                            raceColumnName = item.getString();
-                        } else if (item.getFieldName().equals(ORCCertificateUploadConstants.FLEET)) {
-                            fleetName = item.getString();
-                        } else if (item.getFieldName().equals(ORCCertificateUploadConstants.CERTIFICATE_URLS)) {
-                            certificates.putAll(parseCertificatesFromUrl(item.getString()));
-                        } else if (item.getFieldName().equals(ORCCertificateUploadConstants.MAPPINGS)) {
-                            certificateSelection = new ORCCertificateSelectionDeserializer()
-                                    .deserialize((JSONObject) new JSONParser().parse(item.getString()));
+                        if (item.getFieldName().equals(ORCCertificateUploadConstants.CERTIFICATE_URLS)) {
+                            Util.addAll(parseCertificatesFromUrl(item.getString()), certificates);
                         }
                     }
                 } else {
                     // file entry: parse certificates from file and key them by their ID
                     final ORCCertificatesCollection certificateCollection = ORCCertificatesImporter.INSTANCE.read(item.getInputStream());
                     for (final ORCCertificate certificate : certificateCollection.getCertificates()) {
-                        certificates.put(certificate.getId(), certificate);
+                        certificates.add(certificate);
                     }
                 }
             }
-            if (regattaName != null) {
-                if (raceName == null) {
-                    createCertificateAssignmentsForRegatta(regattaName, certificateSelection, certificates, resp);
-                } else {
-                    createCertificateAssignmentsForRace(regattaName, raceName, certificateSelection, certificates, resp);
-                }
-            } else if (leaderboardName != null) {
-                if (raceColumnName == null || fleetName == null) {
-                    createCertificateAssignmentsForLeaderboard(leaderboardName, certificateSelection, certificates, resp);
-                } else {
-                    createCertificateAssignmentsForRaceLog(leaderboardName, raceColumnName, fleetName, certificateSelection, certificates, resp);
-                }
-            } else {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Regatta name ("+ORCCertificateUploadConstants.REGATTA+
-                        ") and leaderboard name ("+ORCCertificateUploadConstants.LEADERBOARD+") are both missing");
-            }
+            writeResponse(certificates, resp);
         } catch (ParseException e) {
-            logger.log(Level.INFO, "User "+SessionUtils.getPrincipal()+" was trying to upload a certificate for regatta "+regattaName+", race "+raceName+
-                    ", but the certificate mapping failed to parse", e);
+            logger.log(Level.INFO, "User "+SessionUtils.getPrincipal()+" was trying to analyze ORC certificates, but the certificates failed to parse", e);
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unable to parse certificate selection. Probably not valid JSON");
         } finally {
             resp.setContentType("text/html;charset=UTF-8");
         }
     }
 
-    private Map<? extends String, ? extends ORCCertificate> parseCertificatesFromUrl(String urlAsString) throws IOException, ParseException {
+    private Iterable<ORCCertificate> parseCertificatesFromUrl(String urlAsString) throws IOException, ParseException {
         final URL url = new URL(urlAsString);
         final ORCCertificatesCollection certificates = ORCCertificatesImporter.INSTANCE.read(HttpUrlConnectionHelper.redirectConnection(url).getInputStream());
-        final Map<String, ORCCertificate> result = new HashMap<>();
+        final Set<ORCCertificate> result = new HashSet<>();
         for (final ORCCertificate certificate : certificates.getCertificates()) {
-            result.put(certificate.getId(), certificate);
+            result.add(certificate);
         }
         return result;
     }
 
-    private void createCertificateAssignmentsForLeaderboard(String leaderboardName,
-            ORCCertificateSelection certificateSelection, Map<String, ORCCertificate> certificates,
-            HttpServletResponse resp) throws IOException {
-        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard == null) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Leaderboard named "+leaderboardName+" not found");
-        } else if (!(leaderboard instanceof LeaderboardThatHasRegattaLike)) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Leaderboard named "+leaderboardName+" has no regatta log");
-        } else {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(DefaultActions.UPDATE, leaderboard));
-            final RegattaLog regattaLog = ((LeaderboardThatHasRegattaLike) leaderboard).getRegattaLike().getRegattaLog();
-            final LogEventConstructor<RegattaLogEvent, RegattaLogEventVisitor> logEventConstructor = createRegattaLogEventConstructor();
-            createCertificateAssignments(regattaLog, logEventConstructor, certificateSelection, certificates, resp);
-        }
-    }
-
-    private void createCertificateAssignmentsForRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            ORCCertificateSelection certificateSelection, Map<String, ORCCertificate> certificates, HttpServletResponse resp) throws IOException {
-        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard == null) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Leaderboard named "+leaderboardName+" not found");
-        } else {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(DefaultActions.UPDATE, leaderboard));
-            final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-            if (raceColumn == null) {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Race column named "+raceColumnName+" not found in leaderboard named "+leaderboardName);
-            } else {
-                final Fleet fleet = raceColumn.getFleetByName(fleetName);
-                if (fleet == null) {
-                    resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Fleet "+fleetName+" not found in race column named "+raceColumnName+" in leaderboard named "+leaderboardName);
-                } else {
-                    final RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                    final LogEventConstructor<RaceLogEvent, RaceLogEventVisitor> logEventConstructor = createRaceLogEventConstructor();
-                    createCertificateAssignments(raceLog, logEventConstructor, certificateSelection, certificates, resp);
-                }
-            }
-        }
-    }
-
-    private void createCertificateAssignmentsForRegatta(String regattaName,
-            ORCCertificateSelection certificateSelection, Map<String, ORCCertificate> certificates,
-            HttpServletResponse resp) throws IOException {
-        final Regatta regatta = getService().getRegattaByName(regattaName);
-        if (regatta == null) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Regatta named "+regattaName+" not found");
-        } else {
-            final RegattaLog regattaLog = regatta.getRegattaLog();
-            final LogEventConstructor<RegattaLogEvent, RegattaLogEventVisitor> logEventConstructor = createRegattaLogEventConstructor();
-            createCertificateAssignments(regattaLog, logEventConstructor, certificateSelection, certificates, resp);
-        }
-    }
-
-    private LogEventConstructor<RegattaLogEvent, RegattaLogEventVisitor> createRegattaLogEventConstructor() {
-        final LogEventConstructor<RegattaLogEvent, RegattaLogEventVisitor> logEventConstructor = (TimePoint createdAt, TimePoint logicalTimePoint,
-            AbstractLogEventAuthor author, Serializable pId, ORCCertificate certificate, Boat boat)->new RegattaLogORCCertificateAssignmentEventImpl(
-                    createdAt, logicalTimePoint, author, pId, certificate, boat);
-        return logEventConstructor;
-    }
-    
-    @FunctionalInterface
-    private static interface LogEventConstructor<LogEventT extends AbstractLogEvent<VisitorT>, VisitorT> {
-        LogEventT create(TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable pId, ORCCertificate certificate, Boat boat);
-    }
-
-    private <LogT extends AbstractLog<LogEventT, VisitorT>, VisitorT, LogEventT extends AbstractLogEvent<VisitorT>> void createCertificateAssignments(
-            LogT logToAddTo, LogEventConstructor<LogEventT, VisitorT> logEventConstructor,
-            ORCCertificateSelection certificateSelection, Map<String, ORCCertificate> certificates,
-            HttpServletResponse resp) throws IOException {
-        final TimePoint now = MillisecondsTimePoint.now();
-        int status = HttpServletResponse.SC_OK;
-        final Map<Serializable, ORCCertificateUploadConstants.MappingResultStatus> result = new HashMap<>();
-        final CompetitorAndBoatStore boatStore = getService().getCompetitorAndBoatStore();
-        final AbstractLogEventAuthor serverAuthor = getService().getServerAuthor();
-        if (certificateSelection != null) {
-            for (final Entry<Serializable, String> mapping : certificateSelection.getCertificateIdsForBoatIds()) {
-                final Boat boat = boatStore.getExistingBoatById(mapping.getKey());
-                if (boat == null) {
-                    status = HttpServletResponse.SC_NOT_FOUND;
-                    result.put(mapping.getKey(), ORCCertificateUploadConstants.MappingResultStatus.BOAT_NOT_FOUND);
-                } else {
-                    final ORCCertificate certificate = certificates.get(mapping.getValue());
-                    if (certificate == null) {
-                        status = HttpServletResponse.SC_NOT_FOUND;
-                        result.put(mapping.getKey(), ORCCertificateUploadConstants.MappingResultStatus.CERTIFICATE_NOT_FOUND);
-                    } else {
-                        final LogEventT assignment = logEventConstructor.create(
-                                now, now, serverAuthor, UUID.randomUUID(), certificate,
-                                boat);
-                        logToAddTo.add(assignment);
-                        result.put(mapping.getKey(), ORCCertificateUploadConstants.MappingResultStatus.OK);
-                    }
-                }
-            }
-        }
-        writeResponse(status, result, certificateSelection, certificates, resp);
-    }
-
-    private void writeResponse(int status, Map<Serializable, ORCCertificateUploadConstants.MappingResultStatus> result,
-            ORCCertificateSelection certificateSelection, Map<String, ORCCertificate> certificates, HttpServletResponse resp) throws IOException {
-        resp.setStatus(status);
+    private void writeResponse(Iterable<ORCCertificate> certificates, HttpServletResponse resp) throws IOException {
         // Use text/html to prevent browsers from wrapping the response body,
         // see "Handling File Upload Responses in GWT" at http://www.artofsolving.com/node/50
         resp.setContentType("text/html;charset=UTF-8");
         final JSONObject jsonResponse = new JSONObject();
-        final JSONArray mappings = new JSONArray();
-        for (final Entry<Serializable, MappingResultStatus> m : result.entrySet()) {
-            final JSONObject mapping = new JSONObject();
-            mapping.put(ORCCertificateUploadConstants.BOAT_ID, m.getKey().toString());
-            mapping.put(ORCCertificateUploadConstants.STATUS, m.getValue().name());
-            if (m.getValue() == MappingResultStatus.OK) {
-                mapping.put(ORCCertificateUploadConstants.CERTIFICATE_ID, certificateSelection.getCertificateIdForBoatId(m.getKey()));
-            }
-            mappings.add(mapping);
-        }
-        jsonResponse.put(ORCCertificateUploadConstants.MAPPINGS, mappings);
         final ORCCertificateJsonSerializer certificateSerializer = new ORCCertificateJsonSerializer();
         final JSONArray certificatesAsJson = new JSONArray();
-        for (final Entry<String, ORCCertificate> certificateById : certificates.entrySet()) {
-            certificatesAsJson.add(certificateSerializer.serialize(certificateById.getValue()));
+        for (final ORCCertificate certificate : certificates) {
+            certificatesAsJson.add(certificateSerializer.serialize(certificate));
         }
         jsonResponse.put(ORCCertificateUploadConstants.CERTIFICATES, certificatesAsJson);
         resp.getWriter().write(jsonResponse.toJSONString());
     }
 
-    private void createCertificateAssignmentsForRace(String regattaName, String raceName,
-            ORCCertificateSelection certificateSelection, Map<String, ORCCertificate> certificates, HttpServletResponse resp) throws IOException {
-        final RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
-        final TrackedRace trackedRace = getService().getTrackedRace(raceIdentifier);
-        if (trackedRace == null) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Regatta named "+regattaName+" not found");
-        } else {
-            final RaceLog raceLog = trackedRace.getAttachedRaceLogs().iterator().next();
-            final LogEventConstructor<RaceLogEvent, RaceLogEventVisitor> logEventConstructor = createRaceLogEventConstructor();
-            createCertificateAssignments(raceLog, logEventConstructor, certificateSelection, certificates, resp);
-        }
-    }
-
-    private LogEventConstructor<RaceLogEvent, RaceLogEventVisitor> createRaceLogEventConstructor() {
-        return (TimePoint createdAt, TimePoint logicalTimePoint,
-            AbstractLogEventAuthor author, Serializable pId, ORCCertificate certificate, Boat boat)->new RaceLogORCCertificateAssignmentEventImpl(
-                    createdAt, logicalTimePoint, author, pId, /* passId */ 0, certificate, boat);
-    }
 }
