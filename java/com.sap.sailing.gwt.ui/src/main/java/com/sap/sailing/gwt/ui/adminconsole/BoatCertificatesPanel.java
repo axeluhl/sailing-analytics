@@ -331,7 +331,7 @@ public class BoatCertificatesPanel extends SimplePanel {
                             }
                         }
                         temporarilyDeregisterCertificateTableSelectionHandler();
-                        certificateTable.setCertificates(result.values());
+                        certificateTable.setCertificates(new HashSet<>(result.values()));
                         boatTable.setBoats(boatResults);
                     }
                 });

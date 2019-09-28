@@ -180,7 +180,8 @@ public class CertificatesTableWrapper<S extends RefreshableSelectionModel<ORCCer
     }
 
     public void setCertificates(Collection<ORCCertificate> result) {
-        filterField.updateAll(result);
+        filterField.removeAll();
+        addCertificates(result);
     }
 
     public void addCertificates(Iterable<ORCCertificate> result) {
@@ -189,8 +190,9 @@ public class CertificatesTableWrapper<S extends RefreshableSelectionModel<ORCCer
             certificatesById.put(certificate.getId(), certificate);
         }
         for (final ORCCertificate certificate : result) {
-            if (certificatesById.get(certificate.getId()) != null) {
-                filterField.remove(certificate); // replace certificates with same ID by removing here and later adding
+            final ORCCertificate existingCertificateWithSameId = certificatesById.get(certificate.getId());
+            if (existingCertificateWithSameId != null) {
+                filterField.remove(existingCertificateWithSameId); // replace certificates with same ID by removing here and later adding
             }
         }
         filterField.addAll(result);

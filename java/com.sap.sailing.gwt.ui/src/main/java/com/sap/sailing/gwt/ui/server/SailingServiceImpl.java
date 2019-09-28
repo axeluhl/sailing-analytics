@@ -9566,20 +9566,17 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     private <LogT extends AbstractLog<LogEventT, VisitorT>, VisitorT, LogEventT extends AbstractLogEvent<VisitorT>> void createCertificateAssignments(
             LogT logToAddTo, LogEventConstructor<LogEventT, VisitorT> logEventConstructor,
             Map<String, ORCCertificate> certificatesForBoatIdsAsString) throws IOException {
+        // TODO should we check for existing assignments and update only what needs updating?
         final TimePoint now = MillisecondsTimePoint.now();
-        final Map<Serializable, ORCCertificateUploadConstants.MappingResultStatus> result = new HashMap<>();
         final CompetitorAndBoatStore boatStore = getService().getCompetitorAndBoatStore();
         final AbstractLogEventAuthor serverAuthor = getService().getServerAuthor();
         for (final Entry<String, ORCCertificate> mapping : certificatesForBoatIdsAsString.entrySet()) {
             final Boat boat = boatStore.getExistingBoatById(UUIDHelper.tryUuidConversion(mapping.getKey()));
-            if (boat == null) {
-                result.put(mapping.getKey(), ORCCertificateUploadConstants.MappingResultStatus.BOAT_NOT_FOUND);
-            } else {
+            if (boat != null) {
                 final ORCCertificate certificate = mapping.getValue();
                 final LogEventT assignment = logEventConstructor.create(now, now, serverAuthor, UUID.randomUUID(),
                         certificate, boat);
                 logToAddTo.add(assignment);
-                result.put(mapping.getKey(), ORCCertificateUploadConstants.MappingResultStatus.OK);
             }
         }
     }
