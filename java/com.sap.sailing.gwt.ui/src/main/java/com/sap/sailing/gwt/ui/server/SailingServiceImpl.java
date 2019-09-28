@@ -82,6 +82,8 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.orc.BaseORCCertificateAssignmentAnalyzer;
+import com.sap.sailing.domain.abstractlog.orc.ORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataAnalyzer;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEventFinder;
@@ -9483,7 +9485,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return result;
     }
 
-    private void createCertificateAssignmentsForRace(String regattaName, String raceName,
+    private Triple<Integer, Integer, Integer> createCertificateAssignmentsForRace(String regattaName, String raceName,
             Map<String, ORCCertificate> certificatesForBoatIdsAsString) throws IOException, NotFoundException {
         final RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
         final TrackedRace trackedRace = getService().getTrackedRace(raceIdentifier);
@@ -9493,11 +9495,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             getService().getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
             final RaceLog raceLog = trackedRace.getAttachedRaceLogs().iterator().next();
             final LogEventConstructor<RaceLogEvent, RaceLogEventVisitor> logEventConstructor = createRaceLogEventConstructor();
-            createCertificateAssignments(raceLog, logEventConstructor, certificatesForBoatIdsAsString);
+            return createCertificateAssignments(raceLog, logEventConstructor, certificatesForBoatIdsAsString);
         }
     }
 
-    private void createCertificateAssignmentsForLeaderboard(String leaderboardName,
+    private Triple<Integer, Integer, Integer> createCertificateAssignmentsForLeaderboard(String leaderboardName,
             Map<String, ORCCertificate> certificatesForBoatIdsAsString) throws IOException, NotFoundException {
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
@@ -9508,11 +9510,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             getService().getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
             final RegattaLog regattaLog = ((LeaderboardThatHasRegattaLike) leaderboard).getRegattaLike().getRegattaLog();
             final LogEventConstructor<RegattaLogEvent, RegattaLogEventVisitor> logEventConstructor = createRegattaLogEventConstructor();
-            createCertificateAssignments(regattaLog, logEventConstructor, certificatesForBoatIdsAsString);
+            return createCertificateAssignments(regattaLog, logEventConstructor, certificatesForBoatIdsAsString);
         }
     }
 
-    private void createCertificateAssignmentsForRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+    private Triple<Integer, Integer, Integer> createCertificateAssignmentsForRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             Map<String, ORCCertificate> certificatesForBoatIdsAsString) throws IOException, NotFoundException {
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
@@ -9532,13 +9534,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 } else {
                     final RaceLog raceLog = raceColumn.getRaceLog(fleet);
                     final LogEventConstructor<RaceLogEvent, RaceLogEventVisitor> logEventConstructor = createRaceLogEventConstructor();
-                    createCertificateAssignments(raceLog, logEventConstructor, certificatesForBoatIdsAsString);
+                    return createCertificateAssignments(raceLog, logEventConstructor, certificatesForBoatIdsAsString);
                 }
             }
         }
     }
 
-    private void createCertificateAssignmentsForRegatta(String regattaName,
+    private Triple<Integer, Integer, Integer> createCertificateAssignmentsForRegatta(String regattaName,
             Map<String, ORCCertificate> certificatesForBoatIdsAsString) throws IOException, NotFoundException {
         final Regatta regatta = getService().getRegattaByName(regattaName);
         if (regatta == null) {
@@ -9547,7 +9549,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             getService().getSecurityService().checkCurrentUserUpdatePermission(regatta);
             final RegattaLog regattaLog = regatta.getRegattaLog();
             final LogEventConstructor<RegattaLogEvent, RegattaLogEventVisitor> logEventConstructor = createRegattaLogEventConstructor();
-            createCertificateAssignments(regattaLog, logEventConstructor, certificatesForBoatIdsAsString);
+            return createCertificateAssignments(regattaLog, logEventConstructor, certificatesForBoatIdsAsString);
         }
     }
 
@@ -9563,22 +9565,72 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         LogEventT create(TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable pId, ORCCertificate certificate, Boat boat);
     }
 
-    private <LogT extends AbstractLog<LogEventT, VisitorT>, VisitorT, LogEventT extends AbstractLogEvent<VisitorT>> void createCertificateAssignments(
+    /**
+     * @return the number of certificate assignments inserted into (not replaced in) the log in the first component of
+     *         the triple returned; this may be fewer than requested because redundant assignments are ignored; the number
+     *         of assignments replaced in the log in the second component of the triple. The third element of the triple
+     *         is the number of assignments effectively revoked (not including those replaced).
+     */
+    private <LogT extends AbstractLog<LogEventT, VisitorT>, VisitorT, LogEventT extends AbstractLogEvent<VisitorT>,
+    AssignmentEventT extends ORCCertificateAssignmentEvent<VisitorT>> Triple<Integer, Integer, Integer> createCertificateAssignments(
             LogT logToAddTo, LogEventConstructor<LogEventT, VisitorT> logEventConstructor,
             Map<String, ORCCertificate> certificatesForBoatIdsAsString) throws IOException {
-        // TODO should we check for existing assignments and update only what needs updating?
+        int insertedCount = 0;
+        int replacedCount = 0;
+        int removedCount = 0;
+        final BaseORCCertificateAssignmentAnalyzer<LogT, VisitorT, LogEventT, AssignmentEventT> analyzerForPreviousAssignments =
+                new BaseORCCertificateAssignmentAnalyzer<>(logToAddTo);
+        final Map<Serializable, AssignmentEventT> validCertificateAssignmentsInLogByBoatId = analyzerForPreviousAssignments.analyze();
         final TimePoint now = MillisecondsTimePoint.now();
         final CompetitorAndBoatStore boatStore = getService().getCompetitorAndBoatStore();
         final AbstractLogEventAuthor serverAuthor = getService().getServerAuthor();
         for (final Entry<String, ORCCertificate> mapping : certificatesForBoatIdsAsString.entrySet()) {
-            final Boat boat = boatStore.getExistingBoatById(UUIDHelper.tryUuidConversion(mapping.getKey()));
+            final Serializable boatId = UUIDHelper.tryUuidConversion(mapping.getKey());
+            final AssignmentEventT previouslyValidAssignmentEventForBoat = validCertificateAssignmentsInLogByBoatId.remove(boatId);
+            final ORCCertificate certificate = mapping.getValue();
+            final Boat boat = boatStore.getExistingBoatById(boatId);
             if (boat != null) {
-                final ORCCertificate certificate = mapping.getValue();
-                final LogEventT assignment = logEventConstructor.create(now, now, serverAuthor, UUID.randomUUID(),
-                        certificate, boat);
-                logToAddTo.add(assignment);
+                final boolean addEvent;
+                if (previouslyValidAssignmentEventForBoat != null) {
+                    if (!previouslyValidAssignmentEventForBoat.getCertificate().getId().equals(certificate.getId())) {
+                        // revoke the previously valid event because it has a different certificate
+                        logger.info("Replacing certificate "+previouslyValidAssignmentEventForBoat.getCertificate()+
+                                " for boat "+boat+" by "+certificate);
+                        replacedCount++;
+                        addEvent = true;
+                        try {
+                            @SuppressWarnings("unchecked")
+                            final LogEventT previouslyValidAssignmentEventForBoatAsLogEventT = (LogEventT) previouslyValidAssignmentEventForBoat;
+                            logToAddTo.revokeEvent(serverAuthor, previouslyValidAssignmentEventForBoatAsLogEventT);
+                        } catch (NotRevokableException e) {
+                            logger.severe("Couldn't revoke old certificate assignment event "+previouslyValidAssignmentEventForBoat+": "+e.getMessage());
+                        }
+                    } else {
+                        addEvent = false;
+                        logger.info("Not replacing certificate "+previouslyValidAssignmentEventForBoat.getCertificate()+
+                                " because the certificate "+certificate+" requested to be assigned is considered equal.");
+                    }
+                } else {
+                    addEvent = true;
+                    insertedCount++;
+                }
+                if (addEvent) {
+                    final LogEventT assignment = logEventConstructor.create(now, now, serverAuthor, UUID.randomUUID(), certificate, boat);
+                    logToAddTo.add(assignment);
+                }
+            }
+            for (final Entry<Serializable, AssignmentEventT> boatIdAndEventToRevoke : validCertificateAssignmentsInLogByBoatId.entrySet()) {
+                @SuppressWarnings("unchecked")
+                final LogEventT eventToRevoke = (LogEventT) boatIdAndEventToRevoke.getValue();
+                try {
+                    logToAddTo.revokeEvent(serverAuthor, eventToRevoke);
+                    removedCount++;
+                } catch (NotRevokableException e) {
+                    logger.severe("Couldn't revoke old certificate assignment event "+eventToRevoke+": "+e.getMessage());
+                }
             }
         }
+        return new Triple<>(insertedCount, replacedCount, removedCount);
     }
 
     private LogEventConstructor<RaceLogEvent, RaceLogEventVisitor> createRaceLogEventConstructor() {
@@ -9588,26 +9640,26 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
     
     @Override
-    public void assignORCPerformanceCurveCertificates(RegattaName regattaIdentifier,
+    public Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(RegattaName regattaIdentifier,
             Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException {
-        createCertificateAssignmentsForRegatta(regattaIdentifier.getRegattaName(), certificatesForBoatsWithIdAsString);
+        return createCertificateAssignmentsForRegatta(regattaIdentifier.getRegattaName(), certificatesForBoatsWithIdAsString);
     }
 
     @Override
-    public void assignORCPerformanceCurveCertificates(String leaderboardName,
+    public Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(String leaderboardName,
             Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException {
-        createCertificateAssignmentsForLeaderboard(leaderboardName, certificatesForBoatsWithIdAsString);
+        return createCertificateAssignmentsForLeaderboard(leaderboardName, certificatesForBoatsWithIdAsString);
     }
 
     @Override
-    public void assignORCPerformanceCurveCertificates(RegattaAndRaceIdentifier raceIdentifier,
+    public Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(RegattaAndRaceIdentifier raceIdentifier,
             Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException {
-        createCertificateAssignmentsForRace(raceIdentifier.getRegattaName(), raceIdentifier.getRaceName(), certificatesForBoatsWithIdAsString);
+        return createCertificateAssignmentsForRace(raceIdentifier.getRegattaName(), raceIdentifier.getRaceName(), certificatesForBoatsWithIdAsString);
     }
 
     @Override
-    public void assignORCPerformanceCurveCertificates(String leaderboardName, String raceColumnName, String fleetName,
+    public Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(String leaderboardName, String raceColumnName, String fleetName,
             Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException {
-        createCertificateAssignmentsForRaceLog(leaderboardName, raceColumnName, fleetName, certificatesForBoatsWithIdAsString);
+        return createCertificateAssignmentsForRaceLog(leaderboardName, raceColumnName, fleetName, certificatesForBoatsWithIdAsString);
     }
 }

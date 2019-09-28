@@ -37,6 +37,7 @@ import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCCertificateUploadConstants;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
@@ -287,15 +288,16 @@ public class BoatCertificatesPanel extends SimplePanel {
         for (final Entry<BoatDTO, ORCCertificate> e : certificateAssignments.entrySet()) {
             certificatesByBoatIdAsString.put(e.getKey().getIdAsString(), e.getValue());
         }
-        sailingService.assignORCPerformanceCurveCertificates(regattaIdentifier, certificatesByBoatIdAsString, new AsyncCallback<Void>() {
+        sailingService.assignORCPerformanceCurveCertificates(regattaIdentifier, certificatesByBoatIdAsString, new AsyncCallback<Triple<Integer, Integer, Integer>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(stringMessages.errorAssigningCertificates(caught.getMessage()));
             }
 
             @Override
-            public void onSuccess(Void result) {
-                Notification.notify(stringMessages.ok(), Notification.NotificationType.INFO);
+            public void onSuccess(Triple<Integer, Integer, Integer> result) {
+                Notification.notify(stringMessages.insertedAndReplacedAndRemovedCertificateAssignments(
+                        result.getA(), result.getB(), result.getC()), Notification.NotificationType.INFO);
             }
         });
     }
@@ -322,16 +324,19 @@ public class BoatCertificatesPanel extends SimplePanel {
                     @Override
                     public void onSuccess(Map<String, ORCCertificate> result) {
                         certificateAssignments.clear();
+                        final Map<String, ORCCertificate> certificatesById = new HashMap<>();
                         final Set<BoatDTO> boatsToRefreshInTable = new HashSet<>();
                         for (final Entry<String, ORCCertificate> e : result.entrySet()) {
+                            // avoid duplicates with same ID:
+                            final ORCCertificate certificateToUse = certificatesById.computeIfAbsent(e.getValue().getId(), key->e.getValue());
                             final BoatDTO boat = boatsByIdAsString.get(e.getKey());
                             if (boat != null) {
-                                certificateAssignments.put(boat, e.getValue());
+                                certificateAssignments.put(boat, certificateToUse);
                                 boatsToRefreshInTable.add(boat);
                             }
                         }
                         temporarilyDeregisterCertificateTableSelectionHandler();
-                        certificateTable.setCertificates(new HashSet<>(result.values()));
+                        certificateTable.setCertificates(new HashSet<>(certificatesById.values()));
                         boatTable.setBoats(boatResults);
                     }
                 });

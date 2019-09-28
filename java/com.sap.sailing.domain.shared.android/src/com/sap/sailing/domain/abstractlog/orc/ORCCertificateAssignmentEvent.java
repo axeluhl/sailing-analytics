@@ -3,9 +3,10 @@ package com.sap.sailing.domain.abstractlog.orc;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
+import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 
-public interface ORCCertificateAssignmentEvent<VisitorT> extends AbstractLogEvent<VisitorT> {
+public interface ORCCertificateAssignmentEvent<VisitorT> extends AbstractLogEvent<VisitorT>, Revokable {
     Serializable getBoatId();
     
     ORCCertificate getCertificate();

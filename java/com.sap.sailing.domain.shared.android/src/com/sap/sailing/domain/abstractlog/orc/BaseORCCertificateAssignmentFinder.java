@@ -24,20 +24,15 @@ extends BaseLogAnalyzer<LogT, EventT, VisitorT, Map<Boat, ORCCertificate>> {
     @Override
     protected Map<Boat, ORCCertificate> performAnalysis() {
         final Map<Boat, ORCCertificate> result = new HashMap<>();
-        for (final EventT o : getLog().getUnrevokedEvents()) {
-            if (o instanceof ORCCertificateAssignmentEvent) {
-                @SuppressWarnings("unchecked")
-                ORCCertificateAssignmentEvent<VisitorT> event = (ORCCertificateAssignmentEvent<VisitorT>) o;
-                final Serializable boatId = event.getBoatId();
-                final ORCCertificate certificate = event.getCertificate();
-                final Boat boat = boatsById.get(boatId);
-                if (boat != null) {
-                    result.put(boat, certificate);
-                } else {
-                    logger.warning(
-                            "Unable to find boat with ID " + boatId + " for which an ORC certificate with sail number "
-                                    + certificate.getSailnumber() + " is defined. Certificate is ignored.");
-                }
+        for (final ORCCertificateAssignmentEvent<VisitorT> e : new BaseORCCertificateAssignmentAnalyzer<>(log).analyze().values()) {
+            final Boat boat = boatsById.get(e.getBoatId());
+            if (boat != null) {
+                final ORCCertificate certificate = e.getCertificate();
+                result.put(boat, certificate);
+            } else {
+                logger.warning(
+                        "Unable to find boat with ID " + e.getBoatId() + " for which an ORC certificate with sail number "
+                                + e.getCertificate() + " is defined. Certificate is ignored.");
             }
         }
         return result;

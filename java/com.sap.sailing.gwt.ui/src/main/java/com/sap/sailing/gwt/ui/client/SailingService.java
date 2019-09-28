@@ -1231,13 +1231,13 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Map<String, ORCCertificate> getORCCertificateAssignmentsByBoatIdAsString(RegattaName regattaIdentifier) throws NotFoundException;
     
-    void assignORCPerformanceCurveCertificates(RegattaName regattaIdentifier, Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
+    Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(RegattaName regattaIdentifier, Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
     
-    void assignORCPerformanceCurveCertificates(RegattaAndRaceIdentifier raceIdentifier, Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
+    Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(RegattaAndRaceIdentifier raceIdentifier, Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
 
-    void assignORCPerformanceCurveCertificates(String leaderboardName, String raceColumnName, String fleetName, Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
+    Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(String leaderboardName, String raceColumnName, String fleetName, Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
 
-    void assignORCPerformanceCurveCertificates(String leaderboardName,
+    Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(String leaderboardName,
             Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
 
 }
