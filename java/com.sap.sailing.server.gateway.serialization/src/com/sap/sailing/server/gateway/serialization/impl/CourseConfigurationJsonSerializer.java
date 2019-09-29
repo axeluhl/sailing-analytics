@@ -27,7 +27,8 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
     public static final String FIELD_MARK_CONFIGURATION_MARK_TEMPLATE_ID = "markTemplateId";
     public static final String FIELD_MARK_CONFIGURATION_MARK_PROPERTIES_ID = "markPropertiesId";
     public static final String FIELD_MARK_CONFIGURATION_MARK_ID = "markId";
-    public static final String FIELD_MARK_CONFIGURATION_COMMON_MARK_PROPERTIES = "commonMarkProperties";
+    public static final String FIELD_MARK_CONFIGURATION_EFFECTIVE_PROPERTIES = "effectiveProperties";
+    public static final String FIELD_MARK_CONFIGURATION_FREESTYLE_PROPERTIES = "freestyleProperties";
     public static final String FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE = "associatedRole";
     public static final String FIELD_WAYPOINTS = "waypoints";
     public static final String FIELD_WAYPOINT_CONTROL_POINT_NAME = "controlPointName";
@@ -72,8 +73,9 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
                     markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_PROPERTIES_ID,
                             freeStyleMarkConfiguration.getOptionalMarkProperties().getId().toString());
                 }
-                markConfigurationsEntry.putAll(commonMarkPropertiesJsonSerializer
-                        .serialize(freeStyleMarkConfiguration.getFreestyleProperties()));
+                markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_FREESTYLE_PROPERTIES,
+                        commonMarkPropertiesJsonSerializer
+                                .serialize(freeStyleMarkConfiguration.getFreestyleProperties()));
             } else if (markConfiguration instanceof MarkPropertiesBasedMarkConfiguration) {
                 final MarkPropertiesBasedMarkConfiguration markPropertiesBasedMarkConfiguration = (MarkPropertiesBasedMarkConfiguration) markConfiguration;
                 markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_PROPERTIES_ID,
@@ -87,8 +89,8 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
                 markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_ID,
                         regattaMarkConfiguration.getMark().getId().toString());
             }
-            markConfigurationsEntry
-                    .putAll(commonMarkPropertiesJsonSerializer.serialize(markConfiguration.getEffectiveProperties()));
+            markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_EFFECTIVE_PROPERTIES,
+                    commonMarkPropertiesJsonSerializer.serialize(markConfiguration.getEffectiveProperties()));
 
             // TODO: associated role? markConfiguration.
             // TODO add optionalPositioning

@@ -58,13 +58,15 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_MARK_PROPERTIES_ID);
                 final String markID = (String) markConfigurationJSON
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_MARK_ID);
-                final CommonMarkProperties commonMarkProperties = commonMarkPropertiesJsonDeserializer
-                        .deserialize(json);
+                final JSONObject freestylePropertiesObject = (JSONObject) markConfigurationJSON
+                        .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_FREESTYLE_PROPERTIES);
+                final CommonMarkProperties optionalFreestyleProperties = freestylePropertiesObject == null ? null
+                        : commonMarkPropertiesJsonDeserializer.deserialize(freestylePropertiesObject);
                 // TODO add optionalPositioning
                 final MarkConfiguration markConfiguration = builder.addMarkConfiguration(
                         markTemplateID != null ? UUID.fromString(markTemplateID) : null,
                         markPropertiesID != null ? UUID.fromString(markPropertiesID) : null,
-                        markID != null ? UUID.fromString(markID) : null, commonMarkProperties, null);
+                        markID != null ? UUID.fromString(markID) : null, optionalFreestyleProperties, null);
                 String roleName = (String) markConfigurationJSON
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE);
                 if (roleName != null && !roleName.isEmpty()) {

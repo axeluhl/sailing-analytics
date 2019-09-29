@@ -12,12 +12,7 @@ public class MarkConfiguration extends JsonWrapper {
     private static final String FIELD_MARK_TEMPLATE_ID = "markTemplateId";
     private static final String FIELD_MARK_PROPERTIES_ID = "markPropertiesId";
     private static final String FIELD_ASSOCIATED_ROLE = "associatedRole";
-    private static final String FIELD_NAME = "name";
-    private static final String FIELD_SHORT_NAME = "shortName";
-    private static final String FIELD_COLOR = "color";
-    private static final String FIELD_SHAPE = "shape";
-    private static final String FIELD_PATTERN = "pattern";
-    private static final String FIELD_MARK_TYPE = "markType";
+    private static final String FIELD_FREESTYLE_PROPERTIES = "freestyleProperties";
     private static final String FIELD_MARK_ID = "markId";
 
     public MarkConfiguration(final JSONObject json) {
@@ -32,12 +27,7 @@ public class MarkConfiguration extends JsonWrapper {
         markConfiguration.getJson().put(FIELD_MARK_TEMPLATE_ID, markTemplateId.toString());
         markConfiguration.getJson().put(FIELD_MARK_PROPERTIES_ID, markPropertiesId.toString());
         markConfiguration.getJson().put(FIELD_ASSOCIATED_ROLE, associatedRole.toString());
-        markConfiguration.getJson().put(FIELD_NAME, name.toString());
-        markConfiguration.getJson().put(FIELD_SHORT_NAME, shortName.toString());
-        markConfiguration.getJson().put(FIELD_COLOR, color.toString());
-        markConfiguration.getJson().put(FIELD_SHAPE, shape.toString());
-        markConfiguration.getJson().put(FIELD_PATTERN, pattern.toString());
-        markConfiguration.getJson().put(FIELD_MARK_TYPE, markType.toString());
+        markConfiguration.getJson().put(FIELD_FREESTYLE_PROPERTIES, new MarkAppearance(name, shortName, color, shape, pattern, markType).getJson());
         return markConfiguration;
     }
 
