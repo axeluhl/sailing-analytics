@@ -26,6 +26,7 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
     public final static String ACTION_STOP_TRACKING = "ACTION_STOP_TRACKING";
     public final static String ACTION_START_TRACKING = "ACTION_START_TRACKING";
     public final static String ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS = "ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS";
+    public static final String ACTION_CERTIFICATE_ASSIGNMENT = "ACTION_CERTIFICATE_ASSIGNMENT";
     
     private final StringMessages stringMessages;
     private SmartphoneTrackingEventManagementPanel smartphoneTrackingEventManagementPanel;
@@ -39,7 +40,7 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
  
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
-        List<ImageSpec> result = new ArrayList<ImageSpec>();
+        final List<ImageSpec> result = new ArrayList<ImageSpec>();
         RaceColumnDTOAndFleetDTOWithNameBasedEquality object = (RaceColumnDTOAndFleetDTOWithNameBasedEquality) getContext().getKey();
         if (! object.getA().getRaceLogTrackingInfo(object.getB()).raceLogTrackingState.isForTracking()) {
             result.add(new ImageSpec(ACTION_DENOTE_FOR_RACELOG_TRACKING, stringMessages.denoteForRaceLogTracking(), makeImagePrototype(resources.denoteForRaceLogTracking())));
@@ -55,7 +56,6 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
         result.add(new ImageSpec(ACTION_SET_FINISHING_AND_FINISH_TIME, stringMessages.setFinishingAndFinishTime(), makeImagePrototype(resources.blueSmall())));
         result.add(new ImageSpec(ACTION_SHOW_RACELOG, stringMessages.raceLog(), makeImagePrototype(resources.flagIcon())));
         result.add(new ImageSpec(ACTION_SET_TRACKING_TIMES, stringMessages.setTrackingTimes(), makeImagePrototype(resources.setTrackingTimes())));
-        
         Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> startEndTrackingTime = smartphoneTrackingEventManagementPanel.getTrackingTimesFor(object);
         if (startEndTrackingTime == null) {
             result.add(new ImageSpec(ACTION_START_TRACKING, stringMessages.startTracking(), makeImagePrototype(resources.startRaceLogTracking())));
@@ -64,11 +64,17 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
                 result.add(new ImageSpec(ACTION_STOP_TRACKING, stringMessages.stopTracking(), makeImagePrototype(resources.stopRaceLogTracking())));
             }
         }
-        
         if (smartphoneTrackingEventManagementPanel.getSelectedLeaderboard().canBoatsOfCompetitorsChangePerRace) {
             result.add(new ImageSpec(ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS, stringMessages.actionShowCompetitorToBoatAssignments(), makeImagePrototype(resources.sailboatIcon())));
         }
-        
+        if (raceHasORCRankingMetric(object)) {
+            result.add(new ImageSpec(ACTION_CERTIFICATE_ASSIGNMENT, stringMessages.assignCertificates(), resources.updateCertificatesIcon()));
+        }
         return result;
+    }
+
+    private boolean raceHasORCRankingMetric(RaceColumnDTOAndFleetDTOWithNameBasedEquality object) {
+        // TODO Implement RaceLogTrackingEventManagementRaceImagesBarCell.raceHasORCRankingMetric(...)
+        return true;
     }
 }

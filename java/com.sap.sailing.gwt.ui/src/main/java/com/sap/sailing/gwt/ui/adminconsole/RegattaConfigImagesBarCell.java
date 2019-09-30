@@ -54,8 +54,7 @@ public class RegattaConfigImagesBarCell extends ImagesBarCell {
         if (getContext().getKey() instanceof RegattaDTO &&
                 (((RegattaDTO) getContext().getKey()).rankingMetricType == RankingMetrics.ORC_PERFORMANCE_CURVE ||
                         ((RegattaDTO) getContext().getKey()).rankingMetricType == RankingMetrics.ORC_PERFORMANCE_CURVE_BY_IMPLIED_WIND)) {
-            result.add(new ImageSpec(ACTION_CERTIFICATES_UPDATE, stringMessages.updateCertificates(),
-                    makeImagePrototype(IconResources.INSTANCE.updateCertificatesIcon())));
+            result.add(new ImageSpec(ACTION_CERTIFICATES_UPDATE, stringMessages.updateCertificates(), resources.updateCertificatesIcon()));
         }
         return result;
     }

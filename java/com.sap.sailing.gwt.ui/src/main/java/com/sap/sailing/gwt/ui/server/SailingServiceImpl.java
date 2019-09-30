@@ -84,6 +84,7 @@ import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.orc.BaseORCCertificateAssignmentAnalyzer;
 import com.sap.sailing.domain.abstractlog.orc.ORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentFinder;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataAnalyzer;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEventFinder;
@@ -9480,6 +9481,65 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             boatsById.put(boat.getId(), boat);
         }
         for (final Entry<Boat, ORCCertificate> e : new RegattaLogORCCertificateAssignmentFinder(regatta.getRegattaLog(), boatsById).analyze().entrySet()) {
+            result.put(e.getKey().getId().toString(), e.getValue());
+        }
+        return result;
+    }
+
+    @Override
+    public Map<String, ORCCertificate> getORCCertificateAssignmentsByBoatIdAsString(
+            RegattaAndRaceIdentifier raceIdentifier) throws NotFoundException {
+        final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        if (trackedRace == null) {
+            throw new NotFoundException("Tracked race named "+raceIdentifier+" not found");
+        }
+        getService().getSecurityService().checkCurrentUserReadPermission(trackedRace);
+        final Map<String, ORCCertificate> result = new HashMap<>();
+        final Map<Serializable, Boat> boatsById = new HashMap<>();
+        for (final Boat boat : trackedRace.getRace().getBoats()) {
+            boatsById.put(boat.getId(), boat);
+        }
+        for (final RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
+            for (final Entry<Boat, ORCCertificate> e : new RaceLogORCCertificateAssignmentFinder(raceLog, boatsById).analyze().entrySet()) {
+                result.put(e.getKey().getId().toString(), e.getValue());
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Map<String, ORCCertificate> getORCCertificateAssignmentsByBoatIdAsString(String leaderboardName) throws NotFoundException {
+        final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        if (leaderboard instanceof LeaderboardThatHasRegattaLike) {
+            getService().getSecurityService().checkCurrentUserReadPermission(leaderboard);
+            final Map<String, ORCCertificate> result = new HashMap<>();
+            final Map<Serializable, Boat> boatsById = new HashMap<>();
+            for (final Boat boat : leaderboard.getAllBoats()) {
+                boatsById.put(boat.getId(), boat);
+            }
+            for (final Entry<Boat, ORCCertificate> e : new RegattaLogORCCertificateAssignmentFinder(
+                    ((LeaderboardThatHasRegattaLike) leaderboard).getRegattaLike().getRegattaLog(), boatsById).analyze().entrySet()) {
+                result.put(e.getKey().getId().toString(), e.getValue());
+            }
+            return result;
+        } else {
+            throw new IllegalArgumentException("Leaderboard must be of type "+LeaderboardThatHasRegattaLike.class.getSimpleName()+
+                    ", but leaderboard "+leaderboardName+" is of type "+leaderboard.getClass().getSimpleName());
+        }
+    }
+
+    @Override
+    public Map<String, ORCCertificate> getORCCertificateAssignmentsByBoatIdAsString(String leaderboardName,
+            String raceColumnName, String fleetName) throws NotFoundException {
+        final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        getService().getSecurityService().checkCurrentUserReadPermission(leaderboard);
+        final Map<String, ORCCertificate> result = new HashMap<>();
+        final Map<Serializable, Boat> boatsById = new HashMap<>();
+        for (final Boat boat : leaderboard.getAllBoats()) {
+            boatsById.put(boat.getId(), boat);
+        }
+        for (final Entry<Boat, ORCCertificate> e : new RaceLogORCCertificateAssignmentFinder(raceLog, boatsById).analyze().entrySet()) {
             result.put(e.getKey().getId().toString(), e.getValue());
         }
         return result;

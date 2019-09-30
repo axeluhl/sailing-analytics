@@ -23,9 +23,6 @@ public interface IconResources extends ClientBundle {
     @Source("images/edit.png")
     ImageResource editIcon();
     
-    @Source("images/certificates.png")
-    ImageResource updateCertificatesIcon();
-    
     @Source("images/boat_registrations.png")
     ImageResource boatRegistrations();
 }

@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.READ;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -320,12 +322,18 @@ public class SmartphoneTrackingEventManagementPanel
         raceActionColumn.addAction(
                 RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS,
                 DefaultActions.UPDATE, this::showCompetitorToBoatMappings);
+        raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_CERTIFICATE_ASSIGNMENT, READ,
+                t -> assignCertificates(t));
         
         racesTable.addColumn(raceLogTrackingStateColumn, stringMessages.raceStatusColumn());
         racesTable.addColumn(trackerStateColumn, stringMessages.trackerStatus());
         racesTable.addColumn(courseStateColumn, stringMessages.courseStatus());
         racesTable.addColumn(raceActionColumn, stringMessages.actions());
         racesTable.setWidth("600px");
+    }
+
+    private void assignCertificates(RaceColumnDTOAndFleetDTOWithNameBasedEquality t) {
+        // TODO Implement SmartphoneTrackingEventManagementPanel.assignCertificates(...)
     }
 
     private void handleCopy(RaceColumnDTOAndFleetDTOWithNameBasedEquality t) {

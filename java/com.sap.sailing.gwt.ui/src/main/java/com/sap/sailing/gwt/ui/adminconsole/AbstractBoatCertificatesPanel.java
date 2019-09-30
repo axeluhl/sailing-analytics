@@ -32,8 +32,9 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.base.Boat;
-import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCCertificateUploadConstants;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -48,26 +49,31 @@ import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 
 /**
  * This panel houses the functionality to manage the {@link ORCCertificate} linking to the corresponding {@link Boat}.
- * Additionally the BoatTable shows some basic information about the participating Boats and the CertificateTable displays
- * the GPH, Issue Date and identification information. To upload or import some certificates, there is an UploadForm.
+ * Additionally the BoatTable shows some basic information about the participating Boats and the CertificateTable
+ * displays the GPH, Issue Date and identification information. To upload or import some certificates, there is an
+ * UploadForm.
+ * <p>
+ * 
+ * This is an abstract base class that can be adapted by subclasses to fit either a {@link RegattaDTO} or a
+ * {@link RaceColumnDTO}/{@link FleetDTO} context.
  * 
  * @author Daniel Lisunkin (i505543)
  * @author Axel Uhl (d043530)
  *
  */
-public class BoatCertificatesPanel extends SimplePanel {
+public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
     private final BoatWithCertificateTableWrapper<RefreshableSingleSelectionModel<BoatDTO>> boatTable;
     private final Map<String, BoatDTO> boatsByIdAsString;
     private final CertificatesTableWrapper<RefreshableSingleSelectionModel<ORCCertificate>> certificateTable;
     private final BusyIndicator busyIndicator;
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
-    private final RegattaIdentifier regattaIdentifier;
     
     private final StringListEditorComposite urls;
     
@@ -101,20 +107,22 @@ public class BoatCertificatesPanel extends SimplePanel {
     private HandlerRegistration certificateTableSelectionHandlerRegistration;
     
     /**
-     * Checks that the user has permission to {@link DefaultActions#UPDATE} the regatta for which this
-     * panel shows the boats and certificates mappings. Only when this check returns {@code true} will the
-     * buttons for importing and assigning certificates be shown, and will the table allow for assignment
-     * changes.
+     * Checks that the user has permission to {@link DefaultActions#UPDATE} the context to which changes in certificate
+     * assignments will be stored, such as a regatta or a race whose log would then be updated. Only when this check
+     * returns {@code true} will the buttons for importing and assigning certificates be shown, and will the table allow
+     * for assignment changes.
      */
-    private final Supplier<Boolean> regattaUpdatePermissionCheck;
+    private final Supplier<Boolean> contextUpdatePermissionCheck;
+    private final String errorContext;
     
-    public BoatCertificatesPanel(final SailingServiceAsync sailingService, final UserService userService, final RegattaDTO regatta,
-            final StringMessages stringMessages, final ErrorReporter errorReporter) {
+    public AbstractBoatCertificatesPanel(final SailingServiceAsync sailingService, final UserService userService,
+            final SecuredDTO objectToCheckUpdatePermissionFor, final StringMessages stringMessages,
+            final ErrorReporter errorReporter, Supplier<Boolean> contextUpdatePermissionCheck, String errorContext) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        this.regattaIdentifier = regatta.getRegattaIdentifier();
         this.certificateTableSelectionHandler = createCertificateTableSelectionHandler();
+        this.errorContext = errorContext;
         boatsByIdAsString = new HashMap<>();
         fileUpload = new FileUpload();
         fileUpload.getElement().setAttribute("multiple", "multiple");
@@ -125,7 +133,7 @@ public class BoatCertificatesPanel extends SimplePanel {
         this.hiddenCertificateUrlsFields = new ArrayList<>();
         this.boatTable = new BoatWithCertificateTableWrapper<>(sailingService, userService, stringMessages,
                 errorReporter, /* multiSelection */ false, /* enablePager */ true, TableWrapper.DEFAULT_PAGING_SIZE, /* allow actions */ true,
-                boat->unlink(boat), regatta, boat->certificateAssignments.containsKey(boat));
+                boat->unlink(boat), objectToCheckUpdatePermissionFor, boat->certificateAssignments.containsKey(boat));
         this.certificateTable = new CertificatesTableWrapper<>(sailingService, userService, stringMessages,
                 errorReporter, /* multiSelection */ false, /* enablePager */ true, TableWrapper.DEFAULT_PAGING_SIZE);
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
@@ -152,14 +160,13 @@ public class BoatCertificatesPanel extends SimplePanel {
         // BUTTON - Refresh
         final Button refreshButton = topButtonPanel.addUnsecuredAction(stringMessages.refresh(), this::refresh);
         refreshButton.ensureDebugId("RefreshButton");
-        regattaUpdatePermissionCheck = ()->userService.hasPermission(regatta, DefaultActions.UPDATE);
+        this.contextUpdatePermissionCheck = contextUpdatePermissionCheck;
         final Button importCertificatesButton = topButtonPanel.addAction(stringMessages.importCertificates(),
-                regattaUpdatePermissionCheck, this::importCertificates);
+                contextUpdatePermissionCheck, this::importCertificates);
         importCertificatesButton.ensureDebugId("ImportCertificatesButton");
-        final Button assignCertificatesButton = topButtonPanel.addAction(stringMessages.assignCertificates(), regattaUpdatePermissionCheck,
+        final Button assignCertificatesButton = topButtonPanel.addAction(stringMessages.assignCertificates(), contextUpdatePermissionCheck,
                 this::assignCertificates);
         assignCertificatesButton.ensureDebugId("AssignCertificatesButton");
-        // TODO Add functionality to button and implement Form
         // TABLE - Boats
         CaptionPanel boatCaptionPanel = new CaptionPanel("Boats");
         boatCaptionPanel.add(boatTable);
@@ -169,7 +176,7 @@ public class BoatCertificatesPanel extends SimplePanel {
         certificatesCaptionPanel.add(certificateTable);
         wireSelectionModels();
         tablesPanel.setWidget(0, 1, certificatesCaptionPanel);
-        if (regatta != null) {
+        if (objectToCheckUpdatePermissionFor != null) {
             refresh();
         }
     }
@@ -215,7 +222,7 @@ public class BoatCertificatesPanel extends SimplePanel {
             final ORCCertificate selectedCertificate = certificateTable.getSelectionModel().getSelectedObject();
             if (boat != null) {
                 final ORCCertificate assignedCertificate = certificateAssignments.get(boat);
-                if (regattaUpdatePermissionCheck.get()) { // is the user permitted to update the regatta at all?
+                if (contextUpdatePermissionCheck.get()) { // is the user permitted to update the regatta at all?
                     if (selectedCertificate != null) {
                         if (assignedCertificate == null || Window.confirm(stringMessages.reallyChangeAssignedCertificateForBoat(boat.toString()))) {
                             assign(boat, selectedCertificate);
@@ -243,11 +250,12 @@ public class BoatCertificatesPanel extends SimplePanel {
         };
     }
 
-    public void setCertificateSelectionWithoutEventHandling(final ORCCertificate assignedCertificate) {
+    private void setCertificateSelectionWithoutEventHandling(final ORCCertificate assignedCertificate) {
         // re-adjust selection; the user did not confirm:
         temporarilyDeregisterCertificateTableSelectionHandler();
         certificateTable.getSelectionModel().setSelected(assignedCertificate, true);
     }
+    
     private void wireSelectionModels() {
         boatTable.getSelectionModel().addSelectionChangeHandler(e->{
             final ORCCertificate assignedCertificate = certificateAssignments.get(boatTable.getSelectionModel().getSelectedObject());
@@ -316,26 +324,34 @@ public class BoatCertificatesPanel extends SimplePanel {
         for (final Entry<BoatDTO, ORCCertificate> e : certificateAssignments.entrySet()) {
             certificatesByBoatIdAsString.put(e.getKey().getIdAsString(), e.getValue());
         }
-        sailingService.assignORCPerformanceCurveCertificates(regattaIdentifier, certificatesByBoatIdAsString,
-                new AsyncCallback<Triple<Integer, Integer, Integer>>() {
-                    @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.errorAssigningCertificates(caught.getMessage()));
-            }
-
+        final AsyncCallback<Triple<Integer, Integer, Integer>> callback = new AsyncCallback<Triple<Integer, Integer, Integer>>() {
             @Override
-            public void onSuccess(Triple<Integer, Integer, Integer> result) {
-                Notification.notify(stringMessages.insertedAndReplacedAndRemovedCertificateAssignments(
-                        result.getA(), result.getB(), result.getC()), Notification.NotificationType.INFO);
-            }
-        });
+         public void onFailure(Throwable caught) {
+        errorReporter.reportError(stringMessages.errorAssigningCertificates(caught.getMessage()));
+         }
+
+         @Override
+         public void onSuccess(Triple<Integer, Integer, Integer> result) {
+        Notification.notify(stringMessages.insertedAndReplacedAndRemovedCertificateAssignments(
+                result.getA(), result.getB(), result.getC()), Notification.NotificationType.INFO);
+         }
+      };
+      assignCertificates(sailingService, certificatesByBoatIdAsString, callback);
     }
 
-    private void refresh() {
-        sailingService.getBoatRegistrationsForRegatta(regattaIdentifier, new AsyncCallback<Collection<BoatDTO>>() {
+    protected abstract void assignCertificates(SailingServiceAsync sailingService,
+            Map<String, ORCCertificate> certificatesByBoatIdAsString,
+            AsyncCallback<Triple<Integer, Integer, Integer>> callback);
+
+    protected void refresh() {
+        final AsyncCallback<Collection<BoatDTO>> callbackForGetBoats = new AsyncCallback<Collection<BoatDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.errorUnableToGetBoatsForRegatta(regattaIdentifier.toString(), caught.getMessage()));
+                reportErrorWhileGettingBoatsForContext(caught, errorContext);
+            }
+
+            public void reportErrorWhileGettingBoatsForContext(Throwable caught, final String errorContext) {
+                errorReporter.reportError(stringMessages.errorUnableToGetBoatsForRegatta(errorContext, caught.getMessage()));
             }
 
             @Override
@@ -344,7 +360,7 @@ public class BoatCertificatesPanel extends SimplePanel {
                 for (final BoatDTO boat : boatResults) {
                     boatsByIdAsString.put(boat.getIdAsString(), boat);
                 }
-                sailingService.getORCCertificateAssignmentsByBoatIdAsString(regattaIdentifier, new AsyncCallback<Map<String, ORCCertificate>>() {
+                final AsyncCallback<Map<String, ORCCertificate>> callbackForGetCertificates = new AsyncCallback<Map<String, ORCCertificate>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(stringMessages.errorObtainingCertificates(caught.getMessage()));
@@ -368,8 +384,15 @@ public class BoatCertificatesPanel extends SimplePanel {
                         certificateTable.setCertificates(new HashSet<>(certificatesById.values()));
                         boatTable.setBoats(boatResults);
                     }
-                });
+                };
+                getORCCertificateAssignemtnsByBoatIdAsString(sailingService, callbackForGetCertificates);
             }
-        });
+        };
+        getBoats(sailingService, callbackForGetBoats);
+
     }
+
+    protected abstract void getBoats(SailingServiceAsync sailingService, final AsyncCallback<Collection<BoatDTO>> callbackForGetBoats);
+    
+    protected abstract void getORCCertificateAssignemtnsByBoatIdAsString(SailingServiceAsync sailingService, final AsyncCallback<Map<String, ORCCertificate>> callbackForGetCertificates);
 }

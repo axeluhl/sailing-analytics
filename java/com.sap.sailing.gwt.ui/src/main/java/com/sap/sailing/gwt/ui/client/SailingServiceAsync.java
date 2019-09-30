@@ -1150,6 +1150,12 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void getORCCertificateAssignmentsByBoatIdAsString(RegattaIdentifier regattaIdentifier, AsyncCallback<Map<String, ORCCertificate>> asyncCallback);
 
+    void getORCCertificateAssignmentsByBoatIdAsString(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Map<String, ORCCertificate>> asyncCallback);
+
+    void getORCCertificateAssignmentsByBoatIdAsString(String leaderboardName, AsyncCallback<Map<String, ORCCertificate>> asyncCallback);
+
+    void getORCCertificateAssignmentsByBoatIdAsString(String leaderboardName, String raceColumnName, String fleetName, AsyncCallback<Map<String, ORCCertificate>> asyncCallback);
+
     void assignORCPerformanceCurveCertificates(RegattaIdentifier regattaIdentifier,
             Map<String, ORCCertificate> certificatesForBoatsWithIdAsString,
             AsyncCallback<Triple<Integer, Integer, Integer>> callback);

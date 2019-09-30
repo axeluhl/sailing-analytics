@@ -1231,6 +1231,12 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Map<String, ORCCertificate> getORCCertificateAssignmentsByBoatIdAsString(RegattaIdentifier regattaIdentifier) throws NotFoundException;
     
+    Map<String, ORCCertificate> getORCCertificateAssignmentsByBoatIdAsString(RegattaAndRaceIdentifier raceIdentifier) throws NotFoundException;
+
+    Map<String, ORCCertificate> getORCCertificateAssignmentsByBoatIdAsString(String leaderboardName) throws NotFoundException;
+
+    Map<String, ORCCertificate> getORCCertificateAssignmentsByBoatIdAsString(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException;
+
     Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(RegattaIdentifier regattaIdentifier,
             Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
     
@@ -1240,5 +1246,4 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(String leaderboardName,
             Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
-
 }
