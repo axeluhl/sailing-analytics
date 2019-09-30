@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/courseconfiguration/createCourse/{regattaName}/{raceColumn}/{fleet}</h2>
+
+<b>Description:</b>
+<p>The service saves a course to a race using the course configuration model.</p>
+<br/>
+<table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>REST</td>
+    </tr>
+    <tr>
+        <td>Input format:</td>
+        <td>Json</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>Json</td>
+    </tr>
+    <tr>
+        <td>Mandatory parameters:</td>
+        <td>name: the name<br>
+            courseTemplateId: optional ID of an associated course template that is the base of this course configuration<br>
+            markConfigurations: A set of all mark configurations being part of the course configuration. Any mark configuration being part of at least one waypoint must be included. Additional mark configurations that are not part of the waypoint sequence may be included as spare marks. For each entry, the following properties can be defined:
+            <ul>
+                <li>id (required): A string ID (e.g. UUID) that identifies the mark configuration in this course configuration. The ID defined here is used to form the waypoint sequence. The IDs defined here are in no way stored and can freely be regenerated for every API call.</li>
+                <li>associatedRole (optional): For mark templates that are used in the waypoint sequence, an optional but unique role name may be specified.</li>
+                <li>markId (optional): The ID of a mark being available in the specified regatta. This mark is used as is regarding the appearance. Any additional properties (excluding positioning) is ignored.</li>
+                <li>markTemplateId (optional): The ID of a mark template a mark to create is based on.</li>
+                <li>markPropertiesId (optional): Only applicable if no markId is defined. The ID of a mark properties entry a mark to create is based on. If given, available appearance properties overwrite those of a given mark template when creating a mark. If available, the positioning information of the mark properties is used for the created mark.</li>
+                <li>freestyleProperties (optional): Only applicable if no markId is defined. Using this, the appearance of the mark to be created can freely be specified. If given, available appearance properties overwrite those of a given mark template or mark properties when creating a mark. The following properties may be given:
+                    <ul>
+                        <li>name: the name of the mark to create</li>
+                        <li>shortName: the short name to set. If not given, the short name defaults to the name.</li>
+                        <li>tag: Multi value specifying an optional set of tags.</li>
+                        <li>markType: One of [BUOY, CAMERABOAT, STARTBOAT, UMPIREBOAT, LANDMARK, FINISHBOAT]</li>
+                        <li>color: RGB color value. Either of the hex color patterns: #RRGGBB, #RGB, RRGGBB, RGB</li>
+                        <li>shape: For marks with BUOY type, this may be specified as one of [CYLINDER, CONICAL]</li>
+                        <li>pattern: For marks with BUOY type, this may be specified as CHECKERED</li>
+                    </ul>
+                </li>
+                <li>positioning (optional): Not implemented yet! Defines the positioning properties to set for the mark.</li>
+            </ul>
+            waypoints: An ordered sequence of waypoints that form the layout of the course template. For each waypoint, the following properties can be specified:
+            <ul>
+                <li>passingInstruction (required): For single mark waypoints, this can be one of [None, Port, Starboard, Single_Unknown, FixedBearing]. For mark pairs, this can be one of [None, Gate, Line, Offset].</li>
+                <li>markConfigurationIds (required): List of UUIDs of the relevant mark templates. May specify one or two mark templates.</li>
+                <li>controlPointName (depends): For mark pairs this specifies the control point name. For single mark waypoints this is not used.</li>
+                <li>controlPointShortName (depends): For mark pairs this specifies the control point short name. For single mark waypoints this is not used.</li>
+            </ul>
+            </td>
+    </tr>
+    <tr>
+        <td>Optional parameters:</td>
+        <td>regattaName: An optional name of an existing regatta. If given, the course configuration is based on the marks of a regatta if marks are available.
+        </td>
+    </tr>
+    <tr>
+        <td>Optional Query parameters:</td>
+        <td>optionalRepeatablePart: JSON object that if given defines the part of the sequence that can be repeated in lap. The following properties must be given:
+            <ul>
+                <li>zeroBasedIndexOfRepeatablePartStart (required): offset of the first waypoint to include in the repeatable part. Must not be out of range for 0 &lt;= i &lt; count(waypoints).</li>
+                <li>zeroBasedIndexOfRepeatablePartEnd (required): offset of the first waypoint that comes after the repeatable part. Must not be out of range for 1 &lt;= i &lt;= count(waypoints) and must be &gt; zeroBasedIndexOfRepeatablePartStart.</li>
+            </ul>
+            numberOfLaps: The number of laps to create based on the repeatable part. Also required if a non-null optionalRepeatablePart is defined.
+        </td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><a href="http://www.sapsailing.com/sailingserver/api/v1/courseconfiguration/createCourse/{regattaName}/{raceColumn}/{fleet}">/api/v1/courseconfiguration/createCourse/{regattaName}/{raceColumn}/{fleet}</a><br>
+            Example payload:<br>
+            <pre>
+{
+    "name": "my-special-course",
+    "courseTemplateId": "f5e6f88b-ae56-4705-8b41-2558b9dd7063",
+    "markConfigurations": [
+        {
+            "id": "f6012c27-8a62-4d46-aede-5ad4584ccd24",
+            "markTemplateId": "f00e9053-e0ad-430f-a555-73f7ec2e59e1",
+            "freestyleProperties": {
+                "name": "green",
+                "shortName": "green",
+                "color": "#00FF00",
+                "shape": "",
+                "pattern": "",
+                "markType": "BUOY"
+            }
+        },
+        {
+            "id": "43c622d2-46b0-4667-9937-071dec72c0d9",
+            "markTemplateId": "145f7908-a050-46d6-bd88-8267baa65985"
+        },
+        {
+            "id": "cd4f9606-493b-422f-8615-6630d8761f4f",
+            "markTemplateId": "4cd7d7e4-bb8a-4fc2-a075-d47adec335e4"
+        },
+        {
+            "id": "47c22ee7-9150-4f38-a0a2-a23dab5971df",
+            "markId": "41034b11-111b-420e-b929-293f5e80d5cc"
+        },
+        {
+            "id": "4c696f87-a703-4b0f-a50a-4979836cacd7",
+            "freestyleProperties": {
+                "name": "spare",
+                "shortName": "spare",
+                "color": "#00FFFF",
+                "shape": "",
+                "pattern": "",
+                "markType": "BUOY"
+            }
+        },
+        {
+            "id": "57b682af-11c4-4130-970b-0569320af882",
+            "markPropertiesId": "342ab208-d6de-4485-92f6-34ea8b6a0b39"
+        }
+    ],
+    "waypoints": [
+        {
+            "passingInstruction": "Line",
+            "markConfigurationIds": [
+                "43c622d2-46b0-4667-9937-071dec72c0d9",
+                "cd4f9606-493b-422f-8615-6630d8761f4f"
+            ],
+            "controlPointName": "Start\/End",
+            "controlPointShortName": "S\/E"
+        },
+        {
+            "passingInstruction": "Port",
+            "markConfigurationIds": [
+                "47c22ee7-9150-4f38-a0a2-a23dab5971df"
+            ]
+        },
+        {
+            "passingInstruction": "Gate",
+            "markConfigurationIds": [
+                "f6012c27-8a62-4d46-aede-5ad4584ccd24",
+                "57b682af-11c4-4130-970b-0569320af882"
+            ],
+            "controlPointName": null,
+            "controlPointShortName": null
+        },
+        {
+            "passingInstruction": "Port",
+            "markConfigurationIds": [
+                "47c22ee7-9150-4f38-a0a2-a23dab5971df"
+            ]
+        },
+        {
+            "passingInstruction": "Line",
+            "markConfigurationIds": [
+                "43c622d2-46b0-4667-9937-071dec72c0d9",
+                "cd4f9606-493b-422f-8615-6630d8761f4f"
+            ],
+            "controlPointName": "Start\/End",
+            "controlPointShortName": "S\/E"
+        }
+    ],
+    "optionalRepeatablePart": {
+        "zeroBasedIndexOfRepeatablePartStart": 1,
+        "zeroBasedIndexOfRepeatablePartEnd": 3
+    },
+    "numberOfLaps": 2
+}
+</pre>
+        </td>
+    </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>
