@@ -125,7 +125,7 @@ public class BoatCertificatesPanel extends SimplePanel {
         this.hiddenCertificateUrlsFields = new ArrayList<>();
         this.boatTable = new BoatWithCertificateTableWrapper<>(sailingService, userService, stringMessages,
                 errorReporter, /* multiSelection */ false, /* enablePager */ true, TableWrapper.DEFAULT_PAGING_SIZE, /* allow actions */ true,
-                boat->unlink(boat), boat->certificateAssignments.containsKey(boat));
+                boat->unlink(boat), regatta, boat->certificateAssignments.containsKey(boat));
         this.certificateTable = new CertificatesTableWrapper<>(sailingService, userService, stringMessages,
                 errorReporter, /* multiSelection */ false, /* enablePager */ true, TableWrapper.DEFAULT_PAGING_SIZE);
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);

@@ -21,11 +21,13 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 
@@ -43,7 +45,7 @@ public class BoatWithCertificateTableWrapper<S extends RefreshableSelectionModel
     
     public BoatWithCertificateTableWrapper(SailingServiceAsync sailingService, final UserService userService,
             StringMessages stringMessages, ErrorReporter errorReporter, boolean multiSelection, boolean enablePager,
-            int pagingSize, boolean allowActions, Consumer<BoatDTO> unlinkAction, Function<BoatDTO, Boolean> isLinkedChecker) {
+            int pagingSize, boolean allowActions, Consumer<BoatDTO> unlinkAction, RegattaDTO regatta, Function<BoatDTO, Boolean> isLinkedChecker) {
         super(sailingService, stringMessages, errorReporter, multiSelection, enablePager, pagingSize,
                 new EntityIdentityComparator<BoatDTO>() {
                     @Override
@@ -138,8 +140,8 @@ public class BoatWithCertificateTableWrapper<S extends RefreshableSelectionModel
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         // BoatTable edit features
         AccessControlledActionsColumn<BoatDTO, BoatConfigImagesBarCell> boatActionColumn = create(
-                new BoatConfigImagesBarCell(getStringMessages()), userService);
-        boatActionColumn.addAction(BoatConfigImagesBarCell.UNLINK, this::unlink);
+                new BoatConfigImagesBarCell(getStringMessages()), userService, boatDTO->regatta);
+        boatActionColumn.addAction(BoatConfigImagesBarCell.UNLINK, DefaultActions.UPDATE, this::unlink);
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(boatColumnListHandler);
         table.addColumn(sailIdColumn, stringMessages.sailNumber());
