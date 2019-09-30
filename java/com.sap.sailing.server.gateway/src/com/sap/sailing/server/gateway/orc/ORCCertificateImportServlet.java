@@ -57,8 +57,10 @@ public class ORCCertificateImportServlet extends AbstractFileUploadServlet {
                 } else {
                     // file entry: parse certificates from file and key them by their ID
                     final ORCCertificatesCollection certificateCollection = ORCCertificatesImporter.INSTANCE.read(item.getInputStream());
-                    for (final ORCCertificate certificate : certificateCollection.getCertificates()) {
-                        certificates.add(certificate);
+                    if (certificateCollection != null) {
+                        for (final ORCCertificate certificate : certificateCollection.getCertificates()) {
+                            certificates.add(certificate);
+                        }
                     }
                 }
             }

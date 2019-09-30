@@ -549,13 +549,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         racesTable.ensureDebugId("RacesCellTable");
     }
 
-    private void assignCertificates(RaceColumnDTOAndFleetDTOWithNameBasedEquality object) {
-        BoatCertificateAssignmentDialog dialog = new BoatCertificateAssignmentDialog(sailingService, userService,
-                stringMessages, errorReporter, /* callback */ null,
-                new RaceBoatCertificatesPanel(sailingService, userService, object.getC(), object.getA(), object.getB(), stringMessages, errorReporter));
-        dialog.show();
-    }
-
     @Override
     protected void addSelectedLeaderboardRacesControls(Panel racesPanel) {
         addRaceColumnsButton = new Button(stringMessages.actionAddRaces() + "...");
@@ -569,7 +562,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
             }
         });
         racesPanel.add(addRaceColumnsButton);
-
         columnMoveUpButton = new Button(stringMessages.columnMoveUp());
         columnMoveUpButton.ensureDebugId("MoveRaceUpButton");
         columnMoveUpButton.addClickHandler(event -> moveSelectedRaceColumnUp());

@@ -809,4 +809,11 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         }
         return regatta;
     }
+
+    protected void assignCertificates(RaceColumnDTOAndFleetDTOWithNameBasedEquality object) {
+        BoatCertificateAssignmentDialog dialog = new BoatCertificateAssignmentDialog(sailingService, userService,
+                stringMessages, errorReporter, /* callback */ null,
+                new RaceBoatCertificatesPanel(sailingService, userService, object.getC(), object.getA(), object.getB(), stringMessages, errorReporter));
+        dialog.show();
+    }
 }

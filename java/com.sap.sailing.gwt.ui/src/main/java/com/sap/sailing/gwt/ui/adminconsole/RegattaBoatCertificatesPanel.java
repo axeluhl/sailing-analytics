@@ -33,6 +33,7 @@ public class RegattaBoatCertificatesPanel extends AbstractBoatCertificatesPanel 
         super(sailingService, userService, /* objectToCheckUpdatePermissionFor */ regatta, stringMessages, errorReporter,
                 /* context update permission check: */ ()->userService.hasPermission(regatta, DefaultActions.UPDATE), regatta.getName());
         this.regattaIdentifier = regatta.getRegattaIdentifier();
+        refresh();
     }
 
     @Override

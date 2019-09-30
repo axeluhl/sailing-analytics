@@ -115,6 +115,9 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
     private final Supplier<Boolean> contextUpdatePermissionCheck;
     private final String errorContext;
     
+    /**
+     * After invoking this superclass constructor, and after doing any other initialization work, subclasses must call {@link #refresh}.
+     */
     public AbstractBoatCertificatesPanel(final SailingServiceAsync sailingService, final UserService userService,
             final SecuredDTO objectToCheckUpdatePermissionFor, final StringMessages stringMessages,
             final ErrorReporter errorReporter, Supplier<Boolean> contextUpdatePermissionCheck, String errorContext) {
@@ -176,9 +179,6 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
         certificatesCaptionPanel.add(certificateTable);
         wireSelectionModels();
         tablesPanel.setWidget(0, 1, certificatesCaptionPanel);
-        if (objectToCheckUpdatePermissionFor != null) {
-            refresh();
-        }
     }
 
     private void formSubmitComplete(SubmitCompleteEvent e) {

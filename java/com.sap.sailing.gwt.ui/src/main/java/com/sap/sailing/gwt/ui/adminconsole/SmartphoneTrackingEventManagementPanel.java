@@ -332,10 +332,6 @@ public class SmartphoneTrackingEventManagementPanel
         racesTable.setWidth("600px");
     }
 
-    private void assignCertificates(RaceColumnDTOAndFleetDTOWithNameBasedEquality t) {
-        // TODO Implement SmartphoneTrackingEventManagementPanel.assignCertificates(...)
-    }
-
     private void handleCopy(RaceColumnDTOAndFleetDTOWithNameBasedEquality t) {
         final String leaderboardName = t.getC().getName();
         List<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races = new ArrayList<>(
