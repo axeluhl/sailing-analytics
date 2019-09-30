@@ -41,7 +41,6 @@
                 <li>markTemplateIds (required): List of UUIDs of the relevant mark templates. May specify one or two mark templates.</li>
                 <li>controlPointName (depends): For mark pairs this specifies the control point name. For single mark waypoints this is not used.</li>
             </ul>
-            tags: An optional set of tags
             </td>
     </tr>
     <tr>
@@ -52,6 +51,7 @@
                 <li>zeroBasedIndexOfRepeatablePartStart (required): offset of the first waypoint to include in the repeatable part. Must not be out of range for 0 &lt;= i &lt; count(waypoints).</li>
                 <li>zeroBasedIndexOfRepeatablePartEnd (required): offset of the first waypoint that comes after the repeatable part. Must not be out of range for 1 &lt;= i &lt;= count(waypoints) and must be &gt; zeroBasedIndexOfRepeatablePartStart.</li>
             </ul>
+            tags: An set of String tags
         </td>
     </tr>
     <tr>
