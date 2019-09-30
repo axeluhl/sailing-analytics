@@ -406,8 +406,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     
     private void handleBoatCertificateAssignment(RegattaDTO regatta) {
         BoatCertificateAssignmentDialog dialog = new BoatCertificateAssignmentDialog(sailingService, userService,
-                stringMessages, errorReporter, /* callback */ null,
-                new RegattaBoatCertificatesPanel(sailingService, userService, regatta, stringMessages, errorReporter));
+                stringMessages, errorReporter, new RegattaBoatCertificatesPanel(sailingService, userService, regatta, stringMessages, errorReporter));
         dialog.show();
     }
 

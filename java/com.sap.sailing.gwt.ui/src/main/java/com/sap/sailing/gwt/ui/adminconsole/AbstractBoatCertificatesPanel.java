@@ -167,9 +167,6 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
         final Button importCertificatesButton = topButtonPanel.addAction(stringMessages.importCertificates(),
                 contextUpdatePermissionCheck, this::importCertificates);
         importCertificatesButton.ensureDebugId("ImportCertificatesButton");
-        final Button assignCertificatesButton = topButtonPanel.addAction(stringMessages.assignCertificates(), contextUpdatePermissionCheck,
-                this::assignCertificates);
-        assignCertificatesButton.ensureDebugId("AssignCertificatesButton");
         // TABLE - Boats
         CaptionPanel boatCaptionPanel = new CaptionPanel("Boats");
         boatCaptionPanel.add(boatTable);
@@ -317,26 +314,27 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
     }
 
     /**
-     * Submits the form including the {@link #certificateAssignmentsAsJSON} hidden field
+     * Submits the form including the {@link #certificateAssignmentsAsJSON} hidden field, thus making the current
+     * mappings held by {@link #certificateAssignments} persistent in the context provided by the concrete implementation.
      */
-    private void assignCertificates() {
+    public void assignCertificates() {
         final Map<String, ORCCertificate> certificatesByBoatIdAsString = new HashMap<>();
         for (final Entry<BoatDTO, ORCCertificate> e : certificateAssignments.entrySet()) {
             certificatesByBoatIdAsString.put(e.getKey().getIdAsString(), e.getValue());
         }
         final AsyncCallback<Triple<Integer, Integer, Integer>> callback = new AsyncCallback<Triple<Integer, Integer, Integer>>() {
             @Override
-         public void onFailure(Throwable caught) {
-        errorReporter.reportError(stringMessages.errorAssigningCertificates(caught.getMessage()));
-         }
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(stringMessages.errorAssigningCertificates(caught.getMessage()));
+            }
 
-         @Override
-         public void onSuccess(Triple<Integer, Integer, Integer> result) {
-        Notification.notify(stringMessages.insertedAndReplacedAndRemovedCertificateAssignments(
-                result.getA(), result.getB(), result.getC()), Notification.NotificationType.INFO);
-         }
-      };
-      assignCertificates(sailingService, certificatesByBoatIdAsString, callback);
+            @Override
+            public void onSuccess(Triple<Integer, Integer, Integer> result) {
+                Notification.notify(stringMessages.insertedAndReplacedAndRemovedCertificateAssignments(result.getA(),
+                        result.getB(), result.getC()), Notification.NotificationType.INFO);
+            }
+        };
+        assignCertificates(sailingService, certificatesByBoatIdAsString, callback);
     }
 
     protected abstract void assignCertificates(SailingServiceAsync sailingService,
