@@ -9,6 +9,8 @@ import javax.ws.rs.core.Context;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
@@ -87,6 +89,22 @@ public abstract class AbstractSailingServerResource {
             regatta = getService().getRegattaByName(regattaName.replaceAll(SLASH_ENCODING, "/"));
         }
         return regatta;
+    }
+    
+    protected RaceColumn findRaceColumnByName(Regatta regatta, String raceColumnName) {
+        RaceColumn raceColumn = regatta.getRaceColumnByName(raceColumnName);
+        if (raceColumn == null && raceColumnName.contains(SLASH_ENCODING)) {
+            raceColumn = regatta.getRaceColumnByName(raceColumnName.replaceAll(SLASH_ENCODING, "/"));
+        }
+        return raceColumn;
+    }
+    
+    protected Fleet findFleetByName(RaceColumn raceColumn, String fleetName) {
+        Fleet fleet = raceColumn.getFleetByName(fleetName);
+        if (fleet == null && fleetName.contains(SLASH_ENCODING)) {
+            fleet = raceColumn.getFleetByName(fleetName.replaceAll(SLASH_ENCODING, "/"));
+        }
+        return fleet;
     }
 
     protected RaceDefinition findRaceByName(Regatta regatta, String raceName) {
