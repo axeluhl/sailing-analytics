@@ -25,6 +25,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEv
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
@@ -112,10 +113,16 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         if (raceColumnByName == null || fleetByName == null) {
             return getBadRaceErrorResponse(regattaName, raceColumn, fleet);
         }
-
-        final LastPublishedCourseDesignFinder courseDesginFinder = new LastPublishedCourseDesignFinder(
-                regatta.getRacelog(raceColumn, fleet), /* onlyCoursesWithValidWaypointList */ true);
-        final CourseBase courseBase = courseDesginFinder.analyze();
+        
+        final RaceDefinition raceDefinition = raceColumnByName.getRaceDefinition(fleetByName);
+        final CourseBase courseBase;
+        if (raceDefinition != null) {
+            courseBase = raceDefinition.getCourse();
+        } else {
+            final LastPublishedCourseDesignFinder courseDesginFinder = new LastPublishedCourseDesignFinder(
+                    regatta.getRacelog(raceColumn, fleet), /* onlyCoursesWithValidWaypointList */ true);
+            courseBase = courseDesginFinder.analyze();
+        }
 
         if (courseBase == null) {
             return Response.status(Status.NOT_FOUND).entity("No course found for given race.").build();
