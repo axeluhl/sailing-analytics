@@ -15,13 +15,12 @@ import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
@@ -50,7 +49,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
     
     private final FormPanel uploadFormPanel;
     
-    private final HorizontalPanel uploadPanel;
+    private final FlowPanel uploadPanel;
     
     public URLFieldWithFileUpload(final StringMessages stringMessages) {
         this(stringMessages, true);
@@ -58,11 +57,12 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
    
     public URLFieldWithFileUpload(final StringMessages stringMessages, boolean initiallyEnableUpload) {
         final VerticalPanel mainPanel = new VerticalPanel();
-        final HorizontalPanel imageUrlPanel = new HorizontalPanel();
+        final FlowPanel imageUrlPanel = new FlowPanel();
         mainPanel.add(new Label(stringMessages.pleaseOnlyUploadContentYouHaveAllUsageRightsFor()));
         mainPanel.add(imageUrlPanel);
         
         final FormPanel removePanel = new FormPanel();
+        removePanel.getElement().setPropertyString("style", "display: inline-block;");
         removePanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
@@ -95,8 +95,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         // the upload panel
         uploadFormPanel = new FormPanel();
         mainPanel.add(uploadFormPanel);
-        uploadPanel = new HorizontalPanel();
-        uploadPanel.setSpacing(3);
+        uploadPanel = new FlowPanel();
         if(initiallyEnableUpload) {
             uploadFormPanel.add(uploadPanel);
         }
@@ -105,8 +104,8 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         uploadFormPanel.setMethod(FormPanel.METHOD_POST);
         fileUploadField = new FileUpload();
         final Label uploadLabel = new Label(stringMessages.upload()+ ":");
+        uploadLabel.getElement().setPropertyString("style", "display: inline-block;");
         uploadPanel.add(uploadLabel);
-        uploadPanel.setCellVerticalAlignment(uploadLabel, HasVerticalAlignment.ALIGN_MIDDLE);
         uploadPanel.add(fileUploadField);
         final InputElement inputElement = fileUploadField.getElement().cast();
         inputElement.setName("file");
