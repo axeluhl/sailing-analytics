@@ -42,6 +42,7 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.datamining.SailingPredefinedQueries;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
@@ -52,6 +53,7 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -209,6 +211,14 @@ public class RegattasResource extends AbstractSailingServerResource {
     private Response getBadRaceErrorResponse(String regattaName, String raceName) {
         return Response.status(Status.NOT_FOUND)
                 .entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName) + "' in regatta '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
+                .type(MediaType.TEXT_PLAIN).build();
+    }
+    
+    private Response getBadRaceErrorResponse(String regattaName, String raceColumn, String fleet) {
+        return Response.status(Status.NOT_FOUND)
+                .entity("Could not find a race with raceColumn '" + StringEscapeUtils.escapeHtml(raceColumn)
+                        + "' and fleet '" + StringEscapeUtils.escapeHtml(fleet) + "' in regatta '"
+                        + StringEscapeUtils.escapeHtml(regattaName) + "'.")
                 .type(MediaType.TEXT_PLAIN).build();
     }
     
@@ -995,16 +1005,66 @@ public class RegattasResource extends AbstractSailingServerResource {
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
             } else {
-                Course course = race.getCourse();
-                CourseBaseJsonSerializer serializer = new CourseBaseJsonSerializer(new WaypointJsonSerializer(
-                        new ControlPointJsonSerializer(new MarkJsonSerializer(), new GateJsonSerializer(
-                                new MarkJsonSerializer()))));
-
-                JSONObject jsonCourse = serializer.serialize(course);
-                String json = jsonCourse.toJSONString();
-                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                CourseBase course = race.getCourse();
+                response = getCourseResult(course);
             }
         }
+        return response;
+    }
+    
+    /**
+     * Gets the course of the race defined by the raceColumn/fleet tupel.
+     * 
+     * @param regattaName
+     *            the name of the regatta
+     * @return
+     */
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/structure/{raceColumn}/{fleet}/course")
+    public Response getCourse(@PathParam("regattaname") String regattaName, @PathParam("raceColumn") String raceColumnName, @PathParam("fleet") String fleetName) {
+        Response response;
+        Regatta regatta = findRegattaByName(regattaName);
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
+            
+            final RaceColumn raceColumn = findRaceColumnByName(regatta, raceColumnName);
+            final Fleet fleet = findFleetByName(raceColumn, fleetName);
+
+            if (raceColumn == null || fleet == null) {
+                response = getBadRaceErrorResponse(regattaName, raceColumnName, fleetName);
+            } else {
+                final RaceDefinition raceDefinition = raceColumn.getRaceDefinition(fleet);
+                final CourseBase course;
+                if (raceDefinition != null) {
+                    course = raceDefinition.getCourse();
+                } else {
+                    final LastPublishedCourseDesignFinder courseDesginFinder = new LastPublishedCourseDesignFinder(
+                            raceColumn.getRaceLog(fleet), /* onlyCoursesWithValidWaypointList */ true);
+                    course = courseDesginFinder.analyze();
+                }
+                
+                if (course == null) {
+                    response = Response.status(Status.NOT_FOUND).entity("No course found for given race.").build();
+                } else {
+                    response = getCourseResult(course);
+                }
+            }
+        }
+        return response;
+    }
+
+    private Response getCourseResult(CourseBase course) {
+        Response response;
+        CourseBaseJsonSerializer serializer = new CourseBaseJsonSerializer(new WaypointJsonSerializer(
+                new ControlPointJsonSerializer(new MarkJsonSerializer(), new GateJsonSerializer(
+                        new MarkJsonSerializer()))));
+
+        JSONObject jsonCourse = serializer.serialize(course);
+        String json = jsonCourse.toJSONString();
+        response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         return response;
     }
     
