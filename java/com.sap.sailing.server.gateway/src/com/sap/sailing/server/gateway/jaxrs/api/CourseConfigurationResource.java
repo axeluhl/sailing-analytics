@@ -106,8 +106,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
             return getBadRegattaErrorResponse(regattaName);
         }
 
-        final RaceColumn raceColumnByName = regatta.getRaceColumnByName(raceColumn);
-        final Fleet fleetByName = raceColumnByName.getFleetByName(fleet);
+        final RaceColumn raceColumnByName = findRaceColumnByName(regatta, raceColumn);
+        final Fleet fleetByName = findFleetByName(raceColumnByName, fleet);
 
         if (raceColumnByName == null || fleetByName == null) {
             return getBadRaceErrorResponse(regattaName, raceColumn, fleet);
@@ -213,8 +213,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
             return getBadRegattaErrorResponse(regattaName);
         }
 
-        final RaceColumn raceColumnByName = regatta.getRaceColumnByName(raceColumn);
-        final Fleet fleetByName = raceColumnByName.getFleetByName(fleet);
+        final RaceColumn raceColumnByName = findRaceColumnByName(regatta, raceColumn);
+        final Fleet fleetByName = findFleetByName(raceColumnByName, fleet);
 
         if (raceColumnByName == null || fleetByName == null) {
             return getBadRaceErrorResponse(regattaName, raceColumn, fleet);
