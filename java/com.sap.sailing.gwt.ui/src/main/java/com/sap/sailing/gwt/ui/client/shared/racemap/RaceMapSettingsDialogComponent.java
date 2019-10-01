@@ -81,6 +81,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         showSatelliteLayerCheckbox.setValue(initialSettings.isShowSatelliteLayer());
         showSatelliteLayerCheckbox.getElement().setAttribute("selenium_checkbox", String.valueOf(initialSettings.isShowSatelliteLayer()));
         showSatelliteLayerCheckbox.ensureDebugId("showSatelliteLayerCheckBox");
+        showSatelliteLayerCheckbox.setEnabled(!initialSettings.isWindUp());
         vp.add(showSatelliteLayerCheckbox);
 
         windUpCheckbox = dialog.createCheckbox(stringMessages.windUp());

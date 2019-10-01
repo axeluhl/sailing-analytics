@@ -685,7 +685,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     coordinateSystem.setCoordinateSystem(new RotateAndTranslateCoordinateSystem(centerOfCourse,
                             lastCombinedTrueWindFromDirection.add(new DegreeBearingImpl(90))));
                     if (map != null) {
-                        mapOptions = getMapOptions(settings.isShowMapControls(), /* wind-up */ true);
+                        mapOptions = getMapOptions(settings.isShowMapControls(), /* wind-up */ true,
+                                settings.isShowSatelliteLayer());
                     } else {
                         mapOptions = null;
                     }
@@ -702,7 +703,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         } else {
             if (map != null) {
-                mapOptions = getMapOptions(settings.isShowMapControls(), /* wind-up */ false);
+                mapOptions = getMapOptions(settings.isShowMapControls(), /* wind-up */ false,
+                        settings.isShowSatelliteLayer());
             } else {
                 mapOptions = null;
             }
@@ -747,7 +749,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 });
     }
 
-    private void loadMapsAPIV3(final boolean showMapControls, final boolean showHeaderPanel) {
+    private void loadMapsAPIV3(final boolean showMapControls, final boolean showHeaderPanel,
+            final boolean showSatelliteLayer) {
         // load all the libs for use in the maps
         ArrayList<LoadLibrary> loadLibraries = new ArrayList<LoadApi.LoadLibrary>();
         loadLibraries.add(LoadLibrary.DRAWING);
@@ -756,7 +759,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         Runnable onLoad = new Runnable() {
             @Override
             public void run() {
-                MapOptions mapOptions = getMapOptions(showMapControls, /* wind up */ false);
+                MapOptions mapOptions = getMapOptions(showMapControls, /* wind up */ false, showSatelliteLayer);
                 map = new MapWidget(mapOptions);
                 rootPanel.add(map, 0, 0);
                 if (showHeaderPanel) {
@@ -2843,6 +2846,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         boolean requiresRedraw = false;
         boolean requiresUpdateCoordinateSystem = false;
 
+        if (newSettings.isShowSatelliteLayer() != settings.isShowSatelliteLayer()) {
+            requiresUpdateCoordinateSystem = true;
+        }
+
         if (newSettings.isShowManeuverLossVisualization() != settings.isShowManeuverLossVisualization()) {
             showManeuverLossChanged = true;
         }
@@ -3031,7 +3038,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     @Override
     public void initializeData(boolean showMapControls, boolean showHeaderPanel) {
-        loadMapsAPIV3(showMapControls, showHeaderPanel);
+        loadMapsAPIV3(showMapControls, showHeaderPanel, this.settings.isShowSatelliteLayer());
     }
 
     @Override
@@ -3212,40 +3219,42 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return new BoatsBoundsCalculator().calculateNewBounds(RaceMap.this);
     }
 
-    private MapOptions getMapOptions(final boolean showMapControls, boolean windUp) {
+    private MapOptions getMapOptions(final boolean showMapControls, boolean windUp, boolean showSatelliteLayer) {
         MapOptions mapOptions = MapOptions.newInstance();
-          mapOptions.setScrollWheel(true);
-          mapOptions.setMapTypeControl(false);
-          mapOptions.setPanControl(showMapControls);
-          mapOptions.setZoomControl(showMapControls);
-          mapOptions.setScaleControl(true);
-          if (windUp) {
-              mapOptions.setMinZoom(8);
-          } else {
-              mapOptions.setMinZoom(0);
-          }
-          MapTypeStyle[] mapTypeStyles = new MapTypeStyle[4];
-          
-          // hide all transit lines including ferry lines
-          mapTypeStyles[0] = GoogleMapStyleHelper.createHiddenStyle(MapTypeStyleFeatureType.TRANSIT);
-          // hide points of interest
-          mapTypeStyles[1] = GoogleMapStyleHelper.createHiddenStyle(MapTypeStyleFeatureType.POI);
-          // simplify road display
-          mapTypeStyles[2] = GoogleMapStyleHelper.createSimplifiedStyle(MapTypeStyleFeatureType.ROAD);
-          // set water color
-          mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, WATER_COLOR);
+        // Google Maps API does not support rotated satellite images
+        mapOptions.setMapTypeId(showSatelliteLayer && !windUp ? MapTypeId.SATELLITE : MapTypeId.ROADMAP);
+        mapOptions.setScrollWheel(true);
+        mapOptions.setMapTypeControl(false);
+        mapOptions.setPanControl(showMapControls);
+        mapOptions.setZoomControl(showMapControls);
+        mapOptions.setScaleControl(true);
+        if (windUp) {
+            mapOptions.setMinZoom(8);
+        } else {
+            mapOptions.setMinZoom(0);
+        }
+        MapTypeStyle[] mapTypeStyles = new MapTypeStyle[4];
 
-          mapOptions.setMapTypeStyles(mapTypeStyles);
-          // no need to try to position the scale control; it always ends up at the right bottom corner
-          mapOptions.setStreetViewControl(false);
-          if (showMapControls) {
-              ZoomControlOptions zoomControlOptions = ZoomControlOptions.newInstance();
-              zoomControlOptions.setPosition(ControlPosition.RIGHT_TOP);
-              mapOptions.setZoomControlOptions(zoomControlOptions);
-              PanControlOptions panControlOptions = PanControlOptions.newInstance();
-              panControlOptions.setPosition(ControlPosition.RIGHT_TOP);
-              mapOptions.setPanControlOptions(panControlOptions);
-          }
+        // hide all transit lines including ferry lines
+        mapTypeStyles[0] = GoogleMapStyleHelper.createHiddenStyle(MapTypeStyleFeatureType.TRANSIT);
+        // hide points of interest
+        mapTypeStyles[1] = GoogleMapStyleHelper.createHiddenStyle(MapTypeStyleFeatureType.POI);
+        // simplify road display
+        mapTypeStyles[2] = GoogleMapStyleHelper.createSimplifiedStyle(MapTypeStyleFeatureType.ROAD);
+        // set water color
+        mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, WATER_COLOR);
+
+        mapOptions.setMapTypeStyles(mapTypeStyles);
+        // no need to try to position the scale control; it always ends up at the right bottom corner
+        mapOptions.setStreetViewControl(false);
+        if (showMapControls) {
+            ZoomControlOptions zoomControlOptions = ZoomControlOptions.newInstance();
+            zoomControlOptions.setPosition(ControlPosition.RIGHT_TOP);
+            mapOptions.setZoomControlOptions(zoomControlOptions);
+            PanControlOptions panControlOptions = PanControlOptions.newInstance();
+            panControlOptions.setPosition(ControlPosition.RIGHT_TOP);
+            mapOptions.setPanControlOptions(panControlOptions);
+        }
         return mapOptions;
     }
 
