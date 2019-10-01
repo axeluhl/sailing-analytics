@@ -29,11 +29,11 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.LoadApi;
 import com.google.gwt.maps.client.LoadApi.LoadLibrary;
 import com.google.gwt.maps.client.MapOptions;
+import com.google.gwt.maps.client.MapTypeId;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.controls.ControlPosition;
-import com.google.gwt.maps.client.controls.MapTypeControlOptions;
 import com.google.gwt.maps.client.controls.MapTypeStyle;
 import com.google.gwt.maps.client.controls.PanControlOptions;
 import com.google.gwt.maps.client.controls.ZoomControlOptions;
@@ -3215,7 +3215,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private MapOptions getMapOptions(final boolean showMapControls, boolean windUp) {
         MapOptions mapOptions = MapOptions.newInstance();
           mapOptions.setScrollWheel(true);
-          mapOptions.setMapTypeControl(showMapControls && !windUp);
+          mapOptions.setMapTypeControl(false);
           mapOptions.setPanControl(showMapControls);
           mapOptions.setZoomControl(showMapControls);
           mapOptions.setScaleControl(true);
@@ -3234,10 +3234,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
           mapTypeStyles[2] = GoogleMapStyleHelper.createSimplifiedStyle(MapTypeStyleFeatureType.ROAD);
           // set water color
           mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, WATER_COLOR);
-          
-          MapTypeControlOptions mapTypeControlOptions = MapTypeControlOptions.newInstance();
-          mapTypeControlOptions.setPosition(ControlPosition.BOTTOM_RIGHT);
-          mapOptions.setMapTypeControlOptions(mapTypeControlOptions);
 
           mapOptions.setMapTypeStyles(mapTypeStyles);
           // no need to try to position the scale control; it always ends up at the right bottom corner
