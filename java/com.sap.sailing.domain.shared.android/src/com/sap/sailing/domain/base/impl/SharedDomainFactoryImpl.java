@@ -194,7 +194,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
             UUID originatingMarkPropertiesId) {
         Mark result = markCache.get(id);
         if (result == null) {
-            result = new MarkImpl(id, name, type, color, shape, pattern, originatingMarkTemplateId,
+            result = new MarkImpl(id, name, shortName, type, color, shape, pattern, originatingMarkTemplateId,
                     originatingMarkPropertiesId);
             cacheMark(id, result);
         }
