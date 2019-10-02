@@ -47,7 +47,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
 
     @Before
     public void setUp() {
-        clearState(getContextRoot(), /* headeless */ true);
+        clearState(getContextRoot(), /* headless */ true);
     }
 
     @Test
