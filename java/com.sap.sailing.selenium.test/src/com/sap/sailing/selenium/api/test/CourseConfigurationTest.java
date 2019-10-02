@@ -111,6 +111,26 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     }
 
     @Test
+    public void testCreateCourseTemplateWithPositioningIncluded() {
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        
+        MarkConfiguration sb = MarkConfiguration.createFreestyle(null, null, "role_sb", "startboat", "sb", null, null, null, null);
+        sb.setFixedPosition(5.5, 7.1);
+        MarkConfiguration pe = MarkConfiguration.createFreestyle(null, null, "role_pe", "pin end", "pe", null, null, null, null);
+        UUID randomDeviceId = UUID.randomUUID();
+        pe.setTrackingDeviceId(randomDeviceId);
+        MarkConfiguration bl = MarkConfiguration.createFreestyle(null, null, "role_bl", "1", null, "#0000FF", null, null, null);
+        WaypointWithMarkConfiguration wp1 = new WaypointWithMarkConfiguration("start/end", "s/e", PassingInstruction.Line, Arrays.asList(sb.getId(), pe.getId()));
+        WaypointWithMarkConfiguration wp2 = new WaypointWithMarkConfiguration(null, null, PassingInstruction.Port, Arrays.asList(bl.getId()));
+
+        CourseConfiguration courseConfiguration = new CourseConfiguration("my-freestyle-course", Arrays.asList(sb, pe, bl), Arrays.asList(wp1, wp2, wp1));
+        
+        CourseConfiguration courseConfigurationResult = courseConfigurationApi.createCourseTemplate(ctx, courseConfiguration, null);
+        // TODO assert positioning is contained in result and identical to the given values
+    }
+
+    @Test
+    @Ignore
     public void testCreateCourseConfigurationFromTemplate() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 
