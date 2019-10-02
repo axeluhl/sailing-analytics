@@ -62,6 +62,8 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
+import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -441,6 +443,12 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             IRace race, TrackedRegattaRegistry trackedRegattaRegistry) {
+        return getOrCreateDefaultRegatta(raceLogStore, regattaLogStore, race, trackedRegattaRegistry, OneDesignRankingMetric::new);
+    }
+    
+    @Override
+    public Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            IRace race, TrackedRegattaRegistry trackedRegattaRegistry, RankingMetricConstructor rankingMetricConstructor) {
         synchronized (regattaCache) {
             // FIXME Dialog with Lasse by Skype on 2011-06-17:
             //            [6:20:04 PM] Axel Uhl: Lasse, can Event.getCompetitorClassList() ever produce more than one result?
@@ -473,6 +481,7 @@ public class DomainFactoryImpl implements DomainFactory {
                             trackedRegattaRegistry,
                             // use the low-point system as the default scoring scheme
                             getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), race.getId(), null,
+                            /* controlTrackingFromStartAndFinishTimes */ false, rankingMetricConstructor,
                             /* registrationLinkSecret */ UUID.randomUUID().toString());
                     regattaCache.put(key, result);
                     weakDefaultRegattaCache.put(race, result);

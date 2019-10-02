@@ -48,6 +48,9 @@ import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.common.orc.ORCCertificate;
+import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
@@ -118,6 +121,7 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.impl.SecondsDurationImpl;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
@@ -949,7 +953,8 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
             AsyncCallback<Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>>> asyncCallback);
 
     void serializationDummy(PersonDTO dummy, CountryCode ccDummy, PreciseCompactPosition preciseCompactPosition,
-            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, AsyncCallback<SerializationDummy> callback);
+            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, SecondsDurationImpl secondsDuration,
+            KnotSpeedImpl knotSpeedImpl, AsyncCallback<SerializationDummy> callback);
 
     /**
      * @param leaderboardName
@@ -1124,6 +1129,53 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void getTrackedRaceIsUsingMarkPassingCalculator(RegattaAndRaceIdentifier regattaNameAndRaceName, AsyncCallback<Boolean> callback);
 
+
+    void getLegGeometry(String leaderboardName, String raceColumnName, String fleetName, int zeroBasedLegIndex,
+            AsyncCallback<ORCPerformanceCurveLegImpl> callback);
+
+    void getLegGeometry(RegattaAndRaceIdentifier singleSelectedRace, int zeroBasedLegIndex, 
+            AsyncCallback<ORCPerformanceCurveLegImpl> callback);
+
+    void getORCPerformanceCurveLegInfo(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Map<Integer, ORCPerformanceCurveLegImpl>> asyncCallback);
+
+    void getORCPerformanceCurveLegInfo(RegattaAndRaceIdentifier singleSelectedRace,
+            AsyncCallback<Map<Integer, ORCPerformanceCurveLegImpl>> asyncCallback);
+
+    void setORCPerformanceCurveLegInfo(RegattaAndRaceIdentifier raceIdentifier,
+            Map<Integer, ORCPerformanceCurveLegImpl> legInfo, AsyncCallback<Void> callback);
+
+    void setORCPerformanceCurveLegInfo(String leaderboardName, String raceColumnName, String fleetName,
+            Map<Integer, ORCPerformanceCurveLegImpl> legInfo, AsyncCallback<Void> callback);
+
+    void getBoatRegistrationsForRegatta(RegattaIdentifier regattaIdentifier, AsyncCallback<Collection<BoatDTO>> callback);
+    
+    void getORCCertificates(String json, AsyncCallback<Collection<ORCCertificate>> callback);
+
+    void getORCCertificateAssignmentsByBoatIdAsString(RegattaIdentifier regattaIdentifier, AsyncCallback<Map<String, ORCCertificate>> asyncCallback);
+
+    void getORCCertificateAssignmentsByBoatIdAsString(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Map<String, ORCCertificate>> asyncCallback);
+
+    void getORCCertificateAssignmentsByBoatIdAsString(String leaderboardName, AsyncCallback<Map<String, ORCCertificate>> asyncCallback);
+
+    void getORCCertificateAssignmentsByBoatIdAsString(String leaderboardName, String raceColumnName, String fleetName, AsyncCallback<Map<String, ORCCertificate>> asyncCallback);
+
+    void assignORCPerformanceCurveCertificates(RegattaIdentifier regattaIdentifier,
+            Map<String, ORCCertificate> certificatesForBoatsWithIdAsString,
+            AsyncCallback<Triple<Integer, Integer, Integer>> callback);
+
+    void assignORCPerformanceCurveCertificates(RegattaAndRaceIdentifier raceIdentifier,
+            Map<String, ORCCertificate> certificatesForBoatsWithIdAsString,
+            AsyncCallback<Triple<Integer, Integer, Integer>> callback);
+
+    void assignORCPerformanceCurveCertificates(String leaderboardName, String raceColumnName, String fleetName,
+            Map<String, ORCCertificate> certificatesForBoatsWithIdAsString,
+            AsyncCallback<Triple<Integer, Integer, Integer>> callback);
+
+    void assignORCPerformanceCurveCertificates(String leaderboardName,
+            Map<String, ORCCertificate> certificatesForBoatsWithIdAsString,
+            AsyncCallback<Triple<Integer, Integer, Integer>> callback);
+    
     void getMarkTemplates(AsyncCallback<Iterable<MarkTemplateDTO>> callback);
 
     void addOrUpdateMarkTemplate(MarkTemplateDTO markTemplate, AsyncCallback<MarkTemplateDTO> asyncCallback);

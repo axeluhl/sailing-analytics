@@ -176,7 +176,8 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
         RankingMetric.CompetitorRankingInfo c1RI = rankingInfo.getCompetitorRankingInfo().apply(c1);
         RankingMetric.CompetitorRankingInfo c2RI = rankingInfo.getCompetitorRankingInfo().apply(c2);
         assertEquals(c1RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(),
-                c2RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(), 0.00001);
+                c2RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(),
+                /* relative accuracy */ 0.0000001 * c1RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds());
     }
 
     @Test

@@ -30,6 +30,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFinishPo
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFixedMarkPassingEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFlagEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogGateLineOpeningTimeEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogORCLegDataEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogPassChangeEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogPathfinderEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogProtestStartTimeEventSerializer;
@@ -87,7 +88,9 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
                 new RaceLogStartOfTrackingEventDeserializer(competitorDeserializer),
                 new RaceLogUseCompetitorsFromRaceLogEventDeserializer(competitorDeserializer),
                 new RaceLogEndOfTrackingEventDeserializer(competitorDeserializer),
-                new RaceLogTagEventDeserializer(competitorDeserializer));
+                new RaceLogTagEventDeserializer(competitorDeserializer),
+                new RaceLogORCLegDataEventDeserializer(competitorDeserializer),
+                new RaceLogORCScratchBoatEventDeserializer(competitorDeserializer));
     }
 
     protected final JsonDeserializer<RaceLogEvent> flagEventDeserializer;
@@ -114,6 +117,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
     protected final JsonDeserializer<RaceLogEvent> useCompetitorsFromRaceLogDeserializer;
     protected final JsonDeserializer<RaceLogEvent> endOfTrackingDeserializer;
     protected final JsonDeserializer<RaceLogEvent> tagEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> orcLegDataEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> orcScratchBoatEventDeserializer;
 
     public RaceLogEventDeserializer(JsonDeserializer<RaceLogEvent> flagEventDeserializer,
             JsonDeserializer<RaceLogEvent> startTimeEventDeserializer,
@@ -138,7 +143,9 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             JsonDeserializer<RaceLogEvent> startOfTrackingEventDeserializer,
             JsonDeserializer<RaceLogEvent> useCompetitorsFromRaceLogDeserializer,
             JsonDeserializer<RaceLogEvent> endOfTrackingEventDeserializer,
-            JsonDeserializer<RaceLogEvent> tagEventDeserializer) {
+            JsonDeserializer<RaceLogEvent> tagEventDeserializer,
+            JsonDeserializer<RaceLogEvent> orcLegDataEventDeserializer,
+            JsonDeserializer<RaceLogEvent> orcScratchBoatEventDeserializer) {
         this.flagEventDeserializer = flagEventDeserializer;
         this.startTimeEventDeserializer = startTimeEventDeserializer;
         this.dependentStartTimeEventDeserializer = dependentStartTimeEventDeserializer;
@@ -163,6 +170,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
         this.endOfTrackingDeserializer = endOfTrackingEventDeserializer;
         this.useCompetitorsFromRaceLogDeserializer = useCompetitorsFromRaceLogDeserializer;
         this.tagEventDeserializer = tagEventDeserializer;
+        this.orcLegDataEventDeserializer = orcLegDataEventDeserializer;
+        this.orcScratchBoatEventDeserializer = orcScratchBoatEventDeserializer;
     }
 
     protected JsonDeserializer<RaceLogEvent> getDeserializer(JSONObject object) throws JsonDeserializationException {
@@ -216,8 +225,9 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             return useCompetitorsFromRaceLogDeserializer;
         } else if (type.equals(RaceLogTagEventSerializer.VALUE_CLASS)){
             return tagEventDeserializer;
+        } else if (type.equals(RaceLogORCLegDataEventSerializer.VALUE_CLASS)){
+            return orcLegDataEventDeserializer;
         }
-
         throw new JsonDeserializationException(String.format("There is no deserializer defined for event type %s.",
                 type));
     }

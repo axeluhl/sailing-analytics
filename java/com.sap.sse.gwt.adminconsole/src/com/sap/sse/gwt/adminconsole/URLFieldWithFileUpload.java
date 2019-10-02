@@ -115,7 +115,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         fileUploadField.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                if(fileUploadField.getFilename() != null && !fileUploadField.getFilename().isEmpty()) {
+                if (fileUploadField.getFilename() != null && !fileUploadField.getFilename().isEmpty()) {
                     submitButton.setEnabled(true);
                 }
             }

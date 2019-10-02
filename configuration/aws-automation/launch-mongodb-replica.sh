@@ -1,6 +1,6 @@
 #!/bin/bash
 # Usage:
-#   launch-mongodb-replica.sh [ <replica-set-name> [ <primary-host:primary-port> [ <priority> ] ] ]
+#   launch-mongodb-replica.sh [ -r <replica-set-name> -p [ <primary-host:primary-port> [ -P <priority> ] ] ]
 #
 # The defaults are: live, mongo0.internal.sapsailing.com:27017, 1
 #

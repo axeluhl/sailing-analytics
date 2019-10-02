@@ -9,7 +9,7 @@ import com.sap.sse.common.Duration;
  * @author Daniel Lisunkin (i505543)
  *
  */
-public class SecondsDurationImpl implements Duration {
+public class SecondsDurationImpl extends AbstractDuration {
     private static final long serialVersionUID = 7575912908654324216L;
     private final double seconds;
 
@@ -103,12 +103,4 @@ public class SecondsDurationImpl implements Duration {
     public Duration mod(Duration d) {
         return new SecondsDurationImpl(seconds % d.asSeconds());
     }
-    
-    @Override
-    public String toString() {
-        StringBuffer result = new StringBuffer();
-        result.append(asSeconds()).append("s");
-        return result.toString();
-    }
-
 }

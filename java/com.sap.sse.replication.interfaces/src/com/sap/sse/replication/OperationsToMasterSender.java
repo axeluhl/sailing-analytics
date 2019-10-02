@@ -42,7 +42,6 @@ public interface OperationsToMasterSender<S, O extends OperationWithResult<S, ?>
         ReplicationMasterDescriptor masterDescriptor = getMasterDescriptor();
         assert masterDescriptor != null;
         final OperationWithResultWithIdWrapper<S, T> operationWithResultWithIdWrapper = new OperationWithResultWithIdWrapper<S, T>(operation);
-        // TODO bug4018: if sending the operation fails, e.g., because of an HTTP response code != 2xx, enqueue the operation for retry
         addOperationSentToMasterForReplication(operationWithResultWithIdWrapper);
         URL url = masterDescriptor.getSendReplicaInitiatedOperationToMasterURL(this.getId().toString());
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();

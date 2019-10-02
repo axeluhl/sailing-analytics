@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.READ;
 import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
 
 import java.util.ArrayList;
@@ -77,6 +78,8 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     private final RegattaRefresher regattaRefresher;
     private final LabeledAbstractFilterablePanel<RegattaDTO> filterablePanelRegattas;
 
+    private final UserService userService;
+    
     private List<RegattaDTO> allRegattas;
 
     protected static AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
@@ -95,6 +98,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         this.regattaRefresher = regattaRefresher;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
+        this.userService = userService;
         allRegattas = new ArrayList<RegattaDTO>();
         
         final VerticalPanel panel = new VerticalPanel();
@@ -158,7 +162,6 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         FlushableCellTable<RegattaDTO> table = new FlushableCellTable<RegattaDTO>(/* pageSize */10000, tableRes);
         regattaListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
-
         SelectionCheckboxColumn<RegattaDTO> regattaSelectionCheckboxColumn = new SelectionCheckboxColumn<RegattaDTO>(
                 tableRes.cellTableStyle().cellTableCheckboxSelected(),
                 tableRes.cellTableStyle().cellTableCheckboxDeselected(),
@@ -176,7 +179,6 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         ListHandler<RegattaDTO> columnSortHandler = new ListHandler<RegattaDTO>(regattaListDataProvider.getList());
         table.addColumnSortHandler(columnSortHandler);
         columnSortHandler.setComparator(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getComparator());
-
         TextColumn<RegattaDTO> regattaNameColumn = new TextColumn<RegattaDTO>() {
             @Override
             public String getValue(RegattaDTO regatta) {
@@ -190,7 +192,6 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 return new NaturalComparator().compare(r1.getName(), r2.getName());
             }
         });
-
         TextColumn<RegattaDTO> regattaCanBoatsOfCompetitorsChangePerRaceColumn = new TextColumn<RegattaDTO>() {
             @Override
             public String getValue(RegattaDTO regatta) {
@@ -233,7 +234,6 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 return result;
             }
         });
-
         TextColumn<RegattaDTO> regattaBoatClassColumn = new TextColumn<RegattaDTO>() {
             @Override
             public String getValue(RegattaDTO regatta) {
@@ -247,7 +247,6 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 return new NaturalComparator(false).compare(r1.boatClass.getName(), r2.boatClass.getName());
             }
         });
-
         TextColumn<RegattaDTO> rankingMetricColumn = new TextColumn<RegattaDTO>() {
             @Override
             public String getValue(RegattaDTO regatta) {
@@ -261,7 +260,6 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 return new NaturalComparator(false).compare(r1.rankingMetricType.name(), r2.rankingMetricType.name());
             }
         });
-
         final HasPermissions type = SecuredDomainType.REGATTA;
         final AccessControlledActionsColumn<RegattaDTO, RegattaConfigImagesBarCell> actionsColumn = create(
                 new RegattaConfigImagesBarCell(stringMessages), userService);
@@ -271,17 +269,16 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 removeRegatta(regatta);
             }
         });
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CERTIFICATES_UPDATE, READ, this::handleBoatCertificateAssignment);
         final DialogConfig<RegattaDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
                 regatta -> regattaRefresher.fillRegattas(), stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 config::openDialog);
-
         final EditACLDialog.DialogConfig<RegattaDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, regatta -> regattaRefresher.fillRegattas(),
                 stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);
-
         table.addColumn(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getHeader());
         table.addColumn(regattaNameColumn, stringMessages.regattaName());
         table.addColumn(regattaCanBoatsOfCompetitorsChangePerRaceColumn, stringMessages.canBoatsChange());
@@ -405,6 +402,12 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         Util.addAll(regattas, newAllRegattas);
         allRegattas = newAllRegattas;
         filterablePanelRegattas.updateAll(allRegattas);
+    }
+    
+    private void handleBoatCertificateAssignment(RegattaDTO regatta) {
+        BoatCertificateAssignmentDialog dialog = new BoatCertificateAssignmentDialog(sailingService, userService,
+                stringMessages, errorReporter, new RegattaBoatCertificatesPanel(sailingService, userService, regatta, stringMessages, errorReporter));
+        dialog.show();
     }
 
     public List<RegattaDTO> getAllRegattas() {

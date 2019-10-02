@@ -1,14 +1,9 @@
 package com.sap.sailing.domain.test.markpassing;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.text.ParseException;
 
 import org.junit.Test;
-
-import com.tractrac.model.lib.api.event.CreateModelException;
-import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class FlorianopolisMarkPassingTest extends AbstractMarkPassingTest {
 
@@ -17,98 +12,82 @@ public class FlorianopolisMarkPassingTest extends AbstractMarkPassingTest {
     }
 
     @Test
-    public void testRace3() throws IOException, InterruptedException, URISyntaxException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void testRace3() throws Exception {
         testRace("3");
     }
 
     @Test
-    public void testRace4() throws IOException, InterruptedException, URISyntaxException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void testRace4() throws Exception {
         testRace("4");
     }
 
     @Test
-    public void testRace1() throws IOException, InterruptedException, URISyntaxException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void testRace1() throws Exception {
         testRace("1");
     }
 
     @Test
-    public void testRace2() throws IOException, InterruptedException, URISyntaxException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void testRace2() throws Exception {
         testRace("2");
     }
 
     @Test
-    public void testRace5() throws IOException, InterruptedException, URISyntaxException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void testRace5() throws Exception {
         testRace("5");
     }
 
     @Test
-    public void testRace6() throws IOException, InterruptedException, URISyntaxException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void testRace6() throws Exception {
         testRace("6");
     }
 
     @Test
-    public void testRace7() throws IOException, InterruptedException, URISyntaxException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void testRace7() throws Exception {
         testRace("7");
     }
 
     @Test
-    public void testRace8() throws IOException, InterruptedException, URISyntaxException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void testRace8() throws Exception {
         testRace("8");
     }
 
     @Test
-    public void testRace10() throws IOException, InterruptedException, URISyntaxException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void testRace10() throws Exception {
         testRace("10");
     }
 
     @Test
-    public void testRace11() throws IOException, InterruptedException, URISyntaxException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void testRace11() throws Exception {
         testRace("11");
     }
 
     @Test
-    public void testRace12() throws IOException, InterruptedException, URISyntaxException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void testRace12() throws Exception {
         testRace("12");
     }
 
     @Test
-    public void testRace13() throws IOException, InterruptedException, URISyntaxException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void testRace13() throws Exception {
         testRace("13");
     }
 
     @Test
-    public void testRace17() throws IOException, InterruptedException, URISyntaxException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void testRace17() throws Exception {
         testRace("17");
     }
 
     @Test
-    public void testRace19() throws IOException, InterruptedException, URISyntaxException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void testRace19() throws Exception {
         testRace("19");
     }
 
     @Test
-    public void testRace22() throws IOException, InterruptedException, URISyntaxException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void testRace22() throws Exception {
         testRace("22");
     }
 
     @Test
-    public void testRace24() throws IOException, InterruptedException, URISyntaxException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void testRace24() throws Exception {
         testRace("24");
     }
 

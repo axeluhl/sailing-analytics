@@ -164,7 +164,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
                 /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, UUID.randomUUID(), series,
                 /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
-                /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric.CONSTRUCTOR);
+                /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
         assertNotNull(master.getRegatta(masterRegatta.getRegattaIdentifier()));
         assertTrue(master.getAllRegattas().iterator().hasNext());
         assertNull(replica.getRegatta(masterRegatta.getRegattaIdentifier()));

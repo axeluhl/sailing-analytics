@@ -1,6 +1,7 @@
 package com.sap.sailing.server.gateway.deserialization.test.racelog;
 
 import static org.junit.Assert.assertEquals;
+
 import java.util.UUID;
 
 import org.json.simple.JSONObject;
@@ -9,6 +10,7 @@ import org.mockito.Mockito;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
@@ -16,17 +18,21 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogTagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
+import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEndOfTrackingEventDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogFlagEventDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogORCLegDataEventDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogTagEventDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogUseCompetitorsFromRaceLogEventDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class RaceLogEventDeserializerTest {
     
@@ -38,13 +44,13 @@ public class RaceLogEventDeserializerTest {
     protected RaceLogTagEventDeserializer mockitoRaceLogTagEventDeserializer = Mockito.spy(new RaceLogTagEventDeserializer(competitorDeserializer));
     
     public class InnerRaceLogEventDeserializer extends RaceLogEventDeserializer{
-        
-        
         public InnerRaceLogEventDeserializer() {
             super(mockitoRaceLogFlagEventDeserializer, null, null, null, null, null, null, null, null, null, null, null,
                     null, null, null, null, null, null, null, null, null,
                     mockitoRaceLogUseCompetitorsFromRaceLogEventDeserializer,
-                    mockitoRaceLogEndOfTrackingEventDeserializer,mockitoRaceLogTagEventDeserializer);
+                    mockitoRaceLogEndOfTrackingEventDeserializer, mockitoRaceLogTagEventDeserializer,
+                    new RaceLogORCLegDataEventDeserializer(competitorDeserializer),
+                    null);
         }
     }
     
@@ -79,6 +85,28 @@ public class RaceLogEventDeserializerTest {
         assertEquals(originalEvent.getLowerFlag(), newEvent.getLowerFlag());
         assertEquals(originalEvent.getUpperFlag(), newEvent.getUpperFlag());
         assertEquals(originalEvent.getCreatedAt(), newEvent.getCreatedAt());
+    }
+    
+    @Test
+    public void testSerializationAndDeserializationForRaceLogORCLegDataEvent() throws Exception{
+        final RaceLogORCLegDataEventImpl originalEvent = new RaceLogORCLegDataEventImpl(timePoint, timePoint, author,
+                UUID.randomUUID(), 0, /* leg number */ 2, new DegreeBearingImpl(123), new MeterDistance(2345),
+                ORCPerformanceCurveLegTypes.TWA);
+        RaceLogEventSerializer serializer = (RaceLogEventSerializer) RaceLogEventSerializer.create(CompetitorJsonSerializer.create());
+        JSONObject object = serializer.serialize(originalEvent); 
+        RaceLogEvent raceLogEvent = deserializer.deserialize(object);
+        RaceLogORCLegDataEventImpl newEvent = (RaceLogORCLegDataEventImpl) raceLogEvent;
+        //assert raceLogEvent has correct values
+        assertEquals(originalEvent.getTimePoint().toString(), newEvent.getTimePoint().toString());
+        assertEquals(originalEvent.getAuthor().toString(), newEvent.getAuthor().toString());
+        assertEquals(originalEvent.getPassId(), newEvent.getPassId());
+        assertEquals(originalEvent.getClass(), newEvent.getClass());
+        assertEquals(originalEvent.getId(), newEvent.getId());
+        assertEquals(originalEvent.getShortInfo(), newEvent.getShortInfo());
+        assertEquals(originalEvent.getOneBasedLegNumber(), newEvent.getOneBasedLegNumber());
+        assertEquals(originalEvent.getTwa(), newEvent.getTwa());
+        assertEquals(originalEvent.getType(), newEvent.getType());
+        assertEquals(originalEvent.getLength(), newEvent.getLength());
     }
     
     @Test

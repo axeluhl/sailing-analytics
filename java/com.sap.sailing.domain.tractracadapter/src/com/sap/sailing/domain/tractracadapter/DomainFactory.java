@@ -30,6 +30,8 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
+import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -108,15 +110,22 @@ public interface DomainFactory {
     RaceDefinition getAndWaitForRaceDefinition(UUID raceId);
 
     /**
+     * Calls {@link #getOrCreateDefaultRegatta(RaceLogStore, RegattaLogStore, IRace, TrackedRegattaRegistry, RankingMetricConstructor)}
+     * using {@link OneDesignRankingMetric} for the ranking metric constructor.
+     */
+    com.sap.sailing.domain.base.Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            IRace race, TrackedRegattaRegistry trackedRegattaRegistry);
+    
+    /**
      * Creates an {@link com.sap.sailing.domain.base.Regatta event} from a
      * TracTrac event description. It doesn't have {@link RaceDefinition}s yet.
      * A new {@link com.sap.sailing.domain.base.Regatta} is created if no event by
      * an equal name with a boat class with an equal name as the <code>event</code>'s
      * boat class exists yet.
      */
-    com.sap.sailing.domain.base.Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
-            IRace race, TrackedRegattaRegistry trackedRegattaRegistry);
-    
+    Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, IRace race,
+            TrackedRegattaRegistry trackedRegattaRegistry, RankingMetricConstructor rankingMetricConstructor);
+
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
      * data from there. Receiving continues until {@link TracTracRaceTracker#stop(boolean)} is called.

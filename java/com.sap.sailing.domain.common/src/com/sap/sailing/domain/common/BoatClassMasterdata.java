@@ -104,7 +104,7 @@ public enum BoatClassMasterdata {
     RS_X ("RS:X", true, 2.86, 0.93, BoatHullType.SURFERBOARD, false, "RS-X", "RSX", "RS:X", "RS:X Men", "RS:X Woman", "RS:X Women"),
     RS_FEVA ("RS Feva", true, 3.64, 1.42, BoatHullType.MONOHULL, true, "RSFeva"),
     RS_TERA ("RS Tera", true, 2.87, 1.23, BoatHullType.MONOHULL, true, "RSTera"),
-    SK_22 ("SK 22", true, 12, 2, BoatHullType.MONOHULL, true, "22er Sch‰renkreuzer", "22", "SK22", "22 sq.m."),
+    SK_22 ("SK 22", true, 12, 2, BoatHullType.MONOHULL, true, "22er Sch√§renkreuzer", "22", "SK22", "22 sq.m."),
     SKUD_18 ("SKUD 18", true, 5.8, 2.29, BoatHullType.MONOHULL, true),
     SONAR ("Sonar", true, 7.01, 2.39, BoatHullType.MONOHULL, true),
     SOLING ("Soling", true, 8.15, 1.91, BoatHullType.MONOHULL, true),
@@ -134,14 +134,14 @@ public enum BoatClassMasterdata {
     X_99 ("X-99", true, 9.96, 2.95, BoatHullType.MONOHULL, true, "X99"),
     
     // multi-class "boat classes"; to be replaced at some later point in time by something like a RegattaClass
-    ORC ("ORC", true, 13.83, 3.91, BoatHullType.MONOHULL, true),
+    ORC ("ORC", true, 13.83, 3.91, BoatHullType.MONOHULL, true, "ORC I", "ORC II", "ORC III", "ORC IV", "ORC III+IV", "ORC A", "ORC B", "ORC C", "ORC D"),
     ORC_CLUB ("ORC Club", true, 13.83, 3.91, BoatHullType.MONOHULL, true),
     ORC_INTERNATIONAL ("ORC International", true, 13.83, 3.91, BoatHullType.MONOHULL, true, "ORC Int."),
     
     // Performance Handicap Racing Fleet (PHRF) is a handicap system used for racing in North America
     PHRF ("PHRF", true, 13.83, 3.91, BoatHullType.MONOHULL, true),
 
-    // a 'boat class' to track runners at runnng events 
+    // a 'boat class' to track runners at running events 
     RUNNING ("Runner", true, 1.0, 1.0, BoatHullType.NO_HULL, false, "Running");
 
     private final String displayName;

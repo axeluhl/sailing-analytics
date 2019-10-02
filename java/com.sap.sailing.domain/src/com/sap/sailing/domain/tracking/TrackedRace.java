@@ -689,7 +689,7 @@ public interface TrackedRace
      *            materialized ranking information that is expensive to calculate, avoiding redundant calculations
      */
     Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint,
-            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);
+            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Calls {@link #getWindWithConfidence(Position, TimePoint, Iterable)} and excludes those wind sources listed in
@@ -740,7 +740,7 @@ public interface TrackedRace
      * wind on leg and leg bearing is provided.
      */
     Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalyses,
-            WindLegTypeAndLegBearingCache cache) throws NoWindException;
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
     
     Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
             boolean waitForLatestAnalyses) throws NoWindException;
@@ -753,7 +753,7 @@ public interface TrackedRace
      * wind direction and leg bearing is provided.
      */
     Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalyses,
-            WindLegTypeAndLegBearingCache cache) throws NoWindException;
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
 
     Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
             boolean waitForLatestAnalysis) throws NoWindException;
@@ -764,7 +764,7 @@ public interface TrackedRace
 
     Competitor getOverallLeader(TimePoint timePoint);
     
-    Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+    Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     Boat getBoatOfCompetitor(Competitor competitor);
     
@@ -780,7 +780,7 @@ public interface TrackedRace
      * Same as {@link #getCompetitorsFromBestToWorst(TimePoint)}, using a cache for wind, leg type and leg
      * bearing values.
      */
-    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * When provided with a {@link WindStore} during construction, the tracked race will
@@ -1117,7 +1117,7 @@ public interface TrackedRace
      * it can be added to the boat's course over ground to arrive at the wind's {@link Wind#getFrom() "from"} direction. Example: wind
      * from the north (0deg), boat's course over ground 90deg (moving east), then the bearing returned is -90deg.
      */
-    default Bearing getTWA(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    default Bearing getTWA(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Bearing twa = null;
         final GPSFixTrack<Competitor, GPSFixMoving> sogTrack = this.getTrack(competitor);
         if (sogTrack != null) {
@@ -1143,7 +1143,7 @@ public interface TrackedRace
      * Like {@link #getVelocityMadeGood(Competitor, TimePoint)}, but allowing callers to specify a cache that can
      * accelerate requests for wind directions, the leg type and the competitor's current leg's bearing.
      */
-    default SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    default SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return getVelocityMadeGood(competitor, timePoint, WindPositionMode.EXACT, cache);
     }
 
@@ -1155,7 +1155,7 @@ public interface TrackedRace
      * or has already finished), {@code null} is returned.
      */
     SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode,
-            WindLegTypeAndLegBearingCache cache);
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter);
 

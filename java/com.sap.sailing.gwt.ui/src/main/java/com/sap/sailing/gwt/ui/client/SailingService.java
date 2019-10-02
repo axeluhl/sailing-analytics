@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -12,6 +13,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.abstractlog.Revokable;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -55,6 +57,9 @@ import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.common.orc.ORCCertificate;
+import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
@@ -133,6 +138,7 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.impl.SecondsDurationImpl;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.filestorage.FileStorageService;
@@ -1041,8 +1047,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             Collection<Triple<String, String, String>> raceColumnsAndFleets) throws UnauthorizedException;
 
     SerializationDummy serializationDummy(PersonDTO dummy, CountryCode ccDummy,
-            PreciseCompactPosition preciseCompactPosition, TypeRelativeObjectIdentifier typeRelativeObjectIdentifier)
-            throws UnauthorizedException;
+            PreciseCompactPosition preciseCompactPosition, TypeRelativeObjectIdentifier typeRelativeObjectIdentifier,
+            SecondsDurationImpl secondsDuration, KnotSpeedImpl knotSpeedImpl) throws UnauthorizedException;
 
     Collection<CompetitorDTO> getEliminatedCompetitors(String leaderboardName) throws UnauthorizedException;
 
@@ -1187,6 +1193,63 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     boolean existsTracTracConfigurationForCurrentUser(String jsonUrl) throws Exception, UnauthorizedException;
 
     boolean getTrackedRaceIsUsingMarkPassingCalculator(RegattaAndRaceIdentifier regattaNameAndRaceName);
+
+    ORCPerformanceCurveLegImpl getLegGeometry(String leaderboardName, String raceColumnName, String fleetName,
+            int zeroBasedLegIndex);
+
+    ORCPerformanceCurveLegImpl getLegGeometry(RegattaAndRaceIdentifier singleSelectedRace, int zeroBasedLegIndex);
+
+    /**
+     * @throws NotFoundException
+     *             in case the race log cannot be found by the leaderboard, race column and fleet names provided
+     */
+    Map<Integer, ORCPerformanceCurveLegImpl> getORCPerformanceCurveLegInfo(String leaderboardName,
+            String raceColumnName, String fleetName) throws NotFoundException;
+
+    Map<Integer, ORCPerformanceCurveLegImpl> getORCPerformanceCurveLegInfo(RegattaAndRaceIdentifier singleSelectedRace);
+    
+    /**
+     * Into the first {@link RaceLog} {@link TrackedRace#getAttachedRaceLogs() attached} to the tracked race identified by
+     * {@code raceIdentifier} writes {@link RaceLogORCLegDataEvent}s and/or revokation events such that afterwards the
+     * {@link #getORCPerformanceCurveLegInfo(RegattaAndRaceIdentifier)} will return a map equal to the one passed, except
+     * for {@code null} values which then would be missing from the results, where here they mean to explicitly revoke any
+     * previous setting for that leg.
+     */
+    void setORCPerformanceCurveLegInfo(RegattaAndRaceIdentifier raceIdentifier, Map<Integer, ORCPerformanceCurveLegImpl> legInfo) throws NotRevokableException;
+    
+    /**
+     * Into the {@link RaceLog} identified by the leaderboard, race column and fleet names, writes
+     * {@link RaceLogORCLegDataEvent}s and/or revokation events such that afterwards the
+     * {@link #getORCPerformanceCurveLegInfo(RegattaAndRaceIdentifier)} will return a map equal to the one passed,
+     * except for {@code null} values which then would be missing from the results, where here they mean to explicitly
+     * revoke any previous setting for that leg.
+     * 
+     * @throws NotFoundException
+     *             in case the race log cannot be found by the leaderboard, race column and fleet names provided
+     */
+    void setORCPerformanceCurveLegInfo(String leaderboardName, String raceColumnName, String fleetName, Map<Integer, ORCPerformanceCurveLegImpl> legInfo) throws NotFoundException, NotRevokableException;
+
+    Collection<BoatDTO> getBoatRegistrationsForRegatta(RegattaIdentifier regattaIdentifier) throws NotFoundException;
+
+    Collection<ORCCertificate> getORCCertificates(String json) throws Exception;
+
+    Map<String, ORCCertificate> getORCCertificateAssignmentsByBoatIdAsString(RegattaIdentifier regattaIdentifier) throws NotFoundException;
+    
+    Map<String, ORCCertificate> getORCCertificateAssignmentsByBoatIdAsString(RegattaAndRaceIdentifier raceIdentifier) throws NotFoundException;
+
+    Map<String, ORCCertificate> getORCCertificateAssignmentsByBoatIdAsString(String leaderboardName) throws NotFoundException;
+
+    Map<String, ORCCertificate> getORCCertificateAssignmentsByBoatIdAsString(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException;
+
+    Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(RegattaIdentifier regattaIdentifier,
+            Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
+    
+    Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(RegattaAndRaceIdentifier raceIdentifier, Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
+
+    Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(String leaderboardName, String raceColumnName, String fleetName, Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
+
+    Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(String leaderboardName,
+            Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
 
     Iterable<MarkTemplateDTO> getMarkTemplates();
 

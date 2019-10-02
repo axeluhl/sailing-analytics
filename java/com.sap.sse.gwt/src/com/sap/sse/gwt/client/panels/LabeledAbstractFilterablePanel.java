@@ -27,13 +27,9 @@ import com.sap.sse.gwt.client.StringMessages;
  * 
  */
 public abstract class LabeledAbstractFilterablePanel<T> extends AbstractFilterablePanel<T> {
-
-    /**
-     */
     public LabeledAbstractFilterablePanel(Label label, Iterable<T> all, final ListDataProvider<T> filtered,
             StringMessages stringMessages) {
         super(all, filtered, stringMessages);
         insert(label, 0);
     }
-
 }

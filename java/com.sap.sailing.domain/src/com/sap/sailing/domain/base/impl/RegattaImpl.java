@@ -476,14 +476,19 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     @Override
     public Iterable<Boat> getAllBoats() {
-        Set<Boat> result = new HashSet<>();
-        for (RaceColumn rc : getRaceColumns()) {
+        final Set<Boat> result = new HashSet<>();
+        final Set<RaceDefinition> allRaces = new HashSet<>();
+        Util.addAll(getAllRaces(), allRaces);
+        for (final RaceColumn rc : getRaceColumns()) {
             for (final Fleet fleet : rc.getFleets()) {
                 RaceDefinition raceDefinition = rc.getRaceDefinition(fleet);
                 if (raceDefinition != null) {
-                    Util.addAll(raceDefinition.getBoats(), result);
+                    allRaces.add(raceDefinition);
                 }
             }
+        }
+        for (final RaceDefinition raceDefinition : allRaces) {
+            Util.addAll(raceDefinition.getBoats(), result);
         }
         final RegattaLog regattaLog = getRegattaLog();
         // If no race exists, the regatta log-provided boat registrations will not have

@@ -1,0 +1,131 @@
+package com.sap.sailing.domain.common.orc;
+
+import java.io.Serializable;
+import java.util.Map;
+
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.WithID;
+
+/**
+ * Represents semantically a real ORC certificate for a {@link Competitor}, which is used to rate different type of
+ * boats for different insohre and offshore race conditions.
+ * <p>
+ * An ORC certificate is issued by the "Member National Authorities" of World Sailing and are available for insight at
+ * https://www.orc.org/index.asp . Other information about the whole scoring system and different variants are available
+ * too.
+ * <p>
+ * One implementing class provides all necessary functionalities to score the Competitors with a choosen
+ * {@link RankingMetric}.<p>
+ * 
+ * The {@link WithID} interface is to be implemented such that a {@link String} is produced as the ID that
+ * contains the concatenation (without intermediate white space) of the {@code NatAuth}, the {@code CertNo}
+ * and the {@code BIN} fields, as provided as single fields in the JSON representation, and as provided
+ * in the concatenated form in the {@code NATCERTN.FILE_ID} column in the RMS format.
+ * 
+ * @author Daniel Lisunkin (i505543)
+ *
+ */
+public interface ORCCertificate extends WithID, Serializable {
+    /**
+     * As the ID of an ORC certificate we use the concatenation (without intermediate white space) of the
+     * {@code NatAuth}, the {@code CertNo} and the {@code BIN} fields, as provided as single fields in the JSON
+     * representation
+     */
+    @Override
+    String getId();
+    
+    /**
+     * Returns the sailnumber of the {@link Competitor} which this certificate belongs to.
+     * 
+     * @return sailnumber as a string, which consists out of some alphanumeric characters (most time the nation or
+     *         boatclass id), a blank space and some numerical digits
+     */
+    String getSailnumber();
+    
+    /**
+     * Returns the boatclass of the {@link Competitor} which this certificate belongs to.
+     */
+    String getBoatclass();
+    
+    Duration getGPH();
+
+    /**
+     * Returns the GPH value for the {@link Competitor}. The GPH value represents the overall performance of the boat.
+     * The value itself is again an allowance (in seconds per nautical mile) and could be used as a ToD Factor.
+     * Most of the times it is used to divide a big fleet into similar fast divisions.
+     */
+    double getGPHInSecondsToTheMile();
+    
+    /**
+     * Returns the CDL (Class Division Length) value for the {@link Competitor}. This value is another (and newer) approach to rate the overall performance of different boats.
+     * The different division intervals are - in contrast to the intervals of the GPH - set by the Offshore Race Committee and not by the national association for a uniform handling.
+     * The higher the value, the higher the overall performance, it is measured in meters.
+     */
+    double getCDL();
+    
+    /**
+     * Returns the LOA (length over all) of the {@link Competitor} boat which this certificate belongs to.
+     */
+    Distance getLengthOverAll();
+    
+    /**
+     * Returns the TimePoint when the certificate was issued by the national association. 
+     */
+    TimePoint getIssueDate();
+    
+    /**
+     * Returns a Map of speed predictions (in knots) for different wind speeds to use for a {@link ORCPerformanceCurve} rating
+     * in a race, where the upwind and the downwind part both conrtibute 50% to the total course.
+     * 
+     * @return Map with elements of type wind {@link Speed} as keys and {@link Duration}s equaling a time allowance per
+     *         nautical mile as values.
+     */
+    Map<Speed, Speed> getWindwardLeewardSpeedPrediction();
+    
+    /**
+     * Returns a Map of speed predictions (in knots) for different wind speeds to use for a {@link ORCPerformanceCurve} rating
+     * in a race, where the course resembles a circular figure.
+     * 
+     * @return Map with elements of type wind {@link Speed} as keys and {@link Duration}s equaling a time allowance per
+     *         nautical mile as values.
+     */
+    Map<Speed, Speed> getCircularRandomSpeedPredictions();
+    
+    /**
+     * Returns a Map of speed predictions (in knots) for different wind speeds to use for a {@link ORCPerformanceCurve} rating
+     * in a race, where the race is a long distance offshore/coastal race.
+     * 
+     * @return Map with elements of type wind {@link Speed} as keys and {@link Duration}s equaling a time allowance per
+     *         nautical mile as values.
+     */
+    Map<Speed, Speed> getLongDistanceSpeedPredictions();
+    
+    /**
+     * Returns a Map of speed predictions (in knots)  for different wind speeds to use for a {@link ORCPerformanceCurve} rating
+     * in a race, where the competitor doesn't use any spinnaker.
+     * 
+     * @return Map with elements of type wind {@link Speed} as keys and {@link Duration}s equaling a time allowance per
+     *         nautical mile as values.
+     */
+    Map<Speed, Speed> getNonSpinnakerSpeedPredictions();
+    
+    Map<Speed, Bearing> getBeatAngles();
+    
+    Map<Speed, Bearing> getRunAngles();
+    
+    Map<Speed, Duration> getBeatAllowances();
+    
+    Map<Speed, Duration> getRunAllowances();
+    
+    Map<Speed, Speed> getBeatVMGPredictions();
+    
+    Map<Speed, Speed> getRunVMGPredictions();
+    
+    Map<Speed, Map<Bearing, Speed>> getVelocityPredictionPerTrueWindSpeedAndAngle();
+
+    String getBoatName();
+}

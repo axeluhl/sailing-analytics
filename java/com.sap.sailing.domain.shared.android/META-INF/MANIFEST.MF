@@ -11,6 +11,8 @@ Require-Bundle: com.sap.sailing.domain.common,
  com.sap.sse.datamining.annotations
 Export-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.abstractlog.impl,
+ com.sap.sailing.domain.abstractlog.orc,
+ com.sap.sailing.domain.abstractlog.orc.impl,
  com.sap.sailing.domain.abstractlog.race,
  com.sap.sailing.domain.abstractlog.race.analyzing.impl,
  com.sap.sailing.domain.abstractlog.race.impl,

@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.RankingMetrics;
+import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveByImpliedWindRankingMetric;
+import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveRankingMetric;
 
 public final class RankingMetricsFactory {
     public static RankingMetrics getForClass(Class<? extends RankingMetric> c) {
@@ -16,6 +18,8 @@ public final class RankingMetricsFactory {
             return OneDesignRankingMetric::new;
         case ORC_PERFORMANCE_CURVE:
             return ORCPerformanceCurveRankingMetric::new;
+        case ORC_PERFORMANCE_CURVE_BY_IMPLIED_WIND:
+            return ORCPerformanceCurveByImpliedWindRankingMetric::new;
         case TIME_ON_TIME_AND_DISTANCE:
             return TimeOnTimeAndDistanceRankingMetric::new;
         }

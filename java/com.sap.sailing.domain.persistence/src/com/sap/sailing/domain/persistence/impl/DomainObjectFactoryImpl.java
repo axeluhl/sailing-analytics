@@ -48,6 +48,14 @@ import com.mongodb.client.model.RenameCollectionOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
+import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCCertificateAssignmentEventImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCScratchBoatEventImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RegattaLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -195,9 +203,12 @@ import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
+import com.sap.sailing.domain.common.orc.ORCCertificate;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -261,8 +272,11 @@ import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJs
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.deserialization.impl.LegacyCompetitorWithContainedBoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RegattaConfigurationJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.ORCCertificateJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
@@ -1517,7 +1531,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private List<RaceLogEvent> loadRaceLogEvents(RaceLog targetRaceLog, Document query) {
+    private List<RaceLogEvent> loadRaceLogEvents(RaceLog targetRaceLog, Document query) throws JsonDeserializationException, ParseException {
         List<RaceLogEvent> result = new ArrayList<>();
         MongoCollection<Document> raceLog = database.getCollection(CollectionNames.RACE_LOGS.name());
         for (Document o : raceLog.find(query)) {
@@ -1546,7 +1560,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *         updating this object into the RACE_LOGS collection then because only the caller knows the key surrounding
      *         the event object passed to this method.
      */
-    public Pair<RaceLogEvent, Optional<Document>> loadRaceLogEvent(Document dbObject) {
+    public Pair<RaceLogEvent, Optional<Document>> loadRaceLogEvent(Document dbObject) throws JsonDeserializationException, ParseException {
         TimePoint logicalTimePoint = loadTimePoint(dbObject);
         TimePoint createdAt = loadTimePoint(dbObject, FieldNames.RACE_LOG_EVENT_CREATED_AT);
         Serializable id = (Serializable) dbObject.get(FieldNames.RACE_LOG_EVENT_ID.name());
@@ -1633,10 +1647,22 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     competitors, dbObject);
         } else if (eventClass.equals(RaceLogTagEvent.class.getSimpleName())) {
             resultEvent = loadRaceLogTagEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
-        }else {
+        } else if (eventClass.equals(RaceLogORCLegDataEvent.class.getSimpleName())) {
+            resultEvent = loadRaceLogORCLegDataEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
+        } else if (eventClass.equals(RaceLogORCCertificateAssignmentEvent.class.getSimpleName())) {
+            resultEvent = loadRaceLogORCCertificateAssignmentEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
+        } else if (eventClass.equals(RaceLogORCScratchBoatEvent.class.getSimpleName())) {
+            resultEvent = loadRaceLogORCScratchBoatEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
+        } else {
             throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
         }
         return new Pair<>(resultEvent, dbObjectForUpdate);
+    }
+
+    private RaceLogEvent loadRaceLogORCScratchBoatEvent(TimePoint createdAt, AbstractLogEventAuthor author,
+            TimePoint logicalTimePoint, Serializable id, Integer passId, Document dbObject) {
+        Serializable competitorId = (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name());
+        return new RaceLogORCScratchBoatEventImpl(createdAt, logicalTimePoint, author, id, passId, competitorId);
     }
 
     private RaceLogEvent loadRaceLogUseCompetitorsFromRaceLogEvent(TimePoint createdAt, AbstractLogEventAuthor author,
@@ -2048,6 +2074,28 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 .valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name()));
         return new RaceLogRaceStatusEventImpl(createdAt, logicalTimePoint, author, id, passId, nextStatus);
     }
+    
+    private RaceLogORCLegDataEvent loadRaceLogORCLegDataEvent(TimePoint createdAt, AbstractLogEventAuthor author,
+            TimePoint logicalTimePoint, Serializable id, Integer passId, Document dbObject) {
+        final int legNr = ((Number) dbObject.get(FieldNames.ORC_LEG_NR.name())).intValue();
+        final Number twaInDegrees = (Number) dbObject.get(FieldNames.ORC_LEG_TWA_IN_DEG.name());
+        final Bearing twa = twaInDegrees==null?null:new DegreeBearingImpl(twaInDegrees.doubleValue());
+        final Number lengthInNauticalMiles = (Number) dbObject.get(FieldNames.ORC_LEG_LENGTH_IN_NAUTICAL_MILES.name());
+        final Distance length = lengthInNauticalMiles==null?null:new NauticalMileDistance(lengthInNauticalMiles.doubleValue());
+        final ORCPerformanceCurveLegTypes type = ORCPerformanceCurveLegTypes.valueOf(dbObject.getString(FieldNames.ORC_LEG_TYPE.name()));
+        return new RaceLogORCLegDataEventImpl(createdAt, logicalTimePoint, author, id, passId, legNr, twa, length, type);
+    }
+
+    private RaceLogORCCertificateAssignmentEvent loadRaceLogORCCertificateAssignmentEvent(TimePoint createdAt,
+            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, int passId, Document dbObject)
+            throws JsonDeserializationException, ParseException {
+        final Document certificateDbObject = (Document) dbObject.get(FieldNames.ORC_CERTIFICATE.name());
+        final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
+        JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(certificateDbObject.toJson(writerSettings)));
+        final ORCCertificate certificate = new ORCCertificateJsonDeserializer().deserialize(json); 
+        Serializable boatId = (Serializable) dbObject.get(FieldNames.RACE_LOG_BOAT_ID.name());
+        return new RaceLogORCCertificateAssignmentEventImpl(createdAt, logicalTimePoint, author, id, passId, certificate, boatId);
+    }
 
     @Override
     public RegattaLog loadRegattaLog(RegattaLikeIdentifier identifier) {
@@ -2066,7 +2114,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private void loadRegattaLogEvents(RegattaLog targetRegattaLog, Document query,
-            RegattaLikeIdentifier regattaLogIdentifier) {
+            RegattaLikeIdentifier regattaLogIdentifier) throws JsonDeserializationException, ParseException {
         MongoCollection<Document> collection = database.getCollection(CollectionNames.REGATTA_LOGS.name());
         for (Document o : collection.find(query)) {
             try {
@@ -2074,13 +2122,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 if (event != null) {
                     targetRegattaLog.load(event);
                 }
-            } catch (IllegalStateException e) {
+            } catch (Exception e) {
                 logger.log(Level.SEVERE, "Couldn't load regatta log event " + o + ": " + e.getMessage(), e);
             }
         }
     }
 
-    private RegattaLogEvent loadRegattaLogEvent(Document o, RegattaLikeIdentifier regattaLogIdentifier) {
+    private RegattaLogEvent loadRegattaLogEvent(Document o, RegattaLikeIdentifier regattaLogIdentifier)
+            throws JsonDeserializationException, ParseException {
         Document dbObject = (Document) o.get(FieldNames.REGATTA_LOG_EVENT.name());
         TimePoint logicalTimePoint = loadTimePoint(dbObject);
         TimePoint createdAt = loadTimePoint(dbObject, FieldNames.REGATTA_LOG_EVENT_CREATED_AT);
@@ -2133,6 +2182,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRegattaLogDefineMarkEvent(createdAt, author, logicalTimePoint, id, dbObject);
         } else if (eventClass.equals(RegattaLogRevokeEvent.class.getSimpleName())) {
             return loadRegattaLogRevokeEvent(createdAt, author, logicalTimePoint, id, dbObject);
+        } else if (eventClass.equals(RegattaLogORCCertificateAssignmentEvent.class.getSimpleName())) {
+            return loadRegattaLogORCCertificateAssignmentEvent(createdAt, author, logicalTimePoint, id, dbObject);
         }
         throw new IllegalStateException(String.format("Unknown RegattaLogEvent type %s", eventClass));
     }
@@ -2235,6 +2286,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 RegattaLogDeviceMarkMappingEventImpl::new,
                 result -> new MongoObjectFactoryImpl(database, serviceFinderFactory)
                         .storeRegattaLogEvent(regattaLogIdentifier, result));
+    }
+    
+    private RegattaLogORCCertificateAssignmentEvent loadRegattaLogORCCertificateAssignmentEvent(TimePoint createdAt,
+            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Document dbObject)
+            throws JsonDeserializationException, ParseException {
+        final Document certificateDbObject = (Document) dbObject.get(FieldNames.ORC_CERTIFICATE.name());
+        final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
+        JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(certificateDbObject.toJson(writerSettings)));
+        final ORCCertificate certificate = new ORCCertificateJsonDeserializer().deserialize(json); 
+        Serializable boatId = (Serializable) dbObject.get(FieldNames.RACE_LOG_BOAT_ID.name());
+        return new RegattaLogORCCertificateAssignmentEventImpl(createdAt, logicalTimePoint, author, id, certificate, boatId);
     }
 
     /**

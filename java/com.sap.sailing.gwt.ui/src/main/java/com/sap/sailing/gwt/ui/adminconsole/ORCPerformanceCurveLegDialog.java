@@ -1,0 +1,141 @@
+package com.sap.sailing.gwt.ui.adminconsole;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DoubleBox;
+import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sailing.domain.common.impl.NauticalMileDistance;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
+import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
+import com.sap.sailing.gwt.ui.adminconsole.CourseManagementWidget.LegGeometrySupplier;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.WaypointDTO;
+import com.sap.sse.common.impl.DegreeBearingImpl;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+
+/**
+ * An editor allowing users to specify the ORC Performance Curve leg type and distance, and in case of a
+ * {@link ORCPerformanceCurveLegTypes#TWA}-type leg the angle between the leg's rhumb line and the true wind
+ * direction ("leg TWA"). The result is a {@link ORCPerformanceCurveLegImpl} object.<p>
+ * 
+ * If the user chooses the "empty type" then {@code null} will be the result. The caller should then make an
+ * effort to revoke any previously recorded leg information so that again a tracking-based leg adapter will
+ * effectively be used.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
+public class ORCPerformanceCurveLegDialog extends DataEntryDialog<ORCPerformanceCurveLegImpl> {
+    private final Button fetchTrackingBasedDistanceAndTwaButton;
+    private final ListBox legTypeBox;
+    private final DoubleBox distanceInNauticalMilesBox;
+    private final DoubleBox twaBox;
+    private final StringMessages stringMessages;
+    private final ListDataProvider<WaypointDTO> waypointList;
+    private final WaypointDTO forLegEndingAt;
+    private final LegGeometrySupplier legGeometrySupplier;
+    
+    public ORCPerformanceCurveLegDialog(StringMessages stringMessages, WaypointDTO forLegEndingAt,
+            ListDataProvider<WaypointDTO> waypointList, ORCPerformanceCurveLegImpl orcLegParametersSoFar,
+            LegGeometrySupplier legGeometrySupplier,
+            Validator<ORCPerformanceCurveLegImpl> validator, DialogCallback<ORCPerformanceCurveLegImpl> callback) {
+        super(stringMessages.orcPerformanceCurveLeg(),
+                stringMessages.orcPerformanceCurveLegName(waypointList.getList().indexOf(forLegEndingAt), forLegEndingAt.getName()), stringMessages.ok(),
+                stringMessages.cancel(), validator, callback);
+        this.stringMessages = stringMessages;
+        this.forLegEndingAt = forLegEndingAt;
+        this.waypointList = waypointList;
+        this.legGeometrySupplier = legGeometrySupplier;
+        fetchTrackingBasedDistanceAndTwaButton = new Button(stringMessages.orcPerformanceCurveFetchTrackedLegGeometry());
+        fetchTrackingBasedDistanceAndTwaButton.addClickHandler(e->fetchTrackingBasedDistanceAndTwa());
+        legTypeBox = createListBox(/* isMultipleSelect */ false);
+        legTypeBox.addItem("", (String) null);
+        int i=1;
+        for (final ORCPerformanceCurveLegTypes t : ORCPerformanceCurveLegTypes.values()) {
+            legTypeBox.addItem(t.name(), t.name());
+            if (orcLegParametersSoFar != null && orcLegParametersSoFar.getType() == t) {
+                legTypeBox.setSelectedIndex(i);
+            }
+            i++;
+        }
+        distanceInNauticalMilesBox = createDoubleBox(/* visibleLength */ 5);
+        twaBox = createDoubleBox(/* visibleLength */ 5);
+        if (orcLegParametersSoFar != null) {
+            distanceInNauticalMilesBox.setValue(orcLegParametersSoFar.getLength().getNauticalMiles());
+        }
+        legTypeBox.addChangeHandler(e->updateFetchTrackingBasedDistanceAndTwaButtonEnabledState());
+        updateFetchTrackingBasedDistanceAndTwaButtonEnabledState();
+    }
+    
+    private void fetchTrackingBasedDistanceAndTwa() {
+        final int zeroBasedLegIndex = waypointList.getList().indexOf(forLegEndingAt)-1;
+        legGeometrySupplier.getLegGeometry(zeroBasedLegIndex,
+                new AsyncCallback<ORCPerformanceCurveLegImpl>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log(caught.getMessage());
+                        Notification.notify(caught.getMessage(), NotificationType.WARNING);
+                    }
+
+                    @Override
+                    public void onSuccess(ORCPerformanceCurveLegImpl legGeometry) {
+                        twaBox.setValue(legGeometry.getTwa().getDegrees());
+                        distanceInNauticalMilesBox.setValue(legGeometry.getLength().getNauticalMiles());
+                        validateAndUpdate();
+                    }
+        });
+    }
+
+    private ORCPerformanceCurveLegTypes getSelectedLegType() {
+        final String selectedValue = legTypeBox.getSelectedValue();
+        return selectedValue == null || selectedValue.equals("null") ? null : ORCPerformanceCurveLegTypes.valueOf(selectedValue);
+    }
+    
+    private void updateFetchTrackingBasedDistanceAndTwaButtonEnabledState() {
+        final boolean twaIsSelected = getSelectedLegType() == ORCPerformanceCurveLegTypes.TWA;
+        twaBox.setEnabled(twaIsSelected);
+    }
+
+    @Override
+    protected Widget getAdditionalWidget() {
+        final Grid result = new Grid(4, 2);
+        result.setWidget(0, 0, new Label(stringMessages.legType()));
+        result.setWidget(0, 1, legTypeBox);
+        result.setWidget(1, 0, new Label(stringMessages.distanceInNauticalMiles()));
+        result.setWidget(1, 1, distanceInNauticalMilesBox);
+        result.setWidget(2, 0, new Label(stringMessages.legTwaInDegrees()));
+        result.setWidget(2, 1, twaBox);
+        result.setWidget(3, 0, fetchTrackingBasedDistanceAndTwaButton);
+        return result;
+    }
+
+    @Override
+    public FocusWidget getInitialFocusWidget() {
+        return legTypeBox;
+    }
+
+    @Override
+    protected ORCPerformanceCurveLegImpl getResult() {
+        final ORCPerformanceCurveLegImpl result;
+        if (getSelectedLegType() == null) {
+            result = null;
+        } else if (getSelectedLegType() == ORCPerformanceCurveLegTypes.TWA) {
+            result = new ORCPerformanceCurveLegImpl(
+                    distanceInNauticalMilesBox.getValue() == null ? null
+                            : new NauticalMileDistance(distanceInNauticalMilesBox.getValue()),
+                    twaBox.getValue() == null ? null : new DegreeBearingImpl(twaBox.getValue()));
+        } else {
+            result = new ORCPerformanceCurveLegImpl(distanceInNauticalMilesBox.getValue() == null ? null
+                    : new NauticalMileDistance(distanceInNauticalMilesBox.getValue()), getSelectedLegType());
+        }
+        return result;
+    }
+}

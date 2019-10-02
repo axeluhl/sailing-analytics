@@ -61,7 +61,7 @@ extends Track<EventT>, WithID {
 
     Iterable<EventT> getFixesDescending();
 
-    void addAllListeners(HashSet<VisitorT> listeners);
+    void addAllListeners(Iterable<VisitorT> listeners);
 
     Iterable<VisitorT> getAllListeners();
 

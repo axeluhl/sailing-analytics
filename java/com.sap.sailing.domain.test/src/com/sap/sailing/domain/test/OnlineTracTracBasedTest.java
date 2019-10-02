@@ -10,7 +10,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,13 +31,15 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
+import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
+import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -91,7 +92,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest i
     
     
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
+    public void setUp() throws Exception {
         domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl((srlid)->null));
         // keep superclass implementation from automatically setting up for a Weymouth event and force subclasses
         // to select a race
@@ -117,7 +118,12 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest i
 
     protected void setUp(URL paramUrl, URI liveUri, URI storedUri, ReceiverType... receiverTypes)
             throws MalformedURLException, IOException, InterruptedException, URISyntaxException, SubscriberInitializationException, CreateModelException {
-        setUpWithoutLaunchingController(paramUrl, liveUri, storedUri);
+        setUp(paramUrl, liveUri, storedUri, OneDesignRankingMetric::new, receiverTypes);
+    }
+
+    protected void setUp(URL paramUrl, URI liveUri, URI storedUri, RankingMetricConstructor rankingMetricConstructor, ReceiverType... receiverTypes)
+            throws MalformedURLException, IOException, InterruptedException, URISyntaxException, SubscriberInitializationException, CreateModelException {
+        setUpWithoutLaunchingController(paramUrl, liveUri, storedUri, rankingMetricConstructor);
         finishSetUp(receiverTypes);
     }
 
@@ -247,7 +253,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest i
             final URI storedUri) throws MalformedURLException, FileNotFoundException, URISyntaxException,
             SubscriberInitializationException, CreateModelException {
         final URL paramUrl = getParamUrl(regattaName, raceId);
-        setUpWithoutLaunchingController(paramUrl, liveUri, storedUri);
+        setUpWithoutLaunchingController(paramUrl, liveUri, storedUri, OneDesignRankingMetric::new);
     }
 
 
@@ -256,14 +262,14 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest i
     }
 
 
-    protected void setUpWithoutLaunchingController(final URL paramUrl, final URI liveUri, final URI storedUri)
+    protected void setUpWithoutLaunchingController(final URL paramUrl, final URI liveUri, final URI storedUri, RankingMetricConstructor rankingMetricConstructor)
             throws FileNotFoundException, MalformedURLException, URISyntaxException, SubscriberInitializationException, CreateModelException {
         super.setUp(paramUrl, liveUri, storedUri);
         if (domainFactory == null) {
             domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl((srlid)->null));
         }
         domainEvent = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
-                getTracTracRace(), /* trackedRegattaRegistry */ null);
+                getTracTracRace(), /* trackedRegattaRegistry */ null, rankingMetricConstructor);
         trackedRegatta = new DynamicTrackedRegattaImpl(domainEvent);
     }
     
