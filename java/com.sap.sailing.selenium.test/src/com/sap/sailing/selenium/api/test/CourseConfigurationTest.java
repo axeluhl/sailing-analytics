@@ -149,10 +149,10 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                 .collect(Collectors.toList());
 
         List<WaypointWithMarkConfiguration> waypoints = new ArrayList<>();
-        WaypointWithMarkConfiguration waypoint = new WaypointWithMarkConfiguration("test", PassingInstruction.Line,
+        WaypointWithMarkConfiguration waypoint = new WaypointWithMarkConfiguration("test", null, PassingInstruction.Line,
                 markConfigurationIds);
         waypoints.add(waypoint);
 
-        return new CourseConfiguration(markConfigurations, waypoints);
+        return new CourseConfiguration("test-course", markConfigurations, waypoints);
     }
 }

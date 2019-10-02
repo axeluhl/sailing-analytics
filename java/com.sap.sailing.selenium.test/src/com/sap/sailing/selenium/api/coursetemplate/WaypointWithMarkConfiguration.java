@@ -10,6 +10,7 @@ import com.sap.sailing.selenium.api.core.JsonWrapper;
 
 public class WaypointWithMarkConfiguration extends JsonWrapper {
     private static final String FIELD_CONTROL_POINT_NAME = "controlPointName";
+    public static final String FIELD_CONTROL_POINT_SHORT_NAME = "controlPointShortName";
     private static final String FIELD_MARK_CONFIGURATION_IDS = "markConfigurationIds";
     private static final String FIELD_PASSING_INSTRUCTION = "passingInstruction";
 
@@ -24,12 +25,15 @@ public class WaypointWithMarkConfiguration extends JsonWrapper {
         passingInstruction = get(FIELD_PASSING_INSTRUCTION);
     }
 
-    public WaypointWithMarkConfiguration(String name, PassingInstruction passingInstruction,
+    public WaypointWithMarkConfiguration(String name, String shortName, PassingInstruction passingInstruction,
             Iterable<String> markConfigurationIds) {
         super(new JSONObject());
         this.passingInstruction = passingInstruction;
         this.markConfigurationIds = markConfigurationIds;
         getJson().put(FIELD_CONTROL_POINT_NAME, name);
+        if (shortName != null) {
+            getJson().put(FIELD_CONTROL_POINT_SHORT_NAME, shortName);
+        }
         getJson().put(FIELD_PASSING_INSTRUCTION, passingInstruction.name());
         final JSONArray markIds = new JSONArray();
         markConfigurationIds.forEach(mt -> markIds.add(mt.toString()));
