@@ -25,9 +25,13 @@ public class MarkConfiguration extends JsonWrapper {
             final String shape, final String pattern, final String markType) {
         MarkConfiguration markConfiguration = new MarkConfiguration(new JSONObject());
         markConfiguration.getJson().put(FIELD_ID, UUID.randomUUID().toString());
-        markConfiguration.getJson().put(FIELD_MARK_TEMPLATE_ID, markTemplateId.toString());
-        markConfiguration.getJson().put(FIELD_MARK_PROPERTIES_ID, markPropertiesId.toString());
-        markConfiguration.getJson().put(FIELD_ASSOCIATED_ROLE, associatedRole.toString());
+        if (markTemplateId != null) {
+            markConfiguration.getJson().put(FIELD_MARK_TEMPLATE_ID, markTemplateId.toString());
+        }
+        if (markPropertiesId != null) {
+            markConfiguration.getJson().put(FIELD_MARK_PROPERTIES_ID, markPropertiesId.toString());
+        }
+        markConfiguration.getJson().put(FIELD_ASSOCIATED_ROLE, associatedRole);
         markConfiguration.getJson().put(FIELD_FREESTYLE_PROPERTIES, new MarkAppearance(name, shortName, color, shape, pattern, markType).getJson());
         return markConfiguration;
     }
@@ -37,7 +41,7 @@ public class MarkConfiguration extends JsonWrapper {
         MarkConfiguration markConfiguration = new MarkConfiguration(new JSONObject());
         markConfiguration.getJson().put(FIELD_ID, UUID.randomUUID().toString());
         markConfiguration.getJson().put(FIELD_MARK_PROPERTIES_ID, markPropertiesId.toString());
-        markConfiguration.getJson().put(FIELD_ASSOCIATED_ROLE, associatedRole.toString());
+        markConfiguration.getJson().put(FIELD_ASSOCIATED_ROLE, associatedRole);
         return markConfiguration;
     }
 
@@ -45,7 +49,7 @@ public class MarkConfiguration extends JsonWrapper {
         MarkConfiguration markConfiguration = new MarkConfiguration(new JSONObject());
         markConfiguration.getJson().put(FIELD_ID, UUID.randomUUID().toString());
         markConfiguration.getJson().put(FIELD_MARK_ID, markId.toString());
-        markConfiguration.getJson().put(FIELD_ASSOCIATED_ROLE, associatedRole.toString());
+        markConfiguration.getJson().put(FIELD_ASSOCIATED_ROLE, associatedRole);
         return markConfiguration;
     }
 
@@ -53,7 +57,7 @@ public class MarkConfiguration extends JsonWrapper {
         MarkConfiguration markConfiguration = new MarkConfiguration(new JSONObject());
         markConfiguration.getJson().put(FIELD_ID, UUID.randomUUID().toString());
         markConfiguration.getJson().put(FIELD_MARK_TEMPLATE_ID, markTemplateId.toString());
-        markConfiguration.getJson().put(FIELD_ASSOCIATED_ROLE, associatedRole.toString());
+        markConfiguration.getJson().put(FIELD_ASSOCIATED_ROLE, associatedRole);
         return markConfiguration;
     }
 
