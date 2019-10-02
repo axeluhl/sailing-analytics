@@ -20,7 +20,7 @@ public class StorablePositioningJsonSerializer implements JsonSerializer<Storabl
         } else {
             result = new JSONObject();
             if (positioning.getDeviceUUID() != null) {
-                result.put(FIELD_DEVICE_UUID, positioning.getDeviceUUID());
+                result.put(FIELD_DEVICE_UUID, positioning.getDeviceUUID().toString());
             }
             if (positioning.getPosition() != null) {
                 result.put(FIELD_POSITION, positioningJsonSerializer.serialize(positioning.getPosition()));
