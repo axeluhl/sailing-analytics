@@ -312,7 +312,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     
                     regatta.getRegattaLog()
                     .add(new RegattaLogDeviceMarkMappingEventImpl(
-                            timePointForDefinitionOfMarksAndDeviceMappings, author, mark, deviceIdentifier,
+                            timePointForDefinitionOfMarksAndDeviceMappings, author, mark, pingIdentifier,
                             timePointForDefinitionOfMarksAndDeviceMappings,
                             timePointForDefinitionOfMarksAndDeviceMappings));
                 }
