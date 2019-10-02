@@ -48,7 +48,13 @@
                         <li>pattern: For marks with BUOY type, this may be specified as CHECKERED</li>
                     </ul>
                 </li>
-                <li>positioning (optional): Not implemented yet! Any given positioning is only included in the resulting course configuration. As mark templates can't have positioning information attached this is not saved when creating a mark template.</li>
+                <li>positioning (optional): Not implemented yet! </li>
+                <li>positioning (optional): Any given positioning is only included in the resulting course configuration. As mark templates can't have positioning information attached this is not saved when creating a mark template. Because the resulting course configuration may be used to update the UI state, the positioning is included in the updated mark configurations. Either of the following properties may be given:
+                    <ul>
+                        <li>deviceUUID: defines a smartphone tracking device by its UUID</li>
+                        <li>position: object that defines a fixed position for the mark with the required properties 'latitude_deg' and 'longitude_deg'</li>
+                    </ul>
+                </li>
             </ul>
             waypoints: An ordered sequence of waypoints that form the layout of the course template. For each waypoint, the following properties can be specified:
             <ul>
@@ -97,7 +103,13 @@
         },
         {
             "id": "43c622d2-46b0-4667-9937-071dec72c0d9",
-            "markTemplateId": "145f7908-a050-46d6-bd88-8267baa65985"
+            "markTemplateId": "145f7908-a050-46d6-bd88-8267baa65985",
+            "positioning": {
+                "position": {
+                    "latitude_deg": 5.5,
+                    "longitude_deg": 7.1
+                }
+            }
         },
         {
             "id": "cd4f9606-493b-422f-8615-6630d8761f4f",
@@ -116,6 +128,9 @@
                 "shape": "",
                 "pattern": "",
                 "markType": "BUOY"
+            },
+            "positioning": {
+                "deviceUUID": "a7309f55-a28a-420d-81a8-f85013f91269"
             }
         },
         {
