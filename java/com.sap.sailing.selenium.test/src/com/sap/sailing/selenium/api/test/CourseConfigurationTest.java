@@ -6,9 +6,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.junit.Before;
@@ -83,7 +85,32 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     }
 
     @Test
-    @Ignore
+    public void testCreateCourseFromFreestyleConfigurationWithPositioning() {
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final String regattaName = "test";
+        eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
+        final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
+        
+        MarkConfiguration sb = MarkConfiguration.createFreestyle(null, null, "role_sb", "startboat", "sb", null, null, null, null);
+        sb.setFixedPosition(5.5, 7.1);
+        MarkConfiguration pe = MarkConfiguration.createFreestyle(null, null, "role_pe", "pin end", "pe", null, null, null, null);
+        UUID randomDeviceId = UUID.randomUUID();
+        pe.setTrackingDeviceId(randomDeviceId);
+        MarkConfiguration bl = MarkConfiguration.createFreestyle(null, null, "role_bl", "1", null, "#0000FF", null, null, null);
+        WaypointWithMarkConfiguration wp1 = new WaypointWithMarkConfiguration("start/end", "s/e", PassingInstruction.Line, Arrays.asList(sb.getId(), pe.getId()));
+        WaypointWithMarkConfiguration wp2 = new WaypointWithMarkConfiguration(null, null, PassingInstruction.Port, Arrays.asList(bl.getId()));
+        
+        CourseConfiguration courseConfiguration = new CourseConfiguration("my-freestyle-course", Arrays.asList(sb, pe, bl), Arrays.asList(wp1, wp2, wp1));
+        
+        courseConfigurationApi.createCourse(ctx, courseConfiguration, regattaName, race.getRaceName(), "Default");
+        CourseConfiguration createdCourseAsConfiguration = courseConfigurationApi.createCourseConfigurationFromCourse(ctx, regattaName, race.getRaceName(), "Default", null);
+        // TODO assert roles
+        // TODO assert course sequence
+        // TODO assert positioning
+        // TODO assert short names
+    }
+
+    @Test
     public void testCreateCourseConfigurationFromTemplate() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 
