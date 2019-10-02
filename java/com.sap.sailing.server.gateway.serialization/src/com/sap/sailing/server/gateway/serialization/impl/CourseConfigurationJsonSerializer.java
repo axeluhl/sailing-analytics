@@ -100,10 +100,14 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
             markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_EFFECTIVE_PROPERTIES,
                     commonMarkPropertiesJsonSerializer.serialize(markConfiguration.getEffectiveProperties()));
             
-            markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_EFFECTIVE_POSITIONING,
-                    positioningJsonSerializer.serialize(markConfiguration.getEffectivePositioning()));
-            markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_POSITIONING,
-                    storablePositioningJsonSerializer.serialize(markConfiguration.getOptionalPositioning()));
+            if (markConfiguration.getEffectivePositioning() != null) {
+                markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_EFFECTIVE_POSITIONING,
+                        positioningJsonSerializer.serialize(markConfiguration.getEffectivePositioning()));
+            }
+            if (markConfiguration.getOptionalPositioning() != null) {
+                markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_POSITIONING,
+                        storablePositioningJsonSerializer.serialize(markConfiguration.getOptionalPositioning()));
+            }
 
             // TODO: associated role? markConfiguration.
             markConfigurationsToTempIdMap.put(markConfiguration, markConfigurationId);
