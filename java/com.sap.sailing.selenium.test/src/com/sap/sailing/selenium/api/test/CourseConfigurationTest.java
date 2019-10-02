@@ -130,7 +130,6 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     }
 
     @Test
-    @Ignore
     public void testCreateCourseConfigurationFromTemplate() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 
