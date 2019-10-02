@@ -73,7 +73,7 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
                         : commonMarkPropertiesJsonDeserializer.deserialize(freestylePropertiesObject);
                 
                 final Object positioningObject = markConfigurationJSON
-                        .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_EFFECTIVE_POSITIONING);
+                        .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_POSITIONING);
                 final StorablePositioning storablePositioning = positioningObject instanceof JSONObject
                         ? storablePositioningJsonDeserializer.deserialize((JSONObject) positioningObject)
                         : null;
