@@ -805,8 +805,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             }
         });
         this.dataImportLock = new DataImportLockWithProgress();
-        this.courseAndMarkConfigurationFactory = new CourseAndMarkConfigurationFactoryImpl(sharedSailingData,
-                sensorFixStore);
         remoteSailingServerSet = new RemoteSailingServerSet(scheduler, baseDomainFactory);
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         regattasByNameLock = new NamedReentrantReadWriteLock("regattasByName for " + this, /* fair */false);
@@ -840,6 +838,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             logger.log(Level.SEVERE, "Exception trying to obtain MongoDB sensor fix store", e);
             throw new RuntimeException(e);
         }
+        this.courseAndMarkConfigurationFactory = new CourseAndMarkConfigurationFactoryImpl(sharedSailingData,
+                this.sensorFixStore);
         this.raceManagerDeviceConfigurationsById = new HashMap<>();
         this.raceManagerDeviceConfigurationsByName = new HashMap<>();
         this.serviceFinderFactory = serviceFinderFactory;
