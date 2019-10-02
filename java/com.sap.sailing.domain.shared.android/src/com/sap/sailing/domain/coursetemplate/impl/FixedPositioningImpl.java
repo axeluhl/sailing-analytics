@@ -6,6 +6,6 @@ import com.sap.sailing.domain.coursetemplate.FixedPositioning;
 public class FixedPositioningImpl extends AbstractPositioningImpl implements FixedPositioning {
     
     public FixedPositioningImpl(Position position) {
-        super(PositioningType.Fixed, position);
+        super(PositioningType.FIXED_POSITION, position);
     }
 }

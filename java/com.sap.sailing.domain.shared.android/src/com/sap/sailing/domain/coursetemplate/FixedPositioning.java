@@ -1,5 +1,5 @@
 package com.sap.sailing.domain.coursetemplate;
 
-public interface FixedPositioning extends Positioning {
+public interface FixedPositioning extends StorablePositioning {
 
 }

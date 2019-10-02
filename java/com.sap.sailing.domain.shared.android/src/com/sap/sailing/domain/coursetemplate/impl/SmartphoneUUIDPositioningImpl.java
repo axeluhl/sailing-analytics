@@ -10,7 +10,7 @@ public class SmartphoneUUIDPositioningImpl extends AbstractPositioningImpl imple
     private final UUID deviceUUID;
 
     public SmartphoneUUIDPositioningImpl(UUID deviceUUID, Position optionalCurrentPosition) {
-        super(PositioningType.Device, optionalCurrentPosition);
+        super(PositioningType.DEVICE, optionalCurrentPosition);
         this.deviceUUID = deviceUUID;
     }
 

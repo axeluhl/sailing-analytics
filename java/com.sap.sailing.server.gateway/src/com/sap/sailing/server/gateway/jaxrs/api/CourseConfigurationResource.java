@@ -2,8 +2,13 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -28,6 +33,10 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.CourseDesignerMode;
+import com.sap.sailing.domain.common.DeviceIdentifier;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -41,15 +50,19 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSeri
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseConfigurationJsonSerializer;
+import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/v1/courseconfiguration")
 public class CourseConfigurationResource extends AbstractSailingServerResource {
-
+    private static final Logger log = Logger.getLogger(CourseConfigurationResource.class.getName());
+    
     private final JsonSerializer<CourseConfiguration> courseConfigurationJsonSerializer;
     private final JsonSerializer<CourseBase> courseJsonSerializer;
+    private final Function<DeviceIdentifier, Position> positionResolver;
 
     public static final String FIELD_TAGS = "tags";
     public static final String FIELD_OPTIONAL_IMAGE_URL = "optionalImageUrl";
@@ -59,10 +72,25 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         courseJsonSerializer = new CourseJsonSerializer(new CourseBaseJsonSerializer(
                 new WaypointJsonSerializer(new ControlPointJsonSerializer(new MarkJsonSerializer(),
                         new GateJsonSerializer(new MarkJsonSerializer())))));
+        positionResolver = identifier -> {
+            Position lastPosition = null;
+            try {
+                final Map<DeviceIdentifier, Timed> lastFix = getService().getSensorFixStore()
+                        .getLastFix(Collections.singleton(identifier));
+
+                final Timed t = lastFix.get(identifier);
+                if (t instanceof GPSFix) {
+                    lastPosition = ((GPSFix) t).getPosition();
+                }
+            } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                log.log(Level.WARNING, "Could not load associated fix for device " + identifier, e);
+            }
+            return lastPosition;
+        };
     }
 
     private JsonDeserializer<CourseConfiguration> getCourseConfigurationDeserializer(final Regatta regatta) {
-        return new CourseConfigurationJsonDeserializer(this.getSharedSailingData(), regatta);
+        return new CourseConfigurationJsonDeserializer(this.getSharedSailingData(), regatta, positionResolver);
     }
 
     private Response getBadRegattaErrorResponse(String regattaName) {

@@ -3,18 +3,22 @@ package com.sap.sailing.domain.coursetemplate.impl;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.Positioning;
+import com.sap.sailing.domain.coursetemplate.StorablePositioning;
 
 public abstract class MarkConfigurationImpl implements MarkConfiguration {
     private static final long serialVersionUID = -1130451024516101231L;
     
     private final MarkTemplate optionalMarkTemplate;
     private final boolean storeToInventory;
-    private final Positioning optionalPositioning;
+    private final StorablePositioning optionalPositioning;
+    private final Positioning storedPositioning;
 
-    public MarkConfigurationImpl(MarkTemplate optionalMarkTemplate, Positioning optionalPositioning, boolean storeToInventory) {
+    public MarkConfigurationImpl(MarkTemplate optionalMarkTemplate, StorablePositioning optionalPositioning,
+            Positioning storedPositioning, boolean storeToInventory) {
         super();
         this.optionalMarkTemplate = optionalMarkTemplate;
         this.optionalPositioning = optionalPositioning;
+        this.storedPositioning = storedPositioning;
         this.storeToInventory = storeToInventory;
     }
 
@@ -29,7 +33,12 @@ public abstract class MarkConfigurationImpl implements MarkConfiguration {
     }
 
     @Override
-    public Positioning getOptionalPositioning() {
+    public StorablePositioning getOptionalPositioning() {
         return optionalPositioning;
+    }
+    
+    @Override
+    public Positioning getEffectivePositioning() {
+        return optionalPositioning != null ? optionalPositioning : storedPositioning;
     }
 }

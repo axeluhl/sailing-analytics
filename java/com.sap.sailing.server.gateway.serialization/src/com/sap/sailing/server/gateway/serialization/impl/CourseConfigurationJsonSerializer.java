@@ -14,8 +14,10 @@ import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkPairWithConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
+import com.sap.sailing.domain.coursetemplate.StorablePositioning;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
@@ -30,6 +32,8 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
     public static final String FIELD_MARK_CONFIGURATION_EFFECTIVE_PROPERTIES = "effectiveProperties";
     public static final String FIELD_MARK_CONFIGURATION_FREESTYLE_PROPERTIES = "freestyleProperties";
     public static final String FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE = "associatedRole";
+    public static final String FIELD_MARK_CONFIGURATION_POSITIONING = "positioning";
+    public static final String FIELD_MARK_CONFIGURATION_EFFECTIVE_POSITIONING = "effectivePositioning";
     public static final String FIELD_WAYPOINTS = "waypoints";
     public static final String FIELD_WAYPOINT_CONTROL_POINT_NAME = "controlPointName";
     public static final String FIELD_WAYPOINT_CONTROL_POINT_SHORT_NAME = "controlPointShortName";
@@ -41,10 +45,14 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
 
     private final JsonSerializer<RepeatablePart> repeatablePartJsonSerializer;
     private final JsonSerializer<CommonMarkProperties> commonMarkPropertiesJsonSerializer;
+    private final JsonSerializer<Positioning> positioningJsonSerializer;
+    private final JsonSerializer<StorablePositioning> storablePositioningJsonSerializer;
 
     public CourseConfigurationJsonSerializer() {
         repeatablePartJsonSerializer = new RepeatablePartJsonSerializer();
         commonMarkPropertiesJsonSerializer = new CommonMarkPropertiesJsonSerializer();
+        positioningJsonSerializer = new PositioningJsonSerializer();
+        storablePositioningJsonSerializer = new StorablePositioningJsonSerializer();
     }
 
     @Override
@@ -91,9 +99,13 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
             }
             markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_EFFECTIVE_PROPERTIES,
                     commonMarkPropertiesJsonSerializer.serialize(markConfiguration.getEffectiveProperties()));
+            
+            markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_EFFECTIVE_POSITIONING,
+                    positioningJsonSerializer.serialize(markConfiguration.getEffectivePositioning()));
+            markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_POSITIONING,
+                    storablePositioningJsonSerializer.serialize(markConfiguration.getOptionalPositioning()));
 
             // TODO: associated role? markConfiguration.
-            // TODO add optionalPositioning
             markConfigurationsToTempIdMap.put(markConfiguration, markConfigurationId);
             markConfigurationsJSON.add(markConfigurationsEntry);
 

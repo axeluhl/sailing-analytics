@@ -38,7 +38,9 @@ public interface MarkConfiguration extends ControlPointWithMarkConfiguration {
     
     CommonMarkProperties getEffectiveProperties();
     
-    Positioning getOptionalPositioning();
+    Positioning getEffectivePositioning();
+    
+    StorablePositioning getOptionalPositioning();
     
     boolean isStoreToInventory();
     

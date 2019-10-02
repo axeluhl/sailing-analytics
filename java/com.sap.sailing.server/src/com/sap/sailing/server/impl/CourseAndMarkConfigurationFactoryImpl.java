@@ -20,7 +20,6 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
-import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Course;
@@ -55,20 +54,17 @@ import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguratio
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.Positioning;
-import com.sap.sailing.domain.coursetemplate.Positioning.PositioningType;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.SmartphoneUUIDPositioning;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.impl.CourseConfigurationImpl;
-import com.sap.sailing.domain.coursetemplate.impl.FixedPositioningImpl;
 import com.sap.sailing.domain.coursetemplate.impl.FreestyleMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPairWithConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesBasedMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateBasedMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.RegattaMarkConfigurationImpl;
-import com.sap.sailing.domain.coursetemplate.impl.SavedDevicePositioningImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointWithMarkConfigurationImpl;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
@@ -78,13 +74,13 @@ import com.sap.sailing.domain.racelogtracking.impl.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.server.gateway.deserialization.impl.CourseConfigurationBuilder;
 import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfigurationFactory {
@@ -93,10 +89,26 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     
     private final SharedSailingData sharedSailingData;
     private final SensorFixStore sensorFixStore;
+    private final Function<DeviceIdentifier, Position> positionResolver;
 
     public CourseAndMarkConfigurationFactoryImpl(SharedSailingData sharedSailingData, SensorFixStore sensorFixStore) {
         this.sharedSailingData = sharedSailingData;
         this.sensorFixStore = sensorFixStore;
+        positionResolver = identifier -> {
+            Position lastPosition = null;
+            try {
+                final Map<DeviceIdentifier, Timed> lastFix = sensorFixStore
+                        .getLastFix(Collections.singleton(identifier));
+
+                final Timed t = lastFix.get(identifier);
+                if (t instanceof GPSFix) {
+                    lastPosition = ((GPSFix) t).getPosition();
+                }
+            } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                log.log(Level.WARNING, "Could not load associated fix for device " + identifier, e);
+            }
+            return lastPosition;
+        };
     }
 
     @Override
@@ -168,7 +180,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     final MarkProperties markProperties = ((MarkPropertiesBasedMarkConfiguration) markConfiguration)
                             .getMarkProperties();
                     effectiveConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(markProperties,
-                            effectiveMarkTemplate, markConfiguration.getOptionalPositioning());
+                            effectiveMarkTemplate, markConfiguration.getOptionalPositioning(), getPositioningIfAvailable(markProperties));
                     sharedSailingData.recordUsage(effectiveMarkTemplate, markProperties);
                 } else if (markConfiguration instanceof FreestyleMarkConfiguration) {
                     final MarkProperties markPropertiesOrNull = ((FreestyleMarkConfiguration) markConfiguration)
@@ -177,10 +189,11 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                         sharedSailingData.recordUsage(effectiveMarkTemplate, markPropertiesOrNull);
                         if (markPropertiesOrNull.hasEqualAppeareanceWith(effectiveMarkTemplate)) {
                             effectiveConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(markPropertiesOrNull,
-                                    effectiveMarkTemplate, markConfiguration.getOptionalPositioning());
+                                    effectiveMarkTemplate, markConfiguration.getOptionalPositioning(), getPositioningIfAvailable(markPropertiesOrNull));
                         } else {
                             effectiveConfiguration = new FreestyleMarkConfigurationImpl(effectiveMarkTemplate,
-                                    markPropertiesOrNull, effectiveMarkTemplate, markConfiguration.getOptionalPositioning());
+                                    markPropertiesOrNull, effectiveMarkTemplate, markConfiguration.getOptionalPositioning(),
+                                    getPositioningIfAvailable(markPropertiesOrNull));
                         }
                     } else {
                         effectiveConfiguration = new MarkTemplateBasedMarkConfigurationImpl(effectiveMarkTemplate,
@@ -271,41 +284,37 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         }
 
         if (position != null ^ deviceIdentifier != null) {
-            final Positioning latestPosition = getPositioningIfAvailable(regatta, mark);
-            if (position != null) {
-                if (latestPosition.getType() == PositioningType.Fixed
-                        && (latestPosition.getPosition() == null || latestPosition.getPosition().equals(position))) {
+            final DeviceMappingWithRegattaLogEvent<Mark> existingDeviceMapping = CourseConfigurationBuilder.findMostRecentOrOngoingMapping(regatta, mark);
+            if (deviceIdentifier != null) {
+                if (existingDeviceMapping == null || !(deviceIdentifier.equals(existingDeviceMapping.getDevice()) && existingDeviceMapping.getTimeRange().hasOpenEnd())) {
+                    regatta.getRegattaLog()
+                    .add(new RegattaLogDeviceMarkMappingEventImpl(
+                            timePointForDefinitionOfMarksAndDeviceMappings, author, mark, deviceIdentifier,
+                            timePointForDefinitionOfMarksAndDeviceMappings, null));
+                }
+            } else if (position != null) {
+                final boolean update;
+                if (existingDeviceMapping != null) {
+                    if (!PingDeviceIdentifier.TYPE.equals(existingDeviceMapping.getDevice().getIdentifierType())) {
+                        update = true;
+                    } else {
+                        final Position lastPingedPositionOrNull = positionResolver.apply(existingDeviceMapping.getDevice());
+                        update = lastPingedPositionOrNull == null || !lastPingedPositionOrNull.equals(position);
+                    }
+                } else {
+                    update = true;
+                }
+                if (update) {
                     final PingDeviceIdentifierImpl pingIdentifier = new PingDeviceIdentifierImpl(UUID.randomUUID());
-
+                    
                     sensorFixStore.storeFix(pingIdentifier,
                             new GPSFixImpl(position, timePointForDefinitionOfMarksAndDeviceMappings));
-
+                    
                     regatta.getRegattaLog()
-                            .add(new RegattaLogDeviceMarkMappingEventImpl(
-                                    timePointForDefinitionOfMarksAndDeviceMappings, author, mark, deviceIdentifier,
-                                    timePointForDefinitionOfMarksAndDeviceMappings,
-                                    timePointForDefinitionOfMarksAndDeviceMappings));
-                }
-            }
-
-            else if (deviceIdentifier != null) {
-
-                // TODO get current positioning state for the given mark
-                // TODO update positioning if it differs from the existing one
-
-                // TODO device identifier der gleiche + intervall offen
-
-
-                if (latestPosition.getType() == PositioningType.Device && (latestPosition.getPosition() == null)) {
-                    // if (latestPosition instanceof GPSFix) {
-                    // GPSFix f = (GPSFix) latestPosition;
-                    // }
-
-                    regatta.getRegattaLog()
-                            .add(new RegattaLogDeviceMarkMappingEventImpl(
-                                    timePointForDefinitionOfMarksAndDeviceMappings, author, mark, deviceIdentifier,
-                                    timePointForDefinitionOfMarksAndDeviceMappings, null));
-
+                    .add(new RegattaLogDeviceMarkMappingEventImpl(
+                            timePointForDefinitionOfMarksAndDeviceMappings, author, mark, deviceIdentifier,
+                            timePointForDefinitionOfMarksAndDeviceMappings,
+                            timePointForDefinitionOfMarksAndDeviceMappings));
                 }
             }
         }
@@ -651,7 +660,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             if (suggestedMappings.containsKey(keyTemplate)) {
                 final MarkProperties suggestedPropertiesMapping = suggestedMappings.get(keyTemplate);
                 final MarkPropertiesBasedMarkConfigurationImpl newMarkPropertiesBasedConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(
-                        suggestedPropertiesMapping, keyTemplate, getPositioningIfAvailable(suggestedPropertiesMapping));
+                        suggestedPropertiesMapping, keyTemplate, /* optionalPositioning */ null, getPositioningIfAvailable(suggestedPropertiesMapping));
 
                 resultingRoleMapping.remove(entr.getKey());
                 resultingRoleMapping.put(newMarkPropertiesBasedConfiguration, entr.getValue());
@@ -680,7 +689,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             if (suggestedMappings.containsKey(keyTemplate)) {
                 final MarkProperties suggestedPropertiesMapping = suggestedMappings.get(keyTemplate);
                 final MarkPropertiesBasedMarkConfigurationImpl newMarkPropertiesBasedConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(
-                        suggestedPropertiesMapping, keyTemplate, getPositioningIfAvailable(suggestedPropertiesMapping));
+                        suggestedPropertiesMapping, keyTemplate, /* optionalPositioning */ null, getPositioningIfAvailable(suggestedPropertiesMapping));
 
                 markTemplatesToMarkConfigurationsToReplace.put(keyTemplate, newMarkPropertiesBasedConfiguration);
                 markConfigurationsToEdit.remove(entr.getValue());
@@ -690,82 +699,11 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     }
 
     private Positioning getPositioningIfAvailable(Regatta regatta, Mark mark) {
-        final Map<WithID, List<DeviceMappingWithRegattaLogEvent<WithID>>> deviceMappings = new RegattaLogDeviceMappingFinder<>(
-                regatta.getRegattaLog()).analyze();
-
-        final List<DeviceMappingWithRegattaLogEvent<WithID>> foundMappings = deviceMappings.get(mark);
-        final DeviceIdentifier identifier = findMostRecentOrOngoingMapping(foundMappings);
-
-        final Positioning result;
-        if (identifier != null) {
-            Position lastPosition = null;
-            try {
-                final Map<DeviceIdentifier, Timed> lastFix = sensorFixStore
-                        .getLastFix(Collections.singleton(identifier));
-
-                final Timed t = lastFix.get(identifier);
-                if (t instanceof GPSFix) {
-                    lastPosition = ((GPSFix) t).getPosition();
-                }
-            } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-                log.log(Level.WARNING, "Could not load associated fix for regatta mark", e);
-            }
-
-            if (PingDeviceIdentifier.TYPE.equals(identifier.getIdentifierType())) {
-                result = new FixedPositioningImpl(lastPosition);
-            } else {
-                result = new SavedDevicePositioningImpl(lastPosition);
-            }
-        } else {
-            result = null;
-        }
-        return result;
-    }
-
-    /**
-     * @return the device mapping from the set of {@code foundMappings} which is either ongoing or has the most recent
-     *         end time point
-     */
-    private DeviceIdentifier findMostRecentOrOngoingMapping(
-            final List<DeviceMappingWithRegattaLogEvent<WithID>> foundMappings) {
-        DeviceIdentifier identifier = null;
-        TimePoint identifierTP = new MillisecondsTimePoint(0);
-        if (foundMappings != null) {
-            for (DeviceMappingWithRegattaLogEvent<WithID> event : foundMappings) {
-
-                if (event.getTimeRange().hasOpenEnd()) {
-                    identifier = event.getDevice();
-                    break;
-                }
-                if (identifierTP.before(event.getTimeRange().to())) {
-                    identifierTP = event.getTimeRange().to();
-                }
-            }
-        }
-        return identifier;
+        return CourseConfigurationBuilder.getPositioningIfAvailable(regatta, mark, positionResolver);
     }
 
     private Positioning getPositioningIfAvailable(MarkProperties markProperties) {
-        final Position fixedPosition = markProperties.getFixedPosition();
-        if (fixedPosition != null) {
-            return new FixedPositioningImpl(fixedPosition);
-        }
-        final DeviceIdentifier trackingDeviceIdentifier = markProperties.getTrackingDeviceIdentifier();
-        if (trackingDeviceIdentifier != null) {
-            Position lastPositionOrNull = null;
-            try {
-                final Map<DeviceIdentifier, Timed> lastFixMap = sensorFixStore.getLastFix(Collections.singleton(trackingDeviceIdentifier));
-                final Timed lastFixOrNull = lastFixMap.get(trackingDeviceIdentifier);
-                if (lastFixOrNull instanceof GPSFix) {
-                    lastPositionOrNull = ((GPSFix)lastFixOrNull).getPosition();
-                }
-            } catch (Exception e) {
-                log.log(Level.WARNING,
-                        "Error shile trying to load last fix for tracking device associated to mark properties", e);
-            }
-            return new SavedDevicePositioningImpl(lastPositionOrNull);
-        }
-        return null;
+        return CourseConfigurationBuilder.getPositioningIfAvailable(markProperties, positionResolver);
     }
 
     private class MarkTemplatesMarkPropertiesAssociater {
@@ -1014,7 +952,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 markTemplate = resolveMarkTemplateByID(courseTemplate, markTemplateIdOrNull);
             }
             final RegattaMarkConfiguration regattaMarkConfiguration = new RegattaMarkConfigurationImpl(mark,
-                    getPositioningIfAvailable(regatta, mark), markTemplate);
+                    /* optionalPositioning */ null, getPositioningIfAvailable(regatta, mark), markTemplate);
             return regattaMarkConfiguration;
         }
     }
