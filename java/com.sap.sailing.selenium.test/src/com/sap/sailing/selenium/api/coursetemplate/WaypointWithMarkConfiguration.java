@@ -20,9 +20,11 @@ public class WaypointWithMarkConfiguration extends JsonWrapper {
     public WaypointWithMarkConfiguration(final JSONObject json) {
         super(json);
         JSONArray markConfigurationIdsJson = get(FIELD_MARK_CONFIGURATION_IDS);
-        markConfigurationIds = markConfigurationIdsJson.stream().map(m -> ((JSONObject) m).toString())
-                .collect(Collectors.toList());
-        passingInstruction = get(FIELD_PASSING_INSTRUCTION);
+        markConfigurationIds = markConfigurationIdsJson.stream().map(m -> (String) m).collect(Collectors.toList());
+        String passingInstruction = get(FIELD_PASSING_INSTRUCTION);
+        this.passingInstruction = passingInstruction != null && passingInstruction.length() != 0
+                ? PassingInstruction.valueOfIgnoringCase(passingInstruction)
+                : null;
     }
 
     public WaypointWithMarkConfiguration(String name, String shortName, PassingInstruction passingInstruction,

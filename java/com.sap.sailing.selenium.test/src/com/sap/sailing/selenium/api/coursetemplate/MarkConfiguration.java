@@ -13,6 +13,7 @@ public class MarkConfiguration extends JsonWrapper {
     private static final String FIELD_MARK_PROPERTIES_ID = "markPropertiesId";
     private static final String FIELD_ASSOCIATED_ROLE = "associatedRole";
     private static final String FIELD_FREESTYLE_PROPERTIES = "freestyleProperties";
+    private static final String FIELD_EFFECTIVE_PROPERTIES = "effectiveProperties";
     private static final String FIELD_MARK_ID = "markId";
     private static final String FIELD_POSITIONING = "positioning";
 
@@ -32,7 +33,8 @@ public class MarkConfiguration extends JsonWrapper {
             markConfiguration.getJson().put(FIELD_MARK_PROPERTIES_ID, markPropertiesId.toString());
         }
         markConfiguration.getJson().put(FIELD_ASSOCIATED_ROLE, associatedRole);
-        markConfiguration.getJson().put(FIELD_FREESTYLE_PROPERTIES, new MarkAppearance(name, shortName, color, shape, pattern, markType).getJson());
+        markConfiguration.getJson().put(FIELD_FREESTYLE_PROPERTIES,
+                new MarkAppearance(name, shortName, color, shape, pattern, markType).getJson());
         return markConfiguration;
     }
 
@@ -64,17 +66,32 @@ public class MarkConfiguration extends JsonWrapper {
     public String getId() {
         return this.get(FIELD_ID);
     }
-    
+
     public void setTrackingDeviceId(UUID deviceId) {
         getJson().put(FIELD_POSITIONING, new Positioning(deviceId).getJson());
     }
-    
+
     public void setFixedPosition(double latDeg, double lngDeg) {
         getJson().put(FIELD_POSITIONING, new Positioning(latDeg, lngDeg).getJson());
     }
-    
+
     public Positioning getPositioning() {
-        final JSONObject positioningObject = (JSONObject) getJson().get(FIELD_POSITIONING);
+        final JSONObject positioningObject = (JSONObject) get(FIELD_POSITIONING);
         return positioningObject == null ? null : new Positioning(positioningObject);
+    }
+
+    public UUID getMarkTemplateId() {
+        final Object markTemplateId = get(FIELD_MARK_TEMPLATE_ID);
+        return markTemplateId != null ? UUID.fromString((String) markTemplateId) : null;
+    }
+
+    public MarkAppearance getEffectiveProperties() {
+        final JSONObject effectivePropertiesJson = (JSONObject) get(FIELD_EFFECTIVE_PROPERTIES);
+        return effectivePropertiesJson != null ? new MarkAppearance(effectivePropertiesJson) : null;
+    }
+
+    public MarkAppearance getFreestyleProperties() {
+        final JSONObject effectivePropertiesJson = (JSONObject) get(FIELD_FREESTYLE_PROPERTIES);
+        return effectivePropertiesJson != null ? new MarkAppearance(effectivePropertiesJson) : null;
     }
 }

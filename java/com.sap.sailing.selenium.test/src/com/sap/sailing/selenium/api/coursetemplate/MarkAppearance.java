@@ -27,4 +27,8 @@ public class MarkAppearance extends JsonWrapper {
         getJson().put(FIELD_PATTERN, pattern);
         getJson().put(FIELD_MARK_TYPE, markType);
     }
+    
+    public String getName() {
+        return (String) getJson().get(FIELD_NAME);
+    }
 }
