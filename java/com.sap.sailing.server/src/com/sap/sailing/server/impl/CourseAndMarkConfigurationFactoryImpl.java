@@ -305,6 +305,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     update = true;
                 }
                 if (update) {
+                    // TODO check if we can use com.sap.sailing.domain.racelogtracking.impl.RaceLogTrackingAdapterImpl.pingMark(RegattaLog, Mark, GPSFix, RacingEventService)
                     final PingDeviceIdentifierImpl pingIdentifier = new PingDeviceIdentifierImpl(UUID.randomUUID());
                     
                     sensorFixStore.storeFix(pingIdentifier,
