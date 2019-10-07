@@ -251,10 +251,8 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
                 "leaderboard group name", "leaderboard group description", "leaderboard group display name",
                 displayGroupsInReverseOrder, Collections.singletonList(leaderboard.getName()),
                 overallLeaderboardDiscardThresholds, ScoringSchemeType.LOW_POINT);
-
         // Serialize
         List<String> groupNamesToExport = Collections.singletonList(leaderboardGroup.getName());
-
         final DomainFactory domainFactory;
         DummyMasterDataResource spyResource = spyResource(new DummyMasterDataResource(), sourceService);
         Mockito.doReturn(securityService).when(spyResource).getSecurityService();
@@ -283,7 +281,6 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         } finally {
             os.close();
         }
-
         // ---Asserts---
         final Iterable<MediaTrack> targetTracksMaster = master.getAllMediaTracks();
         compareTracks(trackOnSource, targetTracksMaster);
