@@ -13,6 +13,8 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -145,5 +147,10 @@ public abstract class AbstractSailingServerResource {
         BigDecimal bigDecimal = new BigDecimal(value);
         bigDecimal = bigDecimal.setScale(places, RoundingMode.HALF_UP);
         return bigDecimal.doubleValue();
+    }
+    
+    protected RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
+        return RaceLogTrackingAdapterFactory.INSTANCE
+                .getAdapter(getService().getBaseDomainFactory());
     }
 }

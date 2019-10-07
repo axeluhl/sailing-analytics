@@ -57,7 +57,6 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
-import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
@@ -178,9 +177,8 @@ public class MarkResource extends AbstractSailingServerResource {
         String lonDeg = (String) requestObject.get(LON_DEG);
         String latDeg = (String) requestObject.get(LAT_DEG);
         String timeMillis = (String) requestObject.get(TIME_MILLIS);
-
-        RaceLogTrackingAdapter raceLogTrackingAdapter = RaceLogTrackingAdapterFactory.INSTANCE
-                .getAdapter(getService().getBaseDomainFactory());
+        
+        final RaceLogTrackingAdapter raceLogTrackingAdapter = getRaceLogTrackingAdapter();
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             // check leaderboard update permission
