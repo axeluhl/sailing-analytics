@@ -171,8 +171,12 @@ public class CourseConfigurationBuilder {
                     final UUID markTemplateIdOrNull = mark.getOriginatingMarkTemplateIdOrNull();
                     final MarkTemplate markTemplateOrNull = markTemplateIdOrNull == null ? null
                             : resolveMarkTemplateByID(markTemplateIdOrNull);
+                    final UUID markPropertiesIdOrNull = mark.getOriginatingMarkPropertiesIdOrNull();
+                    final MarkProperties markPropertiesOrNull = markPropertiesIdOrNull == null ? null
+                            : sharedSailingData.getMarkPropertiesById(markPropertiesIdOrNull);
                     final RegattaMarkConfiguration result = new RegattaMarkConfigurationImpl(mark, optionalPositioning,
-                            getPositioningIfAvailable(optionalRegatta, mark, positionResolver), markTemplateOrNull);
+                            getPositioningIfAvailable(optionalRegatta, mark, positionResolver), markTemplateOrNull,
+                            markPropertiesOrNull);
                     markConfigurations.add(result);
                     return result;
                 }

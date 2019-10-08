@@ -916,13 +916,13 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
 
         private RegattaMarkConfiguration createMarkConfigurationForRegattaMark(CourseTemplate courseTemplate,
                 Regatta regatta, Mark mark) {
-            MarkTemplate markTemplate = null;
             final UUID markTemplateIdOrNull = mark.getOriginatingMarkTemplateIdOrNull();
-            if (markTemplateIdOrNull != null) {
-                markTemplate = resolveMarkTemplateByID(courseTemplate, markTemplateIdOrNull);
-            }
+            final MarkTemplate markTemplateOrNull = markTemplateIdOrNull == null ? null : resolveMarkTemplateByID(courseTemplate, markTemplateIdOrNull);
+            final UUID markPropertiesIdOrNull = mark.getOriginatingMarkPropertiesIdOrNull();
+            final MarkProperties markPropertiesOrNull = markPropertiesIdOrNull == null ? null
+                    : sharedSailingData.getMarkPropertiesById(markPropertiesIdOrNull);
             final RegattaMarkConfiguration regattaMarkConfiguration = new RegattaMarkConfigurationImpl(mark,
-                    /* optionalPositioning */ null, getPositioningIfAvailable(regatta, mark), markTemplate);
+                    /* optionalPositioning */ null, getPositioningIfAvailable(regatta, mark), markTemplateOrNull, markPropertiesOrNull);
             return regattaMarkConfiguration;
         }
     }
