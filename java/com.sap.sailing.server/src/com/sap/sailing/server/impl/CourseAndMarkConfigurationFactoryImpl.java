@@ -417,7 +417,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             waypoints = courseConfiguration.getWaypoints();
         }
         final CourseSequenceReplacementMapper<ControlPoint, Mark, Waypoint> courseSequenceMapper = new CourseSequenceReplacementMapper<ControlPoint, Mark, Waypoint>(
-                false, waypoints, Collections.emptyMap(), marksByMarkConfigurations) {
+                false, waypoints, courseConfiguration.getAssociatedRoles(), marksByMarkConfigurations) {
             @Override
             protected ControlPointWithTwoMarks createMarkPair(Mark left, Mark right, String name, String shortName) {
                 return new ControlPointWithTwoMarksImpl(UUID.randomUUID(), left, right, name, shortName);
