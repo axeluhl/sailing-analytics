@@ -37,6 +37,8 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
  *
  */
 public class URLFieldWithFileUpload extends Composite implements HasValue<String> {
+    private static final URLFieldWithFileUploadResources RESOURCES = URLFieldWithFileUploadResources.INSTANCE;
+
     private final TextBox urlTextBox;
     
     private final FileUpload fileUploadField;
@@ -56,13 +58,15 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
     }
    
     public URLFieldWithFileUpload(final StringMessages stringMessages, boolean initiallyEnableUpload) {
+        RESOURCES.urlFieldWithFileUploadStyle().ensureInjected();
         final VerticalPanel mainPanel = new VerticalPanel();
         final FlowPanel imageUrlPanel = new FlowPanel();
+        imageUrlPanel.addStyleName(RESOURCES.urlFieldWithFileUploadStyle().spaceDirectChildrenClass());
         mainPanel.add(new Label(stringMessages.pleaseOnlyUploadContentYouHaveAllUsageRightsFor()));
         mainPanel.add(imageUrlPanel);
         
         final FormPanel removePanel = new FormPanel();
-        removePanel.getElement().setPropertyString("style", "display: inline-block;");
+        removePanel.addStyleName(RESOURCES.urlFieldWithFileUploadStyle().inlineClass());
         removePanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
@@ -96,6 +100,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         uploadFormPanel = new FormPanel();
         mainPanel.add(uploadFormPanel);
         uploadPanel = new FlowPanel();
+        uploadPanel.setStylePrimaryName(RESOURCES.urlFieldWithFileUploadStyle().spaceDirectChildrenClass());
         if(initiallyEnableUpload) {
             uploadFormPanel.add(uploadPanel);
         }
@@ -104,7 +109,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         uploadFormPanel.setMethod(FormPanel.METHOD_POST);
         fileUploadField = new FileUpload();
         final Label uploadLabel = new Label(stringMessages.upload()+ ":");
-        uploadLabel.getElement().setPropertyString("style", "display: inline-block;");
+        uploadLabel.setStylePrimaryName(RESOURCES.urlFieldWithFileUploadStyle().inlineClass());
         uploadPanel.add(uploadLabel);
         uploadPanel.add(fileUploadField);
         final InputElement inputElement = fileUploadField.getElement().cast();
