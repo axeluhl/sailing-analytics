@@ -213,21 +213,9 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         final MarkPairTemplateFactory markPairTemplateFactory = new MarkPairTemplateFactory();
         // TODO record usages for MarkProperties by role name
         
-        final CourseSequenceReplacementMapper<ControlPointWithMarkConfiguration, MarkConfiguration, WaypointWithMarkConfiguration> waypointConfigurationMapper = new CourseSequenceReplacementMapper<ControlPointWithMarkConfiguration, MarkConfiguration, WaypointWithMarkConfiguration>(
+        final CourseConfigurationToCourseConfigurationMapper waypointConfigurationMapper = new CourseConfigurationToCourseConfigurationMapper(
                 true, courseWithMarkConfiguration.getWaypoints(), courseWithMarkConfiguration.getAssociatedRoles(),
-                marksConfigurationsMapping) {
-            @Override
-            protected MarkPairWithConfiguration createMarkPair(MarkConfiguration left, MarkConfiguration right,
-                    String name, String shortName) {
-                return new MarkPairWithConfigurationImpl(name, left, right, shortName);
-            }
-
-            @Override
-            protected WaypointWithMarkConfiguration getOrCreateWaypoint(ControlPointWithMarkConfiguration controlPoint,
-                    PassingInstruction passingInstruction) {
-                return new WaypointWithMarkConfigurationImpl(controlPoint, passingInstruction);
-            }
-        };
+                marksConfigurationsMapping);
 
         final CourseSequenceReplacementMapper<ControlPointTemplate, MarkTemplate, WaypointTemplate> waypointTemplateMapper = new CourseSequenceReplacementMapper<ControlPointTemplate, MarkTemplate, WaypointTemplate>(
                 true, courseWithMarkConfiguration.getWaypoints(), courseWithMarkConfiguration.getAssociatedRoles(),
@@ -1007,4 +995,25 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             return existingMapping.get(markConfiguration);
         }
     }
+    
+    private class CourseConfigurationToCourseConfigurationMapper extends
+            CourseSequenceReplacementMapper<ControlPointWithMarkConfiguration, MarkConfiguration, WaypointWithMarkConfiguration> {
+        public CourseConfigurationToCourseConfigurationMapper(boolean ensureRoleForEachMarkInSequence,
+                Iterable<WaypointWithMarkConfiguration> waypoints, Map<MarkConfiguration, String> existingRoleMapping,
+                Map<MarkConfiguration, MarkConfiguration> existingMapping) {
+            super(ensureRoleForEachMarkInSequence, waypoints, existingRoleMapping, existingMapping);
+        }
+
+        @Override
+        protected MarkPairWithConfiguration createMarkPair(MarkConfiguration left, MarkConfiguration right, String name,
+                String shortName) {
+            return new MarkPairWithConfigurationImpl(name, left, right, shortName);
+        }
+
+        @Override
+        protected WaypointWithMarkConfiguration getOrCreateWaypoint(ControlPointWithMarkConfiguration controlPoint,
+                PassingInstruction passingInstruction) {
+            return new WaypointWithMarkConfigurationImpl(controlPoint, passingInstruction);
+        }
+    };
 }
