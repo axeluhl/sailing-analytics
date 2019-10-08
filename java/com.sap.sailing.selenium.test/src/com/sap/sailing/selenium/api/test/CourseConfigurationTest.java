@@ -4,6 +4,7 @@ import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -29,6 +30,8 @@ import com.sap.sailing.selenium.api.coursetemplate.MarkAppearance;
 import com.sap.sailing.selenium.api.coursetemplate.MarkConfiguration;
 import com.sap.sailing.selenium.api.coursetemplate.MarkTemplate;
 import com.sap.sailing.selenium.api.coursetemplate.MarkTemplateApi;
+import com.sap.sailing.selenium.api.coursetemplate.Positioning;
+import com.sap.sailing.selenium.api.coursetemplate.RepeatablePart;
 import com.sap.sailing.selenium.api.coursetemplate.WaypointTemplate;
 import com.sap.sailing.selenium.api.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.selenium.api.event.EventApi;
@@ -72,36 +75,67 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
             final CourseConfiguration trgtCourseConfiguration) {
         System.out.println(srcCourseConfiguration);
         System.out.println(trgtCourseConfiguration);
-         for (final MarkConfiguration markConfiguration : srcCourseConfiguration.getMarkConfigurations()) {
+        for (final MarkConfiguration markConfiguration : srcCourseConfiguration.getMarkConfigurations()) {
             final UUID markTemplateId = markConfiguration.getMarkTemplateId();
             MarkAppearance srcAppearance = markConfiguration.getEffectiveProperties();
             if (srcAppearance == null) {
                 srcAppearance = markConfiguration.getFreestyleProperties();
             }
+            Positioning srcPositioning = markConfiguration.getPositioning();
+            if (srcPositioning == null) {
+                srcPositioning = markConfiguration.getEffectivePositioning();
+            }
             boolean found = false;
-            for (final MarkConfiguration createdMarkConfiguration : trgtCourseConfiguration
-                    .getMarkConfigurations()) {
-                final MarkAppearance trgtAppearance = createdMarkConfiguration.getEffectiveProperties();
+            for (final MarkConfiguration trgtMarkConfiguration : trgtCourseConfiguration.getMarkConfigurations()) {
+                final MarkAppearance trgtAppearance = trgtMarkConfiguration.getEffectiveProperties();
                 if (srcAppearance == null && trgtAppearance == null) {
                     return;
                 }
                 if (srcAppearance.getName().equals(trgtAppearance.getName())) {
                     found = true;
-                    if (markTemplateId != null && createdMarkConfiguration.getMarkTemplateId() != null) {
-                        assertEquals(markTemplateId, createdMarkConfiguration.getMarkTemplateId());
+                    if (markTemplateId != null && trgtMarkConfiguration.getMarkTemplateId() != null) {
+                        assertEquals(
+                                "markTemplateId is different for markconfiguration with name "
+                                        + srcAppearance.getName(),
+                                markTemplateId, trgtMarkConfiguration.getMarkTemplateId());
+                    }
+                    assertEquals("shortName is different for markconfiguration with name " + srcAppearance.getName(),
+                            srcAppearance.getShortName(), trgtAppearance.getShortName());
+                    if (srcPositioning != null) {
+                        Positioning trgtPositioning = trgtMarkConfiguration.getEffectivePositioning();
+                        assertEquals(
+                                "position.lat is different for markconfiguration with name " + srcAppearance.getName(),
+                                srcPositioning.getLatitudeDeg(), trgtPositioning.getLatitudeDeg());
+                        assertEquals(
+                                "position.lng is different for markconfiguration with name " + srcAppearance.getName(),
+                                trgtPositioning.getLongitudeDeg(), trgtPositioning.getLongitudeDeg());
+                        if (srcPositioning.getDeviceId() != null) {
+                            assertEquals(
+                                    "position.type is wrong for markconfiguration with name " + srcAppearance.getName(),
+                                    "DEVICE", trgtPositioning.getType());
+                            assertNull("deviceId should be empty for markconfiguration with name "
+                                    + srcAppearance.getName(), trgtPositioning.getDeviceId());
+                        }
                     }
                 }
             }
             assertTrue("No markconfiguration for appearance with name " + srcAppearance.getName(), found);
+        }
+        final RepeatablePart srcRepeatablePart = srcCourseConfiguration.getRepeatablePart();
+        if (srcRepeatablePart != null) {
+            final RepeatablePart tgrtRepeatablePart = trgtCourseConfiguration.getRepeatablePart();
+            assertEquals("repeatablePart.start is different",
+                    srcRepeatablePart.getZeroBasedIndexOfRepeatablePartStart(),
+                    new Integer(tgrtRepeatablePart.getZeroBasedIndexOfRepeatablePartStart()));
+            assertEquals("repeatablePart.end is different", srcRepeatablePart.getZeroBasedIndexOfRepeatablePartEnd(),
+                    tgrtRepeatablePart.getZeroBasedIndexOfRepeatablePartEnd());
         }
     }
 
     @Test
     public void testCreateCourseFromCourseTemplateWithoutChanges() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
-
         final int numberOfLaps = 2;
-
         final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(ctx);
 
         final Map<MarkTemplate, String> associatedRoles = new HashMap<>();
@@ -165,7 +199,6 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         // TODO assert roles
         // TODO assert course sequence
         // TODO assert positioning
-        // TODO assert short names
     }
 
     @Test
