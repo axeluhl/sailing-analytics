@@ -106,10 +106,17 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                                         + srcAppearance.getName(),
                                 markTemplateId, trgtMarkConfiguration.getMarkTemplateId());
                     }
+                    final String srcAssociatedRole = markConfiguration.getAssociatedRole();
+                    if (srcAssociatedRole != null) {
+                        assertEquals(
+                                "associated role is different for markconfiguration with name "
+                                        + srcAppearance.getName(),
+                                srcAssociatedRole, trgtMarkConfiguration.getAssociatedRole());
+                    }
                     assertEquals("shortName is different for markconfiguration with name " + srcAppearance.getName(),
                             srcAppearance.getShortName(), trgtAppearance.getShortName());
                     if (srcPositioning != null) {
-                        Positioning trgtPositioning = trgtMarkConfiguration.getEffectivePositioning();
+                        final Positioning trgtPositioning = trgtMarkConfiguration.getEffectivePositioning();
                         assertEquals(
                                 "position.lat is different for markconfiguration with name " + srcAppearance.getName(),
                                 srcPositioning.getLatitudeDeg(), trgtPositioning.getLatitudeDeg());
@@ -217,9 +224,6 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
 
         assertConsistentCourseConfiguration(createdCourseAsConfiguration);
         assertCourseConfigurationCompared(courseConfiguration, createdCourseAsConfiguration);
-        // TODO assert roles
-        // TODO assert course sequence
-        // TODO assert positioning
     }
 
     @Test
