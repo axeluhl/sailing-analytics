@@ -79,7 +79,7 @@ public abstract class AbstractSailingServerResource {
         return tracker.getService(); 
     }
     
-    public ReplicationService getReplicationService() {
+    protected ReplicationService getReplicationService() {
         @SuppressWarnings("unchecked")
         ServiceTracker<ReplicationService, ReplicationService> tracker = (ServiceTracker<ReplicationService, ReplicationService>) servletContext.getAttribute(RestServletContainer.REPLICATION_SERVICE_TRACKER_NAME);
         return tracker.getService(); 
