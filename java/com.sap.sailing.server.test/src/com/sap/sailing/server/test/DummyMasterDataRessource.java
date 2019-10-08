@@ -14,7 +14,7 @@ public class DummyMasterDataRessource extends MasterDataResource {
     }
 
     @Override
-    protected ReplicationService getReplicationService() {
+    public ReplicationService getReplicationService() {
         return super.getReplicationService();
     }
 }
