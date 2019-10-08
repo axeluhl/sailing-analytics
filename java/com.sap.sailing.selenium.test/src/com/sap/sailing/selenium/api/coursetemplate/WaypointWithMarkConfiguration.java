@@ -49,4 +49,12 @@ public class WaypointWithMarkConfiguration extends JsonWrapper {
     public PassingInstruction getPassingInstruction() {
         return passingInstruction;
     }
+
+    public String getControlPointName() {
+        return (String) get(FIELD_CONTROL_POINT_NAME);
+    }
+
+    public String getControlPointShortName() {
+        return (String) get(FIELD_CONTROL_POINT_SHORT_NAME);
+    }
 }
