@@ -1,7 +1,7 @@
 package com.sap.sailing.server.test;
 
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.server.gateway.jaxrs.spi.MasterDataResource;
-import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
 
 /**
@@ -14,7 +14,8 @@ public class DummyMasterDataRessource extends MasterDataResource {
     }
 
     @Override
-    public ReplicationService getReplicationService() {
-        return super.getReplicationService();
+    protected RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
+        return super.getRaceLogTrackingAdapter();
     }
+
 }

@@ -149,10 +149,7 @@ public abstract class AbstractSailingServerResource {
         return bigDecimal.doubleValue();
     }
     
-    /**
-     * Mockito requires this to be public in order to be able to mock it :-(
-     */
-    public RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
+    protected RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
         return getService(RaceLogTrackingAdapterFactory.class).getAdapter(getService().getBaseDomainFactory());
     }
 }
