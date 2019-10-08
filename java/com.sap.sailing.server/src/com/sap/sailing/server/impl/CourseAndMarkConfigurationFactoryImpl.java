@@ -59,7 +59,6 @@ import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.SmartphoneUUIDPositioning;
-import com.sap.sailing.domain.coursetemplate.StorablePositioning;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.impl.CourseConfigurationImpl;
@@ -157,7 +156,12 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 } else {
                     sharedSailingData.updateMarkProperties(markPropertiesOrNull.getId(), markConfiguration.getEffectiveProperties(), null, null, Collections.emptySet());
                 }
-                final StorablePositioning positioningOrNull = markConfiguration.getOptionalPositioning();
+                Positioning positioningOrNull = markConfiguration.getOptionalPositioning();
+                if (positioningOrNull == null && markConfiguration instanceof RegattaMarkConfiguration) {
+                    // Only for RegattaMarkConfiguration we can obtain the positioning directly from the Mark if available.
+                    // In all other cases positioning is either already available for and existing MarkProperties or explicitly given.
+                    positioningOrNull = markConfiguration.getEffectivePositioning();
+                }
                 if (positioningOrNull != null) {
                     final DeviceIdentifier deviceIdentifier = positioningOrNull.getDeviceIdentifier();
                     final Position fixedPosition = positioningOrNull.getPosition();
