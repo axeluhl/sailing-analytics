@@ -1005,39 +1005,40 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             for (WaypointWithMarkConfiguration waypointWithMarkConfiguration : waypoints) {
                 final ControlPointWithMarkConfiguration controlPointWithMarkConfiguration = waypointWithMarkConfiguration
                         .getControlPoint();
-                final Function<MarkConfiguration, M> markMapper = markConfiguration -> {
-                    final M mark = getOrCreateMarkReplacement(markConfiguration);
-                    if (mark == null) {
-                        throw new IllegalStateException("Non declared mark found in waypoint sequence");
-                    }
-                    if (!associatedRoles.containsKey(mark)) {
-                        String associatedRoleOrNull = existingRoleMapping.get(markConfiguration);
-                        if (ensureRoleForEachMarkInSequence && associatedRoleOrNull == null) {
-                            // ensure a defined role name for any MarkTemplate used in the CourseTemplate
-                            associatedRoleOrNull = markConfiguration.getEffectiveProperties().getShortName();
-                        }
-                        if (associatedRoleOrNull != null) {
-                            associatedRoles.put(mark, associatedRoleOrNull);
-                        }
-                    }
-                    return mark;
-                };
 
                 if (controlPointWithMarkConfiguration instanceof MarkConfiguration) {
                     final MarkConfiguration markConfiguration = (MarkConfiguration) controlPointWithMarkConfiguration;
                     effectiveWaypoints.add(
-                            getOrCreateWaypoint(markMapper.apply(markConfiguration), waypointWithMarkConfiguration.getPassingInstruction()));
+                            getOrCreateWaypoint(mapMarkConfiguration(markConfiguration), waypointWithMarkConfiguration.getPassingInstruction()));
                 } else {
                     final C controlPoint = markPairCache
                             .computeIfAbsent((MarkPairWithConfiguration) controlPointWithMarkConfiguration, mpwc -> {
-                                final M left = markMapper.apply(mpwc.getLeft());
-                                final M right = markMapper.apply(mpwc.getRight());
+                                final M left = mapMarkConfiguration(mpwc.getLeft());
+                                final M right = mapMarkConfiguration(mpwc.getRight());
                                 return createMarkPair(left, right, mpwc.getName(), mpwc.getShortName());
                             });
                     effectiveWaypoints.add(
                             getOrCreateWaypoint(controlPoint, waypointWithMarkConfiguration.getPassingInstruction()));
                 }
             }
+        }
+        
+        private M mapMarkConfiguration(MarkConfiguration markConfiguration) {
+            final M mark = getOrCreateMarkReplacement(markConfiguration);
+            if (mark == null) {
+                throw new IllegalStateException("Non declared mark found in waypoint sequence");
+            }
+            if (!associatedRoles.containsKey(mark)) {
+                String associatedRoleOrNull = existingRoleMapping.get(markConfiguration);
+                if (ensureRoleForEachMarkInSequence && associatedRoleOrNull == null) {
+                    // ensure a defined role name for any MarkTemplate used in the CourseTemplate
+                    associatedRoleOrNull = markConfiguration.getEffectiveProperties().getShortName();
+                }
+                if (associatedRoleOrNull != null) {
+                    associatedRoles.put(mark, associatedRoleOrNull);
+                }
+            }
+            return mark;
         }
         
         protected abstract M getOrCreateMarkReplacement(MarkConfiguration markConfiguration);
