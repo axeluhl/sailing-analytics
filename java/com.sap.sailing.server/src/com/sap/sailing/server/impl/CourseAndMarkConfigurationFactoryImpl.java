@@ -200,12 +200,12 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
 
     @Override
     public CourseConfiguration createCourseTemplateAndUpdatedConfiguration(
-            CourseConfiguration courseWithMarkConfiguration, Iterable<String> tags, URL optionalImageUrl) {
-        courseWithMarkConfiguration = handleSaveToInventory(courseWithMarkConfiguration);
+            final CourseConfiguration courseConfiguration, Iterable<String> tags, URL optionalImageUrl) {
+        final CourseConfiguration courseConfigurationAfterInventory = handleSaveToInventory(courseConfiguration);
         
         final Map<MarkConfiguration, MarkTemplate> markTemplatesByMarkConfigurations = new HashMap<>();
         final Map<MarkConfiguration, MarkConfiguration> marksConfigurationsMapping = new HashMap<>();
-        for (MarkConfiguration markConfiguration : courseWithMarkConfiguration.getAllMarks()) {
+        for (MarkConfiguration markConfiguration : courseConfigurationAfterInventory.getAllMarks()) {
             final MarkConfiguration effectiveConfiguration;
             final MarkTemplate effectiveMarkTemplate;
             if (markConfiguration instanceof MarkTemplateBasedMarkConfiguration) {
@@ -270,7 +270,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     throw new IllegalStateException("Unknown mark configuration type found");
                 }
             }
-            markTemplatesByMarkConfigurations.put(markConfiguration, effectiveConfiguration.getOptionalMarkTemplate());
+            markTemplatesByMarkConfigurations.put(markConfiguration, effectiveMarkTemplate);
             marksConfigurationsMapping.put(markConfiguration, effectiveConfiguration);
         }
 
@@ -278,11 +278,11 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         // TODO record usages for MarkProperties by role name
         
         final CourseConfigurationToCourseConfigurationMapper waypointConfigurationMapper = new CourseConfigurationToCourseConfigurationMapper(
-                true, courseWithMarkConfiguration.getWaypoints(), courseWithMarkConfiguration.getAssociatedRoles(),
+                true, courseConfigurationAfterInventory.getWaypoints(), courseConfigurationAfterInventory.getAssociatedRoles(),
                 marksConfigurationsMapping);
 
         final CourseSequenceReplacementMapper<ControlPointTemplate, MarkTemplate, WaypointTemplate> waypointTemplateMapper = new CourseSequenceReplacementMapper<ControlPointTemplate, MarkTemplate, WaypointTemplate>(
-                true, courseWithMarkConfiguration.getWaypoints(), courseWithMarkConfiguration.getAssociatedRoles(),
+                true, courseConfigurationAfterInventory.getWaypoints(), courseConfigurationAfterInventory.getAssociatedRoles(),
                 markTemplatesByMarkConfigurations) {
             @Override
             protected ControlPointTemplate createMarkPair(MarkTemplate left, MarkTemplate right, String name,
@@ -297,15 +297,15 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             }
         };
         
-        final CourseTemplate newCourseTemplate = sharedSailingData.createCourseTemplate(courseWithMarkConfiguration.getName(), new HashSet<>(markTemplatesByMarkConfigurations.values()),
-                waypointTemplateMapper.effectiveWaypoints, waypointTemplateMapper.associatedRoles, courseWithMarkConfiguration.getRepeatablePart(),
+        final CourseTemplate newCourseTemplate = sharedSailingData.createCourseTemplate(courseConfigurationAfterInventory.getName(), new HashSet<>(markTemplatesByMarkConfigurations.values()),
+                waypointTemplateMapper.effectiveWaypoints, waypointTemplateMapper.associatedRoles, courseConfigurationAfterInventory.getRepeatablePart(),
                 tags, optionalImageUrl,
-                courseWithMarkConfiguration.getNumberOfLaps());
+                courseConfigurationAfterInventory.getNumberOfLaps());
         return new CourseConfigurationImpl(newCourseTemplate,
                 new HashSet<>(marksConfigurationsMapping.values()),
-                waypointConfigurationMapper.associatedRoles, waypointConfigurationMapper.effectiveWaypoints, courseWithMarkConfiguration.getRepeatablePart(),
-                courseWithMarkConfiguration.getNumberOfLaps(),
-                courseWithMarkConfiguration.getName());
+                waypointConfigurationMapper.associatedRoles, waypointConfigurationMapper.effectiveWaypoints, courseConfigurationAfterInventory.getRepeatablePart(),
+                courseConfigurationAfterInventory.getNumberOfLaps(),
+                courseConfigurationAfterInventory.getName());
     }
 
     private void savePositioningToMark(Regatta regatta, Mark mark, Positioning optionalExplicitPositioning,
@@ -367,13 +367,13 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
 
     @Override
     public CourseBase createCourseFromConfigurationAndDefineMarksAsNeeded(Regatta regatta,
-            CourseConfiguration courseConfiguration, TimePoint timePointForDefinitionOfMarksAndDeviceMappings,
+            final CourseConfiguration courseConfiguration, TimePoint timePointForDefinitionOfMarksAndDeviceMappings,
             AbstractLogEventAuthor author) {
-        courseConfiguration = handleSaveToInventory(courseConfiguration);
+        final CourseConfiguration courseConfigurationAfterInventory = handleSaveToInventory(courseConfiguration);
         
         final Map<MarkConfiguration, Mark> marksByMarkConfigurations = new HashMap<>();
         final RegattaLog regattaLog = regatta.getRegattaLog();
-        for (MarkConfiguration markConfiguration : courseConfiguration.getAllMarks()) {
+        for (MarkConfiguration markConfiguration : courseConfigurationAfterInventory.getAllMarks()) {
             if (markConfiguration instanceof RegattaMarkConfiguration) {
                 final Mark mark = ((RegattaMarkConfiguration) markConfiguration).getMark();
                 marksByMarkConfigurations.put(markConfiguration,
@@ -407,21 +407,21 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                         optionalMarkProperties, timePointForDefinitionOfMarksAndDeviceMappings, author);
             }
         }
-        final CourseDataImpl course = new CourseDataImpl(courseConfiguration.getName(),
-                courseConfiguration.getOptionalCourseTemplate() == null ? null
-                        : courseConfiguration.getOptionalCourseTemplate().getId());
+        final CourseDataImpl course = new CourseDataImpl(courseConfigurationAfterInventory.getName(),
+                courseConfigurationAfterInventory.getOptionalCourseTemplate() == null ? null
+                        : courseConfigurationAfterInventory.getOptionalCourseTemplate().getId());
 
         final Iterable<WaypointWithMarkConfiguration> waypoints;
-        if (courseConfiguration.hasRepeatablePart()) {
-            if (courseConfiguration.getNumberOfLaps() == null) {
+        if (courseConfigurationAfterInventory.hasRepeatablePart()) {
+            if (courseConfigurationAfterInventory.getNumberOfLaps() == null) {
                 throw new IllegalStateException("A course with repeatable part requires a lap count");
             }
-            waypoints = courseConfiguration.getWaypoints(courseConfiguration.getNumberOfLaps());
+            waypoints = courseConfigurationAfterInventory.getWaypoints(courseConfigurationAfterInventory.getNumberOfLaps());
         } else {
-            waypoints = courseConfiguration.getWaypoints();
+            waypoints = courseConfigurationAfterInventory.getWaypoints();
         }
         final CourseSequenceReplacementMapper<ControlPoint, Mark, Waypoint> courseSequenceMapper = new CourseSequenceReplacementMapper<ControlPoint, Mark, Waypoint>(
-                false, waypoints, courseConfiguration.getAssociatedRoles(), marksByMarkConfigurations) {
+                false, waypoints, courseConfigurationAfterInventory.getAssociatedRoles(), marksByMarkConfigurations) {
             @Override
             protected ControlPointWithTwoMarks createMarkPair(Mark left, Mark right, String name, String shortName) {
                 return new ControlPointWithTwoMarksImpl(UUID.randomUUID(), left, right, name, shortName);
