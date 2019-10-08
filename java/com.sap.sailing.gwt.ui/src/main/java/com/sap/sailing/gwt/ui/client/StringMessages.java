@@ -1180,6 +1180,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String eventOverviewURL();
     String eventLogoImageURL();
     String showPingMarkMappings();
+    String showSatelliteLayer();
     String errorFetchingWindStreamletData(String message);
     String showWindStreamletOverlay();
     String showWindStreamletColors();

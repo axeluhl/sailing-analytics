@@ -46,6 +46,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private CheckBox showOnlySelectedCompetitorsCheckBox;
     private CheckBox showWindStreamletOverlayCheckbox;
     private CheckBox showWindStreamletColorsCheckbox;
+    private CheckBox showSatelliteLayerCheckbox;
     private CheckBox windUpCheckbox;
     private CheckBox showSimulationOverlayCheckbox;
     private CheckBox showSelectedCompetitorsInfoCheckBox;
@@ -75,7 +76,14 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         VerticalPanel vp = new VerticalPanel();
         Label generalLabel = dialog.createHeadlineLabel(stringMessages.general());
         vp.add(generalLabel);
-       
+
+        showSatelliteLayerCheckbox = dialog.createCheckbox(stringMessages.showSatelliteLayer());
+        showSatelliteLayerCheckbox.setValue(initialSettings.isShowSatelliteLayer());
+        showSatelliteLayerCheckbox.getElement().setAttribute("selenium_checkbox", String.valueOf(initialSettings.isShowSatelliteLayer()));
+        showSatelliteLayerCheckbox.ensureDebugId("showSatelliteLayerCheckBox");
+        showSatelliteLayerCheckbox.setEnabled(!initialSettings.isWindUp());
+        vp.add(showSatelliteLayerCheckbox);
+
         windUpCheckbox = dialog.createCheckbox(stringMessages.windUp());
         windUpCheckbox.setValue(initialSettings.isWindUp());
         windUpCheckbox.getElement().setAttribute("selenium_checkbox", String.valueOf(initialSettings.isWindUp()));
@@ -309,7 +317,8 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 buoyZoneRadius, showOnlySelectedCompetitorsCheckBox.getValue(), showSelectedCompetitorsInfoCheckBox.getValue(),
                 showWindStreamletColorsCheckbox.getValue(), showWindStreamletOverlayCheckbox.getValue(), showSimulationOverlay,
                 initialSettings.isShowMapControls(), maneuverTypesToShow, showDouglasPeuckerPointsCheckBox.getValue(),estimatedDuration,
-                startCountDownFontSizeScalingBox.getValue(), maneuverLossVisualizationCheckBox.getValue());
+                startCountDownFontSizeScalingBox.getValue(), maneuverLossVisualizationCheckBox.getValue(),
+                showSatelliteLayerCheckbox.getValue());
     }
     
     private RaceMapZoomSettings getZoomSettings() {
