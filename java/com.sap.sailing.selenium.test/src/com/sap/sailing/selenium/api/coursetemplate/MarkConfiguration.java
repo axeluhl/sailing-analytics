@@ -17,6 +17,7 @@ public class MarkConfiguration extends JsonWrapper {
     private static final String FIELD_MARK_ID = "markId";
     private static final String FIELD_POSITIONING = "positioning";
     private static final String FIELD_EFFECTIVE_POSITIONING = "effectivePositioning";
+    private static final String FIELD_STORE_TO_INVENTORY = "storeToInventory";
 
     public MarkConfiguration(final JSONObject json) {
         super(json);
@@ -99,6 +100,14 @@ public class MarkConfiguration extends JsonWrapper {
     public MarkAppearance getFreestyleProperties() {
         final JSONObject effectivePropertiesJson = (JSONObject) get(FIELD_FREESTYLE_PROPERTIES);
         return effectivePropertiesJson != null ? new MarkAppearance(effectivePropertiesJson) : null;
+    }
+    
+    public boolean isStoreToInventory() {
+        return Boolean.TRUE.equals(get(FIELD_STORE_TO_INVENTORY));
+    }
+    
+    public void setStoreToInventory(boolean storeToInventory) {
+        getJson().put(FIELD_STORE_TO_INVENTORY, storeToInventory);
     }
 
 }
