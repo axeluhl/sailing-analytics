@@ -16,9 +16,9 @@ public class MarkAppearance extends JsonWrapper {
     public MarkAppearance(final JSONObject json) {
         super(json);
     }
-    
-    public MarkAppearance(final String name, final String shortName, final String color,
-            final String shape, final String pattern, final String markType) {
+
+    public MarkAppearance(final String name, final String shortName, final String color, final String shape,
+            final String pattern, final String markType) {
         super(new JSONObject());
         getJson().put(FIELD_NAME, name);
         getJson().put(FIELD_SHORT_NAME, shortName);
@@ -27,8 +27,13 @@ public class MarkAppearance extends JsonWrapper {
         getJson().put(FIELD_PATTERN, pattern);
         getJson().put(FIELD_MARK_TYPE, markType);
     }
-    
+
     public String getName() {
         return (String) getJson().get(FIELD_NAME);
     }
+
+    public String getShortName() {
+        return (String) getJson().get(FIELD_SHORT_NAME);
+    }
+
 }

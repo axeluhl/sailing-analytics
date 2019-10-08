@@ -9,8 +9,9 @@ public class MarkTemplateBasedMarkConfigurationImpl extends MarkConfigurationImp
         implements MarkTemplateBasedMarkConfiguration {
     private static final long serialVersionUID = -6683111363486434715L;
 
-    public MarkTemplateBasedMarkConfigurationImpl(MarkTemplate markTemplate, StorablePositioning optionalPositioning) {
-        super(markTemplate, optionalPositioning, /* storedPositioning */ null, /* storeToInventory */ false);
+    public MarkTemplateBasedMarkConfigurationImpl(MarkTemplate markTemplate, StorablePositioning optionalPositioning,
+            boolean storeToInventory) {
+        super(markTemplate, optionalPositioning, /* storedPositioning */ null, storeToInventory);
     }
 
     @Override

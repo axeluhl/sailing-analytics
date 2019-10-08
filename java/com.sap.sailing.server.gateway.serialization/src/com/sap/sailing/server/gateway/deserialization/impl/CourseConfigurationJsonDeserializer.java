@@ -77,11 +77,15 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
                 final StorablePositioning storablePositioning = positioningObject instanceof JSONObject
                         ? storablePositioningJsonDeserializer.deserialize((JSONObject) positioningObject)
                         : null;
+                        
+                final boolean storeToInventory = Boolean.TRUE.equals(markConfigurationJSON
+                        .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_STORE_TO_INVENTORY));
                 
                 final MarkConfiguration markConfiguration = builder.addMarkConfiguration(
                         markTemplateID != null ? UUID.fromString(markTemplateID) : null,
                         markPropertiesID != null ? UUID.fromString(markPropertiesID) : null,
-                        markID != null ? UUID.fromString(markID) : null, optionalFreestyleProperties, storablePositioning);
+                        markID != null ? UUID.fromString(markID) : null, optionalFreestyleProperties,
+                        storablePositioning, storeToInventory);
                 String roleName = (String) markConfigurationJSON
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE);
                 if (roleName != null && !roleName.isEmpty()) {

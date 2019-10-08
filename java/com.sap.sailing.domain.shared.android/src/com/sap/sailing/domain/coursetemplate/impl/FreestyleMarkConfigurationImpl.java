@@ -15,8 +15,8 @@ public class FreestyleMarkConfigurationImpl extends MarkConfigurationImpl implem
 
     public FreestyleMarkConfigurationImpl(MarkTemplate optionalMarkTemplate, MarkProperties optionalMarkProperties,
             CommonMarkProperties freestyleProperties, StorablePositioning optionalPositioning,
-            Positioning storedPositioning) {
-        super(optionalMarkTemplate, optionalPositioning, storedPositioning, /* storeToInventory */ false);
+            Positioning storedPositioning, boolean storeToInventory) {
+        super(optionalMarkTemplate, optionalPositioning, storedPositioning, storeToInventory);
         this.optionalMarkProperties = optionalMarkProperties;
         this.freestyleProperties = freestyleProperties;
     }

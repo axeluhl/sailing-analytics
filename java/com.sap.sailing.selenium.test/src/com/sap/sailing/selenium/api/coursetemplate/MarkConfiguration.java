@@ -16,6 +16,8 @@ public class MarkConfiguration extends JsonWrapper {
     private static final String FIELD_EFFECTIVE_PROPERTIES = "effectiveProperties";
     private static final String FIELD_MARK_ID = "markId";
     private static final String FIELD_POSITIONING = "positioning";
+    private static final String FIELD_EFFECTIVE_POSITIONING = "effectivePositioning";
+    private static final String FIELD_STORE_TO_INVENTORY = "storeToInventory";
 
     public MarkConfiguration(final JSONObject json) {
         super(json);
@@ -80,6 +82,11 @@ public class MarkConfiguration extends JsonWrapper {
         return positioningObject == null ? null : new Positioning(positioningObject);
     }
 
+    public Positioning getEffectivePositioning() {
+        final JSONObject positioningJson = (JSONObject) get(FIELD_EFFECTIVE_POSITIONING);
+        return positioningJson != null ? new Positioning(positioningJson) : null;
+    }
+
     public UUID getMarkTemplateId() {
         final Object markTemplateId = get(FIELD_MARK_TEMPLATE_ID);
         return markTemplateId != null ? UUID.fromString((String) markTemplateId) : null;
@@ -94,4 +101,13 @@ public class MarkConfiguration extends JsonWrapper {
         final JSONObject effectivePropertiesJson = (JSONObject) get(FIELD_FREESTYLE_PROPERTIES);
         return effectivePropertiesJson != null ? new MarkAppearance(effectivePropertiesJson) : null;
     }
+    
+    public boolean isStoreToInventory() {
+        return Boolean.TRUE.equals(get(FIELD_STORE_TO_INVENTORY));
+    }
+    
+    public void setStoreToInventory(boolean storeToInventory) {
+        getJson().put(FIELD_STORE_TO_INVENTORY, storeToInventory);
+    }
+
 }

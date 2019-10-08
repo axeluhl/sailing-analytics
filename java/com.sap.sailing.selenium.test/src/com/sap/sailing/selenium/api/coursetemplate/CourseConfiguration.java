@@ -15,6 +15,7 @@ public class CourseConfiguration extends JsonWrapper {
     private static final String FIELD_MARKCONFIGURATIONS = "markConfigurations";
     private static final String FIELD_WAYPOINTS = "waypoints";
     public static final String FIELD_NUMBER_OF_LAPS = "numberOfLaps";
+    public static final String FIELD_OPTIONAL_REPEATABLE_PART = "optionalRepeatablePart";
 
     public CourseConfiguration(JSONObject json) {
         super(json);
@@ -49,9 +50,14 @@ public class CourseConfiguration extends JsonWrapper {
     public void setNumberOfLaps(Integer numberOfLaps) {
         getJson().put(FIELD_NUMBER_OF_LAPS, numberOfLaps);
     }
-    
+
     public UUID getOptionalCourseTemplateId() {
         Object optionalCourseTemplateId = get(FIELD_OPTIONAL_COURSE_TEMPLATE_UUID);
         return optionalCourseTemplateId != null ? UUID.fromString((String) optionalCourseTemplateId) : null;
+    }
+
+    public RepeatablePart getRepeatablePart() {
+        JSONObject repeatablePartJson = get(FIELD_OPTIONAL_REPEATABLE_PART);
+        return repeatablePartJson != null ? new RepeatablePart(repeatablePartJson) : null;
     }
 }
