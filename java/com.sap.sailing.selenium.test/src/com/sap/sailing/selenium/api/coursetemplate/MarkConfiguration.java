@@ -113,4 +113,9 @@ public class MarkConfiguration extends JsonWrapper {
     public String getAssociatedRole() {
         return (String) get(FIELD_ASSOCIATED_ROLE);
     }
+
+    public UUID getMarkPropertiesId() {
+        final String markPropertiesId = (String) get(FIELD_MARK_PROPERTIES_ID);
+        return markPropertiesId != null ? UUID.fromString(markPropertiesId) : null;
+    }
 }
