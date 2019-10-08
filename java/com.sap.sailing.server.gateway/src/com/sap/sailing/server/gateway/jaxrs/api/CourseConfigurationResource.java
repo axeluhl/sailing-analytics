@@ -43,12 +43,6 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseConfigurationJsonSerializer;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
@@ -61,7 +55,6 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
     private static final Logger log = Logger.getLogger(CourseConfigurationResource.class.getName());
     
     private final JsonSerializer<CourseConfiguration> courseConfigurationJsonSerializer;
-    private final JsonSerializer<CourseBase> courseJsonSerializer;
     private final Function<DeviceIdentifier, Position> positionResolver;
 
     public static final String FIELD_TAGS = "tags";
@@ -69,9 +62,6 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
 
     public CourseConfigurationResource() {
         courseConfigurationJsonSerializer = new CourseConfigurationJsonSerializer();
-        courseJsonSerializer = new CourseJsonSerializer(new CourseBaseJsonSerializer(
-                new WaypointJsonSerializer(new ControlPointJsonSerializer(new MarkJsonSerializer(),
-                        new GateJsonSerializer(new MarkJsonSerializer())))));
         positionResolver = identifier -> {
             Position lastPosition = null;
             try {
@@ -270,7 +260,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         final RaceLog raceLog = raceColumnByName.getRaceLog(fleetByName);
         raceLog.add(new RaceLogCourseDesignChangedEventImpl(timestampForLogEntries, getService().getServerAuthor(),
                 raceLog.getCurrentPassId(), course, CourseDesignerMode.BY_MARKS));
-
-        return Response.ok(courseJsonSerializer.serialize(course).toJSONString()).build();
+        final CourseConfiguration courseConfigurationResult = getService().getCourseAndMarkConfigurationFactory().createCourseConfigurationFromCourse(course, regatta, null);
+        final String jsonString = courseConfigurationJsonSerializer.serialize(courseConfigurationResult).toJSONString();
+        return Response.ok(jsonString).build();
     }
 }
