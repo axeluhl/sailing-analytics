@@ -268,6 +268,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource MiniTransatIcon();
     
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/MOCRA.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource MOCRAIcon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/MUSTO_SKIFF.png")
     @ImageOptions(preventInlining = true)
     ImageResource MustoSkiffIcon();
