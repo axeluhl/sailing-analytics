@@ -28,7 +28,9 @@ public class CourseConfiguration extends JsonWrapper {
         final JSONArray markConfigurationsJson = new JSONArray();
         markConfigurations.forEach(mc -> markConfigurationsJson.add(mc.getJson()));
         getJson().put(FIELD_MARKCONFIGURATIONS, markConfigurationsJson);
-        getJson().put(FIELD_WAYPOINTS, waypoints);
+        final JSONArray waypointsJson = new JSONArray();
+        waypoints.forEach(wp -> waypointsJson.add(wp.getJson()));
+        getJson().put(FIELD_WAYPOINTS, waypointsJson);
     }
 
     public Iterable<MarkConfiguration> getMarkConfigurations() {

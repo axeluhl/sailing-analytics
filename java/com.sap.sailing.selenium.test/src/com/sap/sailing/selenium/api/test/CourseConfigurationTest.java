@@ -75,6 +75,12 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
             final CourseConfiguration trgtCourseConfiguration) {
         System.out.println(srcCourseConfiguration);
         System.out.println(trgtCourseConfiguration);
+        assertEquals("number of markconfiguration is different",
+                Util.size(srcCourseConfiguration.getMarkConfigurations()),
+                Util.size(trgtCourseConfiguration.getMarkConfigurations()));
+        assertEquals("number of waypoints is different",
+                Util.size(srcCourseConfiguration.getWaypoints()),
+                Util.size(trgtCourseConfiguration.getWaypoints()));
         for (final MarkConfiguration markConfiguration : srcCourseConfiguration.getMarkConfigurations()) {
             final UUID markTemplateId = markConfiguration.getMarkTemplateId();
             MarkAppearance srcAppearance = markConfiguration.getEffectiveProperties();
