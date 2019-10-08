@@ -101,13 +101,16 @@ public class MarkConfiguration extends JsonWrapper {
         final JSONObject effectivePropertiesJson = (JSONObject) get(FIELD_FREESTYLE_PROPERTIES);
         return effectivePropertiesJson != null ? new MarkAppearance(effectivePropertiesJson) : null;
     }
-    
+
     public boolean isStoreToInventory() {
         return Boolean.TRUE.equals(get(FIELD_STORE_TO_INVENTORY));
     }
-    
+
     public void setStoreToInventory(boolean storeToInventory) {
         getJson().put(FIELD_STORE_TO_INVENTORY, storeToInventory);
     }
 
+    public String getAssociatedRole() {
+        return (String) get(FIELD_ASSOCIATED_ROLE);
+    }
 }

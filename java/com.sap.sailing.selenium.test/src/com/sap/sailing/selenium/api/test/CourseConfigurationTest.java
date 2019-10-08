@@ -75,7 +75,14 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
             final CourseConfiguration trgtCourseConfiguration) {
         System.out.println(srcCourseConfiguration);
         System.out.println(trgtCourseConfiguration);
-        for (final MarkConfiguration markConfiguration : srcCourseConfiguration.getMarkConfigurations()) {
+        final Iterable<MarkConfiguration> srcMarkConfigurations = srcCourseConfiguration.getMarkConfigurations();
+        final Iterable<MarkConfiguration> trgtMarkConfigurations = trgtCourseConfiguration.getMarkConfigurations();
+        final Iterable<WaypointWithMarkConfiguration> srcWaypoints = srcCourseConfiguration.getWaypoints();
+        final Iterable<WaypointWithMarkConfiguration> trgtWaypoints = trgtCourseConfiguration.getWaypoints();
+        assertEquals("number of markconfiguration is different", Util.size(srcMarkConfigurations),
+                Util.size(trgtMarkConfigurations));
+        assertEquals("number of waypoints is different", Util.size(srcWaypoints), Util.size(trgtWaypoints));
+        for (final MarkConfiguration markConfiguration : srcMarkConfigurations) {
             final UUID markTemplateId = markConfiguration.getMarkTemplateId();
             MarkAppearance srcAppearance = markConfiguration.getEffectiveProperties();
             if (srcAppearance == null) {
@@ -86,7 +93,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                 srcPositioning = markConfiguration.getEffectivePositioning();
             }
             boolean found = false;
-            for (final MarkConfiguration trgtMarkConfiguration : trgtCourseConfiguration.getMarkConfigurations()) {
+            for (final MarkConfiguration trgtMarkConfiguration : trgtMarkConfigurations) {
                 final MarkAppearance trgtAppearance = trgtMarkConfiguration.getEffectiveProperties();
                 if (srcAppearance == null && trgtAppearance == null) {
                     return;
@@ -99,10 +106,17 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                                         + srcAppearance.getName(),
                                 markTemplateId, trgtMarkConfiguration.getMarkTemplateId());
                     }
+                    final String srcAssociatedRole = markConfiguration.getAssociatedRole();
+                    if (srcAssociatedRole != null) {
+                        assertEquals(
+                                "associated role is different for markconfiguration with name "
+                                        + srcAppearance.getName(),
+                                srcAssociatedRole, trgtMarkConfiguration.getAssociatedRole());
+                    }
                     assertEquals("shortName is different for markconfiguration with name " + srcAppearance.getName(),
                             srcAppearance.getShortName(), trgtAppearance.getShortName());
                     if (srcPositioning != null) {
-                        Positioning trgtPositioning = trgtMarkConfiguration.getEffectivePositioning();
+                        final Positioning trgtPositioning = trgtMarkConfiguration.getEffectivePositioning();
                         assertEquals(
                                 "position.lat is different for markconfiguration with name " + srcAppearance.getName(),
                                 srcPositioning.getLatitudeDeg(), trgtPositioning.getLatitudeDeg());
@@ -120,6 +134,20 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                 }
             }
             assertTrue("No markconfiguration for appearance with name " + srcAppearance.getName(), found);
+        }
+        for (final WaypointWithMarkConfiguration srcWaypoint : srcWaypoints) {
+            final String controlPointName = srcWaypoint.getControlPointName();
+            if (controlPointName != null) {
+                boolean found = false;
+                for (final WaypointWithMarkConfiguration trgtWaypoint : trgtWaypoints) {
+                    if (controlPointName.equals(trgtWaypoint.getControlPointName())) {
+                        found = true;
+                        assertEquals("Waypoint controlpoint shortname is different",
+                                srcWaypoint.getControlPointShortName(), trgtWaypoint.getControlPointShortName());
+                    }
+                }
+                assertTrue("Waypoint with control point name " + controlPointName + " not found", found);
+            }
         }
         final RepeatablePart srcRepeatablePart = srcCourseConfiguration.getRepeatablePart();
         if (srcRepeatablePart != null) {
@@ -196,9 +224,6 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
 
         assertConsistentCourseConfiguration(createdCourseAsConfiguration);
         assertCourseConfigurationCompared(courseConfiguration, createdCourseAsConfiguration);
-        // TODO assert roles
-        // TODO assert course sequence
-        // TODO assert positioning
     }
 
     @Test

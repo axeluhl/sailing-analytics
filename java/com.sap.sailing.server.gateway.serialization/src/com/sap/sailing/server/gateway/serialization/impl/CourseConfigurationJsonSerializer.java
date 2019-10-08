@@ -64,17 +64,19 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
             result.put(FIELD_OPTIONAL_COURSE_TEMPLATE_UUID,
                     courseConfiguration.getOptionalCourseTemplate().getId().toString());
         }
-
         final Map<MarkConfiguration, UUID> markConfigurationsToTempIdMap = new HashMap<>();
         final JSONArray markConfigurationsJSON = new JSONArray();
         for (final MarkConfiguration markConfiguration : courseConfiguration.getAllMarks()) {
             JSONObject markConfigurationsEntry = new JSONObject();
             final UUID markConfigurationId = UUID.randomUUID();
-            markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_ID,
-                    markConfigurationId.toString());
+            markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_ID, markConfigurationId.toString());
             if (markConfiguration.getOptionalMarkTemplate() != null) {
                 markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_TEMPLATE_ID,
                         markConfiguration.getOptionalMarkTemplate().getId().toString());
+            }
+            final String associatedRole = courseConfiguration.getAssociatedRoles().get(markConfiguration);
+            if (associatedRole != null) {
+                markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE, associatedRole);
             }
             if (markConfiguration instanceof FreestyleMarkConfiguration) {
                 final FreestyleMarkConfiguration freeStyleMarkConfiguration = (FreestyleMarkConfiguration) markConfiguration;
@@ -100,7 +102,7 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
             }
             markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_EFFECTIVE_PROPERTIES,
                     commonMarkPropertiesJsonSerializer.serialize(markConfiguration.getEffectiveProperties()));
-            
+
             if (markConfiguration.getEffectivePositioning() != null) {
                 markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_EFFECTIVE_POSITIONING,
                         positioningJsonSerializer.serialize(markConfiguration.getEffectivePositioning()));
@@ -112,7 +114,6 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
             markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_STORE_TO_INVENTORY,
                     markConfiguration.isStoreToInventory());
 
-            // TODO: associated role? markConfiguration.
             markConfigurationsToTempIdMap.put(markConfiguration, markConfigurationId);
             markConfigurationsJSON.add(markConfigurationsEntry);
 
