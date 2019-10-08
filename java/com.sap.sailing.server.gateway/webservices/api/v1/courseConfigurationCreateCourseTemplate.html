@@ -55,6 +55,10 @@
                         <li>position: object that defines a fixed position for the mark with the required properties 'latitude_deg' and 'longitude_deg'</li>
                     </ul>
                 </li>
+                <li>storeToInventory (optional): If set to true, this exports a mark properties entry to the inventory.
+                    If the mark configuration already references an existing mark properties entry, this will be updated instead.
+                    The effective appearance (either directly defined by freestyleProperties or indirectly given by a referenced mark or mark template) is used to define the mark properties.
+                    If positioning information is available (either directly or indirectly through a mark) this will also be set for the mark properties.</li>
             </ul>
             waypoints: An ordered sequence of waypoints that form the layout of the course template. For each waypoint, the following properties can be specified:
             <ul>
@@ -99,7 +103,8 @@
                 "shape": "",
                 "pattern": "",
                 "markType": "BUOY"
-            }
+            },
+            "storeToInventory": true
         },
         {
             "id": "43c622d2-46b0-4667-9937-071dec72c0d9",
@@ -131,7 +136,8 @@
             },
             "positioning": {
                 "deviceUUID": "a7309f55-a28a-420d-81a8-f85013f91269"
-            }
+            },
+            "storeToInventory": true
         },
         {
             "id": "57b682af-11c4-4130-970b-0569320af882",
