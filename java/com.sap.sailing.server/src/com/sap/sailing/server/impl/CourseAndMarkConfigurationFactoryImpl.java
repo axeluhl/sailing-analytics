@@ -59,6 +59,7 @@ import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.SmartphoneUUIDPositioning;
+import com.sap.sailing.domain.coursetemplate.StorablePositioning;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.impl.CourseConfigurationImpl;
@@ -139,10 +140,63 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         // TODO Auto-generated method stub
         return null;
     }
+    
+    private CourseConfiguration handleSaveToInventory(CourseConfiguration courseConfiguration) {
+        final Map<MarkConfiguration, MarkConfiguration> effectiveConfigurations = new HashMap<>();
+        for (MarkConfiguration markConfiguration : courseConfiguration.getAllMarks()) {
+            if (markConfiguration.isStoreToInventory()) {
+                MarkProperties markPropertiesOrNull = null;
+                if (markConfiguration instanceof FreestyleMarkConfiguration) {
+                    markPropertiesOrNull = ((FreestyleMarkConfiguration) markConfiguration).getOptionalMarkProperties();
+                } else if (markConfiguration instanceof RegattaMarkConfiguration) {
+                    markPropertiesOrNull = ((RegattaMarkConfiguration) markConfiguration).getOptionalMarkProperties();
+                }
+                if (markPropertiesOrNull == null) {
+                    // If no mark properties exist yet, a new one is created
+                    markPropertiesOrNull = sharedSailingData.createMarkProperties(markConfiguration.getEffectiveProperties(), Collections.emptySet());
+                } else {
+                    sharedSailingData.updateMarkProperties(markPropertiesOrNull.getId(), markConfiguration.getEffectiveProperties(), null, null, Collections.emptySet());
+                }
+                final StorablePositioning positioningOrNull = markConfiguration.getOptionalPositioning();
+                if (positioningOrNull != null) {
+                    final DeviceIdentifier deviceIdentifier = positioningOrNull.getDeviceIdentifier();
+                    final Position fixedPosition = positioningOrNull.getPosition();
+                    if (deviceIdentifier != null) {
+                        sharedSailingData.setTrackingDeviceIdentifierForMarkProperties(markPropertiesOrNull, deviceIdentifier);
+                    } else {
+                        sharedSailingData.setFixedPositionForMarkProperties(markPropertiesOrNull, fixedPosition);
+                    }
+                }
+                final MarkConfiguration effectiveMarkConfiguration;
+                if (markConfiguration instanceof RegattaMarkConfiguration) {
+                    final RegattaMarkConfiguration regattaMarkConfiguration = (RegattaMarkConfiguration) markConfiguration;
+                    effectiveMarkConfiguration = new RegattaMarkConfigurationImpl(regattaMarkConfiguration.getMark(),
+                            /* optionalPositioning */ null, regattaMarkConfiguration.getEffectivePositioning(),
+                            regattaMarkConfiguration.getOptionalMarkTemplate(), markPropertiesOrNull);
+                } else {
+                    effectiveMarkConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(markPropertiesOrNull,
+                            markConfiguration.getOptionalMarkTemplate(), /* optionalPositioning */ null,
+                            getPositioningIfAvailable(markPropertiesOrNull));
+                }
+                effectiveConfigurations.put(markConfiguration, effectiveMarkConfiguration);
+            } else {
+                effectiveConfigurations.put(markConfiguration, markConfiguration);
+            }
+        }
+        final CourseConfigurationToCourseConfigurationMapper waypointConfigurationMapper = new CourseConfigurationToCourseConfigurationMapper(
+                false, courseConfiguration.getWaypoints(), courseConfiguration.getAssociatedRoles(),
+                effectiveConfigurations);
+        return new CourseConfigurationImpl(courseConfiguration.getOptionalCourseTemplate(),
+                new HashSet<>(effectiveConfigurations.values()), waypointConfigurationMapper.associatedRoles,
+                waypointConfigurationMapper.effectiveWaypoints, courseConfiguration.getRepeatablePart(),
+                courseConfiguration.getNumberOfLaps(), courseConfiguration.getName());
+    }
 
     @Override
     public CourseConfiguration createCourseTemplateAndUpdatedConfiguration(
             CourseConfiguration courseWithMarkConfiguration, Iterable<String> tags, URL optionalImageUrl) {
+        courseWithMarkConfiguration = handleSaveToInventory(courseWithMarkConfiguration);
+        
         final Map<MarkConfiguration, MarkTemplate> markTemplatesByMarkConfigurations = new HashMap<>();
         final Map<MarkConfiguration, MarkConfiguration> marksConfigurationsMapping = new HashMap<>();
         for (MarkConfiguration markConfiguration : courseWithMarkConfiguration.getAllMarks()) {
@@ -305,6 +359,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     public CourseBase createCourseFromConfigurationAndDefineMarksAsNeeded(Regatta regatta,
             CourseConfiguration courseConfiguration, TimePoint timePointForDefinitionOfMarksAndDeviceMappings,
             AbstractLogEventAuthor author) {
+        courseConfiguration = handleSaveToInventory(courseConfiguration);
+        
         final Map<MarkConfiguration, Mark> marksByMarkConfigurations = new HashMap<>();
         final RegattaLog regattaLog = regatta.getRegattaLog();
         for (MarkConfiguration markConfiguration : courseConfiguration.getAllMarks()) {
