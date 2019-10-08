@@ -98,7 +98,6 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
-import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
@@ -1275,13 +1274,6 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     private final MarkJsonSerializerWithPosition markWithPositionSerializer = new MarkJsonSerializerWithPosition(
             markSerializer, new FlatGPSFixJsonSerializer());
     private final FlatGPSFixJsonDeserializer fixDeserializer = new FlatGPSFixJsonDeserializer();
-
-    /**
-     * Mockito requires this to be public in order to be able to mock it :-(
-     */
-    public RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
-        return getService(RaceLogTrackingAdapterFactory.class).getAdapter(getService().getBaseDomainFactory());
-    }
 
     /**
      * Expects one GPS Fix in the format understood by {@link #fixDeserializer} in the POST message body, parses that fix,
