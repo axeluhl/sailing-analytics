@@ -109,10 +109,15 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                         && srcAppearance.getName().equals(trgtAppearance.getName());
                 final boolean matchByTemplateId = markTemplateId != null
                         && markTemplateId.equals(trgtMarkConfiguration.getMarkTemplateId());
-                if (matchByName || matchByTemplateId) {
+                final boolean matchByMarkId = markConfiguration.getMarkId() != null
+                        && markConfiguration.getMarkId().equals(trgtMarkConfiguration.getMarkId());
+                // final boolean matchByMarkId =
+                if (matchByName || matchByTemplateId || matchByMarkId) {
                     found = true;
                     final String msgIdentifier = matchByName ? "markconfiguration with name " + srcAppearance.getName()
-                            : matchByTemplateId ? "markconfiguration with markTemplateID " + markTemplateId : "unknown";
+                            : matchByTemplateId ? "markconfiguration with markTemplateID " + markTemplateId
+                                    : matchByMarkId ? "markconfiguration with markId " + markConfiguration.getMarkId()
+                                            : "unknown";
                     if (markTemplateId != null && trgtMarkConfiguration.getMarkTemplateId() != null) {
                         assertEquals("markTemplateId is different for " + msgIdentifier, markTemplateId,
                                 trgtMarkConfiguration.getMarkTemplateId());
@@ -154,7 +159,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                     }
                 }
             }
-            assertTrue("No mathcing markconfiguration found for markconfiguration " + markConfiguration.getId(), found);
+            assertTrue("No matching markconfiguration found for markconfiguration " + markConfiguration.getId(), found);
         }
         for (final WaypointWithMarkConfiguration srcWaypoint : srcWaypoints) {
             final String controlPointName = srcWaypoint.getControlPointName();
