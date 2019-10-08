@@ -172,11 +172,13 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     final RegattaMarkConfiguration regattaMarkConfiguration = (RegattaMarkConfiguration) markConfiguration;
                     effectiveMarkConfiguration = new RegattaMarkConfigurationImpl(regattaMarkConfiguration.getMark(),
                             /* optionalPositioning */ null, regattaMarkConfiguration.getEffectivePositioning(),
-                            regattaMarkConfiguration.getOptionalMarkTemplate(), markPropertiesOrNull);
+                            regattaMarkConfiguration.getOptionalMarkTemplate(), markPropertiesOrNull,
+                            false);
                 } else {
                     effectiveMarkConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(markPropertiesOrNull,
                             markConfiguration.getOptionalMarkTemplate(), /* optionalPositioning */ null,
-                            getPositioningIfAvailable(markPropertiesOrNull));
+                            getPositioningIfAvailable(markPropertiesOrNull),
+                            false);
                 }
                 effectiveConfigurations.put(markConfiguration, effectiveMarkConfiguration);
             } else {
@@ -236,7 +238,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     final MarkProperties markProperties = ((MarkPropertiesBasedMarkConfiguration) markConfiguration)
                             .getMarkProperties();
                     effectiveConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(markProperties,
-                            effectiveMarkTemplate, markConfiguration.getOptionalPositioning(), getPositioningIfAvailable(markProperties));
+                            effectiveMarkTemplate, markConfiguration.getOptionalPositioning(), getPositioningIfAvailable(markProperties),
+                            /* storeToInventory */ false);
                     sharedSailingData.recordUsage(effectiveMarkTemplate, markProperties);
                 } else if (markConfiguration instanceof FreestyleMarkConfiguration) {
                     final MarkProperties markPropertiesOrNull = ((FreestyleMarkConfiguration) markConfiguration)
@@ -245,15 +248,18 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                         sharedSailingData.recordUsage(effectiveMarkTemplate, markPropertiesOrNull);
                         if (markPropertiesOrNull.hasEqualAppeareanceWith(effectiveMarkTemplate)) {
                             effectiveConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(markPropertiesOrNull,
-                                    effectiveMarkTemplate, markConfiguration.getOptionalPositioning(), getPositioningIfAvailable(markPropertiesOrNull));
+                                    effectiveMarkTemplate, markConfiguration.getOptionalPositioning(), getPositioningIfAvailable(markPropertiesOrNull),
+                                    /* storeToInventory */ false);
                         } else {
                             effectiveConfiguration = new FreestyleMarkConfigurationImpl(effectiveMarkTemplate,
                                     markPropertiesOrNull, effectiveMarkTemplate, markConfiguration.getOptionalPositioning(),
-                                    getPositioningIfAvailable(markPropertiesOrNull));
+                                    getPositioningIfAvailable(markPropertiesOrNull),
+                                    /* storeToInventory */ false);
                         }
                     } else {
                         effectiveConfiguration = new MarkTemplateBasedMarkConfigurationImpl(effectiveMarkTemplate,
-                                markConfiguration.getOptionalPositioning());
+                                markConfiguration.getOptionalPositioning(),
+                                /* storeToInventory */ false);
                     }
                 } else {
                     // Should never happen but could in case a new MarkConfiguration type is defined
@@ -459,7 +465,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             markTemplatesToMarkConfigurations.computeIfAbsent(markTemplate, mt -> {
 
                 final MarkConfiguration markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(markTemplate,
-                        null);
+                        null, /* storeToInventory */ false);
                 allMarkConfigurations.add(markConfiguration);
                 return markConfiguration;
             });
@@ -605,7 +611,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                         markTemplatesToMarkConfigurations.computeIfAbsent(markTemplate, mt -> {
 
                             final MarkConfiguration markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(
-                                    markTemplate, null);
+                                    markTemplate, null, /* storeToInventory */ false);
 
                             allMarkConfigurations.add(markConfiguration);
                             resultingRoleMapping.put(markConfiguration,
@@ -674,7 +680,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             if (suggestedMappings.containsKey(keyTemplate)) {
                 final MarkProperties suggestedPropertiesMapping = suggestedMappings.get(keyTemplate);
                 final MarkPropertiesBasedMarkConfigurationImpl newMarkPropertiesBasedConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(
-                        suggestedPropertiesMapping, keyTemplate, /* optionalPositioning */ null, getPositioningIfAvailable(suggestedPropertiesMapping));
+                        suggestedPropertiesMapping, keyTemplate, /* optionalPositioning */ null,
+                        getPositioningIfAvailable(suggestedPropertiesMapping), /* storeToInventory */ false);
 
                 resultingRoleMapping.remove(entr.getKey());
                 resultingRoleMapping.put(newMarkPropertiesBasedConfiguration, entr.getValue());
@@ -703,7 +710,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             if (suggestedMappings.containsKey(keyTemplate)) {
                 final MarkProperties suggestedPropertiesMapping = suggestedMappings.get(keyTemplate);
                 final MarkPropertiesBasedMarkConfigurationImpl newMarkPropertiesBasedConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(
-                        suggestedPropertiesMapping, keyTemplate, /* optionalPositioning */ null, getPositioningIfAvailable(suggestedPropertiesMapping));
+                        suggestedPropertiesMapping, keyTemplate, /* optionalPositioning */ null, getPositioningIfAvailable(suggestedPropertiesMapping),
+                        /* storeToInventory */ false);
 
                 markTemplatesToMarkConfigurationsToReplace.put(keyTemplate, newMarkPropertiesBasedConfiguration);
                 markConfigurationsToEdit.remove(entr.getValue());
@@ -966,7 +974,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             final MarkProperties markPropertiesOrNull = markPropertiesIdOrNull == null ? null
                     : sharedSailingData.getMarkPropertiesById(markPropertiesIdOrNull);
             final RegattaMarkConfiguration regattaMarkConfiguration = new RegattaMarkConfigurationImpl(mark,
-                    /* optionalPositioning */ null, getPositioningIfAvailable(regatta, mark), markTemplateOrNull, markPropertiesOrNull);
+                    /* optionalPositioning */ null, getPositioningIfAvailable(regatta, mark), markTemplateOrNull,
+                    markPropertiesOrNull, /* storeToInventory */ false);
             return regattaMarkConfiguration;
         }
     }

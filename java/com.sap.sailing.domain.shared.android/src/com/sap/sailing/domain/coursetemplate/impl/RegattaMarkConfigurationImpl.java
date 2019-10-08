@@ -15,8 +15,9 @@ public class RegattaMarkConfigurationImpl extends MarkConfigurationImpl implemen
     private final MarkProperties optionalMarkProperties;
 
     public RegattaMarkConfigurationImpl(Mark mark, StorablePositioning optionalPositioning,
-            Positioning storedPositioning, MarkTemplate optionalMarkTemplate, MarkProperties optionalMarkProperties) {
-        super(optionalMarkTemplate, optionalPositioning, storedPositioning, /* storeToInventory */ false);
+            Positioning storedPositioning, MarkTemplate optionalMarkTemplate, MarkProperties optionalMarkProperties,
+            boolean storeToInventory) {
+        super(optionalMarkTemplate, optionalPositioning, storedPositioning, storeToInventory);
         this.mark = mark;
         this.optionalMarkProperties = optionalMarkProperties;
     }

@@ -34,6 +34,7 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
     public static final String FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE = "associatedRole";
     public static final String FIELD_MARK_CONFIGURATION_POSITIONING = "positioning";
     public static final String FIELD_MARK_CONFIGURATION_EFFECTIVE_POSITIONING = "effectivePositioning";
+    public static final String FIELD_MARK_CONFIGURATION_STORE_TO_INVENTORY = "storeToInventory";
     public static final String FIELD_WAYPOINTS = "waypoints";
     public static final String FIELD_WAYPOINT_CONTROL_POINT_NAME = "controlPointName";
     public static final String FIELD_WAYPOINT_CONTROL_POINT_SHORT_NAME = "controlPointShortName";
@@ -108,6 +109,8 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
                 markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_POSITIONING,
                         storablePositioningJsonSerializer.serialize(markConfiguration.getOptionalPositioning()));
             }
+            markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_STORE_TO_INVENTORY,
+                    markConfiguration.isStoreToInventory());
 
             // TODO: associated role? markConfiguration.
             markConfigurationsToTempIdMap.put(markConfiguration, markConfigurationId);

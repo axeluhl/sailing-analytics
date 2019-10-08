@@ -14,8 +14,8 @@ public class MarkPropertiesBasedMarkConfigurationImpl extends MarkConfigurationI
     private final MarkProperties markProperties;
 
     public MarkPropertiesBasedMarkConfigurationImpl(MarkProperties markProperties, MarkTemplate optionalMarkTemplate, StorablePositioning optionalPositioning,
-            Positioning storedPositioning) {
-        super(optionalMarkTemplate, optionalPositioning, storedPositioning, /* storeToInventory */ false);
+            Positioning storedPositioning, boolean storeToInventory) {
+        super(optionalMarkTemplate, optionalPositioning, storedPositioning, storeToInventory);
         this.markProperties = markProperties;
     }
 

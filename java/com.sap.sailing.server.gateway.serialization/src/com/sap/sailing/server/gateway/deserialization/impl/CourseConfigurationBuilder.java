@@ -76,7 +76,8 @@ public class CourseConfigurationBuilder {
     }
 
     public MarkConfiguration addMarkConfiguration(UUID optionalMarkTemplateID, UUID optionalMarkPropertiesID,
-            UUID optionalMarkID, CommonMarkProperties commonMarkProperties, StorablePositioning optionalPositioning) {
+            UUID optionalMarkID, CommonMarkProperties commonMarkProperties, StorablePositioning optionalPositioning,
+            boolean storeToInventory) {
         final MarkConfiguration result;
         if (commonMarkProperties != null) {
             if (optionalMarkID != null) {
@@ -84,14 +85,14 @@ public class CourseConfigurationBuilder {
                         "Freestyle mark configurations may not reference an existing regatta mark");
             }
             result = addFreestyleMarkConfiguration(optionalMarkTemplateID, optionalMarkPropertiesID,
-                    commonMarkProperties, optionalPositioning);
+                    commonMarkProperties, optionalPositioning, storeToInventory);
         } else if (optionalMarkID != null) {
-            result = addRegattaMarkConfiguration(optionalMarkID, optionalPositioning);
+            result = addRegattaMarkConfiguration(optionalMarkID, optionalPositioning, storeToInventory);
         } else if (optionalMarkPropertiesID != null) {
             result = addMarkPropertiesConfiguration(optionalMarkPropertiesID, optionalMarkTemplateID,
-                    optionalPositioning);
+                    optionalPositioning, storeToInventory);
         } else if (optionalMarkTemplateID != null) {
-            result = addMarkTemplateConfiguration(optionalMarkTemplateID, optionalPositioning);
+            result = addMarkTemplateConfiguration(optionalMarkTemplateID, optionalPositioning, storeToInventory);
         } else {
             throw new IllegalArgumentException(
                     "Mark configuration could not be constructed due to missing specification");
@@ -100,12 +101,14 @@ public class CourseConfigurationBuilder {
         return result;
     }
 
-    public MarkTemplateBasedMarkConfiguration addMarkTemplateConfiguration(UUID markTemplateID, StorablePositioning optionalPositioning) {
+    public MarkTemplateBasedMarkConfiguration addMarkTemplateConfiguration(UUID markTemplateID,
+            StorablePositioning optionalPositioning, boolean storeToInventory) {
         final MarkTemplate resolvedMarkTemplate = resolveMarkTemplateByID(markTemplateID);
         if (resolvedMarkTemplate == null) {
             throw new IllegalStateException("Mark template with ID " + markTemplateID + " could not be resolved");
         }
-        final MarkTemplateBasedMarkConfiguration result = new MarkTemplateBasedMarkConfigurationImpl(resolvedMarkTemplate, optionalPositioning);
+        final MarkTemplateBasedMarkConfiguration result = new MarkTemplateBasedMarkConfigurationImpl(
+                resolvedMarkTemplate, optionalPositioning, storeToInventory);
         markConfigurations.add(result);
         return result;
     }
@@ -131,7 +134,8 @@ public class CourseConfigurationBuilder {
         return resolvedMarkTemplate;
     }
 
-    public MarkPropertiesBasedMarkConfiguration addMarkPropertiesConfiguration(UUID markPropertiesID, UUID optionalMarkTemplateID, StorablePositioning optionalPositioning) {
+    public MarkPropertiesBasedMarkConfiguration addMarkPropertiesConfiguration(UUID markPropertiesID,
+            UUID optionalMarkTemplateID, StorablePositioning optionalPositioning, boolean storeToInventory) {
         final MarkProperties resolvedMarkProperties = sharedSailingData.getMarkPropertiesById(markPropertiesID);
         if (resolvedMarkProperties == null) {
             throw new IllegalArgumentException(
@@ -141,13 +145,14 @@ public class CourseConfigurationBuilder {
                 : resolveMarkTemplateByID(optionalMarkTemplateID);
         final MarkPropertiesBasedMarkConfiguration result = new MarkPropertiesBasedMarkConfigurationImpl(
                 resolvedMarkProperties, resolvedMarkTemplate, optionalPositioning,
-                getPositioningIfAvailable(resolvedMarkProperties, positionResolver));
+                getPositioningIfAvailable(resolvedMarkProperties, positionResolver), storeToInventory);
         markConfigurations.add(result);
         return result;
     }
 
     public FreestyleMarkConfiguration addFreestyleMarkConfiguration(UUID optionalMarkTemplateID,
-            UUID optionalMarkPropertiesID, CommonMarkProperties commonMarkProperties, StorablePositioning optionalPositioning) {
+            UUID optionalMarkPropertiesID, CommonMarkProperties commonMarkProperties, StorablePositioning optionalPositioning,
+            boolean storeToInventory) {
         final MarkTemplate resolvedMarkTemplate = optionalMarkTemplateID == null ? null
                 : resolveMarkTemplateByID(optionalMarkTemplateID);
         final MarkProperties resolvedMarkProperties = sharedSailingData.getMarkPropertiesById(optionalMarkPropertiesID);
@@ -156,12 +161,13 @@ public class CourseConfigurationBuilder {
         // isn't available.
         final FreestyleMarkConfiguration result = new FreestyleMarkConfigurationImpl(resolvedMarkTemplate,
                 resolvedMarkProperties, commonMarkProperties, optionalPositioning, resolvedMarkProperties == null ? null
-                        : getPositioningIfAvailable(resolvedMarkProperties, positionResolver));
+                        : getPositioningIfAvailable(resolvedMarkProperties, positionResolver), storeToInventory);
         markConfigurations.add(result);
         return result;
     }
 
-    public RegattaMarkConfiguration addRegattaMarkConfiguration(UUID markID, StorablePositioning optionalPositioning) {
+    public RegattaMarkConfiguration addRegattaMarkConfiguration(UUID markID, StorablePositioning optionalPositioning,
+            boolean storeToInventory) {
         if (optionalRegatta == null) {
             throw new IllegalStateException();
         }
@@ -176,7 +182,7 @@ public class CourseConfigurationBuilder {
                             : sharedSailingData.getMarkPropertiesById(markPropertiesIdOrNull);
                     final RegattaMarkConfiguration result = new RegattaMarkConfigurationImpl(mark, optionalPositioning,
                             getPositioningIfAvailable(optionalRegatta, mark, positionResolver), markTemplateOrNull,
-                            markPropertiesOrNull);
+                            markPropertiesOrNull, storeToInventory);
                     markConfigurations.add(result);
                     return result;
                 }
