@@ -14,7 +14,7 @@ public class DummyMasterDataRessource extends MasterDataResource {
     }
 
     @Override
-    protected RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
+    public RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
         return super.getRaceLogTrackingAdapter();
     }
 

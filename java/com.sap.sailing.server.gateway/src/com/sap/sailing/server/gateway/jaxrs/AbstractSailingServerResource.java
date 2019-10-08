@@ -149,7 +149,7 @@ public abstract class AbstractSailingServerResource {
         return bigDecimal.doubleValue();
     }
     
-    protected RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
+    public RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
         return getService(RaceLogTrackingAdapterFactory.class).getAdapter(getService().getBaseDomainFactory());
     }
 }
