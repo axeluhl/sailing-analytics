@@ -97,6 +97,10 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
                 }
             } else if (markConfiguration instanceof RegattaMarkConfiguration) {
                 final RegattaMarkConfiguration regattaMarkConfiguration = (RegattaMarkConfiguration) markConfiguration;
+                if (regattaMarkConfiguration.getOptionalMarkProperties() != null) {
+                    markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_PROPERTIES_ID,
+                            regattaMarkConfiguration.getOptionalMarkProperties().getId().toString());
+                }
                 markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_ID,
                         regattaMarkConfiguration.getMark().getId().toString());
             }

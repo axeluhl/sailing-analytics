@@ -2,6 +2,7 @@ package com.sap.sailing.selenium.api.test;
 
 import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
+import static java.lang.System.currentTimeMillis;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -28,6 +29,8 @@ import com.sap.sailing.selenium.api.coursetemplate.CourseTemplate;
 import com.sap.sailing.selenium.api.coursetemplate.CourseTemplateApi;
 import com.sap.sailing.selenium.api.coursetemplate.MarkAppearance;
 import com.sap.sailing.selenium.api.coursetemplate.MarkConfiguration;
+import com.sap.sailing.selenium.api.coursetemplate.MarkProperties;
+import com.sap.sailing.selenium.api.coursetemplate.MarkPropertiesApi;
 import com.sap.sailing.selenium.api.coursetemplate.MarkTemplate;
 import com.sap.sailing.selenium.api.coursetemplate.MarkTemplateApi;
 import com.sap.sailing.selenium.api.coursetemplate.Positioning;
@@ -36,6 +39,8 @@ import com.sap.sailing.selenium.api.coursetemplate.WaypointTemplate;
 import com.sap.sailing.selenium.api.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
+import com.sap.sailing.selenium.api.event.MarkApi;
+import com.sap.sailing.selenium.api.event.MarkApi.Mark;
 import com.sap.sailing.selenium.api.helper.CourseTemplateDataFactory;
 import com.sap.sailing.selenium.api.regatta.RaceColumn;
 import com.sap.sailing.selenium.api.regatta.RegattaApi;
@@ -48,9 +53,11 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     private final CourseConfigurationApi courseConfigurationApi = new CourseConfigurationApi();
     private final CourseTemplateApi courseTemplateApi = new CourseTemplateApi();
     private final MarkTemplateApi markTemplateApi = new MarkTemplateApi();
+    private final MarkPropertiesApi markPropertiesApi = new MarkPropertiesApi();
     private final EventApi eventApi = new EventApi();
     private final RegattaApi regattaApi = new RegattaApi();
     private final LeaderboardApi LeaderboardApi = new LeaderboardApi();
+    private final MarkApi markApi = new MarkApi();
 
     @Before
     public void setUp() {
@@ -71,10 +78,8 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         }
     }
 
-    private void assertCourseConfigurationCompared(final CourseConfiguration srcCourseConfiguration,
-            final CourseConfiguration trgtCourseConfiguration) {
-        System.out.println(srcCourseConfiguration);
-        System.out.println(trgtCourseConfiguration);
+    private void assertCourseConfigurationCompared(final ApiContext ctx,
+            final CourseConfiguration srcCourseConfiguration, final CourseConfiguration trgtCourseConfiguration) {
         final Iterable<MarkConfiguration> srcMarkConfigurations = srcCourseConfiguration.getMarkConfigurations();
         final Iterable<MarkConfiguration> trgtMarkConfigurations = trgtCourseConfiguration.getMarkConfigurations();
         final Iterable<WaypointWithMarkConfiguration> srcWaypoints = srcCourseConfiguration.getWaypoints();
@@ -98,42 +103,61 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                 if (srcAppearance == null && trgtAppearance == null) {
                     return;
                 }
-                if (srcAppearance.getName().equals(trgtAppearance.getName())) {
+                final boolean matchByName = srcAppearance != null && trgtAppearance != null
+                        && srcAppearance.getName().equals(trgtAppearance.getName());
+                final boolean matchByTemplateId = markTemplateId != null
+                        && markTemplateId.equals(trgtMarkConfiguration.getMarkTemplateId());
+                final boolean matchByMarkId = markConfiguration.getMarkId() != null
+                        && markConfiguration.getMarkId().equals(trgtMarkConfiguration.getMarkId());
+                // final boolean matchByMarkId =
+                if (matchByName || matchByTemplateId || matchByMarkId) {
                     found = true;
+                    final String msgIdentifier = matchByName ? "markconfiguration with name " + srcAppearance.getName()
+                            : matchByTemplateId ? "markconfiguration with markTemplateID " + markTemplateId
+                                    : matchByMarkId ? "markconfiguration with markId " + markConfiguration.getMarkId()
+                                            : "unknown";
                     if (markTemplateId != null && trgtMarkConfiguration.getMarkTemplateId() != null) {
-                        assertEquals(
-                                "markTemplateId is different for markconfiguration with name "
-                                        + srcAppearance.getName(),
-                                markTemplateId, trgtMarkConfiguration.getMarkTemplateId());
+                        assertEquals("markTemplateId is different for " + msgIdentifier, markTemplateId,
+                                trgtMarkConfiguration.getMarkTemplateId());
                     }
                     final String srcAssociatedRole = markConfiguration.getAssociatedRole();
                     if (srcAssociatedRole != null) {
-                        assertEquals(
-                                "associated role is different for markconfiguration with name "
-                                        + srcAppearance.getName(),
-                                srcAssociatedRole, trgtMarkConfiguration.getAssociatedRole());
+                        assertEquals("associated role is different for " + msgIdentifier, srcAssociatedRole,
+                                trgtMarkConfiguration.getAssociatedRole());
                     }
-                    assertEquals("shortName is different for markconfiguration with name " + srcAppearance.getName(),
-                            srcAppearance.getShortName(), trgtAppearance.getShortName());
+                    if (matchByName) {
+                        assertEquals("shortName is different for " + msgIdentifier, srcAppearance.getShortName(),
+                                trgtAppearance.getShortName());
+                    }
+                    boolean hasDeviceUUID = false;
                     if (srcPositioning != null) {
                         final Positioning trgtPositioning = trgtMarkConfiguration.getEffectivePositioning();
-                        assertEquals(
-                                "position.lat is different for markconfiguration with name " + srcAppearance.getName(),
-                                srcPositioning.getLatitudeDeg(), trgtPositioning.getLatitudeDeg());
-                        assertEquals(
-                                "position.lng is different for markconfiguration with name " + srcAppearance.getName(),
+                        assertEquals("position.lat is different for " + msgIdentifier, srcPositioning.getLatitudeDeg(),
+                                trgtPositioning.getLatitudeDeg());
+                        assertEquals("position.lng is different for " + msgIdentifier,
                                 trgtPositioning.getLongitudeDeg(), trgtPositioning.getLongitudeDeg());
                         if (srcPositioning.getDeviceId() != null) {
-                            assertEquals(
-                                    "position.type is wrong for markconfiguration with name " + srcAppearance.getName(),
-                                    "DEVICE", trgtPositioning.getType());
-                            assertNull("deviceId should be empty for markconfiguration with name "
-                                    + srcAppearance.getName(), trgtPositioning.getDeviceId());
+                            hasDeviceUUID = true;
+                            assertEquals("position.type is wrong for " + msgIdentifier, "DEVICE",
+                                    trgtPositioning.getType());
+                            assertNull("deviceId should be empty for " + msgIdentifier, trgtPositioning.getDeviceId());
                         }
+                    }
+                    if (markConfiguration.isStoreToInventory()) {
+                        final UUID markPropertiesId = trgtMarkConfiguration.getMarkPropertiesId();
+                        assertNotNull(markPropertiesId);
+                        final MarkProperties markProperties = markPropertiesApi.getMarkProperties(ctx,
+                                markPropertiesId);
+                        assertNotNull(markProperties);
+                        if (matchByName) {
+                            assertEquals(srcAppearance.getName(), markProperties.getName());
+                            assertEquals(srcAppearance.getShortName(), markProperties.getShortName());
+                        }
+                        assertEquals(markProperties.hasDevice(), hasDeviceUUID);
                     }
                 }
             }
-            assertTrue("No markconfiguration for appearance with name " + srcAppearance.getName(), found);
+            assertTrue("No matching markconfiguration found for markconfiguration " + markConfiguration.getId(), found);
         }
         for (final WaypointWithMarkConfiguration srcWaypoint : srcWaypoints) {
             final String controlPointName = srcWaypoint.getControlPointName();
@@ -189,7 +213,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
 
         assertEquals(6, Util.size(createdCourseAsConfiguration.getMarkConfigurations()));
         assertEquals(createdCourseTemplate.getId(), createdCourseAsConfiguration.getOptionalCourseTemplateId());
-        assertCourseConfigurationCompared(courseConfiguration, createdCourseAsConfiguration);
+        assertCourseConfigurationCompared(ctx, courseConfiguration, createdCourseAsConfiguration);
         assertConsistentCourseConfiguration(createdCourseAsConfiguration);
         assertEquals(numberOfLaps, createdCourseAsConfiguration.getNumberOfLaps());
     }
@@ -223,7 +247,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                 .createCourseConfigurationFromCourse(ctx, regattaName, race.getRaceName(), "Default", null);
 
         assertConsistentCourseConfiguration(createdCourseAsConfiguration);
-        assertCourseConfigurationCompared(courseConfiguration, createdCourseAsConfiguration);
+        assertCourseConfigurationCompared(ctx, courseConfiguration, createdCourseAsConfiguration);
     }
 
     @Test
@@ -251,7 +275,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                 courseConfiguration, null);
 
         assertConsistentCourseConfiguration(courseConfigurationResult);
-        assertCourseConfigurationCompared(courseConfiguration, courseConfigurationResult);
+        assertCourseConfigurationCompared(ctx, courseConfiguration, courseConfigurationResult);
         // TODO assert positioning is contained in result and identical to the given values
     }
 
@@ -279,6 +303,52 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                 ctx, srcCourseTemplate.getId(), /* optionalRegattaName */ null, /* tags */ null);
         assertNotNull(courseConfiguration);
         assertConsistentCourseConfiguration(courseConfiguration);
+    }
+
+    @Test
+    public void testCreateCourseConfigurationWithStoreToInvventory() {
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+
+        MarkConfiguration sb = MarkConfiguration.createFreestyle(null, null, "role_sb", "startboat", "sb", null, null,
+                null, null);
+        sb.setFixedPosition(5.5, 7.1);
+        sb.setStoreToInventory(true);
+        MarkConfiguration pe = MarkConfiguration.createFreestyle(null, null, "role_pe", "pin end", "pe", null, null,
+                null, null);
+        pe.setStoreToInventory(true);
+        UUID randomDeviceId = UUID.randomUUID();
+        pe.setTrackingDeviceId(randomDeviceId);
+        MarkConfiguration bl = MarkConfiguration.createFreestyle(null, null, "role_bl", "1", null, "#0000FF", null,
+                null, null);
+        MarkTemplate mtb2 = markTemplateApi.createMarkTemplate(ctx, "mark template 1", "mt1", "#FFFFFF", "Cylinder",
+                "Checkered", MarkType.BUOY.name());
+        MarkConfiguration b2 = MarkConfiguration.createMarkTemplateBased(mtb2.getId(), "role_b2");
+        b2.setStoreToInventory(true);
+
+        eventApi.createEvent(ctx, "testregatta", "", CompetitorRegistrationType.CLOSED, "");
+        final RaceColumn race = regattaApi.addRaceColumn(ctx, "testregatta", null, 1)[0];
+        Mark mark = markApi.addMarkToRegatta(ctx, "testregatta", "mymark");
+        markApi.addMarkFix(ctx, "testregatta", race.getRaceName(), "Default", mark.getMarkId(),
+                /* markTemplateId */ UUID.randomUUID(), /* markPropertiesId */ UUID.randomUUID(), 9.12, .599,
+                currentTimeMillis());
+        MarkConfiguration b3 = MarkConfiguration.createMarkBased(mark.getMarkId(), "role_b3");
+        b3.setStoreToInventory(true);
+
+        WaypointWithMarkConfiguration wp1 = new WaypointWithMarkConfiguration("start/end", "s/e",
+                PassingInstruction.Line, Arrays.asList(sb.getId(), pe.getId()));
+        WaypointWithMarkConfiguration wp2 = new WaypointWithMarkConfiguration(null, null, PassingInstruction.Port,
+                Arrays.asList(bl.getId()));
+        WaypointWithMarkConfiguration wp3 = new WaypointWithMarkConfiguration(null, null,
+                PassingInstruction.Single_Unknown, Arrays.asList(b2.getId()));
+        WaypointWithMarkConfiguration wp4 = new WaypointWithMarkConfiguration(null, null,
+                PassingInstruction.Single_Unknown, Arrays.asList(b3.getId()));
+
+        CourseConfiguration courseConfiguration = new CourseConfiguration("my-course",
+                Arrays.asList(sb, pe, bl, b2, b3), Arrays.asList(wp1, wp2, wp1, wp3, wp4));
+
+        CourseConfiguration courseConfigurationResult = courseConfigurationApi.createCourseTemplate(ctx,
+                courseConfiguration, "testregatta");
+        assertCourseConfigurationCompared(ctx, courseConfiguration, courseConfigurationResult);
     }
 
     @Test

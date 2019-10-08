@@ -16,6 +16,7 @@ public class CourseConfigurationApi {
     private static final String TO_COURSE_TEMPLATE = "/createCourseTemplate";
     private static final String TO_COURSE = "/createCourse/";
     private static final String PARAM_TAG = "tag";
+    private static final String PARAM_REGATTA_NAME = "regattaName";
 
     public CourseConfiguration createCourseConfigurationFromCourseTemplate(final ApiContext ctx,
             final UUID courseTemplateId, final String optionalRegattaName, final Iterable<String> tags) {
@@ -46,15 +47,19 @@ public class CourseConfigurationApi {
 
     public CourseConfiguration createCourseTemplate(final ApiContext ctx, final CourseConfiguration courseConfiguration,
             final String optionalRegattaName) {
-        final String url = COURSE_CONFIGURATION + TO_COURSE_TEMPLATE
-                + (optionalRegattaName != null ? "?regattaName=" + optionalRegattaName : "");
-        final JSONObject result = ctx.post(url, null, courseConfiguration.getJson());
+        final String url = COURSE_CONFIGURATION + TO_COURSE_TEMPLATE;
+        final Map<String, String> queryParams = new TreeMap<>();
+        if (optionalRegattaName != null) {
+            queryParams.put(PARAM_REGATTA_NAME, optionalRegattaName);
+        }
+        final JSONObject result = ctx.post(url, queryParams, courseConfiguration.getJson());
         return new CourseConfiguration(result);
     }
 
     public JSONObject createCourse(final ApiContext ctx, final CourseConfiguration courseConfiguration,
             final String regattaName, final String raceColumn, String fleet) {
-        final JSONObject result = ctx.post(COURSE_CONFIGURATION + TO_COURSE + regattaName + "/" + raceColumn + "/" + fleet, null,
+        final JSONObject result = ctx.post(
+                COURSE_CONFIGURATION + TO_COURSE + regattaName + "/" + raceColumn + "/" + fleet, null,
                 courseConfiguration.getJson());
         return result;
     }
