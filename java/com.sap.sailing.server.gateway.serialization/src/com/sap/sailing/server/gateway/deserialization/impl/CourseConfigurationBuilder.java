@@ -238,7 +238,7 @@ public class CourseConfigurationBuilder {
             if (PingDeviceIdentifier.TYPE.equals(identifier.getIdentifierType())) {
                 result = new FixedPositioningImpl(lastPositionOrNull);
             } else {
-                result = new StoredDeviceIdentifierPositioningImpl(lastPositionOrNull);
+                result = new StoredDeviceIdentifierPositioningImpl(identifier, lastPositionOrNull);
             }
         } else {
             result = null;
@@ -291,7 +291,7 @@ public class CourseConfigurationBuilder {
         final DeviceIdentifier trackingDeviceIdentifier = markProperties.getTrackingDeviceIdentifier();
         if (trackingDeviceIdentifier != null) {
             final Position lastPositionOrNull = positionResolver.apply(trackingDeviceIdentifier);
-            return new StoredDeviceIdentifierPositioningImpl(lastPositionOrNull);
+            return new StoredDeviceIdentifierPositioningImpl(trackingDeviceIdentifier, lastPositionOrNull);
         }
         return null;
     }
