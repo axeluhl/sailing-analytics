@@ -80,8 +80,6 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
 
     private void assertCourseConfigurationCompared(final ApiContext ctx,
             final CourseConfiguration srcCourseConfiguration, final CourseConfiguration trgtCourseConfiguration) {
-        System.out.println(srcCourseConfiguration);
-        System.out.println(trgtCourseConfiguration);
         final Iterable<MarkConfiguration> srcMarkConfigurations = srcCourseConfiguration.getMarkConfigurations();
         final Iterable<MarkConfiguration> trgtMarkConfigurations = trgtCourseConfiguration.getMarkConfigurations();
         final Iterable<WaypointWithMarkConfiguration> srcWaypoints = srcCourseConfiguration.getWaypoints();
