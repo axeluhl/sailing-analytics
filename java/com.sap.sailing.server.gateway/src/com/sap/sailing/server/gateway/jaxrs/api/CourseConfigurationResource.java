@@ -142,14 +142,15 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
             courseBase = courseDesginFinder.analyze();
         }
 
+        final JSONObject jsonResult;
         if (courseBase == null) {
-            return Response.status(Status.NOT_FOUND).entity("No course found for given race.").build();
+            jsonResult = new JSONObject();
+        } else {
+            final CourseConfiguration courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
+                    .createCourseConfigurationFromCourse(courseBase, regatta, tags);
+            jsonResult = courseConfigurationJsonSerializer.serialize(courseConfiguration);
         }
-
-        final CourseConfiguration courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
-                .createCourseConfigurationFromCourse(courseBase, regatta, tags);
-
-        return Response.ok(courseConfigurationJsonSerializer.serialize(courseConfiguration).toJSONString()).build();
+        return Response.ok(jsonResult.toJSONString()).build();
     }
 
     @GET
