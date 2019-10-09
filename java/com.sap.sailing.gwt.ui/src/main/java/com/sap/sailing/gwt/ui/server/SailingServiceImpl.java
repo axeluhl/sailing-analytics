@@ -9345,8 +9345,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public ORCPerformanceCurveLegImpl getLegGeometry(String leaderboardName, String raceColumnName, String fleetName, int zeroBasedLegIndex) {
-        ORCPerformanceCurveLegImpl result = null;
+    public ORCPerformanceCurveLegImpl[] getLegGeometry(String leaderboardName, String raceColumnName, String fleetName, int[] zeroBasedLegIndices) {
+        ORCPerformanceCurveLegImpl[] result = null;
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
@@ -9355,7 +9355,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 if (fleet != null) {
                     final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                     if (trackedRace != null) {
-                        result = getLegGeometry(zeroBasedLegIndex, trackedRace);
+                        result = new ORCPerformanceCurveLegImpl[zeroBasedLegIndices.length];
+                        for (int i=0; i<zeroBasedLegIndices.length; i++) {
+                            result[i] = getLegGeometry(zeroBasedLegIndices[i], trackedRace);
+                        }
                     }
                 }
             }
@@ -9364,9 +9367,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public ORCPerformanceCurveLegImpl getLegGeometry(RegattaAndRaceIdentifier regattaNameAndRaceName, int zeroBasedLegIndex) {
+    public ORCPerformanceCurveLegImpl[] getLegGeometry(RegattaAndRaceIdentifier regattaNameAndRaceName, int[] zeroBasedLegIndices) {
         final TrackedRace trackedRace = getExistingTrackedRace(regattaNameAndRaceName);
-        return getLegGeometry(zeroBasedLegIndex, trackedRace);
+        final ORCPerformanceCurveLegImpl[] result = new ORCPerformanceCurveLegImpl[zeroBasedLegIndices.length];
+        for (int i=0; i<zeroBasedLegIndices.length; i++) {
+            result[i] = getLegGeometry(zeroBasedLegIndices[i], trackedRace);
+        }
+        return result;
     }
 
     private ORCPerformanceCurveLegImpl getLegGeometry(int zeroBasedLegIndex, final TrackedRace trackedRace) {

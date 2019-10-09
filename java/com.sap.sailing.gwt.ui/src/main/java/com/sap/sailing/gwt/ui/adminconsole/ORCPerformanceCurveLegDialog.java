@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -20,6 +19,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DoubleBox;
 
 /**
  * An editor allowing users to specify the ORC Performance Curve leg type and distance, and in case of a
@@ -70,6 +70,9 @@ public class ORCPerformanceCurveLegDialog extends DataEntryDialog<ORCPerformance
         twaBox = createDoubleBox(/* visibleLength */ 5);
         if (orcLegParametersSoFar != null) {
             distanceInNauticalMilesBox.setValue(orcLegParametersSoFar.getLength().getNauticalMiles());
+            if (orcLegParametersSoFar.getTwa() != null) {
+                twaBox.setValue(orcLegParametersSoFar.getTwa().getDegrees());
+            }
         }
         legTypeBox.addChangeHandler(e->updateFetchTrackingBasedDistanceAndTwaButtonEnabledState());
         updateFetchTrackingBasedDistanceAndTwaButtonEnabledState();
@@ -77,8 +80,8 @@ public class ORCPerformanceCurveLegDialog extends DataEntryDialog<ORCPerformance
     
     private void fetchTrackingBasedDistanceAndTwa() {
         final int zeroBasedLegIndex = waypointList.getList().indexOf(forLegEndingAt)-1;
-        legGeometrySupplier.getLegGeometry(zeroBasedLegIndex,
-                new AsyncCallback<ORCPerformanceCurveLegImpl>() {
+        legGeometrySupplier.getLegGeometry(new int[] { zeroBasedLegIndex },
+                new AsyncCallback<ORCPerformanceCurveLegImpl[]>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log(caught.getMessage());
@@ -86,9 +89,9 @@ public class ORCPerformanceCurveLegDialog extends DataEntryDialog<ORCPerformance
                     }
 
                     @Override
-                    public void onSuccess(ORCPerformanceCurveLegImpl legGeometry) {
-                        twaBox.setValue(legGeometry.getTwa().getDegrees());
-                        distanceInNauticalMilesBox.setValue(legGeometry.getLength().getNauticalMiles());
+                    public void onSuccess(ORCPerformanceCurveLegImpl[] legGeometries) {
+                        twaBox.setValue(legGeometries == null ? null : legGeometries[0].getTwa().getDegrees());
+                        distanceInNauticalMilesBox.setValue(legGeometries == null ? null : legGeometries[0].getLength().getNauticalMiles());
                         validateAndUpdate();
                     }
         });
@@ -125,16 +128,17 @@ public class ORCPerformanceCurveLegDialog extends DataEntryDialog<ORCPerformance
     @Override
     protected ORCPerformanceCurveLegImpl getResult() {
         final ORCPerformanceCurveLegImpl result;
-        if (getSelectedLegType() == null) {
+        final ORCPerformanceCurveLegTypes selectedLegType = getSelectedLegType();
+        if (selectedLegType == null) {
             result = null;
-        } else if (getSelectedLegType() == ORCPerformanceCurveLegTypes.TWA) {
+        } else if (selectedLegType == ORCPerformanceCurveLegTypes.TWA) {
             result = new ORCPerformanceCurveLegImpl(
                     distanceInNauticalMilesBox.getValue() == null ? null
                             : new NauticalMileDistance(distanceInNauticalMilesBox.getValue()),
                     twaBox.getValue() == null ? null : new DegreeBearingImpl(twaBox.getValue()));
         } else {
             result = new ORCPerformanceCurveLegImpl(distanceInNauticalMilesBox.getValue() == null ? null
-                    : new NauticalMileDistance(distanceInNauticalMilesBox.getValue()), getSelectedLegType());
+                    : new NauticalMileDistance(distanceInNauticalMilesBox.getValue()), selectedLegType);
         }
         return result;
     }

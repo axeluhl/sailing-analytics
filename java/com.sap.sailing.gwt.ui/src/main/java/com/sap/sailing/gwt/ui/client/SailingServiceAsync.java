@@ -1126,11 +1126,11 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void getTrackedRaceIsUsingMarkPassingCalculator(RegattaAndRaceIdentifier regattaNameAndRaceName, AsyncCallback<Boolean> callback);
 
-    void getLegGeometry(String leaderboardName, String raceColumnName, String fleetName, int zeroBasedLegIndex,
-            AsyncCallback<ORCPerformanceCurveLegImpl> callback);
+    void getLegGeometry(String leaderboardName, String raceColumnName, String fleetName, int[] zeroBasedLegIndices,
+            AsyncCallback<ORCPerformanceCurveLegImpl[]> callback);
 
-    void getLegGeometry(RegattaAndRaceIdentifier singleSelectedRace, int zeroBasedLegIndex, 
-            AsyncCallback<ORCPerformanceCurveLegImpl> callback);
+    void getLegGeometry(RegattaAndRaceIdentifier singleSelectedRace, int[] zeroBasedLegIndices,
+            AsyncCallback<ORCPerformanceCurveLegImpl[]> callback);
 
     void getORCPerformanceCurveLegInfo(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Map<Integer, ORCPerformanceCurveLegImpl>> asyncCallback);
