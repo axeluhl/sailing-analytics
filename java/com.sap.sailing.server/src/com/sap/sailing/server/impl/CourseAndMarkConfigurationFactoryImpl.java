@@ -23,7 +23,6 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMa
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
-import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
@@ -114,30 +113,12 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     }
 
     @Override
-    public Course createCourse(CourseTemplate courseTemplate, int numberOfLaps) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void updateCourse(Course courseToUpdate, CourseTemplate courseTemplate, int numberOfLaps) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
     public CourseTemplate resolveCourseTemplate(CourseBase course) {
         if (course.getOriginatingCourseTemplateIdOrNull() == null) {
             return null;
         }
         // TODO this call may fail due to required permissions
         return sharedSailingData.getCourseTemplateById(course.getOriginatingCourseTemplateIdOrNull());
-    }
-
-    @Override
-    public MarkTemplate getOrCreateMarkTemplate(MarkConfiguration markConfiguration) {
-        // TODO Auto-generated method stub
-        return null;
     }
     
     private CourseConfiguration handleSaveToInventory(CourseConfiguration courseConfiguration) {
@@ -437,18 +418,6 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         courseSequenceMapper.explicitAssociatedRoles.forEach(course::addRoleMapping);
         // TODO record usages for MarkProperties by role name
         return course;
-    }
-
-    @Override
-    public MarkPropertiesBasedMarkConfiguration createOrUpdateMarkProperties(MarkConfiguration markProperties) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public RegattaMarkConfiguration createMark(Regatta regatta, MarkConfiguration markConfiguration) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override
