@@ -112,12 +112,22 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         };
     }
 
+    private CourseTemplate resolveCourseTemplateSafe(CourseBase course) {
+        CourseTemplate courseTemplateOrNull = null;
+        try {
+            courseTemplateOrNull = resolveCourseTemplate(course);
+        } catch(Exception e) {
+            // The call may fail due to required permissions.
+            // In this case we just handle it as there is no CourseTemplate.
+        }
+        return courseTemplateOrNull;
+    }
+    
     @Override
     public CourseTemplate resolveCourseTemplate(CourseBase course) {
         if (course.getOriginatingCourseTemplateIdOrNull() == null) {
             return null;
         }
-        // TODO this call may fail due to required permissions
         return sharedSailingData.getCourseTemplateById(course.getOriginatingCourseTemplateIdOrNull());
     }
     
@@ -533,9 +543,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             Iterable<String> tagsToFilterMarkProperties) {
         final Set<MarkConfiguration> allMarkConfigurations = new HashSet<>();
 
-        // TODO this call may fail due to required permissions. Most probably we should just handle it like a course
-        // without template reference instead of letting it fail.
-        final CourseTemplate courseTemplateOrNull = resolveCourseTemplate(course);
+        final CourseTemplate courseTemplateOrNull = resolveCourseTemplateSafe(course);
         final RegattaMarkConfigurations regattaMarkConfigurations = new RegattaMarkConfigurations(courseTemplateOrNull,
                 regatta);
         allMarkConfigurations.addAll(regattaMarkConfigurations.regattaConfigurationsByMark.values());
@@ -897,8 +905,13 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             }
         }
         if (resolvedMarkTemplate == null) {
-            // TODO this call may fail and should not prevent the user from creating a course for a regatta
-            resolvedMarkTemplate = sharedSailingData.getMarkTemplateById(markTemplateID);
+            try {
+                resolvedMarkTemplate = sharedSailingData.getMarkTemplateById(markTemplateID);
+            } catch(Exception e) {
+                // This call may fail due to missing permissions but should not prevent the user from creating a course for a regatta.
+                // This is just the case, a regatta Mark is based on a MarkTemplate that is not part of the associated CourseTemplate.
+                // In this case we don't require the MarkTemplate reference to reconstruct a CourseTemplate.
+            }
         }
         return resolvedMarkTemplate;
     }
