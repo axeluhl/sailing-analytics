@@ -124,6 +124,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         if (regatta == null) {
             return getBadRegattaErrorResponse(regattaName);
         }
+        getSecurityService().checkCurrentUserReadPermission(regatta);
 
         final RaceColumn raceColumnByName = findRaceColumnByName(regatta, raceColumn);
         final Fleet fleetByName = findFleetByName(raceColumnByName, fleet);
@@ -238,6 +239,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         if (regatta == null) {
             return getBadRegattaErrorResponse(regattaName);
         }
+        getSecurityService().checkCurrentUserUpdatePermission(regatta);
 
         final RaceColumn raceColumnByName = findRaceColumnByName(regatta, raceColumn);
         final Fleet fleetByName = findFleetByName(raceColumnByName, fleet);
