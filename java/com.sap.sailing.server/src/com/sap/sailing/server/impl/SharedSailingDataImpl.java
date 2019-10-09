@@ -364,6 +364,22 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
         apply(s -> s.internalRecordUsage(markTemplateId, markPropertiesId));
     }
+    
+    @Override
+    public Void internalRecordUsage(final UUID markPropertiesId, final String roleName) {
+        final MarkProperties markProperties = markPropertiesById.get(markPropertiesId);
+        markProperties.getLastUsedRole().put(roleName, new MillisecondsTimePoint(System.currentTimeMillis()));
+        mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
+        return null;
+    }
+    
+    @Override
+    public void recordUsage(final MarkProperties markProperties, final String roleName) {
+        getSecurityService().checkCurrentUserUpdatePermission(markProperties);
+        final UUID markPropertiesId = markProperties.getId();
+        
+        apply(s -> s.internalRecordUsage(markPropertiesId, roleName));
+    }
 
     @Override
     public Map<MarkProperties, TimePoint> getUsedMarkProperties(MarkTemplate markTemplate) {
@@ -371,6 +387,17 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         for (final MarkProperties mp : markPropertiesById.values()) {
             if (mp.getLastUsedTemplate().containsKey(markTemplate)) {
                 recordedUsage.put(mp, mp.getLastUsedTemplate().get(markTemplate));
+            }
+        }
+        return recordedUsage;
+    }
+    
+    @Override
+    public Map<MarkProperties, TimePoint> getUsedMarkProperties(String roleName) {
+        final Map<MarkProperties, TimePoint> recordedUsage = new HashMap<>();
+        for (final MarkProperties mp : markPropertiesById.values()) {
+            if (mp.getLastUsedRole().containsKey(roleName)) {
+                recordedUsage.put(mp, mp.getLastUsedRole().get(roleName));
             }
         }
         return recordedUsage;

@@ -61,17 +61,30 @@ public interface SharedSailingData {
     CourseTemplate getCourseTemplateById(UUID id);
     
     /**
-     * Records the fact that the {@code markProperties} were used to configure a mark that takes the role defined by the
+     * Records the fact that the {@code markProperties} were used to configure a mark based on a 
      * {@code markTemplate}. Keeps the {@link MillisecondsTimePoint#now() current time} of this call which will be
      * returned for {@code markTemplate} when invoking {@link #getUsedMarkProperties(MarkTemplate)}.
      */
     void recordUsage(MarkTemplate markTemplate, MarkProperties markProperties);
+
+    /**
+     * Records the fact that the {@code markProperties} were used to configure a mark that takes the given role name.
+     * Keeps the {@link MillisecondsTimePoint#now() current time} of this call which will be returned for the role name
+     * when invoking {@link #getUsedMarkProperties(String)}.
+     */
+    void recordUsage(MarkProperties markProperties, String roleName);
     
     /**
      * Returns the time points when {@link MarkProperties} objects were {@link #recordUsage(MarkTemplate, MarkProperties) last used}
      * for the {@link MarkTemplate} passed in the {@code markTemplate} parameter.
      */
     Map<MarkProperties, TimePoint> getUsedMarkProperties(MarkTemplate markTemplate);
+    
+    /**
+     * Returns the time points when {@link MarkProperties} objects were {@link #recordUsage(MarkProperties, String) last used}
+     * for the role name passed in the {@code roleName} parameter.
+     */
+    Map<MarkProperties, TimePoint> getUsedMarkProperties(String roleName);
     
     void deleteMarkProperties(MarkProperties markProperties);
     

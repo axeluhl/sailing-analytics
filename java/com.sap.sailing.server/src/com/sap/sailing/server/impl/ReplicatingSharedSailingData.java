@@ -40,6 +40,8 @@ public interface ReplicatingSharedSailingData extends SharedSailingData,
     Void internalDeleteCourseTemplate(UUID courseTemplateUUID);
 
     Void internalRecordUsage(UUID markTemplateId, UUID markPropertiesId);
+    
+    Void internalRecordUsage(UUID markPropertiesId, String roleName);
 
     Void internalUpdateCourseTemplate(UUID uuid, String name, URL optionalImageURL, ArrayList<String> tags);
 
