@@ -280,7 +280,9 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         for (MarkTemplate markTemplate : marksInSequence) {
             String roleNameForMarkInSequence = associatedRoles.get(markTemplate);
             if (roleNameForMarkInSequence == null) {
-                roleNameForMarkInSequence = markTemplate.getShortName();
+                // In case, no role name is explicitly given for a mark being part of the sequence,
+                // the role defaults to the mark's name
+                roleNameForMarkInSequence = markTemplate.getName();
             }
             if (!alreadyUsedRoles.add(roleNameForMarkInSequence)) {
                 throw new IllegalArgumentException(
