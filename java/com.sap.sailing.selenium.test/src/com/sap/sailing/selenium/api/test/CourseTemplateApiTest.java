@@ -108,8 +108,8 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
         final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(ctx, ctdf.constructCourseTemplate());
         
         assertEquals(
-                new HashSet<>(Arrays.asList(ctdf.sb.getShortName(), ctdf.pe.getShortName(), ctdf.b1.getShortName(),
-                        ctdf.b4s.getShortName(), ctdf.b4p.getShortName())),
+                new HashSet<>(Arrays.asList(ctdf.sb.getName(), ctdf.pe.getName(), ctdf.b1.getName(),
+                        ctdf.b4s.getName(), ctdf.b4p.getName())),
                 new HashSet<>(createdCourseTemplate.getRoleMapping().values()));
     }
     
@@ -123,7 +123,7 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
         final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(ctx,
                 ctdf.constructCourseTemplate(null, /* defaultNumberOfLaps */null, associatedRoles));
         
-        assertEquals(new HashSet<>(Arrays.asList(ctdf.sb.getShortName(), ctdf.pe.getShortName(), "1",
+        assertEquals(new HashSet<>(Arrays.asList(ctdf.sb.getName(), ctdf.pe.getName(), "1",
                 "4s", "4p")),
                 new HashSet<>(createdCourseTemplate.getRoleMapping().values()));
     }
