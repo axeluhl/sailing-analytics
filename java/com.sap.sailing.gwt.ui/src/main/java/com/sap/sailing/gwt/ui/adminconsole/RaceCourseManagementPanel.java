@@ -47,7 +47,6 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                     @Override
                     public void onSuccess(Void result) {
                         Notification.notify(stringMessages.successfullyUpdatedCourse(), NotificationType.INFO);
-                        refreshSelectedRaceData();
                         sailingService.setORCPerformanceCurveLegInfo(singleSelectedRace, getORCPerformanceCurveLegInfoByOneBasedWaypointIndex(), new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -56,6 +55,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
 
                             @Override
                             public void onSuccess(Void result) {
+                                refreshSelectedRaceData();
                             }
                         });
                     }
@@ -64,7 +64,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             
             @Override
             protected LegGeometrySupplier getLegGeometrySupplier() {
-                return (zeroBasedLegIndex, callback)->sailingService.getLegGeometry(singleSelectedRace, zeroBasedLegIndex, callback);
+                return (zeroBasedLegIndices, callback)->sailingService.getLegGeometry(singleSelectedRace, zeroBasedLegIndices, callback);
             }
 
             @Override

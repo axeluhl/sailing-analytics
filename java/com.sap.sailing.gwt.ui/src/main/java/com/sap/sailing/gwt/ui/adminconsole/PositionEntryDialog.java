@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Date;
 
-import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
@@ -16,6 +15,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
 import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DoubleBox;
 
 public class PositionEntryDialog extends DataEntryDialogWithDateTimeBox<Pair<Position, TimePoint>> {
     private final DoubleBox lat;

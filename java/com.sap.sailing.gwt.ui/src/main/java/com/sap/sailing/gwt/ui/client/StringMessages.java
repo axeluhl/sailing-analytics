@@ -2270,9 +2270,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String protestTimeInMinutes();
     String updateCertificates();
     String actionDefineLegForOrcPcs();
+    String actionDefineAllLegsForOrcPcs();
     String importCertificates();
     String assignCertificates();
     String orcPerformanceCurveLeg();
+    String orcPerformanceCurveLegs();
     String orcPerformanceCurveLegName(int i, String name);
     String orcPerformanceCurveFetchTrackedLegGeometry();
     String distanceInNauticalMiles();
@@ -2289,6 +2291,13 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String certificateIssuingDate();
     String errorAssigningCertificates(String message);
     String insertedAndReplacedAndRemovedCertificateAssignments(int inserted, int replaced, int removed);
+    String spreadTotalDistanceProportionallyAcrossLegs();
+    String trackedTwaInDegrees();
+    String trackedDistanceInNauticalMiles();
+    String useTrackedData();
+    String totalDistance();
+    String setAllLegsToType();
+    String desiredTotalDistanceInNauticalMiles();
     String courseCreation();
     String filterMarkTemplateByName();
     String markTemplates();

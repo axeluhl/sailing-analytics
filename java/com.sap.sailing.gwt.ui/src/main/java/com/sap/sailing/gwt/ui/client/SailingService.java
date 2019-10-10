@@ -1194,10 +1194,10 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     boolean getTrackedRaceIsUsingMarkPassingCalculator(RegattaAndRaceIdentifier regattaNameAndRaceName);
 
-    ORCPerformanceCurveLegImpl getLegGeometry(String leaderboardName, String raceColumnName, String fleetName,
-            int zeroBasedLegIndex);
+    ORCPerformanceCurveLegImpl[] getLegGeometry(String leaderboardName, String raceColumnName, String fleetName,
+            int[] zeroBasedLegIndices);
 
-    ORCPerformanceCurveLegImpl getLegGeometry(RegattaAndRaceIdentifier singleSelectedRace, int zeroBasedLegIndex);
+    ORCPerformanceCurveLegImpl[] getLegGeometry(RegattaAndRaceIdentifier singleSelectedRace, int[] zeroBasedLegIndices);
 
     /**
      * @throws NotFoundException
