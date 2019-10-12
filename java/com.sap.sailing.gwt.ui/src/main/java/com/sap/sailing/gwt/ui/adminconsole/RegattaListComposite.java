@@ -270,15 +270,19 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
             }
         });
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CERTIFICATES_UPDATE, READ, this::handleBoatCertificateAssignment);
+        // Using lambda instead of method reference for opening both dialogs because the GWT compiler tries to share the
+        // method across two different objects. See:
+        // https://github.com/gwtproject/gwt/issues/9333
+        // https://github.com/gwtproject/gwt/issues/9307
         final DialogConfig<RegattaDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
                 regatta -> regattaRefresher.fillRegattas(), stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
-                config::openDialog);
+                regattaDTO -> config.openDialog(regattaDTO));
         final EditACLDialog.DialogConfig<RegattaDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, regatta -> regattaRefresher.fillRegattas(),
                 stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                configACL::openDialog);
+                regattaDTO -> configACL.openDialog(regattaDTO));
         table.addColumn(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getHeader());
         table.addColumn(regattaNameColumn, stringMessages.regattaName());
         table.addColumn(regattaCanBoatsOfCompetitorsChangePerRaceColumn, stringMessages.canBoatsChange());
