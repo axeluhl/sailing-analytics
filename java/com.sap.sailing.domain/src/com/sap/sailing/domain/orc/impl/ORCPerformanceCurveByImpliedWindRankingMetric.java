@@ -492,12 +492,13 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
         final TimePoint startOfRace = getTrackedRace().getStartOfRace();
         if (startOfRace != null) {
             final Duration actualRaceDuration = startOfRace.until(timePoint);
+            final Competitor competitorFarthestAhead = getCompetitorFarthestAhead(timePoint, cache);
             for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
                 final Duration correctedTime = getCorrectedTime(competitor, timePoint, cache);
                 competitorRankingInfo.put(competitor, new CompetitorRankingInfoImpl(
                         timePoint, competitor, getWindwardDistanceTraveled(competitor, timePoint, cache),
                         actualRaceDuration, correctedTime,
-                        getEstimatedActualDurationToCompetitorFarthestAhead(competitor, timePoint, cache),
+                        getEstimatedActualDurationToCompetitorFarthestAhead(competitor, competitorFarthestAhead, timePoint, cache),
                         correctedTime));
             }
         }
@@ -509,8 +510,8 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
      * its performance curve for the partial course of the boat farthest ahead; apply the current implied wind and take
      * the delta between the resulting allowance and the time sailed so far
      */
-    private Duration getEstimatedActualDurationToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        final Competitor competitorFarthestAhead = getCompetitorFarthestAhead(timePoint, cache);
+    private Duration getEstimatedActualDurationToCompetitorFarthestAhead(Competitor competitor, Competitor competitorFarthestAhead,
+            TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final ORCPerformanceCurveCourse courseOfCompetitorFarthestAhead = getPartialCourse(competitorFarthestAhead, timePoint, cache);
         ORCPerformanceCurve performanceCurveForCompetitorToPositionOfCompetitorFarthestAhread;
         Duration result;
