@@ -558,8 +558,12 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
                 } else {
                     final Speed impliedWindOfLeader = cache.getImpliedWind(rankingInfo.getTimePoint(), getTrackedRace(),
                             leader, getImpliedWindSupplier(cache));
-                    final Duration allowanceForLeaderInCompetitorsPerformanceCurve = competitorPerformanceCurve.getAllowancePerCourse(impliedWindOfLeader);
-                    result = actualRaceDuration.minus(allowanceForLeaderInCompetitorsPerformanceCurve);
+                    if (impliedWindOfLeader != null) {
+                        final Duration allowanceForLeaderInCompetitorsPerformanceCurve = competitorPerformanceCurve.getAllowancePerCourse(impliedWindOfLeader);
+                        result = actualRaceDuration.minus(allowanceForLeaderInCompetitorsPerformanceCurve);
+                    } else {
+                        result = null; // no implied wind for leader could be determined
+                    }
                 }
             } catch (FunctionEvaluationException e) {
                 logger.log(Level.WARNING, "Problem evaluating performance curve for competitor "+competitor+" for time point "+rankingInfo.getTimePoint(), e);
