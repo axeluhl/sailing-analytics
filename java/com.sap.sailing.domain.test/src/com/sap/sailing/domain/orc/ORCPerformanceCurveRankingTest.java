@@ -122,15 +122,15 @@ public class ORCPerformanceCurveRankingTest extends OnlineTracTracBasedTest {
         final ORCCertificatesCollection certificates = ORCCertificatesImporter.INSTANCE.read(
                 getClass().getClassLoader().getResourceAsStream("orc/worlds2019/orcWorlds2019ClassA.json"));
         assertNotNull(certificates);
-        assertFalse(Util.isEmpty(certificates.getSailNumbers()));
+        assertFalse(Util.isEmpty(certificates.getCertificateIds()));
         author = new LogEventAuthorImpl("Testcase", 1);
         for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
             final Boat boat = getTrackedRace().getRace().getBoatOfCompetitor(competitor);
             ORCCertificate certificate;
             if (boat.getSailID().equals("Air is blue")) {
-                certificate = certificates.getCertificateBySailNumber("ITA5252");
+                certificate = certificates.getCertificateById("ITA52521I5252");
             } else {
-                certificate = certificates.getCertificateBySailNumber(boat.getSailID());
+                certificate = certificates.getCertificateById(boat.getSailID());
                 if (certificate == null) {
                     certificate = certificates.getCertificateByBoatName(boat.getName() == null ? boat.getSailID() : boat.getName());
                 }
