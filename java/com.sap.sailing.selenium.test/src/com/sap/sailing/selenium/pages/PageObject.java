@@ -1,5 +1,8 @@
 package com.sap.sailing.selenium.pages;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.Arrays;
@@ -587,6 +590,20 @@ public class PageObject {
      */
     protected void waitForAlertAndAccept(int timeoutInSeconds) {
         final Alert expectedAlert = new WebDriverWait(driver, timeoutInSeconds).until(ExpectedConditions.alertIsPresent());
+        expectedAlert.accept();
+    }
+    
+    protected void waitForAlertAndAccept(String expectedMessage) {
+        waitForAlertAndAccept(DEFAULT_WAIT_TIMEOUT_SECONDS, expectedMessage);
+    }
+
+    /**
+     * Waits for an alert box to appear and having the text expected, and accepts the alert. If no alert shows up, an
+     * Exception is thrown.
+     */
+    protected void waitForAlertAndAccept(int timeoutInSeconds, String expectedMessageRegexp) {
+        final Alert expectedAlert = new WebDriverWait(driver, timeoutInSeconds).until(ExpectedConditions.alertIsPresent());
+        assertTrue(expectedAlert.getText().matches(expectedMessageRegexp));
         expectedAlert.accept();
     }
 
