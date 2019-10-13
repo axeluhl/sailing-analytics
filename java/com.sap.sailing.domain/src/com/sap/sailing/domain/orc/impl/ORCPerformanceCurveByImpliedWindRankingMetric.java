@@ -32,7 +32,6 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
@@ -128,7 +127,10 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
                     updateScratchBoatFromLogs();
                 }
             });
-            trackedRace.getRace().getCourse().addCourseListener(new CourseListener() {
+            // see bug 5130: don't add as a course change listener on the course but on the race because
+            // only this way will the TrackedRace have aligned its TrackedLeg objects before triggering
+            // these hooks.
+            trackedRace.addListener(new AbstractRaceChangeListener() {
                 @Override
                 public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
                     updateCourseFromRaceLogs();
