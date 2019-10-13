@@ -92,7 +92,7 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
         Map<String, Map<Speed, Duration>> predefinedAllowanceDurationsPerTrueWindSpeed = new HashMap<>();       //per nautical mile
         JSONObject object = certificateJsonObjectsByCertificateId.get(certificateId);
         if (object == null) {
-            // TODO Throw Exception for sailnumber not found. InvalidArgumentException?
+            // TODO Throw Exception for certificate by id not found. InvalidArgumentException?
             return null;
         }
         String sailNumber = null;
