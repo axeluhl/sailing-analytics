@@ -88,6 +88,12 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
      */
     private Competitor explicitScratchBoat;
     
+    final private static ScheduledExecutorService executor;
+    
+    static {
+        executor = ThreadPoolUtil.INSTANCE.createForegroundTaskThreadPoolExecutor("ORC PCS Executor");
+    }
+    
     /**
      * TODO maybe it's a good idea to cache the {@link ORCPerformanceCurve} objects and implied wind speeds for all competitors involved in this object which serves as some sort of cache for ranking calculations for a single time point
      * 
@@ -501,7 +507,6 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
         if (startOfRace != null) {
             final Duration actualRaceDuration = startOfRace.until(timePoint);
             final Set<Future<Pair<Competitor, CompetitorRankingInfoImpl>>> futures = new HashSet<>();
-            final ScheduledExecutorService executor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
             for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
                 futures.add(executor.submit(()->{
                     final Duration correctedTime = getCorrectedTime(competitor, timePoint, cache);
