@@ -4,8 +4,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,6 +56,8 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.util.ThreadPoolUtil;
 
 public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRankingMetric {
     private static final long serialVersionUID = -7814822523533929816L;
@@ -94,8 +101,8 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
          * Uses the {@link ORCPerformanceCurveRankingMetric#getScratchBoat(TimePoint) scratch boat} as the "boat
          * farthest ahead." The default scratch boat is defined as such but may be overridden explicitly.
          */
-        public ORCPerformanceCurveRankingInfo(TimePoint timePoint, Map<Competitor, CompetitorRankingInfo> competitorRankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-            super(timePoint, competitorRankingInfo, getScratchBoat(timePoint, cache));
+        public ORCPerformanceCurveRankingInfo(TimePoint timePoint, Competitor competitorFarthestAhead, Map<Competitor, CompetitorRankingInfo> competitorRankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+            super(timePoint, competitorRankingInfo, competitorFarthestAhead);
         }
     }
     
@@ -490,19 +497,32 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
     public ORCPerformanceCurveRankingInfo getRankingInfo(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Map<Competitor, CompetitorRankingInfo> competitorRankingInfo = new HashMap<>();
         final TimePoint startOfRace = getTrackedRace().getStartOfRace();
+        final Competitor competitorFarthestAhead = getCompetitorFarthestAhead(timePoint, cache);
         if (startOfRace != null) {
             final Duration actualRaceDuration = startOfRace.until(timePoint);
-            final Competitor competitorFarthestAhead = getCompetitorFarthestAhead(timePoint, cache);
+            final Set<Future<Pair<Competitor, CompetitorRankingInfoImpl>>> futures = new HashSet<>();
+            final ScheduledExecutorService executor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
             for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
-                final Duration correctedTime = getCorrectedTime(competitor, timePoint, cache);
-                competitorRankingInfo.put(competitor, new CompetitorRankingInfoImpl(
-                        timePoint, competitor, getWindwardDistanceTraveled(competitor, timePoint, cache),
-                        actualRaceDuration, correctedTime,
-                        getEstimatedActualDurationToCompetitorFarthestAhead(competitor, competitorFarthestAhead, timePoint, cache),
-                        correctedTime));
+                futures.add(executor.submit(()->{
+                    final Duration correctedTime = getCorrectedTime(competitor, timePoint, cache);
+                    return new Pair<>(competitor, new CompetitorRankingInfoImpl(
+                            timePoint, competitor, getWindwardDistanceTraveled(competitor, timePoint, cache),
+                            actualRaceDuration, correctedTime,
+                            getEstimatedActualDurationToCompetitorFarthestAhead(competitor, competitorFarthestAhead, timePoint, cache),
+                            correctedTime));
+                }));
+            }
+            for (final Future<Pair<Competitor, CompetitorRankingInfoImpl>> future : futures) {
+                Pair<Competitor, CompetitorRankingInfoImpl> resultForCompetitor;
+                try {
+                    resultForCompetitor = future.get();
+                    competitorRankingInfo.put(resultForCompetitor.getA(), resultForCompetitor.getB());
+                } catch (InterruptedException | ExecutionException e) {
+                    logger.log(Level.SEVERE, "Problem trying to evaluate ORC ranking info", e);
+                }
             }
         }
-        return new ORCPerformanceCurveRankingInfo(timePoint, competitorRankingInfo, cache);
+        return new ORCPerformanceCurveRankingInfo(timePoint, competitorFarthestAhead, competitorRankingInfo, cache);
     }
 
     /**
