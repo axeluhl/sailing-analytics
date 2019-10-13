@@ -165,13 +165,13 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
                             indexOfMaximumTotalCourseChange = totalCourseChangeFromBeginningOfWindow.size()-1;
                         }
                     }
-                    if (windowDuration.compareTo(maximumWindowLength) > 0) {
+                    if (windowDuration.compareTo(getMaximumWindowLength()) > 0) {
                         result = tryToExtractManeuverCandidate();
                         if (result == null) {
                             // if a result was found, fixes up to and including the result have already been removed;
                             // otherwise, keep removing fixes from the beginning of the window until the window duration
                             // is again at or below the maximum allowed:
-                            while (windowDuration.compareTo(maximumWindowLength) > 0) {
+                            while (windowDuration.compareTo(getMaximumWindowLength()) > 0) {
                                 removeFirst();
                             }
                         }
