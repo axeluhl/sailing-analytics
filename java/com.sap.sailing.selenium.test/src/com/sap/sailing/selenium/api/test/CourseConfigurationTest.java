@@ -1,7 +1,10 @@
 package com.sap.sailing.selenium.api.test;
 
+import static com.sap.sailing.selenium.api.core.ApiContext.SECURITY_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
+import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
+import static com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage.goToPage;
 import static java.lang.System.currentTimeMillis;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -42,9 +45,11 @@ import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
 import com.sap.sailing.selenium.api.event.MarkApi;
 import com.sap.sailing.selenium.api.event.MarkApi.Mark;
+import com.sap.sailing.selenium.api.event.SecurityApi;
 import com.sap.sailing.selenium.api.helper.CourseTemplateDataFactory;
 import com.sap.sailing.selenium.api.regatta.RaceColumn;
 import com.sap.sailing.selenium.api.regatta.RegattaApi;
+import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -59,6 +64,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     private final RegattaApi regattaApi = new RegattaApi();
     private final LeaderboardApi LeaderboardApi = new LeaderboardApi();
     private final MarkApi markApi = new MarkApi();
+    private final SecurityApi securityApi = new SecurityApi();
 
     @Before
     public void setUp() {
@@ -373,9 +379,24 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     }
 
     @Test
-    public void testCreateCourseConfigurationWithStoreToInventory() {
+    public void testCreateCourseConfigurationWithStoreToInventoryWithAdmin() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        testCreateCourseConfigurationWithStoreToInventory(ctx);
+    }
 
+    @Test
+    public void testCreateCourseConfigurationWithStoreToInventoryWithUser() {
+        clearState(getContextRoot());
+        super.setUp();
+        final AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
+        adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+        securityApi.createUser(adminCtx, "donald", "Donald Duck", null, "daisy0815");
+        final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
+        testCreateCourseConfigurationWithStoreToInventory(ctx);
+    }
+
+    private void testCreateCourseConfigurationWithStoreToInventory(final ApiContext ctx) {
         MarkConfiguration sb = MarkConfiguration.createFreestyle(null, null, "role_sb", "startboat", "sb", null, null,
                 null, null);
         sb.setFixedPosition(5.5, 7.1);
@@ -416,6 +437,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         CourseConfiguration courseConfigurationResult = courseConfigurationApi.createCourseTemplate(ctx,
                 courseConfiguration, "testregatta");
         assertCourseConfigurationCompared(ctx, courseConfiguration, courseConfigurationResult);
+        
     }
 
     @Test
