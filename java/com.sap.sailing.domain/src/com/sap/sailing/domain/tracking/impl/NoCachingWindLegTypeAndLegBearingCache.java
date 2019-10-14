@@ -14,6 +14,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 
@@ -60,5 +61,11 @@ public class NoCachingWindLegTypeAndLegBearingCache implements WindLegTypeAndLeg
     @Override
     public Speed getImpliedWind(TimePoint timePoint, TrackedRace raceContext, Competitor competitor, BiFunction<TimePoint, Competitor, Speed> impliedWindSupplier) {
         return impliedWindSupplier.apply(timePoint, competitor);
+    }
+
+    @Override
+    public Duration getRelativeCorrectedTime(Competitor competitor, TrackedRace raceContext, TimePoint timePoint,
+            BiFunction<Competitor, TimePoint, Duration> relativeCorrectedTimeSupplier) {
+        return relativeCorrectedTimeSupplier.apply(competitor, timePoint);
     }
 }

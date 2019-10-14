@@ -331,7 +331,7 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
                 compare(impliedWindByCompetitor.get(c1), impliedWindByCompetitor.get(c2));
     }
 
-    private Map<Competitor, Speed> getImpliedWindByCompetitor(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    protected Map<Competitor, Speed> getImpliedWindByCompetitor(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Map<Competitor, Speed> impliedWindByCompetitor = new HashMap<>();
         for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
             impliedWindByCompetitor.put(competitor, cache.getImpliedWind(timePoint, getTrackedRace(), competitor, getImpliedWindSupplier(cache)));

@@ -29,6 +29,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -95,6 +96,8 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
     
     private final ConcurrentHashMap<Triple<TimePoint, TrackedRace, Competitor>, Speed> impliedWindPerCompetitor;
     
+    private final ConcurrentHashMap<Triple<TimePoint, TrackedRace, Competitor>, Duration> relativeCorrectedTimePerCompetitor;
+    
     private static final Bearing NULL_BEARING = new DegreeBearingImpl(0);
 
     public LeaderboardDTOCalculationReuseCache(TimePoint timePoint) {
@@ -102,6 +105,7 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
         windCache = new ConcurrentHashMap<>();
         scratchBoat = new ConcurrentHashMap<>();
         legBearingCache = new ConcurrentHashMap<>();
+        relativeCorrectedTimePerCompetitor = new ConcurrentHashMap<>();
         this.performanceCurvesPerCompetitor = new ConcurrentHashMap<>();
         this.impliedWindPerCompetitor = new ConcurrentHashMap<>();
         this.timePoint = timePoint;
@@ -202,5 +206,15 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
                         timePointAndTrackedRaceAndCompetitor -> impliedWindSupplier.apply(
                                 timePointAndTrackedRaceAndCompetitor.getA(),
                                 timePointAndTrackedRaceAndCompetitor.getC()));
+    }
+
+    @Override
+    public Duration getRelativeCorrectedTime(Competitor competitor, TrackedRace raceContext,
+            TimePoint timePoint, BiFunction<Competitor, TimePoint, Duration> relativeCorrectedTimeSupplier) {
+        return relativeCorrectedTimePerCompetitor
+                .computeIfAbsent(new Triple<>(timePoint, raceContext, competitor),
+                        timePointAndTrackedRaceAndCompetitor -> relativeCorrectedTimeSupplier.apply(
+                                timePointAndTrackedRaceAndCompetitor.getC(),
+                                timePointAndTrackedRaceAndCompetitor.getA()));
     }
 }
