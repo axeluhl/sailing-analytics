@@ -483,18 +483,24 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         final String regattaName = "test";
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
-
-        courseConfigurationApi.createCourse(ctx, createSimpleCourseConfiguration(ctx), regattaName, race.getRaceName(),
+        final CourseConfiguration simpleCourseConfiguration = createSimpleCourseConfiguration(ctx);
+        assertConsistentCourseConfiguration(simpleCourseConfiguration);
+        CourseConfiguration createdCourseConfiguration = courseConfigurationApi.createCourse(ctx, simpleCourseConfiguration, regattaName, race.getRaceName(),
                 "Default");
+        assertConsistentCourseConfiguration(createdCourseConfiguration);
+        assertCourseConfigurationCompared(ctx, simpleCourseConfiguration, createdCourseConfiguration);
     }
 
     @Test
     public void testCreateCourseTemplateFromCourseConfiguration() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 
-        CourseConfiguration courseConfiguration = courseConfigurationApi.createCourseTemplate(ctx,
-                createSimpleCourseConfiguration(ctx), /* optionalRegattaName */ null);
-        assertConsistentCourseConfiguration(courseConfiguration);
+        final CourseConfiguration simpleCourseConfiguration = createSimpleCourseConfiguration(ctx);
+        System.out.println(simpleCourseConfiguration.getJson());
+        final CourseConfiguration createdCourseConfiguration = courseConfigurationApi.createCourseTemplate(ctx,
+                simpleCourseConfiguration, /* optionalRegattaName */ null);
+        assertConsistentCourseConfiguration(createdCourseConfiguration);
+        assertCourseConfigurationCompared(ctx, simpleCourseConfiguration, createdCourseConfiguration);
     }
 
     private CourseConfiguration createSimpleCourseConfiguration(final ApiContext ctx) {
@@ -507,7 +513,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                 .collect(Collectors.toList());
 
         List<WaypointWithMarkConfiguration> waypoints = new ArrayList<>();
-        WaypointWithMarkConfiguration waypoint = new WaypointWithMarkConfiguration("test", null,
+        WaypointWithMarkConfiguration waypoint = new WaypointWithMarkConfiguration(null, null,
                 PassingInstruction.Line, markConfigurationIds);
         waypoints.add(waypoint);
 
