@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -277,6 +278,41 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertConsistentCourseConfiguration(courseConfigurationResult);
         assertCourseConfigurationCompared(ctx, courseConfiguration, courseConfigurationResult);
         // TODO assert positioning is contained in result and identical to the given values
+    }
+
+    
+    @Test
+    public void testCreateCourseAndReload() {
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final String regattaName = "test";
+        eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
+        final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
+        
+        MarkConfiguration sfp = MarkConfiguration.createFreestyle(null, null, null, "Start/Finish Pin", "SFP", null, null,
+                null, MarkType.BUOY.name());
+        sfp.setFixedPosition(47.159776, 27.5891346);
+        sfp.setStoreToInventory(true);
+        
+        MarkConfiguration sfb = MarkConfiguration.createFreestyle(null, null, null, "Start/Finish Boat", "SFB", null, null,
+                null, MarkType.BUOY.name());
+        sfp.setStoreToInventory(true);
+        
+        
+        WaypointWithMarkConfiguration wp1 = new WaypointWithMarkConfiguration("Start", "S",
+                PassingInstruction.Gate, Arrays.asList(sfp.getId(), sfb.getId()));
+        WaypointWithMarkConfiguration wp2 = new WaypointWithMarkConfiguration("Finish", "F",
+                PassingInstruction.Gate, Arrays.asList(sfp.getId(), sfb.getId()));
+        
+        CourseConfiguration courseConfiguration = new CourseConfiguration("my-freestyle-course",
+                Arrays.asList(sfp, sfb), Arrays.asList(wp1, wp2));
+        System.out.println(courseConfiguration.getJson());
+        
+        JSONObject createdCourseConfiguration = courseConfigurationApi.createCourse(ctx, courseConfiguration, regattaName, race.getRaceName(), "Default");
+        System.out.println(createdCourseConfiguration);
+        
+        //TODO
+        //CourseConfiguration reloadedCourseConfiguration = courseConfigurationApi.createCourseConfigurationFromCourse(ctx, regattaName, race.getRaceName(), "Default", null);
+        //System.out.println(reloadedCourseConfiguration);
     }
 
     @Test
