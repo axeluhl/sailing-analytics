@@ -13,6 +13,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -373,6 +374,36 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         MarkProperties createdMarkProperties = markPropertiesApi.getMarkProperties(ctx, startboatConfigurationResult.getMarkPropertiesId());
         assertEquals(startboatConfigurationResult.getMarkPropertiesId(), createdMarkProperties.getId());
         assertEquals(pinEndName, createdMarkProperties.getName());
+    }
+    
+    @Test
+    public void testGetEmptyCourseWithPredefinedMarks() {
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final String regattaName = "test";
+        eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
+        final RaceColumn[] races = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 2);
+        final RaceColumn race1 = races[0];
+        final RaceColumn race2 = races[1];
+        
+        String markName = "some mark";
+        MarkConfiguration mark = MarkConfiguration.createFreestyle(null, null, null, markName, null, null,
+                null, null, MarkType.BUOY.name());
+        
+        WaypointWithMarkConfiguration wp = new WaypointWithMarkConfiguration(null, null, PassingInstruction.Starboard,
+                Arrays.asList(mark.getId()));
+        
+        CourseConfiguration courseConfiguration = new CourseConfiguration("my-freestyle-course", Arrays.asList(mark),
+                Arrays.asList(wp));
+        
+        courseConfigurationApi.createCourse(ctx, courseConfiguration, regattaName, race1.getRaceName(), "Default");
+        
+        CourseConfiguration courseConfigurationForRace2 = courseConfigurationApi.createCourseConfigurationFromCourse(ctx, regattaName, race2.getRaceName(), "Default", Collections.emptySet());
+        
+        assertEquals(1, Util.size(courseConfigurationForRace2.getMarkConfigurations()));
+        assertEquals(0, Util.size(courseConfigurationForRace2.getWaypoints()));
+        
+        MarkConfiguration previouslyDefinedMark = courseConfigurationForRace2.getMarkConfigurations().iterator().next();
+        assertEquals(markName, previouslyDefinedMark.getEffectiveProperties().getName());
     }
 
     @Test
