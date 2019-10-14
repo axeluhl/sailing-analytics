@@ -8,9 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ForkJoinTask;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -57,7 +55,6 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.util.ThreadPoolUtil;
 
 public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRankingMetric {
     private static final long serialVersionUID = -7814822523533929816L;
@@ -87,12 +84,6 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
      * {@link #getTrackedRace() tracked race} for occurrence and revocations of {@link RaceLogORCScratchBoatEvent}s.
      */
     private Competitor explicitScratchBoat;
-    
-    final private static ScheduledExecutorService executor;
-    
-    static {
-        executor = ThreadPoolUtil.INSTANCE.createForegroundTaskThreadPoolExecutor("ORC PCS Executor");
-    }
     
     /**
      * TODO maybe it's a good idea to cache the {@link ORCPerformanceCurve} objects and implied wind speeds for all competitors involved in this object which serves as some sort of cache for ranking calculations for a single time point
@@ -506,25 +497,21 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
         final Competitor competitorFarthestAhead = getCompetitorFarthestAhead(timePoint, cache);
         if (startOfRace != null) {
             final Duration actualRaceDuration = startOfRace.until(timePoint);
-            final Set<Future<Pair<Competitor, CompetitorRankingInfoImpl>>> futures = new HashSet<>();
+            final Set<ForkJoinTask<Pair<Competitor, CompetitorRankingInfoImpl>>> futures = new HashSet<>();
             for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
-                futures.add(executor.submit(()->{
+                futures.add(ForkJoinTask.adapt(()->{
                     final Duration correctedTime = getCorrectedTime(competitor, timePoint, cache);
                     return new Pair<>(competitor, new CompetitorRankingInfoImpl(
                             timePoint, competitor, getWindwardDistanceTraveled(competitor, timePoint, cache),
                             actualRaceDuration, correctedTime,
                             getEstimatedActualDurationToCompetitorFarthestAhead(competitor, competitorFarthestAhead, timePoint, cache),
                             correctedTime));
-                }));
+                }).fork());
             }
-            for (final Future<Pair<Competitor, CompetitorRankingInfoImpl>> future : futures) {
+            for (final ForkJoinTask<Pair<Competitor, CompetitorRankingInfoImpl>> future : futures) {
                 Pair<Competitor, CompetitorRankingInfoImpl> resultForCompetitor;
-                try {
-                    resultForCompetitor = future.get();
-                    competitorRankingInfo.put(resultForCompetitor.getA(), resultForCompetitor.getB());
-                } catch (InterruptedException | ExecutionException e) {
-                    logger.log(Level.SEVERE, "Problem trying to evaluate ORC ranking info", e);
-                }
+                resultForCompetitor = future.join();
+                competitorRankingInfo.put(resultForCompetitor.getA(), resultForCompetitor.getB());
             }
         }
         return new ORCPerformanceCurveRankingInfo(timePoint, competitorFarthestAhead, competitorRankingInfo, cache);

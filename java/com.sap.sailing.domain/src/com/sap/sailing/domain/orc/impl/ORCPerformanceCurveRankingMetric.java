@@ -5,7 +5,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ForkJoinTask;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,9 +63,13 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
 
     private Map<Competitor, Duration> getRelativeCorrectedTimesByCompetitor(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Map<Competitor, Duration> relativeCorrectedTimesByCompetitor = new HashMap<>();
+        final Map<Competitor, ForkJoinTask<Duration>> futures = new HashMap<>();
         for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
-            relativeCorrectedTimesByCompetitor.put(competitor, cache.getRelativeCorrectedTime(competitor, getTrackedRace(), timePoint,
-                    (c, t)->getRelativeCorrectedTime(c, t, cache)));
+            futures.put(competitor, ForkJoinTask.adapt(()->cache.getRelativeCorrectedTime(competitor, getTrackedRace(), timePoint,
+                    (c, t)->getRelativeCorrectedTime(c, t, cache))).fork());
+        }
+        for (final Entry<Competitor, ForkJoinTask<Duration>> entry : futures.entrySet()) {
+            relativeCorrectedTimesByCompetitor.put(entry.getKey(), entry.getValue().join());
         }
         return relativeCorrectedTimesByCompetitor;
     }
