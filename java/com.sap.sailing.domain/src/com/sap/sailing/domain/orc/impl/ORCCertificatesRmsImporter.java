@@ -41,15 +41,14 @@ public class ORCCertificatesRmsImporter extends AbstractORCCertificatesImporter 
         final BufferedReader br = new BufferedReader(reader);
         final LinkedHashMap<String, Integer> columnNamesAndWidths = readColumnWidthsFromFirstLine(br.readLine());
         final Iterator<String> i = columnNamesAndWidths.keySet().iterator();
-        i.next(); // skip certificate ID column
-        final String sailnumberColumnName = i.next();
-        final Map<String, Map<String, String>> certificateValuesBySailnumber = new HashMap<>();
+        final String certificateIdColumnName = i.next();
+        final Map<String, Map<String, String>> certificateValuesByCertificateId = new HashMap<>();
         String line;
         while ((line = br.readLine()) != null) {
             final Map<String, String> parsedLine = parseLine(line, columnNamesAndWidths);
-            certificateValuesBySailnumber.put(parsedLine.get(sailnumberColumnName), parsedLine);
+            certificateValuesByCertificateId.put(parsedLine.get(certificateIdColumnName), parsedLine);
         }
-        return new ORCCertificatesCollectionRMS(certificateValuesBySailnumber);
+        return new ORCCertificatesCollectionRMS(certificateValuesByCertificateId);
     }
     
     public ORCCertificatesCollectionRMS read(InputStream in) throws IOException {

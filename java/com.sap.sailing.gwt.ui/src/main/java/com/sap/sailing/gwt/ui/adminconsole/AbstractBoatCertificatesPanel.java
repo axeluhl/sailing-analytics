@@ -17,6 +17,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -44,6 +45,7 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
@@ -68,7 +70,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  *
  */
 public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
-    private final BoatWithCertificateTableWrapper<RefreshableSingleSelectionModel<BoatDTO>> boatTable;
+    private final BoatWithCertificateTableWrapper<RefreshableMultiSelectionModel<BoatDTO>> boatTable;
     private final Map<String, BoatDTO> boatsByIdAsString;
     private final CertificatesTableWrapper<RefreshableSingleSelectionModel<ORCCertificate>> certificateTable;
     private final BusyIndicator busyIndicator;
@@ -135,7 +137,7 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
                 /* suggested values */ Collections.emptySet(), stringMessages.enterURLsForCertificateDownload());
         this.hiddenCertificateUrlsFields = new ArrayList<>();
         this.boatTable = new BoatWithCertificateTableWrapper<>(sailingService, userService, stringMessages,
-                errorReporter, /* multiSelection */ false, /* enablePager */ true, TableWrapper.DEFAULT_PAGING_SIZE, /* allow actions */ true,
+                errorReporter, /* multiSelection */ true, /* enablePager */ true, TableWrapper.DEFAULT_PAGING_SIZE, /* allow actions */ true,
                 boat->unlink(boat), objectToCheckUpdatePermissionFor, boat->certificateAssignments.containsKey(boat));
         this.certificateTable = new CertificatesTableWrapper<>(sailingService, userService, stringMessages,
                 errorReporter, /* multiSelection */ false, /* enablePager */ true, TableWrapper.DEFAULT_PAGING_SIZE);
@@ -197,10 +199,15 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
                     }
                 });
             } else {
-                Notification.notify(stringMessages.errorObtainingCertificates(ORCCertificateUploadConstants.CERTIFICATES), Notification.NotificationType.ERROR);
+                Notification.notify(
+                        stringMessages.errorObtainingCertificates(
+                                ((JSONString) json.get(ORCCertificateUploadConstants.MESSAGE)).stringValue()),
+                        Notification.NotificationType.ERROR);
+                busyIndicator.setBusy(false);
             }
         } catch (Exception ex) {
             Notification.notify(stringMessages.errorAssigningCertificatesToBoats(ex.getMessage()), Notification.NotificationType.ERROR);
+            busyIndicator.setBusy(false);
         }
     }
 
@@ -215,32 +222,35 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
 
     private Handler createCertificateTableSelectionHandler() {
         return e->{
-            final BoatDTO boat = boatTable.getSelectionModel().getSelectedObject();
+            final Set<BoatDTO> selectedBoats = boatTable.getSelectionModel().getSelectedSet();
             final ORCCertificate selectedCertificate = certificateTable.getSelectionModel().getSelectedObject();
-            if (boat != null) {
-                final ORCCertificate assignedCertificate = certificateAssignments.get(boat);
-                if (contextUpdatePermissionCheck.get()) { // is the user permitted to update the regatta at all?
-                    if (selectedCertificate != null) {
-                        if (assignedCertificate == null || Window.confirm(stringMessages.reallyChangeAssignedCertificateForBoat(boat.toString()))) {
-                            assign(boat, selectedCertificate);
-                        } else if (assignedCertificate != null) {
-                            // re-adjust selection; the user did not confirm:
-                            temporarilyDeregisterCertificateTableSelectionHandler();
+            if (selectedBoats != null && !selectedBoats.isEmpty()) {
+                for (final BoatDTO boat : selectedBoats) {
+                    final ORCCertificate assignedCertificate = certificateAssignments.get(boat);
+                    if (contextUpdatePermissionCheck.get()) { // is the user permitted to update the regatta at all?
+                        if (selectedCertificate != null) {
+                            if (assignedCertificate == null || assignedCertificate == selectedCertificate ||
+                                    Window.confirm(stringMessages.reallyChangeAssignedCertificateForBoat(boat.toString()))) {
+                                assign(boat, selectedCertificate);
+                            } else if (assignedCertificate != null) {
+                                // re-adjust selection; the user did not confirm:
+                                temporarilyDeregisterCertificateTableSelectionHandler();
+                                certificateTable.getSelectionModel().setSelected(assignedCertificate, true);
+                            }
+                        } else {
+                            if (assignedCertificate != null) {
+                                unlink(boat);
+                            }
+                        }
+                    } else {
+                        temporarilyDeregisterCertificateTableSelectionHandler();
+                        if (assignedCertificate == null) {
+                            if (selectedCertificate != null) {
+                                certificateTable.getSelectionModel().setSelected(selectedCertificate, false);
+                            }
+                        } else {
                             certificateTable.getSelectionModel().setSelected(assignedCertificate, true);
                         }
-                    } else {
-                        if (assignedCertificate != null) {
-                            unlink(boat);
-                        }
-                    }
-                } else {
-                    temporarilyDeregisterCertificateTableSelectionHandler();
-                    if (assignedCertificate == null) {
-                        if (selectedCertificate != null) {
-                            certificateTable.getSelectionModel().setSelected(selectedCertificate, false);
-                        }
-                    } else {
-                        certificateTable.getSelectionModel().setSelected(assignedCertificate, true);
                     }
                 }
             }
@@ -255,15 +265,22 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
     
     private void wireSelectionModels() {
         boatTable.getSelectionModel().addSelectionChangeHandler(e->{
-            final ORCCertificate assignedCertificate = certificateAssignments.get(boatTable.getSelectionModel().getSelectedObject());
-            if (assignedCertificate == null) {
-                final ORCCertificate selectedCertificate = certificateTable.getSelectionModel().getSelectedObject();
-                if (selectedCertificate != null) {
-                    temporarilyDeregisterCertificateTableSelectionHandler();
-                    certificateTable.getSelectionModel().setSelected(selectedCertificate, false);
+            final ORCCertificate selectedCertificate = certificateTable.getSelectionModel().getSelectedObject();
+            final Set<BoatDTO> selectedBoats = boatTable.getSelectionModel().getSelectedSet();
+            if (selectedBoats != null && selectedBoats.size() == 1) {
+                final BoatDTO selectedBoat = selectedBoats.iterator().next();
+                final ORCCertificate assignedCertificate = certificateAssignments.get(selectedBoat);
+                if (assignedCertificate == null) {
+                    if (selectedCertificate != null) {
+                        temporarilyDeregisterCertificateTableSelectionHandler();
+                        certificateTable.getSelectionModel().setSelected(selectedCertificate, false);
+                    }
+                } else {
+                    setCertificateSelectionWithoutEventHandling(assignedCertificate);
                 }
             } else {
-                setCertificateSelectionWithoutEventHandling(assignedCertificate);
+                temporarilyDeregisterCertificateTableSelectionHandler();
+                certificateTable.getSelectionModel().setSelected(selectedCertificate, false);
             }
         });
         certificateTableSelectionHandlerRegistration = certificateTable.getSelectionModel().addSelectionChangeHandler(certificateTableSelectionHandler);
