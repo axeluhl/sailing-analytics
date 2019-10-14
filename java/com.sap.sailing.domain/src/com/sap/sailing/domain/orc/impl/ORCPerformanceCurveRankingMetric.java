@@ -62,7 +62,8 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
     private Map<Competitor, Duration> getRelativeCorrectedTimesByCompetitor(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Map<Competitor, Duration> relativeCorrectedTimesByCompetitor = new HashMap<>();
         for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
-            relativeCorrectedTimesByCompetitor.put(competitor, getRelativeCorrectedTime(competitor, timePoint, cache));
+            relativeCorrectedTimesByCompetitor.put(competitor, cache.getRelativeCorrectedTime(competitor, getTrackedRace(), timePoint,
+                    (c, t)->getRelativeCorrectedTime(c, t, cache)));
         }
         return relativeCorrectedTimesByCompetitor;
     }
@@ -126,7 +127,7 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
             final BiFunction<TimePoint, Competitor, ORCPerformanceCurve> performanceCurveSupplier = getPerformanceCurveSupplier(cache);
             final ORCPerformanceCurve competitorPerformanceCurve = cache.getPerformanceCurveForPartialCourse(timePoint, getTrackedRace(), competitor, performanceCurveSupplier);
             final Speed maxImpliedWind = Collections.max(getImpliedWindByCompetitor(timePoint, cache).values(),
-                    Comparator.nullsLast(Comparator.naturalOrder()));
+                    Comparator.nullsFirst(Comparator.naturalOrder()));
             if (maxImpliedWind != null && competitorPerformanceCurve != null) {
                 final Duration competitorAllowance = competitorPerformanceCurve.getAllowancePerCourse(maxImpliedWind);
                 final Duration competitorElapsedTime = getTrackedRace().getTimeSailedSinceRaceStart(competitor, timePoint);
