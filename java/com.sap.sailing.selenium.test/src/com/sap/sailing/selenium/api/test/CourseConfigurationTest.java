@@ -356,11 +356,9 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
 
         CourseConfiguration courseConfiguration = new CourseConfiguration("my-freestyle-course",
                 Arrays.asList(sfp, sfb), Arrays.asList(wp1, wp2));
-        System.out.println(courseConfiguration.getJson());
 
         CourseConfiguration createdCourseConfiguration = courseConfigurationApi.createCourse(ctx, courseConfiguration,
                 regattaName, race.getRaceName(), "Default");
-        System.out.println(createdCourseConfiguration.getJson());
 
         assertCourseConfigurationCompared(ctx, courseConfiguration, createdCourseConfiguration);
 
