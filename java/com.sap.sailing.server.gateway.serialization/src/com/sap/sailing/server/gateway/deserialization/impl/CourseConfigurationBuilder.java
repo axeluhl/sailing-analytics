@@ -205,7 +205,7 @@ public class CourseConfigurationBuilder {
             throw new IllegalArgumentException();
         }
         final MarkPairWithConfiguration markPair = markPairCache
-                .computeIfAbsent(new MarkPairWithConfigurationImpl(name, rightMark, leftMark, shortNameForMarkPair), mp -> mp);
+                .computeIfAbsent(new MarkPairWithConfigurationImpl(name, leftMark, rightMark, shortNameForMarkPair), mp -> mp);
         waypoints.add(new WaypointWithMarkConfigurationImpl(markPair, passingInstruction));
     }
 
