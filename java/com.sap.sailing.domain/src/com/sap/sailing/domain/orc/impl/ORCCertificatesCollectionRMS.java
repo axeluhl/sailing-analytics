@@ -47,6 +47,7 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
     private static final String GPH = "GPH";
     private static final String LENGTH = "LOA";
     private static final String BOATNAME = "NAME";
+    private static final String SAILNUMBER = "SAILNUMB";
     private static final String BOATCLASS = "TYPE";
     private static final String ISSUEDATE = "DD_MM_yyYY";
     private static final String RUN_ALLOWANCE = "D";
@@ -59,41 +60,40 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
     private static final String NON_SPINNAKER = "NSP";
     private static final String NATCERTN_FILE_ID = "NATCERTN.FILE_ID";
 
-    private final Map<String, Map<String, String>> certificateValuesBySailnumber;
+    private final Map<String, Map<String, String>> certificateValuesByCertificateId;
 
     public class ORCCertificateValues {
-        private final String sailnumber;
+        private final String certificateId;
 
-        public ORCCertificateValues(String sailnumber) {
+        public ORCCertificateValues(String certificateId) {
             super();
-            this.sailnumber = sailnumber;
+            this.certificateId = certificateId;
         }
 
         public String getValue(String columnName) {
-            return certificateValuesBySailnumber.get(sailnumber).get(columnName);
+            return certificateValuesByCertificateId.get(certificateId).get(columnName);
         }
     }
     
-    public ORCCertificatesCollectionRMS(Map<String, Map<String, String>> certificateValuesBySailnumber) throws IOException {
-        this.certificateValuesBySailnumber = new HashMap<>();
-        for (final Entry<String, Map<String, String>> e : certificateValuesBySailnumber.entrySet()) {
-            this.certificateValuesBySailnumber.put(getCanonicalizedSailNumber(e.getKey()), e.getValue());
+    public ORCCertificatesCollectionRMS(Map<String, Map<String, String>> certificateValuesByCertificateId) throws IOException {
+        this.certificateValuesByCertificateId = new HashMap<>();
+        for (final Entry<String, Map<String, String>> e : certificateValuesByCertificateId.entrySet()) {
+            this.certificateValuesByCertificateId.put(e.getKey(), e.getValue());
         }
     }
     
     public Set<String> getSailnumbers() {
-        return Collections.unmodifiableSet(certificateValuesBySailnumber.keySet());
+        return Collections.unmodifiableSet(certificateValuesByCertificateId.keySet());
     }
 
-    private ORCCertificateValues getValuesForSailnumber(String sailnumber) {
-        String searchString = getCanonicalizedSailNumber(sailnumber);
-        return certificateValuesBySailnumber.containsKey(searchString) ? new ORCCertificateValues(searchString) : null;
+    private ORCCertificateValues getValuesForCertificateId(String certificateId) {
+        return certificateValuesByCertificateId.containsKey(certificateId) ? new ORCCertificateValues(certificateId) : null;
     }
     
     @Override
-    public ORCCertificate getCertificateBySailNumber(String sailnumber) {
-        String searchString = getCanonicalizedSailNumber(sailnumber);
-        ORCCertificateValues certificateValues = getValuesForSailnumber(searchString);
+    public ORCCertificate getCertificateById(String certificateId) {
+        ORCCertificateValues certificateValues = getValuesForCertificateId(certificateId);
+        final String sailNumber = certificateValues.getValue(SAILNUMBER);
         final String boatclass = certificateValues.getValue(BOATCLASS);
         final String boatName = certificateValues.getValue(BOATNAME);
         final Distance length  = new MeterDistance(Double.parseDouble(certificateValues.getValue(LENGTH)));
@@ -147,7 +147,7 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
             }
             velocityPredictionsPerTrueWindSpeedAndAngle.put(tws, velocityPredictionPerTrueWindAngle);
         }
-        return new ORCCertificateImpl(certificateValues.getValue(NATCERTN_FILE_ID), searchString, boatName, boatclass,
+        return new ORCCertificateImpl(certificateValues.getValue(NATCERTN_FILE_ID), sailNumber, boatName, boatclass,
                 length, gph, cdl, issueDate, velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
                 beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
                 runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
@@ -155,7 +155,7 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
     }
 
     @Override
-    public Iterable<String> getSailNumbers() {
-        return Collections.unmodifiableCollection(certificateValuesBySailnumber.keySet());
+    public Iterable<String> getCertificateIds() {
+        return Collections.unmodifiableCollection(certificateValuesByCertificateId.keySet());
     }
 }

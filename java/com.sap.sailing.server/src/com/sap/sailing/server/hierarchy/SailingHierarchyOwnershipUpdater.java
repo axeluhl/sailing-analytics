@@ -38,12 +38,10 @@ public class SailingHierarchyOwnershipUpdater {
             boolean copyMembersAndRoles,
             RacingEventService service) {
         SecurityService securityService = service.getSecurityService();
-
         final UserGroup sourceGroup = securityService.getUserGroup(existingGroupIdOrNull);
-
         final GroupOwnerUpdateStrategy updateStrategy;
         if (!createNewGroup) {
-                updateStrategy = createExitingGroupModifyingUpdate(sourceGroup);
+            updateStrategy = createExitingGroupModifyingUpdate(sourceGroup);
         } else {
             if (copyMembersAndRoles) {
                 updateStrategy = createNewGroupUsingUpdate(newGroupName, securityService, sourceGroup, service);
@@ -57,7 +55,6 @@ public class SailingHierarchyOwnershipUpdater {
 
     public interface GroupOwnerUpdateStrategy {
         boolean needsUpdate(QualifiedObjectIdentifier identifier, OwnershipAnnotation currentOwnership);
-
         UserGroup getNewGroupOwner();
     }
 
@@ -240,10 +237,8 @@ public class SailingHierarchyOwnershipUpdater {
         if (newGroupName == null || newGroupName.isEmpty()) {
             throw new RuntimeException("No name for new Group given");
         }
-
         final GroupOwnerUpdateStrategy updateStrategy;
         updateStrategy = new GroupOwnerUpdateStrategy() {
-
             private UserGroup groupOwnerToSet;
 
             @Override

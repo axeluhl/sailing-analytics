@@ -37,7 +37,19 @@ import com.sap.sse.common.impl.SecondsDurationImpl;
  *
  */
 public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollection {
-    private Map<String, JSONObject> data;
+    private static final String GYBE_ANGLE = "GybeAngle";
+    private static final String BEAT_ANGLE = "BeatAngle";
+    private static final String ALLOWANCES = "Allowances";
+    private static final String ISSUE_DATE = "IssueDate";
+    private static final String CDL2 = "CDL";
+    private static final String GPH2 = "GPH";
+    private static final String CLASS = "Class";
+    private static final String YACHT_NAME = "YachtName";
+    private static final String LOA = "LOA";
+    private static final String SAIL_NO = "SailNo";
+    private static final String CERT_NO = "CertNo";
+    private static final String BIN = "BIN";
+    private static final String NAT_AUTH = "NatAuth";
     private static final String RUN = "Run";
     private static final String BEAT = "Beat";
     private static final String WINDWARD_LEEWARD = "WL";
@@ -46,18 +58,17 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
     private static final String NON_SPINNAKER = "NS";
     private static final String EMPTY_CERT_NO = "      ";
 
+    private Map<String, JSONObject> certificateJsonObjectsByCertificateId;
+
     /**
      * Receives an {@link InputStream} from different possible sources (web, local file, ...) and does parse the
      * {@code .json} file.
      */
-    public ORCCertificatesCollectionJSON(Map<String, JSONObject> data) {
-        this.data = new HashMap<>();
-        for (final Entry<String, JSONObject> e : data.entrySet()) {
-            if (this.data.put(getCanonicalizedSailNumber(e.getKey()), e.getValue()) != null) {
-                throw new IllegalArgumentException(
-                        "Certificate sail numbers in collection not unique after canonicalization: " + e.getKey()
-                                + " is canonicalized to " + getCanonicalizedSailNumber(e.getKey())
-                                + " for which a certificate is already in the collection.");
+    public ORCCertificatesCollectionJSON(Iterable<JSONObject> data) {
+        this.certificateJsonObjectsByCertificateId = new HashMap<>();
+        for (final JSONObject o : data) {
+            if (this.certificateJsonObjectsByCertificateId.put(getId(o), o) != null) {
+                throw new IllegalArgumentException("Certificate ID in collection not unique: " + getId(o));
             }
         }
     }
@@ -67,7 +78,7 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
      * given key, the method returns {@link null}.
      */
     @Override
-    public ORCCertificate getCertificateBySailNumber(String sailnumber) {
+    public ORCCertificate getCertificateById(String certificateId) {
         String boatName  = null;
         String boatclass = null;
         Distance length  = null;
@@ -79,57 +90,48 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
         Map<Speed, Map<Bearing, Speed>> velocityPredictionPerTrueWindSpeedAndAngle = new HashMap<>();
         Map<Bearing, Map<Speed, Duration>> allowanceDurationsPerTrueWindAngleAndSpeed = new HashMap<>();        //per nautical mile
         Map<String, Map<Speed, Duration>> predefinedAllowanceDurationsPerTrueWindSpeed = new HashMap<>();       //per nautical mile
-        String searchString = getCanonicalizedSailNumber(sailnumber);
-        JSONObject object = data.get(searchString);
+        JSONObject object = certificateJsonObjectsByCertificateId.get(certificateId);
         if (object == null) {
-            //TODO Throw Exception for sailnumber not found. InvalidArgumentException?
+            // TODO Throw Exception for certificate by id not found. InvalidArgumentException?
             return null;
         }
-        String natAuth = null;
-        String bin = null;
-        String certNo = null;
+        String sailNumber = null;
         for (Entry<Object, Object> entry : object.entrySet()) {
             switch ((String) entry.getKey()) {
-                case "NatAuth":
-                    natAuth = entry.getValue().toString();
+                case SAIL_NO:
+                    sailNumber = entry.getValue() == null ? null : entry.getValue().toString();
                     break;
-                case "BIN":
-                    bin = entry.getValue().toString();
-                    break;
-                case "CertNo":
-                    certNo = entry.getValue() == null ? EMPTY_CERT_NO : entry.getValue().toString();
-                    break;
-                case "LOA":
+                case LOA:
                     length = new MeterDistance(((Number) entry.getValue()).doubleValue());
                     break;
-                case "YachtName":
+                case YACHT_NAME:
                     boatName = entry.getValue()==null?null:entry.getValue().toString();
                     break;
-                case "Class":
+                case CLASS:
                     boatclass = (String) entry.getValue();
                     break;
-                case "GPH":    
+                case GPH2:    
                     gph = new SecondsDurationImpl(((Number) entry.getValue()).doubleValue());
                     break;
-                case "CDL":
+                case CDL2:
                     cdl = ((Number) entry.getValue()).doubleValue();
                     break;
-                case "IssueDate":
+                case ISSUE_DATE:
                     Date date = DatatypeConverter.parseDateTime((String) entry.getValue()).getTime();
                     issueDate = new MillisecondsTimePoint(date);
                     break;
-                case "Allowances":
-                    final JSONObject allowances = (JSONObject) object.get("Allowances");
+                case ALLOWANCES:
+                    final JSONObject allowances = (JSONObject) object.get(ALLOWANCES);
                     for (final Object aKey : allowances.keySet()) {
                         final JSONArray array = (JSONArray) allowances.get(aKey);
-                        if (((String) aKey).equals("BeatAngle")) {
+                        if (((String) aKey).equals(BEAT_ANGLE)) {
                             for (int i = 0; i < array.size(); i++) {
                                 beatAngles.put(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i],
                                         new DegreeBearingImpl(((Number) array.get(i)).doubleValue()));
                             }
                             continue;
                         }
-                        if (((String) aKey).equals("GybeAngle")) {
+                        if (((String) aKey).equals(GYBE_ANGLE)) {
                             for (int i = 0; i < array.size(); i++) {
                                 gybeAngles.put(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i],
                                         new DegreeBearingImpl(((Number) array.get(i)).doubleValue()));
@@ -201,16 +203,26 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
             nonSpinnakerSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE
                     .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(NON_SPINNAKER).get(tws)));
         }
-        return new ORCCertificateImpl(natAuth + certNo + bin, searchString, boatName, boatclass, length, gph, cdl,
+        return new ORCCertificateImpl(getId(object), sailNumber, boatName, boatclass, length, gph, cdl,
                 issueDate, velocityPredictionPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
                 beatAllowancePerTrueWindSpeed, gybeAngles, runVMGPredictionPerTrueWindSpeed,
                 runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
                 longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
                 nonSpinnakerSpeedPredictionPerTrueWindSpeed);
     }
+    
+    private String getId(JSONObject certificateAsJson) {
+        return getIdFromFields(certificateAsJson.get(NAT_AUTH).toString(),
+                certificateAsJson.get(CERT_NO) == null ? EMPTY_CERT_NO : certificateAsJson.get(CERT_NO).toString(),
+                certificateAsJson.get(BIN).toString());
+    }
+    
+    private String getIdFromFields(final String natAuth, final String certNo, final String bin) {
+        return natAuth + certNo + bin;
+    }
 
     @Override
-    public Iterable<String> getSailNumbers() {
-        return Collections.unmodifiableCollection(data.keySet());
+    public Iterable<String> getCertificateIds() {
+        return Collections.unmodifiableCollection(certificateJsonObjectsByCertificateId.keySet());
     }
 }

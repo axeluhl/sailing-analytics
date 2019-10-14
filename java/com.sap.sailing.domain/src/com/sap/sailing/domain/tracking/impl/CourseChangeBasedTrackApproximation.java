@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -77,7 +78,6 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
          */
         private final List<Double> totalCourseChangeFromBeginningOfWindow;
 
-        private final Duration maximumWindowLength;
         private final double maneuverAngleInDegreesThreshold;
         private Duration windowDuration;
         
@@ -101,15 +101,25 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
             this.indexOfMaximumTotalCourseChange = -1;
             this.windowDuration = Duration.NULL;
             // use twice the maneuver duration to also catch slowly-executed gybes
-            this.maximumWindowLength = boatClass.getApproximateManeuverDuration().times(2);
             this.maneuverAngleInDegreesThreshold = boatClass.getManeuverDegreeAngleThreshold();
             final Duration averageIntervalBetweenRawFixes = track.getAverageIntervalBetweenRawFixes();
-            this.totalCourseChangeFromBeginningOfWindow = new ArrayList<>(((int) maximumWindowLength.divide(
+            this.totalCourseChangeFromBeginningOfWindow = new ArrayList<>(((int) getMaximumWindowLength().divide(
                     averageIntervalBetweenRawFixes==null?Duration.ONE_SECOND:averageIntervalBetweenRawFixes))+10);
         }
         
-        public Duration getMaximumWindowLength() {
-            return maximumWindowLength;
+        /**
+         * The duration of the fix window to analyze is the maximum of twice the
+         * {@link BoatClass#getApproximateManeuverDuration() approximate maneuver duration} of this track's boat class,
+         * and three times the {@link GPSFixTrack#getAverageIntervalBetweenRawFixes() average duration between two raw
+         * fixes} on the track.
+         */
+        private Duration getMaximumWindowLength() {
+            final Duration twiceTheApproximateManeuverDuration = boatClass.getApproximateManeuverDuration().times(2);
+            final Duration averageIntervalBetweenRawFixes = track.getAverageIntervalBetweenRawFixes();
+            final Duration threeTimesTheDurationBetweenRawFixes = averageIntervalBetweenRawFixes == null ? null : averageIntervalBetweenRawFixes.times(3);
+            return Comparator.<Duration>nullsFirst(Comparator.naturalOrder()).compare(
+                    twiceTheApproximateManeuverDuration, threeTimesTheDurationBetweenRawFixes) > 0 ?
+                    twiceTheApproximateManeuverDuration : threeTimesTheDurationBetweenRawFixes;
         }
         
         /**
@@ -165,13 +175,13 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
                             indexOfMaximumTotalCourseChange = totalCourseChangeFromBeginningOfWindow.size()-1;
                         }
                     }
-                    if (windowDuration.compareTo(maximumWindowLength) > 0) {
+                    if (windowDuration.compareTo(getMaximumWindowLength()) > 0) {
                         result = tryToExtractManeuverCandidate();
                         if (result == null) {
                             // if a result was found, fixes up to and including the result have already been removed;
                             // otherwise, keep removing fixes from the beginning of the window until the window duration
                             // is again at or below the maximum allowed:
-                            while (windowDuration.compareTo(maximumWindowLength) > 0) {
+                            while (windowDuration.compareTo(getMaximumWindowLength()) > 0) {
                                 removeFirst();
                             }
                         }

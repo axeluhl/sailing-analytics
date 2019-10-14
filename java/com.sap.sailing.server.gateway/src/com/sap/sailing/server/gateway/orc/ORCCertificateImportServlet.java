@@ -65,15 +65,30 @@ public class ORCCertificateImportServlet extends AbstractFileUploadServlet {
                 }
             }
             writeResponse(certificates, resp);
+        } catch (IOException e) {
+            logger.log(Level.INFO, "User "+SessionUtils.getPrincipal()+" was trying to import ORC certificates, but the certificates failed to load", e);
+            final JSONObject errorResponse = new JSONObject();
+            errorResponse.put(ORCCertificateUploadConstants.STATUS, "ERROR");
+            errorResponse.put(ORCCertificateUploadConstants.MESSAGE, "Error trying to import ORC certificates: "+e.getMessage());
+            resp.getOutputStream().print(errorResponse.toJSONString());
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } catch (ParseException e) {
             logger.log(Level.INFO, "User "+SessionUtils.getPrincipal()+" was trying to analyze ORC certificates, but the certificates failed to parse", e);
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unable to parse certificate selection. Probably not valid JSON");
+            final JSONObject errorResponse = new JSONObject();
+            errorResponse.put(ORCCertificateUploadConstants.STATUS, "ERROR");
+            errorResponse.put(ORCCertificateUploadConstants.MESSAGE, "Unable to parse certificate selection: "+e.getMessage());
+            resp.getOutputStream().print(errorResponse.toJSONString());
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } finally {
             resp.setContentType("text/html;charset=UTF-8");
         }
     }
 
     private Iterable<ORCCertificate> parseCertificatesFromUrl(String urlAsString) throws IOException, ParseException {
+        if (!urlAsString.contains(":")) {
+            // no protocol; try with https
+            urlAsString = "https://"+urlAsString;
+        }
         final URL url = new URL(urlAsString);
         final ORCCertificatesCollection certificates = ORCCertificatesImporter.INSTANCE.read(HttpUrlConnectionHelper.redirectConnection(url).getInputStream());
         final Set<ORCCertificate> result = new HashSet<>();
@@ -94,6 +109,7 @@ public class ORCCertificateImportServlet extends AbstractFileUploadServlet {
             certificatesAsJson.add(certificateSerializer.serialize(certificate));
         }
         jsonResponse.put(ORCCertificateUploadConstants.CERTIFICATES, certificatesAsJson);
+        jsonResponse.put(ORCCertificateUploadConstants.STATUS, "OK");
         resp.getWriter().write(jsonResponse.toJSONString());
     }
 

@@ -181,7 +181,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
                     raceTrackingHandler);
             trackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
                     getTrackedRegatta(), tractracRace.getId(), tractracRace.getName(),
-                    dominantBoatClass, competitorAndBoats, course, sidelines, windStore, delayToLiveInMillis,
+                    getTrackedRegatta().getRegatta().getBoatClass(), competitorAndBoats, course, sidelines, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, tracTracUpdateURI,
                     getTracTracEvent().getId(), tracTracUsername, tracTracPassword, useInternalMarkPassingAlgorithm, raceLogResolver, tr->updateRaceTimes(tractracRace, tr), tractracRace,
                     raceTrackingHandler);

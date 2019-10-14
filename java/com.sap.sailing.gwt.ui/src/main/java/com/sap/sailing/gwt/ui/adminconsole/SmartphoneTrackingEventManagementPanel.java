@@ -373,7 +373,18 @@ public class SmartphoneTrackingEventManagementPanel
                                 waypointPairs.getWaypoints(), waypointPairs.getPriority(), new AsyncCallback<Void>() {
                                     @Override
                                     public void onSuccess(Void result) {
-                                        loadAndRefreshLeaderboard(leaderboardName);
+                                        sailingService.setORCPerformanceCurveLegInfo(leaderboardName, raceColumnName, fleetName,
+                                                waypointPairs.getORCLegData(), new AsyncCallback<Void>() {
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                errorReporter.reportError(stringMessages.errorUpdatingRaceCourse(caught.getMessage()));
+                                            }
+
+                                            @Override
+                                            public void onSuccess(Void result) {
+                                                loadAndRefreshLeaderboard(leaderboardName);
+                                            }
+                                        });
                                     }
 
                                     @Override

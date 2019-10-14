@@ -22,8 +22,6 @@ import com.sap.sailing.gwt.ui.shared.RaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.Notification;
-import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.ui.client.UserService;
 
 public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel {
@@ -123,8 +121,7 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
                     builder.append(")");
                     builder.append("\n");
                 }
-                Notification.notify(builder.toString(), NotificationType.ERROR);
-                result = false;
+                result = Window.confirm(builder.toString());
             } else {
                 result = true;
             }

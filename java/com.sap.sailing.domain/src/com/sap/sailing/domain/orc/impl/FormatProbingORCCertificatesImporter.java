@@ -55,7 +55,7 @@ public class FormatProbingORCCertificatesImporter implements ORCCertificatesImpo
         } catch (Exception e) {
             logger.log(Level.FINE, "Couldn't read ORC certificates from input stream as JSON: "+e.getMessage());
         }
-        if (result == null || Util.isEmpty(result.getSailNumbers())) {
+        if (result == null || Util.isEmpty(result.getCertificateIds())) {
             // nothing from JSON; try RMS
             try {
                 result = rmsFuture.get();
