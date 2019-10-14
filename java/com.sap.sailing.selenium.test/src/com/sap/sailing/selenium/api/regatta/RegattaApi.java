@@ -104,7 +104,7 @@ public class RegattaApi {
         final String url = REGATTAS + "/" + regattaName + ADD_RACE_COLUMN_URL;
         final Map<String, String> queryParams = new TreeMap<>();
         queryParams.put("prefix", prefix);
-        queryParams.put("numberOfRaces", numberOfRaces != null ? numberOfRaces.toString() : null);
+        queryParams.put("numberofraces", numberOfRaces != null ? numberOfRaces.toString() : null);
         final JSONArray json = ctx.post(url, queryParams);
         final RaceColumn[] result = new RaceColumn[json.size()];
         for (int i = 0; i < json.size(); i++) {
