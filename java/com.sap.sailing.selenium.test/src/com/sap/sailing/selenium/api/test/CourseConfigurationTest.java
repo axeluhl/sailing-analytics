@@ -313,7 +313,6 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
 
         assertConsistentCourseConfiguration(courseConfigurationResult);
         assertCourseConfigurationCompared(ctx, courseConfiguration, courseConfigurationResult);
-        // TODO assert positioning is contained in result and identical to the given values
     }
 
     @Test
