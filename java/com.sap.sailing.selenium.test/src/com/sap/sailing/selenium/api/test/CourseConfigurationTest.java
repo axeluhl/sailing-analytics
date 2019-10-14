@@ -317,8 +317,24 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     }
 
     @Test
-    public void testCreateCourseAndReload() {
+    public void testCreateCourseAndReloadWithAdmin() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        testCreateCourseAndReload(ctx);
+    }
+
+    @Test
+    public void testCreateCourseAndReloadWithUser() {
+        clearState(getContextRoot());
+        super.setUp();
+        final AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
+        adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+        securityApi.createUser(adminCtx, "donald", "Donald Duck", null, "daisy0815");
+        final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
+        testCreateCourseAndReload(ctx);
+    }
+
+    public void testCreateCourseAndReload(final ApiContext ctx) {
         final String regattaName = "test";
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
