@@ -288,7 +288,8 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     private Competitor getOrCreateCompetitor(ICompetitor competitor, RaceTrackingHandler raceTrackingHandler) {
-        Competitor result = getOrCreateCompetitor(competitor.getId(), competitor.getNationality(), competitor.getName(),
+        final String name = getCompetitorNameOrDescription(competitor);
+        Competitor result = getOrCreateCompetitor(competitor.getId(), competitor.getNationality(), name,
                 competitor.getShortName(), competitor.getHandicapToT(), competitor.getHandicapToD(), /* searchTag */ null,
                 raceTrackingHandler);
         return result;
@@ -298,10 +299,16 @@ public class DomainFactoryImpl implements DomainFactory {
             final RaceTrackingHandler raceTrackingHandler) {
         final String sailId = competitor.getShortName(); // we take the sailId from the shortName attribute
         final String competitorClassName = competitor.getCompetitorClass()==null?null:competitor.getCompetitorClass().getName();
-        CompetitorWithBoat result = getOrCreateCompetitorWithBoat(competitor.getId(), competitor.getNationality(), competitor.getName(),
+        final String name = getCompetitorNameOrDescription(competitor);
+        CompetitorWithBoat result = getOrCreateCompetitorWithBoat(competitor.getId(), competitor.getNationality(), name,
                 /* shortName */ null, competitor.getHandicapToT(), competitor.getHandicapToD(), null,
                 competitorClassName, sailId, raceTrackingHandler);
         return result;
+    }
+
+    private String getCompetitorNameOrDescription(ICompetitor competitor) {
+        final String name = competitor.getName() == null || competitor.getName().isEmpty() ? competitor.getDescription() : competitor.getName();
+        return name;
     }
 
     private CompetitorWithBoat getOrCreateCompetitorWithBoat(final UUID competitorId,

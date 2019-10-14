@@ -267,7 +267,7 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
         return new DialogConfig<>(userManagementService, type, updateCallback, stringMessages);
     }
 
-    public static class DialogConfig<T extends Named & SecuredDTO> {
+    public static class DialogConfig<T extends SecuredDTO> {
         private final UserManagementServiceAsync userManagementService;
         private final Consumer<T> updateCallback;
         private final Function<T, QualifiedObjectIdentifier> identifierFactory;

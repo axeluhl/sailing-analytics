@@ -137,7 +137,7 @@ public class GPSFixMovingWithPolarContext implements LegTypePolarClusterKey, Ang
 
     @Override
     public BoatClass getBoatClass() {
-        return race.getRace().getBoatClass();
+        return race.getBoatOfCompetitor(getCompetitor()).getBoatClass();
     }
 
     @Override

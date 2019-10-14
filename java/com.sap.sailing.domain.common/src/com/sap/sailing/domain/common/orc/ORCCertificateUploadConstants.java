@@ -21,4 +21,5 @@ public interface ORCCertificateUploadConstants {
     String MAPPINGS = "mappings";
     String CERTIFICATES = "certificates";
     String STATUS = "status";
+    String MESSAGE = "message";
 }
