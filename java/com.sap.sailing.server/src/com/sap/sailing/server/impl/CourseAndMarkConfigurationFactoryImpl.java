@@ -543,7 +543,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             Iterable<String> tagsToFilterMarkProperties) {
         final Set<MarkConfiguration> allMarkConfigurations = new HashSet<>();
 
-        final CourseTemplate courseTemplateOrNull = resolveCourseTemplateSafe(course);
+        final CourseTemplate courseTemplateOrNull = course == null ? null : resolveCourseTemplateSafe(course);
         final RegattaMarkConfigurations regattaMarkConfigurations = new RegattaMarkConfigurations(courseTemplateOrNull,
                 regatta);
         allMarkConfigurations.addAll(regattaMarkConfigurations.regattaConfigurationsByMark.values());
@@ -551,7 +551,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         boolean validCourseTemplateUsage = false;
         RepeatablePart optionalRepeatablePart = null;
         Integer numberOfLaps = null;
-        final String name = course.getName();
+        final String name = course == null ? null : course.getName();
         final Map<MarkTemplate, MarkConfiguration> markTemplatesToMarkConfigurations = new HashMap<>();
         final Map<MarkConfiguration, String> roleMappingBasedOnCourseTemplate = new HashMap<>();
         if (courseTemplateOrNull != null) {
@@ -650,28 +650,30 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         } else {
             resultingRoleMapping = new HashMap<>();
             resultingWaypoints = new ArrayList<>();
-            for (Entry<Mark, String> markWithRole : course.getAssociatedRoles().entrySet()) {
-                resultingRoleMapping.put(
-                        regattaMarkConfigurations.regattaConfigurationsByMark.get(markWithRole.getKey()),
-                        markWithRole.getValue());
-            }
-            for (Waypoint waypoint : course.getWaypoints()) {
-                final ControlPoint controlPoint = waypoint.getControlPoint();
-                final ControlPointWithMarkConfiguration resultingControlPoint;
-                if (controlPoint instanceof Mark) {
-                    final Mark mark = (Mark) controlPoint;
-                    resultingControlPoint = regattaMarkConfigurations.regattaConfigurationsByMark.get(mark);
-                } else {
-                    final ControlPointWithTwoMarks markPairTemplate = (ControlPointWithTwoMarks) controlPoint;
-                    final MarkConfiguration left = regattaMarkConfigurations.regattaConfigurationsByMark
-                            .get(markPairTemplate.getLeft());
-                    final MarkConfiguration right = regattaMarkConfigurations.regattaConfigurationsByMark
-                            .get(markPairTemplate.getRight());
-                    resultingControlPoint = new MarkPairWithConfigurationImpl(markPairTemplate.getName(), left, right,
-                            markPairTemplate.getShortName());
+            if (course != null) {
+                for (Entry<Mark, String> markWithRole : course.getAssociatedRoles().entrySet()) {
+                    resultingRoleMapping.put(
+                            regattaMarkConfigurations.regattaConfigurationsByMark.get(markWithRole.getKey()),
+                            markWithRole.getValue());
                 }
-                resultingWaypoints.add(new WaypointWithMarkConfigurationImpl(resultingControlPoint,
-                        waypoint.getPassingInstructions()));
+                for (Waypoint waypoint : course.getWaypoints()) {
+                    final ControlPoint controlPoint = waypoint.getControlPoint();
+                    final ControlPointWithMarkConfiguration resultingControlPoint;
+                    if (controlPoint instanceof Mark) {
+                        final Mark mark = (Mark) controlPoint;
+                        resultingControlPoint = regattaMarkConfigurations.regattaConfigurationsByMark.get(mark);
+                    } else {
+                        final ControlPointWithTwoMarks markPairTemplate = (ControlPointWithTwoMarks) controlPoint;
+                        final MarkConfiguration left = regattaMarkConfigurations.regattaConfigurationsByMark
+                                .get(markPairTemplate.getLeft());
+                        final MarkConfiguration right = regattaMarkConfigurations.regattaConfigurationsByMark
+                                .get(markPairTemplate.getRight());
+                        resultingControlPoint = new MarkPairWithConfigurationImpl(markPairTemplate.getName(), left, right,
+                                markPairTemplate.getShortName());
+                    }
+                    resultingWaypoints.add(new WaypointWithMarkConfigurationImpl(resultingControlPoint,
+                            waypoint.getPassingInstructions()));
+                }
             }
         }
 

@@ -143,14 +143,14 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
             courseBase = courseDesginFinder.analyze();
         }
 
-        final JSONObject jsonResult;
-        if (courseBase == null) {
-            jsonResult = new JSONObject();
-        } else {
-            final CourseConfiguration courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
-                    .createCourseConfigurationFromCourse(courseBase, regatta, tags);
-            jsonResult = courseConfigurationJsonSerializer.serialize(courseConfiguration);
-        }
+        // courseBase may be null in case, no course is defined for the race yet.
+        // createCourseConfigurationFromCourse returns a course configuration with an empty sequence in this case.
+        // Any mark already defined in the regatta will be added to the included mark configurations as an initial
+        // set of marks to be used while defining a course for the regatta.
+        // An additional call to get the marks defined in the regatta isn't necessary with the described behavior of this API.
+        final CourseConfiguration courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
+                .createCourseConfigurationFromCourse(courseBase, regatta, tags);
+        final JSONObject jsonResult = courseConfigurationJsonSerializer.serialize(courseConfiguration);
         return Response.ok(jsonResult.toJSONString()).build();
     }
 
