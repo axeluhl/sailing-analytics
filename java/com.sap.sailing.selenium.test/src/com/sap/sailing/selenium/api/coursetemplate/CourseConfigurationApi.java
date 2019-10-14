@@ -56,11 +56,11 @@ public class CourseConfigurationApi {
         return new CourseConfiguration(result);
     }
 
-    public JSONObject createCourse(final ApiContext ctx, final CourseConfiguration courseConfiguration,
+    public CourseConfiguration createCourse(final ApiContext ctx, final CourseConfiguration courseConfiguration,
             final String regattaName, final String raceColumn, String fleet) {
         final JSONObject result = ctx.post(
                 COURSE_CONFIGURATION + TO_COURSE + regattaName + "/" + raceColumn + "/" + fleet, null,
                 courseConfiguration.getJson());
-        return result;
+        return new CourseConfiguration(result);
     }
 }

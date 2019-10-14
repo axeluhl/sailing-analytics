@@ -14,9 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
-import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -88,6 +88,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertEquals("number of markconfiguration is different", Util.size(srcMarkConfigurations),
                 Util.size(trgtMarkConfigurations));
         assertEquals("number of waypoints is different", Util.size(srcWaypoints), Util.size(trgtWaypoints));
+        final Map<MarkConfiguration, String> markConfigurationToNameMap = new HashMap<>();
         for (final MarkConfiguration markConfiguration : srcMarkConfigurations) {
             final UUID markTemplateId = markConfiguration.getMarkTemplateId();
             MarkAppearance srcAppearance = markConfiguration.getEffectiveProperties();
@@ -113,10 +114,14 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                 // final boolean matchByMarkId =
                 if (matchByName || matchByTemplateId || matchByMarkId) {
                     found = true;
+                    final String identifier = matchByName ? srcAppearance.getName()
+                            : matchByTemplateId ? markTemplateId.toString()
+                                    : matchByMarkId ? markConfiguration.getMarkId().toString() : "unknown";
                     final String msgIdentifier = matchByName ? "markconfiguration with name " + srcAppearance.getName()
                             : matchByTemplateId ? "markconfiguration with markTemplateID " + markTemplateId
                                     : matchByMarkId ? "markconfiguration with markId " + markConfiguration.getMarkId()
                                             : "unknown";
+                    markConfigurationToNameMap.put(markConfiguration, identifier);
                     if (markTemplateId != null && trgtMarkConfiguration.getMarkTemplateId() != null) {
                         assertEquals("markTemplateId is different for " + msgIdentifier, markTemplateId,
                                 trgtMarkConfiguration.getMarkTemplateId());
@@ -169,6 +174,31 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                         found = true;
                         assertEquals("Waypoint controlpoint shortname is different",
                                 srcWaypoint.getControlPointShortName(), trgtWaypoint.getControlPointShortName());
+                        assertEquals("Waypoint number of markconfigurations is different",
+                                Util.size(srcWaypoint.getMarkConfigurationIds()),
+                                Util.size(trgtWaypoint.getMarkConfigurationIds()));
+                        final LongAdder srcIndex = new LongAdder();
+                        for (final String srcMarkConfigurationId : srcWaypoint.getMarkConfigurationIds()) {
+                            srcIndex.increment();
+                            srcMarkConfigurations.forEach(srcMc -> {
+                                if (srcMc.getId().equals(srcMarkConfigurationId)) {
+                                    final LongAdder trgtIndex = new LongAdder();
+                                    for (final String trgtMarkConfigurationId : trgtWaypoint
+                                            .getMarkConfigurationIds()) {
+                                        trgtIndex.increment();
+                                        trgtMarkConfigurations.forEach(trgtMc -> {
+                                            if (trgtMc.getId().equals(trgtMarkConfigurationId)) {
+                                                if (markConfigurationToNameMap.get(srcMc)
+                                                        .equals(trgtMc.getEffectiveProperties().getName())) {
+                                                    assertEquals("Waypoint position of markconfigurations is wrong",
+                                                            srcIndex.intValue(), trgtIndex.intValue());
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }
                     }
                 }
                 assertTrue("Waypoint with control point name " + controlPointName + " not found", found);
@@ -280,39 +310,40 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         // TODO assert positioning is contained in result and identical to the given values
     }
 
-    
     @Test
     public void testCreateCourseAndReload() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         final String regattaName = "test";
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
-        
-        MarkConfiguration sfp = MarkConfiguration.createFreestyle(null, null, null, "Start/Finish Pin", "SFP", null, null,
-                null, MarkType.BUOY.name());
+
+        MarkConfiguration sfp = MarkConfiguration.createFreestyle(null, null, null, "Start/Finish Pin", "SFP", null,
+                null, null, MarkType.BUOY.name());
         sfp.setFixedPosition(47.159776, 27.5891346);
         sfp.setStoreToInventory(true);
-        
-        MarkConfiguration sfb = MarkConfiguration.createFreestyle(null, null, null, "Start/Finish Boat", "SFB", null, null,
-                null, MarkType.STARTBOAT.name());
+
+        MarkConfiguration sfb = MarkConfiguration.createFreestyle(null, null, null, "Start/Finish Boat", "SFB", null,
+                null, null, MarkType.STARTBOAT.name());
         sfp.setStoreToInventory(true);
-        
-        
-        WaypointWithMarkConfiguration wp1 = new WaypointWithMarkConfiguration("Start", "S",
-                PassingInstruction.Gate, Arrays.asList(sfp.getId(), sfb.getId()));
-        WaypointWithMarkConfiguration wp2 = new WaypointWithMarkConfiguration("Finish", "F",
-                PassingInstruction.Gate, Arrays.asList(sfp.getId(), sfb.getId()));
-        
+
+        WaypointWithMarkConfiguration wp1 = new WaypointWithMarkConfiguration("Start", "S", PassingInstruction.Gate,
+                Arrays.asList(sfp.getId(), sfb.getId()));
+        WaypointWithMarkConfiguration wp2 = new WaypointWithMarkConfiguration("Finish", "F", PassingInstruction.Gate,
+                Arrays.asList(sfp.getId(), sfb.getId()));
+
         CourseConfiguration courseConfiguration = new CourseConfiguration("my-freestyle-course",
                 Arrays.asList(sfp, sfb), Arrays.asList(wp1, wp2));
         System.out.println(courseConfiguration.getJson());
-        
-        JSONObject createdCourseConfiguration = courseConfigurationApi.createCourse(ctx, courseConfiguration, regattaName, race.getRaceName(), "Default");
-        System.out.println(createdCourseConfiguration);
-        
-        //TODO
-        //CourseConfiguration reloadedCourseConfiguration = courseConfigurationApi.createCourseConfigurationFromCourse(ctx, regattaName, race.getRaceName(), "Default", null);
-        //System.out.println(reloadedCourseConfiguration);
+
+        CourseConfiguration createdCourseConfiguration = courseConfigurationApi.createCourse(ctx, courseConfiguration,
+                regattaName, race.getRaceName(), "Default");
+        System.out.println(createdCourseConfiguration.getJson());
+
+        assertCourseConfigurationCompared(ctx, courseConfiguration, createdCourseConfiguration);
+
+        CourseConfiguration reloadedCourseConfiguration = courseConfigurationApi
+                .createCourseConfigurationFromCourse(ctx, regattaName, race.getRaceName(), "Default", null);
+        assertCourseConfigurationCompared(ctx, courseConfiguration, reloadedCourseConfiguration);
     }
 
     @Test
@@ -342,7 +373,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     }
 
     @Test
-    public void testCreateCourseConfigurationWithStoreToInvventory() {
+    public void testCreateCourseConfigurationWithStoreToInventory() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 
         MarkConfiguration sb = MarkConfiguration.createFreestyle(null, null, "role_sb", "startboat", "sb", null, null,
