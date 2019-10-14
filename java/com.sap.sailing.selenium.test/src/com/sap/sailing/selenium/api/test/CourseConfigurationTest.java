@@ -323,7 +323,8 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
 
-        MarkConfiguration sfp = MarkConfiguration.createFreestyle(null, null, null, "Start/Finish Pin", "SFP", null,
+        final String pinEndName = "Start/Finish Pin";
+        MarkConfiguration sfp = MarkConfiguration.createFreestyle(null, null, null, pinEndName, "SFP", null,
                 null, null, MarkType.BUOY.name());
         sfp.setFixedPosition(47.159776, 27.5891346);
         sfp.setStoreToInventory(true);
@@ -351,11 +352,14 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                 .createCourseConfigurationFromCourse(ctx, regattaName, race.getRaceName(), "Default", null);
         assertCourseConfigurationCompared(ctx, courseConfiguration, reloadedCourseConfiguration);
         
-        MarkConfiguration startboatConfigurationResult = reloadedCourseConfiguration.getMarkConfigurationByEffectiveName("Start/Finish Pin");
+        MarkConfiguration startboatConfigurationResult = reloadedCourseConfiguration.getMarkConfigurationByEffectiveName(pinEndName);
         assertNotNull(startboatConfigurationResult.getMarkPropertiesId());
         assertNotNull(startboatConfigurationResult.getMarkId());
         Mark markResult = LeaderboardApi.getMark(ctx, regattaName, startboatConfigurationResult.getMarkId());
         assertEquals(startboatConfigurationResult.getMarkPropertiesId(), markResult.getOriginatingMarkPropertiesId());
+        MarkProperties createdMarkProperties = markPropertiesApi.getMarkProperties(ctx, startboatConfigurationResult.getMarkPropertiesId());
+        assertEquals(startboatConfigurationResult.getMarkPropertiesId(), createdMarkProperties.getId());
+        assertEquals(pinEndName, createdMarkProperties.getName());
     }
 
     @Test
