@@ -26,6 +26,8 @@ public class LeaderboardApi {
     private static final String SET_TRACKING_TIMES_URL = LEADERBOARDS_V1_RESOURCE_URL
             + "/{leaderboardname}/settrackingtimes";
     private static final String START_TRACKING_URL = LEADERBOARDS_V1_RESOURCE_URL + "/{leaderboardname}/starttracking";
+    private static final String GET_MARK_URL = LEADERBOARDS_V1_RESOURCE_URL
+            + "/{leaderboardname}/marks/";
 
     public JSONArray getLeaderboards(ApiContext ctx) {
         return ctx.get(LEADERBOARDS_LIST_URL);
@@ -61,6 +63,10 @@ public class LeaderboardApi {
 
     private String toUrl(final String urlTemplate, final String leaderboardName) {
         return urlTemplate.replace("{leaderboardname}", leaderboardName);
+    }
+    
+    public Mark getMark(ApiContext ctx, String leaderboardName, UUID markUUID) {
+        return new Mark(ctx.get(toUrl(GET_MARK_URL, leaderboardName) + markUUID));
     }
 
     public class DeviceMappingRequest {

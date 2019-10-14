@@ -43,8 +43,8 @@ import com.sap.sailing.selenium.api.coursetemplate.WaypointTemplate;
 import com.sap.sailing.selenium.api.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
+import com.sap.sailing.selenium.api.event.Mark;
 import com.sap.sailing.selenium.api.event.MarkApi;
-import com.sap.sailing.selenium.api.event.MarkApi.Mark;
 import com.sap.sailing.selenium.api.event.SecurityApi;
 import com.sap.sailing.selenium.api.helper.CourseTemplateDataFactory;
 import com.sap.sailing.selenium.api.regatta.RaceColumn;
@@ -350,6 +350,12 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         CourseConfiguration reloadedCourseConfiguration = courseConfigurationApi
                 .createCourseConfigurationFromCourse(ctx, regattaName, race.getRaceName(), "Default", null);
         assertCourseConfigurationCompared(ctx, courseConfiguration, reloadedCourseConfiguration);
+        
+        MarkConfiguration startboatConfigurationResult = reloadedCourseConfiguration.getMarkConfigurationByEffectiveName("Start/Finish Pin");
+        assertNotNull(startboatConfigurationResult.getMarkPropertiesId());
+        assertNotNull(startboatConfigurationResult.getMarkId());
+        Mark markResult = LeaderboardApi.getMark(ctx, regattaName, startboatConfigurationResult.getMarkId());
+        assertEquals(startboatConfigurationResult.getMarkPropertiesId(), markResult.getOriginatingMarkPropertiesId());
     }
 
     @Test
@@ -437,7 +443,6 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         CourseConfiguration courseConfigurationResult = courseConfigurationApi.createCourseTemplate(ctx,
                 courseConfiguration, "testregatta");
         assertCourseConfigurationCompared(ctx, courseConfiguration, courseConfigurationResult);
-        
     }
 
     @Test

@@ -5,7 +5,6 @@ import java.util.UUID;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
-import com.sap.sailing.selenium.api.core.JsonWrapper;
 
 public class MarkApi {
 
@@ -45,17 +44,6 @@ public class MarkApi {
         json.put(ATTRIBUTE_ORIGINATING_MARK_TEMPLATE_ID, markTemplateId != null ? markTemplateId.toString() : null);
         json.put(ATTRIBUTE_ORIGINATING_MARK_PROPERTIES_ID, markPropertiesId != null ? markPropertiesId.toString() : null);
         return ctx.post(URL_ADD_MARK_FIX, null, json);
-    }
-
-    public class Mark extends JsonWrapper {
-
-        private Mark(JSONObject json) {
-            super(json);
-        }
-
-        public final UUID getMarkId() {
-            return UUID.fromString(get(ATTRIBUTE_MARK_ID));
-        }
     }
 
 }

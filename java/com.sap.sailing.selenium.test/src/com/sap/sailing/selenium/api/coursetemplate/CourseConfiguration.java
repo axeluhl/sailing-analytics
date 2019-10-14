@@ -62,4 +62,16 @@ public class CourseConfiguration extends JsonWrapper {
         JSONObject repeatablePartJson = get(FIELD_OPTIONAL_REPEATABLE_PART);
         return repeatablePartJson != null ? new RepeatablePart(repeatablePartJson) : null;
     }
+    
+    public MarkConfiguration getMarkConfigurationByEffectiveName(String name) {
+        MarkConfiguration result = null;
+        for (MarkConfiguration markConfiguration : getMarkConfigurations()) {
+            MarkAppearance effectiveProperties = markConfiguration.getEffectiveProperties();
+            if (effectiveProperties != null && name.equals(effectiveProperties.getName())) {
+                result = markConfiguration;
+                break;
+            }
+        }
+        return result;
+    }
 }
