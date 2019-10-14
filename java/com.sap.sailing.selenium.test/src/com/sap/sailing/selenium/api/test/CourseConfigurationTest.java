@@ -294,7 +294,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         sfp.setStoreToInventory(true);
         
         MarkConfiguration sfb = MarkConfiguration.createFreestyle(null, null, null, "Start/Finish Boat", "SFB", null, null,
-                null, MarkType.BUOY.name());
+                null, MarkType.STARTBOAT.name());
         sfp.setStoreToInventory(true);
         
         
