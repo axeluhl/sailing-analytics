@@ -15,8 +15,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
@@ -517,6 +519,19 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         CourseConfiguration courseConfigurationResult = courseConfigurationApi.createCourseTemplate(ctx,
                 courseConfiguration, "testregatta");
         assertCourseConfigurationCompared(ctx, courseConfiguration, courseConfigurationResult);
+        
+        Set<UUID> expectedMarkProperties = new HashSet<>();
+        courseConfigurationResult.getMarkConfigurations().forEach(mc -> {
+            if (mc.getMarkPropertiesId() != null) {
+                expectedMarkProperties.add(mc.getMarkPropertiesId());
+            }
+        });
+        
+        Iterable<MarkProperties> allMarkProperties = markPropertiesApi.getAllMarkProperties(ctx, Collections.emptySet());
+        Set<UUID> availableMarkProperties = new HashSet<>();
+        allMarkProperties.forEach(mp -> availableMarkProperties.add(mp.getId()));
+        
+        assertEquals(expectedMarkProperties, availableMarkProperties);
     }
 
     @Test
