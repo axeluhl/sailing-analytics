@@ -105,6 +105,9 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
 
     private <T> boolean containsAny(Iterable<T> iterable, Iterable<T> search) {
+        if (Util.isEmpty(search)) {
+            return true;
+        }
         for (T t : search) {
             if (Util.contains(iterable, t)) {
                 return true;
