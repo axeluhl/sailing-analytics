@@ -255,6 +255,32 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertConsistentCourseConfiguration(createdCourseAsConfiguration);
         assertEquals(numberOfLaps, createdCourseAsConfiguration.getNumberOfLaps());
     }
+    
+    @Test
+    public void testReconstructionOfLapsForCourseBasedOnTemplate() {
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(ctx);
+        
+        final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(ctx,
+                ctdf.constructCourseTemplate(new Pair<>(1, 3), null, Collections.emptyMap()));
+        
+        
+        final String regattaName = "test";
+        eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
+        final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
+        
+        for (int numberOfLaps = 1; numberOfLaps <=3; numberOfLaps ++) {
+            CourseConfiguration courseConfiguration = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(
+                    ctx, createdCourseTemplate.getId(), regattaName, /* tags */ null);
+            courseConfiguration.setNumberOfLaps(numberOfLaps);
+            courseConfigurationApi.createCourse(ctx, courseConfiguration, regattaName, race.getRaceName(), "Default");
+            CourseConfiguration createdCourseAsConfiguration = courseConfigurationApi
+                    .createCourseConfigurationFromCourse(ctx, regattaName, race.getRaceName(), "Default", null);
+            
+            assertEquals(createdCourseTemplate.getId(), createdCourseAsConfiguration.getOptionalCourseTemplateId());
+            assertEquals(numberOfLaps, createdCourseAsConfiguration.getNumberOfLaps());
+        }
+    }
 
     @Test
     public void testCreateCourseFromFreestyleConfigurationWithPositioning() {
