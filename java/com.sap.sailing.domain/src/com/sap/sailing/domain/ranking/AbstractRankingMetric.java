@@ -261,8 +261,12 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                 result = null;
             } else {
                 final MarkPassing finishingMarkPassing = getTrackedRace().getMarkPassing(competitor, finish);
-                if (finishingMarkPassing != null && finishingMarkPassing.getTimePoint().before(timePoint)) {
-                    result = startOfRace.until(finishingMarkPassing.getTimePoint());
+                if (finishingMarkPassing != null) {
+                    if (finishingMarkPassing.getTimePoint().before(timePoint)) {
+                        result = startOfRace.until(finishingMarkPassing.getTimePoint());
+                    } else {
+                        result = startOfRace.until(timePoint);
+                    }
                 } else {
                     if (trackedRace.getEndOfTracking() != null && timePoint.after(trackedRace.getEndOfTracking())) {
                         result = null; // race not finished until end of tracking; no reasonable value can be computed for competitor
