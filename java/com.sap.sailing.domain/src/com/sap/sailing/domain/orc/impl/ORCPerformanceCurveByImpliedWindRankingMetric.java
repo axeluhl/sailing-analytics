@@ -7,10 +7,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ForkJoinTask;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -57,7 +56,7 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.util.ThreadPoolUtil;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRankingMetric {
     private static final long serialVersionUID = -7814822523533929816L;
@@ -71,6 +70,8 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
      * is detached.
      */
     private Map<Boat, ORCCertificate> certificates;
+    
+    private Boat boatWithLeastGPH;
     
     private ORCPerformanceCurveCourse totalCourse;
     
@@ -88,18 +89,6 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
      */
     private Competitor explicitScratchBoat;
     
-    final private static ScheduledExecutorService executor;
-    
-    static {
-        executor = ThreadPoolUtil.INSTANCE.createForegroundTaskThreadPoolExecutor("ORC PCS Executor");
-    }
-    
-    /**
-     * TODO maybe it's a good idea to cache the {@link ORCPerformanceCurve} objects and implied wind speeds for all competitors involved in this object which serves as some sort of cache for ranking calculations for a single time point
-     * 
-     * @author Axel Uhl (d043530)
-     *
-     */
     private class ORCPerformanceCurveRankingInfo extends AbstractRankingInfoWithCompetitorRankingInfoCache {
         private static final long serialVersionUID = -3578498778702139675L;
         
@@ -161,6 +150,10 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
     
     public ORCCertificate getCertificate(Boat boat) {
         return certificates.get(boat);
+    }
+    
+    protected Boat getBoatWithLeastGph() {
+        return boatWithLeastGPH;
     }
 
     private Map<Serializable, Boat> initBoatsById() {
@@ -251,6 +244,15 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
             }
         }
         certificates = newCertificates;
+        Duration minGPH = new MillisecondsDurationImpl(Long.MAX_VALUE);
+        Boat boatWithMinGPH = null;
+        for (final Entry<Boat, ORCCertificate> e : certificates.entrySet()) {
+            if (e.getValue().getGPH().compareTo(minGPH) < 0) {
+                boatWithMinGPH = e.getKey();
+                minGPH = e.getValue().getGPH();
+            }
+        }
+        boatWithLeastGPH = boatWithMinGPH;
     }
     
     private void updateCourseFromRaceLogs() {
@@ -331,7 +333,7 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
                 compare(impliedWindByCompetitor.get(c1), impliedWindByCompetitor.get(c2));
     }
 
-    private Map<Competitor, Speed> getImpliedWindByCompetitor(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    protected Map<Competitor, Speed> getImpliedWindByCompetitor(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Map<Competitor, Speed> impliedWindByCompetitor = new HashMap<>();
         for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
             impliedWindByCompetitor.put(competitor, cache.getImpliedWind(timePoint, getTrackedRace(), competitor, getImpliedWindSupplier(cache)));
@@ -392,15 +394,7 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
             Speed impliedWind;
             if (trackedLeg.getTrackedLeg(competitor).hasFinishedLeg(timePoint)) {
                 // dedicated time point at leg end; cannot use implied wind from cache
-                try {
-                    impliedWind = getImpliedWind(competitor, trackedLeg.getTrackedLeg(competitor).getFinishTime(), cache);
-                } catch (MaxIterationsExceededException | FunctionEvaluationException e) {
-                    // log and leave entry for competitor empty; this, together with a nullsLast comparator
-                    // will sort such competitors towards "worse" ranks
-                    logger.log(Level.WARNING, "Problem trying to determine ORC PCS implied wind for competitor "
-                            + competitor + " for time point " + timePoint, e);
-                    impliedWind = null;
-                }
+                impliedWind = cache.getImpliedWind(timePoint, getTrackedRace(), competitor, getImpliedWindSupplier(cache));
             } else {
                 // can use cache; we shall compute for the cache's timePoint:
                 impliedWind = cache.getImpliedWind(timePoint, getTrackedRace(), competitor, getImpliedWindSupplier(cache));
@@ -506,25 +500,21 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
         final Competitor competitorFarthestAhead = getCompetitorFarthestAhead(timePoint, cache);
         if (startOfRace != null) {
             final Duration actualRaceDuration = startOfRace.until(timePoint);
-            final Set<Future<Pair<Competitor, CompetitorRankingInfoImpl>>> futures = new HashSet<>();
+            final Set<ForkJoinTask<Pair<Competitor, CompetitorRankingInfoImpl>>> futures = new HashSet<>();
             for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
-                futures.add(executor.submit(()->{
+                futures.add(ForkJoinTask.adapt(()->{
                     final Duration correctedTime = getCorrectedTime(competitor, timePoint, cache);
                     return new Pair<>(competitor, new CompetitorRankingInfoImpl(
                             timePoint, competitor, getWindwardDistanceTraveled(competitor, timePoint, cache),
                             actualRaceDuration, correctedTime,
                             getEstimatedActualDurationToCompetitorFarthestAhead(competitor, competitorFarthestAhead, timePoint, cache),
                             correctedTime));
-                }));
+                }).fork());
             }
-            for (final Future<Pair<Competitor, CompetitorRankingInfoImpl>> future : futures) {
+            for (final ForkJoinTask<Pair<Competitor, CompetitorRankingInfoImpl>> future : futures) {
                 Pair<Competitor, CompetitorRankingInfoImpl> resultForCompetitor;
-                try {
-                    resultForCompetitor = future.get();
-                    competitorRankingInfo.put(resultForCompetitor.getA(), resultForCompetitor.getB());
-                } catch (InterruptedException | ExecutionException e) {
-                    logger.log(Level.SEVERE, "Problem trying to evaluate ORC ranking info", e);
-                }
+                resultForCompetitor = future.join();
+                competitorRankingInfo.put(resultForCompetitor.getA(), resultForCompetitor.getB());
             }
         }
         return new ORCPerformanceCurveRankingInfo(timePoint, competitorFarthestAhead, competitorRankingInfo, cache);
@@ -626,7 +616,8 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
                     } else {
                         final TimePoint timeForLegLeaderImpliedWindCalculation = nowOrLegFinishTimeIfFinishedAtTimePoint(
                                 getTrackedRace().getTrackedLeg(legLeader, trackedLegOfCompetitor.getLeg()), timePoint, cache);
-                        final Speed legLeaderImpliedWindInOrAtEndOfLeg = getImpliedWind(legLeader, timeForLegLeaderImpliedWindCalculation, cache);
+                        final Speed legLeaderImpliedWindInOrAtEndOfLeg = cache.getImpliedWind(timeForLegLeaderImpliedWindCalculation, getTrackedRace(), competitor,
+                                getImpliedWindSupplier(cache));
                         if (legLeaderImpliedWindInOrAtEndOfLeg != null) {
                             final Duration correctedTimeOfLegLeaderInCompetitorsPerformanceCurve = competitorPerformanceCurveForLeg.getAllowancePerCourse(legLeaderImpliedWindInOrAtEndOfLeg);
                             result = actualRaceDurationForCompetitor.minus(correctedTimeOfLegLeaderInCompetitorsPerformanceCurve);
@@ -634,7 +625,7 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
                             result = null;
                         }
                     }
-                } catch (FunctionEvaluationException | MaxIterationsExceededException e) {
+                } catch (FunctionEvaluationException e) {
                     logger.log(Level.WARNING, "Problem with performance curve calculation for competitor "+competitor+" or "+legLeader, e);
                     result = null;
                 }

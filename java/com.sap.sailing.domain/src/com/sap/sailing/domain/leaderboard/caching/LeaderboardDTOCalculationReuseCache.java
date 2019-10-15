@@ -8,12 +8,17 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.apache.commons.math.ArgumentOutsideDomainException;
+import org.apache.commons.math.FunctionEvaluationException;
+import org.apache.commons.math.MaxIterationsExceededException;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
@@ -29,12 +34,14 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.DegreeBearingImpl;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -95,13 +102,43 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
     
     private final ConcurrentHashMap<Triple<TimePoint, TrackedRace, Competitor>, Speed> impliedWindPerCompetitor;
     
+    private final ConcurrentHashMap<Triple<TimePoint, TrackedRace, Competitor>, Duration> relativeCorrectedTimePerCompetitor;
+    
     private static final Bearing NULL_BEARING = new DegreeBearingImpl(0);
+    
+    private static final Speed NULL_IMPLIED_WIND = new KnotSpeedImpl(0);
+
+    private static final Duration NULL_RELATIVE_CORRECTED_TIME = new MillisecondsDurationImpl(0);
+    
+    private static final ORCPerformanceCurve NULL_PERFORMANCE_CURVE = new ORCPerformanceCurve() {
+        @Override
+        public Speed getImpliedWind(Duration durationToCompleteCourse)
+                throws MaxIterationsExceededException, FunctionEvaluationException {
+            return null;
+        }
+
+        @Override
+        public Duration getCalculatedTime(ORCPerformanceCurve referenceBoat, Duration durationToCompleteCourse)
+                throws MaxIterationsExceededException, FunctionEvaluationException {
+            return null;
+        }
+
+        @Override
+        public Duration getAllowancePerCourse(Speed trueWindSpeed) throws ArgumentOutsideDomainException {
+            return null;
+        }
+
+        @Override
+        public ORCPerformanceCurveCourse getCourse() {
+            return null;
+        }};
 
     public LeaderboardDTOCalculationReuseCache(TimePoint timePoint) {
         legTypeCache = new ConcurrentHashMap<>();
         windCache = new ConcurrentHashMap<>();
         scratchBoat = new ConcurrentHashMap<>();
         legBearingCache = new ConcurrentHashMap<>();
+        relativeCorrectedTimePerCompetitor = new ConcurrentHashMap<>();
         this.performanceCurvesPerCompetitor = new ConcurrentHashMap<>();
         this.impliedWindPerCompetitor = new ConcurrentHashMap<>();
         this.timePoint = timePoint;
@@ -166,7 +203,7 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
         boolean changed = false;
         for (final ORCPerformanceCurveLeg leg : course.getLegs()) {
             if (leg instanceof ORCPerformanceCurveLegAdapter) {
-                legs.add(new ORCPerformanceCurveLegImpl(leg.getLength(), leg.getTwa()));
+                legs.add(new ORCPerformanceCurveLegImpl(((ORCPerformanceCurveLegAdapter) leg).getLength(this), leg.getTwa()));
                 changed = true;
             } else {
                 legs.add(leg);
@@ -190,17 +227,39 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
     @Override
     public ORCPerformanceCurve getPerformanceCurveForPartialCourse(TimePoint timePoint,
             TrackedRace raceContext, Competitor competitor, BiFunction<TimePoint, Competitor, ORCPerformanceCurve> performanceCurveSupplier) {
-        return performanceCurvesPerCompetitor.computeIfAbsent(new Triple<>(timePoint, raceContext, competitor),
-                timePointAndTrackedRaceAndCompetitor -> performanceCurveSupplier.apply(timePointAndTrackedRaceAndCompetitor.getA(),
-                        timePointAndTrackedRaceAndCompetitor.getC()));
+        final ORCPerformanceCurve result = performanceCurvesPerCompetitor.computeIfAbsent(new Triple<>(timePoint, raceContext, competitor),
+                timePointAndTrackedRaceAndCompetitor -> {
+                    final ORCPerformanceCurve performanceCurve = performanceCurveSupplier.apply(timePointAndTrackedRaceAndCompetitor.getA(),
+                        timePointAndTrackedRaceAndCompetitor.getC());
+                    return performanceCurve == null ? NULL_PERFORMANCE_CURVE : performanceCurve;
+                });
+        return result == NULL_PERFORMANCE_CURVE ? null : result;
     }
 
     @Override
     public Speed getImpliedWind(TimePoint timePoint, TrackedRace raceContext, Competitor competitor, BiFunction<TimePoint, Competitor, Speed> impliedWindSupplier) {
-        return impliedWindPerCompetitor
+        final Speed result = impliedWindPerCompetitor
                 .computeIfAbsent(new Triple<>(timePoint, raceContext, competitor),
-                        timePointAndTrackedRaceAndCompetitor -> impliedWindSupplier.apply(
+                        timePointAndTrackedRaceAndCompetitor -> {
+                            final Speed impliedWind = impliedWindSupplier.apply(
                                 timePointAndTrackedRaceAndCompetitor.getA(),
-                                timePointAndTrackedRaceAndCompetitor.getC()));
+                                timePointAndTrackedRaceAndCompetitor.getC());
+                            return impliedWind == null ? NULL_IMPLIED_WIND : impliedWind;
+                        });
+        return result == NULL_IMPLIED_WIND ? null : result;
+    }
+
+    @Override
+    public Duration getRelativeCorrectedTime(Competitor competitor, TrackedRace raceContext,
+            TimePoint timePoint, BiFunction<Competitor, TimePoint, Duration> relativeCorrectedTimeSupplier) {
+        final Duration result = relativeCorrectedTimePerCompetitor
+                .computeIfAbsent(new Triple<>(timePoint, raceContext, competitor),
+                        timePointAndTrackedRaceAndCompetitor -> {
+                            final Duration relativeCorrectedTime = relativeCorrectedTimeSupplier.apply(
+                                timePointAndTrackedRaceAndCompetitor.getC(),
+                                timePointAndTrackedRaceAndCompetitor.getA());
+                            return relativeCorrectedTime == null ? NULL_RELATIVE_CORRECTED_TIME : relativeCorrectedTime;
+                        });
+        return result == NULL_RELATIVE_CORRECTED_TIME ? null : result;
     }
 }
