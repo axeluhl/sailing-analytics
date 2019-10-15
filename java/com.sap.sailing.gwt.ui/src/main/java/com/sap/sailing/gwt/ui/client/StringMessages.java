@@ -1420,10 +1420,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String oneDesignRankingMetric();
     String orcPerformanceCurveRankingMetric();
     String orcPerformanceCurveByImpliedWindRankingMetric();
+    String orcPerformanceCurveLeaderForBaselineRankingMetric();
     String timeOnTimeAndDistanceRankingMetric();
     String oneDesignRankingMetricDescription();
     String orcPerformanceCurveRankingMetricDescription();
     String orcPerformanceCurveByImpliedWindRankingMetricDescription();
+    String orcPerformanceCurveLeaderForBaselineRankingMetricDescription();
     String timeOnTimeAndDistanceRankingMetricDescription();
     String timeOnTimeFactor();
     String timeOnDistanceAllowanceInSecondsPerNauticalMile();
