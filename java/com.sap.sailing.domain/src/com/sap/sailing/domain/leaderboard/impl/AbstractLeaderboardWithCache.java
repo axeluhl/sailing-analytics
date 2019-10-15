@@ -429,7 +429,8 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race, isMetaLeaderboardColumn);
             }
             Future<List<CompetitorDTO>> task = executor.submit(
-                    () -> baseDomainFactory.getCompetitorDTOList(AbstractLeaderboardWithCache.this.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
+                    () -> baseDomainFactory.getCompetitorDTOList(AbstractLeaderboardWithCache.this.getCompetitorsFromBestToWorst(
+                            raceColumn, timePoint, cache)));
             competitorsFromBestToWorstTasks.put(raceColumn, task);
         }
         // wait for the competitor orderings to have been computed for all race columns before continuing; subsequent tasks may depend on these data
@@ -484,7 +485,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             }
         }
         final Map<Pair<RaceColumn, Competitor>, RankingInfo> rankingInfoCache = new HashMap<>();
-        for (final Competitor competitor : this.getCompetitorsFromBestToWorst(timePoint)) {
+        for (final Competitor competitor : this.getCompetitorsFromBestToWorst(timePoint, cache)) {
             CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
             LeaderboardRowDTO row = new LeaderboardRowDTO();
             row.competitor = competitorDTO;

@@ -3,10 +3,8 @@ package com.sap.sailing.domain.orc.impl;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ForkJoinTask;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
@@ -21,7 +19,6 @@ import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformance
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util;
 
 /**
  * As opposed to before 2015 when implied wind was the only ranking criterion at all times, in 2015
@@ -95,17 +92,16 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
         //    case the highest implied wind was below 6kts); add all other relative corrected times to the winner's elapsed time.
         // Here, we use the third option, so even the leader can have a corrected time that differs from her elapsed time in case
         // her implied wind was capped at 6 or 20 knots.
-        final Map<Competitor, Duration> relativeCorrectedTimesByCompetitor = getRelativeCorrectedTimesByCompetitor(timePoint, cache);
-        final Comparator<Competitor> raceRankingComparatorByRelativeCorrectedTimes = getRaceRankingComparator(timePoint, relativeCorrectedTimesByCompetitor);
-        final Duration competitorDelta = relativeCorrectedTimesByCompetitor.get(competitor);
+        final Duration competitorDelta = getRelativeCorrectedTime(competitor, timePoint, cache);
         if (competitorDelta != null) {
-            final Set<Competitor> competitors = new HashSet<>();
-            Util.addAll(getTrackedRace().getRace().getCompetitors(), competitors);
-            final Competitor leader = Collections.min(competitors, raceRankingComparatorByRelativeCorrectedTimes);
-            if (leader != null) {
-                final Duration leaderElapsedTime = getTrackedRace().getTimeSailedSinceRaceStart(leader, timePoint);
-                if (leaderElapsedTime != null) {
-                    result = leaderElapsedTime.plus(competitorDelta);
+            final Competitor baseLineCompetitor = getBaseLineCompetitorForAbsoluteCorrectedTimes(timePoint, cache);
+            if (baseLineCompetitor != null) {
+                final Duration baseLineCompetitorRelativeCorrectedTime = getRelativeCorrectedTime(baseLineCompetitor, timePoint, cache);
+                final Duration baseLineCompetitorElapsedTime = getTrackedRace().getTimeSailedSinceRaceStart(baseLineCompetitor, timePoint);
+                if (baseLineCompetitorElapsedTime != null) {
+                    result = baseLineCompetitorElapsedTime.plus(competitorDelta)
+                            .minus(baseLineCompetitorRelativeCorrectedTime == null ? Duration.NULL
+                                    : baseLineCompetitorRelativeCorrectedTime);
                 } else {
                     result = null;
                 }
@@ -116,6 +112,19 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
             result = null;
         }
         return result;
+    }
+
+    /**
+     * This decides which competitor shall have their corrected time set as their elapsed time.
+     * For all other competitors, their absolute corrected time will then be calculated by first computing
+     * the difference between their relative corrected time and the base line competitor's relative corrected time,
+     * then adding this difference to the base line competitor's elapsed time.<p>
+     * 
+     * By default, this implementation uses the boat with the least GPH as the base line boat.
+     */
+    private Competitor getBaseLineCompetitorForAbsoluteCorrectedTimes(TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getTrackedRace().getCompetitorOfBoat(getBoatWithLeastGph());
     }
 
     /**

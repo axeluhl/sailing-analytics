@@ -4,6 +4,7 @@ import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
@@ -26,6 +27,10 @@ public class ORCPerformanceCurveLegAdapter implements ORCPerformanceCurveLeg {
     @Override
     public Distance getLength() {
         return trackedLeg.getWindwardDistance();
+    }
+
+    public Distance getLength(WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return trackedLeg.getWindwardDistance(cache);
     }
 
     @Override

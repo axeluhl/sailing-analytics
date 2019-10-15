@@ -39,6 +39,7 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sailing.util.impl.RaceColumnListeners;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -400,9 +401,10 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     }
 
     @Override
-    public Double getTotalPoints(final Competitor competitor, final RaceColumn raceColumn, final TimePoint timePoint) {
-        return getScoreCorrection().getCorrectedScore(() -> getTrackedRank(competitor, raceColumn, timePoint),
-                competitor, raceColumn, this, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme())
+    public Double getTotalPoints(final Competitor competitor, final RaceColumn raceColumn, final TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getScoreCorrection().getCorrectedScore(() -> getTrackedRank(competitor, raceColumn, timePoint, cache),
+                competitor, raceColumn, this, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme(), cache)
                 .getCorrectedScore();
     }
 
@@ -525,11 +527,11 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
      * points.
      */
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint)
-            throws NoWindException {
+    public List<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
         final Map<Competitor, com.sap.sse.common.Util.Pair<Double, Fleet>> totalPointsAndFleet = new HashMap<Competitor, com.sap.sse.common.Util.Pair<Double, Fleet>>();
         for (Competitor competitor : getCompetitors()) {
-            Double totalPoints = getTotalPoints(competitor, raceColumn, timePoint);
+            Double totalPoints = getTotalPoints(competitor, raceColumn, timePoint, cache);
             if (totalPoints != null) {
                 totalPointsAndFleet.put(competitor, new com.sap.sse.common.Util.Pair<Double, Fleet>(totalPoints,
                         raceColumn.getFleetOfCompetitor(competitor)));
@@ -584,27 +586,27 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
      * suppressed competitors are removed from the result
      */
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
-        return getCompetitorsFromBestToWorst(getRaceColumns(), timePoint);
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getCompetitorsFromBestToWorst(getRaceColumns(), timePoint, cache);
     }
 
     /**
      * suppressed competitors are removed from the result
      */
     private List<Competitor> getCompetitorsFromBestToWorst(Iterable<RaceColumn> raceColumnsToConsider,
-            TimePoint timePoint) {
+            TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         List<Competitor> result = new ArrayList<Competitor>();
         for (Competitor competitor : getCompetitors()) {
             result.add(competitor);
         }
-        Collections.sort(result, getTotalRankComparator(raceColumnsToConsider, timePoint));
+        Collections.sort(result, getTotalRankComparator(raceColumnsToConsider, timePoint, cache));
         return result;
     }
 
     protected Comparator<? super Competitor> getTotalRankComparator(Iterable<RaceColumn> raceColumnsToConsider,
-            TimePoint timePoint) {
+            TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return new LeaderboardTotalRankComparator(this, timePoint, getScoringScheme(), /* nullScoresAreBetter */ false,
-                raceColumnsToConsider);
+                raceColumnsToConsider, cache);
     }
 
     @Override
@@ -674,13 +676,13 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     }
 
     @Override
-    public Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint)
-            throws NoWindException {
+    public Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
         Map<RaceColumn, List<Competitor>> result = new LinkedHashMap<>();
         List<RaceColumn> raceColumnsToConsider = new ArrayList<>();
         for (RaceColumn raceColumn : getRaceColumns()) {
             raceColumnsToConsider.add(raceColumn);
-            result.put(raceColumn, getCompetitorsFromBestToWorst(raceColumnsToConsider, timePoint));
+            result.put(raceColumn, getCompetitorsFromBestToWorst(raceColumnsToConsider, timePoint, cache));
         }
         return result;
     }

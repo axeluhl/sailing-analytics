@@ -289,7 +289,11 @@ public interface TrackedRace
      * @return <code>0</code> in case the competitor hasn't participated in the race; a rank starting with
      *         <code>1</code> where rank <code>1</code> identifies the leader otherwise
      */
-    int getRank(Competitor competitor, TimePoint timePoint);
+    default int getRank(Competitor competitor, TimePoint timePoint) {
+        return getRank(competitor, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
+    int getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * For the given waypoint lists the {@link MarkPassing} events that describe which competitor passed the waypoint at
