@@ -540,7 +540,11 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
                     final Duration allowanceToPositionOfBoatFarthestAhead = performanceCurveForCompetitorToPositionOfCompetitorFarthestAhread
                             .getAllowancePerCourse(competitorsCurrentImpliedWind);
                     final Duration competitorElapsedTime = getTrackedRace().getTimeSailedSinceRaceStart(competitor, timePoint);
-                    result = allowanceToPositionOfBoatFarthestAhead.minus(competitorElapsedTime);
+                    if (competitorElapsedTime == null) { // probably not finished before end-of-tracking
+                        result = null;
+                    } else {
+                        result = allowanceToPositionOfBoatFarthestAhead.minus(competitorElapsedTime);
+                    }
                 } else {
                     result = null;
                 }
