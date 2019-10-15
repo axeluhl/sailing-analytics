@@ -306,7 +306,7 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
             shareOfCurrentLeg = 1.0
                     - trackedLegOfCompetitor.getWindwardDistanceToGo(legType, timePoint, WindPositionMode.LEG_MIDDLE, cache).divide(
                             trackedLegOfCompetitor.getTrackedLeg().getWindwardDistance(timePoint, cache));
-            result = totalCourse.subcourse(getTrackedRace().getRace().getCourse().getIndexOfWaypoint(trackedLegOfCompetitor.getLeg().getFrom()), shareOfCurrentLeg);
+            result = totalCourse.subcourse(zeroBasedIndexOfCurrentLeg, shareOfCurrentLeg);
         }
         return result;
     }
