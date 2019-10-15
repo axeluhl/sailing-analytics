@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -233,43 +234,32 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
      */
     @Override
     protected boolean isLiveModeToBeMadePossible() {
-        long liveTimePointInMillis = timer.getLiveTimePointInMillis();
-        RaceTimesInfoDTO lastRaceTimesInfo = raceTimesInfoProvider != null ? raceTimesInfoProvider.getRaceTimesInfo(selectedRace) : null;
-        final boolean isLiveModeToBeMadePossible;
-        if (lastRaceTimesInfo != null &&
-                // check that we're after startOfTracking or startOfRace minus some leeway:
-                ((lastRaceTimesInfo.startOfTracking != null && liveTimePointInMillis > lastRaceTimesInfo.startOfTracking.getTime()) ||
-                 (lastRaceTimesInfo.startOfRace != null && liveTimePointInMillis > lastRaceTimesInfo.startOfRace.getTime() - RaceTimesCalculationUtil.MIN_TIME_BEFORE_RACE_START))) {
-            // now check that we cannot know about an end time or are reasonably before it;
-            // we don't know about the end time if startOfTracking is valid but endOfTracking is not;
-            // neither do we know about the end time if both, startOfTracking and endOfTracking are null
-            // and we have neither a valid newestTrackingEvent nor an endOfRace value; if we do, we would
-            // have to be before the later one plus some leeway.
-            Date endTimeOfLivePeriod;
-            if (lastRaceTimesInfo.startOfTracking == null && lastRaceTimesInfo.endOfTracking == null) {
-                Date latestOfNewestTrackingEventAndEndOfRace = lastRaceTimesInfo.newestTrackingEvent;
-                if (latestOfNewestTrackingEventAndEndOfRace == null || (lastRaceTimesInfo.endOfRace != null && lastRaceTimesInfo.endOfRace.after(latestOfNewestTrackingEventAndEndOfRace))) {
-                    latestOfNewestTrackingEventAndEndOfRace = lastRaceTimesInfo.endOfRace;
-                }
-                endTimeOfLivePeriod = latestOfNewestTrackingEventAndEndOfRace == null ? null :
-                    new Date(latestOfNewestTrackingEventAndEndOfRace.getTime() + RaceTimesCalculationUtil.TIME_AFTER_LIVE);
-            } else {
-                endTimeOfLivePeriod = lastRaceTimesInfo.endOfTracking;
-                if (lastRaceTimesInfo.endOfRace != null) {
-                    // this is a failsafe, if the tracking was never finished, the race was always assumed to be live.
-                    Date latestAllowedTime = new Date(
-                            lastRaceTimesInfo.endOfRace.getTime() + RaceTimesCalculationUtil.MAX_TIME_AFTER_RACE_END);
-                    if (endTimeOfLivePeriod == null || endTimeOfLivePeriod.after(latestAllowedTime)) {
-                        endTimeOfLivePeriod = latestAllowedTime;
-                    }
-                }
-            }
-            isLiveModeToBeMadePossible = endTimeOfLivePeriod == null /* meaning we don't know an end time */ ||
-                                         endTimeOfLivePeriod.getTime() >= liveTimePointInMillis;
-        } else {
-            isLiveModeToBeMadePossible = false;
+        RaceTimesInfoDTO lastRaceTimesInfo = raceTimesInfoProvider != null
+                ? raceTimesInfoProvider.getRaceTimesInfo(selectedRace)
+                : null;
+        if (lastRaceTimesInfo == null) return false;
+
+        Date timePoint = timer.getLiveTimePointAsDate();
+        Pair<Date, Date> minMax = RaceTimesCalculationUtil.calculateRaceMinMax(timer, lastRaceTimesInfo);
+        Date min = minMax.getA();
+        Date max = minMax.getB();
+
+        // Bug 3482: try to determine a value for max if max is null
+        if (max == null && lastRaceTimesInfo.newestTrackingEvent != null) {
+            max = new Date(lastRaceTimesInfo.newestTrackingEvent.getTime() + RaceTimesCalculationUtil.TIME_AFTER_LIVE);
         }
-        return isLiveModeToBeMadePossible;
+
+        // Assume we are live (no end known as of now)
+        boolean beforeEnd = true;
+        if (max != null) {
+            beforeEnd = timePoint.before(max);
+        }
+
+        if (min != null) {
+            // min < timePoint < max; max might be unknown as of now
+            return beforeEnd && timePoint.after(min);
+        }
+        return beforeEnd;
     }
     
     @Override
