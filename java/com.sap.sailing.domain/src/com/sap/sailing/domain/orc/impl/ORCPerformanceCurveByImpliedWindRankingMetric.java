@@ -13,8 +13,6 @@ import java.util.concurrent.ForkJoinTask;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.MaxIterationsExceededException;
@@ -40,7 +38,7 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
@@ -54,8 +52,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
-import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
-import com.sap.sailing.domain.tracking.impl.TrackedLegOfCompetitorImpl;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
@@ -295,42 +291,21 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
                 result = cache.getTotalCourse(getTrackedRace(), ()->getTotalCourse()).subcourse(0, 0);
             }
         } else {
-            ORCPerformanceCurveCourse totalCourse = cache.getTotalCourse(getTrackedRace(), ()->getTotalCourse());
-            int indexOfCurrentLeg = getTrackedRace().getRace().getCourse().getIndexOfWaypoint(trackedLegOfCompetitor.getLeg().getFrom()) + 1;
-            List<ORCPerformanceCurveLeg> legs = StreamSupport.stream(totalCourse.getLegs().spliterator(), false).collect(Collectors.toList());
-            ORCPerformanceCurveLeg currentLeg = legs.get(indexOfCurrentLeg);
-            double shareOfCurrentLeg;
+            final ORCPerformanceCurveCourse totalCourse = cache.getTotalCourse(getTrackedRace(), ()->getTotalCourse());
+            final int zeroBasedIndexOfCurrentLeg = getTrackedRace().getRace().getCourse().getIndexOfWaypoint(trackedLegOfCompetitor.getLeg().getFrom());
+            final ORCPerformanceCurveLeg currentLeg = Util.get(totalCourse.getLegs(), zeroBasedIndexOfCurrentLeg);
+            final double shareOfCurrentLeg;
+            final LegType legType;
             if (currentLeg.getType().equals(ORCPerformanceCurveLegTypes.WINDWARD_LEEWARD)
                     || currentLeg.getType().equals(ORCPerformanceCurveLegTypes.TWA)) {
-                shareOfCurrentLeg = 1.0
-                        - trackedLegOfCompetitor.getWindwardDistanceToGo(timePoint, WindPositionMode.LEG_MIDDLE, cache).divide(
-                                trackedLegOfCompetitor.getTrackedLeg().getWindwardDistance(timePoint, cache));
+                legType = null;
             } else {
-                final TrackedLegOfCompetitor modifiedTrackedLegOfCompetitor = new TrackedLegOfCompetitorImpl(
-                        (TrackedLegImpl) trackedLegOfCompetitor.getTrackedLeg(), trackedLegOfCompetitor.getCompetitor(), trackedLegOfCompetitor.getBoat()) {
-                    private Distance getWindwardDistanceTo(Waypoint waypoint, TimePoint at,
-                            WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-                        Position estimatedPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false);
-                        if (!hasStartedLeg(at) || estimatedPosition == null) {
-                            // covers the case with no fixes for this leg yet, also if the mark passing has already been received
-                            estimatedPosition = getTrackedRace().getOrCreateTrack(getLeg().getFrom().getMarks().iterator().next())
-                                    .getEstimatedPosition(at, false);
-                        }
-                        if (estimatedPosition == null) { // may happen if mark positions haven't been received yet
-                            return null;
-                        }
-                        final Position approximateWaypointPosition = getTrackedRace().getApproximatePosition(waypoint, at);
-                        if (approximateWaypointPosition == null) {
-                            return null;
-                        }
-                        return approximateWaypointPosition.alongTrackDistance(estimatedPosition, cache.getLegBearing(getTrackedLeg(), at));
-                    }
-                };
-                shareOfCurrentLeg = 1.0
-                        - modifiedTrackedLegOfCompetitor.getWindwardDistanceToGo(timePoint, WindPositionMode.LEG_MIDDLE, cache).divide(
-                                modifiedTrackedLegOfCompetitor.getTrackedLeg().getWindwardDistance(timePoint, cache));
-                // TODO changeCalculation here
+                legType = LegType.REACHING;
             }
+            // use windward projection in case we deem the current leg an upwind or downwind leg
+            shareOfCurrentLeg = 1.0
+                    - trackedLegOfCompetitor.getWindwardDistanceToGo(legType, timePoint, WindPositionMode.LEG_MIDDLE, cache).divide(
+                            trackedLegOfCompetitor.getTrackedLeg().getWindwardDistance(timePoint, cache));
             result = totalCourse.subcourse(getTrackedRace().getRace().getCourse().getIndexOfWaypoint(trackedLegOfCompetitor.getLeg().getFrom()), shareOfCurrentLeg);
         }
         return result;

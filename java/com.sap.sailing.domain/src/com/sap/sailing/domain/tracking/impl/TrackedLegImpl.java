@@ -498,29 +498,46 @@ public class TrackedLegImpl implements TrackedLeg {
 
     @Override
     public Distance getWindwardDistance(final Position pos1, final Position pos2, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getWindwardDistance(/* legType==null means infer leg type */ null, pos1, pos2, at, windPositionMode, cache);
+    }
+
+    /**
+     * @param legType
+     *            if {@code null}, the leg type will be determined for the {@code at} time point based on the wind at
+     *            the middle of the leg and the leg's geometry at that time point. Otherwise, the leg type specified will
+     *            be used; in particular, for {@link LegType#UPWIND} and {@link LegType#DOWNWIND}, projection to the wind
+     *            direction at the leg middle will be used; for {@link LegType#REACHING}, projection to the rhumb line will
+     *            be used.
+     */
+    public Distance getWindwardDistance(final LegType legType, final Position pos1, final Position pos2, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Distance result;
+        LegType effectiveLegType;
         if (pos1 == null || pos2 == null) {
             result = null;
         } else {
-            try {
-                final LegType legType = cache.getLegType(this, at);
-                if (legType != LegType.REACHING) { // upwind or downwind
-                    final Position effectivePosition = getEffectiveWindPosition(() -> pos1.translateGreatCircle(
-                            pos1.getBearingGreatCircle(pos2), pos1.getDistance(pos2).scale(0.5)), at, windPositionMode);
-                    Wind wind = getTrackedRace().getWind(effectivePosition, at);
-                    if (wind == null) {
-                        result = pos2.alongTrackDistance(pos1, cache.getLegBearing(this, at));
-                    } else {
-                        Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, wind.getBearing());
-                        result = pos2.alongTrackDistance(projectionToLineThroughPos2,
-                                legType == LegType.UPWIND ? wind.getFrom() : wind.getBearing());
-                    }
-                } else {
-                    // reaching leg, return distance projected onto leg's bearing
-                    result = pos2.alongTrackDistance(pos1, cache.getLegBearing(this, at));
+            if (legType == null) {
+                try {
+                    effectiveLegType = cache.getLegType(this, at);
+                } catch (NoWindException e) {
+                    // no wind information; use along-track distance as fallback
+                    effectiveLegType = LegType.REACHING;
                 }
-            } catch (NoWindException e) {
-                // no wind information; use along-track distance as fallback
+            } else {
+                effectiveLegType = legType;
+            }
+            if (effectiveLegType != LegType.REACHING) { // upwind or downwind
+                final Position effectivePosition = getEffectiveWindPosition(() -> pos1.translateGreatCircle(
+                        pos1.getBearingGreatCircle(pos2), pos1.getDistance(pos2).scale(0.5)), at, windPositionMode);
+                Wind wind = getTrackedRace().getWind(effectivePosition, at);
+                if (wind == null) {
+                    result = pos2.alongTrackDistance(pos1, cache.getLegBearing(this, at));
+                } else {
+                    Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, wind.getBearing());
+                    result = pos2.alongTrackDistance(projectionToLineThroughPos2,
+                            effectiveLegType == LegType.UPWIND ? wind.getFrom() : wind.getBearing());
+                }
+            } else {
+                // reaching leg, return distance projected onto leg's bearing
                 result = pos2.alongTrackDistance(pos1, cache.getLegBearing(this, at));
             }
         }
