@@ -1,0 +1,40 @@
+package com.sap.sailing.domain.orc.impl;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.ranking.RankingMetricsFactory;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
+
+/**
+ * Instead of using the boat with the least GPH as baseline for absolute corrected time calculation,
+ * this version uses the boat leading by relative corrected time.<p>
+ * 
+ * Note: this metric is not currently used for production purposes and therefore has no support
+ * by the {@link RankingMetricsFactory}. It is used currently by tests only. However, note also that
+ * official tools such as the ORC PCS Scorer used for the 2019 ORC Worlds uses the leader by corrected
+ * time as base line for absolute corrected times, just as implemented here.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
+public class ORCPerformanceCurveRankingMetricLeaderForBaseline extends ORCPerformanceCurveRankingMetric {
+    private static final long serialVersionUID = 3623878797931850165L;
+
+    public ORCPerformanceCurveRankingMetricLeaderForBaseline(TrackedRace trackedRace) {
+        super(trackedRace);
+    }
+
+    @Override
+    protected Competitor getBaseLineCompetitorForAbsoluteCorrectedTimes(TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final Set<Competitor> competitors = new HashSet<>();
+        Util.addAll(getCompetitors(), competitors);
+        return Collections.min(competitors, getRaceRankingComparator(timePoint));
+    }
+}

@@ -122,7 +122,7 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
      * 
      * By default, this implementation uses the boat with the least GPH as the base line boat.
      */
-    private Competitor getBaseLineCompetitorForAbsoluteCorrectedTimes(TimePoint timePoint,
+    protected Competitor getBaseLineCompetitorForAbsoluteCorrectedTimes(TimePoint timePoint,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return getTrackedRace().getCompetitorOfBoat(getBoatWithLeastGph());
     }

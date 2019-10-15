@@ -47,6 +47,7 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveRankingMetric;
+import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveRankingMetricLeaderForBaseline;
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sse.common.Duration;
@@ -109,7 +110,7 @@ public class ORCPerformanceCurveRankingTest extends OnlineTracTracBasedTest {
         super.setUp();
         URI storedUri = new URI("file:///"+new File("resources/orc/worlds2019/348f93c0-6798-0137-b07e-60a44ce903c3.mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(new URL("file:///"+new File("resources/orc/worlds2019/348f93c0-6798-0137-b07e-60a44ce903c3.txt").getCanonicalPath()),
-                /* liveUri */ null, /* storedUri */ storedUri, ORCPerformanceCurveRankingMetric::new,
+                /* liveUri */ null, /* storedUri */ storedUri, ORCPerformanceCurveRankingMetricLeaderForBaseline::new,
                 new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS, ReceiverType.MARKPOSITIONS, ReceiverType.RACECOURSE,
                         ReceiverType.RACESTARTFINISH });
         getTrackedRace().recordWind(new WindImpl(/* position */ new DegreePosition(44.37670797575265, 8.925960855558515), TIME_14_30_00,
