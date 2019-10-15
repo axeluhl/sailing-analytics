@@ -20,13 +20,15 @@ public class CourseConfigurationApi {
 
     public CourseConfiguration createCourseConfigurationFromCourseTemplate(final ApiContext ctx,
             final UUID courseTemplateId, final String optionalRegattaName, final Iterable<String> tags) {
-        final String url = COURSE_CONFIGURATION + FROM_COURSE_TEMPLATE + courseTemplateId.toString()
-                + (optionalRegattaName != null ? "?regattaName=" + optionalRegattaName : "");
+        final String url = COURSE_CONFIGURATION + FROM_COURSE_TEMPLATE + courseTemplateId.toString();
         final Map<String, String> queryParams = new TreeMap<>();
         if (tags != null) {
             for (String tag : tags) {
                 queryParams.put(PARAM_TAG, tag);
             }
+        }
+        if (optionalRegattaName != null) {
+            queryParams.put("regattaName", optionalRegattaName);
         }
         final JSONObject result = ctx.get(url, queryParams);
         return new CourseConfiguration(result);
