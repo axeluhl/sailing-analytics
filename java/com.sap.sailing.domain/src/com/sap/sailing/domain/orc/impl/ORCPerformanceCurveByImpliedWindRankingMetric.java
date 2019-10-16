@@ -122,6 +122,7 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
                     raceLog.addListener(certificatesFromRaceLogUpdater);
                     updateCertificatesFromLogs();
                     updateScratchBoatFromLogs();
+                    updateCourseFromRaceLogs();
                 }
     
                 @Override
@@ -129,6 +130,7 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
                     raceLog.removeListener(certificatesFromRaceLogUpdater);
                     updateCertificatesFromLogs();
                     updateScratchBoatFromLogs();
+                    updateCourseFromRaceLogs();
                 }
             });
             // see bug 5130: don't add as a course change listener on the course but on the race because
