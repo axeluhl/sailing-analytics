@@ -410,7 +410,8 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
             Speed impliedWind;
             if (trackedLeg.getTrackedLeg(competitor).hasFinishedLeg(timePoint)) {
                 // dedicated time point at leg end; cannot use implied wind from cache
-                impliedWind = cache.getImpliedWind(timePoint, getTrackedRace(), competitor, getImpliedWindSupplier(cache));
+                impliedWind = cache.getImpliedWind(trackedLeg.getTrackedLeg(competitor).getFinishTime(),
+                        getTrackedRace(), competitor, getImpliedWindSupplier(cache));
             } else {
                 // can use cache; we shall compute for the cache's timePoint:
                 impliedWind = cache.getImpliedWind(timePoint, getTrackedRace(), competitor, getImpliedWindSupplier(cache));
