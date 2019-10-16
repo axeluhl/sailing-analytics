@@ -42,11 +42,9 @@ public class RaceTimesCalculationUtil {
             // We have no end time so just keep playing until they are created
             max = new Date(liveTimePoint.getTime() + TIME_AFTER_LIVE);
         }
-        // If there are no end events or the additional offset exceeds end of tracking
-        if (endOfTracking != null) {
-            if (max == null || max.after(endOfTracking)) {
-                max = endOfTracking;
-            }
+        // If there are no end events; Events may exceed endOfTracking
+        if (endOfTracking != null && max != null) {
+            max = endOfTracking;
         }
 
         return new Util.Pair<Date, Date>(min, max);
