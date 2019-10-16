@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sap.sailing.domain.common.RaceTimesCalculationUtil;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -240,7 +241,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         if (lastRaceTimesInfo == null) return false;
 
         Date timePoint = timer.getLiveTimePointAsDate();
-        Pair<Date, Date> minMax = RaceTimesCalculationUtil.calculateRaceMinMax(timer, lastRaceTimesInfo);
+        Pair<Date, Date> minMax = RaceTimesCalculationUtil.calculateRaceMinMax(timer.getLiveTimePointAsDate(),
+                lastRaceTimesInfo.startOfTracking, lastRaceTimesInfo.startOfRace, lastRaceTimesInfo.raceFinishingTime,
+                lastRaceTimesInfo.raceFinishedTime, lastRaceTimesInfo.endOfRace, lastRaceTimesInfo.endOfTracking);
         Date min = minMax.getA();
         Date max = minMax.getB();
 
@@ -281,7 +284,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
      * was <code>null</code> before, or extended to a later point in time.
      */
     private void updateMinMax(RaceTimesInfoDTO newRaceTimesInfo) {
-        Util.Pair<Date, Date> raceMinMax = RaceTimesCalculationUtil.calculateRaceMinMax(timer, newRaceTimesInfo);
+        Util.Pair<Date, Date> raceMinMax = RaceTimesCalculationUtil.calculateRaceMinMax(timer.getLiveTimePointAsDate(),
+                newRaceTimesInfo.startOfTracking, newRaceTimesInfo.startOfRace, newRaceTimesInfo.raceFinishingTime,
+                newRaceTimesInfo.raceFinishedTime, newRaceTimesInfo.endOfRace, newRaceTimesInfo.endOfTracking);
         
         Date min = raceMinMax.getA();
         Date max = raceMinMax.getB();
