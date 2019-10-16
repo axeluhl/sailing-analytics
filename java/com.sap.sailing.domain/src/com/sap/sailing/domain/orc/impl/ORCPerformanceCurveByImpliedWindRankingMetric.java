@@ -46,6 +46,7 @@ import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveCourseImpl;
 import com.sap.sailing.domain.orc.ORCPerformanceCurve;
 import com.sap.sailing.domain.ranking.AbstractRankingMetric;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -285,7 +286,19 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
         final Leg firstLeg = getTrackedRace().getRace().getCourse().getFirstLeg();
         final TrackedLegOfCompetitor trackedLegOfCompetitor = getTrackedRace().getTrackedLeg(competitor, timePoint);
         if (trackedLegOfCompetitor == null) {
-            if (getTrackedRace().getTrackedLeg(competitor, firstLeg).hasStartedLeg(timePoint)) {
+            final Waypoint finish;
+            final MarkPassing finishMarkPassing;
+            // Has the competitor finished the race so we can take the total course?
+            // trackedLegOfCompetitor is null either if we're before competitor's start time
+            // or after competitor's finish time, so if we figure the competitor has started at or before
+            // timePoint then the competitor must have finished.
+            if (getTrackedRace().getTrackedLeg(competitor, firstLeg).hasStartedLeg(timePoint) ||
+                    // However, it could also be the case that competitor wasn't tracked properly, but
+                    // a finish mark passing was provided. If so, and the finish mark passing is at or
+                    // before timePoint, we can also apply the total course:
+                    ((finish = getTrackedRace().getRace().getCourse().getLastWaypoint()) != null &&
+                            ((finishMarkPassing=getTrackedRace().getMarkPassing(competitor, finish)) != null &&
+                            !finishMarkPassing.getTimePoint().after(timePoint)))) {
                 // then we know the competitor has finished the race at timePoint
                 result = cache.getTotalCourse(getTrackedRace(), ()->getTotalCourse());
             } else {
