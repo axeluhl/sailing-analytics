@@ -98,7 +98,7 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
                 final Duration calculatedTime = getCalculatedTime(competitor,
                         () -> getTrackedRace().getCurrentLeg(competitor, timePoint).getLeg(), () -> getTrackedRace()
                                 .getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolated */true),
-                        actualRaceDuration, totalWindwardDistanceTraveled);
+                        getTrackedRace().getTimeSailedSinceRaceStart(competitor, timePoint), totalWindwardDistanceTraveled);
                 RankingMetric.CompetitorRankingInfo rankingInfo = new CompetitorRankingInfoImpl(timePoint, competitor,
                         getWindwardDistanceTraveled(competitor, timePoint, cache), actualRaceDuration, calculatedTime,
                         predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead,
