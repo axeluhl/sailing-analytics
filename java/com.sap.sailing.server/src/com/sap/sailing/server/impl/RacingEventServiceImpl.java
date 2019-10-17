@@ -839,7 +839,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             throw new RuntimeException(e);
         }
         this.courseAndMarkConfigurationFactory = new CourseAndMarkConfigurationFactoryImpl(sharedSailingData,
-                this.sensorFixStore);
+                this.sensorFixStore, this);
         this.raceManagerDeviceConfigurationsById = new HashMap<>();
         this.raceManagerDeviceConfigurationsByName = new HashMap<>();
         this.serviceFinderFactory = serviceFinderFactory;

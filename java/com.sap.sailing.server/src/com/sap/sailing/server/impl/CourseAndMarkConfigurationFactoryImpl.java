@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
@@ -91,10 +92,12 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     private final SharedSailingData sharedSailingData;
     private final SensorFixStore sensorFixStore;
     private final Function<DeviceIdentifier, Position> positionResolver;
+    private final RaceLogResolver raceLogResolver;
 
-    public CourseAndMarkConfigurationFactoryImpl(SharedSailingData sharedSailingData, SensorFixStore sensorFixStore) {
+    public CourseAndMarkConfigurationFactoryImpl(SharedSailingData sharedSailingData, SensorFixStore sensorFixStore, RaceLogResolver raceLogResolver) {
         this.sharedSailingData = sharedSailingData;
         this.sensorFixStore = sensorFixStore;
+        this.raceLogResolver = raceLogResolver;
         positionResolver = identifier -> {
             Position lastPosition = null;
             try {
