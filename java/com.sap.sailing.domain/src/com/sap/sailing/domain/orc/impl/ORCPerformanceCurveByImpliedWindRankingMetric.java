@@ -131,7 +131,7 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        initializeListeners();
+        ois.registerValidation(()->initializeListeners(), /* prio */ -1);
     }
 
     private void addTrackedRaceListener(TrackedRace trackedRace) {
