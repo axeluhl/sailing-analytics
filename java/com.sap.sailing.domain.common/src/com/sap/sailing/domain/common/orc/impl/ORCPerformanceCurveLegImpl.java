@@ -1,13 +1,11 @@
 package com.sap.sailing.domain.common.orc.impl;
 
-import java.io.Serializable;
-
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 
-public class ORCPerformanceCurveLegImpl implements Serializable, ORCPerformanceCurveLeg {
+public class ORCPerformanceCurveLegImpl implements ORCPerformanceCurveLeg {
     private static final long serialVersionUID = -1402717786643975976L;
     private final Distance length;
     private final Bearing twa;

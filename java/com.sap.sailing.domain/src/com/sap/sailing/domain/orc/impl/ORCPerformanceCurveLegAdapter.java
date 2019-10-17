@@ -21,6 +21,7 @@ import com.sap.sse.common.TimePoint;
  * be of type {@link ORCPerformanceCurveLegTypes#LONG_DISTANCE}, and {@link #getTwa()} will return {@code null}.
  */
 public class ORCPerformanceCurveLegAdapter implements ORCPerformanceCurveLeg {
+    private static final long serialVersionUID = -6432064480098807397L;
     private final TrackedLeg trackedLeg;
     
     public ORCPerformanceCurveLegAdapter(TrackedLeg trackedLeg) {
@@ -68,6 +69,8 @@ public class ORCPerformanceCurveLegAdapter implements ORCPerformanceCurveLeg {
     @Override
     public ORCPerformanceCurveLeg scale(final double share) {
         return new ORCPerformanceCurveLegAdapter(trackedLeg) {
+            private static final long serialVersionUID = -6724721873285438431L;
+
             @Override
             public Distance getLength() {
                 return ORCPerformanceCurveLegAdapter.this.getLength().scale(share);
