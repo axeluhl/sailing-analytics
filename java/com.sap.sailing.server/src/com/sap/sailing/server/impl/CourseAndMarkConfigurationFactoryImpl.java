@@ -362,6 +362,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
 
         if (position != null ^ deviceIdentifier != null) {
             final DeviceMappingWithRegattaLogEvent<Mark> existingDeviceMapping = CourseConfigurationBuilder.findMostRecentOrOngoingMapping(regatta, mark);
+            // TODO if an existing device mapping exists for another device it needs to be closed
             if (deviceIdentifier != null) {
                 if (existingDeviceMapping == null || !(deviceIdentifier.equals(existingDeviceMapping.getDevice()) && existingDeviceMapping.getTimeRange().hasOpenEnd())) {
                     regatta.getRegattaLog()
