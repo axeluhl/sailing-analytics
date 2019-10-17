@@ -312,6 +312,8 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         // The single spare mark can not be matched by a role because no role was assigned to it.
         // This means a new spare mark will be suggested to be created.
         assertEquals(Util.size(createdCourse.getMarkConfigurations()) + 1, Util.size(courseConfigurationBasedOnOtherTemplate.getMarkConfigurations()));
+        
+        // TODO check that the marks are associated to the same role/position in the sequence as in the originally saved course.
     }
 
     @Test
