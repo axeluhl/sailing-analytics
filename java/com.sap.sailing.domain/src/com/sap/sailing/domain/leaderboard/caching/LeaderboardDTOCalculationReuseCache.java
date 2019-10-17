@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveCourseImpl;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
@@ -203,7 +204,13 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
         boolean changed = false;
         for (final ORCPerformanceCurveLeg leg : course.getLegs()) {
             if (leg instanceof ORCPerformanceCurveLegAdapter) {
-                legs.add(new ORCPerformanceCurveLegImpl(((ORCPerformanceCurveLegAdapter) leg).getLength(this), leg.getTwa()));
+                final ORCPerformanceCurveLeg pcl;
+                if (leg.getType() == ORCPerformanceCurveLegTypes.TWA) {
+                    pcl = new ORCPerformanceCurveLegImpl(((ORCPerformanceCurveLegAdapter) leg).getLength(this), leg.getTwa());
+                } else {
+                    pcl = new ORCPerformanceCurveLegImpl(((ORCPerformanceCurveLegAdapter) leg).getLength(this), leg.getType());
+                }
+                legs.add(pcl);
                 changed = true;
             } else {
                 legs.add(leg);
