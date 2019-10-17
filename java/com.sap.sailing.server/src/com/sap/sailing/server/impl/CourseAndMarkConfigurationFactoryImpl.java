@@ -655,119 +655,59 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     @Override
     public CourseConfiguration createCourseConfigurationFromCourse(CourseBase course, Regatta regatta,
             Iterable<String> tagsToFilterMarkProperties) {
+        assert regatta != null;
+        
         final Set<MarkConfiguration> allMarkConfigurations = new HashSet<>();
 
         final CourseTemplate courseTemplateOrNull = course == null ? null : resolveCourseTemplateSafe(course);
-        final RegattaMarkConfigurations regattaMarkConfigurations = new RegattaMarkConfigurations(courseTemplateOrNull,
-                regatta);
-        allMarkConfigurations.addAll(regattaMarkConfigurations.regattaConfigurationsByMark.values());
-
-        boolean validCourseTemplateUsage = false;
-        RepeatablePart optionalRepeatablePart = null;
-        Integer numberOfLaps = null;
-        final String name = course == null ? null : course.getName();
-        final Map<MarkTemplate, MarkConfiguration> markTemplatesToMarkConfigurations = new HashMap<>();
-        final Map<MarkConfiguration, String> roleMappingBasedOnCourseTemplate = new HashMap<>();
-        if (courseTemplateOrNull != null) {
-            validCourseTemplateUsage = true;
-            final Iterable<WaypointTemplate> effectiveCourseSequence;
-            if (courseTemplateOrNull.hasRepeatablePart()) {
-                optionalRepeatablePart = courseTemplateOrNull.getRepeatablePart();
-                final int numberOfWaypointsInTemplate = Util.size(courseTemplateOrNull.getWaypointTemplates());
-                final int numberOfWaypointsInCourse = Util.size(course.getWaypoints());
-                final int lengthOfRepeatablePart = optionalRepeatablePart.getZeroBasedIndexOfRepeatablePartEnd()
-                        - optionalRepeatablePart.getZeroBasedIndexOfRepeatablePartStart();
-                final int lengthOfNonRepeatablePart = numberOfWaypointsInTemplate - lengthOfRepeatablePart;
-                final int lengthOfRepetitions = numberOfWaypointsInCourse - lengthOfNonRepeatablePart;
-                if (lengthOfRepetitions % lengthOfRepeatablePart == 0) {
-                    numberOfLaps = lengthOfRepetitions / lengthOfRepeatablePart + 1;
-                    effectiveCourseSequence = optionalRepeatablePart.createSequence(numberOfLaps,
-                            courseTemplateOrNull.getWaypointTemplates());
-                } else {
-                    validCourseTemplateUsage = false;
-                    effectiveCourseSequence = courseTemplateOrNull.getWaypointTemplates();
-                }
-            } else {
-                effectiveCourseSequence = courseTemplateOrNull.getWaypointTemplates();
-            }
-            if (validCourseTemplateUsage) {
-                final Iterator<WaypointTemplate> waypointTemplateIterator = effectiveCourseSequence.iterator();
-                final Iterator<Waypoint> waypointIterator = course.getWaypoints().iterator();
-                while (waypointTemplateIterator.hasNext() && validCourseTemplateUsage) {
-                    final WaypointTemplate waypointTemplate = waypointTemplateIterator.next();
-                    final Iterable<MarkTemplate> markTemplatesOfControlPoint = waypointTemplate
-                            .getControlPointTemplate().getMarks();
-                    final Waypoint waypoint = waypointIterator.next();
-                    final Iterable<Mark> marksOfControlPoint = waypoint.getControlPoint().getMarks();
-                    if (Util.size(markTemplatesOfControlPoint) != Util.size(marksOfControlPoint)) {
-                        validCourseTemplateUsage = false;
-                        break;
-                    }
-                    final Iterator<MarkTemplate> markTemplateIterator = markTemplatesOfControlPoint.iterator();
-                    final Iterator<Mark> markIterator = marksOfControlPoint.iterator();
-                    while (markTemplateIterator.hasNext()) {
-                        final MarkTemplate markTemplate = markTemplateIterator.next();
-                        final Mark mark = markIterator.next();
-                        final String roleForMarkTempalte = courseTemplateOrNull.getAssociatedRoles().get(markTemplate);
-                        if (roleForMarkTempalte == null) {
-                            validCourseTemplateUsage = false;
-                            break;
-                        }
-                        String roleForMark = course.getAssociatedRoles().get(mark);
-                        if (roleForMark == null) {
-                            roleForMark = mark.getShortName();
-                        }
-                        if (!Util.equalsWithNull(roleForMarkTempalte, roleForMark)) {
-                            validCourseTemplateUsage = false;
-                            break;
-                        }
-                        final RegattaMarkConfiguration regattaMarkConfiguration = regattaMarkConfigurations.regattaConfigurationsByMark
-                                .get(mark);
-                        markTemplatesToMarkConfigurations.putIfAbsent(markTemplate, regattaMarkConfiguration);
-                        roleMappingBasedOnCourseTemplate.putIfAbsent(regattaMarkConfiguration, roleForMark);
-                    }
-                }
+        
+        final Map<Mark, RegattaMarkConfiguration> markConfigurationsByMark = createMarkConfigurationsForRegatta(regatta, courseTemplateOrNull);
+        allMarkConfigurations.addAll(markConfigurationsByMark.values());
+        
+        final Map<MarkConfiguration, String> resultingRoleMapping = new HashMap<>();
+        if (course != null) {
+            for (Entry<Mark, String> entry : course.getAssociatedRoles().entrySet()) {
+                resultingRoleMapping.put(markConfigurationsByMark.get(entry.getKey()), entry.getValue());
             }
         }
-
-        final Map<MarkConfiguration, String> resultingRoleMapping;
-        final List<WaypointWithMarkConfiguration> resultingWaypoints;
-
-        if (validCourseTemplateUsage) {
-            resultingRoleMapping = roleMappingBasedOnCourseTemplate;
-            if (courseTemplateOrNull.hasRepeatablePart() && numberOfLaps == 1) {
-                // In case of just 1 lap, it is possible that MarkTemplates are left unmapped
-                for (int i = optionalRepeatablePart.getZeroBasedIndexOfRepeatablePartStart(); i < optionalRepeatablePart
-                        .getZeroBasedIndexOfRepeatablePartEnd(); i++) {
-                    final WaypointTemplate waypointTemplate = Util.get(courseTemplateOrNull.getWaypointTemplates(), i);
-
-                    for (final MarkTemplate markTemplate : waypointTemplate.getControlPointTemplate().getMarks()) {
-                        markTemplatesToMarkConfigurations.computeIfAbsent(markTemplate, mt -> {
-
-                            final MarkConfiguration markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(
-                                    markTemplate, null, /* storeToInventory */ false);
-
-                            allMarkConfigurations.add(markConfiguration);
-                            resultingRoleMapping.put(markConfiguration,
-                                    courseTemplateOrNull.getAssociatedRoles().get(mt));
-                            return markConfiguration;
-                        });
+        
+        String name = null;
+        final List<WaypointWithMarkConfiguration> resultingWaypoints = new ArrayList<>();
+        RepeatablePart optionalRepeatablePart = null;
+        Integer numberOfLaps = null;
+        
+        boolean handledByTemplate = false;
+        if (courseTemplateOrNull != null && course != null) {
+            final CourseToCourseTemplateMapper mapper = new CourseToCourseTemplateMapper(course, courseTemplateOrNull, markConfigurationsByMark);
+            if (mapper.validCourseTemplateUsage) {
+                name = courseTemplateOrNull.getName();
+                final Map<MarkTemplate, MarkConfiguration> markTemplatesToMarkConfigurations = new HashMap<>();
+                markTemplatesToMarkConfigurations.putAll(mapper.markTemplatesToMarkConfigurations);
+                
+                if (!mapper.markTemplatesNotIncluded.isEmpty()) {
+                    for (MarkTemplate markTemplate : mapper.markTemplatesNotIncluded) {
+                        final MarkConfiguration markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(
+                                markTemplate, null, /* storeToInventory */ false);
+                        markTemplatesToMarkConfigurations.put(markTemplate, markConfiguration);
+                        resultingRoleMapping.put(markConfiguration,
+                                courseTemplateOrNull.getAssociatedRoles().get(markTemplate));
                     }
-
                     replaceTemplateBasedConfigurationCandidatesBySuggestedPropertiesBasedConfigurationsForRoleMapping(
                             resultingRoleMapping, allMarkConfigurations, tagsToFilterMarkProperties,
                             course.getAssociatedRoles());
                 }
+                resultingWaypoints.addAll(createWaypointConfigurationsWithMarkTemplateMapping(courseTemplateOrNull,
+                        markTemplatesToMarkConfigurations));
+                numberOfLaps = mapper.numberOfLaps;
+                optionalRepeatablePart = courseTemplateOrNull.getRepeatablePart();
+                handledByTemplate = true;
             }
-            resultingWaypoints = createWaypointConfigurationsWithMarkTemplateMapping(courseTemplateOrNull,
-                    markTemplatesToMarkConfigurations);
-        } else {
-            resultingRoleMapping = new HashMap<>();
-            resultingWaypoints = new ArrayList<>();
+        }
+        if (!handledByTemplate) {
             if (course != null) {
                 for (Entry<Mark, String> markWithRole : course.getAssociatedRoles().entrySet()) {
                     resultingRoleMapping.put(
-                            regattaMarkConfigurations.regattaConfigurationsByMark.get(markWithRole.getKey()),
+                            markConfigurationsByMark.get(markWithRole.getKey()),
                             markWithRole.getValue());
                 }
                 for (Waypoint waypoint : course.getWaypoints()) {
@@ -775,12 +715,12 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     final ControlPointWithMarkConfiguration resultingControlPoint;
                     if (controlPoint instanceof Mark) {
                         final Mark mark = (Mark) controlPoint;
-                        resultingControlPoint = regattaMarkConfigurations.regattaConfigurationsByMark.get(mark);
+                        resultingControlPoint = markConfigurationsByMark.get(mark);
                     } else {
                         final ControlPointWithTwoMarks markPairTemplate = (ControlPointWithTwoMarks) controlPoint;
-                        final MarkConfiguration left = regattaMarkConfigurations.regattaConfigurationsByMark
+                        final MarkConfiguration left = markConfigurationsByMark
                                 .get(markPairTemplate.getLeft());
-                        final MarkConfiguration right = regattaMarkConfigurations.regattaConfigurationsByMark
+                        final MarkConfiguration right = markConfigurationsByMark
                                 .get(markPairTemplate.getRight());
                         resultingControlPoint = new MarkPairWithConfigurationImpl(markPairTemplate.getName(), left, right,
                                 markPairTemplate.getShortName());
@@ -793,6 +733,93 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
 
         return new CourseConfigurationImpl(courseTemplateOrNull, allMarkConfigurations, resultingRoleMapping,
                 resultingWaypoints, optionalRepeatablePart, numberOfLaps, name);
+    }
+    
+    private Map<Mark, RegattaMarkConfiguration> createMarkConfigurationsForRegatta(Regatta regatta, CourseTemplate courseTemplate) {
+        final Map<Mark, RegattaMarkConfiguration> result = new HashMap<>();
+        for (RaceColumn raceColumn : regatta.getRaceColumns()) {
+            for (Mark mark : raceColumn.getAvailableMarks()) {
+                result
+                .computeIfAbsent(mark,
+                        m -> createMarkConfigurationForRegattaMark(courseTemplate, regatta, m));
+            }
+        }
+        return result;
+    }
+    
+    private class CourseToCourseTemplateMapper {
+        boolean validCourseTemplateUsage;
+        Integer numberOfLaps;
+        final Map<MarkTemplate, MarkConfiguration> markTemplatesToMarkConfigurations = new HashMap<>();
+        final Set<MarkTemplate> markTemplatesNotIncluded = new HashSet<>();
+        
+        public CourseToCourseTemplateMapper(CourseBase course, CourseTemplate courseTemplate, Map<Mark, RegattaMarkConfiguration> markConfigurationsByMark) {
+            validCourseTemplateUsage = false;
+            RepeatablePart optionalRepeatablePart = null;
+            numberOfLaps = null;
+            if (courseTemplate != null) {
+                validCourseTemplateUsage = true;
+                final Iterable<WaypointTemplate> effectiveCourseSequence;
+                if (courseTemplate.hasRepeatablePart()) {
+                    optionalRepeatablePart = courseTemplate.getRepeatablePart();
+                    final int numberOfWaypointsInTemplate = Util.size(courseTemplate.getWaypointTemplates());
+                    final int numberOfWaypointsInCourse = Util.size(course.getWaypoints());
+                    final int lengthOfRepeatablePart = optionalRepeatablePart.getZeroBasedIndexOfRepeatablePartEnd()
+                            - optionalRepeatablePart.getZeroBasedIndexOfRepeatablePartStart();
+                    final int lengthOfNonRepeatablePart = numberOfWaypointsInTemplate - lengthOfRepeatablePart;
+                    final int lengthOfRepetitions = numberOfWaypointsInCourse - lengthOfNonRepeatablePart;
+                    if (lengthOfRepetitions % lengthOfRepeatablePart == 0) {
+                        numberOfLaps = lengthOfRepetitions / lengthOfRepeatablePart + 1;
+                        effectiveCourseSequence = optionalRepeatablePart.createSequence(numberOfLaps,
+                                courseTemplate.getWaypointTemplates());
+                    } else {
+                        validCourseTemplateUsage = false;
+                        effectiveCourseSequence = courseTemplate.getWaypointTemplates();
+                    }
+                } else {
+                    effectiveCourseSequence = courseTemplate.getWaypointTemplates();
+                }
+                if (validCourseTemplateUsage) {
+                    final Iterator<WaypointTemplate> waypointTemplateIterator = effectiveCourseSequence.iterator();
+                    final Iterator<Waypoint> waypointIterator = course.getWaypoints().iterator();
+                    while (waypointTemplateIterator.hasNext() && validCourseTemplateUsage) {
+                        final WaypointTemplate waypointTemplate = waypointTemplateIterator.next();
+                        final Iterable<MarkTemplate> markTemplatesOfControlPoint = waypointTemplate
+                                .getControlPointTemplate().getMarks();
+                        final Waypoint waypoint = waypointIterator.next();
+                        final Iterable<Mark> marksOfControlPoint = waypoint.getControlPoint().getMarks();
+                        if (Util.size(markTemplatesOfControlPoint) != Util.size(marksOfControlPoint)) {
+                            validCourseTemplateUsage = false;
+                            break;
+                        }
+                        final Iterator<MarkTemplate> markTemplateIterator = markTemplatesOfControlPoint.iterator();
+                        final Iterator<Mark> markIterator = marksOfControlPoint.iterator();
+                        while (markTemplateIterator.hasNext()) {
+                            final MarkTemplate markTemplate = markTemplateIterator.next();
+                            final Mark mark = markIterator.next();
+                            final String roleForMarkTempalte = courseTemplate.getAssociatedRoles().get(markTemplate);
+                            if (roleForMarkTempalte == null) {
+                                validCourseTemplateUsage = false;
+                                break;
+                            }
+                            String roleForMark = course.getAssociatedRoles().get(mark);
+                            if (roleForMark == null) {
+                                roleForMark = mark.getName();
+                            }
+                            if (!Util.equalsWithNull(roleForMarkTempalte, roleForMark)) {
+                                validCourseTemplateUsage = false;
+                                break;
+                            }
+                            final RegattaMarkConfiguration regattaMarkConfiguration = markConfigurationsByMark
+                                    .get(mark);
+                            markTemplatesToMarkConfigurations.putIfAbsent(markTemplate, regattaMarkConfiguration);
+                        }
+                    }
+                }
+            }
+            Util.addAll(courseTemplate.getMarkTemplatesInWaypoints(), markTemplatesNotIncluded);
+            markTemplatesNotIncluded.removeAll(markTemplatesToMarkConfigurations.keySet());
+        }
     }
     
     private void replaceTemplateBasedConfigurationCandidatesBySuggestedPropertiesBasedConfigurationsForRoleMapping(
@@ -1030,82 +1057,6 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             }
         }
         return resolvedMarkTemplate;
-    }
-
-    private class RegattaMarkConfigurations {
-        final Map<MarkTemplate, RegattaMarkConfiguration> markConfigurationsByMarkTemplate = new HashMap<>();
-        final Map<Mark, RegattaMarkConfiguration> regattaConfigurationsByMark = new HashMap<>();
-        final Map<RegattaMarkConfiguration, TimePoint> lastUsages = new HashMap<>();
-        final Set<Mark> marksInCourse = new HashSet<>();
-
-        public RegattaMarkConfigurations(CourseTemplate courseTemplate, Regatta regatta) {
-            this(/* optionalCourse */ null, courseTemplate, regatta);
-        }
-
-        public RegattaMarkConfigurations(CourseBase optionalCourse, CourseTemplate courseTemplate, Regatta regatta) {
-            if (optionalCourse != null) {
-                for (Waypoint waypoint : optionalCourse.getWaypoints()) {
-                    Util.addAll(waypoint.getMarks(), marksInCourse);
-                }
-            }
-
-            for (RaceColumn raceColumn : regatta.getRaceColumns()) {
-                for (Mark mark : raceColumn.getAvailableMarks()) {
-                    final RegattaMarkConfiguration regattaMarkConfiguration = regattaConfigurationsByMark
-                            .computeIfAbsent(mark,
-                                    m -> createMarkConfigurationForRegattaMark(courseTemplate, regatta, m));
-
-                    for (Fleet fleet : raceColumn.getFleets()) {
-                        final TrackedRace trackedRaceOrNull = raceColumn.getTrackedRace(fleet);
-                        if (trackedRaceOrNull != null && Util.contains(raceColumn.getCourseMarks(), mark)) {
-                            TimePoint usage = trackedRaceOrNull.getStartOfRace();
-                            if (usage == null) {
-                                usage = trackedRaceOrNull.getStartOfTracking();
-                            }
-                            if (usage != null) {
-                                final TimePoint effectiveUsageTP = usage;
-                                lastUsages.compute(regattaMarkConfiguration,
-                                        (mc, existingTP) -> (existingTP == null || existingTP.before(effectiveUsageTP))
-                                                ? effectiveUsageTP
-                                                : existingTP);
-                            }
-                        }
-                    }
-                }
-            }
-
-            for (Entry<Mark, RegattaMarkConfiguration> regattaMarkEntry : regattaConfigurationsByMark.entrySet()) {
-                final RegattaMarkConfiguration regattaMarkConfiguration = regattaMarkEntry.getValue();
-                final MarkTemplate associatedMarkTemplateOrNull = regattaMarkConfiguration.getOptionalMarkTemplate();
-                if (associatedMarkTemplateOrNull != null) {
-                    markConfigurationsByMarkTemplate.compute(associatedMarkTemplateOrNull, (mt, rmc) -> {
-                        if (rmc == null) {
-                            return regattaMarkConfiguration;
-                        }
-
-                        final boolean existingContainedInCourse = marksInCourse.contains(rmc.getMark());
-                        final boolean newContainedInCourse = marksInCourse.contains(regattaMarkConfiguration.getMark());
-
-                        if (existingContainedInCourse && !newContainedInCourse) {
-                            return rmc;
-                        }
-                        if (!existingContainedInCourse && newContainedInCourse) {
-                            return regattaMarkConfiguration;
-                        }
-
-                        final TimePoint lastUsageOrNull = lastUsages.get(regattaMarkConfiguration);
-                        if (lastUsageOrNull == null) {
-                            return rmc;
-                        }
-                        final TimePoint lastUsageOfExistingOrNull = lastUsages.get(rmc);
-                        if (lastUsageOfExistingOrNull == null) {
-                            return regattaMarkConfiguration;
-                        }
-                        return lastUsageOrNull.after(lastUsageOfExistingOrNull) ? regattaMarkConfiguration : rmc;
-                    });
-                }
-            }
-        }
     }
 
     private RegattaMarkConfiguration createMarkConfigurationForRegattaMark(CourseTemplate courseTemplate,
