@@ -292,7 +292,8 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
             // trackedLegOfCompetitor is null either if we're before competitor's start time
             // or after competitor's finish time, so if we figure the competitor has started at or before
             // timePoint then the competitor must have finished.
-            if (getTrackedRace().getTrackedLeg(competitor, firstLeg).hasStartedLeg(timePoint) ||
+            final TrackedLegOfCompetitor trackedFirstLegOfCompetitor = getTrackedRace().getTrackedLeg(competitor, firstLeg);
+            if ((trackedFirstLegOfCompetitor != null && trackedFirstLegOfCompetitor.hasStartedLeg(timePoint)) ||
                     // However, it could also be the case that competitor wasn't tracked properly, but
                     // a finish mark passing was provided. If so, and the finish mark passing is at or
                     // before timePoint, we can also apply the total course:
