@@ -23,6 +23,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -366,19 +367,21 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
 
         if (position != null ^ deviceIdentifier != null) {
             final DeviceMappingWithRegattaLogEvent<Mark> existingDeviceMapping = CourseConfigurationBuilder.findMostRecentOrOngoingMapping(regatta, mark);
-            // TODO if an existing device mapping exists for another device it needs to be closed
+            boolean terminateOpenEndedDeviceMapping = false;
             if (deviceIdentifier != null) {
                 if (existingDeviceMapping == null || !(deviceIdentifier.equals(existingDeviceMapping.getDevice()) && existingDeviceMapping.getTimeRange().hasOpenEnd())) {
                     regatta.getRegattaLog()
-                    .add(new RegattaLogDeviceMarkMappingEventImpl(
-                            timePointForDefinitionOfMarksAndDeviceMappings, author, mark, deviceIdentifier,
-                            timePointForDefinitionOfMarksAndDeviceMappings, null));
+                            .add(new RegattaLogDeviceMarkMappingEventImpl(
+                                    timePointForDefinitionOfMarksAndDeviceMappings, author, mark, deviceIdentifier,
+                                    timePointForDefinitionOfMarksAndDeviceMappings, null));
+                    terminateOpenEndedDeviceMapping = true;
                 }
             } else if (position != null) {
                 final boolean update;
                 if (existingDeviceMapping != null) {
                     if (!PingDeviceIdentifier.TYPE.equals(existingDeviceMapping.getDevice().getIdentifierType())) {
                         update = true;
+                        terminateOpenEndedDeviceMapping = true;
                     } else {
                         final Position lastPingedPositionOrNull = positionResolver.apply(existingDeviceMapping.getDevice());
                         update = lastPingedPositionOrNull == null || !lastPingedPositionOrNull.equals(position);
@@ -394,11 +397,18 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                             new GPSFixImpl(position, timePointForDefinitionOfMarksAndDeviceMappings));
                     
                     regatta.getRegattaLog()
-                    .add(new RegattaLogDeviceMarkMappingEventImpl(
-                            timePointForDefinitionOfMarksAndDeviceMappings, author, mark, pingIdentifier,
-                            timePointForDefinitionOfMarksAndDeviceMappings,
-                            timePointForDefinitionOfMarksAndDeviceMappings));
+                            .add(new RegattaLogDeviceMarkMappingEventImpl(
+                                    timePointForDefinitionOfMarksAndDeviceMappings, author, mark, pingIdentifier,
+                                    timePointForDefinitionOfMarksAndDeviceMappings,
+                                    timePointForDefinitionOfMarksAndDeviceMappings));
                 }
+            }
+            if (terminateOpenEndedDeviceMapping && existingDeviceMapping != null && existingDeviceMapping.getTimeRange().hasOpenEnd()) {
+                regatta.getRegattaLog()
+                        .add(new RegattaLogCloseOpenEndedDeviceMappingEventImpl(
+                                timePointForDefinitionOfMarksAndDeviceMappings, author,
+                                existingDeviceMapping.getRegattaLogEvent().getId(),
+                                timePointForDefinitionOfMarksAndDeviceMappings.minus(1)));
             }
         }
     }
