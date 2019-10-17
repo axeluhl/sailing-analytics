@@ -82,6 +82,10 @@ public class MarkConfiguration extends JsonWrapper {
         return positioningObject == null ? null : new Positioning(positioningObject);
     }
 
+    public void unsetPositioning() {
+        getJson().put(FIELD_POSITIONING, null);
+    }
+
     public Positioning getEffectivePositioning() {
         final JSONObject positioningJson = (JSONObject) get(FIELD_EFFECTIVE_POSITIONING);
         return positioningJson != null ? new Positioning(positioningJson) : null;
