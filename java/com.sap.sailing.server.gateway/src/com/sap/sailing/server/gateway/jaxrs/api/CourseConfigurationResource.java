@@ -25,8 +25,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -138,9 +139,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         if (raceDefinition != null) {
             courseBase = raceDefinition.getCourse();
         } else {
-            final LastPublishedCourseDesignFinder courseDesginFinder = new LastPublishedCourseDesignFinder(
-                    regatta.getRacelog(raceColumn, fleet), /* onlyCoursesWithValidWaypointList */ true);
-            courseBase = courseDesginFinder.analyze();
+            final ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(getService(), raceColumnByName.getRaceLog(fleetByName));
+            courseBase = raceState.getCourseDesign();
         }
 
         // courseBase may be null in case, no course is defined for the race yet.
