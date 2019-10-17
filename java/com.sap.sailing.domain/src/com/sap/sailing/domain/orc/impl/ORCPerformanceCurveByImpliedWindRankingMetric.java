@@ -284,45 +284,46 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
     private ORCPerformanceCurveCourse getPartialCourse(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final ORCPerformanceCurveCourse result;
         final Leg firstLeg = getTrackedRace().getRace().getCourse().getFirstLeg();
-        final TrackedLegOfCompetitor trackedLegOfCompetitor = getTrackedRace().getTrackedLeg(competitor, timePoint);
-        if (trackedLegOfCompetitor == null) {
-            final Waypoint finish;
-            final MarkPassing finishMarkPassing;
-            // Has the competitor finished the race so we can take the total course?
-            // trackedLegOfCompetitor is null either if we're before competitor's start time
-            // or after competitor's finish time, so if we figure the competitor has started at or before
-            // timePoint then the competitor must have finished.
-            final TrackedLegOfCompetitor trackedFirstLegOfCompetitor = getTrackedRace().getTrackedLeg(competitor, firstLeg);
-            if ((trackedFirstLegOfCompetitor != null && trackedFirstLegOfCompetitor.hasStartedLeg(timePoint)) ||
-                    // However, it could also be the case that competitor wasn't tracked properly, but
-                    // a finish mark passing was provided. If so, and the finish mark passing is at or
-                    // before timePoint, we can also apply the total course:
-                    ((finish = getTrackedRace().getRace().getCourse().getLastWaypoint()) != null &&
-                            ((finishMarkPassing=getTrackedRace().getMarkPassing(competitor, finish)) != null &&
-                            !finishMarkPassing.getTimePoint().after(timePoint)))) {
-                // then we know the competitor has finished the race at timePoint
-                result = cache.getTotalCourse(getTrackedRace(), ()->getTotalCourse());
-            } else {
-                // not started the race yet; return empty course
-                result = cache.getTotalCourse(getTrackedRace(), ()->getTotalCourse()).subcourse(0, 0);
-            }
+        final Waypoint finish = getTrackedRace().getRace().getCourse().getLastWaypoint();
+        final MarkPassing finishMarkPassing;
+        if (finish != null && (finishMarkPassing = getTrackedRace().getMarkPassing(competitor, finish)) != null &&
+                !finishMarkPassing.getTimePoint().after(timePoint)) {
+            // at or beyond finish mark passing; use total course; works also if track is missing or incomplete or broken
+            result = cache.getTotalCourse(getTrackedRace(), ()->getTotalCourse());
         } else {
-            final ORCPerformanceCurveCourse totalCourse = cache.getTotalCourse(getTrackedRace(), ()->getTotalCourse());
-            final int zeroBasedIndexOfCurrentLeg = getTrackedRace().getRace().getCourse().getIndexOfWaypoint(trackedLegOfCompetitor.getLeg().getFrom());
-            final ORCPerformanceCurveLeg currentLeg = Util.get(totalCourse.getLegs(), zeroBasedIndexOfCurrentLeg);
-            final double shareOfCurrentLeg;
-            final LegType legType;
-            if (currentLeg.getType().equals(ORCPerformanceCurveLegTypes.WINDWARD_LEEWARD)
-                    || currentLeg.getType().equals(ORCPerformanceCurveLegTypes.TWA)) {
-                legType = null;
+            final TrackedLegOfCompetitor trackedLegOfCompetitor = getTrackedRace().getTrackedLeg(competitor, timePoint);
+            if (trackedLegOfCompetitor == null) {
+                // Has the competitor finished the race so we can take the total course?
+                // trackedLegOfCompetitor is null either if we're before competitor's start time
+                // or after competitor's finish time, so if we figure the competitor has started at or before
+                // timePoint then the competitor must have finished.
+                final TrackedLegOfCompetitor trackedFirstLegOfCompetitor = getTrackedRace().getTrackedLeg(competitor, firstLeg);
+                if (trackedFirstLegOfCompetitor != null && trackedFirstLegOfCompetitor.hasStartedLeg(timePoint)) {
+                    // then we know the competitor has finished the race at timePoint
+                    result = cache.getTotalCourse(getTrackedRace(), ()->getTotalCourse());
+                } else {
+                    // not started the race yet; return empty course
+                    result = cache.getTotalCourse(getTrackedRace(), ()->getTotalCourse()).subcourse(0, 0);
+                }
             } else {
-                legType = LegType.REACHING;
+                // started but not yet finished; compute true partial course
+                final ORCPerformanceCurveCourse totalCourse = cache.getTotalCourse(getTrackedRace(), ()->getTotalCourse());
+                final int zeroBasedIndexOfCurrentLeg = getTrackedRace().getRace().getCourse().getIndexOfWaypoint(trackedLegOfCompetitor.getLeg().getFrom());
+                final ORCPerformanceCurveLeg currentLeg = Util.get(totalCourse.getLegs(), zeroBasedIndexOfCurrentLeg);
+                final double shareOfCurrentLeg;
+                final LegType legType;
+                if (currentLeg.getType().equals(ORCPerformanceCurveLegTypes.WINDWARD_LEEWARD)
+                        || currentLeg.getType().equals(ORCPerformanceCurveLegTypes.TWA)) {
+                    legType = null;
+                } else {
+                    legType = LegType.REACHING;
+                }
+                // use windward projection in case we deem the current leg an upwind or downwind leg
+                shareOfCurrentLeg = 1.0
+                        - trackedLegOfCompetitor.getWindwardDistanceToGo(legType, timePoint, WindPositionMode.LEG_MIDDLE, cache).divide(
+                                trackedLegOfCompetitor.getTrackedLeg().getWindwardDistance(timePoint, cache));
+                result = totalCourse.subcourse(zeroBasedIndexOfCurrentLeg, shareOfCurrentLeg);
             }
-            // use windward projection in case we deem the current leg an upwind or downwind leg
-            shareOfCurrentLeg = 1.0
-                    - trackedLegOfCompetitor.getWindwardDistanceToGo(legType, timePoint, WindPositionMode.LEG_MIDDLE, cache).divide(
-                            trackedLegOfCompetitor.getTrackedLeg().getWindwardDistance(timePoint, cache));
-            result = totalCourse.subcourse(zeroBasedIndexOfCurrentLeg, shareOfCurrentLeg);
         }
         return result;
     }
