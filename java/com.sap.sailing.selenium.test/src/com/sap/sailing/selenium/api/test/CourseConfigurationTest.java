@@ -371,6 +371,68 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     }
 
     @Test
+    public void testCreateCourseTemplateWithPositiongUpdated() {
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final String regattaName = "test";
+        final double longDeg = 7.1, updatedLongDeg = 8.4;
+        final double latDeg = 5.5, updatedLatDeg = 6.7;
+
+        eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
+        final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
+
+        final MarkTemplate mt1 = markTemplateApi.createMarkTemplate(ctx, "mt1", "mt1", "#FFFFFF", "Cylinder",
+                "Checkered", MarkType.BUOY.name());
+        final MarkConfiguration mc1 = MarkConfiguration.createMarkTemplateBased(mt1.getId(), "role_mt1");
+        mc1.setFixedPosition(latDeg, longDeg);
+
+        final MarkProperties mp1 = markPropertiesApi.createMarkProperties(ctx, "mp1", "mp1", /* deviceUuid */ null,
+                "#FF0000", "shape", "pattern", "STARTBOAT", Collections.emptyList(), 1.0, 1.0);
+        final MarkConfiguration mc2 = MarkConfiguration.createMarkPropertiesBased(mp1.getId(), "role_mp1");
+        mc2.setFixedPosition(latDeg, longDeg);
+        mc2.setStoreToInventory(true);
+        final MarkConfiguration mc3 = MarkConfiguration.createMarkPropertiesBased(mp1.getId(), "role_mp3");
+
+        final UUID deviceId = UUID.randomUUID();
+        final MarkProperties mp4 = markPropertiesApi.createMarkProperties(ctx, "mp4", "mp4", deviceId.toString(),
+                "#FF0000", "shape", "pattern", "STARTBOAT", Collections.emptyList(), null, null);
+        final MarkConfiguration mc4 = MarkConfiguration.createMarkPropertiesBased(mp4.getId(), "role_mp4");
+        System.out.println(mp4.getJson());
+
+        final WaypointWithMarkConfiguration wp1 = new WaypointWithMarkConfiguration("start/end", "s/e",
+                PassingInstruction.Line, Arrays.asList(mc1.getId(), mc2.getId()));
+        final WaypointWithMarkConfiguration wp2 = new WaypointWithMarkConfiguration("start/end", "s/e",
+                PassingInstruction.Line, Arrays.asList(mc3.getId(), mc4.getId()));
+
+        final CourseConfiguration courseConfiguration = new CourseConfiguration("my-course",
+                Arrays.asList(mc1, mc2, mc3, mc4), Arrays.asList(wp1, wp2));
+        System.out.println(courseConfiguration.getJson());
+
+        final CourseConfiguration createdCourse = courseConfigurationApi.createCourse(ctx, courseConfiguration,
+                regattaName, race.getRaceName(), "Default");
+        System.out.println(createdCourse.getJson());
+
+        final MarkProperties reloadedmp1 = markPropertiesApi.getMarkProperties(ctx, mp1.getId());
+        System.out.println(reloadedmp1.getJson());
+
+        for (final MarkConfiguration mc : createdCourse.getMarkConfigurations()) {
+            final UUID markId = mc.getMarkId();
+            markApi.addMarkFix(ctx, regattaName, race.getRaceName(), "Default", markId, /* markTemplateId */ null,
+                    /* markPropertiesId */ null, updatedLongDeg, updatedLatDeg, currentTimeMillis());
+        }
+
+        final CourseConfiguration loadedCourse = courseConfigurationApi.createCourseConfigurationFromCourse(ctx,
+                regattaName, race.getRaceName(), "Default", null);
+        System.out.println(loadedCourse.getJson());
+        assertEquals(Util.size(createdCourse.getMarkConfigurations()), Util.size(loadedCourse.getMarkConfigurations()));
+        for (final MarkConfiguration mc : loadedCourse.getMarkConfigurations()) {
+            if ("FIXED_POSITION".equals(mc.getEffectivePositioning().getType())) {
+                assertEquals(mc.getEffectivePositioning().getLatitudeDeg().doubleValue(), updatedLatDeg, 0.0);
+                assertEquals(mc.getEffectivePositioning().getLongitudeDeg().doubleValue(), updatedLongDeg, 0.0);
+            }
+        }
+    }
+
+    @Test
     public void testCreateCourseAndReloadWithAdmin() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         testCreateCourseAndReload(ctx);
