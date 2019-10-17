@@ -283,7 +283,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
             assertEquals(numberOfLaps, createdCourseAsConfiguration.getNumberOfLaps());
         }
     }
-
+    
     @Test
     public void testDifferentCourseTemplatesWithCommonRolesInRegatta() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
@@ -299,7 +299,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         // Create a course based on one of the templates
         CourseConfiguration courseConfiguration = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(
                 ctx, createdCourseTemplate.getId(), regattaName, /* tags */ null);
-        courseConfigurationApi.createCourse(ctx, courseConfiguration, regattaName, race.getRaceName(), "Default");
+        final CourseConfiguration createdCourse = courseConfigurationApi.createCourse(ctx, courseConfiguration, regattaName, race.getRaceName(), "Default");
         
         final CourseTemplateDataFactory ctdf2 = new CourseTemplateDataFactory(ctx);
         final CourseTemplate createdCourseTemplate2 = courseTemplateApi.createCourseTemplate(ctx,
@@ -308,6 +308,10 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         CourseConfiguration courseConfigurationBasedOnOtherTemplate = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(
                 ctx, createdCourseTemplate2.getId(), regattaName, /* tags */ null);
         
+        // All marks being part of the course sequence are required to be matched by role.
+        // The single spare mark can not be matched by a role because no role was assigned to it.
+        // This means a new spare mark will be suggested to be created.
+        assertEquals(Util.size(createdCourse.getMarkConfigurations()) + 1, Util.size(courseConfigurationBasedOnOtherTemplate.getMarkConfigurations()));
     }
 
     @Test
