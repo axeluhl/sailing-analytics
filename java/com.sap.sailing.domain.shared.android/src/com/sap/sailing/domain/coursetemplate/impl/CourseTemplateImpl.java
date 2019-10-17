@@ -137,4 +137,13 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     public Integer getDefaultNumberOfLaps() {
         return defaultNumberOfLaps;
     }
+
+    @Override
+    public Iterable<MarkTemplate> getMarkTemplatesInWaypoints() {
+        final HashSet<MarkTemplate> result = new HashSet<>();
+        for (WaypointTemplate waypointTemplate : waypoints) {
+            Util.addAll(waypointTemplate.getControlPointTemplate().getMarks(), result);
+        }
+        return result;
+    }
 }

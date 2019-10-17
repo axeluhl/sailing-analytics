@@ -45,6 +45,8 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
      * marks for the windward mark may be returned to quickly accommodate for wind shifts.
      */
     Iterable<MarkTemplate> getMarkTemplates();
+    
+    Iterable<MarkTemplate> getMarkTemplatesInWaypoints();
 
     /**
      * Returns a sequence of {@link WaypointTemplate}s that can be use to construct a course. If this course template
