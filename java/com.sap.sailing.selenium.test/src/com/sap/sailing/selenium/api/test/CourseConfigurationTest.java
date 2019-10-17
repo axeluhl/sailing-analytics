@@ -285,6 +285,32 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     }
 
     @Test
+    public void testDifferentCourseTemplatesWithCommonRolesInRegatta() {
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(ctx);
+        
+        final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(ctx,
+                ctdf.constructCourseTemplate(new Pair<>(1, 3), 2, Collections.emptyMap()));
+        
+        final String regattaName = "test";
+        eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
+        final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
+        
+        // Create a course based on one of the templates
+        CourseConfiguration courseConfiguration = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(
+                ctx, createdCourseTemplate.getId(), regattaName, /* tags */ null);
+        courseConfigurationApi.createCourse(ctx, courseConfiguration, regattaName, race.getRaceName(), "Default");
+        
+        final CourseTemplateDataFactory ctdf2 = new CourseTemplateDataFactory(ctx);
+        final CourseTemplate createdCourseTemplate2 = courseTemplateApi.createCourseTemplate(ctx,
+                ctdf2.constructCourseTemplate(new Pair<>(1, 3), 3, Collections.emptyMap()));
+        
+        CourseConfiguration courseConfigurationBasedOnOtherTemplate = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(
+                ctx, createdCourseTemplate2.getId(), regattaName, /* tags */ null);
+        
+    }
+
+    @Test
     public void testCreateCourseFromFreestyleConfigurationWithPositioning() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         final String regattaName = "test";
