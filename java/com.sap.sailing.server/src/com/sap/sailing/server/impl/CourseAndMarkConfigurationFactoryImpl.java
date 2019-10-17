@@ -87,8 +87,6 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfigurationFactory {
 
@@ -617,7 +615,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             });
         }
 
-        replaceTemplateBasedConfigurationCandidatesBySuggestedPropertiesBasedConfigurations(markTemplatesToMarkConfigurations, allMarkConfigurations, tagsToFilterMarkProperties,
+        replaceTemplateBasedConfigurationCandidatesBySuggestedProperties(markTemplatesToMarkConfigurations, allMarkConfigurations, tagsToFilterMarkProperties,
                 courseTemplate.getAssociatedRoles());
 
         final Map<MarkConfiguration, String> resultingRoleMapping = createRoleMappingWithMarkTemplateMapping(
@@ -702,9 +700,9 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                         resultingRoleMapping.put(markConfiguration,
                                 courseTemplateOrNull.getAssociatedRoles().get(markTemplate));
                     }
-                    replaceTemplateBasedConfigurationCandidatesBySuggestedPropertiesBasedConfigurationsForRoleMapping(
-                            resultingRoleMapping, allMarkConfigurations, tagsToFilterMarkProperties,
-                            course.getAssociatedRoles());
+                    replaceTemplateBasedConfigurationCandidatesBySuggestedProperties(
+                            markTemplatesToMarkConfigurations, allMarkConfigurations, tagsToFilterMarkProperties,
+                            courseTemplateOrNull.getAssociatedRoles());
                 }
                 resultingWaypoints.addAll(createWaypointConfigurationsWithMarkTemplateMapping(courseTemplateOrNull,
                         markTemplatesToMarkConfigurations));
@@ -831,54 +829,62 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             markTemplatesNotIncluded.removeAll(markTemplatesToMarkConfigurations.keySet());
         }
     }
-    
-    private void replaceTemplateBasedConfigurationCandidatesBySuggestedPropertiesBasedConfigurationsForRoleMapping(
-            Map<MarkConfiguration, String> resultingRoleMapping, Set<MarkConfiguration> markConfigurationsToEdit,
-            Iterable<String> tagsToFilterMarkProperties, Map<Mark, String> associatedRoles) {
-        // find candidates for replacement of mark configuration
-        final Map<MarkConfiguration, String> replacementCandidates = resultingRoleMapping.entrySet().stream()
-                .filter(e -> e.getKey() instanceof MarkTemplateBasedMarkConfigurationImpl)
-                .collect(Collectors.toMap(s -> s.getKey(), s -> s.getValue()));
 
-        Set<MarkTemplate> associatedTemplates = replacementCandidates.entrySet().stream()
-                .map(e -> e.getKey().getOptionalMarkTemplate()).collect(Collectors.toSet());
-        // determine matching MarkProperties to associate
-        final Map<MarkTemplate, MarkProperties> suggestedMappings = new MarkTemplatesMarkPropertiesAssociater()
-                .getSuggestions(associatedRoles, associatedTemplates,
-                        sharedSailingData.getAllMarkProperties(tagsToFilterMarkProperties), false);
-
-        // replace candidates if possible
-        for (Map.Entry<MarkConfiguration, String> entr : replacementCandidates.entrySet()) {
-            final MarkTemplate keyTemplate = entr.getKey().getOptionalMarkTemplate();
-            if (suggestedMappings.containsKey(keyTemplate)) {
-                final MarkProperties suggestedPropertiesMapping = suggestedMappings.get(keyTemplate);
-                final MarkPropertiesBasedMarkConfigurationImpl newMarkPropertiesBasedConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(
-                        suggestedPropertiesMapping, keyTemplate, /* optionalPositioning */ null,
-                        getPositioningIfAvailable(suggestedPropertiesMapping), /* storeToInventory */ false);
-
-                resultingRoleMapping.remove(entr.getKey());
-                resultingRoleMapping.put(newMarkPropertiesBasedConfiguration, entr.getValue());
-                markConfigurationsToEdit.remove(entr.getKey());
-                markConfigurationsToEdit.add(newMarkPropertiesBasedConfiguration);
-            }
-        }
-    }
-
-    private void replaceTemplateBasedConfigurationCandidatesBySuggestedPropertiesBasedConfigurations(Map<MarkTemplate, MarkConfiguration> markTemplatesToMarkConfigurationsToReplace,
+    private void replaceTemplateBasedConfigurationCandidatesBySuggestedProperties(Map<MarkTemplate, MarkConfiguration> markTemplatesToMarkConfigurationsToReplace,
             Set<MarkConfiguration> markConfigurationsToEdit, Iterable<String> tagsToFilterMarkProperties,
             Map<MarkTemplate, String> associatedRoles) {
         // find candidates for replacement of mark configuration
-        final Map<MarkTemplate, MarkConfiguration> replacementCandidates = markTemplatesToMarkConfigurationsToReplace.entrySet()
-                .stream().filter(e -> e.getValue() instanceof MarkTemplateBasedMarkConfigurationImpl)
-                .collect(Collectors.toMap(s -> s.getKey(), s -> s.getValue()));
-
-        // determine matching MarkProperties to associate
-        final Map<MarkTemplate, MarkProperties> suggestedMappings = new MarkTemplatesMarkPropertiesAssociater()
-                .getSuggestions(associatedRoles, replacementCandidates.keySet(),
-                        sharedSailingData.getAllMarkProperties(tagsToFilterMarkProperties));
+        final Map<MarkTemplate, MarkTemplateBasedMarkConfiguration> replacementCandidates = markTemplatesToMarkConfigurationsToReplace.entrySet()
+                .stream().filter(e -> e.getValue() instanceof MarkTemplateBasedMarkConfiguration)
+                .collect(Collectors.toMap(s -> s.getKey(), s -> (MarkTemplateBasedMarkConfiguration)s.getValue()));
+        
+        final Set<MarkProperties> markPropertiesCandidates = new HashSet<>();
+        Util.addAll(sharedSailingData.getAllMarkProperties(tagsToFilterMarkProperties), markPropertiesCandidates);
+        // Already included mark properties may not get associated again
+        markPropertiesCandidates.removeAll(markConfigurationsToEdit.stream()
+                .map(this::getAssociatedMarkPropertiesIfAvailable).filter(v -> v != null).collect(Collectors.toSet()));
+        
+        final LastUsageBasedAssociater<MarkProperties, String> roleBasedAssociater = new LastUsageBasedAssociater<>(
+                replacementCandidates.keySet().stream().map(associatedRoles::get).filter(v -> v != null)
+                        .collect(Collectors.toSet()));
+        
+        for (MarkProperties mp : markPropertiesCandidates) {
+            roleBasedAssociater.addUsages(mp, mp.getLastUsedRole());
+        }
+        
+        final Map<MarkTemplate, MarkProperties> suggestedMappings = new HashMap<>();
+        
+        for (Iterator<Entry<MarkTemplate, MarkTemplateBasedMarkConfiguration>> iterator = replacementCandidates.entrySet().iterator(); iterator
+                .hasNext();) {
+            Entry<MarkTemplate, MarkTemplateBasedMarkConfiguration> entry = iterator.next();
+            final String roleName = associatedRoles.get(entry.getKey());
+            if (roleName != null) {
+                final MarkProperties bestMatchOrNull = roleBasedAssociater.getBestMatchForT2(roleName);
+                if (bestMatchOrNull != null) {
+                    suggestedMappings.put(entry.getKey(), bestMatchOrNull);
+                    iterator.remove();
+                    markPropertiesCandidates.remove(bestMatchOrNull);
+                }
+            }
+        }
+        
+        // Trying to map the left over candidates by direct usages of the MarkTemplate with the MarkProperties
+        final LastUsageBasedAssociater<MarkProperties, MarkTemplate> templateBasedAssociater = new LastUsageBasedAssociater<>(
+                new HashSet<>(replacementCandidates.keySet()));
+        
+        for (MarkProperties mp : markPropertiesCandidates) {
+            roleBasedAssociater.addUsages(mp, mp.getLastUsedRole());
+        }
+        
+        for (Entry<MarkTemplate, MarkTemplateBasedMarkConfiguration> entry : replacementCandidates.entrySet()) {
+            final MarkProperties bestMatchOrNull = templateBasedAssociater.getBestMatchForT2(entry.getKey());
+            if (bestMatchOrNull != null) {
+                suggestedMappings.put(entry.getKey(), bestMatchOrNull);
+            }
+        }
 
         // replace candidates if possible
-        for (Map.Entry<MarkTemplate, MarkConfiguration> entr : replacementCandidates.entrySet()) {
+        for (Map.Entry<MarkTemplate, MarkTemplateBasedMarkConfiguration> entr : replacementCandidates.entrySet()) {
             final MarkTemplate keyTemplate = entr.getKey();
             if (suggestedMappings.containsKey(keyTemplate)) {
                 final MarkProperties suggestedPropertiesMapping = suggestedMappings.get(keyTemplate);
@@ -899,140 +905,6 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
 
     private Positioning getPositioningIfAvailable(MarkProperties markProperties) {
         return CourseConfigurationBuilder.getPositioningIfAvailable(markProperties, positionResolver);
-    }
-
-    private class MarkTemplatesMarkPropertiesAssociater {
-
-        public Map<MarkTemplate, MarkProperties> getSuggestions(Map<Mark, String> roleMappingFromCourseContext,
-                Iterable<MarkTemplate> markTemplates, Iterable<MarkProperties> filteredMarkPropertiesCandiates,
-                boolean dummy) {
-            Map<MarkTemplate, String> transformedRoleMapping = roleMappingFromCourseContext.entrySet().stream()
-                    .map(e -> new Pair<>(
-                            sharedSailingData.getMarkTemplateById(e.getKey().getOriginatingMarkTemplateIdOrNull()),
-                            e.getValue()))
-                    .filter(d -> d.getA() == null).collect(Collectors.toMap(d -> d.getA(), d -> d.getB()));
-            return getSuggestions(transformedRoleMapping, markTemplates, filteredMarkPropertiesCandiates);
-        }
-
-        public Map<MarkTemplate, MarkProperties> getSuggestions(Map<MarkTemplate, String> roleMappingFromCourseContext,
-                Iterable<MarkTemplate> markTemplates, Iterable<MarkProperties> filteredMarkPropertiesCandiates) {
-
-            // build mappings for both directions MP->MT and MT->MP
-            final Map<MarkProperties, Set<Pair<MarkTemplate, TimePoint>>> usedTemplatesWithTimeByMarkProperties = new HashMap<>();
-            final Map<MarkTemplate, Set<Pair<MarkProperties, TimePoint>>> usedPropertiesWithTimeByMarkTemplate = new HashMap<>();
-
-            // go through all mark properties to find the matching mark templates
-            for (final MarkProperties properties : filteredMarkPropertiesCandiates) {
-                usedTemplatesWithTimeByMarkProperties.put(properties, properties.getLastUsedTemplate().entrySet()
-                        .stream()/* .filter(x -> Util.contains(markTemplates, x)) */
-                        .map(k -> new Pair<>(k.getKey(), k.getValue())).collect(Collectors.toSet()));
-
-                // find the matching mark template for this properties
-                for (final MarkTemplate template : markTemplates) {
-                    if (properties.getLastUsedTemplate().containsKey(template)) {
-                        // add template use to reverse map
-                        Util.addToValueSet(usedPropertiesWithTimeByMarkTemplate, template,
-                                new Pair<>(properties, (TimePoint) properties.getLastUsedTemplate().get(template)));
-                    }
-                }
-            }
-
-            final Map<MarkTemplate, MarkProperties> markPropertiesByMarkTemplate = new HashMap<>();
-
-            // find the matching properties for a given template (forward direction)
-            for (final MarkTemplate template : usedPropertiesWithTimeByMarkTemplate.keySet()) {
-                final Set<Pair<MarkProperties, TimePoint>> currentMarkPropertiesSetForThisTemplateWithLastTemplateUsage = usedPropertiesWithTimeByMarkTemplate
-                        .get(template);
-                if (currentMarkPropertiesSetForThisTemplateWithLastTemplateUsage.size() == 0) {
-                    continue;
-                }
-
-                final MarkProperties propertiesResult;
-                if (currentMarkPropertiesSetForThisTemplateWithLastTemplateUsage.size() == 1) {
-                    // 1:x mapping
-                    propertiesResult = currentMarkPropertiesSetForThisTemplateWithLastTemplateUsage.iterator().next()
-                            .getA();
-                } else {
-                    // y:x mapping: reduce to 1:x
-
-                    // A: prioritize by last role use
-                    final Set<Pair<MarkProperties, TimePoint>> candidatesAfterRolePriorizationWithLastTemplateUsage = new HashSet<>();
-                    String role = roleMappingFromCourseContext.get(template);
-                    if (role == null) {
-                        candidatesAfterRolePriorizationWithLastTemplateUsage
-                                .addAll(currentMarkPropertiesSetForThisTemplateWithLastTemplateUsage);
-                    } else {
-                        final Set<Pair<MarkProperties, TimePoint>> candidatesForRolePriorizationWithLastRoleUsage = new HashSet<>();
-                        for (final Pair<MarkProperties, TimePoint> pair : currentMarkPropertiesSetForThisTemplateWithLastTemplateUsage) {
-                            if (pair.getA().getLastUsedRole().containsKey(role)) {
-                                candidatesForRolePriorizationWithLastRoleUsage
-                                        .add(new Pair<>(pair.getA(), pair.getA().getLastUsedRole().get(role)));
-                            }
-                        }
-
-                        if (candidatesForRolePriorizationWithLastRoleUsage.size() == 0) {
-                            candidatesAfterRolePriorizationWithLastTemplateUsage
-                                    .addAll(currentMarkPropertiesSetForThisTemplateWithLastTemplateUsage);
-                        } else {
-                            candidatesForRolePriorizationWithLastRoleUsage
-                                    .forEach(c -> candidatesAfterRolePriorizationWithLastTemplateUsage
-                                            .add(new Pair<>(c.getA(), findAssociatedTimepoint(c.getA(),
-                                                    currentMarkPropertiesSetForThisTemplateWithLastTemplateUsage))));
-                        }
-                    }
-
-                    if (candidatesAfterRolePriorizationWithLastTemplateUsage.size() == 0) {
-                        // no candidates found: use secondary priority metric on all entries
-                        propertiesResult = findMostRecentUse(
-                                currentMarkPropertiesSetForThisTemplateWithLastTemplateUsage);
-                    } else if (candidatesAfterRolePriorizationWithLastTemplateUsage.size() == 1) {
-                        // only one candidate remaining -> use this candidate
-                        propertiesResult = candidatesAfterRolePriorizationWithLastTemplateUsage.iterator().next()
-                                .getA();
-                    } else {
-                        // B: prioritize by last use for the already prioritized candidates
-                        propertiesResult = findMostRecentUse(candidatesAfterRolePriorizationWithLastTemplateUsage);
-                    }
-                }
-
-                // check reverse direction (find templates mapped to the found properties)
-                final Set<Pair<MarkTemplate, TimePoint>> reverseMappings = usedTemplatesWithTimeByMarkProperties
-                        .get(propertiesResult);
-
-                final MarkTemplate mappedTemplate;
-                if (reverseMappings.size() == 1) {
-                    // 1:1 mapping
-                    mappedTemplate = reverseMappings.iterator().next().getA();
-                } else {
-                    // y:1 mapping
-                    // reduce to 1:1 mapping
-                    // TODO: role-based scoring?
-                    mappedTemplate = findMostRecentUse(reverseMappings);
-                }
-
-                markPropertiesByMarkTemplate.put(mappedTemplate, propertiesResult);
-            }
-
-            return markPropertiesByMarkTemplate;
-        }
-
-        private <T> TimePoint findAssociatedTimepoint(T t, Set<Pair<T, TimePoint>> set) {
-            return set.stream().filter(p -> p.getA().equals(t)).collect(Collectors.toSet()).iterator().next().getB();
-        }
-
-        /** @return the most recent use */
-        private <T> T findMostRecentUse(final Set<Pair<T, TimePoint>> lastUses) {
-            TimePoint mostRecent = new MillisecondsTimePoint(0);
-            T mostRecentValue = null;
-            for (final Pair<T, TimePoint> e : lastUses) {
-                if (e.getB().after(mostRecent)) {
-                    mostRecent = e.getB();
-                    mostRecentValue = e.getA();
-                }
-            }
-
-            return mostRecentValue;
-        }
     }
 
     @Override
@@ -1193,6 +1065,12 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             if (t2Filter.test(t2)) {
                 insertOrUpdateUsage(usagesByT1, t1, t2, lastUsage);
                 insertOrUpdateUsage(usagesByT2, t2, t1, lastUsage);
+            }
+        }
+        
+        public void addUsages(T1 t1, Map<T2, TimePoint> lastUsages) {
+            for (Entry<T2, TimePoint> entry : lastUsages.entrySet()) {
+                addUsage(t1, entry.getKey(), entry.getValue());
             }
         }
         
