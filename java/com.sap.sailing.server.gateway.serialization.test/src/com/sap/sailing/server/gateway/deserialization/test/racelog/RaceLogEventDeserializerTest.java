@@ -13,7 +13,6 @@ import org.mockito.Mockito;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
-import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -30,10 +29,8 @@ import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
-import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.orc.ORCCertificatesImporter;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEndOfTrackingEventDeserializer;
@@ -47,7 +44,6 @@ import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerialize
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
-import com.sap.sse.common.impl.SecondsDurationImpl;
 
 public class RaceLogEventDeserializerTest {
     
