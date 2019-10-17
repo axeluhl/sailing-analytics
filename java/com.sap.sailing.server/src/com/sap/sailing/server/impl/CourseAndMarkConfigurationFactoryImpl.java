@@ -13,12 +13,15 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
@@ -28,6 +31,7 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
@@ -481,11 +485,117 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         if (optionalRegatta != null) {
             // If we have a regatta context, we first try to get all existing marks and their association to
             // MarkTemplates from the regatta
-            final RegattaMarkConfigurations regattaMarkConfigurations = new RegattaMarkConfigurations(courseTemplate,
-                    optionalRegatta);
-            allMarkConfigurations.addAll(regattaMarkConfigurations.regattaConfigurationsByMark.values());
-            markTemplatesToMarkConfigurations.putAll(regattaMarkConfigurations.markConfigurationsByMarkTemplate);
+            final Map<MarkTemplate, RegattaMarkConfiguration> markConfigurationsByMarkTemplate = new HashMap<>();
+            final Map<Mark, RegattaMarkConfiguration> markConfigurationsByMark = new HashMap<>();
+            final Map<RegattaMarkConfiguration, TimePoint> lastUsages = new HashMap<>();
+            
+            for (RaceColumn raceColumn : optionalRegatta.getRaceColumns()) {
+                for (Mark mark : raceColumn.getAvailableMarks()) {
+                    markConfigurationsByMark
+                            .computeIfAbsent(mark,
+                                    m -> createMarkConfigurationForRegattaMark(courseTemplate, optionalRegatta, m));
+                }
+            }
+            
+            final LastUsageBasedAssociater<RegattaMarkConfiguration, String> usagesForRole = new LastUsageBasedAssociater<>(
+                    courseTemplate.getAssociatedRoles().values());
+
+            for (RaceColumn raceColumn : optionalRegatta.getRaceColumns()) {
+                for (Fleet fleet : raceColumn.getFleets()) {
+                    final TrackedRace trackedRaceOrNull = raceColumn.getTrackedRace(fleet);
+                    TimePoint usage = null;
+                    if (trackedRaceOrNull != null) {
+                        usage = trackedRaceOrNull.getStartOfRace();
+                        if (usage == null) {
+                            usage = trackedRaceOrNull.getStartOfTracking();
+                        }
+                    }
+                    CourseBase courseOrNull = null;
+                    final RaceDefinition raceDefinition = raceColumn.getRaceDefinition(fleet);
+                    if (raceDefinition != null) {
+                        courseOrNull = raceDefinition.getCourse();
+                    }
+                    if (courseOrNull == null || usage == null) {
+                        final ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(raceLogResolver, raceColumn.getRaceLog(fleet));
+                        if (courseOrNull == null) {
+                            courseOrNull = raceState.getCourseDesign();
+                        }
+                        if (usage == null) {
+                            usage = raceState.getStartTime();
+                        }
+                    }
+                    if (usage == null) {
+                        usage = TimePoint.BeginningOfTime;
+                    }
+                    
+                    if (courseOrNull != null) {
+                        final TimePoint effectiveUsageTP = usage;
+                        for (Waypoint waypoint : courseOrNull.getWaypoints()) {
+                            for (Mark mark : waypoint.getMarks()) {
+                                final RegattaMarkConfiguration regattaMarkConfiguration = markConfigurationsByMark
+                                        .computeIfAbsent(mark,
+                                                m -> createMarkConfigurationForRegattaMark(courseTemplate, optionalRegatta, m));
+                                
+                                lastUsages.compute(regattaMarkConfiguration,
+                                        (mc, existingTP) -> (existingTP == null || existingTP.before(effectiveUsageTP))
+                                        ? effectiveUsageTP
+                                                : existingTP);
+                                
+                                String roleName = courseOrNull.getAssociatedRoles().get(mark);
+                                if (roleName == null) {
+                                    roleName = mark.getName();
+                                }
+                                usagesForRole.addUsage(regattaMarkConfiguration, roleName, effectiveUsageTP);
+                            }
+                        }
+                    }
+                }
+            }
+
+            Set<MarkTemplate> markTemplatesToAssociate = new HashSet<>();
+            Util.addAll(courseTemplate.getMarkTemplates(), markTemplatesToAssociate);
+            
+            // Primary matching is based on the associated role.
+            for (Iterator<MarkTemplate> iterator = markTemplatesToAssociate.iterator(); iterator.hasNext();) {
+                MarkTemplate mt = iterator.next();
+                String roleOrNull = courseTemplate.getAssociatedRoles().get(mt);
+                if (roleOrNull != null) {
+                    RegattaMarkConfiguration bestMatchForRole = usagesForRole.getBestMatchForT2(roleOrNull);
+                    if (bestMatchForRole != null) {
+                        iterator.remove();
+                        markConfigurationsByMarkTemplate.put(mt, bestMatchForRole);
+                        usagesForRole.removeT1(bestMatchForRole);
+                        usagesForRole.removeT2(roleOrNull);
+                    }
+                }
+            }
+            
+            // Marks that couldn't be matched by a role could be directly matched by an originating MarkTemplate and last usage
+            for (RegattaMarkConfiguration regattaMarkConfiguration : usagesForRole.usagesByT1.keySet()) {
+                final MarkTemplate associatedMarkTemplateOrNull = regattaMarkConfiguration.getOptionalMarkTemplate();
+                if (associatedMarkTemplateOrNull != null) {
+                    markConfigurationsByMarkTemplate.compute(associatedMarkTemplateOrNull, (mt, rmc) -> {
+                        if (rmc == null) {
+                            return regattaMarkConfiguration;
+                        }
+
+                        final TimePoint lastUsageOrNull = lastUsages.get(regattaMarkConfiguration);
+                        if (lastUsageOrNull == null) {
+                            return rmc;
+                        }
+                        final TimePoint lastUsageOfExistingOrNull = lastUsages.get(rmc);
+                        if (lastUsageOfExistingOrNull == null) {
+                            return regattaMarkConfiguration;
+                        }
+                        return lastUsageOrNull.after(lastUsageOfExistingOrNull) ? regattaMarkConfiguration : rmc;
+                    });
+                }
+            }
+            
+            allMarkConfigurations.addAll(markConfigurationsByMark.values());
+            markTemplatesToMarkConfigurations.putAll(markConfigurationsByMarkTemplate);
         }
+        
         for (MarkTemplate markTemplate : courseTemplate.getMarkTemplates()) {
             // For any MarkTemplate that wasn't resolved from the regatta, an explicit entry needs to get created
             markTemplatesToMarkConfigurations.computeIfAbsent(markTemplate, mt -> {
@@ -996,19 +1106,19 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 }
             }
         }
+    }
 
-        private RegattaMarkConfiguration createMarkConfigurationForRegattaMark(CourseTemplate courseTemplate,
-                Regatta regatta, Mark mark) {
-            final UUID markTemplateIdOrNull = mark.getOriginatingMarkTemplateIdOrNull();
-            final MarkTemplate markTemplateOrNull = markTemplateIdOrNull == null ? null : resolveMarkTemplateByID(courseTemplate, markTemplateIdOrNull);
-            final UUID markPropertiesIdOrNull = mark.getOriginatingMarkPropertiesIdOrNull();
-            final MarkProperties markPropertiesOrNull = markPropertiesIdOrNull == null ? null
-                    : sharedSailingData.getMarkPropertiesById(markPropertiesIdOrNull);
-            final RegattaMarkConfiguration regattaMarkConfiguration = new RegattaMarkConfigurationImpl(mark,
-                    /* optionalPositioning */ null, getPositioningIfAvailable(regatta, mark), markTemplateOrNull,
-                    markPropertiesOrNull, /* storeToInventory */ false);
-            return regattaMarkConfiguration;
-        }
+    private RegattaMarkConfiguration createMarkConfigurationForRegattaMark(CourseTemplate courseTemplate,
+            Regatta regatta, Mark mark) {
+        final UUID markTemplateIdOrNull = mark.getOriginatingMarkTemplateIdOrNull();
+        final MarkTemplate markTemplateOrNull = markTemplateIdOrNull == null ? null : resolveMarkTemplateByID(courseTemplate, markTemplateIdOrNull);
+        final UUID markPropertiesIdOrNull = mark.getOriginatingMarkPropertiesIdOrNull();
+        final MarkProperties markPropertiesOrNull = markPropertiesIdOrNull == null ? null
+                : sharedSailingData.getMarkPropertiesById(markPropertiesIdOrNull);
+        final RegattaMarkConfiguration regattaMarkConfiguration = new RegattaMarkConfigurationImpl(mark,
+                /* optionalPositioning */ null, getPositioningIfAvailable(regatta, mark), markTemplateOrNull,
+                markPropertiesOrNull, /* storeToInventory */ false);
+        return regattaMarkConfiguration;
     }
     
     private abstract class CourseSequenceMapper<C, M extends C, W> {
@@ -1107,4 +1217,85 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             return new WaypointWithMarkConfigurationImpl(controlPoint, passingInstruction);
         }
     };
+    
+    private class LastUsageBasedAssociater<T1, T2> {
+        
+        private final Map<T1, Map<T2, TimePoint>> usagesByT1 = new HashMap<>();
+        private final Map<T2, Map<T1, TimePoint>> usagesByT2 = new HashMap<>();
+        private final Predicate<T2> t2Filter;
+        
+        public LastUsageBasedAssociater(Iterable<T2> t2Whitelist) {
+            t2Filter = t2 -> Util.contains(t2Whitelist, t2);
+        }
+        
+        public void addUsage(T1 t1, T2 t2, TimePoint lastUsage) {
+            if (t2Filter.test(t2)) {
+                insertOrUpdateUsage(usagesByT1, t1, t2, lastUsage);
+                insertOrUpdateUsage(usagesByT2, t2, t1, lastUsage);
+            }
+        }
+        
+        private <K, V> void insertOrUpdateUsage(Map<K, Map<V, TimePoint>> usages, K key, V value, TimePoint timePoint) {
+            Map<V, TimePoint> usagesForKey = usages.computeIfAbsent(key, k -> new HashMap<>());
+            usagesForKey.compute(value,
+                    (k, currentValue) -> (currentValue == null || timePoint.after(currentValue)) ? timePoint
+                            : currentValue);
+        }
+        
+        private <K, V> V getBestMatch(Map<K, Map<V, TimePoint>> forwardUsages, Map<V, Map<K, TimePoint>> backwardUsages, K keyToSearch) {
+            V bestMatch = getBestMatchCandidate(forwardUsages, keyToSearch);
+            if (bestMatch != null && ! keyToSearch.equals(getBestMatchCandidate(backwardUsages, bestMatch))) {
+                // match would be better suited for another key
+                bestMatch = null;
+            }
+            return bestMatch;
+        }
+        
+        private <K, V> V getBestMatchCandidate(Map<K, Map<V, TimePoint>> usages, K keyToSearch) {
+            final Map<V, TimePoint> usagesForT1 = usages.get(keyToSearch);
+            if (usagesForT1 == null) {
+                // No match at all
+                return null;
+            }
+            TimePoint bestMatchTP = null;
+            V bestMatch = null;
+            for (Map.Entry<V, TimePoint> entry : usagesForT1.entrySet()) {
+                if (bestMatchTP == null || bestMatchTP.after(entry.getValue())) {
+                    bestMatchTP = entry.getValue();
+                    bestMatch = entry.getKey();
+                } else if (bestMatchTP.compareTo(entry.getValue()) == 0) {
+                    // ambiguous match
+                    bestMatch = null;
+                }
+            }
+            return bestMatch;
+        }
+        
+        public T1 getBestMatchForT2(T2 t2) {
+            return getBestMatch(usagesByT2, usagesByT1, t2);
+        }
+        
+        private <K, V> void removeT1(T1 t1) {
+            remove(usagesByT1, usagesByT2, t1);
+        }
+        
+        private <K, V> void removeT2(T2 t2) {
+            remove(usagesByT2, usagesByT1, t2);
+        }
+        
+        private <K, V> void remove(Map<K, Map<V, TimePoint>> forwardUsages, Map<V, Map<K, TimePoint>> backwardUsages, K keyToRemove) {
+            final Map<V, TimePoint> associatedUses = forwardUsages.remove(keyToRemove);
+            if (associatedUses != null) {
+                for (V associatedValue : associatedUses.keySet()) {
+                    final Map<K, TimePoint> usesForValue = backwardUsages.get(associatedValue);
+                    if (usesForValue != null) {
+                        usesForValue.remove(keyToRemove);
+                        if (usesForValue.isEmpty()) {
+                            backwardUsages.remove(associatedValue);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
