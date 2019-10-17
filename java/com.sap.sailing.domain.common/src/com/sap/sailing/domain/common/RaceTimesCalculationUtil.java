@@ -39,12 +39,13 @@ public class RaceTimesCalculationUtil {
             // We have NO blue flag up event and we have an end of race time
             max = new Date(endOfRace.getTime() + MAX_TIME_AFTER_RACE_END);
         } else {
-            // We have no end time so just keep playing until they are created
-            max = new Date(liveTimePoint.getTime() + TIME_AFTER_LIVE);
-        }
-        // If there are no end events; Events may exceed endOfTracking
-        if (endOfTracking != null && max != null) {
-            max = endOfTracking;
+            // We have no end time and are not expecting any end events
+            if (endOfTracking != null && raceFinishingTime == null) {
+                max = endOfTracking;
+            } else {
+                // No end in sight; Keep on playing
+                max = new Date(liveTimePoint.getTime() + TIME_AFTER_LIVE);
+            }
         }
 
         return new Util.Pair<Date, Date>(min, max);

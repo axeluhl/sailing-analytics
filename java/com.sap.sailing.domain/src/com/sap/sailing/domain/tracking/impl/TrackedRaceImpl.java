@@ -74,6 +74,7 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RaceTimesCalculationUtil;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -1180,45 +1181,27 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public boolean hasStarted(TimePoint at) {
         return getStartOfRace() != null && getStartOfRace().compareTo(at) <= 0;
     }
-    
+
     @Override
     public boolean isLive(TimePoint at) {
-        final TimePoint startOfLivePeriod;
-        final TimePoint endOfLivePeriod;
-        if (!hasGPSData() || !hasWindData()) {
-            startOfLivePeriod = null;
-            endOfLivePeriod = null;
-        } else {
-            if (getStartOfRace() == null) {
-                startOfLivePeriod = getStartOfTracking();
-            } else {
-                startOfLivePeriod = getStartOfRace().minus(TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS);
-            }
-            if (getEndOfRace() == null) {
-                if (getTimePointOfNewestEvent() != null) {
-                    endOfLivePeriod = getTimePointOfNewestEvent().plus(
-                            TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).plus(getDelayToLiveInMillis());
-                } else {
-                    endOfLivePeriod = null;
-                }
-            } else {
-                endOfLivePeriod = getEndOfRace().plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
+        if (hasGPSData() && hasWindData()) {
+            Util.Pair<Date, Date> minMax = RaceTimesCalculationUtil.calculateRaceMinMax(at.asDate(),
+                    startOfTracking.asDate(), startTime.asDate(), finishingTime.asDate(), finishedTime.asDate(),
+                    endTime.asDate(), endOfTracking.asDate());
+            Date min = minMax.getA() != null
+                    ? new Date(minMax.getA().getTime() - TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS)
+                    : null;
+            Date max = minMax.getB() != null
+                    ? new Date(minMax.getB().getTime() + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS
+                            + getDelayToLiveInMillis())
+                    : null;
+
+            // We are live if at is in between min and max
+            if (min != null && max != null) {
+                return !min.after(at.asDate()) && !at.asDate().after(max);
             }
         }
-    
-        // if an empty timepoint is given then take the start of the race
-        if (at == null) {
-            at = startOfLivePeriod.plus(1);
-        }
-        
-        // whenLastTrackedRaceWasLive is null if there is no tracked race for fleet, or the tracked race hasn't started yet at the server time
-        // when this DTO was assembled, or there were no GPS or wind data
-        final boolean result =
-                startOfLivePeriod != null &&
-                endOfLivePeriod != null &&
-                !startOfLivePeriod.after(at) &&
-                !at.after(endOfLivePeriod);
-        return result;
+        return false;
     }
 
     @Override
