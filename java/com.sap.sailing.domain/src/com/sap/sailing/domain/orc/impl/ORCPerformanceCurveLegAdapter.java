@@ -11,12 +11,14 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 
 /**
- * Adapts a {@link TrackedLeg} to the {@link ORCPerformanceCurveLeg} interface, using as length the
- * {@link TrackedLeg#getWindwardDistance() "windward distance"} (which for reaching legs is defined as the great circle
- * distance between the leg's start and end waypoint) for the leg's {@link TrackedLeg#getReferenceTimePoint() reference
- * time point}, and as the {@link #getTwa() TWA} the angular difference between this leg's bearing and the TWA as
- * obtained from the {@link TrackedRace#getWind(com.sap.sailing.domain.common.Position, TimePoint) TrackedRace} of which
- * the {@link TrackedLeg} passed to the constructor is a part.
+ * Adapts a {@link TrackedLeg} to the {@link ORCPerformanceCurveLeg} interface. If wind information is known, the leg
+ * will be of type {@link ORCPerformanceCurveLegTypes#TWA}, using as length the {@link TrackedLeg#getWindwardDistance()
+ * "windward distance"} (which for reaching legs is defined as the great circle distance between the leg's start and end
+ * waypoint) for the leg's {@link TrackedLeg#getReferenceTimePoint() reference time point}, and as the {@link #getTwa()
+ * TWA} the angular difference between this leg's bearing and the TWA as obtained from the
+ * {@link TrackedRace#getWind(com.sap.sailing.domain.common.Position, TimePoint) TrackedRace} of which the
+ * {@link TrackedLeg} passed to the constructor is a part. If no wind information is known, the leg is emulated to
+ * be of type {@link ORCPerformanceCurveLegTypes#LONG_DISTANCE}, and {@link #getTwa()} will return {@code null}.
  */
 public class ORCPerformanceCurveLegAdapter implements ORCPerformanceCurveLeg {
     private final TrackedLeg trackedLeg;
@@ -36,20 +38,31 @@ public class ORCPerformanceCurveLegAdapter implements ORCPerformanceCurveLeg {
 
     private Wind getWind() {
         final TimePoint referenceTimePoint = trackedLeg.getReferenceTimePoint();
-        return return trackedLeg.getTrackedRace().getWind(trackedLeg.getMiddleOfLeg(referenceTimePoint), referenceTimePoint);
+        return trackedLeg.getTrackedRace().getWind(trackedLeg.getMiddleOfLeg(referenceTimePoint), referenceTimePoint);
     }
 
     @Override
     public Bearing getTwa() {
-        final TimePoint referenceTimePoint = trackedLeg.getReferenceTimePoint();
-        return trackedLeg.getLegBearing(referenceTimePoint).getDifferenceTo(
-                trackedLeg.getTrackedRace().getWind(trackedLeg.getMiddleOfLeg(referenceTimePoint),
-                        referenceTimePoint).getFrom());
+        final Wind wind = getWind();
+        final Bearing result;
+        if (wind == null) {
+            result = null;
+        } else {
+            final TimePoint referenceTimePoint = trackedLeg.getReferenceTimePoint();
+            result = trackedLeg.getLegBearing(referenceTimePoint).getDifferenceTo(wind.getFrom());
+        }
+        return result;
     }
 
     @Override
     public ORCPerformanceCurveLegTypes getType() {
-        return ORCPerformanceCurveLegTypes.TWA;
+        final ORCPerformanceCurveLegTypes result;
+        if (getWind() == null) {
+            result = ORCPerformanceCurveLegTypes.LONG_DISTANCE;
+        } else {
+            result = ORCPerformanceCurveLegTypes.TWA;
+        }
+        return result;
     }
 
     @Override
