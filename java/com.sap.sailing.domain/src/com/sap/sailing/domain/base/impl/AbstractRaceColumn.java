@@ -236,6 +236,10 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                 TrackedRace trackedRace = getTrackedRace(fleet);
                 if (trackedRace != null) {
                     trackedRace.attachRaceLog(raceLog);
+                    RegattaLog regattaLog = getRegattaLog();
+                    if (regattaLog != null) {
+                        trackedRace.attachRegattaLog(regattaLog);
+                    }
                 }
             }, /* prio */0);
             // because this will add the race log to the tracked race's attachedRaceLogs collection again, and

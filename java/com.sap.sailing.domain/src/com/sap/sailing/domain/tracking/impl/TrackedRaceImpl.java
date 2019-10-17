@@ -1382,16 +1382,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public TrackedLeg getTrackedLegFinishingAt(Waypoint endOfLeg) {
+        final TrackedLeg result;
         getRace().getCourse().lockForRead();
         try {
             int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(endOfLeg);
             if (indexOfWaypoint == -1) {
                 throw new IllegalArgumentException("Waypoint " + endOfLeg + " not found in " + getRace().getCourse());
             } else if (indexOfWaypoint == 0) {
-                throw new IllegalArgumentException("Waypoint " + endOfLeg + " isn't end of any leg in "
-                        + getRace().getCourse());
+                result = null;
+            } else {
+                result = trackedLegs.get(race.getCourse().getLegs().get(indexOfWaypoint - 1));
             }
-            return trackedLegs.get(race.getCourse().getLegs().get(indexOfWaypoint - 1));
+            return result;
         } finally {
             getRace().getCourse().unlockAfterRead();
         }

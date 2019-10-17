@@ -150,12 +150,16 @@ public class TestORCPerformanceCurveCourse {
         final TrackedLeg trackedLeg2 = Mockito.mock(TrackedLeg.class);
         Mockito.when(trackedLeg2.getWindwardDistance()).thenReturn(new NauticalMileDistance(2));
         legs.add(new ORCPerformanceCurveLegAdapter(trackedLeg1) {
+            private static final long serialVersionUID = 2173629869089646863L;
+
             @Override
             public Bearing getTwa() {
                 return new DegreeBearingImpl(0);
             }
         });
         legs.add(new ORCPerformanceCurveLegAdapter(trackedLeg2) {
+            private static final long serialVersionUID = 5651091430433706403L;
+
             @Override
             public Bearing getTwa() {
                 return new DegreeBearingImpl(0);

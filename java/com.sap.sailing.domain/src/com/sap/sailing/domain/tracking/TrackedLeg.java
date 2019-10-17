@@ -138,6 +138,14 @@ public interface TrackedLeg extends Serializable {
      */
     Distance getWindwardDistance(TimePoint at, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
+    /**
+     * Like {@link #getWindwardDistance(TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}, only that
+     * the {@code legType} can optionally be specified explicitly; if not {@code null}, instead of inferring the leg type
+     * from the wind direction, the leg type provided is assumed. This way it is possible to explicitly evaluate the distance
+     * based on rhumb line, namely by providing {@link LegType#REACHING} as {@code legType}. 
+     */
+    Distance getWindwardDistance(LegType legType, TimePoint middle, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+
     Distance getAbsoluteWindwardDistance(TimePoint at, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**

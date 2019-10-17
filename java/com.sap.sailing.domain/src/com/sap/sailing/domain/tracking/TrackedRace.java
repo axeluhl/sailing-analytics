@@ -224,6 +224,8 @@ public interface TrackedRace
     
     /**
      * Precondition: waypoint must still be part of {@link #getRace()}.{@link RaceDefinition#getCourse() getCourse()}.
+     * Returns {@code null} for the first waypoint of the course. If the waypoint is not part of the course, an
+     * {@link IllegalArgumentException} will be thrown.
      */
     TrackedLeg getTrackedLegFinishingAt(Waypoint endOfLeg);
 

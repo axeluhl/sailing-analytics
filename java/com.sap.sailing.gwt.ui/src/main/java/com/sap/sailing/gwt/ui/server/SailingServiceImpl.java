@@ -9450,8 +9450,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         // for the remaining legInfo entries we now have to create race log events:
         final TimePoint now = MillisecondsTimePoint.now();
         for (final Entry<Integer, ORCPerformanceCurveLegImpl> e : legInfo.entrySet()) {
-            raceLog.add(new RaceLogORCLegDataEventImpl(now, now, author, UUID.randomUUID(), /* pPassId */ 0, e.getKey(),
-                    e.getValue().getTwa(), e.getValue().getLength(), e.getValue().getType()));
+            if (e.getValue() != null) {
+                raceLog.add(new RaceLogORCLegDataEventImpl(now, now, author, UUID.randomUUID(), /* pPassId */ 0, e.getKey(),
+                        e.getValue().getTwa(), e.getValue().getLength(), e.getValue().getType()));
+            }
         }
     }
 

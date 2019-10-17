@@ -75,6 +75,22 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
+     * Like
+     * {@link #getWindwardDistanceToGo(TimePoint, WindPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)},
+     * but with the possibility to fix a {@link LegType} for analysis.
+     * 
+     * @param legTypeOrNull
+     *            if {@code null}, the result is as specified for
+     *            {@link #getWindwardDistanceToGo(TimePoint, WindPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}, and
+     *            the leg type will be inferred from the wind field at the middle of the leg for the given {@code timePoint}.
+     *            In all other cases, the {@link LegType} specified will be assumed for determining the distance; in particular,
+     *            for {@link LegType#REACHING reaching} legs, projection to the rhumb line instead of to the wind will be
+     *            used.
+     */
+    Distance getWindwardDistanceToGo(LegType legTypeOrNull, TimePoint timePoint, WindPositionMode windPositionMode,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+
+    /**
      * Computes an approximation for the average velocity made good (windward / leeward speed) of this leg's competitor at
      * <code>timePoint</code>. If the competitor hasn't started the leg yet, <code>null</code> is returned. If the competitor
      * has already finished the leg, the average over the whole leg is computed, otherwise the average for the time interval

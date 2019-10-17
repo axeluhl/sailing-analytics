@@ -14,6 +14,8 @@ import org.apache.commons.math.FunctionEvaluationException;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.orc.ORCPerformanceCurve;
+import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.Duration;
@@ -56,6 +58,72 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
             final Map<Competitor, Duration> relativeCorrectedTimesByCompetitor) {
         return (c1, c2)->Comparator.nullsLast((Duration correctedTime1, Duration correctedTime2)->correctedTime1.compareTo(correctedTime2)).
                 compare(relativeCorrectedTimesByCompetitor.get(c1), relativeCorrectedTimesByCompetitor.get(c2));
+    }
+
+    /**
+     * Determines the ranks in the leg identified by {@code trackedLeg}. The outcome depends on whether the competitors
+     * have started / finished the leg at {@code timePoint}. The following combinations have to be distinguished:
+     * <ol>
+     * <li>Both haven't started the leg yet at {@code timePoint}: both compare equal</li>
+     * <li>One has, one hasn't started the let yet at {@code timePoint}: the one that has started compares "better"
+     * (less)</li>
+     * <li>Both have started the leg at {@code timePoint}: their relative corrected times at {@code timePoint} or the point
+     * in time when the respective competitor finished the leg---whichever is earlier---are compared. Less means better
+     * (less in terms of the comparator returned).</li>
+     * </ol>
+     */
+    @Override
+    public Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final Map<Competitor, Duration> relativeCorrectedTimeByCompetitor = new HashMap<>();
+        final Map<Competitor, ForkJoinTask<Duration>> futures = new HashMap<>();
+        for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
+            futures.put(competitor, ForkJoinTask.adapt(()->{
+                Duration relativeCorrectedTime;
+                if (trackedLeg.getTrackedLeg(competitor).hasFinishedLeg(timePoint)) {
+                    // dedicated time point at leg end; cannot use implied wind from cache
+                    relativeCorrectedTime = cache.getRelativeCorrectedTime(competitor, getTrackedRace(),
+                            trackedLeg.getTrackedLeg(competitor).getFinishTime(),
+                            (c, t)->getRelativeCorrectedTime(c, t, cache));
+                } else {
+                    // can use cache; we shall compute for the cache's timePoint:
+                    relativeCorrectedTime = cache.getRelativeCorrectedTime(competitor, getTrackedRace(), timePoint,
+                            (c, t)->getRelativeCorrectedTime(c, t, cache));
+                }
+                return relativeCorrectedTime;
+            }).fork());
+        }
+        for (final Entry<Competitor, ForkJoinTask<Duration>> e : futures.entrySet()) {
+            relativeCorrectedTimeByCompetitor.put(e.getKey(), e.getValue().join());
+        }
+        return (tloc1, tloc2)->{
+            final int result;
+            final boolean hasStarted1 = tloc1.hasStartedLeg(timePoint);
+            final boolean hasStarted2 = tloc2.hasStartedLeg(timePoint);
+            if (!hasStarted1) {
+                if (!hasStarted2) {
+                    // both haven't started; they are considered equal for the leg under consideration
+                    result = 0;
+                } else {
+                    // competitor 1 has not started the leg yet, competitor 2 has started the leg, so competitor
+                    // 1 is worse (greater) than 2
+                    result = 1;
+                }
+            } else {
+                if (!hasStarted2) {
+                    // competitor 1 has started the leg, competitor 2 hasn't, so competitor 1 is better (less)
+                    result = -1;
+                } else {
+                    // both have started; use timePoint or the respective leg finishing time, whichever comes first,
+                    // and determine the implied wind
+                    result = Comparator
+                            .nullsLast((Duration relativeCorrectedTime1, Duration relativeCorrectedTime2) -> relativeCorrectedTime1.compareTo(relativeCorrectedTime2))
+                            .compare(relativeCorrectedTimeByCompetitor.get(tloc1.getCompetitor()),
+                                    relativeCorrectedTimeByCompetitor.get(tloc2.getCompetitor()));
+                }
+            }
+            return result;
+        };
     }
 
     private Map<Competitor, Duration> getRelativeCorrectedTimesByCompetitor(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
