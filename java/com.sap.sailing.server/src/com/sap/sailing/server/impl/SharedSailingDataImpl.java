@@ -204,6 +204,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     @Override
     public Void internalSetFixedPositionForMarkProperties(UUID markPropertiesId, Position position) {
         final MarkProperties markProperties = markPropertiesById.get(markPropertiesId);
+        markProperties.setTrackingDeviceIdentifier(null);
         markProperties.setFixedPosition(position);
         mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
         return null;
@@ -232,6 +233,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     public Void internalSetTrackingDeviceIdentifierForMarkProperties(UUID markPropertiesId,
             DeviceIdentifier deviceIdentifier) {
         final MarkProperties markProperties = markPropertiesById.get(markPropertiesId);
+        markProperties.setFixedPosition(null);
         markProperties.setTrackingDeviceIdentifier(deviceIdentifier);
         mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
         return null;

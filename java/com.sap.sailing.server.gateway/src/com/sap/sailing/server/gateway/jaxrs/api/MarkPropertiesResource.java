@@ -105,6 +105,12 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         if (markType != null && markType.length() > 0) {
             type = MarkType.valueOf(markType);
         }
+        if (deviceUuid != null && deviceUuid.length() > 0 && (latDeg != null || lonDeg != null)) {
+            return getBadMarkPropertiesValidationErrorResponse("deviceUuid and fixed positioning cannot be used together");
+        }
+        if (latDeg != null && lonDeg == null || latDeg == null && lonDeg != null) {
+            return getBadMarkPropertiesValidationErrorResponse("incomplete positioning");
+        }
         final MarkPropertiesBuilder markPropertiesBuilder = new MarkPropertiesBuilder(/* id */ null, name, effectiveShortName,
                 color, shape, pattern, type);
         final MarkProperties createdMarkProperties = getSharedSailingData()
@@ -112,7 +118,7 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         if (deviceUuid != null && deviceUuid.length() > 0) {
             final DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
             getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(createdMarkProperties, device);
-        }
+        } 
         if (latDeg != null && lonDeg != null) {
             final Position fixedPosition = new DegreePosition(latDeg, lonDeg);
             getSharedSailingData().setFixedPositionForMarkProperties(createdMarkProperties, fixedPosition);
