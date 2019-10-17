@@ -9344,7 +9344,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public ORCPerformanceCurveLegImpl[] getLegGeometry(String leaderboardName, String raceColumnName, String fleetName, int[] zeroBasedLegIndices) {
+    public ORCPerformanceCurveLegImpl[] getLegGeometry(String leaderboardName, String raceColumnName, String fleetName,
+            int[] zeroBasedLegIndices, ORCPerformanceCurveLegTypes[] legTypes) {
+        assert zeroBasedLegIndices.length == legTypes.length;
         ORCPerformanceCurveLegImpl[] result = null;
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
@@ -9355,8 +9357,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                     if (trackedRace != null) {
                         result = new ORCPerformanceCurveLegImpl[zeroBasedLegIndices.length];
+                        final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(MillisecondsTimePoint.now());
                         for (int i=0; i<zeroBasedLegIndices.length; i++) {
-                            result[i] = getLegGeometry(zeroBasedLegIndices[i], trackedRace);
+                            result[i] = getLegGeometry(zeroBasedLegIndices[i], legTypes[i], trackedRace, cache);
                         }
                     }
                 }
@@ -9366,21 +9369,25 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public ORCPerformanceCurveLegImpl[] getLegGeometry(RegattaAndRaceIdentifier regattaNameAndRaceName, int[] zeroBasedLegIndices) {
+    public ORCPerformanceCurveLegImpl[] getLegGeometry(RegattaAndRaceIdentifier regattaNameAndRaceName, int[] zeroBasedLegIndices,
+            ORCPerformanceCurveLegTypes[] legTypes) {
+        final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(MillisecondsTimePoint.now());
         final TrackedRace trackedRace = getExistingTrackedRace(regattaNameAndRaceName);
         final ORCPerformanceCurveLegImpl[] result = new ORCPerformanceCurveLegImpl[zeroBasedLegIndices.length];
         for (int i=0; i<zeroBasedLegIndices.length; i++) {
-            result[i] = getLegGeometry(zeroBasedLegIndices[i], trackedRace);
+            result[i] = getLegGeometry(zeroBasedLegIndices[i], legTypes[i], trackedRace, cache);
         }
         return result;
     }
 
-    private ORCPerformanceCurveLegImpl getLegGeometry(int zeroBasedLegIndex, final TrackedRace trackedRace) {
+    private ORCPerformanceCurveLegImpl getLegGeometry(int zeroBasedLegIndex, ORCPerformanceCurveLegTypes legType,
+            final TrackedRace trackedRace, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final ORCPerformanceCurveLegImpl result;
         if (trackedRace != null) {
             final Leg leg = trackedRace.getRace().getCourse().getLeg(zeroBasedLegIndex);
             final TrackedLeg trackedLeg = trackedRace.getTrackedLeg(leg);
-            final Distance distance = trackedLeg.getWindwardDistance();
+            final Distance distance = trackedLeg.getWindwardDistance(ORCPerformanceCurveLegTypes.getLegType(legType),
+                    trackedLeg.getReferenceTimePoint(), cache);
             Bearing twa;
             try {
                 twa = trackedLeg.getTWA(trackedLeg.getReferenceTimePoint());

@@ -202,6 +202,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
 
     @Override
     protected LegGeometrySupplier getLegGeometrySupplier() {
-        return (zeroBasedLegIndices, callback)->sailingService.getLegGeometry(leaderboardName, raceColumnName, fleetName, zeroBasedLegIndices, callback);
+        return (zeroBasedLegIndices, legTypes, callback)->
+            sailingService.getLegGeometry(leaderboardName, raceColumnName, fleetName, zeroBasedLegIndices, legTypes, callback);
     }
 }
