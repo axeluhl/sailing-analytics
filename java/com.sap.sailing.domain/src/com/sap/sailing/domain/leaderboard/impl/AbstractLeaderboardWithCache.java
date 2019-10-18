@@ -502,6 +502,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 final boolean computeLegDetails = namesOfRaceColumnsForWhichToLoadLegDetails != null &&
                         namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName());
                 // if leg details are to be requested, the ranking info needs to be provided:
+                // TODO bug5143 (performance): shouldn't the rankingInfoCache be passed on because detail computations need them all?
                 final RankingInfo rankingInfo = computeLegDetails ? rankingInfoCache.computeIfAbsent(new Pair<>(raceColumn, competitor),
                         raceColumnAndCompetitor->{
                             final TrackedRace trackedRace = raceColumnAndCompetitor.getA().getTrackedRace(raceColumnAndCompetitor.getB());
@@ -534,7 +535,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                                     + ". Leaving empty.", e);
                 }
             }
-            
             if (addOverallDetails) {
                 //this reuses several prior calculated fields, so must be evaluated after them
                 row.totalScoredRaces = this.getTotalRaces(competitor, row, timePoint);

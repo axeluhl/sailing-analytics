@@ -14,8 +14,11 @@ import org.apache.commons.math.MaxIterationsExceededException;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
@@ -31,6 +34,7 @@ import com.sap.sailing.domain.orc.ORCPerformanceCurve;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveByImpliedWindRankingMetric;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveLegAdapter;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.MarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
@@ -92,7 +96,9 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
      * distance as obtained upon the first call for the {@link #timePoint} from the underlying {@link TrackedRace}.
      */
     private ORCPerformanceCurveCourse totalCourse;
-
+    
+    private final ConcurrentHashMap<Triple<TrackedRace, Waypoint, TimePoint>, Position> approximateWaypointPositions;
+    
     /**
      * The scratch boat at {@link #timePoint}, once it has been requested, computed by a supplier that has
      * to be provided to {@link #getScratchBoat(TimePoint, TrackedRace, Supplier)}.
@@ -140,6 +146,7 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
         scratchBoat = new ConcurrentHashMap<>();
         legBearingCache = new ConcurrentHashMap<>();
         relativeCorrectedTimePerCompetitor = new ConcurrentHashMap<>();
+        approximateWaypointPositions = new ConcurrentHashMap<>();
         this.performanceCurvesPerCompetitor = new ConcurrentHashMap<>();
         this.impliedWindPerCompetitor = new ConcurrentHashMap<>();
         this.timePoint = timePoint;
@@ -164,17 +171,24 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
         if (Util.equalsWithNull(this.timePoint, timePoint)) {
             result = legBearingCache.get(trackedLeg.getLeg());
             if (result == null) {
-                result = trackedLeg.getLegBearing(timePoint);
+                result = trackedLeg.getLegBearing(timePoint, getMarkPositionAtTimePointCache(timePoint, trackedLeg.getTrackedRace()));
                 legBearingCache.put(trackedLeg.getLeg(), result == null ? NULL_BEARING : result);
             } else if (result == NULL_BEARING) {
                 result = null;
             }
         } else {
-            result = trackedLeg.getLegBearing(timePoint); // different time point; don't cache
+            result = trackedLeg.getLegBearing(timePoint, getMarkPositionAtTimePointCache(timePoint, trackedLeg.getTrackedRace()));
         }
         return result;
     }
     
+    @Override
+    public Position getApproximatePosition(TrackedRace trackedRace, Waypoint waypoint, TimePoint timePoint) {
+        Triple<TrackedRace, Waypoint, TimePoint> cacheKey = new Triple<>(trackedRace, waypoint, timePoint);
+        // TODO bug5143: is it worth-while to pass through a MarkPositionAtTimePointCache here?
+        return approximateWaypointPositions.computeIfAbsent(cacheKey, key->key.getA().getApproximatePosition(key.getB(), key.getC()));
+    }
+
     /**
      * Determines the wind at the <code>competitor</code>'s {@link GPSFixTrack#getEstimatedPosition(TimePoint, boolean) estimated position} at
      * <code>timePoint</code>. The result is cached for subsequent calls with equal parameters.
@@ -268,5 +282,35 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
                             return relativeCorrectedTime == null ? NULL_RELATIVE_CORRECTED_TIME : relativeCorrectedTime;
                         });
         return result == NULL_RELATIVE_CORRECTED_TIME ? null : result;
+    }
+
+    @Override
+    public MarkPositionAtTimePointCache getMarkPositionAtTimePointCache(final TimePoint markPositionTimePoint, final TrackedRace trackedRace) {
+        return new MarkPositionAtTimePointCache() {
+            @Override
+            public Position getEstimatedPosition(Mark mark) {
+                return getTrackedRace().getOrCreateTrack(mark).getEstimatedPosition(markPositionTimePoint, /* extrapolate */ false);
+            }
+
+            @Override
+            public Position getApproximatePosition(Waypoint waypoint) {
+                return LeaderboardDTOCalculationReuseCache.this.getApproximatePosition(getTrackedRace(), waypoint, markPositionTimePoint);
+            }
+
+            @Override
+            public Bearing getLegBearing(TrackedLeg trackedLeg) {
+                return LeaderboardDTOCalculationReuseCache.this.getLegBearing(trackedLeg, markPositionTimePoint);
+            }
+
+            @Override
+            public TimePoint getTimePoint() {
+                return markPositionTimePoint;
+            }
+
+            @Override
+            public TrackedRace getTrackedRace() {
+                return trackedRace;
+            }
+        };
     }
 }

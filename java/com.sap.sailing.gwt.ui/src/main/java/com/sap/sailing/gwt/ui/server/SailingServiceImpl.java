@@ -3505,7 +3505,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 break;
             case LEG_GAP_TO_LEADER_IN_SECONDS:
                 if (trackedLeg != null) {
-                    final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint, cache); // TODO use cache
+                    final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
                     final Duration gapToLeaderInOwnTime = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, competitor, cache);
                     result = gapToLeaderInOwnTime == null ? null : gapToLeaderInOwnTime.asSeconds();
                 }
@@ -3854,60 +3854,57 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             Map<CompetitorDTO, FutureTask<CompetitorRaceDataDTO>> resultFutures = new HashMap<>();
             for (final CompetitorDTO competitorDTO : competitors) {
                 FutureTask<CompetitorRaceDataDTO> future = new FutureTask<CompetitorRaceDataDTO>(new Callable<CompetitorRaceDataDTO>() {
-                            @Override
-                            public CompetitorRaceDataDTO call() throws NoWindException {
-                                Competitor competitor = getCompetitorByIdAsString(trackedRace.getRace().getCompetitors(),
-                                        competitorDTO.getIdAsString());
-                                ArrayList<com.sap.sse.common.Util.Triple<String, Date, Double>> markPassingsData = new ArrayList<com.sap.sse.common.Util.Triple<String, Date, Double>>();
-                                ArrayList<com.sap.sse.common.Util.Pair<Date, Double>> raceData = new ArrayList<com.sap.sse.common.Util.Pair<Date, Double>>();
-                                // Filling the mark passings
-                                Set<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
-                                if (competitorMarkPassings != null) {
-                                    trackedRace.lockForRead(competitorMarkPassings);
-                                    try {
-                                        for (MarkPassing markPassing : competitorMarkPassings) {
-                                            MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
-                                            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = cachesByTimePoint.get(time);
-                                            if (cache == null) {
-                                                cache = new LeaderboardDTOCalculationReuseCache(time);
-                                                cachesByTimePoint.put(time, cache);
-                                            }
-                                            Double competitorMarkPassingsData = getCompetitorRaceDataEntry(detailType,
-                                                    trackedRace, competitor, time, leaderboardGroupName, leaderboardName, cache);
-                                            if (competitorMarkPassingsData != null) {
-                                                markPassingsData.add(new com.sap.sse.common.Util.Triple<String, Date, Double>(markPassing
-                                                        .getWaypoint().getName(), time.asDate(), competitorMarkPassingsData));
-                                            }
-                                        }
-                                    } finally {
-                                        trackedRace.unlockAfterRead(competitorMarkPassings);
+                    @Override
+                    public CompetitorRaceDataDTO call() throws NoWindException {
+                        Competitor competitor = getCompetitorByIdAsString(trackedRace.getRace().getCompetitors(),
+                                competitorDTO.getIdAsString());
+                        ArrayList<com.sap.sse.common.Util.Triple<String, Date, Double>> markPassingsData = new ArrayList<com.sap.sse.common.Util.Triple<String, Date, Double>>();
+                        ArrayList<com.sap.sse.common.Util.Pair<Date, Double>> raceData = new ArrayList<com.sap.sse.common.Util.Pair<Date, Double>>();
+                        // Filling the mark passings
+                        Set<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
+                        if (competitorMarkPassings != null) {
+                            trackedRace.lockForRead(competitorMarkPassings);
+                            try {
+                                for (MarkPassing markPassing : competitorMarkPassings) {
+                                    MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
+                                    WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = cachesByTimePoint
+                                            .computeIfAbsent(time, LeaderboardDTOCalculationReuseCache::new);
+                                    Double competitorMarkPassingsData = getCompetitorRaceDataEntry(detailType,
+                                            trackedRace, competitor, time, leaderboardGroupName, leaderboardName, cache);
+                                    if (competitorMarkPassingsData != null) {
+                                        markPassingsData.add(new com.sap.sse.common.Util.Triple<String, Date, Double>(markPassing
+                                                .getWaypoint().getName(), time.asDate(), competitorMarkPassingsData));
                                     }
                                 }
-                                if (startTime != null && endTime != null) {
-                                    for (long i = startTime.asMillis(); i <= endTime.asMillis(); i += adjustedStepSizeInMillis) {
-                                        MillisecondsTimePoint time = new MillisecondsTimePoint(i);
-                                        WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = cachesByTimePoint.get(time);
-                                        if (cache == null) {
-                                            cache = new LeaderboardDTOCalculationReuseCache(time);
-                                            if (cachesByTimePoint.size() >= MAX_CACHE_SIZE) {
-                                                final Iterator<Entry<TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache>> iterator = cachesByTimePoint.entrySet().iterator();
-                                                while (cachesByTimePoint.size() >= MAX_CACHE_SIZE && iterator.hasNext()) {
-                                                    iterator.next();
-                                                    iterator.remove();
-                                                }
-                                            }
-                                            cachesByTimePoint.put(time, cache);
-                                        }
-                                        Double competitorRaceData = getCompetitorRaceDataEntry(detailType, trackedRace,
-                                                competitor, time, leaderboardGroupName, leaderboardName, cache);
-                                        if (competitorRaceData != null) {
-                                            raceData.add(new com.sap.sse.common.Util.Pair<Date, Double>(time.asDate(), competitorRaceData));
-                                        }
-                                    }
-                                }
-                                return new CompetitorRaceDataDTO(competitorDTO, detailType, markPassingsData, raceData);
+                            } finally {
+                                trackedRace.unlockAfterRead(competitorMarkPassings);
                             }
-                        });
+                        }
+                        if (startTime != null && endTime != null) {
+                            for (long i = startTime.asMillis(); i <= endTime.asMillis(); i += adjustedStepSizeInMillis) {
+                                MillisecondsTimePoint time = new MillisecondsTimePoint(i);
+                                WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = cachesByTimePoint.get(time);
+                                if (cache == null) {
+                                    cache = new LeaderboardDTOCalculationReuseCache(time);
+                                    if (cachesByTimePoint.size() >= MAX_CACHE_SIZE) {
+                                        final Iterator<Entry<TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache>> iterator = cachesByTimePoint.entrySet().iterator();
+                                        while (cachesByTimePoint.size() >= MAX_CACHE_SIZE && iterator.hasNext()) {
+                                            iterator.next();
+                                            iterator.remove();
+                                        }
+                                    }
+                                    cachesByTimePoint.put(time, cache);
+                                }
+                                Double competitorRaceData = getCompetitorRaceDataEntry(detailType, trackedRace,
+                                        competitor, time, leaderboardGroupName, leaderboardName, cache);
+                                if (competitorRaceData != null) {
+                                    raceData.add(new com.sap.sse.common.Util.Pair<Date, Double>(time.asDate(), competitorRaceData));
+                                }
+                            }
+                        }
+                        return new CompetitorRaceDataDTO(competitorDTO, detailType, markPassingsData, raceData);
+                    }
+                });
                 resultFutures.put(competitorDTO, future);
                 executor.execute(future);
             }

@@ -500,15 +500,15 @@ public class TrackedLegImpl implements TrackedLeg {
 
     @Override
     public Distance getWindwardDistance(final LegType legType, final TimePoint middle, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        final Position fromPos = getTrackedRace().getApproximatePosition(getLeg().getFrom(), middle);
-        final Position toPos = getTrackedRace().getApproximatePosition(getLeg().getTo(), middle);
+        final Position fromPos = cache.getApproximatePosition(getTrackedRace(), getLeg().getFrom(), middle);
+        final Position toPos = cache.getApproximatePosition(getTrackedRace(), getLeg().getTo(), middle);
         return getWindwardDistance(legType, fromPos, toPos, middle, WindPositionMode.LEG_MIDDLE, cache);
     }
 
     @Override
     public Distance getAbsoluteWindwardDistance(final TimePoint middle, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        final Position fromPos = getTrackedRace().getApproximatePosition(getLeg().getFrom(), middle);
-        final Position toPos = getTrackedRace().getApproximatePosition(getLeg().getTo(), middle);
+        final Position fromPos = cache.getApproximatePosition(getTrackedRace(), getLeg().getFrom(), middle);
+        final Position toPos = cache.getApproximatePosition(getTrackedRace(), getLeg().getTo(), middle);
         return getAbsoluteWindwardDistance(fromPos, toPos, middle, WindPositionMode.LEG_MIDDLE, cache);
     }
 
