@@ -404,12 +404,18 @@ public class TrackedLegImpl implements TrackedLeg {
     
     @Override
     public Distance getWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        final TimePoint referenceTimePoint = getReferenceTimePoint();
-        return getWindwardDistanceFromLegStart(pos, referenceTimePoint, cache);
+        return getWindwardDistanceFromLegStart(/* legType==null means infer leg type from wind */ null, pos, cache);
     }
 
-    private Distance getWindwardDistanceFromLegStart(Position pos, final TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return getWindwardDistance(getTrackedRace().getApproximatePosition(getLeg().getFrom(), timePoint),
+    @Override
+    public Distance getWindwardDistanceFromLegStart(LegType legType, Position pos, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final TimePoint referenceTimePoint = getReferenceTimePoint();
+        return getWindwardDistanceFromLegStart(legType, pos, referenceTimePoint, cache);
+    }
+
+    private Distance getWindwardDistanceFromLegStart(final LegType legType, final Position pos,
+            final TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getWindwardDistance(legType, getTrackedRace().getApproximatePosition(getLeg().getFrom(), timePoint),
                 pos, timePoint, WindPositionMode.LEG_MIDDLE, cache);
     }
 
@@ -440,8 +446,13 @@ public class TrackedLegImpl implements TrackedLeg {
     
     @Override
     public Distance getWindwardDistance(WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getWindwardDistance(/* legType==null means infer from wind */ (LegType) null, cache);
+    }
+
+    @Override
+    public Distance getWindwardDistance(LegType legType, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final TimePoint middle = getReferenceTimePoint();
-        return getWindwardDistance(middle, cache);
+        return getWindwardDistance(legType, middle, cache);
     }
 
     @Override
@@ -484,9 +495,14 @@ public class TrackedLegImpl implements TrackedLeg {
 
     @Override
     public Distance getWindwardDistance(final TimePoint middle, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getWindwardDistance(/* legType==null means infer leg type */ null, middle, cache);
+    }
+
+    @Override
+    public Distance getWindwardDistance(final LegType legType, final TimePoint middle, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Position fromPos = getTrackedRace().getApproximatePosition(getLeg().getFrom(), middle);
         final Position toPos = getTrackedRace().getApproximatePosition(getLeg().getTo(), middle);
-        return getWindwardDistance(fromPos, toPos, middle, WindPositionMode.LEG_MIDDLE, cache);
+        return getWindwardDistance(legType, fromPos, toPos, middle, WindPositionMode.LEG_MIDDLE, cache);
     }
 
     @Override

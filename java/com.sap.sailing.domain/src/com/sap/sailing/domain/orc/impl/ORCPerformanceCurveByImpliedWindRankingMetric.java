@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.orc.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -82,9 +84,9 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
     
     private final Map<Serializable, Competitor> competitorsById;
     
-    private final RaceLogEventVisitor certificatesFromRaceLogUpdater;
+    private transient RaceLogEventVisitor certificatesAndCourseAndScratchBoatFromRaceLogUpdater;
     
-    private final RegattaLogEventVisitor certificatesFromRegattaLogUpdater;
+    private transient RegattaLogEventVisitor certificatesFromRegattaLogUpdater;
     
     /**
      * Updated by an observer pattern that watches all {@link RaceLog}s {@link TrackedRace#getAttachedRaceLogs() attached} to the
@@ -108,49 +110,67 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
         super(trackedRace);
         boatsById = initBoatsById();
         competitorsById = initCompetitorsById();
-        certificatesFromRaceLogUpdater = createCertificatesFromRaceLogAndCourseUpdater();
+        initializeListeners();
+        updateCertificatesFromLogs();
+        updateCourseFromRaceLogs();
+    }
+
+    private void initializeListeners() {
+        certificatesAndCourseAndScratchBoatFromRaceLogUpdater = createCertificatesFromRaceLogAndCourseAndScratchBoatUpdater();
         certificatesFromRegattaLogUpdater = createCertificatesFromRegattaLogUpdater();
-        if (trackedRace != null) {
-            trackedRace.addListener(new AbstractRaceChangeListener() {
-                @Override
-                public void regattaLogAttached(RegattaLog regattaLog) {
-                    regattaLog.addListener(certificatesFromRegattaLogUpdater);
-                    updateCertificatesFromLogs();
-                }
+        if (getTrackedRace() != null) {
+            addTrackedRaceListener(getTrackedRace());
+            for (final RegattaLog regattaLog : getTrackedRace().getAttachedRegattaLogs()) {
+                regattaLog.addListener(certificatesFromRegattaLogUpdater);
+            }
+            for (final RaceLog raceLog : getTrackedRace().getAttachedRaceLogs()) {
+                raceLog.addListener(certificatesAndCourseAndScratchBoatFromRaceLogUpdater);
+            }
+        }
+    }
     
-                @Override
-                public void raceLogAttached(RaceLog raceLog) {
-                    raceLog.addListener(certificatesFromRaceLogUpdater);
-                    updateCertificatesFromLogs();
-                    updateScratchBoatFromLogs();
-                    updateCourseFromRaceLogs();
-                }
-    
-                @Override
-                public void raceLogDetached(RaceLog raceLog) {
-                    raceLog.removeListener(certificatesFromRaceLogUpdater);
-                    updateCertificatesFromLogs();
-                    updateScratchBoatFromLogs();
-                    updateCourseFromRaceLogs();
-                }
-            });
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        ois.registerValidation(()->initializeListeners(), /* prio */ -1);
+    }
+
+    private void addTrackedRaceListener(TrackedRace trackedRace) {
+        trackedRace.addListener(new AbstractRaceChangeListener() {
+            @Override
+            public void regattaLogAttached(RegattaLog regattaLog) {
+                regattaLog.addListener(certificatesFromRegattaLogUpdater);
+                updateCertificatesFromLogs();
+            }
+   
+            @Override
+            public void raceLogAttached(RaceLog raceLog) {
+                raceLog.addListener(certificatesAndCourseAndScratchBoatFromRaceLogUpdater);
+                updateCertificatesFromLogs();
+                updateScratchBoatFromLogs();
+                updateCourseFromRaceLogs();
+            }
+   
+            @Override
+            public void raceLogDetached(RaceLog raceLog) {
+                raceLog.removeListener(certificatesAndCourseAndScratchBoatFromRaceLogUpdater);
+                updateCertificatesFromLogs();
+                updateScratchBoatFromLogs();
+                updateCourseFromRaceLogs();
+            }
+            
             // see bug 5130: don't add as a course change listener on the course but on the race because
             // only this way will the TrackedRace have aligned its TrackedLeg objects before triggering
             // these hooks.
-            trackedRace.addListener(new AbstractRaceChangeListener() {
-                @Override
-                public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
-                    updateCourseFromRaceLogs();
-                }
-                
-                @Override
-                public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
-                    updateCourseFromRaceLogs();
-                }
-            });
-        }
-        updateCertificatesFromLogs();
-        updateCourseFromRaceLogs();
+            @Override
+            public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+                updateCourseFromRaceLogs();
+            }
+            
+            @Override
+            public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+                updateCourseFromRaceLogs();
+            }
+        });
     }
     
     public ORCCertificate getCertificate(Boat boat) {
@@ -181,7 +201,7 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
         return result;
     }
 
-    private RaceLogEventVisitor createCertificatesFromRaceLogAndCourseUpdater() {
+    private RaceLogEventVisitor createCertificatesFromRaceLogAndCourseAndScratchBoatUpdater() {
         return new BaseRaceLogEventVisitor() {
             @Override
             public void visit(RaceLogORCLegDataEvent orcLegDataEventImpl) {
@@ -239,30 +259,30 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
      * replaced by a new one that has the updated mapping of boats to their certificates.
      */
     private void updateCertificatesFromLogs() {
-        final Map<Boat, ORCCertificate> newCertificates = new HashMap<>();
         if (getTrackedRace() != null) {
+            final Map<Boat, ORCCertificate> newCertificates = new HashMap<>();
             for (final RegattaLog regattaLog : getTrackedRace().getAttachedRegattaLogs()) {
                 newCertificates.putAll(new RegattaLogORCCertificateAssignmentFinder(regattaLog, boatsById).analyze());
             }
             for (final RaceLog raceLog : getTrackedRace().getAttachedRaceLogs()) {
                 newCertificates.putAll(new RaceLogORCCertificateAssignmentFinder(raceLog, boatsById).analyze());
             }
-        }
-        certificates = newCertificates;
-        Duration minGPH = new MillisecondsDurationImpl(Long.MAX_VALUE);
-        Boat boatWithMinGPH = null;
-        for (final Entry<Boat, ORCCertificate> e : certificates.entrySet()) {
-            if (e.getValue().getGPH().compareTo(minGPH) < 0) {
-                boatWithMinGPH = e.getKey();
-                minGPH = e.getValue().getGPH();
+            certificates = newCertificates;
+            Duration minGPH = new MillisecondsDurationImpl(Long.MAX_VALUE);
+            Boat boatWithMinGPH = null;
+            for (final Entry<Boat, ORCCertificate> e : certificates.entrySet()) {
+                if (e.getValue().getGPH().compareTo(minGPH) < 0) {
+                    boatWithMinGPH = e.getKey();
+                    minGPH = e.getValue().getGPH();
+                }
             }
+            boatWithLeastGPH = boatWithMinGPH;
         }
-        boatWithLeastGPH = boatWithMinGPH;
     }
     
     private void updateCourseFromRaceLogs() {
-        final Map<Integer, ORCPerformanceCurveLeg> legsWithDefinitions = new HashMap<>();
         if (getTrackedRace() != null) {
+            final Map<Integer, ORCPerformanceCurveLeg> legsWithDefinitions = new HashMap<>();
             for (final RaceLog raceLog : getTrackedRace().getAttachedRaceLogs()) {
                 legsWithDefinitions.putAll(new RaceLogORCLegDataAnalyzer(raceLog).analyze());
             }
@@ -321,7 +341,7 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
                 // use windward projection in case we deem the current leg an upwind or downwind leg
                 shareOfCurrentLeg = 1.0
                         - trackedLegOfCompetitor.getWindwardDistanceToGo(legType, timePoint, WindPositionMode.LEG_MIDDLE, cache).divide(
-                                trackedLegOfCompetitor.getTrackedLeg().getWindwardDistance(timePoint, cache));
+                                trackedLegOfCompetitor.getTrackedLeg().getWindwardDistance(legType, timePoint, cache));
                 result = totalCourse.subcourse(zeroBasedIndexOfCurrentLeg, shareOfCurrentLeg);
             }
         }
@@ -681,5 +701,12 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
             timeForImpliedWindCalculation = timePoint;
         }
         return timeForImpliedWindCalculation;
+    }
+
+    @Override
+    protected LegType getLegTypeForRanking(TrackedLeg trackedLeg) {
+        final int zeroBasedLegIndex = trackedLeg.getLeg().getZeroBasedIndexOfStartWaypoint();
+        final ORCPerformanceCurveLeg orcLeg = Util.get(getTotalCourse().getLegs(), zeroBasedLegIndex);
+        return ORCPerformanceCurveLegTypes.getLegType(orcLeg.getType());
     }
 }

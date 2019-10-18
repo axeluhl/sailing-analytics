@@ -64,7 +64,8 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             
             @Override
             protected LegGeometrySupplier getLegGeometrySupplier() {
-                return (zeroBasedLegIndices, callback)->sailingService.getLegGeometry(singleSelectedRace, zeroBasedLegIndices, callback);
+                return (zeroBasedLegIndices, legTypes, callback)->
+                    sailingService.getLegGeometry(singleSelectedRace, zeroBasedLegIndices, legTypes, callback);
             }
 
             @Override

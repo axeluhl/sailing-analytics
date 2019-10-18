@@ -3,6 +3,7 @@ package com.sap.sailing.domain.orc.impl;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
@@ -21,6 +22,7 @@ import com.sap.sse.common.TimePoint;
  * be of type {@link ORCPerformanceCurveLegTypes#LONG_DISTANCE}, and {@link #getTwa()} will return {@code null}.
  */
 public class ORCPerformanceCurveLegAdapter implements ORCPerformanceCurveLeg {
+    private static final long serialVersionUID = -6432064480098807397L;
     private final TrackedLeg trackedLeg;
     
     public ORCPerformanceCurveLegAdapter(TrackedLeg trackedLeg) {
@@ -29,11 +31,13 @@ public class ORCPerformanceCurveLegAdapter implements ORCPerformanceCurveLeg {
 
     @Override
     public Distance getLength() {
-        return trackedLeg.getWindwardDistance();
+        final TimePoint referenceTimePoint = trackedLeg.getReferenceTimePoint();
+        return trackedLeg.getWindwardDistance(ORCPerformanceCurveLegTypes.getLegType(getType()), referenceTimePoint,
+                new LeaderboardDTOCalculationReuseCache(referenceTimePoint));
     }
 
     public Distance getLength(WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return trackedLeg.getWindwardDistance(cache);
+        return trackedLeg.getWindwardDistance(ORCPerformanceCurveLegTypes.getLegType(getType()), trackedLeg.getReferenceTimePoint(), cache);
     }
 
     private Wind getWind() {
@@ -68,6 +72,8 @@ public class ORCPerformanceCurveLegAdapter implements ORCPerformanceCurveLeg {
     @Override
     public ORCPerformanceCurveLeg scale(final double share) {
         return new ORCPerformanceCurveLegAdapter(trackedLeg) {
+            private static final long serialVersionUID = -6724721873285438431L;
+
             @Override
             public Distance getLength() {
                 return ORCPerformanceCurveLegAdapter.this.getLength().scale(share);

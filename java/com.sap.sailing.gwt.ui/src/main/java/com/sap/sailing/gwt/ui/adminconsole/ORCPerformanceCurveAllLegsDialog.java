@@ -156,7 +156,7 @@ public class ORCPerformanceCurveAllLegsDialog extends DataEntryDialog<ORCPerform
     }
     
     private void fetchTrackingBasedDistanceAndTwa() {
-        legGeometrySupplier.getLegGeometry(IntStream.range(0,  waypointList.getList().size()-1).toArray(),
+        legGeometrySupplier.getLegGeometry(IntStream.range(0,  waypointList.getList().size()-1).toArray(), getSelectedLegTypes(),
                 new AsyncCallback<ORCPerformanceCurveLegImpl[]>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -188,6 +188,14 @@ public class ORCPerformanceCurveAllLegsDialog extends DataEntryDialog<ORCPerform
     private ORCPerformanceCurveLegTypes getSelectedLegType(int zeroBasedLegNumber) {
         final String selectedValue = legTypeBoxes[zeroBasedLegNumber].getSelectedValue();
         return selectedValue == null || selectedValue.equals("null") ? null : ORCPerformanceCurveLegTypes.valueOf(selectedValue);
+    }
+    
+    private ORCPerformanceCurveLegTypes[] getSelectedLegTypes() {
+        final ORCPerformanceCurveLegTypes[] result = new ORCPerformanceCurveLegTypes[legTypeBoxes.length];
+        for (int i=0; i<legTypeBoxes.length; i++) {
+            result[i] = getSelectedLegType(i);
+        }
+        return result;
     }
     
     @Override
