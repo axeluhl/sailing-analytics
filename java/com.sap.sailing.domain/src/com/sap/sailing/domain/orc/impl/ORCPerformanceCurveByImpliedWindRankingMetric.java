@@ -702,4 +702,11 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
         }
         return timeForImpliedWindCalculation;
     }
+
+    @Override
+    protected LegType getLegTypeForRanking(TrackedLeg trackedLeg) {
+        final int zeroBasedLegIndex = trackedLeg.getLeg().getZeroBasedIndexOfStartWaypoint();
+        final ORCPerformanceCurveLeg orcLeg = Util.get(getTotalCourse().getLegs(), zeroBasedLegIndex);
+        return ORCPerformanceCurveLegTypes.getLegType(orcLeg.getType());
+    }
 }

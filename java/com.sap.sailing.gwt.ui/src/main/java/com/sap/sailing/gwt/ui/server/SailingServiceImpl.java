@@ -3505,15 +3505,15 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 break;
             case LEG_GAP_TO_LEADER_IN_SECONDS:
                 if (trackedLeg != null) {
-                    final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
+                    final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint, cache); // TODO use cache
                     final Duration gapToLeaderInOwnTime = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, competitor, cache);
                     result = gapToLeaderInOwnTime == null ? null : gapToLeaderInOwnTime.asSeconds();
                 }
                 break;
             case CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
                 if (trackedLeg != null) {
-                    final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
-                    Distance distanceToLeader = trackedLeg.getWindwardDistanceToCompetitorFarthestAhead(timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo);
+                    final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
+                    Distance distanceToLeader = trackedLeg.getWindwardDistanceToCompetitorFarthestAhead(timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
                     result = (distanceToLeader == null) ? null : distanceToLeader.getMeters();
                 }
                 break;
