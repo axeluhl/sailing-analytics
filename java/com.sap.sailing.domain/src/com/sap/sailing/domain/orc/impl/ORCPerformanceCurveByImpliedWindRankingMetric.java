@@ -349,6 +349,14 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
     }
     
     /**
+     * If a "scratch" boat has been defined explicitly for this metric's {@link #getTrackedRace() race}, it is returned,
+     * otherwise {@code null} is returned. A scratch boat can be defined using a {@link RaceLogORCScratchBoatEvent}.
+     */
+    protected Competitor getExplicitScratchBoat() {
+        return explicitScratchBoat;
+    }
+    
+    /**
      * A "scratch boat" in the logic of ORC Performance Curve Scoring is used to map the official ranking criterion
      * (implied wind) to a metric that is easier to grasp: calculated time. The scratch boat's
      * {@link ORCPerformanceCurve performance curve} is used to map everybody else's implied wind to a duration spent
@@ -365,8 +373,8 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
      */
     private Competitor getScratchBoat(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Competitor result;
-        if (explicitScratchBoat != null) {
-            result = explicitScratchBoat;
+        if (getExplicitScratchBoat() != null) {
+            result = getExplicitScratchBoat();
         } else {
             result = getCompetitorFarthestAhead(timePoint, cache);
         }

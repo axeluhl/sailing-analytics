@@ -178,7 +178,6 @@ public class ORCPerformanceCurveRankingTest extends OnlineTracTracBasedTest {
         setFinishingTime("Dubrovnik", "2019-06-04T08:09:12+0200");
         setFinishingTime("Brava", "2019-06-04T07:54:14+0200");
         setFinishingTime("Alemaro", "2019-06-04T10:44:15+0200");
-        raceLog.add(new RaceLogORCScratchBoatEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, UUID.randomUUID(), /* passId */ 0, getCompetitor("XIO")));
     }
     
     private void setFinishingTime(String boatName, String finishingTimeInISOFormat) throws ParseException {
