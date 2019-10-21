@@ -549,6 +549,11 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         MarkProperties createdMarkProperties = markPropertiesApi.getMarkProperties(ctx, startboatConfigurationResult.getMarkPropertiesId());
         assertEquals(startboatConfigurationResult.getMarkPropertiesId(), createdMarkProperties.getId());
         assertEquals(pinEndName, createdMarkProperties.getName());
+        
+        LeaderboardApi.startRaceLogTracking(ctx, regattaName, race.getRaceName(), "Default");
+        CourseConfiguration reloadedCourseConfigurationAfterTrackingStarted = courseConfigurationApi
+                .createCourseConfigurationFromCourse(ctx, regattaName, race.getRaceName(), "Default", null);
+        assertCourseConfigurationCompared(ctx, courseConfiguration, reloadedCourseConfigurationAfterTrackingStarted);
     }
     
     @Test
