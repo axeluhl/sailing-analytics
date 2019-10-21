@@ -49,7 +49,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
 
     private static final int DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT = 200;
     private final int MIN_LEADERBOARD_WIDTH = Math.min(432, Window.getClientWidth() - 40); // fallback value "432" works well for 505 and ESS
-    private final int MIN_TAGGING_WIDTH = Math.min(440, Window.getClientWidth() - 40);
+    private final int MIN_TAGGING_WIDTH = Math.min(440, Window.getClientWidth() - 80); // Account for Tags and Leaderboard toggle widths: 40px + 40px
 
     /**
      * Absolute Panel that informs its children about a resize
