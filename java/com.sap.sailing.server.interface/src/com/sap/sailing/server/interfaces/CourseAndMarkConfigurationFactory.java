@@ -73,7 +73,6 @@ public interface CourseAndMarkConfigurationFactory {
     List<MarkProperties> createMarkPropertiesSuggestionsForMarkConfiguration(Regatta optionalRegatta,
             MarkConfiguration markConfiguration, Iterable<String> tagsToFilterMarkProperties);
 
-    // TODO Do we need to loosely couple creation of DefineMarkEvents for the Regatta
     /**
      * Use the result to create a {@link RaceLogCourseDesignChangedEvent} or obtain the {@link ControlPoint} and
      * {@link PassingInstruction} pairs to {@code Course.update(...)} a course.
