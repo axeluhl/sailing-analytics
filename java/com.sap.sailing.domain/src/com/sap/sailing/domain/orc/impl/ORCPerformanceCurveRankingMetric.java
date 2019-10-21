@@ -183,16 +183,24 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
     }
 
     /**
-     * This decides which competitor shall have their corrected time set as their elapsed time.
-     * For all other competitors, their absolute corrected time will then be calculated by first computing
-     * the difference between their relative corrected time and the base line competitor's relative corrected time,
-     * then adding this difference to the base line competitor's elapsed time.<p>
+     * This decides which competitor shall have their corrected time set as their elapsed time. For all other
+     * competitors, their absolute corrected time will then be calculated by first computing the difference between
+     * their relative corrected time and the base line competitor's relative corrected time, then adding this difference
+     * to the base line competitor's elapsed time.
+     * <p>
      * 
-     * By default, this implementation uses the boat with the least GPH as the base line boat.
+     * By default, this implementation uses the boat with the least GPH as the base line boat. An
+     * {@link #getExplicitScratchBoat() explicitly-defined scratch boat} will take precedence, however.
      */
     protected Competitor getBaseLineCompetitorForAbsoluteCorrectedTimes(TimePoint timePoint,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return getTrackedRace().getCompetitorOfBoat(getBoatWithLeastGph());
+        final Competitor result;
+        if (getExplicitScratchBoat() != null) {
+            result = getExplicitScratchBoat();
+        } else {
+            result = getTrackedRace().getCompetitorOfBoat(getBoatWithLeastGph());
+        }
+        return result;
     }
 
     /**

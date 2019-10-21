@@ -24,7 +24,6 @@ import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
-import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCScratchBoatEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RegattaLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
@@ -178,7 +177,6 @@ public class ORCPerformanceCurveRankingTest extends OnlineTracTracBasedTest {
         setFinishingTime("Dubrovnik", "2019-06-04T08:09:12+0200");
         setFinishingTime("Brava", "2019-06-04T07:54:14+0200");
         setFinishingTime("Alemaro", "2019-06-04T10:44:15+0200");
-        raceLog.add(new RaceLogORCScratchBoatEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, UUID.randomUUID(), /* passId */ 0, getCompetitor("XIO")));
     }
     
     private void setFinishingTime(String boatName, String finishingTimeInISOFormat) throws ParseException {

@@ -5,20 +5,19 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 /**
- * Instead of using the boat with the least GPH as baseline for absolute corrected time calculation,
- * this version uses the boat leading by relative corrected time.<p>
+ * Instead of using the boat with the least GPH as baseline for absolute corrected time calculation, this version uses
+ * the boat leading by relative corrected time. Still, an {@link #getExplicitScratchBoat() explicitly-defined scratch
+ * boat} will take precedence.
+ * <p>
  * 
- * Note: this metric is not currently used for production purposes and therefore has no support
- * by the {@link RankingMetricsFactory}. It is used currently by tests only. However, note also that
- * official tools such as the ORC PCS Scorer used for the 2019 ORC Worlds uses the leader by corrected
- * time as base line for absolute corrected times, just as implemented here.
+ * Note that official tools such as the ORC PCS Scorer used for the 2019 ORC Worlds uses the leader by corrected time as
+ * base line for absolute corrected times, just as implemented here.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -33,8 +32,14 @@ public class ORCPerformanceCurveRankingMetricLeaderForBaseline extends ORCPerfor
     @Override
     protected Competitor getBaseLineCompetitorForAbsoluteCorrectedTimes(TimePoint timePoint,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        final Set<Competitor> competitors = new HashSet<>();
-        Util.addAll(getCompetitors(), competitors);
-        return Collections.min(competitors, getRaceRankingComparator(timePoint));
+        final Competitor result;
+        if (getExplicitScratchBoat() != null) {
+            result = getExplicitScratchBoat();
+        } else {
+            final Set<Competitor> competitors = new HashSet<>();
+            Util.addAll(getCompetitors(), competitors);
+            result =Collections.min(competitors, getRaceRankingComparator(timePoint));
+        }
+        return result;
     }
 }
