@@ -33,6 +33,10 @@ public class CourseConfiguration extends JsonWrapper {
         getJson().put(FIELD_WAYPOINTS, waypointsJson);
     }
 
+    public String getName() {
+        return get(FIELD_NAME);
+    }
+
     public Iterable<MarkConfiguration> getMarkConfigurations() {
         JSONArray markConfigurationsJson = (JSONArray) get(FIELD_MARKCONFIGURATIONS);
         return markConfigurationsJson.stream().map(m -> (JSONObject) m).map(MarkConfiguration::new)

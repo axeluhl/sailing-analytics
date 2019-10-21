@@ -50,6 +50,7 @@ import com.sap.sailing.selenium.api.event.Mark;
 import com.sap.sailing.selenium.api.event.MarkApi;
 import com.sap.sailing.selenium.api.event.SecurityApi;
 import com.sap.sailing.selenium.api.helper.CourseTemplateDataFactory;
+import com.sap.sailing.selenium.api.regatta.Course;
 import com.sap.sailing.selenium.api.regatta.RaceColumn;
 import com.sap.sailing.selenium.api.regatta.RegattaApi;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -554,6 +555,9 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         CourseConfiguration reloadedCourseConfigurationAfterTrackingStarted = courseConfigurationApi
                 .createCourseConfigurationFromCourse(ctx, regattaName, race.getRaceName(), "Default", null);
         assertCourseConfigurationCompared(ctx, courseConfiguration, reloadedCourseConfigurationAfterTrackingStarted);
+        
+        Course course = regattaApi.getCourse(ctx, regattaName, race.getRaceName(), "Default");
+        assertEquals(courseConfiguration.getName(), course.getName());
     }
     
     @Test
