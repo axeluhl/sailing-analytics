@@ -65,7 +65,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     private final MarkPropertiesApi markPropertiesApi = new MarkPropertiesApi();
     private final EventApi eventApi = new EventApi();
     private final RegattaApi regattaApi = new RegattaApi();
-    private final LeaderboardApi LeaderboardApi = new LeaderboardApi();
+    private final LeaderboardApi leaderboardApi = new LeaderboardApi();
     private final MarkApi markApi = new MarkApi();
     private final SecurityApi securityApi = new SecurityApi();
 
@@ -544,13 +544,13 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         MarkConfiguration startboatConfigurationResult = reloadedCourseConfiguration.getMarkConfigurationByEffectiveName(pinEndName);
         assertNotNull(startboatConfigurationResult.getMarkPropertiesId());
         assertNotNull(startboatConfigurationResult.getMarkId());
-        Mark markResult = LeaderboardApi.getMark(ctx, regattaName, startboatConfigurationResult.getMarkId());
+        Mark markResult = leaderboardApi.getMark(ctx, regattaName, startboatConfigurationResult.getMarkId());
         assertEquals(startboatConfigurationResult.getMarkPropertiesId(), markResult.getOriginatingMarkPropertiesId());
         MarkProperties createdMarkProperties = markPropertiesApi.getMarkProperties(ctx, startboatConfigurationResult.getMarkPropertiesId());
         assertEquals(startboatConfigurationResult.getMarkPropertiesId(), createdMarkProperties.getId());
         assertEquals(pinEndName, createdMarkProperties.getName());
         
-        LeaderboardApi.startRaceLogTracking(ctx, regattaName, race.getRaceName(), "Default");
+        leaderboardApi.startRaceLogTracking(ctx, regattaName, race.getRaceName(), "Default");
         CourseConfiguration reloadedCourseConfigurationAfterTrackingStarted = courseConfigurationApi
                 .createCourseConfigurationFromCourse(ctx, regattaName, race.getRaceName(), "Default", null);
         assertCourseConfigurationCompared(ctx, courseConfiguration, reloadedCourseConfigurationAfterTrackingStarted);
@@ -693,7 +693,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
 
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
-        LeaderboardApi.startRaceLogTracking(ctx, regattaName, race.getRaceName(), "Default");
+        leaderboardApi.startRaceLogTracking(ctx, regattaName, race.getRaceName(), "Default");
 
         CourseConfiguration createdCourseConfiguration = courseConfigurationApi.createCourseConfigurationFromCourse(ctx,
                 regattaName, race.getRaceName(), "Default", /* tags */ null);
