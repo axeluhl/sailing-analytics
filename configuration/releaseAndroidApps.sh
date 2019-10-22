@@ -7,8 +7,6 @@ FILES2SIGN=cfg/files2sign.json
 VERSION_FILE=cfg/VERSION
 GIT_REMOTE=origin
 
-# proxy can be requested with -x
-OPTION_PROXY_SETTINGS=
 OPTION_UPDATE_ANDROID_VERSIONS=1
 OPTION_PERFORM_GIT_OPERATIONS=1
 
@@ -66,12 +64,11 @@ do
 done
 
 # Parse the options
-options="mgxr:"
+options="mgr:"
 while getopts "$options" option
 do
   case $option in
     m) OPTION_UPDATE_ANDROID_VERSIONS=0;;
-    g) OPTION_PERFORM_GIT_OPERATIONS=0;;
     g) OPTION_PERFORM_GIT_OPERATIONS=0;;
     r) GIT_REMOTE=$OPTARG;;
     \?) exit 4;;
