@@ -2,11 +2,12 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import static com.sap.sailing.domain.common.security.SecuredDomainType.LEADERBOARD;
 import static com.sap.sailing.domain.common.security.SecuredDomainType.REGATTA;
+import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_CERTIFICATE_ASSIGNMENT;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_EDIT;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS;
-import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_CERTIFICATE_ASSIGNMENT;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_REFRESH_RACELOG;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_REMOVE;
+import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SCRATCH_BOAT_SELECTION;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SET_FINISHING_AND_FINISH_TIME;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SET_STARTTIME;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SHOW_RACELOG;
@@ -540,8 +541,8 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         actionsColumn.addAction(ACTION_SHOW_RACELOG, UPDATE, object -> showRaceLog(object.getA(), object.getB()));
         actionsColumn.addAction(ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS, UPDATE,
                 object -> editCompetitorToBoatMappings(object.getA(), object.getB()));
-        actionsColumn.addAction(ACTION_CERTIFICATE_ASSIGNMENT, READ,
-                object -> assignCertificates(object));
+        actionsColumn.addAction(ACTION_CERTIFICATE_ASSIGNMENT, READ, object -> assignCertificates(object));
+        actionsColumn.addAction(ACTION_SCRATCH_BOAT_SELECTION, READ, object -> selectScratchBoat(object));
         racesTable.addColumn(isMedalRaceCheckboxColumn, stringMessages.medalRace());
         racesTable.addColumn(isLinkedRaceColumn, stringMessages.islinked());
         racesTable.addColumn(explicitFactorColumn, stringMessages.factor());

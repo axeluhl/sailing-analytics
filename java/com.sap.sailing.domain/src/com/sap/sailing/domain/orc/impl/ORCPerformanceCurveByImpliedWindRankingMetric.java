@@ -251,7 +251,7 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
     private void updateScratchBoatFromLogs() {
         Competitor scratchBoatFromLog = null;
         for (final RaceLog raceLog : getTrackedRace().getAttachedRaceLogs()) {
-            scratchBoatFromLog = new RaceLogORCScratchBoatFinder(raceLog, competitorsById).analyze();
+            scratchBoatFromLog = new RaceLogORCScratchBoatFinder(raceLog, competitorId->competitorsById.get(competitorId)).analyze();
             if (scratchBoatFromLog != null) {
                 break;
             }
