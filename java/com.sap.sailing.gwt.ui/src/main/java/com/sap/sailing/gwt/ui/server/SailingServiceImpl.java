@@ -9728,7 +9728,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public void setORCPerformanceCurveScratchBoat(String leaderboardName, String raceColumnName, String fleetName, CompetitorDTO newScratchBoatDTO) throws NotFoundException {
         final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        final Competitor newScratchBoat = getService().getCompetitorAndBoatStore().getExistingCompetitorById(newScratchBoatDTO.getId());
+        final Competitor newScratchBoat = newScratchBoatDTO==null?null:
+            getService().getCompetitorAndBoatStore().getExistingCompetitorById(UUIDHelper.tryUuidConversion(newScratchBoatDTO.getIdAsString()));
         final RaceLogORCScratchBoatAnalyzer analyzer = new RaceLogORCScratchBoatAnalyzer(raceLog,
                 competitorId -> getService().getCompetitorAndBoatStore().getExistingCompetitorById(competitorId));
         final Pair<Competitor, RaceLogORCScratchBoatEvent> previousScratchBoatAndEvent = analyzer.analyze();
