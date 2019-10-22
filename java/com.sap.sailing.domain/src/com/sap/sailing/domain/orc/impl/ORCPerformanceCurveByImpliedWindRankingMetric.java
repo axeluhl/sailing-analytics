@@ -41,6 +41,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
@@ -113,6 +114,11 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
         initializeListeners();
         updateCertificatesFromLogs();
         updateCourseFromRaceLogs();
+    }
+
+    @Override
+    public RankingMetrics getType() {
+        return RankingMetrics.ORC_PERFORMANCE_CURVE_BY_IMPLIED_WIND;
     }
 
     private void initializeListeners() {

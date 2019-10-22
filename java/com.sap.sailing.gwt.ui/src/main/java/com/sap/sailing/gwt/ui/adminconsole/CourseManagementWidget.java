@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Supplier;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -124,8 +125,14 @@ public abstract class CourseManagementWidget implements IsWidget {
         return mainPanel;
     }
     
+    /**
+     * @param showOrcPcsLegEditActions
+     *            Depending on the ranking metric it may or may not make sense to show the user the actions to maintain
+     *            ORC PCS leg data. By default, these actions are enabled, particularly to cover the case where this
+     *            widget is used without an existing {@code TrackedRace} and only with a race log.
+     */
     public CourseManagementWidget(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            final StringMessages stringMessages, final UserService userService) {
+            final StringMessages stringMessages, final UserService userService, final Supplier<Boolean> showOrcPcsLegEditActions) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -162,7 +169,7 @@ public abstract class CourseManagementWidget implements IsWidget {
         mainPanel.setWidget(1, 1, controlPointsBtnsPanel);
         mainPanel.setWidget(1, 2, marksBtnsPanel);
         final AccessControlledActionsColumn<WaypointDTO, WaypointImagesBarCell> waypointsActionColumn = create(
-                new WaypointImagesBarCell(stringMessages, waypoints.getDataProvider()), userService,
+                new WaypointImagesBarCell(stringMessages, waypoints.getDataProvider(), showOrcPcsLegEditActions), userService,
                 s -> securedDtoForWaypointsPermissionCheck);
         // update permission for tracked race is required for deleting waypoints...
         waypointsActionColumn.addAction(DefaultActions.DELETE.name(), DefaultActions.UPDATE,
@@ -405,7 +412,7 @@ public abstract class CourseManagementWidget implements IsWidget {
                 }).show();
     }
 
-    public void refresh(){};
+    public abstract void refresh();
     
     protected void updateWaypointsAndControlPoints(RaceCourseDTO raceCourseDTO, String leaderboardName) {
         this.sailingService.getLeaderboardWithSecurity(leaderboardName,
@@ -431,7 +438,6 @@ public abstract class CourseManagementWidget implements IsWidget {
         waypoints.getDataProvider().getList().clear();
         multiMarkControlPoints.getDataProvider().getList().clear();
         waypoints.getDataProvider().getList().addAll(raceCourseDTO.waypoints);
-
         Map<String, ControlPointDTO> noDuplicateCPs = new HashMap<>();
         for (ControlPointDTO controlPoint : raceCourseDTO.getControlPoints()) {
             if (controlPoint instanceof GateDTO) {
@@ -439,9 +445,7 @@ public abstract class CourseManagementWidget implements IsWidget {
             }
         }
         multiMarkControlPoints.getDataProvider().getList().addAll(noDuplicateCPs.values());
-
         updateWaypointButtons();
-
         final boolean hasUpdatePermission = userService.hasPermission(securedDTO, DefaultActions.UPDATE);
         insertWaypointAfter.setVisible(hasUpdatePermission);
         insertWaypointBefore.setVisible(hasUpdatePermission);

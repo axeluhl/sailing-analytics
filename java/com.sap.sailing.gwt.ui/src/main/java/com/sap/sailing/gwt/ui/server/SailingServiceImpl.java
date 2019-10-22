@@ -1278,12 +1278,16 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), r.getName());
             TrackedRace trackedRace = getService().getExistingTrackedRace(raceIdentifier);
             TrackedRaceDTO trackedRaceDTO = null; 
+            final RankingMetrics rankingMetricType;
             if (trackedRace != null) {
                 trackedRaceDTO = getBaseDomainFactory().createTrackedRaceDTO(trackedRace);
+                rankingMetricType = trackedRace.getRankingMetric().getType();
+            } else {
+                rankingMetricType = null;
             }
             Map<CompetitorDTO, BoatDTO> competitorAndBoatDTOs = baseDomainFactory.convertToCompetitorAndBoatDTOs(r.getCompetitorsAndTheirBoats());
             RaceWithCompetitorsAndBoatsDTO raceDTO = new RaceWithCompetitorsAndBoatsDTO(raceIdentifier, competitorAndBoatDTOs,
-                    trackedRaceDTO, getService().isRaceBeingTracked(regatta, r));
+                    trackedRaceDTO, getService().isRaceBeingTracked(regatta, r), rankingMetricType);
             if (trackedRace != null) {
                 SecurityDTOUtil.addSecurityInformation(getSecurityService(), raceDTO, trackedRace.getIdentifier());
                 getBaseDomainFactory().updateRaceDTOWithTrackedRaceData(trackedRace, raceDTO);
@@ -1993,7 +1997,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                             .convertToCompetitorAndBoatDTOs(race.getCompetitorsAndTheirBoats());
                     TrackedRaceDTO trackedRaceDTO = getBaseDomainFactory().createTrackedRaceDTO(trackedRace);
                     raceDTO = new RaceWithCompetitorsAndBoatsDTO(raceIdentifier, competitorsAndBoats, trackedRaceDTO,
-                            getService().isRaceBeingTracked(regatta, race));
+                            getService().isRaceBeingTracked(regatta, race), trackedRace.getRankingMetric().getType());
                     if (trackedRace != null) {
                         getBaseDomainFactory().updateRaceDTOWithTrackedRaceData(trackedRace, raceDTO);
                     }

@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -141,6 +142,8 @@ public interface RankingMetric extends Serializable {
      * @return the tracked race to which this ranking metric is specific
      */
     TrackedRace getTrackedRace();
+    
+    RankingMetrics getType();
 
     default Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint) {
         return getRaceRankingComparator(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
