@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import org.apache.commons.math.FunctionEvaluationException;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.orc.ORCPerformanceCurve;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -37,6 +38,11 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
 
     public ORCPerformanceCurveRankingMetric(TrackedRace trackedRace) {
         super(trackedRace);
+    }
+
+    @Override
+    public RankingMetrics getType() {
+        return RankingMetrics.ORC_PERFORMANCE_CURVE;
     }
 
     /**

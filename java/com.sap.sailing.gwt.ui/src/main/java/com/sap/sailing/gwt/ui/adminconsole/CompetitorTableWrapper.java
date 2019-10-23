@@ -70,6 +70,18 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
     private final boolean filterCompetitorsWithBoat;
     private final boolean filterCompetitorsWithoutBoat;
     
+    /**
+     * @param filterCompetitorsWithBoat
+     *            relevant if {@link #refreshCompetitorList(String)} or {@link #refreshCompetitorList(String, Callback)}
+     *            will be called using {@code null} for the leaderboard name, hence requesting <em>all</em> competitors
+     *            to be loaded. In this case, competitors with boat will be fetched only if this flag is
+     *            {@code false}.
+     * @param filterCompetitorsWithoutBoat
+     *            relevant if {@link #refreshCompetitorList(String)} or {@link #refreshCompetitorList(String, Callback)}
+     *            will be called using {@code null} for the leaderboard name, hence requesting <em>all</em> competitors
+     *            to be loaded. In this case, competitors without boat will be fetched only if this flag is
+     *            {@code false}.
+     */
     public CompetitorTableWrapper(SailingServiceAsync sailingService, UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat) {
         super(sailingService, stringMessages, errorReporter, multiSelection, enablePager,
@@ -366,7 +378,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         return filterField;
     }
     
-    public void refreshCompetitorList(Iterable<CompetitorDTO> competitors) {
+    public void refreshCompetitorList(Iterable<? extends CompetitorDTO> competitors) {
         getFilteredCompetitors(competitors);
     }
     
@@ -375,10 +387,13 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
     }
     
     /**
-     * @param leaderboardName If null, all existing competitors are loaded
+     * @param leaderboardName
+     *            If {@code null}, all existing competitors are loaded.
+     * @param callback
+     *            if not {@code null}, its {@code AsyncCallback#onSuccess(Object)} method will be called after
+     *            successfully refreshing the competitors
      */
-    public void refreshCompetitorList(String leaderboardName, final Callback<Iterable<CompetitorDTO>,
-            Throwable> callback) {
+    public void refreshCompetitorList(String leaderboardName, final Callback<Iterable<CompetitorDTO>, Throwable> callback) {
         final AsyncCallback<Iterable<CompetitorDTO>> myCallback = new AsyncCallback<Iterable<CompetitorDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -404,7 +419,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         }
     }
 
-    private void getFilteredCompetitors(Iterable<CompetitorDTO> result) {
+    private void getFilteredCompetitors(Iterable<? extends CompetitorDTO> result) {
         filterField.updateAll(result);
     }
 

@@ -88,9 +88,13 @@ import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentFin
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataAnalyzer;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEventFinder;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatAnalyzer;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatFinder;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentFinder;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCScratchBoatEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RegattaLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
@@ -1278,12 +1282,16 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), r.getName());
             TrackedRace trackedRace = getService().getExistingTrackedRace(raceIdentifier);
             TrackedRaceDTO trackedRaceDTO = null; 
+            final RankingMetrics rankingMetricType;
             if (trackedRace != null) {
                 trackedRaceDTO = getBaseDomainFactory().createTrackedRaceDTO(trackedRace);
+                rankingMetricType = trackedRace.getRankingMetric().getType();
+            } else {
+                rankingMetricType = null;
             }
             Map<CompetitorDTO, BoatDTO> competitorAndBoatDTOs = baseDomainFactory.convertToCompetitorAndBoatDTOs(r.getCompetitorsAndTheirBoats());
             RaceWithCompetitorsAndBoatsDTO raceDTO = new RaceWithCompetitorsAndBoatsDTO(raceIdentifier, competitorAndBoatDTOs,
-                    trackedRaceDTO, getService().isRaceBeingTracked(regatta, r));
+                    trackedRaceDTO, getService().isRaceBeingTracked(regatta, r), rankingMetricType);
             if (trackedRace != null) {
                 SecurityDTOUtil.addSecurityInformation(getSecurityService(), raceDTO, trackedRace.getIdentifier());
                 getBaseDomainFactory().updateRaceDTOWithTrackedRaceData(trackedRace, raceDTO);
@@ -1993,7 +2001,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                             .convertToCompetitorAndBoatDTOs(race.getCompetitorsAndTheirBoats());
                     TrackedRaceDTO trackedRaceDTO = getBaseDomainFactory().createTrackedRaceDTO(trackedRace);
                     raceDTO = new RaceWithCompetitorsAndBoatsDTO(raceIdentifier, competitorsAndBoats, trackedRaceDTO,
-                            getService().isRaceBeingTracked(regatta, race));
+                            getService().isRaceBeingTracked(regatta, race), trackedRace.getRankingMetric().getType());
                     if (trackedRace != null) {
                         getBaseDomainFactory().updateRaceDTOWithTrackedRaceData(trackedRace, raceDTO);
                     }
@@ -5877,30 +5885,22 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public Iterable<CompetitorDTO> getCompetitors(boolean filterCompetitorsWithBoat,
             boolean filterCompetitorsWithoutBoat) {
-        Iterable<CompetitorDTO> result;
         CompetitorAndBoatStore competitorStore = getService().getBaseDomainFactory().getCompetitorAndBoatStore();
         final HasPermissions.Action[] requiredActionsForRead = SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS;
+        final Iterable<? extends Competitor> filteredCompetitors;
         if (filterCompetitorsWithBoat == false && filterCompetitorsWithoutBoat == false) {
-            @SuppressWarnings("unchecked")
-            Iterable<Competitor> competitors = (Iterable<Competitor>) competitorStore.getAllCompetitors();
-            result = getSecurityService().mapAndFilterByAnyExplicitPermissionForCurrentUser(
-                    SecuredDomainType.COMPETITOR,
-                    requiredActionsForRead, competitors,
-                    this::convertToCompetitorDTO);
+            filteredCompetitors = competitorStore.getAllCompetitors();
         } else if (filterCompetitorsWithBoat == true && filterCompetitorsWithoutBoat == false) {
-            result = getSecurityService().mapAndFilterByAnyExplicitPermissionForCurrentUser(
-                    SecuredDomainType.COMPETITOR,
-                    requiredActionsForRead, competitorStore.getCompetitorsWithoutBoat(),
-                    this::convertToCompetitorDTO);
+            filteredCompetitors = competitorStore.getCompetitorsWithoutBoat();
         } else if (filterCompetitorsWithBoat == false && filterCompetitorsWithoutBoat == true) {
-            result = getSecurityService().mapAndFilterByAnyExplicitPermissionForCurrentUser(
-                    SecuredDomainType.COMPETITOR,
-                    requiredActionsForRead, competitorStore.getCompetitorsWithBoat(),
-                    this::convertToCompetitorDTO);
+            filteredCompetitors = competitorStore.getCompetitorsWithBoat();
         } else {
-            result = Collections.emptyList();
+            filteredCompetitors = Collections.emptyList();
         }
-        return result;
+        return getSecurityService().mapAndFilterByAnyExplicitPermissionForCurrentUser(
+                SecuredDomainType.COMPETITOR,
+                requiredActionsForRead, filteredCompetitors,
+                this::convertToCompetitorDTO);
     }
 
     @Override
@@ -9588,28 +9588,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     private Triple<Integer, Integer, Integer> createCertificateAssignmentsForRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             Map<String, ORCCertificate> certificatesForBoatIdsAsString) throws IOException, NotFoundException {
-        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard == null) {
-            throw new NotFoundException("Leaderboard named "+leaderboardName+" not found");
-        } else {
-            getService().getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
-            if (leaderboard instanceof RegattaLeaderboard) {
-                getService().getSecurityService().checkCurrentUserUpdatePermission(((RegattaLeaderboard) leaderboard).getRegatta());
-            }
-            final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-            if (raceColumn == null) {
-                throw new NotFoundException("Race column named "+raceColumnName+" not found in leaderboard named "+leaderboardName);
-            } else {
-                final Fleet fleet = raceColumn.getFleetByName(fleetName);
-                if (fleet == null) {
-                    throw new NotFoundException("Fleet "+fleetName+" not found in race column named "+raceColumnName+" in leaderboard named "+leaderboardName);
-                } else {
-                    final RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                    final LogEventConstructor<RaceLogEvent, RaceLogEventVisitor> logEventConstructor = createRaceLogEventConstructor();
-                    return createCertificateAssignments(raceLog, logEventConstructor, certificatesForBoatIdsAsString);
-                }
-            }
-        }
+        final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        final LogEventConstructor<RaceLogEvent, RaceLogEventVisitor> logEventConstructor = createRaceLogEventConstructor();
+        return createCertificateAssignments(raceLog, logEventConstructor, certificatesForBoatIdsAsString);
     }
 
     private Triple<Integer, Integer, Integer> createCertificateAssignmentsForRegatta(RegattaIdentifier regattaIdentifier,
@@ -9733,5 +9714,40 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(String leaderboardName, String raceColumnName, String fleetName,
             Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException {
         return createCertificateAssignmentsForRaceLog(leaderboardName, raceColumnName, fleetName, certificatesForBoatsWithIdAsString);
+    }
+
+    @Override
+    public CompetitorDTO getORCPerformanceCurveScratchBoat(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException {
+        final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        final RaceLogORCScratchBoatFinder finder = new RaceLogORCScratchBoatFinder(raceLog,
+                competitorId -> getService().getCompetitorAndBoatStore().getExistingCompetitorById(competitorId));
+        final Competitor scratchBoat = finder.analyze();
+        return scratchBoat == null ? null : convertToCompetitorDTO(scratchBoat);
+    }
+
+    @Override
+    public void setORCPerformanceCurveScratchBoat(String leaderboardName, String raceColumnName, String fleetName, CompetitorDTO newScratchBoatDTO) throws NotFoundException {
+        final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        final Competitor newScratchBoat = newScratchBoatDTO==null?null:
+            getService().getCompetitorAndBoatStore().getExistingCompetitorById(UUIDHelper.tryUuidConversion(newScratchBoatDTO.getIdAsString()));
+        final RaceLogORCScratchBoatAnalyzer analyzer = new RaceLogORCScratchBoatAnalyzer(raceLog,
+                competitorId -> getService().getCompetitorAndBoatStore().getExistingCompetitorById(competitorId));
+        final Pair<Competitor, RaceLogORCScratchBoatEvent> previousScratchBoatAndEvent = analyzer.analyze();
+        final Competitor previousScratchBoat = previousScratchBoatAndEvent == null ? null : previousScratchBoatAndEvent.getA();
+        if (!Util.equalsWithNull(newScratchBoat, previousScratchBoat)) {
+            final AbstractLogEventAuthor serverAuthor = getService().getServerAuthor();
+            if (previousScratchBoatAndEvent != null) {
+                // revoke scratch boat setting so far:
+                try {
+                    raceLog.revokeEvent(serverAuthor, previousScratchBoatAndEvent.getB());
+                } catch (NotRevokableException e) {
+                    logger.log(Level.SEVERE, "Unable to revoke scratch boat definition event "+previousScratchBoatAndEvent.getB(), e);
+                }
+            }
+            if (newScratchBoat != null) {
+                final TimePoint now = MillisecondsTimePoint.now();
+                raceLog.add(new RaceLogORCScratchBoatEventImpl(now, now, serverAuthor, UUID.randomUUID(), /* passId */ raceLog.getCurrentPassId(), newScratchBoat));
+            }
+        }
     }
 }

@@ -1248,4 +1248,9 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(String leaderboardName,
             Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
+
+    CompetitorDTO getORCPerformanceCurveScratchBoat(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException;
+
+    void setORCPerformanceCurveScratchBoat(String leaderboardName, String raceColumnName, String fleetName,
+            CompetitorDTO newScratchBoat) throws NotFoundException;
 }

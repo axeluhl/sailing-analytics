@@ -9,6 +9,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -35,7 +36,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             RegattaRefresher regattaRefresher, final StringMessages stringMessages, final UserService userService) {
         super(sailingService, userService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ false, stringMessages);
         courseManagementWidget = new CourseManagementWidget(sailingService, errorReporter, stringMessages,
-                userService) {
+                userService, ()->selectedRaceHasOrcPcsRankingMetric()) {
             @Override
             protected void save() {
                 sailingService.updateRaceCourse(singleSelectedRace, createWaypointPairs(), new AsyncCallback<Void>() {
@@ -94,18 +95,20 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             }
             
             private void refreshORCPerformanceCurveLegs() {
-                sailingService.getORCPerformanceCurveLegInfo(singleSelectedRace,
-                        new AsyncCallback<Map<Integer, ORCPerformanceCurveLegImpl>>() {
-                            @Override
-                            public void onSuccess(Map<Integer, ORCPerformanceCurveLegImpl> result) {
-                                refreshORCPerformanceCurveLegs(result);
-                            }
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError("Could not load ORC Performance Curve leg information: " + caught.getMessage());
-                            }
-                        });
+                if (singleSelectedRace != null) {
+                    sailingService.getORCPerformanceCurveLegInfo(singleSelectedRace,
+                            new AsyncCallback<Map<Integer, ORCPerformanceCurveLegImpl>>() {
+                                @Override
+                                public void onSuccess(Map<Integer, ORCPerformanceCurveLegImpl> result) {
+                                    refreshORCPerformanceCurveLegs(result);
+                                }
+    
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError("Could not load ORC Performance Curve leg information: " + caught.getMessage());
+                                }
+                            });
+                }
             }
         };
         FlowPanel courseManagementPanel = new FlowPanel();
@@ -132,6 +135,13 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         buttonsPanel.add(saveBtn);
         this.selectedRaceContentPanel.add(courseManagementWidget);
         this.selectedRaceContentPanel.add(buttonsPanel);
+    }
+
+    private boolean selectedRaceHasOrcPcsRankingMetric() {
+        final RankingMetrics rankingMetricType = selectedRaceDTO == null ? null : selectedRaceDTO.getRankingMetricType();
+        return rankingMetricType == RankingMetrics.ORC_PERFORMANCE_CURVE ||
+                rankingMetricType == RankingMetrics.ORC_PERFORMANCE_CURVE_BY_IMPLIED_WIND ||
+                rankingMetricType == RankingMetrics.ORC_PERFORMANCE_CURVE_LEADER_FOR_BASELINE;
     }
 
     @Override
