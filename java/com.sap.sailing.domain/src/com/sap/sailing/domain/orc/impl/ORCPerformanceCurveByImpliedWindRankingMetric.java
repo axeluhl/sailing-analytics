@@ -83,8 +83,6 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
     
     private final Map<Serializable, Boat> boatsById;
     
-    private final Map<Serializable, Competitor> competitorsById;
-    
     private transient RaceLogEventVisitor certificatesAndCourseAndScratchBoatFromRaceLogUpdater;
     
     private transient RegattaLogEventVisitor certificatesFromRegattaLogUpdater;
@@ -110,7 +108,6 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
     public ORCPerformanceCurveByImpliedWindRankingMetric(TrackedRace trackedRace) {
         super(trackedRace);
         boatsById = initBoatsById();
-        competitorsById = initCompetitorsById();
         initializeListeners();
         updateCertificatesFromLogs();
         updateCourseFromRaceLogs();
@@ -197,16 +194,6 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
         return result;
     }
 
-    private Map<Serializable, Competitor> initCompetitorsById() {
-        final Map<Serializable, Competitor> result = new HashMap<>();
-        if (getTrackedRace() != null) {
-            for (final Competitor competitor : getTrackedRace().getTrackedRegatta().getRegatta().getAllCompetitors()) {
-                result.put(competitor.getId(), competitor);
-            }
-        }
-        return result;
-    }
-
     private RaceLogEventVisitor createCertificatesFromRaceLogAndCourseAndScratchBoatUpdater() {
         return new BaseRaceLogEventVisitor() {
             @Override
@@ -251,7 +238,7 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
     private void updateScratchBoatFromLogs() {
         Competitor scratchBoatFromLog = null;
         for (final RaceLog raceLog : getTrackedRace().getAttachedRaceLogs()) {
-            scratchBoatFromLog = new RaceLogORCScratchBoatFinder(raceLog, competitorId->competitorsById.get(competitorId)).analyze();
+            scratchBoatFromLog = new RaceLogORCScratchBoatFinder(raceLog).analyze();
             if (scratchBoatFromLog != null) {
                 break;
             }

@@ -47,10 +47,12 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCUseImpliedWindFromOtherRaceEvent;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCScratchBoatEventImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCUseImpliedWindFromOtherRaceEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RegattaLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
@@ -1513,6 +1515,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return result;
     }
+    
+    private SimpleRaceLogIdentifier loadRaceLogIdentifier(Document raceLogIdentifierDocument) {
+        final Triple<String, String, String> triple = TripleSerializer.deserialize(raceLogIdentifierDocument);
+        return new SimpleRaceLogIdentifierImpl(triple.getA(), triple.getB(), triple.getC());
+    }
 
     private List<RaceLogEvent> loadRaceLogEvents(RaceLog targetRaceLog, Document query) throws JsonDeserializationException, ParseException {
         List<RaceLogEvent> result = new ArrayList<>();
@@ -1635,7 +1642,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         } else if (eventClass.equals(RaceLogORCCertificateAssignmentEvent.class.getSimpleName())) {
             resultEvent = loadRaceLogORCCertificateAssignmentEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
         } else if (eventClass.equals(RaceLogORCScratchBoatEvent.class.getSimpleName())) {
-            resultEvent = loadRaceLogORCScratchBoatEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
+            resultEvent = loadRaceLogORCScratchBoatEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(RaceLogORCUseImpliedWindFromOtherRaceEvent.class.getSimpleName())) {
+            resultEvent = loadRaceLogORCUseImpliedWindFromOtherRaceEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else {
             throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
         }
@@ -1643,9 +1652,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private RaceLogEvent loadRaceLogORCScratchBoatEvent(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable id, Integer passId, Document dbObject) {
-        Serializable competitorId = (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name());
-        return new RaceLogORCScratchBoatEventImpl(createdAt, logicalTimePoint, author, id, passId, competitorId);
+            TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors, Document dbObject) {
+        return new RaceLogORCScratchBoatEventImpl(createdAt, logicalTimePoint, author, id, passId, competitors.get(0));
+    }
+    
+    private RaceLogEvent loadRaceLogORCUseImpliedWindFromOtherRaceEvent(TimePoint createdAt,
+            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId,
+            List<Competitor> competitors, Document dbObject) {
+        final SimpleRaceLogIdentifier otherRace = loadRaceLogIdentifier((Document) dbObject.get(FieldNames.ORC_OTHER_RACE_IDENTIFIER.name()));
+        return new RaceLogORCUseImpliedWindFromOtherRaceEventImpl(createdAt, logicalTimePoint, author, id, passId, otherRace);
     }
 
     private RaceLogEvent loadRaceLogUseCompetitorsFromRaceLogEvent(TimePoint createdAt, AbstractLogEventAuthor author,

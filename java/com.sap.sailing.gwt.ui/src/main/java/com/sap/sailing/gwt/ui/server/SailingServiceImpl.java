@@ -9719,8 +9719,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public CompetitorDTO getORCPerformanceCurveScratchBoat(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException {
         final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        final RaceLogORCScratchBoatFinder finder = new RaceLogORCScratchBoatFinder(raceLog,
-                competitorId -> getService().getCompetitorAndBoatStore().getExistingCompetitorById(competitorId));
+        final RaceLogORCScratchBoatFinder finder = new RaceLogORCScratchBoatFinder(raceLog);
         final Competitor scratchBoat = finder.analyze();
         return scratchBoat == null ? null : convertToCompetitorDTO(scratchBoat);
     }
@@ -9730,8 +9729,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         final Competitor newScratchBoat = newScratchBoatDTO==null?null:
             getService().getCompetitorAndBoatStore().getExistingCompetitorById(UUIDHelper.tryUuidConversion(newScratchBoatDTO.getIdAsString()));
-        final RaceLogORCScratchBoatAnalyzer analyzer = new RaceLogORCScratchBoatAnalyzer(raceLog,
-                competitorId -> getService().getCompetitorAndBoatStore().getExistingCompetitorById(competitorId));
+        final RaceLogORCScratchBoatAnalyzer analyzer = new RaceLogORCScratchBoatAnalyzer(raceLog);
         final Pair<Competitor, RaceLogORCScratchBoatEvent> previousScratchBoatAndEvent = analyzer.analyze();
         final Competitor previousScratchBoat = previousScratchBoatAndEvent == null ? null : previousScratchBoatAndEvent.getA();
         if (!Util.equalsWithNull(newScratchBoat, previousScratchBoat)) {

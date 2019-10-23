@@ -223,10 +223,9 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
         try {
             final BiFunction<TimePoint, Competitor, ORCPerformanceCurve> performanceCurveSupplier = getPerformanceCurveSupplier(cache);
             final ORCPerformanceCurve competitorPerformanceCurve = cache.getPerformanceCurveForPartialCourse(timePoint, getTrackedRace(), competitor, performanceCurveSupplier);
-            final Speed maxImpliedWind = Collections.max(getImpliedWindByCompetitor(timePoint, cache).values(),
-                    Comparator.nullsFirst(Comparator.naturalOrder()));
-            if (maxImpliedWind != null && competitorPerformanceCurve != null) {
-                final Duration competitorAllowance = competitorPerformanceCurve.getAllowancePerCourse(maxImpliedWind);
+            final Speed referenceImpliedWind = getReferenceImpliedWind(timePoint, cache);
+            if (referenceImpliedWind != null && competitorPerformanceCurve != null) {
+                final Duration competitorAllowance = competitorPerformanceCurve.getAllowancePerCourse(referenceImpliedWind);
                 final Duration competitorElapsedTime = getTrackedRace().getTimeSailedSinceRaceStart(competitor, timePoint);
                 if (competitorElapsedTime != null) {
                     competitorDelta = competitorElapsedTime.minus(competitorAllowance);
@@ -241,5 +240,19 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
             competitorDelta = null;
         }
         return competitorDelta;
+    }
+
+    /**
+     * Computes the implied wind speed to use for calculating each competitor's time allowance at {@code timePoint}. The default
+     * is to compute all competitors' implied wind at {@code timePoint} and find the maximum of those implied wind values. This
+     * may be overridden by adding a {@link RaceLogORCPerformanceCurveImpliedWindEvent} to the race log which can either specify
+     * an absolute wind speed to use, or it can specify another race whose implied wind value at {@code timePoint} is to be used
+     * instead. This can be useful, e.g., if one race features only a sub-group of another race's competitors, but the sub-group's
+     * implied wind value is to be obtained from the overall race's implied wind maximum.
+     */
+    private Speed getReferenceImpliedWind(TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return Collections.max(getImpliedWindByCompetitor(timePoint, cache).values(),
+                Comparator.nullsFirst(Comparator.naturalOrder()));
     }
 }

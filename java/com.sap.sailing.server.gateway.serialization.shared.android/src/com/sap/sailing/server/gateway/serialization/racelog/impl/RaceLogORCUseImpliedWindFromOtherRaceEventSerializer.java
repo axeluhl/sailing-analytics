@@ -13,12 +13,12 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
  * @author Daniel Lisunkin (i505543)
  * @author Axel Uhl (d043530)
  */
-public class RaceLogORCScratchBoatEventSerializer extends BaseRaceLogEventSerializer {
+public class RaceLogORCUseImpliedWindFromOtherRaceEventSerializer extends BaseRaceLogEventSerializer {
 
     public static final String VALUE_CLASS = RaceLogORCScratchBoatEvent.class.getSimpleName();
     public static final String ORC_CERTIFICATE = "certificate";
     
-    public RaceLogORCScratchBoatEventSerializer(JsonSerializer<Competitor> competitorSerializer) {
+    public RaceLogORCUseImpliedWindFromOtherRaceEventSerializer(JsonSerializer<Competitor> competitorSerializer) {
         super(competitorSerializer);
     }
 

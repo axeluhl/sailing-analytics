@@ -1,10 +1,11 @@
 package com.sap.sailing.domain.abstractlog.orc;
 
-import java.io.Serializable;
-
 import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.base.Competitor;
 
 public interface RaceLogORCScratchBoatEvent extends RaceLogEvent, Revokable {
-    Serializable getCompetitorId();
+    default Competitor getCompetitor() {
+        return getInvolvedCompetitors().get(0);
+    }
 }

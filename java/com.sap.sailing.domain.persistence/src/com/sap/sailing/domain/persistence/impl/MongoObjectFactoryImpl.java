@@ -30,6 +30,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCUseImpliedWindFromOtherRaceEvent;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
@@ -53,6 +54,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
@@ -841,7 +843,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    private void storeRaceLogIdentifier(RaceLogIdentifier raceLogIdentifier, Document result) {
+    private void storeRaceLogIdentifier(SimpleRaceLogIdentifier raceLogIdentifier, Document result) {
         result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
     }
 
@@ -1023,11 +1025,27 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
+    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogORCUseImpliedWindFromOtherRaceEvent event) {
+        Document result = new Document();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeORCUseImpliedWindFromOtherRaceEvent(event));
+        return result;
+    }
+    
+    private Document storeORCUseImpliedWindFromOtherRaceEvent(RaceLogORCUseImpliedWindFromOtherRaceEvent event) {
+        final Document result = new Document();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCUseImpliedWindFromOtherRaceEvent.class.getSimpleName());
+        final Document otherRaceIdentifier = new Document();
+        storeRaceLogIdentifier(event.getOtherRace(), otherRaceIdentifier);
+        result.put(FieldNames.ORC_OTHER_RACE_IDENTIFIER.name(), otherRaceIdentifier);
+        return result;
+    }
+
     private Document storeORCScratchBoatEvent(RaceLogORCScratchBoatEvent event) {
         Document result = new Document();
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCScratchBoatEvent.class.getSimpleName());
-        result.append(FieldNames.COMPETITOR_ID.name(), event.getCompetitorId());
         return result;
     }
     
@@ -1215,12 +1233,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeTimePoint(event.getCreatedAt(), result, FieldNames.RACE_LOG_EVENT_CREATED_AT);
         result.put(FieldNames.RACE_LOG_EVENT_ID.name(), event.getId());
         result.put(FieldNames.RACE_LOG_EVENT_PASS_ID.name(), event.getPassId());
-        result.put(FieldNames.RACE_LOG_EVENT_INVOLVED_BOATS.name(), storeInvolvedBoatsForRaceLogEvent(event.getInvolvedCompetitors()));
+        result.put(FieldNames.RACE_LOG_EVENT_INVOLVED_BOATS.name(), storeInvolvedCompetitorsForRaceLogEvent(event.getInvolvedCompetitors()));
         storeRaceLogEventAuthor(result, event.getAuthor());
     }
 
 
-    private BasicDBList storeInvolvedBoatsForRaceLogEvent(List<Competitor> competitors) {
+    private BasicDBList storeInvolvedCompetitorsForRaceLogEvent(List<Competitor> competitors) {
         BasicDBList dbInvolvedCompetitorIds = new BasicDBList();
         for (Competitor competitor : competitors) {
             dbInvolvedCompetitorIds.add(competitor.getId());
