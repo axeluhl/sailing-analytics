@@ -92,7 +92,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
                 new RaceLogTagEventDeserializer(competitorDeserializer),
                 new RaceLogORCLegDataEventDeserializer(competitorDeserializer),
                 new RaceLogORCScratchBoatEventDeserializer(competitorDeserializer),
-                new RaceLogORCCertificateAssignmentEventDeserializer(competitorDeserializer));
+                new RaceLogORCCertificateAssignmentEventDeserializer(competitorDeserializer),
+                new RaceLogORCUseImpliedWindFromOtherRaceEventDeserializer(competitorDeserializer));
     }
 
     protected final JsonDeserializer<RaceLogEvent> flagEventDeserializer;
@@ -122,6 +123,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
     protected final JsonDeserializer<RaceLogEvent> orcLegDataEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> orcScratchBoatEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> orcCertificateAssignmentEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> orcUseImpliedWindFromOtherRaceEventDeserializer;
 
     public RaceLogEventDeserializer(JsonDeserializer<RaceLogEvent> flagEventDeserializer,
             JsonDeserializer<RaceLogEvent> startTimeEventDeserializer,
@@ -149,7 +151,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             JsonDeserializer<RaceLogEvent> tagEventDeserializer,
             JsonDeserializer<RaceLogEvent> orcLegDataEventDeserializer,
             JsonDeserializer<RaceLogEvent> orcScratchBoatEventDeserializer,
-            JsonDeserializer<RaceLogEvent> orcCertificateAssignmentEventDeserializer) {
+            JsonDeserializer<RaceLogEvent> orcCertificateAssignmentEventDeserializer,
+            JsonDeserializer<RaceLogEvent> orcUseImpliedWindFromOtherRaceEventDeserializer) {
         this.flagEventDeserializer = flagEventDeserializer;
         this.startTimeEventDeserializer = startTimeEventDeserializer;
         this.dependentStartTimeEventDeserializer = dependentStartTimeEventDeserializer;
@@ -177,6 +180,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
         this.orcLegDataEventDeserializer = orcLegDataEventDeserializer;
         this.orcScratchBoatEventDeserializer = orcScratchBoatEventDeserializer;
         this.orcCertificateAssignmentEventDeserializer = orcCertificateAssignmentEventDeserializer;
+        this.orcUseImpliedWindFromOtherRaceEventDeserializer = orcUseImpliedWindFromOtherRaceEventDeserializer;
     }
 
     protected JsonDeserializer<RaceLogEvent> getDeserializer(JSONObject object) throws JsonDeserializationException {

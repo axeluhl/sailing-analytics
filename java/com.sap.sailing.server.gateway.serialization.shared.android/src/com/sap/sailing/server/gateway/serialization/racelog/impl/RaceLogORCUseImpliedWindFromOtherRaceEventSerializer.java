@@ -2,7 +2,7 @@ package com.sap.sailing.server.gateway.serialization.racelog.impl;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCUseImpliedWindFromOtherRaceEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -14,18 +14,22 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
  * @author Axel Uhl (d043530)
  */
 public class RaceLogORCUseImpliedWindFromOtherRaceEventSerializer extends BaseRaceLogEventSerializer {
+    public static final String VALUE_CLASS = RaceLogORCUseImpliedWindFromOtherRaceEvent.class.getSimpleName();
+    public static final String ORC_OTHER_RACE_REGATTA_LIKE_NAME = "regatta_like";
+    public static final String ORC_OTHER_RACE_RACE_COLUMN_NAME = "race_column";
+    public static final String ORC_OTHER_RACE_FLEET_NAME = "fleet";
 
-    public static final String VALUE_CLASS = RaceLogORCScratchBoatEvent.class.getSimpleName();
-    public static final String ORC_CERTIFICATE = "certificate";
-    
     public RaceLogORCUseImpliedWindFromOtherRaceEventSerializer(JsonSerializer<Competitor> competitorSerializer) {
         super(competitorSerializer);
     }
 
     @Override
     public JSONObject serialize(RaceLogEvent object) {
-        RaceLogORCScratchBoatEvent scratchBoatEvent = (RaceLogORCScratchBoatEvent) object;
-        JSONObject result = super.serialize(scratchBoatEvent);
+        final RaceLogORCUseImpliedWindFromOtherRaceEvent useImpliedWindFromOtherRaceEvent = (RaceLogORCUseImpliedWindFromOtherRaceEvent) object;
+        final JSONObject result = super.serialize(useImpliedWindFromOtherRaceEvent);
+        result.put(ORC_OTHER_RACE_REGATTA_LIKE_NAME, useImpliedWindFromOtherRaceEvent.getOtherRace().getRegattaLikeParentName());
+        result.put(ORC_OTHER_RACE_RACE_COLUMN_NAME, useImpliedWindFromOtherRaceEvent.getOtherRace().getRaceColumnName());
+        result.put(ORC_OTHER_RACE_FLEET_NAME, useImpliedWindFromOtherRaceEvent.getOtherRace().getFleetName());
         return result;
     }
 
