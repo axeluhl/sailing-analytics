@@ -84,6 +84,7 @@ import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.orc.BaseORCCertificateAssignmentAnalyzer;
 import com.sap.sailing.domain.abstractlog.orc.ORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentFinder;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataAnalyzer;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
@@ -91,10 +92,14 @@ import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEventFinder;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatAnalyzer;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatFinder;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCSetImpliedWindEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCUseImpliedWindFromOtherRaceEvent;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentFinder;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCScratchBoatEventImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCSetImpliedWindEventImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCUseImpliedWindFromOtherRaceEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RegattaLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
@@ -8813,6 +8818,34 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         }
                     }
                     
+                    @Override
+                    public void visit(RaceLogORCSetImpliedWindEvent event) {
+                        raceLog.add(new RaceLogORCSetImpliedWindEventImpl(event.getCreatedAt(),
+                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
+                                raceLog.getCurrentPassId(), event.getImpliedWindSpeed()));
+                    }
+
+                    @Override
+                    public void visit(RaceLogORCCertificateAssignmentEvent event) {
+                        raceLog.add(new RaceLogORCCertificateAssignmentEventImpl(event.getCreatedAt(),
+                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
+                                raceLog.getCurrentPassId(), event.getCertificate(), event.getBoatId()));
+                    }
+
+                    @Override
+                    public void visit(RaceLogORCScratchBoatEvent event) {
+                        raceLog.add(new RaceLogORCScratchBoatEventImpl(event.getCreatedAt(),
+                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
+                                raceLog.getCurrentPassId(), event.getCompetitor()));
+                    }
+
+                    @Override
+                    public void visit(RaceLogORCUseImpliedWindFromOtherRaceEvent event) {
+                        raceLog.add(new RaceLogORCUseImpliedWindFromOtherRaceEventImpl(event.getCreatedAt(),
+                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
+                                raceLog.getCurrentPassId(), event.getOtherRace()));
+                    }
+
                     private boolean isLatestPass(RaceLogEvent event) {
                         return event.getPassId() == raceLogOfRaceToSlice.getCurrentPassId();
                     }

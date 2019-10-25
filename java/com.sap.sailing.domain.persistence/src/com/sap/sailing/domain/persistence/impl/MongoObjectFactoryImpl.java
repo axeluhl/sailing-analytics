@@ -30,6 +30,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCSetImpliedWindEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCUseImpliedWindFromOtherRaceEvent;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
@@ -1039,6 +1040,21 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         final Document otherRaceIdentifier = new Document();
         storeRaceLogIdentifier(event.getOtherRace(), otherRaceIdentifier);
         result.put(FieldNames.ORC_OTHER_RACE_IDENTIFIER.name(), otherRaceIdentifier);
+        return result;
+    }
+    
+    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogORCSetImpliedWindEvent event) {
+        Document result = new Document();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeORCSetImpliedWindEvent(event));
+        return result;
+    }
+    
+    private Document storeORCSetImpliedWindEvent(RaceLogORCSetImpliedWindEvent event) {
+        final Document result = new Document();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCSetImpliedWindEvent.class.getSimpleName());
+        result.put(FieldNames.ORC_IMPLIED_WIND_SPEED_IN_KNOTS.name(), event.getImpliedWindSpeed() == null ? null : event.getImpliedWindSpeed().getKnots());
         return result;
     }
 

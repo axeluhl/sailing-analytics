@@ -32,6 +32,9 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFlagEven
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogGateLineOpeningTimeEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogORCCertificateAssignmentEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogORCLegDataEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogORCScratchBoatEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogORCSetImpliedWindEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogORCUseImpliedWindFromOtherRaceEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogPassChangeEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogPathfinderEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogProtestStartTimeEventSerializer;
@@ -93,7 +96,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
                 new RaceLogORCLegDataEventDeserializer(competitorDeserializer),
                 new RaceLogORCScratchBoatEventDeserializer(competitorDeserializer),
                 new RaceLogORCCertificateAssignmentEventDeserializer(competitorDeserializer),
-                new RaceLogORCUseImpliedWindFromOtherRaceEventDeserializer(competitorDeserializer));
+                new RaceLogORCUseImpliedWindFromOtherRaceEventDeserializer(competitorDeserializer),
+                new RaceLogORCSetImpliedWindEventDeserializer(competitorDeserializer));
     }
 
     protected final JsonDeserializer<RaceLogEvent> flagEventDeserializer;
@@ -124,6 +128,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
     protected final JsonDeserializer<RaceLogEvent> orcScratchBoatEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> orcCertificateAssignmentEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> orcUseImpliedWindFromOtherRaceEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> orcSetImpliedWindEventDeserializer;
 
     public RaceLogEventDeserializer(JsonDeserializer<RaceLogEvent> flagEventDeserializer,
             JsonDeserializer<RaceLogEvent> startTimeEventDeserializer,
@@ -152,7 +157,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             JsonDeserializer<RaceLogEvent> orcLegDataEventDeserializer,
             JsonDeserializer<RaceLogEvent> orcScratchBoatEventDeserializer,
             JsonDeserializer<RaceLogEvent> orcCertificateAssignmentEventDeserializer,
-            JsonDeserializer<RaceLogEvent> orcUseImpliedWindFromOtherRaceEventDeserializer) {
+            JsonDeserializer<RaceLogEvent> orcUseImpliedWindFromOtherRaceEventDeserializer,
+            JsonDeserializer<RaceLogEvent> orcSetImpliedWindEventDeserializer) {
         this.flagEventDeserializer = flagEventDeserializer;
         this.startTimeEventDeserializer = startTimeEventDeserializer;
         this.dependentStartTimeEventDeserializer = dependentStartTimeEventDeserializer;
@@ -181,6 +187,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
         this.orcScratchBoatEventDeserializer = orcScratchBoatEventDeserializer;
         this.orcCertificateAssignmentEventDeserializer = orcCertificateAssignmentEventDeserializer;
         this.orcUseImpliedWindFromOtherRaceEventDeserializer = orcUseImpliedWindFromOtherRaceEventDeserializer;
+        this.orcSetImpliedWindEventDeserializer = orcSetImpliedWindEventDeserializer;
     }
 
     protected JsonDeserializer<RaceLogEvent> getDeserializer(JSONObject object) throws JsonDeserializationException {
@@ -236,8 +243,14 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             return tagEventDeserializer;
         } else if (type.equals(RaceLogORCLegDataEventSerializer.VALUE_CLASS)){
             return orcLegDataEventDeserializer;
+        } else if (type.equals(RaceLogORCScratchBoatEventSerializer.VALUE_CLASS)){
+            return orcScratchBoatEventDeserializer;
         } else if (type.equals(RaceLogORCCertificateAssignmentEventSerializer.VALUE_CLASS)) {
             return orcCertificateAssignmentEventDeserializer;
+        } else if (type.equals(RaceLogORCUseImpliedWindFromOtherRaceEventSerializer.VALUE_CLASS)) {
+            return orcUseImpliedWindFromOtherRaceEventDeserializer;
+        } else if (type.equals(RaceLogORCSetImpliedWindEventSerializer.VALUE_CLASS)) {
+            return orcSetImpliedWindEventDeserializer;
         }
         throw new JsonDeserializationException(String.format("There is no deserializer defined for event type %s.",
                 type));

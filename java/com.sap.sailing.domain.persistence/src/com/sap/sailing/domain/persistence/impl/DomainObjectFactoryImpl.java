@@ -47,11 +47,13 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCSetImpliedWindEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCUseImpliedWindFromOtherRaceEvent;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCScratchBoatEventImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCSetImpliedWindEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCUseImpliedWindFromOtherRaceEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RegattaLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
@@ -200,6 +202,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.WindImpl;
@@ -1645,6 +1648,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             resultEvent = loadRaceLogORCScratchBoatEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogORCUseImpliedWindFromOtherRaceEvent.class.getSimpleName())) {
             resultEvent = loadRaceLogORCUseImpliedWindFromOtherRaceEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(RaceLogORCSetImpliedWindEvent.class.getSimpleName())) {
+            resultEvent = loadRaceLogORCSetImpliedWindEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else {
             throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
         }
@@ -1661,6 +1666,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             List<Competitor> competitors, Document dbObject) {
         final SimpleRaceLogIdentifier otherRace = loadRaceLogIdentifier((Document) dbObject.get(FieldNames.ORC_OTHER_RACE_IDENTIFIER.name()));
         return new RaceLogORCUseImpliedWindFromOtherRaceEventImpl(createdAt, logicalTimePoint, author, id, passId, otherRace);
+    }
+
+    private RaceLogEvent loadRaceLogORCSetImpliedWindEvent(TimePoint createdAt,
+            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId,
+            List<Competitor> competitors, Document dbObject) {
+        final Number impliedWindAsNumber = (Number) dbObject.get(FieldNames.ORC_IMPLIED_WIND_SPEED_IN_KNOTS.name());
+        return new RaceLogORCSetImpliedWindEventImpl(createdAt, logicalTimePoint, author, id, passId,
+                impliedWindAsNumber == null ? null : new KnotSpeedImpl(impliedWindAsNumber.doubleValue()));
     }
 
     private RaceLogEvent loadRaceLogUseCompetitorsFromRaceLogEvent(TimePoint createdAt, AbstractLogEventAuthor author,
