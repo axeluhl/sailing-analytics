@@ -8,6 +8,7 @@ import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBar
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_REFRESH_RACELOG;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_REMOVE;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SCRATCH_BOAT_SELECTION;
+import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SET_IMPLIED_WIND;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SET_FINISHING_AND_FINISH_TIME;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SET_STARTTIME;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SHOW_RACELOG;
@@ -543,6 +544,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 object -> editCompetitorToBoatMappings(object.getA(), object.getB()));
         actionsColumn.addAction(ACTION_CERTIFICATE_ASSIGNMENT, READ, object -> assignCertificates(object));
         actionsColumn.addAction(ACTION_SCRATCH_BOAT_SELECTION, READ, object -> selectScratchBoat(object));
+        actionsColumn.addAction(ACTION_SET_IMPLIED_WIND, READ, object -> setImpliedWind(object));
         racesTable.addColumn(isMedalRaceCheckboxColumn, stringMessages.medalRace());
         racesTable.addColumn(isLinkedRaceColumn, stringMessages.islinked());
         racesTable.addColumn(explicitFactorColumn, stringMessages.factor());

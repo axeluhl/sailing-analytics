@@ -2304,4 +2304,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorObtainingScratchBoat(String message);
     String errorSettingScratchBoat(String message);
     String scratchBoatSetSuccessfully();
+    String setImpliedWind();
 }

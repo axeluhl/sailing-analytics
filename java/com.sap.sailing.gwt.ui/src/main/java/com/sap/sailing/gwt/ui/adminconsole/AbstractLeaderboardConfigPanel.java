@@ -853,6 +853,10 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
             }
         });
     }
+    
+    protected void setImpliedWind(RaceColumnDTOAndFleetDTOWithNameBasedEquality object) {
+        // TODO implement setImpliedWind
+    }
 
     /**
      * Helps in obtaining competitors for a specific "race slot" identified by leaderboard name, race column name and

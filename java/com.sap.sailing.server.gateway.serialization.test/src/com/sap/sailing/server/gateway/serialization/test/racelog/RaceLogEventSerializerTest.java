@@ -75,6 +75,7 @@ public class RaceLogEventSerializerTest {
     private JsonSerializer<RaceLogEvent> orcCertificateAssignmentEventSerializer;
     private JsonSerializer<RaceLogEvent> orcScratchBoatEventSerializer;
     private JsonSerializer<RaceLogEvent> orcUseImpliedWindFromOtherRaceEventSerializer;
+    private JsonSerializer<RaceLogEvent> orcSetImpliedWindEventSerializer;
     
     private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
 
@@ -110,6 +111,7 @@ public class RaceLogEventSerializerTest {
         orcCertificateAssignmentEventSerializer = mock(JsonSerializer.class);
         orcScratchBoatEventSerializer = mock(JsonSerializer.class);
         orcUseImpliedWindFromOtherRaceEventSerializer = mock(JsonSerializer.class);
+        orcSetImpliedWindEventSerializer = mock(JsonSerializer.class);
         
         serializer = new RaceLogEventSerializer(flagEventSerializer, startTimeSerializer, raceStatusSerializer,
                 passChangedSerializer, courseDesignChangedEventSerializer,
@@ -123,7 +125,7 @@ public class RaceLogEventSerializerTest {
                 startOfTrackingEventSerializer, useCompetitorsFromRaceLogEventSerializer, 
                 endOfTrackingEventSerializer, tagEventSerializer, orcLegDataEventSerializer,
                 orcCertificateAssignmentEventSerializer, orcScratchBoatEventSerializer,
-                orcUseImpliedWindFromOtherRaceEventSerializer);
+                orcUseImpliedWindFromOtherRaceEventSerializer, orcSetImpliedWindEventSerializer);
     }
 
     @Test
