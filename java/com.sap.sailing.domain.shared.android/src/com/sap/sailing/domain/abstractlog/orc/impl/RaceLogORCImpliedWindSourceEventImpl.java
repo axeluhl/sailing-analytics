@@ -5,24 +5,24 @@ import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventImpl;
-import com.sap.sailing.domain.abstractlog.orc.RaceLogORCUseImpliedWindFromOtherRaceEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventData;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventDataImpl;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sse.common.TimePoint;
 
-public class RaceLogORCUseImpliedWindFromOtherRaceEventImpl extends AbstractLogEventImpl<RaceLogEventVisitor> implements RaceLogORCUseImpliedWindFromOtherRaceEvent {
-    private static final long serialVersionUID = 3506411337361892600L;
+public class RaceLogORCImpliedWindSourceEventImpl extends AbstractLogEventImpl<RaceLogEventVisitor> implements RaceLogORCImpliedWindSourceEvent {
+    private static final long serialVersionUID = -792597085691551242L;
     private final RaceLogEventData raceLogEventData;
-    private final SimpleRaceLogIdentifier otherRace;
+    private final ImpliedWindSource impliedWindSource;
 
-    public RaceLogORCUseImpliedWindFromOtherRaceEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
-            AbstractLogEventAuthor author, Serializable pId, int passId, SimpleRaceLogIdentifier otherRace) {
+    public RaceLogORCImpliedWindSourceEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Serializable pId, int passId, ImpliedWindSource impliedWindSource) {
         super(createdAt, logicalTimePoint, author, pId);
         this.raceLogEventData = new RaceLogEventDataImpl(/* involvedBoats */ null, passId);
-        this.otherRace = otherRace;
+        this.impliedWindSource = impliedWindSource;
     }
     
     @Override
@@ -41,12 +41,12 @@ public class RaceLogORCUseImpliedWindFromOtherRaceEventImpl extends AbstractLogE
     }
 
     @Override
-    public SimpleRaceLogIdentifier getOtherRace() {
-        return otherRace;
+    public ImpliedWindSource getImpliedWindSource() {
+        return impliedWindSource;
     }
 
     @Override
     public String getShortInfo() {
-        return "Using implied wind from race "+getOtherRace();
+        return "Using implied wind  "+getImpliedWindSource();
     }
 }

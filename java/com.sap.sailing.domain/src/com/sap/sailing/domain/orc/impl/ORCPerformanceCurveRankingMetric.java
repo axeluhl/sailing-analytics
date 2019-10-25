@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.orc.impl;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,13 +23,12 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 
 /**
- * As opposed to before 2015 when implied wind was the only ranking criterion at all times, in 2015
- * it was decided to rank based on corrected times, and corrected times shall be computed not by mapping
- * each boat's implied wind to the performance curve of a scratch boat, but instead map the implied
- * wind of the boat with the greatest implied wind onto each other boat's performance curve to obtain
- * their time allowance for the course they sailed so far and then compare with their actual elapsed
- * time. Note that for boats other than the one with the greatest implied wind this can lead to a ranking
- * that is inconsistent with an ordering by implied wind.
+ * As opposed to before 2015 when implied wind was the only ranking criterion at all times, in 2015 it was decided to
+ * rank based on corrected times, and corrected times shall be computed not by mapping each boat's implied wind to the
+ * performance curve of a scratch boat, but instead map the implied wind of the boat with the greatest implied wind onto
+ * each other boat's performance curve to obtain their time allowance for the course they sailed so far and then compare
+ * with their actual elapsed time. Note that for boats other than the one with the greatest implied wind this can lead
+ * to a ranking that is inconsistent with an ordering by implied wind.
  */
 public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpliedWindRankingMetric {
     private static final Logger logger = Logger.getLogger(ORCPerformanceCurveRankingMetric.class.getName());
@@ -240,19 +238,5 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
             competitorDelta = null;
         }
         return competitorDelta;
-    }
-
-    /**
-     * Computes the implied wind speed to use for calculating each competitor's time allowance at {@code timePoint}. The default
-     * is to compute all competitors' implied wind at {@code timePoint} and find the maximum of those implied wind values. This
-     * may be overridden by adding a {@link RaceLogORCPerformanceCurveImpliedWindEvent} to the race log which can either specify
-     * an absolute wind speed to use, or it can specify another race whose implied wind value at {@code timePoint} is to be used
-     * instead. This can be useful, e.g., if one race features only a sub-group of another race's competitors, but the sub-group's
-     * implied wind value is to be obtained from the overall race's implied wind maximum.
-     */
-    private Speed getReferenceImpliedWind(TimePoint timePoint,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return Collections.max(getImpliedWindByCompetitor(timePoint, cache).values(),
-                Comparator.nullsFirst(Comparator.naturalOrder()));
     }
 }

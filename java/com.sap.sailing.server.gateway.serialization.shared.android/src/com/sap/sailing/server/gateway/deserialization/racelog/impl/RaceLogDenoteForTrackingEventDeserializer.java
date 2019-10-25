@@ -18,9 +18,9 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogDenoteFo
 import com.sap.sse.common.TimePoint;
 
 public class RaceLogDenoteForTrackingEventDeserializer extends BaseRaceLogEventDeserializer {	
-    private final SharedDomainFactory domainFactory;
+    private final SharedDomainFactory<?> domainFactory;
     public RaceLogDenoteForTrackingEventDeserializer(JsonDeserializer<DynamicCompetitor> competitorDeserializer,
-            SharedDomainFactory factory) {
+            SharedDomainFactory<?> factory) {
         super(competitorDeserializer);
         this.domainFactory = factory;
     }

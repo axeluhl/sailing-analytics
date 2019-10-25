@@ -1,10 +1,9 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
-import com.sap.sailing.domain.abstractlog.orc.RaceLogORCSetImpliedWindEvent;
-import com.sap.sailing.domain.abstractlog.orc.RaceLogORCUseImpliedWindFromOtherRaceEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
@@ -166,12 +165,7 @@ public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisit
     }
 
     @Override
-    public void visit(RaceLogORCUseImpliedWindFromOtherRaceEvent event) {
-        notifyListenerAboutEventAdded(event);
-    }
-
-    @Override
-    public void visit(RaceLogORCSetImpliedWindEvent event) {
+    public void visit(RaceLogORCImpliedWindSourceEvent event) {
         notifyListenerAboutEventAdded(event);
     }
 }

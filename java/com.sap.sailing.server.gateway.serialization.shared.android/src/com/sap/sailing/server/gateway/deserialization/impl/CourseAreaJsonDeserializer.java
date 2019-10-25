@@ -14,9 +14,9 @@ import com.sap.sse.util.impl.UUIDHelper;
 
 public class CourseAreaJsonDeserializer implements JsonDeserializer<CourseArea> {
 
-    private SharedDomainFactory factory;
+    private SharedDomainFactory<?> factory;
 
-    public CourseAreaJsonDeserializer(SharedDomainFactory factory) {
+    public CourseAreaJsonDeserializer(SharedDomainFactory<?> factory) {
         this.factory = factory;
     }
 

@@ -16,7 +16,7 @@ public class CompetitorAndBoatJsonDeserializer implements JsonDeserializer<Pair<
     private final JsonDeserializer<DynamicCompetitor> competitorDeserializer;
     private final JsonDeserializer<DynamicBoat> boatDeserializer;
     
-    public static CompetitorAndBoatJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
+    public static CompetitorAndBoatJsonDeserializer create(SharedDomainFactory<?> baseDomainFactory) {
         return new CompetitorAndBoatJsonDeserializer(CompetitorJsonDeserializer.create(baseDomainFactory), BoatJsonDeserializer.create(baseDomainFactory));
     }
 

@@ -118,7 +118,7 @@ public interface RaceLogTrackingAdapter {
      * race logs. The {@link Mark}s and {@link ControlPoint}s are reused and not duplicated.
      * @param priority TODO
      */
-    void copyCourse(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs, SharedDomainFactory baseDomainFactory,
+    void copyCourse(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs, SharedDomainFactory<?> baseDomainFactory,
             RacingEventService service, int priority);
 
     void copyCompetitors(RaceColumn fromRaceColumn, Fleet fromFleet, Iterable<Pair<RaceColumn, Fleet>> toRaces);

@@ -49,7 +49,7 @@ public class RaceLogWindFixEventSerializerTest {
     
     @Before
     public void setUp() {
-        SharedDomainFactory factory = DomainFactory.INSTANCE;
+        SharedDomainFactory<?> factory = DomainFactory.INSTANCE;
         serializer = new RaceLogWindFixEventSerializer(new CompetitorJsonSerializer(new TeamJsonSerializer(
                 new PersonJsonSerializer(new NationalityJsonSerializer())), new BoatJsonSerializer(new BoatClassJsonSerializer()), /* serializeNonPublicFields */ false), new WindJsonSerializer(
                 new PositionJsonSerializer()));

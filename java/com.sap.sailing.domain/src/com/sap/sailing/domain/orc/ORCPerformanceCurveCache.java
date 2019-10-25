@@ -56,7 +56,6 @@ public interface ORCPerformanceCurveCache {
      * {@code timePoint}, and the difference is returned. Note that this difference could be negative, e.g., in case
      * the implied wind calculation was capped at 20 knots, but the boat sailed faster in an actual 25 knots breeze,
      * therefore having an elapsed time that is shorter than the allowance at 20 knots.
-     * @param raceContext TODO
      */
     Duration getRelativeCorrectedTime(Competitor competitor, TrackedRace raceContext,
             TimePoint timePoint, BiFunction<Competitor, TimePoint, Duration> relativeCorrectedTimeSupplier);

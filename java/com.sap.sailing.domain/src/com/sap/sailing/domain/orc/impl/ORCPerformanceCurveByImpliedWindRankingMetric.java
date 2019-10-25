@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +23,8 @@ import org.apache.commons.math.MaxIterationsExceededException;
 import com.sap.sailing.domain.abstractlog.orc.ORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentFinder;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceFinder;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataAnalyzer;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
@@ -32,7 +35,9 @@ import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
@@ -42,11 +47,17 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.RankingMetrics;
+import com.sap.sailing.domain.common.orc.FixedSpeedImpliedWind;
+import com.sap.sailing.domain.common.orc.ImpliedWindSource;
+import com.sap.sailing.domain.common.orc.ImpliedWindSourceVisitor;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
+import com.sap.sailing.domain.common.orc.OtherRaceAsImpliedWindSource;
+import com.sap.sailing.domain.common.orc.OwnMaxImpliedWind;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveCourseImpl;
+import com.sap.sailing.domain.common.orc.impl.OwnMaxImpliedWindImpl;
 import com.sap.sailing.domain.orc.ORCPerformanceCurve;
 import com.sap.sailing.domain.ranking.AbstractRankingMetric;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -93,6 +104,13 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
      */
     private Competitor explicitScratchBoat;
     
+    /**
+     * Tells where this ranking metric will obtain its overall implied wind from. This is not so much of interest
+     * for the ranking strategy implemented in this class, but it is relevant for subclasses that require an overall
+     * implied wind setting for the race.
+     */
+    private ImpliedWindSource impliedWindSource;
+    
     private class ORCPerformanceCurveRankingInfo extends AbstractRankingInfoWithCompetitorRankingInfoCache {
         private static final long serialVersionUID = -3578498778702139675L;
         
@@ -111,6 +129,7 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
         initializeListeners();
         updateCertificatesFromLogs();
         updateCourseFromRaceLogs();
+        updateImpliedWindSource();
     }
 
     @Override
@@ -207,6 +226,11 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
             }
 
             @Override
+            public void visit(RaceLogORCImpliedWindSourceEvent event) {
+                updateImpliedWindSource();
+            }
+
+            @Override
             public void visit(RaceLogRevokeEvent event) {
                 if (event.getRevokedEventType().equals(RaceLogORCLegDataEventImpl.class.getName())) {
                     updateCourseFromRaceLogs();
@@ -244,6 +268,25 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
             }
         }
         explicitScratchBoat = scratchBoatFromLog;
+    }
+    
+    private void updateImpliedWindSource() {
+        ImpliedWindSource newImpliedWindSource = null;
+        for (final RaceLog raceLog : getTrackedRace().getAttachedRaceLogs()) {
+            newImpliedWindSource = new RaceLogORCImpliedWindSourceFinder(raceLog).analyze();
+            if (newImpliedWindSource != null) {
+                break;
+            }
+        }
+        if (newImpliedWindSource != null) {
+            impliedWindSource = newImpliedWindSource;
+        } else {
+            impliedWindSource = new OwnMaxImpliedWindImpl();
+        }
+    }
+    
+    protected ImpliedWindSource getImpliedWindSource() {
+        return impliedWindSource;
     }
 
     /**
@@ -709,5 +752,78 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
         final int zeroBasedLegIndex = trackedLeg.getLeg().getZeroBasedIndexOfStartWaypoint();
         final ORCPerformanceCurveLeg orcLeg = Util.get(getTotalCourse().getLegs(), zeroBasedLegIndex);
         return ORCPerformanceCurveLegTypes.getLegType(orcLeg.getType());
+    }
+
+    /**
+     * Computes the implied wind speed to use for calculating each competitor's time allowance at {@code timePoint}.
+     * Fetches the {@link #getImpliedWindSource() source for determining the implied wind} and applies a
+     * {@link ImpliedWindSourceVisitor visitor pattern}. The implied wind source is updated based on race log events
+     * of type {@link RaceLogORCImpliedWindSourceEvent}.
+     */
+    @Override
+    public Speed getReferenceImpliedWind(final TimePoint timePoint,
+            final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        // The ImpliedWindSourceVisitor interface is implemented here; this ranking metric implements the different
+        // strategies to obtain the reference implied
+        // wind based on the strategy/source indicated by the visiting ImpliedWindSource object.
+        return getImpliedWindSource().accept(new ImpliedWindSourceVisitor<Speed>() {
+            /**
+             * The fixed wind speed from the implied wind source event is returned unchanged.
+             */
+            @Override
+            public Speed visit(FixedSpeedImpliedWind impliedWindSource) {
+                return impliedWindSource.getFixedImpliedWindSpeed();
+            }
+            
+            /**
+             * The default strategy: use the maximum implied wind obtained for all race competitors' progress at
+             * {@code timePoint}.
+             */
+            @Override
+            public Speed visit(OwnMaxImpliedWind impliedWindSource) {
+                return Collections.max(getImpliedWindByCompetitor(timePoint, cache).values(),
+                        Comparator.nullsFirst(Comparator.naturalOrder()));
+            }
+
+            /**
+             * The implied wind to use comes from another race, identified by the triple of
+             * leaderboard name, race column name and fleet name. This uniquely identifies
+             * a {@link RaceLog}, and there may be a {@link TrackedRace} attached to the slot
+             * identified this way. In case a {@link TrackedRace} is found in that slot, it is
+             * asked for its {@link TrackedRace#getReferenceImpliedWind reference implied wind} which
+             * it is expected to delegate to its ranking metric. If no {@link TrackedRace} is found
+             * in the slot, still that other {@link RaceLog} may contain a definition of an
+             * implied wind source for its race which can be evaluated, unless it requests using
+             * the own maximum implied wind which without a tracked race cannot be determined in which
+             * case {@code null} will be returned.
+             */
+            @Override
+            public Speed visit(OtherRaceAsImpliedWindSource impliedWindSource) {
+                final SimpleRaceLogIdentifier raceLogIdentifier = new SimpleRaceLogIdentifierImpl(
+                        impliedWindSource.getLeaderboardAndRaceColumnAndFleetOfDefiningRace().getA(),
+                        impliedWindSource.getLeaderboardAndRaceColumnAndFleetOfDefiningRace().getB(),
+                        impliedWindSource.getLeaderboardAndRaceColumnAndFleetOfDefiningRace().getC());
+                final TrackedRace otherTrackedRace = getTrackedRace().getRaceLogResolver().resolveTrackedRace(raceLogIdentifier);
+                final Speed result;
+                if (otherTrackedRace == null) {
+                    // check race log:
+                    final RaceLog raceLog = getTrackedRace().getRaceLogResolver().resolve(raceLogIdentifier);
+                    if (raceLog != null) {
+                        final ImpliedWindSource otherRaceImpliedWindSource = new RaceLogORCImpliedWindSourceFinder(raceLog).analyze();
+                        if (otherRaceImpliedWindSource != null) {
+                            result = otherRaceImpliedWindSource.accept(new ImpliedWindRetrieverWithNoTrackedRace(timePoint, cache,
+                                    getTrackedRace().getRaceLogResolver()));
+                        } else {
+                            result = null;
+                        }
+                    } else {
+                        result = null;
+                    }
+                } else {
+                    result = otherTrackedRace.getReferenceImpliedWind(timePoint, cache);
+                }
+                return result;
+            }
+        });
     }
 }

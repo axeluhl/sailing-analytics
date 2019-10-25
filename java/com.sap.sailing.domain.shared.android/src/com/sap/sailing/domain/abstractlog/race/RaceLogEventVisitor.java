@@ -1,10 +1,9 @@
 package com.sap.sailing.domain.abstractlog.race;
 
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
-import com.sap.sailing.domain.abstractlog.orc.RaceLogORCSetImpliedWindEvent;
-import com.sap.sailing.domain.abstractlog.orc.RaceLogORCUseImpliedWindFromOtherRaceEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
@@ -66,7 +65,5 @@ public interface RaceLogEventVisitor {
     
     void visit(RaceLogORCScratchBoatEvent event);
 
-    void visit(RaceLogORCUseImpliedWindFromOtherRaceEvent event);
-    
-    void visit(RaceLogORCSetImpliedWindEvent event);
+    void visit(RaceLogORCImpliedWindSourceEvent event);
 }

@@ -16,7 +16,6 @@ import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -38,6 +37,7 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
@@ -149,7 +149,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
     
     private final boolean useInternalMarkPassingAlgorithm;
     
-    private final RaceLogResolver raceLogResolver;
+    private final RaceLogAndTrackedRaceResolver raceLogResolver;
 
     private final String raceName;
     
@@ -183,7 +183,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
      */
     public SwissTimingReplayToDomainAdapter(Regatta regatta, String raceName, String raceIdForRaceDefinition,
             BoatClass boatClass, DomainFactory domainFactory,
-            TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm, RaceLogResolver raceLogResolver,
+            TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm, RaceLogAndTrackedRaceResolver raceLogResolver,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, TrackerConstructor trackerConstructor,
             RaceTrackingHandler raceTrackingHandler) {
         this.tracker = trackerConstructor == null ? null : trackerConstructor.createTracker(this);

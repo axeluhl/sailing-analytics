@@ -28,10 +28,9 @@ import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
-import com.sap.sailing.domain.abstractlog.orc.RaceLogORCSetImpliedWindEvent;
-import com.sap.sailing.domain.abstractlog.orc.RaceLogORCUseImpliedWindFromOtherRaceEvent;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
@@ -133,6 +132,7 @@ import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerialize
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorWithBoatRefJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.ImpliedWindSourceSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.ORCCertificateJsonSerializer;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
@@ -1026,35 +1026,25 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogORCUseImpliedWindFromOtherRaceEvent event) {
+    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogORCImpliedWindSourceEvent event) {
         Document result = new Document();
         storeRaceLogIdentifier(raceLogIdentifier, result);
-        result.put(FieldNames.RACE_LOG_EVENT.name(), storeORCUseImpliedWindFromOtherRaceEvent(event));
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeORCImpliedWindSourceEvent(event));
         return result;
     }
     
-    private Document storeORCUseImpliedWindFromOtherRaceEvent(RaceLogORCUseImpliedWindFromOtherRaceEvent event) {
+    private Document storeORCImpliedWindSourceEvent(RaceLogORCImpliedWindSourceEvent event) {
         final Document result = new Document();
         storeRaceLogEventProperties(event, result);
-        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCUseImpliedWindFromOtherRaceEvent.class.getSimpleName());
-        final Document otherRaceIdentifier = new Document();
-        storeRaceLogIdentifier(event.getOtherRace(), otherRaceIdentifier);
-        result.put(FieldNames.ORC_OTHER_RACE_IDENTIFIER.name(), otherRaceIdentifier);
-        return result;
-    }
-    
-    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogORCSetImpliedWindEvent event) {
-        Document result = new Document();
-        storeRaceLogIdentifier(raceLogIdentifier, result);
-        result.put(FieldNames.RACE_LOG_EVENT.name(), storeORCSetImpliedWindEvent(event));
-        return result;
-    }
-    
-    private Document storeORCSetImpliedWindEvent(RaceLogORCSetImpliedWindEvent event) {
-        final Document result = new Document();
-        storeRaceLogEventProperties(event, result);
-        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCSetImpliedWindEvent.class.getSimpleName());
-        result.put(FieldNames.ORC_IMPLIED_WIND_SPEED_IN_KNOTS.name(), event.getImpliedWindSpeed() == null ? null : event.getImpliedWindSpeed().getKnots());
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCImpliedWindSourceEvent.class.getSimpleName());
+        final Document impliedWindSourceDocument;
+        if (event.getImpliedWindSource() == null) {
+            impliedWindSourceDocument = null;
+        } else {
+            final JSONObject jsonSerializedImpliedWindSource = new ImpliedWindSourceSerializer().serialize(event.getImpliedWindSource());
+            impliedWindSourceDocument = Document.parse(jsonSerializedImpliedWindSource.toString());
+        }
+        result.put(FieldNames.ORC_IMPLIED_WIND_SOURCE.name(), impliedWindSourceDocument);
         return result;
     }
 

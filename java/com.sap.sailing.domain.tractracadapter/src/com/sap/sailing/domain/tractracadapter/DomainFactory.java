@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -29,6 +28,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
@@ -148,7 +148,7 @@ public interface DomainFactory {
      *            available but loses track of the wind, e.g., during server restarts.
      */
     TracTracRaceTracker createRaceTracker(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
-            WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
+            WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogAndTrackedRaceResolver raceLogResolver,
             LeaderboardGroupResolver leaderboardGroupResolver,
             RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
             RaceTrackingHandler raceTrackingHandler)
@@ -159,7 +159,7 @@ public interface DomainFactory {
      * only that a predefined {@link Regatta} is used to hold the resulting races.
      */
     RaceTracker createRaceTracker(Regatta regatta, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
-            WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
+            WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogAndTrackedRaceResolver raceLogResolver,
             LeaderboardGroupResolver leaderboardGroupResolver,
             RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
             RaceTrackingHandler raceTrackingHandler)
@@ -185,7 +185,7 @@ public interface DomainFactory {
      */
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, long delayToLiveInMillis,
             Simulator simulator, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry,
-            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, IRace tractracRace,
+            RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, IRace tractracRace,
             URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword,
             IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm, long timeoutInMilliseconds,
             RaceTrackingHandler raceTrackingHandler);
@@ -219,7 +219,7 @@ public interface DomainFactory {
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI, UUID tracTracEventUuid,
             String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings,
-            RaceLogResolver raceLogResolver, Consumer<DynamicTrackedRace> runBeforeExposingRace, IRace tractracRace,
+            RaceLogAndTrackedRaceResolver raceLogResolver, Consumer<DynamicTrackedRace> runBeforeExposingRace, IRace tractracRace,
             RaceTrackingHandler raceTrackingHandler);
 
     /**
@@ -237,7 +237,7 @@ public interface DomainFactory {
      */
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, IRace tractracRace, WindStore windStore,
             long delayToLiveInMillis, Simulator simulator, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, 
-            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, URI courseDesignUpdateURI, 
+            RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, URI courseDesignUpdateURI, 
             String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean ignoreTracTracMarkPassings, long timeoutInMilliseconds,
             RaceTrackingHandler raceTrackingHandler, ReceiverType... types);
 

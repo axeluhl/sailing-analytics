@@ -215,5 +215,4 @@ public class OneDesignRankingMetric extends NonPerformanceCurveRankingMetric {
             }
         };
     }
-    
 }
