@@ -23,7 +23,6 @@ public class RaceLogORCUseImpliedWindFromOtherRaceEventImpl extends AbstractLogE
         super(createdAt, logicalTimePoint, author, pId);
         this.raceLogEventData = new RaceLogEventDataImpl(/* involvedBoats */ null, passId);
         this.otherRace = otherRace;
-        
     }
     
     @Override

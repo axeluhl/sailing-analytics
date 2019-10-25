@@ -25,8 +25,10 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.race.InvalidatesLeaderboardCache;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -1181,7 +1183,15 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         return getCompetitorsFromBestToWorst(timePoint).indexOf(competitor) + 1;
     }
 
-    public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
+    protected void regattaLogEventAdded(RegattaLogEvent event) {
+        invalidateCacheIfEventSaysSo(event);
+    }
+    
+    protected void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
+        invalidateCacheIfEventSaysSo(event);
+    }
+
+    private void invalidateCacheIfEventSaysSo(AbstractLogEvent<?> event) {
         if (event instanceof InvalidatesLeaderboardCache) {
             // make sure to invalidate the cache as this event indicates that
             // it changes values the cache could still hold
