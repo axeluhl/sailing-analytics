@@ -272,10 +272,12 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
     
     private void updateImpliedWindSource() {
         ImpliedWindSource newImpliedWindSource = null;
-        for (final RaceLog raceLog : getTrackedRace().getAttachedRaceLogs()) {
-            newImpliedWindSource = new RaceLogORCImpliedWindSourceFinder(raceLog).analyze();
-            if (newImpliedWindSource != null) {
-                break;
+        if (getTrackedRace() != null) {
+            for (final RaceLog raceLog : getTrackedRace().getAttachedRaceLogs()) {
+                newImpliedWindSource = new RaceLogORCImpliedWindSourceFinder(raceLog).analyze();
+                if (newImpliedWindSource != null) {
+                    break;
+                }
             }
         }
         if (newImpliedWindSource != null) {
