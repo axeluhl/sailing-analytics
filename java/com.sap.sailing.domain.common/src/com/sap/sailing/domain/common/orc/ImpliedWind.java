@@ -29,6 +29,7 @@ import com.sap.sse.common.Timed;
  *
  */
 public interface ImpliedWind extends ImpliedWindSource, Serializable, Timed {
+    // TODO after refactoring ImpliedWindSource, re-define this interface... it will be used to transport the result of asking a race column/fleet slot for its implied wind to the client and vice versa
     /**
      * The effective speed that is used as implied wind for ranking purposes. If {@link #getFixedImpliedWindSpeed()} returns
      * a non-{@code null} object then that will be the result also of calling this method. Otherwise, if
