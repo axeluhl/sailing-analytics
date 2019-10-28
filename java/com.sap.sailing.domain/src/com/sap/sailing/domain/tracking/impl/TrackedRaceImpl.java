@@ -1184,10 +1184,25 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public boolean isLive(TimePoint at) {
+        Date timePoint = null;
+        if (at != null) {
+            timePoint = at.asDate();
+        } else {
+            if (startOfTracking != null) {
+                timePoint = startOfTracking.asDate();
+            } else if (startTime != null) {
+                timePoint = startTime.minus(TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS).plus(1).asDate();
+            }
+        }
+
         if (hasGPSData() && hasWindData()) {
-            Util.Pair<Date, Date> minMax = RaceTimesCalculationUtil.calculateRaceMinMax(at.asDate(),
-                    startOfTracking.asDate(), startTime.asDate(), finishingTime.asDate(), finishedTime.asDate(),
-                    endTime.asDate(), endOfTracking.asDate());
+            Util.Pair<Date, Date> minMax = RaceTimesCalculationUtil.calculateRaceMinMax(timePoint,
+                    startOfTracking != null ? startOfTracking.asDate() : null,
+                    startTime != null ? startTime.asDate() : null,
+                    finishingTime != null ? finishingTime.asDate() : null,
+                    finishedTime != null ? finishedTime.asDate() : null,
+                    endTime != null ? endTime.asDate() : null,
+                    endOfTracking != null ? endOfTracking.asDate() : null);
             Date min = minMax.getA() != null
                     ? new Date(minMax.getA().getTime() - TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS)
                     : null;

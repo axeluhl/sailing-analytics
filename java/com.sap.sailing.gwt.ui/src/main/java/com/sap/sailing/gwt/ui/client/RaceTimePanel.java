@@ -255,12 +255,12 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         // Assume we are live (no end known as of now)
         boolean beforeEnd = true;
         if (max != null) {
-            beforeEnd = timePoint.before(max);
+            beforeEnd = max.after(timePoint);
         }
 
         if (min != null) {
             // min < timePoint < max; max might be unknown as of now
-            return beforeEnd && timePoint.after(min);
+            return beforeEnd && min.before(timePoint);
         }
         return beforeEnd;
     }
