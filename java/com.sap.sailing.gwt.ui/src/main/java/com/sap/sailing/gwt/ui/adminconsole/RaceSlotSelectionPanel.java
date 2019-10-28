@@ -1,12 +1,16 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable.Resources;
+import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.ColumnSortList;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -18,6 +22,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
@@ -78,19 +83,61 @@ public class RaceSlotSelectionPanel extends HorizontalPanel {
                 return leaderboardTable;
             }
         };
+        ListHandler<StrippedLeaderboardDTOWithSecurity> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTOWithSecurity>(
+                filteredLeaderboardList.getList());
+        TextColumn<StrippedLeaderboardDTOWithSecurity> leaderboardNameColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
+            @Override
+            public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
+                return leaderboard.getName() != null ? leaderboard.getName() : "";
+            }
+        };
+        leaderboardNameColumn.setSortable(true);
+        leaderboardColumnListHandler.setComparator(leaderboardNameColumn, new Comparator<StrippedLeaderboardDTOWithSecurity>() {
+            @Override
+            public int compare(StrippedLeaderboardDTOWithSecurity o1, StrippedLeaderboardDTOWithSecurity o2) {
+                boolean ascending = isSortedAscending();
+                if (o1.getName().equals(o2.getName())) {
+                    return 0;
+                }
+                int val = -1;
+                val = (o1 != null && o2 != null && ascending) ? (o1.getName().compareTo(o2.getName()))
+                        : -(o2.getName().compareTo(o1.getName()));
+
+                return val;
+            }
+
+            private boolean isSortedAscending() {
+                ColumnSortList sortList = leaderboardTable.getColumnSortList();
+                return sortList.size() > 0 & sortList.get(0).isAscending();
+            }
+        });
+        TextColumn<StrippedLeaderboardDTOWithSecurity> leaderboardDisplayNameColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
+            @Override
+            public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
+                return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : "";
+            }
+        };
+        leaderboardDisplayNameColumn.setSortable(true);
+        leaderboardColumnListHandler.setComparator(leaderboardDisplayNameColumn,
+                new Comparator<StrippedLeaderboardDTOWithSecurity>() {
+                    @Override
+                    public int compare(StrippedLeaderboardDTOWithSecurity o1, StrippedLeaderboardDTOWithSecurity o2) {
+                        return new NaturalComparator().compare(o1.getDisplayName(), o2.getDisplayName());
+                    }
+                });
+        leaderboardTable.addColumnSortHandler(leaderboardColumnListHandler);
+        leaderboardTable.addColumn(leaderboardNameColumn, stringMessages.name());
+        leaderboardTable.addColumn(leaderboardDisplayNameColumn, stringMessages.displayName());
         filterLeaderboardPanel.getTextBox().ensureDebugId("LeaderboardsFilterInRaceSlotSelectionPanelTextBox");
         filterLeaderboardPanel.setUpdatePermissionFilterForCheckbox(
                 leaderboard -> userService.hasPermission(leaderboard, DefaultActions.UPDATE));
         filterLeaderboardPanel.filter();
         leaderboardTable.ensureDebugId("AvailableLeaderboardsInRaceSlotSelectionPanelTable");
-        leaderboardTable.asWidget().setWidth("50%");
-        leaderboardTable.asWidget().setHeight("100%");
         filteredLeaderboardList.addDataDisplay(leaderboardTable);
         leaderboardSelectionModel.addSelectionChangeHandler(e->updateRaceColumnTableAfterLeaderboardSelectionChange());
         raceColumnTable = new RaceTableWrapper<RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
                 sailingService, stringMessages, errorReporter, multiSelection);
         raceColumnTable.asWidget().ensureDebugId("RaceColumnInRaceSlotSelectionPanelTable");
-        raceColumnTable.asWidget().setWidth("50%");
         final Grid leaderboardGrid = new Grid(2, 1);
         leaderboardGrid.setWidget(0, 0, filterLeaderboardPanel);
         leaderboardGrid.setWidget(1, 0, leaderboardTable);
