@@ -221,7 +221,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public int getRank(Competitor competitor, TimePoint timePoint) {
+    public int getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return competitorsFromBestToWorst.indexOf(competitor) + 1;
     }
 

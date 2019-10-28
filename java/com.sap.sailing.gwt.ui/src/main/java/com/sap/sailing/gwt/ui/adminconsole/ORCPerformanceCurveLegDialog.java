@@ -80,7 +80,7 @@ public class ORCPerformanceCurveLegDialog extends DataEntryDialog<ORCPerformance
     
     private void fetchTrackingBasedDistanceAndTwa() {
         final int zeroBasedLegIndex = waypointList.getList().indexOf(forLegEndingAt)-1;
-        legGeometrySupplier.getLegGeometry(new int[] { zeroBasedLegIndex },
+        legGeometrySupplier.getLegGeometry(new int[] { zeroBasedLegIndex }, new ORCPerformanceCurveLegTypes[] { getSelectedLegType() },
                 new AsyncCallback<ORCPerformanceCurveLegImpl[]>() {
                     @Override
                     public void onFailure(Throwable caught) {

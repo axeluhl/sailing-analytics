@@ -752,35 +752,36 @@ public class WindPanel extends FormPanel implements RegattasDisplayer {
         List<String> windSourceTypeNames = new ArrayList<String>();
         windSourceTypeNames.add(WindSourceType.COMBINED.name());
         addWindFixButton.setVisible(userPermission.test(race));
-        sailingService.getAveragedWindInfo(raceIdentifier, race.startOfRace, 30000L, 100, windSourceTypeNames,
-                /* onlyUpToNewestEvent==true means to only use data "based on facts" */ true, /* includeCombinedWindForAllLegMiddles */ false, new AsyncCallback<WindInfoForRaceDTO>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-            }
-
-            @Override
-            public void onSuccess(WindInfoForRaceDTO result) {
-                windFixPanel.clear();
-                for (WindSourceType input : new WindSourceType[] { WindSourceType.COMBINED }) {
-                    windFixPanel.add(new HTML("&nbsp;"));
-                    windFixPanel.add(new Label(stringMessages.windFixListingDescription() + " " + input.name()));
-                    WindTrackInfoDTO windTrackInfo = result.windTrackInfoByWindSource.get(new WindSourceImpl(input));
-                    if (windTrackInfo != null && windTrackInfo.windFixes.size() >= 7) {
-                        NumberFormat formatter = NumberFormat.getFormat(".##");
-                        for (WindDTO windFix : windTrackInfo.windFixes.subList(0, 3)) {
-                            windFixPanel.add(new Label("" + formatter.format(windFix.trueWindFromDeg) + " (deg) " + formatter.format(windFix.trueWindSpeedInKnots) + " (kt) " + formatter.format(windFix.position.getLatDeg()) + " (lat) " + formatter.format(windFix.position.getLngDeg()) + " (lng) " + new Date(windFix.measureTimepoint)));
+        if (race.startOfRace != null) {
+            sailingService.getAveragedWindInfo(raceIdentifier, race.startOfRace, 30000L, 100, windSourceTypeNames,
+                    /* onlyUpToNewestEvent==true means to only use data "based on facts" */ true, /* includeCombinedWindForAllLegMiddles */ false, new AsyncCallback<WindInfoForRaceDTO>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                }
+    
+                @Override
+                public void onSuccess(WindInfoForRaceDTO result) {
+                    windFixPanel.clear();
+                    for (WindSourceType input : new WindSourceType[] { WindSourceType.COMBINED }) {
+                        windFixPanel.add(new HTML("&nbsp;"));
+                        windFixPanel.add(new Label(stringMessages.windFixListingDescription() + " " + input.name()));
+                        WindTrackInfoDTO windTrackInfo = result.windTrackInfoByWindSource.get(new WindSourceImpl(input));
+                        if (windTrackInfo != null && windTrackInfo.windFixes.size() >= 7) {
+                            NumberFormat formatter = NumberFormat.getFormat(".##");
+                            for (WindDTO windFix : windTrackInfo.windFixes.subList(0, 3)) {
+                                windFixPanel.add(new Label("" + formatter.format(windFix.trueWindFromDeg) + " (deg) " + formatter.format(windFix.trueWindSpeedInKnots) + " (kt) " + formatter.format(windFix.position.getLatDeg()) + " (lat) " + formatter.format(windFix.position.getLngDeg()) + " (lng) " + new Date(windFix.measureTimepoint)));
+                            }
+                            // These fixes must not necessarily be the real last ones. This especially holds for long races.
+                            for (WindDTO windFix : windTrackInfo.windFixes.subList(windTrackInfo.windFixes.size() - 4, windTrackInfo.windFixes.size() - 1)) {
+                                windFixPanel.add(new Label("" + formatter.format(windFix.trueWindFromDeg) + " (deg) " + formatter.format(windFix.trueWindSpeedInKnots) + " (kt) " + formatter.format(windFix.position.getLatDeg()) + " (lat) " + formatter.format(windFix.position.getLngDeg()) + " (lng) " + new Date(windFix.measureTimepoint)));
+                            }
+                        } else {
+                            windFixPanel.add(new Label(stringMessages.noWindFixesAvailable()));
                         }
-                        // These fixes must not necessarily be the real last ones. This especially holds for long races.
-                        for (WindDTO windFix : windTrackInfo.windFixes.subList(windTrackInfo.windFixes.size() - 4, windTrackInfo.windFixes.size() - 1)) {
-                            windFixPanel.add(new Label("" + formatter.format(windFix.trueWindFromDeg) + " (deg) " + formatter.format(windFix.trueWindSpeedInKnots) + " (kt) " + formatter.format(windFix.position.getLatDeg()) + " (lat) " + formatter.format(windFix.position.getLngDeg()) + " (lng) " + new Date(windFix.measureTimepoint)));
-                        }
-                    } else {
-                        windFixPanel.add(new Label(stringMessages.noWindFixesAvailable()));
                     }
                 }
-            }
-        });
+            });
+        }
     }
 
     private void updateWindDisplay() {

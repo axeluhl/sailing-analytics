@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.common.orc;
 
+import java.io.Serializable;
+
 import com.sap.sse.common.Distance;
 
 /**
@@ -12,7 +14,7 @@ import com.sap.sse.common.Distance;
  * @author Daniel Lisunkin (i505543)
  *
  */
-public interface ORCPerformanceCurveCourse {
+public interface ORCPerformanceCurveCourse extends Serializable {
 
     /**
      * @return {@link Iterable} object containing all {@link ORCPerformanceCurveLeg}s of an implementing instance of

@@ -88,9 +88,13 @@ import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentFin
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataAnalyzer;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEventFinder;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatAnalyzer;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatFinder;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentFinder;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCScratchBoatEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RegattaLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
@@ -1278,12 +1282,16 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), r.getName());
             TrackedRace trackedRace = getService().getExistingTrackedRace(raceIdentifier);
             TrackedRaceDTO trackedRaceDTO = null; 
+            final RankingMetrics rankingMetricType;
             if (trackedRace != null) {
                 trackedRaceDTO = getBaseDomainFactory().createTrackedRaceDTO(trackedRace);
+                rankingMetricType = trackedRace.getRankingMetric().getType();
+            } else {
+                rankingMetricType = null;
             }
             Map<CompetitorDTO, BoatDTO> competitorAndBoatDTOs = baseDomainFactory.convertToCompetitorAndBoatDTOs(r.getCompetitorsAndTheirBoats());
             RaceWithCompetitorsAndBoatsDTO raceDTO = new RaceWithCompetitorsAndBoatsDTO(raceIdentifier, competitorAndBoatDTOs,
-                    trackedRaceDTO, getService().isRaceBeingTracked(regatta, r));
+                    trackedRaceDTO, getService().isRaceBeingTracked(regatta, r), rankingMetricType);
             if (trackedRace != null) {
                 SecurityDTOUtil.addSecurityInformation(getSecurityService(), raceDTO, trackedRace.getIdentifier());
                 getBaseDomainFactory().updateRaceDTOWithTrackedRaceData(trackedRace, raceDTO);
@@ -1993,7 +2001,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                             .convertToCompetitorAndBoatDTOs(race.getCompetitorsAndTheirBoats());
                     TrackedRaceDTO trackedRaceDTO = getBaseDomainFactory().createTrackedRaceDTO(trackedRace);
                     raceDTO = new RaceWithCompetitorsAndBoatsDTO(raceIdentifier, competitorsAndBoats, trackedRaceDTO,
-                            getService().isRaceBeingTracked(regatta, race));
+                            getService().isRaceBeingTracked(regatta, race), trackedRace.getRankingMetric().getType());
                     if (trackedRace != null) {
                         getBaseDomainFactory().updateRaceDTOWithTrackedRaceData(trackedRace, raceDTO);
                     }
@@ -3505,15 +3513,15 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 break;
             case LEG_GAP_TO_LEADER_IN_SECONDS:
                 if (trackedLeg != null) {
-                    final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
+                    final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
                     final Duration gapToLeaderInOwnTime = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, competitor, cache);
                     result = gapToLeaderInOwnTime == null ? null : gapToLeaderInOwnTime.asSeconds();
                 }
                 break;
             case CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
                 if (trackedLeg != null) {
-                    final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
-                    Distance distanceToLeader = trackedLeg.getWindwardDistanceToCompetitorFarthestAhead(timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo);
+                    final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
+                    Distance distanceToLeader = trackedLeg.getWindwardDistanceToCompetitorFarthestAhead(timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
                     result = (distanceToLeader == null) ? null : distanceToLeader.getMeters();
                 }
                 break;
@@ -3854,60 +3862,57 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             Map<CompetitorDTO, FutureTask<CompetitorRaceDataDTO>> resultFutures = new HashMap<>();
             for (final CompetitorDTO competitorDTO : competitors) {
                 FutureTask<CompetitorRaceDataDTO> future = new FutureTask<CompetitorRaceDataDTO>(new Callable<CompetitorRaceDataDTO>() {
-                            @Override
-                            public CompetitorRaceDataDTO call() throws NoWindException {
-                                Competitor competitor = getCompetitorByIdAsString(trackedRace.getRace().getCompetitors(),
-                                        competitorDTO.getIdAsString());
-                                ArrayList<com.sap.sse.common.Util.Triple<String, Date, Double>> markPassingsData = new ArrayList<com.sap.sse.common.Util.Triple<String, Date, Double>>();
-                                ArrayList<com.sap.sse.common.Util.Pair<Date, Double>> raceData = new ArrayList<com.sap.sse.common.Util.Pair<Date, Double>>();
-                                // Filling the mark passings
-                                Set<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
-                                if (competitorMarkPassings != null) {
-                                    trackedRace.lockForRead(competitorMarkPassings);
-                                    try {
-                                        for (MarkPassing markPassing : competitorMarkPassings) {
-                                            MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
-                                            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = cachesByTimePoint.get(time);
-                                            if (cache == null) {
-                                                cache = new LeaderboardDTOCalculationReuseCache(time);
-                                                cachesByTimePoint.put(time, cache);
-                                            }
-                                            Double competitorMarkPassingsData = getCompetitorRaceDataEntry(detailType,
-                                                    trackedRace, competitor, time, leaderboardGroupName, leaderboardName, cache);
-                                            if (competitorMarkPassingsData != null) {
-                                                markPassingsData.add(new com.sap.sse.common.Util.Triple<String, Date, Double>(markPassing
-                                                        .getWaypoint().getName(), time.asDate(), competitorMarkPassingsData));
-                                            }
-                                        }
-                                    } finally {
-                                        trackedRace.unlockAfterRead(competitorMarkPassings);
+                    @Override
+                    public CompetitorRaceDataDTO call() throws NoWindException {
+                        Competitor competitor = getCompetitorByIdAsString(trackedRace.getRace().getCompetitors(),
+                                competitorDTO.getIdAsString());
+                        ArrayList<com.sap.sse.common.Util.Triple<String, Date, Double>> markPassingsData = new ArrayList<com.sap.sse.common.Util.Triple<String, Date, Double>>();
+                        ArrayList<com.sap.sse.common.Util.Pair<Date, Double>> raceData = new ArrayList<com.sap.sse.common.Util.Pair<Date, Double>>();
+                        // Filling the mark passings
+                        Set<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
+                        if (competitorMarkPassings != null) {
+                            trackedRace.lockForRead(competitorMarkPassings);
+                            try {
+                                for (MarkPassing markPassing : competitorMarkPassings) {
+                                    MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
+                                    WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = cachesByTimePoint
+                                            .computeIfAbsent(time, LeaderboardDTOCalculationReuseCache::new);
+                                    Double competitorMarkPassingsData = getCompetitorRaceDataEntry(detailType,
+                                            trackedRace, competitor, time, leaderboardGroupName, leaderboardName, cache);
+                                    if (competitorMarkPassingsData != null) {
+                                        markPassingsData.add(new com.sap.sse.common.Util.Triple<String, Date, Double>(markPassing
+                                                .getWaypoint().getName(), time.asDate(), competitorMarkPassingsData));
                                     }
                                 }
-                                if (startTime != null && endTime != null) {
-                                    for (long i = startTime.asMillis(); i <= endTime.asMillis(); i += adjustedStepSizeInMillis) {
-                                        MillisecondsTimePoint time = new MillisecondsTimePoint(i);
-                                        WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = cachesByTimePoint.get(time);
-                                        if (cache == null) {
-                                            cache = new LeaderboardDTOCalculationReuseCache(time);
-                                            if (cachesByTimePoint.size() >= MAX_CACHE_SIZE) {
-                                                final Iterator<Entry<TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache>> iterator = cachesByTimePoint.entrySet().iterator();
-                                                while (cachesByTimePoint.size() >= MAX_CACHE_SIZE && iterator.hasNext()) {
-                                                    iterator.next();
-                                                    iterator.remove();
-                                                }
-                                            }
-                                            cachesByTimePoint.put(time, cache);
-                                        }
-                                        Double competitorRaceData = getCompetitorRaceDataEntry(detailType, trackedRace,
-                                                competitor, time, leaderboardGroupName, leaderboardName, cache);
-                                        if (competitorRaceData != null) {
-                                            raceData.add(new com.sap.sse.common.Util.Pair<Date, Double>(time.asDate(), competitorRaceData));
-                                        }
-                                    }
-                                }
-                                return new CompetitorRaceDataDTO(competitorDTO, detailType, markPassingsData, raceData);
+                            } finally {
+                                trackedRace.unlockAfterRead(competitorMarkPassings);
                             }
-                        });
+                        }
+                        if (startTime != null && endTime != null) {
+                            for (long i = startTime.asMillis(); i <= endTime.asMillis(); i += adjustedStepSizeInMillis) {
+                                MillisecondsTimePoint time = new MillisecondsTimePoint(i);
+                                WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = cachesByTimePoint.get(time);
+                                if (cache == null) {
+                                    cache = new LeaderboardDTOCalculationReuseCache(time);
+                                    if (cachesByTimePoint.size() >= MAX_CACHE_SIZE) {
+                                        final Iterator<Entry<TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache>> iterator = cachesByTimePoint.entrySet().iterator();
+                                        while (cachesByTimePoint.size() >= MAX_CACHE_SIZE && iterator.hasNext()) {
+                                            iterator.next();
+                                            iterator.remove();
+                                        }
+                                    }
+                                    cachesByTimePoint.put(time, cache);
+                                }
+                                Double competitorRaceData = getCompetitorRaceDataEntry(detailType, trackedRace,
+                                        competitor, time, leaderboardGroupName, leaderboardName, cache);
+                                if (competitorRaceData != null) {
+                                    raceData.add(new com.sap.sse.common.Util.Pair<Date, Double>(time.asDate(), competitorRaceData));
+                                }
+                            }
+                        }
+                        return new CompetitorRaceDataDTO(competitorDTO, detailType, markPassingsData, raceData);
+                    }
+                });
                 resultFutures.put(competitorDTO, future);
                 executor.execute(future);
             }
@@ -5880,30 +5885,22 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public Iterable<CompetitorDTO> getCompetitors(boolean filterCompetitorsWithBoat,
             boolean filterCompetitorsWithoutBoat) {
-        Iterable<CompetitorDTO> result;
         CompetitorAndBoatStore competitorStore = getService().getBaseDomainFactory().getCompetitorAndBoatStore();
         final HasPermissions.Action[] requiredActionsForRead = SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS;
+        final Iterable<? extends Competitor> filteredCompetitors;
         if (filterCompetitorsWithBoat == false && filterCompetitorsWithoutBoat == false) {
-            @SuppressWarnings("unchecked")
-            Iterable<Competitor> competitors = (Iterable<Competitor>) competitorStore.getAllCompetitors();
-            result = getSecurityService().mapAndFilterByAnyExplicitPermissionForCurrentUser(
-                    SecuredDomainType.COMPETITOR,
-                    requiredActionsForRead, competitors,
-                    this::convertToCompetitorDTO);
+            filteredCompetitors = competitorStore.getAllCompetitors();
         } else if (filterCompetitorsWithBoat == true && filterCompetitorsWithoutBoat == false) {
-            result = getSecurityService().mapAndFilterByAnyExplicitPermissionForCurrentUser(
-                    SecuredDomainType.COMPETITOR,
-                    requiredActionsForRead, competitorStore.getCompetitorsWithoutBoat(),
-                    this::convertToCompetitorDTO);
+            filteredCompetitors = competitorStore.getCompetitorsWithoutBoat();
         } else if (filterCompetitorsWithBoat == false && filterCompetitorsWithoutBoat == true) {
-            result = getSecurityService().mapAndFilterByAnyExplicitPermissionForCurrentUser(
-                    SecuredDomainType.COMPETITOR,
-                    requiredActionsForRead, competitorStore.getCompetitorsWithBoat(),
-                    this::convertToCompetitorDTO);
+            filteredCompetitors = competitorStore.getCompetitorsWithBoat();
         } else {
-            result = Collections.emptyList();
+            filteredCompetitors = Collections.emptyList();
         }
-        return result;
+        return getSecurityService().mapAndFilterByAnyExplicitPermissionForCurrentUser(
+                SecuredDomainType.COMPETITOR,
+                requiredActionsForRead, filteredCompetitors,
+                this::convertToCompetitorDTO);
     }
 
     @Override
@@ -9344,7 +9341,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public ORCPerformanceCurveLegImpl[] getLegGeometry(String leaderboardName, String raceColumnName, String fleetName, int[] zeroBasedLegIndices) {
+    public ORCPerformanceCurveLegImpl[] getLegGeometry(String leaderboardName, String raceColumnName, String fleetName,
+            int[] zeroBasedLegIndices, ORCPerformanceCurveLegTypes[] legTypes) {
+        assert zeroBasedLegIndices.length == legTypes.length;
         ORCPerformanceCurveLegImpl[] result = null;
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
@@ -9355,8 +9354,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                     if (trackedRace != null) {
                         result = new ORCPerformanceCurveLegImpl[zeroBasedLegIndices.length];
+                        final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(MillisecondsTimePoint.now());
                         for (int i=0; i<zeroBasedLegIndices.length; i++) {
-                            result[i] = getLegGeometry(zeroBasedLegIndices[i], trackedRace);
+                            result[i] = getLegGeometry(zeroBasedLegIndices[i], legTypes[i], trackedRace, cache);
                         }
                     }
                 }
@@ -9366,21 +9366,25 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public ORCPerformanceCurveLegImpl[] getLegGeometry(RegattaAndRaceIdentifier regattaNameAndRaceName, int[] zeroBasedLegIndices) {
+    public ORCPerformanceCurveLegImpl[] getLegGeometry(RegattaAndRaceIdentifier regattaNameAndRaceName, int[] zeroBasedLegIndices,
+            ORCPerformanceCurveLegTypes[] legTypes) {
+        final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(MillisecondsTimePoint.now());
         final TrackedRace trackedRace = getExistingTrackedRace(regattaNameAndRaceName);
         final ORCPerformanceCurveLegImpl[] result = new ORCPerformanceCurveLegImpl[zeroBasedLegIndices.length];
         for (int i=0; i<zeroBasedLegIndices.length; i++) {
-            result[i] = getLegGeometry(zeroBasedLegIndices[i], trackedRace);
+            result[i] = getLegGeometry(zeroBasedLegIndices[i], legTypes[i], trackedRace, cache);
         }
         return result;
     }
 
-    private ORCPerformanceCurveLegImpl getLegGeometry(int zeroBasedLegIndex, final TrackedRace trackedRace) {
+    private ORCPerformanceCurveLegImpl getLegGeometry(int zeroBasedLegIndex, ORCPerformanceCurveLegTypes legType,
+            final TrackedRace trackedRace, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final ORCPerformanceCurveLegImpl result;
         if (trackedRace != null) {
             final Leg leg = trackedRace.getRace().getCourse().getLeg(zeroBasedLegIndex);
             final TrackedLeg trackedLeg = trackedRace.getTrackedLeg(leg);
-            final Distance distance = trackedLeg.getWindwardDistance();
+            final Distance distance = trackedLeg.getWindwardDistance(ORCPerformanceCurveLegTypes.getLegType(legType),
+                    trackedLeg.getReferenceTimePoint(), cache);
             Bearing twa;
             try {
                 twa = trackedLeg.getTWA(trackedLeg.getReferenceTimePoint());
@@ -9450,8 +9454,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         // for the remaining legInfo entries we now have to create race log events:
         final TimePoint now = MillisecondsTimePoint.now();
         for (final Entry<Integer, ORCPerformanceCurveLegImpl> e : legInfo.entrySet()) {
-            raceLog.add(new RaceLogORCLegDataEventImpl(now, now, author, UUID.randomUUID(), /* pPassId */ 0, e.getKey(),
-                    e.getValue().getTwa(), e.getValue().getLength(), e.getValue().getType()));
+            if (e.getValue() != null) {
+                raceLog.add(new RaceLogORCLegDataEventImpl(now, now, author, UUID.randomUUID(), /* pPassId */ 0, e.getKey(),
+                        e.getValue().getTwa(), e.getValue().getLength(), e.getValue().getType()));
+            }
         }
     }
 
@@ -9582,28 +9588,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     private Triple<Integer, Integer, Integer> createCertificateAssignmentsForRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             Map<String, ORCCertificate> certificatesForBoatIdsAsString) throws IOException, NotFoundException {
-        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard == null) {
-            throw new NotFoundException("Leaderboard named "+leaderboardName+" not found");
-        } else {
-            getService().getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
-            if (leaderboard instanceof RegattaLeaderboard) {
-                getService().getSecurityService().checkCurrentUserUpdatePermission(((RegattaLeaderboard) leaderboard).getRegatta());
-            }
-            final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-            if (raceColumn == null) {
-                throw new NotFoundException("Race column named "+raceColumnName+" not found in leaderboard named "+leaderboardName);
-            } else {
-                final Fleet fleet = raceColumn.getFleetByName(fleetName);
-                if (fleet == null) {
-                    throw new NotFoundException("Fleet "+fleetName+" not found in race column named "+raceColumnName+" in leaderboard named "+leaderboardName);
-                } else {
-                    final RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                    final LogEventConstructor<RaceLogEvent, RaceLogEventVisitor> logEventConstructor = createRaceLogEventConstructor();
-                    return createCertificateAssignments(raceLog, logEventConstructor, certificatesForBoatIdsAsString);
-                }
-            }
-        }
+        final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        final LogEventConstructor<RaceLogEvent, RaceLogEventVisitor> logEventConstructor = createRaceLogEventConstructor();
+        return createCertificateAssignments(raceLog, logEventConstructor, certificatesForBoatIdsAsString);
     }
 
     private Triple<Integer, Integer, Integer> createCertificateAssignmentsForRegatta(RegattaIdentifier regattaIdentifier,
@@ -9727,5 +9714,40 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(String leaderboardName, String raceColumnName, String fleetName,
             Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException {
         return createCertificateAssignmentsForRaceLog(leaderboardName, raceColumnName, fleetName, certificatesForBoatsWithIdAsString);
+    }
+
+    @Override
+    public CompetitorDTO getORCPerformanceCurveScratchBoat(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException {
+        final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        final RaceLogORCScratchBoatFinder finder = new RaceLogORCScratchBoatFinder(raceLog,
+                competitorId -> getService().getCompetitorAndBoatStore().getExistingCompetitorById(competitorId));
+        final Competitor scratchBoat = finder.analyze();
+        return scratchBoat == null ? null : convertToCompetitorDTO(scratchBoat);
+    }
+
+    @Override
+    public void setORCPerformanceCurveScratchBoat(String leaderboardName, String raceColumnName, String fleetName, CompetitorDTO newScratchBoatDTO) throws NotFoundException {
+        final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        final Competitor newScratchBoat = newScratchBoatDTO==null?null:
+            getService().getCompetitorAndBoatStore().getExistingCompetitorById(UUIDHelper.tryUuidConversion(newScratchBoatDTO.getIdAsString()));
+        final RaceLogORCScratchBoatAnalyzer analyzer = new RaceLogORCScratchBoatAnalyzer(raceLog,
+                competitorId -> getService().getCompetitorAndBoatStore().getExistingCompetitorById(competitorId));
+        final Pair<Competitor, RaceLogORCScratchBoatEvent> previousScratchBoatAndEvent = analyzer.analyze();
+        final Competitor previousScratchBoat = previousScratchBoatAndEvent == null ? null : previousScratchBoatAndEvent.getA();
+        if (!Util.equalsWithNull(newScratchBoat, previousScratchBoat)) {
+            final AbstractLogEventAuthor serverAuthor = getService().getServerAuthor();
+            if (previousScratchBoatAndEvent != null) {
+                // revoke scratch boat setting so far:
+                try {
+                    raceLog.revokeEvent(serverAuthor, previousScratchBoatAndEvent.getB());
+                } catch (NotRevokableException e) {
+                    logger.log(Level.SEVERE, "Unable to revoke scratch boat definition event "+previousScratchBoatAndEvent.getB(), e);
+                }
+            }
+            if (newScratchBoat != null) {
+                final TimePoint now = MillisecondsTimePoint.now();
+                raceLog.add(new RaceLogORCScratchBoatEventImpl(now, now, serverAuthor, UUID.randomUUID(), /* passId */ raceLog.getCurrentPassId(), newScratchBoat));
+            }
+        }
     }
 }

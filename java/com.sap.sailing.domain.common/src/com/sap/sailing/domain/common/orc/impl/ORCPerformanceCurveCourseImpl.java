@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sse.common.Util;
 
 public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse {
+    private static final long serialVersionUID = -8975425405727779768L;
     private final Iterable<ORCPerformanceCurveLeg> legs;
 
     public ORCPerformanceCurveCourseImpl(Iterable<ORCPerformanceCurveLeg> legs) {

@@ -59,6 +59,7 @@ import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
@@ -1191,9 +1192,10 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     boolean getTrackedRaceIsUsingMarkPassingCalculator(RegattaAndRaceIdentifier regattaNameAndRaceName);
 
     ORCPerformanceCurveLegImpl[] getLegGeometry(String leaderboardName, String raceColumnName, String fleetName,
-            int[] zeroBasedLegIndices);
+            int[] zeroBasedLegIndices, ORCPerformanceCurveLegTypes[] legTypes);
 
-    ORCPerformanceCurveLegImpl[] getLegGeometry(RegattaAndRaceIdentifier singleSelectedRace, int[] zeroBasedLegIndices);
+    ORCPerformanceCurveLegImpl[] getLegGeometry(RegattaAndRaceIdentifier singleSelectedRace, int[] zeroBasedLegIndices,
+            ORCPerformanceCurveLegTypes[] legTypes);
 
     /**
      * @throws NotFoundException
@@ -1246,4 +1248,9 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(String leaderboardName,
             Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
+
+    CompetitorDTO getORCPerformanceCurveScratchBoat(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException;
+
+    void setORCPerformanceCurveScratchBoat(String leaderboardName, String raceColumnName, String fleetName,
+            CompetitorDTO newScratchBoat) throws NotFoundException;
 }

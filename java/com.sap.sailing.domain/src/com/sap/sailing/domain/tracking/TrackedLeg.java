@@ -138,6 +138,14 @@ public interface TrackedLeg extends Serializable {
      */
     Distance getWindwardDistance(TimePoint at, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
+    /**
+     * Like {@link #getWindwardDistance(TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}, only that
+     * the {@code legType} can optionally be specified explicitly; if not {@code null}, instead of inferring the leg type
+     * from the wind direction, the leg type provided is assumed. This way it is possible to explicitly evaluate the distance
+     * based on rhumb line, namely by providing {@link LegType#REACHING} as {@code legType}. 
+     */
+    Distance getWindwardDistance(LegType legType, TimePoint middle, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+
     Distance getAbsoluteWindwardDistance(TimePoint at, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
@@ -154,6 +162,14 @@ public interface TrackedLeg extends Serializable {
      * Same as {@link #getWindwardDistance()}, but offering the client to use a cache
      */
     Distance getWindwardDistance(WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+
+    /**
+     * Same as {@link #getWindwardDistance(WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}, only that
+     * the {@code legType} can optionally be specified explicitly; if not {@code null}, instead of inferring the leg type
+     * from the wind direction, the leg type provided is assumed. This way it is possible to explicitly evaluate the distance
+     * based on rhumb line, namely by providing {@link LegType#REACHING} as {@code legType}.  
+     */
+    Distance getWindwardDistance(LegType legType, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     Distance getAbsoluteWindwardDistance(WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
@@ -186,6 +202,14 @@ public interface TrackedLeg extends Serializable {
     Distance getAbsoluteWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     Distance getWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+
+    /**
+     * Like {@link #getWindwardDistanceFromLegStart(Position, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}, only that
+     * the {@code legType} can optionally be specified explicitly; if not {@code null}, instead of inferring the leg type
+     * from the wind direction, the leg type provided is assumed. This way it is possible to explicitly evaluate the distance
+     * based on rhumb line, namely by providing {@link LegType#REACHING} as {@code legType}. 
+     */
+    Distance getWindwardDistanceFromLegStart(LegType legType, Position pos, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Determines an average true wind direction for this leg; it does so by querying the tracked race for

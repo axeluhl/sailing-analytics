@@ -217,16 +217,21 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         return track.getMaximumSpeedOverGround(legStart.getTimePoint(), to);
     }
 
-    
     @Override
-    public Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    public Distance getWindwardDistanceToGo(LegType legTypeOrNull, TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Distance result;
         if (hasFinishedLeg(timePoint)) {
             result = Distance.NULL;
         } else {
-            result = getWindwardDistanceTo(getLeg().getTo(), timePoint, windPositionMode, cache);
+            result = getWindwardDistanceTo(legTypeOrNull, getLeg().getTo(), timePoint, windPositionMode, cache);
         }
         return result;
+    }
+    
+    @Override
+    public Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getWindwardDistanceToGo(/* legTypeOrNull == null means infer leg type from wind and leg geometry */ null,
+                timePoint, windPositionMode, cache);
     }
 
     @Override
@@ -239,8 +244,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * with the wind's bearing, the competitor's position is projected onto the line crossing <code>waypoint</code> (its
      * approximate position) in the wind's bearing, and the distance from the projection to the <code>waypoint</code> is
      * returned. Otherwise, it is assumed that the leg is neither an upwind nor a downwind leg, and hence the
-     * along-track distance to <code>waypoint</code> is returned. A cache for wind and leg type / bearing can be passed to
-     * avoid their redundant calculation during a single round-trip.
+     * along-track distance to <code>waypoint</code> is returned. A cache for wind and leg type / bearing can be passed
+     * to avoid their redundant calculation during a single round-trip.
      * <p>
      * 
      * If no wind information is available, again the along-track distance to <code>waypoint</code> is returned.
@@ -248,12 +253,23 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * 
      * If the competitor's position or the waypoint's position cannot be determined, <code>null</code> is returned.
      * <code>null</code> is also returned if the leg's bearing cannot be determined because for at least one of its two
-     * waypoints no mark has a known position.<p>
+     * waypoints no mark has a known position.
+     * <p>
      * 
      * The distance returned may turn negative if the competitor sailed past the approximate windward position of the
      * leg's {@link Leg#getTo() end waypoint} but hasn't finished the leg yet.
+     * 
+     * @param legTypeOrNull
+     *            if {@code null}, the leg type will be determined for the {@code at} time point based on the wind at
+     *            the middle of the leg and the leg's geometry at that time point. Otherwise, the leg type specified
+     *            will be used; in particular, for {@link LegType#UPWIND} and {@link LegType#DOWNWIND}, projection to
+     *            the wind direction at the leg middle will be used; for {@link LegType#REACHING}, projection to the
+     *            rhumb line will be used.
+     * 
      */
-    private Distance getWindwardDistanceTo(Waypoint waypoint, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    private Distance getWindwardDistanceTo(LegType legTypeOrNull, Waypoint waypoint, TimePoint at,
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final Distance result;
         Position estimatedPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false);
         if (!hasStartedLeg(at) || estimatedPosition == null) {
             // covers the case with no fixes for this leg yet, also if the mark passing has already been received
@@ -261,13 +277,16 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                     .getEstimatedPosition(at, false);
         }
         if (estimatedPosition == null) { // may happen if mark positions haven't been received yet
-            return null;
+            result = null;
+        } else {
+            final Position approximateWaypointPosition = getTrackedRace().getApproximatePosition(waypoint, at);
+            if (approximateWaypointPosition == null) {
+                result = null;
+            } else {
+                result = getTrackedLeg().getWindwardDistance(legTypeOrNull, estimatedPosition, approximateWaypointPosition, at, windPositionMode, cache);
+            }
         }
-        final Position approximateWaypointPosition = getTrackedRace().getApproximatePosition(waypoint, at);
-        if (approximateWaypointPosition == null) {
-            return null;
-        }
-        return getTrackedLeg().getWindwardDistance(estimatedPosition, approximateWaypointPosition, at, windPositionMode, cache);
+        return result;
     }
 
     /**

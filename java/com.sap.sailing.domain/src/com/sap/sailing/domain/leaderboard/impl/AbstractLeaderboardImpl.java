@@ -30,6 +30,7 @@ import com.sap.sailing.domain.leaderboard.HasRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -136,11 +137,11 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     }
 
     @Override
-    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) {
+    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final TrackedRace trackedRace = race.getTrackedRace(competitor);
         return trackedRace == null ? 0
                 : trackedRace.hasStarted(timePoint) ? improveByDisqualificationsOfBetterRankedCompetitors(race,
-                        trackedRace, timePoint, trackedRace.getRank(competitor, timePoint)) : 0;
+                        trackedRace, timePoint, trackedRace.getRank(competitor, timePoint, cache)) : 0;
     }
 
     /**

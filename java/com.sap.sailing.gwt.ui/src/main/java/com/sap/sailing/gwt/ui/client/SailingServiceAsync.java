@@ -50,6 +50,7 @@ import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
@@ -1127,9 +1128,9 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void getTrackedRaceIsUsingMarkPassingCalculator(RegattaAndRaceIdentifier regattaNameAndRaceName, AsyncCallback<Boolean> callback);
 
     void getLegGeometry(String leaderboardName, String raceColumnName, String fleetName, int[] zeroBasedLegIndices,
-            AsyncCallback<ORCPerformanceCurveLegImpl[]> callback);
+            ORCPerformanceCurveLegTypes[] legTypes, AsyncCallback<ORCPerformanceCurveLegImpl[]> callback);
 
-    void getLegGeometry(RegattaAndRaceIdentifier singleSelectedRace, int[] zeroBasedLegIndices,
+    void getLegGeometry(RegattaAndRaceIdentifier singleSelectedRace, int[] zeroBasedLegIndices, ORCPerformanceCurveLegTypes[] legTypes,
             AsyncCallback<ORCPerformanceCurveLegImpl[]> callback);
 
     void getORCPerformanceCurveLegInfo(String leaderboardName, String raceColumnName, String fleetName,
@@ -1171,4 +1172,10 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void assignORCPerformanceCurveCertificates(String leaderboardName,
             Map<String, ORCCertificate> certificatesForBoatsWithIdAsString,
             AsyncCallback<Triple<Integer, Integer, Integer>> callback);
+
+    void getORCPerformanceCurveScratchBoat(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<CompetitorDTO> asyncCallback);
+
+    void setORCPerformanceCurveScratchBoat(String leaderboardName, String raceColumnName, String fleetName, CompetitorDTO newScratchBoat,
+            AsyncCallback<Void> asyncCallback);
 }

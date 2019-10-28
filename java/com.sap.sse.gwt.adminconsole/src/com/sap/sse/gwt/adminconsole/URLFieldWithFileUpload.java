@@ -15,13 +15,12 @@ import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
@@ -38,6 +37,8 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
  *
  */
 public class URLFieldWithFileUpload extends Composite implements HasValue<String> {
+    private static final URLFieldWithFileUploadResources RESOURCES = URLFieldWithFileUploadResources.INSTANCE;
+
     private final TextBox urlTextBox;
     
     private final FileUpload fileUploadField;
@@ -50,19 +51,22 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
     
     private final FormPanel uploadFormPanel;
     
-    private final HorizontalPanel uploadPanel;
+    private final FlowPanel uploadPanel;
     
     public URLFieldWithFileUpload(final StringMessages stringMessages) {
         this(stringMessages, true);
     }
    
     public URLFieldWithFileUpload(final StringMessages stringMessages, boolean initiallyEnableUpload) {
+        RESOURCES.urlFieldWithFileUploadStyle().ensureInjected();
         final VerticalPanel mainPanel = new VerticalPanel();
-        final HorizontalPanel imageUrlPanel = new HorizontalPanel();
+        final FlowPanel imageUrlPanel = new FlowPanel();
+        imageUrlPanel.addStyleName(RESOURCES.urlFieldWithFileUploadStyle().spaceDirectChildrenClass());
         mainPanel.add(new Label(stringMessages.pleaseOnlyUploadContentYouHaveAllUsageRightsFor()));
         mainPanel.add(imageUrlPanel);
         
         final FormPanel removePanel = new FormPanel();
+        removePanel.addStyleName(RESOURCES.urlFieldWithFileUploadStyle().inlineClass());
         removePanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
@@ -95,8 +99,8 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         // the upload panel
         uploadFormPanel = new FormPanel();
         mainPanel.add(uploadFormPanel);
-        uploadPanel = new HorizontalPanel();
-        uploadPanel.setSpacing(3);
+        uploadPanel = new FlowPanel();
+        uploadPanel.setStylePrimaryName(RESOURCES.urlFieldWithFileUploadStyle().spaceDirectChildrenClass());
         if(initiallyEnableUpload) {
             uploadFormPanel.add(uploadPanel);
         }
@@ -105,8 +109,8 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         uploadFormPanel.setMethod(FormPanel.METHOD_POST);
         fileUploadField = new FileUpload();
         final Label uploadLabel = new Label(stringMessages.upload()+ ":");
+        uploadLabel.setStylePrimaryName(RESOURCES.urlFieldWithFileUploadStyle().inlineClass());
         uploadPanel.add(uploadLabel);
-        uploadPanel.setCellVerticalAlignment(uploadLabel, HasVerticalAlignment.ALIGN_MIDDLE);
         uploadPanel.add(fileUploadField);
         final InputElement inputElement = fileUploadField.getElement().cast();
         inputElement.setName("file");
