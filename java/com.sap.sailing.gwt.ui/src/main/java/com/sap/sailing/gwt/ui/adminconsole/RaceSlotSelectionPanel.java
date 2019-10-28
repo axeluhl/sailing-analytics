@@ -138,11 +138,11 @@ public class RaceSlotSelectionPanel extends HorizontalPanel {
         raceColumnTable = new RaceTableWrapper<RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
                 sailingService, stringMessages, errorReporter, multiSelection);
         raceColumnTable.asWidget().ensureDebugId("RaceColumnInRaceSlotSelectionPanelTable");
-        final Grid leaderboardGrid = new Grid(2, 1);
-        leaderboardGrid.setWidget(0, 0, filterLeaderboardPanel);
-        leaderboardGrid.setWidget(1, 0, leaderboardTable);
-        add(leaderboardGrid);
-        add(raceColumnTable.getTable());
+        final Grid tableGrid = new Grid(2, 2);
+        tableGrid.setWidget(0, 0, filterLeaderboardPanel);
+        tableGrid.setWidget(1, 0, leaderboardTable);
+        tableGrid.setWidget(1, 1, raceColumnTable.getTable());
+        add(tableGrid);
         // update data into table
         // apply selection if requested
         if (preselected != null) {
