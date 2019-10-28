@@ -90,6 +90,7 @@ public class ImpliedWindSourceEditDialog extends DataEntryDialog<ImpliedWindSour
         this.raceSlotSelectionPanel = new RaceSlotSelectionPanel(sailingService, userService, stringMessages,
                 errorReporter, /* multiSelection */ false, availableLeaderboards, previousImpliedWindSource instanceof OtherRaceAsImpliedWindSource ?
                         getLeaderboardNameAndRaceColumnNameAndFleetName((OtherRaceAsImpliedWindSource) previousImpliedWindSource, availableLeaderboards) : null);
+        this.raceSlotSelectionPanel.getSelectionModel().addSelectionChangeHandler(e->validateAndUpdate());
         final ValueChangeHandler<Boolean> buttonSelectionHandler = e->{
             raceSlotSelectionPanel.setVisible(fromOtherRaceButton.getValue());
             fixedImpliedWindSpeedBox.setEnabled(fixedButton.getValue());
@@ -185,5 +186,4 @@ public class ImpliedWindSourceEditDialog extends DataEntryDialog<ImpliedWindSour
         }
         return result;
     }
-
 }
