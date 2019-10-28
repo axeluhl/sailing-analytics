@@ -855,7 +855,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     }
     
     protected void setImpliedWind(RaceColumnDTOAndFleetDTOWithNameBasedEquality object) {
-        // TODO implement setImpliedWind
+        // TODO Implement setImpliedWind: first get implied wind, then show dialog, and if confirmed, submit. See selectScratchBoat(...).
     }
 
     /**
