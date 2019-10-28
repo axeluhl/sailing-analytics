@@ -270,6 +270,12 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
         explicitScratchBoat = scratchBoatFromLog;
     }
     
+    /**
+     * Scans the race logs attached to the {@link #getTrackedRace() tracked race}; the first non-{@code null}
+     * {@link ImpliedWindSource} specified by a valid {@link RaceLogORCImpliedWindSourceEvent} is used. If no valid such
+     * event is found, or all those valid events report {@code null} as their implied wind source,
+     * {@link OwnMaxImpliedWind} is returned as the default strategy.
+     */
     private void updateImpliedWindSource() {
         ImpliedWindSource newImpliedWindSource = null;
         if (getTrackedRace() != null) {

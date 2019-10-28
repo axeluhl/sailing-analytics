@@ -49,8 +49,10 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
+import com.sap.sailing.domain.common.orc.OwnMaxImpliedWind;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
@@ -1178,4 +1180,16 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void setORCPerformanceCurveScratchBoat(String leaderboardName, String raceColumnName, String fleetName, CompetitorDTO newScratchBoat,
             AsyncCallback<Void> asyncCallback);
+
+    /**
+     * Obtains the {@link ImpliedWindSource} set in the race log identified by the triple {@code leaderboardName},
+     * {@code raceColumnName}, and {@code fleetName}. Note that other than in the ORC Performance Curve ranking metric
+     * no defaulting takes place here, and {@code null} is a possible result that indicates that either no race log
+     * event was found that set an implied wind source, or that event explicitly set the implied wind source to {@code null}
+     * (which will have the ranking metric default to {@link OwnMaxImpliedWind}, eventually).
+     */
+    void getImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName, AsyncCallback<ImpliedWindSource> asyncCallback);
+
+    void setImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName,
+            ImpliedWindSource impliedWindSource, AsyncCallback<Void> callback);
 }

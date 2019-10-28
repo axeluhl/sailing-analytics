@@ -58,6 +58,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
@@ -1253,4 +1254,9 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void setORCPerformanceCurveScratchBoat(String leaderboardName, String raceColumnName, String fleetName,
             CompetitorDTO newScratchBoat) throws NotFoundException;
+
+    ImpliedWindSource getImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException;
+
+    void setImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName,
+            ImpliedWindSource impliedWindSource) throws NotFoundException;
 }

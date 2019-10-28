@@ -87,6 +87,7 @@ import com.sap.sailing.domain.abstractlog.orc.ORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentFinder;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceFinder;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataAnalyzer;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEventFinder;
@@ -303,6 +304,7 @@ import com.sap.sailing.domain.common.impl.PolarSheetsXYDiagramDataImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCCertificateUploadConstants;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
@@ -9371,6 +9373,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         ORCPerformanceCurveLegImpl[] result = null;
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
+            getService().getSecurityService().checkCurrentUserReadPermission(leaderboard);
             final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
                 final Fleet fleet = raceColumn.getFleetByName(fleetName);
@@ -9394,6 +9397,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             ORCPerformanceCurveLegTypes[] legTypes) {
         final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(MillisecondsTimePoint.now());
         final TrackedRace trackedRace = getExistingTrackedRace(regattaNameAndRaceName);
+        getService().getSecurityService().checkCurrentUserReadPermission(trackedRace);
         final ORCPerformanceCurveLegImpl[] result = new ORCPerformanceCurveLegImpl[zeroBasedLegIndices.length];
         for (int i=0; i<zeroBasedLegIndices.length; i++) {
             result[i] = getLegGeometry(zeroBasedLegIndices[i], legTypes[i], trackedRace, cache);
@@ -9425,6 +9429,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public Map<Integer, ORCPerformanceCurveLegImpl> getORCPerformanceCurveLegInfo(String leaderboardName,
             String raceColumnName, String fleetName) throws NotFoundException {
+        final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        getService().getSecurityService().checkCurrentUserReadPermission(leaderboard);
         return getORCPerformanceCurveLegInfo(Collections.singleton(getRaceLog(leaderboardName, raceColumnName, fleetName)));
     }
     
@@ -9450,7 +9456,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public void setORCPerformanceCurveLegInfo(RegattaAndRaceIdentifier raceIdentifier,
             Map<Integer, ORCPerformanceCurveLegImpl> legInfo) throws NotRevokableException {
-        setORCPerformanceCurveInfo(getExistingTrackedRace(raceIdentifier).getAttachedRaceLogs().iterator().next(), legInfo);
+        final TrackedRace existingTrackedRace = getExistingTrackedRace(raceIdentifier);
+        getService().getSecurityService().checkCurrentUserUpdatePermission(existingTrackedRace);
+        setORCPerformanceCurveInfo(existingTrackedRace.getAttachedRaceLogs().iterator().next(), legInfo);
     }
 
     private void setORCPerformanceCurveInfo(RaceLog raceLog, Map<Integer, ORCPerformanceCurveLegImpl> legInfo) throws NotRevokableException {
@@ -9612,6 +9620,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     private Triple<Integer, Integer, Integer> createCertificateAssignmentsForRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             Map<String, ORCCertificate> certificatesForBoatIdsAsString) throws IOException, NotFoundException {
+        final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        getService().getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         final LogEventConstructor<RaceLogEvent, RaceLogEventVisitor> logEventConstructor = createRaceLogEventConstructor();
         return createCertificateAssignments(raceLog, logEventConstructor, certificatesForBoatIdsAsString);
@@ -9742,6 +9752,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public CompetitorDTO getORCPerformanceCurveScratchBoat(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException {
+        final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        getService().getSecurityService().checkCurrentUserReadPermission(leaderboard);
         final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         final RaceLogORCScratchBoatFinder finder = new RaceLogORCScratchBoatFinder(raceLog);
         final Competitor scratchBoat = finder.analyze();
@@ -9750,6 +9762,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void setORCPerformanceCurveScratchBoat(String leaderboardName, String raceColumnName, String fleetName, CompetitorDTO newScratchBoatDTO) throws NotFoundException {
+        final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        getService().getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         final Competitor newScratchBoat = newScratchBoatDTO==null?null:
             getService().getCompetitorAndBoatStore().getExistingCompetitorById(UUIDHelper.tryUuidConversion(newScratchBoatDTO.getIdAsString()));
@@ -9771,5 +9785,24 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 raceLog.add(new RaceLogORCScratchBoatEventImpl(now, now, serverAuthor, UUID.randomUUID(), /* passId */ raceLog.getCurrentPassId(), newScratchBoat));
             }
         }
+    }
+
+    @Override
+    public ImpliedWindSource getImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException {
+        final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        getService().getSecurityService().checkCurrentUserReadPermission(leaderboard);
+        final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        final ImpliedWindSource impliedWindSource = new RaceLogORCImpliedWindSourceFinder(raceLog).analyze();
+        return impliedWindSource;
+    }
+
+    @Override
+    public void setImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName, ImpliedWindSource impliedWindSource) throws NotFoundException {
+        final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        getService().getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
+        final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        final TimePoint now = MillisecondsTimePoint.now();
+        final RaceLogEvent impliedWindSourceEvent = new RaceLogORCImpliedWindSourceEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(), impliedWindSource);
+        raceLog.add(impliedWindSourceEvent);
     }
 }
