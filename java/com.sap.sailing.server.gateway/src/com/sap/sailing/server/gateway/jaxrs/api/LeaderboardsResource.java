@@ -1154,9 +1154,9 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         final Triple<TimePoint, Integer, RacingProcedureType> result = getService().getStartTimeAndProcedure(leaderboardName, raceColumnName, fleetName);
         final JSONObject responseJson = new JSONObject();
         if (result != null) {
-            responseJson.put("startTimeAsMillis", result.getA().asMillis());
+            responseJson.put("startTimeAsMillis", result.getA()==null?null:result.getA().asMillis());
             responseJson.put("passId", result.getB());
-            responseJson.put("racingProcedureType", result.getC().name());
+            responseJson.put("racingProcedureType", result.getC()==null?null:result.getC().name());
         }
         return Response.status(Status.OK)
                 .entity(responseJson.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
