@@ -79,7 +79,19 @@ Next, each boat needs to have a certificate assigned to it. This works by first 
 
 ### Managing Courses
 
+To score a race using ORC Performance Curve Scoring (PCS), a definition of the course must be provided that for each leg specifies how the time allowances for that leg will be determined. The following choices need to be made:
 
+* What is the (rhumb-line) length of the leg?
+* Is the leg "constructed," with a defined true wind angle (*TWA*) in the sense that such a TWA can be defined as characteristic for this leg?
+* Or is the leg of one of the pre-defined types (*WINDWARD_LEEWARD*, *LONG_DISTANCE*, *NON_SPINNAKER*, or *CIRCULAR_RANDOM*)?
+
+In the latter case a predefined mix of allowances is used along the leg, assuming a certain distribution of wind angles, such as 50% upwind and 50% downwind for the *WINDWARD_LEEWARD* type.
+
+The following video demonstrates the definition of a course for a simple up-and-down race with a short offset leg after mark 1 where the tracking data provides measures for TWAs and leg distances which can be taken over into the "official" course definition. Note that here instead of picking *WINDWARD_LEEWARD* for all legs, the constructed / TWA type is used for more accurate results, specifically during live tracking and live ranking. In particular, the offset leg is modeled more accurately this way, and since allowance relations for upwind and downwind may vary across the fleet significantly, live ranking in the middle of an upwind leg or the middle of a downwind leg will be more realistic than if modeling the entire course with the *WINDWARD_LEEWARD* average. The video also shows how a desired total course distance of exactly 4.500 nautical miles is then defined by spreading this distance proportionately across the legs according to their tracked distance.
+
+[ORC Course Modeling](/wiki/images/orc/course-modeling-1-small.mp4)
+
+If the course consists of several waypoints, thus splitting it into legs, and the entire course shall be scored as, say, a *CIRCULAR_RANDOM* scheme, all legs shall be modeled as *CIRCULAR_RANDOM*. If a total course distance is known but individual leg distances can only be approximated, the desired or defined total distance can be distributed proportionately across the legs based on their estimated, approximated length.
 
 ### Scratch Boat Selection
 
