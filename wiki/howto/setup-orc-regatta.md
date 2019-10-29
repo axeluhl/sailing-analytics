@@ -71,11 +71,16 @@ Assuming that your regatta already has competitors and boats assigned, the boat 
 
 There are currently two ways and two formats supported for certificates import: documents in JSON and RMS format can either be uploaded or referenced by a set of URLs pointing at the documents available for download. Use the "Certificate download URLs" control to edit a set of URLs from where certificates can be obtained; use the "Choose Files" button to select RMS and / or JSON files containing ORC certificates from your file system. Then use the ``Import Certificates`` button which will upload any local files selected to the server and will instruct the server to download the certificate files referenced by URL. The combined set of certificates will be obtained and displayed in the "Certificates" table on the right.
 
-![Certificate Import](/wiki/images/orc/regatta-certificates-import-1-small.mp4)
+[![Certificate Import](/wiki/images/orc/regatta-certificates-import-1-small.png)](/wiki/images/orc/regatta-certificates-import-1-small.mp4)
 
 Next, each boat needs to have a certificate assigned to it. This works by first selecting the boat on the left, then selecting the certificate to assign to that boat on the right. Should this constitute an assignment *change* then a warning will pop up, so as to avoid accidentally overwriting previous assignments. Use the sorting and filtering capabilities to find the matches and to finally check that all boats have a certificate assigned.
 
-![Certificate Import](/wiki/images/orc/regatta-certificates-assignment-1-small.mp4)
+[![Certificate Import](/wiki/images/orc/regatta-certificates-assignment-1-small.png)](/wiki/images/orc/regatta-certificates-assignment-1-small.mp4)
+
+The same dialog is available at race level. See the following two screenshots for where to reach them.
+
+![Certificates Dialog from Leaderboard Races](/wiki/images/orc/certificate-assignment-per-race-from-leaderboard.png)
+![Certificates Dialog from Smartphone Tracking Races](/wiki/images/orc/certificate-assignment-per-race-from-smartphone-tracking.png)
 
 ### Managing Courses
 
@@ -89,11 +94,17 @@ In the latter case a predefined mix of allowances is used along the leg, assumin
 
 The following video demonstrates the definition of a course for a simple up-and-down race with a short offset leg after mark 1 where the tracking data provides measures for TWAs and leg distances which can be taken over into the "official" course definition. Note that here instead of picking *WINDWARD_LEEWARD* for all legs, the constructed / TWA type is used for more accurate results, specifically during live tracking and live ranking. In particular, the offset leg is modeled more accurately this way, and since allowance relations for upwind and downwind may vary across the fleet significantly, live ranking in the middle of an upwind leg or the middle of a downwind leg will be more realistic than if modeling the entire course with the *WINDWARD_LEEWARD* average. The video also shows how a desired total course distance of exactly 4.500 nautical miles is then defined by spreading this distance proportionately across the legs according to their tracked distance.
 
-[ORC Course Modeling](/wiki/images/orc/course-modeling-1-small.mp4)
+[![Course Modeling](/wiki/images/orc/course-modeling-1-small.png)](/wiki/images/orc/course-modeling-1-small.mp4)
 
 If the course consists of several waypoints, thus splitting it into legs, and the entire course shall be scored as, say, a *CIRCULAR_RANDOM* scheme, all legs shall be modeled as *CIRCULAR_RANDOM*. If a total course distance is known but individual leg distances can only be approximated, the desired or defined total distance can be distributed proportionately across the legs based on their estimated, approximated length.
 
 ### Scratch Boat Selection
+
+A so-called "scratch boat" is used in both, the pre-2015 and since-2015 variants in order to produce absolute corrected times for all competitors in a race. In the pre-2015 version the scratch boat provides the performance curve for the course sailed that is used to map all individual implied winds achieved by each competitor to a comparable absolute time. In the since-2015 version the role of the scratch boat is to provide an absolute elapsed time to which the relative corrected times can be added to obtain absolute corrected times which can be compared.
+
+If no scratch boat is selected explicitly, one is found by a default rule. For the pre-2015 variant this is the boat that has the "physical lead" or the first ship home if a boat has already passed the finish line. For the since-2015 variant the scratch boat selection defaults to the boat with the least GPH (general performance handicap) value listed in the certificate (which obviously needs overriding in case this boat does not finish a race regularly). The "leader as baseline" variant of the since-2015 rule will, instead of using the GPH, pick the boat with the least relative corrected time. Please note that compared to picking the boat with the GPH this requires significantly more computation and can slow things down a bit during live operations. You may consider using the "least GPH" default while live, and if you feel necessary, switch to "leader as baseline" only after the race.
+
+The following video illustrates the explicit selection of a scratch boat. Note how at the end of the video the explicit scratch boat selection is cancelled by holding the Ctrl-key while clicking on the previously selected scratch boat, this way de-selecting it and returning to the default way of inferring the scratch boat, as explained above.
 
 
 
