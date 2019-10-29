@@ -4,9 +4,17 @@
 
 ## Introduction
 
-The Offshore Racing Congress (ORC, see [https://orc.org](https://org.org)) has defined a process and set of [rules](https://www.orc.org/rules/ORC%20Rating%20Systems%202019.pdf) to measure, rate and rank boats in regattas that is based on the boats' performance as predicted by a so-called "[Velocity Prediction Program](https://orc.org/index.asp?id=21)" (VPP). The output of this program is a measurement certificate, as shown [here](https://data.orc.org/public/WPub.dll/CC/64934.pdf). Such a certificate contains predicted boat speeds for different true wind angles (TWAs) and wind speeds, displayed in table form. With this, boats in a regatta can be ranked according to their performance relative to their performance predicted.
+The Offshore Racing Congress (ORC, see [https://orc.org](https://org.org)) has defined a process and set of [rules](https://www.orc.org/rules/ORC%20Rating%20Systems%202019.pdf) to measure, rate and rank boats in regattas that is based on the boats' performance as predicted by a so-called "[Velocity Prediction Program](https://orc.org/index.asp?id=21)" (VPP). The output of this program is a measurement certificate, as shown [here](https://data.orc.org/public/WPub.dll/CC/64934.pdf). Such a certificate contains predicted boat speeds for different true wind angles (TWAs) and wind speeds, displayed in table form, like this:
 
-The key concept behind this so-called *Performance Curve Scoring* is for each boat in a regatta to derive a mathematical function---the performance curve---based on the certificate's data and the course to sail that maps the wind speed on the course to the time the boat is expected to require to sail the course. In doing so, the course can be modeled at different levels of detail, depending largely on how stable and/or predictable the wind conditions are or were while sailing the course. If rather stable wind conditions are met on a leg, the leg can be defined as a "constructed" course where the leg's distance and true wind angle are specified. For long legs with changing wind conditions, boat performance is averaged across a profile of different assumed wind directions on that leg, with variants called *circular random* and *coastal long distance*.
+![Certificate Excerpt](/wiki/images/orc/certificate-excerpt.png)
+
+With this, boats in a regatta can be ranked according to their performance relative to their performance predicted.
+
+The key concept behind this so-called *Performance Curve Scoring* is for each boat in a regatta to derive a mathematical function---the performance curve---based on the certificate's data and the course to sail that maps the wind speed on the course to the time the boat is expected to require to sail the course. See the following figure for an example of such a performance curve.
+
+<center><img alt="Performance Curve Example Graphics" src="https://data.orc.org/tools/ex1.png"/></center>
+
+In doing so, the course can be modeled at different levels of detail, depending largely on how stable and/or predictable the wind conditions are or were while sailing the course. If rather stable wind conditions are met on a leg, the leg can be defined as a "constructed" course where the leg's distance and true wind angle are specified. For long legs with changing wind conditions, boat performance is averaged across a profile of different assumed wind directions on that leg, with variants called *circular random* and *coastal long distance*.
 
 The performance curve function for each boat can also be inverted, mapping the time elapsed for a competitor while sailing the course to the wind speed this competitor would have required according to the prediction to sail that course in this time. This wind speed is called the *implied wind*.
 
