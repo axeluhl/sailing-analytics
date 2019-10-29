@@ -106,6 +106,21 @@ If no scratch boat is selected explicitly, one is found by a default rule. For t
 
 The following video illustrates the explicit selection of a scratch boat. Note how at the end of the video the explicit scratch boat selection is cancelled by holding the Ctrl-key while clicking on the previously selected scratch boat, this way de-selecting it and returning to the default way of inferring the scratch boat, as explained above.
 
-
+[![Course Modeling](/wiki/images/orc/setting-scratch-boat-1-small.png)](/wiki/images/orc/setting-scratch-boat-1-small.mp4)
 
 ### Implied Wind Selection
+
+For the ORC PCS variant in use since 2015, a single implied wind value is used to compute relative corrected times which in turn are the basis for ranking the competitors in the race. By default, the implied wind speed to use for this is the greatest implied wind speed in the race's fleet. However, we have seen two scenarios where this is not the value desired by the race committee.
+
+* The actual wind on the course may have been significantly stronger than what the implied wind calculation came up with. A typical situation would be massive sea state with choppy waves which lets the boats sail far slower than predicted by the VPP. The race officials may then decide to score the race based on a greater implied wind speed.
+* The set of competitors to score in a race is a subset of a larger fleet that races on the same course under the same conditions. If this overall race is modeled as a separate race with its own overall scoring, that race may lend itself as source for the implied wind for each of the sub-groups, too, because its maximum implied wind is guaranteed to be greater than or equal to the maximum implied wind of each of the sub-groups and therefore has a better chance of matching the real wind speed on the course.
+
+The action buttons for setting the implied wind for the since-2015 ORC PCS variants can be found at the same level as the buttons for setting the scratch boat for a race explicitly. See the following video.
+
+[![Course Modeling](/wiki/images/orc/setting-implied-wind-1-small.png)](/wiki/images/orc/setting-implied-wind-1-small.mp4)
+
+## Outlook
+
+Especially the course definition for ORC PCS and probably also the scratch boat and implied wind selection are good candidates for support in the *SAP Sailing Race Manager App*. They clearly fall into the same set of responsibilities addressed by the app so far.
+
+Further feature requests related to ORC Performance Curve Scoring have already been noted and will be tackled as time and resources permit. See, in particular [#5147 (Offer contiguous scoring based on corrected time or implied wind for multi-fleet handicap regattas)](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5147), [#5115 (Enable user to copy the leg data / course definition from one race to one or more others)](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5115), [#5128 (Support ORC certificate search and/or use of RefNo to construct a certificate download URL)](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5128), and [#5137 (Consider using constructed course before finish, and windward/leeward after finish for ORC Performance Curve Scoring (PCS))](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5137).
