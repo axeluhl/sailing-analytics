@@ -47,9 +47,39 @@ The SAP Sailing Analytics support scoring regattas using the different flavors o
 
 ### Creating a Regatta with Ranking Based on ORC Performance Curve Scoring
 
+To create a regatta using ORC Performance curve scoring, pick one of the following three ranking metrics:
+
+![New Ranking Metrics](/wiki/images/orc/ranking-metrics.png)
+
+Also note the tool tips on the options as you hover your pointer over each one of them.
+
+* ORC Performance Curve (>= 2015): This uses a common implied wind for the fleet (usually the maximum implied wind obtained from the race under consideration), calculates the time allowances for all boats in this wind and determines the relative corrected times which are then added to the elapsed time of a scratch boat.
+* ORC Performance Curve with Individual Implied Wind (<2015): The ranking is based on the implied wind achieved by each individual boat; corrected times are based on mapping those implied wind values to a time allowance based on a scratch boat's performance curve. By default, the scratch boat is selected as the one with the least GPH value but can be overruled by setting a scratch boat explicitly.
+* ORC Performance Curve (>=2015, leader as baseline): same as the previous one, only that by default the scratch boat is selected as the leader in the race. For implied wind values between six and twenty knots this will mean that the leader's corrected time equals her elapsed time.
+
 ### Managing Certificates
 
+Before performance curve scoring does anything useful, measurement certificates need to be imported and assigned to the competitors in the regatta. It is also possible to handle per-race exceptions in case the race committee decides that for a boat different allowance shall apply in one race but not in others. Reasons could range from accounting for damages to short-term changes to the boat's configuration or a "regatta" that consists of races run across an entire season with new certificates being issued before all races of the "regatta" have completed.
+
+To assign certificates to competitors for a regatta, go to the "Regatta" tab in the AdminConsole. For those regattas using an ORC ranking metric, an additional action is displayed:
+
+![New Certificates Action](/wiki/images/orc/regatta-certificates-0.png)
+
+Assuming that your regatta already has competitors and boats assigned, the boat list will now be displayed in a table on the left, whereas an empty "Certificates" tables is shown to the right:
+
+![Certificates Dialog](/wiki/images/orc/regatta-certificates-2.png)
+
+There are currently two ways and two formats supported for certificates import: documents in JSON and RMS format can either be uploaded or referenced by a set of URLs pointing at the documents available for download. Use the "Certificate download URLs" control to edit a set of URLs from where certificates can be obtained; use the "Choose Files" button to select RMS and / or JSON files containing ORC certificates from your file system. Then use the ``Import Certificates`` button which will upload any local files selected to the server and will instruct the server to download the certificate files referenced by URL. The combined set of certificates will be obtained and displayed in the "Certificates" table on the right.
+
+![Certificate Import](/wiki/images/orc/regatta-certificates-import-1-small.mp4)
+
+Next, each boat needs to have a certificate assigned to it. This works by first selecting the boat on the left, then selecting the certificate to assign to that boat on the right. Should this constitute an assignment *change* then a warning will pop up, so as to avoid accidentally overwriting previous assignments. Use the sorting and filtering capabilities to find the matches and to finally check that all boats have a certificate assigned.
+
+![Certificate Import](/wiki/images/orc/regatta-certificates-assignment-1-small.mp4)
+
 ### Managing Courses
+
+
 
 ### Scratch Boat Selection
 
