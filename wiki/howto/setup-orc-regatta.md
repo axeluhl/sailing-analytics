@@ -95,4 +95,6 @@ If the course consists of several waypoints, thus splitting it into legs, and th
 
 ### Scratch Boat Selection
 
+
+
 ### Implied Wind Selection
