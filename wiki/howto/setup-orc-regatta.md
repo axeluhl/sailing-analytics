@@ -81,6 +81,12 @@ There are currently two ways and two formats supported for certificates import: 
 
 [![Certificate Import](/wiki/images/orc/regatta-certificates-import-1-small.png)](/wiki/images/orc/regatta-certificates-import-1-small.mp4)
 
+A good source for certificate files is of course the ORC web site. [https://www.orc.org/index.asp?id=44](https://www.orc.org/index.asp?id=44) has the current certificates listed by issuing country. Note, though, that the country authority issuing a certificate does not necessarily have to be the same as the nationality of the sail number. [https://data.orc.org/public/WPub.dll?action=SrchCert&xslp=scert.php](https://data.orc.org/public/WPub.dll?action=SrchCert&xslp=scert.php) offers a comprehensive search form, but you need to apply for an account which can be done [here](https://data.orc.org/public/register.php). While we plan (see also section [Outlook](#setting-up-an-orc-regatta-with-performance-curve-scoring-pcs_outlook) and [#5128 (Support ORC certificate search and/or use of RefNo to construct a certificate download URL)](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5128)) to support a more automated way of searching and downloading matching certificates, for now dedicated certificates can be found via the ORC search form. A typical search result looks like this:
+
+![Search Result](/wiki/images/orc/search-result.png)
+
+Use the reference number, say ``FRA00013881`` to download the certificate, either in RMS format like this: ``http://data.orc.org/public/WPub.dll?action=DownBoatRMS&RefNo=FRA00013881`` or in JSON format like that: ``http://data.orc.org/public/WPub.dll?action=DownBoatRMS&RefNo=FRA00013881&ext=json``.
+
 Next, each boat needs to have a certificate assigned to it. This works by first selecting the boat on the left, then selecting the certificate to assign to that boat on the right. Should this constitute an assignment *change* then a warning will pop up, so as to avoid accidentally overwriting previous assignments. Use the sorting and filtering capabilities to find the matches and to finally check that all boats have a certificate assigned.
 
 [![Certificate Import](/wiki/images/orc/regatta-certificates-assignment-1-small.png)](/wiki/images/orc/regatta-certificates-assignment-1-small.mp4)
