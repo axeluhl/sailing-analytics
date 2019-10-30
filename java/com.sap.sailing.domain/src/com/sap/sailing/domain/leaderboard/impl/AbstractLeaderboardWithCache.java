@@ -1198,6 +1198,9 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             if (leaderboardDTOCache != null) {
                 leaderboardDTOCache.invalidate(this);
             }
+            synchronized (raceDetailsAtEndOfTrackingCache) {
+                raceDetailsAtEndOfTrackingCache.clear();
+            }
         }
     }
     
