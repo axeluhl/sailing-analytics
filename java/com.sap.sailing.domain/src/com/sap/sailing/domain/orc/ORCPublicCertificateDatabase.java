@@ -1,10 +1,15 @@
 package com.sap.sailing.domain.orc;
 
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Future;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
+import com.sap.sailing.domain.orc.impl.ORCPublicCertificateDatabaseImpl;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 /**
  * An interface to {@code data.orc.org}, mostly the search functionality at
@@ -79,6 +84,14 @@ import com.sap.sse.common.TimePoint;
  *
  */
 public interface ORCPublicCertificateDatabase {
+    ORCPublicCertificateDatabase INSTANCE = new ORCPublicCertificateDatabaseImpl();
+    
+    /**
+     * Equality and hash code of such handles is based on the {@link #getReferenceNumber() reference number} only.
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     */
     public interface CertificateHandle {
         CountryCode getIssuingCountry();
         Double getGPH();
@@ -98,6 +111,8 @@ public interface ORCPublicCertificateDatabase {
     /**
      * Searches for certificates based on various criteria. Pass {@code null} for a criterion to not restrict search
      * results based on that criterion.
+     * 
+     * @return an always valid, never {@code null} object which may be {@link Util#isEmpty() empty}.
      */
     Iterable<CertificateHandle> search(CountryCode country, Integer yearOfIssuance, String referenceNumber,
             String yachtName, String sailNumber, String boatClassName) throws Exception;
@@ -111,4 +126,25 @@ public interface ORCPublicCertificateDatabase {
     }
     
     ORCCertificate getCertificate(String referenceNumber) throws Exception;
+    
+    /**
+     * Creates a lookup job that is forked into the background. The job will first try an exact lookup
+     * with the parameters as specified. If one or more results are obtained this way, they are returned. If no
+     * certificate is found, a relaxation and rotation process starts, under the following assumptions:
+     * <ul>
+     * <li>The {@code sailNumber} may be noted in a different way from the way the ORC database has it represented;
+     * typical variations include the addition or removal of space and dash characters between the nationality letters
+     * and the actual numeric digits, e.g. "DEN- 13" instead of "DEN13" or "DEN 13".</li>
+     * <li>The boat class name used here may differ from the boat class name used by the ORC database. We will try the
+     * different boat class alias names to keep looking for a match.</li>
+     * <li>Yacht name and sail number may have been swapped in how the boat was specified. We'll try swapping them in
+     * the search request</li>
+     * </ul>
+     * 
+     * @return an object from which the caller can obtain the set of certificates found by invoking
+     *         {@link Future#get()}. The result set will be the smallest, most concise non-empty set found, or it will
+     *         be empty in case no match was found at all, regardless the rotation and alterations applied to the search
+     *         parameters.
+     */
+    Future<Set<ORCCertificate>> search(String yachtName, String sailNumber, BoatClass boatClass);
 }

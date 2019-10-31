@@ -1259,4 +1259,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void setImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName,
             ImpliedWindSource impliedWindSource) throws NotFoundException;
+
+    Map<BoatDTO, Set<ORCCertificate>> getSuggestedCertificates(ArrayList<BoatDTO> boats) throws Exception;
 }

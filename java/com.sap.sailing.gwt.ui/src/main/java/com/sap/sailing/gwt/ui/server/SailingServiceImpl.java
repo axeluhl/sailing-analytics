@@ -347,6 +347,7 @@ import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuse
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.meta.MetaLeaderboardColumn;
+import com.sap.sailing.domain.orc.ORCPublicCertificateDatabase;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
@@ -9804,5 +9805,22 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final TimePoint now = MillisecondsTimePoint.now();
         final RaceLogEvent impliedWindSourceEvent = new RaceLogORCImpliedWindSourceEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(), impliedWindSource);
         raceLog.add(impliedWindSourceEvent);
+    }
+    
+    @Override
+    public Map<BoatDTO, Set<ORCCertificate>> getSuggestedCertificates(ArrayList<BoatDTO> boats) throws InterruptedException, ExecutionException {
+        final ORCPublicCertificateDatabase db = ORCPublicCertificateDatabase.INSTANCE;
+        final Map<BoatDTO, Set<ORCCertificate>> result = new HashMap<>();
+        final Map<BoatDTO, Future<Set<ORCCertificate>>> futures = new HashMap<>();
+        for (final BoatDTO boat : boats) {
+            futures.put(boat, db.search(boat.getName(), boat.getSailId(),
+                    getService().getBaseDomainFactory().getBoatClass(boat.getBoatClass().getName())));
+        }
+        for (final Entry<BoatDTO, Future<Set<ORCCertificate>>> boatAndFutures : futures.entrySet()) {
+            final Set<ORCCertificate> certificatesForBoat = new HashSet<>();
+            certificatesForBoat.addAll(boatAndFutures.getValue().get());
+            result.put(boatAndFutures.getKey(), certificatesForBoat);
+        }
+        return result;
     }
 }

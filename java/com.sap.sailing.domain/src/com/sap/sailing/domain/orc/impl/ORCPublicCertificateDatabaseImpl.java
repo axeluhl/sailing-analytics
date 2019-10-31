@@ -6,9 +6,15 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -27,11 +33,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.orc.ORCPublicCertificateDatabase;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.CountryCodeFactory;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDatabase {
@@ -57,6 +66,12 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     private static final String ROW_ELEMENT = "ROW";
     private static final DateFormat isoTimestampFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     
+    /**
+     * Hash code and equality as based on {@link #getReferenceNumber() the reference number field} only.
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     */
     private static class CertificateHandleImpl implements CertificateHandle {
         private final CountryCode issuingCountry;
         private final String sssid;
@@ -89,6 +104,31 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
             this.yearBuilt = yearBuilt;
             this.issueDate = issueDate;
             this.isProvisional = isProvisional;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((referenceNumber == null) ? 0 : referenceNumber.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            CertificateHandleImpl other = (CertificateHandleImpl) obj;
+            if (referenceNumber == null) {
+                if (other.referenceNumber != null)
+                    return false;
+            } else if (!referenceNumber.equals(other.referenceNumber))
+                return false;
+            return true;
         }
 
         @Override
@@ -167,14 +207,14 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     }
     
     @Override
-    public Iterable<CertificateHandle> search(CountryCode country, Integer yearOfIssuance, String referenceNumber,
+    public Iterable<CertificateHandle> search(CountryCode issuingCountry, Integer yearOfIssuance, String referenceNumber,
             String yachtName, String sailNumber, String boatClassName) throws Exception {
         final List<ORCPublicCertificateDatabase.CertificateHandle> result = new LinkedList<>(); 
         final HttpClient client = new SystemDefaultHttpClient();
         final List<NameValuePair> params = new ArrayList<>();
         params.add(ACTION_PARAM);
         params.add(XSLP_PARAM);
-        params.add(new BasicNameValuePair(COUNTRY_PARAM_NAME, country==null?"*":country.getThreeLetterIOCCode()));
+        params.add(new BasicNameValuePair(COUNTRY_PARAM_NAME, issuingCountry==null?"*":issuingCountry.getThreeLetterIOCCode()));
         params.add(new BasicNameValuePair(VPP_YEAR_PARAM_NAME, yearOfIssuance==null?"0":yearOfIssuance.toString()));
         if (referenceNumber != null) {
             params.add(new BasicNameValuePair(REF_NO_PARAM_NAME, referenceNumber));
@@ -284,8 +324,97 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         final HttpClient client = new SystemDefaultHttpClient();
         final HttpGet getRequest = new HttpGet("http://data.orc.org/public/WPub.dll?action=DownBoatRMS&RefNo="+referenceNumber);
         addAuthorizationHeader(getRequest);
-        return new ORCCertificatesRmsImporter().read(client.execute(getRequest).getEntity().getContent())
-                .getCertificates().iterator().next();
+        final Iterable<ORCCertificate> certificates = new ORCCertificatesRmsImporter().read(client.execute(getRequest).getEntity().getContent())
+                .getCertificates();
+        return certificates.iterator().hasNext() ? certificates.iterator().next() : null;
+    }
+
+    @Override
+    public Future<Set<ORCCertificate>> search(final String yachtName, final String sailNumber, final BoatClass boatClass) {
+        final FutureTask<Set<ORCCertificate>> result = new FutureTask<Set<ORCCertificate>>(()->{
+            final Set<ORCCertificate> certificates = new HashSet<>();
+            Iterable<CertificateHandle> certificateHandles = fuzzySearchVaryingSailNumberPadding(yachtName, sailNumber, boatClass);
+            if (Util.isEmpty(certificateHandles)) {
+                // try swapping yacht name and sail number and go again:
+                certificateHandles = fuzzySearchVaryingSailNumberPadding(sailNumber, yachtName, boatClass);
+            }
+            for (final CertificateHandle handle : certificateHandles) {
+                final ORCCertificate certificate = getCertificate(handle);
+                if (certificate != null) {
+                    certificates.add(certificate);
+                }
+            }
+            return certificates;
+        });
+        final Thread backgroundExecutor = new Thread(result, "ORC certificate background lookup thread for "+yachtName+"/"+sailNumber+"/"+boatClass);
+        backgroundExecutor.setDaemon(true);
+        backgroundExecutor.start();
+        return result;
+    }
+
+    private Iterable<CertificateHandle> fuzzySearchVaryingSailNumberPadding(final String yachtName, final String sailNumber, final BoatClass boatClass) throws Exception {
+        Iterable<CertificateHandle> certificateHandles = fuzzySearchVaryingBoatClassName(yachtName, sailNumber, boatClass);
+        if (Util.isEmpty(certificateHandles)) {
+            // try without sail number constraint; if that doesn't find anything either, we can stop
+            certificateHandles = fuzzySearchVaryingBoatClassName(yachtName, /* sailNumber */ null, boatClass);
+            if (!Util.isEmpty(certificateHandles)) {
+                // try all sail number variants and see if/where we get something; if not, return the full set, unconstrained by sail number
+                for (final String sailNumberVariant : getSailNumberVariants(sailNumber)) {
+                    final Iterable<CertificateHandle> restrictedHandles = fuzzySearchVaryingBoatClassName(yachtName, sailNumberVariant, boatClass);
+                    if (!Util.isEmpty(restrictedHandles)) {
+                        certificateHandles = restrictedHandles;
+                        break;
+                    }
+                }
+            }
+        }
+        return certificateHandles;
+    }
+
+    /**
+     * Varies the boat class name by first using the true boat class name, then, if nothing is found, stepping through
+     * the alternative names, and finally removing the boat class name constraint altogether.
+     * 
+     * @return the boat class name that ultimately led to the matches returned, and the matches in the form of a
+     *         sequence of handles
+     */
+    private Iterable<CertificateHandle> fuzzySearchVaryingBoatClassName(final String yachtName, final String sailNumber, final BoatClass boatClass) throws Exception {
+        String successfulBoatClassName = boatClass.getName();
+        Iterable<CertificateHandle> certificateHandles = search(/* issuingCountry */ null, /* yearOfIssuance */ null, /* referenceNumber */ null, yachtName, sailNumber, successfulBoatClassName);
+        if (Util.isEmpty(certificateHandles)) {
+            // try without boat class restriction
+            successfulBoatClassName = null;
+            certificateHandles = search(/* issuingCountry */ null, /* yearOfIssuance */ null, /* referenceNumber */ null, yachtName, sailNumber, successfulBoatClassName);
+        }
+        for (final CertificateHandle handle : certificateHandles) {
+            final Set<CertificateHandle> restrictedResults = new HashSet<>();
+            final BoatClassMasterdata boatClassMasterData = BoatClassMasterdata.resolveBoatClass(boatClass.getName());
+            if (boatClassMasterData != null && boatClassMasterData.getDisplayName().equals(boatClass.getDisplayName())) {
+                restrictedResults.add(handle);
+            }
+            if (!restrictedResults.isEmpty()) {
+                certificateHandles = restrictedResults;
+                break;
+            }
+        }
+        return certificateHandles;
+    }
+
+    private Iterable<String> getSailNumberVariants(String sailNumber) {
+        final List<String> result = new LinkedList<>();
+        result.add(sailNumber);
+        if (sailNumber != null) {
+            final Matcher matcher = Pattern.compile("[^A-Za-z]*([A-Za-z]*).*([0-9]*).*").matcher(sailNumber);
+            final boolean findResult = matcher.find();
+            if (findResult) {
+                final String country = matcher.group(1);
+                final String number = matcher.group(2);
+                for (final String paddingToTry : new String[] { " ", "  ", "   ", "    ", " - ", "-", "- ", "-  ", "-   ", "-    " }) {
+                    result.add(country+paddingToTry+number);
+                }
+            }
+        }
+        return result;
     }
 
     private static String getDecodedCredentials() {

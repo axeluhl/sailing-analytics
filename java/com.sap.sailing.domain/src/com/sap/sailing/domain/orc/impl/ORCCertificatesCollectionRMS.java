@@ -51,7 +51,7 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
     private static final String BOATNAME = "NAME";
     private static final String SAILNUMBER = "SAILNUMB";
     private static final String BOATCLASS = "TYPE";
-    private static final String ISSUEDATE = "DD_MM_yyYY";
+    static final String ISSUEDATE = "DD_MM_yyYY";
     private static final String ISSUETIME = "HH:MM:SS";
     private static final String RUN_ALLOWANCE = "D";
     private static final String RUN_ANGLE = "DA";

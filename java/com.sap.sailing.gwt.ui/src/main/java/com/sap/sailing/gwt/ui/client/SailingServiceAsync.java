@@ -1192,4 +1192,6 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void setImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName,
             ImpliedWindSource impliedWindSource, AsyncCallback<Void> callback);
+
+    void getSuggestedCertificates(ArrayList<BoatDTO> boats, AsyncCallback<Map<BoatDTO, Set<ORCCertificate>>> callback);
 }

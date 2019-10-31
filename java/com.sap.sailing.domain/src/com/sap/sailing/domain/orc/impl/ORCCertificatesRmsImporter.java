@@ -35,7 +35,7 @@ import com.sap.sailing.domain.common.orc.ORCCertificate;
  */
 
 public class ORCCertificatesRmsImporter extends AbstractORCCertificatesImporter {
-    private static final String NAME_OF_LAST_LEFT_ALIGNED_COLUMN_HEADER = "HH:MM:SS";
+    private static final String NAME_OF_LAST_LEFT_ALIGNED_COLUMN_HEADER = ORCCertificatesCollectionRMS.ISSUEDATE;
 
     public ORCCertificatesCollectionRMS read(Reader reader) throws IOException {
         final BufferedReader br = new BufferedReader(reader);
@@ -45,8 +45,10 @@ public class ORCCertificatesRmsImporter extends AbstractORCCertificatesImporter 
         final Map<String, Map<String, String>> certificateValuesByCertificateId = new HashMap<>();
         String line;
         while ((line = br.readLine()) != null) {
-            final Map<String, String> parsedLine = parseLine(line, columnNamesAndWidths);
-            certificateValuesByCertificateId.put(parsedLine.get(certificateIdColumnName), parsedLine);
+            if (!line.trim().isEmpty()) {
+                final Map<String, String> parsedLine = parseLine(line, columnNamesAndWidths);
+                certificateValuesByCertificateId.put(parsedLine.get(certificateIdColumnName), parsedLine);
+            }
         }
         return new ORCCertificatesCollectionRMS(certificateValuesByCertificateId);
     }
@@ -55,7 +57,7 @@ public class ORCCertificatesRmsImporter extends AbstractORCCertificatesImporter 
         return read(getReaderForInputStream(in));
     }
 
-    private Map<String, String> parseLine(final String line, Map<String, Integer> columnNamesAndWidths) {
+    private Map<String, String> parseLine(final String line, LinkedHashMap<String, Integer> columnNamesAndWidths) {
         assert columnNamesAndWidths != null;
         final Map<String, String> result = new LinkedHashMap<>();
         int start=0;

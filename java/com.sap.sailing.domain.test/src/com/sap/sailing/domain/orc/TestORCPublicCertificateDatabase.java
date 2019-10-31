@@ -4,11 +4,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Set;
+import java.util.TimeZone;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.orc.ORCPublicCertificateDatabase.CertificateHandle;
 import com.sap.sailing.domain.orc.impl.ORCPublicCertificateDatabaseImpl;
@@ -74,6 +82,32 @@ public class TestORCPublicCertificateDatabase {
         assertEquals(handle.getGPH(), result.getGPH().asSeconds(), 0.00001);
         assertEquals(handle.getIssueDate(), result.getIssueDate());
         assertEquals(handle.getSailNumber(), result.getSailNumber());
+    }
+    
+    @Test
+    public void testParallelFuzzySearch() throws InterruptedException, ExecutionException {
+        final Future<Set<ORCCertificate>> soulmateCertificatesFuture = db.search("Soulmate", "DEN13", new BoatClassImpl("ORC", BoatClassMasterdata.ORC));
+        final Future<Set<ORCCertificate>> amarettoCertificatesFuture = db.search("Amaretto", "NED 6101", new BoatClassImpl("Beneteau First 40.7", /* starts upwind */ true));
+        final Set<ORCCertificate> soulmateCertificates = soulmateCertificatesFuture.get();
+        final Set<ORCCertificate> amarettoCertificates = amarettoCertificatesFuture.get();
+        assertFoundYear(soulmateCertificates, 2019);
+        assertFoundYear(amarettoCertificates, 2019);
+    }
+
+    private void assertFoundYear(final Set<ORCCertificate> certificates, int year) {
+        boolean foundYear = false;
+        for (final ORCCertificate certificate : certificates) {
+            if (certificate.getIssueDate() != null) {
+                final GregorianCalendar cal = new GregorianCalendar();
+                cal.setTimeZone(TimeZone.getTimeZone("UTC"));
+                cal.setTimeInMillis(certificate.getIssueDate().asMillis());
+                if (cal.get(Calendar.YEAR) == year) {
+                    foundYear = true;
+                    break;
+                }
+            }
+        }
+        assertTrue(foundYear);
     }
 
     private void assertSoulmate(final String referenceNumber, CertificateHandle handle) {

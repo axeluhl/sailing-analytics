@@ -54,7 +54,7 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
         result.put(ORC_CERTIFICATE_GPH, certificate.getGPHInSecondsToTheMile());
         result.put(ORC_CERTIFICATE_CDL, certificate.getCDL());
         result.put(ORC_CERTIFICATE_LENGTH, certificate.getLengthOverAll().getMeters());
-        result.put(ORC_CERTIFICATE_ISSUE_DATE, certificate.getIssueDate().asMillis());
+        result.put(ORC_CERTIFICATE_ISSUE_DATE, certificate.getIssueDate()==null?null:certificate.getIssueDate().asMillis());
         
         JSONObject beatAngles = new JSONObject();
         JSONObject runAngles = new JSONObject();
