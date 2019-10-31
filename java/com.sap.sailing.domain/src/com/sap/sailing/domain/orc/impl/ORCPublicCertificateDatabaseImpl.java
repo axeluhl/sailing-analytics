@@ -13,10 +13,12 @@ import java.util.UUID;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.http.HttpMessage;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.SystemDefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
@@ -25,6 +27,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.orc.ORCPublicCertificateDatabase;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.CountryCodeFactory;
@@ -152,6 +155,15 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         public Boolean isProvisional() {
             return isProvisional;
         }
+
+        @Override
+        public String toString() {
+            return "CertificateHandleImpl [issuingCountry=" + issuingCountry + ", sssid=" + sssid + ", gph=" + gph
+                    + ", datInGID=" + datInGID + ", referenceNumber=" + referenceNumber + ", yachtName=" + yachtName
+                    + ", sailNumber=" + sailNumber + ", boatClassName=" + boatClassName + ", designer=" + designer
+                    + ", builder=" + builder + ", yearBuilt=" + yearBuilt + ", issueDate=" + issueDate
+                    + ", isProvisional=" + isProvisional + "]";
+        }
     }
     
     @Override
@@ -179,7 +191,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         final UrlEncodedFormEntity parametersEntity = new UrlEncodedFormEntity(params);
         final HttpPost postRequest = new HttpPost(SEARCH_URL);
         postRequest.setEntity(parametersEntity);
-        postRequest.addHeader("Authorization", "Basic "+new String(Base64.getEncoder().encode((USER_NAME+":"+getDecodedCredentials()).getBytes())));
+        addAuthorizationHeader(postRequest);
         final HttpResponse processorResponse = client.execute(postRequest);
         final InputStream content = processorResponse.getEntity().getContent();
         final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -198,6 +210,10 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
             }
         }
         return result;
+    }
+
+    private void addAuthorizationHeader(final HttpMessage httpMessage) {
+        httpMessage.addHeader("Authorization", "Basic "+new String(Base64.getEncoder().encode((USER_NAME+":"+getDecodedCredentials()).getBytes())));
     }
 
     private CertificateHandle parseHandle(Node rowNode) throws DOMException, ParseException {
@@ -225,7 +241,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
                 sssid = child.getTextContent();
                 break;
             case "GPH":
-                gph = Double.valueOf(child.getTextContent().trim());
+                gph = child.getTextContent().trim().isEmpty() ? null : Double.valueOf(child.getTextContent().trim());
                 break;
             case "DatInGID":
                 datInGID = UUID.fromString(child.getTextContent().trim().replaceAll("[{}]", ""));
@@ -261,6 +277,15 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         }
         return new CertificateHandleImpl(issuingCountry, gph, sssid, datInGID, referenceNumber, yachtName,
                 sailNumber, boatClassName, designer, builder, yearBuilt, issueDate, isProvisional);
+    }
+
+    @Override
+    public ORCCertificate getCertificate(String referenceNumber) throws Exception {
+        final HttpClient client = new SystemDefaultHttpClient();
+        final HttpGet getRequest = new HttpGet("http://data.orc.org/public/WPub.dll?action=DownBoatRMS&RefNo="+referenceNumber);
+        addAuthorizationHeader(getRequest);
+        return new ORCCertificatesRmsImporter().read(client.execute(getRequest).getEntity().getContent())
+                .getCertificates().iterator().next();
     }
 
     private static String getDecodedCredentials() {

@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.orc.impl;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -50,6 +52,7 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
     private static final String SAILNUMBER = "SAILNUMB";
     private static final String BOATCLASS = "TYPE";
     private static final String ISSUEDATE = "DD_MM_yyYY";
+    private static final String ISSUETIME = "HH:MM:SS";
     private static final String RUN_ALLOWANCE = "D";
     private static final String RUN_ANGLE = "DA";
     private static final String BEAT_ALLOWANCE = "UP";
@@ -59,8 +62,9 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
     private static final String CIRCULAR_RANDOM = "CR";
     private static final String NON_SPINNAKER = "NSP";
     private static final String NATCERTN_FILE_ID = "NATCERTN.FILE_ID";
-
+    private static final DateFormat timestampFormat = new SimpleDateFormat("dd MM yyyy HH:mm:ssZ");
     private final Map<String, Map<String, String>> certificateValuesByCertificateId;
+    
 
     public class ORCCertificateValues {
         private final String certificateId;
@@ -100,10 +104,13 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
         final Duration gph     = new SecondsDurationImpl(Double.parseDouble(certificateValues.getValue(GPH)));
         final Double cdl       = Double.parseDouble(certificateValues.getValue(CDL));
         String dateString = certificateValues.getValue(ISSUEDATE);
-        int yyYY = Integer.parseInt(dateString.substring(6));;
-        int mm = Integer.parseInt(dateString.substring(3,5));
-        int dd = Integer.parseInt(dateString.substring(0,2));
-        final TimePoint issueDate = new MillisecondsTimePoint(new GregorianCalendar(yyYY, mm, dd).getTime());
+        String timeString = certificateValues.getValue(ISSUETIME);
+        TimePoint issueDate;
+        try {
+            issueDate = new MillisecondsTimePoint(timestampFormat.parse(dateString+" "+timeString+"+0000")); // assume UTC
+        } catch (ParseException e) {
+            issueDate = null;
+        }
         final Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle = new HashMap<>();
         final Map<Speed, Bearing> beatAngles = new HashMap<>();
         final Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed = new HashMap<>();

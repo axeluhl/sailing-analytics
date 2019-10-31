@@ -106,7 +106,9 @@ public interface ORCPublicCertificateDatabase {
         return getCertificate(handle.getReferenceNumber());
     }
     
-    default ORCCertificate getCertificate(String referenceNumber) throws Exception {
-        return getCertificate(search(null, null, referenceNumber, null, null, null).iterator().next());
+    default CertificateHandle getCertificateHandle(String referenceNumber) throws Exception {
+        return search(null, null, referenceNumber, null, null, null).iterator().next();
     }
+    
+    ORCCertificate getCertificate(String referenceNumber) throws Exception;
 }

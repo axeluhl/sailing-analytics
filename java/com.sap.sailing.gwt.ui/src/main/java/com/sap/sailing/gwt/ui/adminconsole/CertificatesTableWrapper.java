@@ -64,7 +64,7 @@ public class CertificatesTableWrapper<S extends RefreshableSelectionModel<ORCCer
         TextColumn<ORCCertificate> boatClassColumn = new TextColumn<ORCCertificate>() {
             @Override
             public String getValue(ORCCertificate certificate) {
-                return certificate.getBoatclass() != null ? certificate.getBoatclass() : "";
+                return certificate.getBoatClassName() != null ? certificate.getBoatClassName() : "";
             }
         };
         boatClassColumn.setSortable(true);
@@ -72,7 +72,7 @@ public class CertificatesTableWrapper<S extends RefreshableSelectionModel<ORCCer
             private final NaturalComparator comparator = new NaturalComparator(/* caseSensitive */ false);
             @Override
             public int compare(ORCCertificate o1, ORCCertificate o2) {
-                return comparator.compare(o1.getBoatclass(), o2.getBoatclass());
+                return comparator.compare(o1.getBoatClassName(), o2.getBoatClassName());
             }
         });
         TextColumn<ORCCertificate> boatNameColumn = new TextColumn<ORCCertificate>() {
@@ -93,7 +93,7 @@ public class CertificatesTableWrapper<S extends RefreshableSelectionModel<ORCCer
             @Override
             public SafeHtml getValue(ORCCertificate certificate) {
                 SafeHtmlBuilder sb = new SafeHtmlBuilder();
-                sb.appendEscaped(certificate.getSailnumber());
+                sb.appendEscaped(certificate.getSailNumber());
                 return sb.toSafeHtml();
             }
         };
@@ -102,7 +102,7 @@ public class CertificatesTableWrapper<S extends RefreshableSelectionModel<ORCCer
             private final NaturalComparator comparator = new NaturalComparator(/* case sensitive */ false);
             @Override
             public int compare(ORCCertificate o1, ORCCertificate o2) {
-                return comparator.compare(o1.getSailnumber(), o2.getSailnumber());
+                return comparator.compare(o1.getSailNumber(), o2.getSailNumber());
             }
         });
         Column<ORCCertificate, SafeHtml> gphColumn = new Column<ORCCertificate, SafeHtml>(new SafeHtmlCell()) {
@@ -139,8 +139,8 @@ public class CertificatesTableWrapper<S extends RefreshableSelectionModel<ORCCer
             public Iterable<String> getSearchableStrings(ORCCertificate certificate) {
                 List<String> string = new ArrayList<String>();
                 string.add(certificate.getId());
-                string.add(certificate.getSailnumber());
-                string.add(certificate.getBoatclass());
+                string.add(certificate.getSailNumber());
+                string.add(certificate.getBoatClassName());
                 string.add(certificate.getBoatName());
                 return string;
             }
