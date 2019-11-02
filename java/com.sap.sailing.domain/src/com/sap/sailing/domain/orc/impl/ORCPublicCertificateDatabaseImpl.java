@@ -373,9 +373,12 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
                 certificateHandles = fuzzySearchVaryingSailNumberPadding(sailNumber, yachtName, boatClass);
             }
             for (final CertificateHandle handle : certificateHandles) {
-                final ORCCertificate certificate = getCertificates(handle).iterator().next();
-                if (certificate != null) {
-                    certificates.add(certificate);
+                final Iterable<ORCCertificate> certificatesFromHandle = getCertificates(handle);
+                if (certificatesFromHandle.iterator().hasNext()) {
+                    final ORCCertificate certificate = certificatesFromHandle.iterator().next();
+                    if (certificate != null) {
+                        certificates.add(certificate);
+                    }
                 }
             }
             return certificates;
