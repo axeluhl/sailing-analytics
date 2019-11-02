@@ -922,7 +922,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public SerializationDummy serializationDummy(PersonDTO dummy,
             CountryCode ccDummy, PreciseCompactPosition preciseCompactPosition,
-            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, SecondsDurationImpl secondsDuration, KnotSpeedImpl knotSpeedImpl) {
+            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, SecondsDurationImpl secondsDuration,
+            KnotSpeedImpl knotSpeedImpl, KilometersPerHourSpeedImpl kmhSpeedImpl) {
         return null;
     }
 

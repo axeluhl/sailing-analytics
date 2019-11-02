@@ -57,6 +57,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
@@ -1046,7 +1047,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     SerializationDummy serializationDummy(PersonDTO dummy, CountryCode ccDummy,
             PreciseCompactPosition preciseCompactPosition, TypeRelativeObjectIdentifier typeRelativeObjectIdentifier,
-            SecondsDurationImpl secondsDuration, KnotSpeedImpl knotSpeedImpl) throws UnauthorizedException;
+            SecondsDurationImpl secondsDuration, KnotSpeedImpl knotSpeedImpl, KilometersPerHourSpeedImpl kmhSpeedImpl) throws UnauthorizedException;
 
     Collection<CompetitorDTO> getEliminatedCompetitors(String leaderboardName) throws UnauthorizedException;
 

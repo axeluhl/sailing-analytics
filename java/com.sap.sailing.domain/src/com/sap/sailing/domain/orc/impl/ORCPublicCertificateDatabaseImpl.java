@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,6 +45,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDatabase {
+    private static final Logger logger = Logger.getLogger(ORCPublicCertificateDatabaseImpl.class.getName());
     private static final String USER_NAME = "Sailing_Analytics@sap.com";
     private static final String CREDENTIALS = "QUdIVUJU";
     
@@ -232,6 +234,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         final HttpPost postRequest = new HttpPost(SEARCH_URL);
         postRequest.setEntity(parametersEntity);
         addAuthorizationHeader(postRequest);
+        logger.fine(()->"Searching for "+params+"...");
         final HttpResponse processorResponse = client.execute(postRequest);
         final InputStream content = processorResponse.getEntity().getContent();
         final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -249,6 +252,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
                 }
             }
         }
+        logger.fine(()->"Search for "+params+" returned "+result.size()+" results");
         return result;
     }
 
@@ -331,11 +335,14 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
 
     @Override
     public Future<Set<ORCCertificate>> search(final String yachtName, final String sailNumber, final BoatClass boatClass) {
+        logger.fine(()->"Looking for ORC certificate for "+yachtName+"/"+sailNumber+"/"+boatClass);
         final FutureTask<Set<ORCCertificate>> result = new FutureTask<Set<ORCCertificate>>(()->{
             final Set<ORCCertificate> certificates = new HashSet<>();
             Iterable<CertificateHandle> certificateHandles = fuzzySearchVaryingSailNumberPadding(yachtName, sailNumber, boatClass);
             if (Util.isEmpty(certificateHandles)) {
                 // try swapping yacht name and sail number and go again:
+                logger.fine(()->"Nothing found for "+yachtName+"/"+sailNumber+"/"+boatClass+
+                        "; trying by swapping sail number and yacht name");
                 certificateHandles = fuzzySearchVaryingSailNumberPadding(sailNumber, yachtName, boatClass);
             }
             for (final CertificateHandle handle : certificateHandles) {
@@ -355,11 +362,15 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     private Iterable<CertificateHandle> fuzzySearchVaryingSailNumberPadding(final String yachtName, final String sailNumber, final BoatClass boatClass) throws Exception {
         Iterable<CertificateHandle> certificateHandles = fuzzySearchVaryingBoatClassName(yachtName, sailNumber, boatClass);
         if (Util.isEmpty(certificateHandles)) {
+            logger.fine(()->"Nothing found; trying without restricting sail number to "+sailNumber);
             // try without sail number constraint; if that doesn't find anything either, we can stop
             certificateHandles = fuzzySearchVaryingBoatClassName(yachtName, /* sailNumber */ null, boatClass);
-            if (!Util.isEmpty(certificateHandles)) {
+            if (Util.size(certificateHandles) > 1) {
+                logger.fine("Found "+Util.size(certificateHandles)+" results without restricting sail number to "+
+                        sailNumber+"; checking if we find a smaller result set with a specific sail number variation");
                 // try all sail number variants and see if/where we get something; if not, return the full set, unconstrained by sail number
                 for (final String sailNumberVariant : getSailNumberVariants(sailNumber)) {
+                    logger.fine(()->"Trying sail number variation "+sailNumberVariant);
                     final Iterable<CertificateHandle> restrictedHandles = fuzzySearchVaryingBoatClassName(yachtName, sailNumberVariant, boatClass);
                     if (!Util.isEmpty(restrictedHandles)) {
                         certificateHandles = restrictedHandles;
@@ -382,6 +393,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         String successfulBoatClassName = boatClass.getName();
         Iterable<CertificateHandle> certificateHandles = search(/* issuingCountry */ null, /* yearOfIssuance */ null, /* referenceNumber */ null, yachtName, sailNumber, successfulBoatClassName);
         if (Util.isEmpty(certificateHandles)) {
+            logger.fine(()->"Nothing found; removing boat class name restriction "+boatClass.getName());
             // try without boat class restriction
             successfulBoatClassName = null;
             certificateHandles = search(/* issuingCountry */ null, /* yearOfIssuance */ null, /* referenceNumber */ null, yachtName, sailNumber, successfulBoatClassName);
