@@ -162,13 +162,15 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
         urlsPanel.add(urls);
         mainPanel.add(fileUpload);
         mainPanel.add(tablesPanel);
-        // BUTTON - Refresh
         final Button refreshButton = topButtonPanel.addUnsecuredAction(stringMessages.refresh(), this::refresh);
         refreshButton.ensureDebugId("RefreshButton");
         this.contextUpdatePermissionCheck = contextUpdatePermissionCheck;
         final Button importCertificatesButton = topButtonPanel.addAction(stringMessages.importCertificates(),
                 contextUpdatePermissionCheck, this::importCertificates);
         importCertificatesButton.ensureDebugId("ImportCertificatesButton");
+        final Button suggestCertificatesButton = topButtonPanel.addAction(stringMessages.suggestCertificates(),
+                contextUpdatePermissionCheck, this::suggestCertificates);
+        suggestCertificatesButton.ensureDebugId("SuggestCertificatesButton");
         // TABLE - Boats
         CaptionPanel boatCaptionPanel = new CaptionPanel("Boats");
         boatCaptionPanel.add(boatTable);
@@ -328,6 +330,27 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
      */
     private void importCertificates() {
         form.submit();
+    }
+    
+    private void suggestCertificates() {
+        busyIndicator.setBusy(true);
+        sailingService.getSuggestedCertificates(new ArrayList<>(boatsByIdAsString.values()),
+                new AsyncCallback<Map<BoatDTO, Set<ORCCertificate>>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        busyIndicator.setBusy(false);
+                        errorReporter.reportError(stringMessages.errorSuggestingCertificates(caught.getMessage()));
+                    }
+
+                    @Override
+                    public void onSuccess(Map<BoatDTO, Set<ORCCertificate>> result) {
+                        busyIndicator.setBusy(false);
+                        // TODO try to map one of the suggested certificates to the key boat...
+                        for (final Set<ORCCertificate> certificates : result.values()) {
+                            certificateTable.addCertificates(certificates);
+                        }
+                    }
+        });
     }
 
     /**

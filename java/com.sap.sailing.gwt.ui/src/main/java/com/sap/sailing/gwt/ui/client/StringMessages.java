@@ -2315,4 +2315,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String useImpliedWindFromOtherRace();
     String pleaseProvideAFixedValueForImpliedWindSpeed();
     String pleaseSelectARaceWhoseImpliedWindToUse();
+    String suggestCertificates();
+    String errorSuggestingCertificates(String message);
 }

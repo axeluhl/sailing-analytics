@@ -60,7 +60,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     
     private static final NameValuePair ACTION_PARAM = new BasicNameValuePair(ACTION_PARAM_NAME, ACTION_PARAM_VALUE_LIST_CERT);
     private static final NameValuePair XSLP_PARAM = new BasicNameValuePair(XSLP_PARAM_NAME, XSLP_PARAM_VALUE_LIST_CERT);
-    private static final String SEARCH_URL = "https://data.orc.org/public/WPub.dll";
+    private static final String SEARCH_URL = "http://data.orc.org/public/WPub.dll";
     private static final String ROOT_ELEMENT = "ROOT";
     private static final String DATA_ELEMENT = "DATA";
     private static final String ROW_ELEMENT = "ROW";
