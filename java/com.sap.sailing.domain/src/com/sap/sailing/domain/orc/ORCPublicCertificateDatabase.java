@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.orc;
 
+import java.util.Arrays;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
@@ -117,8 +118,18 @@ public interface ORCPublicCertificateDatabase {
     Iterable<CertificateHandle> search(CountryCode country, Integer yearOfIssuance, String referenceNumber,
             String yachtName, String sailNumber, String boatClassName) throws Exception;
     
-    default ORCCertificate getCertificate(CertificateHandle handle) throws Exception {
-        return getCertificate(handle.getReferenceNumber());
+    default Iterable<ORCCertificate> getCertificates(Iterable<CertificateHandle> handles) throws Exception {
+        return Util.map(handles, handle->{
+            try {
+                return getCertificate(handle.getReferenceNumber());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+    
+    default Iterable<ORCCertificate> getCertificates(CertificateHandle... handles) throws Exception {
+        return getCertificates(Arrays.asList(handles));
     }
     
     default CertificateHandle getCertificateHandle(String referenceNumber) throws Exception {

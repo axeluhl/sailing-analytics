@@ -211,7 +211,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     @Override
     public Iterable<CertificateHandle> search(CountryCode issuingCountry, Integer yearOfIssuance, String referenceNumber,
             String yachtName, String sailNumber, String boatClassName) throws Exception {
-        final List<ORCPublicCertificateDatabase.CertificateHandle> result = new LinkedList<>(); 
+        final Set<ORCPublicCertificateDatabase.CertificateHandle> result = new HashSet<>(); 
         final HttpClient client = new SystemDefaultHttpClient();
         final List<NameValuePair> params = new ArrayList<>();
         params.add(ACTION_PARAM);
@@ -312,7 +312,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
                 issueDate = new MillisecondsTimePoint(isoTimestampFormat.parse(child.getTextContent()+"+0000")); // assume UTC
                 break;
             case "Age":
-                yearBuilt = Integer.valueOf(child.getTextContent());
+                yearBuilt = child.getTextContent().trim().isEmpty() ? null : Integer.valueOf(child.getTextContent().trim());
                 break;
             case "Provisional":
                 isProvisional = Boolean.valueOf(child.getTextContent());
@@ -328,9 +328,36 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         final HttpClient client = new SystemDefaultHttpClient();
         final HttpGet getRequest = new HttpGet("http://data.orc.org/public/WPub.dll?action=DownBoatRMS&RefNo="+referenceNumber);
         addAuthorizationHeader(getRequest);
+        logger.fine("Obtaining certificate for reference number "+referenceNumber);
         final Iterable<ORCCertificate> certificates = new ORCCertificatesRmsImporter().read(client.execute(getRequest).getEntity().getContent())
                 .getCertificates();
-        return certificates.iterator().hasNext() ? certificates.iterator().next() : null;
+        final ORCCertificate result;
+        if (certificates.iterator().hasNext()) {
+            result = certificates.iterator().next();
+        } else {
+            result = null;
+            logger.info("Couldn't find ORC certificate with reference number "+referenceNumber);
+        }
+        return result;
+    }
+
+    public Iterable<ORCCertificate> getCertificates(Iterable<CertificateHandle> handles) throws Exception {
+        final Set<Future<ORCCertificate>> futures = new HashSet<>();
+        for (final CertificateHandle handle : handles) {
+            final FutureTask<ORCCertificate> task = new FutureTask<ORCCertificate>(()->getCertificate(handle.getReferenceNumber()));
+            final Thread backgroundExecutor = new Thread(task, "ORC certificate background download thread for "+handle.getReferenceNumber());
+            backgroundExecutor.setDaemon(true);
+            backgroundExecutor.start();
+            futures.add(task);
+        }
+        final Set<ORCCertificate> result = new HashSet<>();
+        for (final Future<ORCCertificate> future : futures) {
+            final ORCCertificate certificate = future.get();
+            if (certificate != null) {
+                result.add(certificate);
+            }
+        }
+        return result;
     }
 
     @Override
@@ -346,7 +373,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
                 certificateHandles = fuzzySearchVaryingSailNumberPadding(sailNumber, yachtName, boatClass);
             }
             for (final CertificateHandle handle : certificateHandles) {
-                final ORCCertificate certificate = getCertificate(handle);
+                final ORCCertificate certificate = getCertificates(handle).iterator().next();
                 if (certificate != null) {
                     certificates.add(certificate);
                 }
