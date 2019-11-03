@@ -8,9 +8,12 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
@@ -89,11 +92,13 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         private final String builder;
         private final Integer yearBuilt;
         private final TimePoint issueDate;
+        private final Integer certType;
+        private final Boolean isOneDesign;
         private final Boolean isProvisional;
 
         public CertificateHandleImpl(CountryCode issuingCountry, Double gph, String sssid, UUID datInGID,
                 String referenceNumber, String yachtName, String sailNumber, String boatClassName, String designer,
-                String builder, Integer yearBuilt, TimePoint issueDate, Boolean isProvisional) {
+                String builder, Integer yearBuilt, TimePoint issueDate, Integer certType, Boolean oneDesign, Boolean isProvisional) {
             super();
             this.issuingCountry = issuingCountry;
             this.gph = gph;
@@ -107,6 +112,8 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
             this.builder = builder;
             this.yearBuilt = yearBuilt;
             this.issueDate = issueDate;
+            this.certType = certType;
+            this.isOneDesign = oneDesign;
             this.isProvisional = isProvisional;
         }
 
@@ -194,10 +201,20 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         public TimePoint getIssueDate() {
             return issueDate;
         }
+        
+        @Override
+        public Integer getCertType() {
+            return certType;
+        }
 
         @Override
         public Boolean isProvisional() {
             return isProvisional;
+        }
+        
+        @Override
+        public Boolean isOd() {
+            return isOneDesign;
         }
 
         @Override
@@ -205,8 +222,8 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
             return "CertificateHandleImpl [issuingCountry=" + issuingCountry + ", sssid=" + sssid + ", gph=" + gph
                     + ", datInGID=" + datInGID + ", referenceNumber=" + referenceNumber + ", yachtName=" + yachtName
                     + ", sailNumber=" + sailNumber + ", boatClassName=" + boatClassName + ", designer=" + designer
-                    + ", builder=" + builder + ", yearBuilt=" + yearBuilt + ", issueDate=" + issueDate
-                    + ", isProvisional=" + isProvisional + "]";
+                    + ", builder=" + builder + ", yearBuilt=" + yearBuilt + ", issueDate=" + issueDate + ", certType="
+                    + certType + ", isOneDesign=" + isOneDesign + ", isProvisional=" + isProvisional + "]";
         }
     }
     
@@ -275,7 +292,9 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         String designer = null;
         String builder = null;
         Integer yearBuilt = null;
+        Integer certType = null;
         TimePoint issueDate = null;
+        Boolean isOneDesign = null;
         Boolean isProvisional = null;
         for (int i=0; i<rowNode.getChildNodes().getLength(); i++) {
             final Node child = rowNode.getChildNodes().item(i);
@@ -313,8 +332,14 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
             case "dxtDate":
                 issueDate = new MillisecondsTimePoint(isoTimestampFormat.parse(child.getTextContent()+"+0000")); // assume UTC
                 break;
+            case "CertType":
+                certType = Integer.valueOf(child.getTextContent().trim());
+                break;
             case "Age":
                 yearBuilt = child.getTextContent().trim().isEmpty() ? null : Integer.valueOf(child.getTextContent().trim());
+                break;
+            case "IsOd":
+                isOneDesign = Boolean.valueOf(child.getTextContent());
                 break;
             case "Provisional":
                 isProvisional = Boolean.valueOf(child.getTextContent());
@@ -322,7 +347,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
             }
         }
         return new CertificateHandleImpl(issuingCountry, gph, sssid, datInGID, referenceNumber, yachtName,
-                sailNumber, boatClassName, designer, builder, yearBuilt, issueDate, isProvisional);
+                sailNumber, boatClassName, designer, builder, yearBuilt, issueDate, certType, isOneDesign, isProvisional);
     }
 
     @Override
@@ -344,19 +369,26 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     }
 
     public Iterable<ORCCertificate> getCertificates(Iterable<CertificateHandle> handles) throws Exception {
-        final Set<Future<ORCCertificate>> futures = new HashSet<>();
+        final Map<CertificateHandle, Future<ORCCertificate>> futures = new HashMap<>();
         for (final CertificateHandle handle : handles) {
-            final FutureTask<ORCCertificate> task = new FutureTask<ORCCertificate>(()->getCertificate(handle.getReferenceNumber()));
-            final Thread backgroundExecutor = new Thread(task, "ORC certificate background download thread for "+handle.getReferenceNumber());
-            backgroundExecutor.setDaemon(true);
-            backgroundExecutor.start();
-            futures.add(task);
+            if (!handle.getReferenceNumber().trim().isEmpty()) {
+                final FutureTask<ORCCertificate> task = new FutureTask<ORCCertificate>(()->getCertificate(handle.getReferenceNumber()));
+                final Thread backgroundExecutor = new Thread(task, "ORC certificate background download thread for "+handle.getReferenceNumber());
+                backgroundExecutor.setDaemon(true);
+                backgroundExecutor.start();
+                futures.put(handle, task);
+            } else {
+                logger.fine("Ignoring handle "+handle+" because it has an empty reference number");
+            }
         }
         final Set<ORCCertificate> result = new HashSet<>();
-        for (final Future<ORCCertificate> future : futures) {
-            final ORCCertificate certificate = future.get();
+        for (final Entry<CertificateHandle, Future<ORCCertificate>> e : futures.entrySet()) {
+            final ORCCertificate certificate = e.getValue().get();
             if (certificate != null) {
+                logger.fine("Found certificate for handle "+e.getKey());
                 result.add(certificate);
+            } else {
+                logger.fine("Did not find certificate for handle "+e.getKey());
             }
         }
         return result;
@@ -368,7 +400,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         final FutureTask<Set<ORCCertificate>> result = new FutureTask<Set<ORCCertificate>>(()->{
             final Set<ORCCertificate> certificates = new HashSet<>();
             Iterable<CertificateHandle> certificateHandles = fuzzySearchVaryingSailNumberPadding(yachtName, sailNumber, boatClass);
-            if (Util.isEmpty(certificateHandles)) {
+            if (!containsHandleForCurrentYear(certificateHandles)) {
                 // try swapping yacht name and sail number and go again:
                 logger.fine(()->"Nothing found for "+yachtName+"/"+sailNumber+"/"+boatClass+
                         "; trying by swapping sail number and yacht name");
@@ -392,70 +424,90 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     }
 
     private Iterable<CertificateHandle> fuzzySearchVaryingSailNumberPadding(final String yachtName, final String sailNumber, final BoatClass boatClass) throws Exception {
-        Iterable<CertificateHandle> certificateHandles = fuzzySearchVaryingBoatClassName(yachtName, sailNumber, boatClass);
-        if (Util.isEmpty(certificateHandles)) {
+        final Set<CertificateHandle> result = new HashSet<>();
+        for (final String sailNumberVariant : getSailNumberVariants(sailNumber)) {
+            logger.fine(()->"Trying sail number variation "+sailNumberVariant);
+            final Iterable<CertificateHandle> certificateHandles = fuzzySearchVaryingBoatClassName(yachtName, sailNumberVariant, boatClass);
+            Util.addAll(filterHandlesForCurrentYear(certificateHandles), result);
+        }
+        if (sailNumber != null && result.isEmpty() && (yachtName != null || boatClass != null)) {
             logger.fine(()->"Nothing found; trying without restricting sail number to "+sailNumber);
             // try without sail number constraint; if that doesn't find anything either, we can stop
-            certificateHandles = fuzzySearchVaryingBoatClassName(yachtName, /* sailNumber */ null, boatClass);
-            if (Util.size(certificateHandles) > 1 || !containsHandleForCurrentYear(certificateHandles)) {
-                logger.fine("Found "+Util.size(certificateHandles)+" results without restricting sail number to "+
-                        sailNumber+"; checking if we find a smaller result set with a specific sail number variation");
-                // try all sail number variants and see if/where we get something; if not, return the full set, unconstrained by sail number
-                for (final String sailNumberVariant : getSailNumberVariants(sailNumber)) {
-                    logger.fine(()->"Trying sail number variation "+sailNumberVariant);
-                    final Iterable<CertificateHandle> restrictedHandles = fuzzySearchVaryingBoatClassName(yachtName, sailNumberVariant, boatClass);
-                    if (!Util.isEmpty(restrictedHandles)) {
-                        certificateHandles = restrictedHandles;
-                        break;
-                    }
-                }
-            }
+            Util.addAll(fuzzySearchVaryingBoatClassName(yachtName, /* sailNumber */ null, boatClass), result);
         }
-        return certificateHandles;
+        return result;
     }
 
     private boolean containsHandleForCurrentYear(Iterable<CertificateHandle> certificateHandles) {
+        return filterHandlesForCurrentYear(certificateHandles).iterator().hasNext();
+    }
+
+    private Iterable<CertificateHandle> filterHandlesForCurrentYear(Iterable<CertificateHandle> certificateHandles) {
+        final List<CertificateHandle> result = new LinkedList<>();
         final Calendar cal = new GregorianCalendar();
         final int currentYear = cal.get(Calendar.YEAR);
         for (final CertificateHandle handle : certificateHandles) {
             cal.setTime(handle.getIssueDate().asDate());
             if (cal.get(Calendar.YEAR) ==  currentYear) {
-                return true;
+                result.add(handle);
             }
         }
-        return false;
+        return result;
     }
 
     /**
      * Varies the boat class name by first using the true boat class name, then, if nothing is found, stepping through
      * the alternative names, and finally removing the boat class name constraint altogether.
      * 
+     * @param yachtName
+     *            may be {@code null}
+     * @param sailNumber
+     *            may be {@code null}
+     * @param boatClass
+     *            may be {@code null}
+     * 
      * @return the boat class name that ultimately led to the matches returned, and the matches in the form of a
-     *         sequence of handles
+     *         sequence of handles; may be {@code null}
      */
     private Iterable<CertificateHandle> fuzzySearchVaryingBoatClassName(final String yachtName, final String sailNumber, final BoatClass boatClass) throws Exception {
-        String successfulBoatClassName = boatClass.getName();
+        String successfulBoatClassName = boatClass==null?null:boatClass.getName();
         Iterable<CertificateHandle> certificateHandles = search(/* issuingCountry */ null, /* yearOfIssuance */ null, /* referenceNumber */ null, yachtName, sailNumber, successfulBoatClassName);
-        if (Util.isEmpty(certificateHandles)) {
-            logger.fine(()->"Nothing found; removing boat class name restriction "+boatClass.getName());
-            // try without boat class restriction
-            successfulBoatClassName = null;
-            certificateHandles = search(/* issuingCountry */ null, /* yearOfIssuance */ null, /* referenceNumber */ null, yachtName, sailNumber, successfulBoatClassName);
+        if (!containsHandleForCurrentYear(certificateHandles) && successfulBoatClassName != null) {
+            if (yachtName != null || sailNumber != null) {
+                logger.fine(()->"Nothing found; removing boat class name restriction "+boatClass.getName());
+                // try without boat class restriction
+                successfulBoatClassName = null;
+                certificateHandles = search(/* issuingCountry */ null, /* yearOfIssuance */ null, /* referenceNumber */ null, yachtName, sailNumber, successfulBoatClassName);
+            } else {
+                logger.fine(()->"No current certificates found for boat class "+boatClass.getName()+
+                        " but yacht name and sail number are not specified either; giving up.");
+            }
         }
-        for (final CertificateHandle handle : certificateHandles) {
+        // if a valid boatClass was specified, try to filter; if none match the filter, return unfiltered
+        if (boatClass != null) {
             final Set<CertificateHandle> restrictedResults = new HashSet<>();
-            final BoatClassMasterdata boatClassMasterData = BoatClassMasterdata.resolveBoatClass(boatClass.getName());
-            if (boatClassMasterData != null && boatClassMasterData.getDisplayName().equals(boatClass.getDisplayName())) {
-                restrictedResults.add(handle);
+            for (final CertificateHandle handle : filterHandlesForCurrentYear(certificateHandles)) {
+                final BoatClassMasterdata boatClassMasterData = BoatClassMasterdata.resolveBoatClass(handle.getBoatClassName());
+                if (boatClassMasterData != null && boatClassMasterData.getDisplayName().equals(boatClass.getDisplayName())) {
+                    restrictedResults.add(handle);
+                }
             }
             if (!restrictedResults.isEmpty()) {
                 certificateHandles = restrictedResults;
-                break;
             }
         }
         return certificateHandles;
     }
 
+    /**
+     * Produces a sequence of sail number variations of which {@code sailNumber} is the first.
+     * It then adds separations of a recognized three-letter IOC nationality code at the beginning
+     * of {@code sailNumber} and a digit sequence at the end and connects them with combinations
+     * of space and dash (-) characters surrounded by the wildcard character "%". This can lead
+     * to slightly unprecise results: e.g., "DEN%-%13" can also match "DEN-413". To be fair, the
+     * original search also is a prefix search, so "DEN 13" would also match "DEN 134"" and all other
+     * sail numbers of which "DEN 13" is a prefix.
+     */
     private Iterable<String> getSailNumberVariants(String sailNumber) {
         final List<String> result = new LinkedList<>();
         result.add(sailNumber);
@@ -465,7 +517,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
             if (findResult) {
                 final String country = matcher.group(1);
                 final String number = matcher.group(2);
-                for (final String paddingToTry : new String[] { " ", "  ", "   ", "    ", " - ", "-", "- ", "-  ", "-   ", "-    " }) {
+                for (final String paddingToTry : new String[] { "% %", "%-%" }) {
                     result.add(country+paddingToTry+number);
                 }
             }

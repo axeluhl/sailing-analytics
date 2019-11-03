@@ -1196,6 +1196,14 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void getSuggestedORCBoatCertificates(ArrayList<BoatDTO> boats, AsyncCallback<Map<BoatDTO, Set<ORCCertificate>>> callback);
 
+    /**
+     * Searches for ORC certificates based on various criteria. Pass {@code null} for a criterion to not restrict search
+     * results based on that criterion. You can use "%" as wildcards in the {@code yachtName}, {@code sailNumber} and
+     * {@code boatClassName} parameters.
+     * <p>
+     * 
+     * @return an always valid, never {@code null} object which may be {@link Util#isEmpty() empty}.
+     */
     void searchORCBoatCertificates(CountryCode country, Integer yearOfIssuance, String referenceNumber,
             String yachtName, String sailNumber, String boatClassName, AsyncCallback<Set<ORCCertificate>> callback);
 }

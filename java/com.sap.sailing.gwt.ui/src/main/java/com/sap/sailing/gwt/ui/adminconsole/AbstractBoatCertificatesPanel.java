@@ -398,9 +398,9 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
     }
     
     private void suggestCertificates() {
-        busyIndicator.setBusy(true);
         final Set<BoatDTO> selectedBoats = boatTable.getSelectionModel().getSelectedSet();
         if (selectedBoats != null && !selectedBoats.isEmpty()) {
+            busyIndicator.setBusy(true);
             sailingService.getSuggestedORCBoatCertificates(new ArrayList<>(selectedBoats),
                     new AsyncCallback<Map<BoatDTO, Set<ORCCertificate>>>() {
                         @Override
@@ -412,7 +412,6 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
                         @Override
                         public void onSuccess(Map<BoatDTO, Set<ORCCertificate>> result) {
                             busyIndicator.setBusy(false);
-                            // TODO try to map one of the suggested certificates to the key boat...
                             for (final Entry<BoatDTO, Set<ORCCertificate>> e : result.entrySet()) {
                                 certificateTable.addCertificates(e.getValue());
                                 if (!certificateAssignments.containsKey(e.getKey()) && e.getValue().size() == 1) {
