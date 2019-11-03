@@ -6,6 +6,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -395,7 +397,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
             logger.fine(()->"Nothing found; trying without restricting sail number to "+sailNumber);
             // try without sail number constraint; if that doesn't find anything either, we can stop
             certificateHandles = fuzzySearchVaryingBoatClassName(yachtName, /* sailNumber */ null, boatClass);
-            if (Util.size(certificateHandles) > 1) {
+            if (Util.size(certificateHandles) > 1 || !containsHandleForCurrentYear(certificateHandles)) {
                 logger.fine("Found "+Util.size(certificateHandles)+" results without restricting sail number to "+
                         sailNumber+"; checking if we find a smaller result set with a specific sail number variation");
                 // try all sail number variants and see if/where we get something; if not, return the full set, unconstrained by sail number
@@ -410,6 +412,18 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
             }
         }
         return certificateHandles;
+    }
+
+    private boolean containsHandleForCurrentYear(Iterable<CertificateHandle> certificateHandles) {
+        final Calendar cal = new GregorianCalendar();
+        final int currentYear = cal.get(Calendar.YEAR);
+        for (final CertificateHandle handle : certificateHandles) {
+            cal.setTime(handle.getIssueDate().asDate());
+            if (cal.get(Calendar.YEAR) ==  currentYear) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

@@ -60,7 +60,7 @@ public class TestORCPublicCertificateDatabase {
         boolean found = false;
         for (final CertificateHandle handle : result) {
             if (handle.getReferenceNumber().equals(referenceNumber)) {
-                assertSoulmate(referenceNumber, result.iterator().next());
+                assertSoulmate(referenceNumber, handle);
                 found = true;
             }
         }
