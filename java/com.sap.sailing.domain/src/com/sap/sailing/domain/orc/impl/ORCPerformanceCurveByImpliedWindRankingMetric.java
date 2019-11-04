@@ -834,4 +834,9 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
             }
         });
     }
+    
+    @Override
+    public String toString() {
+        return getClass().getSimpleName()+" for race "+getTrackedRace();
+    }
 }
