@@ -99,7 +99,6 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     @Override
     public Iterable<MarkProperties> getAllMarkProperties(Iterable<String> tagsToFilterFor) {
-        // TODO: synchronization
         return markPropertiesById.values().stream().filter(m -> containsAny(m.getTags(), tagsToFilterFor))
                 .filter(getSecurityService()::hasCurrentUserReadPermission).collect(Collectors.toList());
     }
@@ -155,12 +154,12 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     @Override
     public MarkProperties updateMarkProperties(UUID uuid, CommonMarkProperties properties, Position position,
             DeviceIdentifier deviceIdentifier, Iterable<String> tags) {
-        // TODO: synchronization
-        if (!markPropertiesById.containsKey(uuid)) {
+        final MarkProperties markProperties = markPropertiesById.get(uuid);
+        if (markProperties == null) {
             throw new NullPointerException(String.format("Could not find mark properties with id %s", uuid.toString()));
         }
 
-        getSecurityService().checkCurrentUserUpdatePermission(markPropertiesById.get(uuid));
+        getSecurityService().checkCurrentUserUpdatePermission(markProperties);
         apply(s -> internalUpdateMarkProperties(uuid, properties, position, deviceIdentifier, tags));
         return getMarkPropertiesById(uuid);
     }
@@ -189,7 +188,6 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
                 properties.getShortName(), properties.getColor(), properties.getShape(), properties.getPattern(),
                 properties.getType()).withTags(tags).build();
 
-        // TODO: synchronization
         mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
         markPropertiesById.put(markProperties.getId(), markProperties);
         return null;
@@ -417,7 +415,6 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     @Override
     public Void internalDeleteMarkProperties(UUID markPropertiesUUID) {
-        // TODO: synchronization
         if (this.markPropertiesById.remove(markPropertiesUUID) != null) {
             mongoObjectFactory.removeMarkProperties(markPropertiesUUID);
         } else {
