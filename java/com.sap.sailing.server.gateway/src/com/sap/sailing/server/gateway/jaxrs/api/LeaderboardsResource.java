@@ -610,7 +610,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         final Response result;
         if (leaderboardAndRaceColumnAndFleetAndResponse.getFleet() != null) {
             final RaceLog raceLog = leaderboardAndRaceColumnAndFleetAndResponse.getRaceColumn().getRaceLog(leaderboardAndRaceColumnAndFleetAndResponse.getFleet());
-            final LogEventAuthorImpl author = new LogEventAuthorImpl(SecurityUtils.getSubject().getPrincipal().toString(), /* priority */ 0);
+            final AbstractLogEventAuthor author = getService().getServerAuthor();
             JSONObject jsonResult = new JSONObject();
             if (startOfTrackingAsISO != null || startOfTrackingAsMillis != null) {
                 final TimePoint startOfTracking = parseTimePoint(startOfTrackingAsISO, startOfTrackingAsMillis, null);
