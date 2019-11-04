@@ -17,7 +17,6 @@ import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -145,6 +144,7 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.WithID;
@@ -2398,12 +2398,33 @@ public class RegattasResource extends AbstractSailingServerResource {
 
             final JSONObject result = new JSONObject();
             foundMappings.forEach((item, mappings) -> {
+                Map<DeviceIdentifier, DeviceMappingWithRegattaLogEvent<WithID>> mappingByDeviceID = new HashMap<>();
+                for (DeviceMappingWithRegattaLogEvent<WithID> mapping : mappings) {
+                    mappingByDeviceID.compute(mapping.getDevice(), (di, existingMapping) -> {
+                        if (existingMapping == null) {
+                            return mapping;
+                        }
+                        TimeRange existingTimeRange = existingMapping.getTimeRange();
+                        TimeRange newTimeRange = mapping.getTimeRange();
+                        if ((!existingTimeRange.hasOpenEnd() && newTimeRange.hasOpenEnd())
+                                || newTimeRange.endsAfter(existingTimeRange)
+                                || (newTimeRange.to().compareTo(existingTimeRange.to()) == 0
+                                && newTimeRange.startsAfter(existingTimeRange))) {
+                            return mapping;
+                        }
+                        return existingMapping;
+                    });
+                }
                 final JSONArray deviceStatusesOfTrackedItem = new JSONArray();
-                deviceStatusesOfTrackedItem
-                        .addAll(mappings.stream().map(DeviceMappingWithRegattaLogEvent<WithID>::getDevice).distinct()
-                                .map(deviceIdentifier -> serializer.serialize(
-                                        TrackingDeviceStatus.calculateDeviceStatus(deviceIdentifier, getService())))
-                                .collect(Collectors.toList()));
+                for (DeviceMappingWithRegattaLogEvent<WithID> deviceMapping: mappingByDeviceID.values()) {
+                    JSONObject serializedDeviceStatus = serializer.serialize(
+                            TrackingDeviceStatus.calculateDeviceStatus(deviceMapping.getDevice(), getService()));
+                    deviceStatusesOfTrackedItem.add(serializedDeviceStatus);
+                    TimeRange mappedTimeRange = deviceMapping.getTimeRange();
+                    serializedDeviceStatus.put("mappedFrom", mappedTimeRange.from().asMillis());
+                    serializedDeviceStatus.put("mappedTo",
+                            mappedTimeRange.hasOpenEnd() ? null : mappedTimeRange.to().asMillis());
+                }
                 final JSONObject itemObject = new JSONObject();
                 itemObject.put("deviceStatuses", deviceStatusesOfTrackedItem);
                 if (item instanceof Competitor) {
