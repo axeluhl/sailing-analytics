@@ -86,11 +86,14 @@ public abstract class CourseManagementWidget implements IsWidget {
     public static interface LegGeometrySupplier {
         /**
          * The lengths of the {@code zeroBasedLegNumbers} and {@code orcPerformanceCurveLegTypes} arrays must be equal,
-         * and the indices bind the values together. The leg geometries will be determined based on the leg type selected.
-         * If the leg type is {@code null} for a leg, the server-defined leg type will be determined and applied, so that
-         * windward / leeward legs will have their length computed by projecting onto the wind direction, and reaching legs
-         * will be judged based on rhumb line distance; the same applies for {@link ORCPerformanceCurveLegTypes#WINDWARD_LEEWARD}
-         * and {@link ORCPerformanceCurveLegTypes#TWA}-typed legs. For all other leg types, rhumb-line distance is to be computed.
+         * and the indices bind the values together. The leg geometries will be determined based on the leg type
+         * selected. If the leg type is {@code null} for a leg, the server-defined leg type will be determined and
+         * applied, so that windward / leeward legs will have their length computed by projecting onto the wind
+         * direction, and reaching legs will be judged based on rhumb line distance; the same applies for
+         * {@link ORCPerformanceCurveLegTypes#WINDWARD_LEEWARD},
+         * {@link ORCPerformanceCurveLegTypes#WINDWARD_LEEWARD_REAL_LIVE} and
+         * {@link ORCPerformanceCurveLegTypes#TWA}-typed legs. For all other leg types, rhumb-line distance is to be
+         * computed.
          */
         void getLegGeometry(int[] zeroBasedLegNumbers, ORCPerformanceCurveLegTypes[] orcPerformanceCurveLegTypes, AsyncCallback<ORCPerformanceCurveLegImpl[]> callback);
     }

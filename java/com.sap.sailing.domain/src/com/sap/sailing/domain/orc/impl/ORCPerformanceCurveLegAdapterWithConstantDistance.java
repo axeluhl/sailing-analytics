@@ -2,7 +2,6 @@ package com.sap.sailing.domain.orc.impl;
 
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
-import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
@@ -19,21 +18,21 @@ import com.sap.sse.common.TimePoint;
  * {@link TrackedLeg} passed to the constructor is a part. If no wind information is known, the leg is emulated to
  * be of type {@link ORCPerformanceCurveLegTypes#LONG_DISTANCE}, and {@link #getTwa()} will return {@code null}.
  */
-public class ORCPerformanceCurveLegAdapter extends AbstractORCPerformanceCurveTwaLegAdapter {
+public class ORCPerformanceCurveLegAdapterWithConstantDistance extends AbstractORCPerformanceCurveTwaLegAdapter {
     private static final long serialVersionUID = -6432064480098807397L;
+    private final Distance length;
     
-    public ORCPerformanceCurveLegAdapter(TrackedLeg trackedLeg) {
+    public ORCPerformanceCurveLegAdapterWithConstantDistance(TrackedLeg trackedLeg, Distance length) {
         super(trackedLeg);
+        this.length = length;
     }
 
     @Override
     public Distance getLength() {
-        final TimePoint referenceTimePoint = getTrackedLeg().getReferenceTimePoint();
-        return getTrackedLeg().getWindwardDistance(ORCPerformanceCurveLegTypes.getLegType(getType()), referenceTimePoint,
-                new LeaderboardDTOCalculationReuseCache(referenceTimePoint));
+        return length;
     }
 
     public Distance getLength(WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return getTrackedLeg().getWindwardDistance(ORCPerformanceCurveLegTypes.getLegType(getType()), getTrackedLeg().getReferenceTimePoint(), cache);
+        return length;
     }
 }
