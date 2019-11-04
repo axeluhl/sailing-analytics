@@ -48,9 +48,12 @@ import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
+import com.sap.sailing.domain.common.orc.OwnMaxImpliedWind;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
@@ -955,7 +958,7 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void serializationDummy(PersonDTO dummy, CountryCode ccDummy, PreciseCompactPosition preciseCompactPosition,
             TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, SecondsDurationImpl secondsDuration,
-            KnotSpeedImpl knotSpeedImpl, AsyncCallback<SerializationDummy> callback);
+            KnotSpeedImpl knotSpeedImpl, KilometersPerHourSpeedImpl kmhSpeedImpl, AsyncCallback<SerializationDummy> callback);
 
     /**
      * @param leaderboardName
@@ -1176,6 +1179,37 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void assignORCPerformanceCurveCertificates(String leaderboardName,
             Map<String, ORCCertificate> certificatesForBoatsWithIdAsString,
             AsyncCallback<Triple<Integer, Integer, Integer>> callback);
+
+    void getORCPerformanceCurveScratchBoat(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<CompetitorDTO> asyncCallback);
+
+    void setORCPerformanceCurveScratchBoat(String leaderboardName, String raceColumnName, String fleetName, CompetitorDTO newScratchBoat,
+            AsyncCallback<Void> asyncCallback);
+
+    /**
+     * Obtains the {@link ImpliedWindSource} set in the race log identified by the triple {@code leaderboardName},
+     * {@code raceColumnName}, and {@code fleetName}. Note that other than in the ORC Performance Curve ranking metric
+     * no defaulting takes place here, and {@code null} is a possible result that indicates that either no race log
+     * event was found that set an implied wind source, or that event explicitly set the implied wind source to {@code null}
+     * (which will have the ranking metric default to {@link OwnMaxImpliedWind}, eventually).
+     */
+    void getImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName, AsyncCallback<ImpliedWindSource> asyncCallback);
+
+    void setImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName,
+            ImpliedWindSource impliedWindSource, AsyncCallback<Void> callback);
+
+    void getSuggestedORCBoatCertificates(ArrayList<BoatDTO> boats, AsyncCallback<Map<BoatDTO, Set<ORCCertificate>>> callback);
+
+    /**
+     * Searches for ORC certificates based on various criteria. Pass {@code null} for a criterion to not restrict search
+     * results based on that criterion. You can use "%" as wildcards in the {@code yachtName}, {@code sailNumber} and
+     * {@code boatClassName} parameters.
+     * <p>
+     * 
+     * @return an always valid, never {@code null} object which may be {@link Util#isEmpty() empty}.
+     */
+    void searchORCBoatCertificates(CountryCode country, Integer yearOfIssuance, String referenceNumber,
+            String yachtName, String sailNumber, String boatClassName, AsyncCallback<Set<ORCCertificate>> callback);
     
     void getMarkTemplates(AsyncCallback<Iterable<MarkTemplateDTO>> callback);
 

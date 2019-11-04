@@ -932,6 +932,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     @Override
     public void regattaLogEventAdded(RegattaLogEvent event) {
         getRaceColumnListeners().notifyListenersAboutRegattaLogEventAdded(event);
+        super.regattaLogEventAdded(event);
     }
 
     public String toString() {

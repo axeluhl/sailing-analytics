@@ -21,7 +21,7 @@ public class TeamJsonDeserializer implements JsonDeserializer<DynamicTeam> {
     private final JsonDeserializer<DynamicPerson> personDeserializer;
     private static final Logger logger = Logger.getLogger(TeamJsonDeserializer.class.getName());
 
-    public static TeamJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
+    public static TeamJsonDeserializer create(SharedDomainFactory<?> baseDomainFactory) {
         return new TeamJsonDeserializer(new PersonJsonDeserializer(new NationalityJsonDeserializer(baseDomainFactory)));
     }
 

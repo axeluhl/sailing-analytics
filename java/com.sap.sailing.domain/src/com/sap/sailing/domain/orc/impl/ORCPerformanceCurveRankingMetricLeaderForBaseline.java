@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
@@ -27,6 +28,11 @@ public class ORCPerformanceCurveRankingMetricLeaderForBaseline extends ORCPerfor
 
     public ORCPerformanceCurveRankingMetricLeaderForBaseline(TrackedRace trackedRace) {
         super(trackedRace);
+    }
+
+    @Override
+    public RankingMetrics getType() {
+        return RankingMetrics.ORC_PERFORMANCE_CURVE_LEADER_FOR_BASELINE;
     }
 
     @Override

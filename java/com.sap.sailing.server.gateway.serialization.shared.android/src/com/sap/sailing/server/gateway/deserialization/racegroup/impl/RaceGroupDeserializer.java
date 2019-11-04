@@ -32,7 +32,7 @@ public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
     private final JsonDeserializer<SeriesWithRows> seriesDeserializer;
     private final JsonDeserializer<RegattaConfiguration> configurationDeserializer;
 
-    public static RaceGroupDeserializer create(SharedDomainFactory domainFactory,
+    public static RaceGroupDeserializer create(SharedDomainFactory<?> domainFactory,
             JsonDeserializer<RegattaConfiguration> proceduresDeserializer) {
         return new RaceGroupDeserializer(new BoatClassJsonDeserializer(domainFactory), new SeriesWithRowsDeserializer(
                 new RaceRowDeserializer(new FleetDeserializer(new ColorDeserializer()), new RaceCellDeserializer(

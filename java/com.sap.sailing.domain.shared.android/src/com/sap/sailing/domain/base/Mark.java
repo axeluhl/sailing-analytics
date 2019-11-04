@@ -13,7 +13,7 @@ import com.sap.sse.common.IsManagedByCache;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface Mark extends CommonMarkProperties, ControlPoint, IsManagedByCache<SharedDomainFactory> {
+public interface Mark extends CommonMarkProperties, ControlPoint, IsManagedByCache<SharedDomainFactory<?>> {
 
     UUID getOriginatingMarkTemplateIdOrNull();
 

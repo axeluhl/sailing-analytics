@@ -39,7 +39,7 @@ import com.sap.sse.common.IsManagedByCache;
  * @author Axel Uhl (d043530)
  * 
  */
-public class DelayedLeaderboardCorrectionsImpl implements RaceColumnListenerWithDefaultAction, DelayedLeaderboardCorrections, IsManagedByCache<SharedDomainFactory> {
+public class DelayedLeaderboardCorrectionsImpl implements RaceColumnListenerWithDefaultAction, DelayedLeaderboardCorrections, IsManagedByCache<SharedDomainFactory<?>> {
     private static final long serialVersionUID = 8824782847677232275L;
     
     // structures that key corrections by competitor ID
@@ -269,7 +269,7 @@ public class DelayedLeaderboardCorrectionsImpl implements RaceColumnListenerWith
     }
 
     @Override
-    public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
+    public IsManagedByCache<SharedDomainFactory<?>> resolve(SharedDomainFactory<?> domainFactory) {
         this.competitorFactory = domainFactory;
         return this;
     }

@@ -21,7 +21,7 @@ public class StatisticsJsonDeserializer implements JsonDeserializer<Statistics> 
     
     private final CompetitorJsonDeserializer competitorJsonDeserializer;
 
-    public static StatisticsJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
+    public static StatisticsJsonDeserializer create(SharedDomainFactory<?> baseDomainFactory) {
         return new StatisticsJsonDeserializer(CompetitorJsonDeserializer.create(baseDomainFactory));
     }
     

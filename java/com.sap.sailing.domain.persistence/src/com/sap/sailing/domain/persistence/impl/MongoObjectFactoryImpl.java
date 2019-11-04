@@ -30,6 +30,7 @@ import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
@@ -55,6 +56,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
@@ -138,6 +140,7 @@ import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerialize
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorWithBoatRefJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.ImpliedWindSourceSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.ORCCertificateJsonSerializer;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
@@ -856,7 +859,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    private void storeRaceLogIdentifier(RaceLogIdentifier raceLogIdentifier, Document result) {
+    private void storeRaceLogIdentifier(SimpleRaceLogIdentifier raceLogIdentifier, Document result) {
         result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
     }
 
@@ -1038,11 +1041,32 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
+    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogORCImpliedWindSourceEvent event) {
+        Document result = new Document();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeORCImpliedWindSourceEvent(event));
+        return result;
+    }
+    
+    private Document storeORCImpliedWindSourceEvent(RaceLogORCImpliedWindSourceEvent event) {
+        final Document result = new Document();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCImpliedWindSourceEvent.class.getSimpleName());
+        final Document impliedWindSourceDocument;
+        if (event.getImpliedWindSource() == null) {
+            impliedWindSourceDocument = null;
+        } else {
+            final JSONObject jsonSerializedImpliedWindSource = new ImpliedWindSourceSerializer().serialize(event.getImpliedWindSource());
+            impliedWindSourceDocument = Document.parse(jsonSerializedImpliedWindSource.toString());
+        }
+        result.put(FieldNames.ORC_IMPLIED_WIND_SOURCE.name(), impliedWindSourceDocument);
+        return result;
+    }
+
     private Document storeORCScratchBoatEvent(RaceLogORCScratchBoatEvent event) {
         Document result = new Document();
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCScratchBoatEvent.class.getSimpleName());
-        result.append(FieldNames.COMPETITOR_ID.name(), event.getCompetitorId());
         return result;
     }
     
@@ -1230,12 +1254,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeTimePoint(event.getCreatedAt(), result, FieldNames.RACE_LOG_EVENT_CREATED_AT);
         result.put(FieldNames.RACE_LOG_EVENT_ID.name(), event.getId());
         result.put(FieldNames.RACE_LOG_EVENT_PASS_ID.name(), event.getPassId());
-        result.put(FieldNames.RACE_LOG_EVENT_INVOLVED_BOATS.name(), storeInvolvedBoatsForRaceLogEvent(event.getInvolvedCompetitors()));
+        result.put(FieldNames.RACE_LOG_EVENT_INVOLVED_BOATS.name(), storeInvolvedCompetitorsForRaceLogEvent(event.getInvolvedCompetitors()));
         storeRaceLogEventAuthor(result, event.getAuthor());
     }
 
 
-    private BasicDBList storeInvolvedBoatsForRaceLogEvent(List<Competitor> competitors) {
+    private BasicDBList storeInvolvedCompetitorsForRaceLogEvent(List<Competitor> competitors) {
         BasicDBList dbInvolvedCompetitorIds = new BasicDBList();
         for (Competitor competitor : competitors) {
             dbInvolvedCompetitorIds.add(competitor.getId());

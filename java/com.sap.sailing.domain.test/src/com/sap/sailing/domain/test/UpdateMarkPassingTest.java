@@ -11,7 +11,6 @@ import java.util.UUID;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -24,6 +23,7 @@ import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
@@ -52,7 +52,7 @@ public class UpdateMarkPassingTest {
                         /* registrationLinkSecret */ UUID.randomUUID().toString())),
                 race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 
         /* delayToLiveInMillis */1000, /* millisecondsOverWhichToAverageWind */30000,
-        /* millisecondsOverWhichToAverageSpeed */30000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new, mock(RaceLogResolver.class));
+        /* millisecondsOverWhichToAverageSpeed */30000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new, mock(RaceLogAndTrackedRaceResolver.class));
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = now.plus(1000);
         trackedRace.updateMarkPassings(competitor, Arrays.asList(new MarkPassing[] { new MarkPassingImpl(now, waypoint, competitor) }));

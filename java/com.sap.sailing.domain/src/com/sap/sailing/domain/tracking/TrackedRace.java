@@ -6,9 +6,9 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedSet;
 
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
@@ -16,11 +16,11 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMapping
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
@@ -49,6 +49,7 @@ import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuse
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
@@ -84,7 +85,7 @@ import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
  * 
  */
 public interface TrackedRace
-        extends Serializable, IsManagedByCache<SharedDomainFactory>, WithQualifiedObjectIdentifier {
+        extends Serializable, IsManagedByCache<DomainFactory>, WithQualifiedObjectIdentifier {
     final Duration START_TRACKING_THIS_MUCH_BEFORE_RACE_START = Duration.ONE_MINUTE.times(5);
     final Duration STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH = Duration.ONE_SECOND.times(30);
 
@@ -964,10 +965,17 @@ public interface TrackedRace
     Distance getCourseLength();
     
     /**
-     * The average wind speed with confidence for this race. It uses the timepoint of the race end as
-     * a reference point.
+     * The average wind speed with confidence for this race. It uses the timepoint of the {@link #getEndOfRace race end} as
+     * a reference point, or, if that is {@code null}, the {@link #getTimePointOfNewestEvent()}.
      */
     SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis);
+    
+    SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidenceWithNumberOfSamples(int numberOfSamples);
+    
+    /**
+     * The average wind speed with confidence for this race.
+     */
+    SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(TimePoint formTimePoint, TimePoint toTimePoint, int numberOfSamples);
     
     /**
      * Computes the center point of the course's marks at the given time point.
@@ -1042,7 +1050,7 @@ public interface TrackedRace
 
     void setPolarDataService(PolarDataService polarDataService);
 
-    default RaceLogResolver getRaceLogResolver() {
+    default RaceLogAndTrackedRaceResolver getRaceLogResolver() {
         return null;
     }
 
@@ -1216,5 +1224,27 @@ public interface TrackedRace
     
     public static HasPermissions getSecuredDomainType() {
         return SecuredDomainType.TRACKED_RACE;
+    }
+
+    /**
+     * A so-called "implied wind" speed is determined in ORC Performance Curve Scoring (PCS) by inverting the
+     * performance curve functions of the competitors that maps a wind speed to the time allowance for a course that the
+     * competitor gets for that wind speed. This way, a virtual wind speed can be calculated based on the time the
+     * competitor actually took to complete that course.
+     * <p>
+     * 
+     * For OCS PCS starting in the year 2015, an overall implied wind needs to be determined for a race, and it defaults
+     * to the maximum implied wind across all competitors. However, this default can be overridden, and one approach is
+     * to use the implied wind of another race.
+     * <p>
+     * 
+     * This method delegates to the {@link #getRankingMetric()} to determine this implied wind. Any non-ORC ranking
+     * metric would be an unusual choice for such a set-up, but it should respond with the average wind speed during the
+     * race (the combined wind). The ORC ranking metrics are expected to deliver their implied wind, either by taking
+     * the maximum across their competitors' implied winds, or in case the implied wind was explicitly fixed by a
+     * corresponding {@link RaceLogORCImpliedWindSourceEvent}, that fixed implied wind speed.
+     */
+    default Speed getReferenceImpliedWind(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getRankingMetric().getReferenceImpliedWind(timePoint, cache);
     }
 }

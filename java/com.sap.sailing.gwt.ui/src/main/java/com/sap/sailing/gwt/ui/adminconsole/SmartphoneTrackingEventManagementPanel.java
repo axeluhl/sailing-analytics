@@ -300,11 +300,11 @@ public class SmartphoneTrackingEventManagementPanel
                 DefaultActions.UPDATE, this::handleDefineCourse);
         raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_COPY, DefaultActions.UPDATE,
                 this::handleCopy);
-        raceActionColumn.addAction(LeaderboardRaceConfigImagesBarCell.ACTION_EDIT, DefaultActions.UPDATE,
+        raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_EDIT, DefaultActions.UPDATE,
                 this::editRaceColumnOfLeaderboard);
-        raceActionColumn.addAction(LeaderboardRaceConfigImagesBarCell.ACTION_UNLINK, DefaultActions.UPDATE,
+        raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_UNLINK, DefaultActions.UPDATE,
                 t -> unlinkRaceColumnFromTrackedRace(t.getA().getRaceColumnName(), t.getB()));
-        raceActionColumn.addAction(LeaderboardRaceConfigImagesBarCell.ACTION_REFRESH_RACELOG, DefaultActions.UPDATE,
+        raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_REFRESH_RACELOG, DefaultActions.UPDATE,
                 t -> refreshRaceLog(t.getA(), t.getB(), true));
         raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_SET_STARTTIME,
                 DefaultActions.UPDATE, this::setStartTime);
@@ -324,6 +324,10 @@ public class SmartphoneTrackingEventManagementPanel
                 DefaultActions.UPDATE, this::showCompetitorToBoatMappings);
         raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_CERTIFICATE_ASSIGNMENT, READ,
                 t -> assignCertificates(t));
+        raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_SCRATCH_BOAT_SELECTION, READ,
+                t -> selectScratchBoat(t));
+        raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_SET_IMPLIED_WIND, READ,
+                t -> setImpliedWind(t));
         
         racesTable.addColumn(raceLogTrackingStateColumn, stringMessages.raceStatusColumn());
         racesTable.addColumn(trackerStateColumn, stringMessages.trackerStatus());

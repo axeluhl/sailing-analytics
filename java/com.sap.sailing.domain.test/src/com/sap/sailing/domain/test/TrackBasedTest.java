@@ -59,6 +59,7 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
@@ -141,7 +142,7 @@ public abstract class TrackBasedTest {
     public static DynamicTrackedRaceImpl createTestTrackedRace(String regattaName, String raceName, String boatClassName,
             Map<Competitor, Boat> competitorsAndBoats, TimePoint timePointForFixes, boolean useMarkPassingCalculator) {
         return createTestTrackedRace(regattaName, raceName, boatClassName, competitorsAndBoats, timePointForFixes, useMarkPassingCalculator,
-                mock(RaceLogResolver.class));
+                mock(RaceLogAndTrackedRaceResolver.class));
     }
     
     /**
@@ -162,7 +163,7 @@ public abstract class TrackBasedTest {
      *            whether or not to use the internal mark passing calculator
      */
     public static DynamicTrackedRaceImpl createTestTrackedRace(String regattaName, String raceName, String boatClassName,
-            Map<Competitor, Boat> competitorsAndBoats, TimePoint timePointForFixes, boolean useMarkPassingCalculator, RaceLogResolver raceLogResolver) {
+            Map<Competitor, Boat> competitorsAndBoats, TimePoint timePointForFixes, boolean useMarkPassingCalculator, RaceLogAndTrackedRaceResolver raceLogResolver) {
         return createTestTrackedRace(regattaName, raceName, boatClassName, competitorsAndBoats, timePointForFixes, useMarkPassingCalculator, raceLogResolver,
                 OneDesignRankingMetric::new);
     }
@@ -172,7 +173,7 @@ public abstract class TrackBasedTest {
      * a specific {@link RankingMetricConstructor} can be provided which otherwise would default to {@link OneDesignRankingMetric}.
      */
     public static DynamicTrackedRaceImpl createTestTrackedRace(String regattaName, String raceName, String boatClassName,
-            Map<Competitor, Boat> competitorsAndBoats, TimePoint timePointForFixes, boolean useMarkPassingCalculator, RaceLogResolver raceLogResolver,
+            Map<Competitor, Boat> competitorsAndBoats, TimePoint timePointForFixes, boolean useMarkPassingCalculator, RaceLogAndTrackedRaceResolver raceLogResolver,
             RankingMetricConstructor rankingMetricConstructor) {
         BoatClassImpl boatClass = new BoatClassImpl(boatClassName, /* typicallyStartsUpwind */ true);
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,

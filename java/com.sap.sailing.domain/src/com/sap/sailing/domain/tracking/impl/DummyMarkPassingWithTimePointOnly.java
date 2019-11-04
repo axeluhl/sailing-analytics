@@ -70,7 +70,7 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
             }
 
             @Override
-            public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
+            public IsManagedByCache<SharedDomainFactory<?>> resolve(SharedDomainFactory<?> domainFactory) {
                 return this;
             }
 

@@ -36,6 +36,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -174,6 +175,7 @@ import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoSensorFixStoreFactory;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
@@ -623,7 +625,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             SailingNotificationService sailingNotificationService,
             TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces,
             ServiceTracker<SecurityService, SecurityService> securityServiceTracker, SharedSailingData sharedSailingData) {
-        this((final RaceLogResolver raceLogResolver) -> {
+        this((final RaceLogAndTrackedRaceResolver raceLogResolver) -> {
             return new ConstructorParameters() {
                 private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE
                         .getDefaultMongoObjectFactory(serviceFinderFactory);
@@ -659,7 +661,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private RacingEventServiceImpl(final boolean clearPersistentCompetitorStore, WindStore windStore,
             SensorFixStore sensorFixStore, final TypeBasedServiceFinderFactory serviceFinderFactory,
             SailingNotificationService sailingNotificationService, boolean restoreTrackedRaces) {
-        this((final RaceLogResolver raceLogResolver) -> {
+        this((final RaceLogAndTrackedRaceResolver raceLogResolver) -> {
             return new ConstructorParameters() {
                 private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE
                         .getDefaultMongoObjectFactory(serviceFinderFactory);
@@ -692,7 +694,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     public RacingEventServiceImpl(final DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
             MediaDB mediaDB, WindStore windStore, SensorFixStore sensorFixStore, boolean restoreTrackedRaces) {
-        this((final RaceLogResolver raceLogResolver) -> {
+        this((final RaceLogAndTrackedRaceResolver raceLogResolver) -> {
             return new ConstructorParameters() {
                 @Override
                 public DomainObjectFactory getDomainObjectFactory() {
@@ -745,7 +747,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      *            will complete as soon as the securityServiceTracker is able to provide a SecurityService, NEVER hold a
      *            reference to the result of this, as it might become invalid if bundles are replaced/ restarted
      */
-    public RacingEventServiceImpl(Function<RaceLogResolver, ConstructorParameters> constructorParametersProvider,
+    public RacingEventServiceImpl(Function<RaceLogAndTrackedRaceResolver, ConstructorParameters> constructorParametersProvider,
             MediaDB mediaDb, final WindStore windStore, final SensorFixStore sensorFixStore,
             TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListenerManager trackedRegattaListener,
             SailingNotificationService sailingNotificationService,
@@ -884,7 +886,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
                             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
                             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator,
-                            RaceLogResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter) {
+                            RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter) {
                         final DynamicTrackedRace trackedRace = super.createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
                                         delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                                         millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate,
@@ -4246,8 +4248,33 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     @Override
     public RaceLog resolve(SimpleRaceLogIdentifier identifier) {
-        final RaceLog result;
+        return resolveFromSimpleRaceLogIdentifier(identifier, (raceColumn, fleet)->raceColumn.getRaceLog(fleet));
+    }
+
+    private <T> T resolveFromSimpleRaceLogIdentifier(SimpleRaceLogIdentifier identifier, BiFunction<RaceColumn, Fleet, T> innerResolver) {
+        final T result;
+        final RaceColumn raceColumn = getRaceColumn(identifier);
+        if (raceColumn != null) {
+            final Fleet fleet = raceColumn.getFleetByName(identifier.getFleetName());
+            if (fleet != null) {
+                result = innerResolver.apply(raceColumn, fleet);
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    @Override
+    public TrackedRace resolveTrackedRace(SimpleRaceLogIdentifier identifier) {
+        return resolveFromSimpleRaceLogIdentifier(identifier, (raceColumn, fleet)->raceColumn.getTrackedRace(fleet));
+    }
+
+    private RaceColumn getRaceColumn(SimpleRaceLogIdentifier identifier) {
         final IsRegattaLike regattaLike;
+        final RaceColumn raceColumn;
         final Regatta regatta = regattasByName.get(identifier.getRegattaLikeParentName());
         if (regatta != null) {
             regattaLike = regatta;
@@ -4260,21 +4287,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             }
         }
         if (regattaLike != null) {
-            final RaceColumn raceColumn = regattaLike.getRaceColumnByName(identifier.getRaceColumnName());
-            if (raceColumn != null) {
-                final Fleet fleet = raceColumn.getFleetByName(identifier.getFleetName());
-                if (fleet != null) {
-                    result = raceColumn.getRaceLog(fleet);
+            raceColumn = regattaLike.getRaceColumnByName(identifier.getRaceColumnName());
                 } else {
-                    result = null;
+            raceColumn = null;
                 }
-            } else {
-                result = null;
-            }
-        } else {
-            result = null;
-        }
-        return result;
+        return raceColumn;
     }
 
     @Override

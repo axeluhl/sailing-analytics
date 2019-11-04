@@ -194,7 +194,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     }
 
     @Override
-    public void copyCourse(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs, SharedDomainFactory baseDomainFactory,
+    public void copyCourse(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs, SharedDomainFactory<?> baseDomainFactory,
             RacingEventService service, int priority) {
         CourseBase course = new LastPublishedCourseDesignFinder(fromRaceLog,
                 /* onlyCoursesWithValidWaypointList */ true).analyze();

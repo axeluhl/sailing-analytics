@@ -90,7 +90,7 @@ public class TestStoringAndLoadingRegattaORCCertificateAssignmentEvent extends A
 
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(expectedEvent.getBoatId(), actualEvent.getBoatId());
-        assertEquals(expectedEvent.getCertificate().getSailnumber(), actualEvent.getCertificate().getSailnumber());
+        assertEquals(expectedEvent.getCertificate().getSailNumber(), actualEvent.getCertificate().getSailNumber());
         assertEquals(expectedEvent.getCertificate().getGPHInSecondsToTheMile(), actualEvent.getCertificate().getGPHInSecondsToTheMile(), 0.00001);
 
         List<Speed> expectedBeatVMGPredictions = new ArrayList<>(expectedEvent.getCertificate().getBeatVMGPredictions().values());

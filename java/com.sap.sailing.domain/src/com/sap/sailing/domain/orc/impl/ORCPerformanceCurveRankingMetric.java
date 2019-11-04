@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.orc.impl;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,6 +12,7 @@ import java.util.logging.Logger;
 import org.apache.commons.math.FunctionEvaluationException;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.orc.ORCPerformanceCurve;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -23,13 +23,12 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 
 /**
- * As opposed to before 2015 when implied wind was the only ranking criterion at all times, in 2015
- * it was decided to rank based on corrected times, and corrected times shall be computed not by mapping
- * each boat's implied wind to the performance curve of a scratch boat, but instead map the implied
- * wind of the boat with the greatest implied wind onto each other boat's performance curve to obtain
- * their time allowance for the course they sailed so far and then compare with their actual elapsed
- * time. Note that for boats other than the one with the greatest implied wind this can lead to a ranking
- * that is inconsistent with an ordering by implied wind.
+ * As opposed to before 2015 when implied wind was the only ranking criterion at all times, in 2015 it was decided to
+ * rank based on corrected times, and corrected times shall be computed not by mapping each boat's implied wind to the
+ * performance curve of a scratch boat, but instead map the implied wind of the boat with the greatest implied wind onto
+ * each other boat's performance curve to obtain their time allowance for the course they sailed so far and then compare
+ * with their actual elapsed time. Note that for boats other than the one with the greatest implied wind this can lead
+ * to a ranking that is inconsistent with an ordering by implied wind.
  */
 public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpliedWindRankingMetric {
     private static final Logger logger = Logger.getLogger(ORCPerformanceCurveRankingMetric.class.getName());
@@ -37,6 +36,11 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
 
     public ORCPerformanceCurveRankingMetric(TrackedRace trackedRace) {
         super(trackedRace);
+    }
+
+    @Override
+    public RankingMetrics getType() {
+        return RankingMetrics.ORC_PERFORMANCE_CURVE;
     }
 
     /**
@@ -217,10 +221,9 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
         try {
             final BiFunction<TimePoint, Competitor, ORCPerformanceCurve> performanceCurveSupplier = getPerformanceCurveSupplier(cache);
             final ORCPerformanceCurve competitorPerformanceCurve = cache.getPerformanceCurveForPartialCourse(timePoint, getTrackedRace(), competitor, performanceCurveSupplier);
-            final Speed maxImpliedWind = Collections.max(getImpliedWindByCompetitor(timePoint, cache).values(),
-                    Comparator.nullsFirst(Comparator.naturalOrder()));
-            if (maxImpliedWind != null && competitorPerformanceCurve != null) {
-                final Duration competitorAllowance = competitorPerformanceCurve.getAllowancePerCourse(maxImpliedWind);
+            final Speed referenceImpliedWind = getReferenceImpliedWind(timePoint, cache);
+            if (referenceImpliedWind != null && competitorPerformanceCurve != null) {
+                final Duration competitorAllowance = competitorPerformanceCurve.getAllowancePerCourse(referenceImpliedWind);
                 final Duration competitorElapsedTime = getTrackedRace().getTimeSailedSinceRaceStart(competitor, timePoint);
                 if (competitorElapsedTime != null) {
                     competitorDelta = competitorElapsedTime.minus(competitorAllowance);

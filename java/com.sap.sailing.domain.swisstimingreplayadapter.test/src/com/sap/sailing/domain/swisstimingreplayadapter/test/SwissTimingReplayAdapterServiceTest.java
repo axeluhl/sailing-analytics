@@ -17,9 +17,9 @@ import java.util.Map.Entry;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
@@ -185,7 +185,7 @@ public class SwissTimingReplayAdapterServiceTest {
     public void testRaceData_SAW010955_20120802_WithDomainAdapter() throws Exception {
         SwissTimingReplayToDomainAdapter replayListener = new SwissTimingReplayToDomainAdapter(null, /* raceName */ "SAW005906",
                 "SAW005906", /* boatClass */ null, DomainFactory.INSTANCE, new DummyTrackedRegattaRegistry(), /* useInternalMarkPassingAlgorithm */ false,
-                mock(RaceLogResolver.class), EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, /* tracker creator */ null,
+                mock(RaceLogAndTrackedRaceResolver.class), EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, /* tracker creator */ null,
                 new DefaultRaceTrackingHandler());
         new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"), replayListener);
         Iterable<? extends TrackedRace> trackedRaces = replayListener.getTrackedRaces();
@@ -201,7 +201,7 @@ public class SwissTimingReplayAdapterServiceTest {
     public void testStartPerformanceDetection() throws Exception {
         SwissTimingReplayToDomainAdapter replayListener = new SwissTimingReplayToDomainAdapter(null, /* raceName */ "SAW005905",
                 "SAW005905", /* boatClass */ null, DomainFactory.INSTANCE, new DummyTrackedRegattaRegistry(), /* useInternalMarkPassingAlgorithm */ false,
-                mock(RaceLogResolver.class), EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, /* tracker creator */ null, new DefaultRaceTrackingHandler());
+                mock(RaceLogAndTrackedRaceResolver.class), EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, /* tracker creator */ null, new DefaultRaceTrackingHandler());
         new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005905.20120805.replay"), replayListener);
         Iterable<? extends TrackedRace> trackedRaces = replayListener.getTrackedRaces();
         TrackedRace trackedRace = trackedRaces.iterator().next();

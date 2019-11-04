@@ -19,9 +19,9 @@ import com.sap.sse.util.impl.UUIDHelper;
  */
 public class MarkDeserializer implements JsonDeserializer<Mark> {
 
-    private SharedDomainFactory factory;
+    private SharedDomainFactory<?> factory;
 
-    public MarkDeserializer(SharedDomainFactory factory) {
+    public MarkDeserializer(SharedDomainFactory<?> factory) {
         this.factory = factory;
     }
 

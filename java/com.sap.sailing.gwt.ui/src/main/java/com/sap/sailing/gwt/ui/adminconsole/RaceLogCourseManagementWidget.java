@@ -30,7 +30,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
     public RaceLogCourseManagementWidget(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages, final String leaderboardName, final String raceColumnName,
             final String fleetName, final UserService userService) {
-        super(sailingService, errorReporter, stringMessages, userService);
+        super(sailingService, errorReporter, stringMessages, userService, /* always show ORC OCS leg data actions */ ()->true);
         this.leaderboardName = leaderboardName;
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;

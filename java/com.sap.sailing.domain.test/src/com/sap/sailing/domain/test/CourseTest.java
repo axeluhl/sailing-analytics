@@ -18,7 +18,6 @@ import java.util.UUID;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -39,6 +38,7 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -320,7 +320,7 @@ public class CourseTest {
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */3000,
                 /* millisecondsOverWhichToAverageWind */30000,
                 /* millisecondsOverWhichToAverageSpeed */8000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new,
-                mock(RaceLogResolver.class));
+                mock(RaceLogAndTrackedRaceResolver.class));
         assertLegStructure(course, trackedRace);
         course.removeWaypoint(0);
         assertLegStructure(course, trackedRace);
@@ -356,7 +356,7 @@ public class CourseTest {
                 EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                         /* millisecondsOverWhichToAverageWind */ 30000,
                         /* millisecondsOverWhichToAverageSpeed */ 8000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new,
-                        mock(RaceLogResolver.class));
+                        mock(RaceLogAndTrackedRaceResolver.class));
         assertLegStructure(course, trackedRace);
         final WaypointImpl wp1_5 = new WaypointImpl(new MarkImpl("Test Mark 1.5"));
         assertWaypointIndexes(course);

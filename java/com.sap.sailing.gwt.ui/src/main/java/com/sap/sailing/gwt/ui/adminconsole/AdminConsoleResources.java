@@ -130,4 +130,10 @@ interface AdminConsoleResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/certificates.png")
     ImageResource updateCertificatesIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/scratchBoat.png")
+    ImageResource scratchBoatIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/impliedWind.png")
+    ImageResource impliedWindIcon();
 }

@@ -25,9 +25,9 @@ public class ORCCertificateImpl_CustomFieldSerializer extends CustomFieldSeriali
     public static void serialize(SerializationStreamWriter streamWriter, ORCCertificateImpl instance)
             throws SerializationException {
         streamWriter.writeString(instance.getId());
-        streamWriter.writeString(instance.getSailnumber());
+        streamWriter.writeString(instance.getSailNumber());
         streamWriter.writeString(instance.getBoatName());
-        streamWriter.writeString(instance.getBoatclass());
+        streamWriter.writeString(instance.getBoatClassName());
         streamWriter.writeObject(instance.getLengthOverAll());
         streamWriter.writeObject(instance.getGPH());
         streamWriter.writeDouble(instance.getCDL());

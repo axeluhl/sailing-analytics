@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 import org.bson.Document;
 
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
@@ -150,7 +151,7 @@ public class MongoRaceLogStoreVisitor implements RaceLogEventVisitor {
         mongoObjectFactory.storeRaceLogEventEvent(object);
     }
     
-        @Override
+    @Override
     public void visit(RaceLogFixedMarkPassingEvent event) {
         Document object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         mongoObjectFactory.storeRaceLogEventEvent(object);
@@ -206,6 +207,12 @@ public class MongoRaceLogStoreVisitor implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogORCScratchBoatEvent event) {
+        Document object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
+        mongoObjectFactory.storeRaceLogEventEvent(object);
+    }
+
+    @Override
+    public void visit(RaceLogORCImpliedWindSourceEvent event) {
         Document object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         mongoObjectFactory.storeRaceLogEventEvent(object);
     }
