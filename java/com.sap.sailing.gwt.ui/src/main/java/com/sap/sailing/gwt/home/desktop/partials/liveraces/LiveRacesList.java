@@ -45,7 +45,7 @@ public class LiveRacesList extends Composite {
         private final SortableRaceListColumn<LiveRaceDTO, ?> raceViewStateColumn = RaceListColumnFactory.getRaceViewStateColumn();
         
         public RaceListLiveRaces(EventView.Presenter presenter, boolean showRegattaDetails) {
-            super(presenter, new RaceListColumnSet(1, 1), false);
+            super(presenter, new RaceListColumnSet(1, 1), false); // See: https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3819
             this.regattaNameColumn.setShowDetails(showRegattaDetails);
         }
         
