@@ -13,13 +13,13 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogDependentStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
@@ -32,7 +32,7 @@ public class TrackedRaceStartTimeUpdateForDependentStartTimeTest extends TrackBa
         final CompetitorWithBoat hasso = createCompetitorWithBoat("Hasso");
         final RaceLog r1RaceLog = new RaceLogImpl("r1RaceLog");
         final RaceLog r2RaceLog = new RaceLogImpl("r2RaceLog");
-        final RaceLogResolver raceLogResolver = new RaceLogResolver() {
+        final RaceLogAndTrackedRaceResolver raceLogResolver = new RaceLogAndTrackedRaceResolver() {
             @Override
             public RaceLog resolve(SimpleRaceLogIdentifier identifier) {
                 if (identifier.getRaceColumnName().equals("R1")) {
@@ -40,6 +40,11 @@ public class TrackedRaceStartTimeUpdateForDependentStartTimeTest extends TrackBa
                 } else if (identifier.getRaceColumnName().equals("R2")) {
                     return r2RaceLog;
                 }
+                return null;
+            }
+
+            @Override
+            public TrackedRace resolveTrackedRace(SimpleRaceLogIdentifier identifier) {
                 return null;
             }
         };

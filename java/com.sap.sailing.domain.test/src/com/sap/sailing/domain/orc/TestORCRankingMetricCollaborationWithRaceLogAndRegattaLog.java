@@ -22,13 +22,12 @@ import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCCertificateAssignme
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RegattaLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
@@ -37,6 +36,7 @@ import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveLegAdapter;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveRankingMetric;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
@@ -65,7 +65,7 @@ public class TestORCRankingMetricCollaborationWithRaceLogAndRegattaLog {
     
     @Before
     public void setUp() {
-        final RaceLogResolver raceLogResolver = createRaceLogResolver();
+        final RaceLogAndTrackedRaceResolver raceLogResolver = createRaceLogResolver();
         competitor1 = TrackBasedTest.createCompetitorWithBoat("C1");
         competitor2 = TrackBasedTest.createCompetitorWithBoat("C2");
         final Map<Competitor, Boat> competitorsAndBoats = TrackBasedTest.createCompetitorAndBoatsMap(competitor1, competitor2);
@@ -84,13 +84,8 @@ public class TestORCRankingMetricCollaborationWithRaceLogAndRegattaLog {
         trackedRace.attachRaceLog(raceLog);
     }
 
-    private RaceLogResolver createRaceLogResolver() {
-        return new RaceLogResolver() {
-            @Override
-            public RaceLog resolve(SimpleRaceLogIdentifier identifier) {
-                return null;
-            }
-        };
+    private RaceLogAndTrackedRaceResolver createRaceLogResolver() {
+        return DomainFactory.TEST_RACE_LOG_RESOLVER;
     }
     
     @Test

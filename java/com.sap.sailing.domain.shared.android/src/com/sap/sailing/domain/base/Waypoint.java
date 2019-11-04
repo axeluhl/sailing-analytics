@@ -13,7 +13,7 @@ import com.sap.sse.common.NamedWithID;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface Waypoint extends NamedWithID, IsManagedByCache<SharedDomainFactory> {
+public interface Waypoint extends NamedWithID, IsManagedByCache<SharedDomainFactory<?>> {
     ControlPoint getControlPoint();
 
     Iterable<Mark> getMarks();

@@ -11,7 +11,7 @@ import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
-public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFactory>, WithQualifiedObjectIdentifier {
+public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFactory<?>>, WithQualifiedObjectIdentifier {
     Team getTeam();
     
     /**

@@ -44,12 +44,12 @@ public interface ORCCertificate extends WithID, Serializable {
      * @return sailnumber as a string, which consists out of some alphanumeric characters (most time the nation or
      *         boatclass id), a blank space and some numerical digits
      */
-    String getSailnumber();
+    String getSailNumber();
     
     /**
      * Returns the boatclass of the {@link Competitor} which this certificate belongs to.
      */
-    String getBoatclass();
+    String getBoatClassName();
     
     Duration getGPH();
 

@@ -36,6 +36,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sailing.gwt.ui.adminconsole.RaceColumnInLeaderboardDialog.RaceColumnDescriptor;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
@@ -57,7 +58,6 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
-import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
@@ -345,11 +345,9 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
             leaderboardRaceColumnSelectionChanged();
         });
         vPanel.add(raceColumnTable);
-
         HorizontalPanel selectedLeaderboardRaceButtonPanel = new HorizontalPanel();
         selectedLeaderboardRaceButtonPanel.setSpacing(5);
         vPanel.add(selectedLeaderboardRaceButtonPanel);
-
         addSelectedLeaderboardRacesControls(selectedLeaderboardRaceButtonPanel);
     }
 
@@ -376,18 +374,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
                 tableResources.cellTableStyle().cellTableCheckboxSelected(),
                 tableResources.cellTableStyle().cellTableCheckboxDeselected(),
                 tableResources.cellTableStyle().cellTableCheckboxColumnCell(),
-                new EntityIdentityComparator<StrippedLeaderboardDTOWithSecurity>() {
-                    @Override
-                    public boolean representSameEntity(StrippedLeaderboardDTOWithSecurity dto1,
-                            StrippedLeaderboardDTOWithSecurity dto2) {
-                        return dto1.getName().equals(dto2.getName());
-                    }
-
-                    @Override
-                    public int hashCode(StrippedLeaderboardDTOWithSecurity t) {
-                        return t.getName().hashCode();
-                    }
-                }, listDataProvider, leaderboardTable);
+                new NameBasedStrippedLeaderboardDTOEntityIdentityComparator(), listDataProvider, leaderboardTable);
         selectionCheckboxColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(selectionCheckboxColumn,
                 (o1, o2) -> (leaderboardTable.getSelectionModel().isSelected(o1) ? 1 : 0)
@@ -851,6 +838,46 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
                             public void cancel() {}
                 }).show();
             }
+        });
+    }
+    
+    protected void setImpliedWind(RaceColumnDTOAndFleetDTOWithNameBasedEquality object) {
+        final String raceDisplayName = object.getC().getName() + "/" + object.getA().getName() + "/" + object.getB().getName();
+        sailingService.getImpliedWindSource(object.getC().getName(), object.getA().getName(), object.getB().getName(),
+                new AsyncCallback<ImpliedWindSource>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.errorObtainingImpliedWindSourceForRace(
+                                raceDisplayName,
+                                caught.getMessage()));
+                    }
+
+                    @Override
+                    public void onSuccess(ImpliedWindSource result) {
+                        new ImpliedWindSourceEditDialog(object, result, availableLeaderboardList, stringMessages, errorReporter, sailingService, userService, new DialogCallback<ImpliedWindSource>() {
+                            @Override
+                            public void ok(ImpliedWindSource editedObject) {
+                                sailingService.setImpliedWindSource(object.getC().getName(), object.getA().getName(), object.getB().getName(), editedObject,
+                                        new AsyncCallback<Void>() {
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                errorReporter.reportError(
+                                                        stringMessages.errorSettingImpliedWindSourceForRace(raceDisplayName,
+                                                                caught.getMessage()));
+                                            }
+
+                                            @Override
+                                            public void onSuccess(Void result) {
+                                                Notification.notify(stringMessages.impliedWindForRaceSetSuccessfully(raceDisplayName), NotificationType.SUCCESS);
+                                            }
+                                });
+                            }
+
+                            @Override
+                            public void cancel() {
+                            }
+                        }).show();
+                    }
         });
     }
 

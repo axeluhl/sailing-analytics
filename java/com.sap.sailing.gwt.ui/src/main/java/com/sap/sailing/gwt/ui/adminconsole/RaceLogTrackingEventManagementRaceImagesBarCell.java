@@ -29,6 +29,7 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
     public final static String ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS = "ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS";
     public static final String ACTION_CERTIFICATE_ASSIGNMENT = "ACTION_CERTIFICATE_ASSIGNMENT";
     public static final String ACTION_SCRATCH_BOAT_SELECTION = "ACTION_SCRATCH_BOAT_SELECTION";
+    public static final String ACTION_SET_IMPLIED_WIND = "ACTION_SET_IMPLIED_WIND";
     
     private final StringMessages stringMessages;
     private SmartphoneTrackingEventManagementPanel smartphoneTrackingEventManagementPanel;
@@ -73,6 +74,7 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
         if (raceCouldHaveORCRankingMetric(object)) {
             result.add(new ImageSpec(ACTION_CERTIFICATE_ASSIGNMENT, stringMessages.assignCertificates(), resources.updateCertificatesIcon()));
             result.add(new ImageSpec(ACTION_SCRATCH_BOAT_SELECTION, stringMessages.selectScratchBoat(), resources.scratchBoatIcon()));
+            result.add(new ImageSpec(ACTION_SET_IMPLIED_WIND, stringMessages.setImpliedWind(), resources.impliedWindIcon()));
         }
         return result;
     }

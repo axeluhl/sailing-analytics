@@ -2304,4 +2304,23 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorObtainingScratchBoat(String message);
     String errorSettingScratchBoat(String message);
     String scratchBoatSetSuccessfully();
+    String setImpliedWind();
+    String impliedWindSource();
+    String provideImpliedWindSourceForRace(String raceName);
+    String errorObtainingImpliedWindSourceForRace(String race, String message);
+    String errorSettingImpliedWindSourceForRace(String raceDisplayName, String message);
+    String impliedWindForRaceSetSuccessfully(String raceDisplayName);
+    String fixedImpliedWindInKnots();
+    String ownMaxImpliedWind();
+    String useImpliedWindFromOtherRace();
+    String pleaseProvideAFixedValueForImpliedWindSpeed();
+    String pleaseSelectARaceWhoseImpliedWindToUse();
+    String suggestCertificatesForSelectedBoats();
+    String errorSuggestingCertificates(String message);
+    String searchForCertificatesExplanation();
+    String issuingCountry();
+    String yearOfIssuance();
+    String referenceNumber();
+    String yachtName();
+    String errorSearchingForCertificates(String message);
 }

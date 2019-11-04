@@ -10,9 +10,9 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 
 public class NationalityJsonDeserializer implements JsonDeserializer<Nationality> {
-    private final SharedDomainFactory domainFactory;
+    private final SharedDomainFactory<?> domainFactory;
 
-    public NationalityJsonDeserializer(SharedDomainFactory domainFactory) {
+    public NationalityJsonDeserializer(SharedDomainFactory<?> domainFactory) {
         this.domainFactory = domainFactory;
     }
 

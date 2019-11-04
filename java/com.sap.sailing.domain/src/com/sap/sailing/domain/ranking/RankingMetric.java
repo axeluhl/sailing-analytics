@@ -4,9 +4,11 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.function.Function;
 
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.common.RankingMetrics;
+import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -14,6 +16,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 
@@ -233,4 +236,24 @@ public interface RankingMetric extends Serializable {
      */
     Duration getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint,
             RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+
+    /**
+     * A so-called "implied wind" speed is determined in ORC Performance Curve Scoring (PCS) by inverting the
+     * performance curve functions of the competitors that maps a wind speed to the time allowance for a course that the
+     * competitor gets for that wind speed. This way, a virtual wind speed can be calculated based on the time the
+     * competitor actually took to complete that course.
+     * <p>
+     * 
+     * For OCS PCS starting in the year 2015, an overall implied wind needs to be determined for a race, and it defaults
+     * to the maximum implied wind across all competitors. However, this default can be overridden, and one approach is
+     * to use the implied wind of another race.
+     * <p>
+     * 
+     * Delivers the implied wind according to the {@link ImpliedWindSource strategy} set in the {@link RaceLog}s
+     * attached to this ranking metric's {@link #getTrackedRace() tracked race}, either by taking the maximum across
+     * their competitors' implied winds, or in case the implied wind was explicitly fixed by a corresponding
+     * {@link RaceLogORCImpliedWindSourceEvent}, that fixed implied wind speed, or by delegating the request to
+     * another race.
+     */
+    Speed getReferenceImpliedWind(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 }

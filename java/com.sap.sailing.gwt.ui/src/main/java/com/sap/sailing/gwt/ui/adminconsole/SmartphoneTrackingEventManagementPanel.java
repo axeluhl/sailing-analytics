@@ -326,6 +326,8 @@ public class SmartphoneTrackingEventManagementPanel
                 t -> assignCertificates(t));
         raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_SCRATCH_BOAT_SELECTION, READ,
                 t -> selectScratchBoat(t));
+        raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_SET_IMPLIED_WIND, READ,
+                t -> setImpliedWind(t));
         
         racesTable.addColumn(raceLogTrackingStateColumn, stringMessages.raceStatusColumn());
         racesTable.addColumn(trackerStateColumn, stringMessages.trackerStatus());

@@ -15,7 +15,6 @@ import java.util.function.Function;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
@@ -44,6 +43,7 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.test.TrackBasedTest;
@@ -102,7 +102,7 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                 /* delay for wind estimation cache invalidation */ 0, /*useMarkPassingCalculator*/ false,
                 tr->new TimeOnTimeAndDistanceRankingMetric(tr,
                         timeOnTimeFactors, // time-on-time
-                        c->new MillisecondsDurationImpl((long) (1000.*timeOnDistanceFactors.apply(c)))), mock(RaceLogResolver.class));
+                        c->new MillisecondsDurationImpl((long) (1000.*timeOnDistanceFactors.apply(c)))), mock(RaceLogAndTrackedRaceResolver.class));
         // in this simplified artificial course, the top mark is exactly north of the right leeward gate
         DegreePosition topPosition = new DegreePosition(1, 0);
         trackedRace.getOrCreateTrack(left).addGPSFix(new GPSFixImpl(new DegreePosition(0, -0.000001), timePointForFixes));

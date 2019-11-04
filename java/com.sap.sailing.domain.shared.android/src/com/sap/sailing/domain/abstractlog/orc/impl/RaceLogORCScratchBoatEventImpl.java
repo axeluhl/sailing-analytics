@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.abstractlog.orc.impl;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -15,19 +16,11 @@ import com.sap.sse.common.TimePoint;
 public class RaceLogORCScratchBoatEventImpl extends AbstractLogEventImpl<RaceLogEventVisitor> implements RaceLogORCScratchBoatEvent {
     private static final long serialVersionUID = 3506411337361892600L;
     private final RaceLogEventData raceLogEventData;
-    private final Serializable competitorId;
 
     public RaceLogORCScratchBoatEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, Serializable pId, int passId, Competitor competitor) {
-        this(createdAt, logicalTimePoint, author, pId, passId, competitor.getId());
-    }
-
-    public RaceLogORCScratchBoatEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
-            AbstractLogEventAuthor author, Serializable pId, int passId, Serializable competitorId) {
         super(createdAt, logicalTimePoint, author, pId);
-        this.raceLogEventData = new RaceLogEventDataImpl(/* involvedBoats */ null, passId);
-        this.competitorId = competitorId;
-        
+        this.raceLogEventData = new RaceLogEventDataImpl(/* involvedBoats */ Collections.singletonList(competitor), passId);
     }
     
     @Override
@@ -46,12 +39,7 @@ public class RaceLogORCScratchBoatEventImpl extends AbstractLogEventImpl<RaceLog
     }
 
     @Override
-    public Serializable getCompetitorId() {
-        return competitorId;
-    }
-
-    @Override
     public String getShortInfo() {
-        return "Setting scratch boat to competitor with ID "+getCompetitorId();
+        return "Setting scratch boat to competitor "+getCompetitor();
     }
 }

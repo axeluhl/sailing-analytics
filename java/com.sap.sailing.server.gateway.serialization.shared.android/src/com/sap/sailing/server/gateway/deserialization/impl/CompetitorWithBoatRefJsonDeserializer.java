@@ -28,7 +28,7 @@ import com.sap.sse.util.impl.UUIDHelper;
 public class CompetitorWithBoatRefJsonDeserializer extends CompetitorJsonDeserializer {
     private final BoatFactory boatFactory;
 
-    public static CompetitorWithBoatRefJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
+    public static CompetitorWithBoatRefJsonDeserializer create(SharedDomainFactory<?> baseDomainFactory) {
         return new CompetitorWithBoatRefJsonDeserializer(baseDomainFactory, baseDomainFactory, new TeamJsonDeserializer(new PersonJsonDeserializer(
                 new NationalityJsonDeserializer(baseDomainFactory))));
     }

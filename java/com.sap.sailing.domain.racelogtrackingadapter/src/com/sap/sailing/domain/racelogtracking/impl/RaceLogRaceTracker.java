@@ -23,7 +23,6 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
@@ -58,6 +57,7 @@ import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLo
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerBaseImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -95,14 +95,14 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     private final RaceLogConnectivityParams params;
     private final WindStore windStore;
     private final DynamicTrackedRegatta trackedRegatta;
-    private final RaceLogResolver raceLogResolver;
+    private final RaceLogAndTrackedRaceResolver raceLogResolver;
     private final TrackedRegattaRegistry trackedRegattaRegistry;
 
     private volatile DynamicTrackedRace trackedRace;
     private final RaceTrackingHandler raceTrackingHandler;
 
     public RaceLogRaceTracker(DynamicTrackedRegatta regatta, RaceLogConnectivityParams params, WindStore windStore,
-            RaceLogResolver raceLogResolver, RaceLogConnectivityParams connectivityParams,
+            RaceLogAndTrackedRaceResolver raceLogResolver, RaceLogConnectivityParams connectivityParams,
             TrackedRegattaRegistry trackedRegattaRegistry, RaceTrackingHandler raceTrackingHandler) {
         super(connectivityParams);
         this.trackedRegattaRegistry = trackedRegattaRegistry;
