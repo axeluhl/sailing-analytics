@@ -15,9 +15,19 @@ import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.SecurityService;
 
 /**
- * TODO document what this service encapuslated, such as persistence, replication, ...; mention reason for providing UUID in factory methods, regarding security aspects
+ * {@link com.sap.sailing.server.interfaces.RacingEventService RacingEventService} is scoped to one server
+ * only. To share data that is not exclusively bound to one specific server but relevant for several servers,
+ * {@link SharedSailingData} provides an alternative replication scope. This means {@link SharedSailingData} may
+ * be replicated in a similar way as {@link SecurityService}.<br>
+ * {@link SharedSailingData} encapsulates persistence, replication and security aspects for the following domain types:
+ * <ul>
+ * <li>{@link MarkTemplate}s</li>
+ * <li>{@link MarkProperties}</li>
+ * <li>{@link CourseTemplate}s</li>
+ * </ul>
  * 
  * @author Axel Uhl (D043530)
  *
