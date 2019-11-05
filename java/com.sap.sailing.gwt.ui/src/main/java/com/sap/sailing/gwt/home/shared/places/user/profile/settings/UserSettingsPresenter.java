@@ -9,11 +9,11 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.shared.settings.SailingSettingsConstants;
+import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 import com.sap.sse.security.ui.authentication.WithUserService;
 
@@ -71,7 +71,7 @@ public class UserSettingsPresenter<C extends ClientFactoryWithDispatch & ErrorAn
     
     private Map<String, String> loadSettingsFromLocalStorage() {
         final Map<String, String> localSettings;
-        if(Storage.isLocalStorageSupported()) {
+        if (Storage.isLocalStorageSupported()) {
             localSettings = new HashMap<String, String>();
             Storage localStorage = Storage.getLocalStorageIfSupported();
             for(int i = 0; i< localStorage.getLength(); i++) {
@@ -91,7 +91,7 @@ public class UserSettingsPresenter<C extends ClientFactoryWithDispatch & ErrorAn
     public void remove(UserSettingsEntry entry) {
         String storageKey = entry.getKey();
         clientFactory.getUserService().unsetPreference(storageKey);
-        if(Storage.isLocalStorageSupported()) {
+        if (Storage.isLocalStorageSupported()) {
             Storage localStorage = Storage.getLocalStorageIfSupported();
             localStorage.removeItem(storageKey);
         }

@@ -130,7 +130,7 @@ public class Storage extends JavaScriptObject {
         this.clear();
     }-*/;
 
-    public final native String getKey(int index) /*-{
+    public final native String key(int index) /*-{
         return this.key(index);
     }-*/;
 
