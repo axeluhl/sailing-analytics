@@ -47,7 +47,7 @@ public class SecurityWebSessionManager extends DefaultWebSessionManager {
         super();
         getSessionIdCookie().setPath(Cookie.ROOT_PATH);
         final Thread backgroundThreadWaitingForSecurityServiceToObtainSharedAcrossSubdomains = new Thread(()->{
-            final String domainForSecurityServiceSharing = Activator.getSecurityService().getSharedAcrossSubdomains();
+            final String domainForSecurityServiceSharing = Activator.getSecurityService().getSharedAcrossSubdomainsOf();
             if (domainForSecurityServiceSharing != null) {
                 getSessionIdCookie().setDomain(domainForSecurityServiceSharing);
             }

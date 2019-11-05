@@ -631,6 +631,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * 
      * @return
      */
-    String getSharedAcrossSubdomains();
+    String getSharedAcrossSubdomainsOf();
 
 }

@@ -64,7 +64,7 @@ public class Activator implements BundleActivator {
 
     private ServiceTracker<AccessControlStore, AccessControlStore> accessControlStoreTracker;
     
-    public static final String SHARED_ACROSS_SUBDOMAINS_PROPERTY_NAME = "security.sharedAcrossSubdomains";
+    public static final String SHARED_ACROSS_SUBDOMAINS_OF_PROPERTY_NAME = "security.sharedAcrossSubdomainsOf";
     /**
      * Should be {@code null} if the security service instantiated by the bundle activated by this activator is not
      * shared across different sub-domains; otherwise, the parent domain across which the security service and its
@@ -72,9 +72,9 @@ public class Activator implements BundleActivator {
      * <p>
      * 
      * The value can be specified by a system property whose name is provided by
-     * {@link #SHARED_ACROSS_SUBDOMAINS_PROPERTY_NAME}.
+     * {@link #SHARED_ACROSS_SUBDOMAINS_OF_PROPERTY_NAME}.
      */
-    private final String sharedAcrossSubdomains;
+    private final String sharedAcrossSubdomainsOf;
     
     public static void setTestStores(UserStore theTestUserStore, AccessControlStore theTestAccessControlStore) {
         testUserStore = theTestUserStore;
@@ -100,7 +100,7 @@ public class Activator implements BundleActivator {
     }
 
     public Activator() {
-        sharedAcrossSubdomains = System.getProperty(SHARED_ACROSS_SUBDOMAINS_PROPERTY_NAME);
+        sharedAcrossSubdomainsOf = System.getProperty(SHARED_ACROSS_SUBDOMAINS_OF_PROPERTY_NAME);
     }
     
     /**
@@ -150,7 +150,7 @@ public class Activator implements BundleActivator {
         hasPermissionsProviderTracker.open();
         SecurityServiceImpl initialSecurityService = new SecurityServiceImpl(
                 ServiceTrackerFactory.createAndOpen(context, MailService.class), userStore, accessControlStore,
-                new OSGIHasPermissionsProvider(hasPermissionsProviderTracker), sharedAcrossSubdomains);
+                new OSGIHasPermissionsProvider(hasPermissionsProviderTracker), sharedAcrossSubdomainsOf);
         initialSecurityService.initialize();
         securityService.complete(initialSecurityService);
         registration = context.registerService(SecurityService.class.getName(), initialSecurityService, null);

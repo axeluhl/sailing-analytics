@@ -186,7 +186,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     private final HasPermissionsProvider hasPermissionsProvider;
 
-    private String sharedAcrossSubdomains;
+    private String sharedAcrossSubdomainsOf;
     
     static {
         shiroConfiguration = new Ini();
@@ -219,7 +219,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      */
     public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore,
             AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider) {
-        this(mailServiceTracker, userStore, accessControlStore, hasPermissionsProvider, /* isSharedAcrossSubdomains */ null);
+        this(mailServiceTracker, userStore, accessControlStore, hasPermissionsProvider, /* sharedAcrossSubdomainsOf */ null);
     }
     
     /**
@@ -229,10 +229,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * be shared as well.
      */
     public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore,
-            AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider, String sharedAcrossSubdomains) {
+            AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider, String sharedAcrossSubdomainsOf) {
         logger.info("Initializing Security Service with user store " + userStore);
         operationsSentToMasterForReplication = new HashSet<>();
-        this.sharedAcrossSubdomains = sharedAcrossSubdomains;
+        this.sharedAcrossSubdomainsOf = sharedAcrossSubdomainsOf;
         this.operationExecutionListeners = new ConcurrentHashMap<>();
         this.store = userStore;
         this.accessControlStore = accessControlStore;
@@ -2085,8 +2085,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             Thread.currentThread().setContextClassLoader(oldCCL);
         }
         logger.info("Reading isSharedAcrossSubdomains...");
-        sharedAcrossSubdomains = (String) is.readObject();
-        logger.info("...as "+sharedAcrossSubdomains);
+        sharedAcrossSubdomainsOf = (String) is.readObject();
+        logger.info("...as "+sharedAcrossSubdomainsOf);
         logger.info("Done filling SecurityService");
     }
 
@@ -2095,7 +2095,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         objectOutputStream.writeObject(cacheManager);
         objectOutputStream.writeObject(store);
         objectOutputStream.writeObject(accessControlStore);
-        objectOutputStream.writeObject(sharedAcrossSubdomains);
+        objectOutputStream.writeObject(sharedAcrossSubdomainsOf);
     }
 
     @Override
@@ -2456,7 +2456,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public String getSharedAcrossSubdomains() {
-        return sharedAcrossSubdomains;
+    public String getSharedAcrossSubdomainsOf() {
+        return sharedAcrossSubdomainsOf;
     }
 }
