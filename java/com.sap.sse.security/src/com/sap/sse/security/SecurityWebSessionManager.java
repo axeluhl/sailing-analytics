@@ -12,6 +12,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.concurrent.ConcurrentWeakHashMap;
+import com.sap.sse.security.impl.Activator;
 import com.sap.sse.util.TimerWithRunnable;
 
 /**
@@ -45,6 +46,14 @@ public class SecurityWebSessionManager extends DefaultWebSessionManager {
     public SecurityWebSessionManager() {
         super();
         getSessionIdCookie().setPath(Cookie.ROOT_PATH);
+        final Thread backgroundThreadWaitingForSecurityServiceToObtainSharedAcrossSubdomains = new Thread(()->{
+            final String domainForSecurityServiceSharing = Activator.getSecurityService().getSharedAcrossSubdomains();
+            if (domainForSecurityServiceSharing != null) {
+                getSessionIdCookie().setDomain(domainForSecurityServiceSharing);
+            }
+        }, "Background thread of "+getClass().getName()+" waiting for security service");
+        backgroundThreadWaitingForSecurityServiceToObtainSharedAcrossSubdomains.setDaemon(true);
+        backgroundThreadWaitingForSecurityServiceToObtainSharedAcrossSubdomains.start();
     }
 
     @Override

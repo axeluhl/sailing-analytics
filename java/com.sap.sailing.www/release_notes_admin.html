@@ -21,6 +21,16 @@
 			<div class="mainContent">
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
+                    <h2 class="articleSubheadline">November 2019</h2>
+                    <ul class="bulletList">
+                        <li>Added system property <tt>security.sharedAcrossSubdomains</tt> which can be used to
+                            configure the security service as shared across several subdomains of the parent
+                            domain specified by the system property. Use, e.g., as in<pre>
+                              -Dsecurity.sharedAcrossSubdomains=sapsailing.com
+                            </pre>
+                        </li>
+                    </ul>
+
                     <h2 class="articleSubheadline">October 2019</h2>
                     <ul class="bulletList">
                         <li>
@@ -39,7 +49,8 @@
                             defined to be "constructed course" or any of the pre-defined types (windward/leeward,
                             coastal long distance, non-spinnaker, and circular random). Tracking data can be used
                             to pre-fill leg distance and true wind angle. Desired total course distances can be spread
-                            proportionally across the legs based on their estimated length.
+                            proportionally across the legs based on their estimated length. For more details
+                            see <a href="https://wiki.sapsailing.com/wiki/howto/setup-orc-regatta">https://wiki.sapsailing.com/wiki/howto/setup-orc-regatta</a>.
                         </li>
                         <li>
                         	Loading a race using the TracTrac connector used to determine the race's boat class
