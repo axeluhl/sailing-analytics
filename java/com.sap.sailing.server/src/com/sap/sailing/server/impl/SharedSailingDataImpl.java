@@ -91,6 +91,8 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     private void removeAll() {
         markPropertiesById.clear();
+        markTemplatesById.clear();
+        courseTemplatesById.clear();
     }
 
     public SecurityService getSecurityService() {
