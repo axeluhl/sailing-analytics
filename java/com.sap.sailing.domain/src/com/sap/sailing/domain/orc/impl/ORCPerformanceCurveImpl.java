@@ -196,6 +196,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             }
             break;
         case WINDWARD_LEEWARD:
+        case WINDWARD_LEEWARD_REAL_LIVE:
             for (final Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
                 result.put(tws, certificate.getWindwardLeewardSpeedPrediction().get(tws).getDuration(leg.getLength()));
             }

@@ -18,7 +18,6 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DoubleBox;
 
 /**
@@ -33,7 +32,7 @@ import com.sap.sse.gwt.client.dialog.DoubleBox;
  * @author Axel Uhl (D043530)
  *
  */
-public class ORCPerformanceCurveLegDialog extends DataEntryDialog<ORCPerformanceCurveLegImpl> {
+public class ORCPerformanceCurveLegDialog extends AbstractORCPerformanceCurveLegDialog<ORCPerformanceCurveLegImpl> {
     private final Button fetchTrackingBasedDistanceAndTwaButton;
     private final ListBox legTypeBox;
     private final DoubleBox distanceInNauticalMilesBox;
@@ -47,25 +46,16 @@ public class ORCPerformanceCurveLegDialog extends DataEntryDialog<ORCPerformance
             ListDataProvider<WaypointDTO> waypointList, ORCPerformanceCurveLegImpl orcLegParametersSoFar,
             LegGeometrySupplier legGeometrySupplier,
             Validator<ORCPerformanceCurveLegImpl> validator, DialogCallback<ORCPerformanceCurveLegImpl> callback) {
-        super(stringMessages.orcPerformanceCurveLeg(),
-                stringMessages.orcPerformanceCurveLegName(waypointList.getList().indexOf(forLegEndingAt), forLegEndingAt.getName()), stringMessages.ok(),
-                stringMessages.cancel(), validator, callback);
+        super(stringMessages.orcPerformanceCurveLeg(), stringMessages
+                .orcPerformanceCurveLegName(waypointList.getList().indexOf(forLegEndingAt), forLegEndingAt.getName()),
+                stringMessages, validator, callback);
         this.stringMessages = stringMessages;
         this.forLegEndingAt = forLegEndingAt;
         this.waypointList = waypointList;
         this.legGeometrySupplier = legGeometrySupplier;
         fetchTrackingBasedDistanceAndTwaButton = new Button(stringMessages.orcPerformanceCurveFetchTrackedLegGeometry());
         fetchTrackingBasedDistanceAndTwaButton.addClickHandler(e->fetchTrackingBasedDistanceAndTwa());
-        legTypeBox = createListBox(/* isMultipleSelect */ false);
-        legTypeBox.addItem("", (String) null);
-        int i=1;
-        for (final ORCPerformanceCurveLegTypes t : ORCPerformanceCurveLegTypes.values()) {
-            legTypeBox.addItem(t.name(), t.name());
-            if (orcLegParametersSoFar != null && orcLegParametersSoFar.getType() == t) {
-                legTypeBox.setSelectedIndex(i);
-            }
-            i++;
-        }
+        legTypeBox = createLegTypeBox(orcLegParametersSoFar);
         distanceInNauticalMilesBox = createDoubleBox(/* visibleLength */ 5);
         twaBox = createDoubleBox(/* visibleLength */ 5);
         if (orcLegParametersSoFar != null) {

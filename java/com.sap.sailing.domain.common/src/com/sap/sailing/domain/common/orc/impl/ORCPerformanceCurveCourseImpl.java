@@ -2,9 +2,11 @@ package com.sap.sailing.domain.common.orc.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sse.common.Util;
 
 public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse {
@@ -22,6 +24,12 @@ public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse 
 
     @Override
     public ORCPerformanceCurveCourse subcourse(int lastFinishedLegOneBased, double shareOfCurrentLeg) {
+        return subcourse(lastFinishedLegOneBased, shareOfCurrentLeg, /* windwardLeewardLegReplacer */ null);
+    }
+    
+    @Override
+    public ORCPerformanceCurveCourse subcourse(int lastFinishedLegOneBased, double shareOfCurrentLeg,
+            BiFunction<Integer, ORCPerformanceCurveLeg, ORCPerformanceCurveLeg> windwardLeewardLegReplacer) {
         // does function for empty courses, returns again empty course
         if (lastFinishedLegOneBased >= Util.size(legs)) {
             return this;
@@ -30,11 +38,17 @@ public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse 
             int count = 0;
             ORCPerformanceCurveLeg lastFinishedLeg = null;
             for (final ORCPerformanceCurveLeg leg : getLegs()) {
+                final ORCPerformanceCurveLeg potentiallyReplacedLeg;
+                if (leg.getType() == ORCPerformanceCurveLegTypes.WINDWARD_LEEWARD_REAL_LIVE && windwardLeewardLegReplacer != null) {
+                    potentiallyReplacedLeg = windwardLeewardLegReplacer.apply(count, leg);
+                } else {
+                    potentiallyReplacedLeg = leg;
+                }
                 if (count++ >= lastFinishedLegOneBased) {
-                    lastFinishedLeg = leg;
+                    lastFinishedLeg = potentiallyReplacedLeg;
                     break;
                 }
-                resultLegs.add(leg);
+                resultLegs.add(potentiallyReplacedLeg);
             }
             resultLegs.add(lastFinishedLeg.scale(shareOfCurrentLeg));
             return new ORCPerformanceCurveCourseImpl(resultLegs);

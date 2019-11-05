@@ -22,7 +22,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DoubleBox;
 
 /**
@@ -32,7 +31,7 @@ import com.sap.sse.gwt.client.dialog.DoubleBox;
  * @author Axel Uhl (D043530)
  *
  */
-public class ORCPerformanceCurveAllLegsDialog extends DataEntryDialog<ORCPerformanceCurveLegImpl[]> {
+public class ORCPerformanceCurveAllLegsDialog extends AbstractORCPerformanceCurveLegDialog<ORCPerformanceCurveLegImpl[]> {
     private final ListBox commonLegTypeBox;
     private final DoubleBox desiredTotalCourseDistanceInNauticalMilesBox;
     private final ListBox[] legTypeBoxes;
@@ -56,9 +55,7 @@ public class ORCPerformanceCurveAllLegsDialog extends DataEntryDialog<ORCPerform
             ORCPerformanceCurveLegImpl[] orcLegParametersSoFar, LegGeometrySupplier legGeometrySupplier,
             Validator<ORCPerformanceCurveLegImpl[]> validator,
             DialogCallback<ORCPerformanceCurveLegImpl[]> callback) {
-        super(stringMessages.orcPerformanceCurveLegs(),
-                stringMessages.orcPerformanceCurveLegs(), stringMessages.ok(),
-                stringMessages.cancel(), validator, callback);
+        super(stringMessages.orcPerformanceCurveLegs(), stringMessages.orcPerformanceCurveLegs(), stringMessages, validator, callback);
         this.stringMessages = stringMessages;
         this.waypointList = waypointList;
         this.legGeometrySupplier = legGeometrySupplier;
@@ -139,20 +136,6 @@ public class ORCPerformanceCurveAllLegsDialog extends DataEntryDialog<ORCPerform
             legDistance = Distance.NULL;
         }
         return legDistance;
-    }
-    
-    private ListBox createLegTypeBox(ORCPerformanceCurveLegImpl orcLegParametersSoFar) {
-        final ListBox legTypeBox = createListBox(/* isMultipleSelect */ false);
-        legTypeBox.addItem("", (String) null);
-        int i=1;
-        for (final ORCPerformanceCurveLegTypes t : ORCPerformanceCurveLegTypes.values()) {
-            legTypeBox.addItem(t.name(), t.name());
-            if (orcLegParametersSoFar != null && orcLegParametersSoFar.getType() == t) {
-                legTypeBox.setSelectedIndex(i);
-            }
-            i++;
-        }
-        return legTypeBox;
     }
     
     private void fetchTrackingBasedDistanceAndTwa() {
