@@ -529,13 +529,20 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         return new ObjectInputStream(is);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public synchronized void initiallyFillFromInternal(ObjectInputStream is)
             throws IOException, ClassNotFoundException, InterruptedException {
+        markTemplatesById.putAll((Map<UUID, MarkTemplate>) is.readObject());
+        markPropertiesById.putAll((Map<UUID, MarkProperties>) is.readObject());
+        courseTemplatesById.putAll((Map<UUID, CourseTemplate>) is.readObject());
     }
 
     @Override
     public void serializeForInitialReplicationInternal(ObjectOutputStream objectOutputStream) throws IOException {
+        objectOutputStream.writeObject(markTemplatesById);
+        objectOutputStream.writeObject(markPropertiesById);
+        objectOutputStream.writeObject(courseTemplatesById);
     }
 
     @Override
