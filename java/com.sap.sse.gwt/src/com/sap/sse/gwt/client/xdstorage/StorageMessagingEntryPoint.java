@@ -1,6 +1,6 @@
 package com.sap.sse.gwt.client.xdstorage;
 
-import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.messaging.AbstractMessagingEntryPoint;
 import com.sap.sse.gwt.client.messaging.MessageListener;
@@ -16,8 +16,8 @@ import com.sap.sse.gwt.client.messaging.MessagePort;
  * @author Axel Uhl (d043530)
  *
  */
-public class StorageMessagingEntryPoint extends AbstractMessagingEntryPoint<JSONObject> {
-    protected MessageListener<JSONObject> getMessageListener() {
+public class StorageMessagingEntryPoint extends AbstractMessagingEntryPoint<JavaScriptObject> {
+    protected MessageListener<JavaScriptObject> getMessageListener() {
         return new LocalStorageDrivenByMessageEvents();
     }
 }

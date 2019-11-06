@@ -1,6 +1,7 @@
 package com.sap.sse.gwt.client.xdstorage;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import java.util.function.Consumer;
+
 import com.sap.sse.gwt.client.Storage;
 
 /**
@@ -11,17 +12,17 @@ import com.sap.sse.gwt.client.Storage;
  *
  */
 public interface CrossDomainStorage {
-    void setItem(String key, String value, AsyncCallback<Void> callback);
+    void setItem(String key, String value, Consumer<Void> callback);
 
-    void getItem(String key, AsyncCallback<String> callback);
+    void getItem(String key, Consumer<String> callback);
 
-    void removeItem(String key, AsyncCallback<Void> callback);
+    void removeItem(String key, Consumer<Void> callback);
 
-    void clear(AsyncCallback<Void> callback);
+    void clear(Consumer<Void> callback);
 
-    void key(int index, AsyncCallback<String> callback);
+    void key(int index, Consumer<String> callback);
 
-    void getLength(AsyncCallback<Integer> callback);
+    void getLength(Consumer<Integer> callback);
 
-    void getAllKeys(AsyncCallback<String[]> callback);
+    void getAllKeys(Consumer<String[]> callback);
 }

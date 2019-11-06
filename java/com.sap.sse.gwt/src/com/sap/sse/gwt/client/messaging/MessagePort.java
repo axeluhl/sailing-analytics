@@ -3,7 +3,6 @@ package com.sap.sse.gwt.client.messaging;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.IFrameElement;
-import com.sap.sse.gwt.client.xdstorage.StorageMessagingEntryPoint;
 
 /**
  * The handle to a {@code Window} in the DOM which can be used to post a message to and to register a message event
@@ -27,11 +26,6 @@ import com.sap.sse.gwt.client.xdstorage.StorageMessagingEntryPoint;
  *
  */
 public class MessagePort extends JavaScriptObject {
-    /**
-     * The path under which the HTML document running the {@link StorageMessagingEntryPoint} can be loaded.
-     */
-    private static final String MESSAGING_ENTRY_POINT_PATH = "/gwt-base/StorageMessaging.html";
-
     protected MessagePort() {
         super();
     }
@@ -44,17 +38,17 @@ public class MessagePort extends JavaScriptObject {
      * 
      * @param document
      *            the document to whose {@code body} element to append the invisible {@code iframe}
-     * @param baseUrlForMessagingEntryPoint
+     * @param urlForMessagingEntryPoint
      *            can be provided with or without a trailing slash; during construction of the full URL this method will
      *            ensure that there are no duplications
      * @return a {@link MesssagePort} connected to the content window of a new {@link IFrameElement} that has been added
      *         to the {@code document}'s {@link Document#getBody() body element}.
      */
-    public static MessagePort createInDocument(Document document, String baseUrlForMessagingEntryPoint) {
+    public static MessagePort createInDocument(Document document, String urlForMessagingEntryPoint) {
         final IFrameElement iframe = document.createIFrameElement();
         iframe.setAttribute("style", "width:0; height:0; border:0; border:none;");
         // TODO register an onload function on the iframe using JSNI and return the MessagePort to a callback once the onload was triggered
-        iframe.setSrc(baseUrlForMessagingEntryPoint+MESSAGING_ENTRY_POINT_PATH);
+        iframe.setSrc(urlForMessagingEntryPoint);
         Document.get().getBody().appendChild(iframe);
         return getFromIframe(iframe);
     }

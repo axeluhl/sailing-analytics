@@ -1,14 +1,45 @@
 package com.sap.sse.gwt.client.xdstorage;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Consumer;
+
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.json.client.JSONObject;
+import com.sap.sse.gwt.client.messaging.MessageEvent;
 import com.sap.sse.gwt.client.messaging.MessagePort;
 
 public class CrossDomainStorageImpl implements CrossDomainStorage {
-    private final MessagePort portToStorageMessagingEntryPoint;
+    /**
+     * The path under which the HTML document running the {@link StorageMessagingEntryPoint} can be loaded.
+     */
+    private static final String STORAGE_MESSAGING_ENTRY_POINT_PATH = "gwt-base/StorageMessaging.html";
 
-    public CrossDomainStorageImpl(MessagePort portToStorageMessagingEntryPoint) {
+    private final MessagePort portToStorageMessagingEntryPoint;
+    private final Map<UUID, Consumer<Object>> resultForwardersByRequestUuidAsString;
+
+    public CrossDomainStorageImpl(Document documentInWhichToInsertMessagingIframe, String baseUrlForStorageMessagingEntryPoint) {
         super();
-        this.portToStorageMessagingEntryPoint = portToStorageMessagingEntryPoint;
+        resultForwardersByRequestUuidAsString = new HashMap<>();
+        this.portToStorageMessagingEntryPoint = MessagePort.createInDocument(documentInWhichToInsertMessagingIframe,
+                baseUrlForStorageMessagingEntryPoint+(baseUrlForStorageMessagingEntryPoint.endsWith("/")?"":"/")+STORAGE_MESSAGING_ENTRY_POINT_PATH);
+        MessagePort.getCurrentWindow().addMessageListener((MessageEvent<JavaScriptObject> messageEvent)->dispatchMessageToCallback(messageEvent));
+    }
+    
+    private void postMessageAndRegisterCallback(UUID id, JSONObject request, Consumer<Object> resultConsumer) {
+        resultForwardersByRequestUuidAsString.put(id, resultConsumer);
+        portToStorageMessagingEntryPoint.postMessage(request.getJavaScriptObject(), getTargetOrigin());
+    }
+
+    private void dispatchMessageToCallback(MessageEvent<JavaScriptObject> messageEvent) {
+        final Response response = messageEvent.getData().cast();
+        final UUID idOfRequestToWhichThisIsTheResponse = LocalStorageDrivenByMessageEvents.getId(response);
+        final Consumer<Object> resultForwarder = resultForwardersByRequestUuidAsString.remove(idOfRequestToWhichThisIsTheResponse);
+        if (resultForwarder != null) {
+            resultForwarder.accept(response.getResult());
+        }
     }
 
     private String getTargetOrigin() {
@@ -16,40 +47,45 @@ public class CrossDomainStorageImpl implements CrossDomainStorage {
         return "*";
     }
 
-    // TODO in the following methods record the request ID and register for a response for exactly that ID
-    
     @Override
-    public void setItem(String key, String value, AsyncCallback<Void> callback) {
-        portToStorageMessagingEntryPoint.postMessage(LocalStorageDrivenByMessageEvents.createSetItemRequest(key, value), getTargetOrigin());
+    public void setItem(String key, String value, Consumer<Void> callback) {
+        final UUID id = UUID.randomUUID();
+        postMessageAndRegisterCallback(id, LocalStorageDrivenByMessageEvents.createSetItemRequest(id, key, value), result->callback.accept(null));
     }
 
     @Override
-    public void getItem(String key, AsyncCallback<String> callback) {
-        portToStorageMessagingEntryPoint.postMessage(LocalStorageDrivenByMessageEvents.createGetItemRequest(key), getTargetOrigin());
+    public void getItem(String key, Consumer<String> callback) {
+        final UUID id = UUID.randomUUID();
+        postMessageAndRegisterCallback(id, LocalStorageDrivenByMessageEvents.createGetItemRequest(id, key), result->callback.accept((String) result));
     }
 
     @Override
-    public void removeItem(String key, AsyncCallback<Void> callback) {
-        portToStorageMessagingEntryPoint.postMessage(LocalStorageDrivenByMessageEvents.createRemoveItemRequest(key), getTargetOrigin());
+    public void removeItem(String key, Consumer<Void> callback) {
+        final UUID id = UUID.randomUUID();
+        postMessageAndRegisterCallback(id, LocalStorageDrivenByMessageEvents.createRemoveItemRequest(id, key), result->callback.accept(null));
     }
 
     @Override
-    public void clear(AsyncCallback<Void> callback) {
-        portToStorageMessagingEntryPoint.postMessage(LocalStorageDrivenByMessageEvents.createClearRequest(), getTargetOrigin());
+    public void clear(Consumer<Void> callback) {
+        final UUID id = UUID.randomUUID();
+        postMessageAndRegisterCallback(id, LocalStorageDrivenByMessageEvents.createClearRequest(id), result->callback.accept(null));
     }
 
     @Override
-    public void key(int index, AsyncCallback<String> callback) {
-        portToStorageMessagingEntryPoint.postMessage(LocalStorageDrivenByMessageEvents.createKeyRequest(index), getTargetOrigin());
+    public void key(int index, Consumer<String> callback) {
+        final UUID id = UUID.randomUUID();
+        postMessageAndRegisterCallback(id, LocalStorageDrivenByMessageEvents.createKeyRequest(id, index), result->callback.accept((String) result));
     }
 
     @Override
-    public void getLength(AsyncCallback<Integer> callback) {
-        portToStorageMessagingEntryPoint.postMessage(LocalStorageDrivenByMessageEvents.createGetLengthRequest(), getTargetOrigin());
+    public void getLength(Consumer<Integer> callback) {
+        final UUID id = UUID.randomUUID();
+        postMessageAndRegisterCallback(id, LocalStorageDrivenByMessageEvents.createGetLengthRequest(id), result->callback.accept(((Number) result).intValue()));
     }
 
     @Override
-    public void getAllKeys(AsyncCallback<String[]> callback) {
-        portToStorageMessagingEntryPoint.postMessage(LocalStorageDrivenByMessageEvents.createGetAllKeysRequest(), getTargetOrigin());
+    public void getAllKeys(Consumer<String[]> callback) {
+        final UUID id = UUID.randomUUID();
+        postMessageAndRegisterCallback(id, LocalStorageDrivenByMessageEvents.createGetAllKeysRequest(id), result->callback.accept((String[]) result));
     }
 }
