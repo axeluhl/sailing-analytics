@@ -82,10 +82,4 @@ public class CrossDomainStorageImpl implements CrossDomainStorage {
         final UUID id = UUID.randomUUID();
         postMessageAndRegisterCallback(id, LocalStorageDrivenByMessageEvents.createGetLengthRequest(id), result->callback.accept(((Number) result).intValue()));
     }
-
-    @Override
-    public void getAllKeys(Consumer<String[]> callback) {
-        final UUID id = UUID.randomUUID();
-        postMessageAndRegisterCallback(id, LocalStorageDrivenByMessageEvents.createGetAllKeysRequest(id), result->callback.accept((String[]) result));
-    }
 }

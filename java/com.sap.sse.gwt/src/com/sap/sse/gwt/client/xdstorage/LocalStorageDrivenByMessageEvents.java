@@ -3,7 +3,6 @@ package com.sap.sse.gwt.client.xdstorage;
 import java.util.UUID;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNull;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
@@ -32,13 +31,6 @@ public class LocalStorageDrivenByMessageEvents implements MessageListener<JavaSc
         case CLEAR:
             localStorage.clear();
             result = JSONNull.getInstance();
-            break;
-        case GET_ALL_KEYS:
-            final JSONArray keysArray = new JSONArray();
-            for (int i=0; i<localStorage.getAllKeys().length; i++) {
-                keysArray.set(i, new JSONString(localStorage.getAllKeys()[i]));
-            }
-            result = keysArray;
             break;
         case GET_ITEM:
             final String itemValue = localStorage.getItem(request.getKey());
@@ -100,14 +92,8 @@ public class LocalStorageDrivenByMessageEvents implements MessageListener<JavaSc
     
     public static JSONObject createKeyRequest(UUID id, int i) {
         final JSONObject result = createEmptyRequest(id);
-        result.put(Request.OPERATION, new JSONString(StorageOperation.GET_LENGTH.name()));
+        result.put(Request.OPERATION, new JSONString(StorageOperation.KEY.name()));
         result.put(Request.INDEX, new JSONNumber(i));
-        return result;
-    }
-    
-    public static JSONObject createGetAllKeysRequest(UUID id) {
-        final JSONObject result = createEmptyRequest(id);
-        result.put(Request.OPERATION, new JSONString(StorageOperation.GET_ALL_KEYS.name()));
         return result;
     }
     

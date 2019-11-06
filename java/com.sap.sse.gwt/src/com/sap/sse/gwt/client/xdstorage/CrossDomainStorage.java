@@ -23,6 +23,4 @@ public interface CrossDomainStorage {
     void key(int index, Consumer<String> callback);
 
     void getLength(Consumer<Integer> callback);
-
-    void getAllKeys(Consumer<String[]> callback);
 }
