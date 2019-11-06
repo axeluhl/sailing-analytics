@@ -77,14 +77,38 @@ public class MessagePort extends JavaScriptObject {
         return iframe.contentWindow;
     }-*/;
 
+    /**
+     * Posts a message to this port's {@code window}. All {@link MessagePort} objects for the receiving {@code window}
+     * will trigger their registered {@link MessageListener}s accordingly.
+     * 
+     * @param targetOrigin
+     *            can either be "*" which will post the message regardless of the origin of the window sending to (not
+     *            recommended for security reasons), or must be a URI providing the same scheme, hostname and port of
+     *            the origin of the window sending to. See also
+     *            <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">here</a>
+     */
     public final native <T> void postMessage(T message, String targetOrigin) /*-{
         this.postMessage(message, targetOrigin);
     }-*/;
 
+    /**
+     * Adds a message listener to this port so that when a message is posted to this port's {@code window}, the
+     * listener's {@link MessageListener#onMessageReceived(MessageEvent)} will be invoked.
+     */
     public final native <T> void addMessageListener(MessageListener<T> listener) /*-{
         this.addEventListener("message",
             function(messageEvent) {
                 listener.@com.sap.sse.gwt.client.messaging.MessageListener::onMessageReceived(Lcom/google/gwt/core/client/JavaScriptObject;)(messageEvent);
             });
     }-*/;
+
+    /**
+     * Adds a listener on this application's {@code window} which for a typical GWT application will be the content
+     * window of the implicit {@code iframe} element that GWT generates to host the application. This listener will
+     * receive {@link MessageEvent}s that receivers of messages {@link #postMessage(Object, String) posted} through this message port
+     * send back to the the {@link MessageEvent#getSource() message event's source}.
+     */
+    public final <T> void addResponseListener(MessageListener<T> listener) {
+        MessagePort.getCurrentWindow().addMessageListener(listener);
+    }
 }

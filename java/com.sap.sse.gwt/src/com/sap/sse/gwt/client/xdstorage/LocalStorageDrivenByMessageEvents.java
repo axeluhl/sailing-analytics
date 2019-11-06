@@ -23,6 +23,7 @@ public class LocalStorageDrivenByMessageEvents implements MessageListener<JavaSc
     
     @Override
     public void onMessageReceived(MessageEvent<JavaScriptObject> messageEvent) {
+        // TODO filter by source origin; don't allow arbitrary domains to tamper with this domain's local storage...
         final Request request = messageEvent.getData().cast();
         final String operation = request.getOperation();
         final StorageOperation op = StorageOperation.valueOf(operation);
@@ -57,7 +58,7 @@ public class LocalStorageDrivenByMessageEvents implements MessageListener<JavaSc
         final JSONObject response = new JSONObject();
         response.put(RESULT, result);
         response.put(Request.ID, new JSONString(request.getId()));
-        messageEvent.getSource().postMessage(response.getJavaScriptObject(), "*"); // TODO clarify origin restriction
+        messageEvent.getSource().postMessage(response.getJavaScriptObject(), messageEvent.getOrigin());
     }
     
     private static JSONObject createEmptyRequest(UUID id) {

@@ -11,7 +11,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.sap.sse.gwt.client.messaging.MessageEvent;
 import com.sap.sse.gwt.client.messaging.MessagePort;
 
-public class CrossDomainStorageImpl implements CrossDomainStorage {
+class CrossDomainStorageImpl implements CrossDomainStorage {
     /**
      * The path under which the HTML document running the {@link StorageMessagingEntryPoint} can be loaded.
      */
@@ -19,13 +19,15 @@ public class CrossDomainStorageImpl implements CrossDomainStorage {
 
     private final MessagePort portToStorageMessagingEntryPoint;
     private final Map<UUID, Consumer<Object>> resultForwardersByRequestUuidAsString;
+    private final String targetOrigin;
 
     public CrossDomainStorageImpl(Document documentInWhichToInsertMessagingIframe, String baseUrlForStorageMessagingEntryPoint) {
         super();
+        this.targetOrigin = baseUrlForStorageMessagingEntryPoint;
         resultForwardersByRequestUuidAsString = new HashMap<>();
         this.portToStorageMessagingEntryPoint = MessagePort.createInDocument(documentInWhichToInsertMessagingIframe,
                 baseUrlForStorageMessagingEntryPoint+(baseUrlForStorageMessagingEntryPoint.endsWith("/")?"":"/")+STORAGE_MESSAGING_ENTRY_POINT_PATH);
-        MessagePort.getCurrentWindow().addMessageListener((MessageEvent<JavaScriptObject> messageEvent)->dispatchMessageToCallback(messageEvent));
+        this.portToStorageMessagingEntryPoint.addResponseListener((MessageEvent<JavaScriptObject> messageEvent)->dispatchMessageToCallback(messageEvent));
     }
     
     private void postMessageAndRegisterCallback(UUID id, JSONObject request, Consumer<Object> resultConsumer) {
@@ -43,8 +45,7 @@ public class CrossDomainStorageImpl implements CrossDomainStorage {
     }
 
     private String getTargetOrigin() {
-        // TODO Implement CrossDomainStorageImpl.getTargetOrigin(...)
-        return "*";
+        return targetOrigin;
     }
 
     @Override

@@ -4,19 +4,17 @@ import java.util.Date;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
-import com.sap.sse.gwt.client.xdstorage.CrossDomainStorageImpl;
 
 public class MessagingTestEntryPoint implements EntryPoint {
     @Override
     public void onModuleLoad() {
-        CrossDomainStorage xdStorage = new CrossDomainStorageImpl(Document.get(), "http://localhost:8888");
+        CrossDomainStorage xdStorage = CrossDomainStorage.create("http://localhost:8888");
         // getLength
         final HorizontalPanel getLengthPanel = new HorizontalPanel();
         RootPanel.get().add(getLengthPanel);
