@@ -29,7 +29,7 @@ public interface ReplicatingSharedSailingData extends SharedSailingData,
     Void internalCreateCourseTemplate(UUID idOfNewCourseTemplate, String courseTemplateName,
             Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
             Map<MarkTemplate, String> associatedRoles, RepeatablePart optionalRepeatablePart, Iterable<String> tags,
-            URL optionalImageUR, Integer defaultNumberOfLapsL);
+            URL optionalImageURL, Integer defaultNumberOfLaps);
     
     Void internalSetTrackingDeviceIdentifierForMarkProperties(UUID markPropertiesUUID, DeviceIdentifier deviceIdentifier);
     
