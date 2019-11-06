@@ -144,13 +144,16 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     @Override
     public MarkProperties createMarkProperties(CommonMarkProperties properties, Iterable<String> tags) {
         final UUID idOfNewMarkProperties = UUID.randomUUID();
-        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.MARK_PROPERTIES,
                 MarkProperties.getTypeRelativeObjectIdentifier(idOfNewMarkProperties),
                 idOfNewMarkProperties + "/" + properties.getName(), () -> {
-                    apply(s -> s.internalCreateMarkProperties(idOfNewMarkProperties, properties, tags));
-                    return getMarkPropertiesById(idOfNewMarkProperties);
+                    final UUID idOfNewMarkPropertiesForReplication = idOfNewMarkProperties;
+                    final CommonMarkProperties propertiesForReplication = properties;
+                    final Iterable<String> tagsForReplication = tags;
+                    apply(s -> s.internalCreateMarkProperties(idOfNewMarkPropertiesForReplication, propertiesForReplication, tagsForReplication));
                 });
+        return getMarkPropertiesById(idOfNewMarkProperties);
     }
 
     @Override
@@ -242,12 +245,14 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     @Override
     public MarkTemplate createMarkTemplate(CommonMarkProperties properties) {
         final UUID idOfNewMarkTemplate = UUID.randomUUID();
-        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.MARK_TEMPLATE, MarkTemplate.getTypeRelativeObjectIdentifier(idOfNewMarkTemplate),
                 idOfNewMarkTemplate + "/" + properties.getName(), () -> {
-                    apply(s -> s.internalCreateMarkTemplate(idOfNewMarkTemplate, properties));
-                    return getMarkTemplateById(idOfNewMarkTemplate);
+                    final UUID idOfNewMarkTemplateForReplication = idOfNewMarkTemplate;
+                    final CommonMarkProperties propertiesForReplication = properties;
+                    apply(s -> s.internalCreateMarkTemplate(idOfNewMarkTemplateForReplication, propertiesForReplication));
                 });
+        return getMarkTemplateById(idOfNewMarkTemplate);
     }
 
     @Override
@@ -297,15 +302,24 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         }
 
         final UUID idOfNewCourseTemplate = UUID.randomUUID();
-        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.COURSE_TEMPLATE,
                 CourseTemplate.getTypeRelativeObjectIdentifier(idOfNewCourseTemplate),
                 idOfNewCourseTemplate + "/" + courseTemplateName, () -> {
-                    apply(s -> s.internalCreateCourseTemplate(idOfNewCourseTemplate, courseTemplateName, marks,
-                            waypoints, effectiveAssociatedRoles, optionalRepeatablePart, tags, optionalImageURL,
-                            defaultNumberOfLaps));
-                    return getCourseTemplateById(idOfNewCourseTemplate);
+                    final UUID idOfNewCourseTemplateForReplication = idOfNewCourseTemplate;
+                    final String courseTemplateNameForReplication = courseTemplateName;
+                    final Iterable<MarkTemplate> marksForReplication = marks;
+                    final Iterable<WaypointTemplate> waypointsForReplication = waypoints;
+                    final Map<MarkTemplate, String> effectiveAssociatedRolesForReplication = effectiveAssociatedRoles;
+                    final RepeatablePart optionalRepeatablePartForReplication = optionalRepeatablePart;
+                    final Iterable<String> tagsForReplication = tags;
+                    final URL optionalImageURLForReplication = optionalImageURL;
+                    final Integer defaultNumberOfLapsForReplication = defaultNumberOfLaps;
+                    apply(s -> s.internalCreateCourseTemplate(idOfNewCourseTemplateForReplication, courseTemplateNameForReplication, marksForReplication,
+                            waypointsForReplication, effectiveAssociatedRolesForReplication, optionalRepeatablePartForReplication, tagsForReplication, optionalImageURLForReplication,
+                            defaultNumberOfLapsForReplication));
                 });
+        return getCourseTemplateById(idOfNewCourseTemplate);
     }
 
     @Override
