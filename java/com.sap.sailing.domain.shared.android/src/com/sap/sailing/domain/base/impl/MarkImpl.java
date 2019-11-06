@@ -11,7 +11,8 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.NamedImpl;
 
 public class MarkImpl extends NamedImpl implements Mark {
-    private static final long serialVersionUID = 1900673146064411979L;
+
+    private static final long serialVersionUID = -4817053057647606900L;
 
     private final Color color;
     private final String shape;

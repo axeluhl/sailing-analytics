@@ -8,7 +8,7 @@ import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
 
 public class ControlPointWithTwoMarksImpl implements ControlPointWithTwoMarks {
-    private static final long serialVersionUID = 2807354812133070574L;
+    private static final long serialVersionUID = -6407078290366911597L;
     private final Mark left;
     private final Mark right;
     private final String name;

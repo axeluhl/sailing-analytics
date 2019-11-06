@@ -14,9 +14,9 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sse.common.impl.NamedImpl;
 
 public class CourseDataImpl extends NamedImpl implements CourseBase {
-
-    private static final long serialVersionUID = 1389216430392253253L;
     
+    private static final long serialVersionUID = 2749443048689453078L;
+
     private final List<Waypoint> waypoints;
 
     private final UUID originatingCourseTemplateId; 
