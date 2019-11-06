@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.coursetemplate;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +16,7 @@ import com.sap.sse.common.Util;
  * <li>{@link #getZeroBasedIndexOfRepeatablePartStart()} is <= {@link #getZeroBasedIndexOfRepeatablePartEnd()}</li>
  * </ul>
  */
-public interface RepeatablePart {
+public interface RepeatablePart extends Serializable {
     /**
      * The index into {@link #waypoints} of the first waypoint that is to be cloned for repetitive laps.
      */

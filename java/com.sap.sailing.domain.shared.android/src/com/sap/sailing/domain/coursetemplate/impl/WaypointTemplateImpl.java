@@ -5,6 +5,8 @@ import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 
 public class WaypointTemplateImpl implements WaypointTemplate {
+    private static final long serialVersionUID = -4708322032365234982L;
+    
     private final PassingInstruction passingInstruction;
     private final ControlPointTemplate controlPointTemplate;
     

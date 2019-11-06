@@ -3,6 +3,8 @@ package com.sap.sailing.domain.coursetemplate.impl;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 
 public class RepeatablePartImpl implements RepeatablePart {
+    private static final long serialVersionUID = -7432656529810302123L;
+
     private final int zeroBasedIndexOfRepeatablePartStart;
 
     private final int zeroBasedIndexOfRepeatablePartEnd;
