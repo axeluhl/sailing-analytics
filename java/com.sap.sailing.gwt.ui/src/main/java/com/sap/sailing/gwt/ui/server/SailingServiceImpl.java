@@ -343,7 +343,7 @@ import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
-import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesImpl;
+import com.sap.sailing.domain.coursetemplate.impl.CommonMarkPropertiesImpl;
 import com.sap.sailing.domain.coursetemplate.impl.RepeatablePartImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
 import com.sap.sailing.domain.igtimiadapter.Account;
@@ -9898,14 +9898,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         SecuredDomainType.MARK_TEMPLATE,
                         MarkTemplate.getTypeRelativeObjectIdentifier(markTemplateUUID), markTemplate.getName(),
                         () -> getSharedSailingData()
-                                .createMarkTemplate(convertDtoToCommonMarkProperties(markTemplateUUID,
+                                .createMarkTemplate(convertDtoToCommonMarkProperties(
                                         markTemplate.getCommonMarkProperties())));
         return convertToMarkTemplateDTO(mTemplate);
     }
 
-    private CommonMarkProperties convertDtoToCommonMarkProperties(UUID markTemplateUUID,
-            CommonMarkPropertiesDTO markProperties) {
-        return new MarkPropertiesImpl(markTemplateUUID, markProperties.getName(), markProperties.getShortName(),
+    private CommonMarkProperties convertDtoToCommonMarkProperties(CommonMarkPropertiesDTO markProperties) {
+        return new CommonMarkPropertiesImpl(markProperties.getName(), markProperties.getShortName(),
                 markProperties.getColor(), markProperties.getShape(), markProperties.getPattern(),
                 markProperties.getType());
     }
@@ -9920,7 +9919,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         if (createdOrUpdatedMarkProperties != null) {
             getSecurityService().checkCurrentUserUpdatePermission(createdOrUpdatedMarkProperties);
             getSharedSailingData().updateMarkProperties(markProperties.getUuid(),
-                    convertDtoToCommonMarkProperties(markProperties.getUuid(), markProperties.getCommonMarkProperties()),
+                    convertDtoToCommonMarkProperties(markProperties.getCommonMarkProperties()),
                     markProperties.getPosition(), convertDtoToDeviceIdentifier(markProperties.getDeviceIdentifier()),
                     markProperties.getTags());
             createdOrUpdatedMarkProperties = getSharedSailingData().getMarkPropertiesById(createdOrUpdatedMarkProperties.getId());
@@ -9931,7 +9930,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                             MarkTemplate.getTypeRelativeObjectIdentifier(UUID.randomUUID()),
                             markProperties.getName(),
                             () -> getSharedSailingData()
-                                    .createMarkProperties(convertDtoToCommonMarkProperties(markProperties.getUuid(),
+                                    .createMarkProperties(convertDtoToCommonMarkProperties(
                                             markProperties.getCommonMarkProperties()), markProperties.getTags()));
         }
         return convertToMarkPropertiesDTO(createdOrUpdatedMarkProperties);

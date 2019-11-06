@@ -18,21 +18,29 @@ public class MarkPropertiesImpl extends CommonMarkPropertiesImpl implements Mark
     private DeviceIdentifier trackingDeviceIdentifier;
     private Position fixedPosition;
     private Iterable<String> tags;
+    private UUID id;
 
     private final Map<MarkTemplate, TimePoint> lastUsedTemplate = new HashMap<>();
     private final Map<String, TimePoint> lastUsedRole = new HashMap<>();
 
     public MarkPropertiesImpl(String name, String shortName, Color color, String shape, String pattern, MarkType type) {
-        super(name, shortName, color, shape, pattern, type);
+        this(UUID.randomUUID(), name, shortName, color, shape, pattern, type);
     }
 
     public MarkPropertiesImpl(UUID id, String name, String shortName, Color color, String shape, String pattern,
             MarkType type) {
-        super(id, name, shortName, color, shape, pattern, type);
+        super(name, shortName, color, shape, pattern, type);
+        this.id = id;
     }
 
     public MarkPropertiesImpl(UUID id, final CommonMarkProperties commonMarkProperties) {
-        super(id, commonMarkProperties);
+        super(commonMarkProperties);
+        this.id = id;
+    }
+    
+    @Override
+    public UUID getId() {
+        return id;
     }
 
     @Override
