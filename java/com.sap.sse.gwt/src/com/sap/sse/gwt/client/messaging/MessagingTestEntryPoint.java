@@ -15,6 +15,7 @@ public class MessagingTestEntryPoint implements EntryPoint {
         final MessagePort localPort = MessagePort.getCurrentWindow();
         localPort.addMessageListener(messageEvent -> GWT.log("Received " + messageEvent.getData() + " from origin " + messageEvent.getOrigin()));
         final IFrameElement iframe1 = Document.get().createIFrameElement();
+        iframe1.setAttribute("style", "width:0; height:0; border:0; border:none;");
         iframe1.setSrc("http://localhost:8888/gwt-base/Messaging.html");
         Document.get().getBody().appendChild(iframe1);
         final Button button = new Button("Test");

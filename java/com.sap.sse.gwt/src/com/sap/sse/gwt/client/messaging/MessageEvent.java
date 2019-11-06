@@ -3,6 +3,15 @@ package com.sap.sse.gwt.client.messaging;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.sap.sse.gwt.client.StorageEvent;
 
+/**
+ * Received by a {@link MessagePort} and forwarded to its {@link MessagePort#addMessageListener(MessageListener)
+ * registered} {@link MessageListener}s. To respond to the sender, use
+ * {@link #getSource()}.{@link MessagePort#postMessage(Object, String) postMessage(Object, String)}.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ * @param <T>
+ */
 public class MessageEvent<T> extends JavaScriptObject {
     protected MessageEvent() {
         super();
