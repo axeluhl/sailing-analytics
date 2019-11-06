@@ -15,7 +15,7 @@
 	<inherits name="com.sap.sse.SSECommon" />
 	<super-source path="jre" />
 
-	<entry-point class='com.sap.sse.gwt.client.messaging.MessagingEntryPoint'/>
+	<entry-point class='com.sap.sse.gwt.client.xdstorage.StorageMessagingEntryPoint'/>
 
 	<set-property name="gwt.logging.enabled" value="TRUE"/> 
 	<set-property name="gwt.logging.logLevel" value="FINE"/>
@@ -32,5 +32,6 @@
         <set-configuration-property name="CssResource.enableGss" value="true" />
         <set-configuration-property name="CssResource.conversionMode" value="strict" />
 	
-	<source path='client'/>
+	<source path='client/messaging'/>
+        <source path='client/xdstorage'/>
 </module>
