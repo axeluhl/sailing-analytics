@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Could not determine the version of your GWT SDK; using the module DTD from GWT 1.6.4. You may want to change this. -->
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.7.0//EN" "http://gwtproject.org/doctype/2.7.0/gwt-module.dtd">
+<module>
+	<!-- Inherit the core Web Toolkit stuff.                        -->
+	<inherits name='com.google.gwt.user.User'/> 
+	<inherits name='com.google.gwt.debug.Debug'/>
+	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
+	<inherits name="com.google.gwt.resources.Resources" />
+	<inherits name="com.google.gwt.logging.Logging"/>
+  
+	<!-- Other module inherits                                      -->
+	<inherits name="com.sap.sse.gwt.EmulatedJRE" />
+        <inherits name="com.sap.sse.gwt.SSESharedGWT" />
+	<inherits name="com.sap.sse.SSECommon" />
+	<super-source path="jre" />
+
+	<entry-point class='com.sap.sse.gwt.client.messaging.MessagingEntryPoint'/>
+
+	<set-property name="gwt.logging.enabled" value="TRUE"/> 
+	<set-property name="gwt.logging.logLevel" value="FINE"/>
+	
+	<set-property name="gwt.logging.consoleHandler" value="ENABLED" />
+	<set-property name="gwt.logging.developmentModeHandler" value="DISABLED" />
+	<set-property name="gwt.logging.systemHandler" value="ENABLED" />
+
+	<!-- Turning CSS obfuscation off -->
+	<set-configuration-property name="CssResource.style" value="pretty"/>
+	<!-- Turning CSS obfuscation on, which is the default -->
+	<!--  <set-configuration-property name="CssResource.style" value="obf"/> -->
+	
+        <set-configuration-property name="CssResource.enableGss" value="true" />
+        <set-configuration-property name="CssResource.conversionMode" value="strict" />
+	
+	<source path='client'/>
+</module>
