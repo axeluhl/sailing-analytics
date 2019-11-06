@@ -13,8 +13,6 @@ import com.sap.sse.gwt.client.messaging.MessageEvent;
 import com.sap.sse.gwt.client.messaging.MessageListener;
 
 public class LocalStorageDrivenByMessageEvents implements MessageListener<JavaScriptObject> {
-    private static final String RESULT = "r";
-    
     private final Storage localStorage;
     
     public LocalStorageDrivenByMessageEvents() {
@@ -56,7 +54,7 @@ public class LocalStorageDrivenByMessageEvents implements MessageListener<JavaSc
             throw new RuntimeException("Unknown operation "+op);
         }
         final JSONObject response = new JSONObject();
-        response.put(RESULT, result);
+        response.put(Response.RESULT, result);
         response.put(Request.ID, new JSONString(request.getId()));
         messageEvent.getSource().postMessage(response.getJavaScriptObject(), messageEvent.getOrigin());
     }
