@@ -48,7 +48,7 @@
               <!-- <userAgents>chrome</userAgents> -->
               <modules>
                 <module>com.sap.sse.gwt.StorageMessaging</module>
-                <module>com.sap.sse.gwt.MessagingTest</module>
+                <module>com.sap.sse.gwt.StorageMessagingTest</module>
               </modules>
               <gen>${basedir}/.generated</gen>
               <webappDirectory>${basedir}</webappDirectory>

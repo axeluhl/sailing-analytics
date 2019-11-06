@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.client.messaging;
+package com.sap.sse.gwt.client.xdstorage.impl;
 
 import java.util.Date;
 
@@ -10,7 +10,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
-import com.sap.sse.gwt.client.xdstorage.impl.LocalStorageDrivenByMessageEvents;
 
 /**
  * A test application registered at {@code /gwt-base/MessagingTest.html}. When run on, say, {@code http://127.0.0.1:8888},
@@ -26,7 +25,7 @@ import com.sap.sse.gwt.client.xdstorage.impl.LocalStorageDrivenByMessageEvents;
  * @author Axel Uhl (d043530)
  *
  */
-public class MessagingTestEntryPoint implements EntryPoint {
+public class StorageMessagingTestEntryPoint implements EntryPoint {
     @Override
     public void onModuleLoad() {
         CrossDomainStorage xdStorage = CrossDomainStorage.create("http://localhost:8888");
