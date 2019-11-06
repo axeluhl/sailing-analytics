@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.client.xdstorage;
+package com.sap.sse.gwt.client.xdstorage.impl;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
@@ -10,6 +10,6 @@ public class JavaScriptObjectWithID extends JavaScriptObject {
     }
     
     public final native String getId() /*-{
-                return this[@com.sap.sse.gwt.client.xdstorage.JavaScriptObjectWithID::ID];
+                return this[@com.sap.sse.gwt.client.xdstorage.impl.JavaScriptObjectWithID::ID];
     }-*/;
 }

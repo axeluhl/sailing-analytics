@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.client.xdstorage;
+package com.sap.sse.gwt.client.xdstorage.impl;
 
 import java.util.UUID;
 
@@ -11,7 +11,15 @@ import com.google.gwt.json.client.JSONValue;
 import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.messaging.MessageEvent;
 import com.sap.sse.gwt.client.messaging.MessageListener;
+import com.sap.sse.gwt.client.messaging.MessagePort;
 
+/**
+ * The request message processor and counterpart to {@link CrossDomainStorageImpl}. Receives {@link Request} objects
+ * through a {@link MessagePort} 
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class LocalStorageDrivenByMessageEvents implements MessageListener<JavaScriptObject> {
     private final Storage localStorage;
     

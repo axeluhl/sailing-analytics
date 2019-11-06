@@ -4,6 +4,8 @@ import java.util.function.Consumer;
 
 import com.google.gwt.dom.client.Document;
 import com.sap.sse.gwt.client.Storage;
+import com.sap.sse.gwt.client.xdstorage.impl.CrossDomainStorageImpl;
+import com.sap.sse.gwt.client.xdstorage.impl.StorageMessagingEntryPoint;
 
 /**
  * Provides local storage capabilities, similar to {@code window.localStorage} and {@link Storage}, but in a way where

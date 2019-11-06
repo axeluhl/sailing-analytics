@@ -10,7 +10,22 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
+import com.sap.sse.gwt.client.xdstorage.impl.LocalStorageDrivenByMessageEvents;
 
+/**
+ * A test application registered at {@code /gwt-base/MessagingTest.html}. When run on, say, {@code http://127.0.0.1:8888},
+ * an {@code iframe} will be loaded from {@code http://localhost:8888/gwt-base/StorageMessaging.html} which will register
+ * a {@link LocalStorageDrivenByMessageEvents} message listener which plays the "server" counterpart for
+ * {@link CrossDomainStorageImpl}. A few UI elements in the root panel allow the user to get/set/clear/count/list the
+ * items in the local storage. Check our your browser's developer tools to introspect the local storage situation.
+ * You will see entries for both, {@code http://127.0.0.1:8888} <em>and</em> {@code http://localhost:8888}, with the values
+ * submitted through 127.0.0.1 ending up in the localhost section, as intended.
+ * 
+ * @see CrossDomainStorage
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class MessagingTestEntryPoint implements EntryPoint {
     @Override
     public void onModuleLoad() {

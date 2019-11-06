@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.client.xdstorage;
+package com.sap.sse.gwt.client.xdstorage.impl;
 
 public class Request extends JavaScriptObjectWithID {
     static final String OPERATION = "o";
@@ -11,18 +11,18 @@ public class Request extends JavaScriptObjectWithID {
     }
 
     public final native String getOperation() /*-{
-		return this[@com.sap.sse.gwt.client.xdstorage.Request::OPERATION];
+		return this[@com.sap.sse.gwt.client.xdstorage.impl.Request::OPERATION];
     }-*/;
 
     public final native String getKey() /*-{
-		return this[@com.sap.sse.gwt.client.xdstorage.Request::KEY];
+		return this[@com.sap.sse.gwt.client.xdstorage.impl.Request::KEY];
     }-*/;
 
     public final native String getValue() /*-{
-		return this[@com.sap.sse.gwt.client.xdstorage.Request::VALUE];
+		return this[@com.sap.sse.gwt.client.xdstorage.impl.Request::VALUE];
     }-*/;
 
     public final native int getIndex() /*-{
-		return this[@com.sap.sse.gwt.client.xdstorage.Request::INDEX];
+		return this[@com.sap.sse.gwt.client.xdstorage.impl.Request::INDEX];
     }-*/;
 }

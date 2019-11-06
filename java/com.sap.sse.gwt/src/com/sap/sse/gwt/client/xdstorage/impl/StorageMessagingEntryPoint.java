@@ -1,10 +1,11 @@
-package com.sap.sse.gwt.client.xdstorage;
+package com.sap.sse.gwt.client.xdstorage.impl;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.messaging.AbstractMessagingEntryPoint;
 import com.sap.sse.gwt.client.messaging.MessageListener;
 import com.sap.sse.gwt.client.messaging.MessagePort;
+import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
 
 /**
  * A {@link AbstractMessagingEntryPoint messaging entry point} that implements a protocol with {@link CrossDomainStorage} such

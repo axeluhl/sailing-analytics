@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.client.xdstorage;
+package com.sap.sse.gwt.client.xdstorage.impl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,8 +10,9 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.json.client.JSONObject;
 import com.sap.sse.gwt.client.messaging.MessageEvent;
 import com.sap.sse.gwt.client.messaging.MessagePort;
+import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
 
-class CrossDomainStorageImpl implements CrossDomainStorage {
+public class CrossDomainStorageImpl implements CrossDomainStorage {
     /**
      * The path under which the HTML document running the {@link StorageMessagingEntryPoint} can be loaded.
      */

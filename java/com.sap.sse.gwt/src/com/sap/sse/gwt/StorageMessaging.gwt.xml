@@ -14,7 +14,7 @@
 	<inherits name="com.sap.sse.SSECommon" />
 	<super-source path="jre" />
 
-	<entry-point class='com.sap.sse.gwt.client.xdstorage.StorageMessagingEntryPoint'/>
+	<entry-point class='com.sap.sse.gwt.client.xdstorage.impl.StorageMessagingEntryPoint'/>
 
 	<set-property name="gwt.logging.enabled" value="TRUE"/> 
 	<set-property name="gwt.logging.logLevel" value="FINE"/>

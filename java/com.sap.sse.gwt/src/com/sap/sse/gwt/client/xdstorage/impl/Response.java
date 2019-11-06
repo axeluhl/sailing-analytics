@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.client.xdstorage;
+package com.sap.sse.gwt.client.xdstorage.impl;
 
 public class Response extends JavaScriptObjectWithID {
     static final String RESULT = "r";
@@ -8,6 +8,6 @@ public class Response extends JavaScriptObjectWithID {
     }
 
     public final native Object getResult() /*-{
-		return this[@com.sap.sse.gwt.client.xdstorage.Response::RESULT];
+		return this[@com.sap.sse.gwt.client.xdstorage.impl.Response::RESULT];
     }-*/;
 }

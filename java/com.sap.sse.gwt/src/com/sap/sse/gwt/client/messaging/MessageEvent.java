@@ -1,7 +1,6 @@
 package com.sap.sse.gwt.client.messaging;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.sap.sse.gwt.client.StorageEvent;
 
 /**
  * Received by a {@link MessagePort} and forwarded to its {@link MessagePort#addMessageListener(MessageListener)
@@ -17,10 +16,6 @@ public class MessageEvent<T> extends JavaScriptObject {
         super();
     }
     
-    public static interface Handler {
-        void onStorageChange(StorageEvent event);
-    }
-
     public final native T getData() /*-{
         return this.data;
     }-*/;
