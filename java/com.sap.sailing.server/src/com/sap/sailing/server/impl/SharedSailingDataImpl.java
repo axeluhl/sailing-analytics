@@ -26,6 +26,7 @@ import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBuilder;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.MarkTemplate.MarkTemplateResolver;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.impl.CourseTemplateImpl;
@@ -48,6 +49,7 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.ClearStateTestSupport;
+import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 public class SharedSailingDataImpl implements ReplicatingSharedSailingData, ClearStateTestSupport {
 
@@ -540,7 +542,9 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     @Override
     public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        return new ObjectInputStream(is);
+        return new ObjectInputStreamResolvingAgainstCache<MarkTemplateResolver>(is,
+                mt -> markTemplatesById.computeIfAbsent(mt.getId(), id -> mt), null) {
+        };
     }
 
     @SuppressWarnings("unchecked")
