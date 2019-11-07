@@ -67,7 +67,7 @@ public interface CourseAndMarkConfigurationFactory {
     CourseConfiguration createCourseConfigurationFromTemplate(CourseTemplate courseTemplate, Regatta optionalRegatta,
             Iterable<String> tagsToFilterMarkProperties);
 
-    CourseConfiguration createCourseConfigurationFromCourse(CourseBase course, Regatta regatta,
+    CourseConfiguration createCourseConfigurationFromRegatta(CourseBase optionalCourse, Regatta regatta,
             Iterable<String> tagsToFilterMarkProperties);
 
     List<MarkProperties> createMarkPropertiesSuggestionsForMarkConfiguration(Regatta optionalRegatta,

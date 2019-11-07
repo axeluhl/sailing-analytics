@@ -661,7 +661,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     }
 
     @Override
-    public CourseConfiguration createCourseConfigurationFromCourse(CourseBase course, Regatta regatta,
+    public CourseConfiguration createCourseConfigurationFromRegatta(CourseBase course, Regatta regatta,
             Iterable<String> tagsToFilterMarkProperties) {
         assert regatta != null;
         

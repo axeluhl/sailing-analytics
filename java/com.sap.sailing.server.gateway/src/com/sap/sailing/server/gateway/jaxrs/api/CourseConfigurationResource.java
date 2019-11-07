@@ -149,7 +149,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         // set of marks to be used while defining a course for the regatta.
         // An additional call to get the marks defined in the regatta isn't necessary with the described behavior of this API.
         final CourseConfiguration courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
-                .createCourseConfigurationFromCourse(courseBase, regatta, tags);
+                .createCourseConfigurationFromRegatta(courseBase, regatta, tags);
         final JSONObject jsonResult = courseConfigurationJsonSerializer.serialize(courseConfiguration);
         return Response.ok(jsonResult.toJSONString()).build();
     }
@@ -263,7 +263,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         final RaceLog raceLog = raceColumnByName.getRaceLog(fleetByName);
         raceLog.add(new RaceLogCourseDesignChangedEventImpl(timestampForLogEntries, getService().getServerAuthor(),
                 raceLog.getCurrentPassId(), course, CourseDesignerMode.BY_MARKS));
-        final CourseConfiguration courseConfigurationResult = getService().getCourseAndMarkConfigurationFactory().createCourseConfigurationFromCourse(course, regatta, null);
+        final CourseConfiguration courseConfigurationResult = getService().getCourseAndMarkConfigurationFactory().createCourseConfigurationFromRegatta(course, regatta, null);
         final String jsonString = courseConfigurationJsonSerializer.serialize(courseConfigurationResult).toJSONString();
         return Response.ok(jsonString).build();
     }
