@@ -2,6 +2,7 @@ package com.sap.sse.gwt.client.xdstorage.impl;
 
 import java.util.UUID;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONNull;
 import com.google.gwt.json.client.JSONNumber;
@@ -30,41 +31,44 @@ public class LocalStorageDrivenByMessageEvents implements MessageListener<JavaSc
     @Override
     public void onMessageReceived(MessageEvent<JavaScriptObject> messageEvent) {
         // TODO filter by source origin; don't allow arbitrary domains to tamper with this domain's local storage...
-        final Request request = messageEvent.getData().cast();
-        final String operation = request.getOperation();
-        final StorageOperation op = StorageOperation.valueOf(operation);
-        final JSONValue result;
-        switch (op) {
-        case CLEAR:
-            localStorage.clear();
-            result = JSONNull.getInstance();
-            break;
-        case GET_ITEM:
-            final String itemValue = localStorage.getItem(request.getKey());
-            result = itemValue == null ? JSONNull.getInstance() : new JSONString(itemValue);
-            break;
-        case GET_LENGTH:
-            result = new JSONNumber(localStorage.getLength());
-            break;
-        case KEY:
-            final String keyValue = localStorage.key(request.getIndex());
-            result = keyValue == null ? JSONNull.getInstance() : new JSONString(keyValue);
-            break;
-        case REMOVE_ITEM:
-            localStorage.removeItem(request.getKey());
-            result = JSONNull.getInstance();
-            break;
-        case SET_ITEM:
-            localStorage.setItem(request.getKey(), request.getValue());
-            result = JSONNull.getInstance();
-            break;
-        default:
-            throw new RuntimeException("Unknown operation "+op);
+        GWT.debugger();
+        if (messageEvent.getData() instanceof JavaScriptObject) {
+            final Request request = messageEvent.getData().cast();
+            final String operation = request.getOperation();
+            final StorageOperation op = StorageOperation.valueOf(operation);
+            final JSONValue result;
+            switch (op) {
+            case CLEAR:
+                localStorage.clear();
+                result = JSONNull.getInstance();
+                break;
+            case GET_ITEM:
+                final String itemValue = localStorage.getItem(request.getKey());
+                result = itemValue == null ? JSONNull.getInstance() : new JSONString(itemValue);
+                break;
+            case GET_LENGTH:
+                result = new JSONNumber(localStorage.getLength());
+                break;
+            case KEY:
+                final String keyValue = localStorage.key(request.getIndex());
+                result = keyValue == null ? JSONNull.getInstance() : new JSONString(keyValue);
+                break;
+            case REMOVE_ITEM:
+                localStorage.removeItem(request.getKey());
+                result = JSONNull.getInstance();
+                break;
+            case SET_ITEM:
+                localStorage.setItem(request.getKey(), request.getValue());
+                result = JSONNull.getInstance();
+                break;
+            default:
+                throw new RuntimeException("Unknown operation "+op);
+            }
+            final JSONObject response = new JSONObject();
+            response.put(Response.RESULT, result);
+            response.put(Request.ID, new JSONString(request.getId()));
+            messageEvent.getSource().postMessage(response.getJavaScriptObject(), messageEvent.getOrigin());
         }
-        final JSONObject response = new JSONObject();
-        response.put(Response.RESULT, result);
-        response.put(Request.ID, new JSONString(request.getId()));
-        messageEvent.getSource().postMessage(response.getJavaScriptObject(), messageEvent.getOrigin());
     }
     
     private static JSONObject createEmptyRequest(UUID id) {
