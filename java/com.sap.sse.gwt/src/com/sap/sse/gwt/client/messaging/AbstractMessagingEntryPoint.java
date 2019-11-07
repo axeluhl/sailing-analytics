@@ -1,12 +1,15 @@
 package com.sap.sse.gwt.client.messaging;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
 
 /**
- * Let entry points inherit from this class and define the {@link #getMessageListener()} method. Then your listener will
- * be attached to the entry point's global window (what GWT returns as {@code $wnd}) and will receive messages posted
- * there.
+ * An entry point for embedding in an {@code iframe} element and to which to then send messages. The message listener is
+ * described by subclasses as the result of the {@code #getMessageListener()} method. The listener will be attached to
+ * the entry point's global window (what GWT returns as {@code $wnd}) and will receive messages posted there. When the
+ * module has loaded and listener has been registered, a message with the string described by the constant
+ * {@link #READY_TOKEN} is posted as a message to the entry point's parent window (stepping through the intermediate
+ * implicit GWT iframe element) to indicate the listener's readiness.
+ * <p>
  * 
  * @author Axel Uhl (d043530)
  *
@@ -21,9 +24,7 @@ public abstract class AbstractMessagingEntryPoint<T> implements EntryPoint {
     public void onModuleLoad() {
         messagePort = MessagePort.getGlobalWindow();
         messagePort.addMessageListener(getMessageListener());
-        GWT.log("iframe listener set up");
         messagePort.getParentWindow().postMessage(READY_TOKEN, "*");
-        GWT.log("iframe announced readiness");
     }
 
     abstract protected MessageListener<T> getMessageListener();

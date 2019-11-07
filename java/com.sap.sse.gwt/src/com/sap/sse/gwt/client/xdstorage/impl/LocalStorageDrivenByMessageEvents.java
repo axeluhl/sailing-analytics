@@ -2,7 +2,6 @@ package com.sap.sse.gwt.client.xdstorage.impl;
 
 import java.util.UUID;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONNull;
 import com.google.gwt.json.client.JSONNumber;
@@ -31,7 +30,6 @@ public class LocalStorageDrivenByMessageEvents implements MessageListener<JavaSc
     @Override
     public void onMessageReceived(MessageEvent<JavaScriptObject> messageEvent) {
         // TODO filter by source origin; don't allow arbitrary domains to tamper with this domain's local storage...
-        GWT.debugger();
         if (messageEvent.getData() instanceof JavaScriptObject) {
             final Request request = messageEvent.getData().cast();
             final String operation = request.getOperation();

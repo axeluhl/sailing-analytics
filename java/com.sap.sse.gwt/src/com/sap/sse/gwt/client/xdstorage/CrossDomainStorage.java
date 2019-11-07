@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 
 import com.google.gwt.dom.client.Document;
 import com.sap.sse.gwt.client.Storage;
-import com.sap.sse.gwt.client.xdstorage.impl.CrossDomainStorageImpl;
+import com.sap.sse.gwt.client.xdstorage.impl.CrossDomainStorageFallingBackToLocalAfterTimeout;
 import com.sap.sse.gwt.client.xdstorage.impl.LocalStorage;
 import com.sap.sse.gwt.client.xdstorage.impl.StorageMessagingEntryPoint;
 
@@ -33,7 +33,7 @@ import com.sap.sse.gwt.client.xdstorage.impl.StorageMessagingEntryPoint;
  */
 public interface CrossDomainStorage {
     static CrossDomainStorage create(Document documentInWhichToInsertMessagingIframe, String baseUrlForStorageMessagingEntryPoint) {
-        return new CrossDomainStorageImpl(documentInWhichToInsertMessagingIframe, baseUrlForStorageMessagingEntryPoint);
+        return new CrossDomainStorageFallingBackToLocalAfterTimeout(documentInWhichToInsertMessagingIframe, baseUrlForStorageMessagingEntryPoint);
     }
     
     /**

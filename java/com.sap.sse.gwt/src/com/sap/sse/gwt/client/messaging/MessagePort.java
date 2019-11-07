@@ -1,6 +1,7 @@
 package com.sap.sse.gwt.client.messaging;
 
-import com.google.gwt.core.client.GWT;
+import java.util.function.Consumer;
+
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.IFrameElement;
@@ -34,22 +35,26 @@ public class MessagePort extends JavaScriptObject {
     /**
      * Creates a {@link MessagePort} by adding a hidden {@code iframe} element to the {@code body} element of the
      * {@code document} provided, and then {@link #getFromIframe(IFrameElement) obtaining a message port for that
-     * iframe}. The {@code iframe} is instructed to load the {@link AbstractMessagingEntryPoint} from the base URL (just
-     * protocol/hots/[port] with empty path) provided in the {@code baseUrlForMessagingEntryPoint} parameter.
+     * iframe}. The {@code iframe} is instructed to load a document that is expected to be implemented by a subclass of
+     * {@link AbstractMessagingEntryPoint} from the {@code urlForMessagingEntryPoint} URL.
      * 
      * @param document
      *            the document to whose {@code body} element to append the invisible {@code iframe}
      * @param urlForMessagingEntryPoint
-     *            can be provided with or without a trailing slash; during construction of the full URL this method will
-     *            ensure that there are no duplications. The URL is expected to point to a document rendered by a
-     *            subclass of {@link AbstractMessagingEntryPoint}. A little protocol between this method and the
-     *            entry point establishes a "connection" by the entry point sending a token to its parent window as
-     *            its first action after being ready for incoming messages. This way, the {@link MessagePort} returned
-     *            by this method will know whether or not its counter-part is ready for receiving messages.
-     * @return a {@link MesssagePort} connected to the content window of a new {@link IFrameElement} that has been added
-     *         to the {@code document}'s {@link Document#getBody() body element}.
+     *            The URL is expected to point to a document rendered by a subclass of
+     *            {@link AbstractMessagingEntryPoint}. A protocol between this method and the entry point establishes a
+     *            "connection" by the entry point sending a token to its parent window (seen from here that's our
+     *            "global window" that we obtain by {@link #getGlobalWindow()}) as its first action after being ready
+     *            for incoming messages. This way, the {@link MessagePort} returned by this method will know whether or
+     *            not its counter-part is ready for receiving messages.
+     * @param resultCallback
+     *            a {@link MesssagePort} consumer that is sent a {@link MessagePort} object once the iframe hosting the
+     *            window for that message port has announced its readiness, meaning the message port is connected to the content
+     *            window of a new {@link IFrameElement} that has been added to the {@code document}'s
+     *            {@link Document#getBody() body element}, the contents of the iframe have been loaded, and its
+     *            message receiver has been registered on its window properly.
      */
-    public static MessagePort createInDocument(Document document, String urlForMessagingEntryPoint) {
+    public static void createInDocument(Document document, String urlForMessagingEntryPoint, Consumer<MessagePort> resultCallback) {
         final IFrameElement iframe = document.createIFrameElement();
         iframe.setAttribute("style", "width:0; height:0; border:0; border:none;");
         iframe.setAttribute("importance", "high"); // shall load as quickly as possible
@@ -59,13 +64,12 @@ public class MessagePort extends JavaScriptObject {
         final MessagePort iframeParent = getGlobalWindow();
         final MessageListener<String> readyListener = messageEvent->{
             if (messageEvent.getData().equals(AbstractMessagingEntryPoint.READY_TOKEN)) {
-                GWT.log("iframe is ready"); // TODO do what's necessary to let clients of the result MessagePort know that it's now "connected"
                 iframeParent.removeMessageListener(listenerHandle[0]);
+                resultCallback.accept(result);
             }
         };
         listenerHandle[0] = iframeParent.addMessageListener(readyListener);
         iframe.setSrc(urlForMessagingEntryPoint);
-        return result;
     }
     
     /**
@@ -89,7 +93,7 @@ public class MessagePort extends JavaScriptObject {
      * Returns the {@link MessagePort} view of this port's parent window
      */
     public final native MessagePort getParentWindow() /*-{
-        return this.parent.parent.window;
+        return this.parent.window;
     }-*/;
     
     /**

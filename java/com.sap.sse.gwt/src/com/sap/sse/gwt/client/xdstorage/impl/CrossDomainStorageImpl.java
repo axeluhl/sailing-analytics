@@ -6,29 +6,21 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.json.client.JSONObject;
 import com.sap.sse.gwt.client.messaging.MessageEvent;
 import com.sap.sse.gwt.client.messaging.MessagePort;
 import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
 
 public class CrossDomainStorageImpl implements CrossDomainStorage {
-    /**
-     * The path under which the HTML document running the {@link StorageMessagingEntryPoint} can be loaded.
-     */
-    private static final String STORAGE_MESSAGING_ENTRY_POINT_PATH = "gwt-base/StorageMessaging.html";
-
     private final MessagePort portToStorageMessagingEntryPoint;
     private final Map<UUID, Consumer<Object>> resultForwardersByRequestUuidAsString;
     private final String targetOrigin;
-
-    public CrossDomainStorageImpl(Document documentInWhichToInsertMessagingIframe, String baseUrlForStorageMessagingEntryPoint) {
-        super();
-        this.targetOrigin = baseUrlForStorageMessagingEntryPoint;
+    
+    public CrossDomainStorageImpl(MessagePort portToStorageMessagingEntryPoint, String targetOrigin) {
         resultForwardersByRequestUuidAsString = new HashMap<>();
-        this.portToStorageMessagingEntryPoint = MessagePort.createInDocument(documentInWhichToInsertMessagingIframe,
-                baseUrlForStorageMessagingEntryPoint+(baseUrlForStorageMessagingEntryPoint.endsWith("/")?"":"/")+STORAGE_MESSAGING_ENTRY_POINT_PATH);
-        this.portToStorageMessagingEntryPoint.addResponseListener((MessageEvent<JavaScriptObject> messageEvent)->dispatchMessageToCallback(messageEvent));
+        this.targetOrigin = targetOrigin;
+        this.portToStorageMessagingEntryPoint = portToStorageMessagingEntryPoint;
+        portToStorageMessagingEntryPoint.addResponseListener((MessageEvent<JavaScriptObject> messageEvent)->dispatchMessageToCallback(messageEvent));
     }
     
     private void postMessageAndRegisterCallback(UUID id, JSONObject request, Consumer<Object> resultConsumer) {
@@ -36,7 +28,7 @@ public class CrossDomainStorageImpl implements CrossDomainStorage {
         portToStorageMessagingEntryPoint.postMessage(request.getJavaScriptObject(), getTargetOrigin());
     }
 
-    private void dispatchMessageToCallback(MessageEvent<JavaScriptObject> messageEvent) {
+    void dispatchMessageToCallback(MessageEvent<JavaScriptObject> messageEvent) {
         final Response response = messageEvent.getData().cast();
         final UUID idOfRequestToWhichThisIsTheResponse = LocalStorageDrivenByMessageEvents.getId(response);
         final Consumer<Object> resultForwarder = resultForwardersByRequestUuidAsString.remove(idOfRequestToWhichThisIsTheResponse);
