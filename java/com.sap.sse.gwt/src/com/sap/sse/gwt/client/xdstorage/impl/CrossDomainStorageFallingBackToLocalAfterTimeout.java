@@ -6,11 +6,13 @@ import java.util.function.Consumer;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.sap.sse.common.Duration;
 import com.sap.sse.gwt.client.messaging.MessagePort;
 import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
+import com.sap.sse.gwt.client.xdstorage.CrossDomainStorageEvent.Handler;
 
 public class CrossDomainStorageFallingBackToLocalAfterTimeout implements CrossDomainStorage {
     /**
@@ -113,6 +115,20 @@ public class CrossDomainStorageFallingBackToLocalAfterTimeout implements CrossDo
             };
             timer.schedule((int) TIMEOUT_FOR_IFRAME_TO_RESPOND.asMillis());
         }
+    }
+
+    @Override
+    public HandlerRegistration addStorageEventHandler(Handler handler) {
+        final HandlerRegistration[] result = new HandlerRegistration[1];
+        runOrEnqueue(storage->result[0]=storage.addStorageEventHandler(handler));
+        // not entirely safe if the addStorageEventHandler call above is really enqueued and the
+        // HandlerRegistration.removeHandler call occurs before successful connection; the handler removal
+        // then would fail with result[0] not yet being initialized
+        return () -> runOrEnqueue(storage->{
+                if (result[0] != null) {
+                    result[0].removeHandler();
+                }
+            });
     }
 
     @Override

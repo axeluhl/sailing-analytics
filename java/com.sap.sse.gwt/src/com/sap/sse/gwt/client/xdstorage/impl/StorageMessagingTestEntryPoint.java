@@ -4,7 +4,6 @@ import java.util.Date;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -34,8 +33,7 @@ import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
 public class StorageMessagingTestEntryPoint implements EntryPoint {
     @Override
     public void onModuleLoad() {
-        final String local = Window.Location.getParameter("local");
-        CrossDomainStorage xdStorage = Boolean.valueOf(local) ? CrossDomainStorage.createLocal() : CrossDomainStorage.create("http://localhost:8888");
+        CrossDomainStorage xdStorage = CrossDomainStorage.create("http://localhost:8888");
         // getLength
         final HorizontalPanel getLengthPanel = new HorizontalPanel();
         RootPanel.get().add(getLengthPanel);
@@ -105,5 +103,11 @@ public class StorageMessagingTestEntryPoint implements EntryPoint {
                 }
             });
         });
+        final HorizontalPanel eventPanel = new HorizontalPanel();
+        eventPanel.add(new Label("Last event:"));
+        final Label storageEventLabel = new Label();
+        eventPanel.add(storageEventLabel);
+        xdStorage.addStorageEventHandler(e->storageEventLabel.setText(e.toString()));
+        RootPanel.get().add(eventPanel);
     }
 }

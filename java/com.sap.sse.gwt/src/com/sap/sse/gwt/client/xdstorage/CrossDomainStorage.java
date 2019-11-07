@@ -3,9 +3,9 @@ package com.sap.sse.gwt.client.xdstorage;
 import java.util.function.Consumer;
 
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.xdstorage.impl.CrossDomainStorageFallingBackToLocalAfterTimeout;
-import com.sap.sse.gwt.client.xdstorage.impl.LocalStorage;
 import com.sap.sse.gwt.client.xdstorage.impl.StorageMessagingEntryPoint;
 
 /**
@@ -43,14 +43,7 @@ public interface CrossDomainStorage {
         return create(Document.get(), baseUrlForStorageMessagingEntryPoint);
     }
     
-    /**
-     * Obtains a shortcut implementation that does not use any hidden {@code iframe} but uses a {@link Storage} object
-     * directly. The asynchronous pattern is implemented only for compatibility with the {@link CrossDomainStorage}
-     * interface, so that the result can be used as a "plug-in replacement" for a true cross-domain storage implementation.
-     */
-    static CrossDomainStorage createLocal() {
-        return new LocalStorage();
-    }
+    HandlerRegistration addStorageEventHandler(final CrossDomainStorageEvent.Handler handler);
     
     void setItem(String key, String value, Consumer<Void> callback);
 
