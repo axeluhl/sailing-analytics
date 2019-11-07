@@ -97,7 +97,7 @@ public interface CourseAndMarkConfigurationFactory {
     /**
      * Creates a {@link CourseConfiguration} for a Regatta - either based on a {@link CourseBase} or independently. The
      * resulting waypoint sequence is consistent with the one defined in the {@link CourseBase}, if one is given. In
-     * case, no {@link CourseBase} is given, no waypoint sequence is construced but existing {@link Mark}s of the
+     * case, no {@link CourseBase} is given, no waypoint sequence is constructed but existing {@link Mark}s of the
      * {@link Regatta} are loaded as {@link MarkConfiguration}s.<br>
      * 
      * If a given {@link CourseBase} is based on a {@link CourseTemplate}
