@@ -9,7 +9,6 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.sap.sse.common.Duration;
 import com.sap.sse.gwt.client.messaging.MessagePort;
 import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
 import com.sap.sse.gwt.client.xdstorage.CrossDomainStorageEvent.Handler;
@@ -25,7 +24,7 @@ public class CrossDomainStorageFallingBackToLocalAfterTimeout implements CrossDo
      * storage in the target domain announces its readiness. If this timeout expires, the {@link #fallbackLocalStorage} is
      * used instead.
      */
-    private static final Duration TIMEOUT_FOR_IFRAME_TO_RESPOND = Duration.ONE_SECOND.times(5);
+    private static final int TIMEOUT_FOR_IFRAME_TO_RESPOND_IN_MILLIS = 5000;
     
     /**
      * Starts out as {@code null}. The constructor makes an effort to create an {@code iframe} element in the body of
@@ -36,7 +35,7 @@ public class CrossDomainStorageFallingBackToLocalAfterTimeout implements CrossDo
      * <p>
      * 
      * When a request comes in through any of the {@link CrossDomainStorage} methods and this field is still
-     * {@code null}, a timer is started with the {@link #TIMEOUT_FOR_IFRAME_TO_RESPOND} duration, and the request is
+     * {@code null}, a timer is started with the {@link #TIMEOUT_FOR_IFRAME_TO_RESPOND_IN_MILLIS} duration, and the request is
      * recorded in the {@link #queuedWhileWaitingForIframe} queue. When the timer times out, or the {@link MessagePort}
      * is established---whichever comes first---the queued requests will be executed with the now decided
      * {@link CrossDomainStorage} which is then also set to this field. In case the timer timed out, this will be
@@ -100,7 +99,7 @@ public class CrossDomainStorageFallingBackToLocalAfterTimeout implements CrossDo
     
     private void ensureTimerIsRunning() {
         if (timer == null) {
-            GWT.log("cross-domain storage iframe not ready yet; waiting "+TIMEOUT_FOR_IFRAME_TO_RESPOND+" for message port");
+            GWT.log("cross-domain storage iframe not ready yet; waiting "+TIMEOUT_FOR_IFRAME_TO_RESPOND_IN_MILLIS+" for message port");
             timer = new Timer() {
                 @Override
                 public void run() {
@@ -113,7 +112,7 @@ public class CrossDomainStorageFallingBackToLocalAfterTimeout implements CrossDo
                     }
                 }
             };
-            timer.schedule((int) TIMEOUT_FOR_IFRAME_TO_RESPOND.asMillis());
+            timer.schedule(TIMEOUT_FOR_IFRAME_TO_RESPOND_IN_MILLIS);
         }
     }
 
