@@ -19,13 +19,23 @@ import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.WithOptionalRepeatablePart;
 import com.sap.sse.common.TimePoint;
 
 /**
- * From a {@link CourseTemplate} constructs or updates a {@link CourseBase}.
+ * {@link CourseConfiguration} is meant as an in memory model for all kinds of course definitions. This model is not
+ * stored to the DB but can be constructed from and stored to other representations of courses. Currently the
+ * interaction with the following domain types is possible via {@link CourseConfiguration}s:
+ * <ul>
+ * <li>{@link CourseTemplate}</li>
+ * <li>{@link CourseBase}</li>
+ * </ul>
+ * 
+ * {@link CourseAndMarkConfigurationFactory} provides the functionality to convert domain types to
+ * {@link CourseConfiguration}s as well as creating or updating those types from {@link CourseConfiguration}s.
  * 
  * @author Axel Uhl (d043530)
  *
@@ -53,7 +63,6 @@ public interface CourseAndMarkConfigurationFactory {
      * referenced by these {@link WaypointTemplates} are those obtained by
      * {@link #getOrCreateMarkTemplate(MarkConfiguration)} for the respective {@link MarkConfiguration} objects used in
      * the {@link WaypointWithMarkConfiguration} objects.
-     * @param optionalRegatta TODO
      * 
      * @return a course with its mark configurations and a {@link CourseTemplate} returned by
      *         {@link CourseConfiguration#getOptionalCourseTemplate()} that is always valid, never {@code null}. All
@@ -64,12 +73,56 @@ public interface CourseAndMarkConfigurationFactory {
     CourseConfiguration createCourseTemplateAndUpdatedConfiguration(CourseConfiguration courseWithMarkConfiguration,
             Iterable<String> tags, URL optionalImageUrl);
 
+    /**
+     * Creates a {@link CourseConfiguration} from a {@link CourseTemplate}. The resulting waypoint sequence is
+     * consistent with the one defined in the {@link CourseTemplate}. In case, no {@link Regatta} is given, the
+     * resulting {@link MarkConfiguration}s will 1:1 match the {@link MarkTemplate}s of the {@link CourseTemplate}. In
+     * case a {@link Regatta} is given, the {@link MarkTemplate}s are mapped to contained {@link Mark}s if possible. Any
+     * {@link MarkTemplate} not mapped to a {@link Mark} (in case, no {@link Regatta} is given, these are just all
+     * {@link MarkTemplate}s), is a candidate to be mapped to a {@link MarkProperties} of the user's inventory. Matching
+     * of {@link MarkProperties} is primarily done based on associated role names for which a {@link MarkProperties} was
+     * last used. If no matching of {@link MarkProperties} using role names is possible, a direct association is done if
+     * a {@link MarkProperties} was explicitly mapped to a specific {@link MarkTemplate} before.
+     * 
+     * @param optionalRegatta
+     *            If given, {@link MarkTemplate}s of the given {@link CourseTemplate} are automatically mapped to their
+     *            {@link Mark} counterpart of the {@link Regatta}.
+     * @param tagsToFilterMarkProperties
+     *            If given, any {@link MarkProperties} that is suggested to replace a {@link MarkTemplate} of the given
+     *            {@link CourseTemplate} needs to match all given tags.
+     */
     CourseConfiguration createCourseConfigurationFromTemplate(CourseTemplate courseTemplate, Regatta optionalRegatta,
             Iterable<String> tagsToFilterMarkProperties);
 
+    /**
+     * Creates a {@link CourseConfiguration} for a Regatta - either based on a {@link CourseBase} or independently. The
+     * resulting waypoint sequence is consistent with the one defined in the {@link CourseBase}, if one is given. In
+     * case, no {@link CourseBase} is given, no waypoint sequence is construced but existing {@link Mark}s of the
+     * {@link Regatta} are loaded as {@link MarkConfiguration}s.<br>
+     * 
+     * If a given {@link CourseBase} is based on a {@link CourseTemplate}
+     * ({@link CourseBase#getOriginatingCourseTemplateIdOrNull() references an existing and visible CourseTemplate} and
+     * the waypoint sequences are compatible, the sequence is mapped back to the {@link CourseTemplate} instead of just
+     * loading the {@link CourseBase}. This means, if a {@link CourseBase} was created for a {@link CourseTemplate}
+     * having a {@link RepeatablePart}, the lap count is reconstructed and the shortened waypoint sequence is used.<br>
+     * 
+     * If no {@link CourseTemplate} can be obtained or the waypoint sequences aren't compatible, the
+     * {@link CourseTemplate} is just ignored. No lap count and {@link RepeatablePart} is recognized and the whole
+     * waypoint sequence is just 1:1 mapped to the {@link CourseConfiguration}.
+     * 
+     * @param optionalCourse
+     *            if given, the course configuration is based on the real course sequence. If not given, only available
+     *            {@link Mark} are included but the course sequence is empty.
+     * @param tagsToFilterMarkProperties
+     *            If given, any {@link MarkProperties} that is suggested to replace a {@link MarkTemplate} of the given
+     *            {@link CourseTemplate} needs to match all given tags.
+     */
     CourseConfiguration createCourseConfigurationFromRegatta(CourseBase optionalCourse, Regatta regatta,
             Iterable<String> tagsToFilterMarkProperties);
 
+    /**
+     * TODO: not implemented yet
+     */
     List<MarkProperties> createMarkPropertiesSuggestionsForMarkConfiguration(Regatta optionalRegatta,
             MarkConfiguration markConfiguration, Iterable<String> tagsToFilterMarkProperties);
 
