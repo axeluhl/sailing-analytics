@@ -166,10 +166,8 @@ public class UserService {
      * tabs/windows.
      */
     public void fireUserUpdateEvent() {
-        if (Storage.isSupported()) {
-            Storage.getLocalStorageIfSupported().setItem(LOCAL_STORAGE_UPDATE_KEY, ""); // force a change
-            Storage.getLocalStorageIfSupported().setItem(LOCAL_STORAGE_UPDATE_KEY, id);
-        }
+        getStorage().setItem(LOCAL_STORAGE_UPDATE_KEY, "", // force a change
+            e->getStorage().setItem(LOCAL_STORAGE_UPDATE_KEY, id, null));
     }
 
     /**
@@ -390,31 +388,33 @@ public class UserService {
     }
     
     /**
-     * Unauthenticated users get a hint that it has benefits to create an account and log in.When a user was recently
+     * Unauthenticated users get a hint that it has benefits to create an account and log in. When a user was recently
      * logged in or dismissed the notification, he won't see the hint again for some time. This method checks if a user
      * was logged in or dismissed the message recently.
+     * 
+     * @param runnable
+     *            called if the user was not recently logged in or dismissed the hint
      */
-    public boolean wasUserRecentlyLoggedInOrDismissedTheHint() {
-        final TimePoint lastLoginOrSupression = parseLastNewUserSupression();
-        return lastLoginOrSupression != null
-                && lastLoginOrSupression.plus(SUPRESSION_DELAY).after(MillisecondsTimePoint.now());
+    public void runIfUserWasNotRecentlyLoggedInOrDismissedTheHint(Runnable runnable) {
+        parseLastNewUserSupression(lastLoginOrSuppression->{
+            if (lastLoginOrSuppression == null
+                    || !lastLoginOrSuppression.plus(SUPRESSION_DELAY).before(MillisecondsTimePoint.now())) {
+                runnable.run();
+            }
+        });
     }
 
-    private TimePoint parseLastNewUserSupression() {
-        TimePoint lastLoginOrSupression = null;
-        final Storage storage = Storage.getLocalStorageIfSupported();
-        if(storage != null) {
-            final String stringValue = storage.getItem(STORAGE_KEY_FOR_USER_LOGIN_HINT);
+    private void parseLastNewUserSupression(Consumer<TimePoint> callback) {
+        getStorage().getItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, stringValue->{
             try {
                 if (stringValue != null) {
-                    lastLoginOrSupression = new MillisecondsTimePoint(Long.parseLong(stringValue));
+                    callback.accept(new MillisecondsTimePoint(Long.parseLong(stringValue)));
                 }
             } catch (Exception e) {
                 logger.warning("Error parsing localstore value '" + stringValue + "'");
-                storage.removeItem(STORAGE_KEY_FOR_USER_LOGIN_HINT);
+                getStorage().removeItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, v->callback.accept(null));
             }
-        }
-        return lastLoginOrSupression;
+        });
     }
 
     /**
@@ -423,10 +423,7 @@ public class UserService {
      * suppression.
      */
     public void setUserLoginHintToStorage() {
-        final Storage storage = Storage.getLocalStorageIfSupported();
-        if(storage != null) {
-            storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(MillisecondsTimePoint.now().asMillis()));
-        }
+        getStorage().setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(MillisecondsTimePoint.now().asMillis()), /* callback */ null);
     }
     
     /**

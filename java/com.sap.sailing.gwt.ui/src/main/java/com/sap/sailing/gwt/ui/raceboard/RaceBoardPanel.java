@@ -306,7 +306,7 @@ public class RaceBoardPanel
                     public LeaderboardDTO getLeaderboard() {
                         return leaderboardPanel.getLeaderboard();
                     }
-                }, selectedRaceIdentifier);
+                }, selectedRaceIdentifier, userService.getStorage());
         raceMap.getLeftHeaderPanel().add(raceInformationHeader);
         raceMap.getRightHeaderPanel().add(regattaAndRaceTimeInformationHeader);
         raceMap.getRightHeaderPanel().add(userManagementMenuView);

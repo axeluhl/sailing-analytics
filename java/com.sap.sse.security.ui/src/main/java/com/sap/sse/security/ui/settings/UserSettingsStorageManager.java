@@ -1,19 +1,21 @@
 package com.sap.sse.security.ui.settings;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.function.Consumer;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsStoredCallback;
 import com.sap.sse.gwt.client.shared.settings.SettingsStorageManager;
 import com.sap.sse.gwt.client.shared.settings.StorableRepresentationOfDocumentAndUserSettings;
 import com.sap.sse.gwt.client.shared.settings.StorableSettingsRepresentation;
+import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
@@ -90,24 +92,22 @@ public class UserSettingsStorageManager implements SettingsStorageManager {
     }
 
     private void storeSettingsRepresentationsOnLocalStorage(
-            StorableRepresentationOfDocumentAndUserSettings settingsRepresentations) {
-        Storage localStorage = Storage.getLocalStorageIfSupported();
-        if (localStorage != null) {
-            if (settingsRepresentations.hasStoredUserSettings()) {
-                localStorage.removeItem(storageKeyForUserSettings);
-                final String settingsString = settingsRepresentations.getUserSettingsRepresentation().asString();
-                if(settingsString != null) {
-                    localStorage.setItem(storageKeyForUserSettings,
-                            settingsString);
-                }
+        StorableRepresentationOfDocumentAndUserSettings settingsRepresentations) {
+        final CrossDomainStorage storage = userService.getStorage();
+        if (settingsRepresentations.hasStoredUserSettings()) {
+            final String settingsString = settingsRepresentations.getUserSettingsRepresentation().asString();
+            if (settingsString != null) {
+                storage.setItem(storageKeyForUserSettings, settingsString, /* callback */ null);
+            } else {
+                storage.removeItem(storageKeyForUserSettings, /* callback */ null);
             }
-            if (settingsRepresentations.hasStoredDocumentSettings()) {
-                localStorage.removeItem(storageKeyForDocumentSettings);
-                final String settingsString = settingsRepresentations.getDocumentSettingsRepresentation().asString();
-                if(settingsString != null) {
-                    localStorage.setItem(storageKeyForDocumentSettings,
-                            settingsString);
-                }
+        }
+        if (settingsRepresentations.hasStoredDocumentSettings()) {
+            final String settingsString = settingsRepresentations.getDocumentSettingsRepresentation().asString();
+            if (settingsString != null) {
+                storage.setItem(storageKeyForDocumentSettings, settingsString, /* callback */ null);
+            } else {
+                storage.removeItem(storageKeyForDocumentSettings, /* callback */ null);
             }
         }
     }
@@ -172,15 +172,11 @@ public class UserSettingsStorageManager implements SettingsStorageManager {
                 documentSettingsRepresentation);
     }
 
-    private StorableRepresentationOfDocumentAndUserSettings retrieveSettingsRepresentationsFromLocalStorage() {
-        Storage localStorage = Storage.getLocalStorageIfSupported();
-        String userSettings = null;
-        String documentSettings = null;
-        if (localStorage != null) {
-            userSettings = localStorage.getItem(storageKeyForUserSettings);
-            documentSettings = localStorage.getItem(storageKeyForDocumentSettings);
-        }
-        return convertStringsToSettingsRepresentations(userSettings, documentSettings);
+    private void retrieveSettingsRepresentationsFromLocalStorage(final Iterable<Consumer<StorableRepresentationOfDocumentAndUserSettings>> resultCallbacks) {
+        CrossDomainStorage localStorage = userService.getStorage();
+        localStorage.getItem(storageKeyForUserSettings, userSettings->
+            localStorage.getItem(storageKeyForDocumentSettings, documentSettings->
+                resultCallbacks.forEach(resultCallback->resultCallback.accept(convertStringsToSettingsRepresentations(userSettings, documentSettings)))));
     }
 
     private void retrieveSettingsRepresentationsFromServer(
@@ -237,64 +233,62 @@ public class UserSettingsStorageManager implements SettingsStorageManager {
 
     private void retrieveSettingsRepresentationsFromServerOrLocalStorage() {
         if (userService.getCurrentUser() == null) {
-            StorableRepresentationOfDocumentAndUserSettings settingsRepresentations = retrieveSettingsRepresentationsFromLocalStorage();
-            OnSettingsLoadedCallback<StorableRepresentationOfDocumentAndUserSettings> callback;
-            while ((callback = retrieveSettingsCallbacksQueue.poll()) != null) {
-                callback.onSuccess(settingsRepresentations);
-            }
+            retrieveSettingsRepresentationsFromLocalStorage(getQueuedSettingsCallbacks());
         } else {
             userWasAlreadyLoggedIn = true;
             retrieveSettingsRepresentationsFromServer(
                     new AsyncCallback<StorableRepresentationOfDocumentAndUserSettings>() {
-
                         @Override
                         public void onSuccess(
                                 StorableRepresentationOfDocumentAndUserSettings serverSettingsRepresentations) {
-                            serverSettingsRepresentations = syncLocalStorageAndServer(serverSettingsRepresentations);
-                            OnSettingsLoadedCallback<StorableRepresentationOfDocumentAndUserSettings> callback;
-                            while ((callback = retrieveSettingsCallbacksQueue.poll()) != null) {
-                                callback.onSuccess(serverSettingsRepresentations);
-                            }
+                            syncLocalStorageAndServer(serverSettingsRepresentations, getQueuedSettingsCallbacks());
                         }
 
                         @Override
                         public void onFailure(Throwable caught) {
-                            StorableRepresentationOfDocumentAndUserSettings fallbackSettingsRepresentations = retrieveSettingsRepresentationsFromLocalStorage();
-                            OnSettingsLoadedCallback<StorableRepresentationOfDocumentAndUserSettings> callback;
-                            while ((callback = retrieveSettingsCallbacksQueue.poll()) != null) {
-                                callback.onError(caught, fallbackSettingsRepresentations);
-                            }
+                            retrieveSettingsRepresentationsFromLocalStorage(getQueuedSettingsCallbacks());
                         }
                     });
         }
     }
 
-    private StorableRepresentationOfDocumentAndUserSettings syncLocalStorageAndServer(
-            StorableRepresentationOfDocumentAndUserSettings serverSettingsRepresentations) {
+    private List<Consumer<StorableRepresentationOfDocumentAndUserSettings>> getQueuedSettingsCallbacks() {
+        OnSettingsLoadedCallback<StorableRepresentationOfDocumentAndUserSettings> callback;
+        final List<Consumer<StorableRepresentationOfDocumentAndUserSettings>> callbacks = new LinkedList<>();
+        while ((callback = retrieveSettingsCallbacksQueue.poll()) != null) {
+            final OnSettingsLoadedCallback<StorableRepresentationOfDocumentAndUserSettings> finalCallback = callback;
+            callbacks.add(settingsRepresentations->finalCallback.onSuccess(settingsRepresentations));
+        }
+        return callbacks;
+    }
+
+    private void syncLocalStorageAndServer(
+            StorableRepresentationOfDocumentAndUserSettings serverSettingsRepresentations,
+            Iterable<Consumer<StorableRepresentationOfDocumentAndUserSettings>> resultCallbacks) {
         if (!serverSettingsRepresentations.hasStoredUserSettings()
                 && !serverSettingsRepresentations.hasStoredDocumentSettings()) {
-            StorableRepresentationOfDocumentAndUserSettings localStorageSettingsRepresentations = retrieveSettingsRepresentationsFromLocalStorage();
-            if (localStorageSettingsRepresentations.hasStoredUserSettings()
-                    || localStorageSettingsRepresentations.hasStoredDocumentSettings()) {
-                storeSettingsRepresentationsOnServer(localStorageSettingsRepresentations,
-                        new OnSettingsStoredCallback() {
-
-                            @Override
-                            public void onSuccess() {
-                                // nothing to do
-                            }
-
-                            @Override
-                            public void onError(Throwable caught) {
-                                // nothing to do
-                            }
-                        });
-            }
-            serverSettingsRepresentations = localStorageSettingsRepresentations;
+            retrieveSettingsRepresentationsFromLocalStorage(Collections.singleton(localStorageSettingsRepresentations->{
+                if (localStorageSettingsRepresentations.hasStoredUserSettings()
+                        || localStorageSettingsRepresentations.hasStoredDocumentSettings()) {
+                    storeSettingsRepresentationsOnServer(localStorageSettingsRepresentations,
+                            new OnSettingsStoredCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    // nothing to do
+                                }
+    
+                                @Override
+                                public void onError(Throwable caught) {
+                                    // nothing to do
+                                }
+                            });
+                }
+                resultCallbacks.forEach(resultCallback->resultCallback.accept(localStorageSettingsRepresentations));
+            }));
         } else {
             storeSettingsRepresentationsOnLocalStorage(serverSettingsRepresentations);
+            resultCallbacks.forEach(resultCallback->resultCallback.accept(serverSettingsRepresentations));
         }
-        return serverSettingsRepresentations;
     }
 
 }

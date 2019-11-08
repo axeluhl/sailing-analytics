@@ -30,33 +30,45 @@ public class LocalStorage implements CrossDomainStorage {
     @Override
     public void setItem(String key, String value, Consumer<Void> callback) {
         storage.setItem(key, value);
-        callback.accept(null);
+        if (callback != null) {
+            callback.accept(null);
+        }
     }
 
     @Override
     public void getItem(String key, Consumer<String> callback) {
-        callback.accept(storage.getItem(key));
+        if (callback != null) {
+            callback.accept(storage.getItem(key));
+        }
     }
 
     @Override
     public void removeItem(String key, Consumer<Void> callback) {
         storage.removeItem(key);
-        callback.accept(null);
+        if (callback != null) {
+            callback.accept(null);
+        }
     }
 
     @Override
     public void clear(Consumer<Void> callback) {
         storage.clear();
-        callback.accept(null);
+        if (callback != null) {
+            callback.accept(null);
+        }
     }
 
     @Override
     public void key(int index, Consumer<String> callback) {
-        callback.accept(storage.key(index));
+        if (callback != null) {
+            callback.accept(storage.key(index));
+        }
     }
 
     @Override
     public void getLength(Consumer<Integer> callback) {
-        callback.accept(storage.getLength());
+        if (callback != null) {
+            callback.accept(storage.getLength());
+        }
     }
 }

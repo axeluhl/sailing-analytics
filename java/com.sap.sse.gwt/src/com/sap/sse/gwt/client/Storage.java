@@ -6,6 +6,7 @@ import java.util.Set;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
 
 /**
  * Represents the browser's localStorage and sessionStorage objects and provides eventing support. Other than
@@ -17,14 +18,22 @@ import com.google.gwt.event.shared.HandlerRegistration;
  * <p>
  * 
  * There is a theoretical possibility to override GWT's replacement rules leading to this strange behavior. See
- * {@code Storage.gwt.xml}. It replaces the correct native storage eventing implementation by a proprietary one
- * which then only works inside the same tab, and the replacement rules include, in addition to ancient browser types,
- * all "safari" browsers, causing the problem. Such replacement rules may be overridable in our own .gwt.xml module
- * specifications, but in a quick test we were unable to modify the GWT Storage's behavior to suit our needs.<p>
+ * {@code Storage.gwt.xml}. It replaces the correct native storage eventing implementation by a proprietary one which
+ * then only works inside the same tab, and the replacement rules include, in addition to ancient browser types, all
+ * "safari" browsers, causing the problem. Such replacement rules may be overridable in our own .gwt.xml module
+ * specifications, but in a quick test we were unable to modify the GWT Storage's behavior to suit our needs.
+ * <p>
  * 
  * This class is a "drop-in replacement" for {@link com.google.gwt.storage.client.Storage} together with
  * {@link StorageEvent} "drop-in replacing" {@link com.google.gwt.storage.client.StorageEvent}, and then have compatible
  * methods.
+ * <p>
+ * 
+ * Also check out {@link CrossDomainStorage} which is an asynchronous version of a storage, when obtained from
+ * {@code UserService.getStorage()} then with central server-provided configuration and the possibility to store items
+ * to a specific "origin" instead of the local application's origin.
+ * 
+ * @see CrossDomainStorage
  * 
  * @author Axel Uhl (D043530)
  *

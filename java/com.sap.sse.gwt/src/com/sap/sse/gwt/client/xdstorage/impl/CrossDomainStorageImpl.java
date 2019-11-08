@@ -74,36 +74,60 @@ public class CrossDomainStorageImpl implements CrossDomainStorage {
     @Override
     public void setItem(String key, String value, Consumer<Void> callback) {
         final UUID id = UUID.randomUUID();
-        postMessageAndRegisterCallback(id, LocalStorageDrivenByMessageEvents.createSetItemRequest(id, key, value), result->callback.accept(null));
+        postMessageAndRegisterCallback(id, LocalStorageDrivenByMessageEvents.createSetItemRequest(id, key, value), result->{
+            if (callback != null) {
+                callback.accept(null);
+            }
+        });
     }
 
     @Override
     public void getItem(String key, Consumer<String> callback) {
         final UUID id = UUID.randomUUID();
-        postMessageAndRegisterCallback(id, LocalStorageDrivenByMessageEvents.createGetItemRequest(id, key), result->callback.accept((String) result));
+        postMessageAndRegisterCallback(id, LocalStorageDrivenByMessageEvents.createGetItemRequest(id, key), result->{
+            if (callback != null) {
+                callback.accept((String) result);
+            }
+        });
     }
 
     @Override
     public void removeItem(String key, Consumer<Void> callback) {
         final UUID id = UUID.randomUUID();
-        postMessageAndRegisterCallback(id, LocalStorageDrivenByMessageEvents.createRemoveItemRequest(id, key), result->callback.accept(null));
+        postMessageAndRegisterCallback(id, LocalStorageDrivenByMessageEvents.createRemoveItemRequest(id, key), result->{
+            if (callback != null) {
+                callback.accept(null);
+            }
+        });
     }
 
     @Override
     public void clear(Consumer<Void> callback) {
         final UUID id = UUID.randomUUID();
-        postMessageAndRegisterCallback(id, LocalStorageDrivenByMessageEvents.createClearRequest(id), result->callback.accept(null));
+        postMessageAndRegisterCallback(id, LocalStorageDrivenByMessageEvents.createClearRequest(id), result->{
+            if (callback != null) {
+                callback.accept(null);
+            }
+        });
     }
 
     @Override
     public void key(int index, Consumer<String> callback) {
         final UUID id = UUID.randomUUID();
-        postMessageAndRegisterCallback(id, LocalStorageDrivenByMessageEvents.createKeyRequest(id, index), result->callback.accept((String) result));
+        postMessageAndRegisterCallback(id, LocalStorageDrivenByMessageEvents.createKeyRequest(id, index), result->{
+            if (callback != null) {
+                callback.accept((String) result);
+            }
+        });
     }
 
     @Override
     public void getLength(Consumer<Integer> callback) {
         final UUID id = UUID.randomUUID();
-        postMessageAndRegisterCallback(id, LocalStorageDrivenByMessageEvents.createGetLengthRequest(id), result->callback.accept(((Number) result).intValue()));
+        postMessageAndRegisterCallback(id, LocalStorageDrivenByMessageEvents.createGetLengthRequest(id), result->{
+            if (callback != null) {
+                callback.accept(((Number) result).intValue());
+            }
+        });
     }
 }
