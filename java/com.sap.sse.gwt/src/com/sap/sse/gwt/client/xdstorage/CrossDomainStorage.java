@@ -10,7 +10,7 @@ import com.sap.sse.gwt.client.xdstorage.impl.StorageMessagingEntryPoint;
 
 /**
  * Provides local storage capabilities, similar to {@code window.localStorage} and {@link Storage}, but in a way where
- * you can choose the "origin" under which the items shall be stored.<p>
+ * you can choose the "origin" under which the items shall be stored within certain boundary conditions.<p>
  * 
  * Local and session {@link Storage} are isolated based on the document's <em>origin</em>. This cannot be influenced by
  * the {@code document.domain} property. Therefore, using {@link Storage} will always store items under your application's
