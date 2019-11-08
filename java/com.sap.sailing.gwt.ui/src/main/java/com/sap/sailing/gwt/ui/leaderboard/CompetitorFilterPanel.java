@@ -84,15 +84,6 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.competitorSelectionProvider = competitorSelectionProvider;
         this.setStyleName(css.competitorFilterContainer());
-        loadCompetitorsFilterSets(loadedCompetitorsFilterSets->{
-            if (loadedCompetitorsFilterSets != null) {
-                competitorsFilterSets = loadedCompetitorsFilterSets;
-                insertSelectedCompetitorsFilter(competitorsFilterSets);
-            } else {
-                competitorsFilterSets = createAndAddDefaultCompetitorsFilter();
-                storeCompetitorsFilterSets(competitorsFilterSets);
-            }
-        });
         filter = new AbstractListFilter<CompetitorDTO>() {
             @Override
             public Iterable<String> getStrings(CompetitorDTO competitor) {
@@ -147,6 +138,15 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         add(searchBoxPanel);
         add(settingsButton);
         add(advancedSettingsButton);
+        loadCompetitorsFilterSets(loadedCompetitorsFilterSets->{
+            if (loadedCompetitorsFilterSets != null) {
+                competitorsFilterSets = loadedCompetitorsFilterSets;
+                insertSelectedCompetitorsFilter(competitorsFilterSets);
+            } else {
+                competitorsFilterSets = createAndAddDefaultCompetitorsFilter();
+                storeCompetitorsFilterSets(competitorsFilterSets);
+            }
+        });
     }
     
     public CompetitorsFilterSets getCompetitorsFilterSets() {
@@ -302,13 +302,17 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
     }
     
    private void loadCompetitorsFilterSets(Consumer<CompetitorsFilterSets> resultConsumer) {
-        storage.getItem(LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY, jsonAsLocalStore->{
+        storage.getItem(LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY, jsonAsLocalStore -> {
             if (jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
                 CompetitorsFilterSetsJsonDeSerializer deserializer = new CompetitorsFilterSetsJsonDeSerializer();
                 JSONValue value = JSONParser.parseStrict(jsonAsLocalStore);
                 if (value.isObject() != null) {
                     resultConsumer.accept(deserializer.deserialize((JSONObject) value));
+                } else {
+                    resultConsumer.accept(null);
                 }
+            } else {
+                resultConsumer.accept(null);
             }
         });
     }

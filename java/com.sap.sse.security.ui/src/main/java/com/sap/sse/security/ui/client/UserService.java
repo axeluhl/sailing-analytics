@@ -21,10 +21,9 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.Storage;
-import com.sap.sse.gwt.client.StorageEvent;
-import com.sap.sse.gwt.client.StorageEvent.Handler;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
+import com.sap.sse.gwt.client.xdstorage.CrossDomainStorageEvent;
 import com.sap.sse.gwt.client.xdstorage.DelegatingCrossDomainStorageFuture;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.Action;
@@ -147,9 +146,9 @@ public class UserService {
     }
 
     private void registerStorageEventHandler() {
-        Storage.addStorageEventHandler(new Handler() {
+        getStorage().addStorageEventHandler(new CrossDomainStorageEvent.Handler() {
             @Override
-            public void onStorageChange(StorageEvent event) {
+            public void onStorageChange(CrossDomainStorageEvent event) {
                 logger.finest("Received storage event { key: "+event.getKey()+", newValue: "+event.getNewValue()+", oldValue: "+
                         event.getOldValue()+", url: "+event.getUrl());
                 // ignore update events coming from this object itself

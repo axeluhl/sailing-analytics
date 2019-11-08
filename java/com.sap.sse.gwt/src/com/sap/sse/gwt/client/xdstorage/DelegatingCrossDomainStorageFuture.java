@@ -104,7 +104,8 @@ public class DelegatingCrossDomainStorageFuture implements CrossDomainStorage {
                     " to "+storageToUse.getClass().getName());
         }
         if (!queuedWhileWaitingForStorage.isEmpty()) {
-            GWT.log("now executing "+queuedWhileWaitingForStorage.size()+" queued requests for cross-domain storage");
+            GWT.log("now executing "+queuedWhileWaitingForStorage.size()+" queued requests for cross-domain storage of type "+
+                        storageToUse.getClass().getName());
             for (final Consumer<CrossDomainStorage> queuedRequest : queuedWhileWaitingForStorage) {
                 queuedRequest.accept(storageToUse);
             }
