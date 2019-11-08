@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.common.orc;
 
+import java.io.Serializable;
+import java.util.function.BiFunction;
+
 import com.sap.sse.common.Distance;
 
 /**
@@ -12,7 +15,7 @@ import com.sap.sse.common.Distance;
  * @author Daniel Lisunkin (i505543)
  *
  */
-public interface ORCPerformanceCurveCourse {
+public interface ORCPerformanceCurveCourse extends Serializable {
 
     /**
      * @return {@link Iterable} object containing all {@link ORCPerformanceCurveLeg}s of an implementing instance of
@@ -45,4 +48,21 @@ public interface ORCPerformanceCurveCourse {
      *         object. Same idea as the substring method for Strings.
      */
     ORCPerformanceCurveCourse subcourse(int lastFinishedLegOneBased, double shareOfCurrentLeg);
+
+    /**
+     * Like {@link #subcourse(int, double)}, but in case of
+     * {@link ORCPerformanceCurveLegTypes#WINDWARD_LEEWARD_REAL_LIVE} the {@code windwardLeewardLegReplacer} function
+     * will be used to put a {@link ORCPerformanceCurveLegTypes#TWA} leg ("constructed course") into the resulting
+     * course instead, using a leg adapter that is based on the true wind angle on that leg, using the distance as
+     * provided by the existing {@link ORCPerformanceCurveLeg} of type
+     * {@link ORCPerformanceCurveLegTypes#WINDWARD_LEEWARD_REAL_LIVE WINDWARD_LEEWARD_REAL_LIVE}. All other legs are
+     * expected to be returned unchanged.
+     * 
+     * @param windwardLeewardLegReplacer
+     *            if not {@code null}, legs of type {@link ORCPerformanceCurveLegTypes#WINDWARD_LEEWARD_REAL_LIVE} will
+     *            be mapped using this function before applying the regular {@link #subcourse(int, double)} logic; if
+     *            {@code null}, the method behaves like {@link #subcourse(int, double)}.
+     */
+    ORCPerformanceCurveCourse subcourse(int zeroBasedIndexOfCurrentLeg, double shareOfCurrentLeg,
+            BiFunction<Integer, ORCPerformanceCurveLeg, ORCPerformanceCurveLeg> windwardLeewardLegReplacer);
 }

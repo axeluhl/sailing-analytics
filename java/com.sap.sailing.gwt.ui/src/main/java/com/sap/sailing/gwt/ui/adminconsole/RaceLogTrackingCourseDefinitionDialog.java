@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -10,6 +11,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
@@ -29,10 +31,12 @@ public class RaceLogTrackingCourseDefinitionDialog extends
     
     public static class Result {
         private final List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> waypoints;
+        private final Map<Integer, ORCPerformanceCurveLegImpl> orcLegData;
         private final Integer priority;
-        public Result(List<Pair<ControlPointDTO, PassingInstruction>> waypoints, Integer priority) {
+        public Result(List<Pair<ControlPointDTO, PassingInstruction>> waypoints, Map<Integer, ORCPerformanceCurveLegImpl> orcLegData, Integer priority) {
             super();
             this.waypoints = waypoints;
+            this.orcLegData = orcLegData;
             this.priority = priority;
         }
         public List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> getWaypoints() {
@@ -40,6 +44,9 @@ public class RaceLogTrackingCourseDefinitionDialog extends
         }
         public Integer getPriority() {
             return priority;
+        }
+        public Map<Integer, ORCPerformanceCurveLegImpl> getORCLegData() {
+            return orcLegData;
         }
     }
 
@@ -90,6 +97,7 @@ public class RaceLogTrackingCourseDefinitionDialog extends
     
     @Override
     protected Result getResult() {
-        return new Result(courseManagementWidget.createWaypointPairs(), priorityBox.getValue());
+        return new Result(courseManagementWidget.createWaypointPairs(),
+                courseManagementWidget.getORCPerformanceCurveLegInfoByOneBasedWaypointIndex(), priorityBox.getValue());
     }
 }

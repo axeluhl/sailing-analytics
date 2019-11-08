@@ -60,14 +60,14 @@ public class CompetitorStoreTest {
     @Test
     public void testPersistentCompetitorStore() {
         CompetitorAndBoatStore persistentStore1 = new PersistentCompetitorAndBoatStore(
-                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */true, null, /* raceLogResolver */ (srlid)->null);
+                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */true, null, /* raceLogResolver */ DomainFactory.TEST_RACE_LOG_RESOLVER);
         DynamicCompetitor template = (DynamicCompetitor) AbstractLeaderboardTest.createCompetitor("Test Competitor");
         Competitor competitor = persistentStore1.getOrCreateCompetitor(template.getId(), template.getName(), template.getShortName(),
                 template.getColor(), template.getEmail(), template.getFlagImage(), template.getTeam(),
                 /* timeOnTimeFactor */ 1.234, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ Duration.ONE_SECOND.times(730), null, /* storePersistently */ true);
 
         CompetitorAndBoatStore persistentStore2 = new PersistentCompetitorAndBoatStore(
-                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */false, null, /* raceLogResolver */ (srlid)->null);
+                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */false, null, /* raceLogResolver */ DomainFactory.TEST_RACE_LOG_RESOLVER);
         Competitor competitor2 = persistentStore2.getExistingCompetitorById(template.getId());
         assertNotSame(competitor2, template); // the new store loads new instances from the database
         assertEquals(template.getId(), competitor2.getId());
@@ -96,14 +96,14 @@ public class CompetitorStoreTest {
     @Test
     public void testPersistentCompetitorWithBoatStore() {
         CompetitorAndBoatStore persistentStore1 = new PersistentCompetitorAndBoatStore(
-                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */true, null, /* raceLogResolver */ (srlid)->null);
+                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */true, null, /* raceLogResolver */ DomainFactory.TEST_RACE_LOG_RESOLVER);
         DynamicCompetitorWithBoat template = (DynamicCompetitorWithBoat) AbstractLeaderboardTest.createCompetitorWithBoat("Test Competitor");
         CompetitorWithBoat competitor = persistentStore1.getOrCreateCompetitorWithBoat(template.getId(), template.getName(), template.getShortName(),
                 template.getColor(), template.getEmail(), template.getFlagImage(), template.getTeam(),
                 /* timeOnTimeFactor */ 1.234, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ Duration.ONE_SECOND.times(730), null, template.getBoat(), /* storePersistently */ true);
 
         CompetitorAndBoatStore persistentStore2 = new PersistentCompetitorAndBoatStore(
-                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */false, null, /* raceLogResolver */ (srlid)->null);
+                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */false, null, /* raceLogResolver */ DomainFactory.TEST_RACE_LOG_RESOLVER);
         CompetitorWithBoat competitor2 = persistentStore2.getExistingCompetitorWithBoatById(template.getId());
         assertNotSame(competitor2, template); // the new store loads new instances from the database
         assertEquals(template.getId(), competitor2.getId());
@@ -132,14 +132,14 @@ public class CompetitorStoreTest {
     @Test
     public void testPersistentBoatStore() {
         CompetitorAndBoatStore persistentStore1 = new PersistentCompetitorAndBoatStore(
-                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */true, null, /* raceLogResolver */ (srlid)->null);
+                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */true, null, /* raceLogResolver */ DomainFactory.TEST_RACE_LOG_RESOLVER);
         DynamicBoat template = new BoatImpl("id-12345", "Morning Glory", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), 
                 "GER 1234", new RGBColor(255, 0, 0));
         persistentStore1.getOrCreateBoat(template.getId(), template.getName(), template.getBoatClass(), 
                 template.getSailID(), template.getColor(), /* storePersistently */ true);
 
         CompetitorAndBoatStore persistentStore2 = new PersistentCompetitorAndBoatStore(
-                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */false, null, /* raceLogResolver */ (srlid)->null);
+                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */false, null, /* raceLogResolver */ DomainFactory.TEST_RACE_LOG_RESOLVER);
         DynamicBoat boat2 = persistentStore2.getExistingBoatById(template.getId());
         assertNotSame(boat2, template); // the new store loads new instances from the database
         assertEquals(template.getId(), boat2.getId());

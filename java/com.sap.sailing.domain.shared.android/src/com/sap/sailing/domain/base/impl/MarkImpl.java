@@ -48,7 +48,7 @@ public class MarkImpl extends NamedImpl implements Mark {
     }
 
     @Override
-    public Mark resolve(SharedDomainFactory domainFactory) {
+    public Mark resolve(SharedDomainFactory<?> domainFactory) {
         Mark result = domainFactory.getOrCreateMark(getId(), getName(), type, color, shape, pattern);
         return result;
     }

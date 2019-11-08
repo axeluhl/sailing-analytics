@@ -3,8 +3,8 @@ package com.sap.sailing.domain.orc.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -35,12 +35,12 @@ public class ORCCertificatesJsonImporter extends AbstractORCCertificatesImporter
     
     @Override
     public ORCCertificatesCollectionJSON read(Reader reader) throws IOException, ParseException {
-        Map<String, JSONObject> result = new HashMap<>();
+        List<JSONObject> result = new LinkedList<>();
         JSONObject parsedJson = (JSONObject) new JSONParser().parse(reader);
         JSONArray dataArray = (JSONArray) parsedJson.get("rms");
         for (int i = 0; i < dataArray.size(); i++) {
             JSONObject object = (JSONObject) dataArray.get(i);
-            result.put((String) object.get("SailNo"), object);
+            result.add(object);
         }
         return new ORCCertificatesCollectionJSON(result);
     }

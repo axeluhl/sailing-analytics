@@ -34,7 +34,7 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.WithID;
 
-public class SharedDomainFactoryImpl implements SharedDomainFactory {
+public class SharedDomainFactoryImpl<RLR extends RaceLogResolver> implements SharedDomainFactory<RLR> {
     private static final Logger logger = Logger.getLogger(SharedDomainFactoryImpl.class.getName());
     
     /**
@@ -105,16 +105,16 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
      */
     private final Set<String> mayStartWithNoUpwindLeg;
     
-    private final RaceLogResolver raceLogResolver;
+    private final RLR raceLogResolver;
     
     /**
      * Uses a transient competitor store
      */
-    public SharedDomainFactoryImpl(RaceLogResolver raceLogResolver) {
+    public SharedDomainFactoryImpl(RLR raceLogResolver) {
         this(new TransientCompetitorAndBoatStoreImpl(), raceLogResolver);
     }
     
-    public SharedDomainFactoryImpl(CompetitorAndBoatStore competitorStore, RaceLogResolver raceLogResolver) {
+    public SharedDomainFactoryImpl(CompetitorAndBoatStore competitorStore, RLR raceLogResolver) {
         this.raceLogResolver = raceLogResolver;
         waypointCacheReferenceQueue = new ReferenceQueue<Waypoint>();
         nationalityCache = new HashMap<String, Nationality>();
@@ -283,7 +283,9 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     private void expungeStaleWaypointCacheEntries() {
         Reference<? extends Waypoint> ref;
         while ((ref=waypointCacheReferenceQueue.poll()) != null) {
-            ((WeakWaypointReference) ref).removeCacheEntry();
+            @SuppressWarnings("unchecked")
+            final SharedDomainFactoryImpl<RLR>.WeakWaypointReference weakWaypointReference = (WeakWaypointReference) ref;
+            weakWaypointReference.removeCacheEntry();
         }
     }
     
@@ -420,7 +422,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public RaceLogResolver getRaceLogResolver() {
+    public RLR getRaceLogResolver() {
         return raceLogResolver;
     }
 }

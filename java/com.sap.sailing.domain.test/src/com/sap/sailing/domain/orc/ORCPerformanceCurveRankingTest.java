@@ -24,7 +24,6 @@ import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
-import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCScratchBoatEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RegattaLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
@@ -47,6 +46,7 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveRankingMetric;
+import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveRankingMetricLeaderForBaseline;
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sse.common.Duration;
@@ -109,7 +109,7 @@ public class ORCPerformanceCurveRankingTest extends OnlineTracTracBasedTest {
         super.setUp();
         URI storedUri = new URI("file:///"+new File("resources/orc/worlds2019/348f93c0-6798-0137-b07e-60a44ce903c3.mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(new URL("file:///"+new File("resources/orc/worlds2019/348f93c0-6798-0137-b07e-60a44ce903c3.txt").getCanonicalPath()),
-                /* liveUri */ null, /* storedUri */ storedUri, ORCPerformanceCurveRankingMetric::new,
+                /* liveUri */ null, /* storedUri */ storedUri, ORCPerformanceCurveRankingMetricLeaderForBaseline::new,
                 new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS, ReceiverType.MARKPOSITIONS, ReceiverType.RACECOURSE,
                         ReceiverType.RACESTARTFINISH });
         getTrackedRace().recordWind(new WindImpl(/* position */ new DegreePosition(44.37670797575265, 8.925960855558515), TIME_14_30_00,
@@ -122,15 +122,15 @@ public class ORCPerformanceCurveRankingTest extends OnlineTracTracBasedTest {
         final ORCCertificatesCollection certificates = ORCCertificatesImporter.INSTANCE.read(
                 getClass().getClassLoader().getResourceAsStream("orc/worlds2019/orcWorlds2019ClassA.json"));
         assertNotNull(certificates);
-        assertFalse(Util.isEmpty(certificates.getSailNumbers()));
+        assertFalse(Util.isEmpty(certificates.getCertificateIds()));
         author = new LogEventAuthorImpl("Testcase", 1);
         for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
             final Boat boat = getTrackedRace().getRace().getBoatOfCompetitor(competitor);
             ORCCertificate certificate;
             if (boat.getSailID().equals("Air is blue")) {
-                certificate = certificates.getCertificateBySailNumber("ITA5252");
+                certificate = certificates.getCertificateById("ITA52521I5252");
             } else {
-                certificate = certificates.getCertificateBySailNumber(boat.getSailID());
+                certificate = certificates.getCertificateById(boat.getSailID());
                 if (certificate == null) {
                     certificate = certificates.getCertificateByBoatName(boat.getName() == null ? boat.getSailID() : boat.getName());
                 }
@@ -177,7 +177,6 @@ public class ORCPerformanceCurveRankingTest extends OnlineTracTracBasedTest {
         setFinishingTime("Dubrovnik", "2019-06-04T08:09:12+0200");
         setFinishingTime("Brava", "2019-06-04T07:54:14+0200");
         setFinishingTime("Alemaro", "2019-06-04T10:44:15+0200");
-        raceLog.add(new RaceLogORCScratchBoatEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, UUID.randomUUID(), /* passId */ 0, getCompetitor("XIO")));
     }
     
     private void setFinishingTime(String boatName, String finishingTimeInISOFormat) throws ParseException {

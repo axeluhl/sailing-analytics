@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Supplier;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -75,17 +76,66 @@ public abstract class CourseManagementWidget implements IsWidget {
      */
     private final Map<WaypointDTO, ORCPerformanceCurveLegImpl> orcPerformanceCurveLegInfo;
     
+    /**
+     * Abstracts from how the leg geometry for a single leg is obtained; implementations may, e.g., use
+     * different ways to identify the race from which to fetch the data.
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     */
     public static interface LegGeometrySupplier {
-        void getLegGeometry(int zeroBasedLegNumber, AsyncCallback<ORCPerformanceCurveLegImpl> callback);
+        /**
+         * The lengths of the {@code zeroBasedLegNumbers} and {@code orcPerformanceCurveLegTypes} arrays must be equal,
+         * and the indices bind the values together. The leg geometries will be determined based on the leg type
+         * selected. If the leg type is {@code null} for a leg, the server-defined leg type will be determined and
+         * applied, so that windward / leeward legs will have their length computed by projecting onto the wind
+         * direction, and reaching legs will be judged based on rhumb line distance; the same applies for
+         * {@link ORCPerformanceCurveLegTypes#WINDWARD_LEEWARD},
+         * {@link ORCPerformanceCurveLegTypes#WINDWARD_LEEWARD_REAL_LIVE} and
+         * {@link ORCPerformanceCurveLegTypes#TWA}-typed legs. For all other leg types, rhumb-line distance is to be
+         * computed.
+         */
+        void getLegGeometry(int[] zeroBasedLegNumbers, ORCPerformanceCurveLegTypes[] orcPerformanceCurveLegTypes, AsyncCallback<ORCPerformanceCurveLegImpl[]> callback);
     }
+    
+    public static class SingleLegValidator implements Validator<ORCPerformanceCurveLegImpl> {
+        private final StringMessages stringMessages;
+        
+        public SingleLegValidator(StringMessages stringMessages) {
+            this.stringMessages = stringMessages;
+        }
 
+        @Override
+        public String getErrorMessage(ORCPerformanceCurveLegImpl valueToValidate) {
+               final String result;
+               if (valueToValidate == null) {
+                   result = null; // empty is allowed
+               } else {
+                   if (valueToValidate.getLength() == null) {
+                       result = stringMessages.pleaseEnterADistance();
+                   } else if (valueToValidate.getType() == ORCPerformanceCurveLegTypes.TWA && valueToValidate.getTwa() == null) {
+                       result = stringMessages.pleaseEnterATwa();
+                   } else {
+                       result = null;
+                   }
+               }
+               return result;
+        }
+   }
+    
     @Override
     public Widget asWidget() {
         return mainPanel;
     }
     
+    /**
+     * @param showOrcPcsLegEditActions
+     *            Depending on the ranking metric it may or may not make sense to show the user the actions to maintain
+     *            ORC PCS leg data. By default, these actions are enabled, particularly to cover the case where this
+     *            widget is used without an existing {@code TrackedRace} and only with a race log.
+     */
     public CourseManagementWidget(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            final StringMessages stringMessages, final UserService userService) {
+            final StringMessages stringMessages, final UserService userService, final Supplier<Boolean> showOrcPcsLegEditActions) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -122,7 +172,7 @@ public abstract class CourseManagementWidget implements IsWidget {
         mainPanel.setWidget(1, 1, controlPointsBtnsPanel);
         mainPanel.setWidget(1, 2, marksBtnsPanel);
         final AccessControlledActionsColumn<WaypointDTO, WaypointImagesBarCell> waypointsActionColumn = create(
-                new WaypointImagesBarCell(stringMessages, waypoints.getDataProvider()), userService,
+                new WaypointImagesBarCell(stringMessages, waypoints.getDataProvider(), showOrcPcsLegEditActions), userService,
                 s -> securedDtoForWaypointsPermissionCheck);
         // update permission for tracked race is required for deleting waypoints...
         waypointsActionColumn.addAction(DefaultActions.DELETE.name(), DefaultActions.UPDATE,
@@ -130,6 +180,8 @@ public abstract class CourseManagementWidget implements IsWidget {
         // ...as well as for setting any ORC PCS-related leg details:
         waypointsActionColumn.addAction(WaypointImagesBarCell.ACTION_ORC_PCS_DEFINE_LEG, DefaultActions.UPDATE,
                 waypoint -> createOrcPcsLegEventForLegEndingAt(waypoint));
+        waypointsActionColumn.addAction(WaypointImagesBarCell.ACTION_ORC_PCS_DEFINE_ALL_LEGS, DefaultActions.UPDATE,
+                waypoint -> createOrcPcsLegEventsForAllLegs());
         waypoints.getTable().addColumn(waypointsActionColumn);
         waypoints.getSelectionModel().addSelectionChangeHandler(new Handler() {
             @Override
@@ -197,24 +249,7 @@ public abstract class CourseManagementWidget implements IsWidget {
     private void createOrcPcsLegEventForLegEndingAt(WaypointDTO waypoint) {
         new ORCPerformanceCurveLegDialog(stringMessages, waypoint, waypoints.getDataProvider(),
                 orcPerformanceCurveLegInfo.get(waypoint), getLegGeometrySupplier(),
-                new Validator<ORCPerformanceCurveLegImpl>() {
-             @Override
-             public String getErrorMessage(ORCPerformanceCurveLegImpl valueToValidate) {
-                    final String result;
-                    if (valueToValidate == null) {
-                        result = null; // empty is allowed
-                    } else {
-                        if (valueToValidate.getLength() == null) {
-                            result = stringMessages.pleaseEnterADistance();
-                        } else if (valueToValidate.getType() == ORCPerformanceCurveLegTypes.TWA && valueToValidate.getTwa() == null) {
-                            result = stringMessages.pleaseEnterATwa();
-                        } else {
-                            result = null;
-                        }
-                    }
-                    return result;
-             }
-        }, new DialogCallback<ORCPerformanceCurveLegImpl>() {
+                new SingleLegValidator(stringMessages), new DialogCallback<ORCPerformanceCurveLegImpl>() {
             @Override
             public void ok(ORCPerformanceCurveLegImpl legInfoForWaypoint) {
                 orcPerformanceCurveLegInfo.put(waypoint, legInfoForWaypoint);
@@ -224,6 +259,54 @@ public abstract class CourseManagementWidget implements IsWidget {
             public void cancel() {
             }
         }).show();
+    }
+    
+    /**
+     * Shows an editable dialog that is filled with the current ORC PCS definitions for all legs. Other than the
+     * {@link ORCPerformanceCurveLegDialog} that is good only for a single leg, the dialog presented by this method
+     * allows the user to
+     * <ul>
+     * <li>see the total distance of the course by adding up all leg distances</li>
+     * <li>set a common leg type, such as {@link ORCPerformanceCurveLegTypes#CIRCULAR_RANDOM}, for all legs at once</li>
+     * <li>set a total course distance and break it down proportionally to the legs, based on their current length</li>
+     * </ul>
+     */
+    private void createOrcPcsLegEventsForAllLegs() {
+        new ORCPerformanceCurveAllLegsDialog(stringMessages, waypoints.getDataProvider(), getExplicitOrcPerformanceCurveLegInfos(),
+                getLegGeometrySupplier(), new Validator<ORCPerformanceCurveLegImpl[]>() {
+                    @Override
+                    public String getErrorMessage(ORCPerformanceCurveLegImpl[] valueToValidate) {
+                        final SingleLegValidator singleLegValidator = new SingleLegValidator(stringMessages);
+                        for (final ORCPerformanceCurveLegImpl legToValidate : valueToValidate) {
+                            final String errorMessage = singleLegValidator.getErrorMessage(legToValidate);
+                            if (errorMessage != null) {
+                                return errorMessage;
+                            }
+                        }
+                        return null;
+                    }
+                    
+                },
+                new DialogCallback<ORCPerformanceCurveLegImpl[]>() {
+                    @Override
+                    public void ok(ORCPerformanceCurveLegImpl[] legInfos) {
+                        for (int i=0; i<legInfos.length; i++) {
+                            orcPerformanceCurveLegInfo.put(waypoints.getDataProvider().getList().get(i+1), legInfos[i]);
+                        }
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                }).show();
+    }
+
+    private ORCPerformanceCurveLegImpl[] getExplicitOrcPerformanceCurveLegInfos() {
+        final ORCPerformanceCurveLegImpl[] result = new ORCPerformanceCurveLegImpl[waypoints.getDataProvider().getList().size()-1];
+        for (int i=0; i<result.length; i++) {
+            result[i] = orcPerformanceCurveLegInfo.get(waypoints.getDataProvider().getList().get(i+1));
+        }
+        return result;
     }
 
     protected void markSelectionChanged() {
@@ -332,7 +415,7 @@ public abstract class CourseManagementWidget implements IsWidget {
                 }).show();
     }
 
-    public void refresh(){};
+    public abstract void refresh();
     
     protected void updateWaypointsAndControlPoints(RaceCourseDTO raceCourseDTO, String leaderboardName) {
         this.sailingService.getLeaderboardWithSecurity(leaderboardName,
@@ -358,7 +441,6 @@ public abstract class CourseManagementWidget implements IsWidget {
         waypoints.getDataProvider().getList().clear();
         multiMarkControlPoints.getDataProvider().getList().clear();
         waypoints.getDataProvider().getList().addAll(raceCourseDTO.waypoints);
-
         Map<String, ControlPointDTO> noDuplicateCPs = new HashMap<>();
         for (ControlPointDTO controlPoint : raceCourseDTO.getControlPoints()) {
             if (controlPoint instanceof GateDTO) {
@@ -366,9 +448,7 @@ public abstract class CourseManagementWidget implements IsWidget {
             }
         }
         multiMarkControlPoints.getDataProvider().getList().addAll(noDuplicateCPs.values());
-
         updateWaypointButtons();
-
         final boolean hasUpdatePermission = userService.hasPermission(securedDTO, DefaultActions.UPDATE);
         insertWaypointAfter.setVisible(hasUpdatePermission);
         insertWaypointBefore.setVisible(hasUpdatePermission);

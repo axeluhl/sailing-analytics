@@ -283,9 +283,8 @@ public class TracTracEventManagementPanelPO extends PageArea {
     }
     
     private void waitForSelectedRacesContainDifferentBoatClassesError(String boatClass) {
-        String message = String.format("The selected races contain boat classes which are not the same as "
-                + "the boat class '%s' of the selected regatta.", boatClass);
-        
-        waitForNotificationAndDismiss(message);
+        String message = String.format("(?s)The selected races contain boat classes which are not the same as "
+                + "the boat class '%s' of the selected regatta. Really load races\\?.*", boatClass);
+        waitForAlertAndAccept(message);
     }
 }

@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -16,6 +17,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 
 public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMetric {
@@ -98,7 +100,7 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
                 final Duration calculatedTime = getCalculatedTime(competitor,
                         () -> getTrackedRace().getCurrentLeg(competitor, timePoint).getLeg(), () -> getTrackedRace()
                                 .getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolated */true),
-                        actualRaceDuration, totalWindwardDistanceTraveled);
+                        getTrackedRace().getTimeSailedSinceRaceStart(competitor, timePoint), totalWindwardDistanceTraveled);
                 RankingMetric.CompetitorRankingInfo rankingInfo = new CompetitorRankingInfoImpl(timePoint, competitor,
                         getWindwardDistanceTraveled(competitor, timePoint, cache), actualRaceDuration, calculatedTime,
                         predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead,
@@ -228,9 +230,9 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
     }
 
     @Override
-    public RankingInfo getRankingInfo(TimePoint timePoint) {
-        // TODO Implement NonPerformanceCurveRankingMetric.getRankingInfo(...)
-        return super.getRankingInfo(timePoint);
+    public Speed getReferenceImpliedWind(TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final SpeedWithConfidence<TimePoint> averageWindWithConfidence = getTrackedRace().getAverageWindSpeedWithConfidenceWithNumberOfSamples(/* number of samples */ 10);
+        return averageWindWithConfidence == null ? null : averageWindWithConfidence.getObject();
     }
-    
 }

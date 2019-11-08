@@ -124,7 +124,16 @@ interface AdminConsoleResources extends ClientBundle {
     
     @Source("com/sap/sailing/gwt/ui/client/images/orc_pcs_leg.png")
     ImageResource orcPcsDefineLegIcon();
-    
+
+    @Source("com/sap/sailing/gwt/ui/client/images/orc_pcs_all_legs.png")
+    ImageResource orcPcsDefineAllLegsIcon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/certificates.png")
     ImageResource updateCertificatesIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/scratchBoat.png")
+    ImageResource scratchBoatIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/impliedWind.png")
+    ImageResource impliedWindIcon();
 }

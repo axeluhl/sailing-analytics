@@ -5,15 +5,19 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.orc.ORCPerformanceCurve;
+import com.sap.sailing.domain.tracking.MarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 
@@ -61,4 +65,21 @@ public class NoCachingWindLegTypeAndLegBearingCache implements WindLegTypeAndLeg
     public Speed getImpliedWind(TimePoint timePoint, TrackedRace raceContext, Competitor competitor, BiFunction<TimePoint, Competitor, Speed> impliedWindSupplier) {
         return impliedWindSupplier.apply(timePoint, competitor);
     }
+
+    @Override
+    public Duration getRelativeCorrectedTime(Competitor competitor, TrackedRace raceContext, TimePoint timePoint,
+            BiFunction<Competitor, TimePoint, Duration> relativeCorrectedTimeSupplier) {
+        return relativeCorrectedTimeSupplier.apply(competitor, timePoint);
+    }
+
+    @Override
+    public Position getApproximatePosition(TrackedRace trackedRace, Waypoint waypoint, TimePoint timePoint) {
+        return trackedRace.getApproximatePosition(waypoint, timePoint);
+    }
+
+    @Override
+    public MarkPositionAtTimePointCache getMarkPositionAtTimePointCache(TimePoint markPositionTimePoint, TrackedRace trackedRace) {
+        return new MarkPositionAtTimePointCacheImpl(trackedRace, markPositionTimePoint);
+    }
+
 }

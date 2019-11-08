@@ -57,8 +57,11 @@ import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
@@ -1044,7 +1047,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     SerializationDummy serializationDummy(PersonDTO dummy, CountryCode ccDummy,
             PreciseCompactPosition preciseCompactPosition, TypeRelativeObjectIdentifier typeRelativeObjectIdentifier,
-            SecondsDurationImpl secondsDuration, KnotSpeedImpl knotSpeedImpl) throws UnauthorizedException;
+            SecondsDurationImpl secondsDuration, KnotSpeedImpl knotSpeedImpl, KilometersPerHourSpeedImpl kmhSpeedImpl) throws UnauthorizedException;
 
     Collection<CompetitorDTO> getEliminatedCompetitors(String leaderboardName) throws UnauthorizedException;
 
@@ -1190,10 +1193,11 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     boolean getTrackedRaceIsUsingMarkPassingCalculator(RegattaAndRaceIdentifier regattaNameAndRaceName);
 
-    ORCPerformanceCurveLegImpl getLegGeometry(String leaderboardName, String raceColumnName, String fleetName,
-            int zeroBasedLegIndex);
+    ORCPerformanceCurveLegImpl[] getLegGeometry(String leaderboardName, String raceColumnName, String fleetName,
+            int[] zeroBasedLegIndices, ORCPerformanceCurveLegTypes[] legTypes);
 
-    ORCPerformanceCurveLegImpl getLegGeometry(RegattaAndRaceIdentifier singleSelectedRace, int zeroBasedLegIndex);
+    ORCPerformanceCurveLegImpl[] getLegGeometry(RegattaAndRaceIdentifier singleSelectedRace, int[] zeroBasedLegIndices,
+            ORCPerformanceCurveLegTypes[] legTypes);
 
     /**
      * @throws NotFoundException
@@ -1246,4 +1250,19 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Triple<Integer, Integer, Integer> assignORCPerformanceCurveCertificates(String leaderboardName,
             Map<String, ORCCertificate> certificatesForBoatsWithIdAsString) throws IOException, NotFoundException;
+
+    CompetitorDTO getORCPerformanceCurveScratchBoat(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException;
+
+    void setORCPerformanceCurveScratchBoat(String leaderboardName, String raceColumnName, String fleetName,
+            CompetitorDTO newScratchBoat) throws NotFoundException;
+
+    ImpliedWindSource getImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException;
+
+    void setImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName,
+            ImpliedWindSource impliedWindSource) throws NotFoundException;
+
+    Map<BoatDTO, Set<ORCCertificate>> getSuggestedORCBoatCertificates(ArrayList<BoatDTO> boats) throws Exception;
+
+    Set<ORCCertificate> searchORCBoatCertificates(CountryCode country, Integer yearOfIssuance, String referenceNumber,
+            String yachtName, String sailNumber, String boatClassName) throws Exception;
 }

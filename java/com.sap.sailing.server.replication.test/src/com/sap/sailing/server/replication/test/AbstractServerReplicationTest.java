@@ -1,6 +1,5 @@
 package com.sap.sailing.server.replication.test;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
@@ -8,6 +7,7 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.tracking.EmptySensorFixStore;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
@@ -46,7 +46,7 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
 
         @Override
         public RacingEventServiceImpl createNewMaster() {
-            return new RacingEventServiceImpl((final RaceLogResolver raceLogResolver)-> {
+            return new RacingEventServiceImpl((final RaceLogAndTrackedRaceResolver raceLogResolver)-> {
                 return new ConstructorParameters() {
                     private final DomainFactory baseDomainFactory = new DomainFactoryImpl(raceLogResolver);
                     
@@ -62,7 +62,7 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
         @Override
         public RacingEventServiceImpl createNewReplica() {
             return new RacingEventServiceImpl(
-                    (final RaceLogResolver raceLogResolver) -> {
+                    (final RaceLogAndTrackedRaceResolver raceLogResolver) -> {
                         return new RacingEventServiceImpl.ConstructorParameters() {
                             private final DomainObjectFactory domainObjectFactory =
                                     PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,

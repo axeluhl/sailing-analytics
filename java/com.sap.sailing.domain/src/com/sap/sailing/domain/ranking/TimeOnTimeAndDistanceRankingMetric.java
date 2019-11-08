@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -74,6 +75,11 @@ public class TimeOnTimeAndDistanceRankingMetric extends NonPerformanceCurveRanki
         super(trackedRace);
         this.timeOnTimeFactor = timeOnTimeFactor;
         this.timeOnDistanceFactorNauticalMile = timeOnDistanceFactorInSecondsPerNauticalMile;
+    }
+
+    @Override
+    public RankingMetrics getType() {
+        return RankingMetrics.TIME_ON_TIME_AND_DISTANCE;
     }
 
     /**

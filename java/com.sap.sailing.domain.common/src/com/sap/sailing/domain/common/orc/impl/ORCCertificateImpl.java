@@ -52,9 +52,9 @@ public class ORCCertificateImpl implements ORCCertificate {
 
     public final static Distance NAUTICAL_MILE = new NauticalMileDistance(1);
     
-    private final String sailnumber;
+    private final String sailNumber;
     private final String boatName;
-    private final String boatclass;
+    private final String boatClassName;
     private final Distance lengthOverAll;
     private final Duration gph;
     private final Double cdl;
@@ -112,7 +112,7 @@ public class ORCCertificateImpl implements ORCCertificate {
     private final Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed;
 
     public ORCCertificateImpl(String idConsistingOfNatAuthCertNoAndBIN,
-            String sailnumber, String boatName, String boatclass,
+            String sailnumber, String boatName, String boatClassName,
             Distance length, Duration gph,
             Double cdl, TimePoint issueDate,
             Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle, 
@@ -125,9 +125,9 @@ public class ORCCertificateImpl implements ORCCertificate {
             Map<Speed, Speed> circularRandomSpeedPredictionsPerTrueWindSpeed,
             Map<Speed, Speed> nonSpinnakerSpeedPredictionsPerTrueWindSpeed) {
         this.idConsistingOfNatAuthCertNoAndBIN = idConsistingOfNatAuthCertNoAndBIN;
-        this.sailnumber = sailnumber;
+        this.sailNumber = sailnumber;
         this.boatName = boatName;
-        this.boatclass = boatclass;
+        this.boatClassName = boatClassName;
         this.lengthOverAll = length;
         this.gph = gph;
         this.cdl = cdl;
@@ -191,13 +191,13 @@ public class ORCCertificateImpl implements ORCCertificate {
     }
 
     @Override
-    public String getSailnumber() {
-        return sailnumber;
+    public String getSailNumber() {
+        return sailNumber;
     }
 
     @Override
-    public String getBoatclass() {
-        return boatclass;
+    public String getBoatClassName() {
+        return boatClassName;
     }
 
     @Override
@@ -252,7 +252,7 @@ public class ORCCertificateImpl implements ORCCertificate {
     
     @Override
     public String toString() {
-        return "ID \""+getId()+"\" for "+getSailnumber()+" / "+getBoatName() + " - Issued on: " + getIssueDate().asDate()+" with GPH "+
+        return "Certificate with ID \""+getId()+"\" for "+getSailNumber()+" / "+getBoatName() + " - Issued on: " + (getIssueDate()==null?"n/a":getIssueDate().asDate())+" with GPH "+
                 Util.padPositiveValue(getGPHInSecondsToTheMile(), 1, 1, /* round */ true);
     }
 }

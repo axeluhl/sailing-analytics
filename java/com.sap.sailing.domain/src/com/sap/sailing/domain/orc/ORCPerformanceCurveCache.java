@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 
@@ -47,4 +48,15 @@ public interface ORCPerformanceCurveCache {
     Speed getImpliedWind(TimePoint timePoint, TrackedRace raceContext, Competitor competitor,
             BiFunction<TimePoint, Competitor, Speed> impliedWindSupplier);
 
+    /**
+     * Computes the (relative) corrected time by determining the implied wind to use at {@code timePoint} (the greatest
+     * found for any competitor), then determining the {@code competitor}'s performance curve for the partial or total
+     * course sailed up to {@code timePoint} and mapping the implied wind to the time allowance for {@code competitor}
+     * at {@code timePoint}. This allowance is then compared to the time sailed by {@code competitor} at
+     * {@code timePoint}, and the difference is returned. Note that this difference could be negative, e.g., in case
+     * the implied wind calculation was capped at 20 knots, but the boat sailed faster in an actual 25 knots breeze,
+     * therefore having an elapsed time that is shorter than the allowance at 20 knots.
+     */
+    Duration getRelativeCorrectedTime(Competitor competitor, TrackedRace raceContext,
+            TimePoint timePoint, BiFunction<Competitor, TimePoint, Duration> relativeCorrectedTimeSupplier);
 }

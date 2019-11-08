@@ -30,12 +30,10 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
     public RaceLogCourseManagementWidget(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages, final String leaderboardName, final String raceColumnName,
             final String fleetName, final UserService userService) {
-        super(sailingService, errorReporter, stringMessages, userService);
-
+        super(sailingService, errorReporter, stringMessages, userService, /* always show ORC OCS leg data actions */ ()->true);
         this.leaderboardName = leaderboardName;
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
-
         Button addMark = new Button(stringMessages.addMarkToRegatta());
         addMark.addClickHandler(new ClickHandler() {
             @Override
@@ -123,24 +121,6 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
         marks.getTable().addColumn(actionColumn);
     }
 
-    /**
-     * We cannot update the course here really, but we can at least try to update the ORC PCS leg data.
-     */
-    @Override
-    protected void save() {
-        sailingService.setORCPerformanceCurveLegInfo(leaderboardName, raceColumnName, fleetName,
-                getORCPerformanceCurveLegInfoByOneBasedWaypointIndex(), new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.errorUpdatingRaceCourse(caught.getMessage()));
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-            }
-        });
-    }
-
     @Override
     protected void markSelectionChanged() {
         Set<MarkDTO> marksToRemove = marks.getSelectionModel().getSelectedSet();
@@ -222,6 +202,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
 
     @Override
     protected LegGeometrySupplier getLegGeometrySupplier() {
-        return (zeroBasedLegIndex, callback)->sailingService.getLegGeometry(leaderboardName, raceColumnName, fleetName, zeroBasedLegIndex, callback);
+        return (zeroBasedLegIndices, legTypes, callback)->
+            sailingService.getLegGeometry(leaderboardName, raceColumnName, fleetName, zeroBasedLegIndices, legTypes, callback);
     }
 }

@@ -17,7 +17,6 @@ public class RaceLogORCScratchBoatEventSerializer extends BaseRaceLogEventSerial
 
     public static final String VALUE_CLASS = RaceLogORCScratchBoatEvent.class.getSimpleName();
     public static final String ORC_CERTIFICATE = "certificate";
-    public static final String ORC_COMPETITOR_ID = "competitorId";
     
     public RaceLogORCScratchBoatEventSerializer(JsonSerializer<Competitor> competitorSerializer) {
         super(competitorSerializer);
@@ -27,7 +26,6 @@ public class RaceLogORCScratchBoatEventSerializer extends BaseRaceLogEventSerial
     public JSONObject serialize(RaceLogEvent object) {
         RaceLogORCScratchBoatEvent scratchBoatEvent = (RaceLogORCScratchBoatEvent) object;
         JSONObject result = super.serialize(scratchBoatEvent);
-        result.put(ORC_COMPETITOR_ID, scratchBoatEvent.getCompetitorId().toString());
         return result;
     }
 

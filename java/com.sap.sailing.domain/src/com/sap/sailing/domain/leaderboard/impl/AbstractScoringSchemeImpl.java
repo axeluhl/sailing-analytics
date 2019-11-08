@@ -24,8 +24,22 @@ import com.sap.sse.common.Util.Pair;
 public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
     private static final long serialVersionUID = 6830414905539642446L;
     
+    /**
+     * Compares two scores equal if their difference is less than {@link #THRESHOLD_FOR_EQUALITY}.
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     */
     private class ScoreComparator implements Comparator<Double>, Serializable {
         private static final long serialVersionUID = -2767385186133743330L;
+        
+        /**
+         * Adding scores using {@code double} as type can lead to small differences ranging around
+         * 10^-10 and less. If two scores vary by only this little they shall be considered equal.
+         * 
+         * See also bug 5145.
+         */
+        private static final double THRESHOLD_FOR_EQUALITY = 0.0000000001;
         
         private final boolean nullScoresAreBetter;
         
@@ -48,8 +62,20 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
                 if (o2 == null) {
                     result = nullScoresAreBetter ? 1 : -1;
                 } else {
-                    result = o1.compareTo(o2) * (isHigherBetter() ? -1 : 1);
+                    result = compareDoublesWithThreshold(o1, o2) * (isHigherBetter() ? -1 : 1);
                 }
+            }
+            return result;
+        }
+        
+        private int compareDoublesWithThreshold(double d1, double d2) {
+            final int result;
+            if (Math.abs(d1-d2) < THRESHOLD_FOR_EQUALITY) {
+                result = 0;
+            } else if (d1 > d2) {
+                result = 1;
+            } else {
+                result = -1;
             }
             return result;
         }

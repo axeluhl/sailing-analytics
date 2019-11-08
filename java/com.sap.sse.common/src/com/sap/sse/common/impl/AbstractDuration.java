@@ -8,8 +8,9 @@ public abstract class AbstractDuration implements Duration {
 
     @Override
     public String toString() {
-        return ""+Util.padPositiveValue((int) asHours(), 2, 0, /* round */ false)+":"+
-                Util.padPositiveValue(asMinutes()%60, 2, 0, /* round */ false)+":"+
-                Util.padPositiveValue(asSeconds()%60, 2, 3, /* round */ true);
+        return (Math.signum(asHours()) < 0 ? "-" : "")+
+                Util.padPositiveValue((int) Math.abs(asHours()), 2, 0, /* round */ false)+":"+
+                Util.padPositiveValue(Math.abs(asMinutes())%60, 2, 0, /* round */ false)+":"+
+                Util.padPositiveValue(Math.abs(asSeconds())%60, 2, 3, /* round */ true);
     }
 }

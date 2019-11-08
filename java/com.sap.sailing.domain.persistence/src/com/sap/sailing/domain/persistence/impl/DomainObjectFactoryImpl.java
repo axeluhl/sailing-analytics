@@ -45,10 +45,12 @@ import com.mongodb.client.result.DeleteResult;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
 import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCCertificateAssignmentEventImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCImpliedWindSourceEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCScratchBoatEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RegattaLogORCCertificateAssignmentEventImpl;
@@ -203,6 +205,7 @@ import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
+import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -255,6 +258,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJs
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.deserialization.impl.LegacyCompetitorWithContainedBoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RegattaConfigurationJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.ImpliedWindSourceDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.ORCCertificateJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 import com.sap.sse.common.Bearing;
@@ -1513,7 +1517,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return result;
     }
-
+    
     private List<RaceLogEvent> loadRaceLogEvents(RaceLog targetRaceLog, Document query) throws JsonDeserializationException, ParseException {
         List<RaceLogEvent> result = new ArrayList<>();
         MongoCollection<Document> raceLog = database.getCollection(CollectionNames.RACE_LOGS.name());
@@ -1635,7 +1639,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         } else if (eventClass.equals(RaceLogORCCertificateAssignmentEvent.class.getSimpleName())) {
             resultEvent = loadRaceLogORCCertificateAssignmentEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
         } else if (eventClass.equals(RaceLogORCScratchBoatEvent.class.getSimpleName())) {
-            resultEvent = loadRaceLogORCScratchBoatEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
+            resultEvent = loadRaceLogORCScratchBoatEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(RaceLogORCImpliedWindSourceEvent.class.getSimpleName())) {
+            resultEvent = loadRaceLogORCSetImpliedWindEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else {
             throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
         }
@@ -1643,9 +1649,23 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private RaceLogEvent loadRaceLogORCScratchBoatEvent(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable id, Integer passId, Document dbObject) {
-        Serializable competitorId = (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name());
-        return new RaceLogORCScratchBoatEventImpl(createdAt, logicalTimePoint, author, id, passId, competitorId);
+            TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors, Document dbObject) {
+        return new RaceLogORCScratchBoatEventImpl(createdAt, logicalTimePoint, author, id, passId, competitors.get(0));
+    }
+    
+    private RaceLogEvent loadRaceLogORCSetImpliedWindEvent(TimePoint createdAt,
+            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId,
+            List<Competitor> competitors, Document dbObject) throws JsonDeserializationException, ParseException {
+        final Document impliedWindSourceDocument = (Document) dbObject.get(FieldNames.ORC_IMPLIED_WIND_SOURCE.name());
+        final ImpliedWindSource impliedWindSource;
+        if (impliedWindSourceDocument == null) {
+            impliedWindSource = null;
+        } else {
+            final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
+            JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(impliedWindSourceDocument.toJson(writerSettings)));
+            impliedWindSource = new ImpliedWindSourceDeserializer().deserialize(json);
+        }
+        return new RaceLogORCImpliedWindSourceEventImpl(createdAt, logicalTimePoint, author, id, passId, impliedWindSource);
     }
 
     private RaceLogEvent loadRaceLogUseCompetitorsFromRaceLogEvent(TimePoint createdAt, AbstractLogEventAuthor author,

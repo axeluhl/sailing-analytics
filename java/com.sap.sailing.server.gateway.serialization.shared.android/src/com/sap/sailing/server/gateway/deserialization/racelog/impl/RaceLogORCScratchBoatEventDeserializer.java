@@ -12,9 +12,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogORCScratchBoatEventSerializer;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.util.impl.UUIDHelper;
 
 /**
  * Deserializer for {@link com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent ORCLegDataEvent}.
@@ -31,8 +29,6 @@ public class RaceLogORCScratchBoatEventDeserializer extends BaseRaceLogEventDese
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
-        Serializable competitorId = (Serializable) object.get(RaceLogORCScratchBoatEventSerializer.ORC_COMPETITOR_ID);
-        competitorId = UUIDHelper.tryUuidConversion(competitorId);
-        return new RaceLogORCScratchBoatEventImpl(createdAt, timePoint, author, id, passId, competitorId);
+        return new RaceLogORCScratchBoatEventImpl(createdAt, timePoint, author, id, passId, competitors.get(0));
     }
 }

@@ -16,6 +16,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -261,8 +262,12 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                 result = null;
             } else {
                 final MarkPassing finishingMarkPassing = getTrackedRace().getMarkPassing(competitor, finish);
-                if (finishingMarkPassing != null && finishingMarkPassing.getTimePoint().before(timePoint)) {
-                    result = startOfRace.until(finishingMarkPassing.getTimePoint());
+                if (finishingMarkPassing != null) {
+                    if (finishingMarkPassing.getTimePoint().before(timePoint)) {
+                        result = startOfRace.until(finishingMarkPassing.getTimePoint());
+                    } else {
+                        result = startOfRace.until(timePoint);
+                    }
                 } else {
                     if (trackedRace.getEndOfTracking() != null && timePoint.after(trackedRace.getEndOfTracking())) {
                         result = null; // race not finished until end of tracking; no reasonable value can be computed for competitor
@@ -431,19 +436,21 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                 for (final TrackedLeg trackedLeg : getTrackedRace().getTrackedLegs()) {
                     count = count || trackedLeg.getLeg().getFrom() == from;
                     if (count) {
+                        final LegType legTypeForRanking = getLegTypeForRanking(trackedLeg);
                         final TrackedLegOfCompetitor trackedLegOfCompetitor = trackedLeg.getTrackedLeg(competitor);
                         if (isAssumedToHaveStartedLeg(timePoint, trackedLegOfCompetitor)) {
                             if (!isAssumedToHaveFinishedLeg(timePoint, trackedLegOfCompetitor)) {
                                 // partial distance sailed:
                                 final Position estimatedPosition = getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */ true);
                                 if (estimatedPosition != null) {
-                                    final Distance windwardDistanceFromLegStart = trackedLeg.getWindwardDistanceFromLegStart(estimatedPosition, cache);
+                                    final Distance windwardDistanceFromLegStart = trackedLeg.getWindwardDistanceFromLegStart(legTypeForRanking,
+                                            estimatedPosition, cache);
                                     if (windwardDistanceFromLegStart == null) {
                                         // probably the leg start position is not known; therefore, distance cannot be determined; return null:
                                         d = null;
                                         break;
                                     }
-                                    final Distance legWindwardDistance = trackedLeg.getWindwardDistance(cache);
+                                    final Distance legWindwardDistance = trackedLeg.getWindwardDistance(legTypeForRanking, cache);
                                     if (legWindwardDistance != null && legWindwardDistance.compareTo(windwardDistanceFromLegStart) < 0) {
                                         d = d.add(legWindwardDistance);
                                     } else {
@@ -456,7 +463,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                                 }
                                 break;
                             } else {
-                                final Distance legWindwardDistance = trackedLeg.getWindwardDistance(cache);
+                                final Distance legWindwardDistance = trackedLeg.getWindwardDistance(legTypeForRanking, cache);
                                 if (legWindwardDistance != null) {
                                     d = d.add(legWindwardDistance);
                                 }
@@ -470,6 +477,17 @@ public abstract class AbstractRankingMetric implements RankingMetric {
             result = d;
         }
         return result;
+    }
+
+    /**
+     * Defines the leg type to use for ranking competitors in {@code trackedLeg}. This default implementation returns
+     * {@code null}, meaning to infer the leg type based on the wind direction on that leg. Specializations may override
+     * this, e.g., to use a leg type matching any ranking specifications made with the ranking metric for that leg, such
+     * as projecting to the rhumb line instead of to the wind in certain circumstances, even if the leg may be classified
+     * as an upwind or downwind leg based on the wind detected on it.
+     */
+    protected LegType getLegTypeForRanking(TrackedLeg trackedLeg) {
+        return null;
     }
 
     /**

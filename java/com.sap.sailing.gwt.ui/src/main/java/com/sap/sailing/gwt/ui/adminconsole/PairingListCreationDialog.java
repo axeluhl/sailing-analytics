@@ -71,8 +71,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         pairingListGrid = new Grid(this.template.getPairingListTemplate().length,
                 this.template.getPairingListTemplate()[0].length);
         pairingListTemplateScrollPanel = new ScrollPanel(pairingListGrid);
-        if (template.getCompetitorCount() == leaderboardDTO.competitorsCount
-                && template.getCompetitorCount() <= (template.getFlightCount() * template.getGroupCount())) {
+        if (template.getCompetitorCount() == leaderboardDTO.competitorsCount) {
             sailingService.getPairingListFromTemplate(this.leaderboardDTO.getName(),
                     this.template.getFlightMultiplier(), this.template.getSelectedFlightNames(), this.template,
                     new AsyncCallback<PairingListDTO>() {

@@ -83,14 +83,14 @@ public class TestStoringAndLoadingRegattaORCCertificateAssignmentEvent extends A
     @Test
     public void test() throws JsonDeserializationException, ParseException {
         RaceLogORCCertificateAssignmentEvent expectedEvent = new RaceLogORCCertificateAssignmentEventImpl(MillisecondsTimePoint.now(), expectedEventTime, author,
-                expectedId, expectedPassId, importer.getCertificateBySailNumber("GER 5549"), competitor);
+                expectedId, expectedPassId, importer.getCertificateById("GER140772GER5549"), competitor);
 
         Document dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RaceLogORCCertificateAssignmentEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(expectedEvent.getBoatId(), actualEvent.getBoatId());
-        assertEquals(expectedEvent.getCertificate().getSailnumber(), actualEvent.getCertificate().getSailnumber());
+        assertEquals(expectedEvent.getCertificate().getSailNumber(), actualEvent.getCertificate().getSailNumber());
         assertEquals(expectedEvent.getCertificate().getGPHInSecondsToTheMile(), actualEvent.getCertificate().getGPHInSecondsToTheMile(), 0.00001);
 
         List<Speed> expectedBeatVMGPredictions = new ArrayList<>(expectedEvent.getCertificate().getBeatVMGPredictions().values());

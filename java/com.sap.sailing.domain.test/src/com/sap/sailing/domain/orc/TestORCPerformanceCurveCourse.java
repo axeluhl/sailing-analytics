@@ -5,9 +5,11 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.mockito.Matchers;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveCourse;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
@@ -16,7 +18,9 @@ import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveCourseImpl;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveLegAdapter;
 import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
@@ -146,19 +150,35 @@ public class TestORCPerformanceCurveCourse {
         double accuracy = 0.000000001;
         List<ORCPerformanceCurveLeg> legs = new ArrayList<>();
         final TrackedLeg trackedLeg1 = Mockito.mock(TrackedLeg.class);
-        Mockito.when(trackedLeg1.getWindwardDistance()).thenReturn(new NauticalMileDistance(1));
+        Mockito.when(trackedLeg1.getWindwardDistance(Matchers.any(LegType.class), Matchers.any(TimePoint.class),
+                Matchers.any(WindLegTypeAndLegBearingAndORCPerformanceCurveCache.class))).thenReturn(new NauticalMileDistance(1));
         final TrackedLeg trackedLeg2 = Mockito.mock(TrackedLeg.class);
-        Mockito.when(trackedLeg2.getWindwardDistance()).thenReturn(new NauticalMileDistance(2));
+        Mockito.when(trackedLeg2.getWindwardDistance(Matchers.any(LegType.class), Matchers.any(TimePoint.class),
+                Matchers.any(WindLegTypeAndLegBearingAndORCPerformanceCurveCache.class))).thenReturn(new NauticalMileDistance(2));
         legs.add(new ORCPerformanceCurveLegAdapter(trackedLeg1) {
+            private static final long serialVersionUID = 2173629869089646863L;
+
             @Override
             public Bearing getTwa() {
                 return new DegreeBearingImpl(0);
             }
+
+            @Override
+            public ORCPerformanceCurveLegTypes getType() {
+                return ORCPerformanceCurveLegTypes.TWA;
+            }
         });
         legs.add(new ORCPerformanceCurveLegAdapter(trackedLeg2) {
+            private static final long serialVersionUID = 5651091430433706403L;
+
             @Override
             public Bearing getTwa() {
                 return new DegreeBearingImpl(0);
+            }
+
+            @Override
+            public ORCPerformanceCurveLegTypes getType() {
+                return ORCPerformanceCurveLegTypes.TWA;
             }
         });
         ORCPerformanceCurveCourse course = new ORCPerformanceCurveCourseImpl(legs);

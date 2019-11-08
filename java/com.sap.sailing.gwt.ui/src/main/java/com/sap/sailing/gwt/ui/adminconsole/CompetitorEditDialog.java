@@ -1,11 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -17,13 +11,12 @@ import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
-import com.sap.sse.common.CountryCode;
-import com.sap.sse.common.CountryCodeFactory;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DialogUtils;
+import com.sap.sse.gwt.client.dialog.DoubleBox;
 
 /**
  * The competitors produced by this dialog will have a <code>null</code>
@@ -108,32 +101,7 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
         this.searchTag = createTextBox(competitorToEdit.getSearchTag());
         this.displayColorTextBox = createTextBox(competitorToEdit.getColor() == null ? "" : competitorToEdit.getColor().getAsHtml()); 
         this.threeLetterIocCountryCode = createListBox(/* isMultipleSelect */ false);
-        CountryCodeFactory ccf = CountryCodeFactory.INSTANCE;
-        int i=0;
-        List<CountryCode> ccs = new ArrayList<CountryCode>();
-        Util.addAll(ccf.getAll(), ccs);
-        ccs.add(null); // representing no nationality (NONE / white flag)
-        Collections.sort(ccs, new Comparator<CountryCode>() {
-            @Override
-            public int compare(CountryCode o1, CountryCode o2) {
-                return Util.compareToWithNull(o1 == null ? null : o1.getThreeLetterIOCCode(), o2 == null ? null : o2.getThreeLetterIOCCode(), /* nullIsLess */ true);
-            }
-        });
-        for (CountryCode cc : ccs) {
-            if (cc == null) {
-                this.threeLetterIocCountryCode.addItem("", ""); // the NONE country code that uses the empty, white flag
-                if (competitorToEdit.getThreeLetterIocCountryCode() == null || competitorToEdit.getThreeLetterIocCountryCode().isEmpty()) {
-                    this.threeLetterIocCountryCode.setSelectedIndex(i);
-                }
-                i++;
-            } else if (cc.getThreeLetterIOCCode() != null) {
-                this.threeLetterIocCountryCode.addItem(cc.getThreeLetterIOCCode() + " " + cc.getName(), cc.getThreeLetterIOCCode());
-                if (cc.getThreeLetterIOCCode().equals(competitorToEdit.getThreeLetterIocCountryCode())) {
-                    this.threeLetterIocCountryCode.setSelectedIndex(i);
-                }
-                i++;
-            }
-        }
+        DialogUtils.makeCountrySelection(this.threeLetterIocCountryCode, competitorToEdit.getThreeLetterIocCountryCode());
         this.flagImageURL = new URLFieldWithFileUpload(stringMessages);
         this.flagImageURL.setURL(competitorToEdit.getFlagImageURL());
         this.imageUrlAndUploadComposite = new URLFieldWithFileUpload(stringMessages);

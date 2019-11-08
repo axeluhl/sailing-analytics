@@ -37,6 +37,7 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.ObscuringIterable;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
@@ -132,9 +133,10 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return new HashSet<Competitor>(eliminatedCompetitors.keySet());
     }
 
-    public Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint)
-            throws NoWindException {
-        Map<RaceColumn, List<Competitor>> preResult = getFullLeaderboard().getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(timePoint);
+    @Override
+    public Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
+        Map<RaceColumn, List<Competitor>> preResult = getFullLeaderboard().getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(timePoint, cache);
         for (final List<Competitor> e : preResult.values()) {
             e.removeAll(eliminatedCompetitors.keySet());
         }
@@ -151,14 +153,14 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return result;
     }
 
-    public Iterable<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint)
-            throws NoWindException {
-        return new ObscuringIterable<>(getFullLeaderboard().getCompetitorsFromBestToWorst(raceColumn, timePoint), eliminatedCompetitors.keySet());
+    public Iterable<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
+        return new ObscuringIterable<>(getFullLeaderboard().getCompetitorsFromBestToWorst(raceColumn, timePoint, cache), eliminatedCompetitors.keySet());
     }
 
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final List<Competitor> result = new ArrayList<>();
-        for (final Competitor c : getFullLeaderboard().getCompetitorsFromBestToWorst(timePoint)) {
+        for (final Competitor c : getFullLeaderboard().getCompetitorsFromBestToWorst(timePoint, cache)) {
             if (!isEliminated(c)) {
                 result.add(c);
             }
@@ -268,12 +270,12 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return getFullLeaderboard().getCarriedPoints(competitor);
     }
 
-    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) {
-        return getFullLeaderboard().getTrackedRank(competitor, race, timePoint);
+    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getFullLeaderboard().getTrackedRank(competitor, race, timePoint, cache);
     }
 
-    public Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
-        return getFullLeaderboard().getTotalPoints(competitor, raceColumn, timePoint);
+    public Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getFullLeaderboard().getTotalPoints(competitor, raceColumn, timePoint, cache);
     }
 
     public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn race, TimePoint timePoint) {

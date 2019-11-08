@@ -35,28 +35,29 @@ import com.sap.sailing.domain.common.orc.ORCCertificate;
  */
 
 public class ORCCertificatesRmsImporter extends AbstractORCCertificatesImporter {
-    private static final String NAME_OF_LAST_LEFT_ALIGNED_COLUMN_HEADER = "HH:MM:SS";
+    private static final String NAME_OF_LAST_LEFT_ALIGNED_COLUMN_HEADER = ORCCertificatesCollectionRMS.ISSUEDATE;
 
     public ORCCertificatesCollectionRMS read(Reader reader) throws IOException {
         final BufferedReader br = new BufferedReader(reader);
         final LinkedHashMap<String, Integer> columnNamesAndWidths = readColumnWidthsFromFirstLine(br.readLine());
         final Iterator<String> i = columnNamesAndWidths.keySet().iterator();
-        i.next(); // skip certificate ID column
-        final String sailnumberColumnName = i.next();
-        final Map<String, Map<String, String>> certificateValuesBySailnumber = new HashMap<>();
+        final String certificateIdColumnName = i.next();
+        final Map<String, Map<String, String>> certificateValuesByCertificateId = new HashMap<>();
         String line;
         while ((line = br.readLine()) != null) {
-            final Map<String, String> parsedLine = parseLine(line, columnNamesAndWidths);
-            certificateValuesBySailnumber.put(parsedLine.get(sailnumberColumnName), parsedLine);
+            if (!line.trim().isEmpty()) {
+                final Map<String, String> parsedLine = parseLine(line, columnNamesAndWidths);
+                certificateValuesByCertificateId.put(parsedLine.get(certificateIdColumnName), parsedLine);
+            }
         }
-        return new ORCCertificatesCollectionRMS(certificateValuesBySailnumber);
+        return new ORCCertificatesCollectionRMS(certificateValuesByCertificateId);
     }
     
     public ORCCertificatesCollectionRMS read(InputStream in) throws IOException {
         return read(getReaderForInputStream(in));
     }
 
-    private Map<String, String> parseLine(final String line, Map<String, Integer> columnNamesAndWidths) {
+    private Map<String, String> parseLine(final String line, LinkedHashMap<String, Integer> columnNamesAndWidths) {
         assert columnNamesAndWidths != null;
         final Map<String, String> result = new LinkedHashMap<>();
         int start=0;

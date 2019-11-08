@@ -36,7 +36,7 @@ public class BoatClassVectorGraphicsResolver {
         BoatClassVectorGraphics _49er = new _49erVectorGraphics(BoatClassMasterdata._49ER, BoatClassMasterdata._49ERFX,
                 BoatClassMasterdata._29ER, BoatClassMasterdata._18Footer);
         BoatClassVectorGraphics extreme40 = new Extreme40VectorGraphics(BoatClassMasterdata.EXTREME_40,
-                BoatClassMasterdata.D_35, BoatClassMasterdata.SKUD_18, BoatClassMasterdata.WETA);
+                BoatClassMasterdata.D_35, BoatClassMasterdata.SKUD_18, BoatClassMasterdata.MOCRA, BoatClassMasterdata.WETA);
         BoatClassVectorGraphics gc32 = new GC32VectorGraphics(BoatClassMasterdata.GC_32, BoatClassMasterdata.M32);
         BoatClassVectorGraphics smallMultihull = new SmallMultihullVectorGraphics(BoatClassMasterdata.NACRA_15, BoatClassMasterdata.NACRA_17,
                 BoatClassMasterdata.NACRA_17_FOIL, BoatClassMasterdata.F_16, BoatClassMasterdata.F_18,

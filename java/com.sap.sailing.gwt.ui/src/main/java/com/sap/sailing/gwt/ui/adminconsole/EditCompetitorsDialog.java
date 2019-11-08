@@ -10,11 +10,6 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.ui.client.UserService;
 
-/**
- * 
- * @author Daniel Lisunkin (i505543)
- *
- */
 public class EditCompetitorsDialog extends DataEntryDialog<List<CompetitorWithBoatDTO>> {
     private final SailingServiceAsync sailingService;
     private final UserService userService;
@@ -51,7 +46,6 @@ public class EditCompetitorsDialog extends DataEntryDialog<List<CompetitorWithBo
     @Override
     protected Widget getAdditionalWidget() {
         CompetitorPanel competitorPanel = new CompetitorPanel(sailingService, userService, leaderboardName, stringMessages, errorReporter);
-
         return competitorPanel; 
     }
 }

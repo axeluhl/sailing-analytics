@@ -1,9 +1,11 @@
 package com.sap.sailing.domain.common.orc;
 
+import java.io.Serializable;
+
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 
-public interface ORCPerformanceCurveLeg {
+public interface ORCPerformanceCurveLeg extends Serializable {
 
     Distance getLength();
     

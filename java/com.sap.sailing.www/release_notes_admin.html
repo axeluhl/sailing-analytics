@@ -24,12 +24,32 @@
                     <h2 class="articleSubheadline">October 2019</h2>
                     <ul class="bulletList">
                         <li>
-                            The ORC Performance Curve ranking metric is now implemented. Two flavors exist, one
+                            The ORC Performance Curve (PCS) ranking metric is now implemented. Two flavors exist, one
                             as valid up until 2015 with ranking by implied wind and corrected times calculated
                             using a scratch boat's performance curve; and the current default one valid starting
                             from 2015, using each competitor's own performance curve to calculate the allowance
                             based on the greatest implied wind achieved in the race and then computing the
-                            corrected time as the delta between time elapsed and individual allowance.
+                            corrected time as the delta between time elapsed and individual allowance.<p>
+                            In the Regattas/Regattas tab the boat certificates can be managed with a new action
+                            button. Certificates can be uploaded, and certificates can be referenced by URL,
+                            e.g., pointing to the ORC web site's certificate database. Then, the certificates
+                            can be assigned to the boats one by one. Certifiate assignment can be overruled on
+                            a per-race basis in the Leaderboards/Leaderboards tab.<p>
+                            Furthermore, course definitions can be fixed for the ORC PCS rules; legs can be
+                            defined to be "constructed course" or any of the pre-defined types (windward/leeward,
+                            coastal long distance, non-spinnaker, and circular random). Tracking data can be used
+                            to pre-fill leg distance and true wind angle. Desired total course distances can be spread
+                            proportionally across the legs based on their estimated length.
+                        </li>
+                        <li>
+                        	Loading a race using the TracTrac connector used to determine the race's boat class
+                        	based on the boat class of the majority of the race's competitors. This approach leads
+                        	to trouble specifically for non-one-design regattas where different boats compete against
+                        	each other, and the regatta is modeled with a "boat class" representing the handicap
+                        	rule set, such as IRC, ORC, or similar. Now, the race boat class is inferred from the
+                        	regatta boat class in which the race is created. Only in case a default regatta needs
+                        	to be created, the old majority rule applies to determining the regatta's (and
+                        	consequently the race's) boat class.
                         </li>
                     </ul>
                     <h2 class="articleSubheadline">September 2019</h2>
