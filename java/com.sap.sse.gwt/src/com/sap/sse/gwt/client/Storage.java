@@ -8,7 +8,23 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
- * Represents the browser's localStorage and sessionStorage objects and provides eventing support.
+ * Represents the browser's localStorage and sessionStorage objects and provides eventing support. Other than
+ * {@link com.google.gwt.storage.client.Storage}, here the {@link #registerAsStorageEventHandler() event registration}
+ * works across browser tabs and windows, as it should, whereas for the GWT-provided
+ * {@link com.google.gwt.storage.client.Storage} this only seems to work within a single browser tab for all browsers
+ * classified as "safari" which includes all Chrome versoins, and therefore is useless for our purposes and defeats the
+ * specification of this web browser feature.
+ * <p>
+ * 
+ * There is a theoretical possibility to override GWT's replacement rules leading to this strange behavior. See
+ * {@code Storage.gwt.xml}. It replaces the correct native storage eventing implementation by a proprietary one
+ * which then only works inside the same tab, and the replacement rules include, in addition to ancient browser types,
+ * all "safari" browsers, causing the problem. Such replacement rules may be overridable in our own .gwt.xml module
+ * specifications, but in a quick test we were unable to modify the GWT Storage's behavior to suit our needs.<p>
+ * 
+ * This class is a "drop-in replacement" for {@link com.google.gwt.storage.client.Storage} together with
+ * {@link StorageEvent} "drop-in replacing" {@link com.google.gwt.storage.client.StorageEvent}, and then have compatible
+ * methods.
  * 
  * @author Axel Uhl (D043530)
  *

@@ -67,6 +67,7 @@ import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.ui.client.UserManagementService;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
+import com.sap.sse.security.ui.shared.SecurityServiceSharingDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public class UserManagementServiceImpl extends RemoteServiceServlet implements UserManagementService {
@@ -1151,5 +1152,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             return SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.ROLE_ASSOCIATION
                     .getStringPermissionForTypeRelativeIdentifier(DefaultActions.READ, typeRelativeObjectIdentifier));
         });
+    }
+
+    @Override
+    public SecurityServiceSharingDTO getSharingConfiguration() {
+        return new SecurityServiceSharingDTO(getSecurityService().getSharedAcrossSubdomainsOf(),
+                getSecurityService().getBaseUrlForCrossDomainStorage());
     }
 }

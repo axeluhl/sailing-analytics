@@ -35,7 +35,7 @@ public class UserSettingsPresenter<C extends ClientFactoryWithDispatch & ErrorAn
 
     @Override
     public void loadData() {
-        if(clientFactory.getAuthenticationManager().getAuthenticationContext().isLoggedIn()) {
+        if (clientFactory.getAuthenticationManager().getAuthenticationContext().isLoggedIn()) {
             clientFactory.getUserService().getAllPreferences(new AsyncCallback<Map<String,String>>() {
                 @Override
                 public void onSuccess(Map<String, String> result) {
@@ -63,7 +63,7 @@ public class UserSettingsPresenter<C extends ClientFactoryWithDispatch & ErrorAn
         allKeys.addAll(userSettings.keySet());
         allKeys.addAll(localSettings.keySet());
         currentlyShownEntries.clear();
-        for(String key : allKeys) {
+        for (String key : allKeys) {
             currentlyShownEntries.add(new UserSettingsEntry(key, userSettings.get(key), localSettings.get(key)));
         }
         this.updateData();
@@ -74,9 +74,9 @@ public class UserSettingsPresenter<C extends ClientFactoryWithDispatch & ErrorAn
         if (Storage.isLocalStorageSupported()) {
             localSettings = new HashMap<String, String>();
             Storage localStorage = Storage.getLocalStorageIfSupported();
-            for(int i = 0; i< localStorage.getLength(); i++) {
+            for (int i = 0; i< localStorage.getLength(); i++) {
                 String key = localStorage.key(i);
-                if(key.startsWith(SailingSettingsConstants.USER_SETTINGS_UI)) {
+                if (key.startsWith(SailingSettingsConstants.USER_SETTINGS_UI)) {
                     String value = localStorage.getItem(key);
                     localSettings.put(key, value);
                 }

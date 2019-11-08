@@ -6,6 +6,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.xdstorage.impl.CrossDomainStorageFallingBackToLocalAfterTimeout;
+import com.sap.sse.gwt.client.xdstorage.impl.LocalStorage;
 import com.sap.sse.gwt.client.xdstorage.impl.StorageMessagingEntryPoint;
 
 /**
@@ -37,10 +38,20 @@ public interface CrossDomainStorage {
     }
     
     /**
-     * Like {@link #create(Document, String)}, inserting the {@code iframe} into the {@link Document#get() current document}.
+     * If {@code baseUrlForStorageMessagingEntryPoint} is {@code null}, a {@link LocalStorage} will be returned.
+     * Otherwise, the method behaves like {@link #create(Document, String)}, inserts the {@code iframe} into the
+     * {@link Document#get() current document} and returns a {@link CrossDomainStorageFallingBackToLocalAfterTimeout}
+     * which only resorts to a {@link LocalStorage} again in case the iframe doesn't load within an appropriate
+     * timeout starting with the first request.
      */
     static CrossDomainStorage create(String baseUrlForStorageMessagingEntryPoint) {
-        return create(Document.get(), baseUrlForStorageMessagingEntryPoint);
+        final CrossDomainStorage result;
+        if (baseUrlForStorageMessagingEntryPoint == null) {
+            result = new LocalStorage();
+        } else {
+            result = create(Document.get(), baseUrlForStorageMessagingEntryPoint);
+        }
+        return result;
     }
     
     HandlerRegistration addStorageEventHandler(final CrossDomainStorageEvent.Handler handler);

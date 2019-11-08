@@ -188,6 +188,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     private String sharedAcrossSubdomainsOf;
     
+    private String baseUrlForCrossDomainStorage;
+    
     static {
         shiroConfiguration = new Ini();
         shiroConfiguration.loadFromPath("classpath:shiro.ini");
@@ -219,7 +221,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      */
     public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore,
             AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider) {
-        this(mailServiceTracker, userStore, accessControlStore, hasPermissionsProvider, /* sharedAcrossSubdomainsOf */ null);
+        this(mailServiceTracker, userStore, accessControlStore, hasPermissionsProvider,
+                /* sharedAcrossSubdomainsOf */ null, /* baseUrlForCrossDomainStorage */ null);
     }
     
     /**
@@ -229,10 +232,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * be shared as well.
      */
     public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore,
-            AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider, String sharedAcrossSubdomainsOf) {
+            AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider,
+            String sharedAcrossSubdomainsOf, String baseUrlForCrossDomainStorage) {
         logger.info("Initializing Security Service with user store " + userStore);
         operationsSentToMasterForReplication = new HashSet<>();
         this.sharedAcrossSubdomainsOf = sharedAcrossSubdomainsOf;
+        this.baseUrlForCrossDomainStorage = baseUrlForCrossDomainStorage;
         this.operationExecutionListeners = new ConcurrentHashMap<>();
         this.store = userStore;
         this.accessControlStore = accessControlStore;
@@ -2086,6 +2091,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         logger.info("Reading isSharedAcrossSubdomains...");
         sharedAcrossSubdomainsOf = (String) is.readObject();
+        baseUrlForCrossDomainStorage = (String) is.readObject();
         logger.info("...as "+sharedAcrossSubdomainsOf);
         logger.info("Done filling SecurityService");
     }
@@ -2096,6 +2102,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         objectOutputStream.writeObject(store);
         objectOutputStream.writeObject(accessControlStore);
         objectOutputStream.writeObject(sharedAcrossSubdomainsOf);
+        objectOutputStream.writeObject(baseUrlForCrossDomainStorage);
     }
 
     @Override
@@ -2458,5 +2465,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public String getSharedAcrossSubdomainsOf() {
         return sharedAcrossSubdomainsOf;
+    }
+
+    @Override
+    public String getBaseUrlForCrossDomainStorage() {
+        return baseUrlForCrossDomainStorage;
     }
 }

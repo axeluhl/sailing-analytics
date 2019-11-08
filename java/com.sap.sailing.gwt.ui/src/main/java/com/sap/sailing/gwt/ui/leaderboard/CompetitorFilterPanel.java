@@ -321,11 +321,10 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
 
     private void storeCompetitorsFilterSets(CompetitorsFilterSets newCompetitorsFilterSets) {
         Storage localStorage = Storage.getLocalStorageIfSupported();
-        if(localStorage != null) {
+        if (localStorage != null) {
             // delete old value
             localStorage.removeItem(LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY);
-            
-            // store the competiors filter set 
+            // store the competitors filter set 
             CompetitorsFilterSetsJsonDeSerializer serializer = new CompetitorsFilterSetsJsonDeSerializer();
             JSONObject jsonObject = serializer.serialize(newCompetitorsFilterSets);
             localStorage.setItem(LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY, jsonObject.toString());

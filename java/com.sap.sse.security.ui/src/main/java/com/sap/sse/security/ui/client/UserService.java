@@ -4,11 +4,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -24,6 +24,8 @@ import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.StorageEvent;
 import com.sap.sse.gwt.client.StorageEvent.Handler;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
+import com.sap.sse.gwt.client.xdstorage.DelegatingCrossDomainStorageFuture;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -39,6 +41,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
+import com.sap.sse.security.ui.shared.SecurityServiceSharingDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 /**
@@ -69,7 +72,6 @@ public class UserService {
      */
     private static final String LOCAL_STORAGE_UPDATE_KEY = "current-user-has-changed";
     
-    
     /**
      * Storage key to remember when a user was authenticated or dismissed the login hint the last time.
      */
@@ -97,15 +99,51 @@ public class UserService {
     private ServerInfoDTO serverInfo;
     
     private final Set<HasPermissions> allKnownHasPermissions;
+    
+    /**
+     * The storage configured based on what {@link UserManagementServiceAsync#getSharingConfiguration(AsyncCallback)} has returned.
+     */
+    private final DelegatingCrossDomainStorageFuture crossDomainStorage;
 
     public UserService(UserManagementServiceAsync userManagementService) {
-        this.id = ""+(System.currentTimeMillis() * Random.nextInt()); // something pretty random
+        this.id = UUID.randomUUID().toString();
         this.userManagementService = userManagementService;
         handlers = new HashSet<>();
         allKnownHasPermissions = new HashSet<>();
+        crossDomainStorage = new DelegatingCrossDomainStorageFuture();
+        initializeCrossDomainStorage();
         Util.addAll(SecuredSecurityTypes.getAllInstances(), allKnownHasPermissions);
         registerStorageEventHandler();
         updateUser(/* notifyOtherInstances */ false);
+    }
+
+    private void initializeCrossDomainStorage() {
+        assert userManagementService != null;
+        assert crossDomainStorage != null;
+        userManagementService.getSharingConfiguration(new AsyncCallback<SecurityServiceSharingDTO>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(caught.getMessage(), NotificationType.ERROR);
+            }
+
+            @Override
+            public void onSuccess(SecurityServiceSharingDTO result) {
+                crossDomainStorage.setStorageToUse(CrossDomainStorage.create(result.getBaseUrlForCrossDomainStorage()));
+            }
+        });
+    }
+    
+    /**
+     * Use this instead of {@link Storage#getLocalStorageIfSupported()}. The resulting {@link CrossDomainStorage} object
+     * is configured by the server settings for sharing or isolation of the security service. Note that the methods all
+     * work asynchronously, talking to a callback that the caller needs to pass. It can also happen that first requests
+     * initially have to wait a few milliseconds because the configuration needs to be loaded from the back-end first
+     * (which happens immediately when this {@link UserService} is constructed), and if a shared storage is configured,
+     * an {@code iframe} needs to be loaded, and request processing is delayed until the loading of that {@code iframe}
+     * has completed.
+     */
+    public CrossDomainStorage getStorage() {
+        return crossDomainStorage;
     }
 
     private void registerStorageEventHandler() {
@@ -295,18 +333,18 @@ public class UserService {
      */
     public void getPreference(String key,
             final AsyncCallback<String> callback) {
-        String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
+        String username = getCurrentUser().getName();
         getUserManagementService().getPreference(username, key, callback);
     }
     
     public void getPreferences(List<String> keys,
             final AsyncCallback<Map<String, String>> callback) {
-        String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
+        String username = getCurrentUser().getName();
         getUserManagementService().getPreferences(username, keys, callback);
     }
     
     public void getAllPreferences(final AsyncCallback<Map<String, String>> callback) {
-        String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
+        String username = getCurrentUser().getName();
         getUserManagementService().getAllPreferences(username, callback);
     }
     
@@ -319,13 +357,13 @@ public class UserService {
      *            Serialized settings as {@link String} containing the preferences
      */
     public void setPreference(String key, String serializedSettings, final AsyncCallback<Void> callback) {
-        String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
+        String username = getCurrentUser().getName();
         getUserManagementService().setPreference(username, key, serializedSettings, callback);
     }
     
     public void setPreferences(Map<String, String> keyValuePairs,
             final AsyncCallback<Void> callback) {
-        String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
+        String username = getCurrentUser().getName();
         getUserManagementService().setPreferences(username, keyValuePairs, callback);
     }
     
@@ -338,16 +376,15 @@ public class UserService {
      * @see AbstractGenericSerializableSettings
      */
     public void unsetPreference(String key) {
-        String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
+        String username = getCurrentUser().getName();
         getUserManagementService().unsetPreference(username, key, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-                // TODO What to do in case of failure?
+                Notification.notify(caught.getMessage(), NotificationType.ERROR);
             }
             
             @Override
             public void onSuccess(Void result) {
-                // TODO Do anything in case of success?
             }
         });
     }

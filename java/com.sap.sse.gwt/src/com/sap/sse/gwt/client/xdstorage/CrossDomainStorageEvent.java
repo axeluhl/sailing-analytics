@@ -1,5 +1,7 @@
 package com.sap.sse.gwt.client.xdstorage;
 
+import com.sap.sse.gwt.client.Storage;
+
 /**
  * A change event sent to a {@link Handler} object that has been {@link Storage#addStorageEventHandler(Handler)
  * registered} with the browser's {@link Storage}. It will receive events from both, the session storage and the local
