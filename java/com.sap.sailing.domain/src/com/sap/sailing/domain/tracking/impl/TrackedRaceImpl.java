@@ -187,6 +187,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public static final Duration EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS = Duration.ONE_HOUR;
 
     private TrackedRaceStatus status;
+    
+    private String trackingConnector;
 
     private final Object statusNotifier;
 
@@ -432,10 +434,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final Iterable<Sideline> sidelines,
             final WindStore windStore, long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation,
-            boolean useInternalMarkPassingAlgorithm, RaceLogAndTrackedRaceResolver raceLogResolver) {
+            boolean useInternalMarkPassingAlgorithm, RaceLogAndTrackedRaceResolver raceLogResolver, String trackedBy) {
         this(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 millisecondsOverWhichToAverageSpeed, delayForWindEstimationCacheInvalidation,
-                useInternalMarkPassingAlgorithm, OneDesignRankingMetric::new, raceLogResolver);
+                useInternalMarkPassingAlgorithm, OneDesignRankingMetric::new, raceLogResolver, trackedBy);
     }
     
     /**
@@ -449,9 +451,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             final WindStore windStore, long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation,
             boolean useInternalMarkPassingAlgorithm, RankingMetricConstructor rankingMetricConstructor,
-            RaceLogAndTrackedRaceResolver raceLogResolver) {
+            RaceLogAndTrackedRaceResolver raceLogResolver, String trackingConnector) {
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
         this.raceLogResolver = raceLogResolver;
+        this.trackingConnector = trackingConnector;
         raceStates = new WeakHashMap<>();
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
         locksForMarkPassings = new ConcurrentHashMap<IdentityWrapper<Iterable<MarkPassing>>, NamedReentrantReadWriteLock>();
@@ -3972,5 +3975,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             result = null;
         }
         return result;
+    }
+    
+    @Override
+    public String getTrackingConnector() {
+        return trackingConnector;
     }
 }

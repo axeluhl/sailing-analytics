@@ -119,10 +119,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForCacheInvalidationOfWindEstimation,
             boolean useInternalMarkPassingAlgorithm, RankingMetricConstructor rankingMetricConstructor,
-            RaceLogAndTrackedRaceResolver raceLogResolver) {
+            RaceLogAndTrackedRaceResolver raceLogResolver, String trackingConnector) {
         super(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 millisecondsOverWhichToAverageSpeed, delayForCacheInvalidationOfWindEstimation,
-                useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver);
+                useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver, trackingConnector);
         raceStateBasedStartTimeChangedListener = createRaceStateStartTimeChangeListener();
         this.competitorResultsFromRaceLog = new HashMap<>();
         this.logListener = new DynamicTrackedRaceLogListener(this);
@@ -210,10 +210,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, boolean useInternalMarkPassingAlgorithm,
-            RankingMetricConstructor rankingMetricConstructor, RaceLogAndTrackedRaceResolver raceLogResolver) {
+            RankingMetricConstructor rankingMetricConstructor, RaceLogAndTrackedRaceResolver raceLogResolver, String trackingConnector) {
         this(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis,
                 millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                millisecondsOverWhichToAverageWind / 2, useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver);
+                millisecondsOverWhichToAverageWind / 2, useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver, trackingConnector);
     }
 
     @Override
