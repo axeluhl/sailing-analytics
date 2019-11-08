@@ -185,6 +185,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private static Ini shiroConfiguration;
 
     private final HasPermissionsProvider hasPermissionsProvider;
+
+    private String sharedAcrossSubdomainsOf;
+    
     static {
         shiroConfiguration = new Ini();
         shiroConfiguration.loadFromPath("classpath:shiro.ini");
@@ -203,18 +206,33 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     /**
+     * Creates a security service that is not shared across subdomains, therefore leading to the use of the full
+     * domain through which its services are requested for {@code Document.domain} and hence for the browser local
+     * storage, session storage and the Shiro {@code JSESSIONID} cookie's domain.
+     * 
      * @param setAsActivatorSecurityService
      *            when <code>true</code>, the {@link Activator#setSecurityService(com.sap.sse.security.SecurityService)}
      *            will be called with this new instance as argument so that the cache manager can already be accessed
      *            when the security manager is created. {@link ReplicatingCacheManager#getCache(String)} fetches the
      *            activator's security service and passes it to the cache entries created. They need it, in turn, for
      *            replication.
-     * 
      */
     public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore,
             AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider) {
+        this(mailServiceTracker, userStore, accessControlStore, hasPermissionsProvider, /* sharedAcrossSubdomainsOf */ null);
+    }
+    
+    /**
+     * Like {@link #SecurityServiceImpl(ServiceTracker, UserStore, AccessControlStore, HasPermissionsProvider)}, only that additionally
+     * a parent domain can be specified in {@code isSharedAcrossSubdomains}, such as, e.g., {@code "sapsailing.com"}, across which
+     * the browser local and session store shall be shared and for which sessions identified by the {@code JSESSIONID} cookie shall
+     * be shared as well.
+     */
+    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore,
+            AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider, String sharedAcrossSubdomainsOf) {
         logger.info("Initializing Security Service with user store " + userStore);
         operationsSentToMasterForReplication = new HashSet<>();
+        this.sharedAcrossSubdomainsOf = sharedAcrossSubdomainsOf;
         this.operationExecutionListeners = new ConcurrentHashMap<>();
         this.store = userStore;
         this.accessControlStore = accessControlStore;
@@ -2066,6 +2084,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         } finally {
             Thread.currentThread().setContextClassLoader(oldCCL);
         }
+        logger.info("Reading isSharedAcrossSubdomains...");
+        sharedAcrossSubdomainsOf = (String) is.readObject();
+        logger.info("...as "+sharedAcrossSubdomainsOf);
         logger.info("Done filling SecurityService");
     }
 
@@ -2074,6 +2095,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         objectOutputStream.writeObject(cacheManager);
         objectOutputStream.writeObject(store);
         objectOutputStream.writeObject(accessControlStore);
+        objectOutputStream.writeObject(sharedAcrossSubdomainsOf);
     }
 
     @Override
@@ -2431,5 +2453,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public boolean isInitialOrMigration() {
         return isInitialOrMigration;
+    }
+
+    @Override
+    public String getSharedAcrossSubdomainsOf() {
+        return sharedAcrossSubdomainsOf;
     }
 }

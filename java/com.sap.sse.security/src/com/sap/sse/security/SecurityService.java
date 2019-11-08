@@ -622,4 +622,15 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     void checkCurrentUserServerPermission(ServerActions action);
 
+    /**
+     * In case this security service is shared across multiple replica sets that are published under different
+     * subdomains, session cookies and the local store shall be arranged such that sessions and content are identified
+     * regardless the subdomain used. For example, if there are two events, A, and B, published through
+     * {@code a.sapsailing.com} and {@code b.sapsailing.com}, respectively, by default the full subdomain name will be
+     * used for the {@code JSESSIONID} cookie as well as for the identification of content in the browser's local store.
+     * 
+     * @return
+     */
+    String getSharedAcrossSubdomainsOf();
+
 }
