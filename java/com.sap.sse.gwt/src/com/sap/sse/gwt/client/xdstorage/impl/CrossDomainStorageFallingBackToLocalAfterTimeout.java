@@ -16,7 +16,7 @@ public class CrossDomainStorageFallingBackToLocalAfterTimeout extends Delegating
      * storage in the target domain announces its readiness. If this timeout expires, the {@link #fallbackLocalStorage} is
      * used instead.
      */
-    private static final int TIMEOUT_FOR_IFRAME_TO_RESPOND_IN_MILLIS = 5000;
+    private static final int TIMEOUT_FOR_IFRAME_TO_RESPOND_IN_MILLIS = 10000;
     
     public CrossDomainStorageFallingBackToLocalAfterTimeout(Document documentInWhichToInsertMessagingIframe,
             String baseUrlForStorageMessagingEntryPoint) {

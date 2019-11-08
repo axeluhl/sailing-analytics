@@ -97,10 +97,12 @@ public class DelegatingCrossDomainStorageFuture implements CrossDomainStorage {
         if (storageToUse == null) {
             throw new NullPointerException("Must set a valid, non-null storage");
         }
-        if (this.storageToUse != null) {
-            throw new IllegalStateException("The storage can only be set once");
-        }
+        final CrossDomainStorage oldStorageToUse = this.storageToUse;
         this.storageToUse = storageToUse;
+        if (oldStorageToUse != null) {
+            GWT.log("Switching storage to use from type "+oldStorageToUse.getClass().getName()+
+                    " to "+storageToUse.getClass().getName());
+        }
         if (!queuedWhileWaitingForStorage.isEmpty()) {
             GWT.log("now executing "+queuedWhileWaitingForStorage.size()+" queued requests for cross-domain storage");
             for (final Consumer<CrossDomainStorage> queuedRequest : queuedWhileWaitingForStorage) {

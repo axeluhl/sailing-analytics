@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.shared.settings.SailingSettingsConstants;
 import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
@@ -46,7 +47,8 @@ public class UserSettingsPresenter<C extends ClientFactoryWithDispatch & ErrorAn
                 
                 @Override
                 public void onFailure(Throwable caught) {
-                    clientFactory.createErrorView("Error while loading user settings!", caught);
+                    final StringMessages stringMessages = GWT.create(StringMessages.class);
+                    clientFactory.createErrorView(stringMessages.errorWhileLoadingUserSettings(caught.getMessage()), caught);
                 }
             });
         } else {
@@ -73,7 +75,6 @@ public class UserSettingsPresenter<C extends ClientFactoryWithDispatch & ErrorAn
     }
     
     private void loadSettingsFromLocalStorage(CrossDomainStorage storage, Consumer<Map<String, String>> resultCallback) {
-        GWT.debugger(); // TODO bug5048: debug this to see if it still works
         final Map<String, String> localSettings = new HashMap<String, String>();
         storage.getLength(length->{
             int[] numberOfRequestsSent = new int[1];
