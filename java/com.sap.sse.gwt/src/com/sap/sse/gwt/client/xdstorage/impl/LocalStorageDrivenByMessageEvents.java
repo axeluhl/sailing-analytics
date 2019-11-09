@@ -40,8 +40,11 @@ public class LocalStorageDrivenByMessageEvents implements MessageListener<JavaSc
      * Therefore, == comparisons and a simple list must do.
      */
     private final ArrayList<Pair<Object, String>> windowsToForwardStorageEventsToAndTheirTargetOrigins;
+
+    private final String acceptableCrossDomainStorageRequestOriginRegexp;
     
-    public LocalStorageDrivenByMessageEvents() {
+    public LocalStorageDrivenByMessageEvents(String acceptableCrossDomainStorageRequestOriginRegexp) {
+        this.acceptableCrossDomainStorageRequestOriginRegexp = acceptableCrossDomainStorageRequestOriginRegexp;
         localStorage = Storage.getLocalStorageIfSupported();
         windowsToForwardStorageEventsToAndTheirTargetOrigins = new ArrayList<>();
         Storage.addStorageEventHandler(storageEvent->sendStorageEvent(storageEvent));
@@ -72,60 +75,69 @@ public class LocalStorageDrivenByMessageEvents implements MessageListener<JavaSc
 
     @Override
     public void onMessageReceived(MessageEvent<JavaScriptObject> messageEvent) {
-        // TODO filter by source origin; don't allow arbitrary domains to tamper with this domain's local storage...
-        if (messageEvent.getData() instanceof JavaScriptObject) {
-            final Request request = messageEvent.getData().cast();
-            final String operation = request.getOperation();
-            final StorageOperation op = StorageOperation.valueOf(operation);
-            final JSONValue result;
-            switch (op) {
-            case CLEAR:
-                localStorage.clear();
-                result = JSONNull.getInstance();
-                break;
-            case GET_ITEM:
-                final String itemValue = localStorage.getItem(request.getKey());
-                result = jsonStringOrJsonNull(itemValue);
-                break;
-            case GET_LENGTH:
-                result = new JSONNumber(localStorage.getLength());
-                break;
-            case KEY:
-                final String keyValue = localStorage.key(request.getIndex());
-                result = jsonStringOrJsonNull(keyValue);
-                break;
-            case REMOVE_ITEM:
-                localStorage.removeItem(request.getKey());
-                result = JSONNull.getInstance();
-                break;
-            case SET_ITEM:
-                localStorage.setItem(request.getKey(), request.getValue());
-                result = JSONNull.getInstance();
-                break;
-            case REGISTER_FOR_STORAGE_EVENTS:
-                GWT.log("received storage event handler registration from "+messageEvent.getOrigin());
-                windowsToForwardStorageEventsToAndTheirTargetOrigins.add(new Pair<>(messageEvent.getSource(), messageEvent.getOrigin()));
-                result = JSONNull.getInstance();
-                break;
-            case UNREGISTER_FOR_STORAGE_EVENTS:
-                GWT.log("received storage event handler unregistration from "+messageEvent.getOrigin());
-                // make sure not to invoke hashCode() or equals() on the underlying Window because it's a different origin, therefore disallowed
-                for (final Iterator<Pair<Object, String>> i=windowsToForwardStorageEventsToAndTheirTargetOrigins.iterator(); i.hasNext(); ) {
-                    final Pair<Object, String> next = i.next();
-                    if (next.getA() == messageEvent.getSource()) {
-                        i.remove();
+        if (isRequestFromOriginAllowed(messageEvent.getOrigin())) {
+            if (messageEvent.getData() instanceof JavaScriptObject) {
+                final Request request = messageEvent.getData().cast();
+                final String operation = request.getOperation();
+                final StorageOperation op = StorageOperation.valueOf(operation);
+                final JSONValue result;
+                switch (op) {
+                case CLEAR:
+                    localStorage.clear();
+                    result = JSONNull.getInstance();
+                    break;
+                case GET_ITEM:
+                    final String itemValue = localStorage.getItem(request.getKey());
+                    result = jsonStringOrJsonNull(itemValue);
+                    break;
+                case GET_LENGTH:
+                    result = new JSONNumber(localStorage.getLength());
+                    break;
+                case KEY:
+                    final String keyValue = localStorage.key(request.getIndex());
+                    result = jsonStringOrJsonNull(keyValue);
+                    break;
+                case REMOVE_ITEM:
+                    localStorage.removeItem(request.getKey());
+                    result = JSONNull.getInstance();
+                    break;
+                case SET_ITEM:
+                    localStorage.setItem(request.getKey(), request.getValue());
+                    result = JSONNull.getInstance();
+                    break;
+                case REGISTER_FOR_STORAGE_EVENTS:
+                    GWT.log("received storage event handler registration from "+messageEvent.getOrigin());
+                    windowsToForwardStorageEventsToAndTheirTargetOrigins.add(new Pair<>(messageEvent.getSource(), messageEvent.getOrigin()));
+                    result = JSONNull.getInstance();
+                    break;
+                case UNREGISTER_FOR_STORAGE_EVENTS:
+                    GWT.log("received storage event handler unregistration from "+messageEvent.getOrigin());
+                    // make sure not to invoke hashCode() or equals() on the underlying Window because it's a different origin, therefore disallowed
+                    for (final Iterator<Pair<Object, String>> i=windowsToForwardStorageEventsToAndTheirTargetOrigins.iterator(); i.hasNext(); ) {
+                        final Pair<Object, String> next = i.next();
+                        if (next.getA() == messageEvent.getSource()) {
+                            i.remove();
+                        }
                     }
+                    result = JSONNull.getInstance();
+                    break;
+                default:
+                    throw new RuntimeException("Unknown operation "+op);
                 }
-                result = JSONNull.getInstance();
-                break;
-            default:
-                throw new RuntimeException("Unknown operation "+op);
+                final JSONObject response = new JSONObject();
+                response.put(Response.RESULT, result);
+                response.put(Request.ID, new JSONString(request.getId()));
+                messageEvent.getSource().postMessage(response.getJavaScriptObject(), messageEvent.getOrigin());
             }
-            final JSONObject response = new JSONObject();
-            response.put(Response.RESULT, result);
-            response.put(Request.ID, new JSONString(request.getId()));
-            messageEvent.getSource().postMessage(response.getJavaScriptObject(), messageEvent.getOrigin());
+        } else {
+            GWT.log("LocalStorageDrivenByMessageEvents dropped message from inacceptable origin "+messageEvent.getOrigin()+
+                    " with data "+messageEvent.getData().toString());
         }
+    }
+
+    private boolean isRequestFromOriginAllowed(String origin) {
+        return acceptableCrossDomainStorageRequestOriginRegexp == null ? origin.endsWith(".sapsailing.com")
+                : origin.matches(acceptableCrossDomainStorageRequestOriginRegexp);
     }
 
     protected JSONValue jsonStringOrJsonNull(final String s) {

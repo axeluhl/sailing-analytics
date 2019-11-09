@@ -18,5 +18,13 @@
 	   		<param-value>false</param-value>
 	 	</init-param>
 	</servlet>
-    
+        <servlet>
+          <display-name>Cross-Domain Storage Configuration Service</display-name>
+          <servlet-name>CrossDomainStorageConfigurationService</servlet-name>
+          <servlet-class>com.sap.sse.gwt.server.CrossDomainStorageConfigurationServiceImpl</servlet-class>
+        </servlet>
+        <servlet-mapping>
+          <servlet-name>CrossDomainStorageConfigurationService</servlet-name>
+          <url-pattern>/service/crossdomainstorageconfiguration</url-pattern>
+        </servlet-mapping>
 </web-app>

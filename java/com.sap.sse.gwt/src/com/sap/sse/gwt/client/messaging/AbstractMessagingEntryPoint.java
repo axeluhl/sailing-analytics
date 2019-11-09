@@ -1,5 +1,7 @@
 package com.sap.sse.gwt.client.messaging;
 
+import java.util.function.Consumer;
+
 import com.google.gwt.core.client.EntryPoint;
 
 /**
@@ -23,9 +25,11 @@ public abstract class AbstractMessagingEntryPoint<T> implements EntryPoint {
     @Override
     public void onModuleLoad() {
         messagePort = MessagePort.getGlobalWindow();
-        messagePort.addMessageListener(getMessageListener());
-        messagePort.getParentWindow().postMessage(READY_TOKEN, "*");
+        getMessageListener(messageListener->{
+            messagePort.addMessageListener(messageListener);
+            messagePort.getParentWindow().postMessage(READY_TOKEN, "*");
+        });
     }
-
-    abstract protected MessageListener<T> getMessageListener();
+    
+    abstract protected void getMessageListener(Consumer<MessageListener<T>> resultCallback);
 }
