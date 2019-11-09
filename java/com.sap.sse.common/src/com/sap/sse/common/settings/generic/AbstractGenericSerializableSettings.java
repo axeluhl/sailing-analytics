@@ -127,7 +127,7 @@ public abstract class AbstractGenericSerializableSettings extends AbstractSettin
     }
     
     protected final void addChildSettingsInternal() {
-        if(childSettings == null) {
+        if (childSettings == null) {
             childSettings = new HashMap<>();
             addChildSettings();
         }
