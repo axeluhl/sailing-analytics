@@ -45,11 +45,16 @@
                             configure which origins are permitted to access the local storage in the server instance. For example,
                             to restrict access to the local storage of www.sapsailing.com to all sub-domains of sapsailing.com, specify
                             the following regular expression:<pre>
-                              -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp="^.*\.sapsailing\.com$"
+                              -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp="https://.*\.sapsailing\.com$"
+                            </pre> or, for allowing for an optional port specification, it could be something like<pre>
+                              -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp="http://127\.0\.0\.1[:[0-9]*]?$"
                             </pre>
                             This allows the <tt>iframe</tt> embedded in other instances for cross-domain local storage access to
                             read from the local storage compartment for domain www.sapsailing.com (the example instance configured
-                            by the system property shown above) if the other instance's origin ends on ".sapsailing.com".
+                            by the system property shown above) if the other instance's origin ends on ".sapsailing.com".<p>
+                            Note that the origin is presented as the scheme (e.g., "https://") plus the hostname, plus optionally
+                            the colon-separated port, so you may be seeing something like "https://lyc.sapsailing.com" or
+                            "http://127.0.0.1:8888".
                         </li>
                     </ul>
 

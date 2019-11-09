@@ -1,7 +1,12 @@
 package com.sap.sse.gwt.client.xdstorage.impl;
 
+import java.util.UUID;
+
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
+import com.sap.sse.gwt.client.messaging.MessageEvent;
+import com.sap.sse.gwt.client.messaging.MessageListenerHandle;
 import com.sap.sse.gwt.client.messaging.MessagePort;
 import com.sap.sse.gwt.client.xdstorage.DelegatingCrossDomainStorageFuture;
 
@@ -24,8 +29,19 @@ public class CrossDomainStorageFallingBackToLocalAfterTimeout extends Delegating
         MessagePort.createInDocument(documentInWhichToInsertMessagingIframe,
                 baseUrlForStorageMessagingEntryPoint+(baseUrlForStorageMessagingEntryPoint.endsWith("/")?"":"/")+STORAGE_MESSAGING_ENTRY_POINT_PATH,
                 result->{
-                    GWT.log("connection to cross-domain storage at "+baseUrlForStorageMessagingEntryPoint+" established");
-                    setStorageToUse(new CrossDomainStorageImpl(result, baseUrlForStorageMessagingEntryPoint));
+                    final UUID idOfPingEvent = UUID.randomUUID();
+                    GWT.log("connection to cross-domain storage at "+baseUrlForStorageMessagingEntryPoint+" established. Sending PING with ID "+idOfPingEvent);
+                    final MessageListenerHandle[] handle = new MessageListenerHandle[1];
+                    handle[0] = result.addResponseListener((MessageEvent<JavaScriptObject> pongEvent)->{
+                        result.removeMessageListener(handle[0]);
+                        final Response response = pongEvent.getData().cast();
+                        if (response.getId().equals(idOfPingEvent.toString())) {
+                            // a PONG came back; we're connected and accepted; set the storage as the one to use:
+                            GWT.log("Received PONG, so we're accepted. Using cross-domain storage now.");
+                            setStorageToUse(new CrossDomainStorageImpl(result, baseUrlForStorageMessagingEntryPoint));
+                        }
+                    });
+                    result.postMessage(LocalStorageDrivenByMessageEvents.createPingRequest(idOfPingEvent), baseUrlForStorageMessagingEntryPoint);
                 });
     }
 }

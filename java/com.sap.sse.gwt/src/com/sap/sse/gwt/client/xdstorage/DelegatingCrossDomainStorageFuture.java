@@ -93,6 +93,14 @@ public class DelegatingCrossDomainStorageFuture implements CrossDomainStorage {
         this.defaultSupplier = defaultSupplier;
     }
     
+    /**
+     * Directs this delegate to use a certain delegation target to forward requests to. A warning will be logged
+     * if there already was a storage configured, because changing is unusual and should only result, e.g., from a
+     * premature timeout with a solution coming in after the timeout expired.<p>
+     * 
+     * When a storage is set and there are {@link #queuedWhileWaitingForStorage queued messages}, those messages will
+     * start processing against the new {@code storageToUse}.
+     */
     public void setStorageToUse(CrossDomainStorage storageToUse) {
         if (storageToUse == null) {
             throw new NullPointerException("Must set a valid, non-null storage");

@@ -97,6 +97,13 @@ public class MessagePort extends JavaScriptObject {
     }-*/;
     
     /**
+     * Returns the {@code origin} property of the underlying window.
+     */
+    public final native String getOrigin() /*-{
+        return this.origin;
+    }-*/;
+    
+    /**
      * Uses the {@code iframe}'s content window as the message port.
      */
     public static final native MessagePort getFromIframe(IFrameElement iframe) /*-{
@@ -139,7 +146,7 @@ public class MessagePort extends JavaScriptObject {
      * receive {@link MessageEvent}s that receivers of messages {@link #postMessage(Object, String) posted} through this message port
      * send back to the the {@link MessageEvent#getSource() message event's source}.
      */
-    public final <T> void addResponseListener(MessageListener<T> listener) {
-        MessagePort.getCurrentWindow().addMessageListener(listener);
+    public final <T> MessageListenerHandle addResponseListener(MessageListener<T> listener) {
+        return MessagePort.getCurrentWindow().addMessageListener(listener);
     }
 }

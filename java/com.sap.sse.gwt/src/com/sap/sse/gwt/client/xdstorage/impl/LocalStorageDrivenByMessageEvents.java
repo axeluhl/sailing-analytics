@@ -78,6 +78,7 @@ public class LocalStorageDrivenByMessageEvents implements MessageListener<JavaSc
         if (isRequestFromOriginAllowed(messageEvent.getOrigin())) {
             if (messageEvent.getData() instanceof JavaScriptObject) {
                 final Request request = messageEvent.getData().cast();
+                GWT.log("Received request with operation "+request.getOperation());
                 final String operation = request.getOperation();
                 final StorageOperation op = StorageOperation.valueOf(operation);
                 final JSONValue result;
@@ -120,6 +121,10 @@ public class LocalStorageDrivenByMessageEvents implements MessageListener<JavaSc
                         }
                     }
                     result = JSONNull.getInstance();
+                    break;
+                case PING:
+                    // send a "PONG" response
+                    result = new JSONString("PONG");
                     break;
                 default:
                     throw new RuntimeException("Unknown operation "+op);
@@ -192,6 +197,11 @@ public class LocalStorageDrivenByMessageEvents implements MessageListener<JavaSc
     
     public static JSONObject createClearRequest(UUID id) {
         final JSONObject result = createOperationRequest(id, StorageOperation.CLEAR);
+        return result;
+    }
+    
+    public static JSONObject createPingRequest(UUID id) {
+        final JSONObject result = createOperationRequest(id, StorageOperation.PING);
         return result;
     }
     
