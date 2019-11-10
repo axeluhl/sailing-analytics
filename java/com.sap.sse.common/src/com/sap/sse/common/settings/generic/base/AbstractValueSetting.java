@@ -12,7 +12,7 @@ public abstract class AbstractValueSetting<T> extends AbstractHasValueSetting<T>
     protected AbstractValueSetting(String name, AbstractGenericSerializableSettings settings, T defaultValue, ValueConverter<T> valueConverter) {
         super(name, settings, valueConverter);
         this.defaultValue = defaultValue;
-        if(settings.getValue(settingName) == null) {
+        if (settings.getValue(settingName) == null) {
             resetToDefault();
         }
     }
@@ -20,7 +20,7 @@ public abstract class AbstractValueSetting<T> extends AbstractHasValueSetting<T>
     @Override
     public T getValue() {
         Value value = settings.getValue(settingName);
-        if(value == null) {
+        if (value == null) {
             return null;
         }
         return getValueConverter().fromValue(value);
@@ -34,10 +34,10 @@ public abstract class AbstractValueSetting<T> extends AbstractHasValueSetting<T>
     @Override
     public boolean isDefaultValue() {
         T value = getValue();
-        if(value == defaultValue) {
+        if (value == defaultValue) {
             return true;
         }
-        if(value != null) {
+        if (value != null) {
             return value.equals(defaultValue);
         }
         // value == null && defaultValue != null => value isn't default
@@ -53,7 +53,7 @@ public abstract class AbstractValueSetting<T> extends AbstractHasValueSetting<T>
     public final void setDefaultValue(T defaultValue) {
         boolean wasDefault = isDefaultValue();
         this.defaultValue = defaultValue;
-        if(wasDefault) {
+        if (wasDefault) {
             resetToDefault();
         }
     }
