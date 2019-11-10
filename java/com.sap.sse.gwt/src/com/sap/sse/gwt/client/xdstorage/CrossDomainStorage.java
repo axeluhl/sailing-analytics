@@ -2,6 +2,7 @@ package com.sap.sse.gwt.client.xdstorage;
 
 import java.util.function.Consumer;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.sap.sse.gwt.client.Storage;
@@ -47,8 +48,10 @@ public interface CrossDomainStorage {
     static CrossDomainStorage create(String baseUrlForStorageMessagingEntryPoint) {
         final CrossDomainStorage result;
         if (baseUrlForStorageMessagingEntryPoint == null) {
+            GWT.log("Using local storage");
             result = new LocalStorage();
         } else {
+            GWT.log("Using "+baseUrlForStorageMessagingEntryPoint+" as shared storage");
             result = create(Document.get(), baseUrlForStorageMessagingEntryPoint);
         }
         return result;
