@@ -60,7 +60,7 @@ public class TestORCPublicCertificateDatabase {
         boolean found = false;
         for (final CertificateHandle handle : result) {
             if (handle.getReferenceNumber().equals(referenceNumber)) {
-                assertSoulmate(referenceNumber, result.iterator().next());
+                assertSoulmate(referenceNumber, handle);
                 found = true;
             }
         }
@@ -74,6 +74,7 @@ public class TestORCPublicCertificateDatabase {
         assertSoulmate(referenceNumber, result);
     }
 
+    // TODO this test will probably break 2020 when 2019 certificates will no longer be returned as valid...
     @Test
     public void testGetCertificate() throws Exception {
         final String referenceNumber = "FRA00013881";
@@ -84,6 +85,7 @@ public class TestORCPublicCertificateDatabase {
         assertEquals(handle.getSailNumber(), result.getSailNumber());
     }
     
+    // TODO this test will probably break 2020 when 2019 certificates will no longer be returned as valid...
     @Test
     public void testParallelFuzzySearch() throws InterruptedException, ExecutionException {
         final Future<Set<ORCCertificate>> soulmateCertificatesFuture = db.search("Soulmate", "DEN13", new BoatClassImpl("ORC", BoatClassMasterdata.ORC));

@@ -20,6 +20,11 @@ updatePlugins() {
 	echo ""
 }
 
+uninstallPlugins() {
+    "$installPath/eclipse" -application org.eclipse.equinox.p2.director -noSplash -roaming -uninstallIU $1
+	echo ""
+}
+
 # Not necessary if using Eclipse for JEE developers
 echo "Installing webtools (WTP/WST/JPT) and m2e that are required by the GWT plugin..."
 installPlugins http://download.eclipse.org/releases/2019-09/ org.eclipse.wst.web_ui.feature.feature.group,org.eclipse.jst.web_ui.feature.feature.group,org.eclipse.wst.xml_ui.feature.feature.group,org.eclipse.jpt.common.feature.feature.group,org.eclipse.jpt.jpa.feature.feature.group,org.eclipse.m2e.feature.feature.group,org.eclipse.m2e.wtp.feature.feature.group
@@ -50,5 +55,8 @@ installPlugins http://download.eclipse.org/tools/orbit/downloads/drops/R20180905
 
 echo "Installing Enhanced Class Decompiler"
 installPlugins https://ecd-plugin.github.io/update org.sf.feeling.decompiler.feature.group,org.sf.feeling.decompiler.cfr.feature.group,org.sf.feeling.decompiler.jad.feature.group,org.sf.feeling.decompiler.jd.feature.group,org.sf.feeling.decompiler.procyon.feature.group
+
+echo "Uninstalling Wild Web Developer"
+uninstallPlugins org.eclipse.wildwebdeveloper.feature.feature.group
 
 echo "Installation completed!"

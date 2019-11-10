@@ -252,7 +252,7 @@ public class ORCCertificateImpl implements ORCCertificate {
     
     @Override
     public String toString() {
-        return "ID \""+getId()+"\" for "+getSailNumber()+" / "+getBoatName() + " - Issued on: " + getIssueDate()==null?"n/a":getIssueDate().asDate()+" with GPH "+
+        return "Certificate with ID \""+getId()+"\" for "+getSailNumber()+" / "+getBoatName() + " - Issued on: " + (getIssueDate()==null?"n/a":getIssueDate().asDate())+" with GPH "+
                 Util.padPositiveValue(getGPHInSecondsToTheMile(), 1, 1, /* round */ true);
     }
 }

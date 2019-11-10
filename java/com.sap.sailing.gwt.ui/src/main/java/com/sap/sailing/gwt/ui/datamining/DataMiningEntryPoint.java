@@ -25,7 +25,6 @@ import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
-import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.presentation.TabbedSailingResultsPresenter;
 import com.sap.sailing.gwt.ui.shared.settings.SailingSettingsConstants;
 import com.sap.sse.datamining.shared.DataMiningSession;
@@ -41,11 +40,9 @@ import com.sap.sse.datamining.ui.client.DataMiningSettingsInfoManager;
 import com.sap.sse.datamining.ui.client.execution.SimpleQueryRunner;
 import com.sap.sse.datamining.ui.client.selection.QueryDefinitionProviderWithControls;
 import com.sap.sse.gwt.client.EntryPointHelper;
-import com.sap.sse.gwt.client.Notification;
-import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.ServerInfoDTO;
-import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
+import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
 import com.sap.sse.gwt.resources.Highcharts;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
@@ -142,14 +139,11 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                  * automatic execution of queries. Re-enable this, when this functionality is desired again.
                  */
                 // settingsControl.addSettingsComponent(queryRunner);
-
                 queryAndResultSplitPanel = new SplitLayoutPanel(10);
                 addDefinitionProviderAndResultPresenter();
-
                 if (queryIdentifier != null) {
-                    if (Storage.isLocalStorageSupported()) {
-                        Storage store = Storage.getLocalStorageIfSupported();
-                        String storedElem = store.getItem(SailingSettingsConstants.DATAMINING_QUERY);
+                    CrossDomainStorage store = getUserService().getStorage();
+                    store.getItem(SailingSettingsConstants.DATAMINING_QUERY, storedElem->{
                         JSONArray arr = JSONParser.parseStrict(storedElem).isArray();
                         for (int i = 0; i < arr.size(); i++) {
                             JSONObject json = arr.get(i).isObject();
@@ -157,13 +151,12 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                                 String serializedQuery = json.get("payload").isString().stringValue();
                                 dataMiningService.getDeserializedQuery(serializedQuery,
                                         new AsyncCallback<ModifiableStatisticQueryDefinitionDTO>() {
-
                                             @Override
                                             public void onSuccess(ModifiableStatisticQueryDefinitionDTO result) {
                                                 queryDefinitionProvider.applyQueryDefinition(result);
                                                 queryRunner.run(result);
                                             }
-
+    
                                             @Override
                                             public void onFailure(Throwable caught) {
                                                 LOG.log(Level.SEVERE, caught.getMessage(), caught);
@@ -172,10 +165,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                                 break;
                             }
                         }
-                    } else {
-                        Notification.notify(StringMessages.INSTANCE.warningBrowserUnsupported(),
-                                NotificationType.ERROR);
-                    }
+                    });
                 }
                 return queryAndResultSplitPanel;
             }

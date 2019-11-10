@@ -348,6 +348,7 @@ import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.meta.MetaLeaderboardColumn;
 import com.sap.sailing.domain.orc.ORCPublicCertificateDatabase;
+import com.sap.sailing.domain.orc.ORCPublicCertificateDatabase.CertificateHandle;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
@@ -922,7 +923,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public SerializationDummy serializationDummy(PersonDTO dummy,
             CountryCode ccDummy, PreciseCompactPosition preciseCompactPosition,
-            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, SecondsDurationImpl secondsDuration, KnotSpeedImpl knotSpeedImpl) {
+            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, SecondsDurationImpl secondsDuration,
+            KnotSpeedImpl knotSpeedImpl, KilometersPerHourSpeedImpl kmhSpeedImpl) {
         return null;
     }
 
@@ -9808,7 +9810,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
     
     @Override
-    public Map<BoatDTO, Set<ORCCertificate>> getSuggestedCertificates(ArrayList<BoatDTO> boats) throws InterruptedException, ExecutionException {
+    public Map<BoatDTO, Set<ORCCertificate>> getSuggestedORCBoatCertificates(ArrayList<BoatDTO> boats) throws InterruptedException, ExecutionException {
         final ORCPublicCertificateDatabase db = ORCPublicCertificateDatabase.INSTANCE;
         final Map<BoatDTO, Set<ORCCertificate>> result = new HashMap<>();
         final Map<BoatDTO, Future<Set<ORCCertificate>>> futures = new HashMap<>();
@@ -9821,6 +9823,19 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             certificatesForBoat.addAll(boatAndFutures.getValue().get());
             result.put(boatAndFutures.getKey(), certificatesForBoat);
         }
+        return result;
+    }
+    
+    @Override
+    public Set<ORCCertificate> searchORCBoatCertificates(CountryCode country, Integer yearOfIssuance,
+            String referenceNumber, String yachtName, String sailNumber, String boatClassName) throws Exception {
+        final ORCPublicCertificateDatabase db = ORCPublicCertificateDatabase.INSTANCE;
+        final Set<ORCCertificate> result = new HashSet<>();
+        final Iterable<CertificateHandle> searchResult = db.search(country, yearOfIssuance, referenceNumber, yachtName, sailNumber, boatClassName);
+        Util.addAll(
+                db.getCertificates(searchResult),
+                result);
+        result.remove(null); // in case some certificate wasn't found by reference number
         return result;
     }
 }

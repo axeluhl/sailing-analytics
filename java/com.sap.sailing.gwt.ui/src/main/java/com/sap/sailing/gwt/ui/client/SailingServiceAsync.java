@@ -48,6 +48,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
@@ -954,7 +955,7 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void serializationDummy(PersonDTO dummy, CountryCode ccDummy, PreciseCompactPosition preciseCompactPosition,
             TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, SecondsDurationImpl secondsDuration,
-            KnotSpeedImpl knotSpeedImpl, AsyncCallback<SerializationDummy> callback);
+            KnotSpeedImpl knotSpeedImpl, KilometersPerHourSpeedImpl kmhSpeedImpl, AsyncCallback<SerializationDummy> callback);
 
     /**
      * @param leaderboardName
@@ -1193,5 +1194,16 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void setImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName,
             ImpliedWindSource impliedWindSource, AsyncCallback<Void> callback);
 
-    void getSuggestedCertificates(ArrayList<BoatDTO> boats, AsyncCallback<Map<BoatDTO, Set<ORCCertificate>>> callback);
+    void getSuggestedORCBoatCertificates(ArrayList<BoatDTO> boats, AsyncCallback<Map<BoatDTO, Set<ORCCertificate>>> callback);
+
+    /**
+     * Searches for ORC certificates based on various criteria. Pass {@code null} for a criterion to not restrict search
+     * results based on that criterion. You can use "%" as wildcards in the {@code yachtName}, {@code sailNumber} and
+     * {@code boatClassName} parameters.
+     * <p>
+     * 
+     * @return an always valid, never {@code null} object which may be {@link Util#isEmpty() empty}.
+     */
+    void searchORCBoatCertificates(CountryCode country, Integer yearOfIssuance, String referenceNumber,
+            String yachtName, String sailNumber, String boatClassName, AsyncCallback<Set<ORCCertificate>> callback);
 }

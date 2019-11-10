@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.orc;
 
+import java.util.Arrays;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
@@ -105,20 +106,34 @@ public interface ORCPublicCertificateDatabase {
         String getBuilder();
         Integer getYearBuilt();
         TimePoint getIssueDate();
+        Integer getCertType();
+        Boolean isOd();
         Boolean isProvisional();
     }
     
     /**
      * Searches for certificates based on various criteria. Pass {@code null} for a criterion to not restrict search
-     * results based on that criterion.
+     * results based on that criterion. You can use "%" as wildcards in the {@code yachtName}, {@code sailNumber} and
+     * {@code boatClassName} parameters.
+     * <p>
      * 
      * @return an always valid, never {@code null} object which may be {@link Util#isEmpty() empty}.
      */
     Iterable<CertificateHandle> search(CountryCode country, Integer yearOfIssuance, String referenceNumber,
             String yachtName, String sailNumber, String boatClassName) throws Exception;
     
-    default ORCCertificate getCertificate(CertificateHandle handle) throws Exception {
-        return getCertificate(handle.getReferenceNumber());
+    default Iterable<ORCCertificate> getCertificates(Iterable<CertificateHandle> handles) throws Exception {
+        return Util.map(handles, handle->{
+            try {
+                return getCertificate(handle.getReferenceNumber());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+    
+    default Iterable<ORCCertificate> getCertificates(CertificateHandle... handles) throws Exception {
+        return getCertificates(Arrays.asList(handles));
     }
     
     default CertificateHandle getCertificateHandle(String referenceNumber) throws Exception {
@@ -140,6 +155,10 @@ public interface ORCPublicCertificateDatabase {
      * <li>Yacht name and sail number may have been swapped in how the boat was specified. We'll try swapping them in
      * the search request</li>
      * </ul>
+     * 
+     * @param yachtName may be {@code null}
+     * @param sailNumber may be {@code null}
+     * @param boatClass may be {@code null}
      * 
      * @return an object from which the caller can obtain the set of certificates found by invoking
      *         {@link Future#get()}. The result set will be the smallest, most concise non-empty set found, or it will

@@ -31,8 +31,8 @@ import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveCourseImpl;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
 import com.sap.sailing.domain.orc.ORCPerformanceCurve;
+import com.sap.sailing.domain.orc.impl.AbstractORCPerformanceCurveTwaLegAdapter;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveByImpliedWindRankingMetric;
-import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveLegAdapter;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -217,12 +217,12 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
         final List<ORCPerformanceCurveLeg> legs = new ArrayList<>();
         boolean changed = false;
         for (final ORCPerformanceCurveLeg leg : course.getLegs()) {
-            if (leg instanceof ORCPerformanceCurveLegAdapter) {
+            if (leg instanceof AbstractORCPerformanceCurveTwaLegAdapter) {
                 final ORCPerformanceCurveLeg pcl;
                 if (leg.getType() == ORCPerformanceCurveLegTypes.TWA) {
-                    pcl = new ORCPerformanceCurveLegImpl(((ORCPerformanceCurveLegAdapter) leg).getLength(this), leg.getTwa());
+                    pcl = new ORCPerformanceCurveLegImpl(((AbstractORCPerformanceCurveTwaLegAdapter) leg).getLength(this), leg.getTwa());
                 } else {
-                    pcl = new ORCPerformanceCurveLegImpl(((ORCPerformanceCurveLegAdapter) leg).getLength(this), leg.getType());
+                    pcl = new ORCPerformanceCurveLegImpl(((AbstractORCPerformanceCurveTwaLegAdapter) leg).getLength(this), leg.getType());
                 }
                 legs.add(pcl);
                 changed = true;

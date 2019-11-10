@@ -47,6 +47,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
@@ -251,14 +252,14 @@ public class TaggingPanel extends ComponentWithoutSettings
     /**
      * Notifies other instances that the private tags have changed.
      */
-    private void firePrivateTagUpdateEvent() {
-        if (Storage.isSupported()) {
-            if (Storage.getLocalStorageIfSupported().getItem(LOCAL_STORAGE_UPDATE_KEY).equals(id)) {
+    private void firePrivateTagUpdateEvent(CrossDomainStorage storage) {
+        storage.getItem(LOCAL_STORAGE_UPDATE_KEY, value->{
+            if (value.equals(id)) {
                 // This instance fired the last update. To fire another one we have to change our id
                 generateRandomId();
             }
-            Storage.getLocalStorageIfSupported().setItem(LOCAL_STORAGE_UPDATE_KEY, id);
-        }
+            storage.setItem(LOCAL_STORAGE_UPDATE_KEY, id, null);
+        });
     }
 
     /**
@@ -417,7 +418,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                                 // reload private tags if added tag is private
                                 if (!visibleForPublic) {
                                     reloadPrivateTags();
-                                    firePrivateTagUpdateEvent();
+                                    firePrivateTagUpdateEvent(userService.getStorage());
                                 }
                             } else {
                                 Notification.notify(stringMessages.tagNotSavedReason(result.getMessage()),
@@ -465,7 +466,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                             if (!silent) {
                                 Notification.notify(stringMessages.tagRemovedSuccessfully(), NotificationType.SUCCESS);
                             }
-                            firePrivateTagUpdateEvent();
+                            firePrivateTagUpdateEvent(userService.getStorage());
                         } else {
                             Notification.notify(stringMessages.tagNotRemoved() + " " + result.getMessage(),
                                     NotificationType.ERROR);
@@ -509,7 +510,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                                     // refresh UI.
                                     if (!tagToUpdate.isVisibleForPublic() || !visibleForPublic) {
                                         reloadPrivateTags();
-                                        firePrivateTagUpdateEvent();
+                                        firePrivateTagUpdateEvent(userService.getStorage());
                                     } else {
                                         updateContent();
                                     }

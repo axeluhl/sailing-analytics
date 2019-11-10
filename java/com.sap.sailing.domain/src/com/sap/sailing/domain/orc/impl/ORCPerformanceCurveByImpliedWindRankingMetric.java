@@ -46,6 +46,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.orc.FixedSpeedImpliedWind;
 import com.sap.sailing.domain.common.orc.ImpliedWindSource;
@@ -345,7 +346,8 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
         return totalCourse;
     }
 
-    private ORCPerformanceCurveCourse getPartialCourse(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    private ORCPerformanceCurveCourse getPartialCourse(final Competitor competitor, final TimePoint timePoint,
+            final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final ORCPerformanceCurveCourse result;
         final Leg firstLeg = getTrackedRace().getRace().getCourse().getFirstLeg();
         final Waypoint finish = getTrackedRace().getRace().getCourse().getLastWaypoint();
@@ -376,8 +378,7 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
                 final ORCPerformanceCurveLeg currentLeg = Util.get(totalCourse.getLegs(), zeroBasedIndexOfCurrentLeg);
                 final double shareOfCurrentLeg;
                 final LegType legType;
-                if (currentLeg.getType().equals(ORCPerformanceCurveLegTypes.WINDWARD_LEEWARD)
-                        || currentLeg.getType().equals(ORCPerformanceCurveLegTypes.TWA)) {
+                if (currentLeg.getType().isProjectToWindForUpwindAndDownwind()) {
                     legType = null;
                 } else {
                     legType = LegType.REACHING;
@@ -386,8 +387,31 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
                 shareOfCurrentLeg = 1.0
                         - trackedLegOfCompetitor.getWindwardDistanceToGo(legType, timePoint, WindPositionMode.LEG_MIDDLE, cache).divide(
                                 trackedLegOfCompetitor.getTrackedLeg().getWindwardDistance(legType, timePoint, cache));
-                result = totalCourse.subcourse(zeroBasedIndexOfCurrentLeg, shareOfCurrentLeg);
+                result = totalCourse.subcourse(zeroBasedIndexOfCurrentLeg, shareOfCurrentLeg, (zeroBasedLegIndex, leg)->replaceWindwardLeewardByConstructed(zeroBasedLegIndex, leg, timePoint, cache));
             }
+        }
+        return result;
+    }
+    
+    /**
+     * For the {@link #getTrackedRace() tracked race} fetches all {@link TrackedRace#getTrackedLeg(Leg) tracked legs} and figures
+     * out their {@link TrackedLeg#getLegType(TimePoint) leg type} at {@code timePoint}. Instead of throwing a
+     * {@link NoWindException} if the wind direction is not known for a leg, {@code null} is used as such a leg's "type."
+     */
+    private ORCPerformanceCurveLeg replaceWindwardLeewardByConstructed(final int zeroBasedLegIndex,
+            final ORCPerformanceCurveLeg originalLeg,
+            final TimePoint timePoint, final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        assert originalLeg.getType() == ORCPerformanceCurveLegTypes.WINDWARD_LEEWARD_REAL_LIVE;
+        final ORCPerformanceCurveLeg result;
+        final List<Leg> legs = getTrackedRace().getRace().getCourse().getLegs();
+        if (zeroBasedLegIndex >= legs.size()) {
+            // can't find leg; log a warning and return original leg
+            logger.warning("Couldn't construct leg adapter for leg #"+zeroBasedLegIndex+" as there are only "+legs.size()+
+                    " legs in the race course of "+getTrackedRace()+"; using original leg");
+            result = originalLeg;
+        } else {
+            final TrackedLeg trackedLeg = getTrackedRace().getTrackedLeg(legs.get(zeroBasedLegIndex));
+            result = new ORCPerformanceCurveLegAdapterWithConstantDistance(trackedLeg, originalLeg.getLength());
         }
         return result;
     }
@@ -833,5 +857,10 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
                 return result;
             }
         });
+    }
+    
+    @Override
+    public String toString() {
+        return getClass().getSimpleName()+" for race "+getTrackedRace();
     }
 }
