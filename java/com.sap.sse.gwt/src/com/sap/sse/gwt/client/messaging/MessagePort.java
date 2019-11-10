@@ -28,6 +28,19 @@ import com.google.gwt.dom.client.IFrameElement;
  *
  */
 public class MessagePort extends JavaScriptObject {
+    public static class ResponseListenerHandle {
+        private final MessageListenerHandle messageListenerHandle;
+
+        public ResponseListenerHandle(MessageListenerHandle messageListenerHandle) {
+            super();
+            this.messageListenerHandle = messageListenerHandle;
+        }
+        
+        private MessageListenerHandle getMessageListenerHandle() {
+            return messageListenerHandle;
+        }
+    }
+    
     protected MessagePort() {
         super();
     }
@@ -143,10 +156,21 @@ public class MessagePort extends JavaScriptObject {
     /**
      * Adds a listener on this application's {@code window} which for a typical GWT application will be the content
      * window of the implicit {@code iframe} element that GWT generates to host the application. This listener will
-     * receive {@link MessageEvent}s that receivers of messages {@link #postMessage(Object, String) posted} through this message port
-     * send back to the the {@link MessageEvent#getSource() message event's source}.
+     * receive {@link MessageEvent}s that receivers of messages {@link #postMessage(Object, String) posted} through this
+     * message port send back to the the {@link MessageEvent#getSource() message event's source}.
+     * 
+     * @return a handle that can be passed to {@link #removeResponseListener(MessageListenerHandle)}
      */
-    public final <T> MessageListenerHandle addResponseListener(MessageListener<T> listener) {
-        return MessagePort.getCurrentWindow().addMessageListener(listener);
+    public final <T> ResponseListenerHandle addResponseListener(MessageListener<T> listener) {
+        return new ResponseListenerHandle(MessagePort.getCurrentWindow().addMessageListener(listener));
+    }
+    
+    /**
+     * Removes the listener for which the handle is passed from this application's {@code window} which for a typical
+     * GWT application will be the content window of the implicit {@code iframe} element that GWT generates to host the
+     * application.
+     */
+    public final void removeResponseListener(ResponseListenerHandle listenerHandle) {
+        MessagePort.getCurrentWindow().removeMessageListener(listenerHandle.getMessageListenerHandle());
     }
 }

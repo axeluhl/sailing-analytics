@@ -78,7 +78,6 @@ public class LocalStorageDrivenByMessageEvents implements MessageListener<JavaSc
         if (isRequestFromOriginAllowed(messageEvent.getOrigin())) {
             if (messageEvent.getData() instanceof JavaScriptObject) {
                 final Request request = messageEvent.getData().cast();
-                GWT.log("Received request with operation "+request.getOperation());
                 final String operation = request.getOperation();
                 final StorageOperation op = StorageOperation.valueOf(operation);
                 final JSONValue result;
@@ -135,8 +134,14 @@ public class LocalStorageDrivenByMessageEvents implements MessageListener<JavaSc
                 messageEvent.getSource().postMessage(response.getJavaScriptObject(), messageEvent.getOrigin());
             }
         } else {
-            GWT.log("LocalStorageDrivenByMessageEvents dropped message from inacceptable origin "+messageEvent.getOrigin()+
-                    " with data "+messageEvent.getData().toString());
+            final String messageRepresentation;
+            if (messageEvent.getData() instanceof JavaScriptObject) {
+                final Request request = messageEvent.getData().cast();
+                messageRepresentation = " with ID "+request.getId()+" and operation "+request.getOperation();
+            } else {
+                messageRepresentation = "";
+            }
+            GWT.log("LocalStorageDrivenByMessageEvents dropped message"+messageRepresentation+" from inacceptable origin "+messageEvent.getOrigin());
         }
     }
 
