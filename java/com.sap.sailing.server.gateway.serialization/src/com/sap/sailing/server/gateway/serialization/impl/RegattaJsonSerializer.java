@@ -25,6 +25,8 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
     public static final String FIELD_COURSE_AREA_ID = "courseAreaId";
     public static final String FIELD_CAN_BOATS_OF_COMPETITORS_CHANGE_PER_RACE = "canBoatsOfCompetitorsChangePerRace";
     public static final String FIELD_COMPETITOR_REGISTRATION_TYPE = "competitorRegistrationType";
+    public static final String FIELD_USE_START_TIME_INFERENCE = "useStartTimeInference";
+    public static final String FIELD_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES = "controlTrackingFromStartAndFinishTimes";
 
     private final JsonSerializer<Series> seriesSerializer;
     private final JsonSerializer<Competitor> competitorSerializer;
@@ -56,6 +58,8 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
                 regatta.getDefaultCourseArea() != null ? regatta.getDefaultCourseArea().getId().toString() : null);
         result.put(FIELD_CAN_BOATS_OF_COMPETITORS_CHANGE_PER_RACE, regatta.canBoatsOfCompetitorsChangePerRace());
         result.put(FIELD_COMPETITOR_REGISTRATION_TYPE, regatta.getCompetitorRegistrationType().name());
+        result.put(FIELD_USE_START_TIME_INFERENCE, regatta.useStartTimeInference());
+        result.put(FIELD_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES, regatta.isControlTrackingFromStartAndFinishTimes());
         if (seriesSerializer != null) {
             JSONArray seriesJson = new JSONArray();
             for (Series series : regatta.getSeries()) {

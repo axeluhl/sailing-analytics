@@ -44,4 +44,12 @@ public class Regatta extends JsonWrapper {
     public CompetitorRegistrationType getCompetitorRegistrationType() {
         return CompetitorRegistrationType.valueOf(get("competitorRegistrationType"));
     }
+    
+    public boolean isUseStartTimeInference() {
+        return Boolean.TRUE.equals(get("useStartTimeInference"));
+    }
+    
+    public boolean isControlTrackingFromStartAndFinishTimes() {
+        return Boolean.TRUE.equals(get("controlTrackingFromStartAndFinishTimes"));
+    }
 }

@@ -85,6 +85,9 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         assertEquals("read: regatta.competitorRegistrationType is different", CLOSED,
                 regatta.getCompetitorRegistrationType());
 
+        assertTrue(regatta.isUseStartTimeInference());
+        assertFalse(regatta.isControlTrackingFromStartAndFinishTimes());
+
         assertEquals("read: reagtta.series should have 1 entry", 1, series.size());
         assertEquals("read: reagtta.fleets should have 1 entry", 1, fleets.size());
         assertNotNull("read: reagtta.trackedRaces is missing", trackedRaces);
