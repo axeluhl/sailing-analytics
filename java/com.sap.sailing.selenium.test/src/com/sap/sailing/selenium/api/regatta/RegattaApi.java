@@ -45,7 +45,7 @@ public class RegattaApi {
         requestObject.put("controlTrackingFromStartAndFinishTimes", controlTrackingFromStartAndFinishTimes);
         requestObject.put("registrationLinkSecret", registrationLinkSecret);
         requestObject.put("competitorRegistrationType", registrationType == null ? null : registrationType.name());
-        return new Regatta(ctx.post(REGATTAS + "/" + regattaName, null, requestObject));
+        return new Regatta(ctx.put(REGATTAS + "/" + regattaName, null, requestObject));
     }
 
     public RegattaRaces getRegattaRaces(ApiContext ctx, String regattaName) {
