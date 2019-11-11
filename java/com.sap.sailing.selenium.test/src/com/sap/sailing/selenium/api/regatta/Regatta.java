@@ -1,11 +1,10 @@
 package com.sap.sailing.selenium.api.regatta;
 
-import java.util.Date;
-
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.JsonWrapper;
+import com.sap.sse.common.TimePoint;
 
 public class Regatta extends JsonWrapper {
 
@@ -17,12 +16,12 @@ public class Regatta extends JsonWrapper {
         return get("name");
     }
 
-    public Date getStartDate() {
-        return get("startDate");
+    public TimePoint getStartDate() {
+        return getTimePointFromMilliseconds("startDate");
     }
 
-    public Date getEndDate() {
-        return get("endDate");
+    public TimePoint getEndDate() {
+        return getTimePointFromMilliseconds("endDate");
     }
 
     public String getBoatClass() {
