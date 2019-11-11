@@ -26,14 +26,6 @@
           <filter-name>GWTCacheControlServletFilter</filter-name>
           <url-pattern>/*</url-pattern>
         </filter-mapping>
-        <filter>
-          <filter-name>LocaleInjectionFilter</filter-name>
-          <filter-class>com.sap.sse.security.ui.server.LocaleInjectionFilter</filter-class>
-        </filter>
-        <filter-mapping>
-          <filter-name>LocaleInjectionFilter</filter-name>
-          <url-pattern>*.html</url-pattern>
-        </filter-mapping>
         <servlet>
           <display-name>Cross-Domain Storage Configuration Service</display-name>
           <servlet-name>CrossDomainStorageConfigurationService</servlet-name>
