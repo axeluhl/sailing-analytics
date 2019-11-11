@@ -29,6 +29,7 @@ import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.shared.dto.WildcardPermissionWithSecurityDTO;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
+import com.sap.sse.security.ui.shared.SecurityServiceSharingDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public interface UserManagementService extends RemoteService {
@@ -218,4 +219,6 @@ public interface UserManagementService extends RemoteService {
             throws UserManagementException, org.apache.shiro.authz.UnauthorizedException;
 
     Boolean userGroupExists(String userGroupName) throws org.apache.shiro.authz.UnauthorizedException;
+
+    SecurityServiceSharingDTO getSharingConfiguration();
 }

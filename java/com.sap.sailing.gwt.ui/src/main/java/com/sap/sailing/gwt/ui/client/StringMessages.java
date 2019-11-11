@@ -2329,6 +2329,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String orcPerformanceCurveLegTypeDescriptionConstructedCourse();
     String orcPerformanceCurveLegTypeDescriptionWindwardLeeward();
     String orcPerformanceCurveLegTypeDescriptionWindwardLeewardRealLive();
+    String errorWhileLoadingUserSettings(String errorMessage);
     String courseCreation();
     String filterMarkTemplateByName();
     String markTemplates();

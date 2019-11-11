@@ -25,8 +25,7 @@ Require-Bundle: javax.servlet;bundle-version="3.1.0",
  com.sap.sse.security.common,
  com.sap.sse.mail
 Web-ContextPath: /security/ui
-Export-Package: com.sap.sse.security.shared,
- com.sap.sse.security.ui.authentication,
+Export-Package: com.sap.sse.security.ui.authentication,
  com.sap.sse.security.ui.authentication.app,
  com.sap.sse.security.ui.authentication.confirm,
  com.sap.sse.security.ui.authentication.create,

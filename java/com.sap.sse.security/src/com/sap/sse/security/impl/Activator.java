@@ -64,6 +64,34 @@ public class Activator implements BundleActivator {
 
     private ServiceTracker<AccessControlStore, AccessControlStore> accessControlStoreTracker;
     
+    public static final String SHARED_ACROSS_SUBDOMAINS_OF_PROPERTY_NAME = "security.sharedAcrossSubdomainsOf";
+    /**
+     * Should be {@code null} if the security service instantiated by the bundle activated by this activator is not
+     * shared across different sub-domains; otherwise, the parent domain across which the security service and its
+     * replicas are shared shall be provided here, e.g., {@code "sapsailing.com"}.
+     * <p>
+     * 
+     * The value can be specified by a system property whose name is provided by
+     * {@link #SHARED_ACROSS_SUBDOMAINS_OF_PROPERTY_NAME}. If a non-{@code null} value is provided for
+     * {@link #baseUrlForCrossDomainStorage} then a non-{@code null} value should be provided here, too.
+     */
+    private final String sharedAcrossSubdomainsOf;
+    
+    public static final String BASE_URL_FOR_CROSS_DOMAIN_STORAGE_PROPERTY_NAME = "security.baseUrlForCrossDomainStorage";
+    /**
+     * Should be {@code null} if the security service instantiated by the bundle activated by this activator is not
+     * shared across different sub-domains; otherwise, the base URL where {@code /gwt-base/StorageMessaging.html} can be
+     * loaded from shall be provided, and this base URL will then form the "origin" for the local browser storage used
+     * for session storage and other local data stored in the browser which will then be available to all servers using
+     * the same setting fo rthis field. Example value: {@code "https://www.sapsailing.com"}.
+     * <p>
+     * 
+     * The value can be specified by a system property whose name is provided by
+     * {@link #BASE_URL_FOR_CROSS_DOMAIN_STORAGE_PROPERTY_NAME}. If a non-{@code null} value is provided for
+     * {@link #sharedAcrossSubdomainsOf} then a non-{@code null} value should be provided here, too.
+     */
+    private final String baseUrlForCrossDomainStorage;
+    
     public static void setTestStores(UserStore theTestUserStore, AccessControlStore theTestAccessControlStore) {
         testUserStore = theTestUserStore;
         testAccessControlStore = theTestAccessControlStore;
@@ -87,6 +115,17 @@ public class Activator implements BundleActivator {
         }
     }
 
+    public Activator() {
+        sharedAcrossSubdomainsOf = System.getProperty(SHARED_ACROSS_SUBDOMAINS_OF_PROPERTY_NAME);
+        baseUrlForCrossDomainStorage = System.getProperty(BASE_URL_FOR_CROSS_DOMAIN_STORAGE_PROPERTY_NAME);
+        if ((sharedAcrossSubdomainsOf == null) != (baseUrlForCrossDomainStorage == null)) {
+            logger.warning("This looks like an inconsistent configuration. The security service uses "
+                    + sharedAcrossSubdomainsOf + " as shared cookie domain but " + baseUrlForCrossDomainStorage
+                    + " as cross-domain storage origin. " + " Either leave both null or set both consistently, e.g., "
+                    + "to \"sapsailing.com\" and \"https://www.sapsailing.com\", respectively");
+        }
+    }
+    
     /**
      * If no {@link #testUserStore} is available, start looking for a {@link UserStore} service in a background thread.
      * As soon as a service reference for a {@link UserStore} implementation becomes available in the service registry.
@@ -134,7 +173,7 @@ public class Activator implements BundleActivator {
         hasPermissionsProviderTracker.open();
         SecurityServiceImpl initialSecurityService = new SecurityServiceImpl(
                 ServiceTrackerFactory.createAndOpen(context, MailService.class), userStore, accessControlStore,
-                new OSGIHasPermissionsProvider(hasPermissionsProviderTracker));
+                new OSGIHasPermissionsProvider(hasPermissionsProviderTracker), sharedAcrossSubdomainsOf, baseUrlForCrossDomainStorage);
         initialSecurityService.initialize();
         securityService.complete(initialSecurityService);
         registration = context.registerService(SecurityService.class.getName(), initialSecurityService, null);
