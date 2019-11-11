@@ -45,7 +45,7 @@
                             configure which origins are permitted to access the local storage in the server instance. For example,
                             to restrict access to the local storage of www.sapsailing.com to all sub-domains of sapsailing.com, specify
                             the following regular expression:<pre>
-                              -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp="https://.*\.sapsailing\.com$"
+                              -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp='https://.*\\.sapsailing\.com$'
                             </pre> or, for allowing for an optional port specification, it could be something like<pre>
                               -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp="http://127\.0\.0\.1[:[0-9]*]?$"
                             </pre>
