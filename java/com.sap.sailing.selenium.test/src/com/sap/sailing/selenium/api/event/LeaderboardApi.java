@@ -1,5 +1,6 @@
 package com.sap.sailing.selenium.api.event;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -8,6 +9,7 @@ import java.util.logging.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.core.JsonWrapper;
 
@@ -28,6 +30,14 @@ public class LeaderboardApi {
     private static final String START_TRACKING_URL = LEADERBOARDS_V1_RESOURCE_URL + "/{leaderboardname}/starttracking";
     private static final String GET_MARK_URL = LEADERBOARDS_V1_RESOURCE_URL
             + "/{leaderboardname}/marks/";
+    private static final String START_TIME_URL = LEADERBOARDS_V1_RESOURCE_URL + "/{leaderboardname}/starttime";
+    private static final String PARAM_RACE_COLUMN_NAME = "race_column";
+    private static final String PARAM_RACE_FLEET_NAME = "fleet";
+    private static final String PARAM_FIELD_AUTHOR_NAME = "authorName";
+    private static final String PARAM_FIELD_AUTHOR_PRIORITY = "authorPriority";
+    private static final String PARAM_START_TIME = "startTime";
+    private static final String PARAM_START_PROCEDURE_TYPE = "startProcedureType";
+    private static final String PARAM_PASS_ID = "passId";
 
     public JSONArray getLeaderboards(ApiContext ctx) {
         return ctx.get(LEADERBOARDS_LIST_URL);
@@ -59,6 +69,30 @@ public class LeaderboardApi {
         queryParams.put("trackWind", Boolean.FALSE.toString());
         queryParams.put("correctWindDirectionByMagneticDeclination", Boolean.FALSE.toString());
         return ctx.post(toUrl(START_TRACKING_URL, leaderboardName), queryParams);
+    }
+
+    public StartTime getStartTime(final ApiContext ctx, final String leaderboardName, final String raceColumnName,
+            final String fleetName) {
+        final Map<String, String> queryParams = new TreeMap<>();
+        queryParams.put(PARAM_RACE_COLUMN_NAME, raceColumnName);
+        queryParams.put(PARAM_RACE_FLEET_NAME, fleetName);
+        return new StartTime(ctx.get(toUrl(START_TIME_URL, leaderboardName), queryParams));
+    }
+
+    public Long setStartTime(final ApiContext ctx, final String leaderboardName, final String raceColumnName,
+            final String fleetName, final Long startTime, final Integer passId,
+            final RacingProcedureType startProcedureType, final String authorName, final Integer authorPriortity) {
+        final Map<String, String> queryParams = new TreeMap<>();
+        queryParams.put(PARAM_RACE_COLUMN_NAME, raceColumnName);
+        queryParams.put(PARAM_RACE_FLEET_NAME, fleetName);
+        queryParams.put(PARAM_FIELD_AUTHOR_NAME, authorName);
+        queryParams.put(PARAM_FIELD_AUTHOR_PRIORITY, authorPriortity != null ? authorPriortity.toString() : null);
+        queryParams.put(PARAM_START_TIME, startTime != null ? startTime.toString() : null);
+        queryParams.put(PARAM_START_PROCEDURE_TYPE, startProcedureType != null ? startProcedureType.name() : null);
+        queryParams.put(PARAM_PASS_ID, passId != null ? passId.toString() : null);
+        final JSONObject result = ctx.put(toUrl(START_TIME_URL, leaderboardName), queryParams,
+                new HashMap<String, String>());
+        return (Long) result.get("startTimeAsMillis");
     }
 
     private String toUrl(final String urlTemplate, final String leaderboardName) {
@@ -135,6 +169,30 @@ public class LeaderboardApi {
 
         public Long getEndOfTracking() {
             return get("endoftracking");
+        }
+    }
+
+    public class StartTime extends JsonWrapper {
+
+        private static final String START_TIME_AS_MILLIS = "startTimeAsMillis";
+        private static final String PASS_ID = "passId";
+        private static final String RACING_PROCEDURE_TYPE = "racingProcedureType";
+
+        private StartTime(final JSONObject json) {
+            super(json);
+        }
+
+        public Long getStartTimeAsMillis() {
+            return get(START_TIME_AS_MILLIS);
+        }
+
+        public Integer getPassId() {
+            Long passID = (Long) get(PASS_ID);
+            return passID != null ? passID.intValue() : null;
+        }
+
+        public RacingProcedureType getRacingProcedureType() {
+            return RacingProcedureType.valueOf(get(RACING_PROCEDURE_TYPE));
         }
     }
 

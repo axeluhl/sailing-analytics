@@ -14,10 +14,12 @@ import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi.DeviceMappingRequest;
+import com.sap.sailing.selenium.api.event.LeaderboardApi.StartTime;
 import com.sap.sailing.selenium.api.event.LeaderboardApi.TrackingTimes;
 import com.sap.sailing.selenium.api.regatta.Competitor;
 import com.sap.sailing.selenium.api.regatta.RaceColumn;
@@ -88,5 +90,21 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
                 "Default", startTime, endTime);
         assertEquals("read: startTime is different", startTime, trackingTimes.getStartOfTracking());
         assertEquals("read: endTime is different", endTime, trackingTimes.getEndOfTracking());
+    }
+
+    @Test
+    public void testRaceStartTime() throws Exception {
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        eventApi.createEvent(ctx, LEADERBOARD_NAME, BOATCLASSNAME, CLOSED, "default");
+        final Integer passID = 1;
+        final RaceColumn race = regattaApi.addRaceColumn(ctx, LEADERBOARD_NAME, null, 1)[0];
+        final Long startTime = currentTimeMillis();
+        Long effectiveStartTime = leaderboardApi.setStartTime(ctx, LEADERBOARD_NAME, race.getRaceName(), "Default", startTime, 1,
+                RacingProcedureType.BASIC, "Administrator", passID);
+        assertNotNull(effectiveStartTime);
+        StartTime reloadedStartTime = leaderboardApi.getStartTime(ctx, LEADERBOARD_NAME, race.getRaceName(), "Default");
+        assertEquals(reloadedStartTime.getStartTimeAsMillis(), effectiveStartTime);
+        assertEquals(reloadedStartTime.getPassId(), passID);
+        assertEquals(reloadedStartTime.getRacingProcedureType(), RacingProcedureType.BASIC);
     }
 }
