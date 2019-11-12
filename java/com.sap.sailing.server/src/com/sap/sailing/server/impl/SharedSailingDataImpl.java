@@ -92,8 +92,11 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
 
     private void removeAll() {
+        markPropertiesById.keySet().forEach(mongoObjectFactory::removeMarkProperties);
         markPropertiesById.clear();
+        markTemplatesById.keySet().forEach(mongoObjectFactory::removeMarkTemplate);
         markTemplatesById.clear();
+        courseTemplatesById.keySet().forEach(mongoObjectFactory::removeCourseTemplate);
         courseTemplatesById.clear();
     }
 
