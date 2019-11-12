@@ -95,14 +95,24 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         eventApi.createEvent(ctx, LEADERBOARD_NAME, BOATCLASSNAME, CLOSED, "default");
         final Integer passID = 1;
-        final RaceColumn race = regattaApi.addRaceColumn(ctx, LEADERBOARD_NAME, null, 1)[0];
-        final Long startTime = currentTimeMillis();
-        Long effectiveStartTime = leaderboardApi.setStartTime(ctx, LEADERBOARD_NAME, race.getRaceName(), "Default", startTime, 1,
-                RacingProcedureType.BASIC, "Administrator", passID);
-        assertNotNull(effectiveStartTime);
-        StartTime reloadedStartTime = leaderboardApi.getStartTime(ctx, LEADERBOARD_NAME, race.getRaceName(), "Default");
-        assertEquals(reloadedStartTime.getStartTimeAsMillis(), effectiveStartTime);
-        assertEquals(reloadedStartTime.getPassId(), passID);
-        assertEquals(reloadedStartTime.getRacingProcedureType(), RacingProcedureType.BASIC);
+        final RaceColumn[] races = regattaApi.addRaceColumn(ctx, LEADERBOARD_NAME, null, 2);
+        final RaceColumn race1 = races[0], race2 = races[1];
+        final Long startTimeRace1 = currentTimeMillis();
+        final Long startTimeRace2 = currentTimeMillis() + 10000;
+        final Long effectiveStartTimeRace1 = leaderboardApi.setStartTime(ctx, LEADERBOARD_NAME, race1.getRaceName(),
+                "Default", startTimeRace1, passID, RacingProcedureType.BASIC, "Administrator", 1);
+        final Long effectiveStartTimeRace2 = leaderboardApi.setStartTime(ctx, LEADERBOARD_NAME, race2.getRaceName(),
+                "Default", startTimeRace2, passID, RacingProcedureType.BASIC, "Administrator", 1);
+        assertNotNull(effectiveStartTimeRace1);
+        final StartTime reloadedStartTimeRace1 = leaderboardApi.getStartTime(ctx, LEADERBOARD_NAME, race1.getRaceName(),
+                "Default");
+        final StartTime reloadedStartTimeRace2 = leaderboardApi.getStartTime(ctx, LEADERBOARD_NAME, race2.getRaceName(),
+                "Default");
+        assertEquals(reloadedStartTimeRace1.getStartTimeAsMillis(), effectiveStartTimeRace1);
+        assertEquals(reloadedStartTimeRace2.getStartTimeAsMillis(), effectiveStartTimeRace2);
+        assertEquals(reloadedStartTimeRace1.getPassId(), passID);
+        assertEquals(reloadedStartTimeRace2.getPassId(), passID);
+        assertEquals(reloadedStartTimeRace1.getRacingProcedureType(), RacingProcedureType.BASIC);
+        assertEquals(reloadedStartTimeRace2.getRacingProcedureType(), RacingProcedureType.BASIC);
     }
 }
