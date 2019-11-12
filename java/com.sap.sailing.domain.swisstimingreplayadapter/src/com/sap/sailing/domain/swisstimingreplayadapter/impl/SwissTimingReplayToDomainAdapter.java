@@ -79,6 +79,8 @@ import difflib.PatchFailedException;
  *
  */
 public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter implements TrackingDataLoader {
+    private static final String SWISS_TIMING = "swissTiming";
+
     private static final int THRESHOLD_FOR_EARLIEST_MARK_PASSING_BEFORE_START_IN_MILLIS = 30000;
 
     private static final Logger logger = Logger.getLogger(SwissTimingReplayToDomainAdapter.class.getName());
@@ -411,7 +413,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
                     WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 
                     /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                     /* raceDefinitionSetToUpdate */ null, useInternalMarkPassingAlgorithm, raceLogResolver,
-                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());
+                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(), SWISS_TIMING);
             trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0));
             TimePoint bestStartTimeKnownSoFar = bestStartTimePerRaceID.get(currentRaceID);
             if (bestStartTimeKnownSoFar != null) {

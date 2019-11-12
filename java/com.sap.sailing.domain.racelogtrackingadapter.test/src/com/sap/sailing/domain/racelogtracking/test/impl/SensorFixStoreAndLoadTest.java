@@ -173,7 +173,7 @@ public class SensorFixStoreAndLoadTest {
                 /* registrationLinkSecret */ UUID.randomUUID().toString()));
         trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline> emptyList(),
                 EmptyWindStore.INSTANCE, 0, 0, 0, /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
-                mock(RaceLogAndTrackedRaceResolver.class));
+                mock(RaceLogAndTrackedRaceResolver.class), null);
     }
 
     private void dropPersistedData() {

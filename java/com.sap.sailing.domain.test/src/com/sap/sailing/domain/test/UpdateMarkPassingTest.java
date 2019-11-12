@@ -52,7 +52,7 @@ public class UpdateMarkPassingTest {
                         /* registrationLinkSecret */ UUID.randomUUID().toString())),
                 race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 
         /* delayToLiveInMillis */1000, /* millisecondsOverWhichToAverageWind */30000,
-        /* millisecondsOverWhichToAverageSpeed */30000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new, mock(RaceLogAndTrackedRaceResolver.class));
+        /* millisecondsOverWhichToAverageSpeed */30000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new, mock(RaceLogAndTrackedRaceResolver.class), null);
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = now.plus(1000);
         trackedRace.updateMarkPassings(competitor, Arrays.asList(new MarkPassing[] { new MarkPassingImpl(now, waypoint, competitor) }));
