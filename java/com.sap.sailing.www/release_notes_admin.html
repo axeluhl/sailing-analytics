@@ -43,18 +43,26 @@
                         </li>
                         <li>Added system property <tt>gwt.acceptableCrossDomainStorageRequestOriginRegexp</tt> which can be used to
                             configure which origins are permitted to access the local storage in the server instance. For example,
-                            to restrict access to the local storage of www.sapsailing.com to all sub-domains of sapsailing.com, specify
+                            to grant access to the local storage of www.sapsailing.com for all sub-domains of sapsailing.com including
+                            sapsailing.com itself, specify
                             the following regular expression:<pre>
-                              -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp='https://.*\\.sapsailing\.com$'
+                              -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sapsailing\.com$
                             </pre> or, for allowing for an optional port specification, it could be something like<pre>
-                              -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp="http://127\.0\.0\.1[:[0-9]*]?$"
+                              -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sapsailing\.com(:[0-9]*)?$
                             </pre>
+                            To represent this in the <tt>env.sh</tt> configuration file for an instance, use, e.g., something like this:<pre>
+                                ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\\.)?sapsailing\\.com\$"
+                            </pre>
+                            Note the escaping of the backslashes and the $ sign with a preceding backslash character in this Bash
+                            syntax.<p>
                             This allows the <tt>iframe</tt> embedded in other instances for cross-domain local storage access to
                             read from the local storage compartment for domain www.sapsailing.com (the example instance configured
                             by the system property shown above) if the other instance's origin ends on ".sapsailing.com".<p>
                             Note that the origin is presented as the scheme (e.g., "https://") plus the hostname, plus optionally
                             the colon-separated port, so you may be seeing something like "https://lyc.sapsailing.com" or
-                            "http://127.0.0.1:8888".
+                            "http://127.0.0.1:8888".<p>
+                            If the system property is not specified, no origin will be permitted to use this instance's local storage
+                            through the cross-domain storage mechanism.
                         </li>
                     </ul>
 

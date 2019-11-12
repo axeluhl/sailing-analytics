@@ -32,6 +32,7 @@ import com.sap.sse.gwt.client.messaging.MessagePort;
  *
  */
 public class LocalStorageDrivenByMessageEvents implements MessageListener<JavaScriptObject> {
+    
     private final Storage localStorage;
     
     /**
@@ -45,6 +46,10 @@ public class LocalStorageDrivenByMessageEvents implements MessageListener<JavaSc
     
     public LocalStorageDrivenByMessageEvents(String acceptableCrossDomainStorageRequestOriginRegexp) {
         this.acceptableCrossDomainStorageRequestOriginRegexp = acceptableCrossDomainStorageRequestOriginRegexp;
+        GWT.log("Cross-domain storage requests will be accepted from "
+                + (acceptableCrossDomainStorageRequestOriginRegexp != null
+                        ? "origins matching " + this.acceptableCrossDomainStorageRequestOriginRegexp
+                        : "no other origin"));
         localStorage = Storage.getLocalStorageIfSupported();
         windowsToForwardStorageEventsToAndTheirTargetOrigins = new ArrayList<>();
         Storage.addStorageEventHandler(storageEvent->sendStorageEvent(storageEvent));
@@ -146,8 +151,7 @@ public class LocalStorageDrivenByMessageEvents implements MessageListener<JavaSc
     }
 
     private boolean isRequestFromOriginAllowed(String origin) {
-        return acceptableCrossDomainStorageRequestOriginRegexp == null ? origin.endsWith(".sapsailing.com")
-                : origin.matches(acceptableCrossDomainStorageRequestOriginRegexp);
+        return acceptableCrossDomainStorageRequestOriginRegexp != null && origin.matches(acceptableCrossDomainStorageRequestOriginRegexp);
     }
 
     protected JSONValue jsonStringOrJsonNull(final String s) {

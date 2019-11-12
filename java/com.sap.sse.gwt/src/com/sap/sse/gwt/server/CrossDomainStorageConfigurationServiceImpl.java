@@ -8,7 +8,6 @@ public class CrossDomainStorageConfigurationServiceImpl extends ResultCachingPro
 
     @Override
     public String getAcceptableCrossDomainStorageRequestOriginRegexp() {
-        return System.getProperty(ACCEPTABLE_CROSS_DOMAIN_STORAGE_REQUEST_ORIGIN_REGEXP_PROPERTY_NAME,
-                "^.*\\.sapsailing\\.com$");
+        return System.getProperty(ACCEPTABLE_CROSS_DOMAIN_STORAGE_REQUEST_ORIGIN_REGEXP_PROPERTY_NAME);
     }
 }
