@@ -142,14 +142,14 @@ public class LeaderboardApi {
             return this;
         }
 
-        public JSONObject startDeviceMapping(final Long fromMillis) {
+        public void startDeviceMapping(final Long fromMillis) {
             requestBody.put("fromMillis", fromMillis);
-            return post(START_DEVICE_MAPPING_URL, "devicemapping started for : ");
+            post(START_DEVICE_MAPPING_URL, "devicemapping started for : ");
         }
 
-        public JSONObject endDeviceMapping(final Long toMillis) {
+        public void endDeviceMapping(final Long toMillis) {
             requestBody.put("toMillis", toMillis);
-            return post(END_DEVICE_MAPPING_URL, "devicemapping ended for : ");
+            post(END_DEVICE_MAPPING_URL, "devicemapping ended for : ");
         }
 
         private JSONObject post(final String urlTemplate, final String logMessage) {

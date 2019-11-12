@@ -72,10 +72,8 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
                 "Max Mustermann", "USA");
         final DeviceMappingRequest request = leaderboardApi.createDeviceMappingRequest(ctx, LEADERBOARD_NAME)
                 .forCompetitor(competitor.getId()).withDeviceUuid(randomUUID());
-        @SuppressWarnings("unused") // TODO: check result
-        JSONObject mappingStart = request.startDeviceMapping(currentTimeMillis());
-        @SuppressWarnings("unused") // TODO: check result
-        JSONObject mappingEnd = request.endDeviceMapping(currentTimeMillis());
+        request.startDeviceMapping(currentTimeMillis());
+        request.endDeviceMapping(currentTimeMillis());
     }
 
     @Test
