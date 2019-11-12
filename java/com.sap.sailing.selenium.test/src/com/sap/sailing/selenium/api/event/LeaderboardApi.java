@@ -28,8 +28,7 @@ public class LeaderboardApi {
     private static final String SET_TRACKING_TIMES_URL = LEADERBOARDS_V1_RESOURCE_URL
             + "/{leaderboardname}/settrackingtimes";
     private static final String START_TRACKING_URL = LEADERBOARDS_V1_RESOURCE_URL + "/{leaderboardname}/starttracking";
-    private static final String GET_MARK_URL = LEADERBOARDS_V1_RESOURCE_URL
-            + "/{leaderboardname}/marks/";
+    private static final String GET_MARK_URL = LEADERBOARDS_V1_RESOURCE_URL + "/{leaderboardname}/marks/";
     private static final String START_TIME_URL = LEADERBOARDS_V1_RESOURCE_URL + "/{leaderboardname}/starttime";
     private static final String PARAM_RACE_COLUMN_NAME = "race_column";
     private static final String PARAM_RACE_FLEET_NAME = "fleet";
@@ -38,12 +37,16 @@ public class LeaderboardApi {
     private static final String PARAM_START_TIME = "startTime";
     private static final String PARAM_START_PROCEDURE_TYPE = "startProcedureType";
     private static final String PARAM_PASS_ID = "passId";
+    private static final String PARAM_START_OF_TRACKING = "startoftrackingasmillis";
+    private static final String PARAM_END_OF_TRACKING = "endoftrackingasmillis";
+    private static final String PARAM_TRACK_WIND = "trackWind";
+    private static final String PARAM_CORRECT_WIND_DIRECTION_BY_MAGNETIC_DECLINATION = "correctWindDirectionByMagneticDeclination";
 
-    public JSONArray getLeaderboards(ApiContext ctx) {
+    public JSONArray getLeaderboards(final ApiContext ctx) {
         return ctx.get(LEADERBOARDS_LIST_URL);
     }
 
-    public JSONObject getLeaderboard(ApiContext ctx, String leaderboardName) {
+    public JSONObject getLeaderboard(final ApiContext ctx, final String leaderboardName) {
         return ctx.get(toUrl(LEADERBOARD_URL, leaderboardName));
     }
 
@@ -51,23 +54,23 @@ public class LeaderboardApi {
         return new DeviceMappingRequest(ctx, leaderboardName);
     }
 
-    public TrackingTimes setTrackingTimes(ApiContext ctx, String leaderboardName, String raceColumnName, String fleetName,
-            Long startTime, Long endTime) {
+    public TrackingTimes setTrackingTimes(final ApiContext ctx, final String leaderboardName,
+            final String raceColumnName, String fleetName, Long startTime, Long endTime) {
         final Map<String, String> queryParams = new TreeMap<>();
-        queryParams.put("race_column", raceColumnName);
-        queryParams.put("fleet", fleetName);
-        queryParams.put("startoftrackingasmillis", startTime != null ? startTime.toString() : null);
-        queryParams.put("endoftrackingasmillis", endTime != null ? endTime.toString() : null);
+        queryParams.put(PARAM_RACE_COLUMN_NAME, raceColumnName);
+        queryParams.put(PARAM_RACE_FLEET_NAME, fleetName);
+        queryParams.put(PARAM_START_OF_TRACKING, startTime != null ? startTime.toString() : null);
+        queryParams.put(PARAM_END_OF_TRACKING, endTime != null ? endTime.toString() : null);
         return new TrackingTimes(ctx.post(toUrl(SET_TRACKING_TIMES_URL, leaderboardName), queryParams));
     }
 
     public JSONObject startRaceLogTracking(ApiContext ctx, String leaderboardName, String raceColumnName,
             String fleetName) {
         final Map<String, String> queryParams = new TreeMap<>();
-        queryParams.put("race_column", raceColumnName);
-        queryParams.put("fleet", fleetName);
-        queryParams.put("trackWind", Boolean.FALSE.toString());
-        queryParams.put("correctWindDirectionByMagneticDeclination", Boolean.FALSE.toString());
+        queryParams.put(PARAM_RACE_COLUMN_NAME, raceColumnName);
+        queryParams.put(PARAM_RACE_FLEET_NAME, fleetName);
+        queryParams.put(PARAM_TRACK_WIND, Boolean.FALSE.toString());
+        queryParams.put(PARAM_CORRECT_WIND_DIRECTION_BY_MAGNETIC_DECLINATION, Boolean.FALSE.toString());
         return ctx.post(toUrl(START_TRACKING_URL, leaderboardName), queryParams);
     }
 
@@ -92,13 +95,13 @@ public class LeaderboardApi {
         queryParams.put(PARAM_PASS_ID, passId != null ? passId.toString() : null);
         final JSONObject result = ctx.put(toUrl(START_TIME_URL, leaderboardName), queryParams,
                 new HashMap<String, String>());
-        return (Long) result.get("startTimeAsMillis");
+        return (Long) result.get(StartTime.START_TIME_AS_MILLIS);
     }
 
     private String toUrl(final String urlTemplate, final String leaderboardName) {
         return urlTemplate.replace("{leaderboardname}", leaderboardName);
     }
-    
+
     public Mark getMark(ApiContext ctx, String leaderboardName, UUID markUUID) {
         return new Mark(ctx.get(toUrl(GET_MARK_URL, leaderboardName) + markUUID));
     }
@@ -159,16 +162,19 @@ public class LeaderboardApi {
 
     public class TrackingTimes extends JsonWrapper {
 
+        private static final String START_OF_TRACKING = "startoftracking";
+        private static final String END_OF_TRACKING = "endoftracking";
+
         private TrackingTimes(JSONObject json) {
             super(json);
         }
 
         public Long getStartOfTracking() {
-            return get("startoftracking");
+            return get(START_OF_TRACKING);
         }
 
         public Long getEndOfTracking() {
-            return get("endoftracking");
+            return get(END_OF_TRACKING);
         }
     }
 
