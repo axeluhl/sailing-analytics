@@ -54,7 +54,12 @@ public class AbstractFinishPositioningListFinder extends RaceLogAnalyzer<Competi
             }
         }
         final CompetitorResultsImpl result = new CompetitorResultsImpl();
-        result.addAll(resultsByCompetitor.values());
+        //Remove all results with rank 0
+        for (Map.Entry<Serializable, CompetitorResult> entry : resultsByCompetitor.entrySet()) {
+            if (entry.getValue().getOneBasedRank() > 0) {
+                result.add(entry.getValue());
+            }
+        }
         return resultFound ? result : null;
     }
 }

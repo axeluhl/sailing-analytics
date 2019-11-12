@@ -100,15 +100,18 @@ public class TrackingListFragment extends BaseFragment
 
     private RecyclerView mFinishView;
     private FinishListAdapter mFinishedAdapter;
-    private CompetitorResultsList<CompetitorResultWithIdImpl> mFinishedData;
+    private CompetitorResultsList<CompetitorResultWithIdImpl> mFinishedData =
+            new CompetitorResultsList<>(Collections.synchronizedList(new ArrayList<CompetitorResultWithIdImpl>()));
+    private CompetitorResultsList<CompetitorResultWithIdImpl> mChangedData =
+            new CompetitorResultsList<>(Collections.synchronizedList(new ArrayList<CompetitorResultWithIdImpl>()));
+    private CompetitorResultsList<CompetitorResultWithIdImpl> mConfirmedData =
+            new CompetitorResultsList<>(Collections.synchronizedList(new ArrayList<CompetitorResultWithIdImpl>()));
     private ItemTouchHelper mItemTouchHelper;
 
     private Button mConfirm;
     private TextView mEntryCount;
 
     private CompetitorAndBoatAdapter mCompetitorAdapter;
-    private CompetitorResults mDraftData;
-    private CompetitorResults mConfirmedData;
     private List<Map.Entry<Competitor, Boat>> mCompetitorData;
     private List<Map.Entry<Competitor, Boat>> mFilteredCompetitorData;
     private int mId = 0;
@@ -232,10 +235,19 @@ public class TrackingListFragment extends BaseFragment
         mComparators.add(SORT_NAME, new CompetitorNameComparator());
         mComparators.add(SORT_GOAL, new CompetitorGoalPassingComparator());
         mComparator = mComparators.get(SORT_SAIL_NUMBER);
-        mFinishedData = initializeFinishList();
-        mConfirmedData = new CompetitorResultsImpl();
-        mDraftData = new CompetitorResultsImpl();
+
+        Util.addAll(getRace().getCompetitorsAndBoats().entrySet(), mCompetitorData);
+        mFilteredCompetitorData.clear();
+        mFilteredCompetitorData.addAll(mCompetitorData);
+
+        initializeFinishList();
+        initLocalData();
+
+        deleteCompetitorsFromCompetitorList();
+
         loadCompetitors();
+        loadLeaderboardResult();
+
         if (getView() != null) {
             initCompetitorsView();
             initFinishersView();
@@ -246,11 +258,6 @@ public class TrackingListFragment extends BaseFragment
                 viewPanel(MOVE_NONE);
             }
         }
-        Util.addAll(getRace().getCompetitorsAndBoats().entrySet(), mCompetitorData);
-        mFilteredCompetitorData.clear();
-        mFilteredCompetitorData.addAll(mCompetitorData);
-        loadLeaderboardResult();
-        initLocalData();
     }
 
     private void initCompetitorsView() {
@@ -292,31 +299,15 @@ public class TrackingListFragment extends BaseFragment
                 @Override
                 public void onClick(View v) {
                     TimePoint now = MillisecondsTimePoint.now();
-                    CompetitorResults result = getCompetitorResultsDiff(mConfirmedData);
-                    getRaceState().setFinishPositioningListChanged(now, result);
-                    getRaceState().setFinishPositioningConfirmed(now, result);
+                    getRaceState().setFinishPositioningListChanged(now, getCompetitorResultsDiff(mChangedData));
+                    getRaceState().setFinishPositioningConfirmed(now, getCompetitorResultsDiff(mConfirmedData));
+                    initializeFinishList();
                     initLocalData();
                     Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
                     sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
                     sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
                 }
             });
-        }
-    }
-
-    private void initLocalData() {
-        mDraftData.clear();
-        if (getRaceState().getFinishPositioningList() != null) {
-            for (CompetitorResult item : getRaceState().getFinishPositioningList()) {
-                mDraftData.add(item);
-            }
-        }
-
-        mConfirmedData.clear();
-        if (getRaceState().getConfirmedFinishPositioningList() != null) {
-            for (CompetitorResult item : getRaceState().getConfirmedFinishPositioningList()) {
-                mConfirmedData.add(new CompetitorResultImpl(item));
-            }
         }
     }
 
@@ -351,8 +342,10 @@ public class TrackingListFragment extends BaseFragment
             getRaceState().removeChangedListener(mStateChangeListener);
         }
 
-        if (isDirty()) {
-            sendUnconfirmed();
+        //Check and send the diff of changed results
+        CompetitorResultsImpl diff = (CompetitorResultsImpl) getCompetitorResultsDiff(mChangedData);
+        if (!diff.isEmpty()) {
+            getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), diff);
         }
 
         Intent intent = new Intent(AppConstants.INTENT_ACTION_ON_LIFECYCLE);
@@ -406,25 +399,6 @@ public class TrackingListFragment extends BaseFragment
     @Override
     public void onStartDrag(RecyclerView.ViewHolder viewholder) {
         mItemTouchHelper.startDrag(viewholder);
-    }
-
-    private boolean isDirty() {
-        CompetitorResultsImpl diff = (CompetitorResultsImpl) getCompetitorResultsDiff(mConfirmedData);
-        boolean dirty = diff.size() != mDraftData.size();
-        if (!dirty) {
-            for (CompetitorResult item : getCompetitorResultsDiff(mConfirmedData)) {
-                for (CompetitorResult last : mDraftData) {
-                    if (item.getCompetitorId().equals(last) && !item.equals(last)) {
-                        dirty = true;
-                        break;
-                    }
-                }
-                if (dirty) {
-                    break;
-                }
-            }
-        }
-        return dirty;
     }
 
     private void setPublishButton() {
@@ -557,7 +531,7 @@ public class TrackingListFragment extends BaseFragment
         return DataManager.create(getActivity()).getDataStore().getDomainFactory().getCompetitorAndBoatStore();
     }
 
-    private CompetitorResultsList<CompetitorResultWithIdImpl> initializeFinishList() {
+    private void initializeFinishList() {
         CompetitorResultsList<CompetitorResultWithIdImpl> positioning = new CompetitorResultsList<>(
                 Collections.synchronizedList(new ArrayList<CompetitorResultWithIdImpl>()));
         if (getRaceState() != null && getRaceState().getFinishPositioningList() != null) {
@@ -568,7 +542,24 @@ public class TrackingListFragment extends BaseFragment
         }
         Collections.sort(positioning,
                 new DefaultCompetitorResultComparator(/* lowPoint TODO where to get this from? */ true));
-        return positioning;
+        mFinishedData.clear();
+        mFinishedData.addAll(positioning);
+    }
+
+    private void initLocalData() {
+        mChangedData.clear();
+        if (getRaceState().getFinishPositioningList() != null) {
+            for (CompetitorResult item : getRaceState().getFinishPositioningList()) {
+                mChangedData.add(new CompetitorResultWithIdImpl(-1, item));
+            }
+        }
+
+        mConfirmedData.clear();
+        if (getRaceState().getConfirmedFinishPositioningList() != null) {
+            for (CompetitorResult item : getRaceState().getConfirmedFinishPositioningList()) {
+                mConfirmedData.add(new CompetitorResultWithIdImpl(-1, item));
+            }
+        }
     }
 
     @Nullable
@@ -821,17 +812,16 @@ public class TrackingListFragment extends BaseFragment
         return result;
     }
 
-    private CompetitorResults getCompetitorResultsDiff(CompetitorResults results) {
+    private CompetitorResults getCompetitorResultsDiff(CompetitorResultsList<CompetitorResultWithIdImpl> results) {
         CompetitorResults result = new CompetitorResultsImpl();
 
         // all changed items
-        for (CompetitorResult oldItem : results) {
+        for (CompetitorResultWithIdImpl oldItem : results) {
             boolean found = false;
             for (CompetitorResult newItem : mFinishedData) {
                 if (oldItem.getCompetitorId().equals(newItem.getCompetitorId())) {
-                    CompetitorResult temp = new CompetitorResultImpl(newItem);
-                    if (!oldItem.equals(temp)) {
-                        result.add(temp);
+                    if (!oldItem.equals(newItem)) {
+                        result.add(new CompetitorResultImpl(newItem));
                     }
                     found = true;
                     break;
@@ -957,7 +947,7 @@ public class TrackingListFragment extends BaseFragment
                     break;
                 }
             }
-            for (CompetitorResult saved : mDraftData) {
+            for (CompetitorResult saved : mChangedData) {
                 if (result.getCompetitorId().equals(saved.getCompetitorId())) {
                     draft = saved;
                     break;
