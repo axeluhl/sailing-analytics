@@ -109,7 +109,7 @@ public class EventImpl extends EventBaseImpl implements Event {
             for (Leaderboard lb : lbg.getLeaderboards()) {
                 //Leaderboard.getTrackedRaces() could lead to performance issues due to duplicative collection of TrackedRaces
                 for (TrackedRace tr : lb.getTrackedRaces()) {
-                    if("TRAC_TRAC".equals(tr.getTrackingConnector())){
+                    if("tracTrac".equals(tr.getTrackingConnector())){
                         return true;
                     }
                 }
