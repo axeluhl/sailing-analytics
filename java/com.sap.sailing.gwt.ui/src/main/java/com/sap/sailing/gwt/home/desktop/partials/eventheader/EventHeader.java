@@ -60,6 +60,7 @@ public class EventHeader extends Composite {
     @UiField DivElement courseAreaUi;
     @UiField FlowPanel dropdownContent;
     @UiField SharingButtons sharing;
+    @UiField AnchorElement dataByContainer;
 
     private EventViewDTO event;
     private Presenter presenter;
@@ -148,6 +149,9 @@ public class EventHeader extends Composite {
                 hide(eventLink);
             }
             hide(competitors, races, courseAreaUi, eventCategory);
+        }
+        if(!event.isTrackedByTracTrac()) {
+            hide(dataByContainer);
         }
         initTitleAndSelection(nameToShow);
     }
