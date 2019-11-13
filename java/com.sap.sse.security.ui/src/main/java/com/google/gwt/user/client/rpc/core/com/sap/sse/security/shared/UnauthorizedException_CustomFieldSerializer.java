@@ -1,9 +1,10 @@
-package com.sap.sse.security.shared;
+package com.google.gwt.user.client.rpc.core.com.sap.sse.security.shared;
 
 import com.google.gwt.user.client.rpc.CustomFieldSerializer;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
+import com.sap.sse.security.shared.UnauthorizedException;
 
 public class UnauthorizedException_CustomFieldSerializer extends CustomFieldSerializer<UnauthorizedException> {
     @Override

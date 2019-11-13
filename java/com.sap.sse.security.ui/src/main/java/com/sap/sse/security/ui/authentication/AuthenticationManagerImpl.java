@@ -258,9 +258,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
                     userService.removeUserStatusEventHandler(this);
                     hideUserHintCallback.run();
                 } else {
-                    if (!userService.wasUserRecentlyLoggedInOrDismissedTheHint()) {
-                        showUserHintCallback.accept(userService::setUserLoginHintToStorage);
-                    }
+                    userService.runIfUserWasNotRecentlyLoggedInOrDismissedTheHint(()->showUserHintCallback.accept(userService::setUserLoginHintToStorage));
                 }
             }
         }, true);

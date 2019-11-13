@@ -32,7 +32,7 @@ public class CircleVectorGraphics extends BoatClassVectorGraphics {
         return 10;
     }
 
-    public double getMinBeamLengthInPx() {
+    public double getMinBeamInPx() {
         return 10;
     }
 
