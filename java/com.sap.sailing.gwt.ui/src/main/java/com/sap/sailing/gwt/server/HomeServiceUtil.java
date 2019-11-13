@@ -311,6 +311,7 @@ public final class HomeServiceUtil {
         dto.setBaseURL(baseURL.toString());
         dto.setOnRemoteServer(onRemoteServer);
         dto.setStageType(stageType);
+        dto.setTrackedByTracTrac(event.isTrackedByTracTrac());
         dto.setStageImageURL(useTeaserImage ? findEventThumbnailImageUrlAsString(event) : getStageImageURLAsString(event));
         return dto;
     }

@@ -1995,7 +1995,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public RaceboardDataDTO getRaceboardData(String regattaName, String raceName, String leaderboardName,
             String leaderboardGroupName, UUID eventId) {
         RaceboardDataDTO result = new RaceboardDataDTO(null, false, false, Collections.emptyList(),
-                Collections.emptyList(), null);
+                Collections.emptyList(), null, false);
         RaceWithCompetitorsAndBoatsDTO raceDTO = null;
         Regatta regatta = getService().getRegattaByName(regattaName);
         if (regatta != null) {
@@ -2051,8 +2051,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     StrippedLeaderboardDTOWithSecurity leaderboardDTO = createStrippedLeaderboardDTOWithSecurity(
                             leaderboard, false,
                             false);
+                    boolean isTrackedByTracTrac = event.isTrackedByTracTrac();
                     result = new RaceboardDataDTO(raceDTO, isValidLeaderboardGroup, isValidEvent,
-                            detailTypesForCompetitorChart, availableDetailTypesForLeaderboard, leaderboardDTO);
+                            detailTypesForCompetitorChart, availableDetailTypesForLeaderboard, leaderboardDTO, isTrackedByTracTrac);
                 }
             }
         }
