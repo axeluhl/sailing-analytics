@@ -41,6 +41,7 @@ public interface EventHeaderResources extends SharedDesktopResources {
         String eventheader_status();
         String eventheader_status_title();
         String eventheader_status_body();
+        String eventheader_tractrac_logo();
         String locationicon();
         String eventnavigation();
         String eventnavigationnormal();

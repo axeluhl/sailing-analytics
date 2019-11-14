@@ -46,10 +46,9 @@
             <span ui:field="eventVenue"></span>
           </div>
           <a ui:field="eventLink" class="{local_res.css.eventheader_intro_details_item}"></a>
-          <a target="_blank" href="https://www.tractrac.com/" ui:field="dataByContainer">
-            <span class="">data by</span>
-            <span class="" >TracTrac</span>
-          </a> 
+          <a ui:field="tractracLogoContainer" target="_blank"  href="https://www.tractrac.com" class="{local_res.css.eventheader_intro_details_item}">
+            <img src="http://www.dev.tractrac.com/web/wp-content/themes/pivot/style/img/logo-light.png" class="{local_res.css.eventheader_tractrac_logo}"></img>
+          </a>
           <!-- IFEND event.venue && event.eventType !== 'multi-regatta-event' -->
           <!-- IF event.eventType === 'multi-regatta-event' -->
           <div ui:field="competitors" class="{local_res.css.eventheader_intro_details_item}" />

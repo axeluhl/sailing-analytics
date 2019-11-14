@@ -191,6 +191,9 @@
 .eventheader_status_body {
   font-size: 1rem;
 }
+.eventheader_tractrac_logo{
+ height: 1em !important;
+}
 .locationicon {
   vertical-align: text-bottom;
   margin-right: 0.333333333333333em;
@@ -265,3 +268,4 @@
 .eventnavigation .navbar_button {
   font-size: 1.2rem;
 }
+
