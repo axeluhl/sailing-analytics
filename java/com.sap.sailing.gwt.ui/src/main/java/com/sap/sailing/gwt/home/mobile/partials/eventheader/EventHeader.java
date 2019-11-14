@@ -28,6 +28,10 @@ public class EventHeader extends Composite {
     @UiField AnchorElement eventLogoUi;
     @UiField DivElement eventDateUi;
     @UiField DivElement eventLocationUi;
+    @UiField DivElement eventHeader;
+    @UiField AnchorElement tractracLogoContainer;
+    
+    
 
     public EventHeader(EventViewDTO event, String optionalRegattaDisplayName, PlaceNavigation<?> logoNavigation) {
         EventHeaderResources.INSTANCE.css().ensureInjected();
@@ -47,6 +51,11 @@ public class EventHeader extends Composite {
         LogoUtil.setEventLogo(eventLogoUi, event);
         if(logoNavigation != null) {
             logoNavigation.configureAnchorElement(eventLogoUi);
+        }
+        if(event.isTrackedByTracTrac()) {
+            eventHeader.addClassName("eventheader_with_logo");
+        }else {
+            tractracLogoContainer.removeFromParent();
         }
         eventDateUi.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate()));
         eventLocationUi.setInnerText(event.getLocationAndVenueAndCountry());

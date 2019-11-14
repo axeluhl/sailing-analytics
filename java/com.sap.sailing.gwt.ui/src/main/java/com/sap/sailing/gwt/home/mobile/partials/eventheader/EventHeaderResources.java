@@ -12,6 +12,7 @@ public interface EventHeaderResources extends ClientBundle {
 
     public interface LocalCss extends CssResource {
         String eventheader();
+        String eventheader_with_logo();
         String eventheader_info_subtitle();
 
         String eventheader_info();
@@ -23,5 +24,7 @@ public interface EventHeaderResources extends ClientBundle {
         String eventheader_info_subtitle_info();
         String eventheader_info_subtitle_info_date();
         String eventheader_info_subtitle_info_location();
+        String eventheader_info_subtitle_tractrac_logo();
+        String eventheader_info_subtitle_tractrac_logo_container();
     }
 }

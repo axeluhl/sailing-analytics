@@ -8,7 +8,7 @@
 
 	<g:HTMLPanel>
 		<div class="{res.mediaCss.grid}">
-			<div class="{local_res.css.eventheader} {res.mediaCss.small12} {res.mediaCss.columns}">
+			<div ui:field="eventHeader" class="{local_res.css.eventheader} {res.mediaCss.small12} {res.mediaCss.columns}">
 				<div class="{local_res.css.eventheader_info} {res.mediaCss.small12} {res.mediaCss.columns}">
 					<div class="{local_res.css.eventheader_info_title}">
 						<!-- IF event.name -->
@@ -40,6 +40,9 @@
 						</div>
 					</div>
 				</div>
+					<a ui:field="tractracLogoContainer"  href="https://www.tractrac.com" class="{local_res.css.eventheader_info_subtitle_tractrac_logo_container}">
+					     <img src="http://www.dev.tractrac.com/web/wp-content/themes/pivot/style/img/logo-light.png" class="{local_res.css.eventheader_info_subtitle_tractrac_logo}"></img>
+					</a>
 			</div>
 		</div>
 	</g:HTMLPanel>

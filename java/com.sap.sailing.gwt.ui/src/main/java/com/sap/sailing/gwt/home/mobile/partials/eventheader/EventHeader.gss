@@ -8,7 +8,11 @@
      -moz-transition: top 0.3s ease-in-out;
           transition: top 0.3s ease-in-out;
 }
+.eventheader_with_logo{
+ padding-bottom: 1.5em;
+}
 .eventheader_info {
+ 
   padding: 0.666666666666667em 0 0 0.666666666666667em;
 }
 .eventheader_info_title {
@@ -52,4 +56,13 @@
 }
 .eventheader_info_subtitle_info_location {
   visibility: visible;
+}
+.eventheader_info_subtitle_tractrac_logo{
+ height: 1em !important;
+}
+.eventheader_info_subtitle_tractrac_logo_container{
+ position:absolute;
+ bottom:0.25em;
+ right:0.25em;
+ display: inline-block;
 }
