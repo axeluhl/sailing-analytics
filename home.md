@@ -140,6 +140,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 
 ## Projects
 * [[Analytics on a stick|wiki/projects/analytics-on-a-stick]]
+* [[Consolidating User Stores (bug 4006 / 4018)|wiki/projects/consolidating-user-stores]]
 
 ## Events and Planning
 * [[Project Planning (bigger development)|wiki/events/planning]]
