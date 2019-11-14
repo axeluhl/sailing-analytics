@@ -82,13 +82,13 @@ public class OfflineDataManager extends DataManager {
         final TimePoint endDate = new MillisecondsTimePoint(cal.getTimeInMillis());
 
         dataStore.addEvent(new StrippedEventImpl("Extreme Sailing Series 2012 (Cardiff)", startDate, endDate, "Cardiff",
-                true, UUID.randomUUID(), Collections.<LeaderboardGroupBase> emptySet(), null));
+                true, UUID.randomUUID(), Collections.<LeaderboardGroupBase> emptySet(), false));
         dataStore.addEvent(new StrippedEventImpl("Extreme Sailing Series 2012 (Nice)", startDate, endDate, "Nice", true,
-                UUID.randomUUID(), Collections.<LeaderboardGroupBase> emptySet(), null));
+                UUID.randomUUID(), Collections.<LeaderboardGroupBase> emptySet(), false));
         dataStore.addEvent(new StrippedEventImpl("Extreme Sailing Series 2012 (Rio)", startDate, endDate, "Rio", true,
-                UUID.randomUUID(), Collections.<LeaderboardGroupBase> emptySet(), null));
+                UUID.randomUUID(), Collections.<LeaderboardGroupBase> emptySet(), false));
         EventBase newEvent = new StrippedEventImpl("Extreme Sailing Series 2013 (Muscat)", startDate, endDate, "Muscat",
-                true, UUID.randomUUID(), Collections.<LeaderboardGroupBase> emptySet(), null);
+                true, UUID.randomUUID(), Collections.<LeaderboardGroupBase> emptySet(), false);
         newEvent.getVenue().addCourseArea(new CourseAreaImpl("Offshore", UUID.randomUUID()));
         newEvent.getVenue().addCourseArea(new CourseAreaImpl("Stadium", UUID.randomUUID()));
         dataStore.addEvent(newEvent);
