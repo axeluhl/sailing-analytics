@@ -272,6 +272,8 @@ peter:
   MANAGE_DEVICE_CONFIGURATION
 ```
 
+Cleaned up permissions as of 2019-11-15T23:50:00Z.
+
 The ``PREFERENCES`` collection can be merged based on user name, such that in case of conflicting preference key the collection to merge into will "win."
 
 Merging the ``USER_GROUPS`` collection should be straightforward. They will be copied if they don't exist on the importing side. Should a user group with the same ID exist, their set of users will be merged and their set of roles will be merged.
