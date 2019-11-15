@@ -178,11 +178,11 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
                 contextUpdatePermissionCheck, this::suggestCertificates);
         suggestCertificatesButton.ensureDebugId("SuggestCertificatesButton");
         // TABLE - Boats
-        CaptionPanel boatCaptionPanel = new CaptionPanel("Boats");
+        CaptionPanel boatCaptionPanel = new CaptionPanel(stringMessages.boats());
         boatCaptionPanel.add(boatTable);
         tablesPanel.setWidget(0, 0, boatCaptionPanel);
         // TABLE - Certificates
-        CaptionPanel certificatesCaptionPanel = new CaptionPanel("Certificates");
+        CaptionPanel certificatesCaptionPanel = new CaptionPanel(stringMessages.certificates());
         certificatesCaptionPanel.add(certificateTable);
         wireSelectionModels();
         tablesPanel.setWidget(0, 1, certificatesCaptionPanel);
