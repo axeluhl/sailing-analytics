@@ -241,12 +241,43 @@ for i in */env.sh; do cat $i | grep "\(MONGODB_URI\)\|\(MONGODB_NAME\)" |  grep 
 
 ## Strategy and Approach for Merging the Collections
 
-As the starting point we should use the ``winddb`` ARCHIVE server's MongoDB collections ``USERS``, ``PREFERENCES``, and ``USER_GROUPS``. We will ignore all databases from inactive servers, including all content archived during the end of the 2019 season.
+As the starting point we should use the ``winddb`` ARCHIVE server's MongoDB collections ``USERS``, ``PREFERENCES``, and ``USER_GROUPS``. We will ignore all databases from inactive servers, including all content archived during the end of the 2019 season. Further collections to consider are the ``ACCESS_CONTROL_LIST`` and ``OWNERSHIPS`` collections.
 
 Remaining to be added to the ``winddb`` content are the same collections from all active, non-isolated servers (see above).
 
 ### Algorithm for Merging
 
-Start with the ``USERS`` collection of the database to be merged. For each username check if that name already exists in the target collection into which to merge. If so, log this and compare the e-mail addresses. If they do not match, it is not clear the records belong to the same subject, and no merge attempt will be made. Otherwise, the merge process will consider the ``ROLE_IDS`` and ``PERMISSIONS`` fields, as well as the ``DEFAULT_TENANT_IDS`` field. For the role assignments we will make sure that no unqualified assignments are merged. Furthermore, a role referenced in the ``ROLE_IDS`` will only be merged if the role's ID exists in the target's ``ROLE_DEFINITIONS`` collection. According to the research above, only ``user``, ``admin`` and ``moderator`` assignments seem to exist and those are pre-defined roles that will exist in the target with the same IDs.
+Start with the ``USERS`` collection of the database to be merged. For each username check if that name already exists in the target collection into which to merge. If no, copy the record. If yes, log this and compare the e-mail addresses. If they do not match, log this because it is not clear the records belong to the same subject, and no merge attempt will be made. Otherwise, the merge process will consider the ``ROLE_IDS`` and ``PERMISSIONS`` fields, as well as the ``DEFAULT_TENANT_IDS`` field and will set the ``EMAIL_VALIDATED`` field to ``true`` if either one of the two was ``true``. For the role assignments we will make sure that no unqualified assignments are merged. Furthermore, a role referenced in the ``ROLE_IDS`` will only be merged if the role's ID exists in the target's ``ROLE_DEFINITIONS`` collection. According to the research above, only ``user``, ``admin`` and ``moderator`` assignments seem to exist and those are pre-defined roles that will exist in the target with the same IDs. During a merge we won't touch the account and password information. Users affected by a merge will therefore end up with the username/password combination they have on the ARCHIVE server. Should that be different and should they have forgotten, they can still recover the password.
 
-Before merging a permission into the ``PERMISSIONS`` array of the ``USERS`` collection we have to ensure proper qualification. The ``SERVER:DATAMINING`` permission must be constrained to the server name from where the record is being merged. This can easiest be established by stepping through the permissions granted on the active servers to be merged. Only 49er, HNV, my, NOR, sailracer, SRV and VSAW have such records, and I'll qualify or remove any unqualified permissions. (Side note: currently, due to bug 5156 it is not possible to remove those erroneous permission assignments.)
+Before merging a permission into the ``PERMISSIONS`` array of the ``USERS`` collection we have to ensure proper qualification. The ``SERVER:DATAMINING`` permission must be constrained to the server name from where the record is being merged. This can easiest be established by stepping through the permissions granted on the active servers to be merged. Only 49er, HNV, my, NOR, sailracer, SRV and VSAW have such records, and I'll qualify or remove any unqualified permissions. (Side note: currently, due to bug 5156 it is not possible to remove those erroneous permission assignments. However, a fix is underway with commit 841893528be759d11f776bb1c437e61ffc66dccf and as soon as a release becomes available we can upgrade the servers that require it.)
+
+Remaining permissions to clean up:
+
+```
+ ====== HNV =====
+Johannes.Hellmich:
+  admin
+ ====== NOR =====
+saillogic:
+  manage_device_configuration:*
+  leaderboard:update:*
+ ====== sailracer =====
+Kai:
+  admin
+ ====== SRV =====
+Max:
+  Admin
+ ====== VSAW =====
+peter:
+  MANAGE_DEVICE_CONFIGURATION
+```
+
+The ``PREFERENCES`` collection can be merged based on user name, such that in case of conflicting preference key the collection to merge into will "win."
+
+Merging the ``USER_GROUPS`` collection should be straightforward. They will be copied if they don't exist on the importing side. Should a user group with the same ID exist, their set of users will be merged and their set of roles will be merged.
+
+``OWNERSHIPS`` and ``ACCESS_CONTROL_LISTS`` need to be checked for conflicts in object IDs first... TODO
+
+## Open Issues
+
+Should we implement a migration of Local Storage properties? If a server is configured to use a cross-domain storage and under the application origin's local storage there exist one or more properties, should we make an effort to copy those into the shared cross-domain storage? How to resolve conflicts there?
