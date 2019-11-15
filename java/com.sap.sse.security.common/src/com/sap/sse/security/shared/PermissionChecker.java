@@ -307,7 +307,7 @@ public class PermissionChecker {
         final Set<String> effectiveIdPartsToCheck;
         if (isIdPartWildcard) {
             effectiveIdPartsToCheck = Collections.singleton("");
-        } else if(expandToSingleIds) {
+        } else if (expandToSingleIds) {
             effectiveIdPartsToCheck = idParts;
         } else {
             effectiveIdPartsToCheck = Collections.singleton(Util.joinStrings(WildcardPermission.SUBPART_DIVIDER_TOKEN, idParts));
@@ -334,12 +334,13 @@ public class PermissionChecker {
                     }
                 }
             }
-
-            for (String actionPart : effectiveActionPartsToCheck) {
-                for (String idPart : effectiveIdPartsToCheck) {
-                    String idSuffix = idPart.isEmpty() ? "" : WildcardPermission.PART_DIVIDER_TOKEN + idPart;
-                    effectivePermissionsToCheck.add(new WildcardPermission(
-                            typePart + WildcardPermission.PART_DIVIDER_TOKEN + actionPart + idSuffix));
+            if (effectiveActionPartsToCheck != null) {
+                for (String actionPart : effectiveActionPartsToCheck) {
+                    for (String idPart : effectiveIdPartsToCheck) {
+                        String idSuffix = idPart.isEmpty() ? "" : WildcardPermission.PART_DIVIDER_TOKEN + idPart;
+                        effectivePermissionsToCheck.add(new WildcardPermission(
+                                typePart + WildcardPermission.PART_DIVIDER_TOKEN + actionPart + idSuffix));
+                    }
                 }
             }
         }
