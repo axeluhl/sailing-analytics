@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
@@ -19,7 +20,7 @@ import com.sap.sse.common.impl.NamedWithUUIDImpl;
 public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTemplate {
     private static final long serialVersionUID = -183875832585632806L;
 
-    private final Iterable<MarkTemplate> marks;
+    private final Set<MarkTemplate> marks;
     
     private final ArrayList<WaypointTemplate> waypoints;
     
@@ -53,11 +54,10 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
         if (optionalRepeatablePart != null) {
             optionalRepeatablePart.validateRepeatablePartForSequence(waypoints);
         }
-        final Set<MarkTemplate> theMarks = new HashSet<>();
-        Util.addAll(marks, theMarks);
         this.waypoints = new ArrayList<>();
         Util.addAll(waypoints, this.waypoints);
-        this.marks = theMarks;
+        this.marks = new HashSet<>();
+        Util.addAll(marks, this.marks);
         this.optionalImageURL = optionalImageURL;
         this.optionalRepeatablePart = optionalRepeatablePart;
         this.associatedRoles = new HashMap<>(associatedRoles);
@@ -82,6 +82,18 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     @Override
     public Iterable<MarkTemplate> getMarkTemplates() {
         return marks;
+    }
+    
+    @Override
+    public MarkTemplate getMarkTemplateByIdIfContainedInCourseTemplate(UUID markTemplateId) {
+        MarkTemplate result = null;
+        for (MarkTemplate markTemplate : marks) {
+            if (markTemplate.getId().equals(markTemplateId)) {
+                result = markTemplate;
+                break;
+            }
+        }
+        return result;
     }
 
     @Override
@@ -113,6 +125,28 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     @Override
     public Map<MarkTemplate, MarkRole> getAssociatedRoles() {
         return associatedRoles;
+    }
+
+    @Override
+    public Map<MarkTemplate, MarkRole> getMarkTemplatesWithOptionalRoles() {
+        return marks.stream().collect(Collectors.toMap(mc -> mc, associatedRoles::get));
+    }
+
+    @Override
+    public MarkRole getOptionalAssociatedRole(MarkTemplate markTemplate) {
+        return associatedRoles.get(markTemplate);
+    }
+
+    @Override
+    public MarkRole getMarkRoleByIdIfContainedInCourseTemplate(UUID markRoleId) {
+        MarkRole result = null;
+        for (MarkRole markRole : associatedRoles.values()) {
+            if (markRole.getId().equals(markRoleId)) {
+                result = markRole;
+                break;
+            }
+        }
+        return result;
     }
 
     public void setAssociatedRoles(Map<MarkTemplate, MarkRole> associatedRoles) {

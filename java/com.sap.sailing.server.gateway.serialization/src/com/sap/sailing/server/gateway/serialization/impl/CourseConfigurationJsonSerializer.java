@@ -69,7 +69,8 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
         }
         final Map<MarkConfiguration, UUID> markConfigurationsToTempIdMap = new HashMap<>();
         final JSONArray markConfigurationsJSON = new JSONArray();
-        for (final MarkConfiguration markConfiguration : courseConfiguration.getAllMarks()) {
+        for (Map.Entry<MarkConfiguration, IsMarkRole> markWithOptionalRole : courseConfiguration.getAllMarksWithOptionalRoles().entrySet()) {
+            final MarkConfiguration markConfiguration = markWithOptionalRole.getKey();
             JSONObject markConfigurationsEntry = new JSONObject();
             final UUID markConfigurationId = UUID.randomUUID();
             markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_ID, markConfigurationId.toString());
@@ -77,7 +78,7 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
                 markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_TEMPLATE_ID,
                         markConfiguration.getOptionalMarkTemplate().getId().toString());
             }
-            final IsMarkRole associatedRole = courseConfiguration.getAssociatedRoles().get(markConfiguration);
+            final IsMarkRole associatedRole = markWithOptionalRole.getValue();
             if (associatedRole != null) {
                 markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE, associatedRole.getName());
                 if (associatedRole instanceof MarkRole) {

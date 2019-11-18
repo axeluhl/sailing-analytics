@@ -46,6 +46,8 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
      */
     Iterable<MarkTemplate> getMarkTemplates();
     
+    MarkTemplate getMarkTemplateByIdIfContainedInCourseTemplate(UUID markTemplateId);
+    
     Iterable<MarkTemplate> getMarkTemplatesInWaypoints();
 
     /**
@@ -70,6 +72,12 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
     Iterable<WaypointTemplate> getWaypointTemplates();
 
     Map<MarkTemplate, MarkRole> getAssociatedRoles();
+    
+    Map<MarkTemplate, MarkRole> getMarkTemplatesWithOptionalRoles();
+    
+    MarkRole getOptionalAssociatedRole(MarkTemplate markTemplate);
+    
+    MarkRole getMarkRoleByIdIfContainedInCourseTemplate(UUID markRoleId);
     
     URL getOptionalImageURL();
 

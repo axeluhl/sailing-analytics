@@ -124,12 +124,8 @@ public class CourseConfigurationBuilder {
     private MarkTemplate resolveMarkTemplateByID(UUID markTemplateID) {
         MarkTemplate resolvedMarkTemplate = null;
         if (optionalCourseTemplate != null) {
-            for (MarkTemplate markTemplate : optionalCourseTemplate.getMarkTemplates()) {
-                if (markTemplate.getId().equals(markTemplateID)) {
-                    resolvedMarkTemplate = markTemplate;
-                    break;
-                }
-            }
+            resolvedMarkTemplate = optionalCourseTemplate
+                    .getMarkTemplateByIdIfContainedInCourseTemplate(markTemplateID);
         }
         if (resolvedMarkTemplate == null) {
             resolvedMarkTemplate = sharedSailingData.getMarkTemplateById(markTemplateID);
@@ -140,12 +136,7 @@ public class CourseConfigurationBuilder {
     private MarkRole resolveMarkRoleByID(UUID markRoleID) {
         MarkRole resolvedMarkRole = null;
         if (optionalCourseTemplate != null) {
-            for (MarkRole markRole : optionalCourseTemplate.getAssociatedRoles().values()) {
-                if (markRole.getId().equals(markRoleID)) {
-                    resolvedMarkRole = markRole;
-                    break;
-                }
-            }
+            resolvedMarkRole = optionalCourseTemplate.getMarkRoleByIdIfContainedInCourseTemplate(markRoleID);
         }
         if (resolvedMarkRole == null) {
             resolvedMarkRole = sharedSailingData.getMarkRoleById(markRoleID);

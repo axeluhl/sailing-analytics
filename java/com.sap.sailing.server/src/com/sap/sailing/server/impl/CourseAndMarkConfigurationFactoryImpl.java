@@ -221,14 +221,14 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         if (markRoleId == null) {
             return null;
         }
+        MarkRole markRole = null;
         if (optionalCourseTemplate != null) {
-            for (MarkRole markRoleInCourseTemplate : optionalCourseTemplate.getAssociatedRoles().values()) {
-                if (markRoleInCourseTemplate.getId().equals(markRoleId)) {
-                    return markRoleInCourseTemplate;
-                }
-            }
+            markRole = optionalCourseTemplate.getMarkRoleByIdIfContainedInCourseTemplate(markRoleId);
         }
-        return sharedSailingData.getMarkRoleById(markRoleId);
+        if (markRole == null) {
+            markRole = sharedSailingData.getMarkRoleById(markRoleId);
+        }
+        return markRole;
     }
 
     @Override
@@ -735,7 +735,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                                 markTemplate, null, /* storeToInventory */ false);
                         markTemplatesToMarkConfigurations.put(markTemplate, markConfiguration);
                         resultingRoleMapping.put(markConfiguration,
-                                courseTemplateOrNull.getAssociatedRoles().get(markTemplate));
+                                courseTemplateOrNull.getOptionalAssociatedRole(markTemplate));
                     }
                     replaceTemplateBasedConfigurationCandidatesBySuggestedProperties(
                             markTemplatesToMarkConfigurations, allMarkConfigurations, tagsToFilterMarkProperties,
@@ -842,7 +842,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                         while (markTemplateIterator.hasNext()) {
                             final MarkTemplate markTemplate = markTemplateIterator.next();
                             final Mark mark = markIterator.next();
-                            final MarkRole roleForMarkTempalte = courseTemplate.getAssociatedRoles().get(markTemplate);
+                            final MarkRole roleForMarkTempalte = courseTemplate.getOptionalAssociatedRole(markTemplate);
                             if (roleForMarkTempalte == null) {
                                 validCourseTemplateUsage = false;
                                 break;
@@ -956,12 +956,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     private MarkTemplate resolveMarkTemplateByID(CourseTemplate courseTemplate, UUID markTemplateID) {
         MarkTemplate resolvedMarkTemplate = null;
         if (courseTemplate != null) {
-            for (MarkTemplate markTemplate : courseTemplate.getMarkTemplates()) {
-                if (markTemplate.getId().equals(markTemplateID)) {
-                    resolvedMarkTemplate = markTemplate;
-                    break;
-                }
-            }
+            resolvedMarkTemplate = courseTemplate.getMarkTemplateByIdIfContainedInCourseTemplate(markTemplateID);
         }
         if (resolvedMarkTemplate == null) {
             try {

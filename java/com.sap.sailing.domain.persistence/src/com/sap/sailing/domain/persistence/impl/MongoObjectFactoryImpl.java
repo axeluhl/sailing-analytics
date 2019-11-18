@@ -2064,10 +2064,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         
         // store mark template list including role names for those who have one defined
         final BasicDBList markTemplates = new BasicDBList();
-        courseTemplate.getMarkTemplates().forEach(m -> {
+        courseTemplate.getMarkTemplatesWithOptionalRoles().forEach((m, role) -> {
             final BasicDBObject markTemplateObject = new BasicDBObject(
                     FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ID.name(), m.getId().toString());
-            final MarkRole role = courseTemplate.getAssociatedRoles().get(m);
             if (role != null) {
                 markTemplateObject.append(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ROLE.name(), role.getId().toString());
             }

@@ -53,6 +53,8 @@ public interface CourseConfigurationBase<R extends IsMarkRole> extends WithOptio
      */
     Map<MarkConfiguration, R> getAssociatedRoles();
     
+    Map<MarkConfiguration, R> getAllMarksWithOptionalRoles();
+    
     /**
      * A {@link CourseConfigurationBase} having a {@link RepeatablePart} can optionally also specify a number of laps.
      * Depending on the use-case this can be omitted (saving a course template) or is required (creating a regatta

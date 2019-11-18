@@ -4,7 +4,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
-import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -46,9 +45,8 @@ public class CourseTemplateJsonSerializer implements JsonSerializer<CourseTempla
         result.put(FIELD_TAGS, tags);
         
         final JSONArray allMarkTemplates = new JSONArray();
-        courseTemplate.getMarkTemplates().forEach(mt -> {
+        courseTemplate.getMarkTemplatesWithOptionalRoles().forEach((mt, associatedRoleOrNull) -> {
             final JSONObject markTemplateEntry = markTemplateJsonSerializer.serialize(mt);
-            final MarkRole associatedRoleOrNull = courseTemplate.getAssociatedRoles().get(mt);
             if (associatedRoleOrNull != null) {
                 markTemplateEntry.put(FIELD_ASSOCIATED_ROLE_ID, associatedRoleOrNull.getId().toString());
             }
