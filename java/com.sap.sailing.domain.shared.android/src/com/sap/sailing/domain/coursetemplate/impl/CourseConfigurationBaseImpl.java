@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.coursetemplate.impl;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.coursetemplate.CourseConfigurationBase;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
@@ -66,7 +66,11 @@ public abstract class CourseConfigurationBaseImpl<R extends IsMarkRole> implemen
     
     @Override
     public Map<MarkConfiguration, R> getAllMarksWithOptionalRoles() {
-        return markConfigurations.stream().collect(Collectors.toMap(mc -> mc, associatedRoles::get));
+        final Map<MarkConfiguration, R> result = new HashMap<>();
+        for (MarkConfiguration mc : markConfigurations) {
+            result.put(mc, associatedRoles.get(mc));
+        }
+        return result;
     }
 
     @Override

@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
@@ -129,7 +128,11 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
 
     @Override
     public Map<MarkTemplate, MarkRole> getMarkTemplatesWithOptionalRoles() {
-        return marks.stream().collect(Collectors.toMap(mc -> mc, associatedRoles::get));
+        final Map<MarkTemplate, MarkRole> result = new HashMap<>();
+        for (MarkTemplate mt : marks) {
+            result.put(mt, associatedRoles.get(mt));
+        }
+        return result;
     }
 
     @Override
