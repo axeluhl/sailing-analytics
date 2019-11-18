@@ -2068,7 +2068,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             final BasicDBObject markTemplateObject = new BasicDBObject(
                     FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ID.name(), m.getId().toString());
             if (role != null) {
-                markTemplateObject.append(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ROLE.name(), role.getId().toString());
+                markTemplateObject.append(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ROLE_ID.name(), role.getId().toString());
             }
             markTemplates.add(markTemplateObject);
         });

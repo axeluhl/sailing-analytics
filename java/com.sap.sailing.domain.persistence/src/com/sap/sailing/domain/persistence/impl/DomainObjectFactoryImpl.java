@@ -3312,7 +3312,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         markTemplateUUID);
                 if (markTemplate != null) {
                     markTemplates.add(markTemplate);
-                    final String roleIdAsStringOrNull = entryObject.getString(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ROLE.name());
+                    final String roleIdAsStringOrNull = entryObject.getString(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ROLE_ID.name());
                     final MarkRole markRoleOrNull = roleIdAsStringOrNull == null ? null : markRoleResolver.apply(UUID.fromString(roleIdAsStringOrNull));
                     if (markRoleOrNull != null) {
                         associatedRoles.put(markTemplate, markRoleOrNull);
