@@ -142,8 +142,9 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
     @Test
     public void createCourseTemplateWithInvalidRoleMappingTest() {
         final Map<MarkTemplate, MarkRole> associatedRoles = new HashMap<>();
-        associatedRoles.put(ctdf.b4s, markRoleApi.createMarkRole(ctx, "4"));
-        associatedRoles.put(ctdf.b4p, markRoleApi.createMarkRole(ctx, "4"));
+        final MarkRole markRole = markRoleApi.createMarkRole(ctx, "4");
+        associatedRoles.put(ctdf.b4s, markRole);
+        associatedRoles.put(ctdf.b4p, markRole);
 
         final CourseTemplate courseTemplateToSave = ctdf.constructCourseTemplate(null, /* defaultNumberOfLaps */null,
                 associatedRoles);
