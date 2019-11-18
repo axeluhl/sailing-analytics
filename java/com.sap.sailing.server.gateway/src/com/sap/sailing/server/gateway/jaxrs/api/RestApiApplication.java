@@ -41,6 +41,7 @@ public class RestApiApplication extends Application {
         classes.add(MarkTemplateResource.class);
         classes.add(CourseTemplateResource.class);
         classes.add(CourseConfigurationResource.class);
+        classes.add(MarkRoleResource.class);
         
         // Exception Mappers
         classes.add(ShiroAuthorizationExceptionTo401ResponseMapper.class);
