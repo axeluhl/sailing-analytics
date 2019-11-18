@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.coursetemplate.impl;
 
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,9 +20,9 @@ public class CourseConfigurationWithMarkRolesImpl extends CourseConfigurationBas
     public CourseConfigurationWithMarkRolesImpl(CourseTemplate optionalCourseTemplate,
             Set<MarkConfiguration> markConfigurations, Map<MarkConfiguration, MarkRole> associatedRoles,
             List<WaypointWithMarkConfiguration> waypoints, RepeatablePart optionalRepeatablePart, Integer numberOfLaps,
-            String name) {
+            String name, URL optionalImageURL) {
         super(optionalCourseTemplate, markConfigurations, associatedRoles, waypoints, optionalRepeatablePart,
-                numberOfLaps, name);
+                numberOfLaps, name, optionalImageURL);
     }
 
 }

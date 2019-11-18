@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.coursetemplate;
 
+import java.net.URL;
 import java.util.Map;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -30,6 +31,8 @@ public interface CourseConfigurationBase<R extends IsMarkRole> extends WithOptio
      * delegate to the {@link CourseTemplate} returned by this method.
      */
     CourseTemplate getOptionalCourseTemplate();
+    
+    URL getOptionalImageURL();
     
     /**
      * Returns all marks that are part of this course configuration. This consists of:

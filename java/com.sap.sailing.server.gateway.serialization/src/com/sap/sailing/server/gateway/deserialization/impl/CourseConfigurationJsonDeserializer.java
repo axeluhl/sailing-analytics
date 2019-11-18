@@ -1,5 +1,7 @@
 package com.sap.sailing.server.gateway.deserialization.impl;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,13 +49,20 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
     @Override
     public CourseConfiguration deserialize(JSONObject json) throws JsonDeserializationException {
         final String name = (String) json.get(CourseConfigurationJsonSerializer.FIELD_NAME);
+        final String optionalImageURLAsString = (String) json.get(CourseConfigurationJsonSerializer.FIELD_OPTIONAL_IMAGE_URL);
+        URL optionalImageURL;
+        try {
+            optionalImageURL = optionalImageURLAsString == null ? null : new URL(optionalImageURLAsString);
+        } catch (MalformedURLException e) {
+            throw new JsonDeserializationException(e);
+        }
         final String courseTemplateIdString = (String) json.get(CourseConfigurationJsonSerializer.FIELD_OPTIONAL_COURSE_TEMPLATE_UUID);
         CourseTemplate optionalCourseTemplate = null;
         if (courseTemplateIdString != null && !courseTemplateIdString.isEmpty()) {
             optionalCourseTemplate = sharedSailingData.getCourseTemplateById(UUID.fromString(courseTemplateIdString));
         }
         CourseConfigurationBuilder builder = new CourseConfigurationBuilder(sharedSailingData, regatta, optionalCourseTemplate,
-                name, positionResolver);
+                name, optionalImageURL, positionResolver);
 
         final Map<UUID, MarkConfiguration> markConfigurationsByID = new HashMap<UUID, MarkConfiguration>();
         final JSONArray markConfigurationsJSON = (JSONArray) json

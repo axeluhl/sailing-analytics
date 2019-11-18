@@ -1,6 +1,5 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -59,7 +58,6 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
     private final Function<DeviceIdentifier, Position> positionResolver;
 
     public static final String FIELD_TAGS = "tags";
-    public static final String FIELD_OPTIONAL_IMAGE_URL = "optionalImageUrl";
 
     public CourseConfigurationResource() {
         courseConfigurationJsonSerializer = new CourseConfigurationJsonSerializer();
@@ -207,14 +205,9 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
 
         final Iterable<String> tags = Arrays
                 .asList(ArrayUtils.nullToEmpty((String[]) ((JSONObject) parsedObject).get(FIELD_TAGS)));
-        final String optionalImageURLStr = (String) ((JSONObject) parsedObject).get(FIELD_OPTIONAL_IMAGE_URL);
-        
-        final URL optionalImageURL = optionalImageURLStr != null && !optionalImageURLStr.isEmpty()
-                ? new URL(optionalImageURLStr)
-                : null;
 
         final CourseConfiguration courseTemplate = getService().getCourseAndMarkConfigurationFactory()
-                .createCourseTemplateAndUpdatedConfiguration(courseConfiguration, tags, optionalImageURL);
+                .createCourseTemplateAndUpdatedConfiguration(courseConfiguration, tags);
         final String jsonString = courseConfigurationJsonSerializer.serialize(courseTemplate).toJSONString();
         return Response.ok(jsonString).build();
     }

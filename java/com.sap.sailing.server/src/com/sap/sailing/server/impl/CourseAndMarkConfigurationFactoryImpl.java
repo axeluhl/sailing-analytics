@@ -195,9 +195,11 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 courseConfiguration.getWaypoints(), courseConfiguration.getAssociatedRoles(),
                 effectiveConfigurations);
         return new CourseConfigurationWithMarkRolesImpl(courseConfiguration.getOptionalCourseTemplate(),
-                new HashSet<>(effectiveConfigurations.values()), ensureMarkRoles(waypointConfigurationMapper.explicitAssociatedRoles),
+                new HashSet<>(effectiveConfigurations.values()),
+                ensureMarkRoles(waypointConfigurationMapper.explicitAssociatedRoles),
                 waypointConfigurationMapper.effectiveWaypoints, courseConfiguration.getRepeatablePart(),
-                courseConfiguration.getNumberOfLaps(), courseConfiguration.getName());
+                courseConfiguration.getNumberOfLaps(), courseConfiguration.getName(),
+                courseConfiguration.getOptionalImageURL());
     }
 
     private <C> Map<C, MarkRole> ensureMarkRoles(
@@ -233,7 +235,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
 
     @Override
     public CourseConfiguration createCourseTemplateAndUpdatedConfiguration(
-            final CourseConfiguration courseConfiguration, Iterable<String> tags, URL optionalImageUrl) {
+            final CourseConfiguration courseConfiguration, Iterable<String> tags) {
         final CourseConfigurationWithMarkRoles courseConfigurationAfterInventory = handleSaveToInventory(courseConfiguration);
         
         final Map<MarkConfiguration, MarkTemplate> markTemplatesByMarkConfigurations = new HashMap<>();
@@ -318,13 +320,13 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         
         final CourseTemplate newCourseTemplate = sharedSailingData.createCourseTemplate(courseConfigurationAfterInventory.getName(), new HashSet<>(markTemplatesByMarkConfigurations.values()),
                 waypointTemplateMapper.effectiveWaypoints, ensureMarkRoles(waypointTemplateMapper.allAssociatedRoles), courseConfigurationAfterInventory.getRepeatablePart(),
-                tags, optionalImageUrl,
+                tags, courseConfigurationAfterInventory.getOptionalImageURL(),
                 courseConfigurationAfterInventory.getNumberOfLaps());
         return new CourseConfigurationImpl(newCourseTemplate,
                 new HashSet<>(marksConfigurationsMapping.values()),
                 waypointConfigurationMapper.allAssociatedRoles, waypointConfigurationMapper.effectiveWaypoints, courseConfigurationAfterInventory.getRepeatablePart(),
                 courseConfigurationAfterInventory.getNumberOfLaps(),
-                courseConfigurationAfterInventory.getName());
+                courseConfigurationAfterInventory.getName(), courseConfigurationAfterInventory.getOptionalImageURL());
     }
     
     private void recordUsagesForMarkProperties(Iterable<WaypointWithMarkConfiguration> waypoints,
@@ -660,7 +662,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 courseTemplate, markTemplatesToMarkConfigurations);
         return new CourseConfigurationImpl(courseTemplate, allMarkConfigurations, resultingRoleMapping,
                 resultingWaypoints, courseTemplate.getRepeatablePart(), courseTemplate.getDefaultNumberOfLaps(),
-                courseTemplate.getName());
+                courseTemplate.getName(), courseTemplate.getOptionalImageURL());
     }
 
     private Map<MarkConfiguration, IsMarkRole> createRoleMappingWithMarkTemplateMapping(CourseTemplate courseTemplate,
@@ -717,6 +719,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         }
         
         String name = null;
+        URL optionalImageURL = null;
         final List<WaypointWithMarkConfiguration> resultingWaypoints = new ArrayList<>();
         RepeatablePart optionalRepeatablePart = null;
         Integer numberOfLaps = null;
@@ -726,6 +729,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             final CourseToCourseTemplateMapper mapper = new CourseToCourseTemplateMapper(course, courseTemplateOrNull, markConfigurationsByMark);
             if (mapper.validCourseTemplateUsage) {
                 name = courseTemplateOrNull.getName();
+                optionalImageURL = courseTemplateOrNull.getOptionalImageURL();
                 final Map<MarkTemplate, MarkConfiguration> markTemplatesToMarkConfigurations = new HashMap<>();
                 markTemplatesToMarkConfigurations.putAll(mapper.markTemplatesToMarkConfigurations);
                 
@@ -777,7 +781,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         }
 
         return new CourseConfigurationImpl(courseTemplateOrNull, allMarkConfigurations, resultingRoleMapping,
-                resultingWaypoints, optionalRepeatablePart, numberOfLaps, name);
+                resultingWaypoints, optionalRepeatablePart, numberOfLaps, name, optionalImageURL);
     }
     
     private Map<Mark, RegattaMarkConfiguration> createMarkConfigurationsForRegatta(Regatta regatta, CourseTemplate courseTemplate) {

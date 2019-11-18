@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.coursetemplate.impl;
 
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,13 +23,13 @@ public abstract class CourseConfigurationBaseImpl<R extends IsMarkRole> implemen
     private final Map<MarkConfiguration, R> associatedRoles;
     private final List<WaypointWithMarkConfiguration> waypoints;
     private final RepeatablePart optionalRepeatablePart;
+    private final Integer numberOfLaps;
     private final String name;
-
-    private Integer numberOfLaps;
+    private final URL optionalImageURL;
     
     public CourseConfigurationBaseImpl(CourseTemplate optionalCourseTemplate, Set<MarkConfiguration> markConfigurations,
             Map<MarkConfiguration, R> associatedRoles, List<WaypointWithMarkConfiguration> waypoints,
-            RepeatablePart optionalRepeatablePart, Integer numberOfLaps, String name) {
+            RepeatablePart optionalRepeatablePart, Integer numberOfLaps, String name, URL optionalImageURL) {
         super();
         this.optionalCourseTemplate = optionalCourseTemplate;
         this.markConfigurations = markConfigurations;
@@ -37,6 +38,7 @@ public abstract class CourseConfigurationBaseImpl<R extends IsMarkRole> implemen
         this.optionalRepeatablePart = optionalRepeatablePart;
         this.numberOfLaps = numberOfLaps;
         this.name = name;
+        this.optionalImageURL = optionalImageURL;
     }
 
     @Override
@@ -97,4 +99,8 @@ public abstract class CourseConfigurationBaseImpl<R extends IsMarkRole> implemen
         return this.name;
     }
 
+    @Override
+    public URL getOptionalImageURL() {
+        return optionalImageURL;
+    }
 }

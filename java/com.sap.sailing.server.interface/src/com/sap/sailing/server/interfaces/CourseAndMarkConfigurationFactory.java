@@ -1,6 +1,5 @@
 package com.sap.sailing.server.interfaces;
 
-import java.net.URL;
 import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -71,7 +70,7 @@ public interface CourseAndMarkConfigurationFactory {
      *         {@link CourseTemplate} obtained from {@link CourseConfiguration#getOptionalCourseTemplate()}.
      */
     CourseConfiguration createCourseTemplateAndUpdatedConfiguration(CourseConfiguration courseWithMarkConfiguration,
-            Iterable<String> tags, URL optionalImageUrl);
+            Iterable<String> tags);
 
     /**
      * Creates a {@link CourseConfiguration} from a {@link CourseTemplate}. The resulting waypoint sequence is

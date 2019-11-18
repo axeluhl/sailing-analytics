@@ -1,5 +1,6 @@
 package com.sap.sailing.server.gateway.deserialization.impl;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,6 +61,7 @@ public class CourseConfigurationBuilder {
     private final Regatta optionalRegatta;
     private final CourseTemplate optionalCourseTemplate;
     private final String name;
+    private final URL optionalImageUrl;
     // TODO decide if we should combine markConfigurations and roleMapping to one field
     private Set<MarkConfiguration> markConfigurations = new HashSet<>();
     private Map<MarkConfiguration, IsMarkRole> associatedRoles = new HashMap<>();
@@ -70,11 +72,12 @@ public class CourseConfigurationBuilder {
     private final Function<DeviceIdentifier, Position> positionResolver;
 
     public CourseConfigurationBuilder(SharedSailingData sharedSailingData, Regatta optionalRegatta,
-            CourseTemplate optionalCourseTemplate, String name, Function<DeviceIdentifier, Position> positionResolver) {
+            CourseTemplate optionalCourseTemplate, String name, URL optionalImageUrl, Function<DeviceIdentifier, Position> positionResolver) {
         this.sharedSailingData = sharedSailingData;
         this.optionalRegatta = optionalRegatta;
         this.optionalCourseTemplate = optionalCourseTemplate;
         this.name = name;
+        this.optionalImageUrl = optionalImageUrl;
         this.positionResolver = positionResolver;
     }
 
@@ -249,7 +252,7 @@ public class CourseConfigurationBuilder {
 
     public CourseConfiguration build() {
         return new CourseConfigurationImpl(optionalCourseTemplate, markConfigurations, associatedRoles, waypoints,
-                optionalRepeatablePart, numberOfLaps, name);
+                optionalRepeatablePart, numberOfLaps, name, optionalImageUrl);
     }
     
     public static Positioning getPositioningIfAvailable(Regatta regatta, Mark mark, Function<DeviceIdentifier, Position> positionResolver) {
