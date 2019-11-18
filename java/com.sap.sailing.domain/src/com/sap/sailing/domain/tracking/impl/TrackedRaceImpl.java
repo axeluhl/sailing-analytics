@@ -1204,18 +1204,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     finishingTime != null ? finishingTime.asDate() : null,
                     finishedTime != null ? finishedTime.asDate() : null,
                     endTime != null ? endTime.asDate() : null,
-                    endOfTracking != null ? endOfTracking.asDate() : null);
-            Date min = minMax.getA() != null
-                    ? new Date(minMax.getA().getTime() - TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS)
-                    : null;
-            Date max = minMax.getB() != null
-                    ? new Date(minMax.getB().getTime() + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS
-                            + getDelayToLiveInMillis())
-                    : null;
+                    endOfTracking != null ? endOfTracking.asDate() : null,
+                    TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS,
+                    RaceTimesCalculationUtil.MAX_TIME_AFTER_RACE_END,
+                    TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
 
             // We are live if at is in between min and max
-            if (min != null && max != null) {
-                return !min.after(at.asDate()) && !at.asDate().after(max);
+            if (minMax.getA() != null && minMax.getB() != null) {
+                return !minMax.getA().after(at.asDate()) && !at.asDate().after(minMax.getB());
             }
         }
         return false;
