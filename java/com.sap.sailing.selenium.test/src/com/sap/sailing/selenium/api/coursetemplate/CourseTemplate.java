@@ -24,7 +24,7 @@ public class CourseTemplate extends JsonWrapper {
     private static final String FIELD_OPTIONAL_IMAGE_URL = "optionalImageURL";
     private static final String FIELD_ALL_MARK_TEMPLATES = "allMarkTemplates";
     private static final String FIELD_WAYPOINTS = "waypoints";
-    private static final String FIELD_ASSOCIATED_ROLE = "associatedRole";
+    private static final String FIELD_ASSOCIATED_ROLE_ID = "associatedRoleId";
     private static final String FIELD_OPTIONAL_REPEATABLE_PART = "optionalRepeatablePart";
     private static final String FIELD_DEFAULT_NUMBER_OF_LAPS = "defaultNumberOfLaps";
 
@@ -66,9 +66,10 @@ public class CourseTemplate extends JsonWrapper {
             final JSONObject mtJSON = (JSONObject) o;
             final MarkTemplate markTemplate = new MarkTemplate(mtJSON);
             markTemplatesById.put(markTemplate.getId(), markTemplate);
-            String roleOrNull = (String) mtJSON.get(FIELD_ASSOCIATED_ROLE);
-            if (roleOrNull != null) {
-                roleMapping.put(markTemplate, roleOrNull);
+            String roleIdOrNull = (String) mtJSON.get(FIELD_ASSOCIATED_ROLE_ID);
+            
+            if (roleIdOrNull != null) {
+                roleMapping.put(markTemplate, roleIdOrNull);
             }
         });
         allMarkTemplates = markTemplatesById.values();
@@ -105,9 +106,9 @@ public class CourseTemplate extends JsonWrapper {
         final JSONArray markTemplatesJSON = new JSONArray();
         allMarkTemplates.forEach(mt -> {
             final JSONObject markTemplateEntry = mt.getJson();
-            final String roleOrNull = roleMapping.get(mt);
-            if (roleOrNull != null) {
-                markTemplateEntry.put(FIELD_ASSOCIATED_ROLE, roleOrNull);
+            final String roleIdOrNull = roleMapping.get(mt);
+            if (roleIdOrNull != null) {
+                markTemplateEntry.put(FIELD_ASSOCIATED_ROLE_ID, roleIdOrNull);
             }
             markTemplatesJSON.add(markTemplateEntry);
         });
@@ -130,6 +131,7 @@ public class CourseTemplate extends JsonWrapper {
         if (defaultNumberOfLaps != null) {
             getJson().put(FIELD_DEFAULT_NUMBER_OF_LAPS, defaultNumberOfLaps);
         }
+        System.out.println(getJson().toJSONString());
     }
 
     public String getName() {

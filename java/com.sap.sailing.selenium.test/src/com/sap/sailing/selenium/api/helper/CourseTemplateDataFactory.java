@@ -2,13 +2,16 @@ package com.sap.sailing.selenium.api.helper;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.coursetemplate.CourseTemplate;
+import com.sap.sailing.selenium.api.coursetemplate.MarkRole;
 import com.sap.sailing.selenium.api.coursetemplate.MarkTemplate;
 import com.sap.sailing.selenium.api.coursetemplate.MarkTemplateApi;
 import com.sap.sailing.selenium.api.coursetemplate.WaypointTemplate;
@@ -22,10 +25,10 @@ public class CourseTemplateDataFactory {
     public final MarkTemplate b4p;
     public final MarkTemplate spare;
     public final List<WaypointTemplate> waypointSequence;
-    
+
     public CourseTemplateDataFactory(ApiContext ctx) {
         final MarkTemplateApi markTemplateApi = new MarkTemplateApi();
-        
+
         sb = markTemplateApi.createMarkTemplate(ctx, "Startboat", "sb", null, null, null, MarkType.STARTBOAT.name());
         pe = markTemplateApi.createMarkTemplate(ctx, "Pinend", "pe", "#000000", null, null, MarkType.BUOY.name());
         b1 = markTemplateApi.createMarkTemplate(ctx, "blue", "blue", "#0000FF", null, null, MarkType.BUOY.name());
@@ -40,18 +43,28 @@ public class CourseTemplateDataFactory {
                 new WaypointTemplate(null, PassingInstruction.Port, Arrays.asList(b1)),
                 new WaypointTemplate("Start/End", PassingInstruction.Line, Arrays.asList(sb, pe)));
     }
-    
+
     public CourseTemplate constructCourseTemplate() {
         return constructCourseTemplate(null, null);
     }
-    
-    public CourseTemplate constructCourseTemplate(Pair<Integer, Integer> optionalRepeatablePart, Integer defaultNumberOfLaps) {
+
+    public CourseTemplate constructCourseTemplate(Pair<Integer, Integer> optionalRepeatablePart,
+            Integer defaultNumberOfLaps) {
         return this.constructCourseTemplate(optionalRepeatablePart, defaultNumberOfLaps, Collections.emptyMap());
     }
-    
-    public CourseTemplate constructCourseTemplate(Pair<Integer, Integer> optionalRepeatablePart, Integer defaultNumberOfLaps, Map<MarkTemplate, String> associatedRoles) {
-        return new CourseTemplate("my-special-course-template",
-                Arrays.asList(sb, pe, b1, b4s, b4p, spare), associatedRoles,
-                waypointSequence, optionalRepeatablePart, Collections.emptySet(), null, defaultNumberOfLaps);
+
+    public CourseTemplate constructCourseTemplate(Pair<Integer, Integer> optionalRepeatablePart,
+            Integer defaultNumberOfLaps, Map<MarkTemplate, MarkRole> associatedRoles) {
+        return new CourseTemplate("my-special-course-template", Arrays.asList(sb, pe, b1, b4s, b4p, spare),
+                extractMarkRoleIds(associatedRoles), waypointSequence, optionalRepeatablePart, Collections.emptySet(),
+                null, defaultNumberOfLaps);
+    }
+
+    private Map<MarkTemplate, String> extractMarkRoleIds(Map<MarkTemplate, MarkRole> associatedRoles) {
+        final Map<MarkTemplate, String> result = new HashMap<>();
+        for (Entry<MarkTemplate, MarkRole> associatedRole : associatedRoles.entrySet()) {
+            result.put(associatedRole.getKey(), associatedRole.getValue().getId().toString());
+        }
+        return result;
     }
 }
