@@ -59,8 +59,8 @@ public interface CourseBase extends Named {
      * @return the associated roles required for checking course template validity and when creating a new course
      *         template from this course.
      */
-    Map<Mark, String> getAssociatedRoles();
+    Map<Mark, UUID> getAssociatedRoles();
 
-    void addRoleMapping(Mark mark, String role);
+    void addRoleMapping(Mark mark, UUID role);
 
 }

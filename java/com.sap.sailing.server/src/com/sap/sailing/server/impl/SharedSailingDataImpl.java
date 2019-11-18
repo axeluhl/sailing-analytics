@@ -83,10 +83,10 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         domainObjectFactory.loadAllMarkTemplates().forEach(m -> markTemplatesById.put(m.getId(), m));
         domainObjectFactory.loadAllMarkRoles().forEach(m -> markRolesById.put(m.getId(), m));
 
-        domainObjectFactory.loadAllMarkProperties(v -> markTemplatesById.get(v))
+        domainObjectFactory.loadAllMarkProperties(markTemplatesById::get, markRolesById::get)
                 .forEach(m -> markPropertiesById.put(m.getId(), m));
 
-        domainObjectFactory.loadAllCourseTemplates(m -> markTemplatesById.get(m))
+        domainObjectFactory.loadAllCourseTemplates(markTemplatesById::get, markRolesById::get)
                 .forEach(c -> courseTemplatesById.put(c.getId(), c));
     }
 
@@ -326,7 +326,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     @Override
     public CourseTemplate createCourseTemplate(String courseTemplateName, Iterable<MarkTemplate> marks,
-            Iterable<WaypointTemplate> waypoints, Map<MarkTemplate, String> associatedRoles,
+            Iterable<WaypointTemplate> waypoints, Map<MarkTemplate, MarkRole> associatedRoles,
             RepeatablePart optionalRepeatablePart, Iterable<String> tags, URL optionalImageURL,
             Integer defaultNumberOfLaps) {
         final Set<MarkTemplate> marksInSequence = new HashSet<>();
@@ -337,14 +337,14 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
             throw new IllegalArgumentException(
                     "All marks contained in the sequence are expected to be part of the course template");
         }
-        final Map<MarkTemplate, String> effectiveAssociatedRoles = new HashMap<>();
-        final Set<String> alreadyUsedRoles = new HashSet<>();
+        final Map<MarkTemplate, MarkRole> effectiveAssociatedRoles = new HashMap<>();
+        final Set<MarkRole> alreadyUsedRoles = new HashSet<>();
         for (MarkTemplate markTemplate : marksInSequence) {
-            String roleNameForMarkInSequence = associatedRoles.get(markTemplate);
+            MarkRole roleNameForMarkInSequence = associatedRoles.get(markTemplate);
             if (roleNameForMarkInSequence == null) {
                 // In case, no role name is explicitly given for a mark being part of the sequence,
                 // the role defaults to the mark's name
-                roleNameForMarkInSequence = markTemplate.getName();
+                roleNameForMarkInSequence = createMarkRole(markTemplate.getName());
             }
             if (!alreadyUsedRoles.add(roleNameForMarkInSequence)) {
                 throw new IllegalArgumentException(
@@ -362,7 +362,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
                     final String courseTemplateNameForReplication = courseTemplateName;
                     final Iterable<MarkTemplate> marksForReplication = marks;
                     final Iterable<WaypointTemplate> waypointsForReplication = waypoints;
-                    final Map<MarkTemplate, String> effectiveAssociatedRolesForReplication = effectiveAssociatedRoles;
+                    final Map<MarkTemplate, MarkRole> effectiveAssociatedRolesForReplication = effectiveAssociatedRoles;
                     final RepeatablePart optionalRepeatablePartForReplication = optionalRepeatablePart;
                     final Iterable<String> tagsForReplication = tags;
                     final URL optionalImageURLForReplication = optionalImageURL;
@@ -399,7 +399,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     @Override
     public Void internalCreateCourseTemplate(UUID idOfNewCourseTemplate, String courseTemplateName,
             Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
-            Map<MarkTemplate, String> associatedRoles, RepeatablePart optionalRepeatablePart, Iterable<String> tags,
+            Map<MarkTemplate, MarkRole> associatedRoles, RepeatablePart optionalRepeatablePart, Iterable<String> tags,
             URL optionalImageURL, Integer defaultNumberOfLaps) {
         final CourseTemplateImpl courseTemplate = new CourseTemplateImpl(idOfNewCourseTemplate, courseTemplateName,
                 marks, waypoints, associatedRoles, optionalImageURL, optionalRepeatablePart, defaultNumberOfLaps);
@@ -437,7 +437,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
     
     @Override
-    public Void internalRecordUsage(final UUID markPropertiesId, final String roleName) {
+    public Void internalRecordUsage(final UUID markPropertiesId, final MarkRole roleName) {
         final MarkProperties markProperties = markPropertiesById.get(markPropertiesId);
         markProperties.getLastUsedRole().put(roleName, new MillisecondsTimePoint(System.currentTimeMillis()));
         mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
@@ -445,7 +445,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
     
     @Override
-    public void recordUsage(final MarkProperties markProperties, final String roleName) {
+    public void recordUsage(final MarkProperties markProperties, final MarkRole roleName) {
         getSecurityService().checkCurrentUserUpdatePermission(markProperties);
         final UUID markPropertiesId = markProperties.getId();
         
@@ -464,7 +464,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
     
     @Override
-    public Map<MarkProperties, TimePoint> getUsedMarkProperties(String roleName) {
+    public Map<MarkProperties, TimePoint> getUsedMarkProperties(MarkRole roleName) {
         final Map<MarkProperties, TimePoint> recordedUsage = new HashMap<>();
         for (final MarkProperties mp : markPropertiesById.values()) {
             if (mp.getLastUsedRole().containsKey(roleName)) {

@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
@@ -22,7 +23,7 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     
     private final ArrayList<WaypointTemplate> waypoints;
     
-    private final Map<MarkTemplate, String> associatedRoles;
+    private final Map<MarkTemplate, MarkRole> associatedRoles;
 
     private Iterable<String> tags = new ArrayList<>();
     
@@ -35,17 +36,17 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     
     /** Creates a course template with a random UUID. */
     public CourseTemplateImpl(String name, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
-            Map<MarkTemplate, String> associatedRoles, URL optionalImageURL) {
+            Map<MarkTemplate, MarkRole> associatedRoles, URL optionalImageURL) {
         this(UUID.randomUUID(), name, marks, waypoints, associatedRoles, optionalImageURL);
     }
 
     public CourseTemplateImpl(UUID id, String name, Iterable<MarkTemplate> marks,
-            Iterable<WaypointTemplate> waypoints, Map<MarkTemplate, String> associatedRoles, URL optionalImageURL) {
+            Iterable<WaypointTemplate> waypoints, Map<MarkTemplate, MarkRole> associatedRoles, URL optionalImageURL) {
         this(id, name, marks, waypoints, associatedRoles, optionalImageURL, /* optionalRepeatablePart */ null, null);
     }
     
     public CourseTemplateImpl(UUID id, String name, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
-            Map<MarkTemplate, String> associatedRoles, URL optionalImageURL, RepeatablePart optionalRepeatablePart,
+            Map<MarkTemplate, MarkRole> associatedRoles, URL optionalImageURL, RepeatablePart optionalRepeatablePart,
             Integer defaultNumberOfLaps) {
         super(name, id);
         this.defaultNumberOfLaps = defaultNumberOfLaps;
@@ -110,11 +111,11 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     
 
     @Override
-    public Map<MarkTemplate, String> getAssociatedRoles() {
+    public Map<MarkTemplate, MarkRole> getAssociatedRoles() {
         return associatedRoles;
     }
 
-    public void setAssociatedRoles(Map<MarkTemplate, String> associatedRoles) {
+    public void setAssociatedRoles(Map<MarkTemplate, MarkRole> associatedRoles) {
         this.associatedRoles.clear();
         this.associatedRoles.putAll(associatedRoles);
     }

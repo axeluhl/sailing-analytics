@@ -26,7 +26,7 @@ public class CourseTemplateDTO extends NamedDTO implements SecuredDTO {
     // use concrete types instead of Iterable for GWT serialization
     private ArrayList<MarkTemplateDTO> markTemplates = new ArrayList<>();
     private ArrayList<WaypointTemplateDTO> waypointTemplates = new ArrayList<>();
-    private HashMap<MarkTemplateDTO, String> associatedRoles = new HashMap<>();
+    private HashMap<MarkTemplateDTO, UUID> associatedRoles = new HashMap<>();
     private ArrayList<String> tags = new ArrayList<>();
 
     private String optionalImageUrl;
@@ -41,7 +41,7 @@ public class CourseTemplateDTO extends NamedDTO implements SecuredDTO {
     }
 
     public CourseTemplateDTO(UUID uuid, String name, Iterable<MarkTemplateDTO> markTemplates,
-            Iterable<WaypointTemplateDTO> waypointTemplates, Map<MarkTemplateDTO, String> associatedRoles,
+            Iterable<WaypointTemplateDTO> waypointTemplates, Map<MarkTemplateDTO, UUID> associatedRoles,
             String optionalImageUrl, Iterable<String> tags, RepeatablePartDTO repeatablePart,
             Integer defaultNumberOfLaps) {
         super(name);
@@ -49,7 +49,7 @@ public class CourseTemplateDTO extends NamedDTO implements SecuredDTO {
         this.defaultNumberOfLaps = defaultNumberOfLaps;
         Util.addAll(markTemplates, this.markTemplates);
         Util.addAll(waypointTemplates, this.waypointTemplates);
-        this.associatedRoles.putAll(this.associatedRoles);
+        this.associatedRoles.putAll(associatedRoles);
         this.optionalImageUrl = optionalImageUrl;
         Util.addAll(tags, this.tags);
         this.repeatablePart = repeatablePart;
@@ -105,7 +105,7 @@ public class CourseTemplateDTO extends NamedDTO implements SecuredDTO {
         return waypointTemplates;
     }
 
-    public HashMap<MarkTemplateDTO, String> getAssociatedRoles() {
+    public HashMap<MarkTemplateDTO, UUID> getAssociatedRoles() {
         return associatedRoles;
     }
 

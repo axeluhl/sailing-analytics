@@ -11,9 +11,11 @@ import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.ControlPointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.IsMarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkPairWithConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
@@ -32,6 +34,7 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
     public static final String FIELD_MARK_CONFIGURATION_EFFECTIVE_PROPERTIES = "effectiveProperties";
     public static final String FIELD_MARK_CONFIGURATION_FREESTYLE_PROPERTIES = "freestyleProperties";
     public static final String FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE = "associatedRole";
+    public static final String FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_ID = "associatedRoleId";
     public static final String FIELD_MARK_CONFIGURATION_POSITIONING = "positioning";
     public static final String FIELD_MARK_CONFIGURATION_EFFECTIVE_POSITIONING = "effectivePositioning";
     public static final String FIELD_MARK_CONFIGURATION_STORE_TO_INVENTORY = "storeToInventory";
@@ -74,9 +77,12 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
                 markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_TEMPLATE_ID,
                         markConfiguration.getOptionalMarkTemplate().getId().toString());
             }
-            final String associatedRole = courseConfiguration.getAssociatedRoles().get(markConfiguration);
+            final IsMarkRole associatedRole = courseConfiguration.getAssociatedRoles().get(markConfiguration);
             if (associatedRole != null) {
-                markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE, associatedRole);
+                markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE, associatedRole.getName());
+                if (associatedRole instanceof MarkRole) {
+                    markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_ID, ((MarkRole)associatedRole).getId().toString());
+                }
             }
             if (markConfiguration instanceof FreestyleMarkConfiguration) {
                 final FreestyleMarkConfiguration freeStyleMarkConfiguration = (FreestyleMarkConfiguration) markConfiguration;

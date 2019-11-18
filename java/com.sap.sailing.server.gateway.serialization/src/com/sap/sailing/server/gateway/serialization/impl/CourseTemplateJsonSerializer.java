@@ -4,6 +4,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -20,7 +21,7 @@ public class CourseTemplateJsonSerializer implements JsonSerializer<CourseTempla
     public static final String FIELD_CONTROL_POINT_NAME = "controlPointName";
     public static final String FIELD_CONTROL_POINT_SHORT_NAME = "controlPointShortName";
     public static final String FIELD_MARK_TEMPLATE_IDS = "markTemplateIds";
-    public static final String FIELD_ASSOCIATED_ROLE = "associatedRole";
+    public static final String FIELD_ASSOCIATED_ROLE_ID = "associatedRoleId";
     public static final String FIELD_OPTIONAL_REPEATABLE_PART = "optionalRepeatablePart";
     public static final String FIELD_DEFAULT_NUMBER_OF_LAPS = "defaultNumberOfLaps";
     
@@ -47,9 +48,9 @@ public class CourseTemplateJsonSerializer implements JsonSerializer<CourseTempla
         final JSONArray allMarkTemplates = new JSONArray();
         courseTemplate.getMarkTemplates().forEach(mt -> {
             final JSONObject markTemplateEntry = markTemplateJsonSerializer.serialize(mt);
-            final String associatedRoleOrNull = courseTemplate.getAssociatedRoles().get(mt);
+            final MarkRole associatedRoleOrNull = courseTemplate.getAssociatedRoles().get(mt);
             if (associatedRoleOrNull != null) {
-                markTemplateEntry.put(FIELD_ASSOCIATED_ROLE, associatedRoleOrNull);
+                markTemplateEntry.put(FIELD_ASSOCIATED_ROLE_ID, associatedRoleOrNull.getId().toString());
             }
             allMarkTemplates.add(markTemplateEntry);
         });

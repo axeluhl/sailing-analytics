@@ -73,7 +73,7 @@ public interface MarkProperties extends CommonMarkPropertiesWithOptionalPosition
 
     Map<MarkTemplate, TimePoint> getLastUsedTemplate();
 
-    Map<String, TimePoint> getLastUsedRole();
+    Map<MarkRole, TimePoint> getLastUsedRole();
     
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(UUID markPropertiesUUID) {
         return new TypeRelativeObjectIdentifier(markPropertiesUUID.toString());

@@ -20,10 +20,12 @@ import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.IsMarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkPairWithConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.Positioning;
@@ -36,6 +38,7 @@ import com.sap.sailing.domain.coursetemplate.impl.FixedPositioningImpl;
 import com.sap.sailing.domain.coursetemplate.impl.FreestyleMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPairWithConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesBasedMarkConfigurationImpl;
+import com.sap.sailing.domain.coursetemplate.impl.MarkRoleNameImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateBasedMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.RegattaMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.StoredDeviceIdentifierPositioningImpl;
@@ -59,7 +62,7 @@ public class CourseConfigurationBuilder {
     private final String name;
     // TODO decide if we should combine markConfigurations and roleMapping to one field
     private Set<MarkConfiguration> markConfigurations = new HashSet<>();
-    private Map<MarkConfiguration, String> associatedRoles = new HashMap<>();
+    private Map<MarkConfiguration, IsMarkRole> associatedRoles = new HashMap<>();
     private List<WaypointWithMarkConfiguration> waypoints = new ArrayList<>();
     private RepeatablePart optionalRepeatablePart;
     private Integer numberOfLaps;
@@ -132,6 +135,22 @@ public class CourseConfigurationBuilder {
             resolvedMarkTemplate = sharedSailingData.getMarkTemplateById(markTemplateID);
         }
         return resolvedMarkTemplate;
+    }
+    
+    private MarkRole resolveMarkRoleByID(UUID markRoleID) {
+        MarkRole resolvedMarkRole = null;
+        if (optionalCourseTemplate != null) {
+            for (MarkRole markRole : optionalCourseTemplate.getAssociatedRoles().values()) {
+                if (markRole.getId().equals(markRoleID)) {
+                    resolvedMarkRole = markRole;
+                    break;
+                }
+            }
+        }
+        if (resolvedMarkRole == null) {
+            resolvedMarkRole = sharedSailingData.getMarkRoleById(markRoleID);
+        }
+        return resolvedMarkRole;
     }
 
     public MarkPropertiesBasedMarkConfiguration addMarkPropertiesConfiguration(UUID markPropertiesID,
@@ -209,17 +228,24 @@ public class CourseConfigurationBuilder {
         waypoints.add(new WaypointWithMarkConfigurationImpl(markPair, passingInstruction));
     }
 
-    public void setRole(MarkConfiguration markConfiguration, String roleName) {
+    public void setRole(MarkConfiguration markConfiguration, UUID markRoleId, String roleName) {
         if (!markConfigurations.contains(markConfiguration)) {
             throw new IllegalArgumentException();
         }
+        final IsMarkRole candidate;
+        if (markRoleId != null) {
+            candidate = resolveMarkRoleByID(markRoleId);
+        } else {
+            candidate = new MarkRoleNameImpl(roleName);
+        }
+        
         associatedRoles.forEach((mc, existingRole) -> {
-            if (roleName.equals(existingRole) && !mc.equals(markConfiguration)) {
+            if (candidate.equals(existingRole) && !mc.equals(markConfiguration)) {
                 throw new IllegalArgumentException(
                         "Role name '" + roleName + "' is already used for another mark configuration");
             }
         });
-        associatedRoles.put(markConfiguration, roleName);
+        associatedRoles.put(markConfiguration, candidate);
     }
 
     public void setOptionalRepeatablePart(RepeatablePart optionalRepeatablePart) {

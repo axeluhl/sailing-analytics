@@ -21,7 +21,7 @@ public class CourseDataImpl extends NamedImpl implements CourseBase {
 
     private final UUID originatingCourseTemplateId; 
 
-    private final Map<Mark, String> associatedRoles = new HashMap<>();
+    private final Map<Mark, UUID> associatedRoles = new HashMap<>();
 
     public CourseDataImpl(String name) {
         this(name, null);
@@ -91,11 +91,11 @@ public class CourseDataImpl extends NamedImpl implements CourseBase {
         return originatingCourseTemplateId;
     }
 
-    public void addRoleMapping(Mark mark, String role) {
+    public void addRoleMapping(Mark mark, UUID role) {
         associatedRoles.put(mark, role);
     }
 
-    public Map<Mark, String> getAssociatedRoles() {
+    public Map<Mark, UUID> getAssociatedRoles() {
         return associatedRoles;
     }
 

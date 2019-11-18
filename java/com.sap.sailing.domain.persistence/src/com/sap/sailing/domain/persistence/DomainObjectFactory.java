@@ -223,11 +223,13 @@ public interface DomainObjectFactory {
      */
     Map<? extends Integer, ? extends Pair<DetailedRaceInfo, AnniversaryType>> getAnniversaryData() throws MalformedURLException;
 
-    Iterable<MarkProperties> loadAllMarkProperties(Function<UUID, MarkTemplate> markTemplateResolver);
+    Iterable<MarkProperties> loadAllMarkProperties(Function<UUID, MarkTemplate> markTemplateResolver,
+            Function<UUID, MarkRole> markRoleResolver);
 
     Iterable<MarkTemplate> loadAllMarkTemplates();
     
     Iterable<MarkRole> loadAllMarkRoles();
 
-    Iterable<CourseTemplate> loadAllCourseTemplates(Function<UUID, MarkTemplate> markTemplateResolver);
+    Iterable<CourseTemplate> loadAllCourseTemplates(Function<UUID, MarkTemplate> markTemplateResolver,
+            Function<UUID, MarkRole> markRoleResolver);
 }

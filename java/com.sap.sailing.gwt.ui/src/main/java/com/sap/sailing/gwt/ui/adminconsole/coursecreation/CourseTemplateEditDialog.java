@@ -139,7 +139,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         // TODO: implement
         final UUID id = currentUuid == null ? UUID.randomUUID() : currentUuid;
         final ArrayList<MarkTemplateDTO> markTemplates = new ArrayList<MarkTemplateDTO>();
-        final Map<MarkTemplateDTO, String> associatedRoles = new HashMap<MarkTemplateDTO, String>();
+        final Map<MarkTemplateDTO, UUID> associatedRoles = new HashMap<>();
         final String optionalUrl = urlTextBox.getText() != null && !urlTextBox.getText().isEmpty()
                 ? urlTextBox.getText()
                 : null;

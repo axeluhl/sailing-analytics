@@ -340,6 +340,7 @@ import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkPairTemplate.MarkPairTemplateFactory;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
@@ -9966,8 +9967,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     public CourseTemplateDTO convertToCourseTemplateDTO(CourseTemplate courseTemplate) {
-        final Map<MarkTemplateDTO, String> convertedAssociatedRoles = courseTemplate.getAssociatedRoles().entrySet()
-                .stream().collect(Collectors.toMap(k -> convertToMarkTemplateDTO(k.getKey()), v -> v.getValue()));
+        final Map<MarkTemplateDTO, UUID> convertedAssociatedRoles = courseTemplate.getAssociatedRoles().entrySet()
+                .stream().collect(Collectors.toMap(entry -> convertToMarkTemplateDTO(entry.getKey()),
+                        entry -> entry.getValue().getId()));
         final List<MarkTemplateDTO> convertedMarkTemplates = StreamSupport
                 .stream(courseTemplate.getMarkTemplates().spliterator(), false).map(this::convertToMarkTemplateDTO)
                 .collect(Collectors.toList());
@@ -10052,9 +10054,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             final MarkPairTemplateFactory markPairTemplateFactory = new MarkPairTemplateFactory();
             final List<WaypointTemplate> waypoints = courseTemplate.getWaypointTemplates().stream()
                     .map(wp -> convertToWaypointTemplate(wp, markPairTemplateFactory)).collect(Collectors.toList());
-            final Map<MarkTemplate, String> associatedRoles = courseTemplate.getAssociatedRoles().entrySet().stream()
-                    .collect(Collectors.toMap(k -> getSharedSailingData().getMarkTemplateById(k.getKey().getUuid()),
-                            Entry::getValue));
+            final Map<MarkTemplate, MarkRole> associatedRoles = courseTemplate.getAssociatedRoles().entrySet().stream()
+                    .collect(Collectors.toMap(
+                            entry -> getSharedSailingData().getMarkTemplateById(entry.getKey().getUuid()),
+                            entry -> getSharedSailingData().getMarkRoleById(entry.getValue())));
             final RepeatablePart optionalRepeatablePart = courseTemplate.getRepeatablePart() != null
                     ? convertToRepeatablePart(courseTemplate.getRepeatablePart())
                     : null;

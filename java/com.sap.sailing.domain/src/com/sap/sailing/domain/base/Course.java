@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.sap.sailing.domain.common.PassingInstruction;
@@ -43,7 +44,7 @@ public interface Course extends CourseBase, Renamable {
      * had been used.
      */
     void update(Iterable<Util.Pair<ControlPoint, PassingInstruction>> newControlPoints,
-            Map<Mark, String> associatedRoles, DomainFactory baseDomainFactory) throws PatchFailedException;
+            Map<Mark, UUID> associatedRoles, DomainFactory baseDomainFactory) throws PatchFailedException;
     
     int getNumberOfWaypoints();
 

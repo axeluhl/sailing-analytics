@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkPairTemplate.MarkPairTemplateFactory;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
@@ -29,10 +30,13 @@ import com.sap.sailing.server.gateway.serialization.impl.MarkTemplateJsonSeriali
 public class CourseTemplateJsonDeserializer implements JsonDeserializer<CourseTemplate> {
 
     private final Function<UUID, MarkTemplate> markTemplateResolver;
+    private final Function<UUID, MarkRole> markRoleResolver;
     private final JsonDeserializer<RepeatablePart> repeatablePartJsonDeserializer;
 
-    public CourseTemplateJsonDeserializer(Function<UUID, MarkTemplate> markTemplateResolver) {
+    public CourseTemplateJsonDeserializer(Function<UUID, MarkTemplate> markTemplateResolver,
+            Function<UUID, MarkRole> markRoleResolver) {
         this.markTemplateResolver = markTemplateResolver;
+        this.markRoleResolver = markRoleResolver;
         repeatablePartJsonDeserializer = new RepeatablePartJsonDeserializer();
     }
 
@@ -53,7 +57,7 @@ public class CourseTemplateJsonDeserializer implements JsonDeserializer<CourseTe
         }
         
         final Map<UUID, MarkTemplate> allMarkTemplatesById = new HashMap<UUID, MarkTemplate>();
-        final Map<MarkTemplate, String> roles = new HashMap<>();
+        final Map<MarkTemplate, MarkRole> roles = new HashMap<>();
         final JSONArray allMarkTemplatesJSON = (JSONArray) json.get(CourseTemplateJsonSerializer.FIELD_ALL_MARK_TEMPLATES);
         for (Object markTemplateWithOptionalRoleNameObject : allMarkTemplatesJSON) {
             final JSONObject markTemplateWithOptionalRoleName = (JSONObject) markTemplateWithOptionalRoleNameObject;
@@ -64,9 +68,10 @@ public class CourseTemplateJsonDeserializer implements JsonDeserializer<CourseTe
                 throw new JsonDeserializationException("Mark template with ID " + markTemplateUUID + " can't be resolved");
             }
             allMarkTemplatesById.put(markTemplateUUID, resolvedMarkTemplate);
-            String roleName = (String) markTemplateWithOptionalRoleName.get(CourseTemplateJsonSerializer.FIELD_ASSOCIATED_ROLE);
-            if (roleName != null && !roleName.isEmpty()) {
-                roles.put(resolvedMarkTemplate, roleName);
+            final String markRoleIdAsStringOrNull = (String) markTemplateWithOptionalRoleName.get(CourseTemplateJsonSerializer.FIELD_ASSOCIATED_ROLE_ID);
+            if (markRoleIdAsStringOrNull != null && !markRoleIdAsStringOrNull.isEmpty()) {
+                final MarkRole resolvedMarkRole = markRoleResolver.apply(UUID.fromString(markRoleIdAsStringOrNull));
+                roles.put(resolvedMarkTemplate, resolvedMarkRole);
             }
         }
         

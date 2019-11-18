@@ -40,7 +40,7 @@ public interface SharedSailingData {
     Iterable<MarkTemplate> getAllMarkTemplates();
     
     Iterable<CourseTemplate> getAllCourseTemplates(Iterable<String> tagsToFilterFor);
-
+    
     Iterable<MarkRole> getAllMarkRoles();
     
     MarkRole createMarkRole(String name);
@@ -72,7 +72,7 @@ public interface SharedSailingData {
      * @param waypoints the waypoints in their defined order (iteration order equals order of waypoints in course)
      */
     CourseTemplate createCourseTemplate(String courseTemplateName, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
-            Map<MarkTemplate, String> associatedRoles, RepeatablePart optionalRepeatablePart, Iterable<String> tags,
+            Map<MarkTemplate, MarkRole> associatedRoles, RepeatablePart optionalRepeatablePart, Iterable<String> tags,
             URL optionalImageURL, Integer defaultNumberOfLaps);
     
     CourseTemplate getCourseTemplateById(UUID id);
@@ -89,7 +89,7 @@ public interface SharedSailingData {
      * Keeps the {@link MillisecondsTimePoint#now() current time} of this call which will be returned for the role name
      * when invoking {@link #getUsedMarkProperties(String)}.
      */
-    void recordUsage(MarkProperties markProperties, String roleName);
+    void recordUsage(MarkProperties markProperties, MarkRole markRole);
     
     /**
      * Returns the time points when {@link MarkProperties} objects were {@link #recordUsage(MarkTemplate, MarkProperties) last used}
@@ -101,7 +101,7 @@ public interface SharedSailingData {
      * Returns the time points when {@link MarkProperties} objects were {@link #recordUsage(MarkProperties, String) last used}
      * for the role name passed in the {@code roleName} parameter.
      */
-    Map<MarkProperties, TimePoint> getUsedMarkProperties(String roleName);
+    Map<MarkProperties, TimePoint> getUsedMarkProperties(MarkRole roleName);
     
     void deleteMarkProperties(MarkProperties markProperties);
     

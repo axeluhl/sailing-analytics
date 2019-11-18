@@ -45,7 +45,7 @@ public class CourseImpl extends RenamableImpl implements Course {
     private final Map<Waypoint, Integer> waypointIndexes;
     private final List<Leg> legs;
     private final UUID originatingCourseTemplateId;
-    private final Map<Mark, String> associatedRoles = new HashMap<>();
+    private final Map<Mark, UUID> associatedRoles = new HashMap<>();
     private transient Set<CourseListener> listeners;
     private transient NamedReentrantReadWriteLock lock;
     
@@ -350,7 +350,7 @@ public class CourseImpl extends RenamableImpl implements Course {
 
     @Override
     public void update(Iterable<Pair<ControlPoint, PassingInstruction>> newControlPoints,
-            Map<Mark, String> associatedRoles, DomainFactory baseDomainFactory) throws PatchFailedException {
+            Map<Mark, UUID> associatedRoles, DomainFactory baseDomainFactory) throws PatchFailedException {
         Patch<Waypoint> patch = null;
         synchronized (updateMonitor) {
             lockForRead();
@@ -408,12 +408,12 @@ public class CourseImpl extends RenamableImpl implements Course {
     }
 
     @Override
-    public Map<Mark, String> getAssociatedRoles() {
+    public Map<Mark, UUID> getAssociatedRoles() {
         return associatedRoles;
     }
 
     @Override
-    public void addRoleMapping(Mark mark, String role) {
-        associatedRoles.put(mark, role);
+    public void addRoleMapping(Mark mark, UUID markRoleId) {
+        associatedRoles.put(mark, markRoleId);
     }
 }

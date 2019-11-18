@@ -9,6 +9,7 @@ import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
@@ -21,7 +22,7 @@ public class MarkPropertiesImpl extends CommonMarkPropertiesImpl implements Mark
     private UUID id;
 
     private final Map<MarkTemplate, TimePoint> lastUsedTemplate = new HashMap<>();
-    private final Map<String, TimePoint> lastUsedRole = new HashMap<>();
+    private final Map<MarkRole, TimePoint> lastUsedRole = new HashMap<>();
 
     public MarkPropertiesImpl(String name, String shortName, Color color, String shape, String pattern, MarkType type) {
         this(UUID.randomUUID(), name, shortName, color, shape, pattern, type);
@@ -103,11 +104,11 @@ public class MarkPropertiesImpl extends CommonMarkPropertiesImpl implements Mark
     }
 
     @Override
-    public Map<String, TimePoint> getLastUsedRole() {
+    public Map<MarkRole, TimePoint> getLastUsedRole() {
         return lastUsedRole;
     }
 
-    public void setLastUsedRole(Map<String, TimePoint> lastUsedRole) {
+    public void setLastUsedRole(Map<MarkRole, TimePoint> lastUsedRole) {
         this.lastUsedRole.clear();
         this.lastUsedRole.putAll(lastUsedRole);
     }

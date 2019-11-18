@@ -37,7 +37,8 @@ public class CourseTemplateResource extends AbstractSailingServerResource {
     }
     
     private JsonDeserializer<CourseTemplate> getCourseTemplateDeserializer() {
-        return new CourseTemplateJsonDeserializer(getSharedSailingData()::getMarkTemplateById);
+        return new CourseTemplateJsonDeserializer(getSharedSailingData()::getMarkTemplateById,
+                getSharedSailingData()::getMarkRoleById);
     }
 
     private Response getBadCourseTemplateValidationErrorResponse(String errorText) {

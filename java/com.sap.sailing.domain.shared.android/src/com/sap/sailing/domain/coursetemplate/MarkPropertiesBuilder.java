@@ -23,7 +23,7 @@ public class MarkPropertiesBuilder {
     private DeviceIdentifier deviceId;
     private Position position;
     private Map<MarkTemplate, TimePoint> lastUsedTemplate;
-    private Map<String, TimePoint> lastUsedRole;
+    private Map<MarkRole, TimePoint> lastUsedRole;
 
     public MarkPropertiesBuilder(UUID id, String name, String shortName, Color color, String shape, String pattern,
             MarkType type) {
@@ -77,7 +77,7 @@ public class MarkPropertiesBuilder {
         this.lastUsedTemplate = lastUsedTemplate;
     }
 
-    public void withLastUsedRole(Map<String, TimePoint> lastUsedRole) {
+    public void withLastUsedRole(Map<MarkRole, TimePoint> lastUsedRole) {
         this.lastUsedRole = lastUsedRole;
     }
 

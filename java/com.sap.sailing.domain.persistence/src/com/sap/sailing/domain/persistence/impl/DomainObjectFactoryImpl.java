@@ -1941,10 +1941,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                             entryObject.getString(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_MARK_ID.name()));
                     final Mark mark = baseDomainFactory.getExistingMarkById(markUUID);
                     if (mark != null) {
-                        final String roleOrNull = entryObject
-                                .getString(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_ROLE.name());
-                        if (roleOrNull != null) {
-                            courseData.getA().addRoleMapping(mark, roleOrNull);
+                        final String roleIdAsStringOrNull = entryObject
+                                .getString(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_ROLE_ID.name());
+                        if (roleIdAsStringOrNull != null) {
+                            courseData.getA().addRoleMapping(mark, UUID.fromString(roleIdAsStringOrNull));
                         }
                     } else {
                         logger.warning(String.format("Could not resolve mark with id %s for course %s.", markUUID, id));
@@ -2739,13 +2739,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Iterable<MarkProperties> loadAllMarkProperties(Function<UUID, MarkTemplate> markTemplateResolver) {
+    public Iterable<MarkProperties> loadAllMarkProperties(Function<UUID, MarkTemplate> markTemplateResolver,
+            Function<UUID, MarkRole> markRoleResolver) {
         final List<MarkProperties> result = new ArrayList<>();
         final MongoCollection<Document> configurationCollection = database
                 .getCollection(CollectionNames.MARK_PROPERTIES.name());
         try {
             for (final Document dbObject : configurationCollection.find()) {
-                final MarkProperties entry = loadMarkPropertiesEntry(dbObject, markTemplateResolver);
+                final MarkProperties entry = loadMarkPropertiesEntry(dbObject, markTemplateResolver, markRoleResolver);
                 result.add(entry);
             }
         } catch (Exception e) {
@@ -2757,7 +2758,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private MarkProperties loadMarkPropertiesEntry(final Document dbObject,
-            Function<UUID, MarkTemplate> markTemplateResolver) {
+            Function<UUID, MarkTemplate> markTemplateResolver,
+            Function<UUID, MarkRole> markRoleResolver) {
         //load all mandatory data
         final UUID id = UUID.fromString(dbObject.getString(FieldNames.MARK_PROPERTIES_ID.name()));
         final String name = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_NAME.name());
@@ -2819,8 +2821,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final Document lastUsedRoleObject = dbObject.get(FieldNames.MARK_PROPERTIES_USED_ROLE.name(), Document.class);
         final Map<Object, Object> mapUsedRole = new HashMap<>();
         lastUsedRoleObject.forEach((k, v) -> mapUsedRole.put(k, v));
-        final Map<String, TimePoint> lastUsedRole = mapUsedRole.entrySet().stream()
-                .collect(Collectors.toMap(k -> k.toString(), v -> parseTimePoint(v)));
+        final Map<MarkRole, TimePoint> lastUsedRole = mapUsedRole.entrySet().stream()
+                .collect(Collectors.toMap(
+                        (Object markRoleIdObject) -> markRoleResolver.apply(UUID.fromString((String) markRoleIdObject)),
+                        v -> parseTimePoint(v)));
         builder.withLastUsedRole(lastUsedRole);
 
         return builder.build();
@@ -3259,13 +3263,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Iterable<CourseTemplate> loadAllCourseTemplates(Function<UUID, MarkTemplate> markTemplateResolver) {
+    public Iterable<CourseTemplate> loadAllCourseTemplates(Function<UUID, MarkTemplate> markTemplateResolver,
+            Function<UUID, MarkRole> markRoleResolver) {
         final List<CourseTemplate> result = new ArrayList<>();
         final MongoCollection<Document> configurationCollection = database
                 .getCollection(CollectionNames.COURSE_TEMPLATES.name());
         try {
             for (final Document dbObject : configurationCollection.find()) {
-                final CourseTemplate entry = loadCourseTemplateEntry(dbObject, markTemplateResolver);
+                final CourseTemplate entry = loadCourseTemplateEntry(dbObject, markTemplateResolver, markRoleResolver);
                 result.add(entry);
             }
         } catch (Exception e) {
@@ -3277,7 +3282,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private CourseTemplate loadCourseTemplateEntry(Document dbObject,
-            Function<UUID, MarkTemplate> markTemplateResolver) {
+            Function<UUID, MarkTemplate> markTemplateResolver,
+            Function<UUID, MarkRole> markRoleResolver) {
         // load master data
         final UUID id = UUID.fromString(dbObject.getString(FieldNames.COURSE_TEMPLATE_ID.name()));
         final String name = dbObject.getString(FieldNames.COURSE_TEMPLATE_NAME.name());
@@ -3297,7 +3303,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final ArrayList<?> markTemplatesList = dbObject.get(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATES.name(),
                 ArrayList.class);
         final Set<MarkTemplate> markTemplates = new HashSet<>();
-        final Map<MarkTemplate, String> associatedRoles = new HashMap<>();
+        final Map<MarkTemplate, MarkRole> associatedRoles = new HashMap<>();
         for (Object entry : markTemplatesList) {
             if (entry instanceof Document) {
                 final Document entryObject = (Document) entry;
@@ -3306,9 +3312,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         markTemplateUUID);
                 if (markTemplate != null) {
                     markTemplates.add(markTemplate);
-                    final String roleOrNull = entryObject.getString(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ROLE.name());
-                    if (roleOrNull != null) {
-                        associatedRoles.put(markTemplate, roleOrNull);
+                    final String roleIdAsStringOrNull = entryObject.getString(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ROLE.name());
+                    final MarkRole markRoleOrNull = roleIdAsStringOrNull == null ? null : markRoleResolver.apply(UUID.fromString(roleIdAsStringOrNull));
+                    if (markRoleOrNull != null) {
+                        associatedRoles.put(markTemplate, markRoleOrNull);
                     }
                 } else {
                     logger.warning(String.format("Could not resolve MarkTemplate with id %s for CourseTemplate %s.",

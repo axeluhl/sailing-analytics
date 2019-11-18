@@ -18,7 +18,7 @@ import com.sap.sse.replication.ReplicableWithObjectInputStream;
 
 public interface ReplicatingSharedSailingData extends SharedSailingData,
         ReplicableWithObjectInputStream<ReplicatingSharedSailingData, OperationWithResult<ReplicatingSharedSailingData, ?>> {
-
+    
     Void internalCreateMarkRole(UUID idOfNewMarkRole, String name);
 
     Void internalCreateMarkProperties(UUID idOfNewMarkProperties, CommonMarkProperties properties,
@@ -31,7 +31,7 @@ public interface ReplicatingSharedSailingData extends SharedSailingData,
     
     Void internalCreateCourseTemplate(UUID idOfNewCourseTemplate, String courseTemplateName,
             Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
-            Map<MarkTemplate, String> associatedRoles, RepeatablePart optionalRepeatablePart, Iterable<String> tags,
+            Map<MarkTemplate, MarkRole> associatedRoles, RepeatablePart optionalRepeatablePart, Iterable<String> tags,
             URL optionalImageURL, Integer defaultNumberOfLaps);
     
     Void internalSetTrackingDeviceIdentifierForMarkProperties(UUID markPropertiesUUID, DeviceIdentifier deviceIdentifier);
@@ -44,7 +44,7 @@ public interface ReplicatingSharedSailingData extends SharedSailingData,
 
     Void internalRecordUsage(UUID markTemplateId, UUID markPropertiesId);
     
-    Void internalRecordUsage(UUID markPropertiesId, String roleName);
+    Void internalRecordUsage(UUID markPropertiesId, MarkRole roleName);
 
     Void internalUpdateCourseTemplate(UUID uuid, String name, URL optionalImageURL, ArrayList<String> tags);
 

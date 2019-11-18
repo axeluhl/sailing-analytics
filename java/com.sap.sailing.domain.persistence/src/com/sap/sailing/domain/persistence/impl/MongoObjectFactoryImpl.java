@@ -1316,7 +1316,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         courseDesignChangedEvent.getCourseDesign().getAssociatedRoles().forEach((mark, role) -> {
             final Document mapping = new Document();
             mapping.put(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_MARK_ID.name(), mark.getId().toString());
-            mapping.put(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_ROLE.name(), role);
+            mapping.put(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_ROLE_ID.name(), role.toString());
             roleMap.add(mapping);
         });
 
@@ -1474,7 +1474,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.MARK_PROPERTIES_USED_TEMPLATE.name(), new BasicDBObject(lastUsedTemplateMap));
 
         Map<String, Long> lastUsedRoleMap = markProperties.getLastUsedRole().entrySet().stream()
-                .collect(Collectors.toMap(k -> k.getKey(), v -> v.getValue().asMillis()));
+                .collect(Collectors.toMap(k -> k.getKey().getId().toString(), v -> v.getValue().asMillis()));
         result.put(FieldNames.MARK_PROPERTIES_USED_ROLE.name(), new BasicDBObject(lastUsedRoleMap));
         return result;
     }
@@ -2067,9 +2067,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         courseTemplate.getMarkTemplates().forEach(m -> {
             final BasicDBObject markTemplateObject = new BasicDBObject(
                     FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ID.name(), m.getId().toString());
-            final String role = courseTemplate.getAssociatedRoles().get(m);
+            final MarkRole role = courseTemplate.getAssociatedRoles().get(m);
             if (role != null) {
-                markTemplateObject.append(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ROLE.name(), role);
+                markTemplateObject.append(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ROLE.name(), role.getId().toString());
             }
             markTemplates.add(markTemplateObject);
         });

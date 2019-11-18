@@ -11,14 +11,14 @@ import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 
-public abstract class CourseConfigurationBaseImpl implements CourseConfigurationBase<R> {
+public abstract class CourseConfigurationBaseImpl<R extends IsMarkRole> implements CourseConfigurationBase<R> {
     
     private static final long serialVersionUID = -9189989170055144298L;
 
     private final CourseTemplate optionalCourseTemplate;
     // TODO decide if we should combine markConfigurations and roleMapping to one field
     private final Set<MarkConfiguration> markConfigurations;
-    private final Map<MarkConfiguration, String> associatedRoles;
+    private final Map<MarkConfiguration, R> associatedRoles;
     private final List<WaypointWithMarkConfiguration> waypoints;
     private final RepeatablePart optionalRepeatablePart;
     private final String name;
@@ -26,7 +26,7 @@ public abstract class CourseConfigurationBaseImpl implements CourseConfiguration
     private Integer numberOfLaps;
     
     public CourseConfigurationBaseImpl(CourseTemplate optionalCourseTemplate, Set<MarkConfiguration> markConfigurations,
-            Map<MarkConfiguration, String> associatedRoles, List<WaypointWithMarkConfiguration> waypoints,
+            Map<MarkConfiguration, R> associatedRoles, List<WaypointWithMarkConfiguration> waypoints,
             RepeatablePart optionalRepeatablePart, Integer numberOfLaps, String name) {
         super();
         this.optionalCourseTemplate = optionalCourseTemplate;
@@ -59,7 +59,7 @@ public abstract class CourseConfigurationBaseImpl implements CourseConfiguration
     }
 
     @Override
-    public Map<MarkConfiguration, String> getAssociatedRoles() {
+    public Map<MarkConfiguration, R> getAssociatedRoles() {
         return associatedRoles;
     }
 
