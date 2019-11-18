@@ -193,6 +193,9 @@ public enum FieldNames {
     // mark template fields
     MARK_TEMPLATE_ID,
 
+    // mark role fields
+    MARK_ROLE_ID, MARK_ROLE_NAME,
+
     // repeatable part
     REPEATABLE_PART_START, REPEATABLE_PART_END,
 

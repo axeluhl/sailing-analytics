@@ -113,6 +113,7 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -2012,6 +2013,30 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         final MongoCollection<Document> configurationsCollections = database
                 .getCollection(CollectionNames.MARK_TEMPLATES.name());
         final Document query = new Document(FieldNames.MARK_TEMPLATE_ID.name(), markTemplateId.toString());
+        configurationsCollections.deleteOne(query);
+    }
+
+    @Override
+    public void storeMarkRole(MarkRole markRole) {
+        final MongoCollection<Document> collection = database.getCollection(CollectionNames.MARK_ROLES.name());
+        final Document query = new Document(FieldNames.MARK_ROLE_ID.name(), markRole.getId().toString());
+
+        final Document entry = storeMarkRoleToDocument(markRole);
+        collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry,
+                new UpdateOptions().upsert(true));
+    }
+
+    private Document storeMarkRoleToDocument(MarkRole markRole) {
+        final Document result = new Document(FieldNames.MARK_ROLE_ID.name(), markRole.getId().toString());
+        result.put(FieldNames.MARK_ROLE_NAME.name(), markRole.getName());
+        return result;
+    }
+    
+    @Override
+    public void removeMarkRole(UUID markRoleId) {
+        final MongoCollection<Document> configurationsCollections = database
+                .getCollection(CollectionNames.MARK_ROLES.name());
+        final Document query = new Document(FieldNames.MARK_ROLE_ID.name(), markRoleId.toString());
         configurationsCollections.deleteOne(query);
     }
 

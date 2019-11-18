@@ -223,10 +223,12 @@ import com.sap.sailing.domain.coursetemplate.MarkPairTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkPairTemplate.MarkPairTemplateFactory;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBuilder;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.impl.CourseTemplateImpl;
+import com.sap.sailing.domain.coursetemplate.impl.MarkRoleImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.RepeatablePartImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
@@ -3229,6 +3231,31 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final Color color = AbstractColor.getCssColor(storedColor);
 
         return new MarkTemplateImpl(id, name, shortName, color, shape, pattern, markType);
+    }
+    
+    @Override
+    public Iterable<MarkRole> loadAllMarkRoles() {
+        final List<MarkRole> result = new ArrayList<>();
+        final MongoCollection<Document> configurationCollection = database
+                .getCollection(CollectionNames.MARK_ROLES.name());
+        try {
+            for (final Document dbObject : configurationCollection.find()) {
+                final MarkRole entry = loadMarkRoleEntry(dbObject);
+                result.add(entry);
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load mark roles.");
+            logger.log(Level.SEVERE, "loadAllMarkRoles", e);
+        }
+        
+        return result;
+    }
+    
+    private MarkRole loadMarkRoleEntry(Document dbObject) {
+        final UUID id = UUID.fromString(dbObject.getString(FieldNames.MARK_ROLE_ID.name()));
+        final String name = dbObject.getString(FieldNames.MARK_ROLE_NAME.name());
+        
+        return new MarkRoleImpl(id, name);
     }
 
     @Override

@@ -32,6 +32,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.leaderboard.EventResolver;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -225,6 +226,8 @@ public interface DomainObjectFactory {
     Iterable<MarkProperties> loadAllMarkProperties(Function<UUID, MarkTemplate> markTemplateResolver);
 
     Iterable<MarkTemplate> loadAllMarkTemplates();
+    
+    Iterable<MarkRole> loadAllMarkRoles();
 
     Iterable<CourseTemplate> loadAllCourseTemplates(Function<UUID, MarkTemplate> markTemplateResolver);
 }

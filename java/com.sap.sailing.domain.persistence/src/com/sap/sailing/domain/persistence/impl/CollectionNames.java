@@ -4,6 +4,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 
@@ -130,6 +131,9 @@ public enum CollectionNames {
 
     /** Contains the {@link MarkTemplate} objects. */
     MARK_TEMPLATES,
+    
+    /** Contains the {@link MarkRole} objects. */
+    MARK_ROLES,
 
     /** Contains the {@link CourseTemplate}s. */
     COURSE_TEMPLATES
