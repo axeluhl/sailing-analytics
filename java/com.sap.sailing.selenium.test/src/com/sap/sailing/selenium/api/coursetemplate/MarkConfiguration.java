@@ -11,7 +11,7 @@ public class MarkConfiguration extends JsonWrapper {
     private static final String FIELD_ID = "id";
     private static final String FIELD_MARK_TEMPLATE_ID = "markTemplateId";
     private static final String FIELD_MARK_PROPERTIES_ID = "markPropertiesId";
-    private static final String FIELD_ASSOCIATED_ROLE = "associatedRole";
+    private static final String FIELD_ASSOCIATED_ROLE_ID = "associatedRoleId";
     private static final String FIELD_FREESTYLE_PROPERTIES = "freestyleProperties";
     private static final String FIELD_EFFECTIVE_PROPERTIES = "effectiveProperties";
     private static final String FIELD_MARK_ID = "markId";
@@ -24,7 +24,7 @@ public class MarkConfiguration extends JsonWrapper {
     }
 
     public static MarkConfiguration createFreestyle(final UUID markTemplateId, final UUID markPropertiesId,
-            final String associatedRole, final String name, final String shortName, final String color,
+            final UUID associatedRoleId, final String name, final String shortName, final String color,
             final String shape, final String pattern, final String markType) {
         MarkConfiguration markConfiguration = new MarkConfiguration(new JSONObject());
         markConfiguration.getJson().put(FIELD_ID, UUID.randomUUID().toString());
@@ -34,34 +34,42 @@ public class MarkConfiguration extends JsonWrapper {
         if (markPropertiesId != null) {
             markConfiguration.getJson().put(FIELD_MARK_PROPERTIES_ID, markPropertiesId.toString());
         }
-        markConfiguration.getJson().put(FIELD_ASSOCIATED_ROLE, associatedRole);
+        if (associatedRoleId != null) {
+            markConfiguration.getJson().put(FIELD_ASSOCIATED_ROLE_ID, associatedRoleId.toString());
+        }
         markConfiguration.getJson().put(FIELD_FREESTYLE_PROPERTIES,
                 new MarkAppearance(name, shortName, color, shape, pattern, markType).getJson());
         return markConfiguration;
     }
 
     public static MarkConfiguration createMarkPropertiesBased(final UUID markPropertiesId,
-            final String associatedRole) {
+            final UUID associatedRoleId) {
         MarkConfiguration markConfiguration = new MarkConfiguration(new JSONObject());
         markConfiguration.getJson().put(FIELD_ID, UUID.randomUUID().toString());
         markConfiguration.getJson().put(FIELD_MARK_PROPERTIES_ID, markPropertiesId.toString());
-        markConfiguration.getJson().put(FIELD_ASSOCIATED_ROLE, associatedRole);
+        if (associatedRoleId != null) {
+            markConfiguration.getJson().put(FIELD_ASSOCIATED_ROLE_ID, associatedRoleId.toString());
+        }
         return markConfiguration;
     }
 
-    public static MarkConfiguration createMarkBased(final UUID markId, final String associatedRole) {
+    public static MarkConfiguration createMarkBased(final UUID markId, final UUID associatedRoleId) {
         MarkConfiguration markConfiguration = new MarkConfiguration(new JSONObject());
         markConfiguration.getJson().put(FIELD_ID, UUID.randomUUID().toString());
         markConfiguration.getJson().put(FIELD_MARK_ID, markId.toString());
-        markConfiguration.getJson().put(FIELD_ASSOCIATED_ROLE, associatedRole);
+        if (associatedRoleId != null) {
+            markConfiguration.getJson().put(FIELD_ASSOCIATED_ROLE_ID, associatedRoleId.toString());
+        }
         return markConfiguration;
     }
 
-    public static MarkConfiguration createMarkTemplateBased(final UUID markTemplateId, final String associatedRole) {
+    public static MarkConfiguration createMarkTemplateBased(final UUID markTemplateId, final UUID associatedRoleId) {
         MarkConfiguration markConfiguration = new MarkConfiguration(new JSONObject());
         markConfiguration.getJson().put(FIELD_ID, UUID.randomUUID().toString());
         markConfiguration.getJson().put(FIELD_MARK_TEMPLATE_ID, markTemplateId.toString());
-        markConfiguration.getJson().put(FIELD_ASSOCIATED_ROLE, associatedRole);
+        if (associatedRoleId != null) {
+            markConfiguration.getJson().put(FIELD_ASSOCIATED_ROLE_ID, associatedRoleId.toString());
+        }
         return markConfiguration;
     }
 
@@ -114,8 +122,8 @@ public class MarkConfiguration extends JsonWrapper {
         getJson().put(FIELD_STORE_TO_INVENTORY, storeToInventory);
     }
 
-    public String getAssociatedRole() {
-        return (String) get(FIELD_ASSOCIATED_ROLE);
+    public String getAssociatedRoleId() {
+        return (String) get(FIELD_ASSOCIATED_ROLE_ID);
     }
 
     public UUID getMarkPropertiesId() {

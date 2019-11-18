@@ -38,6 +38,8 @@ import com.sap.sailing.selenium.api.coursetemplate.MarkAppearance;
 import com.sap.sailing.selenium.api.coursetemplate.MarkConfiguration;
 import com.sap.sailing.selenium.api.coursetemplate.MarkProperties;
 import com.sap.sailing.selenium.api.coursetemplate.MarkPropertiesApi;
+import com.sap.sailing.selenium.api.coursetemplate.MarkRole;
+import com.sap.sailing.selenium.api.coursetemplate.MarkRoleApi;
 import com.sap.sailing.selenium.api.coursetemplate.MarkTemplate;
 import com.sap.sailing.selenium.api.coursetemplate.MarkTemplateApi;
 import com.sap.sailing.selenium.api.coursetemplate.Positioning;
@@ -64,6 +66,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     private final CourseTemplateApi courseTemplateApi = new CourseTemplateApi();
     private final MarkTemplateApi markTemplateApi = new MarkTemplateApi();
     private final MarkPropertiesApi markPropertiesApi = new MarkPropertiesApi();
+    private final MarkRoleApi markRoleApi = new MarkRoleApi();
     private final EventApi eventApi = new EventApi();
     private final RegattaApi regattaApi = new RegattaApi();
     private final LeaderboardApi leaderboardApi = new LeaderboardApi();
@@ -136,10 +139,10 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                         assertEquals("markTemplateId is different for " + msgIdentifier, markTemplateId,
                                 trgtMarkConfiguration.getMarkTemplateId());
                     }
-                    final String srcAssociatedRole = markConfiguration.getAssociatedRole();
-                    if (srcAssociatedRole != null) {
-                        assertEquals("associated role is different for " + msgIdentifier, srcAssociatedRole,
-                                trgtMarkConfiguration.getAssociatedRole());
+                    final String srcAssociatedRoleId = markConfiguration.getAssociatedRoleId();
+                    if (srcAssociatedRoleId != null) {
+                        assertEquals("associated role is different for " + msgIdentifier, srcAssociatedRoleId,
+                                trgtMarkConfiguration.getAssociatedRoleId());
                     }
                     if (matchByName) {
                         assertEquals("shortName is different for " + msgIdentifier, srcAppearance.getShortName(),
@@ -231,12 +234,12 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         final int numberOfLaps = 2;
         final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(ctx);
 
-        final Map<MarkTemplate, String> associatedRoles = new HashMap<>();
-        associatedRoles.put(ctdf.sb, "Startboat");
-        associatedRoles.put(ctdf.pe, "Pinend");
-        associatedRoles.put(ctdf.b1, "1");
-        associatedRoles.put(ctdf.b4s, "4s");
-        associatedRoles.put(ctdf.b4p, "4p");
+        final Map<MarkTemplate, MarkRole> associatedRoles = new HashMap<>();
+        associatedRoles.put(ctdf.sb, markRoleApi.createMarkRole(ctx, "Startboat"));
+        associatedRoles.put(ctdf.pe, markRoleApi.createMarkRole(ctx, "Pinend"));
+        associatedRoles.put(ctdf.b1, markRoleApi.createMarkRole(ctx, "1"));
+        associatedRoles.put(ctdf.b4s, markRoleApi.createMarkRole(ctx, "4s"));
+        associatedRoles.put(ctdf.b4p, markRoleApi.createMarkRole(ctx, "4p"));
 
         final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(ctx,
                 ctdf.constructCourseTemplate(new Pair<>(1, 3), numberOfLaps, associatedRoles));
@@ -258,63 +261,67 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertConsistentCourseConfiguration(createdCourseAsConfiguration);
         assertEquals(numberOfLaps, createdCourseAsConfiguration.getNumberOfLaps());
     }
-    
+
     @Test
     public void testReconstructionOfLapsForCourseBasedOnTemplate() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(ctx);
-        
+
         final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(ctx,
                 ctdf.constructCourseTemplate(new Pair<>(1, 3), null, Collections.emptyMap()));
-        
-        
+
         final String regattaName = "test";
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
-        
-        for (int numberOfLaps = 1; numberOfLaps <=3; numberOfLaps ++) {
-            CourseConfiguration courseConfiguration = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(
-                    ctx, createdCourseTemplate.getId(), regattaName, /* tags */ null);
+
+        for (int numberOfLaps = 1; numberOfLaps <= 3; numberOfLaps++) {
+            CourseConfiguration courseConfiguration = courseConfigurationApi
+                    .createCourseConfigurationFromCourseTemplate(ctx, createdCourseTemplate.getId(), regattaName,
+                            /* tags */ null);
             courseConfiguration.setNumberOfLaps(numberOfLaps);
             courseConfigurationApi.createCourse(ctx, courseConfiguration, regattaName, race.getRaceName(), "Default");
             CourseConfiguration createdCourseAsConfiguration = courseConfigurationApi
                     .createCourseConfigurationFromCourse(ctx, regattaName, race.getRaceName(), "Default", null);
-            
+
             assertEquals(createdCourseTemplate.getId(), createdCourseAsConfiguration.getOptionalCourseTemplateId());
             assertEquals(numberOfLaps, createdCourseAsConfiguration.getNumberOfLaps());
         }
     }
-    
+
     @Test
     public void testDifferentCourseTemplatesWithCommonRolesInRegatta() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(ctx);
-        
+
         final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(ctx,
                 ctdf.constructCourseTemplate(new Pair<>(1, 3), 2, Collections.emptyMap()));
-        
+
         final String regattaName = "test";
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
-        
+
         // Create a course based on one of the templates
         CourseConfiguration courseConfiguration = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(
                 ctx, createdCourseTemplate.getId(), regattaName, /* tags */ null);
-        final CourseConfiguration createdCourse = courseConfigurationApi.createCourse(ctx, courseConfiguration, regattaName, race.getRaceName(), "Default");
-        
+        final CourseConfiguration createdCourse = courseConfigurationApi.createCourse(ctx, courseConfiguration,
+                regattaName, race.getRaceName(), "Default");
+
         final CourseTemplateDataFactory ctdf2 = new CourseTemplateDataFactory(ctx);
         final CourseTemplate createdCourseTemplate2 = courseTemplateApi.createCourseTemplate(ctx,
                 ctdf2.constructCourseTemplate(new Pair<>(1, 3), 3, Collections.emptyMap()));
-        
-        CourseConfiguration courseConfigurationBasedOnOtherTemplate = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(
-                ctx, createdCourseTemplate2.getId(), regattaName, /* tags */ null);
-        
+
+        CourseConfiguration courseConfigurationBasedOnOtherTemplate = courseConfigurationApi
+                .createCourseConfigurationFromCourseTemplate(ctx, createdCourseTemplate2.getId(), regattaName,
+                        /* tags */ null);
+
         // All marks being part of the course sequence are required to be matched by role.
         // The single spare mark can not be matched by a role because no role was assigned to it.
         // This means a new spare mark will be suggested to be created.
-        assertEquals(Util.size(createdCourse.getMarkConfigurations()) + 1, Util.size(courseConfigurationBasedOnOtherTemplate.getMarkConfigurations()));
-        
-        // TODO check that the marks are associated to the same role/position in the sequence as in the originally saved course.
+        assertEquals(Util.size(createdCourse.getMarkConfigurations()) + 1,
+                Util.size(courseConfigurationBasedOnOtherTemplate.getMarkConfigurations()));
+
+        // TODO check that the marks are associated to the same role/position in the sequence as in the originally saved
+        // course.
     }
 
     @Test
@@ -324,15 +331,15 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
 
-        MarkConfiguration sb = MarkConfiguration.createFreestyle(null, null, "role_sb", "startboat", "sb", null, null,
-                null, null);
+        MarkConfiguration sb = MarkConfiguration.createFreestyle(null, null,
+                markRoleApi.createMarkRole(ctx, "role_sb").getId(), "startboat", "sb", null, null, null, null);
         sb.setFixedPosition(5.5, 7.1);
-        MarkConfiguration pe = MarkConfiguration.createFreestyle(null, null, "role_pe", "pin end", "pe", null, null,
-                null, null);
+        MarkConfiguration pe = MarkConfiguration.createFreestyle(null, null,
+                markRoleApi.createMarkRole(ctx, "role_pe").getId(), "pin end", "pe", null, null, null, null);
         UUID randomDeviceId = UUID.randomUUID();
         pe.setTrackingDeviceId(randomDeviceId);
-        MarkConfiguration bl = MarkConfiguration.createFreestyle(null, null, "role_bl", "1", null, "#0000FF", null,
-                null, null);
+        MarkConfiguration bl = MarkConfiguration.createFreestyle(null, null,
+                markRoleApi.createMarkRole(ctx, "role_bl").getId(), "1", null, "#0000FF", null, null, null);
         WaypointWithMarkConfiguration wp1 = new WaypointWithMarkConfiguration("start/end", "s/e",
                 PassingInstruction.Line, Arrays.asList(sb.getId(), pe.getId()));
         WaypointWithMarkConfiguration wp2 = new WaypointWithMarkConfiguration(null, null, PassingInstruction.Port,
@@ -353,15 +360,15 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     public void testCreateCourseTemplateWithPositioningIncluded() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 
-        MarkConfiguration sb = MarkConfiguration.createFreestyle(null, null, "role_sb", "startboat", "sb", null, null,
-                null, null);
+        MarkConfiguration sb = MarkConfiguration.createFreestyle(null, null,
+                markRoleApi.createMarkRole(ctx, "role_sb").getId(), "startboat", "sb", null, null, null, null);
         sb.setFixedPosition(5.5, 7.1);
-        MarkConfiguration pe = MarkConfiguration.createFreestyle(null, null, "role_pe", "pin end", "pe", null, null,
-                null, null);
+        MarkConfiguration pe = MarkConfiguration.createFreestyle(null, null,
+                markRoleApi.createMarkRole(ctx, "role_pe").getId(), "pin end", "pe", null, null, null, null);
         UUID randomDeviceId = UUID.randomUUID();
         pe.setTrackingDeviceId(randomDeviceId);
-        MarkConfiguration bl = MarkConfiguration.createFreestyle(null, null, "role_bl", "1", null, "#0000FF", null,
-                null, null);
+        MarkConfiguration bl = MarkConfiguration.createFreestyle(null, null,
+                markRoleApi.createMarkRole(ctx, "role_bl").getId(), "1", null, "#0000FF", null, null, null);
         WaypointWithMarkConfiguration wp1 = new WaypointWithMarkConfiguration("start/end", "s/e",
                 PassingInstruction.Line, Arrays.asList(sb.getId(), pe.getId()));
         WaypointWithMarkConfiguration wp2 = new WaypointWithMarkConfiguration(null, null, PassingInstruction.Port,
@@ -389,26 +396,30 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
 
         final MarkTemplate mt1 = markTemplateApi.createMarkTemplate(ctx, "mc1", "mc1", "#FFFFFF", "Cylinder",
                 "Checkered", MarkType.BUOY.name());
-        final MarkConfiguration mc1 = MarkConfiguration.createMarkTemplateBased(mt1.getId(), "role_mt1");
+        final MarkConfiguration mc1 = MarkConfiguration.createMarkTemplateBased(mt1.getId(),
+                markRoleApi.createMarkRole(ctx, "role_mt1").getId());
 
         final MarkProperties mp1 = markPropertiesApi.createMarkProperties(ctx, "mc2", "mc2", /* deviceUuid */ null,
                 "#FF0000", "shape", "pattern", "STARTBOAT", Collections.emptyList(), 1.0, 1.0);
-        final MarkConfiguration mc2 = MarkConfiguration.createMarkPropertiesBased(mp1.getId(), "role_mp1");
+        final MarkConfiguration mc2 = MarkConfiguration.createMarkPropertiesBased(mp1.getId(),
+                markRoleApi.createMarkRole(ctx, "role_mp1").getId());
         mc2.setFixedPosition(latDeg, longDeg);
-        
-        final MarkConfiguration mc3 = MarkConfiguration.createFreestyle(null, null, "role_mp2", "mc3", "mc3", "#0000FF", null,
-                null, null);
+
+        final MarkConfiguration mc3 = MarkConfiguration.createFreestyle(null, null,
+                markRoleApi.createMarkRole(ctx, "role_mp2").getId(), "mc3", "mc3", "#0000FF", null, null, null);
         mc3.setFixedPosition(latDeg, longDeg);
-        
+
         final UUID deviceId = UUID.randomUUID();
         final MarkProperties mp4 = markPropertiesApi.createMarkProperties(ctx, "mc4", "mc4", deviceId.toString(),
                 "#FF0000", "shape", "pattern", "STARTBOAT", Collections.emptyList(), null, null);
-        final MarkConfiguration mc4 = MarkConfiguration.createMarkPropertiesBased(mp4.getId(), "role_mp4");
-        //mc4.setStoreToInventory(true);
-        
-        final MarkProperties mp5 = markPropertiesApi.createMarkProperties(ctx, "mc5", "mc5", null,
-                "#FF0000", "shape", "pattern", "STARTBOAT", Collections.emptyList(), 1.0, 1.0);
-        final MarkConfiguration mc5 = MarkConfiguration.createMarkPropertiesBased(mp5.getId(), "role_mc5");
+        final MarkConfiguration mc4 = MarkConfiguration.createMarkPropertiesBased(mp4.getId(),
+                markRoleApi.createMarkRole(ctx, "role_mp4").getId());
+        // mc4.setStoreToInventory(true);
+
+        final MarkProperties mp5 = markPropertiesApi.createMarkProperties(ctx, "mc5", "mc5", null, "#FF0000", "shape",
+                "pattern", "STARTBOAT", Collections.emptyList(), 1.0, 1.0);
+        final MarkConfiguration mc5 = MarkConfiguration.createMarkPropertiesBased(mp5.getId(),
+                markRoleApi.createMarkRole(ctx, "role_mc5").getId());
 
         final WaypointWithMarkConfiguration wp1 = new WaypointWithMarkConfiguration("start/end", "s/e",
                 PassingInstruction.Line, Arrays.asList(mc1.getId(), mc2.getId()));
@@ -423,38 +434,39 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
 
         final CourseConfiguration createdCourse = courseConfigurationApi.createCourse(ctx, courseConfiguration,
                 regattaName, race.getRaceName(), "Default");
-        System.out.println("createdCourse: " +createdCourse.getJson());
-        
+        System.out.println("createdCourse: " + createdCourse.getJson());
+
         final MarkConfiguration mc1a = createdCourse.getMarkConfigurationByEffectiveName("mc1");
         assertNull(mc1a.getEffectivePositioning());
         mc1a.setFixedPosition(updatedLatDeg, updatedLongDeg);
-        
+
         final MarkConfiguration mc2a = createdCourse.getMarkConfigurationByEffectiveName("mc2");
         assertNull(mc2a.getEffectivePositioning().getDeviceId());
         assertEquals(latDeg, mc2a.getEffectivePositioning().getLatitudeDeg().doubleValue(), 0.0);
         assertEquals(longDeg, mc2a.getEffectivePositioning().getLongitudeDeg().doubleValue(), 0.0);
         mc2a.setTrackingDeviceId(deviceId);
-        
+
         final MarkConfiguration mc3a = createdCourse.getMarkConfigurationByEffectiveName("mc3");
         assertEquals(latDeg, mc3a.getEffectivePositioning().getLatitudeDeg().doubleValue(), 0.0);
         assertEquals(longDeg, mc3a.getEffectivePositioning().getLongitudeDeg().doubleValue(), 0.0);
         mc3a.unsetPositioning();
-        
+
         final MarkConfiguration mc4a = createdCourse.getMarkConfigurationByEffectiveName("mc4");
         assertNull(mc4a.getEffectivePositioning().getLatitudeDeg());
         assertNull(mc4a.getEffectivePositioning().getLongitudeDeg());
         mc4a.setFixedPosition(updatedLatDeg, updatedLongDeg);
-        
+
         final MarkConfiguration mc5a = createdCourse.getMarkConfigurationByEffectiveName("mc5");
         assertNull(mc5a.getEffectivePositioning().getDeviceId());
         assertEquals(mc5a.getEffectivePositioning().getLatitudeDeg().doubleValue(), 1.0, 0.0);
         assertEquals(mc5a.getEffectivePositioning().getLongitudeDeg().doubleValue(), 1.0, 0.0);
         mc5a.setFixedPosition(updatedLatDeg, updatedLongDeg);
         mc5a.setStoreToInventory(true);
-        
+
         System.out.println("createdCourseChanged: " + createdCourse);
-        
-        CourseConfiguration updatedCourse = courseConfigurationApi.createCourse(ctx, createdCourse, regattaName, race.getRaceName(), "Default");
+
+        CourseConfiguration updatedCourse = courseConfigurationApi.createCourse(ctx, createdCourse, regattaName,
+                race.getRaceName(), "Default");
         System.out.println("updatedCourse: " + updatedCourse);
 
         final CourseConfiguration loadedCourse = courseConfigurationApi.createCourseConfigurationFromCourse(ctx,
@@ -466,27 +478,27 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertEquals("FIXED_POSITION", mc1b.getEffectivePositioning().getType());
         assertEquals(updatedLatDeg, mc1b.getEffectivePositioning().getLatitudeDeg().doubleValue(), .0);
         assertEquals(updatedLongDeg, mc1b.getEffectivePositioning().getLongitudeDeg().doubleValue(), .0);
-        
+
         final MarkConfiguration mc2b = loadedCourse.getMarkConfigurationByEffectiveName("mc2");
         assertNull(mc2b.getEffectivePositioning().getDeviceId());
         assertEquals("DEVICE", mc2b.getEffectivePositioning().getType());
         assertNull(mc2b.getEffectivePositioning().getLatitudeDeg());
         assertNull(mc2b.getEffectivePositioning().getLongitudeDeg());
-        
-        final MarkConfiguration mc3b = loadedCourse.getMarkConfigurationByEffectiveName("mc3");
-        //TODO: following assertfails, but mc3a.unsetPositioning(); was called (position: null)
-        //assertNull(mc3b.getEffectivePositioning());
-        
+
+        // final MarkConfiguration mc3b = loadedCourse.getMarkConfigurationByEffectiveName("mc3");
+        // TODO: following assertfails, but mc3a.unsetPositioning(); was called (position: null)
+        // assertNull(mc3b.getEffectivePositioning());
+
         final MarkConfiguration mc4b = loadedCourse.getMarkConfigurationByEffectiveName("mc4");
         assertEquals("FIXED_POSITION", mc4b.getEffectivePositioning().getType());
         assertEquals(updatedLatDeg, mc4b.getEffectivePositioning().getLatitudeDeg().doubleValue(), .0);
         assertEquals(updatedLongDeg, mc4b.getEffectivePositioning().getLongitudeDeg().doubleValue(), .0);
-        
-        final MarkConfiguration mc5b = loadedCourse.getMarkConfigurationByEffectiveName("mc5");
-        //TODO: position is not updated when mc5a.setStoreToInventory(true), so following asserts fail
-        //      but the mark property is updated
-        //assertEquals(updatedLatDeg, mc5b.getEffectivePositioning().getLatitudeDeg().doubleValue(), 0.0);
-        //assertEquals(updatedLongDeg, mc5b.getEffectivePositioning().getLongitudeDeg().doubleValue(), 0.0);
+
+        // final MarkConfiguration mc5b = loadedCourse.getMarkConfigurationByEffectiveName("mc5");
+        // TODO: position is not updated when mc5a.setStoreToInventory(true), so following asserts fail
+        // but the mark property is updated
+        // assertEquals(updatedLatDeg, mc5b.getEffectivePositioning().getLatitudeDeg().doubleValue(), 0.0);
+        // assertEquals(updatedLongDeg, mc5b.getEffectivePositioning().getLongitudeDeg().doubleValue(), 0.0);
         final MarkProperties reloadedMp5 = markPropertiesApi.getMarkProperties(ctx, mp5.getId());
         assertEquals(updatedLatDeg, reloadedMp5.getLatDeg().doubleValue(), .0);
         assertEquals(updatedLongDeg, reloadedMp5.getLonDeg().doubleValue(), .0);
@@ -516,8 +528,8 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
 
         final String pinEndName = "Start/Finish Pin";
-        MarkConfiguration sfp = MarkConfiguration.createFreestyle(null, null, null, pinEndName, "SFP", null,
-                null, null, MarkType.BUOY.name());
+        MarkConfiguration sfp = MarkConfiguration.createFreestyle(null, null, null, pinEndName, "SFP", null, null, null,
+                MarkType.BUOY.name());
         sfp.setFixedPosition(47.159776, 27.5891346);
         sfp.setStoreToInventory(true);
 
@@ -541,25 +553,27 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         CourseConfiguration reloadedCourseConfiguration = courseConfigurationApi
                 .createCourseConfigurationFromCourse(ctx, regattaName, race.getRaceName(), "Default", null);
         assertCourseConfigurationCompared(ctx, courseConfiguration, reloadedCourseConfiguration);
-        
-        MarkConfiguration startboatConfigurationResult = reloadedCourseConfiguration.getMarkConfigurationByEffectiveName(pinEndName);
+
+        MarkConfiguration startboatConfigurationResult = reloadedCourseConfiguration
+                .getMarkConfigurationByEffectiveName(pinEndName);
         assertNotNull(startboatConfigurationResult.getMarkPropertiesId());
         assertNotNull(startboatConfigurationResult.getMarkId());
         Mark markResult = leaderboardApi.getMark(ctx, regattaName, startboatConfigurationResult.getMarkId());
         assertEquals(startboatConfigurationResult.getMarkPropertiesId(), markResult.getOriginatingMarkPropertiesId());
-        MarkProperties createdMarkProperties = markPropertiesApi.getMarkProperties(ctx, startboatConfigurationResult.getMarkPropertiesId());
+        MarkProperties createdMarkProperties = markPropertiesApi.getMarkProperties(ctx,
+                startboatConfigurationResult.getMarkPropertiesId());
         assertEquals(startboatConfigurationResult.getMarkPropertiesId(), createdMarkProperties.getId());
         assertEquals(pinEndName, createdMarkProperties.getName());
-        
+
         leaderboardApi.startRaceLogTracking(ctx, regattaName, race.getRaceName(), "Default");
         CourseConfiguration reloadedCourseConfigurationAfterTrackingStarted = courseConfigurationApi
                 .createCourseConfigurationFromCourse(ctx, regattaName, race.getRaceName(), "Default", null);
         assertCourseConfigurationCompared(ctx, courseConfiguration, reloadedCourseConfigurationAfterTrackingStarted);
-        
+
         Course course = regattaApi.getCourse(ctx, regattaName, race.getRaceName(), "Default");
         assertEquals(courseConfiguration.getName(), course.getName());
     }
-    
+
     @Test
     public void testGetEmptyCourseWithPredefinedMarks() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
@@ -568,24 +582,25 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         final RaceColumn[] races = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 2);
         final RaceColumn race1 = races[0];
         final RaceColumn race2 = races[1];
-        
+
         String markName = "some mark";
-        MarkConfiguration mark = MarkConfiguration.createFreestyle(null, null, null, markName, null, null,
-                null, null, MarkType.BUOY.name());
-        
+        MarkConfiguration mark = MarkConfiguration.createFreestyle(null, null, null, markName, null, null, null, null,
+                MarkType.BUOY.name());
+
         WaypointWithMarkConfiguration wp = new WaypointWithMarkConfiguration(null, null, PassingInstruction.Starboard,
                 Arrays.asList(mark.getId()));
-        
+
         CourseConfiguration courseConfiguration = new CourseConfiguration("my-freestyle-course", Arrays.asList(mark),
                 Arrays.asList(wp));
-        
+
         courseConfigurationApi.createCourse(ctx, courseConfiguration, regattaName, race1.getRaceName(), "Default");
-        
-        CourseConfiguration courseConfigurationForRace2 = courseConfigurationApi.createCourseConfigurationFromCourse(ctx, regattaName, race2.getRaceName(), "Default", Collections.emptySet());
-        
+
+        CourseConfiguration courseConfigurationForRace2 = courseConfigurationApi.createCourseConfigurationFromCourse(
+                ctx, regattaName, race2.getRaceName(), "Default", Collections.emptySet());
+
         assertEquals(1, Util.size(courseConfigurationForRace2.getMarkConfigurations()));
         assertEquals(0, Util.size(courseConfigurationForRace2.getWaypoints()));
-        
+
         MarkConfiguration previouslyDefinedMark = courseConfigurationForRace2.getMarkConfigurations().iterator().next();
         assertEquals(markName, previouslyDefinedMark.getEffectiveProperties().getName());
     }
@@ -635,20 +650,20 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     }
 
     private void testCreateCourseConfigurationWithStoreToInventory(final ApiContext ctx) {
-        MarkConfiguration sb = MarkConfiguration.createFreestyle(null, null, "role_sb", "startboat", "sb", null, null,
+        MarkConfiguration sb = MarkConfiguration.createFreestyle(null, null, markRoleApi.createMarkRole(ctx, "role_sb").getId(), "startboat", "sb", null, null,
                 null, null);
         sb.setFixedPosition(5.5, 7.1);
         sb.setStoreToInventory(true);
-        MarkConfiguration pe = MarkConfiguration.createFreestyle(null, null, "role_pe", "pin end", "pe", null, null,
+        MarkConfiguration pe = MarkConfiguration.createFreestyle(null, null, markRoleApi.createMarkRole(ctx, "role_pe").getId(), "pin end", "pe", null, null,
                 null, null);
         pe.setStoreToInventory(true);
         UUID randomDeviceId = UUID.randomUUID();
         pe.setTrackingDeviceId(randomDeviceId);
-        MarkConfiguration bl = MarkConfiguration.createFreestyle(null, null, "role_bl", "1", null, "#0000FF", null,
+        MarkConfiguration bl = MarkConfiguration.createFreestyle(null, null, markRoleApi.createMarkRole(ctx, "role_bl").getId(), "1", null, "#0000FF", null,
                 null, null);
         MarkTemplate mtb2 = markTemplateApi.createMarkTemplate(ctx, "mark template 1", "mt1", "#FFFFFF", "Cylinder",
                 "Checkered", MarkType.BUOY.name());
-        MarkConfiguration b2 = MarkConfiguration.createMarkTemplateBased(mtb2.getId(), "role_b2");
+        MarkConfiguration b2 = MarkConfiguration.createMarkTemplateBased(mtb2.getId(), markRoleApi.createMarkRole(ctx, "role_b2").getId());
         b2.setStoreToInventory(true);
 
         eventApi.createEvent(ctx, "testregatta", "", CompetitorRegistrationType.CLOSED, "");
@@ -657,7 +672,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         markApi.addMarkFix(ctx, "testregatta", race.getRaceName(), "Default", mark.getMarkId(),
                 /* markTemplateId */ UUID.randomUUID(), /* markPropertiesId */ UUID.randomUUID(), 9.12, .599,
                 currentTimeMillis());
-        MarkConfiguration b3 = MarkConfiguration.createMarkBased(mark.getMarkId(), "role_b3");
+        MarkConfiguration b3 = MarkConfiguration.createMarkBased(mark.getMarkId(), markRoleApi.createMarkRole(ctx, "role_b3").getId());
         b3.setStoreToInventory(true);
 
         WaypointWithMarkConfiguration wp1 = new WaypointWithMarkConfiguration("start/end", "s/e",
@@ -675,18 +690,19 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         CourseConfiguration courseConfigurationResult = courseConfigurationApi.createCourseTemplate(ctx,
                 courseConfiguration, "testregatta");
         assertCourseConfigurationCompared(ctx, courseConfiguration, courseConfigurationResult);
-        
+
         Set<UUID> expectedMarkProperties = new HashSet<>();
         courseConfigurationResult.getMarkConfigurations().forEach(mc -> {
             if (mc.getMarkPropertiesId() != null) {
                 expectedMarkProperties.add(mc.getMarkPropertiesId());
             }
         });
-        
-        Iterable<MarkProperties> allMarkProperties = markPropertiesApi.getAllMarkProperties(ctx, Collections.emptySet());
+
+        Iterable<MarkProperties> allMarkProperties = markPropertiesApi.getAllMarkProperties(ctx,
+                Collections.emptySet());
         Set<UUID> availableMarkProperties = new HashSet<>();
         allMarkProperties.forEach(mp -> availableMarkProperties.add(mp.getId()));
-        
+
         assertEquals(expectedMarkProperties, availableMarkProperties);
     }
 
@@ -713,8 +729,8 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
         final CourseConfiguration simpleCourseConfiguration = createSimpleCourseConfiguration(ctx);
         assertConsistentCourseConfiguration(simpleCourseConfiguration);
-        CourseConfiguration createdCourseConfiguration = courseConfigurationApi.createCourse(ctx, simpleCourseConfiguration, regattaName, race.getRaceName(),
-                "Default");
+        CourseConfiguration createdCourseConfiguration = courseConfigurationApi.createCourse(ctx,
+                simpleCourseConfiguration, regattaName, race.getRaceName(), "Default");
         assertConsistentCourseConfiguration(createdCourseConfiguration);
         assertCourseConfigurationCompared(ctx, simpleCourseConfiguration, createdCourseConfiguration);
     }
@@ -735,14 +751,14 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         List<MarkConfiguration> markConfigurations = new ArrayList<MarkConfiguration>();
         MarkTemplate markTemplate = markTemplateApi.createMarkTemplate(ctx, "test", "test", "#ffffff", "shape",
                 "pattern", MarkType.LANDMARK.name());
-        MarkConfiguration markConfiguration = MarkConfiguration.createMarkTemplateBased(markTemplate.getId(), "test");
+        MarkConfiguration markConfiguration = MarkConfiguration.createMarkTemplateBased(markTemplate.getId(), markRoleApi.createMarkRole(ctx, "test").getId());
         markConfigurations.add(markConfiguration);
         List<String> markConfigurationIds = markConfigurations.stream().map(mc -> mc.getId())
                 .collect(Collectors.toList());
 
         List<WaypointWithMarkConfiguration> waypoints = new ArrayList<>();
-        WaypointWithMarkConfiguration waypoint = new WaypointWithMarkConfiguration(null, null,
-                PassingInstruction.Line, markConfigurationIds);
+        WaypointWithMarkConfiguration waypoint = new WaypointWithMarkConfiguration(null, null, PassingInstruction.Line,
+                markConfigurationIds);
         waypoints.add(waypoint);
 
         return new CourseConfiguration("test-course", markConfigurations, waypoints);
