@@ -91,4 +91,5 @@ public class SecuredDomainType extends HasPermissionsImpl {
     public static final HasPermissions MARK_PROPERTIES = new SecuredDomainType("MARK_PROPERTIES");
     public static final HasPermissions MARK_TEMPLATE = new SecuredDomainType("MARK_TEMPLATE");
     public static final HasPermissions COURSE_TEMPLATE = new SecuredDomainType("COURSE_TEMPLATE");
+    public static final HasPermissions MARK_ROLE = new SecuredDomainType("MARK_ROLE");
 }
