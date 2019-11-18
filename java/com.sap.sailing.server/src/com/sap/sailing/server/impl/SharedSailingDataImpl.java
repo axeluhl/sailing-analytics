@@ -25,12 +25,14 @@ import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBuilder;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate.MarkTemplateResolver;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.impl.CourseTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesImpl;
+import com.sap.sailing.domain.coursetemplate.impl.MarkRoleImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -59,6 +61,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     private final Map<UUID, MarkProperties> markPropertiesById = new ConcurrentHashMap<>();
     private final Map<UUID, MarkTemplate> markTemplatesById = new ConcurrentHashMap<>();
     private final Map<UUID, CourseTemplate> courseTemplatesById = new ConcurrentHashMap<>();
+    private final Map<UUID, MarkRole> markRolesById = new ConcurrentHashMap<>();
 
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
     private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
@@ -76,8 +79,9 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
 
     private void load() {
-        // load mark templates before mark properties and course templates
+        // load mark templates and mark roles  before mark properties and course templates
         domainObjectFactory.loadAllMarkTemplates().forEach(m -> markTemplatesById.put(m.getId(), m));
+        domainObjectFactory.loadAllMarkRoles().forEach(m -> markRolesById.put(m.getId(), m));
 
         domainObjectFactory.loadAllMarkProperties(v -> markTemplatesById.get(v))
                 .forEach(m -> markPropertiesById.put(m.getId(), m));
@@ -88,16 +92,18 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     @Override
     public void clearState() throws Exception {
+        markPropertiesById.keySet().forEach(mongoObjectFactory::removeMarkProperties);
+        markTemplatesById.keySet().forEach(mongoObjectFactory::removeMarkTemplate);
+        courseTemplatesById.keySet().forEach(mongoObjectFactory::removeCourseTemplate);
+        markRolesById.keySet().forEach(mongoObjectFactory::removeMarkRole);
         removeAll();
     }
 
     private void removeAll() {
-        markPropertiesById.keySet().forEach(mongoObjectFactory::removeMarkProperties);
         markPropertiesById.clear();
-        markTemplatesById.keySet().forEach(mongoObjectFactory::removeMarkTemplate);
         markTemplatesById.clear();
-        courseTemplatesById.keySet().forEach(mongoObjectFactory::removeCourseTemplate);
         courseTemplatesById.clear();
+        markRolesById.clear();
     }
 
     public SecurityService getSecurityService() {
@@ -144,6 +150,47 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     public Iterable<MarkProperties> getAllMarkProperties() {
         return markPropertiesById.values().stream().filter(getSecurityService()::hasCurrentUserReadPermission)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Iterable<MarkRole> getAllMarkRoles() {
+        return markRolesById.values().stream().filter(getSecurityService()::hasCurrentUserReadPermission)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public MarkRole createMarkRole(final String name) {
+        final UUID idOfNewMarkRole = UUID.randomUUID();
+        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredDomainType.MARK_ROLE,
+                MarkRole.getTypeRelativeObjectIdentifier(idOfNewMarkRole),
+                idOfNewMarkRole + "/" + name, () -> {
+                    final UUID idOfNewMarkRoleForReplication = idOfNewMarkRole;
+                    final String nameForReplication = name;
+                    apply(s -> s.internalCreateMarkRole(idOfNewMarkRoleForReplication, nameForReplication));
+                });
+        return getMarkRoleById(idOfNewMarkRole);
+    }
+    
+    @Override
+    public Void internalCreateMarkRole(UUID idOfNewMarkRole, String name) {
+        final MarkRole markRole = new MarkRoleImpl(idOfNewMarkRole, name);
+        
+        mongoObjectFactory.storeMarkRole(markRole);
+        markRolesById.put(markRole.getId(), markRole);
+        return null;
+    }
+    
+    @Override
+    public MarkRole getMarkRoleById(UUID id) {
+        if (id == null) {
+            return null;
+        }
+        final MarkRole markRole = markRolesById.get(id);
+        if (markRole != null) {
+            getSecurityService().checkCurrentUserReadPermission(markRole);
+        }
+        return markRole;
     }
 
     @Override

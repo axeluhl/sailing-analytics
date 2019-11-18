@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
@@ -39,6 +40,12 @@ public interface SharedSailingData {
     Iterable<MarkTemplate> getAllMarkTemplates();
     
     Iterable<CourseTemplate> getAllCourseTemplates(Iterable<String> tagsToFilterFor);
+
+    Iterable<MarkRole> getAllMarkRoles();
+    
+    MarkRole createMarkRole(String name);
+    
+    MarkRole getMarkRoleById(UUID id);
 
     MarkProperties createMarkProperties(CommonMarkProperties properties, Iterable<String> tags);
     

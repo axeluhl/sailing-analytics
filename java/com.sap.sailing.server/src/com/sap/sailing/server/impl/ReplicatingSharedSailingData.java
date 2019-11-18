@@ -8,6 +8,7 @@ import java.util.UUID;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
@@ -17,6 +18,8 @@ import com.sap.sse.replication.ReplicableWithObjectInputStream;
 
 public interface ReplicatingSharedSailingData extends SharedSailingData,
         ReplicableWithObjectInputStream<ReplicatingSharedSailingData, OperationWithResult<ReplicatingSharedSailingData, ?>> {
+
+    Void internalCreateMarkRole(UUID idOfNewMarkRole, String name);
 
     Void internalCreateMarkProperties(UUID idOfNewMarkProperties, CommonMarkProperties properties,
             Iterable<String> tags);
