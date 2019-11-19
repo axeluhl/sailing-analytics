@@ -131,7 +131,6 @@ public class CourseTemplate extends JsonWrapper {
         if (defaultNumberOfLaps != null) {
             getJson().put(FIELD_DEFAULT_NUMBER_OF_LAPS, defaultNumberOfLaps);
         }
-        System.out.println(getJson().toJSONString());
     }
 
     public String getName() {
