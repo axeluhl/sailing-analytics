@@ -131,6 +131,7 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
@@ -1285,4 +1286,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void removeCourseTemplate(UUID uuid);
 
     void removeMarkProperties(UUID uuid);
+
+    Iterable<MarkRoleDTO> getMarkRoles();
+
+    MarkRoleDTO addOrUpdateMarkRole(MarkRoleDTO markRole);
 }

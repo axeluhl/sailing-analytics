@@ -519,6 +519,7 @@ import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CommonMarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.RepeatablePartDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.WaypointTemplateDTO;
@@ -10072,5 +10073,30 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public void removeMarkProperties(UUID uuid) {
         getSharedSailingData().deleteMarkProperties(getSharedSailingData().getMarkPropertiesById(uuid));
+    }
+
+    private MarkRoleDTO convertToMarkRoleDTO(final MarkRole markRole) {
+        return new MarkRoleDTO(markRole.getId(), markRole.getName());
+    }
+
+    @Override
+    public Iterable<MarkRoleDTO> getMarkRoles() {
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(getSharedSailingData().getAllMarkRoles(),
+                m -> convertToMarkRoleDTO(m));
+    }
+
+    @Override
+    public MarkRoleDTO addOrUpdateMarkRole(MarkRoleDTO markRole) {
+        MarkRole existingMarkRole = getSharedSailingData().getMarkRoleById(markRole.getUuid());
+        final MarkRoleDTO result;
+        if (existingMarkRole != null) {
+            getSecurityService().checkCurrentUserUpdatePermission(existingMarkRole);
+            // result = convertToMarkRoleDTO(getSharedSailingData().updateMarkRole(markRole.getUuid(),
+            // markRole.getName()));
+            throw new UnsupportedOperationException("Updating a mark role is not yet implemented!");
+        } else {
+            result = convertToMarkRoleDTO(getSharedSailingData().createMarkRole(markRole.getName()));
+        }
+        return result;
     }
 }

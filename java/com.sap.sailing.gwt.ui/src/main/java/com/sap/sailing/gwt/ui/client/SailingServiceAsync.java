@@ -117,6 +117,7 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
@@ -1226,4 +1227,8 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void removeCourseTemplate(UUID uuid, AsyncCallback<Void> asyncCallback);
 
     void removeMarkProperties(UUID uuid, AsyncCallback<Void> asyncCallback);
+
+    void getMarkRoles(AsyncCallback<Iterable<MarkRoleDTO>> callback);
+
+    void addOrUpdateMarkRole(MarkRoleDTO markRole, AsyncCallback<MarkRoleDTO> asyncCallback);
 }

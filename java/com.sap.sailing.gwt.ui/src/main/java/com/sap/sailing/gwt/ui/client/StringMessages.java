@@ -2348,4 +2348,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String doYouReallyWantToRemoveMarkProperties(String name);
 
     String couldNotRemoveMarkProperties(String message);
+    
+    String markRoles();
+    String filterMarkRoles();
+    
 }
