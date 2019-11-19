@@ -20,10 +20,10 @@ public class Main {
     private final UserStore targetUserStore;
     private final AccessControlStore targetAccessControlStore;
 
-    public Main(MongoDBConfiguration cfgForTarget) throws UserGroupManagementException, UserManagementException {
+    public Main(MongoDBConfiguration cfgForTarget, String targetDefaultCreationGroupName) throws UserGroupManagementException, UserManagementException {
         final PersistenceFactory targetPf = PersistenceFactory.create(cfgForTarget.getService());
         logger.info("Loading target user store from "+cfgForTarget);
-        this.targetUserStore = loadUserStore(targetPf, System.getProperty(TARGET_DEFAULT_TENANT_NAME_SYSTEM_PROPERTY_NAME));
+        this.targetUserStore = loadUserStore(targetPf, targetDefaultCreationGroupName);
         logger.info("Loading target access control store from "+cfgForTarget);
         final AccessControlStore accessControlStore = loadAccessControlStore(targetPf, targetUserStore);
         this.targetAccessControlStore = accessControlStore;
@@ -67,7 +67,7 @@ public class Main {
      */
     public static void main(String[] args) throws UserGroupManagementException, UserManagementException {
         final MongoDBConfiguration cfgForTarget = MongoDBConfiguration.getDefaultConfiguration();
-        final Main instance = new Main(cfgForTarget);
+        final Main instance = new Main(cfgForTarget, System.getProperty(TARGET_DEFAULT_TENANT_NAME_SYSTEM_PROPERTY_NAME));
         for (int i=0; i<args.length/2; i++) {
             final MongoDBConfiguration cfgForSource = new MongoDBConfiguration(new MongoClientURI(args[2*i]));
             instance.importStores(cfgForSource, args[2*i+1]);

@@ -23,5 +23,5 @@ Require-Bundle: org.apache.shiro.core;bundle-version="1.2.2",
  com.sap.sse,
  com.sap.sse.security.interface
 Export-Package: com.sap.sse.security.userstore.mongodb,
- com.sap.sse.security.userstore.mongodb.impl;x-friends:="com.sap.sse.security.test"
+ com.sap.sse.security.userstore.mongodb.impl;x-friends:="com.sap.sse.security.storemerging,com.sap.sse.security.test"
 Automatic-Module-Name: com.sap.sse.security.userstore.mongodb
