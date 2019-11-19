@@ -10076,7 +10076,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private MarkRoleDTO convertToMarkRoleDTO(final MarkRole markRole) {
-        return new MarkRoleDTO(markRole.getId(), markRole.getName());
+        final MarkRoleDTO markRoleDTO =  new MarkRoleDTO(markRole.getId(), markRole.getName());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), markRoleDTO, markRole.getIdentifier());
+        return markRoleDTO;
     }
 
     @Override

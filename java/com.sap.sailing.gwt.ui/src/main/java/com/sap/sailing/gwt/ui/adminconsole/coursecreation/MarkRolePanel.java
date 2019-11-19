@@ -56,7 +56,7 @@ public class MarkRolePanel extends FlowPanel {
     private final StringMessages stringMessages;
     private final ListDataProvider<MarkRoleDTO> markRoleListDataProvider = new ListDataProvider<>();
     private final LabeledAbstractFilterablePanel<MarkRoleDTO> filterableMarkRoles;
-    private List<MarkRoleDTO> allMarkRoles = new ArrayList<>();
+    private List<MarkRoleDTO> allMarkRoles;
     private CellTable<MarkRoleDTO> markRolesTable;
     private RefreshableMultiSelectionModel<MarkRoleDTO> refreshableSelectionModel;
 
@@ -68,6 +68,7 @@ public class MarkRolePanel extends FlowPanel {
         AccessControlledButtonPanel buttonAndFilterPanel = new AccessControlledButtonPanel(userService,
                 SecuredDomainType.MARK_ROLE);
         add(buttonAndFilterPanel);
+        allMarkRoles = new ArrayList<>();
         buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), new Command() {
 
             @Override
@@ -210,7 +211,6 @@ public class MarkRolePanel extends FlowPanel {
                 return markRole.getUuid().toString();
             }
         };
-        markRolesTable.addColumn(idColumn, stringMessages.name());
 
         // name
         Column<MarkRoleDTO, String> nameColumn = new Column<MarkRoleDTO, String>(new TextCell()) {
@@ -219,7 +219,6 @@ public class MarkRolePanel extends FlowPanel {
                 return markRole.getName();
             }
         };
-        markRolesTable.addColumn(nameColumn, stringMessages.name());
 
         nameColumn.setSortable(true);
         sortHandler.setComparator(nameColumn, new Comparator<MarkRoleDTO>() {
@@ -227,6 +226,8 @@ public class MarkRolePanel extends FlowPanel {
                 return markRole1.getName().compareTo(markRole2.getName());
             }
         });
+
+        markRolesTable.addColumn(nameColumn, stringMessages.name());
 
         SecuredDTOOwnerColumn.configureOwnerColumns(markRolesTable, sortHandler, stringMessages);
         final AccessControlledActionsColumn<MarkRoleDTO, DefaultActionsImagesBarCell> actionsColumn = create(
@@ -240,8 +241,8 @@ public class MarkRolePanel extends FlowPanel {
         actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 markRole -> configACL.openDialog(markRole));
+        markRolesTable.addColumn(idColumn, stringMessages.id());
         markRolesTable.addColumn(actionsColumn, stringMessages.actions());
-
     }
 
     void openEditMarkRoleDialog(final MarkRoleDTO originalMarkRole) {

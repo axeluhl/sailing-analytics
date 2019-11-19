@@ -16,11 +16,10 @@ public class MarkRoleDTO extends NamedDTO implements SecuredDTO {
 
     private static final long serialVersionUID = -5758518891989155229L;
 
-    private final UUID uuid;
+    private UUID uuid;
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
 
     public MarkRoleDTO() {
-        this.uuid = null;
     }
 
     public MarkRoleDTO(final UUID uuid, final String name) {
