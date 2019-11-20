@@ -57,12 +57,18 @@
 .eventheader_info_subtitle_info_location {
   visibility: visible;
 }
-.eventheader_info_subtitle_tractrac_logo{
- height: 1em !important;
+.eventheader_info_subtitle_dataBy_logo{
+ height: 1.33333em !important;
 }
-.eventheader_info_subtitle_tractrac_logo_container{
+.eventheader_info_subtitle_dataBy_logo_container{
  position:absolute;
  bottom:0.25em;
  right:0.25em;
+ font-size: 0.75em;
  display: inline-block;
+ color: black;
+}
+
+.subtleLink, subtleLink:hover, subtleLink:active, subtleLink:visited, subtleLink:focus {
+  text-decoration: none;
 }

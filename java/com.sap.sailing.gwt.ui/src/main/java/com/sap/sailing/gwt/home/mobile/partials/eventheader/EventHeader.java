@@ -53,7 +53,7 @@ public class EventHeader extends Composite {
             logoNavigation.configureAnchorElement(eventLogoUi);
         }
         if(event.isTrackedByTracTrac()) {
-            eventHeader.addClassName("eventheader_with_logo");
+            eventHeader.addClassName(EventHeaderResources.INSTANCE.css().eventheader_with_logo());
         }else {
             tractracLogoContainer.removeFromParent();
         }

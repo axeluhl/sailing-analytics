@@ -191,8 +191,13 @@
 .eventheader_status_body {
   font-size: 1rem;
 }
-.eventheader_tractrac_logo{
- height: 1em !important;
+.eventheader_dataBy_logo_container{
+ display: inline-block;
+ white-space: nowrap;
+ font-size: 0.75em;
+}
+.eventheader_dataBy_logo{
+ height: 1.3333333em !important;
 }
 .locationicon {
   vertical-align: text-bottom;

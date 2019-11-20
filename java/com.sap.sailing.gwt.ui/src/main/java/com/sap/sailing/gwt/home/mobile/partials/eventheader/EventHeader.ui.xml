@@ -40,9 +40,10 @@
 						</div>
 					</div>
 				</div>
-					<a ui:field="tractracLogoContainer" target="_blank" href="https://www.tractrac.com" class="{local_res.css.eventheader_info_subtitle_tractrac_logo_container}">
-					     <img src="http://www.dev.tractrac.com/web/wp-content/themes/pivot/style/img/logo-light.png" class="{local_res.css.eventheader_info_subtitle_tractrac_logo}"></img>
-					</a>
+				<a ui:field="tractracLogoContainer" target="_blank"  href="https://www.tractrac.com" class="{local_res.css.eventheader_info_subtitle_dataBy_logo_container} {local_res.css.subtleLink}">
+		            <ui:text from="{i18n.dataBy}"/>
+		            <img src="{local_res.tractrac.getSafeUri}" class="{local_res.css.eventheader_info_subtitle_dataBy_logo}"></img>
+	            </a>
 			</div>
 		</div>
 	</g:HTMLPanel>
