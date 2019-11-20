@@ -74,7 +74,6 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         this.deviceIdentifierServiceFinder = serviceFinderFactory
                 .createServiceFinder(DeviceIdentifierMongoHandler.class);
         this.securityServiceTracker = securityServiceTracker;
-
         load();
     }
 
@@ -82,10 +81,8 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         // load mark templates and mark roles  before mark properties and course templates
         domainObjectFactory.loadAllMarkTemplates().forEach(m -> markTemplatesById.put(m.getId(), m));
         domainObjectFactory.loadAllMarkRoles().forEach(m -> markRolesById.put(m.getId(), m));
-
         domainObjectFactory.loadAllMarkProperties(markTemplatesById::get, markRolesById::get)
                 .forEach(m -> markPropertiesById.put(m.getId(), m));
-
         domainObjectFactory.loadAllCourseTemplates(markTemplatesById::get, markRolesById::get)
                 .forEach(c -> courseTemplatesById.put(c.getId(), c));
     }
