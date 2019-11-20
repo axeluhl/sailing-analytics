@@ -23,6 +23,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 
 public class TracTracAdapterImpl implements TracTracAdapter {
     private final static Logger logger = Logger.getLogger(TracTracAdapter.class.getName());
@@ -80,12 +81,12 @@ public class TracTracAdapterImpl implements TracTracAdapter {
     }
 
     @Override
-    public Util.Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL, boolean loadClientParams)
+    public Triple<String, String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL, boolean loadClientParams)
             throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         logger.info("Retrieving TracTrac race records from " + jsonURL);
         JSONService jsonService = getTracTracDomainFactory().parseJSONURLWithRaceRecords(jsonURL, loadClientParams);
         logger.info("OK retrieving TracTrac race records from " + jsonURL);
-        return new Util.Pair<String, List<RaceRecord>>(jsonService.getEventName(), jsonService.getRaceRecords());
+        return new Util.Triple<>(jsonService.getEventName(),jsonService.getEventWebUrl(), jsonService.getRaceRecords());
     }
 
     @Override
@@ -99,10 +100,10 @@ public class TracTracAdapterImpl implements TracTracAdapter {
     }
 
     @Override
-    public TracTracConfiguration createTracTracConfiguration(String creatorName, String name, String jsonURL,
+    public TracTracConfiguration createTracTracConfiguration(String creatorName, String name, String eventWebUrl, String jsonURL,
             String liveDataURI,
             String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) {
-        return getTracTracDomainFactory().createTracTracConfiguration(creatorName, name, jsonURL, liveDataURI,
+        return getTracTracDomainFactory().createTracTracConfiguration(creatorName, name, eventWebUrl, jsonURL, liveDataURI,
                 storedDataURI,
                 courseDesignUpdateURI, tracTracUsername, tracTracPassword);
     }

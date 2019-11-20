@@ -65,7 +65,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void listRacesInEvent(){
-        service.listTracTracRacesInEvent(JSON_URL, /* hidden */ true, new AsyncCallback<Util.Pair<String,List<TracTracRaceRecordDTO>>>() {
+        service.listTracTracRacesInEvent(JSON_URL, /* hidden */ true, new AsyncCallback<Util.Triple<String,String, List<TracTracRaceRecordDTO>>>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -73,9 +73,9 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
             }
 
             @Override
-            public void onSuccess(Util.Pair<String, List<TracTracRaceRecordDTO>> result) {
+            public void onSuccess(Util.Triple<String, String, List<TracTracRaceRecordDTO>> result) {
                 System.out.println("Listed races.");
-                for (TracTracRaceRecordDTO rr : result.getB()){
+                for (TracTracRaceRecordDTO rr : result.getC()){
                     if (rr.getName().equals(TRACKED_RACE)){
                         rrDao = rr;
                     }

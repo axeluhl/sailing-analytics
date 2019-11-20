@@ -119,7 +119,7 @@ public class EditTracTracConnectionDialog extends DataEntryDialog<TracTracConfig
         final String tractracUsername = tractracUsernameTextBox.getValue();
         final String tractracPassword = tractracPasswordTextBox.getValue();
 
-        return new TracTracConfigurationWithSecurityDTO(dtoToEdit.getName(), jsonURL, liveDataURI, storedDataURI,
+        return new TracTracConfigurationWithSecurityDTO(dtoToEdit.getName(), dtoToEdit.getEventWebUrl(), jsonURL, liveDataURI, storedDataURI,
                 courseDesignUpdateURI, tractracUsername, tractracPassword, dtoToEdit.getCreatorName());
     }
 

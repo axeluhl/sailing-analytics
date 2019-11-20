@@ -1028,10 +1028,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public TracTracConfiguration createTracTracConfiguration(String creatorName, String name, String jsonURL,
+    public TracTracConfiguration createTracTracConfiguration(String creatorName, String name, String eventWebUrl, String jsonURL,
             String liveDataURI, String storedDataURI, String courseDesignUpdateURI, String tracTracUsername,
             String tracTracPassword) {
-        return new TracTracConfigurationImpl(creatorName, name, jsonURL, liveDataURI, storedDataURI,
+        return new TracTracConfigurationImpl(creatorName, name, eventWebUrl, jsonURL, liveDataURI, storedDataURI,
                 courseDesignUpdateURI, tracTracUsername, tracTracPassword);
     }
 

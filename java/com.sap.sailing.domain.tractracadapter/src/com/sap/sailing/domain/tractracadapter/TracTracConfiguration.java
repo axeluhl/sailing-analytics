@@ -60,4 +60,6 @@ public interface TracTracConfiguration extends WithQualifiedObjectIdentifier {
         return username == null ? new TypeRelativeObjectIdentifier(jsonUrl)
                 : new TypeRelativeObjectIdentifier(jsonUrl, username);
     }
+
+    String getEventWebUrl();
 }

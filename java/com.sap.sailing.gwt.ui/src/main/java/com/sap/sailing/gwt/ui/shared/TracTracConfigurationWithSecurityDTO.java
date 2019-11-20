@@ -23,6 +23,7 @@ public class TracTracConfigurationWithSecurityDTO implements IsSerializable, Sec
     private String tracTracUsername;
     private String tracTracPassword;
     private String creatorName;
+    private String eventWebUrl;
 
     public TracTracConfigurationWithSecurityDTO() {
     }
@@ -31,10 +32,11 @@ public class TracTracConfigurationWithSecurityDTO implements IsSerializable, Sec
         this.creatorName = creatorName;
     }
 
-    public TracTracConfigurationWithSecurityDTO(String name, String jsonUrl, String liveDataURI, String storedDataURI,
+    public TracTracConfigurationWithSecurityDTO(String name, String eventWebUrl, String jsonUrl, String liveDataURI, String storedDataURI,
             String courseDesignUpdateUrl, String tractracUsername, String tractracPassword, String creatorName) {
         super();
         this.name = name;
+        this.setEventWebUrl(eventWebUrl);
         this.jsonUrl = jsonUrl;
         this.liveDataURI = liveDataURI;
         this.storedDataURI = storedDataURI;
@@ -45,9 +47,10 @@ public class TracTracConfigurationWithSecurityDTO implements IsSerializable, Sec
     }
 
     /** Copy constructor with new name */
-    public TracTracConfigurationWithSecurityDTO(TracTracConfigurationWithSecurityDTO config, final String name) {
+    public TracTracConfigurationWithSecurityDTO(TracTracConfigurationWithSecurityDTO config, final String name, String eventWebUrl) {
         super();
         this.name = name;
+        this.setEventWebUrl(eventWebUrl);
         this.jsonUrl = config.getJsonUrl();
         this.liveDataURI = config.getLiveDataURI();
         this.storedDataURI = config.getStoredDataURI();
@@ -126,5 +129,13 @@ public class TracTracConfigurationWithSecurityDTO implements IsSerializable, Sec
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
         return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    public String getEventWebUrl() {
+        return eventWebUrl;
+    }
+
+    public void setEventWebUrl(String eventWebUrl) {
+        this.eventWebUrl = eventWebUrl;
     }
 }
