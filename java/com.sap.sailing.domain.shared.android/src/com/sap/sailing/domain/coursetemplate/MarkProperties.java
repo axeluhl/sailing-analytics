@@ -41,7 +41,7 @@ import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
  * @author Axel Uhl (d043530)
  *
  */
-public interface MarkProperties extends CommonMarkPropertiesWithOptionalPositioning, NamedWithUUID, HasTags, WithQualifiedObjectIdentifier {
+public interface MarkProperties extends CommonMarkProperties, NamedWithUUID, HasTags, WithQualifiedObjectIdentifier {
     void setColor(Color color);
 
     void setShape(String shape);
@@ -51,6 +51,23 @@ public interface MarkProperties extends CommonMarkPropertiesWithOptionalPosition
     void setType(MarkType type);
 
     void setShortName(String shortName);
+
+    /**
+     * If not {@code null} then a device identifier that can be used to create a device mapping
+     * in the scope of a regatta such that the tracking device with the ID returned will be used
+     * to track the mark to which these properties are applied. No timing for any device mapping is
+     * provided here. It is up to the process of creating and configuring the regatta marks to decide
+     * about device mapping time intervals.
+     */
+    DeviceIdentifier getTrackingDeviceIdentifier();
+
+    /**
+     * Returns a fixed position to be used to "ping" the mark to which these properties are applied; or {@code null} in
+     * case the mark is not at a fixed position or no position is known. In particular, it is considered an error to
+     * provide a non-{@code null} fixed position when a non-{@code null} {@link #getTrackingDeviceIdentifier() tracking
+     * device identifier} has been provided for these mark properties.
+     */
+    Position getFixedPosition();
 
     /**
      * Updates this properties object such that the next call to {@link #getTrackingDeviceIdentifier()} returns the
