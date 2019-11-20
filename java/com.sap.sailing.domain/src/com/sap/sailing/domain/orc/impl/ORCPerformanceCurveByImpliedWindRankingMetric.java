@@ -384,9 +384,9 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
                     legType = LegType.REACHING;
                 }
                 // use windward projection in case we deem the current leg an upwind or downwind leg
-                Distance windwardToGo = trackedLegOfCompetitor.getWindwardDistanceToGo(legType, timePoint,
+                final Distance windwardToGo = trackedLegOfCompetitor.getWindwardDistanceToGo(legType, timePoint,
                         WindPositionMode.LEG_MIDDLE, cache);
-                Distance windwardTotal = trackedLegOfCompetitor.getTrackedLeg().getWindwardDistance(legType, timePoint,
+                final Distance windwardTotal = trackedLegOfCompetitor.getTrackedLeg().getWindwardDistance(legType, timePoint,
                         cache);
                 if (windwardToGo != null && windwardTotal != null) {
                     shareOfCurrentLeg = 1.0 - windwardToGo.divide(windwardTotal);
