@@ -263,23 +263,7 @@ public class CourseImpl extends RenamableImpl implements Course {
 
     @Override
     public String toString() {
-        lockForRead();
-        try {
-            StringBuilder result = new StringBuilder(getName());
-            result.append(": ");
-            boolean first = true;
-            for (Waypoint waypoint : getWaypoints()) {
-                if (!first) {
-                    result.append(" -> ");
-                } else {
-                    first = false;
-                }
-                result.append(waypoint);
-            }
-            return result.toString();
-        } finally {
-            unlockAfterRead();
-        }
+        return internalToString();
     }
 
     @Override

@@ -99,4 +99,8 @@ public class CourseDataImpl extends NamedImpl implements CourseBase {
         return associatedRoles;
     }
 
+    @Override
+    public String toString() {
+        return internalToString();
+    }
 }
