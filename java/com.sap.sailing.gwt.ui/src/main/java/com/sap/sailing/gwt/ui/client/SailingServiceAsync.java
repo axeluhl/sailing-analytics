@@ -144,8 +144,13 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void getRegattaByName(String regattaName, AsyncCallback<RegattaDTO> asyncCallback);
 
+    /**
+     * The string returned in the callback's pair is the common event name
+     * 
+     * @param listHiddenRaces
+     */
     void listTracTracRacesInEvent(String eventJsonURL, boolean listHiddenRaces,
-            AsyncCallback<Triple<String, String, List<TracTracRaceRecordDTO>>> callback);
+            AsyncCallback<Util.Pair<String, List<TracTracRaceRecordDTO>>> callback);
 
     /**
      * @param regattaToAddTo
@@ -187,9 +192,8 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void getPreviousTracTracConfigurations(AsyncCallback<List<TracTracConfigurationWithSecurityDTO>> callback);
 
-    void createTracTracConfiguration(String name, String eventWebUrl, String jsonURL, String liveDataURI,
-            String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword,
-            AsyncCallback<Void> callback);
+    void createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
+            String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, AsyncCallback<Void> callback);
 
     void deleteTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration,
             AsyncCallback<Void> callback);

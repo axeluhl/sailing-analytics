@@ -173,7 +173,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     List<EventDTO> getEvents() throws Exception;
 
-    Util.Triple<String, String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL,
+    Util.Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL,
             boolean listHiddenRaces) throws UnauthorizedException, Exception;
 
     void trackWithTracTrac(RegattaIdentifier regattaToAddTo, Iterable<TracTracRaceRecordDTO> rrs, String liveURI,
@@ -189,7 +189,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm)
             throws UnauthorizedException;
 
-    void createTracTracConfiguration(String name, String eventWebUrl, String jsonURL, String liveDataURI, String storedDataURI,
+    void createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword)
             throws UnauthorizedException, Exception;
 

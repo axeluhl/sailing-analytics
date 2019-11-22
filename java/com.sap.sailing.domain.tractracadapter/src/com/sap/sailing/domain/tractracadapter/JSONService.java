@@ -8,6 +8,4 @@ public interface JSONService {
 
     String getEventName();
 
-    String getEventWebUrl();
-
 }

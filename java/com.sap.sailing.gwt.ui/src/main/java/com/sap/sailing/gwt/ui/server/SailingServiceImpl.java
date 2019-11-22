@@ -1384,11 +1384,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public Triple<String, String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL, boolean listHiddenRaces) throws MalformedURLException, IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
-        Triple<String, String, List<RaceRecord>> raceRecords;
+    public com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL, boolean listHiddenRaces) throws MalformedURLException, IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
+        com.sap.sse.common.Util.Pair<String,List<RaceRecord>> raceRecords;
         raceRecords = getTracTracAdapter().getTracTracRaceRecords(new URL(eventJsonURL), /*loadClientParam*/ false);
         List<TracTracRaceRecordDTO> result = new ArrayList<TracTracRaceRecordDTO>();
-        for (RaceRecord raceRecord : raceRecords.getC()) {
+        for (RaceRecord raceRecord : raceRecords.getB()) {
             if (listHiddenRaces == false && raceRecord.getRaceVisibility().equals(TracTracConnectionConstants.HIDDEN_VISIBILITY)) {
                 continue;
             }
@@ -1398,7 +1398,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     raceRecord.getBoatClassNames(), raceRecord.getRaceStatus(), raceRecord.getRaceVisibility(), raceRecord.getJsonURL().toString(),
                     hasRememberedRegatta(raceRecord.getID())));
         }
-        return new com.sap.sse.common.Util.Triple<>(raceRecords.getA(),raceRecords.getB(), result);
+        return new com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>(raceRecords.getA(), result);
     }
 
     private boolean hasRememberedRegatta(Serializable raceID) {
@@ -1457,8 +1457,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 configs,
                 ttConfig -> {
                     TracTracConfigurationWithSecurityDTO config = new TracTracConfigurationWithSecurityDTO(
-                        ttConfig.getName(),
-                        ttConfig.getEventWebUrl(),
+                            ttConfig.getName(),
                         ttConfig.getJSONURL().toString(),
                         ttConfig.getLiveDataURI().toString(), ttConfig.getStoredDataURI().toString(),
                         ttConfig.getCourseDesignUpdateURI().toString(), ttConfig.getTracTracUsername().toString(),
@@ -1469,7 +1468,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
     
     @Override
-    public void createTracTracConfiguration(String name, String eventWebUrl, String jsonURL, String liveDataURI, String storedDataURI,
+    public void createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception {
         if (existsTracTracConfigurationForCurrentUser(jsonURL)) {
             throw new RuntimeException("A configuration for the current user with this json URL already exists.");
@@ -1480,7 +1479,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 SecuredDomainType.TRACTRAC_ACCOUNT,
                 identifier, name,
                 () -> tractracMongoObjectFactory.createTracTracConfiguration(
-                        getTracTracAdapter().createTracTracConfiguration(currentUserName, name, eventWebUrl, jsonURL, liveDataURI,
+                        getTracTracAdapter().createTracTracConfiguration(currentUserName, name, jsonURL, liveDataURI,
                                 storedDataURI,
                                 courseDesignUpdateURI, tracTracUsername, tracTracPassword)));
     }
@@ -1500,7 +1499,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         getSecurityService().checkCurrentUserUpdatePermission(tracTracConfiguration);
         tractracMongoObjectFactory.updateTracTracConfiguration(
                 getTracTracAdapter().createTracTracConfiguration(tracTracConfiguration.getCreatorName(),
-                tracTracConfiguration.getName(),tracTracConfiguration.getEventWebUrl(), tracTracConfiguration.getJsonUrl(),
+                tracTracConfiguration.getName(), tracTracConfiguration.getJsonUrl(),
                 tracTracConfiguration.getLiveDataURI(), tracTracConfiguration.getStoredDataURI(),
                 tracTracConfiguration.getCourseDesignUpdateURI(), tracTracConfiguration.getTracTracUsername(),
                         tracTracConfiguration.getTracTracPassword()));

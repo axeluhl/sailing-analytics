@@ -96,12 +96,12 @@ public interface TracTracAdapter {
      *            and {@link #addTracTracRace(TrackerManager, URL, URI, URI, URI, RaceLogStore, WindStore, long, String, String)} will
      *            fetch the JSON and clientparams.php documents to work with up-to-date data.
      */
-    Util.Triple<String, String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL, boolean loadClientParams) throws IOException,
+    Util.Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL, boolean loadClientParams) throws IOException,
             ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 
     RaceRecord getSingleTracTracRaceRecord(URL jsonURL, String raceId, boolean loadClientParams) throws Exception;
 
-    TracTracConfiguration createTracTracConfiguration(String creatorName, String name, String eventWebUrl, String jsonURL,
+    TracTracConfiguration createTracTracConfiguration(String creatorName, String name, String jsonURL,
             String liveDataURI,
             String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword);
 

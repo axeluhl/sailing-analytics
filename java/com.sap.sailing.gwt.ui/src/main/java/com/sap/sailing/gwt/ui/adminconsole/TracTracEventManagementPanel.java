@@ -129,7 +129,6 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                             @Override
                             public void ok(TracTracConfigurationWithSecurityDTO editedConnection) {
                                 sailingService.createTracTracConfiguration(editedConnection.getName(),
-                                        editedConnection.getEventWebUrl(),
                                         editedConnection.getJsonUrl(), editedConnection.getLiveDataURI(),
                                         editedConnection.getStoredDataURI(),
                                         editedConnection.getCourseDesignUpdateURI(),
@@ -452,8 +451,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         if (selectedConnection != null) {
 
             sailingService.listTracTracRacesInEvent(selectedConnection.getJsonUrl(), listHiddenRaces,
-                    new MarkedAsyncCallback<com.sap.sse.common.Util.Triple<String, String, List<TracTracRaceRecordDTO>>>(
-                new AsyncCallback<com.sap.sse.common.Util.Triple<String, String, List<TracTracRaceRecordDTO>>>() {
+                    new MarkedAsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>(
+                new AsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         loadingMessageLabel.setText("");
@@ -461,14 +460,13 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                     }
         
                     @Override
-                    public void onSuccess(final com.sap.sse.common.Util.Triple<String, String, List<TracTracRaceRecordDTO>> result) {
+                    public void onSuccess(final com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>> result) {
                         loadingMessageLabel.setText("Building resultset and saving configuration...");
                         TracTracEventManagementPanel.this.availableTracTracRaces.clear();
                                     final TracTracConfigurationWithSecurityDTO updatedConnection = new TracTracConfigurationWithSecurityDTO(
                                             selectedConnection,
-                                            result.getA(),
-                                            result.getB());
-                        final List<TracTracRaceRecordDTO> eventRaces = result.getC();
+                                            result.getA());
+                        final List<TracTracRaceRecordDTO> eventRaces = result.getB();
                         if (eventRaces != null) {
                             TracTracEventManagementPanel.this.availableTracTracRaces.addAll(eventRaces);
                             racesFilterablePanel.updateAll(availableTracTracRaces);

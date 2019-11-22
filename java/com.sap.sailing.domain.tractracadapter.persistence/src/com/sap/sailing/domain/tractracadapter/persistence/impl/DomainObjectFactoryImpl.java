@@ -63,7 +63,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final TracTracConfiguration loadedTracTracConfiguration = tracTracDomainFactory.createTracTracConfiguration(
                 creatorName,
                 (String) object.get(FieldNames.TT_CONFIG_NAME.name()),
-                (String) object.get(FieldNames.TT_CONFIG_EVENT_WEB_URL.name()),
                 jsonURL,
                 (String) object.get(FieldNames.TT_CONFIG_LIVE_DATA_URI.name()),
                 (String) object.get(FieldNames.TT_CONFIG_STORED_DATA_URI.name()),

@@ -256,7 +256,7 @@ public interface DomainFactory {
      */
     void updateCourseWaypoints(Course courseToUpdate, Iterable<Util.Pair<TracTracControlPoint, PassingInstruction>> controlPoints) throws PatchFailedException;
 
-    TracTracConfiguration createTracTracConfiguration(String creatorName, String name, String eventWebUrl, String jsonURL,
+    TracTracConfiguration createTracTracConfiguration(String creatorName, String name, String jsonURL,
             String liveDataURI, String storedDataURI, String courseDesignUpdateURI, String tracTracUsername,
             String tracTracPassword);
 

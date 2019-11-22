@@ -20,13 +20,11 @@ import com.sap.sailing.domain.tractracadapter.RaceRecord;
 public class JSONServiceImpl implements JSONService {
     private final String regattaName;
     private final List<RaceRecord> raceRecords;
-    private final String eventWebUrl;
     
     public JSONServiceImpl(URL jsonURL, boolean loadLiveAndStoredURI) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         JSONObject jsonObject = parseJSONObject(jsonURL.openStream());
         raceRecords = new ArrayList<RaceRecord>();
         regattaName = (String) ((JSONObject) jsonObject.get("event")).get("name");
-        eventWebUrl = (String) ((JSONObject) jsonObject.get("event")).get("web_url");
         for (Object raceEntry : (JSONArray) jsonObject.get("races")) {
             JSONObject jsonRaceEntry = (JSONObject) raceEntry;
             RaceRecord raceRecord = createRaceRecord(jsonURL, loadLiveAndStoredURI, jsonRaceEntry);
@@ -55,7 +53,6 @@ public class JSONServiceImpl implements JSONService {
         JSONObject jsonObject = parseJSONObject(jsonURL.openStream());
         raceRecords = new ArrayList<RaceRecord>();
         regattaName = (String) ((JSONObject) jsonObject.get("event")).get("name");
-        eventWebUrl = (String) ((JSONObject) jsonObject.get("event")).get("web_url");
         for (Object raceEntry : (JSONArray) jsonObject.get("races")) {
             JSONObject jsonRaceEntry = (JSONObject) raceEntry;
             if (jsonRaceEntry.get("id").equals(raceEntryId)) {
@@ -79,10 +76,5 @@ public class JSONServiceImpl implements JSONService {
         JSONParser parser = new JSONParser();
         Object result = parser.parse(new InputStreamReader(is));
         return (JSONObject) result;
-    }
-
-    @Override
-    public String getEventWebUrl() {
-        return eventWebUrl;
     }
 }
