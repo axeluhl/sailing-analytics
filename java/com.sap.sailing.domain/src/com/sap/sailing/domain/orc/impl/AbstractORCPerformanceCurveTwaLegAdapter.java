@@ -53,7 +53,8 @@ public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPer
             result = null;
         } else {
             final TimePoint referenceTimePoint = trackedLeg.getReferenceTimePoint();
-            result = trackedLeg.getLegBearing(referenceTimePoint).getDifferenceTo(wind.getFrom());
+            final Bearing bearing = trackedLeg.getLegBearing(referenceTimePoint);
+            result = bearing != null ? bearing.getDifferenceTo(wind.getFrom()) : null;
         }
         return result;
     }

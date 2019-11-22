@@ -73,4 +73,8 @@ public class CourseDataImpl extends NamedImpl implements CourseBase {
         return null;
     }
 
+    @Override
+    public String toString() {
+        return internalToString();
+    }
 }
