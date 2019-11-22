@@ -3,9 +3,11 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.ws.rs.GET;
@@ -23,6 +25,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
@@ -37,6 +40,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
+import com.sap.sailing.server.util.RaceBoardLinkFactory;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
@@ -99,21 +103,27 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                 jsonLeaderboardGroup.put("id", leaderboardGroup.getId().toString());
                 jsonLeaderboardGroup.put("description", leaderboardGroup.getDescription());
                 jsonLeaderboardGroup.put("timepoint", timePoint.toString());
+                final Set<Event> eventsReferencingLeaderboardGroup = new HashSet<>();
+                JSONArray idsOfEventsReferencingLeaderboardGroup = new JSONArray();
+                for (final Event event : getService().getAllEvents()) {
+                    if (Util.contains(event.getLeaderboardGroups(), leaderboardGroup)) {
+                        eventsReferencingLeaderboardGroup.add(event);
+                        idsOfEventsReferencingLeaderboardGroup.add(event.getId().toString());
+                    }
+                }
+                jsonLeaderboardGroup.put("events", idsOfEventsReferencingLeaderboardGroup);
                 JSONArray jsonLeaderboardEntries = new JSONArray();
                 jsonLeaderboardGroup.put("leaderboards", jsonLeaderboardEntries);
                 for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                     if (getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
-
                         boolean isMetaLeaderboard = leaderboard instanceof MetaLeaderboard ? true : false;
                         boolean isRegattaLeaderboard = leaderboard instanceof RegattaLeaderboard ? true : false;
-
                         JSONObject jsonLeaderboard = new JSONObject();
                         jsonLeaderboard.put("name", leaderboard.getName());
                         jsonLeaderboard.put("displayName", leaderboard.getDisplayName());
                         jsonLeaderboard.put("isMetaLeaderboard", isMetaLeaderboard);
                         jsonLeaderboard.put("isRegattaLeaderboard", isRegattaLeaderboard);
                         jsonLeaderboardEntries.add(jsonLeaderboard);
-
                         SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
                         if (scoreCorrection != null) {
                             jsonLeaderboard.put("scoringComment", scoreCorrection.getComment());
@@ -124,7 +134,6 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                             jsonLeaderboard.put("scoringComment", null);
                             jsonLeaderboard.put("lastScoringUpdate", null);
                         }
-
                         final List<Triple<String, Iterable<Fleet>, Iterable<? extends RaceColumn>>> seriesNameAndFleetsAndRaceColumnsOfSeries = new ArrayList<>();
                         final Map<String, Boolean> medalSeriesNames = new HashMap<>();
                         if (isRegattaLeaderboard) {
@@ -180,6 +189,14 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                                             jsonRaceColumn.put("regattaName",
                                                     trackedRace.getTrackedRegatta().getRegatta().getName());
                                             jsonRaceColumn.put("trackedRaceName", trackedRace.getRace().getName());
+                                            final JSONObject raceBoardURLsByEventID = new JSONObject();
+                                            for (Event event : eventsReferencingLeaderboardGroup) {
+                                                if (Util.contains(event.getVenue().getCourseAreas(), leaderboard.getDefaultCourseArea())) {
+                                                    raceBoardURLsByEventID.put(event.getId().toString(), RaceBoardLinkFactory.createRaceBoardLink(trackedRace, leaderboard, event, leaderboardGroup, "PLAYER",
+                                                            /* locale */ null));
+                                                }
+                                            }
+                                            jsonRaceColumn.put("raceViewerUrls", raceBoardURLsByEventID);
                                             jsonRaceColumn.put("hasGpsData", trackedRace.hasGPSData());
                                             jsonRaceColumn.put("hasWindData", trackedRace.hasWindData());
                                         } else {
