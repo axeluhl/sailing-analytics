@@ -188,7 +188,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     private TrackedRaceStatus status;
     
-    private String trackingConnector;
+    private final String trackingConnector;
 
     private final Object statusNotifier;
 
