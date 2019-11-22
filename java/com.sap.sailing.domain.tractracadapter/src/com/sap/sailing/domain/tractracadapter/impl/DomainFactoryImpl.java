@@ -116,7 +116,7 @@ import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 import difflib.PatchFailedException;
 
 public class DomainFactoryImpl implements DomainFactory {
-    private static final String TRAC_TRAC = "tracTrac";
+    public static final String TRAC_TRAC = "tracTrac";
 
     private static final Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
     
