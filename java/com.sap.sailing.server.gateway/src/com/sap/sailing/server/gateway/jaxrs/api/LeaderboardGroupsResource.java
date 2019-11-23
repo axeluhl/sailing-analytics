@@ -1,5 +1,6 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -45,6 +46,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.impl.UUIDHelper;
 
 @Path("/v1/leaderboardgroups")
 public class LeaderboardGroupsResource extends AbstractSailingServerResource {
@@ -86,10 +88,16 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{name}")
-    public Response getLeaderboardGroup(@PathParam("name") String leaderboardGroupName) {
+    @Path("{nameOrUUID}")
+    public Response getLeaderboardGroup(@PathParam("nameOrUUID") String leaderboardGroupName) {
         Response response;
-        LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroupByName(leaderboardGroupName);
+        final Serializable uuid = UUIDHelper.tryUuidConversion(leaderboardGroupName);
+        final LeaderboardGroup leaderboardGroup;
+        if (uuid != leaderboardGroupName) {
+            leaderboardGroup = getService().getLeaderboardGroupByID((UUID) uuid);
+        } else {
+            leaderboardGroup = getService().getLeaderboardGroupByName(leaderboardGroupName);
+        }
         if (leaderboardGroup == null) {
             response = Response.status(Status.NOT_FOUND)
                     .entity("Could not find a leaderboard group with name '"
