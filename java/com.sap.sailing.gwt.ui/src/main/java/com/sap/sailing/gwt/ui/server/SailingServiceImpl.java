@@ -2024,7 +2024,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     if (!getSecurityService().hasCurrentUserReadPermission(event)) {
                         event = null;
                     }
-
                     boolean isValidLeaderboardGroup = false;
                     if (leaderboardGroup != null) {
                         for (Leaderboard leaderboardInGroup : leaderboardGroup.getLeaderboards()) {
@@ -2051,7 +2050,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     StrippedLeaderboardDTOWithSecurity leaderboardDTO = createStrippedLeaderboardDTOWithSecurity(
                             leaderboard, false,
                             false);
-                    boolean isTrackedByTracTrac = event.isTrackedByTracTrac();
+                    boolean isTrackedByTracTrac = isValidEvent && event.isTrackedByTracTrac();
                     result = new RaceboardDataDTO(raceDTO, isValidLeaderboardGroup, isValidEvent,
                             detailTypesForCompetitorChart, availableDetailTypesForLeaderboard, leaderboardDTO, isTrackedByTracTrac);
                 }
