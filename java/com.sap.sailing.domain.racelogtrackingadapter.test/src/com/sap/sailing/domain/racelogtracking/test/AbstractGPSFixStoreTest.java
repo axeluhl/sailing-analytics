@@ -129,7 +129,7 @@ public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
                 /* endDate */null, null, null, "a", null, /* registrationLinkSecret */ UUID.randomUUID().toString()));
         return new DynamicTrackedRaceImpl(regatta, raceDefinition, Collections.<Sideline> emptyList(),
                 EmptyWindStore.INSTANCE, 0, 0, 0, /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
-                mock(RaceLogAndTrackedRaceResolver.class));
+                mock(RaceLogAndTrackedRaceResolver.class), null);
     }
 
     protected void testNumberOfRawFixes(Track<?> track, long expected) {

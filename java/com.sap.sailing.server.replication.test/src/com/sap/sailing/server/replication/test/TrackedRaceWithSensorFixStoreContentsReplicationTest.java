@@ -105,7 +105,7 @@ public class TrackedRaceWithSensorFixStoreContentsReplicationTest extends Abstra
         trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
                         PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory()), /* delayToLiveInMillis */ 5000,
-                /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000));
+                /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000, null));
         master.apply(new UpdateStartOfTracking(raceIdentifier, new MillisecondsTimePoint(0)));
         trackedRace.waitUntilLoadingFromWindStoreComplete();
         // set up the tracked race on the master with a non-empty GPS fix store before starting replication; this shall

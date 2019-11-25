@@ -19,7 +19,7 @@ public class MarkRoleEditDialog extends DataEntryDialog<MarkRoleDTO> {
 
     public MarkRoleEditDialog(final StringMessages stringMessages, MarkRoleDTO markRoleToEdit,
             DialogCallback<MarkRoleDTO> callback) {
-        super(stringMessages.edit() + " " + stringMessages.markProperties(), null, stringMessages.ok(),
+        super(stringMessages.edit() + " " + stringMessages.markRoles(), null, stringMessages.ok(),
                 stringMessages.cancel(), new Validator<MarkRoleDTO>() {
                     @Override
                     public String getErrorMessage(MarkRoleDTO valueToValidate) {
@@ -31,7 +31,7 @@ public class MarkRoleEditDialog extends DataEntryDialog<MarkRoleDTO> {
                         return result;
                     }
                 }, /* animationEnabled */ true, callback);
-        this.ensureDebugId("MarkPropertiesToEditEditDialog");
+        this.ensureDebugId("MarkRolesEditDialog");
         id = markRoleToEdit.getUuid();
         this.stringMessages = stringMessages;
         this.nameTextBox = createTextBox(markRoleToEdit.getName());

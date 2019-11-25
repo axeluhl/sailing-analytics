@@ -105,7 +105,7 @@ public class RemoveLeaderboardTest {
                 /* windStore */ EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l,
                 /* millisecondsOverWhichToAverageWind */ 0l,
                 /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, /*useMarkPassingCalculator*/ false, mock(RaceLogAndTrackedRaceResolver.class),
-                Optional.empty());
+                Optional.empty(), null);
     }
     
     @Test
