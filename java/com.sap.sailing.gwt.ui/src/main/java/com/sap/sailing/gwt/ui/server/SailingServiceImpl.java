@@ -2015,7 +2015,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     }
                     raceDTO.boatClass = regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName();
                     SecurityDTOUtil.addSecurityInformation(getSecurityService(), raceDTO, raceDTO.getIdentifier());
-
                     Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
                     LeaderboardGroup leaderboardGroup = leaderboardGroupName != null
                             ? getService().getLeaderboardGroupByName(leaderboardGroupName)
