@@ -477,12 +477,8 @@ public class RaceContext {
         if (!isLive) {
             TimePoint startTime = getStartTime();
             if (startTime != null) {
-                TimePoint finishTime = getFinishTime();
-                // no data from tracking but maybe a manual setting of the start and finish time
                 TimePoint startOfLivePeriod = startTime.minus(TIME_BEFORE_START_TO_SHOW_RACES_AS_LIVE);
-                TimePoint endOfLivePeriod = finishTime != null ? finishTime
-                        .plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS) : null;
-                if (now.after(startOfLivePeriod) && (endOfLivePeriod == null || now.before(endOfLivePeriod))) {
+                if (now.before(startTime) && now.after(startOfLivePeriod)) {
                     isOfPublicInterest = true;
                 }
             } else if (raceLog != null) {
