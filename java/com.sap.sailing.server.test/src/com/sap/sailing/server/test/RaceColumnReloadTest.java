@@ -109,7 +109,7 @@ public class RaceColumnReloadTest {
         service.apply(new TrackRegatta(raceIdentifier));
         trackedRace = service.apply(new CreateTrackedRace(raceIdentifier, EmptyWindStore.INSTANCE,
                 /* delayToLiveInMillis */ 5000, /* millisecondsOverWhichToAverageWind */ 10000,
-                /* millisecondsOverWhichToAverageSpeed */10000));
+                /* millisecondsOverWhichToAverageSpeed */10000, null));
         trackedRace.setStartOfTrackingReceived(MillisecondsTimePoint.now());
         defaultFleet = Util.get(raceColumn.getFleets(), 0);
 

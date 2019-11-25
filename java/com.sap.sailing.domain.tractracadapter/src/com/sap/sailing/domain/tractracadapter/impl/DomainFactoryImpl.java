@@ -116,6 +116,8 @@ import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 import difflib.PatchFailedException;
 
 public class DomainFactoryImpl implements DomainFactory {
+    public static final String TRAC_TRAC = "tracTrac";
+
     private static final Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
     
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
@@ -744,7 +746,7 @@ public class DomainFactoryImpl implements DomainFactory {
         return raceTrackingHandler.createTrackedRace(trackedRegatta, race, sidelines,
                 windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
-                raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver, Optional.empty());
+                raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver, Optional.empty(), TRAC_TRAC);
     }
 
     /**

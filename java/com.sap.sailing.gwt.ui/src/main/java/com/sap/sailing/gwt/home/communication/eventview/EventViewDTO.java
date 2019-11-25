@@ -27,6 +27,8 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
     private String sailorsInfoWebsiteURL;
     private String description;
     private List<SpotDTO> allWindFinderSpotIdsUsedByEvent;
+    private boolean isTrackedByTracTrac;
+
 
     public Collection<RegattaMetadataDTO> getRegattas() {
         return regattas;
@@ -140,5 +142,13 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
     
     public boolean isMultiRegatta() {
         return multiRegatta;
+    }
+    
+    public boolean isTrackedByTracTrac() {
+        return isTrackedByTracTrac;
+    }
+    
+    public void setTrackedByTracTrac(boolean isTrackedByTracTrac) {
+        this.isTrackedByTracTrac = isTrackedByTracTrac;
     }
 }

@@ -39,6 +39,7 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
     public static final String FIELD_CREATEDATDATE = "createdAtDate";
     public static final String FIELD_LOCALE = "locale";
     public static final String FIELD_TAGS = "tags";
+    public static final String Field_TRACKED_BY_TRACTRAC = "trackedByTracTrac";
     // specific image fields
     public static final String FIELD_IMAGES = "images";
     public static final String FIELD_IMAGE_WIDTH_IN_PX = "widthInPixel";
@@ -73,6 +74,7 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
         for (LeaderboardGroupBase lg : event.getLeaderboardGroups()) {
             leaderboardGroups.add(leaderboardGroupBaseSerializer.serialize(lg));
         }
+        result.put(Field_TRACKED_BY_TRACTRAC, event.isTrackedByTracTrac());
         JSONArray imageSizes = new JSONArray();
         result.put(FIELD_IMAGE_SIZES, imageSizes);
         for (ImageDescriptor image : event.getImages()) {

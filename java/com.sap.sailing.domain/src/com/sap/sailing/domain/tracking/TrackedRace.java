@@ -1247,4 +1247,9 @@ public interface TrackedRace
     default Speed getReferenceImpliedWind(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return getRankingMetric().getReferenceImpliedWind(timePoint, cache);
     }
+    
+    /**
+     * gets a String representation of the Tracking-Service used to Track the Race
+     */
+    String getTrackingConnector();
 }

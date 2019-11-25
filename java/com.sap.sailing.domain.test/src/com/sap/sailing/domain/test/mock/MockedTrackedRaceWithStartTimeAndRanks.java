@@ -808,4 +808,9 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public void setWindEstimation(IncrementalWindEstimation windEstimation) {
     }
 
+    @Override
+    public String getTrackingConnector() {
+        return null;
+    }
+
 }

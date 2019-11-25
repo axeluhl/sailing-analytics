@@ -1,7 +1,6 @@
 package com.sap.sailing.server.notification.impl;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.util.HashSet;
@@ -19,7 +18,6 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -29,6 +27,7 @@ import com.sap.sailing.server.impl.preferences.BoatClassUpcomingRaceNotification
 import com.sap.sailing.server.impl.preferences.CompetitorResultsNotificationSet;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.notification.SailingNotificationService;
+import com.sap.sailing.server.util.RaceBoardLinkFactory;
 import com.sap.sse.common.Stoppable;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -50,7 +49,6 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
     private final BoatClassResultsNotificationSet boatClassResults;
     private final BoatClassUpcomingRaceNotificationSet boatClassUpcomingRace;
     private final CompetitorResultsNotificationSet competitorResults;
-    private final URL defaultBaseURL;
 
     public SailingNotificationServiceImpl(BundleContext bundleContext, MailQueue mailQueue) throws MalformedURLException {
         this(mailQueue,
@@ -76,8 +74,6 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
         this.mailQueue = mailQueue;
         this.messages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME,
                 this.getClass().getClassLoader(), StandardCharsets.UTF_8.name());
-        this.defaultBaseURL = new URL("https://www.sapsailing.com");
-        
         toStop.add(this.boatClassResults = boatClassResults);
         toStop.add(this.boatClassUpcomingRace = boatClassUpcomingRace);
         toStop.add(this.competitorResults = competitorResults);
@@ -175,27 +171,22 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
     
     private Pair<String, String> createRaceBoardShowRaceLink(TrackedRace trackedRace, Leaderboard leaderboard,
             Event event, LeaderboardGroup leaderboardGroup, Locale locale) {
-        return createRaceBoardLink(trackedRace, leaderboard, event, leaderboardGroup, "PLAYER",
+        return createRaceBoardLinkWithMessage(trackedRace, leaderboard, event, leaderboardGroup, "PLAYER",
                 "raceboardShowRaceLinkTitle", locale);
     }
 
     private Pair<String, String> createRaceBoardRaceAnalysisLink(TrackedRace trackedRace, Leaderboard leaderboard,
             Event event, LeaderboardGroup leaderboardGroup, Locale locale) {
-        return createRaceBoardLink(trackedRace, leaderboard, event, leaderboardGroup, "FULL_ANALYSIS",
+        return createRaceBoardLinkWithMessage(trackedRace, leaderboard, event, leaderboardGroup, "FULL_ANALYSIS",
                 "raceboardRaceAnalysisLinkTitle", locale);
     }
 
-    private Pair<String, String> createRaceBoardLink(TrackedRace trackedRace, Leaderboard leaderboard, Event event,
+    private Pair<String, String> createRaceBoardLinkWithMessage(TrackedRace trackedRace, Leaderboard leaderboard, Event event,
             LeaderboardGroup leaderboardGroup, String raceboardMode, String labelMessageKey, Locale locale) {
-        RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
-        String link = getBaseURL(event).toString() + "/gwt/RaceBoard.html?locale=" + locale.toLanguageTag()
-        + "&eventId=" + event.getId() + "&leaderboardName=" + leaderboard.getName()
-        + "&leaderboardGroupName=" + leaderboardGroup.getName() + "&raceName="
-        + raceIdentifier.getRaceName() + "&showMapControls=true&regattaName="
-        + raceIdentifier.getRegattaName() + "&mode=" + raceboardMode;
+        String link = RaceBoardLinkFactory.createRaceBoardLink(trackedRace, leaderboard, event, leaderboardGroup, raceboardMode, locale);
         return new Pair<String, String>(messages.get(locale, labelMessageKey), link);
     }
-    
+
     private Pair<String, String> createHomeRacesListLink(Leaderboard leaderboard, Event event, Locale locale) {
         return createHomeRegattaLink("races", "racesOverviewLinkTitle", leaderboard, event, locale);
     }
@@ -207,25 +198,11 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
     
     private Pair<String, String> createHomeRegattaLink(String tab, String labelMessageKey, Leaderboard leaderboard,
             Event event, Locale locale) {
-        String link = getBaseURL(event).toString() + "/gwt/Home.html?locale=" + locale.toLanguageTag()
+        String link = RaceBoardLinkFactory.getBaseURL(event).toString() + "/gwt/Home.html?locale=" + locale.toLanguageTag()
                 + "#/regatta/" + tab + "/:eventId=" + event.getId() + "&regattaId=" + leaderboard.getName();
         return new Pair<String, String>(messages.get(locale, labelMessageKey), link);
     }
     
-    /**
-     * The base URL for notifications as extracted from the {@link Event#getBaseURL() event}; defaults
-     * to {@code https://www.sapsailing.com} if no base URL has been provided for the event.
-     */
-    private URL getBaseURL(final Event event) {
-        final URL result;
-        if (event.getBaseURL() == null) {
-            result = defaultBaseURL;
-        } else {
-            result = event.getBaseURL();
-        }
-        return result;
-    }
-
     @Override
     public void notifyUserOnBoatClassRaceChangesStateToFinished(BoatClass boatClass, TrackedRace trackedRace,
             Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet) {
@@ -239,7 +216,7 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
                             messages.get(locale, "boatClassRaceFinishedSubject", boatClass.getDisplayName()), 
                             messages.get(locale, "boatClassRaceFinishedBody", boatClass.getDisplayName(),
                                     raceDescription),
-                            getBaseURL(event),
+                            RaceBoardLinkFactory.getBaseURL(event),
                             createRaceBoardShowRaceLink(trackedRace, leaderboard, event, leaderboardGroup, locale),
                             createRaceBoardRaceAnalysisLink(trackedRace, leaderboard, event, leaderboardGroup, locale));
                 }
@@ -259,7 +236,7 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
                             messages.get(locale, "boatClassScoreCorrectionSubject", boatClass.getDisplayName()), 
                             messages.get(locale, "boatClassScoreCorrectionBody", boatClass.getDisplayName(),
                                     leaderboardDescription),
-                            getBaseURL(event),
+                            RaceBoardLinkFactory.getBaseURL(event),
                             createHomeLeaderboardLink(leaderboard, event, locale));
                 }
             });
@@ -279,7 +256,7 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
                             messages.get(locale, "boatClassUpcomingRaceSubject", boatClass.getDisplayName()),
                             messages.get(locale, "boatClassUpcomingRaceBody", boatClass.getDisplayName(),
                                     raceDescription, time),
-                            getBaseURL(event),
+                            RaceBoardLinkFactory.getBaseURL(event),
                             createHomeRacesListLink(leaderboard, event, locale));
                 }
             });
@@ -297,7 +274,7 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
                     return new NotificationMailTemplate(
                             messages.get(locale, "competitorPassesFinishSubject", competitor.getName()),
                             messages.get(locale, "competitorPassesFinishBody", competitor.getName(), raceDescription),
-                            getBaseURL(event),
+                            RaceBoardLinkFactory.getBaseURL(event),
                             createRaceBoardShowRaceLink(trackedRace, leaderboard, event, leaderboardGroup, locale),
                             createRaceBoardRaceAnalysisLink(trackedRace, leaderboard, event, leaderboardGroup, locale));
                 }
@@ -317,7 +294,7 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
                             messages.get(locale, "competitorScoreCorrectionSubject", competitor.getName()),
                             messages.get(locale, "competitorScoreCorrectionBody", competitor.getName(),
                                     leaderboardDescription),
-                            getBaseURL(event),
+                            RaceBoardLinkFactory.getBaseURL(event),
                             createHomeLeaderboardLink(leaderboard, event, locale));
                 }
             });
