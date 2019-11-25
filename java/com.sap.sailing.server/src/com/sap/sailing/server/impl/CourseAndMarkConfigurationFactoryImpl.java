@@ -18,6 +18,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import org.osgi.util.tracker.ServiceTracker;
+
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -97,13 +99,13 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
 
     private static final Logger log = Logger.getLogger(CourseAndMarkConfigurationFactoryImpl.class.getName());
     
-    private final SharedSailingData sharedSailingData;
+    private final ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker;
     private final SensorFixStore sensorFixStore;
     private final Function<DeviceIdentifier, Position> positionResolver;
     private final RaceLogResolver raceLogResolver;
 
-    public CourseAndMarkConfigurationFactoryImpl(SharedSailingData sharedSailingData, SensorFixStore sensorFixStore, RaceLogResolver raceLogResolver) {
-        this.sharedSailingData = sharedSailingData;
+    public CourseAndMarkConfigurationFactoryImpl(ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker, SensorFixStore sensorFixStore, RaceLogResolver raceLogResolver) {
+        this.sharedSailingDataTracker = sharedSailingDataTracker;
         this.sensorFixStore = sensorFixStore;
         this.raceLogResolver = raceLogResolver;
         positionResolver = identifier -> {
@@ -122,6 +124,10 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             return lastPosition;
         };
     }
+    
+    private SharedSailingData getSharedSailingData() {
+        return sharedSailingDataTracker.getService();
+    }
 
     private CourseTemplate resolveCourseTemplateSafe(CourseBase course) {
         CourseTemplate courseTemplateOrNull = null;
@@ -139,7 +145,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         if (course.getOriginatingCourseTemplateIdOrNull() == null) {
             return null;
         }
-        return sharedSailingData.getCourseTemplateById(course.getOriginatingCourseTemplateIdOrNull());
+        return getSharedSailingData().getCourseTemplateById(course.getOriginatingCourseTemplateIdOrNull());
     }
     
     private CourseConfigurationWithMarkRoles handleSaveToInventory(CourseConfiguration courseConfiguration) {
@@ -154,9 +160,9 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 }
                 if (markPropertiesOrNull == null) {
                     // If no mark properties exist yet, a new one is created
-                    markPropertiesOrNull = sharedSailingData.createMarkProperties(markConfiguration.getEffectiveProperties(), Collections.emptySet());
+                    markPropertiesOrNull = getSharedSailingData().createMarkProperties(markConfiguration.getEffectiveProperties(), Collections.emptySet());
                 } else {
-                    sharedSailingData.updateMarkProperties(markPropertiesOrNull.getId(), markConfiguration.getEffectiveProperties(), null, null, Collections.emptySet());
+                    getSharedSailingData().updateMarkProperties(markPropertiesOrNull.getId(), markConfiguration.getEffectiveProperties(), null, null, Collections.emptySet());
                 }
                 Positioning positioningOrNull = markConfiguration.getOptionalPositioning();
                 if (positioningOrNull == null && markConfiguration instanceof RegattaMarkConfiguration) {
@@ -168,9 +174,9 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     final DeviceIdentifier deviceIdentifier = positioningOrNull.getDeviceIdentifier();
                     final Position fixedPosition = positioningOrNull.getPosition();
                     if (deviceIdentifier != null) {
-                        sharedSailingData.setTrackingDeviceIdentifierForMarkProperties(markPropertiesOrNull, deviceIdentifier);
+                        getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(markPropertiesOrNull, deviceIdentifier);
                     } else {
-                        sharedSailingData.setFixedPositionForMarkProperties(markPropertiesOrNull, fixedPosition);
+                        getSharedSailingData().setFixedPositionForMarkProperties(markPropertiesOrNull, fixedPosition);
                     }
                 }
                 final MarkConfiguration effectiveMarkConfiguration;
@@ -214,7 +220,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         if (r instanceof MarkRole) {
             mr = (MarkRole) r;
         } else {
-            mr = sharedSailingData.createMarkRole(r.getName());
+            mr = getSharedSailingData().createMarkRole(r.getName());
         }
         return mr;
     }
@@ -228,7 +234,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             markRole = optionalCourseTemplate.getMarkRoleByIdIfContainedInCourseTemplate(markRoleId);
         }
         if (markRole == null) {
-            markRole = sharedSailingData.getMarkRoleById(markRoleId);
+            markRole = getSharedSailingData().getMarkRoleById(markRoleId);
         }
         return markRole;
     }
@@ -251,7 +257,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 if (markTemplateOrNull != null && markTemplateOrNull.hasEqualAppeareanceWith(markConfiguration.getEffectiveProperties())) {
                     effectiveMarkTemplate = markTemplateOrNull;
                 } else {
-                    effectiveMarkTemplate = sharedSailingData
+                    effectiveMarkTemplate = getSharedSailingData()
                             .createMarkTemplate(markConfiguration.getEffectiveProperties());
                 }
                 if (markConfiguration instanceof RegattaMarkConfiguration) {
@@ -318,7 +324,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             }
         };
         
-        final CourseTemplate newCourseTemplate = sharedSailingData.createCourseTemplate(courseConfigurationAfterInventory.getName(), new HashSet<>(markTemplatesByMarkConfigurations.values()),
+        final CourseTemplate newCourseTemplate = getSharedSailingData().createCourseTemplate(courseConfigurationAfterInventory.getName(), new HashSet<>(markTemplatesByMarkConfigurations.values()),
                 waypointTemplateMapper.effectiveWaypoints, ensureMarkRoles(waypointTemplateMapper.allAssociatedRoles), courseConfigurationAfterInventory.getRepeatablePart(),
                 tags, courseConfigurationAfterInventory.getOptionalImageURL(),
                 courseConfigurationAfterInventory.getNumberOfLaps());
@@ -336,7 +342,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             if (markProperties != null) {
                 final IsMarkRole role = getExplicitOrImplicitMarkRole(associatedRoles, markConfiguration);
                 try {
-                    sharedSailingData.recordUsage(markProperties, ensureMarkRole(role));
+                    getSharedSailingData().recordUsage(markProperties, ensureMarkRole(role));
                 } catch (Exception e) {
                     log.log(Level.WARNING,
                             "Could not record usage for mark properties " + markProperties + " and role " + role,
@@ -345,7 +351,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 final MarkTemplate markTemplateOrNull = markConfiguration.getOptionalMarkTemplate();
                 if (markTemplateOrNull != null) {
                     try {
-                        sharedSailingData.recordUsage(markTemplateOrNull, markProperties);
+                        getSharedSailingData().recordUsage(markTemplateOrNull, markProperties);
                     } catch (Exception e) {
                         log.log(Level.WARNING, "Could not record usage for mark properties " + markProperties
                                 + " and mark template " + markTemplateOrNull, e);
@@ -877,7 +883,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 .collect(Collectors.toMap(s -> s.getKey(), s -> (MarkTemplateBasedMarkConfiguration)s.getValue()));
         
         final Set<MarkProperties> markPropertiesCandidates = new HashSet<>();
-        Util.addAll(sharedSailingData.getAllMarkProperties(tagsToFilterMarkProperties), markPropertiesCandidates);
+        Util.addAll(getSharedSailingData().getAllMarkProperties(tagsToFilterMarkProperties), markPropertiesCandidates);
         // Already included mark properties may not get associated again
         markPropertiesCandidates.removeAll(markConfigurationsToEdit.stream()
                 .map(this::getAssociatedMarkPropertiesIfAvailable).filter(v -> v != null).collect(Collectors.toSet()));
@@ -964,7 +970,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         }
         if (resolvedMarkTemplate == null) {
             try {
-                resolvedMarkTemplate = sharedSailingData.getMarkTemplateById(markTemplateID);
+                resolvedMarkTemplate = getSharedSailingData().getMarkTemplateById(markTemplateID);
             } catch(Exception e) {
                 // This call may fail due to missing permissions but should not prevent the user from creating a course for a regatta.
                 // This is just the case, a regatta Mark is based on a MarkTemplate that is not part of the associated CourseTemplate.
@@ -980,13 +986,13 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         final MarkTemplate markTemplateOrNull = markTemplateIdOrNull == null ? null : resolveMarkTemplateByID(courseTemplate, markTemplateIdOrNull);
         final UUID markPropertiesIdOrNull = mark.getOriginatingMarkPropertiesIdOrNull();
         final MarkProperties markPropertiesOrNull = markPropertiesIdOrNull == null ? null
-                : sharedSailingData.getMarkPropertiesById(markPropertiesIdOrNull);
+                : getSharedSailingData().getMarkPropertiesById(markPropertiesIdOrNull);
         final RegattaMarkConfiguration regattaMarkConfiguration = new RegattaMarkConfigurationImpl(mark,
                 /* optionalPositioning */ null, getPositioningIfAvailable(regatta, mark), markTemplateOrNull,
                 markPropertiesOrNull, /* storeToInventory */ false);
         return regattaMarkConfiguration;
     }
-    
+
     private abstract class CourseSequenceMapper<C, M extends C, W> {
         final Map<M, IsMarkRole> explicitAssociatedRoles = new HashMap<>();
         final Map<M, IsMarkRole> allAssociatedRoles = new HashMap<>();
