@@ -9,4 +9,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.sap.sse.mongodb,
  org.mongodb.mongo-java-driver,
  com.sap.sse.security.interface,
- com.sap.sse.security.userstore.mongodb
+ com.sap.sse.security.userstore.mongodb,
+ com.sap.sse.common

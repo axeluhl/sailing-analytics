@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/com.sap.sse.security.storemerging/src/com/sap/sse/security/storemerging/Main.java"/>
+<listEntry value="/com.sap.sse.security.storemerging/src/com/sap/sse/security/storemerging/SecurityStoreMerger.java"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="1"/>
 </listAttribute>
 <booleanAttribute key="org.eclipse.jdt.launching.ATTR_EXCLUDE_TEST_CODE" value="true"/>
-<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.sap.sse.security.storemerging.Main"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.sap.sse.security.storemerging.SecurityStoreMerger"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="mongodb://localhost/winddbTest &quot;unknoan server name-server&quot;"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.sap.sse.security.storemerging"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dmongo.uri=&quot;mongodb://localhost/winddb&quot; -Ddefault.tenant.name=&quot;unknown server name-server&quot;"/>

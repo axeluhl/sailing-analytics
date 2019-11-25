@@ -1,0 +1,15 @@
+{ "_id" : ObjectId("5da642dbbcba5dcf9b8986f7"), "ID" : BinData(3,"2UkTqzNgD1UjE7TYQaZPvw=="), "NAME" : "admin-tenant", "USERNAMES" : [ "admin" ], "ROLE_DEFINITION_MAP" : [ ] }
+{ "_id" : ObjectId("5da6f2d7bcba5dcf9b89aeec"), "ID" : BinData(3,"0kXofM2ReYsRD+CRNVrPlQ=="), "NAME" : "admin-tenant", "USERNAMES" : [ "admin" ], "ROLE_DEFINITION_MAP" : [ ] }
+{ "_id" : ObjectId("5da986c7bcba5dcf9b934ca8"), "ID" : BinData(3,"eUGuvd970yv9eqpCzb0Znw=="), "NAME" : "unknown server name-server", "USERNAMES" : [ ], "ROLE_DEFINITION_MAP" : [ ] }
+{ "_id" : ObjectId("5da986d6bcba5dcf9b934d0e"), "ID" : BinData(3,"rU3mZkIKAPCQHdkh9Ai0kQ=="), "NAME" : "unknown server name-server", "USERNAMES" : [ "admin" ], "ROLE_DEFINITION_MAP" : [ { "ROLE_DEFINITION_MAP_ROLE_ID" : BinData(3,"y0V7Ud9IKcQV4Rif59Gpnw=="), "ROLE_DEFINITION_MAP_FOR_ALL" : true } ]}
+{ "_id" : ObjectId("5da986d6bcba5dcf9b934d28"), "ID" : BinData(3,"KU+/j3USwWyRSybtIG+juQ=="), "NAME" : "admin-tenant", "USERNAMES" : [ "admin" ], "ROLE_DEFINITION_MAP" : [ ] }
+{ "_id" : ObjectId("5da986f7bcba5dcf9b934dc1"), "ID" : BinData(3,"fEoAyL0wNLMctIVFTcjDjA=="), "NAME" : "unknown server name-server", "USERNAMES" : [ "admin" ], "ROLE_DEFINITION_MAP" : [ { "ROLE_DEFINITION_MAP_ROLE_ID" : BinData(3,"y0V7Ud9IKcQV4Rif59Gpnw=="), "ROLE_DEFINITION_MAP_FOR_ALL" : true } ]}
+{ "_id" : ObjectId("5da986f7bcba5dcf9b934dca"), "ID" : BinData(3,"cEvfLbXYDxBgv5r8ldEVgQ=="), "NAME" : "admin-tenant", "USERNAMES" : [ "admin" ], "ROLE_DEFINITION_MAP" : [ ] }
+{ "_id" : ObjectId("5da9873dbcba5dcf9b934e5d"), "ID" : BinData(3,"KU3+yAcof3xfzrVBrJg4jg=="), "NAME" : "unknown server name-server", "USERNAMES" : [ "admin" ], "ROLE_DEFINITION_MAP" : [ { "ROLE_DEFINITION_MAP_ROLE_ID" : BinData(3,"y0V7Ud9IKcQV4Rif59Gpnw=="), "ROLE_DEFINITION_MAP_FOR_ALL" : true } ]}
+{ "_id" : ObjectId("5da9873dbcba5dcf9b934e66"), "ID" : BinData(3,"lEGQBz87sPN5v4IGhoW1qQ=="), "NAME" : "admin-tenant", "USERNAMES" : [ "admin" ], "ROLE_DEFINITION_MAP" : [ ] }
+{ "_id" : ObjectId("5da98743bcba5dcf9b934f0e"), "ID" : BinData(3,"SEsB9kahnW2VVTitLEUHuQ=="), "NAME" : "unknown server name-server", "USERNAMES" : [ "admin" ], "ROLE_DEFINITION_MAP" : [ { "ROLE_DEFINITION_MAP_ROLE_ID" : BinData(3,"y0V7Ud9IKcQV4Rif59Gpnw=="), "ROLE_DEFINITION_MAP_FOR_ALL" : true } ]}
+{ "_id" : ObjectId("5da98743bcba5dcf9b934f17"), "ID" : BinData(3,"8EZHHRX/DX4FG6WrggGOhQ=="), "NAME" : "admin-tenant", "USERNAMES" : [ "admin" ], "ROLE_DEFINITION_MAP" : [ ] }
+{ "_id" : ObjectId("5da9fb89bcba5dcf9b938693"), "ID" : BinData(3,"wk3t8bCm1eG/R26723mhtA=="), "NAME" : "admin-tenant", "USERNAMES" : [ "admin" ], "ROLE_DEFINITION_MAP" : [ ] }
+{ "_id" : ObjectId("5dadce46bcba5dcf9b93ee83"), "ID" : BinData(3,"h0wAowdQM9vgY14Qq073qw=="), "NAME" : "admin-tenant", "USERNAMES" : [ "admin" ], "ROLE_DEFINITION_MAP" : [ ] }
+{ "_id" : ObjectId("5db37397bcba5dcf9b94c226"), "ID" : BinData(3,"LUvZnBbBI48OvWErhOaUmw=="), "NAME" : "admin-tenant", "USERNAMES" : [ "admin" ], "ROLE_DEFINITION_MAP" : [ ] }
+{ "_id" : ObjectId("5dd40e69c0825924ce5b9544"), "ID" : BinData(3,"skegJZFkXU8DtJyTD+gUuw=="), "NAME" : "unknoan server name-server", "USERNAMES" : [ ], "ROLE_DEFINITION_MAP" : [ ] }
