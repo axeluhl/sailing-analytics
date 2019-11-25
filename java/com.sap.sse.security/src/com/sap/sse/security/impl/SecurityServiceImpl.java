@@ -893,7 +893,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     private String getDefaultTenantNameForUsername(final String username) {
-        return username + "-tenant";
+        return username + TENANT_SUFFIX;
     }
 
     @Override

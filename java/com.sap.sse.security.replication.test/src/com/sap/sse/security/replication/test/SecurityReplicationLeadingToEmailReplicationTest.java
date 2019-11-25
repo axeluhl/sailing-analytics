@@ -51,7 +51,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
     private class SecurityServerReplicationTestSetUp extends
             AbstractSecurityReplicationTest.SecurityServerReplicationTestSetUp {
         @Override
-        protected SecurityServiceImpl createNewMaster() throws MalformedURLException, IOException, InterruptedException, UserGroupManagementException, UserManagementException {
+        protected SecurityService createNewMaster() throws MalformedURLException, IOException, InterruptedException, UserGroupManagementException, UserManagementException {
             @SuppressWarnings("unchecked")
             ServiceTracker<MailService, MailService> trackerMock = mock(ServiceTracker.class);
             doReturn(masterMailService).when(trackerMock).getService();
@@ -59,19 +59,19 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
             userStore.ensureDefaultRolesExist();
             userStore.loadAndMigrateUsers();
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
-            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore);
+            SecurityService result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore);
             result.initialize();
             return result;
         }
 
         @Override
-        protected SecurityServiceImpl createNewReplica() throws UserGroupManagementException, UserManagementException, MalformedURLException, IOException, InterruptedException {
+        protected SecurityService createNewReplica() throws UserGroupManagementException, UserManagementException, MalformedURLException, IOException, InterruptedException {
             @SuppressWarnings("unchecked")
             ServiceTracker<MailService, MailService> trackerMock = mock(ServiceTracker.class);
             doReturn(replicaMailService).when(trackerMock).getService();
             final UserStoreImpl userStore = new UserStoreImpl("TestDefaultTenant");
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
-            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore);
+            SecurityService result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore);
             userStore.ensureDefaultRolesExist();
             userStore.ensureDefaultTenantExists();
             result.initialize();

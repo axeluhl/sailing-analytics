@@ -1,14 +1,18 @@
 package com.sap.sse.security.storemerging;
 
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.mongodb.MongoClientURI;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.mongodb.MongoDBConfiguration;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.PersistenceFactory;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
@@ -26,8 +30,7 @@ public class SecurityStoreMerger {
         logger.info("Loading target user store from "+cfgForTarget);
         this.targetUserStore = loadUserStore(targetPf, targetDefaultCreationGroupName);
         logger.info("Loading target access control store from "+cfgForTarget);
-        final AccessControlStore accessControlStore = loadAccessControlStore(targetPf, targetUserStore);
-        this.targetAccessControlStore = accessControlStore;
+        this.targetAccessControlStore = loadAccessControlStore(targetPf, targetUserStore);
     }
 
     private AccessControlStore loadAccessControlStore(final PersistenceFactory targetPf, UserStore userStore) {
@@ -108,6 +111,32 @@ public class SecurityStoreMerger {
     private void mergeUsersAndGroups(UserStore sourceUserStore) {
         // TODO Implement Main.mergeUsersAndGroups(...)
         
+    }
+    
+    /**
+     * If the groups have equal {@link UserGroup#getId() IDs} then they are considered identical. If both groups have
+     * different IDs but equal names and the names match the pattern {@code <username>-tenant} and both contain a user
+     * named {@code <username>} then they will be considered identical, too. In all other cases they are considered
+     * distinct.
+     */
+    boolean considerGroupsIdentical(final UserGroup g1, final UserGroup g2) {
+        final String g1TenantGroupUserName, g2TenantGroupUserName;
+        return g1.getId().equals(g2.getId()) ||
+                (g1TenantGroupUserName=getTenantGroupUserName(g1)) != null &&
+                (g2TenantGroupUserName=getTenantGroupUserName(g2)) != null &&
+                g1TenantGroupUserName.equals(g2TenantGroupUserName);
+    }
+
+    private static final Pattern tenantUserGroupNamePattern = Pattern.compile("(.*)*"+SecurityService.TENANT_SUFFIX);
+    private String getTenantGroupUserName(UserGroup g) {
+        final String result;
+        final Matcher matcher = tenantUserGroupNamePattern.matcher(g.getName());
+        if (matcher.matches()) {
+            result = matcher.group(1);
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     private void mergePreferences(UserStore sourceUserStore) {

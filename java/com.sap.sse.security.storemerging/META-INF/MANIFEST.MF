@@ -11,3 +11,4 @@ Require-Bundle: com.sap.sse.mongodb,
  com.sap.sse.security.interface,
  com.sap.sse.security.userstore.mongodb,
  com.sap.sse.common
+Import-Package: com.sap.sse.security
