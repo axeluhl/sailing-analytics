@@ -76,6 +76,8 @@ import difflib.PatchFailedException;
 
 public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
         implements SwissTimingRaceTracker, SailMasterListener, TrackingDataLoader {
+    private static final String SWISS_TIMING = "swissTiming";
+
     private static final Logger logger = Logger.getLogger(SwissTimingRaceTrackerImpl.class.getName());
     
     private final SailMasterConnector connector;
@@ -493,7 +495,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
                     assert SwissTimingRaceTrackerImpl.this.race == race;
                 }
             }, useInternalMarkPassingAlgorithm, raceLogResolver,
-                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());
+                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(), SWISS_TIMING);
             addUpdateHandlers();
             notifyRaceCreationListeners();
             logger.info("Created SwissTiming RaceDefinition and TrackedRace for "+race.getName());

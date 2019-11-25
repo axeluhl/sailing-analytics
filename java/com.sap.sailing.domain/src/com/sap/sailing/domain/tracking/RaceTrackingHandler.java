@@ -35,7 +35,7 @@ public interface RaceTrackingHandler {
             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator,
-            RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter);
+            RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter, String trackingConnector);
     
     DynamicCompetitor getOrCreateCompetitor(CompetitorAndBoatStore competitorAndBoatStore, Serializable competitorId,
             String name, String shortName, Color displayColor, String email, URI flagImageURI, DynamicTeam team,
@@ -58,10 +58,10 @@ public interface RaceTrackingHandler {
                 Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
                 long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
                 DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator,
-                RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter) {
+                RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter, String trackingConnector) {
             return trackedRegatta.createTrackedRace(raceDefinition, sidelines, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate,
-                    useMarkPassingCalculator, raceLogResolver, threadLocalTransporter);
+                    useMarkPassingCalculator, raceLogResolver, threadLocalTransporter, trackingConnector);
         }
 
         @Override

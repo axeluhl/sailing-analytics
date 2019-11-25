@@ -102,4 +102,19 @@ public class EventImpl extends EventBaseImpl implements Event {
             windFinderReviewedSpotsCollectionIds.putIfAbsent(reviewedSpotsCollectionId, true);
         }
     }
+
+    @Override
+    public boolean isTrackedByTracTrac() {
+        for (LeaderboardGroup lbg : this.getLeaderboardGroups()) {
+            for (Leaderboard lb : lbg.getLeaderboards()) {
+                //Leaderboard.getTrackedRaces() could lead to performance issues due to duplicative collection of TrackedRaces
+                for (TrackedRace tr : lb.getTrackedRaces()) {
+                    if("tracTrac".equals(tr.getTrackingConnector())){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 }

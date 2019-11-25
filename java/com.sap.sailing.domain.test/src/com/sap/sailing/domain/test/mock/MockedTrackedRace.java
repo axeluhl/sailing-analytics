@@ -657,7 +657,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     WindStore windStore, long delayToLiveInMillis,
                     long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
                     DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingcalculator,
-                    RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter) {
+                    RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter, String trackingConnector) {
                 return null;
             }
 
@@ -1282,6 +1282,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public void setWindEstimation(IncrementalWindEstimation windEstimation) {
+    }
+
+    @Override
+    public String getTrackingConnector() {
+        return null;
     }
 
 }
