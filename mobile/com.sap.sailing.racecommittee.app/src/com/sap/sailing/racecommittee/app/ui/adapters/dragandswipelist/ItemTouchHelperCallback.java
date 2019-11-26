@@ -31,7 +31,7 @@ public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
         int swipeFlags = ItemTouchHelper.START | ItemTouchHelper.END;
         if (viewHolder instanceof BaseDraggableSwipeViewHolder) {
             boolean isDragAllowed = ((BaseDraggableSwipeViewHolder) viewHolder).isDragAllowed();
-            return makeMovementFlags(isDragAllowed ? dragFlags : 0, isDragAllowed ? swipeFlags : 0);
+            return makeMovementFlags(isDragAllowed ? dragFlags : 0, swipeFlags);
         }
         return makeMovementFlags(dragFlags, swipeFlags);
     }
