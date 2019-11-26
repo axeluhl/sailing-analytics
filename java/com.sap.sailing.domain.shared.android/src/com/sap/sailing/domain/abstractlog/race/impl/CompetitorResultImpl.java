@@ -1,28 +1,28 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
-import java.io.Serializable;
-
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sse.common.TimePoint;
+
+import java.io.Serializable;
 
 public class CompetitorResultImpl implements CompetitorResult {
     private static final long serialVersionUID = 4928351242700897387L;
 
     private final Serializable competitorId;
-    
+
     private final String competitorName;
 
     private final String competitorShortName;
-    
+
     private final int oneBasedRank;
-    
+
     private final MaxPointsReason maxPointsReason;
-    
+
     private final Double score;
-    
+
     private final TimePoint finishingTime;
-    
+
     private final String comment;
 
     private final MergeState mergeState;
@@ -37,15 +37,21 @@ public class CompetitorResultImpl implements CompetitorResult {
                 item.getComment(), item.getMergeState());
     }
 
-    public CompetitorResultImpl(CompetitorResult item,  int oneBasedRank) {
+    public CompetitorResultImpl(CompetitorResult item, int oneBasedRank, MaxPointsReason maxPointsReason, Double score, TimePoint finishingTime) {
+        this(item.getCompetitorId(), item.getName(), item.getShortName(), item.getBoatName(), item.getBoatSailId(),
+                oneBasedRank, maxPointsReason, score, finishingTime,
+                item.getComment(), item.getMergeState());
+    }
+
+    public CompetitorResultImpl(CompetitorResult item, int oneBasedRank) {
         this(item.getCompetitorId(), item.getName(), item.getShortName(), item.getBoatName(), item.getBoatSailId(),
                 oneBasedRank, item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(),
                 item.getComment(), item.getMergeState());
     }
 
     public CompetitorResultImpl(Serializable competitorId, String competitorName, String competitorShortName,
-            String boatName, String boatSailId, int oneBasedRank, MaxPointsReason maxPointsReason, Double score,
-            TimePoint finishingTime, String comment, MergeState mergeState) {
+                                String boatName, String boatSailId, int oneBasedRank, MaxPointsReason maxPointsReason, Double score,
+                                TimePoint finishingTime, String comment, MergeState mergeState) {
         super();
         this.competitorId = competitorId;
         this.competitorName = competitorName;
@@ -192,9 +198,8 @@ public class CompetitorResultImpl implements CompetitorResult {
     @Override
     public String toString() {
         return "CompetitorResultImpl [competitorId=" + competitorId + ", competitorName=" + competitorName
-                + ", competitorShortName=" + competitorShortName + ", boatName=" + boatName+ ", boatSailId="
-                + boatSailId + ", rank=" + oneBasedRank + ", maxPointsReason=" + maxPointsReason + ", score="+ score
+                + ", competitorShortName=" + competitorShortName + ", boatName=" + boatName + ", boatSailId="
+                + boatSailId + ", rank=" + oneBasedRank + ", maxPointsReason=" + maxPointsReason + ", score=" + score
                 + ", finishingTime=" + finishingTime + ", comment=" + comment + ", mergeState=" + mergeState + "]";
     }
-    
 }
