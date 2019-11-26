@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
-import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.base.Boat;
@@ -17,14 +18,16 @@ public class CompetitorResultWithIdImpl extends CompetitorResultImpl {
 
     public CompetitorResultWithIdImpl(long id, CompetitorResult result) {
         this(id, result.getCompetitorId(), result.getName(), result.getShortName(), result.getBoatName(),
-                result.getBoatSailId(),result.getOneBasedRank(), result.getMaxPointsReason(), result.getScore(),
+                result.getBoatSailId(), result.getOneBasedRank(), result.getMaxPointsReason(), result.getScore(),
                 result.getFinishingTime(), result.getComment(), result.getMergeState());
     }
 
     public CompetitorResultWithIdImpl(long id, Serializable competitorId, String competitorName, String shortName,
-                                      @NonNull Boat boat, int oneBasedRank, MaxPointsReason maxPointsReason,
+                                      @Nullable Boat boat, int oneBasedRank, MaxPointsReason maxPointsReason,
                                       Double score, TimePoint finishingTime, String comment, MergeState mergeState) {
-        this(id, competitorId, competitorName, shortName, boat.getName(), boat.getSailID(),
+        this(id, competitorId, competitorName, shortName,
+                boat != null ? boat.getName() : null,
+                boat != null ? boat.getSailID() : null,
                 oneBasedRank, maxPointsReason, score, finishingTime, comment, mergeState);
         mBoat = boat;
     }
