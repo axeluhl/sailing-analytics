@@ -28,7 +28,6 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -340,7 +339,8 @@ public class RaceContext {
     public RaceListRaceDTO getFinishedRaceOrNull() {
         // a race is of 'public interest' of a race is a combination of it's 'live' state
         // and special flags states indicating how the postponed/canceled races will be continued
-        if (getLiveRaceViewState() == RaceViewState.FINISHED) {
+        // See: https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5029
+        if (getLiveRaceViewState() == RaceViewState.FINISHED && !isLiveOrOfPublicInterest()) {
             // the start time is always given for live races
             RaceListRaceDTO raceListRaceDTO = new RaceListRaceDTO(getLeaderboardName(), 
                     getRaceIdentifierOrNull(), getRaceName());
@@ -476,12 +476,8 @@ public class RaceContext {
         if (!isLive) {
             TimePoint startTime = getStartTime();
             if (startTime != null) {
-                TimePoint finishTime = getFinishTime();
-                // no data from tracking but maybe a manual setting of the start and finish time
                 TimePoint startOfLivePeriod = startTime.minus(TIME_BEFORE_START_TO_SHOW_RACES_AS_LIVE);
-                TimePoint endOfLivePeriod = finishTime != null ? finishTime
-                        .plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS) : null;
-                if (now.after(startOfLivePeriod) && (endOfLivePeriod == null || now.before(endOfLivePeriod))) {
+                if (now.before(startTime) && now.after(startOfLivePeriod)) {
                     isOfPublicInterest = true;
                 }
             } else if (raceLog != null) {

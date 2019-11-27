@@ -12,6 +12,13 @@ public class RaceTimesCalculationUtil {
 
     public static Util.Pair<Date, Date> calculateRaceMinMax(Date liveTimePoint, Date startOfTracking, Date startOfRace,
             Date raceFinishingTime, Date raceFinishedTime, Date endOfRace, Date endOfTracking) {
+        return calculateRaceMinMax(liveTimePoint, startOfTracking, startOfRace, raceFinishingTime, raceFinishedTime,
+                endOfRace, endOfTracking, MIN_TIME_BEFORE_RACE_START, MAX_TIME_AFTER_RACE_END, TIME_AFTER_LIVE);
+    }
+
+    public static Util.Pair<Date, Date> calculateRaceMinMax(Date liveTimePoint, Date startOfTracking, Date startOfRace,
+            Date raceFinishingTime, Date raceFinishedTime, Date endOfRace, Date endOfTracking, long millisBeforeStart,
+            long millisAfterEnd, long millisAfterLive) {
         if (liveTimePoint == null) {
             return new Util.Pair<Date, Date>(null, null);
         }
@@ -21,7 +28,7 @@ public class RaceTimesCalculationUtil {
         // Range start / min
         if (startOfRace != null) {
             // We have a start time
-            min = new Date(startOfRace.getTime() - MIN_TIME_BEFORE_RACE_START);
+            min = new Date(startOfRace.getTime() - millisBeforeStart);
         } else if (startOfTracking != null) {
             // We at least have a start of tracking time
             min = startOfTracking;
@@ -34,17 +41,18 @@ public class RaceTimesCalculationUtil {
         // Range end / max
         if (raceFinishedTime != null) {
             // We have a blue flag down event
-            max = new Date(raceFinishedTime.getTime() + MAX_TIME_AFTER_RACE_END);
+            max = new Date(raceFinishedTime.getTime() + millisAfterEnd);
         } else if (endOfRace != null && raceFinishingTime == null) {
             // We have NO blue flag up event and we have an end of race time
-            max = new Date(endOfRace.getTime() + MAX_TIME_AFTER_RACE_END);
+            max = new Date(endOfRace.getTime() + millisAfterEnd);
         } else {
-            // We have no end time and are not expecting any end events
-            if (endOfTracking != null && raceFinishingTime == null) {
+            // We have no end time and are not expecting any end events and the race is no longer live
+            // (TracTrac sets endOfTracking to the end of the event while the race is live)
+            if (endOfTracking != null && raceFinishingTime == null && liveTimePoint.after(endOfTracking)) {
                 max = endOfTracking;
             } else {
                 // No end in sight; Keep on playing
-                max = new Date(liveTimePoint.getTime() + TIME_AFTER_LIVE);
+                max = new Date(liveTimePoint.getTime() + millisAfterLive);
             }
         }
 

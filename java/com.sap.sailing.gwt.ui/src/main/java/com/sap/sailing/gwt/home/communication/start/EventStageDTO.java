@@ -6,6 +6,8 @@ public class EventStageDTO extends EventLinkAndMetadataDTO {
 
     private StageEventType stageType;
     private String stageImageURL;
+    private boolean isTrackedByTracTrac;
+
 
     @Override
     public StageEventType getStageType() {
@@ -22,5 +24,12 @@ public class EventStageDTO extends EventLinkAndMetadataDTO {
 
     public void setStageImageURL(String stageImageURL) {
         this.stageImageURL = stageImageURL;
+    }
+    public boolean isTrackedByTracTrac() {
+        return isTrackedByTracTrac;
+    }
+    
+    public void setTrackedByTracTrac(boolean isTrackedByTracTrac) {
+        this.isTrackedByTracTrac = isTrackedByTracTrac;
     }
 }

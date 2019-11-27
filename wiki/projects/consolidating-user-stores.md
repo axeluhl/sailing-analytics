@@ -6,6 +6,7 @@ This document is an evolving set of ideas, requirements and strategies that will
 
 ## First Steps
 An exported version of the ``USERS``, ``USER_GROUPS`` and ``PREFERENCES`` collections is at ``dbserver.internal.sapsailing.com:/var/lib/mongodb/dump``. The command to obtain this was:
+
 ```
 	for port in 10201 10202 10203; do echo "rs.slaveOk()
 	show dbs
@@ -29,14 +30,15 @@ There are a few dedicated server instances with their DBs:
 * The DBs of all instances running on "SL Multi-Instance Kiel" (we should check if we could take this opportunity to shut down those that are still entirely empty): bartlomiejkapusta benjaminalhadef ditlevleth emilienpochet filip frederiksivertsen guentherpachschwoell gustavhultgren hinnerksiemsen janekbalster jassiskogman joanameyerduro jyrikuivalainen konradlipski lukasgrallert mandy marcusbaur martinmaursundrishovd oriolmahiques paulbakker peterwagner rolandregnemer tamarafischer thorbennowak thorechristiansen
 * The DBs of all instances running on "SL Multi-Instance Sailing Server NVMe" (we should check if we could take this opportunity to shut down those that are still entirely empty): 49er AARHUSSEJLKLUB abeam-training alarie505 ASVIA baldeneysee BYC d-labs DUTCH_FEDERATION ess-team-training formula18 galvestaure HNV hsc-womensteam irishdbscdw3 ISR JOJOPOLGAR jonaswitt KBSC KJSCS KSSS kyc LYC mdf my NOR oakcliff phoenix PMYC RDSAILING rheinwoche2019 SAILCANADA SAILINGACADEMY sailracer Sailtracks schadewaldt schanzenberg schwielochsee seascape SEGELZENTRUM SINGAPORESAILING SITGES SRN SRV SSC SSV STARLAB TracTracTest ubilabs-test USSAILING VSAW YCL
 
-bartlomiejkapusta is empty. Removing. benjaminalhadef is largely empty. Removing. mandy is basically empty. Removing. filip is empty. Removing. thorbennowak empty. Removing. lukasgrallert basically empty. Removing. konradlipski only imported old stuff. Removing. gustavhultgren was not even started and had only one old test event. Removing. oriolmahiques has only empty events. Removing. thorechristiansen empty other than Bundesliga imports. Removing. tamarafischer basically empty. Removing. emilienpochet contains only empty events. Removing. paulbakker empty, removing. guentherpachschwoell only has league imports. Removing. rolandregnemer empty; removing. ditlevleth empty; removing. frederiksivertsen empty; removing. jassiskogman empty; removing. jyrikuivalainen empty; removing. martinmaursundrishovd empty; removing. The janekbalster and peterwagner DBs have remained, and their server instances have now been moved to the common multi-instance server. The "SL Multi-Instance Kiel" server has been terminated by now.
+bartlomiejkapusta is empty. Removing. benjaminalhadef is largely empty. Removing. mandy is basically empty. Removing. filip is empty. Removing. thorbennowak empty. Removing. lukasgrallert basically empty. Removing. konradlipski only imported old stuff. Removing. gustavhultgren was not even started and had only one old test event. Removing. oriolmahiques has only empty events. Removing. thorechristiansen empty other than Bundesliga imports. Removing. tamarafischer basically empty. Removing. emilienpochet contains only empty events. Removing. paulbakker empty, removing. guentherpachschwoell only has league imports. Removing. rolandregnemer empty; removing. ditlevleth empty; removing. frederiksivertsen empty; removing. jassiskogman empty; removing. jyrikuivalainen empty; removing. martinmaursundrishovd empty; removing. The janekbalster and peterwagner DBs have remained, and their server instances have now been moved to the common multi-instance server. The "SL Multi-Instance Kiel" server has been terminated by now. YCL is completely empty. Removed.
 
 On the "SL Multi-Instance Sailing Server NVMe" server some cleanup is possible, too. I'll remove the ``ubilabs-test`` instance and DB. In particular, "49er" is empty and dead. I'll remove that now.
 
-So the list of remaining active, non-isolated servers is:
+So the list of remaining active, non-isolated server database names other than ``winddb`` for the archive server is:
 * AARHUSSEJLKLUB
 * abeam-training
 * alarie505
+* AST
 * ASVIA
 * baldeneysee
 * BYC
@@ -83,7 +85,6 @@ So the list of remaining active, non-isolated servers is:
 * TracTracTest
 * USSAILING
 * VSAW
-* YCL
 
 Isolated but active databases that will explicitly not be merged are:
 * Sailtracks
@@ -195,6 +196,14 @@ Overall we have 24623 keys in all ``PREFERENCES`` collections out of which 872 u
 
 ### Scripts for Data Extraction
 
+Exporting the collections into JSON files in a ``dump/`` sub-folder of the current working directory:
+
+```
+	for port in 10201 10202 10203; do echo "rs.slaveOk()
+	show dbs
+	quit()" | mongo --host dbserver.internal.sapsailing.com --port $port | tail -n +5| awk '{print $1;}' | grep -v ^config$ | grep -v ^local$ | grep -v ^admin$ | while read i; do echo $i; for c in USERS PREFERENCES USER_GROUPS OWNERSHIPS ACCESS_CONTROL_LISTS; do mongoexport --host dbserver.internal.sapsailing.com --port $port --db $i -c $c -o dump/${i}_${c}.json; done; done; done
+```
+
 Obtaining users with non-default ("user") role assignments:
 
 ```
@@ -271,6 +280,8 @@ Max:
 peter:
   MANAGE_DEVICE_CONFIGURATION
 ```
+
+Cleaned up permissions as of 2019-11-15T23:50:00Z.
 
 The ``PREFERENCES`` collection can be merged based on user name, such that in case of conflicting preference key the collection to merge into will "win."
 

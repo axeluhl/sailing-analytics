@@ -22,10 +22,11 @@ import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
  *
  */
 public class CreateTrackedRace extends AbstractRaceOperation<DynamicTrackedRace> {
-    private static final long serialVersionUID = 5084401060896514911L;
+    private static final long serialVersionUID = -3707097845987093245L;
     private final long millisecondsOverWhichToAverageWind;
     private final long millisecondsOverWhichToAverageSpeed;
     private final long delayToLiveInMillis;
+    private final String trackingConnector;
     
     /**
      * If a {@link WindStore} is provided to this command, it will be used for the construction of the tracked race.
@@ -40,12 +41,13 @@ public class CreateTrackedRace extends AbstractRaceOperation<DynamicTrackedRace>
      *            won't be serialized. A receiver of this operation will therefore always use an {@link EmptyWindStore}.
      */
     public CreateTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore, long delayToLiveInMillis,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, String trackingConnector) {
         super(raceIdentifier);
         this.windStore = windStore;
         this.delayToLiveInMillis = delayToLiveInMillis;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
+        this.trackingConnector = trackingConnector;
     }
 
     @Override
@@ -64,7 +66,7 @@ public class CreateTrackedRace extends AbstractRaceOperation<DynamicTrackedRace>
     public DynamicTrackedRace internalApplyTo(RacingEventService toState) {
         return toState.createTrackedRace(getRaceIdentifier(), windStore == null ? EmptyWindStore.INSTANCE : windStore,
                 delayToLiveInMillis, millisecondsOverWhichToAverageWind,
-                millisecondsOverWhichToAverageSpeed, /* useMarkPassingCalculator */ false); 
+                millisecondsOverWhichToAverageSpeed, /* useMarkPassingCalculator */ false, trackingConnector); 
                 // no separate mark passing calculations in replica;
         // Mark passings are computed on master and are replicated separately.
         // See UpdateMarkPassings

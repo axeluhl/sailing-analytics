@@ -879,11 +879,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
                             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
                             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator,
-                            RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter) {
+                            RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter, String trackingConnector) {
                         final DynamicTrackedRace trackedRace = super.createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
                                         delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                                         millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate,
-                                        useMarkPassingCalculator, raceLogResolver, threadLocalTransporter);
+                                        useMarkPassingCalculator, raceLogResolver, threadLocalTransporter, trackingConnector);
                         getSecurityService().migrateOwnership(trackedRace);
                         return trackedRace;
                     }
@@ -1962,13 +1962,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
-            long millisecondsOverWhichToAverageSpeed, boolean useMarkPassingCalculator) {
+            long millisecondsOverWhichToAverageSpeed, boolean useMarkPassingCalculator, String trackingConnector) {
         DynamicTrackedRegatta trackedRegatta = getOrCreateTrackedRegatta(getRegatta(raceIdentifier));
         RaceDefinition race = getRace(raceIdentifier);
         return trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), windStore,
                 delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 /* raceDefinitionSetToUpdate */null, useMarkPassingCalculator, /* raceLogResolver */ this,
-                Optional.of(this.getThreadLocalTransporterForCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster()));
+                Optional.of(this.getThreadLocalTransporterForCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster()), trackingConnector);
     }
 
     private void ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(
@@ -2029,7 +2029,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             // replicate the addition of the tracked race:
             CreateTrackedRace op = new CreateTrackedRace(trackedRace.getRaceIdentifier(), trackedRace.getWindStore(),
                     trackedRace.getDelayToLiveInMillis(), trackedRace.getMillisecondsOverWhichToAverageWind(),
-                    trackedRace.getMillisecondsOverWhichToAverageSpeed());
+                    trackedRace.getMillisecondsOverWhichToAverageSpeed(), trackedRace.getTrackingConnector());
             replicate(op);
             linkRaceToConfiguredLeaderboardColumns(trackedRace);
             TrackedRaceReplicatorAndNotifier trackedRaceReplicator = new TrackedRaceReplicatorAndNotifier(trackedRace);

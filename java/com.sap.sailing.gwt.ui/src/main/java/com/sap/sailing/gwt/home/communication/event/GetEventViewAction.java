@@ -118,6 +118,8 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
                         singleLeaderboardGroup.getId(), eventAndLeaderboardReferencesForSeriesOrdered));
             }
         }
+        dto.setTrackedByTracTrac(event.isTrackedByTracTrac());
+        
         return dto;
     }
 

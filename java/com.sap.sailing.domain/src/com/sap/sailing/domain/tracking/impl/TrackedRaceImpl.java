@@ -187,6 +187,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public static final Duration EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS = Duration.ONE_HOUR;
 
     private TrackedRaceStatus status;
+    
+    private final String trackingConnector;
 
     private final Object statusNotifier;
 
@@ -432,10 +434,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final Iterable<Sideline> sidelines,
             final WindStore windStore, long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation,
-            boolean useInternalMarkPassingAlgorithm, RaceLogAndTrackedRaceResolver raceLogResolver) {
+            boolean useInternalMarkPassingAlgorithm, RaceLogAndTrackedRaceResolver raceLogResolver, String trackedBy) {
         this(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 millisecondsOverWhichToAverageSpeed, delayForWindEstimationCacheInvalidation,
-                useInternalMarkPassingAlgorithm, OneDesignRankingMetric::new, raceLogResolver);
+                useInternalMarkPassingAlgorithm, OneDesignRankingMetric::new, raceLogResolver, trackedBy);
     }
     
     /**
@@ -449,9 +451,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             final WindStore windStore, long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation,
             boolean useInternalMarkPassingAlgorithm, RankingMetricConstructor rankingMetricConstructor,
-            RaceLogAndTrackedRaceResolver raceLogResolver) {
+            RaceLogAndTrackedRaceResolver raceLogResolver, String trackingConnector) {
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
         this.raceLogResolver = raceLogResolver;
+        this.trackingConnector = trackingConnector;
         raceStates = new WeakHashMap<>();
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
         locksForMarkPassings = new ConcurrentHashMap<IdentityWrapper<Iterable<MarkPassing>>, NamedReentrantReadWriteLock>();
@@ -1204,18 +1207,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     finishingTime != null ? finishingTime.asDate() : null,
                     finishedTime != null ? finishedTime.asDate() : null,
                     endTime != null ? endTime.asDate() : null,
-                    endOfTracking != null ? endOfTracking.asDate() : null);
-            Date min = minMax.getA() != null
-                    ? new Date(minMax.getA().getTime() - TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS)
-                    : null;
-            Date max = minMax.getB() != null
-                    ? new Date(minMax.getB().getTime() + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS
-                            + getDelayToLiveInMillis())
-                    : null;
+                    endOfTracking != null ? endOfTracking.asDate() : null,
+                    TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS,
+                    RaceTimesCalculationUtil.MAX_TIME_AFTER_RACE_END,
+                    TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
 
             // We are live if at is in between min and max
-            if (min != null && max != null) {
-                return !min.after(at.asDate()) && !at.asDate().after(max);
+            if (minMax.getA() != null && minMax.getB() != null) {
+                return !minMax.getA().after(at.asDate()) && !at.asDate().after(minMax.getB());
             }
         }
         return false;
@@ -3972,5 +3971,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             result = null;
         }
         return result;
+    }
+    
+    @Override
+    public String getTrackingConnector() {
+        return trackingConnector;
     }
 }
