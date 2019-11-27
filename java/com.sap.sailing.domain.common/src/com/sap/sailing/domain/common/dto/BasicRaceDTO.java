@@ -49,17 +49,20 @@ public class BasicRaceDTO extends NamedDTO {
             timePoint = new Date(startOfRace.getTime() - TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS + 1);
         }
 
-        if (trackedRace != null && timePoint != null && trackedRace.hasGPSData && trackedRace.hasWindData) {
+        if (trackedRace != null && trackedRace.hasGPSData && trackedRace.hasWindData) {
             Util.Pair<Date, Date> minMax = RaceTimesCalculationUtil.calculateRaceMinMax(timePoint,
                     trackedRace.startOfTracking, startOfRace, raceFinishingTime, raceFinishedTime, endOfRace,
-                    trackedRace.endOfTracking, TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS,
-                    RaceTimesCalculationUtil.MAX_TIME_AFTER_RACE_END,
-                    TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS + trackedRace.delayToLiveInMs);
-            Date min = minMax.getA() != null ? new Date(minMax.getA().getTime()) : null;
-            Date max = minMax.getB() != null ? new Date(minMax.getB().getTime()) : null;
+                    trackedRace.endOfTracking);
+            Date min = minMax.getA() != null
+                    ? new Date(minMax.getA().getTime() - TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS)
+                    : null;
+            Date max = minMax.getB() != null
+                    ? new Date(minMax.getB().getTime() + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS
+                            + trackedRace.delayToLiveInMs)
+                    : null;
 
             // We are live if at is in between min and max
-            if (min != null && max != null) {
+            if (timePoint != null && min != null && max != null) {
                 return !min.after(timePoint) && !timePoint.after(max);
             }
         }
