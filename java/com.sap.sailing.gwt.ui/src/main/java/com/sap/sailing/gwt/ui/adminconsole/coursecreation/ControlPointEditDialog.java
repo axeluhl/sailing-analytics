@@ -35,7 +35,7 @@ public class ControlPointEditDialog extends DataEntryDialog<ControlPointEditDTO>
     private Label labelControlPointName;
     private Label labelControlPointShortName;
 
-    public ControlPointEditDialog(final SailingServiceAsync sailingServiceAsync, final StringMessages stringMessages,
+    public ControlPointEditDialog(final SailingServiceAsync sailingService, final StringMessages stringMessages,
             ControlPointEditDTO courseTemplateToEdit, DialogCallback<ControlPointEditDTO> callback) {
         super(stringMessages.edit() + " " + stringMessages.waypoints(), null, stringMessages.ok(),
                 stringMessages.cancel(), new Validator<ControlPointEditDTO>() {
@@ -64,7 +64,7 @@ public class ControlPointEditDialog extends DataEntryDialog<ControlPointEditDTO>
         labelControlPointName = new Label(stringMessages.name());
         labelControlPointShortName = new Label(stringMessages.shortName());
 
-        markTemplateOracle = new MarkTemplateSuggestOracle(sailingServiceAsync, stringMessages);
+        markTemplateOracle = new MarkTemplateSuggestOracle(sailingService, stringMessages);
         suggestMarkTemplate1 = new SuggestBox(markTemplateOracle);
         suggestMarkTemplate2 = new SuggestBox(markTemplateOracle);
 
@@ -74,7 +74,7 @@ public class ControlPointEditDialog extends DataEntryDialog<ControlPointEditDTO>
         suggestMarkTemplate1.getValueBox().addChangeHandler(e -> validateAndUpdate());
         suggestMarkTemplate1.getValueBox().addKeyUpHandler(e -> validateAndUpdate());
         suggestMarkTemplate1.getValueBox().addBlurHandler(e -> validateAndUpdate());
-        
+
         markPassingInstructionChooser = new ValueListBox<>(new Renderer<PassingInstruction>() {
             @Override
             public String render(PassingInstruction object) {
@@ -99,6 +99,7 @@ public class ControlPointEditDialog extends DataEntryDialog<ControlPointEditDTO>
         final boolean doubleMarkPassing = markPassingInstructionChooser.getValue().applicability[0] == 2;
         suggestMarkTemplate2.setVisible(doubleMarkPassing);
         labelMarkTemplate2.setVisible(doubleMarkPassing);
+        labelControlPointName.setVisible(doubleMarkPassing);
         textControlPointName.setVisible(doubleMarkPassing);
         validateAndUpdate();
     }
