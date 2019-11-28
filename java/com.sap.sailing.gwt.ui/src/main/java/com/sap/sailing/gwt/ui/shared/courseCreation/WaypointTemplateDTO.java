@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sse.common.Util;
 
-public class WaypointTemplateDTO implements Serializable{
+public class WaypointTemplateDTO implements Serializable {
     private static final long serialVersionUID = -3137039437059719498L;
 
     // using concrete type ArrayList because of GWT serialization
@@ -37,12 +37,24 @@ public class WaypointTemplateDTO implements Serializable{
         return PassingInstruction.valueOf(passingInstruction);
     }
 
+    public void setPassingInstruction(String passingInstruction) {
+        this.passingInstruction = passingInstruction;
+    }
+
     public String getName() {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getShortName() {
         return shortName;
+    }
+
+    public void setShortName(String shortName) {
+        this.shortName = shortName;
     }
 
 }

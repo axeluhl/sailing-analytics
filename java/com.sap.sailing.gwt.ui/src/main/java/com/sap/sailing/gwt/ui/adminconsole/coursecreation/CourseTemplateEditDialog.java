@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SelectionCell;
-import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.cell.client.TextInputCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
@@ -22,14 +22,13 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.adminconsole.coursecreation.ControlPointEditDialog.ControlPointEditDTO;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.WaypointTemplateDTO;
-import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
@@ -44,16 +43,15 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
     private final TextBox nameTextBox;
     private final TextBox urlTextBox;
     private final StringMessages stringMessages;
-    private final Button addWaypointTemplate;
+    private final Map<UUID, MarkRoleDTO> markRolesMap;
+    private final List<MarkTemplateDTO> allMarkTemplates;
 
     private CellTable<MarkTemplateWithAssociatedRoleDTO> markTemplatesTable;
     private List<MarkTemplateWithAssociatedRoleDTO> markTemplates = new ArrayList<>();
-    private final Map<UUID, MarkRoleDTO> markRolesMap;
-    private final List<MarkTemplateDTO> allMarkTemplates;
     private final Button buttonAddMarkTemplate;
-
     private CellTable<WaypointTemplateDTO> waypointTemplatesTable;
     private Collection<WaypointTemplateDTO> waypointTemplates = new ArrayList<>();
+    private final Button buttonAddWaypointTemplate;
 
     private final UUID currentUuid;
 
@@ -81,34 +79,6 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         this.nameTextBox = createTextBox(courseTemplateToEdit.getName());
         this.urlTextBox = createTextBox(courseTemplateToEdit.getOptionalImageUrl().orElse(""));
 
-        addWaypointTemplate = new Button(stringMessages.add());
-        addWaypointTemplate.addClickHandler(c -> {
-            ControlPointEditDialog dialog = new ControlPointEditDialog(sailingService, stringMessages,
-                    new ControlPointEditDTO(), new DialogCallback<ControlPointEditDTO>() {
-                        @Override
-                        public void ok(ControlPointEditDTO editedObject) {
-                            // create list with one or two elements based on passing instruction
-                            final Collection<MarkTemplateDTO> markTemplates = editedObject
-                                    .getPassingInstruction().applicability[0] == 2
-                                            ? Arrays.asList(editedObject.getMarkTemplate1(),
-                                                    editedObject.getMarkTemplate2().get())
-                                            : Collections.singletonList(editedObject.getMarkTemplate1());
-                            waypointTemplates.add(new WaypointTemplateDTO(editedObject.getName().orElse(null),
-                                    editedObject.getShortName(), markTemplates, editedObject.getPassingInstruction()));
-                            refreshWaypointsTable();
-                        }
-
-                        @Override
-                        public void cancel() {
-                            // nothing to do
-                        }
-                    });
-
-            dialog.show();
-        });
-        createWaypointTemplateTable();
-        waypointTemplates.addAll(courseTemplateToEdit.getWaypointTemplates());
-        refreshWaypointsTable();
         this.markRolesMap = markRolesMap;
         this.allMarkTemplates = allMarkTemplates;
         createMarkTemplateTable();
@@ -117,10 +87,21 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
             markTemplates.add(new MarkTemplateWithAssociatedRoleDTO());
             refreshMarkTemplateTable();
         });
+        buttonAddMarkTemplate.setEnabled(isNew);
         markTemplates.addAll(courseTemplateToEdit.getAssociatedRoles().entrySet().stream()
                 .map(e -> new MarkTemplateWithAssociatedRoleDTO(e.getKey(), markRolesMap.get(e.getValue())))
                 .collect(Collectors.toList()));
         refreshMarkTemplateTable();
+
+        createWaypointTemplateTable();
+        waypointTemplates.addAll(courseTemplateToEdit.getWaypointTemplates());
+        refreshWaypointsTable();
+        buttonAddWaypointTemplate = new Button(stringMessages.add());
+        buttonAddWaypointTemplate.addClickHandler(c -> {
+            waypointTemplates.add(new WaypointTemplateDTO());
+            refreshWaypointsTable();
+        });
+        buttonAddWaypointTemplate.setEnabled(isNew);
 
         nameTextBox.addKeyUpHandler(e -> validateAndUpdate());
         urlTextBox.addKeyUpHandler(e -> validateAndUpdate());
@@ -128,8 +109,6 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         tagsEditor = new StringListEditorComposite(courseTemplateToEdit.getTags(), stringMessages,
                 stringMessages.edit(stringMessages.tags()), IconResources.INSTANCE.removeIcon(),
                 Collections.emptyList(), stringMessages.tag());
-
-        this.addWaypointTemplate.setEnabled(isNew);
     }
 
     private void refreshMarkTemplateTable() {
@@ -198,16 +177,111 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         waypointTemplatesTable = new BaseCelltable<>(1000, tableResources);
         waypointTemplatesTable.setWidth("100%");
 
-        Column<WaypointTemplateDTO, String> waypointTemplateColumn = new Column<WaypointTemplateDTO, String>(
-                new TextCell()) {
+        Column<WaypointTemplateDTO, String> shortNameColumn = new Column<WaypointTemplateDTO, String>(
+                new TextInputCell()) {
             @Override
             public String getValue(WaypointTemplateDTO waypointTemplate) {
-                return waypointTemplate.getMarkTemplatesForControlPoint().stream().map(m -> m.getName())
-                        .collect(Collectors.joining("-"));
+                return waypointTemplate.getShortName();
             }
         };
-        waypointTemplatesTable.addColumn(waypointTemplateColumn, stringMessages.name());
+        shortNameColumn.setFieldUpdater(new FieldUpdater<WaypointTemplateDTO, String>() {
+            @Override
+            public void update(int index, WaypointTemplateDTO waypointTemplate, String value) {
+                waypointTemplate.setShortName(value);
+            }
+        });
+        Column<WaypointTemplateDTO, String> nameColumn = new Column<WaypointTemplateDTO, String>(new TextInputCell()) {
+            @Override
+            public String getValue(WaypointTemplateDTO waypointTemplate) {
+                return waypointTemplate.getName();
+            }
+        };
+        nameColumn.setFieldUpdater(new FieldUpdater<WaypointTemplateDTO, String>() {
+            @Override
+            public void update(int index, WaypointTemplateDTO waypointTemplate, String value) {
+                waypointTemplate.setName(value);
+            }
+        });
+        Column<WaypointTemplateDTO, String> markTemplateColumn1 = new Column<WaypointTemplateDTO, String>(
+                new SelectionCell(
+                        allMarkTemplates.stream().map(MarkTemplateDTO::getName).collect(Collectors.toList()))) {
+            @Override
+            public String getValue(WaypointTemplateDTO waypointTemplate) {
+                return waypointTemplate.getMarkTemplatesForControlPoint() != null
+                        && waypointTemplate.getMarkTemplatesForControlPoint().size() >= 1
+                                ? waypointTemplate.getMarkTemplatesForControlPoint().get(0).getName()
+                                : "";
+            }
+        };
+        markTemplateColumn1.setFieldUpdater(new FieldUpdater<WaypointTemplateDTO, String>() {
+            @Override
+            public void update(int index, WaypointTemplateDTO waypointTemplate, String value) {
+                MarkTemplateDTO selectedMarkTemplate = allMarkTemplates.stream()
+                        .filter(mt -> mt.getName().equals(value)).findFirst().get();
+                if (waypointTemplate.getMarkTemplatesForControlPoint().size() == 0) {
+                    waypointTemplate.getMarkTemplatesForControlPoint().add(selectedMarkTemplate);
+                } else {
+                    waypointTemplate.getMarkTemplatesForControlPoint().set(0, selectedMarkTemplate);
+                }
+            }
+        });
+        Column<WaypointTemplateDTO, String> markTemplateColumn2 = new Column<WaypointTemplateDTO, String>(
+                new SelectionCell(
+                        allMarkTemplates.stream().map(MarkTemplateDTO::getName).collect(Collectors.toList()))) {
+            @Override
+            public String getValue(WaypointTemplateDTO waypointTemplate) {
+                return waypointTemplate.getMarkTemplatesForControlPoint() != null
+                        && waypointTemplate.getMarkTemplatesForControlPoint().size() >= 2
+                                ? waypointTemplate.getMarkTemplatesForControlPoint().get(1).getName()
+                                : "";
+            }
+        };
+        markTemplateColumn2.setFieldUpdater(new FieldUpdater<WaypointTemplateDTO, String>() {
+            @Override
+            public void update(int index, WaypointTemplateDTO waypointTemplate, String value) {
+                MarkTemplateDTO selectedMarkTemplate = allMarkTemplates.stream()
+                        .filter(mt -> mt.getName().equals(value)).findFirst().get();
+                if (waypointTemplate.getMarkTemplatesForControlPoint().size() == 1) {
+                    waypointTemplate.getMarkTemplatesForControlPoint().add(selectedMarkTemplate);
+                } else {
+                    waypointTemplate.getMarkTemplatesForControlPoint().set(1, selectedMarkTemplate);
+                }
+            }
+        });
+        Column<WaypointTemplateDTO, String> passingInstructionColumn = new Column<WaypointTemplateDTO, String>(
+                new SelectionCell(Arrays.stream(PassingInstruction.relevantValues()).map(PassingInstruction::name)
+                        .collect(Collectors.toList()))) {
+            @Override
+            public String getValue(WaypointTemplateDTO waypointTemplate) {
+                return waypointTemplate.getMarkTemplatesForControlPoint() != null
+                        && waypointTemplate.getMarkTemplatesForControlPoint().size() >= 2
+                                ? waypointTemplate.getMarkTemplatesForControlPoint().get(1).getName()
+                                : "";
+            }
+        };
+        passingInstructionColumn.setFieldUpdater(new FieldUpdater<WaypointTemplateDTO, String>() {
+            @Override
+            public void update(int index, WaypointTemplateDTO waypointTemplate, String value) {
+                waypointTemplate.setPassingInstruction(Arrays.stream(PassingInstruction.relevantValues())
+                        .filter(pi -> pi.name().equals(value)).findFirst().get().name());
+            }
+        });
+        DefaultActionsImagesBarCell imagesBarCell = new DefaultActionsImagesBarCell(stringMessages) {
 
+            @Override
+            protected Iterable<ImageSpec> getImageSpecs() {
+                return Arrays.asList(getDeleteImageSpec());
+            }
+
+        };
+        ImagesBarColumn<WaypointTemplateDTO, DefaultActionsImagesBarCell> actionsColumn = new ImagesBarColumn<>(
+                imagesBarCell);
+        waypointTemplatesTable.addColumn(shortNameColumn, stringMessages.shortName());
+        waypointTemplatesTable.addColumn(nameColumn, stringMessages.name());
+        waypointTemplatesTable.addColumn(markTemplateColumn1, stringMessages.markTemplate1());
+        waypointTemplatesTable.addColumn(markTemplateColumn2, stringMessages.markTemplate2());
+        waypointTemplatesTable.addColumn(passingInstructionColumn, stringMessages.passingInstructions());
+        waypointTemplatesTable.addColumn(actionsColumn, stringMessages.actions());
     }
 
     @Override
@@ -217,7 +291,6 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
 
     @Override
     protected CourseTemplateDTO getResult() {
-        // TODO: implement
         final UUID id = currentUuid == null ? UUID.randomUUID() : currentUuid;
         final ArrayList<MarkTemplateDTO> markTemplates = new ArrayList<MarkTemplateDTO>();
         final Map<MarkTemplateDTO, UUID> associatedRoles = new HashMap<>();
@@ -225,11 +298,12 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                 ? urlTextBox.getText()
                 : null;
 
-        waypointTemplates.stream().forEach(wt -> {
-            markTemplates.addAll(Util.asList(wt.getMarkTemplatesForControlPoint()));
+        this.markTemplates.stream().forEach(mt -> {
+            markTemplates.add(mt.markTemplate);
+            if (mt.getAssociatedRole() != null) {
+                associatedRoles.put(mt.getMarkTemplate(), mt.getAssociatedRole().getUuid());
+            }
         });
-        this.markTemplates.forEach(mt -> associatedRoles.put(mt.getMarkTemplate(),
-                mt.getAssociatedRole() != null ? mt.getAssociatedRole().getUuid() : null));
         // TODO: repeatable part
         // TODO: default number of laps
         return new CourseTemplateDTO(id, nameTextBox.getValue(), markTemplates, waypointTemplates, associatedRoles,
@@ -245,7 +319,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         result.setWidget(1, 1, urlTextBox);
         result.setWidget(2, 0, buttonAddMarkTemplate);
         result.setWidget(2, 1, markTemplatesTable);
-        result.setWidget(3, 0, addWaypointTemplate);
+        result.setWidget(3, 0, buttonAddWaypointTemplate);
         result.setWidget(3, 1, waypointTemplatesTable);
         result.setWidget(4, 0, new Label(stringMessages.tags()));
         result.setWidget(4, 1, tagsEditor);
@@ -277,4 +351,5 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         }
 
     }
+
 }

@@ -120,8 +120,7 @@ public class CourseTemplatePanel extends FlowPanel {
         buttonAndFilterPanel.addUnsecuredWidget(filterableCourseTemplatePanel);
         filterableCourseTemplatePanel
                 .setUpdatePermissionFilterForCheckbox(event -> userService.hasPermission(event, DefaultActions.UPDATE));
-        
-        
+
     }
 
     public void loadCourseTemplates() {
@@ -142,7 +141,7 @@ public class CourseTemplatePanel extends FlowPanel {
             }
         });
     }
-    
+
     private void loadMarkRoles() {
         sailingService.getMarkRoles(new AsyncCallback<Iterable<MarkRoleDTO>>() {
 
@@ -158,7 +157,7 @@ public class CourseTemplatePanel extends FlowPanel {
 
         });
     }
-    
+
     private void loadMarkTemplates() {
         sailingService.getMarkTemplates(new AsyncCallback<Iterable<MarkTemplateDTO>>() {
 
@@ -169,7 +168,7 @@ public class CourseTemplatePanel extends FlowPanel {
 
             @Override
             public void onSuccess(Iterable<MarkTemplateDTO> markTemplateDTOs) {
-                markTemplates = Util.asList(markTemplateDTOs); 
+                markTemplates = Util.asList(markTemplateDTOs);
             }
 
         });
@@ -351,20 +350,18 @@ public class CourseTemplatePanel extends FlowPanel {
 
     void openEditCourseTemplateDialog(final CourseTemplateDTO originalCourseTemplate, final boolean isNew) {
         final CourseTemplateEditDialog dialog = new CourseTemplateEditDialog(sailingService, stringMessages,
-                originalCourseTemplate, markRolesMap, markTemplates,
-                new DialogCallback<CourseTemplateDTO>() {
+                originalCourseTemplate, markRolesMap, markTemplates, new DialogCallback<CourseTemplateDTO>() {
                     @Override
                     public void ok(CourseTemplateDTO courseTemplate) {
                         sailingService.createOrUpdateCourseTemplate(courseTemplate,
                                 new AsyncCallback<CourseTemplateDTO>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter
-                                                .reportError("Error trying to store course template: "
-                                                        + caught.getMessage());
-                            }
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        errorReporter.reportError(
+                                                "Error trying to store course template: " + caught.getMessage());
+                                    }
 
-                            @Override
+                                    @Override
                                     public void onSuccess(CourseTemplateDTO updatedCourseTemplate) {
                                         int editedCourseTemplateIndex = filterableCourseTemplatePanel
                                                 .indexOf(originalCourseTemplate);
@@ -372,12 +369,12 @@ public class CourseTemplatePanel extends FlowPanel {
                                         if (editedCourseTemplateIndex >= 0) {
                                             filterableCourseTemplatePanel.add(editedCourseTemplateIndex,
                                                     updatedCourseTemplate);
-                                } else {
+                                        } else {
                                             filterableCourseTemplatePanel.add(updatedCourseTemplate);
-                                }
+                                        }
                                         courseTemplateListDataProvider.refresh();
-                            }
-                        });
+                                    }
+                                });
                     }
 
                     @Override
