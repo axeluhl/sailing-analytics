@@ -1,6 +1,6 @@
 package com.sap.sailing.selenium.api.test;
 
-import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
+import static com.sap.sailing.selenium.api.core.ApiContext.SHARED_SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertEquals;
@@ -50,7 +50,7 @@ public class MarkPropertiesTest extends AbstractSeleniumTest {
 
     @Test
     public void createMarkPropertyWithDeviceUuidTest() {
-        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
         final UUID deviceUuid = randomUUID();
         MarkProperties markProperties = markPropertiesApi.createMarkProperties(ctx, MARK_PROPERTIES_NAME,
                 MARK_PROPERTIES_SHORTNAME, deviceUuid.toString(), MARK_PROPERTIES_COLOR, "shape", "pattern",
@@ -62,7 +62,7 @@ public class MarkPropertiesTest extends AbstractSeleniumTest {
 
     @Test
     public void createAndGetMarkPropertiesWithoutDeviceUuidTest() {
-        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
         MarkProperties createdMarkProperties = markPropertiesApi.createMarkProperties(ctx, MARK_PROPERTIES_NAME,
                 MARK_PROPERTIES_SHORTNAME, null, MARK_PROPERTIES_COLOR, MARK_PROPERTIES_SHAPE, MARK_PROPERTIES_PATTERN,
                 MARK_PROPERTIES_TYPE, MARK_PROPERTIES_TAGS, MARK_PROPERTIES_LATDEG, MARK_PROPERTIES_LONDEG);
@@ -77,7 +77,7 @@ public class MarkPropertiesTest extends AbstractSeleniumTest {
 
     @Test
     public void createSeveralMarkPropertiesAndGetAll() {
-        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
         MarkProperties markProperties1 = markPropertiesApi.createMarkProperties(ctx, MARK_PROPERTIES_NAME,
                 MARK_PROPERTIES_SHORTNAME, null, MARK_PROPERTIES_COLOR, MARK_PROPERTIES_SHAPE, MARK_PROPERTIES_PATTERN,
                 MARK_PROPERTIES_TYPE, MARK_PROPERTIES_TAGS, MARK_PROPERTIES_LATDEG, MARK_PROPERTIES_LONDEG);
@@ -95,7 +95,7 @@ public class MarkPropertiesTest extends AbstractSeleniumTest {
 
     @Ignore
     public void createAndUpdateMarkProperties() {
-        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
         MarkProperties createdMarkProperties = markPropertiesApi.createMarkProperties(ctx, MARK_PROPERTIES_NAME,
                 MARK_PROPERTIES_SHORTNAME, null, MARK_PROPERTIES_COLOR, MARK_PROPERTIES_SHAPE, MARK_PROPERTIES_PATTERN,
                 MARK_PROPERTIES_TYPE, MARK_PROPERTIES_TAGS, MARK_PROPERTIES_LATDEG, MARK_PROPERTIES_LONDEG);
@@ -120,7 +120,7 @@ public class MarkPropertiesTest extends AbstractSeleniumTest {
 
     @Test(expected = HttpException.NotFound.class)
     public void createAndDeleteMarkPropertiesTest() {
-        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
         MarkProperties createdMarkProperties = markPropertiesApi.createMarkProperties(ctx, MARK_PROPERTIES_NAME,
                 MARK_PROPERTIES_SHORTNAME, null, MARK_PROPERTIES_COLOR, MARK_PROPERTIES_SHAPE, MARK_PROPERTIES_PATTERN,
                 MARK_PROPERTIES_TYPE, MARK_PROPERTIES_TAGS, MARK_PROPERTIES_LATDEG, MARK_PROPERTIES_LONDEG);
@@ -133,7 +133,7 @@ public class MarkPropertiesTest extends AbstractSeleniumTest {
 
     @Test
     public void testExclusionOfDeviceUuidAndFixedPositioning() {
-        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
         MarkProperties createdMarkProperties = markPropertiesApi.createMarkProperties(ctx, MARK_PROPERTIES_NAME,
                 MARK_PROPERTIES_SHORTNAME, null, MARK_PROPERTIES_COLOR, MARK_PROPERTIES_SHAPE, MARK_PROPERTIES_PATTERN,
                 MARK_PROPERTIES_TYPE, MARK_PROPERTIES_TAGS, MARK_PROPERTIES_LATDEG, MARK_PROPERTIES_LONDEG);
@@ -153,7 +153,7 @@ public class MarkPropertiesTest extends AbstractSeleniumTest {
     
     @Test(expected = HttpException.class)
     public void testOverlapOfDeviceUuidAndFixedPositioning() {
-        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
         final UUID deviceUuid = UUID.randomUUID();
         markPropertiesApi.createMarkProperties(ctx, MARK_PROPERTIES_NAME,
                 MARK_PROPERTIES_SHORTNAME, deviceUuid.toString(), MARK_PROPERTIES_COLOR, MARK_PROPERTIES_SHAPE, MARK_PROPERTIES_PATTERN,
