@@ -39,6 +39,10 @@ public class RaceWindCalculator {
     }
 
     private WindSummary getTrackedRaceWindSummary(TrackedRace trackedRace) {
+        final TimePoint startOfRace = trackedRace.getStartOfRace();
+        if (startOfRace == null) {
+            return null;
+        }
         final TimePoint finishedTime = trackedRace.getFinishedTime();
         final TimePoint endOfRace = trackedRace.getEndOfRace();
         final TimePoint finishTime = finishedTime == null ?
@@ -50,8 +54,8 @@ public class RaceWindCalculator {
         } else {
             toTimePoint = finishTime;
         }
-        final TimePoint middleOfRace = trackedRace.getStartOfRace().plus(trackedRace.getStartOfRace().until(toTimePoint).divide(2));
-        final List<TimePoint> pointsToGetWind = Arrays.asList(trackedRace.getStartOfRace(), middleOfRace, toTimePoint);
+        final TimePoint middleOfRace = startOfRace.plus(startOfRace.until(toTimePoint).divide(2));
+        final List<TimePoint> pointsToGetWind = Arrays.asList(startOfRace, middleOfRace, toTimePoint);
         final List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToUse = new ArrayList<>(3);
         for (TimePoint timePoint : pointsToGetWind) {
             final WindWithConfidence<Pair<Position, TimePoint>> windFixToUse = getWindFromTrackedRace(timePoint, trackedRace);
