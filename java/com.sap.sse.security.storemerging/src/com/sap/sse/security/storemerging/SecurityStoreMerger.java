@@ -110,10 +110,35 @@ public class SecurityStoreMerger {
     }
 
     private void mergeUsersAndGroups(UserStore sourceUserStore) {
+        for (final UserGroup sourceGroup : sourceUserStore.getUserGroups()) {
+            final UserGroup targetGroupWithSameID = targetUserStore.getUserGroup(sourceGroup.getId());
+            if (targetGroupWithSameID != null) {
+                logger.info("Identical target group found: "+targetGroupWithSameID+". Merging...");
+                mergeSecondUserGroupIntoFirst(targetGroupWithSameID, sourceGroup);
+            } else {
+                final UserGroup targetGroupWithEqualName = targetUserStore.getUserGroupByName(sourceGroup.getName());
+                if (targetGroupWithEqualName != null) {
+                    if (considerGroupsIdentical(targetGroupWithEqualName, sourceGroup)) {
+                        logger.info("Identical target group (though different ID) found: "+targetGroupWithEqualName+". Merging...");
+                        mergeSecondUserGroupIntoFirst(targetGroupWithEqualName, sourceGroup);
+                    } else {
+                        logger.warning("Found existing target user group "+targetGroupWithEqualName+" but source group "+
+                                sourceGroup+" is not considered identical, so not merging");
+                    }
+                } else {
+                    logger.info("No target user group found for source group "+sourceGroup+". Mering for adding");
+                }
+            }
+        }
         // TODO Implement Main.mergeUsersAndGroups(...)
         
     }
     
+    private void mergeSecondUserGroupIntoFirst(UserGroup targetGroupWithSameID, UserGroup sourceGroup) {
+        // TODO Implement SecurityStoreMerger.mergeSecondUserGroupIntoFirst(...)
+        
+    }
+
     /**
      * If the groups have equal {@link UserGroup#getId() IDs} then they are considered identical. If both groups have
      * different IDs but equal names and the names match the pattern {@code <username>-tenant} and both contain a user
