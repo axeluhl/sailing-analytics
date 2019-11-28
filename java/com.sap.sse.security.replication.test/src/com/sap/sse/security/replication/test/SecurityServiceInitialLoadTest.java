@@ -31,7 +31,7 @@ public class SecurityServiceInitialLoadTest extends AbstractServerWithSingleServ
     public SecurityServiceInitialLoadTest() {
         super(new AbstractSecurityReplicationTest.SecurityServerReplicationTestSetUp() {
             @Override
-            protected SecurityService createNewMaster()
+            protected SecurityServiceImpl createNewMaster()
                     throws MalformedURLException, IOException, InterruptedException, UserManagementException, MailException, UserGroupManagementException {
                 final UserStore userStore = new UserStoreImpl(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
                         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), "TestDefaultTenant");
@@ -39,7 +39,7 @@ public class SecurityServiceInitialLoadTest extends AbstractServerWithSingleServ
                 userStore.loadAndMigrateUsers();
                 final AccessControlStore accessControlStore = new AccessControlStoreImpl(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
                         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), userStore);
-                final SecurityService newMaster = new SecurityServiceImpl(userStore, accessControlStore);
+                final SecurityServiceImpl newMaster = new SecurityServiceImpl(userStore, accessControlStore);
                 newMaster.createSimpleUser(username, email, password, fullName, company,
                         /* validationBaseURL */ Locale.ENGLISH, null, null);
                 accessToken = newMaster.createAccessToken(username);
