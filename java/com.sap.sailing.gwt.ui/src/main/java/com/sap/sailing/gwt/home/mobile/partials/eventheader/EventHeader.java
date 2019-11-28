@@ -28,6 +28,8 @@ public class EventHeader extends Composite {
     @UiField AnchorElement eventLogoUi;
     @UiField DivElement eventDateUi;
     @UiField DivElement eventLocationUi;
+    @UiField DivElement eventHeader;
+    @UiField AnchorElement tractracLogoContainer;
 
     public EventHeader(EventViewDTO event, String optionalRegattaDisplayName, PlaceNavigation<?> logoNavigation) {
         EventHeaderResources.INSTANCE.css().ensureInjected();
@@ -38,15 +40,20 @@ public class EventHeader extends Composite {
 
     private void setUiFieldValues(EventViewDTO event, String optionalRegattaDisplayName, PlaceNavigation<?> logoNavigation) {
         eventNameUi.setInnerText(event.getDisplayName());
-        if(optionalRegattaDisplayName != null && !optionalRegattaDisplayName.isEmpty()) {
+        if (optionalRegattaDisplayName != null && !optionalRegattaDisplayName.isEmpty()) {
             eventRegattaUi.setInnerText(optionalRegattaDisplayName);
         } else {
             nameSeparatorUi.removeFromParent();
         }
         LabelTypeUtil.renderLabelType(eventStateUi, event.getState().getStateMarker());
         LogoUtil.setEventLogo(eventLogoUi, event);
-        if(logoNavigation != null) {
+        if (logoNavigation != null) {
             logoNavigation.configureAnchorElement(eventLogoUi);
+        }
+        if (event.isTrackedByTracTrac()) {
+            eventHeader.addClassName(EventHeaderResources.INSTANCE.css().eventheader_with_logo());
+        } else {
+            tractracLogoContainer.removeFromParent();
         }
         eventDateUi.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate()));
         eventLocationUi.setInnerText(event.getLocationAndVenueAndCountry());

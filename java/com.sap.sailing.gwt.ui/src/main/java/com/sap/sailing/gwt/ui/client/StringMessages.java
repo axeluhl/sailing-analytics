@@ -2331,4 +2331,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String orcPerformanceCurveLegTypeDescriptionWindwardLeewardRealLive();
     String errorWhileLoadingUserSettings(String errorMessage);
     String certificates();
+    String dataBy();
 }

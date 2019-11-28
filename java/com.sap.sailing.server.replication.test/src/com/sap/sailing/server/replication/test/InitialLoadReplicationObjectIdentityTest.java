@@ -175,7 +175,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         masterRegatta.addRace(masterRace);
         DynamicTrackedRace masterTrackedRace = master.createTrackedRace(new RegattaNameAndRaceName(masterRegatta.getName(), masterRace.getName()),
                 master.getWindStore(), /* delayToLiveInMillis */ 3000,
-                /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 10000, /*ignoreTracTracMarkPassings*/ false);
+                /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 10000, /*ignoreTracTracMarkPassings*/ false, null);
         masterTrackedRace.setStartOfTrackingReceived(MillisecondsTimePoint.now());
         /* Leaderboard */
         final String leaderboardName = "Great Leaderboard";

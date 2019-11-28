@@ -106,7 +106,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
                 }, /*useMarkPassingCalculator*/ false, mock(RaceLogAndTrackedRaceResolver.class),
-                Optional.empty());
+                Optional.empty(), null);
         WindSource windSource = new WindSourceImpl(WindSourceType.WEB);
         MongoClient myFirstMongo = newMongo();
         MongoDatabase firstDatabase = myFirstMongo.getDatabase(dbConfiguration.getDatabaseName());

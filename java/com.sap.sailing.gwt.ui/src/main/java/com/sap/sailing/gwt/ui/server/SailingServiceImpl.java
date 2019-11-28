@@ -1995,7 +1995,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public RaceboardDataDTO getRaceboardData(String regattaName, String raceName, String leaderboardName,
             String leaderboardGroupName, UUID eventId) {
         RaceboardDataDTO result = new RaceboardDataDTO(null, false, false, Collections.emptyList(),
-                Collections.emptyList(), null);
+                Collections.emptyList(), null, false);
         RaceWithCompetitorsAndBoatsDTO raceDTO = null;
         Regatta regatta = getService().getRegattaByName(regattaName);
         if (regatta != null) {
@@ -2015,7 +2015,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     }
                     raceDTO.boatClass = regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName();
                     SecurityDTOUtil.addSecurityInformation(getSecurityService(), raceDTO, raceDTO.getIdentifier());
-
                     Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
                     LeaderboardGroup leaderboardGroup = leaderboardGroupName != null
                             ? getService().getLeaderboardGroupByName(leaderboardGroupName)
@@ -2024,7 +2023,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     if (!getSecurityService().hasCurrentUserReadPermission(event)) {
                         event = null;
                     }
-
                     boolean isValidLeaderboardGroup = false;
                     if (leaderboardGroup != null) {
                         for (Leaderboard leaderboardInGroup : leaderboardGroup.getLeaderboards()) {
@@ -2051,8 +2049,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     StrippedLeaderboardDTOWithSecurity leaderboardDTO = createStrippedLeaderboardDTOWithSecurity(
                             leaderboard, false,
                             false);
+                    boolean isTrackedByTracTrac = isValidEvent && event.isTrackedByTracTrac();
                     result = new RaceboardDataDTO(raceDTO, isValidLeaderboardGroup, isValidEvent,
-                            detailTypesForCompetitorChart, availableDetailTypesForLeaderboard, leaderboardDTO);
+                            detailTypesForCompetitorChart, availableDetailTypesForLeaderboard, leaderboardDTO, isTrackedByTracTrac);
                 }
             }
         }

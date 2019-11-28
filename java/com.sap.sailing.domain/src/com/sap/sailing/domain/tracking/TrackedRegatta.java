@@ -67,7 +67,7 @@ public interface TrackedRegatta extends Serializable {
     DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useInternalMarkPassingAlgorithm, RaceLogAndTrackedRaceResolver raceLogResolver,
-            Optional<ThreadLocalTransporter> beforeAndAfterNotificationHandler);
+            Optional<ThreadLocalTransporter> beforeAndAfterNotificationHandler, String trackingConnector);
 
     /**
      * Obtains the tracked race for <code>race</code>. Blocks until the tracked race has been created

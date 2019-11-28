@@ -57,6 +57,7 @@ import difflib.PatchFailedException;
  * 
  */
 public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute, Long, Void>  {
+
     private final static Logger logger = Logger.getLogger(RaceCourseReceiver.class.getName());
     
     private final long millisecondsOverWhichToAverageWind;
@@ -266,7 +267,9 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
                 /* time over which to average speed: */ race.getBoatClass()
                         .getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate, useInternalMarkPassingAlgorithm, raceLogResolver,
-                /* ThreadLocalTransporter not needed because the RaceTracker is not active on a replica */ Optional.empty());
+                /* ThreadLocalTransporter not needed because the RaceTracker is not active on a replica */ Optional
+                        .empty(),
+                DomainFactoryImpl.TRAC_TRAC);
         if (runAfterCreatingTrackedRace != null) {
             runAfterCreatingTrackedRace.accept(trackedRace);
         }

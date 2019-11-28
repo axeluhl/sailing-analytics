@@ -317,7 +317,7 @@ public class CourseTest {
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */3000,
                 /* millisecondsOverWhichToAverageWind */30000,
                 /* millisecondsOverWhichToAverageSpeed */8000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new,
-                mock(RaceLogAndTrackedRaceResolver.class));
+                mock(RaceLogAndTrackedRaceResolver.class), null);
         assertLegStructure(course, trackedRace);
         course.removeWaypoint(0);
         assertLegStructure(course, trackedRace);
@@ -353,7 +353,7 @@ public class CourseTest {
                 EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                         /* millisecondsOverWhichToAverageWind */ 30000,
                         /* millisecondsOverWhichToAverageSpeed */ 8000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new,
-                        mock(RaceLogAndTrackedRaceResolver.class));
+                        mock(RaceLogAndTrackedRaceResolver.class), null);
         assertLegStructure(course, trackedRace);
         final WaypointImpl wp1_5 = new WaypointImpl(new MarkImpl("Test Mark 1.5"));
         assertWaypointIndexes(course);

@@ -119,10 +119,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForCacheInvalidationOfWindEstimation,
             boolean useInternalMarkPassingAlgorithm, RankingMetricConstructor rankingMetricConstructor,
-            RaceLogAndTrackedRaceResolver raceLogResolver) {
+            RaceLogAndTrackedRaceResolver raceLogResolver, String trackingConnector) {
         super(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 millisecondsOverWhichToAverageSpeed, delayForCacheInvalidationOfWindEstimation,
-                useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver);
+                useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver, trackingConnector);
         raceStateBasedStartTimeChangedListener = createRaceStateStartTimeChangeListener();
         this.competitorResultsFromRaceLog = new HashMap<>();
         this.logListener = new DynamicTrackedRaceLogListener(this);
@@ -210,10 +210,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, boolean useInternalMarkPassingAlgorithm,
-            RankingMetricConstructor rankingMetricConstructor, RaceLogAndTrackedRaceResolver raceLogResolver) {
+            RankingMetricConstructor rankingMetricConstructor, RaceLogAndTrackedRaceResolver raceLogResolver, String trackingConnector) {
         this(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis,
                 millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                millisecondsOverWhichToAverageWind / 2, useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver);
+                millisecondsOverWhichToAverageWind / 2, useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver, trackingConnector);
     }
 
     @Override
@@ -587,12 +587,22 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     @Override
     public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
         super.waypointAdded(zeroBasedIndex, waypointThatGotAdded);
+        if (zeroBasedIndex == getRace().getCourse().getNumberOfWaypoints()-1) {
+            // a new finishing waypoint was added; make sure that explicit finishing times from
+            // the race log are now applied to this new finishing waypoint:
+            updateFinishingTimesFromRaceLog();
+        }
         notifyListenersWaypointAdded(zeroBasedIndex, waypointThatGotAdded);
     }
 
     @Override
     public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
         super.waypointRemoved(zeroBasedIndex, waypointThatGotRemoved);
+        if (zeroBasedIndex == getRace().getCourse().getNumberOfWaypoints()) {
+            // the previous finishing waypoint was removed, if the course is not empty, a new ; make sure that explicit finishing times from
+            // the race log are now applied to this new finishing waypoint:
+            updateFinishingTimesFromRaceLog();
+        }
         notifyListenersWaypointRemoved(zeroBasedIndex, waypointThatGotRemoved);
     }
 
@@ -705,6 +715,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      * <li>A wrapper finish mark passing exists that has a {@code null} original, meaning it was created solely based
      * on the race log finishing time, and we have no finish time in the {@code competitorResult}: then the synthetic
      * finish mark passing is removed.</li>
+     * <li>A mark passing exists for a waypoint that is not (no longer?) the finishing waypoint and that is a wrapper
+     * mark passing for a finish time coming from the race log. Such a mark passing is replaced by its original mark
+     * passing which may be {@code null} in which case it will not be added to the result.</li>
      * </ul>
      * 
      * If no such modification was required, the unmodified {@code markPassings} object is returned; otherwise, a new
@@ -721,8 +734,15 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         boolean neededToCreateOrUpdateFinishMarkPassing = false;
         boolean foundFinishMarkPassing = false;
         for (final MarkPassing originalMarkPassing : markPassings) {
+            final MarkPassing originalsOriginal = originalMarkPassing.getOriginal();
             if (originalMarkPassing.getWaypoint() != finish) {
-                copyOfMarkPassings.add(originalMarkPassing);
+                // take the originalMarkPassing if it is a real mark passing, or unwrap a wrapper
+                // mark passing because this is not the finishing waypoint and hence no finishing time-
+                // based mark passing wrapper is desired. Should no original mark passing exist for a
+                // wrapper, don't add a mark passing.
+                if (originalsOriginal != null) {
+                    copyOfMarkPassings.add(originalsOriginal);
+                }
             } else {
                 foundFinishMarkPassing = true;
                 final MarkPassing finishMarkPassingToUse;
@@ -733,18 +753,18 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                     // If we already have a wrapper in place with the correct time, nothing needs to be done.
                     // If no wrapper is in place or a wrapper is in place but has the wrong time, a wrapper
                     // for the original is constructed with the time taken from the competitor result.
-                    if (/* is it the original mark passing? */ originalMarkPassing.getOriginal() == originalMarkPassing ||
+                    if (/* is it the original mark passing? */ originalsOriginal == originalMarkPassing ||
                         /* is the time incorrect? */ !originalMarkPassing.getTimePoint().equals(competitorResult.getFinishingTime())) {
                         // since we so far only have the original mark passing or a wrapper mark passing with an
                         // incorrect time point, we need to create a wrapper mark passing:
                         finishMarkPassingToUse = new MarkPassingFromRaceLogProvidedFinishingTimeImpl(
                                 competitorResult.getFinishingTime(), finish, competitor,
-                                originalMarkPassing.getOriginal());
-                        logger.info(getRace().getName()+": Updating finish mark passing "+originalMarkPassing.getOriginal()+" to "+finishMarkPassingToUse);
+                                originalsOriginal);
+                        logger.info(getRace().getName()+": Updating finish mark passing "+originalsOriginal+" to "+finishMarkPassingToUse);
                         neededToCreateOrUpdateFinishMarkPassing = true;
                     } else {
                         // the finish mark passing already is a wrapper with the correct time; no action is required:
-                        assert originalMarkPassing.getOriginal() != originalMarkPassing;
+                        assert originalsOriginal != originalMarkPassing;
                         assert originalMarkPassing.getTimePoint().equals(competitorResult.getFinishingTime());
                         finishMarkPassingToUse = originalMarkPassing;
                         neededToCreateOrUpdateFinishMarkPassing = false;
@@ -752,7 +772,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 } else {
                     // we don't have a result for the competitor, or we do have a result but the finishing time is null;
                     // use the original mark passing (null, if none exists) and flag the change in case it is a change
-                    finishMarkPassingToUse = originalMarkPassing.getOriginal();
+                    finishMarkPassingToUse = originalsOriginal;
                     if (finishMarkPassingToUse != originalMarkPassing) {
                         logger.info(getRace().getName()+": Reverting race log-based finish mark passing "+originalMarkPassing+" to "+finishMarkPassingToUse+
                                 " because no finishing time found anymore for that competitor in race log");
