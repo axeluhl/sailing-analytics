@@ -5,6 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.mongodb.MongoClientURI;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.security.SecurityService;
@@ -119,16 +120,22 @@ public class SecurityStoreMerger {
      * named {@code <username>} then they will be considered identical, too. In all other cases they are considered
      * distinct.
      */
-    boolean considerGroupsIdentical(final UserGroup g1, final UserGroup g2) {
+    static boolean considerGroupsIdentical(final UserGroup g1, final UserGroup g2) {
         final String g1TenantGroupUserName, g2TenantGroupUserName;
         return g1.getId().equals(g2.getId()) ||
                 (g1TenantGroupUserName=getTenantGroupUserName(g1)) != null &&
                 (g2TenantGroupUserName=getTenantGroupUserName(g2)) != null &&
-                g1TenantGroupUserName.equals(g2TenantGroupUserName);
+                g1TenantGroupUserName.equals(g2TenantGroupUserName) &&
+                hasUserNamed(g1, g1TenantGroupUserName) &&
+                hasUserNamed(g2, g2TenantGroupUserName);
     }
 
-    private static final Pattern tenantUserGroupNamePattern = Pattern.compile("(.*)*"+SecurityService.TENANT_SUFFIX);
-    private String getTenantGroupUserName(UserGroup g) {
+    private static boolean hasUserNamed(UserGroup group, String username) {
+        return Util.contains(Util.map(group.getUsers(), u->u.getName()), username);
+    }
+
+    private static final Pattern tenantUserGroupNamePattern = Pattern.compile("(.*)"+SecurityService.TENANT_SUFFIX);
+    private static String getTenantGroupUserName(UserGroup g) {
         final String result;
         final Matcher matcher = tenantUserGroupNamePattern.matcher(g.getName());
         if (matcher.matches()) {

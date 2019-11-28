@@ -27,7 +27,7 @@ public class TestMongoDBFiller {
     @Test
     public void testUsersFiller() throws IOException {
         final MongoCollection<Document> testCollection = MongoDBService.INSTANCE.getDB().getCollection(ODD_FILLER_TEST_COLLECTION_NAME);
-        filler.fill(testCollection, "/resources/USERS_target1.json");
+        filler.fill(testCollection, "/resources/USERS_filler_test.json");
         final Document singleResult = testCollection.find(new Document(FieldNames.User.NAME.name(), "uhl3")).first();
         assertEquals("axel.uhl@sap.com", singleResult.get(FieldNames.User.EMAIL.name()));
         final Document secondSingleResult = testCollection.find(new Document(FieldNames.User.NAME.name(), "axel")).first();
@@ -37,7 +37,7 @@ public class TestMongoDBFiller {
     @Test
     public void testAccessControlStoreFiller() throws IOException {
         final MongoCollection<Document> testCollection = MongoDBService.INSTANCE.getDB().getCollection(ODD_FILLER_TEST_COLLECTION_NAME);
-        filler.fill(testCollection, "/resources/ACCESS_CONTROL_STORE_target1.json");
+        filler.fill(testCollection, "/resources/ACCESS_CONTROL_LISTS_filler_test.json");
         final Document singleResult = testCollection.find(new Document(FieldNames.Ownership.OBJECT_ID.name(), "ROLE_DEFINITION/244cb84c-2b8a-4557-b175-db963072cfbc")).first();
         assertNotNull(singleResult.get(FieldNames.AccessControlList.PERMISSION_MAP.name()));
     }

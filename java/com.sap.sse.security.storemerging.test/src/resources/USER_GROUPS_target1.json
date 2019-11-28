@@ -1,3 +1,10 @@
-{ "_id" : ObjectId("5da642dbbcba5dcf9b8986f7"), "ID" : BinData(3,"2UkTqzNgD1UjE7TYQaZPvw=="), "NAME" : "admin-tenant", "USERNAMES" : [ "admin" ], "ROLE_DEFINITION_MAP" : [ ] }
-{ "_id" : ObjectId("5da642d777795dcf9b8986f7"), "ID" : BinData(3,"dkoh2nbqrGJvWKIHpYEqog=="), "NAME" : "uhl-tenant", "USERNAMES" : [ "uhl" ], "ROLE_DEFINITION_MAP" : [ ] }
-{ "_id" : ObjectId("5d1728d4e14e8d1caca9c9fe"), "ID" : BinData(3,"4U5+98apCi7bjpVjY+Zzgw=="), "NAME" : "uhl2-tenant", "USERNAMES" : [ "uhl2" ], "ROLE_DEFINITION_MAP" : [ ] }
+{"_id":{"$oid":"5ddfdf70c0825924ce5d1248"},"ID":{"$binary":"OUJ7wnbNFmW3jA3dufgZuQ==","$type":"03"},"NAME":"unknown server name-server","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[{"ROLE_DEFINITION_MAP_ROLE_ID":{"$binary":"y0V7Ud9IKcQV4Rif59Gpnw==","$type":"03"},"ROLE_DEFINITION_MAP_FOR_ALL":true}]}
+{"_id":{"$oid":"5ddfdf70c0825924ce5d1259"},"ID":{"$binary":"7kesB1Eog4IjeKqeT2/fnQ==","$type":"03"},"NAME":"admin-tenant","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5ddfe5efc0825924ce5d2c09"},"ID":{"$binary":"uEUpjx6KGPU/YTBrgorbng==","$type":"03"},"NAME":"uhl-tenant","USERNAMES":["uhl"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5ddfe5fdc0825924ce5d2c2b"},"ID":{"$binary":"MUjY3yV9n596z9vCPwr1mQ==","$type":"03"},"NAME":"uhl2-tenant","USERNAMES":["uhl2"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5ddfe621c0825924ce5d2c5f"},"ID":{"$binary":"r0a+pdlseagjw7uWmkuXoA==","$type":"03"},"NAME":"axel.uhl-tenant","USERNAMES":["axel.uhl"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5ddfe637c0825924ce5d2c87"},"ID":{"$binary":"wkmNE+146vbJ/Y9h28+SkA==","$type":"03"},"NAME":"axel-tenant","USERNAMES":["axel"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5ddfe651c0825924ce5d2cb1"},"ID":{"$binary":"AkV8BQNR8M7d89g1KnzCjw==","$type":"03"},"NAME":"YCaT-tenant","USERNAMES":["YCaT"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5ddfe666c0825924ce5d2cdd"},"ID":{"$binary":"t0MJug6uIOVW0enVXk6fuw==","$type":"03"},"NAME":"YCaT-member1-tenant","USERNAMES":["YCaT-member1"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5ddfe676c0825924ce5d2cff"},"ID":{"$binary":"s0SQCOyHewgex4Wc/jPStg==","$type":"03"},"NAME":"YCaT-member2-tenant","USERNAMES":["YCaT-member2"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5ddfeb89c0825924ce5d3f88"},"ID":{"$binary":"h0kp50s+ke89MTQhwezkjA==","$type":"03"},"NAME":"uhl3-tenant","USERNAMES":["uhl3"],"ROLE_DEFINITION_MAP":[]}
