@@ -58,6 +58,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
+import com.sap.sailing.domain.tracking.impl.TrackingConnectorInfoImpl;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -79,7 +80,7 @@ import difflib.PatchFailedException;
  *
  */
 public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter implements TrackingDataLoader {
-    private static final String SWISS_TIMING = "swissTiming";
+    private static final String SWISS_TIMING_IDENTIFIER = "SwissTiming";
 
     private static final int THRESHOLD_FOR_EARLIEST_MARK_PASSING_BEFORE_START_IN_MILLIS = 30000;
 
@@ -413,7 +414,8 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
                     WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 
                     /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                     /* raceDefinitionSetToUpdate */ null, useInternalMarkPassingAlgorithm, raceLogResolver,
-                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(), SWISS_TIMING);
+                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(), 
+                    /*no api connection to query the event url*/new TrackingConnectorInfoImpl(SWISS_TIMING_IDENTIFIER, null));
             trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0));
             TimePoint bestStartTimeKnownSoFar = bestStartTimePerRaceID.get(currentRaceID);
             if (bestStartTimeKnownSoFar != null) {

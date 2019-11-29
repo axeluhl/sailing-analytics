@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
@@ -18,6 +19,7 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.communication.eventview.SeriesReferenceWithEventsDTO;
+import com.sap.sailing.gwt.home.communication.eventview.TrackingConnectorInfoDTO;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.EventActionUtil.LeaderboardCallback;
 import com.sap.sailing.gwt.home.server.LeaderboardContext;
@@ -118,9 +120,21 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
                         singleLeaderboardGroup.getId(), eventAndLeaderboardReferencesForSeriesOrdered));
             }
         }
-        dto.setTrackedByTracTrac(event.isTrackedByTracTrac());
         
+        Set<TrackingConnectorInfoDTO> trackingConnectorInfos = event.getTrackingConnectorInfos()
+            .stream()
+            .map(trackingConnectorInfo -> new TrackingConnectorInfoDTO(trackingConnectorInfo.getTrackedBy(), mapURLToString(trackingConnectorInfo.getWebUrl()))).collect(Collectors.toSet());
+        dto.setTrackingConnectorInfos(trackingConnectorInfos);
         return dto;
+    }
+    
+    @GwtIncompatible
+    private String mapURLToString(URL url) {
+        if(url != null) {
+            return url.toString();
+        }else {
+            return "";
+        }
     }
 
     @Override

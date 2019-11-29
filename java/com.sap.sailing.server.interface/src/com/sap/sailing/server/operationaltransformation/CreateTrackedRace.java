@@ -7,6 +7,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.interfaces.RacingEventService;
@@ -22,11 +23,11 @@ import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
  *
  */
 public class CreateTrackedRace extends AbstractRaceOperation<DynamicTrackedRace> {
-    private static final long serialVersionUID = -3707097845987093245L;
+    private static final long serialVersionUID = 7164691177800524484L;
     private final long millisecondsOverWhichToAverageWind;
     private final long millisecondsOverWhichToAverageSpeed;
     private final long delayToLiveInMillis;
-    private final String trackingConnector;
+    private final TrackingConnectorInfo trackingConnectorInfo;
     
     /**
      * If a {@link WindStore} is provided to this command, it will be used for the construction of the tracked race.
@@ -41,13 +42,13 @@ public class CreateTrackedRace extends AbstractRaceOperation<DynamicTrackedRace>
      *            won't be serialized. A receiver of this operation will therefore always use an {@link EmptyWindStore}.
      */
     public CreateTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore, long delayToLiveInMillis,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, String trackingConnector) {
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, TrackingConnectorInfo trackingConnectorInfo) {
         super(raceIdentifier);
         this.windStore = windStore;
         this.delayToLiveInMillis = delayToLiveInMillis;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
-        this.trackingConnector = trackingConnector;
+        this.trackingConnectorInfo = trackingConnectorInfo;
     }
 
     @Override
@@ -66,7 +67,7 @@ public class CreateTrackedRace extends AbstractRaceOperation<DynamicTrackedRace>
     public DynamicTrackedRace internalApplyTo(RacingEventService toState) {
         return toState.createTrackedRace(getRaceIdentifier(), windStore == null ? EmptyWindStore.INSTANCE : windStore,
                 delayToLiveInMillis, millisecondsOverWhichToAverageWind,
-                millisecondsOverWhichToAverageSpeed, /* useMarkPassingCalculator */ false, trackingConnector); 
+                millisecondsOverWhichToAverageSpeed, /* useMarkPassingCalculator */ false, trackingConnectorInfo); 
                 // no separate mark passing calculations in replica;
         // Mark passings are computed on master and are replicated separately.
         // See UpdateMarkPassings

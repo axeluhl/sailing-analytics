@@ -41,6 +41,7 @@ import com.sap.sailing.gwt.home.communication.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
 import com.sap.sailing.gwt.home.communication.start.EventStageDTO;
 import com.sap.sailing.gwt.home.communication.start.StageEventType;
+import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.common.TimePoint;
@@ -311,9 +312,20 @@ public final class HomeServiceUtil {
         dto.setBaseURL(baseURL.toString());
         dto.setOnRemoteServer(onRemoteServer);
         dto.setStageType(stageType);
-        dto.setTrackedByTracTrac(event.isTrackedByTracTrac());
+        Set<TrackingConnectorInfoDTO> trackingConnectorInfos = event.getTrackingConnectorInfos()
+                .stream()
+                .map(trackingConnectorInfo -> new TrackingConnectorInfoDTO(trackingConnectorInfo.getTrackedBy(), mapURLToString(trackingConnectorInfo.getWebUrl()))).collect(Collectors.toSet());
+        dto.setTrackingConnectorInfo(trackingConnectorInfos);
         dto.setStageImageURL(useTeaserImage ? findEventThumbnailImageUrlAsString(event) : getStageImageURLAsString(event));
         return dto;
+    }
+    
+    private static String mapURLToString(URL url) {
+        if(url != null) {
+            return url.toString();
+        }else {
+            return "";
+        }
     }
     
     public static EventListEventDTO convertToEventListDTO(EventBase event, URL baseURL, boolean onRemoteServer,

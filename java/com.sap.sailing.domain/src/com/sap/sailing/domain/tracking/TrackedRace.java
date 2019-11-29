@@ -1251,5 +1251,5 @@ public interface TrackedRace
     /**
      * gets a String representation of the Tracking-Service used to Track the Race
      */
-    String getTrackingConnector();
+    TrackingConnectorInfo getTrackingConnectorInfo();
 }

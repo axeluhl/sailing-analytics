@@ -3,8 +3,10 @@ package com.sap.sailing.server.gateway.deserialization.impl;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 
 import org.json.simple.JSONArray;
@@ -14,6 +16,7 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.impl.StrippedEventImpl;
+import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
@@ -28,10 +31,12 @@ import com.sap.sse.shared.media.impl.VideoDescriptorImpl;
 public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
     private final JsonDeserializer<Venue> venueDeserializer;
     private final JsonDeserializer<LeaderboardGroupBase> leaderboardGroupDeserializer;
+    private final JsonDeserializer<TrackingConnectorInfo>trackingConnectorInfoDeserializer;
 
-    public EventBaseJsonDeserializer(JsonDeserializer<Venue> venueDeserializer, JsonDeserializer<LeaderboardGroupBase> leaderboardGroupDeserializer) {
+    public EventBaseJsonDeserializer(JsonDeserializer<Venue> venueDeserializer, JsonDeserializer<LeaderboardGroupBase> leaderboardGroupDeserializer, JsonDeserializer<TrackingConnectorInfo>trackingConnectorInfoDeserializer) {
         this.venueDeserializer = venueDeserializer;
         this.leaderboardGroupDeserializer = leaderboardGroupDeserializer;
+        this.trackingConnectorInfoDeserializer = trackingConnectorInfoDeserializer;
     }
 
     public EventBase deserialize(JSONObject eventJson) throws JsonDeserializationException {
@@ -56,9 +61,14 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
                 leaderboardGroups.add(leaderboardGroupDeserializer.deserialize((JSONObject) lgJson));
             }
         }
-        boolean isTrackedByTracTrac = Boolean.TRUE.equals(eventJson.get(EventBaseJsonSerializer.Field_TRACKED_BY_TRACTRAC));
+        Set<TrackingConnectorInfo> trackedBy = new HashSet<>();
+        JSONArray trackedByJson = Helpers.getNestedArraySafe(eventJson, EventBaseJsonSerializer.FIELD_TRACKING_CONNECTOR_INFOS);
+        for (Object jsonPair : trackedByJson) {
+            trackedBy.add(trackingConnectorInfoDeserializer.deserialize((JSONObject) jsonPair));
+        }
+        
         StrippedEventImpl result = new StrippedEventImpl(name, startDate == null ? null : new MillisecondsTimePoint(startDate.longValue()),
-                endDate == null ? null : new MillisecondsTimePoint(endDate.longValue()), venue, /* is public */ true, id, leaderboardGroups, isTrackedByTracTrac);
+                endDate == null ? null : new MillisecondsTimePoint(endDate.longValue()), venue, /* is public */ true, id, leaderboardGroups, trackedBy);
         result.setDescription(description);
         if (officialWebsiteURLAsString != null) {
             try {

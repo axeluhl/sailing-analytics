@@ -1,10 +1,12 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Venue;
+import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -16,20 +18,20 @@ import com.sap.sse.common.TimePoint;
  * 
  */
 public class StrippedEventImpl extends EventBaseImpl {
-    private static final long serialVersionUID = -8158306909959745156L;
-    private final boolean isTrackedByTracTrac;
+    private static final long serialVersionUID = -4443856327974643859L;
+    private final Set<TrackingConnectorInfo> trackingConnectorInfos;
     private final Iterable<LeaderboardGroupBase> leaderboardGroups;
     
     public StrippedEventImpl(String name, TimePoint startDate, TimePoint endDate, String venueName,
-            boolean isPublic, UUID id, Iterable<LeaderboardGroupBase> leaderboardGroups, boolean isTrackedByTracTrac) {
-        this(name, startDate, endDate, new VenueImpl(venueName), isPublic, id, leaderboardGroups, isTrackedByTracTrac);
+            boolean isPublic, UUID id, Iterable<LeaderboardGroupBase> leaderboardGroups, Set<TrackingConnectorInfo> trackingConnectorInfos) {
+        this(name, startDate, endDate, new VenueImpl(venueName), isPublic, id, leaderboardGroups, trackingConnectorInfos);
     }
 
     public StrippedEventImpl(String name, TimePoint startDate, TimePoint endDate, Venue venue,
-            boolean isPublic, UUID id, Iterable<LeaderboardGroupBase> leaderboardGroups, boolean isTrackedByTracTrac) {
+            boolean isPublic, UUID id, Iterable<LeaderboardGroupBase> leaderboardGroups, Set<TrackingConnectorInfo> trackingConnectorInfos) {
         super(name, startDate, endDate, venue, isPublic, id);
         this.leaderboardGroups = leaderboardGroups;
-        this.isTrackedByTracTrac = isTrackedByTracTrac;
+        this.trackingConnectorInfos = trackingConnectorInfos;
     }
 
     @Override
@@ -38,7 +40,7 @@ public class StrippedEventImpl extends EventBaseImpl {
     }
 
     @Override
-    public boolean isTrackedByTracTrac() {
-        return isTrackedByTracTrac;
+    public Set<TrackingConnectorInfo> getTrackingConnectorInfos() {
+        return trackingConnectorInfos;
     }
 }

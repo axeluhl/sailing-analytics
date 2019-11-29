@@ -74,11 +74,13 @@ import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.FinishTimeUpdateHandler;
 import com.sap.sailing.domain.tracking.impl.RaceAbortedHandler;
 import com.sap.sailing.domain.tracking.impl.StartTimeUpdateHandler;
+import com.sap.sailing.domain.tracking.impl.TrackingConnectorInfoImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.MetadataParser;
@@ -116,7 +118,7 @@ import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 import difflib.PatchFailedException;
 
 public class DomainFactoryImpl implements DomainFactory {
-    public static final String TRAC_TRAC = "tracTrac";
+    public static final String TRAC_TRAC_IDENTIFIER = "TracTrac";
 
     private static final Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
     
@@ -641,9 +643,13 @@ public class DomainFactoryImpl implements DomainFactory {
                     // add to existing regatta only if boat class matches
                     if (raceDefinition.getBoatClass() == trackedRegatta.getRegatta().getBoatClass()) {
                         trackedRegatta.getRegatta().addRace(raceDefinition);
+                        TrackingConnectorInfo trackingConnectorInfo = null;
+                        if (tractracRace != null) {
+                            trackingConnectorInfo = new TrackingConnectorInfoImpl(TRAC_TRAC_IDENTIFIER,tractracRace.getEvent().getWebURL());
+                        }
                         trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
                                 delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, ignoreTracTracMarkPassings,
-                                raceLogResolver, raceTrackingHandler);
+                                raceLogResolver, raceTrackingHandler, trackingConnectorInfo);
                         logger.info("Added race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta());
                         if (runBeforeExposingRace != null) {
                             logger.fine("Running callback for tracked race creation for "+trackedRace.getRace());
@@ -740,11 +746,11 @@ public class DomainFactoryImpl implements DomainFactory {
     private DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition race,
             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-            boolean useMarkPassingCalculator, RaceLogAndTrackedRaceResolver raceLogResolver, RaceTrackingHandler raceTrackingHandler) {
+            boolean useMarkPassingCalculator, RaceLogAndTrackedRaceResolver raceLogResolver, RaceTrackingHandler raceTrackingHandler, TrackingConnectorInfo trackingConnectorInfo) {
         return raceTrackingHandler.createTrackedRace(trackedRegatta, race, sidelines,
                 windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
-                raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver, Optional.empty(), TRAC_TRAC);
+                raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver, Optional.empty(), trackingConnectorInfo);
     }
 
     /**

@@ -17,6 +17,7 @@ import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerialize
 import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardSearchResultJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.TrackingConnectorInfoJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.search.KeywordQuery;
@@ -29,7 +30,7 @@ public class SearchResource extends AbstractSailingServerResource {
     public SearchResource() {
         final LeaderboardGroupBaseJsonSerializer leaderboardGroupSerializer = new LeaderboardGroupBaseJsonSerializer();
         serializer = new LeaderboardSearchResultJsonSerializer(new EventBaseJsonSerializer(new VenueJsonSerializer(
-                new CourseAreaJsonSerializer()), leaderboardGroupSerializer), leaderboardGroupSerializer);
+                new CourseAreaJsonSerializer()), leaderboardGroupSerializer, new TrackingConnectorInfoJsonSerializer()), leaderboardGroupSerializer);
     }
     
     private Result<LeaderboardSearchResult> search(KeywordQuery query) {

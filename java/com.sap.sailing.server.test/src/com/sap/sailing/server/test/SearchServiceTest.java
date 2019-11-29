@@ -55,11 +55,13 @@ import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeseria
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResultBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfoJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardSearchResultJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.TrackingConnectorInfoJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.interfaces.RacingEventService;
@@ -358,12 +360,12 @@ public class SearchServiceTest {
         Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Buhl" })));
         LeaderboardGroupBaseJsonSerializer leaderboardGroupBaseJsonSerializer = new LeaderboardGroupBaseJsonSerializer();
         LeaderboardSearchResultJsonSerializer serializer = new LeaderboardSearchResultJsonSerializer(new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()),
-                leaderboardGroupBaseJsonSerializer),
+                leaderboardGroupBaseJsonSerializer, new TrackingConnectorInfoJsonSerializer()),
                 leaderboardGroupBaseJsonSerializer);
         LeaderboardGroupBaseJsonDeserializer leaderboardGroupBaseJsonDeserializer = new LeaderboardGroupBaseJsonDeserializer();
         LeaderboardSearchResultBaseJsonDeserializer deserializer = new LeaderboardSearchResultBaseJsonDeserializer(
                 new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
-                        leaderboardGroupBaseJsonDeserializer), leaderboardGroupBaseJsonDeserializer);
+                        leaderboardGroupBaseJsonDeserializer, new TrackingConnectorInfoJsonDeserializer()), leaderboardGroupBaseJsonDeserializer);
         final LeaderboardSearchResult expected = searchResults.getHits().iterator().next();
         LeaderboardSearchResultBase deserialized = deserializer.deserialize(serializer.serialize(expected));
         assertEquals("Pfingstbusch (470)", deserialized.getRegattaName());

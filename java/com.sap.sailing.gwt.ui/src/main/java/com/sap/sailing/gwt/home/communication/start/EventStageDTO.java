@@ -1,13 +1,15 @@
 package com.sap.sailing.gwt.home.communication.start;
 
+import java.util.Set;
+
 import com.sap.sailing.gwt.home.communication.event.EventLinkAndMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
 
 public class EventStageDTO extends EventLinkAndMetadataDTO {
 
     private StageEventType stageType;
     private String stageImageURL;
-    private boolean isTrackedByTracTrac;
-
+    private Set<TrackingConnectorInfoDTO> trackingConnectorInfo;
 
     @Override
     public StageEventType getStageType() {
@@ -25,11 +27,12 @@ public class EventStageDTO extends EventLinkAndMetadataDTO {
     public void setStageImageURL(String stageImageURL) {
         this.stageImageURL = stageImageURL;
     }
-    public boolean isTrackedByTracTrac() {
-        return isTrackedByTracTrac;
+
+    public Set<TrackingConnectorInfoDTO> getTrackingConnectorInfo() {
+        return trackingConnectorInfo;
     }
-    
-    public void setTrackedByTracTrac(boolean isTrackedByTracTrac) {
-        this.isTrackedByTracTrac = isTrackedByTracTrac;
+
+    public void setTrackingConnectorInfo(Set<TrackingConnectorInfoDTO> trackingConnectorInfo) {
+        this.trackingConnectorInfo = trackingConnectorInfo;
     }
 }

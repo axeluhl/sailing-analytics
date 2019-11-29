@@ -10,6 +10,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
+import com.sap.sailing.gwt.home.communication.eventview.TrackingConnectorInfoDTO;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
@@ -50,7 +51,14 @@ public class EventHeader extends Composite {
         if (logoNavigation != null) {
             logoNavigation.configureAnchorElement(eventLogoUi);
         }
-        if (event.isTrackedByTracTrac()) {
+        boolean trackedByTracTrac = false;
+        for(TrackingConnectorInfoDTO trackingConnectorInfo : event.getTrackingConnectorInfos()) {
+            if("TracTrac".equals(trackingConnectorInfo.getTrackedBy())) {
+                trackedByTracTrac = true;
+                break;
+            }
+        }
+        if (trackedByTracTrac) {
             eventHeader.addClassName(EventHeaderResources.INSTANCE.css().eventheader_with_logo());
         } else {
             tractracLogoContainer.removeFromParent();

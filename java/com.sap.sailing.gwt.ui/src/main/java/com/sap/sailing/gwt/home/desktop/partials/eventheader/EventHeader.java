@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
+import com.sap.sailing.gwt.home.communication.eventview.TrackingConnectorInfoDTO;
 import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingButtons;
 import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingMetadataProvider;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
@@ -150,7 +151,14 @@ public class EventHeader extends Composite {
             }
             hide(competitors, races, courseAreaUi, eventCategory);
         }
-        if(!event.isTrackedByTracTrac()) {
+        boolean trackedByTracTrac = false;
+        for(TrackingConnectorInfoDTO trackingConnectorInfo : event.getTrackingConnectorInfos()) {
+            if("TracTrac".equals(trackingConnectorInfo.getTrackedBy())) {
+                trackedByTracTrac = true;
+                break;
+            }
+        }
+        if(!trackedByTracTrac) {
             hide(tractracLogoContainer);
         }
         initTitleAndSelection(nameToShow);

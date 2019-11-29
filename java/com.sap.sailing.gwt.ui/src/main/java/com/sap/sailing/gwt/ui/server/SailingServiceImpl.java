@@ -52,6 +52,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import java.util.zip.GZIPInputStream;
 
@@ -494,6 +495,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
+import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
@@ -1995,7 +1997,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public RaceboardDataDTO getRaceboardData(String regattaName, String raceName, String leaderboardName,
             String leaderboardGroupName, UUID eventId) {
         RaceboardDataDTO result = new RaceboardDataDTO(null, false, false, Collections.emptyList(),
-                Collections.emptyList(), null, false);
+                Collections.emptyList(), null, null);
         RaceWithCompetitorsAndBoatsDTO raceDTO = null;
         Regatta regatta = getService().getRegattaByName(regattaName);
         if (regatta != null) {
@@ -2049,9 +2051,16 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     StrippedLeaderboardDTOWithSecurity leaderboardDTO = createStrippedLeaderboardDTOWithSecurity(
                             leaderboard, false,
                             false);
-                    boolean isTrackedByTracTrac = isValidEvent && event.isTrackedByTracTrac();
+                    Set<TrackingConnectorInfoDTO> trackingConnectorInfos;
+                    if(isValidEvent) {
+                        trackingConnectorInfos = event.getTrackingConnectorInfos()
+                                .stream()
+                                .map(trackingConnectorInfo -> new TrackingConnectorInfoDTO(trackingConnectorInfo.getTrackedBy(), trackingConnectorInfo.getWebUrl().toString())).collect(Collectors.toSet());
+                    }else {
+                        trackingConnectorInfos = Collections.emptySet();
+                    }
                     result = new RaceboardDataDTO(raceDTO, isValidLeaderboardGroup, isValidEvent,
-                            detailTypesForCompetitorChart, availableDetailTypesForLeaderboard, leaderboardDTO, isTrackedByTracTrac);
+                            detailTypesForCompetitorChart, availableDetailTypesForLeaderboard, leaderboardDTO, trackingConnectorInfos);
                 }
             }
         }

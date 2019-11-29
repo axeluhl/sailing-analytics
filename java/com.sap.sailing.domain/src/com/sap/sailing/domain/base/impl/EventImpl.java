@@ -17,6 +17,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -104,17 +105,15 @@ public class EventImpl extends EventBaseImpl implements Event {
     }
 
     @Override
-    public boolean isTrackedByTracTrac() {
+    public Set<TrackingConnectorInfo> getTrackingConnectorInfos() {
+        Set<TrackingConnectorInfo> result = new HashSet<>();
         for (LeaderboardGroup lbg : this.getLeaderboardGroups()) {
             for (Leaderboard lb : lbg.getLeaderboards()) {
-                //Leaderboard.getTrackedRaces() could lead to performance issues due to duplicative collection of TrackedRaces
                 for (TrackedRace tr : lb.getTrackedRaces()) {
-                    if("tracTrac".equals(tr.getTrackingConnector())){
-                        return true;
-                    }
+                    result.add(tr.getTrackingConnectorInfo());
                 }
             }
         }
-        return false;
+        return result;
     }
 }

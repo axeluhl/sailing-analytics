@@ -65,6 +65,7 @@ import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
+import com.sap.sailing.domain.tracking.impl.TrackingConnectorInfoImpl;
 import com.sap.sailing.domain.tracking.impl.UpdateHandler;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
@@ -76,7 +77,7 @@ import difflib.PatchFailedException;
 
 public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
         implements SwissTimingRaceTracker, SailMasterListener, TrackingDataLoader {
-    private static final String SWISS_TIMING = "swissTiming";
+    private static final String SWISS_TIMING_IDENTIFIER = "SwissTiming";
 
     private static final Logger logger = Logger.getLogger(SwissTimingRaceTrackerImpl.class.getName());
     
@@ -495,7 +496,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
                     assert SwissTimingRaceTrackerImpl.this.race == race;
                 }
             }, useInternalMarkPassingAlgorithm, raceLogResolver,
-                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(), SWISS_TIMING);
+                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(), 
+                    /*no api connection to query the event url*/new TrackingConnectorInfoImpl(SWISS_TIMING_IDENTIFIER, null));
             addUpdateHandlers();
             notifyRaceCreationListeners();
             logger.info("Created SwissTiming RaceDefinition and TrackedRace for "+race.getName());

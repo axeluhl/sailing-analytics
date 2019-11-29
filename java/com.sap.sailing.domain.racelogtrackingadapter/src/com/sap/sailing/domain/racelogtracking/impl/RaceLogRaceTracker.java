@@ -68,6 +68,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.TrackingConnectorInfoImpl;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -86,7 +87,7 @@ import difflib.PatchFailedException;
  */
 public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     
-    private static final String RACE_LOG = "raceLog";
+    private static final String RACE_LOG = "RaceLog";
     private static final String LOGGER_AND_LOGAUTHOR_NAME = RaceLogRaceTracker.class.getName();
     private static final Logger logger = Logger.getLogger(LOGGER_AND_LOGAUTHOR_NAME);
     
@@ -313,7 +314,8 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
             trackedRace = raceTrackingHandler.createTrackedRace(trackedRegatta, raceDef, sidelines, windStore,
                     params.getDelayToLiveInMillis(), WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                     boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true, raceLogResolver,
-                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(), RACE_LOG);
+                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(), 
+                    new TrackingConnectorInfoImpl(RACE_LOG, null));
             notifyRaceCreationListeners();
             logger.info(String.format("Started tracking race-log race (%s)", raceLog));
             // this wakes up all waiting race handles

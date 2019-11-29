@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.DetailType;
@@ -16,7 +17,7 @@ public class RaceboardDataDTO implements IsSerializable {
     private ArrayList<DetailType> detailTypesForCompetitorChart;
     private ArrayList<DetailType> availableDetailTypesForLeaderboard;
     private StrippedLeaderboardDTOWithSecurity leaderboard;
-    private boolean isTrackedByTracTrac;
+    private Set<TrackingConnectorInfoDTO> trackingConnectorInfos;
     
 
     // for GWT
@@ -24,7 +25,7 @@ public class RaceboardDataDTO implements IsSerializable {
     
     public RaceboardDataDTO(RaceWithCompetitorsAndBoatsDTO race,
             boolean isValidLeaderboardGroup, boolean isValidEvent, Iterable<DetailType> detailTypesForCompetitorChart,
-            Iterable<DetailType> availableDetailTypesForLeaderboard, StrippedLeaderboardDTOWithSecurity leaderboard, boolean isTrackedByTracTrac) {
+            Iterable<DetailType> availableDetailTypesForLeaderboard, StrippedLeaderboardDTOWithSecurity leaderboard, Set<TrackingConnectorInfoDTO> trackingConnectorInfos) {
         this.race = race;
         this.isValidLeaderboardGroup = isValidLeaderboardGroup;
         this.isValidEvent = isValidEvent;
@@ -33,7 +34,7 @@ public class RaceboardDataDTO implements IsSerializable {
         this.availableDetailTypesForLeaderboard = new ArrayList<>();
         Util.addAll(availableDetailTypesForLeaderboard, this.availableDetailTypesForLeaderboard);
         this.leaderboard = leaderboard;
-        this.isTrackedByTracTrac = isTrackedByTracTrac;
+        this.trackingConnectorInfos = trackingConnectorInfos;
     }
 
     public StrippedLeaderboardDTOWithSecurity getLeaderboard() {
@@ -68,7 +69,7 @@ public class RaceboardDataDTO implements IsSerializable {
         return isValidEvent;
     }
     
-    public boolean isTrackedByTracTrac() {
-        return isTrackedByTracTrac;
+    public Set<TrackingConnectorInfoDTO> isTrackedByTracTrac() {
+        return trackingConnectorInfos;
     }
 }
