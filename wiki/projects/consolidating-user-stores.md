@@ -262,13 +262,28 @@ Merging the ``USER_GROUPS`` and ``USERS`` collections has several interdependenc
 
 #### Pass 1: Marking Users and User Groups for Adding, Merging or Dropping
 
-In the first pass the decision is made for each user and group object whether it will be added, merged or dropped. Warnings will be issued for objects dropped. Groups will be added if none with the same UUID or an equal name exists on the importing side. Should a user group with the same ID exist, it will be marked for merge. If a user group exists on the importing side that has an equal name but a different ID, the groups will only be marked for merge if their equal names have the format``"&lt;username&gt;-tenant"`` and a user named ``&lt;username&gt;`` exists in both groups. Otherwise, the source group will be marked for dropping. Users with a name for which no user exists in the target will be added to the target. If a target user exists with a name equal to that of the source user the source user will be marked for merge into the target user if the e-mail addresses are equal. Otherwise, the source user is marked for dropping. For objects marked for merging, the merge target is recorded for each merge source.
+In the first pass the decision is made for each user and group object whether it will be added, merged or dropped. Warnings will be issued for objects dropped. Groups will be added if none with the same UUID or an equal name exists on the importing side. Should a user group with the same ID exist, it will be marked for merge. If a user group exists on the importing side that has an equal name but a different ID, the groups will only be marked for merge if their equal names have the format``"&lt;username&gt;-tenant"`` and a user named ``&lt;username&gt;`` exists in both groups. Otherwise, the source group will be marked for dropping. Users with a name for which no user exists in the target will be marked for "add". If a target user exists with a name equal to that of the source user the source user will be marked for merge into the target user if the e-mail addresses are equal. Otherwise, the source user is marked for dropping. For objects marked for merging, the merge target is recorded for each merge source.
+
+Ownerships can only be marked for add or drop. They are added if no ownership exist in the target for the object ID yet; they are dropped otherwise, or if all owner references (group and/or user) point to objects marked for drop.
+
+Access control lists (ACLs) for object IDs for which no ACL exists in the target are marked for add. ACLs for object IDs for which an ACL exists already in the target are marked for merge. ACLs for which all groups used by it are marked for drop will be marked for drop.
+
+Preferences are marked for add if no preference object exists in the target for the user and the user is marked for add or merge. They are marked for merge if a preference object exists for a user by the same name in the target. They are marked for drop if the user is marked for drop.
 
 #### Pass 2: Update Source Objects Based on Pass 1 Marking Results
 
+All references from objects marked as "add" pointing to objects in the source store marked as "merge" are updated to point to the corresponding merged objects in the target store. (Objects referenced that were also marked "add" will be moved to the target store, so references pointing to them don't need to be updated.) All references that point to objects marked as "drop" are removed.
 
+The types whose objects are scanned for such references are:
+* User: check role qualifications (group/user), default creation groups
+* UserGroup: check users that are members of that group; note that the role definitions the group has don't need a check as the definition itself has no qualifications
+* Ownership: check user and group owner
+* AccessControlList: check groups
+* Preferences: check user
 
 #### Pass 3: Adding and Merging Objects
+
+All objects marked to be added are copied from their source store to the target store. 
 
 When merging a source group into a target group, the set of roles will be merged, and the set of users will be merged after the ``USERS`` collection has been merged (see below). As groups are merged, roles attached to groups that use the source group as ownership qualification will have the qualification replaced with the target group after the merge. Similarly, at least for the in-memory representation (not so much for the persistent representation which simply uses the plain user names as Strings for identification) any User object used in role qualifications needs to be replaced by the merge result if the user object got merged.
 
