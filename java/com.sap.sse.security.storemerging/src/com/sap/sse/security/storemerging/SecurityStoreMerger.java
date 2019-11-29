@@ -1,5 +1,7 @@
 package com.sap.sse.security.storemerging;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,6 +15,7 @@ import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.PersistenceFactory;
@@ -92,24 +95,77 @@ public class SecurityStoreMerger {
         final PersistenceFactory sourcePf = PersistenceFactory.create(cfgForSource.getService());
         final UserStore sourceUserStore = loadUserStore(sourcePf, defaultCreationGroupNameForSource);
         final AccessControlStore sourceAccessControlStore = loadAccessControlStore(sourcePf, sourceUserStore);
-        mergeUsersAndGroups(sourceUserStore);
-        mergePreferences(sourceUserStore);
-        mergeOwnerships(sourceAccessControlStore);
-        mergeAccessControlLists(sourceAccessControlStore);
+        // the following maps work like this: The keys are source objects to be imported.
+        // If the key object is to be added to the target, it is its own value;
+        // if it is to be dropped, the key is not part of the map. If it is to be merged with an object in the target,
+        // the corresponding target object is the value.
+        final Map<User, User> userMap = markUsersForAddMergeOrDrop(sourceUserStore);
+        final Map<UserGroup, UserGroup> userGroupMap = markUserGroupsForAddMergeOrDrop(sourceUserStore);
+        mergeUsersAndGroups(sourceUserStore, userMap, userGroupMap);
+        mergePreferences(sourceUserStore, userMap);
+        mergeOwnerships(sourceAccessControlStore, userMap, userGroupMap);
+        mergeAccessControlLists(sourceAccessControlStore, userGroupMap);
         return new Pair<>(sourceUserStore, sourceAccessControlStore);
     }
 
-    private void mergeAccessControlLists(AccessControlStore sourceAccessControlStore) {
+    private Map<User, User> markUsersForAddMergeOrDrop(UserStore sourceUserStore) {
+        final Map<User, User> userMap = new HashMap<>();
+        for (final User user : sourceUserStore.getUsers()) {
+            final User targetUserWithEqualName = targetUserStore.getUserByName(user.getName());
+            if (targetUserWithEqualName != null) {
+                if (Util.equalsWithNull(user.getEmail(), targetUserWithEqualName.getEmail())) {
+                    logger.info("Found user "+user.getName()+" in target having equal e-mail address "+user.getEmail()+
+                            ". Marking for merge.");
+                    userMap.put(user, targetUserWithEqualName);
+                } else {
+                    logger.info("Found user " + user.getName() + " in target, but e-mail addresses " + user.getEmail()
+                            + " and " + targetUserWithEqualName.getEmail() + " don't match. Dropping.");
+                }
+            } else {
+                logger.info("User "+user.getName()+" not found in target. Marking for adding.");
+                userMap.put(user, user);
+            }
+        }
+        return userMap;
+    }
+
+    private Map<UserGroup, UserGroup> markUserGroupsForAddMergeOrDrop(UserStore sourceUserStore) {
+        final Map<UserGroup, UserGroup> userGroupMap = new HashMap<>();
+        for (final UserGroup sourceGroup : sourceUserStore.getUserGroups()) {
+            final UserGroup targetGroupWithSameID = targetUserStore.getUserGroup(sourceGroup.getId());
+            if (targetGroupWithSameID != null) {
+                logger.info("Identical target group found: "+targetGroupWithSameID+". Marking for merge.");
+                userGroupMap.put(sourceGroup, targetGroupWithSameID);
+            } else {
+                final UserGroup targetGroupWithEqualName = targetUserStore.getUserGroupByName(sourceGroup.getName());
+                if (targetGroupWithEqualName != null) {
+                    if (considerGroupsIdentical(targetGroupWithEqualName, sourceGroup)) {
+                        logger.info("Identical target group (though different ID) found: "+targetGroupWithEqualName+". Merging...");
+                        userGroupMap.put(sourceGroup, targetGroupWithEqualName);
+                    } else {
+                        logger.warning("Found existing target user group "+targetGroupWithEqualName+" but source group "+
+                                sourceGroup+" is not considered identical. Dropping.");
+                    }
+                } else {
+                    logger.info("No target user group found for source group "+sourceGroup+". Marking for adding");
+                    userGroupMap.put(sourceGroup, sourceGroup);
+                }
+            }
+        }
+        return userGroupMap;
+    }
+
+    private void mergeAccessControlLists(AccessControlStore sourceAccessControlStore, Map<UserGroup, UserGroup> userGroupMap) {
         // TODO Implement Main.mergeAccessControlLists(...)
         
     }
 
-    private void mergeOwnerships(AccessControlStore sourceAccessControlStore) {
+    private void mergeOwnerships(AccessControlStore sourceAccessControlStore, Map<User, User> userMap, Map<UserGroup, UserGroup> userGroupMap) {
         // TODO Implement Main.mergeOwnerships(...)
         
     }
 
-    private void mergeUsersAndGroups(UserStore sourceUserStore) {
+    private void mergeUsersAndGroups(UserStore sourceUserStore, Map<User, User> userMap, Map<UserGroup, UserGroup> userGroupMap) {
         for (final UserGroup sourceGroup : sourceUserStore.getUserGroups()) {
             final UserGroup targetGroupWithSameID = targetUserStore.getUserGroup(sourceGroup.getId());
             if (targetGroupWithSameID != null) {
@@ -171,7 +227,7 @@ public class SecurityStoreMerger {
         return result;
     }
 
-    private void mergePreferences(UserStore sourceUserStore) {
+    private void mergePreferences(UserStore sourceUserStore, Map<User, User> userMap) {
         // TODO Implement Main.mergePreferences(...)
         
     }
