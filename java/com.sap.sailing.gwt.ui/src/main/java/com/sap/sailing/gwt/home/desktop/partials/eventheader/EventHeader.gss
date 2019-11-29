@@ -191,14 +191,6 @@
 .eventheader_status_body {
   font-size: 1rem;
 }
-.eventheader_dataBy_logo_container{
- display: inline-block;
- white-space: nowrap;
- font-size: 0.75em;
-}
-.eventheader_dataBy_logo{
- height: 1.3333333em !important;
-}
 .locationicon {
   vertical-align: text-bottom;
   margin-right: 0.333333333333333em;

@@ -1,0 +1,27 @@
+.eventheader_dataBy_logo_container{
+ display: inline-block;
+ white-space: nowrap;
+ font-size: 0.75em;
+ cursor: pointer;
+ 
+}
+.eventheader_dataBy_logo{
+ height: 1.3333333em !important;
+}
+
+.eventheader_dataBy_subtleLink, 
+.eventheader_dataBy_subtleLink:hover, 
+.eventheader_dataBy_subtleLink:active, 
+.eventheader_dataBy_subtleLink:visited, 
+.eventheader_dataBy_subtleLink:focus {
+  text-decoration: none;
+  color: black;
+}
+
+.eventheader_intro_details_item {
+  display: inline-block;
+  border-left: 1px solid #cfcfcf;
+  margin: 0.266666666666667em 0 0.266666666666667em 0.333333333333333em;
+  padding-left: 0.666666666666667em;
+  color: #666;
+}
