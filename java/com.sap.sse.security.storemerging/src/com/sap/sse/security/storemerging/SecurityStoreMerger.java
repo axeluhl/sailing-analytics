@@ -1,7 +1,10 @@
 package com.sap.sse.security.storemerging;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,8 +16,10 @@ import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
@@ -101,6 +106,10 @@ public class SecurityStoreMerger {
         // the corresponding target object is the value.
         final Map<User, User> userMap = markUsersForAddMergeOrDrop(sourceUserStore);
         final Map<UserGroup, UserGroup> userGroupMap = markUserGroupsForAddMergeOrDrop(sourceUserStore);
+        replaceSourceUserReferencesToUsersAndGroups(userMap, userGroupMap);
+        replaceSourceUserGroupReferencesToUsers(userMap, userGroupMap);
+        replaceSourceOwnershipReferencesToUsersAndGroups(sourceAccessControlStore, userMap, userGroupMap);
+        replaceSourceAccessControlListReferencesToGroups(sourceAccessControlStore, userGroupMap);
         mergeUsersAndGroups(sourceUserStore, userMap, userGroupMap);
         mergePreferences(sourceUserStore, userMap);
         mergeOwnerships(sourceAccessControlStore, userMap, userGroupMap);
@@ -153,6 +162,94 @@ public class SecurityStoreMerger {
             }
         }
         return userGroupMap;
+    }
+
+    private void replaceSourceUserReferencesToUsersAndGroups(Map<User, User> userMap,
+            Map<UserGroup, UserGroup> userGroupMap) {
+        for (final User sourceUser : userMap.keySet()) {
+            final Set<Role> rolesToRemoveBecauseOfLostOrMissingQualifier = new HashSet<>();
+            final Map<Role, Role> rolesToReplaceDueToChangingQualifierObject = new HashMap<>();
+            for (final Role role : sourceUser.getRoles()) {
+                final User qualifiedForUser = role.getQualifiedForUser();
+                final UserGroup qualifiedForGroup = role.getQualifiedForTenant();
+                if (qualifiedForUser == null && qualifiedForGroup == null) {
+                    logger.severe("Dropping unqualified role "+role+" from user "+sourceUser);
+                    rolesToRemoveBecauseOfLostOrMissingQualifier.add(role);
+                } else {
+                    final User userQualifierInTarget;
+                    final UserGroup groupQualifierInTarget;
+                    if (qualifiedForUser != null) {
+                        userQualifierInTarget = userMap.get(qualifiedForUser);
+                        if (userQualifierInTarget == null) {
+                            logger.severe("User qualifying role "+role+" for user "+sourceUser+" will be dropped. Dropping role.");
+                            rolesToRemoveBecauseOfLostOrMissingQualifier.add(role);
+                        }
+                    } else {
+                        userQualifierInTarget = null;
+                    }
+                    if (qualifiedForGroup != null) {
+                        groupQualifierInTarget = userGroupMap.get(qualifiedForGroup);
+                        if (groupQualifierInTarget == null) {
+                            logger.severe("Group qualifying role "+role+" for user "+sourceUser+" will be dropped. Dropping role.");
+                            rolesToRemoveBecauseOfLostOrMissingQualifier.add(role);
+                        }
+                    } else {
+                        groupQualifierInTarget = null;
+                    }
+                    if (!rolesToRemoveBecauseOfLostOrMissingQualifier.contains(role) &&
+                            (qualifiedForUser != userQualifierInTarget || qualifiedForGroup != groupQualifierInTarget)) {
+                        logger.info("Qualifying user/group for role "+role+" on user "+sourceUser+
+                                " merged to target. Updating role");
+                        rolesToReplaceDueToChangingQualifierObject.put(role,
+                                new Role(role.getRoleDefinition(), groupQualifierInTarget, userQualifierInTarget));
+                    }
+                }
+            }
+            for (final Role roleToRemove : rolesToRemoveBecauseOfLostOrMissingQualifier) {
+                sourceUser.removeRole(roleToRemove);
+            }
+            for (final Entry<Role, Role> e : rolesToReplaceDueToChangingQualifierObject.entrySet()) {
+                sourceUser.removeRole(e.getKey());
+                sourceUser.addRole(e.getValue());
+            }
+        }
+    }
+    
+    private void replaceSourceUserGroupReferencesToUsers(Map<User, User> userMap,
+            Map<UserGroup, UserGroup> userGroupMap) {
+        // two passes to avoid ConcurrentModificationException
+        for (final UserGroup sourceUserGroup : userGroupMap.keySet()) {
+            final Map<User, User> mapping = new HashMap<>();
+            for (final User user : sourceUserGroup.getUsers()) {
+                mapping.put(user, userMap.get(user));
+            }
+            for (final Entry<User, User> e : mapping.entrySet()) {
+                sourceUserGroup.remove(e.getKey());
+                if (e.getValue() == null) {
+                    logger.severe("User "+e.getKey()+" from group "+sourceUserGroup+" dropped. Removing from group.");
+                } else if (e.getValue() != e.getKey()) {
+                    logger.info("User "+e.getKey()+" from group "+sourceUserGroup+" merging into target's user "+e.getValue()+
+                            ". Updating group.");
+                    sourceUserGroup.add(e.getValue());
+                }
+            }
+        }
+    }
+    
+    private void replaceSourceOwnershipReferencesToUsersAndGroups(AccessControlStore sourceAccessControlStore,
+            Map<User, User> userMap, Map<UserGroup, UserGroup> userGroupMap) {
+        for (final OwnershipAnnotation sourceOwnership : sourceAccessControlStore.getOwnerships()) {
+            final UserGroup groupOwnership = sourceOwnership.getAnnotation().getTenantOwner();
+            
+        }
+        // TODO Implement SecurityStoreMerger.replaceSourceOwnershipReferencesToUsersAndGroups(...)
+        
+    }
+    
+    private void replaceSourceAccessControlListReferencesToGroups(AccessControlStore sourceAccessControlStore,
+            Map<UserGroup, UserGroup> userGroupMap) {
+        // TODO Implement SecurityStoreMerger.replaceSourceAccessControlListReferencesToGroups(...)
+        
     }
 
     private void mergeAccessControlLists(AccessControlStore sourceAccessControlStore, Map<UserGroup, UserGroup> userGroupMap) {
