@@ -73,7 +73,7 @@ public interface UserManagementServiceAsync {
     void putRoleDefintionToUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString, boolean forAll,
             AsyncCallback<Void> callback);
 
-    void removeRoleDefintionFromUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString,
+    void removeRoleDefinitionFromUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString,
             AsyncCallback<Void> callback);
 
     /**

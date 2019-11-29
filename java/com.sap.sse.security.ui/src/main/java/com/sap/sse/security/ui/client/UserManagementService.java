@@ -77,7 +77,7 @@ public interface UserManagementService extends RemoteService {
     void putRoleDefintionToUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString, boolean forAll)
             throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
-    void removeRoleDefintionFromUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString)
+    void removeRoleDefinitionFromUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString)
             throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
     Collection<UserDTO> getUserList() throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;

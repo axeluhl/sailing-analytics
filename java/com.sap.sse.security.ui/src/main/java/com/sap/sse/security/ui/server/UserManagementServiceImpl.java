@@ -435,18 +435,14 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public void removeRoleDefintionFromUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString)
+    public void removeRoleDefinitionFromUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString)
             throws UnauthorizedException {
         final UserGroup userGroup = getSecurityService().getUserGroup(UUID.fromString(userGroupIdAsString));
         if (SecurityUtils.getSubject().isPermitted(
-                SecuredSecurityTypes.USER_GROUP.getStringPermissionForObject(DefaultActions.DELETE, userGroup))) {
+                SecuredSecurityTypes.USER_GROUP.getStringPermissionForObject(DefaultActions.UPDATE, userGroup))) {
             final RoleDefinition roleDefinition = getSecurityService()
                     .getRoleDefinition(UUID.fromString(roleDefinitionIdAsString));
             if (roleDefinition != null) {
-                if (!getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(roleDefinition,
-                        new Ownership(null, userGroup))) {
-                    throw new UnauthorizedException("Not permitted to remove role definition from group");
-                }
                 getSecurityService().removeRoleDefintionFromUserGroup(userGroup, roleDefinition);
             }
         } else {
@@ -917,28 +913,22 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public SuccessInfo removeRoleFromUser(String username, String userQualifierName, UUID roleDefinitionId,
             String tenantQualifierName) throws UserManagementException, UnauthorizedException {
-
         SuccessInfo successInfo;
         try {
             // get user for which to remove role
             final User user = getOrThrowUser(username);
-
             // get user for which the role is qualified, if one exists
             getOrThrowQualifiedUser(userQualifierName);
-
             // get the group tenant the role is qualified for if one exists
             UserGroup tenant = getOrThrowTenant(tenantQualifierName);
-
             Role role = getOrThrowRoleFromIDs(roleDefinitionId, tenant == null ? null : tenant.getId(),
                     userQualifierName);
-
             final String message = "removed role " + role.getName() + " for user " + username;
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
             final QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                     .getQualifiedObjectIdentifier(associationTypeIdentifier);
             getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
                     new Callable<Void>() {
-
                         @Override
                         public Void call() throws Exception {
                             getSecurityService().removeRoleFromUser(user, role);
@@ -946,7 +936,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                             return null;
                         }
                     });
-
             final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
             successInfo = new SuccessInfo(true, message, /* redirectURL */null,
                     new Triple<>(userDTO, getAllUser(), getServerInfo()));
@@ -1020,18 +1009,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public SuccessInfo addPermissionForUser(String username, WildcardPermission permission)
             throws UnauthorizedException {
-
         SuccessInfo successInfo;
         try {
             // check if user exists
             User user = getOrThrowUser(username);
-
             // check permissions
             if (!getSecurityService().hasCurrentUserMetaPermissionWithOwnershipLookup(permission)) {
                 throw new UnauthorizedException(
                         "Not permitted to grant/revoke permission " + permission + " for user " + user.getName());
             }
-
             // grant permission
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(permission,
                     user);
@@ -1039,7 +1025,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredSecurityTypes.PERMISSION_ASSOCIATION, associationTypeIdentifier,
                     associationTypeIdentifier.toString(), new Action() {
-
                         @Override
                         public void run() throws Exception {
                             final QualifiedObjectIdentifier qualifiedObjectAssociationIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
@@ -1050,7 +1035,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                             logger.info(message);
                         }
                     });
-
             final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
             successInfo = new SuccessInfo(true, message, /* redirectURL */null,
                     new Triple<>(userDTO, getAllUser(), getServerInfo()));
@@ -1064,25 +1048,16 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public SuccessInfo removePermissionFromUser(String username, WildcardPermissionWithSecurityDTO permission)
             throws UnauthorizedException {
-
         SuccessInfo successInfo;
         try {
             // check if user exists
             User user = getOrThrowUser(username);
-
-            // check permissions
-            if (!getSecurityService().hasCurrentUserMetaPermissionWithOwnershipLookup(permission)) {
-                throw new UnauthorizedException(
-                        "Not permitted to grant/revoke permission " + permission + " for user " + user.getName());
-            }
-
             // revoke permission
             final String message = "Revoked permission " + permission + " for user " + username;
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(permission,
                     user);
             final QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
                     .getQualifiedObjectIdentifier(associationTypeIdentifier);
-
             getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
                     new Callable<Void>() {
                         @Override
@@ -1092,15 +1067,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                             return null;
                         }
                     });
-
             final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
             successInfo = new SuccessInfo(true, message, /* redirectURL */null,
                     new Triple<>(userDTO, getAllUser(), getServerInfo()));
-
-        } catch (UserManagementException | UnauthorizedException e) {
+        } catch (UserManagementException e) {
             successInfo = new SuccessInfo(false, "Not permitted to revoke permission " + permission + " for user "
                     + username + " or the user or permission did not exist", /* redirectURL */null, null);
-
         }
         return successInfo;
     }
