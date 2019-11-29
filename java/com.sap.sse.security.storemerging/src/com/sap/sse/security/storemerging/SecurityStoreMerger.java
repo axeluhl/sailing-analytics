@@ -19,6 +19,7 @@ import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
@@ -108,11 +109,12 @@ public class SecurityStoreMerger {
         final Map<UserGroup, UserGroup> userGroupMap = markUserGroupsForAddMergeOrDrop(sourceUserStore);
         replaceSourceUserReferencesToUsersAndGroups(userMap, userGroupMap);
         replaceSourceUserGroupReferencesToUsers(userMap, userGroupMap);
-        replaceSourceOwnershipReferencesToUsersAndGroups(sourceAccessControlStore, userMap, userGroupMap);
+        final Set<OwnershipAnnotation> ownershipsToTryToImport =
+                replaceSourceOwnershipReferencesToUsersAndGroups(sourceAccessControlStore, userMap, userGroupMap);
         replaceSourceAccessControlListReferencesToGroups(sourceAccessControlStore, userGroupMap);
         mergeUsersAndGroups(sourceUserStore, userMap, userGroupMap);
         mergePreferences(sourceUserStore, userMap);
-        mergeOwnerships(sourceAccessControlStore, userMap, userGroupMap);
+        mergeOwnerships(sourceAccessControlStore, ownershipsToTryToImport);
         mergeAccessControlLists(sourceAccessControlStore, userGroupMap);
         return new Pair<>(sourceUserStore, sourceAccessControlStore);
     }
@@ -236,14 +238,29 @@ public class SecurityStoreMerger {
         }
     }
     
-    private void replaceSourceOwnershipReferencesToUsersAndGroups(AccessControlStore sourceAccessControlStore,
+    private Set<OwnershipAnnotation> replaceSourceOwnershipReferencesToUsersAndGroups(AccessControlStore sourceAccessControlStore,
             Map<User, User> userMap, Map<UserGroup, UserGroup> userGroupMap) {
+        final Set<OwnershipAnnotation> result = new HashSet<>();
         for (final OwnershipAnnotation sourceOwnership : sourceAccessControlStore.getOwnerships()) {
             final UserGroup groupOwnership = sourceOwnership.getAnnotation().getTenantOwner();
-            
+            final User userOwnership = sourceOwnership.getAnnotation().getUserOwner();
+            final UserGroup targetGroupOwnership = userGroupMap.get(groupOwnership);
+            final User targetUserOwnership = userMap.get(userOwnership);
+            if (targetGroupOwnership != null && targetUserOwnership != null) {
+                if (targetGroupOwnership != groupOwnership || targetUserOwnership != userOwnership) {
+                    // something changed, and at least one ownership component is not null; create new annotation:
+                    logger.info("User/group of ownership for object "+sourceOwnership.getIdOfAnnotatedObject()+" changed. Ownership updated");
+                    result.add(new OwnershipAnnotation(new Ownership(targetUserOwnership, targetGroupOwnership),
+                            sourceOwnership.getIdOfAnnotatedObject(), sourceOwnership.getDisplayNameOfAnnotatedObject()));
+                } else {
+                    result.add(sourceOwnership);
+                }
+            } else {
+                logger.info("Ownership's group or user dropped. Not importing ownership for object with ID "
+                        + sourceOwnership.getIdOfAnnotatedObject());
+            }
         }
-        // TODO Implement SecurityStoreMerger.replaceSourceOwnershipReferencesToUsersAndGroups(...)
-        
+        return result;
     }
     
     private void replaceSourceAccessControlListReferencesToGroups(AccessControlStore sourceAccessControlStore,
@@ -257,8 +274,9 @@ public class SecurityStoreMerger {
         
     }
 
-    private void mergeOwnerships(AccessControlStore sourceAccessControlStore, Map<User, User> userMap, Map<UserGroup, UserGroup> userGroupMap) {
-        // TODO Implement Main.mergeOwnerships(...)
+    private void mergeOwnerships(AccessControlStore sourceAccessControlStore,
+            Set<OwnershipAnnotation> ownershipsToTryToImport) {
+        // TODO Implement SecurityStoreMerger.mergeOwnerships(...)
         
     }
 
