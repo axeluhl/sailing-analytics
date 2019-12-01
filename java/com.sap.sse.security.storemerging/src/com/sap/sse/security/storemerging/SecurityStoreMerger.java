@@ -16,9 +16,11 @@ import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
@@ -240,26 +242,29 @@ public class SecurityStoreMerger {
             Map<User, User> userMap, Map<UserGroup, UserGroup> userGroupMap) {
         for (final OwnershipAnnotation sourceOwnership : sourceAccessControlStore.getOwnerships()) {
             final UserGroup groupOwnership = sourceOwnership.getAnnotation().getTenantOwner();
-            
+            final User userOwnership = sourceOwnership.getAnnotation().getUserOwner();
+            final UserGroup targetGroupOwnership = userGroupMap.get(groupOwnership);
+            final User targetUserOwnerwhip = userMap.get(userOwnership);
+            sourceAccessControlStore.setOwnership(sourceOwnership.getIdOfAnnotatedObject(), targetUserOwnerwhip,
+                    targetGroupOwnership, sourceOwnership.getDisplayNameOfAnnotatedObject());
         }
-        // TODO Implement SecurityStoreMerger.replaceSourceOwnershipReferencesToUsersAndGroups(...)
-        
     }
     
     private void replaceSourceAccessControlListReferencesToGroups(AccessControlStore sourceAccessControlStore,
             Map<UserGroup, UserGroup> userGroupMap) {
+        for (final AccessControlListAnnotation acl : sourceAccessControlStore.getAccessControlLists()) {
+            final Map<UserGroup, Set<String>> actionByGroup = acl.getAnnotation().getActionsByUserGroup();
+            // TODO figure out which user groups will change by the userGroupMap mapping and adjust accordingly
+        }
         // TODO Implement SecurityStoreMerger.replaceSourceAccessControlListReferencesToGroups(...)
-        
     }
 
     private void mergeAccessControlLists(AccessControlStore sourceAccessControlStore, Map<UserGroup, UserGroup> userGroupMap) {
         // TODO Implement Main.mergeAccessControlLists(...)
-        
     }
 
     private void mergeOwnerships(AccessControlStore sourceAccessControlStore, Map<User, User> userMap, Map<UserGroup, UserGroup> userGroupMap) {
         // TODO Implement Main.mergeOwnerships(...)
-        
     }
 
     private void mergeUsersAndGroups(UserStore sourceUserStore, Map<User, User> userMap, Map<UserGroup, UserGroup> userGroupMap) {
@@ -284,12 +289,10 @@ public class SecurityStoreMerger {
             }
         }
         // TODO Implement Main.mergeUsersAndGroups(...)
-        
     }
     
     private void mergeSecondUserGroupIntoFirst(UserGroup targetGroupWithSameID, UserGroup sourceGroup) {
         // TODO Implement SecurityStoreMerger.mergeSecondUserGroupIntoFirst(...)
-        
     }
 
     /**
@@ -326,6 +329,5 @@ public class SecurityStoreMerger {
 
     private void mergePreferences(UserStore sourceUserStore, Map<User, User> userMap) {
         // TODO Implement Main.mergePreferences(...)
-        
     }
 }
