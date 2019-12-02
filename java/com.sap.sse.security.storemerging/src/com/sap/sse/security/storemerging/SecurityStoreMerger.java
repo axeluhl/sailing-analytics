@@ -410,12 +410,10 @@ public class SecurityStoreMerger {
     private void mergeOwnerships(AccessControlStore sourceAccessControlStore,
             Set<OwnershipAnnotation> ownershipsToTryToImport) {
         // TODO Implement SecurityStoreMerger.mergeOwnerships(...)
-        
     }
 
     private void mergeAccessControlLists(AccessControlStore sourceAccessControlStore, Map<UserGroup, UserGroup> userGroupMap) {
         // TODO Implement Main.mergeAccessControlLists(...)
-        
     }
     
     /**
