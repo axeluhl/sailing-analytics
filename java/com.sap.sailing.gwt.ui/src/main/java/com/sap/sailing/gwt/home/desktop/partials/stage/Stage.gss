@@ -209,3 +209,15 @@
   -ms-transition: width 0.1s linear;
   transition: width 0.1s linear;
 }
+.stage_dataBy_logo_container{
+  color: white;
+  padding: 0 0.4em;
+  line-height: 4rem;
+}
+.stage_dataBy_logo_container>*{
+  display: inline-block !important;
+  vertical-align: middle;
+}
+.stageteaser_rightbound_bond_item{
+  float: right;
+}

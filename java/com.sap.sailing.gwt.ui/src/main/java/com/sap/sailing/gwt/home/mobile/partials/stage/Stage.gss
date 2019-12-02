@@ -206,5 +206,11 @@
   background: #333;
 }
 
+.stageteaser_databylogo_container{
+ color: white;
+ padding: .6em 0.4em 0.6em .4em;
+ float: right;
+}
+
 @external slick-dots, slick-active;
 

@@ -151,7 +151,7 @@ public class EventHeader extends Composite {
             }
             hide(competitors, races, courseAreaUi, eventCategory);
         }
-        dataByLogo.setUp(event, true);
+        dataByLogo.setUp(event.getTrackingConnectorInfos(), true);
         initTitleAndSelection(nameToShow);
     }
 

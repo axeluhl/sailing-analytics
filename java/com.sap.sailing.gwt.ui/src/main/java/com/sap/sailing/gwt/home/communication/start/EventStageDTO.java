@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.home.communication.start;
 import java.util.Set;
 
 import com.sap.sailing.gwt.home.communication.event.EventLinkAndMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
+import com.sap.sailing.gwt.home.communication.eventview.TrackingConnectorInfoDTO;
 
 public class EventStageDTO extends EventLinkAndMetadataDTO {
 
@@ -28,11 +28,11 @@ public class EventStageDTO extends EventLinkAndMetadataDTO {
         this.stageImageURL = stageImageURL;
     }
 
-    public Set<TrackingConnectorInfoDTO> getTrackingConnectorInfo() {
+    public Set<TrackingConnectorInfoDTO> getTrackingConnectorInfos() {
         return trackingConnectorInfo;
     }
 
-    public void setTrackingConnectorInfo(Set<TrackingConnectorInfoDTO> trackingConnectorInfo) {
+    public void setTrackingConnectorInfos(Set<TrackingConnectorInfoDTO> trackingConnectorInfo) {
         this.trackingConnectorInfo = trackingConnectorInfo;
     }
 }

@@ -45,6 +45,7 @@
 			<div class="{style.right}">
 				<g:Anchor ui:field="actionLink"
 					styleName="{res.mainCss.button} {local_res.css.stageteaser_content_band_action}" />
+				<s:databylogo.DataByLogo ui:field="dataByLogo" addStyleNames="{local_res.css.stageteaser_databylogo_container}" />
 			</div>
 		</div>
 	</g:HTMLPanel>
