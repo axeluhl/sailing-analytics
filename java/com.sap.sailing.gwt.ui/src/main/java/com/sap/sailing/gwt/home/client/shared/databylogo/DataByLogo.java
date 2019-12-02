@@ -29,13 +29,17 @@ public class DataByLogo extends Widget {
         setElement(uiBinder.createAndBindUi(this));
     }
 
-    public void setUp(EventViewDTO event) {
+    public void setUp(EventViewDTO event, boolean colorIfPossible) {
         Set<TrackingConnectorInfoDTO> trackingConnectorInfos = event.getTrackingConnectorInfos();
         boolean istrackedByTracTrac = false;
         for (TrackingConnectorInfoDTO trackingConnectorInfo : trackingConnectorInfos) {
             if ("TracTrac".equals(trackingConnectorInfo.getTrackedBy())) {
                 istrackedByTracTrac = true;
-                logo.setSrc(DataByLogoResources.INSTANCE.tractrac().getSafeUri().asString());
+                if(colorIfPossible) {
+                    logo.setSrc(DataByLogoResources.INSTANCE.tractracColor().getSafeUri().asString());
+                }else {
+                    logo.setSrc(DataByLogoResources.INSTANCE.tractracWhite().getSafeUri().asString());
+                }
                 String webUrl = trackingConnectorInfo.getWebUrl();
                 if (webUrl == null || "".equals(trackingConnectorInfo.getWebUrl())) {
                     dataByContainer.setHref("https://www.tractrac.com/");

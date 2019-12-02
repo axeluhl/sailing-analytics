@@ -14,7 +14,11 @@ public interface DataByLogoResources extends SharedHomeResources {
     
     @Source("tractrac-color.svg")
     @MimeType("image/svg+xml")
-    DataResource tractrac();
+    DataResource tractracColor();
+    
+    @Source("tractrac-white.svg")
+    @MimeType("image/svg+xml")
+    DataResource tractracWhite();
 
     public interface LocalCss extends CssResource {
         String databylogo_logo();
