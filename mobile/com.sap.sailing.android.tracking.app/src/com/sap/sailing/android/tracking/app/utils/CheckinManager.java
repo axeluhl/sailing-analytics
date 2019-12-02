@@ -34,7 +34,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.BoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfoJsonDeserializer;l
+import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfoJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sse.common.Util;
 import com.sap.sse.shared.media.ImageDescriptor;
