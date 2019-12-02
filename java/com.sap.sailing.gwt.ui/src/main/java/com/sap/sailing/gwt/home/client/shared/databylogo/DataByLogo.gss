@@ -8,7 +8,6 @@
 .databylogo_subtlelink:visited, 
 .databylogo_subtlelink:focus {
   text-decoration: none;
-  color: black;
 }
 
 .databylogo_container{

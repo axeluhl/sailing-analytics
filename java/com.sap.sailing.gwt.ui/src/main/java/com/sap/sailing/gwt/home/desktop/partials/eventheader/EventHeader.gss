@@ -267,6 +267,7 @@
 }
 
 .eventheader_databylogo{
+ color: black;
  display: inline-block;
  white-space: nowrap;
  font-size: 0.75em;
