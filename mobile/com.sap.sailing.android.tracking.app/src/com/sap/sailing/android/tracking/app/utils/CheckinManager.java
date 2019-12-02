@@ -34,6 +34,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.BoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfoJsonDeserializer;l
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sse.common.Util;
 import com.sap.sse.shared.media.ImageDescriptor;
@@ -221,7 +222,8 @@ public class CheckinManager {
                                                 return null;
                                             }
                                         }))),
-                                new LeaderboardGroupBaseJsonDeserializer());
+                                new LeaderboardGroupBaseJsonDeserializer(),
+                                new TrackingConnectorInfoJsonDeserializer());
                         try {
                             final EventBase event = deserializer.deserialize(
                                     (org.json.simple.JSONObject) new JSONParser().parse(response.toString()));

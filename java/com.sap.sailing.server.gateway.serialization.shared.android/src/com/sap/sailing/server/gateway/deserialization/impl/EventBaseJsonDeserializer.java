@@ -33,7 +33,9 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
     private final JsonDeserializer<LeaderboardGroupBase> leaderboardGroupDeserializer;
     private final JsonDeserializer<TrackingConnectorInfo>trackingConnectorInfoDeserializer;
 
-    public EventBaseJsonDeserializer(JsonDeserializer<Venue> venueDeserializer, JsonDeserializer<LeaderboardGroupBase> leaderboardGroupDeserializer, JsonDeserializer<TrackingConnectorInfo>trackingConnectorInfoDeserializer) {
+    public EventBaseJsonDeserializer(JsonDeserializer<Venue> venueDeserializer,
+            JsonDeserializer<LeaderboardGroupBase> leaderboardGroupDeserializer,
+            JsonDeserializer<TrackingConnectorInfo> trackingConnectorInfoDeserializer) {
         this.venueDeserializer = venueDeserializer;
         this.leaderboardGroupDeserializer = leaderboardGroupDeserializer;
         this.trackingConnectorInfoDeserializer = trackingConnectorInfoDeserializer;
