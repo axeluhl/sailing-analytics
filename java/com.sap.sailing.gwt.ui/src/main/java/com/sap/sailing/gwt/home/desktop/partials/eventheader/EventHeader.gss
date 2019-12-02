@@ -266,3 +266,9 @@
   font-size: 1.2rem;
 }
 
+.eventheader_databylogo{
+ display: inline-block;
+ white-space: nowrap;
+ font-size: 0.75em;
+ cursor: pointer;
+}

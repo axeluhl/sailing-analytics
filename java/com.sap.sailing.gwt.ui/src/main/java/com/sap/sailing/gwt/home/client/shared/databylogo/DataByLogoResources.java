@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.desktop.partials.databylogo;
+package com.sap.sailing.gwt.home.client.shared.databylogo;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
@@ -17,9 +17,8 @@ public interface DataByLogoResources extends SharedHomeResources {
     DataResource tractrac();
 
     public interface LocalCss extends CssResource {
-        String eventheader_dataBy_logo_container();
-        String eventheader_dataBy_logo();
-        String eventheader_dataBy_subtleLink();
-        String eventheader_intro_details_item();
+        String databylogo_logo();
+        String databylogo_subtlelink();
+        String databylogo_container();
     }
 }

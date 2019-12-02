@@ -1,32 +1,32 @@
-package com.sap.sailing.gwt.home.desktop.partials.databylogo;
+package com.sap.sailing.gwt.home.client.shared.databylogo;
 
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.TrackingConnectorInfoDTO;
 
-public class DataByLogo extends Composite {
+public class DataByLogo extends Widget {
 
-    private static SharingButtonsUiBinder uiBinder = GWT.create(SharingButtonsUiBinder.class);
+    private static DataByLogoUiBinder uiBinder = GWT.create(DataByLogoUiBinder.class);
 
-    interface SharingButtonsUiBinder extends UiBinder<Widget, DataByLogo> {
+    interface DataByLogoUiBinder extends UiBinder<Element, DataByLogo> {
     }
 
     @UiField
     AnchorElement dataByContainer;
     @UiField
-    Image logo;
+    ImageElement logo;
 
     public DataByLogo() {
         DataByLogoResources.INSTANCE.css().ensureInjected();
-        initWidget(uiBinder.createAndBindUi(this));
+        setElement(uiBinder.createAndBindUi(this));
     }
 
     public void setUp(EventViewDTO event) {
@@ -35,7 +35,7 @@ public class DataByLogo extends Composite {
         for (TrackingConnectorInfoDTO trackingConnectorInfo : trackingConnectorInfos) {
             if ("TracTrac".equals(trackingConnectorInfo.getTrackedBy())) {
                 istrackedByTracTrac = true;
-                logo.setUrl(DataByLogoResources.INSTANCE.tractrac().getSafeUri());
+                logo.setSrc(DataByLogoResources.INSTANCE.tractrac().getSafeUri().asString());
                 String webUrl = trackingConnectorInfo.getWebUrl();
                 if (webUrl == null || "".equals(trackingConnectorInfo.getWebUrl())) {
                     dataByContainer.setHref("https://www.tractrac.com/");
@@ -45,7 +45,7 @@ public class DataByLogo extends Composite {
             }
         }
         if (!istrackedByTracTrac) {
-            this.removeFromParent();
+            this.setVisible(false);
         }
     }
 }

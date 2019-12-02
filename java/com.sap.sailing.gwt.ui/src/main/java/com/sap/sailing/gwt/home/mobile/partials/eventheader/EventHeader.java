@@ -9,8 +9,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.shared.databylogo.DataByLogo;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
-import com.sap.sailing.gwt.home.communication.eventview.TrackingConnectorInfoDTO;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
@@ -30,7 +30,7 @@ public class EventHeader extends Composite {
     @UiField DivElement eventDateUi;
     @UiField DivElement eventLocationUi;
     @UiField DivElement eventHeader;
-    @UiField AnchorElement tractracLogoContainer;
+    @UiField DataByLogo dataByLogo;
 
     public EventHeader(EventViewDTO event, String optionalRegattaDisplayName, PlaceNavigation<?> logoNavigation) {
         EventHeaderResources.INSTANCE.css().ensureInjected();
@@ -51,17 +51,9 @@ public class EventHeader extends Composite {
         if (logoNavigation != null) {
             logoNavigation.configureAnchorElement(eventLogoUi);
         }
-        boolean trackedByTracTrac = false;
-        for(TrackingConnectorInfoDTO trackingConnectorInfo : event.getTrackingConnectorInfos()) {
-            if("TracTrac".equals(trackingConnectorInfo.getTrackedBy())) {
-                trackedByTracTrac = true;
-                break;
-            }
-        }
-        if (trackedByTracTrac) {
-            eventHeader.addClassName(EventHeaderResources.INSTANCE.css().eventheader_with_logo());
-        } else {
-            tractracLogoContainer.removeFromParent();
+        dataByLogo.setUp(event);
+        if (dataByLogo.isVisible()) {
+            this.addStyleName(EventHeaderResources.INSTANCE.css().eventheader_with_logo());
         }
         eventDateUi.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate()));
         eventLocationUi.setInnerText(event.getLocationAndVenueAndCountry());

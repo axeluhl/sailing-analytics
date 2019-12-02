@@ -40,11 +40,8 @@
 						</div>
 					</div>
 				</div>
-				<a ui:field="tractracLogoContainer" target="_blank"  href="https://www.tractrac.com" class="{local_res.css.eventheader_info_subtitle_dataBy_logo_container} {local_res.css.subtleLink}">
-		            <ui:text from="{i18n.dataBy}"/>
-		            <img src="{local_res.tractrac.getSafeUri}" class="{local_res.css.eventheader_info_subtitle_dataBy_logo}"></img>
-	            </a>
 			</div>
 		</div>
+		<s:databylogo.DataByLogo ui:field="dataByLogo" addStyleNames="{local_res.css.eventheader_info_subtitle_dataBy_logo_container}" />
 	</g:HTMLPanel>
 </ui:UiBinder>
