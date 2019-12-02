@@ -156,8 +156,9 @@ public class TestSimpleUserAndPreferenceMerge {
         assertNotNull(targetUserStore.getUserByName("uhl3"));
         assertNotNull(targetUserStore.getUserByName("uhl4")); // in particular new user uhl4 is expected to be present now
         // the uhl-tenant group is expected to have been merged: the uhl4 user is part of that group in source1
-        assertEquals(2, Util.size(targetUserStore.getUserGroupByName("uhl-tenant").getUsers()));
+        assertEquals(3, Util.size(targetUserStore.getUserGroupByName("uhl-tenant").getUsers()));
         assertTrue(Util.contains(targetUserStore.getUserGroupByName("uhl-tenant").getUsers(), targetUserStore.getUserByName("uhl")));
+        assertTrue(Util.contains(targetUserStore.getUserGroupByName("uhl-tenant").getUsers(), targetUserStore.getUserByName("uhl3")));
         assertTrue(Util.contains(targetUserStore.getUserGroupByName("uhl-tenant").getUsers(), targetUserStore.getUserByName("uhl4")));
     }
 }

@@ -16,9 +16,12 @@ import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
@@ -174,16 +177,21 @@ public class SecurityStoreMerger {
             for (final Role role : sourceUser.getRoles()) {
                 final User qualifiedForUser = role.getQualifiedForUser();
                 final UserGroup qualifiedForGroup = role.getQualifiedForTenant();
+                final RoleDefinition targetRoleDefinition = targetUserStore.getRoleDefinition(role.getRoleDefinition().getId());
                 if (qualifiedForUser == null && qualifiedForGroup == null) {
-                    logger.severe("Dropping unqualified role "+role+" from user "+sourceUser);
+                    logger.severe("Dropping unqualified role "+role+" from user "+sourceUser.getName());
                     rolesToRemoveBecauseOfLostOrMissingQualifier.add(role);
+                } else if (targetRoleDefinition == null) {
+                    logger.severe("Dropping role "+role+" from user "+sourceUser.getName()+
+                            " because the role definition with ID "+
+                            role.getRoleDefinition().getIdAsString()+" was not found in target user store");
                 } else {
                     final User userQualifierInTarget;
                     final UserGroup groupQualifierInTarget;
                     if (qualifiedForUser != null) {
                         userQualifierInTarget = userMap.get(qualifiedForUser);
                         if (userQualifierInTarget == null) {
-                            logger.severe("User qualifying role "+role+" for user "+sourceUser+" will be dropped. Dropping role.");
+                            logger.severe("User qualifying role "+role+" for user "+sourceUser.getName()+" will be dropped. Dropping role.");
                             rolesToRemoveBecauseOfLostOrMissingQualifier.add(role);
                         }
                     } else {
@@ -203,7 +211,7 @@ public class SecurityStoreMerger {
                         logger.info("Qualifying user/group for role "+role+" on user "+sourceUser+
                                 " merged to target. Updating role");
                         rolesToReplaceDueToChangingQualifierObject.put(role,
-                                new Role(role.getRoleDefinition(), groupQualifierInTarget, userQualifierInTarget));
+                                new Role(targetRoleDefinition, groupQualifierInTarget, userQualifierInTarget));
                     }
                 }
             }
@@ -226,12 +234,14 @@ public class SecurityStoreMerger {
                 mapping.put(user, userMap.get(user));
             }
             for (final Entry<User, User> e : mapping.entrySet()) {
-                sourceUserGroup.remove(e.getKey());
+                if (e.getKey() != e.getValue()) {
+                    sourceUserGroup.remove(e.getKey());
+                }
                 if (e.getValue() == null) {
-                    logger.severe("User "+e.getKey()+" from group "+sourceUserGroup+" dropped. Removing from group.");
+                    logger.severe("User "+e.getKey().getName()+" from group "+sourceUserGroup.getName()+" dropped. Removing from group.");
                 } else if (e.getValue() != e.getKey()) {
-                    logger.info("User "+e.getKey()+" from group "+sourceUserGroup+" merging into target's user "+e.getValue()+
-                            ". Updating group.");
+                    logger.info("User " + e.getKey().getName() + " from group " + sourceUserGroup.getName()
+                            + " merging into target's user " + e.getValue().getName() + ". Updating group.");
                     sourceUserGroup.add(e.getValue());
                 }
             }
@@ -265,7 +275,141 @@ public class SecurityStoreMerger {
     
     private void replaceSourceAccessControlListReferencesToGroups(AccessControlStore sourceAccessControlStore,
             Map<UserGroup, UserGroup> userGroupMap) {
-        // TODO Implement SecurityStoreMerger.replaceSourceAccessControlListReferencesToGroups(...)
+        for (final AccessControlListAnnotation aclAnnotation : sourceAccessControlStore.getAccessControlLists()) {
+            final Map<UserGroup, Set<String>> actionsByUserGroup = aclAnnotation.getAnnotation().getActionsByUserGroup();
+            final Set<UserGroup> groupsInAcl = new HashSet<>(actionsByUserGroup.keySet());
+            for (final UserGroup sourceGroup : groupsInAcl) {
+                final Set<String> actionsForGroup = new HashSet<>(actionsByUserGroup.get(sourceGroup));
+                final UserGroup targetGroup = userGroupMap.get(sourceGroup);
+                if (targetGroup == null) {
+                    // drop; check that we don't grow permissions:
+                    for (final String action : actionsForGroup) {
+                        if (action.startsWith("!")) {
+                            throw new IllegalStateException("Denying ACL permission "+action
+                                    +" would be dropped because group "+sourceGroup.getName()
+                                    +" to which it applies will be dropped. Therefore, users who belonged to this group"
+                                    +" could accidentally receive this permission in the target. Aborting!");
+                        }
+                        aclAnnotation.getAnnotation().removePermission(sourceGroup, action);
+                    }
+                } else if (targetGroup != sourceGroup) {
+                    // replace source group by target group:
+                    logger.info("Replacing group "+sourceGroup.getName()+" by merged target group for ACL on "+
+                            aclAnnotation.getDisplayNameOfAnnotatedObject()+" with ID "+aclAnnotation.getIdOfAnnotatedObject());
+                    for (final String action : actionsForGroup) {
+                        aclAnnotation.getAnnotation().removePermission(sourceGroup, action);
+                        aclAnnotation.getAnnotation().addPermission(targetGroup, action);
+                    }
+                }
+            }
+        }
+    }
+
+    private void mergeUsersAndGroups(UserStore sourceUserStore, Map<User, User> userMap,
+            Map<UserGroup, UserGroup> userGroupMap) throws UserGroupManagementException, UserManagementException {
+        for (final UserGroup sourceGroup : sourceUserStore.getUserGroups()) {
+            final UserGroup targetGroup = userGroupMap.get(sourceGroup);
+            if (targetGroup != null) {
+                if (targetGroup == sourceGroup) {
+                    // places the existing source group into the target user store
+                    targetUserStore.addUserGroup(targetGroup);
+                } else {
+                    mergeSecondUserGroupIntoFirst(targetGroup, sourceGroup);
+                }
+            } // else  drop
+        }
+        for (final User sourceUser : sourceUserStore.getUsers()) {
+            final User targetUser = userMap.get(sourceUser);
+            if (targetUser != null) {
+                if (targetUser == sourceUser) {
+                    // places the existing user into the target user store
+                    targetUserStore.addUser(targetUser);
+                } else {
+                    mergeSecondUserIntoFirst(targetUser, sourceUser);
+                }
+            } // else drop
+        }
+    }
+    
+    private void mergeSecondUserGroupIntoFirst(UserGroup targetGroup, UserGroup sourceGroup) {
+        for (final User sourceUser : sourceGroup.getUsers()) {
+            boolean updated = false;
+            if (!targetGroup.contains(sourceUser)) {
+                logger.info("Adding user "+sourceUser.getName()+" to merged group "+targetGroup.getName());
+                targetGroup.add(sourceUser);
+                updated = true;
+            }
+            for (final Entry<RoleDefinition, Boolean> e : sourceGroup.getRoleDefinitionMap().entrySet()) {
+                final Boolean roleAssociationInTargetGroup = targetGroup.getRoleAssociation(e.getKey());
+                updated = 
+                    !Util.equalsWithNull(targetGroup.put(e.getKey(),
+                            (roleAssociationInTargetGroup==null?false:roleAssociationInTargetGroup) || e.getValue()),
+                            roleAssociationInTargetGroup)
+                    || updated;
+            }
+            if (updated) {
+                targetUserStore.updateUserGroup(targetGroup);
+            }
+        }
+    }
+
+    private void mergeSecondUserIntoFirst(User targetUser, User sourceUser) throws UserManagementException {
+        assert Util.equalsWithNull(targetUser.getEmail(), sourceUser.getEmail());
+        for (final Role role : sourceUser.getRoles()) {
+            if (role.getQualifiedForTenant() == null && role.getQualifiedForUser() == null) {
+                // such roles should have been dropped from the source user already during "phase 2"
+                throw new InternalError("Adding an unqualified role "+role+" to user "+targetUser.getName()+" forbidden.");
+            } else {
+                if (targetUserStore.getRoleDefinition(role.getRoleDefinition().getId()) == null) {
+                    // such roles should have been dropped from the source user already during "phase 2"
+                    throw new InternalError("Role definition for role "+role+" not found in target user store. "+
+                            "Dropping role from user "+sourceUser.getName());
+                } else {
+                    logger.info("Adding role "+role+" to target user "+targetUser.getName());
+                    targetUserStore.addRoleForUser(targetUser.getName(), role);
+                }
+            }
+        }
+        for (final WildcardPermission permission : sourceUser.getPermissions()) {
+            if (Util.isEmpty(permission.getQualifiedObjectIdentifiers())) {
+                logger.severe("Dropping unqualified permission "+permission+" for user "+sourceUser.getName());
+            } else {
+                logger.info("Adding qualified permission "+permission+" to target user "+targetUser.getName());
+                targetUserStore.addPermissionForUser(targetUser.getName(), permission);
+            }
+        }
+        if (!targetUser.isEmailValidated() && sourceUser.isEmailValidated()) {
+            final String validationSecret;
+            if (targetUser.getValidationSecret() == null) {
+                validationSecret = targetUser.createRandomSecret();
+                targetUser.startEmailValidation(validationSecret);
+            } else {
+                validationSecret = targetUser.getValidationSecret();
+            }
+            logger.info("Validating e-mail address "+targetUser.getEmail()+" of target user "+targetUser.getName()+
+                    " because it was validated successfully on the source side");
+            targetUser.validate(validationSecret);
+            targetUserStore.updateUser(targetUser);
+        }
+    }
+
+    private void mergePreferences(UserStore sourceUserStore, Map<User, User> userMap) {
+        for (final Entry<User, User> e : userMap.entrySet()) {
+            for (final Entry<String, String> preference : sourceUserStore.getAllPreferences(e.getKey().getName()).entrySet()) {
+                if (targetUserStore.getPreference(e.getValue().getName(), preference.getKey()) == null) {
+                    logger.info("Copying preference for key "+preference.getKey()+" for user "+e.getKey().getName());
+                    targetUserStore.setPreference(e.getValue().getName(), preference.getKey(), preference.getValue());
+                } else {
+                    logger.info("Not copying preference for key "+preference.getKey()+" for user "+e.getKey().getName()+
+                            " because the key for that user was already present in target");
+                }
+            }
+        }
+    }
+    
+    private void mergeOwnerships(AccessControlStore sourceAccessControlStore,
+            Set<OwnershipAnnotation> ownershipsToTryToImport) {
+        // TODO Implement SecurityStoreMerger.mergeOwnerships(...)
         
     }
 
@@ -273,43 +417,7 @@ public class SecurityStoreMerger {
         // TODO Implement Main.mergeAccessControlLists(...)
         
     }
-
-    private void mergeOwnerships(AccessControlStore sourceAccessControlStore,
-            Set<OwnershipAnnotation> ownershipsToTryToImport) {
-        // TODO Implement SecurityStoreMerger.mergeOwnerships(...)
-        
-    }
-
-    private void mergeUsersAndGroups(UserStore sourceUserStore, Map<User, User> userMap, Map<UserGroup, UserGroup> userGroupMap) {
-        for (final UserGroup sourceGroup : sourceUserStore.getUserGroups()) {
-            final UserGroup targetGroupWithSameID = targetUserStore.getUserGroup(sourceGroup.getId());
-            if (targetGroupWithSameID != null) {
-                logger.info("Identical target group found: "+targetGroupWithSameID+". Merging...");
-                mergeSecondUserGroupIntoFirst(targetGroupWithSameID, sourceGroup);
-            } else {
-                final UserGroup targetGroupWithEqualName = targetUserStore.getUserGroupByName(sourceGroup.getName());
-                if (targetGroupWithEqualName != null) {
-                    if (considerGroupsIdentical(targetGroupWithEqualName, sourceGroup)) {
-                        logger.info("Identical target group (though different ID) found: "+targetGroupWithEqualName+". Merging...");
-                        mergeSecondUserGroupIntoFirst(targetGroupWithEqualName, sourceGroup);
-                    } else {
-                        logger.warning("Found existing target user group "+targetGroupWithEqualName+" but source group "+
-                                sourceGroup+" is not considered identical, so not merging");
-                    }
-                } else {
-                    logger.info("No target user group found for source group "+sourceGroup+". Mering for adding");
-                }
-            }
-        }
-        // TODO Implement Main.mergeUsersAndGroups(...)
-        
-    }
     
-    private void mergeSecondUserGroupIntoFirst(UserGroup targetGroupWithSameID, UserGroup sourceGroup) {
-        // TODO Implement SecurityStoreMerger.mergeSecondUserGroupIntoFirst(...)
-        
-    }
-
     /**
      * If the groups have equal {@link UserGroup#getId() IDs} then they are considered identical. If both groups have
      * different IDs but equal names and the names match the pattern {@code <username>-tenant} and both contain a user
@@ -340,10 +448,5 @@ public class SecurityStoreMerger {
             result = null;
         }
         return result;
-    }
-
-    private void mergePreferences(UserStore sourceUserStore, Map<User, User> userMap) {
-        // TODO Implement Main.mergePreferences(...)
-        
     }
 }
