@@ -38,10 +38,10 @@ import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListEventDTO;
+import com.sap.sailing.gwt.home.communication.eventview.TrackingConnectorInfoDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
 import com.sap.sailing.gwt.home.communication.start.EventStageDTO;
 import com.sap.sailing.gwt.home.communication.start.StageEventType;
-import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.common.TimePoint;
@@ -315,7 +315,7 @@ public final class HomeServiceUtil {
         Set<TrackingConnectorInfoDTO> trackingConnectorInfos = event.getTrackingConnectorInfos()
                 .stream()
                 .map(trackingConnectorInfo -> new TrackingConnectorInfoDTO(trackingConnectorInfo.getTrackedBy(), mapURLToString(trackingConnectorInfo.getWebUrl()))).collect(Collectors.toSet());
-        dto.setTrackingConnectorInfo(trackingConnectorInfos);
+        dto.setTrackingConnectorInfos(trackingConnectorInfos);
         dto.setStageImageURL(useTeaserImage ? findEventThumbnailImageUrlAsString(event) : getStageImageURLAsString(event));
         return dto;
     }
