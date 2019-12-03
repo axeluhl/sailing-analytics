@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -78,17 +79,34 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                             sb.append(stringMessages.pleaseEnterAName());
                         }
 
+                        AtomicBoolean unAssignedMarkTemplateUsed = new AtomicBoolean(false);
                         valueToValidate.getWaypointTemplates().forEach(wt -> {
                             if (wt.getPassingInstruction() == null) {
-                                sb.append("Waypoint requires Passing Instruction. ");
+                                sb.append("Waypoints require Passing Instruction. ");
                             } else {
+                                if (wt.getShortName() == null) {
+                                    sb.append("Waypoints require short name. ");
+                                }
+                                valueToValidate.getMarkTemplates().forEach(mt -> GWT.log(mt.toString()));
+                                wt.getMarkTemplatesForControlPoint()
+                                        .forEach(wtmt -> unAssignedMarkTemplateUsed.set(unAssignedMarkTemplateUsed.get()
+                                                || valueToValidate.getMarkTemplates().stream()
+                                                        .noneMatch(mt -> mt.getUuid().equals(wtmt.getUuid()))));
+                                GWT.log(" " + unAssignedMarkTemplateUsed.get());
                                 if (hasTwoMarks(wt)) {
                                     if (wt.getName() == null) {
-                                        sb.append("Waypoint requires name. ");
+                                        sb.append("Waypoints require name. \n");
+                                    }
+                                    if (wt.getMarkTemplatesForControlPoint().get(0)
+                                            .equals(wt.getMarkTemplatesForControlPoint().get(1))) {
+                                        sb.append("Mark Template 1 and Mark Template 2 cannot be the same. \n");
                                     }
                                 }
                             }
                         });
+                        if (unAssignedMarkTemplateUsed.get()) {
+                            sb.append("Mark used in Sequence does not exist on Course Template. ");
+                        }
                         return sb.toString();
                     }
                 }, /* animationEnabled */true, callback);
@@ -357,6 +375,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                 : null;
 
         this.markTemplates.stream().forEach(mt -> {
+            GWT.log("added markTemplate " + mt.markTemplate);
             markTemplates.add(mt.markTemplate);
             if (mt.getAssociatedRole() != null) {
                 associatedRoles.put(mt.getMarkTemplate(), mt.getAssociatedRole().getUuid());
