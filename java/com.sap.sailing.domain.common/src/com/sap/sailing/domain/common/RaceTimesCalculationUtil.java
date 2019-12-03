@@ -46,8 +46,9 @@ public class RaceTimesCalculationUtil {
             // We have NO blue flag up event and we have an end of race time
             max = new Date(endOfRace.getTime() + millisAfterEnd);
         } else {
-            // We have no end time and are not expecting any end events
-            if (endOfTracking != null && raceFinishingTime == null) {
+            // We have no end time and are not expecting any end events and the race is no longer live
+            // (TracTrac sets endOfTracking to the end of the event while the race is live)
+            if (endOfTracking != null && raceFinishingTime == null && liveTimePoint.after(endOfTracking)) {
                 max = endOfTracking;
             } else {
                 // No end in sight; Keep on playing
