@@ -92,7 +92,7 @@ public class CourseTemplatePanel extends FlowPanel {
         buttonAndFilterPanel.addCreateAction(stringMessages.add(), new Command() {
             @Override
             public void execute() {
-                openEditCourseTemplateDialog(new CourseTemplateDTO(), true);
+                openEditCourseTemplateDialog(new CourseTemplateDTO(), userService, true);
             }
         });
 
@@ -333,7 +333,7 @@ public class CourseTemplatePanel extends FlowPanel {
                 });
             }
         });
-        actionsColumn.addAction(ACTION_UPDATE, UPDATE, e -> openEditCourseTemplateDialog(e, false));
+        actionsColumn.addAction(ACTION_UPDATE, UPDATE, e -> openEditCourseTemplateDialog(e, userService, false));
         actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 courseTemplate -> configACL.openDialog(courseTemplate));
@@ -348,9 +348,11 @@ public class CourseTemplatePanel extends FlowPanel {
         loadMarkTemplates();
     }
 
-    void openEditCourseTemplateDialog(final CourseTemplateDTO originalCourseTemplate, final boolean isNew) {
-        final CourseTemplateEditDialog dialog = new CourseTemplateEditDialog(sailingService, stringMessages,
-                originalCourseTemplate, markRolesMap, markTemplates, new DialogCallback<CourseTemplateDTO>() {
+    void openEditCourseTemplateDialog(final CourseTemplateDTO originalCourseTemplate, final UserService userService,
+            final boolean isNew) {
+        final CourseTemplateEditDialog dialog = new CourseTemplateEditDialog(sailingService, userService,
+                stringMessages, originalCourseTemplate, markRolesMap, markTemplates,
+                new DialogCallback<CourseTemplateDTO>() {
                     @Override
                     public void ok(CourseTemplateDTO courseTemplate) {
                         sailingService.createOrUpdateCourseTemplate(courseTemplate,

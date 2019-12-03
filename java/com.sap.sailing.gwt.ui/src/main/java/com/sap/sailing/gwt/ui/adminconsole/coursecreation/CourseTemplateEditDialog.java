@@ -43,6 +43,7 @@ import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 
 public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO> {
@@ -66,9 +67,10 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
 
     private final StringListEditorComposite tagsEditor;
 
-    public CourseTemplateEditDialog(final SailingServiceAsync sailingService, final StringMessages stringMessages,
-            CourseTemplateDTO courseTemplateToEdit, Map<UUID, MarkRoleDTO> markRolesMap,
-            List<MarkTemplateDTO> allMarkTemplates, DialogCallback<CourseTemplateDTO> callback, final boolean isNew) {
+    public CourseTemplateEditDialog(final SailingServiceAsync sailingService, final UserService userService,
+            final StringMessages stringMessages, CourseTemplateDTO courseTemplateToEdit,
+            Map<UUID, MarkRoleDTO> markRolesMap, List<MarkTemplateDTO> allMarkTemplates,
+            DialogCallback<CourseTemplateDTO> callback, final boolean isNew) {
         super(stringMessages.edit() + " " + stringMessages.courseTemplates(), null, stringMessages.ok(),
                 stringMessages.cancel(), new Validator<CourseTemplateDTO>() {
                     @Override
@@ -122,7 +124,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         this.allMarkTemplatesSelectionList = allMarkTemplates.stream().map(MarkTemplateDTO::getName)
                 .collect(Collectors.toList());
 
-        createMarkTemplateTable(/* readOnly */isNew);
+        createMarkTemplateTable(/* readOnly */ !isNew, userService);
         buttonAddMarkTemplate = new Button(stringMessages.add());
         buttonAddMarkTemplate.addClickHandler(c -> {
             markTemplates.add(new MarkTemplateWithAssociatedRoleDTO(allMarkTemplates.stream().findFirst().orElse(null),
@@ -136,7 +138,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                 .collect(Collectors.toList()));
         refreshMarkTemplateTable();
 
-        createWaypointTemplateTable(/* readOnly */isNew);
+        createWaypointTemplateTable(/* readOnly */ !isNew);
         waypointTemplates.addAll(courseTemplateToEdit.getWaypointTemplates());
         refreshWaypointsTable();
         buttonAddWaypointTemplate = new Button(stringMessages.add());
@@ -163,7 +165,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         markTemplatesTable.setRowData(0, markTemplates);
     }
 
-    private void createMarkTemplateTable(final boolean readOnly) {
+    private void createMarkTemplateTable(final boolean readOnly, final UserService userService) {
         markTemplatesTable = new BaseCelltable<>(1000, tableResources);
         markTemplatesTable.setWidth("100%");
         final SelectionCell markTemplateSelectionCell = new SelectionCell(allMarkTemplatesSelectionList);
@@ -210,12 +212,20 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
 
             @Override
             protected Iterable<ImageSpec> getImageSpecs() {
-                return Arrays.asList(getDeleteImageSpec());
+                return readOnly ? Collections.emptyList() : Arrays.asList(getDeleteImageSpec());
             }
 
         };
         ImagesBarColumn<MarkTemplateWithAssociatedRoleDTO, DefaultActionsImagesBarCell> actionsColumn = new ImagesBarColumn<>(
                 imagesBarCell);
+        actionsColumn.setFieldUpdater(new FieldUpdater<MarkTemplateWithAssociatedRoleDTO, String>() {
+            @Override
+            public void update(int index, MarkTemplateWithAssociatedRoleDTO markTemplate, String value) {
+                markTemplates.remove(index);
+                validateAndUpdate();
+                refreshMarkTemplateTable();
+            }
+        });
 
         markTemplatesTable.addColumn(markTemplateColumn, stringMessages.markTemplate());
         markTemplatesTable.addColumn(associatedRoleColumn, stringMessages.markRoles());
@@ -338,15 +348,22 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
             }
         });
         DefaultActionsImagesBarCell imagesBarCell = new DefaultActionsImagesBarCell(stringMessages) {
-
             @Override
             protected Iterable<ImageSpec> getImageSpecs() {
-                return Arrays.asList(getDeleteImageSpec());
+                return readOnly ? Collections.emptyList() : Arrays.asList(getDeleteImageSpec());
             }
-
         };
         ImagesBarColumn<WaypointTemplateDTO, DefaultActionsImagesBarCell> actionsColumn = new ImagesBarColumn<>(
                 imagesBarCell);
+        actionsColumn.setFieldUpdater(new FieldUpdater<WaypointTemplateDTO, String>() {
+            @Override
+            public void update(int index, WaypointTemplateDTO waypointTemplate, String value) {
+                waypointTemplates.removeIf(r -> r == waypointTemplate);
+                validateAndUpdate();
+                refreshWaypointsTable();
+            }
+        });
+
         waypointTemplatesTable.addColumn(passingInstructionColumn, stringMessages.passingInstructions());
         waypointTemplatesTable.addColumn(shortNameColumn, stringMessages.shortName());
         waypointTemplatesTable.addColumn(nameColumn, stringMessages.name());
@@ -449,7 +466,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
             @SuppressWarnings("unchecked")
             DTO object = (DTO) context.getKey();
             if (hiddenPredicate == null || !hiddenPredicate.test(object)) {
-                if (editablePredicate != null && editablePredicate.test(object)) {
+                if (editablePredicate != null && !editablePredicate.test(object)) {
                     sb.appendHtmlConstant("<div contentEditable='false' unselectable='false' >" + value + "</div>");
                 } else {
                     concreteCell.render(context, value, sb);
