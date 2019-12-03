@@ -110,7 +110,9 @@ public interface EventBase extends NamedWithID, WithDescription, Renamable, With
     
     /**
      * Determines whether the race is tracked by TracTrac or not
-     * @return a boolean flag, whether any @TrackedRace in the event is tracked by TracTrac or not
+     * 
+     * @return a boolean flag, whether any {@link TrackedRace} in the event is tracked by which connector; the set
+     *         returned is never {@code null} and never contains {@code null} values, but it may be empty
      */
     Set<TrackingConnectorInfo> getTrackingConnectorInfos();
 }

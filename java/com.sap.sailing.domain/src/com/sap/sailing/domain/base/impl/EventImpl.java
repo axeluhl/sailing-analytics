@@ -110,7 +110,10 @@ public class EventImpl extends EventBaseImpl implements Event {
         for (LeaderboardGroup lbg : this.getLeaderboardGroups()) {
             for (Leaderboard lb : lbg.getLeaderboards()) {
                 for (TrackedRace tr : lb.getTrackedRaces()) {
-                    result.add(tr.getTrackingConnectorInfo());
+                    final TrackingConnectorInfo trackingConnectorInfo = tr.getTrackingConnectorInfo();
+                    if (trackingConnectorInfo != null) {
+                        result.add(trackingConnectorInfo);
+                    }
                 }
             }
         }

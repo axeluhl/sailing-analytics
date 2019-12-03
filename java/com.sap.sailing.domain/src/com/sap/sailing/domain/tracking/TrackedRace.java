@@ -1249,7 +1249,8 @@ public interface TrackedRace
     }
     
     /**
-     * gets a String representation of the Tracking-Service used to Track the Race
+     * gets a String representation of the Tracking-Service used to Track the Race; may be {@code null}, particularly in
+     * test set-ups
      */
     TrackingConnectorInfo getTrackingConnectorInfo();
 }
