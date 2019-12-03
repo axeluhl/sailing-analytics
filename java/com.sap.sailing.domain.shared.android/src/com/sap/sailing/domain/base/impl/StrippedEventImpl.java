@@ -31,6 +31,7 @@ public class StrippedEventImpl extends EventBaseImpl {
             boolean isPublic, UUID id, Iterable<LeaderboardGroupBase> leaderboardGroups, Set<TrackingConnectorInfo> trackingConnectorInfos) {
         super(name, startDate, endDate, venue, isPublic, id);
         this.leaderboardGroups = leaderboardGroups;
+        assert trackingConnectorInfos != null;
         this.trackingConnectorInfos = trackingConnectorInfos;
     }
 

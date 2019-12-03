@@ -78,7 +78,7 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
             leaderboardGroups.add(leaderboardGroupBaseSerializer.serialize(lg));
         }
         JSONArray trackingConnectorInfos = new JSONArray();
-        for(TrackingConnectorInfo trackingConnectorInfo : event.getTrackingConnectorInfos()) {
+        for (TrackingConnectorInfo trackingConnectorInfo : event.getTrackingConnectorInfos()) {
             trackingConnectorInfos.add(trackingConnectorInfoSerializer.serialize(trackingConnectorInfo));
         }
         result.put(FIELD_TRACKING_CONNECTOR_INFOS, trackingConnectorInfos);
@@ -88,12 +88,12 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
             addImageSize(image, imageSizes);
         }
         JSONArray jsonImages = new JSONArray();
-        for(ImageDescriptor imageDescriptor: event.getImages()) {
+        for (ImageDescriptor imageDescriptor: event.getImages()) {
             addImage(imageDescriptor, jsonImages);
         }
         result.put(FIELD_IMAGES, jsonImages);
         JSONArray jsonVideos = new JSONArray();
-        for(VideoDescriptor videoDescriptor: event.getVideos()) {
+        for (VideoDescriptor videoDescriptor: event.getVideos()) {
             addVideo(videoDescriptor, jsonVideos);
         }
         result.put(FIELD_VIDEOS, jsonVideos);
@@ -150,7 +150,7 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
      * JSON object to <code>imageSizes</code>
      */
     private void addImageSize(ImageDescriptor image, JSONArray imageSizes) {
-        if(image.getHeightInPx() != null && image.getWidthInPx() != null) {
+        if (image.getHeightInPx() != null && image.getWidthInPx() != null) {
             JSONObject imageSizeJson = new JSONObject();
             imageSizes.add(imageSizeJson);
             imageSizeJson.put(FIELD_IMAGE_URL, image.getURL().toString());
