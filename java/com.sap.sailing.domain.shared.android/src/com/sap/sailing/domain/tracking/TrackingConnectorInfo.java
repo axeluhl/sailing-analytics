@@ -1,10 +1,9 @@
 package com.sap.sailing.domain.tracking;
 
+import java.io.Serializable;
 import java.net.URL;
 
-public interface TrackingConnectorInfo {
-    public String getTrackedBy();
-    public void setTrackedBy(String trackedBy);
-    public URL getWebUrl();
-    public void setWebUrl(URL webUrl);
+public interface TrackingConnectorInfo extends Serializable {
+    String getTrackedBy();
+    URL getWebUrl();
 }

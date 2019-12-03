@@ -5,11 +5,10 @@ import java.net.URL;
 import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 
 public class TrackingConnectorInfoImpl implements TrackingConnectorInfo {
-    String trackedBy;
-    URL webUrl;
-
-    public TrackingConnectorInfoImpl() {
-    }
+    private static final long serialVersionUID = -1681930521305924294L;
+    
+    private final String trackedBy;
+    private final URL webUrl;
 
     public TrackingConnectorInfoImpl(String trackedBy, URL webUrl) {
         super();
@@ -21,16 +20,7 @@ public class TrackingConnectorInfoImpl implements TrackingConnectorInfo {
         return trackedBy;
     }
 
-    public void setTrackedBy(String trackedBy) {
-        this.trackedBy = trackedBy;
-    }
-
     public URL getWebUrl() {
         return webUrl;
     }
-
-    public void setWebUrl(URL webUrl) {
-        this.webUrl = webUrl;
-    }
-
 }
