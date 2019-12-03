@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import static com.mongodb.client.model.Filters.eq;
+import static com.sap.sailing.shared.persistence.impl.DomainObjectFactoryImpl.loadDeviceId;
+import static com.sap.sailing.shared.persistence.impl.DomainObjectFactoryImpl.loadPosition;
 
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -187,7 +189,6 @@ import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaName;
@@ -199,7 +200,6 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.dto.EventType;
-import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.WindImpl;
@@ -211,7 +211,6 @@ import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.EventResolver;
@@ -237,7 +236,6 @@ import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelogtracking.impl.PlaceHolderDeviceIdentifierSerializationHandler;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.ranking.RankingMetricsFactory;
@@ -265,7 +263,6 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.TypeBasedServiceFinder;
@@ -337,18 +334,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     public Wind loadWind(Document object) {
         return new WindImpl(loadPosition(object), loadTimePoint(object), loadSpeedWithBearing(object));
-    }
-
-    public Position loadPosition(Document object) {
-        Number latNumber = (Number) object.get(FieldNames.LAT_DEG.name());
-        Double lat = latNumber == null ? null : latNumber.doubleValue();
-        Number lngNumber = (Number) object.get(FieldNames.LNG_DEG.name());
-        Double lng = lngNumber == null ? null : lngNumber.doubleValue();
-        if (lat != null && lng != null) {
-            return new DegreePosition(lat, lng);
-        } else {
-            return null;
-        }
     }
 
     public static TimePoint loadTimePoint(Document object, String fieldName) {
@@ -2754,22 +2739,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(configObject.toJson(writerSettings)));
         configuration = deserializer.deserialize(json);
         return configuration;
-    }
-
-    private DeviceIdentifier loadDeviceId(
-            TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder, Document deviceId)
-            throws TransformationException, NoCorrespondingServiceRegisteredException {
-        String deviceType = (String) deviceId.get(FieldNames.DEVICE_TYPE.name());
-        Object deviceTypeId = deviceId.get(FieldNames.DEVICE_TYPE_SPECIFIC_ID.name());
-        String stringRepresentation = (String) deviceId.get(FieldNames.DEVICE_STRING_REPRESENTATION.name());
-
-        try {
-            return deviceIdentifierServiceFinder.findService(deviceType).deserialize(deviceTypeId, deviceType,
-                    stringRepresentation);
-        } catch (TransformationException e) {
-            return new PlaceHolderDeviceIdentifierSerializationHandler().deserialize(stringRepresentation, deviceType,
-                    stringRepresentation);
-        }
     }
 
     @Override

@@ -173,8 +173,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return builder.build();
     }
 
-    // TODO copy of com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl
-    private DeviceIdentifier loadDeviceId(
+    public static DeviceIdentifier loadDeviceId(
             TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder, Document deviceId)
             throws TransformationException, NoCorrespondingServiceRegisteredException {
         String deviceType = (String) deviceId.get(FieldNames.DEVICE_TYPE.name());
@@ -190,8 +189,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
     }
 
-    // TODO copy of com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl
-    public Position loadPosition(Document object) {
+    public static Position loadPosition(Document object) {
         Number latNumber = (Number) object.get(FieldNames.LAT_DEG.name());
         Double lat = latNumber == null ? null : latNumber.doubleValue();
         Number lngNumber = (Number) object.get(FieldNames.LNG_DEG.name());

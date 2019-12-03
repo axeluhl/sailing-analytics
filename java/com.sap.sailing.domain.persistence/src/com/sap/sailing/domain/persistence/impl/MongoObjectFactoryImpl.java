@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.persistence.impl;
 
+import static com.sap.sailing.shared.persistence.impl.MongoObjectFactoryImpl.getPassingInstructions;
+import static com.sap.sailing.shared.persistence.impl.MongoObjectFactoryImpl.storeDeviceId;
+
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -98,7 +101,6 @@ import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Positioned;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -258,9 +260,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dropIndexSafe(gpsFixCollection, "DEVICE_ID_1_GPSFIX.TIME_AS_MILLIS_1");
         Document index = new Document();
         index.put(FieldNames.TIME_AS_MILLIS.name(), 1);
-        index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE.name(), 1);
-        index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), 1);
-        index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_STRING_REPRESENTATION.name(), 1);
+        index.put(FieldNames.DEVICE_ID.name()+"."+com.sap.sailing.shared.persistence.impl.FieldNames.DEVICE_TYPE.name(), 1);
+        index.put(FieldNames.DEVICE_ID.name()+"."+com.sap.sailing.shared.persistence.impl.FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), 1);
+        index.put(FieldNames.DEVICE_ID.name()+"."+com.sap.sailing.shared.persistence.impl.FieldNames.DEVICE_STRING_REPRESENTATION.name(), 1);
         gpsFixCollection.createIndex(index, new IndexOptions().name("fixbytimeanddev"));
         return gpsFixCollection;
     }
@@ -1414,16 +1416,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.MARK_ORIGINATING_MARK_PROPERTIES_ID.name(), mark.getOriginatingMarkPropertiesIdOrNull());
         return result;
     }
-
-    private String getPassingInstructions(PassingInstruction passingInstructions) {
-        final String passing;
-        if (passingInstructions != null) {
-            passing = passingInstructions.name();
-        } else {
-            passing = null;
-        }
-        return passing;
-    }
     
     @Override
     public void storeCompetitor(Competitor competitor) {
@@ -1574,20 +1566,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         MongoCollection<Document> configurationsCollections = database.getCollection(CollectionNames.CONFIGURATIONS.name());
         Document query = new Document(FieldNames.CONFIGURATION_ID_AS_STRING.name(), id.toString());
         configurationsCollections.deleteOne(query);
-    }
-
-    public static Document storeDeviceId(
-    		TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder, DeviceIdentifier device)
-    				throws TransformationException, NoCorrespondingServiceRegisteredException {
-        String type = device.getIdentifierType();
-        DeviceIdentifierMongoHandler handler = deviceIdentifierServiceFinder.findService(type);
-        com.sap.sse.common.Util.Pair<String, ? extends Object> pair = handler.serialize(device);
-        type = pair.getA();
-    	Object deviceTypeSpecificId = pair.getB();
-    	return new Document()
-    			.append(FieldNames.DEVICE_TYPE.name(), type)
-    			.append(FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), deviceTypeSpecificId)
-    			.append(FieldNames.DEVICE_STRING_REPRESENTATION.name(), device.getStringRepresentation());
     }
     
     void storeRaceLogEventEvent(Document eventEntry) {

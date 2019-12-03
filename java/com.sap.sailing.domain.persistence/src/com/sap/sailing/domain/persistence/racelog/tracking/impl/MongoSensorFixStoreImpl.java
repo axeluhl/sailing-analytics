@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.persistence.racelog.tracking.impl;
 
-import static com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl.storeDeviceId;
+import static com.sap.sailing.shared.persistence.impl.MongoObjectFactoryImpl.storeDeviceId;
 import static com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl.storeTimeRange;
 
 import java.util.ArrayList;

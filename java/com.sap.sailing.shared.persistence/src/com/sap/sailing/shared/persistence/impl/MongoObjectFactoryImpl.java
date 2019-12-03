@@ -267,8 +267,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return waypointTemplateObject;
     }
 
-    // TODO copy of com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl
-    private String getPassingInstructions(PassingInstruction passingInstructions) {
+    public static String getPassingInstructions(PassingInstruction passingInstructions) {
         final String passing;
         if (passingInstructions != null) {
             passing = passingInstructions.name();
