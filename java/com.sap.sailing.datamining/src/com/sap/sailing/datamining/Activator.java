@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.sap.sailing.datamining.data.HasBravoFixContext;
 import com.sap.sailing.datamining.data.HasBravoFixTrackContext;
@@ -41,6 +43,7 @@ import com.sap.sailing.datamining.impl.components.aggregators.ParallelDurationMa
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDurationMinAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDurationSumAggregationProcessor;
 import com.sap.sailing.datamining.provider.RacingEventServiceProvider;
+import com.sap.sse.datamining.DataMiningPredefinedQueryService;
 import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
@@ -49,6 +52,7 @@ import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
+import com.sap.sse.util.JoinedClassLoader;
 
 public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries {
 
@@ -59,6 +63,9 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
 
     private BundleContext context = null;
 
+    private JoinedClassLoader joinedClassLoader;
+    private Set<ClassLoader> classLoaders = new HashSet<>();
+
     private final ResourceBundleStringMessages sailingServerStringMessages;
     private final SailingDataRetrievalChainDefinitions dataRetrieverChainDefinitions;
     private final SailingPredefinedQueries predefinedQueries;
@@ -66,6 +73,7 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
     private boolean dataSourceProvidersHaveBeenInitialized;
 
     public Activator() {
+        joinedClassLoader = new JoinedClassLoader(classLoaders);
         sailingServerStringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, getClassLoader(),
                 StandardCharsets.UTF_8.name());
         dataRetrieverChainDefinitions = new SailingDataRetrievalChainDefinitions();
@@ -171,4 +179,47 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         return INSTANCE;
     }
 
+    @Override
+    public ClassLoader getClassLoader() {
+        return joinedClassLoader;
+    }
+
+    public void addClassLoader(ClassLoader classLoader) {
+        classLoaders.add(classLoader);
+    }
+
+    public void removeClassLoader(ClassLoader classLoader) {
+        classLoaders.remove(classLoader);
+    }
+
+    private class DataMiningServiceTrackerCustomizer
+            implements ServiceTrackerCustomizer<DataMiningPredefinedQueryService, DataMiningPredefinedQueryService> {
+        private BundleContext context;
+        private Activator activator;
+
+        public DataMiningServiceTrackerCustomizer(BundleContext context, Activator activator) {
+            this.context = context;
+            this.activator = activator;
+        }
+
+        @Override
+        public DataMiningPredefinedQueryService addingService(
+                ServiceReference<DataMiningPredefinedQueryService> reference) {
+            DataMiningPredefinedQueryService service = context.getService(reference);
+            activator.addClassLoader(service.getClass().getClassLoader());
+            return service;
+        }
+
+        @Override
+        public void modifiedService(ServiceReference<DataMiningPredefinedQueryService> reference,
+                DataMiningPredefinedQueryService service) {
+        }
+
+        @Override
+        public void removedService(ServiceReference<DataMiningPredefinedQueryService> reference,
+                DataMiningPredefinedQueryService service) {
+            // TODO Auto-generated method stub
+            
+        }
+    }
 }
