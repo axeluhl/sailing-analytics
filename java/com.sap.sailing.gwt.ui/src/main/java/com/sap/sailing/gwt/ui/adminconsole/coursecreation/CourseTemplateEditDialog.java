@@ -51,6 +51,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
 
     private final TextBox nameTextBox;
     private final TextBox urlTextBox;
+    private final TextBox numberOfLapsTextBox;
     private final StringMessages stringMessages;
     private final Map<UUID, MarkRoleDTO> markRolesMap;
     private final List<MarkTemplateDTO> allMarkTemplates;
@@ -116,6 +117,9 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
 
         this.nameTextBox = createTextBox(courseTemplateToEdit.getName());
         this.urlTextBox = createTextBox(courseTemplateToEdit.getOptionalImageUrl().orElse(""));
+        this.numberOfLapsTextBox = createTextBox(courseTemplateToEdit.getDefaultNumberOfLaps() != null
+                ? courseTemplateToEdit.getDefaultNumberOfLaps().toString()
+                : null);
 
         this.markRolesMap = markRolesMap;
         this.allMarkTemplates = allMarkTemplates;
@@ -398,14 +402,21 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
             }
         });
         // TODO: repeatable part
-        // TODO: default number of laps
+        Integer defaultNumberOfLaps = null;
+        try {
+            defaultNumberOfLaps = numberOfLapsTextBox.getValue() != null && numberOfLapsTextBox.getValue().length() > 0
+                    ? Integer.parseInt(numberOfLapsTextBox.getValue())
+                    : null;
+        } catch (NumberFormatException nfe) {
+            defaultNumberOfLaps = null;
+        }
         return new CourseTemplateDTO(id, nameTextBox.getValue(), markTemplates, waypointTemplates, associatedRoles,
-                optionalUrl, tagsEditor.getValue(), null, null);
+                optionalUrl, tagsEditor.getValue(), null, defaultNumberOfLaps);
     }
 
     @Override
     protected Widget getAdditionalWidget() {
-        Grid result = new Grid(5, 2);
+        Grid result = new Grid(6, 2);
         result.setWidget(0, 0, new Label(stringMessages.name()));
         result.setWidget(0, 1, nameTextBox);
         result.setWidget(1, 0, new Label(stringMessages.url()));
@@ -416,6 +427,8 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         result.setWidget(3, 1, waypointTemplatesTable);
         result.setWidget(4, 0, new Label(stringMessages.tags()));
         result.setWidget(4, 1, tagsEditor);
+        result.setWidget(5, 0, new Label(stringMessages.defaultNumberOfLaps()));
+        result.setWidget(5, 1, numberOfLapsTextBox);
         return result;
     }
 
