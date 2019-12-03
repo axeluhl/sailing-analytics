@@ -7,13 +7,20 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SelectionCell;
 import com.google.gwt.cell.client.TextInputCell;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.ui.Button;
@@ -45,6 +52,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
     private final StringMessages stringMessages;
     private final Map<UUID, MarkRoleDTO> markRolesMap;
     private final List<MarkTemplateDTO> allMarkTemplates;
+    private final List<String> allMarkTemplatesSelectionList;
 
     private CellTable<MarkTemplateWithAssociatedRoleDTO> markTemplatesTable;
     private List<MarkTemplateWithAssociatedRoleDTO> markTemplates = new ArrayList<>();
@@ -64,12 +72,24 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                 stringMessages.cancel(), new Validator<CourseTemplateDTO>() {
                     @Override
                     public String getErrorMessage(CourseTemplateDTO valueToValidate) {
-                        String result = null;
+                        final StringBuilder sb = new StringBuilder();
                         boolean invalidName = valueToValidate.getName() == null || valueToValidate.getName().isEmpty();
                         if (invalidName) {
-                            result = stringMessages.pleaseEnterAName();
+                            sb.append(stringMessages.pleaseEnterAName());
                         }
-                        return result;
+
+                        valueToValidate.getWaypointTemplates().forEach(wt -> {
+                            if (wt.getPassingInstruction() == null) {
+                                sb.append("Waypoint requires Passing Instruction. ");
+                            } else {
+                                if (hasTwoMarks(wt)) {
+                                    if (wt.getName() == null) {
+                                        sb.append("Waypoint requires name. ");
+                                    }
+                                }
+                            }
+                        });
+                        return sb.toString();
                     }
                 }, /* animationEnabled */true, callback);
         this.currentUuid = courseTemplateToEdit.getUuid();
@@ -81,10 +101,14 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
 
         this.markRolesMap = markRolesMap;
         this.allMarkTemplates = allMarkTemplates;
-        createMarkTemplateTable();
+        this.allMarkTemplatesSelectionList = allMarkTemplates.stream().map(MarkTemplateDTO::getName)
+                .collect(Collectors.toList());
+
+        createMarkTemplateTable(/* readOnly */isNew);
         buttonAddMarkTemplate = new Button(stringMessages.add());
         buttonAddMarkTemplate.addClickHandler(c -> {
-            markTemplates.add(new MarkTemplateWithAssociatedRoleDTO());
+            markTemplates.add(new MarkTemplateWithAssociatedRoleDTO(allMarkTemplates.stream().findFirst().orElse(null),
+                    markRolesMap.values().stream().findFirst().orElse(null)));
             refreshMarkTemplateTable();
         });
         buttonAddMarkTemplate.setEnabled(isNew);
@@ -93,12 +117,15 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                 .collect(Collectors.toList()));
         refreshMarkTemplateTable();
 
-        createWaypointTemplateTable();
+        createWaypointTemplateTable(/* readOnly */isNew);
         waypointTemplates.addAll(courseTemplateToEdit.getWaypointTemplates());
         refreshWaypointsTable();
         buttonAddWaypointTemplate = new Button(stringMessages.add());
         buttonAddWaypointTemplate.addClickHandler(c -> {
-            waypointTemplates.add(new WaypointTemplateDTO());
+            final MarkTemplateDTO firstMarkTemplate = allMarkTemplates.stream().findFirst().orElse(null);
+            waypointTemplates
+                    .add(new WaypointTemplateDTO(null, null, Arrays.asList(firstMarkTemplate, firstMarkTemplate),
+                            Arrays.stream(PassingInstruction.relevantValues()).findFirst().orElse(null)));
             refreshWaypointsTable();
         });
         buttonAddWaypointTemplate.setEnabled(isNew);
@@ -116,12 +143,14 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         markTemplatesTable.setRowData(0, markTemplates);
     }
 
-    private void createMarkTemplateTable() {
+    private void createMarkTemplateTable(final boolean readOnly) {
         markTemplatesTable = new BaseCelltable<>(1000, tableResources);
         markTemplatesTable.setWidth("100%");
+        final SelectionCell markTemplateSelectionCell = new SelectionCell(allMarkTemplatesSelectionList);
+        final HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell> hideableMarkTemplateSelectionCell = new HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell>(
+                markTemplateSelectionCell, /* hidden */ null, /* editable */ wt -> !readOnly);
         Column<MarkTemplateWithAssociatedRoleDTO, String> markTemplateColumn = new Column<MarkTemplateWithAssociatedRoleDTO, String>(
-                new SelectionCell(
-                        allMarkTemplates.stream().map(MarkTemplateDTO::getName).collect(Collectors.toList()))) {
+                hideableMarkTemplateSelectionCell) {
             @Override
             public String getValue(MarkTemplateWithAssociatedRoleDTO markTemplate) {
                 return markTemplate.getMarkTemplate() != null ? markTemplate.getMarkTemplate().getName() : "";
@@ -132,12 +161,16 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
             public void update(int index, MarkTemplateWithAssociatedRoleDTO markTemplate, String value) {
                 markTemplate.markTemplate = allMarkTemplates.stream().filter(mt -> mt.getName().equals(value))
                         .findFirst().get();
+                validateAndUpdate();
             }
         });
+        final SelectionCell associatedRoleSelectionCell = new SelectionCell(
+                markRolesMap.values().stream().map(MarkRoleDTO::getName).collect(Collectors.toList()));
+        final HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell> hideableAssociatedRoleSelectionCell = new HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell>(
+                associatedRoleSelectionCell, /* hidden */ null, /* editable */ wt -> !readOnly);
         Column<MarkTemplateWithAssociatedRoleDTO, String> associatedRoleColumn = new Column<MarkTemplateWithAssociatedRoleDTO, String>(
-                new SelectionCell(
-                        markRolesMap.values().stream().map(MarkRoleDTO::getName).collect(Collectors.toList())) {
-                }) {
+                hideableAssociatedRoleSelectionCell) {
+
             @Override
             public String getValue(MarkTemplateWithAssociatedRoleDTO markTemplate) {
                 return markTemplate.getAssociatedRole() != null ? markTemplate.getAssociatedRole().getName() : "";
@@ -148,6 +181,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
             public void update(int index, MarkTemplateWithAssociatedRoleDTO markTemplate, String value) {
                 markTemplate.setAssociatedRole(
                         markRolesMap.values().stream().filter(mr -> mr.getName().equals(value)).findFirst().get());
+                validateAndUpdate();
 
             }
 
@@ -173,12 +207,14 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         waypointTemplatesTable.setRowData(0, (List<? extends WaypointTemplateDTO>) waypointTemplates);
     }
 
-    private void createWaypointTemplateTable() {
+    private void createWaypointTemplateTable(final boolean readOnly) {
         waypointTemplatesTable = new BaseCelltable<>(1000, tableResources);
         waypointTemplatesTable.setWidth("100%");
 
+        final HideableAndEditableCell<WaypointTemplateDTO, String, TextInputCell> hideableShortNameCell = new HideableAndEditableCell<>(
+                new TextInputCell(), /* hidden */ null, /* editable */ wt -> !readOnly);
         Column<WaypointTemplateDTO, String> shortNameColumn = new Column<WaypointTemplateDTO, String>(
-                new TextInputCell()) {
+                hideableShortNameCell) {
             @Override
             public String getValue(WaypointTemplateDTO waypointTemplate) {
                 return waypointTemplate.getShortName();
@@ -188,9 +224,12 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
             @Override
             public void update(int index, WaypointTemplateDTO waypointTemplate, String value) {
                 waypointTemplate.setShortName(value);
+                validateAndUpdate();
             }
         });
-        Column<WaypointTemplateDTO, String> nameColumn = new Column<WaypointTemplateDTO, String>(new TextInputCell()) {
+        final HideableAndEditableCell<WaypointTemplateDTO, String, TextInputCell> hideableNameCell = new HideableAndEditableCell<>(
+                new TextInputCell(), /* hidden */ wt -> !hasTwoMarks(wt), /* editable */ wt -> !readOnly);
+        Column<WaypointTemplateDTO, String> nameColumn = new Column<WaypointTemplateDTO, String>(hideableNameCell) {
             @Override
             public String getValue(WaypointTemplateDTO waypointTemplate) {
                 return waypointTemplate.getName();
@@ -200,11 +239,14 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
             @Override
             public void update(int index, WaypointTemplateDTO waypointTemplate, String value) {
                 waypointTemplate.setName(value);
+                validateAndUpdate();
             }
         });
+        final SelectionCell markTemplate1SelectionCell = new SelectionCell(allMarkTemplatesSelectionList);
+        final HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell> hideablemarkTemplate1Cell = new HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell>(
+                markTemplate1SelectionCell, /* hidden */ null, /* editable */ wt -> !readOnly);
         Column<WaypointTemplateDTO, String> markTemplateColumn1 = new Column<WaypointTemplateDTO, String>(
-                new SelectionCell(
-                        allMarkTemplates.stream().map(MarkTemplateDTO::getName).collect(Collectors.toList()))) {
+                hideablemarkTemplate1Cell) {
             @Override
             public String getValue(WaypointTemplateDTO waypointTemplate) {
                 return waypointTemplate.getMarkTemplatesForControlPoint() != null
@@ -223,17 +265,20 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                 } else {
                     waypointTemplate.getMarkTemplatesForControlPoint().set(0, selectedMarkTemplate);
                 }
+                validateAndUpdate();
             }
         });
+        final SelectionCell markTemplate2SelectionCell = new SelectionCell(allMarkTemplatesSelectionList);
+        final HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell> hideablemarkTemplate2Cell = new HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell>(
+                markTemplate2SelectionCell, /* hidden */ wt -> !hasTwoMarks(wt), /* editable */ wt -> !readOnly);
         Column<WaypointTemplateDTO, String> markTemplateColumn2 = new Column<WaypointTemplateDTO, String>(
-                new SelectionCell(
-                        allMarkTemplates.stream().map(MarkTemplateDTO::getName).collect(Collectors.toList()))) {
+                hideablemarkTemplate2Cell) {
             @Override
             public String getValue(WaypointTemplateDTO waypointTemplate) {
                 return waypointTemplate.getMarkTemplatesForControlPoint() != null
-                        && waypointTemplate.getMarkTemplatesForControlPoint().size() >= 2
+                        && waypointTemplate.getMarkTemplatesForControlPoint().size() == 2
                                 ? waypointTemplate.getMarkTemplatesForControlPoint().get(1).getName()
-                                : "";
+                                : null;
             }
         };
         markTemplateColumn2.setFieldUpdater(new FieldUpdater<WaypointTemplateDTO, String>() {
@@ -246,11 +291,15 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                 } else {
                     waypointTemplate.getMarkTemplatesForControlPoint().set(1, selectedMarkTemplate);
                 }
+                validateAndUpdate();
             }
         });
-        Column<WaypointTemplateDTO, String> passingInstructionColumn = new Column<WaypointTemplateDTO, String>(
+        final HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell> hideablePassingInstructionCell = new HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell>(
                 new SelectionCell(Arrays.stream(PassingInstruction.relevantValues()).map(PassingInstruction::name)
-                        .collect(Collectors.toList()))) {
+                        .collect(Collectors.toList())),
+                /* hidden */ null, /* editable */ wt -> !readOnly);
+        Column<WaypointTemplateDTO, String> passingInstructionColumn = new Column<WaypointTemplateDTO, String>(
+                hideablePassingInstructionCell) {
             @Override
             public String getValue(WaypointTemplateDTO waypointTemplate) {
                 return waypointTemplate.getMarkTemplatesForControlPoint() != null
@@ -264,6 +313,8 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
             public void update(int index, WaypointTemplateDTO waypointTemplate, String value) {
                 waypointTemplate.setPassingInstruction(Arrays.stream(PassingInstruction.relevantValues())
                         .filter(pi -> pi.name().equals(value)).findFirst().get().name());
+                validateAndUpdate();
+                refreshWaypointsTable();
             }
         });
         DefaultActionsImagesBarCell imagesBarCell = new DefaultActionsImagesBarCell(stringMessages) {
@@ -276,12 +327,19 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         };
         ImagesBarColumn<WaypointTemplateDTO, DefaultActionsImagesBarCell> actionsColumn = new ImagesBarColumn<>(
                 imagesBarCell);
+        waypointTemplatesTable.addColumn(passingInstructionColumn, stringMessages.passingInstructions());
         waypointTemplatesTable.addColumn(shortNameColumn, stringMessages.shortName());
         waypointTemplatesTable.addColumn(nameColumn, stringMessages.name());
         waypointTemplatesTable.addColumn(markTemplateColumn1, stringMessages.markTemplate1());
         waypointTemplatesTable.addColumn(markTemplateColumn2, stringMessages.markTemplate2());
-        waypointTemplatesTable.addColumn(passingInstructionColumn, stringMessages.passingInstructions());
         waypointTemplatesTable.addColumn(actionsColumn, stringMessages.actions());
+    }
+
+    private static boolean hasTwoMarks(final WaypointTemplateDTO wt) {
+        boolean hasTwoMarks = wt != null && wt.getPassingInstruction() != null
+                && Arrays.stream(wt.getPassingInstruction().applicability).anyMatch(a -> a == 2);
+        return hasTwoMarks;
+
     }
 
     @Override
@@ -348,6 +406,70 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
 
         public void setAssociatedRole(final MarkRoleDTO markRole) {
             associatedRole = markRole;
+        }
+
+    }
+
+    public static class HideableAndEditableCell<DTO, V, T extends Cell<V>> implements Cell<V> {
+
+        private final T concreteCell;
+        private final Predicate<DTO> hiddenPredicate;
+        private final Predicate<DTO> editablePredicate;
+
+        public HideableAndEditableCell(final T concreteCell, final Predicate<DTO> hiddenPredicate,
+                final Predicate<DTO> editablePredicate) {
+            this.concreteCell = concreteCell;
+            this.hiddenPredicate = hiddenPredicate;
+            this.editablePredicate = editablePredicate;
+        }
+
+        @Override
+        public void render(final Context context, final V value, final SafeHtmlBuilder sb) {
+            @SuppressWarnings("unchecked")
+            DTO object = (DTO) context.getKey();
+            if (hiddenPredicate == null || !hiddenPredicate.test(object)) {
+                if (editablePredicate != null && editablePredicate.test(object)) {
+                    sb.appendHtmlConstant("<div contentEditable='false' unselectable='false' >" + value + "</div>");
+                } else {
+                    concreteCell.render(context, value, sb);
+                }
+            }
+        }
+
+        @Override
+        public boolean dependsOnSelection() {
+            return concreteCell.dependsOnSelection();
+        }
+
+        @Override
+        public Set<String> getConsumedEvents() {
+            return concreteCell.getConsumedEvents();
+        }
+
+        @Override
+        public boolean handlesSelection() {
+            return concreteCell.handlesSelection();
+        }
+
+        @Override
+        public boolean isEditing(Context context, Element parent, V value) {
+            return concreteCell.isEditing(context, parent, value);
+        }
+
+        @Override
+        public void onBrowserEvent(Context context, Element parent, V value, NativeEvent event,
+                ValueUpdater<V> valueUpdater) {
+            concreteCell.onBrowserEvent(context, parent, value, event, valueUpdater);
+        }
+
+        @Override
+        public boolean resetFocus(Context context, Element parent, V value) {
+            return concreteCell.resetFocus(context, parent, value);
+        }
+
+        @Override
+        public void setValue(Context context, Element parent, V value) {
+            concreteCell.setValue(context, parent, value);
         }
 
     }
