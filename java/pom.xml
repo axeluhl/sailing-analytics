@@ -136,6 +136,7 @@
         <module>com.sap.sailing.server.interface</module>
         <module>com.sap.sailing.server.gateway</module>
         <module>com.sap.sailing.server.gateway.serialization</module>
+        <module>com.sap.sailing.shared.persistence</module>
         <module>com.sap.sailing.shared.server</module>
         <module>com.sap.sailing.shared.server.gateway</module>
         <module>com.sap.sailing.www</module>

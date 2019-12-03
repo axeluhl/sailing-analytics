@@ -18,7 +18,6 @@ Import-Package: com.sap.sailing.server.gateway.deserialization,
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.mongodb,
- com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.common,
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.server.gateway.serialization,
@@ -36,7 +35,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.mail,
  com.sap.sailing.server.interface,
  org.mongodb.mongo-java-driver;bundle-version="3.6.4",
- com.sap.sse.security.common
+ com.sap.sse.security.common,
+ com.sap.sailing.shared.persistence
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.shared.server.impl;
   x-friends:="com.sap.sailing.mongodb.test,

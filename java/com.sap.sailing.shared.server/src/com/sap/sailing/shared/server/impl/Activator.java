@@ -8,8 +8,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
+import com.sap.sailing.shared.persistence.PersistenceFactory;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.SecurityService;
@@ -34,7 +34,7 @@ public class Activator implements BundleActivator {
 
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
 
-        sharedSailingData = new SharedSailingDataImpl(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
+        sharedSailingData = new SharedSailingDataImpl(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(serviceFinderFactory),
                 PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory), serviceFinderFactory,
                 securityServiceTracker);
         registrations.add(context.registerService(SharedSailingData.class, sharedSailingData, /* properties */ null));

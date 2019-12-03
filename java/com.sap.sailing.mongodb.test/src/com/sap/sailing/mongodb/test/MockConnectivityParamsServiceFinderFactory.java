@@ -9,8 +9,6 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
-import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
-import com.sap.sailing.domain.persistence.racelog.tracking.impl.PlaceHolderDeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.racelog.tracking.test.mock.AbstractTypeBasedServiceFinder;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.RaceLogConnectivityParams;
@@ -26,6 +24,8 @@ import com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParam
 import com.sap.sailing.domain.tractracadapter.persistence.impl.TracTracConnectivityParamsHandler;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
+import com.sap.sailing.shared.persistence.device.impl.PlaceHolderDeviceIdentifierMongoHandler;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
