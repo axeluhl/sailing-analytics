@@ -59,7 +59,7 @@ public class TestSimpleUserAndPreferenceMerge {
     private void fill(final String variant, final MongoDatabase db) throws IOException {
         for (final CollectionNames collectionName : new CollectionNames[] { CollectionNames.USERS,
                 CollectionNames.USER_GROUPS, CollectionNames.OWNERSHIPS, CollectionNames.ACCESS_CONTROL_LISTS,
-                CollectionNames.PREFERENCES }) {
+                CollectionNames.PREFERENCES, CollectionNames.ROLES }) {
             fill(collectionName, variant, db);
         }
     }
@@ -159,6 +159,10 @@ public class TestSimpleUserAndPreferenceMerge {
         assertEquals(3, Util.size(targetUserStore.getUserGroupByName("uhl-tenant").getUsers()));
         assertTrue(Util.contains(targetUserStore.getUserGroupByName("uhl-tenant").getUsers(), targetUserStore.getUserByName("uhl")));
         assertTrue(Util.contains(targetUserStore.getUserGroupByName("uhl-tenant").getUsers(), targetUserStore.getUserByName("uhl3")));
-        assertTrue(Util.contains(targetUserStore.getUserGroupByName("uhl-tenant").getUsers(), targetUserStore.getUserByName("uhl4")));
+        final UserGroup testTenantGroupInTarget = targetUserStore.getUserGroup(UUID.fromString("fbfc1d06-ef0c-40c7-a056-355c68a31162"));
+        assertSame(testTenantGroupInTarget, targetAccessControlStore.getOwnership(testTenantGroupInTarget.getIdentifier()));
+        final User uhl4InTarget = targetUserStore.getUserByName("uhl4");
+        assertTrue(Util.contains(targetUserStore.getUserGroupByName("uhl-tenant").getUsers(), uhl4InTarget));
+        assertSame(uhl4InTarget, targetAccessControlStore.getOwnership(uhl4InTarget.getIdentifier()).getAnnotation().getUserOwner());
     }
 }

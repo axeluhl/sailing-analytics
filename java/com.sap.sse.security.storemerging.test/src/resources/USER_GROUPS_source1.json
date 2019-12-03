@@ -1,4 +1,4 @@
-{"_id":{"$oid":"5ddfe8a5c0825924ce5d3369"},"ID":{"$binary":"x0AM7wYd/PtiEaNoXDVWoA==","$type":"03"},"NAME":"unknown server name-server","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[{"ROLE_DEFINITION_MAP_ROLE_ID":{"$binary":"y0V7Ud9IKcQV4Rif59Gpnw==","$type":"03"},"ROLE_DEFINITION_MAP_FOR_ALL":true}]}
+{"_id":{"$oid":"5ddfe8a5c0825924ce5d3369"},"ID":{"$binary":"x0AM7wYd/PtiEaNoXDVWoA==","$type":"03"},"NAME":"test-server","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[{"ROLE_DEFINITION_MAP_ROLE_ID":{"$binary":"y0V7Ud9IKcQV4Rif59Gpnw==","$type":"03"},"ROLE_DEFINITION_MAP_FOR_ALL":true}]}
 {"_id":{"$oid":"5ddfe8a5c0825924ce5d337a"},"ID":{"$binary":"qUeT6Zd7VNQQlZrKA/wyug==","$type":"03"},"NAME":"admin-tenant","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[]}
 {"_id":{"$oid":"5ddfe8dbc0825924ce5d372f"},"ID":{"$binary":"I0GFS4Jm0TchSMp0SluUnQ==","$type":"03"},"NAME":"uhl-tenant","USERNAMES":["uhl","uhl4","uhl3"],"ROLE_DEFINITION_MAP":[]}
 {"_id":{"$oid":"5ddfe8ebc0825924ce5d3753"},"ID":{"$binary":"jUctEl255OAdcqbVAQ39iQ==","$type":"03"},"NAME":"uhl3-tenant","USERNAMES":["uhl3"],"ROLE_DEFINITION_MAP":[]}

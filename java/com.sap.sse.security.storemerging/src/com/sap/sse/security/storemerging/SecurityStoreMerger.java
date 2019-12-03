@@ -200,7 +200,7 @@ public class SecurityStoreMerger {
                     if (qualifiedForGroup != null) {
                         groupQualifierInTarget = userGroupMap.get(qualifiedForGroup);
                         if (groupQualifierInTarget == null) {
-                            logger.severe("Group qualifying role "+role+" for user "+sourceUser+" will be dropped. Dropping role.");
+                            logger.severe("Group qualifying role "+role+" for user "+sourceUser.getName()+" will be dropped. Dropping role.");
                             rolesToRemoveBecauseOfLostOrMissingQualifier.add(role);
                         }
                     } else {
@@ -208,7 +208,7 @@ public class SecurityStoreMerger {
                     }
                     if (!rolesToRemoveBecauseOfLostOrMissingQualifier.contains(role) &&
                             (qualifiedForUser != userQualifierInTarget || qualifiedForGroup != groupQualifierInTarget)) {
-                        logger.info("Qualifying user/group for role "+role+" on user "+sourceUser+
+                        logger.info("Qualifying user/group for role "+role+" on user "+sourceUser.getName()+
                                 " merged to target. Updating role");
                         rolesToReplaceDueToChangingQualifierObject.put(role,
                                 new Role(targetRoleDefinition, groupQualifierInTarget, userQualifierInTarget));
@@ -256,6 +256,7 @@ public class SecurityStoreMerger {
             final User userOwnership = sourceOwnership.getAnnotation().getUserOwner();
             final UserGroup targetGroupOwnership = userGroupMap.get(groupOwnership);
             final User targetUserOwnership = userMap.get(userOwnership);
+            // FIXME && seems wrong; should be || instead
             if (targetGroupOwnership != null && targetUserOwnership != null) {
                 if (targetGroupOwnership != groupOwnership || targetUserOwnership != userOwnership) {
                     // something changed, and at least one ownership component is not null; create new annotation:
