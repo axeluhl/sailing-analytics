@@ -76,16 +76,16 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                         final StringBuilder sb = new StringBuilder();
                         boolean invalidName = valueToValidate.getName() == null || valueToValidate.getName().isEmpty();
                         if (invalidName) {
-                            sb.append(stringMessages.pleaseEnterAName());
+                            sb.append(stringMessages.pleaseEnterAName()).append(". ");
                         }
 
                         AtomicBoolean unAssignedMarkTemplateUsed = new AtomicBoolean(false);
                         valueToValidate.getWaypointTemplates().forEach(wt -> {
                             if (wt.getPassingInstruction() == null) {
-                                sb.append("Waypoints require Passing Instruction. ");
+                                sb.append(stringMessages.wayPointRequiresPassingInstruction()).append(". ");
                             } else {
                                 if (wt.getShortName() == null) {
-                                    sb.append("Waypoints require short name. ");
+                                    sb.append(stringMessages.wayPointRequiresShortName()).append(". ");
                                 }
                                 valueToValidate.getMarkTemplates().forEach(mt -> GWT.log(mt.toString()));
                                 wt.getMarkTemplatesForControlPoint()
@@ -95,17 +95,17 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                                 GWT.log(" " + unAssignedMarkTemplateUsed.get());
                                 if (hasTwoMarks(wt)) {
                                     if (wt.getName() == null) {
-                                        sb.append("Waypoints require name. \n");
+                                        sb.append(stringMessages.wayPointRequiresName()).append(". ");
                                     }
                                     if (wt.getMarkTemplatesForControlPoint().get(0)
                                             .equals(wt.getMarkTemplatesForControlPoint().get(1))) {
-                                        sb.append("Mark Template 1 and Mark Template 2 cannot be the same. \n");
+                                        sb.append(stringMessages.wayPointMarkTemplatesAreTheSame());
                                     }
                                 }
                             }
                         });
                         if (unAssignedMarkTemplateUsed.get()) {
-                            sb.append("Mark used in Sequence does not exist on Course Template. ");
+                            sb.append(stringMessages.wayPointMarkInSequenceMissing()).append(". ");
                         }
                         return sb.toString();
                     }
@@ -128,6 +128,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
             markTemplates.add(new MarkTemplateWithAssociatedRoleDTO(allMarkTemplates.stream().findFirst().orElse(null),
                     markRolesMap.values().stream().findFirst().orElse(null)));
             refreshMarkTemplateTable();
+            validateAndUpdate();
         });
         buttonAddMarkTemplate.setEnabled(isNew);
         markTemplates.addAll(courseTemplateToEdit.getAssociatedRoles().entrySet().stream()
@@ -145,6 +146,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                     .add(new WaypointTemplateDTO(null, null, Arrays.asList(firstMarkTemplate, firstMarkTemplate),
                             Arrays.stream(PassingInstruction.relevantValues()).findFirst().orElse(null)));
             refreshWaypointsTable();
+            validateAndUpdate();
         });
         buttonAddWaypointTemplate.setEnabled(isNew);
 

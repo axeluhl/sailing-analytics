@@ -2350,4 +2350,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String couldNotRemoveMarkProperties(String message);
     String markRoles();
     String filterMarkRoles();
+    String wayPointRequiresPassingInstruction();
+    String wayPointRequiresShortName();
+    String wayPointRequiresName();
+    String wayPointMarkTemplatesAreTheSame();
+    String wayPointMarkInSequenceMissing();
 }
