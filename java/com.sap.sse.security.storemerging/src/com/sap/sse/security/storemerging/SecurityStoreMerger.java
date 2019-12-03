@@ -257,7 +257,7 @@ public class SecurityStoreMerger {
             final UserGroup targetGroupOwnership = userGroupMap.get(groupOwnership);
             final User targetUserOwnership = userMap.get(userOwnership);
             // FIXME && seems wrong; should be || instead
-            if (targetGroupOwnership != null && targetUserOwnership != null) {
+            if (targetGroupOwnership != null || targetUserOwnership != null) {
                 if (targetGroupOwnership != groupOwnership || targetUserOwnership != userOwnership) {
                     // something changed, and at least one ownership component is not null; create new annotation:
                     logger.info("User/group of ownership for object "+sourceOwnership.getIdOfAnnotatedObject()+" changed. Ownership updated");
@@ -410,7 +410,12 @@ public class SecurityStoreMerger {
     
     private void mergeOwnerships(AccessControlStore sourceAccessControlStore,
             Set<OwnershipAnnotation> ownershipsToTryToImport) {
-        // TODO Implement SecurityStoreMerger.mergeOwnerships(...)
+        for (final OwnershipAnnotation o : ownershipsToTryToImport) {
+            if (targetAccessControlStore.getOwnership(o.getIdOfAnnotatedObject()) == null) {
+                targetAccessControlStore.setOwnership(o.getIdOfAnnotatedObject(), o.getAnnotation().getUserOwner(),
+                        o.getAnnotation().getTenantOwner(), o.getDisplayNameOfAnnotatedObject());
+            }
+        }
     }
 
     private void mergeAccessControlLists(AccessControlStore sourceAccessControlStore, Map<UserGroup, UserGroup> userGroupMap) {

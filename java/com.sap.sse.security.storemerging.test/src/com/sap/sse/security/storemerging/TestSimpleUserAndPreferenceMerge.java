@@ -145,7 +145,8 @@ public class TestSimpleUserAndPreferenceMerge {
         final AccessControlStore targetAccessControlStore = merger.getTargetAccessControlStore();
         final Pair<UserStore, AccessControlStore> sourceStores = merger.importStores(cfgForSource, defaultCreationGroupNameForSource);
         final UserStore sourceUserStore = sourceStores.getA();
-        final AccessControlStore sourceAccessControlStore = sourceStores.getB();
+        // Should we need the source access control store, here it is:
+        // final AccessControlStore sourceAccessControlStore = sourceStores.getB();
         assertNotNull(sourceUserStore.getUserByName("admin"));
         assertNotNull(sourceUserStore.getUserByName("<all>"));
         assertNotNull(sourceUserStore.getUserByName("uhl"));
@@ -159,8 +160,9 @@ public class TestSimpleUserAndPreferenceMerge {
         assertEquals(3, Util.size(targetUserStore.getUserGroupByName("uhl-tenant").getUsers()));
         assertTrue(Util.contains(targetUserStore.getUserGroupByName("uhl-tenant").getUsers(), targetUserStore.getUserByName("uhl")));
         assertTrue(Util.contains(targetUserStore.getUserGroupByName("uhl-tenant").getUsers(), targetUserStore.getUserByName("uhl3")));
-        final UserGroup testTenantGroupInTarget = targetUserStore.getUserGroup(UUID.fromString("fbfc1d06-ef0c-40c7-a056-355c68a31162"));
-        assertSame(testTenantGroupInTarget, targetAccessControlStore.getOwnership(testTenantGroupInTarget.getIdentifier()));
+        final UserGroup testServerGroupInTarget = targetUserStore.getUserGroup(UUID.fromString("fbfc1d06-ef0c-40c7-a056-355c68a31162"));
+        assertSame(testServerGroupInTarget, targetAccessControlStore
+                .getOwnership(testServerGroupInTarget.getIdentifier()).getAnnotation().getTenantOwner());
         final User uhl4InTarget = targetUserStore.getUserByName("uhl4");
         assertTrue(Util.contains(targetUserStore.getUserGroupByName("uhl-tenant").getUsers(), uhl4InTarget));
         assertSame(uhl4InTarget, targetAccessControlStore.getOwnership(uhl4InTarget.getIdentifier()).getAnnotation().getUserOwner());
