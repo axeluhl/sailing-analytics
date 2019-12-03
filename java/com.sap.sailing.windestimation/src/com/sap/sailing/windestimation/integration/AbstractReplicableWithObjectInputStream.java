@@ -3,7 +3,6 @@ package com.sap.sailing.windestimation.integration;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.io.ObjectStreamClass;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -19,6 +18,7 @@ import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.util.ClearStateTestSupport;
+import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 /**
  * 
@@ -106,8 +106,8 @@ public abstract class AbstractReplicableWithObjectInputStream<S, O extends Opera
 
     @Override
     public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        ObjectInputStream ois = new ObjectInputStreamWithContextClassLoaderAsResolver(is);
-        return ois;
+        return new ObjectInputStreamResolvingAgainstCache<Object>(is, /* dummy "cache" */ new Object(), /* resolve listener */ null) {
+        }; // use anonymous inner class in this class loader to see all that this class sees
     }
 
     @Override
@@ -139,31 +139,4 @@ public abstract class AbstractReplicableWithObjectInputStream<S, O extends Opera
     public void addOperationSentToMasterForReplication(OperationWithResultWithIdWrapper<S, ?> operation) {
         this.operationsSentToMasterForReplication.add(operation);
     }
-
-    /**
-     * Custom {@link ObjectInputStream} which is necessary in OSGI context in order to load the class
-     * {@link WindEstimationModelsUpdateOperation} without {@link ClassNotFoundException}.
-     * 
-     * @author Vladislav Chumak (D069712)
-     *
-     */
-    private class ObjectInputStreamWithContextClassLoaderAsResolver extends ObjectInputStream {
-
-        public ObjectInputStreamWithContextClassLoaderAsResolver(InputStream in) throws IOException {
-            super(in);
-        }
-
-        @Override
-        protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
-            String name = desc.getName();
-            try {
-                return Class.forName(name, /* initialize */true, Thread.currentThread().getContextClassLoader());
-            } catch (ClassNotFoundException ex) {
-                // fall back on super class in order to load primitive types
-                return super.resolveClass(desc);
-            }
-        }
-
-    }
-
 }
