@@ -256,7 +256,6 @@ public class SecurityStoreMerger {
             final User userOwnership = sourceOwnership.getAnnotation().getUserOwner();
             final UserGroup targetGroupOwnership = userGroupMap.get(groupOwnership);
             final User targetUserOwnership = userMap.get(userOwnership);
-            // FIXME && seems wrong; should be || instead
             if (targetGroupOwnership != null || targetUserOwnership != null) {
                 if (targetGroupOwnership != groupOwnership || targetUserOwnership != userOwnership) {
                     // something changed, and at least one ownership component is not null; create new annotation:
@@ -419,7 +418,14 @@ public class SecurityStoreMerger {
     }
 
     private void mergeAccessControlLists(AccessControlStore sourceAccessControlStore, Map<UserGroup, UserGroup> userGroupMap) {
-        // TODO Implement Main.mergeAccessControlLists(...)
+        logger.info("Applying all source ACLs to target");
+        for (final AccessControlListAnnotation sourceACL : sourceAccessControlStore.getAccessControlLists()) {
+            for (final Entry<UserGroup, Set<String>> permissionsPerGroup : sourceACL.getAnnotation().getActionsByUserGroup().entrySet()) {
+                for (final String action : permissionsPerGroup.getValue()) {
+                    targetAccessControlStore.addAclPermission(sourceACL.getIdOfAnnotatedObject(), permissionsPerGroup.getKey(), action);
+                }
+            }
+        }
     }
     
     /**

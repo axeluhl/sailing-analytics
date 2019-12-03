@@ -4958,7 +4958,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             for (QualifiedObjectIdentifier toRemovePermissionObjects : objectsThatWillBeImplicitlyCleanedByRemoveRegatta) {
                 getSecurityService().deleteAllDataForRemovedObject(toRemovePermissionObjects);
             }
-
         }
     }
     

@@ -2697,14 +2697,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 // remove any race; however, the event may already have been created by another tracker whose race hasn't
                 // arrived yet and therefore the races list is still empty; therefore, only remove the event if its
                 // race list became empty by the removal performed here.
-                final int oldSizeOfTrackedRaces;
-                final int newSizeOfTrackedRaces;
-                oldSizeOfTrackedRaces = Util.size(trackedRegatta.getTrackedRaces());
+                final boolean oldTrackedRacesIsEmpty = Util.isEmpty(trackedRegatta.getTrackedRaces());
                 try {
                     trackedRegatta.removeTrackedRace(trackedRace, Optional.of(
                             getThreadLocalTransporterForCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster()));
-                    newSizeOfTrackedRaces = Util.size(trackedRegatta.getTrackedRaces());
-                    isTrackedRacesBecameEmpty = (oldSizeOfTrackedRaces > 0 && newSizeOfTrackedRaces == 0);
+                    final boolean newTrackedRacesIsEmpty = Util.isEmpty(trackedRegatta.getTrackedRaces());
+                    isTrackedRacesBecameEmpty = (!oldTrackedRacesIsEmpty && newTrackedRacesIsEmpty);
                 } finally {
                     trackedRegatta.unlockTrackedRacesAfterWrite();
                 }
