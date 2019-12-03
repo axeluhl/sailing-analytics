@@ -89,12 +89,10 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                                 if (wt.getShortName() == null) {
                                     sb.append(stringMessages.wayPointRequiresShortName()).append(". ");
                                 }
-                                valueToValidate.getMarkTemplates().forEach(mt -> GWT.log(mt.toString()));
                                 wt.getMarkTemplatesForControlPoint()
                                         .forEach(wtmt -> unAssignedMarkTemplateUsed.set(unAssignedMarkTemplateUsed.get()
                                                 || valueToValidate.getMarkTemplates().stream()
                                                         .noneMatch(mt -> mt.getUuid().equals(wtmt.getUuid()))));
-                                GWT.log(" " + unAssignedMarkTemplateUsed.get());
                                 if (hasTwoMarks(wt)) {
                                     if (wt.getName() == null) {
                                         sb.append(stringMessages.wayPointRequiresName()).append(". ");
@@ -394,7 +392,6 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                 : null;
 
         this.markTemplates.stream().forEach(mt -> {
-            GWT.log("added markTemplate " + mt.markTemplate);
             markTemplates.add(mt.markTemplate);
             if (mt.getAssociatedRole() != null) {
                 associatedRoles.put(mt.getMarkTemplate(), mt.getAssociatedRole().getUuid());
