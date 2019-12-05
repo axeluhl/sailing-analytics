@@ -106,7 +106,7 @@ public abstract class AbstractExportedPositionsBasedTest {
                 /* sidelines */ Collections.emptySet(),
                 EmptyWindStore.INSTANCE,
                 /* delayToLiveInMillis */ 3000, /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 10000,
-                /* useInternalMarkPassingAlgorithm */ true, OneDesignRankingMetric::new, /* raceLogResolver */ null, null);
+                /* useInternalMarkPassingAlgorithm */ true, OneDesignRankingMetric::new, /* raceLogResolver */ null, /* trackingConnectorInfo */ null);
         result.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0.0));
         for (final Entry<CompetitorWithBoat, Iterable<GPSFixMoving>> e : competitorsAndTheirTracks.entrySet()) {
             final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = result.getTrack(e.getKey());

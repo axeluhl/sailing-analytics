@@ -109,10 +109,11 @@ public interface EventBase extends NamedWithID, WithDescription, Renamable, With
     boolean setMediaURLs(Iterable<URL> imageURLs, Iterable<URL> sponsorImageURLs, Iterable<URL> videoURLs, URL logoImageURL, Map<URL, ImageSize> imageSizes);
     
     /**
-     * Determines whether the race is tracked by TracTrac or not
+     * Gets all TrackingConnectorInfos containing information over what TrackingConnectors are involved in tracking this
+     * event
      * 
-     * @return a boolean flag, whether any {@link TrackedRace} in the event is tracked by which connector; the set
-     *         returned is never {@code null} and never contains {@code null} values, but it may be empty
+     * @return a Set of {@link TrackingConnectorInfo}; the set returned is never {@code null} and never contains
+     *         {@code null} values, but it may be empty
      */
     Set<TrackingConnectorInfo> getTrackingConnectorInfos();
 }

@@ -23,6 +23,7 @@ public class EventUtilTest {
         Calendar calendar = Calendar.getInstance();
         calendar.set(year, month - 1, date);
         MillisecondsTimePoint startEnd = new MillisecondsTimePoint(calendar.getTime());
-        return new StrippedEventImpl("Test", startEnd, startEnd, "Anywhere", true, UUID.randomUUID(), null, Collections.emptySet());
+        return new StrippedEventImpl("Test", startEnd, startEnd, "Anywhere", true, UUID.randomUUID(), 
+                /** leaderBoardGroups **/ null, /** trackingConnectorInfos **/ Collections.emptySet());
     }
 }
