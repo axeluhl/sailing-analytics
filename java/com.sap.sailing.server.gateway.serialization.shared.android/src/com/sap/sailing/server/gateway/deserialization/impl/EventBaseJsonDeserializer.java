@@ -63,14 +63,14 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
                 leaderboardGroups.add(leaderboardGroupDeserializer.deserialize((JSONObject) lgJson));
             }
         }
-        Set<TrackingConnectorInfo> trackedBy = new HashSet<>();
+        Set<TrackingConnectorInfo> trackingConnectorInfos = new HashSet<>();
         JSONArray trackedByJson = Helpers.getNestedArraySafe(eventJson, EventBaseJsonSerializer.FIELD_TRACKING_CONNECTOR_INFOS);
         for (Object jsonPair : trackedByJson) {
-            trackedBy.add(trackingConnectorInfoDeserializer.deserialize((JSONObject) jsonPair));
+            trackingConnectorInfos.add(trackingConnectorInfoDeserializer.deserialize((JSONObject) jsonPair));
         }
         
         StrippedEventImpl result = new StrippedEventImpl(name, startDate == null ? null : new MillisecondsTimePoint(startDate.longValue()),
-                endDate == null ? null : new MillisecondsTimePoint(endDate.longValue()), venue, /* is public */ true, id, leaderboardGroups, trackedBy);
+                endDate == null ? null : new MillisecondsTimePoint(endDate.longValue()), venue, /* is public */ true, id, leaderboardGroups, trackingConnectorInfos);
         result.setDescription(description);
         if (officialWebsiteURLAsString != null) {
             try {
