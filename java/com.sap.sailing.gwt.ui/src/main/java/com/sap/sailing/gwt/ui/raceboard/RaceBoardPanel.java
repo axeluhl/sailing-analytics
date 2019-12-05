@@ -94,6 +94,8 @@ import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
+import com.sap.sailing.gwt.ui.shared.databylogo.DataByLogo;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -182,6 +184,7 @@ public class RaceBoardPanel
     private ManeuverTablePanel maneuverTablePanel;
 
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
+    private Set<TrackingConnectorInfoDTO> trackingConnectorInfos;
     
     /**
      * @param eventId
@@ -199,6 +202,7 @@ public class RaceBoardPanel
      * @param availableDetailTypes
      *            A list of all Detailtypes, that will be offered in the Settingsdialog. Can be used to hide settings no
      *            data exists for, eg Bravo, Expdition ect.
+     * @param trackingConnectorInfos 
      */
     public RaceBoardPanel(Component<?> parent,
             ComponentContext<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> componentContext,
@@ -211,7 +215,7 @@ public class RaceBoardPanel
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider,
             boolean showChartMarkEditMediaButtonsAndVideo, boolean showHeaderPanel,
             Iterable<DetailType> availableDetailTypes, StrippedLeaderboardDTOWithSecurity leaderboardDTO,
-            final RaceWithCompetitorsAndBoatsDTO raceDTO) {
+            final RaceWithCompetitorsAndBoatsDTO raceDTO, Set<TrackingConnectorInfoDTO> trackingConnectorInfos) {
         super(parent, componentContext, lifecycle, settings);
         this.sailingService = sailingService;
         this.mediaService = mediaService;
@@ -221,6 +225,7 @@ public class RaceBoardPanel
         this.userAgent = userAgent;
         this.timer = timer;
         this.eventId = eventId;
+        this.trackingConnectorInfos = trackingConnectorInfos;
         this.currentRaceHasBeenSelectedOnce = false;
         this.leaderboardName = leaderboardName;
         this.selectedRaceIdentifier = selectedRaceIdentifier;
@@ -780,8 +785,12 @@ public class RaceBoardPanel
         timeLineInnerPanel.add(timeLineInnerBgPanel);
         timeLineInnerPanel.addStyleName("timeLineInnerPanel");
         
+        DataByLogo dataByLogo = new DataByLogo();
+        dataByLogo.setUp(trackingConnectorInfos, true);
+        
         ResizableFlowPanel timelinePanel = new ResizableFlowPanel();
         timelinePanel.add(timeLineInnerPanel);
+        timelinePanel.add(dataByLogo);
         timelinePanel.addStyleName("timeLinePanel");
         
         return timelinePanel;
