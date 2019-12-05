@@ -2059,7 +2059,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     if(isValidEvent) {
                         trackingConnectorInfos = event.getTrackingConnectorInfos()
                                 .stream()
-                                .map(trackingConnectorInfo -> new TrackingConnectorInfoDTO(trackingConnectorInfo.getTrackedBy(), trackingConnectorInfo.getWebUrl().toString())).collect(Collectors.toSet());
+                                .map(trackingConnectorInfo -> new TrackingConnectorInfoDTO(trackingConnectorInfo.getTrackedBy(), mapURLToString(trackingConnectorInfo.getWebUrl())))
+                                .collect(Collectors.toSet());
                     }else {
                         trackingConnectorInfos = Collections.emptySet();
                     }
@@ -2069,6 +2070,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             }
         }
         return result;
+    }
+    
+    private static String mapURLToString(URL url) {
+        if (url != null) {
+            return url.toString();
+        } else {
+            return "";
+        }
     }
 
     @Override
