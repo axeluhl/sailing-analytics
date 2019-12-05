@@ -69,7 +69,7 @@ public class RaceboardDataDTO implements IsSerializable {
         return isValidEvent;
     }
     
-    public Set<TrackingConnectorInfoDTO> isTrackedByTracTrac() {
+    public Set<TrackingConnectorInfoDTO> getTrackingConnectorInfos() {
         return trackingConnectorInfos;
     }
 }

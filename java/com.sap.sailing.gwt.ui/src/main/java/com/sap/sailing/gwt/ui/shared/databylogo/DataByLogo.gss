@@ -1,0 +1,18 @@
+.databylogo_logo{
+ height: 1.3333333em !important;
+}
+
+.databylogo_subtlelink, 
+.databylogo_subtlelink:hover, 
+.databylogo_subtlelink:active, 
+.databylogo_subtlelink:visited, 
+.databylogo_subtlelink:focus {
+  text-decoration: none;
+}
+
+.databylogo_container{
+ display: inline-block;
+ white-space: nowrap;
+ font-size: 0.75em;
+ cursor: pointer;
+}
