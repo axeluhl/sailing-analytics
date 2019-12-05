@@ -51,7 +51,5 @@ public interface EventHeaderResources extends SharedDesktopResources {
         String eventnavigation_dropdown_containerhidden();
         String navbar_button();
         String navbar_buttonhidden();
-        String eventheader_databylogo();
     }
-
 }

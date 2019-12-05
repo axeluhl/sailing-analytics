@@ -47,7 +47,7 @@
             <span ui:field="eventVenue"></span>
           </div>
           <a ui:field="eventLink" class="{local_res.css.eventheader_intro_details_item}"></a>
-          <s:databylogo.DataByLogo ui:field="dataByLogo" addStyleNames="{local_res.css.eventheader_intro_details_item} {local_res.css.eventheader_databylogo}"></s:databylogo.DataByLogo>
+          <s:databylogo.DataByLogo ui:field="dataByLogo" addStyleNames="{local_res.css.eventheader_intro_details_item}"></s:databylogo.DataByLogo>
           <!-- IFEND event.venue && event.eventType !== 'multi-regatta-event' -->
           <!-- IF event.eventType === 'multi-regatta-event' -->
           <div ui:field="competitors" class="{local_res.css.eventheader_intro_details_item}" />
