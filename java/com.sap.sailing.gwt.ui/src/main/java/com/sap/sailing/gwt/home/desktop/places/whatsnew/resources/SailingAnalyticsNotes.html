@@ -5,6 +5,18 @@
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
       
+         <h5 class="articleSubheadline">December 2019</h5>
+         <ul class="bulletList">
+            <li>The "Relative score" rank on race level in the data mining module has been adjusted
+                such that it computes the score relative to the number of competitors in the single race,
+                not in the entire leaderboard. This leads to different numbers being reported for
+                split-fleet / group racing. Assume the fleet of 150 competitors is split into three groups
+                of 50 boats each. Before, a rank of 20 led to a relative score of 20/150. Now it is reported
+                as 20/50, so the values reported will increase, roughly by a factor determined by the number
+                of groups into which the fleet is split.
+            </li>
+         </ul>
+         
          <h5 class="articleSubheadline">October 2019</h5>
          <ul class="bulletList">
             <li>The SAP Sailing Analytics now also support ORC Performance Curve for ranking and scoring.
@@ -13,7 +25,9 @@
                 this ranking/scoring option will reflect the ranks based on each boat's individual
                 performance-based allowance and be a good reflection of the race standings. This also
                 works live, while the race is progressing, and allows spectators and sailors alike to
-                judge their gap to the leader in corrected times.
+                judge their gap to the leader in corrected times. See also
+                <a href="https://wiki.sapsailing.com/wiki/howto/setup-orc-regatta">https://wiki.sapsailing.com/wiki/howto/setup-orc-regatta</a>
+                for how to set this up.
             </li>
             <li>The satellite imagery button has moved into the settings menu which can be opened via the cog / settings
                 button in the top-right corner of the map. The very first checkbox labeled "Show satellite images" will
