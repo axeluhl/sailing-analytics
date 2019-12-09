@@ -138,9 +138,8 @@ public class UserGroupRoleDefinitionPanel extends Composite
             } else if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(selectedRole.getA().getName()))) {
                 UserGroupDTO selectedObject = userGroupSelectionModel.getSelectedObject();
                 if (selectedObject != null) {
-                    userManagementService.removeRoleDefintionFromUserGroup(selectedObject.getId().toString(),
+                    userManagementService.removeRoleDefinitionFromUserGroup(selectedObject.getId().toString(),
                             selectedRole.getA().getId().toString(), new AsyncCallback<Void>() {
-
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     Window.alert(stringMessages.couldNotDeleteRole(selectedRole.getA().getName()));

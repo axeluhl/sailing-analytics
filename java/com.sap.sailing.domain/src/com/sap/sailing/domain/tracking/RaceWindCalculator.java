@@ -40,30 +40,32 @@ public class RaceWindCalculator {
 
     private WindSummary getTrackedRaceWindSummary(TrackedRace trackedRace) {
         final TimePoint startOfRace = trackedRace.getStartOfRace();
+        final WindSummary result;
         if (startOfRace == null) {
-            return null;
-        }
-        final TimePoint finishedTime = trackedRace.getFinishedTime();
-        final TimePoint endOfRace = trackedRace.getEndOfRace();
-        final TimePoint finishTime = finishedTime == null ?
-                endOfRace == null ? MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis()) : endOfRace : finishedTime;
-        final TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
-        final TimePoint toTimePoint;
-        if (newestEvent != null && newestEvent.before(finishTime)) {
-            toTimePoint = newestEvent;
+            result = null;
         } else {
-            toTimePoint = finishTime;
-        }
-        final TimePoint middleOfRace = startOfRace.plus(startOfRace.until(toTimePoint).divide(2));
-        final List<TimePoint> pointsToGetWind = Arrays.asList(startOfRace, middleOfRace, toTimePoint);
-        final List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToUse = new ArrayList<>(3);
-        for (TimePoint timePoint : pointsToGetWind) {
-            final WindWithConfidence<Pair<Position, TimePoint>> windFixToUse = getWindFromTrackedRace(timePoint, trackedRace);
-            if (windFixToUse != null) {
-                windFixesToUse.add(windFixToUse);
+            final TimePoint finishedTime = trackedRace.getFinishedTime();
+            final TimePoint endOfRace = trackedRace.getEndOfRace();
+            final TimePoint finishTime = finishedTime == null ?
+                    endOfRace == null ? MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis()) : endOfRace : finishedTime;
+            final TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
+            final TimePoint toTimePoint;
+            if (newestEvent != null && newestEvent.before(finishTime)) {
+                toTimePoint = newestEvent;
+            } else {
+                toTimePoint = finishTime;
             }
+            final TimePoint middleOfRace = startOfRace.plus(startOfRace.until(toTimePoint).divide(2));
+            final List<TimePoint> pointsToGetWind = Arrays.asList(startOfRace, middleOfRace, toTimePoint);
+            final List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToUse = new ArrayList<>(3);
+            for (TimePoint timePoint : pointsToGetWind) {
+                final WindWithConfidence<Pair<Position, TimePoint>> windFixToUse = getWindFromTrackedRace(timePoint, trackedRace);
+                if (windFixToUse != null) {
+                    windFixesToUse.add(windFixToUse);
+                }
+            }
+            result = createWindSummaryFromWindFixes(middleOfRace, windFixesToUse);
         }
-        final WindSummary result = createWindSummaryFromWindFixes(middleOfRace, windFixesToUse);
         return result;
     }
 
