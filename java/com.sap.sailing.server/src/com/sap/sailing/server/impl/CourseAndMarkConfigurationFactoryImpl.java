@@ -455,14 +455,12 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             AbstractLogEventAuthor author) {
         final CourseConfigurationWithMarkRoles courseConfigurationAfterInventory = handleSaveToInventory(courseConfiguration);
         recordUsagesForMarkProperties(courseConfiguration.getWaypoints(), courseConfiguration.getAssociatedRoles());
-        
         final Map<MarkConfiguration, Mark> marksByMarkConfigurations = new HashMap<>();
         final RegattaLog regattaLog = regatta.getRegattaLog();
         for (MarkConfiguration markConfiguration : courseConfigurationAfterInventory.getAllMarks()) {
             if (markConfiguration instanceof RegattaMarkConfiguration) {
                 final Mark mark = ((RegattaMarkConfiguration) markConfiguration).getMark();
-                marksByMarkConfigurations.put(markConfiguration,
-                        mark);
+                marksByMarkConfigurations.put(markConfiguration, mark);
                 savePositioningToMark(regatta, mark, markConfiguration.getOptionalPositioning(), null,
                         timePointForDefinitionOfMarksAndDeviceMappings, author);
             } else {
@@ -487,7 +485,6 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 regattaLog.add(new RegattaLogDefineMarkEventImpl(timePointForDefinitionOfMarksAndDeviceMappings, author,
                         timePointForDefinitionOfMarksAndDeviceMappings, UUID.randomUUID(), markToCreate));
                 marksByMarkConfigurations.put(markConfiguration, markToCreate);
-                
                 savePositioningToMark(regatta, markToCreate, markConfiguration.getOptionalPositioning(),
                         optionalMarkProperties, timePointForDefinitionOfMarksAndDeviceMappings, author);
             }
