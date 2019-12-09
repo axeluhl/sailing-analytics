@@ -30,6 +30,13 @@ public class SecurityWebSessionManager extends DefaultWebSessionManager {
     private static final Duration MAX_DURATION_ASSUMED_FOR_MESSAGE_DELIVERY = Duration.ONE_SECOND.times(30);
     
     /**
+     * When {@link SecurityService#getSharedAcrossSubdomainsOf()} returns a non-{@code null}
+     * domain, a different session cookie name is used to avoid collisions with more specific
+     * default session cookies.
+     */
+    private static final String GLOBAL_SESSION_ID_COOKIE_NAME = "JSESSIONID_GLOBAL";
+    
+    /**
      * Wait no longer than this duration before pinging / bumping the session. The session timeout may be
      * very long, even compared to the average life span of a server instance. If the server instance dies
      * before having pinged / bumped the session, the ping/bump goes missing. If this continues to happen
@@ -50,6 +57,7 @@ public class SecurityWebSessionManager extends DefaultWebSessionManager {
             final String domainForSecurityServiceSharing = Activator.getSecurityService().getSharedAcrossSubdomainsOf();
             if (domainForSecurityServiceSharing != null) {
                 getSessionIdCookie().setDomain(domainForSecurityServiceSharing);
+                getSessionIdCookie().setName(GLOBAL_SESSION_ID_COOKIE_NAME);
             }
         }, "Background thread of "+getClass().getName()+" waiting for security service");
         backgroundThreadWaitingForSecurityServiceToObtainSharedAcrossSubdomains.setDaemon(true);
