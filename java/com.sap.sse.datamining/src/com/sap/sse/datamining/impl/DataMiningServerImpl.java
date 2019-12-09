@@ -138,7 +138,8 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         return executorService;
     }
     
-    private JoinedClassLoader getJoinedClassLoader() {
+    @Override
+    public JoinedClassLoader getJoinedClassLoader() {
         return new JoinedClassLoader(dataMiningClassLoaders);
     }
     

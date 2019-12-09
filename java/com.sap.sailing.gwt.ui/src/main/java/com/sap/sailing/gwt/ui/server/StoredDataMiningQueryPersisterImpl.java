@@ -6,11 +6,14 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.apache.shiro.authz.AuthorizationException;
+import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.server.impl.preferences.model.SailingPreferences;
 import com.sap.sailing.server.impl.preferences.model.StoredDataMiningQueryPreference;
 import com.sap.sailing.server.impl.preferences.model.StoredDataMiningQueryPreferences;
 import com.sap.sse.common.Util;
+import com.sap.sse.datamining.DataMiningServer;
+import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.shared.DataMiningQuerySerializer;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.StoredDataMiningQueryDTO;
@@ -23,10 +26,12 @@ import com.sap.sse.security.shared.impl.User;
 public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQueryPersister {
 
     private final SecurityService securityService;
+    private final ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker;
 
-    public StoredDataMiningQueryPersisterImpl(SecurityService securityService) {
+    public StoredDataMiningQueryPersisterImpl(SecurityService securityService,
+            ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker) {
         this.securityService = securityService;
-
+        this.dataMiningServerTracker = dataMiningServerTracker;
     }
 
     /** @return all {@link StoredDataMiningQueryDTO}s the user has stored in his user store. */
@@ -42,7 +47,7 @@ public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQuery
         return new ArrayList<StoredDataMiningQueryDTOImpl>(
                 (Collection<? extends StoredDataMiningQueryDTOImpl>) StreamSupport
                         .stream(prefs.getStoredQueries().spliterator(), false).map(this::transform)
-                .collect(Collectors.toList()));
+                        .collect(Collectors.toList()));
     }
 
     /** Updates or creates a new stored query and returns it. */
@@ -109,7 +114,8 @@ public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQuery
 
     /** Converts a {@link StoredDataMiningQueryPreference} to a {@link StoredDataMiningQueryDTO}. */
     private StoredDataMiningQueryDTO transform(StoredDataMiningQueryPreference pref) {
-        StatisticQueryDefinitionDTO query = DataMiningQuerySerializer.fromBase64String(pref.getSerializedQuery());
+        StatisticQueryDefinitionDTO query = DataMiningQuerySerializer.fromBase64String(pref.getSerializedQuery(),
+                ((ModifiableDataMiningServer) dataMiningServerTracker.getService()).getJoinedClassLoader());
         return new StoredDataMiningQueryDTOImpl(pref.getName(), pref.getId(), query);
     }
 

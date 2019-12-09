@@ -23,7 +23,7 @@ public class DataMiningQuerySerializerTest {
 
     private void testSerializationAndDeserialization(final StatisticQueryDefinitionDTO dto) {
         String base64 = DataMiningQuerySerializer.toBase64String(dto);
-        StatisticQueryDefinitionDTO deserialized = DataMiningQuerySerializer.fromBase64String(base64);
+        StatisticQueryDefinitionDTO deserialized = DataMiningQuerySerializer.fromBase64String(base64, null);
         Assert.assertEquals(dto, deserialized);
     }
 }

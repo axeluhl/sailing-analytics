@@ -21,6 +21,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.DataMiningServer;
+import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.StatisticQueryDefinition;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
@@ -71,7 +72,8 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
         dataMiningServerTracker = createAndOpenDataMiningServerTracker(context);
         securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
 
-        storedDataMiningQueryPersistor = new StoredDataMiningQueryPersisterImpl(getSecurityService());
+        storedDataMiningQueryPersistor = new StoredDataMiningQueryPersisterImpl(getSecurityService(),
+                dataMiningServerTracker);
         dtoFactory = new DataMiningDTOFactory();
     }
 
@@ -86,7 +88,7 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
     private DataMiningServer getDataMiningServer() {
         return dataMiningServerTracker.getService();
     }
-    
+
     private SecurityService getSecurityService() {
         return securityServiceTracker.getService();
     }
@@ -96,7 +98,7 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
         checkDataMiningPermission();
         return getDataMiningServer().getComponentsChangedTimepoint();
     }
-    
+
     @Override
     public FunctionDTO getIdentityFunction(String localeInfoName) {
         checkDataMiningPermission();
@@ -377,7 +379,7 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
         }
         return predefinedQueryNames;
     }
-    
+
     @Override
     public ModifiableStatisticQueryDefinitionDTO getPredefinedQueryDefinition(PredefinedQueryIdentifier identifier,
             String localeInfoName) {
@@ -399,13 +401,14 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
         }
         return null;
     }
-    
+
     @Override
     public ModifiableStatisticQueryDefinitionDTO localize(ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO,
             String localeInfoName) {
         checkDataMiningPermission();
         DataMiningServer dataMiningServer = getDataMiningServer();
-        StatisticQueryDefinition<?, ?, ?, ?> queryDefinition = dataMiningServer.getQueryDefinitionForDTO(queryDefinitionDTO);
+        StatisticQueryDefinition<?, ?, ?, ?> queryDefinition = dataMiningServer
+                .getQueryDefinitionForDTO(queryDefinitionDTO);
         Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         return (ModifiableStatisticQueryDefinitionDTO) dtoFactory.createQueryDefinitionDTO(queryDefinition,
                 dataMiningServer.getStringMessages(), locale, localeInfoName);
@@ -436,6 +439,7 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
 
     @Override
     public ModifiableStatisticQueryDefinitionDTO getDeserializedQuery(String serializedQuery) {
-        return (ModifiableStatisticQueryDefinitionDTO) DataMiningQuerySerializer.fromBase64String(serializedQuery);
+        return (ModifiableStatisticQueryDefinitionDTO) DataMiningQuerySerializer.fromBase64String(serializedQuery,
+                ((ModifiableDataMiningServer) dataMiningServerTracker.getService()).getJoinedClassLoader());
     }
 }

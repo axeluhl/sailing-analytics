@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
 import java.util.logging.Logger;
 
 import com.sap.sse.common.Base64Utils;
@@ -31,7 +32,7 @@ public final class DataMiningQuerySerializer {
     }
 
     /** @return the {@link StatisticQueryDefinitionDTO} from a base 64 string deserialized with java serialization */
-    public static StatisticQueryDefinitionDTO fromBase64String(final String string) {
+    public static StatisticQueryDefinitionDTO fromBase64String(final String string, ClassLoader joinedClassLoader) {
         byte[] bytes;
         try {
             bytes = Base64Utils.fromBase64(string);
@@ -40,14 +41,25 @@ public final class DataMiningQuerySerializer {
         }
 
         try (ByteArrayInputStream stream = new ByteArrayInputStream(bytes)) {
-            ObjectInputStream in;
-            in = new ObjectInputStream(stream);
+            ObjectInputStream in = new ObjectInputStream(stream) {
+                @Override
+                protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+                    if (joinedClassLoader != null) {
+                        try {
+                            return joinedClassLoader.loadClass(desc.getName());
+                        } catch (ClassNotFoundException e) {
+                            return super.resolveClass(desc);
+                        }
+                    }
+                    return super.resolveClass(desc);
+                }
+            };
             Object o = in.readObject();
             if (o instanceof StatisticQueryDefinitionDTO) {
                 return (StatisticQueryDefinitionDTO) o;
             }
         } catch (IOException | ClassNotFoundException e) {
-            LOG.warning("Could not load query: " + e.getMessage());
+            LOG.severe("Could not load query: " + e.getMessage());
         }
         return null;
     }
