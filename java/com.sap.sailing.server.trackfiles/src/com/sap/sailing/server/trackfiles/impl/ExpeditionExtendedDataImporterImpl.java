@@ -49,17 +49,17 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixImporter
         implements DoubleVectorFixImporter {
     private static final Logger logger = Logger.getLogger(ExpeditionExtendedDataImporterImpl.class.getName());
-    private static final String ORIGINAL_POSITION_HEADER = "Pos[ddd.dd]";
-    public static final String BOAT_COL = "Boat";
-    public static final String COL_NAME_LAT = "Lat";
-    public static final String COL_NAME_LON = "Lon";
-    private static final String UTC_COLUMN = "Utc";
+    private static final String ORIGINAL_POSITION_HEADER = "pos[ddd.dd]";
+    public static final String BOAT_COL = "boat";
+    public static final String COL_NAME_LAT = "lat";
+    public static final String COL_NAME_LON = "lon";
+    private static final String UTC_COLUMN = "utc";
     private static final String DATE_COLUMN_1 = "dd/mm/yy";
     private static final String DATE_COLUMN_1_PATTERN = "dd/MM/yy";
     private static final String DATE_COLUMN_2 = "mm/dd/yy";
     private static final String DATE_COLUMN_2_PATTERN = "MM/dd/yy";
     private static final String TIME_COLUMN = "hhmmss";
-    private static final String GPS_TIME_COLUMN = "GPS Time"; // FIXME this has to be "GPS time" with a lowercase t but then we need to handle all these odd values...
+    private static final String GPS_TIME_COLUMN = "gps time"; // FIXME this has to be "GPS time" with a lowercase t but then we need to handle all these odd values...
     private static final Pattern BOAT_CHECK_PATTERN = Pattern.compile("[1-9]?[0-9]");
     private final Map<String, Integer> columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix;
     /**
@@ -140,12 +140,13 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
     }
 
     /**
-     * When the header contains one or more occurrences of
-     * {@link #ORIGINAL_POSITION_HEADER}, it is substituted by the two header
-     * columns {@link #COL_NAME_LAT} and {@link #COL_NAME_LON} because that's
-     * how positions are stored in Expedition files: as two comma-separated
-     * values, one for latitude, another for longitude, although there is only
+     * When the header contains one or more occurrences of {@link #ORIGINAL_POSITION_HEADER}, it is substituted by the
+     * two header columns {@link #COL_NAME_LAT} and {@link #COL_NAME_LON} because that's how positions are stored in
+     * Expedition files: as two comma-separated values, one for latitude, another for longitude, although there is only
      * one header field.
+     * <p>
+     * 
+     * All header column names will be stored in the resulting map's key set as lowercase.
      */
     public static Map<String, Integer> parseHeader(String headerLine) {
         final String[] headerTokens = split(headerLine);
@@ -154,10 +155,10 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
         for (int columnInHeader = 0; columnInHeader < headerTokens.length; columnInHeader++) {
             String header = headerTokens[columnInHeader];
             if (header.equals(ORIGINAL_POSITION_HEADER)) {
-                colIndicesInFile.put(COL_NAME_LAT, columnInResultingHeader++);
-                colIndicesInFile.put(COL_NAME_LON, columnInResultingHeader++);
+                colIndicesInFile.put(COL_NAME_LAT.toLowerCase(), columnInResultingHeader++);
+                colIndicesInFile.put(COL_NAME_LON.toLowerCase(), columnInResultingHeader++);
             } else {
-                colIndicesInFile.put(header, columnInResultingHeader++);
+                colIndicesInFile.put(header.toLowerCase(), columnInResultingHeader++);
             }
         }
         return colIndicesInFile;
