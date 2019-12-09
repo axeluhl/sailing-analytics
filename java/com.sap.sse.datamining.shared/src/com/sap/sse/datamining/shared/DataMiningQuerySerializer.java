@@ -40,7 +40,6 @@ public final class DataMiningQuerySerializer {
         }
 
         try (ByteArrayInputStream stream = new ByteArrayInputStream(bytes)) {
-            // FIXME bug5032: the object input stream needs a class loader that can see what is required to de-serialize
             ObjectInputStream in;
             in = new ObjectInputStream(stream);
             Object o = in.readObject();
@@ -48,7 +47,7 @@ public final class DataMiningQuerySerializer {
                 return (StatisticQueryDefinitionDTO) o;
             }
         } catch (IOException | ClassNotFoundException e) {
-            LOG.severe("Could not load query: " + e.getMessage());
+            LOG.warning("Could not load query: " + e.getMessage());
         }
         return null;
     }
