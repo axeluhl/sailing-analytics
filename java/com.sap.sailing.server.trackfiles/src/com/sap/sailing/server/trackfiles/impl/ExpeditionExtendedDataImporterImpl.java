@@ -256,10 +256,19 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
         final TimePoint timePoint;
         final String date;
         final String dateFormatPattern;
-        if (columnsInFileFromHeader.containsKey(GPS_TIME_COLUMN) && !lineContentTokens[columnsInFileFromHeader.get(GPS_TIME_COLUMN)].trim().isEmpty()) {
-            timePoint = getTimePoint(lineContentTokens[columnsInFileFromHeader.get(GPS_TIME_COLUMN)]);
-        } else if (columnsInFileFromHeader.containsKey(UTC_COLUMN) && !lineContentTokens[columnsInFileFromHeader.get(UTC_COLUMN)].trim().isEmpty()) {
-            timePoint = getTimePoint(lineContentTokens[columnsInFileFromHeader.get(UTC_COLUMN)]);
+        final Integer gpsTimeColumnIndex = columnsInFileFromHeader.get(GPS_TIME_COLUMN);
+        final String time_ExcelEpoch = gpsTimeColumnIndex == null ? null : lineContentTokens[gpsTimeColumnIndex];
+        final Integer utcColumnIndex = columnsInFileFromHeader.get(UTC_COLUMN);
+        final String utc = utcColumnIndex == null ? null : lineContentTokens[utcColumnIndex];
+        if (time_ExcelEpoch != null && !time_ExcelEpoch.trim().isEmpty()) {
+            if (Double.valueOf(time_ExcelEpoch) < 1 && utc != null &&
+                    !utc.trim().isEmpty()) { // then it seems to be only the fractional time of the day; try to add UTC day:
+                timePoint = getTimePoint(""+(Double.valueOf(utc.trim()).intValue()+Double.valueOf(time_ExcelEpoch)));
+            } else {
+                timePoint = getTimePoint(time_ExcelEpoch);
+            }
+        } else if (utc != null && !utc.trim().isEmpty()) {
+            timePoint = getTimePoint(lineContentTokens[utcColumnIndex]);
         } else if (columnsInFileFromHeader.containsKey(DATE_COLUMN_1) && !lineContentTokens[columnsInFileFromHeader.get(DATE_COLUMN_1)].trim().isEmpty()
                 || columnsInFileFromHeader.containsKey(DATE_COLUMN_2) && !lineContentTokens[columnsInFileFromHeader.get(DATE_COLUMN_2)].trim().isEmpty()) {
             if (columnsInFileFromHeader.containsKey(DATE_COLUMN_1)) {
