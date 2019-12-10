@@ -2356,4 +2356,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String wayPointMarkTemplatesAreTheSame();
     String wayPointMarkInSequenceMissing();
     String defaultNumberOfLaps();
+    String markRoleUsedTwice();
 }

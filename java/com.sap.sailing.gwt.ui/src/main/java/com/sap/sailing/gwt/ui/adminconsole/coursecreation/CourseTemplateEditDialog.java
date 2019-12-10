@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -81,25 +82,30 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                         if (invalidName) {
                             sb.append(stringMessages.pleaseEnterAName()).append(". ");
                         }
-
+                        final Set<UUID> distinctUUIDs = new HashSet<>();
+                        if (valueToValidate.getAssociatedRoles().values().stream().map(u -> distinctUUIDs.add(u))
+                                .filter(b -> b == false).count() > 0) {
+                            sb.append(stringMessages.markRoleUsedTwice()).append(". ");
+                        }
                         AtomicBoolean unAssignedMarkTemplateUsed = new AtomicBoolean(false);
                         valueToValidate.getWaypointTemplates().forEach(wt -> {
                             if (wt.getPassingInstruction() == null) {
                                 sb.append(stringMessages.wayPointRequiresPassingInstruction()).append(". ");
                             } else {
-                                if (wt.getShortName() == null) {
-                                    sb.append(stringMessages.wayPointRequiresShortName()).append(". ");
-                                }
                                 wt.getMarkTemplatesForControlPoint()
                                         .forEach(wtmt -> unAssignedMarkTemplateUsed.set(unAssignedMarkTemplateUsed.get()
                                                 || valueToValidate.getMarkTemplates().stream()
                                                         .noneMatch(mt -> mt.getUuid().equals(wtmt.getUuid()))));
                                 if (hasTwoMarks(wt)) {
+                                    if (wt.getShortName() == null) {
+                                        sb.append(stringMessages.wayPointRequiresShortName()).append(". ");
+                                    }
                                     if (wt.getName() == null) {
                                         sb.append(stringMessages.wayPointRequiresName()).append(". ");
                                     }
-                                    if (wt.getMarkTemplatesForControlPoint().get(0)
-                                            .equals(wt.getMarkTemplatesForControlPoint().get(1))) {
+                                    if (wt.getMarkTemplatesForControlPoint().size() == 2
+                                            && wt.getMarkTemplatesForControlPoint().get(0)
+                                                    .equals(wt.getMarkTemplatesForControlPoint().get(1))) {
                                         sb.append(stringMessages.wayPointMarkTemplatesAreTheSame());
                                     }
                                 }
@@ -334,10 +340,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                 hideablePassingInstructionCell) {
             @Override
             public String getValue(WaypointTemplateDTO waypointTemplate) {
-                return waypointTemplate.getMarkTemplatesForControlPoint() != null
-                        && waypointTemplate.getMarkTemplatesForControlPoint().size() >= 2
-                                ? waypointTemplate.getMarkTemplatesForControlPoint().get(1).getName()
-                                : "";
+                return waypointTemplate.getPassingInstruction().name();
             }
         };
         passingInstructionColumn.setFieldUpdater(new FieldUpdater<WaypointTemplateDTO, String>() {
@@ -410,6 +413,12 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         } catch (NumberFormatException nfe) {
             defaultNumberOfLaps = null;
         }
+        waypointTemplates.forEach(wt -> {
+            if (!hasTwoMarks(wt) && wt.getMarkTemplatesForControlPoint() != null
+                    && wt.getMarkTemplatesForControlPoint().size() == 2) {
+                wt.getMarkTemplatesForControlPoint().remove(1);
+            }
+        });
         return new CourseTemplateDTO(id, nameTextBox.getValue(), markTemplates, waypointTemplates, associatedRoles,
                 optionalUrl, tagsEditor.getValue(), null, defaultNumberOfLaps);
     }
