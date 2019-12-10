@@ -22,6 +22,7 @@ import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
@@ -69,6 +70,9 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
 
     private final StringListEditorComposite tagsEditor;
 
+    private static final RegExp urlRegExp = RegExp
+            .compile("^((ftp|http|https)://[\\w@.\\-\\_]+(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$");
+
     public CourseTemplateEditDialog(final SailingServiceAsync sailingService, final UserService userService,
             final StringMessages stringMessages, CourseTemplateDTO courseTemplateToEdit,
             Map<UUID, MarkRoleDTO> markRolesMap, List<MarkTemplateDTO> allMarkTemplates,
@@ -113,6 +117,11 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                         });
                         if (unAssignedMarkTemplateUsed.get()) {
                             sb.append(stringMessages.wayPointMarkInSequenceMissing()).append(". ");
+                        }
+                        if (valueToValidate.getOptionalImageUrl().isPresent()) {
+                            if (urlRegExp.exec(valueToValidate.getOptionalImageUrl().get()) == null) {
+                                sb.append(stringMessages.invalidImageURL()).append(". ");
+                            }
                         }
                         return sb.toString();
                     }
@@ -428,7 +437,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         Grid result = new Grid(6, 2);
         result.setWidget(0, 0, new Label(stringMessages.name()));
         result.setWidget(0, 1, nameTextBox);
-        result.setWidget(1, 0, new Label(stringMessages.url()));
+        result.setWidget(1, 0, new Label(stringMessages.imageURL()));
         result.setWidget(1, 1, urlTextBox);
         result.setWidget(2, 0, buttonAddMarkTemplate);
         result.setWidget(2, 1, markTemplatesTable);
