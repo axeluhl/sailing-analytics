@@ -105,4 +105,11 @@ public interface EventBase extends NamedWithID, WithDescription, Renamable, With
      * Sets and converts all event images and videos from the old URL based format to the new richer format 
      * */ 
     boolean setMediaURLs(Iterable<URL> imageURLs, Iterable<URL> sponsorImageURLs, Iterable<URL> videoURLs, URL logoImageURL, Map<URL, ImageSize> imageSizes);
+    
+    /**
+     * Determines whether the race is tracked by TracTrac or not
+     * @return a boolean flag, whether any @TrackedRace in the event is tracked by TracTrac or not
+     */
+    boolean isTrackedByTracTrac();
+    
 }

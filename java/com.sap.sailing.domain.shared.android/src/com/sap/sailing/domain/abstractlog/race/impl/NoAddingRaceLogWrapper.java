@@ -59,7 +59,7 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     }
 
     @Override
-    public void addAllListeners(HashSet<RaceLogEventVisitor> listeners) {
+    public void addAllListeners(Iterable<RaceLogEventVisitor> listeners) {
         innerRaceLog.addAllListeners(listeners);
     }
 

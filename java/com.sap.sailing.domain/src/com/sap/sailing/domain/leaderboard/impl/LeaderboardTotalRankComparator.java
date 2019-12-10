@@ -17,6 +17,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -62,9 +63,10 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     /**
      * Considers all of the leaderboard's columns in their state at <code>timePoint</code> for calculating the score and rank.
      */
-    public LeaderboardTotalRankComparator(Leaderboard leaderboard, TimePoint timePoint,
-            ScoringScheme scoringScheme, boolean nullScoresAreBetter) throws NoWindException {
-        this(leaderboard, timePoint, scoringScheme, nullScoresAreBetter, leaderboard.getRaceColumns());
+    public LeaderboardTotalRankComparator(Leaderboard leaderboard, TimePoint timePoint, ScoringScheme scoringScheme,
+            boolean nullScoresAreBetter, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache)
+            throws NoWindException {
+        this(leaderboard, timePoint, scoringScheme, nullScoresAreBetter, leaderboard.getRaceColumns(), cache);
     }
     
     /**
@@ -78,8 +80,9 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
      * those columns considered is computed for the <code>timePoint</code> specified. In particular, if a time point is chosen that
      * is before a race in a column that is considered has started, <code>null</code> values may result in that column.
      */
-    public LeaderboardTotalRankComparator(Leaderboard leaderboard, TimePoint timePoint,
-            ScoringScheme scoringScheme, boolean nullScoresAreBetter, Iterable<RaceColumn> raceColumnsToConsider) {
+    public LeaderboardTotalRankComparator(Leaderboard leaderboard, TimePoint timePoint, ScoringScheme scoringScheme,
+            boolean nullScoresAreBetter, Iterable<RaceColumn> raceColumnsToConsider,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         super();
         this.leaderboard = leaderboard;
         this.timePoint = timePoint;
@@ -94,8 +97,10 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
             this.discardedRaceColumnsPerCompetitor.put(competitor, discardedRaceColumns);
             for (RaceColumn raceColumn : raceColumnsToConsider) {
                 Pair<Competitor, RaceColumn> key = new Util.Pair<Competitor, RaceColumn>(competitor, raceColumn);
-                netPointsCache.put(key, leaderboard.getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns));
-                totalPointsCache.put(key, leaderboard.getTotalPoints(competitor, raceColumn, timePoint));
+                final Double totalPoints = leaderboard.getTotalPoints(competitor, raceColumn, timePoint, cache);
+                netPointsCache.put(key, leaderboard.getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns,
+                        /* total points provider */ ()->totalPoints));
+                totalPointsCache.put(key, totalPoints);
             }
         }
     }
@@ -243,7 +248,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                         if (result == 0) {
                             result = compareByMedalRaceScore(o1MedalRaceScore, o2MedalRaceScore);
                             if (result == 0) {
-                                result = compareByBetterScore(o1, Collections.unmodifiableList(o1Scores), o2, Collections.unmodifiableList(o2Scores), timePoint);
+                                result = compareByBetterScore(o1, Collections.unmodifiableList(o1TotalPoints), o2, Collections.unmodifiableList(o2TotalPoints), timePoint);
                                 if (result == 0) {
                                     // compare by last race:
                                     result = scoringScheme.compareByLastRace(o1TotalPoints, o2TotalPoints, nullScoresAreBetter, o1, o2);
@@ -472,9 +477,17 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     }
 
     /**
-     * Assuming both competitors scored in the same number of races, and assuming they scored the same net score,
-     * break the tie according to the {@link #scoringScheme scoring scheme} set for this comparator.
+     * Assuming both competitors scored in the same number of races, and assuming they scored the same net score, break
+     * the tie according to the {@link #scoringScheme scoring scheme} set for this comparator.
+     * 
      * @see ScoringScheme#compareByBetterScore(Competitor, List, Competitor, List, boolean, TimePoint, Leaderboard, Map)
+     * 
+     * @param o1Scores
+     *            the scores of each race for competitor {@code o1}, including the scores of races that may be
+     *            discarded, with their original score
+     * @param o2Scores
+     *            the scores of each race for competitor {@code o2}, including the scores of races that may be
+     *            discarded, with their original score
      */
     protected int compareByBetterScore(Competitor o1, List<Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2,
             List<Util.Pair<RaceColumn, Double>> o2Scores, TimePoint timePoint) {

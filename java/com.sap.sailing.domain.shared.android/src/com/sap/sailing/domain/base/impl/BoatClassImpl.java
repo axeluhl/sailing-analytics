@@ -132,7 +132,7 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     }
 
     @Override
-    public BoatClass resolve(SharedDomainFactory domainFactory) {
+    public BoatClass resolve(SharedDomainFactory<?> domainFactory) {
         return domainFactory.getOrCreateBoatClass(getName(), typicallyStartsUpwind());
     }
 

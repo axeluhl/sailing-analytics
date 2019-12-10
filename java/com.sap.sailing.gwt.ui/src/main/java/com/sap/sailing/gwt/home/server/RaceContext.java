@@ -340,7 +340,8 @@ public class RaceContext {
     public RaceListRaceDTO getFinishedRaceOrNull() {
         // a race is of 'public interest' of a race is a combination of it's 'live' state
         // and special flags states indicating how the postponed/canceled races will be continued
-        if (getLiveRaceViewState() == RaceViewState.FINISHED) {
+        // See: https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5029
+        if (getLiveRaceViewState() == RaceViewState.FINISHED && !isLiveOrOfPublicInterest()) {
             // the start time is always given for live races
             RaceListRaceDTO raceListRaceDTO = new RaceListRaceDTO(getLeaderboardName(), 
                     getRaceIdentifierOrNull(), getRaceName());

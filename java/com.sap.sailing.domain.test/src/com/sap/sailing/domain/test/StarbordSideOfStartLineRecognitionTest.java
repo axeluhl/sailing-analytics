@@ -13,7 +13,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
@@ -25,6 +24,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
@@ -91,7 +91,7 @@ public class StarbordSideOfStartLineRecognitionTest {
 
         public MockedTrackedRaceImpl() {
             super(null, null, Collections.<Sideline> emptyList(), null, 0, 0, 0, 0, false, OneDesignRankingMetric::new,
-                    mock(RaceLogResolver.class));
+                    mock(RaceLogAndTrackedRaceResolver.class), null);
         }
         
         @Override

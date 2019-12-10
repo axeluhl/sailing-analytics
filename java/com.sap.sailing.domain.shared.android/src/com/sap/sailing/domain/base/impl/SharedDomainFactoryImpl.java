@@ -34,7 +34,7 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.WithID;
 
-public class SharedDomainFactoryImpl implements SharedDomainFactory {
+public class SharedDomainFactoryImpl<RLR extends RaceLogResolver> implements SharedDomainFactory<RLR> {
     private static final Logger logger = Logger.getLogger(SharedDomainFactoryImpl.class.getName());
     
     /**
@@ -105,16 +105,16 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
      */
     private final Set<String> mayStartWithNoUpwindLeg;
     
-    private final RaceLogResolver raceLogResolver;
+    private final RLR raceLogResolver;
     
     /**
      * Uses a transient competitor store
      */
-    public SharedDomainFactoryImpl(RaceLogResolver raceLogResolver) {
+    public SharedDomainFactoryImpl(RLR raceLogResolver) {
         this(new TransientCompetitorAndBoatStoreImpl(), raceLogResolver);
     }
     
-    public SharedDomainFactoryImpl(CompetitorAndBoatStore competitorStore, RaceLogResolver raceLogResolver) {
+    public SharedDomainFactoryImpl(CompetitorAndBoatStore competitorStore, RLR raceLogResolver) {
         this.raceLogResolver = raceLogResolver;
         waypointCacheReferenceQueue = new ReferenceQueue<Waypoint>();
         nationalityCache = new HashMap<String, Nationality>();
@@ -283,7 +283,9 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     private void expungeStaleWaypointCacheEntries() {
         Reference<? extends Waypoint> ref;
         while ((ref=waypointCacheReferenceQueue.poll()) != null) {
-            ((WeakWaypointReference) ref).removeCacheEntry();
+            @SuppressWarnings("unchecked")
+            final SharedDomainFactoryImpl<RLR>.WeakWaypointReference weakWaypointReference = (WeakWaypointReference) ref;
+            weakWaypointReference.removeCacheEntry();
         }
     }
     
@@ -375,23 +377,23 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     @Override
     public DynamicCompetitor getOrCreateCompetitor(Serializable competitorId, String name, String shortname, Color displayColor, String email,
             URI flagImage, DynamicTeam team, Double timeOnTimeFactor,
-            Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
+            Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, boolean storePersistently) {
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "getting or creating competitor "+name+" with ID "+competitorId+" in domain factory "+this);
         }
         return getCompetitorAndBoatStore().getOrCreateCompetitor(competitorId, name, shortname, displayColor, email, flagImage, team,
-                timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
+                timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, storePersistently);
     }
 
     @Override
     public DynamicCompetitorWithBoat getOrCreateCompetitorWithBoat(Serializable competitorId, String name, String shortName,
             Color displayColor, String email, URI flagImageURI, DynamicTeam team, Double timeOnTimeFactor,
-            Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
+            Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat, boolean storePersistently) {
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "getting or creating competitor "+name+" with ID "+competitorId+" in domain factory "+this);
         }
         return getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(competitorId, name, shortName, displayColor, email, flagImageURI, team,
-                timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
+                timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat, storePersistently);
     }
 
     @Override
@@ -405,8 +407,8 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public DynamicBoat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color) {
-        return getCompetitorAndBoatStore().getOrCreateBoat(id, name, boatClass, sailId, color);
+    public DynamicBoat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color, boolean storePersistently) {
+        return getCompetitorAndBoatStore().getOrCreateBoat(id, name, boatClass, sailId, color, storePersistently);
     }
 
     @Override
@@ -420,7 +422,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public RaceLogResolver getRaceLogResolver() {
+    public RLR getRaceLogResolver() {
         return raceLogResolver;
     }
 }

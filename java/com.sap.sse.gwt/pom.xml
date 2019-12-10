@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>root</artifactId>
@@ -9,24 +9,52 @@
   </parent>
   <artifactId>com.sap.sse.gwt</artifactId>
   <packaging>eclipse-plugin</packaging>
-  
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>tycho-source-plugin</artifactId>
-				<version>${tycho-version}</version>
-				<executions>
-					<execution>
-						<id>plugin-source</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>plugin-source</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
-
+  <dependencies>
+    <dependency>
+      <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sse.common</artifactId>
+      <version>${project.version}</version>
+      <classifier>sources</classifier>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-source-plugin</artifactId>
+        <version>${tycho-version}</version>
+        <executions>
+          <execution>
+            <id>plugin-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>plugin-source</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>gwt-maven-plugin</artifactId>
+        <version>${gwt.plugin.version}</version>
+        <executions>
+          <!-- GWT version detected from dependencyManagement -->
+          <execution>
+            <configuration>
+              <!-- <userAgents>chrome</userAgents> -->
+              <modules>
+                <module>com.sap.sse.gwt.StorageMessaging</module>
+                <module>com.sap.sse.gwt.StorageMessagingTest</module>
+              </modules>
+              <gen>${basedir}/.generated</gen>
+              <webappDirectory>${basedir}</webappDirectory>
+            </configuration>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>

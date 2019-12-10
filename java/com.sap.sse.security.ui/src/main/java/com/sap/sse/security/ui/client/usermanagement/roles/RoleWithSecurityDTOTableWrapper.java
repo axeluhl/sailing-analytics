@@ -120,7 +120,7 @@ public class RoleWithSecurityDTOTableWrapper extends
 
         // filter field configuration
         filterField = new LabeledAbstractFilterablePanel<RoleWithSecurityDTO>(new Label(stringMessages.filterRoles()),
-                new ArrayList<RoleWithSecurityDTO>(), dataProvider) {
+                new ArrayList<RoleWithSecurityDTO>(), dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(RoleWithSecurityDTO t) {
                 List<String> string = new ArrayList<String>();
@@ -133,6 +133,7 @@ public class RoleWithSecurityDTOTableWrapper extends
                 return table;
             }
         };
+        filterField.setUpdatePermissionFilterForCheckbox(role -> userService.hasPermission(role, DefaultActions.UPDATE));
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
 
         mainPanel.insert(filterField, 0);

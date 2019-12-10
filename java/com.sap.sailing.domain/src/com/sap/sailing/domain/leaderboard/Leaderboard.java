@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
@@ -28,9 +29,11 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCache;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
@@ -194,7 +197,31 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * @return The resulting map is guaranteed to have the same iteration order regarding the race columns
      * as {@link #getRaceColumns()}.
      */
-    Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint) throws NoWindException;
+    default Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(
+            TimePoint timePoint) throws NoWindException {
+        return getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(timePoint,
+                new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+    
+    /**
+     * Computes the competitor's ranks as they were or would have been after each race column (from left to right)
+     * was completed.<p>
+     * 
+     * A leaderboard fills up over time, usually "from left to right" with one race after another finishing.
+     * For split fleets things can vary slightly. There, one fleet may complete a few races before the another fleet
+     * starts with those races. In this case there isn't even any point in time at which all fleets have finished
+     * exactly <i>n</i> races. Still, this method pretends such a time point would have existed, actually ignoring
+     * the <i>times</i> at which a race took place but only looking at the resulting scores and discards.<p>
+     * 
+     * When computing the ranks after all columns up to and including the race column that is the key of the resulting
+     * map, the method applies the discarding and tie breaking rules as they would have had to be applied had the races
+     * in the respective column just completed.
+     * 
+     * @return The resulting map is guaranteed to have the same iteration order regarding the race columns
+     * as {@link #getRaceColumns()}.
+     */
+    Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
     
     /**
      * Computes the competitor's net points sum as they were or would have been after each race column (from left to right)
@@ -247,7 +274,28 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *            a race that is contained in the {@link #getRaceColumns()} result
      * @return a 1-based rank, or 0 if no rank can be determined for the {@code competitor} in {@code race}
      */
-    int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint);
+    default int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) {
+        return getTrackedRank(competitor, race, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
+    /**
+     * Shorthand for {@link TrackedRace#getRank(Competitor, com.sap.sse.common.TimePoint)} with the additional logic
+     * that in case the <code>race</code> hasn't {@link TrackedRace#hasStarted(TimePoint) started} yet or no
+     * {@link TrackedRace} exists for <code>race</code>, 0 will be returned for all those competitors. The tracked race
+     * for the correct {@link Fleet} is determined using {@link RaceColumn#getTrackedRace(Competitor)}.
+     * <p>
+     * 
+     * For each competitor tracking-wise ranking better than <code>competitor</code> but with a
+     * {@link #getMaxPointsReason(Competitor, RaceColumn, TimePoint) disqualification reason} given,
+     * <code>competitor</code>'s rank is improved by one.
+     * 
+     * @param competitor
+     *            a competitor contained in the {@link #getCompetitors()} result
+     * @param race
+     *            a race that is contained in the {@link #getRaceColumns()} result
+     * @return a 1-based rank, or 0 if no rank can be determined for the {@code competitor} in {@code race}
+     */
+    int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * A possibly corrected number of points for the race specified. Defaults to the result of calling
@@ -261,7 +309,23 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * @return <code>null</code> if the competitor didn't participate in the race or the race hasn't started yet at
      *         <code>timePoint</code>
      */
-    Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
+    default Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
+        return getTotalPoints(competitor, raceColumn, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
+    /**
+     * A possibly corrected number of points for the race specified. Defaults to the result of calling
+     * {@link #getTrackedRank(Competitor, TrackedRace, TimePoint)} but may be corrected by disqualifications or calls by
+     * the jury for the particular race that differ from the tracking results.
+     * 
+     * @param competitor
+     *            a competitor contained in the {@link #getCompetitors()} result
+     * @param raceColumn
+     *            a race that is contained in the {@link #getRaceColumns()} result
+     * @return <code>null</code> if the competitor didn't participate in the race or the race hasn't started yet at
+     *         <code>timePoint</code>
+     */
+    Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Tells if and why a competitor received "penalty" points for a race (however the scoring rules define the
@@ -322,7 +386,25 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * {@link #getTotalPoints(Competitor, RaceColumn, TimePoint)} and not on
      * {@link #getNetPoints(Competitor, RaceColumn, TimePoint)}.
      */
-    Iterable<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint) throws NoWindException;
+    default Iterable<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
+        return getCompetitorsFromBestToWorst(raceColumn, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+    
+    /**
+     * Sorts the competitors according to their ranking in the race column specified. Only competitors who have a score
+     * are added to the result list. This excludes competitors whose fleet hasn't raced for the <code>raceColumn</code>
+     * yet, and those where no tracked rank is known and no manual score correction was performed.
+     * <p>
+     * 
+     * The sorting order considers this leaderboard's scoring scheme including the semantics of
+     * {@link Fleet#compareTo(Fleet) ordered fleets} and {@link RaceColumn#isMedalRace() medal races}. The ordering
+     * does not consider result discarding because when sorting for a race column it is of interest how the competitor
+     * performed in that race and not how the score affected the overall regatta score. Therefore, it is based on
+     * {@link #getTotalPoints(Competitor, RaceColumn, TimePoint)} and not on
+     * {@link #getNetPoints(Competitor, RaceColumn, TimePoint)}.
+     */
+    Iterable<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
     
     /**
      * Sorts the competitors according to the overall regatta standings, considering the sorting rules for
@@ -330,7 +412,17 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * created per call, so the caller may freely manipulate the result.
      * @throws NoWindException 
      */
-    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
+    default List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+        return getCompetitorsFromBestToWorst(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+    
+    /**
+     * Sorts the competitors according to the overall regatta standings, considering the sorting rules for
+     * {@link Series}, {@link Fleet}s, medal races, discarding rules and score corrections. A new list is
+     * created per call, so the caller may freely manipulate the result.
+     * @throws NoWindException 
+     */
+    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
     
     /**
      * Returns the total rank of the given competitor or {@code 0} if no rank can be determined for
@@ -539,6 +631,15 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
             Set<RaceColumn> discardedRaceColumns);
 
+    /**
+     * Same as {@link #getNetPoints(Competitor, RaceColumn, TimePoint, Set)}, only that a supplier for
+     * the total points for the {@code competitor} in column {@code raceColumn} at time point {@code timePoint}
+     * is provided. This helps if a caller also needs to determine the total points anyway, saving redundant
+     * calculations.
+     */
+    Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
+            Set<RaceColumn> discardedRaceColumns, Supplier<Double> totalPointsProvider);
+
     TimePoint getNowMinusDelay();
     
     /**
@@ -655,4 +756,11 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
         }
         return result;
     }
+
+    /**
+     * @return a map whose keys contain different averaging time spans, e.g., 5s, 30s, and 60s, and whose values contain
+     *         a pair with the average leaderboard computation time for all computation requests not older than the time
+     *         given as the key, and as the second pair component the number of computations in that time period.
+     */
+    Map<Duration, Pair<Duration, Integer>> getComputationTimeStatistics();
 }

@@ -29,7 +29,7 @@ public class LegacyCompetitorWithContainedBoatJsonDeserializer implements JsonDe
     protected final JsonDeserializer<DynamicBoat> boatJsonDeserializer;
     private static final Logger logger = Logger.getLogger(LegacyCompetitorWithContainedBoatJsonDeserializer.class.getName());
 
-    public static LegacyCompetitorWithContainedBoatJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
+    public static LegacyCompetitorWithContainedBoatJsonDeserializer create(SharedDomainFactory<?> baseDomainFactory) {
         return new LegacyCompetitorWithContainedBoatJsonDeserializer(baseDomainFactory, new TeamJsonDeserializer(new PersonJsonDeserializer(
                 new NationalityJsonDeserializer(baseDomainFactory))), new LegacyBoatJsonDeserializer(baseDomainFactory, new BoatClassJsonDeserializer(baseDomainFactory)));
     }
@@ -60,7 +60,6 @@ public class LegacyCompetitorWithContainedBoatJsonDeserializer implements JsonDe
             String displayColorAsString = (String) object.get(CompetitorJsonConstants.FIELD_DISPLAY_COLOR);
             String email = (String) object.get(CompetitorJsonConstants.FIELD_EMAIL);
             String searchTag = (String) object.get(CompetitorJsonConstants.FIELD_SEARCHTAG);
-            
             URI flagImageURI = null;
             String flagImageURIAsString = (String) object.get(CompetitorJsonConstants.FIELD_FLAG_IMAGE_URI);
             if (flagImageURIAsString != null) {
@@ -70,7 +69,6 @@ public class LegacyCompetitorWithContainedBoatJsonDeserializer implements JsonDe
                     logger.warning("Illegal flag image URI " + e.getMessage());
                 }
             }
-
             final Color displayColor;
             if (displayColorAsString == null || displayColorAsString.isEmpty()) {
                 displayColor = null;
@@ -94,7 +92,6 @@ public class LegacyCompetitorWithContainedBoatJsonDeserializer implements JsonDe
                     flagImageURI, team, timeOnTimeFactor,
                     timeOnDistanceAllowanceInSecondsPerNauticalMile == null ? null : 
                         new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag, boat);
-            
             return competitorWithBoat;
         } catch (Exception e) {
             throw new JsonDeserializationException(e);

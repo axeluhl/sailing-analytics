@@ -4,6 +4,53 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
+      
+         <h5 class="articleSubheadline">December 2019</h5>
+         <ul class="bulletList">
+            <li>The "Relative score" rank on race level in the data mining module has been adjusted
+                such that it computes the score relative to the number of competitors in the single race,
+                not in the entire leaderboard. This leads to different numbers being reported for
+                split-fleet / group racing. Assume the fleet of 150 competitors is split into three groups
+                of 50 boats each. Before, a rank of 20 led to a relative score of 20/150. Now it is reported
+                as 20/50, so the values reported will increase, roughly by a factor determined by the number
+                of groups into which the fleet is split.
+            </li>
+         </ul>
+         
+         <h5 class="articleSubheadline">October 2019</h5>
+         <ul class="bulletList">
+            <li>The SAP Sailing Analytics now also support ORC Performance Curve for ranking and scoring.
+                See also <a href="https://www.orc.org/index.asp?id=32">here</a> for more details on this
+                advanced and fair way of sailing handicap regattas. The leaderboard for regattas using
+                this ranking/scoring option will reflect the ranks based on each boat's individual
+                performance-based allowance and be a good reflection of the race standings. This also
+                works live, while the race is progressing, and allows spectators and sailors alike to
+                judge their gap to the leader in corrected times. See also
+                <a href="https://wiki.sapsailing.com/wiki/howto/setup-orc-regatta">https://wiki.sapsailing.com/wiki/howto/setup-orc-regatta</a>
+                for how to set this up.
+            </li>
+            <li>The satellite imagery button has moved into the settings menu which can be opened via the cog / settings
+                button in the top-right corner of the map. The very first checkbox labeled "Show satellite images" will
+                now enable satellite imagery. (Note: Satellite imagery is not available in Wind-Up view)
+            </li>
+         </ul>
+         
+         <h5 class="articleSubheadline">July 2019</h5>
+         <ul class="bulletList">
+            <li>A new wind source that estimates true wind direction and speed from maneuvers is available.
+                It has been trained using machine learning techniques, based on approximately 12 million
+                maneuvers that the SAP Sailing Analytics have tracked and classified so far. It is intended
+                to serve as a fallback wind source in case the wind direction is not being made available
+                to a tracked race in any other way (entry through the Race Manager app, the web page or
+                estimated based on the first upwind leg's direction). Therefore, the confidence level has
+                been set fairly low, hence this wind source will always be outweighed by any real wind
+                sensor out on the course, but it will help "bootstrap" true wind direction which then
+                also helps the already existing wind direction estimation that clusters the tracks of
+                a race into upwind and downwind, then by the tacks the boats are on and then averages
+                the COG values to obtain a TWD approximation. With the new maneuver-based wind source
+                this other estimation will be able to infer wind directions in more cases.</li>
+         </ul>
+
          <h5 class="articleSubheadline">June 2019</h5>
          <ul class="bulletList">
             <li>The combined wind arrow on the top left of the map now switches through three states:

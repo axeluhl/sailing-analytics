@@ -51,7 +51,7 @@ public class AccessControlledButtonPanel extends Composite {
     }
 
     /**
-     * Adds an unsecured action button, which's visibility is independent from the current user's permissions.
+     * Adds an unsecured action button whose visibility is independent from the current user's permissions.
      * 
      * @param text
      *            the {@link String text} to show on the button
@@ -64,7 +64,7 @@ public class AccessControlledButtonPanel extends Composite {
     }
 
     /**
-     * Adds an unsecured textbox, which's visibility is independent from the current user's permissions.
+     * Adds an unsecured textbox, whose visibility is independent from the current user's permissions.
      * 
      * @param label
      *            the {@link String label} displayed as a placeholder in the textbox

@@ -21,6 +21,179 @@
 			<div class="mainContent">
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
+                    <h2 class="articleSubheadline">November 2019</h2>
+                    <ul class="bulletList">
+                        <li>Added system property <tt>security.sharedAcrossSubdomains</tt> which can be used to
+                            configure the security service as shared across several subdomains of the parent
+                            domain specified by the system property. Use, e.g., as in<pre>
+                              -Dsecurity.sharedAcrossSubdomainsOf=sapsailing.com
+                            </pre>
+                        </li>
+                        <li>Added system property <tt>security.baseUrlForCrossDomainStorage</tt> which can be used to
+                            configure which origin's local storage is used, e.g., for storing settings and the time point
+                            a user was seen last. Use, e.g., as in<pre>
+                              -Dsecurity.baseUrlForCrossDomainStorage=https://www.sapsailing.com
+                            </pre>
+                            This allows the settings to be shared across different sub-domains. Note that the instance
+                            of the SAP Sailing Analytics running at the base URL chosen needs to be configured to allow
+                            requests from the domain hosting your instance of the application.<p>
+                            The implementation includes an invisible <tt>iframe</tt> element in the page, loaded from the base URL provided
+                            in the system property and then uses cross-window, cross-domain messaging between the application
+                            and the <tt>iframe</tt> to request storage access and receive responses and storage events.
+                        </li>
+                        <li>Added system property <tt>gwt.acceptableCrossDomainStorageRequestOriginRegexp</tt> which can be used to
+                            configure which origins are permitted to access the local storage in the server instance. For example,
+                            to grant access to the local storage of www.sapsailing.com for all sub-domains of sapsailing.com including
+                            sapsailing.com itself, specify
+                            the following regular expression:<pre>
+                              -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sapsailing\.com$
+                            </pre> or, for allowing for an optional port specification, it could be something like<pre>
+                              -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sapsailing\.com(:[0-9]*)?$
+                            </pre>
+                            To represent this in the <tt>env.sh</tt> configuration file for an instance, use, e.g., something like this:<pre>
+                                ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\\.)?sapsailing\\.com\$"
+                            </pre>
+                            Note the escaping of the backslashes and the $ sign with a preceding backslash character in this Bash
+                            syntax.<p>
+                            This allows the <tt>iframe</tt> embedded in other instances for cross-domain local storage access to
+                            read from the local storage compartment for domain www.sapsailing.com (the example instance configured
+                            by the system property shown above) if the other instance's origin ends on ".sapsailing.com".<p>
+                            Note that the origin is presented as the scheme (e.g., "https://") plus the hostname, plus optionally
+                            the colon-separated port, so you may be seeing something like "https://lyc.sapsailing.com" or
+                            "http://127.0.0.1:8888".<p>
+                            If the system property is not specified, no origin will be permitted to use this instance's local storage
+                            through the cross-domain storage mechanism.
+                        </li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">October 2019</h2>
+                    <ul class="bulletList">
+                        <li>
+                            The ORC Performance Curve (PCS) ranking metric is now implemented. Two flavors exist, one
+                            as valid up until 2015 with ranking by implied wind and corrected times calculated
+                            using a scratch boat's performance curve; and the current default one valid starting
+                            from 2015, using each competitor's own performance curve to calculate the allowance
+                            based on the greatest implied wind achieved in the race and then computing the
+                            corrected time as the delta between time elapsed and individual allowance.<p>
+                            In the Regattas/Regattas tab the boat certificates can be managed with a new action
+                            button. Certificates can be uploaded, and certificates can be referenced by URL,
+                            e.g., pointing to the ORC web site's certificate database. Then, the certificates
+                            can be assigned to the boats one by one. Certifiate assignment can be overruled on
+                            a per-race basis in the Leaderboards/Leaderboards tab.<p>
+                            Furthermore, course definitions can be fixed for the ORC PCS rules; legs can be
+                            defined to be "constructed course" or any of the pre-defined types (windward/leeward,
+                            coastal long distance, non-spinnaker, and circular random). Tracking data can be used
+                            to pre-fill leg distance and true wind angle. Desired total course distances can be spread
+                            proportionally across the legs based on their estimated length. For more details
+                            see <a href="https://wiki.sapsailing.com/wiki/howto/setup-orc-regatta">https://wiki.sapsailing.com/wiki/howto/setup-orc-regatta</a>.
+                        </li>
+                        <li>
+                        	Loading a race using the TracTrac connector used to determine the race's boat class
+                        	based on the boat class of the majority of the race's competitors. This approach leads
+                        	to trouble specifically for non-one-design regattas where different boats compete against
+                        	each other, and the regatta is modeled with a "boat class" representing the handicap
+                        	rule set, such as IRC, ORC, or similar. Now, the race boat class is inferred from the
+                        	regatta boat class in which the race is created. Only in case a default regatta needs
+                        	to be created, the old majority rule applies to determining the regatta's (and
+                        	consequently the race's) boat class.
+                        </li>
+                    </ul>
+                    <h2 class="articleSubheadline">September 2019</h2>
+                    <ul class="bulletList">
+                        <li>
+                            The RaceBoard timeslider has been adjusted to react to blue flag events. In particular the
+                            timeslider will wait for a blue flag down event if a blue flag up event has occurred.
+                        </li>
+                    </ul>
+		    <h2 class="articleSubheadline">August 2019</h2>
+                    <ul class="bulletList">
+                        <li>New API endpoints were added to get the status of tracking devices. By now, just the last received GPS fix is returned in the status.
+                            Under /sailingserver/api/v1/tracking_devices/[deviceUUID] the status of smartphone tracking devices can be read by using the device's UUID.
+                            /sailingserver/api/v1/regattas/[regattaName]/tracking_devices the status for all tracking devices associated to a regatta is returned.
+                            While the first requires the non public device UUID to be included in the request, the latter requires a user to have UPDATE permission for the regatta in question.
+                        </li>
+                        <li>Added a filter to hide all elements the current user is not allowed to edit. The filter can 
+                            be applied for each table in the AdminConsole and is active per default.
+                        </li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">July 2019</h2>
+                    <ul class="bulletList">
+                        <li>Result and competitor import URLs are now only considered when the requesting user
+                            has the permission to read that URL.</li>
+                        <li>A new wind source that estimates true wind direction and speed from maneuvers is available.
+                            It has been trained using machine learning techniques, based on approximately 12 million
+                            maneuvers that the SAP Sailing Analytics have tracked and classified so far. It is intended
+                            to serve as a fallback wind source in case the wind direction is not being made available
+                            to a tracked race in any other way (entry through the Race Manager app, the web page or
+                            estimated based on the first upwind leg's direction). Therefore, the confidence level has
+                            been set fairly low, hence this wind source will always be outweighed by any real wind
+                            sensor out on the course.<p>
+                            
+                            To make the wind source available in a server, the trained
+                            maneuver classification models have to be available in the server's underlying database.
+                            To achieve this,
+                            the system property parameter <tt>-Dwindestimation.source.url=https://www.sapsailing.com</tt>
+                            can be used to import the wind data from the archive server in case no local model
+                            exists yet in the server's database. To force loading the data from another server,
+                            regardless of whether a model exists in the local server's database, use
+                            <tt>-Dwindestimation.source.always.url</tt>, respectively. Alternatively, the model data
+                            can be obtained as a file from another server like this: <tt>curl -o windEstimationModels.dat https://www.sapsailing.com/windestimation/api/windestimation_data</tt>.
+                            Alternatively, a recent copy is also maintained at <a href="http://static.sapsailing.com/windEstimationModels.dat">http://static.sapsailing.com/windEstimationModels.dat</a>.
+                            The resulting file, <tt>windEstimationModels.dat</tt>, can then be uploaded to another server, like this:
+                            <tt>curl -X POST -H "Content-Type: application/octet-stream" --data-binary @windEstimationModels.dat https://username:password@host.sapsailing.com/windestimation/api/windestimation_data</tt>
+                            Note that user credentials need to be provided with the request. The user must have the permission
+                            <tt>WIND_ESTIMATION_MODELS:UPDATE:&lt;server-name&gt;</tt> for the server to which the
+                            model data is to be stored.<p>
+                            
+                            Subsequent server starts
+                            won't need to load the remote model data again because it has been stored in the server's
+                            database during the initial import. Replicas will receive the model data from their master.<p>
+                            
+                            For more details, in particular how to re-train the models, see also
+                            <a href="https://wiki.sapsailing.com/wiki/howto/windestimation">https://wiki.sapsailing.com/wiki/howto/windestimation</a>.
+                        </li>
+                        <li>JMX metrics in Prometheus-ready form have been added for the leaderboard computation times. Metrics are offered
+                            for each leaderboard in a server, as well as a summary averaging and counting all leaderboard accesses, each
+                            in a short, medium and long time interval (e.g., 5, 30, and 60 seconds, respectively).<p>
+                            
+                            <img src="images/JConsoleLeaderboardComputationStats_Overall.png"><br>
+                            Example of the overall leaderboard computation statistics<p>
+                            <img src="images/JConsoleLeaderboardComputationStats_Specific.png"><br>
+                            Example of the specific leaderboard computation statistics for one leaderboard<p>
+                            
+                            This can then also be used, e.g., to export these metrics to other tools, such as
+                            Prometheus. See <a href="https://github.com/prometheus/jmx_exporter">here</a> for an exporter
+                            that can be used to expose JMX data to Prometheus. If the Java VM running the SAP Sailing Analytics
+                            server is invoked with a VM argument such as <tt>-javaagent:/path/to/jmx_prometheus_javaagent-0.12.0.jar=9000:/path/to/jmxPrometheusConfig.yaml</tt>
+                            then an HTTP GET request to <tt>http://hostname:9000/</tt> will produce a document that contains
+                            lines such as:<p>
+                            <pre>
+        com_sap_sailing_Leaderboard_ComputationTimeAverageMedium_averageComputeDurationInMillis{name="5O5-Worlds 2010 (5O5)",} -1.0
+	com_sap_sailing_Leaderboard_ComputationTimeAverageMedium_numberOfComputations{name="5O5-Worlds 2010 (5O5)",} 0.0
+	com_sap_sailing_Leaderboard_ComputationTimeAverageYoung_averageRangeInMillis{name="5O5-Worlds 2010 (5O5)",} 5000.0
+	com_sap_sailing_Leaderboard_ComputationTimeAverageOld_averageComputeDurationInMillis{name="5O5-Worlds 2010 (5O5)",} 597.0
+	com_sap_sailing_Leaderboard_DelayToLiveInMillis{name="5O5-Worlds 2010 (5O5)",} 20000.0
+	com_sap_sailing_Leaderboard_ComputationTimeAverageYoung_numberOfComputations{name="5O5-Worlds 2010 (5O5)",} 0.0
+	com_sap_sailing_Leaderboard_ComputationTimeAverageOld_numberOfComputations{name="5O5-Worlds 2010 (5O5)",} 1.0
+	com_sap_sailing_Leaderboard_ComputationTimeAverageOld_averageRangeInMillis{name="5O5-Worlds 2010 (5O5)",} 60000.0
+	com_sap_sailing_Leaderboard_ComputationTimeAverageYoung_averageComputeDurationInMillis{name="5O5-Worlds 2010 (5O5)",} -1.0
+	com_sap_sailing_Leaderboard_NumberOfCompetitors{name="5O5-Worlds 2010 (5O5)",} 147.0
+	com_sap_sailing_Leaderboard_NumberOfAllCompetitors{name="5O5-Worlds 2010 (5O5)",} 147.0
+	com_sap_sailing_Leaderboard_ComputationTimeAverageMedium_averageRangeInMillis{name="5O5-Worlds 2010 (5O5)",} 30000.0
+        ...
+        com_sap_sailing_RacingEventService_LeaderboardComputationStatisticsYoung_averageComputeDurationInMillis 13.0
+	com_sap_sailing_RacingEventService_LeaderboardComputationStatisticsMedium_averageComputeDurationInMillis 52.0
+	com_sap_sailing_RacingEventService_LeaderboardComputationStatisticsYoung_numberOfComputations 5.0
+	com_sap_sailing_RacingEventService_LeaderboardComputationStatisticsMedium_numberOfComputations 17.0
+	com_sap_sailing_RacingEventService_LeaderboardComputationStatisticsYoung_averageRangeInMillis 30000.0
+	com_sap_sailing_RacingEventService_LeaderboardComputationStatisticsMedium_averageRangeInMillis 60000.0
+                            </pre>
+                            Note that average durations of <tt>-1</tt> mean "no data" and should be ignored. The corresponding
+                            <tt>numberOfComputations</tt> value will be <tt>0.0</tt> in those cases.
+                            
+                    </ul>
+		    
                     <h2 class="articleSubheadline">June 2019</h2>
                     <ul class="bulletList">
                         <li>Added new API endpoints for creating, reading, updating and deleting roles under /restsecurity/role.
@@ -35,7 +208,12 @@
                         <li>Blue flag up/down times can be cleared in the AdminConsole now</li>
                         <li>Users can now create media tracks if they have the permissions based on the ownership that
                             will result from the creation process.</li>
+                        <li>A couple of new API end points for managing tracked events were added under /api/v1/trackedevents/. 
+                            The new end points support creation, reading, updating and deleting tracked events and their 
+                            associated device-competitor/boat/mark elements for the current user.
+                        </li>
                     </ul>
+
                     <h2 class="articleSubheadline">May 2019</h2>
                     <ul class="bulletList">
 			<li>Ranks (finishing orders) entered by the Race Manager app user are no longer

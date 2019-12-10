@@ -28,8 +28,10 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.adminconsole.FileStorageServiceConnectionTestObservable;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer.PlayerCloseListener;
@@ -87,11 +89,12 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     private MediaPlayerSettings settings;
     private final MediaPlayerLifecycle mediaPlayerLifecycle;
     private final RaceDTO raceDto;
+    private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
 
     private List<PlayerChangeListener> playerChangeListener = new ArrayList<>();
 
     public MediaPlayerManagerComponent(Component<?> parent, ComponentContext<?> context,
-            MediaPlayerLifecycle mediaPlayerLifecycle,
+            MediaPlayerLifecycle mediaPlayerLifecycle, SailingServiceAsync sailingService,
             RegattaAndRaceIdentifier selectedRaceIdentifier,
             RaceTimesInfoProvider raceTimesInfoProvider, Timer raceTimer, MediaServiceAsync mediaService,
             UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
@@ -115,6 +118,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         this.userAgent = userAgent;
         this.popupPositionProvider = popupPositionProvider;
         this.settings = settings;
+        this.storageServiceAvailable = new FileStorageServiceConnectionTestObservable(sailingService);
         Window.addCloseHandler(this);
         Window.addWindowClosingHandler(this);
 
@@ -525,7 +529,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         }
         NewMediaDialog dialog = new NewMediaDialog(mediaService, defaultStartTime,
                 MediaPlayerManagerComponent.this.stringMessages, this.getCurrentRace(),
-                new DialogCallback<MediaTrack>() {
+                storageServiceAvailable, new DialogCallback<MediaTrack>() {
 
                     @Override
                     public void cancel() {

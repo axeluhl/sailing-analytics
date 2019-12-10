@@ -23,3 +23,5 @@ There are several differences when running the build on Lean DI. Due to this, it
 * Configuration of parent POM "com.sap.ldi:ldi-parent" in workspace POM
 * Versions are set to not be *-SNAPSHOT but release versions
 * Some profile activation conditions are changed
+
+See also [https://wiki.sapsailing.com/wiki/info/landscape/building-and-deploying#building-deploying-stopping-and-starting-server-instances_app-build-process-for-ios-and-android](https://wiki.sapsailing.com/wiki/info/landscape/building-and-deploying#building-deploying-stopping-and-starting-server-instances_app-build-process-for-ios-and-android).

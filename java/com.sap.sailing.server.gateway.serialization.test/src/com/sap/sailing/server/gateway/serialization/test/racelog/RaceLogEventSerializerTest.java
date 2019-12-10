@@ -71,8 +71,13 @@ public class RaceLogEventSerializerTest {
     private JsonSerializer<RaceLogEvent> useCompetitorsFromRaceLogEventSerializer;
     private JsonSerializer<RaceLogEvent> endOfTrackingEventSerializer;
     private JsonSerializer<RaceLogEvent> tagEventSerializer;
-
+    private JsonSerializer<RaceLogEvent> orcLegDataEventSerializer;
+    private JsonSerializer<RaceLogEvent> orcCertificateAssignmentEventSerializer;
+    private JsonSerializer<RaceLogEvent> orcScratchBoatEventSerializer;
+    private JsonSerializer<RaceLogEvent> orcSetImpliedWindEventSerializer;
+    
     private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
+
 
     @SuppressWarnings("unchecked")
     @Before
@@ -101,7 +106,11 @@ public class RaceLogEventSerializerTest {
         useCompetitorsFromRaceLogEventSerializer = mock(JsonSerializer.class);
         endOfTrackingEventSerializer = mock(JsonSerializer.class);
         tagEventSerializer = mock(JsonSerializer.class);
-
+        orcLegDataEventSerializer = mock(JsonSerializer.class);
+        orcCertificateAssignmentEventSerializer = mock(JsonSerializer.class);
+        orcScratchBoatEventSerializer = mock(JsonSerializer.class);
+        orcSetImpliedWindEventSerializer = mock(JsonSerializer.class);
+        
         serializer = new RaceLogEventSerializer(flagEventSerializer, startTimeSerializer, raceStatusSerializer,
                 passChangedSerializer, courseDesignChangedEventSerializer,
                 finishPositioningListChangedEventSerializer, finishPositioningConfirmedEventSerializer,
@@ -112,7 +121,9 @@ public class RaceLogEventSerializerTest {
                 fixedMarkPassingEventSerializer, suppressedMarkPassingsSerializer, 
                 additionalScoringInformationSerializer, dependentStartTimeEventSerializer, 
                 startOfTrackingEventSerializer, useCompetitorsFromRaceLogEventSerializer, 
-                endOfTrackingEventSerializer, tagEventSerializer);
+                endOfTrackingEventSerializer, tagEventSerializer, orcLegDataEventSerializer,
+                orcCertificateAssignmentEventSerializer, orcScratchBoatEventSerializer,
+                orcSetImpliedWindEventSerializer);
     }
 
     @Test
@@ -240,14 +251,14 @@ public class RaceLogEventSerializerTest {
     public void testRegisterCompetitorEventSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
         Competitor c = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", "c", null, null, null, null,
-                /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-        Boat b = DomainFactory.INSTANCE.getOrCreateBoat("boat", "b", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null, null);
+                /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true);
+        Boat b = DomainFactory.INSTANCE.getOrCreateBoat("boat", "b", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null, null, /* storePersistently */ true);
         RaceLogEvent event = new RaceLogRegisterCompetitorEventImpl(null, author, 0, c, b);
         serializer.serialize(event);
         verify(registerCompetitorEventSerializer).serialize(event);
         Boat b2 = new BoatImpl("boat", "b", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null, null);
         CompetitorWithBoat c2 = DomainFactory.INSTANCE.getOrCreateCompetitorWithBoat("comp2", "comp", "c", null, null,
-                null, null, /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, (DynamicBoat) b2);
+                null, null, /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, (DynamicBoat) b2, /* storePersistently */ true);
         RaceLogEvent event2 = new RaceLogRegisterCompetitorEventImpl(null, author, 0, c2, b2);
         serializer.serialize(event2);
         verify(registerCompetitorEventSerializer).serialize(event2);        

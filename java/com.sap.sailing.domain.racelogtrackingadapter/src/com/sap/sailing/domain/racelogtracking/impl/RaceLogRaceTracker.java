@@ -23,7 +23,6 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
@@ -58,6 +57,7 @@ import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLo
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerBaseImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -86,6 +86,7 @@ import difflib.PatchFailedException;
  */
 public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     
+    private static final String RACE_LOG = "raceLog";
     private static final String LOGGER_AND_LOGAUTHOR_NAME = RaceLogRaceTracker.class.getName();
     private static final Logger logger = Logger.getLogger(LOGGER_AND_LOGAUTHOR_NAME);
     
@@ -95,14 +96,14 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     private final RaceLogConnectivityParams params;
     private final WindStore windStore;
     private final DynamicTrackedRegatta trackedRegatta;
-    private final RaceLogResolver raceLogResolver;
+    private final RaceLogAndTrackedRaceResolver raceLogResolver;
     private final TrackedRegattaRegistry trackedRegattaRegistry;
 
     private volatile DynamicTrackedRace trackedRace;
     private final RaceTrackingHandler raceTrackingHandler;
 
     public RaceLogRaceTracker(DynamicTrackedRegatta regatta, RaceLogConnectivityParams params, WindStore windStore,
-            RaceLogResolver raceLogResolver, RaceLogConnectivityParams connectivityParams,
+            RaceLogAndTrackedRaceResolver raceLogResolver, RaceLogConnectivityParams connectivityParams,
             TrackedRegattaRegistry trackedRegattaRegistry, RaceTrackingHandler raceTrackingHandler) {
         super(connectivityParams);
         this.trackedRegattaRegistry = trackedRegattaRegistry;
@@ -312,7 +313,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
             trackedRace = raceTrackingHandler.createTrackedRace(trackedRegatta, raceDef, sidelines, windStore,
                     params.getDelayToLiveInMillis(), WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                     boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true, raceLogResolver,
-                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());
+                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(), RACE_LOG);
             notifyRaceCreationListeners();
             logger.info(String.format("Started tracking race-log race (%s)", raceLog));
             // this wakes up all waiting race handles

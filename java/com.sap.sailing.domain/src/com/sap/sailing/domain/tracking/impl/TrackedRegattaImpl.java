@@ -18,12 +18,12 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceListener;
@@ -320,13 +320,14 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines,
             WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useInternalMarkPassingAlgorithm, RaceLogResolver raceLogResolver,
-            Optional<ThreadLocalTransporter> threadLocalTransporter) {
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useInternalMarkPassingAlgorithm, RaceLogAndTrackedRaceResolver raceLogResolver,
+            Optional<ThreadLocalTransporter> threadLocalTransporter, String trackingConnector) {
         logger.log(Level.INFO, "Creating DynamicTrackedRaceImpl for RaceDefinition " + raceDefinition.getName());
         DynamicTrackedRaceImpl result = new DynamicTrackedRaceImpl(this, raceDefinition, sidelines, windStore,
                 delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 millisecondsOverWhichToAverageSpeed,
-                /* useMarkPassingCalculator */useInternalMarkPassingAlgorithm, getRegatta().getRankingMetricConstructor(), raceLogResolver);
+                /* useMarkPassingCalculator */useInternalMarkPassingAlgorithm, getRegatta().getRankingMetricConstructor(), raceLogResolver,
+                trackingConnector);
         // adding the raceDefinition to the raceDefinitionSetToUpdate BEFORE calling addTrackedRace helps those who
         // are called back by RaceListener.raceAdded(TrackedRace) and who then expect the update to have happened
         if (raceDefinitionSetToUpdate != null) {

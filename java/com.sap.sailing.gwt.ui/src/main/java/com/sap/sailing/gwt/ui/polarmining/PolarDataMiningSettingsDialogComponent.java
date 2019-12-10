@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.polarmining;
 
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -13,6 +12,7 @@ import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettingsImpl;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
+import com.sap.sse.gwt.client.dialog.DoubleBox;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**

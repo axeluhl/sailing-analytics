@@ -22,12 +22,13 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Allows an administrator to map a list of given competitors to boats for a race.
@@ -60,11 +61,13 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
     }
     
     public CompetitorToBoatMappingsDialog(final SailingServiceAsync sailingService, final StringMessages stringMessages,
-            final ErrorReporter errorReporter, String leaderboardName, Map<CompetitorDTO, BoatDTO> competitorsAndBoats, DialogCallback<Map<CompetitorDTO, BoatDTO>> callback) {
+            final ErrorReporter errorReporter, String leaderboardName, Map<CompetitorDTO, BoatDTO> competitorsAndBoats,
+            DialogCallback<Map<CompetitorDTO, BoatDTO>> callback, UserService userService) {
         super(stringMessages.actionEditCompetitorToBoatAssignments(), null, stringMessages.ok(), stringMessages.cancel(), new CompetitorToBoatMappingValidator(), callback);
         this.stringMessages = stringMessages;
         this.competitorToBoatMappings = new HashMap<>(competitorsAndBoats);
-        this.competitorTable = new CompactCompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
+        this.competitorTable = new CompactCompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
+                /* multiSelection */ false, /* enablePager */ true, userService);
         this.boatTable = new CompactBoatTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
         ImagesBarColumn<CompetitorDTO, CompactCompetitorConfigImagesBarCell> competitorActionColumn = new ImagesBarColumn<>(new CompactCompetitorConfigImagesBarCell(stringMessages));
         competitorActionColumn.setFieldUpdater(new FieldUpdater<CompetitorDTO, String>() {

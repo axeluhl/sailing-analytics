@@ -221,7 +221,7 @@ public class MasterDataImportTest {
 
         Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
 
-        DomainFactory sourceDomainFactory = new DomainFactoryImpl((srlid) -> null);
+        DomainFactory sourceDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
 
         DomainObjectFactory dbFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE,
                 sourceDomainFactory);
@@ -994,7 +994,7 @@ public class MasterDataImportTest {
         BoatClass boatClass = new BoatClassImpl("H16", true);
         Competitor competitor = sourceService.getBaseDomainFactory().getOrCreateCompetitor(competitorUUID, "Froderik", "F", Color.RED,
                 "noone@nowhere.de", null, team, /* timeOnTimeFactor */null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */
-                null, null);
+                null, null, /* storePersistently */ true);
         competitors.add(competitor);
         UUID competitor2UUID = UUID.randomUUID();
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
@@ -1003,7 +1003,7 @@ public class MasterDataImportTest {
         DynamicTeam team2 = new TeamImpl("Pros2", sailors2, coach2);
         Competitor competitor2 = sourceService.getBaseDomainFactory().getCompetitorAndBoatStore().getOrCreateCompetitor(competitor2UUID,
                 "Froderik", "F", Color.RED, "noone@nowhere.de", null, team2, /* timeOnTimeFactor */null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */
-                null, null);
+                null, null, /* storePersistently */ true);
         competitors.add(competitor2);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         TrackedRace trackedRace = new DummyTrackedRace(raceId, createCompetitorsAndBoatsMap(boatClass, competitors), regatta, null, sourceService.getWindStore());
@@ -1020,7 +1020,7 @@ public class MasterDataImportTest {
         TimePoint logTimePoint2 = logTimePoint.plus(10);
         CompetitorResults positionedCompetitors = new CompetitorResultsImpl();
         Boat storedBoat = DomainFactory.INSTANCE.getOrCreateBoat(UUID.randomUUID(), "SAP Extreme Sailing Team",
-                new BoatClassImpl("X40", false), "123", Color.RED);
+                new BoatClassImpl("X40", false), "123", Color.RED, /* storePersistently */ true);
         positionedCompetitors.add(new CompetitorResultImpl(
                 competitor.getId(), competitor.getName(), competitor.getShortName(), storedBoat.getName(),
                 storedBoat.getSailID(), /* rank */ 1, MaxPointsReason.DNS, /* score */ null, /* finishingTime */ null,
@@ -1459,7 +1459,7 @@ public class MasterDataImportTest {
             String competitorOldName = "oldName";
             Competitor competitorToOverride = domainFactory.getOrCreateCompetitor(competitorUUID, competitorOldName, "c",
                     Color.BLUE, "noone@nowhere.de", null, teamToOverride, /* timeOnTimeFactor */null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */
-                    null, null);
+                    null, null, /* storePersistently */ true);
             competitorsToOverride.add(competitorToOverride);
 
             Leaderboard leaderboardToOverride = destService.addRegattaLeaderboard(

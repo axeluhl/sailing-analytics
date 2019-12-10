@@ -59,8 +59,10 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
+import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -140,25 +142,39 @@ public abstract class TrackBasedTest {
     public static DynamicTrackedRaceImpl createTestTrackedRace(String regattaName, String raceName, String boatClassName,
             Map<Competitor, Boat> competitorsAndBoats, TimePoint timePointForFixes, boolean useMarkPassingCalculator) {
         return createTestTrackedRace(regattaName, raceName, boatClassName, competitorsAndBoats, timePointForFixes, useMarkPassingCalculator,
-                mock(RaceLogResolver.class));
+                mock(RaceLogAndTrackedRaceResolver.class));
     }
+    
     /**
      * Creates a simple two-lap upwind-downwind course for a race/event with given name and boat class name with the
-     * competitors specified. The marks are laid out such that the upwind/downwind leg detection should be alright. The
-     * start line equals the finish line and the leeward gate. Wind is coming from the north. A single wind fix with
-     * bearing 180deg (from=0deg) is added to the {@link WindSourceType#WEB} wind track using
-     * <code>timePointForFixes</code> as time point. The leeward gate is located at N54.4680424, E10.234451 and
-     * N54.4680424, E10.24. The windward mark is located at N54.48, E10.24.
+     * competitors specified, with a {@link OneDesignRankingMetric} as ranking metric. The marks are laid out such that
+     * the upwind/downwind leg detection should be alright. The start line equals the finish line and the leeward gate.
+     * Wind is coming from the north. A single wind fix with bearing 180deg (from=0deg) is added to the
+     * {@link WindSourceType#WEB} wind track using <code>timePointForFixes</code> as time point. The leeward gate is
+     * located at N54.4680424, E10.234451 and N54.4680424, E10.24. The windward mark is located at N54.48, E10.24.
+     * 
      * @param timePointForFixes
      *            a wind fix will be inserted into the {@link WindSourceType#WEB} wind track which is aligned with the
      *            course layout; the value of this parameter will be used as the time stamp for this wind fix. Using a
      *            time that is reasonably within the race time (mark passing times or whatever is collected for the
      *            tracked race returned by this method) is important because otherwise confidences of wind readouts may
      *            be ridiculously low.
-     * @param useMarkPassingCalculator whether or not to use the internal mark passing calculator
+     * @param useMarkPassingCalculator
+     *            whether or not to use the internal mark passing calculator
      */
     public static DynamicTrackedRaceImpl createTestTrackedRace(String regattaName, String raceName, String boatClassName,
-            Map<Competitor, Boat> competitorsAndBoats, TimePoint timePointForFixes, boolean useMarkPassingCalculator, RaceLogResolver raceLogResolver) {
+            Map<Competitor, Boat> competitorsAndBoats, TimePoint timePointForFixes, boolean useMarkPassingCalculator, RaceLogAndTrackedRaceResolver raceLogResolver) {
+        return createTestTrackedRace(regattaName, raceName, boatClassName, competitorsAndBoats, timePointForFixes, useMarkPassingCalculator, raceLogResolver,
+                OneDesignRankingMetric::new);
+    }
+    
+    /**
+     * Like {@link #createTestTrackedRace(String, String, String, Map, TimePoint, boolean, RaceLogResolver)}, only that additionally
+     * a specific {@link RankingMetricConstructor} can be provided which otherwise would default to {@link OneDesignRankingMetric}.
+     */
+    public static DynamicTrackedRaceImpl createTestTrackedRace(String regattaName, String raceName, String boatClassName,
+            Map<Competitor, Boat> competitorsAndBoats, TimePoint timePointForFixes, boolean useMarkPassingCalculator, RaceLogAndTrackedRaceResolver raceLogResolver,
+            RankingMetricConstructor rankingMetricConstructor) {
         BoatClassImpl boatClass = new BoatClassImpl(boatClassName, /* typicallyStartsUpwind */ true);
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
                 RegattaImpl.getDefaultName(regattaName, boatClass.getName()), boatClass,
@@ -180,11 +196,12 @@ public abstract class TrackBasedTest {
         waypoints.add(new WaypointImpl(leeGate));
         Course course = new CourseImpl(raceName, waypoints);
         RaceDefinition race = new RaceDefinitionImpl(raceName, course, boatClass, competitorsAndBoats);
+        regatta.addRace(race);
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE,
                 /* delayToLiveInMillis */ 0,
                 /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 30000,
                 /* delay for wind estimation cache invalidation */ 0, useMarkPassingCalculator,
-                OneDesignRankingMetric::new, raceLogResolver);
+                rankingMetricConstructor, raceLogResolver, null);
         // in this simplified artificial course, the top mark is exactly north of the right leeward gate
         DegreePosition topPosition = new DegreePosition(54.48, 10.24);
         TimePoint afterTheRace = new MillisecondsTimePoint(timePointForFixes.asMillis() + 36000000); // 10h after the fix timed

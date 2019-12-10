@@ -19,7 +19,6 @@ import org.apache.shiro.subject.Subject;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
@@ -73,6 +72,7 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStoreSupplier;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
@@ -133,7 +133,7 @@ import com.sap.sse.shared.media.VideoDescriptor;
  */
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher,
         LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager, Searchable<LeaderboardSearchResult, KeywordQuery>,
-        ReplicableWithObjectInputStream<RacingEventService, RacingEventServiceOperation<?>>, RaceLogResolver,
+        ReplicableWithObjectInputStream<RacingEventService, RacingEventServiceOperation<?>>, RaceLogAndTrackedRaceResolver,
         SensorFixStoreSupplier, WindFinderReviewedSpotsCollectionIdProvider {
     @Override
     Regatta getRegatta(RegattaName regattaName);
@@ -319,7 +319,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void updateStoredLeaderboardGroup(LeaderboardGroup leaderboardGroup);
 
     DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
-            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, boolean useMarkPassingCalculator);
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, boolean useMarkPassingCalculator, String trackingConnector);
 
     Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id);
 

@@ -10,7 +10,6 @@ import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
@@ -35,6 +34,7 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoSensorFixStoreImpl;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockDeviceAndSessionIdentifierWithGPSFixesDeserializer;
@@ -62,8 +62,8 @@ public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
     protected RegattaLog regattaLog;
     protected SensorFixStore store;
     protected final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
-    protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
-    protected final Boat boat = DomainFactory.INSTANCE.getOrCreateBoat("boat", "boat", boatClass, "GER 234", null);
+    protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
+    protected final Boat boat = DomainFactory.INSTANCE.getOrCreateBoat("boat", "boat", boatClass, "GER 234", null, /* storePersistently */ true);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
 
     protected GPSFixMoving createFix(long millis, double lat, double lng, double knots, double degrees) {
@@ -129,7 +129,7 @@ public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
                 /* endDate */null, null, null, "a", null, /* registrationLinkSecret */ UUID.randomUUID().toString()));
         return new DynamicTrackedRaceImpl(regatta, raceDefinition, Collections.<Sideline> emptyList(),
                 EmptyWindStore.INSTANCE, 0, 0, 0, /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
-                mock(RaceLogResolver.class));
+                mock(RaceLogAndTrackedRaceResolver.class), null);
     }
 
     protected void testNumberOfRawFixes(Track<?> track, long expected) {

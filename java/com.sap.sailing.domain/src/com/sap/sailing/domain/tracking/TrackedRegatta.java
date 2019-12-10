@@ -4,13 +4,13 @@ import java.io.Serializable;
 import java.util.Optional;
 import java.util.concurrent.Future;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.impl.TrackedRaces;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.util.ThreadLocalTransporter;
 
@@ -66,8 +66,8 @@ public interface TrackedRegatta extends Serializable {
      */
     DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useInternalMarkPassingAlgorithm, RaceLogResolver raceLogResolver,
-            Optional<ThreadLocalTransporter> beforeAndAfterNotificationHandler);
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useInternalMarkPassingAlgorithm, RaceLogAndTrackedRaceResolver raceLogResolver,
+            Optional<ThreadLocalTransporter> beforeAndAfterNotificationHandler, String trackingConnector);
 
     /**
      * Obtains the tracked race for <code>race</code>. Blocks until the tracked race has been created

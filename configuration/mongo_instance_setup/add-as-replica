@@ -1,0 +1,21 @@
+#!/bin/bash
+REPLICA_SET_NAME=$(ec2-metadata | grep REPLICA_SET_NAME | sed -e 's/^user-data: //' | sed -e 's/^REPLICA_SET_NAME=//')
+if [ -z "$REPLICA_SET_NAME" ]; then
+  REPLICA_SET_NAME=live
+fi
+REPLICA_SET_PRIMARY=$(ec2-metadata | grep REPLICA_SET_PRIMARY | sed -e 's/^user-data: //' | sed -e 's/^REPLICA_SET_PRIMARY=//')
+if [ -z "$REPLICA_SET_PRIMARY" ]; then
+  REPLICA_SET_PRIMARY=mongo0.internal.sapsailing.com:27017
+fi
+REPLICA_SET_PRIORITY=$(ec2-metadata | grep REPLICA_SET_PRIORITY | sed -e 's/^user-data: //' | sed -e 's/^REPLICA_SET_PRIORITY=//')
+if [ -z "$REPLICA_SET_PRIORITY" ]; then
+  REPLICA_SET_PRIORITY=1
+fi
+REPLICA_SET_VOTES=$(ec2-metadata | grep REPLICA_SET_VOTES | sed -e 's/^user-data: //' | sed -e 's/^REPLICA_SET_VOTES=//')
+if [ -z "$REPLICA_SET_VOTES" ]; then
+  REPLICA_SET_VOTES=0
+fi
+if [ \! -z "REPLICA_SET_PRIMARY" ]; then
+  IP=$(ec2-metadata -o | sed -e 's/^local-ipv4: //')
+  echo "rs.add({host: \"$IP:27017\", priority: $REPLICA_SET_PRIORITY, votes: $REPLICA_SET_VOTES})" | mongo "mongodb://$REPLICA_SET_PRIMARY/?replicaSet=$REPLICA_SET_NAME&retryWrites=true"
+fi

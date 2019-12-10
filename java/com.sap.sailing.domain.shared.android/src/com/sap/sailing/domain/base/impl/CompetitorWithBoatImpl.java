@@ -35,7 +35,7 @@ public class CompetitorWithBoatImpl extends CompetitorImpl implements DynamicCom
         return this;
     }
 
-    public Competitor resolve(SharedDomainFactory domainFactory) {
+    public Competitor resolve(SharedDomainFactory<?> domainFactory) {
         final Competitor result;
         if (!hasBoat()) {
             // bug2822: this is a migrated competitor that had its default boat removed because it occurs in a boats-can-change regatta.
@@ -46,7 +46,7 @@ public class CompetitorWithBoatImpl extends CompetitorImpl implements DynamicCom
         } else {
             result = domainFactory.getOrCreateCompetitorWithBoat(getId(), getName(), getShortName(), getColor(),
                     getEmail(), getFlagImage(), getTeam(), getTimeOnTimeFactor(),
-                    getTimeOnDistanceAllowancePerNauticalMile(), getSearchTag(), getBoat());
+                    getTimeOnDistanceAllowancePerNauticalMile(), getSearchTag(), getBoat(), /* storePersistently */ true);
         }
         return result;
     }

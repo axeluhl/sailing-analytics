@@ -2,10 +2,13 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import static com.sap.sailing.domain.common.security.SecuredDomainType.LEADERBOARD;
 import static com.sap.sailing.domain.common.security.SecuredDomainType.REGATTA;
+import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_CERTIFICATE_ASSIGNMENT;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_EDIT;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_REFRESH_RACELOG;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_REMOVE;
+import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SCRATCH_BOAT_SELECTION;
+import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SET_IMPLIED_WIND;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SET_FINISHING_AND_FINISH_TIME;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SET_STARTTIME;
 import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SHOW_RACELOG;
@@ -492,7 +495,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 return object.getA().getExplicitFactor() == null ? "" : object.getA().getExplicitFactor().toString();
             }
         };
-
         Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, Boolean> isMedalRaceCheckboxColumn = new Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, Boolean>(
                 new DisablableCheckboxCell(new IsEnabled() {
                     @Override
@@ -514,7 +516,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                     }
                 });
         isMedalRaceCheckboxColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-
         TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality> isLinkedRaceColumn = new TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
             @Override
             public String getValue(RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnAndFleetName) {
@@ -522,7 +523,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 return isTrackedRace ? stringMessages.yes() : stringMessages.no();
             }
         };
-
         final AccessControlledActionsColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality, LeaderboardRaceConfigImagesBarCell> actionsColumn = create(
                 new LeaderboardRaceConfigImagesBarCell(this, stringMessages), userService,
                 item -> getSelectedLeaderboard());
@@ -542,12 +542,13 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         actionsColumn.addAction(ACTION_SHOW_RACELOG, UPDATE, object -> showRaceLog(object.getA(), object.getB()));
         actionsColumn.addAction(ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS, UPDATE,
                 object -> editCompetitorToBoatMappings(object.getA(), object.getB()));
-
+        actionsColumn.addAction(ACTION_CERTIFICATE_ASSIGNMENT, READ, object -> assignCertificates(object));
+        actionsColumn.addAction(ACTION_SCRATCH_BOAT_SELECTION, READ, object -> selectScratchBoat(object));
+        actionsColumn.addAction(ACTION_SET_IMPLIED_WIND, READ, object -> setImpliedWind(object));
         racesTable.addColumn(isMedalRaceCheckboxColumn, stringMessages.medalRace());
         racesTable.addColumn(isLinkedRaceColumn, stringMessages.islinked());
         racesTable.addColumn(explicitFactorColumn, stringMessages.factor());
         racesTable.addColumn(actionsColumn, stringMessages.actions());
-
         racesTable.ensureDebugId("RacesCellTable");
     }
 
@@ -564,7 +565,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
             }
         });
         racesPanel.add(addRaceColumnsButton);
-
         columnMoveUpButton = new Button(stringMessages.columnMoveUp());
         columnMoveUpButton.ensureDebugId("MoveRaceUpButton");
         columnMoveUpButton.addClickHandler(event -> moveSelectedRaceColumnUp());
@@ -652,7 +652,8 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         final String raceName = LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName) ? raceColumnName
                 : raceColumnName + ", " + fleetName;
         ShowCompetitorToBoatMappingsDialog dialog = new ShowCompetitorToBoatMappingsDialog(sailingService,
-                stringMessages, errorReporter, selectedLeaderboardName, raceColumnName, fleetName, raceName);
+                stringMessages, errorReporter, selectedLeaderboardName, raceColumnName, fleetName, raceName,
+                userService);
         dialog.center();
     }
 

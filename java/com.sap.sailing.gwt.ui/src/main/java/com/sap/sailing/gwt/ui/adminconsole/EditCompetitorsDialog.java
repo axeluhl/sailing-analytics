@@ -46,7 +46,6 @@ public class EditCompetitorsDialog extends DataEntryDialog<List<CompetitorWithBo
     @Override
     protected Widget getAdditionalWidget() {
         CompetitorPanel competitorPanel = new CompetitorPanel(sailingService, userService, leaderboardName, stringMessages, errorReporter);
-
         return competitorPanel; 
     }
 }

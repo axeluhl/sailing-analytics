@@ -122,7 +122,7 @@ public class SwissTimingArchivedConnectionTableWrapper extends
                 u -> configACL.openDialog(u));
         filterField = new LabeledAbstractFilterablePanel<SwissTimingArchiveConfigurationWithSecurityDTO>(
                 new Label(stringMessages.filterSwissTimingAchivedConnections()),
-                new ArrayList<SwissTimingArchiveConfigurationWithSecurityDTO>(), dataProvider) {
+                new ArrayList<SwissTimingArchiveConfigurationWithSecurityDTO>(), dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(SwissTimingArchiveConfigurationWithSecurityDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -137,6 +137,8 @@ public class SwissTimingArchivedConnectionTableWrapper extends
             }
         };
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
+        filterField
+                .setUpdatePermissionFilterForCheckbox(connection -> userService.hasPermission(connection, DefaultActions.UPDATE));
 
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(swissTimingAccountColumnListHandler);

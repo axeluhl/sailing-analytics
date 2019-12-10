@@ -7,7 +7,8 @@ metadata:
   name: sailing-kw2019-master-svc
   namespace: default
 spec:
-  type: LoadBalancer
+  #type: LoadBalancer
+  clusterIP: None
   ports:
     - port: 80
       targetPort: http-port
@@ -22,7 +23,8 @@ metadata:
   name: sailing-kw2019-svc
   namespace: default
 spec:
-  type: LoadBalancer
+  #type: LoadBalancer
+  clusterIP: None
   ports:
     - port: 80
       targetPort: http-port

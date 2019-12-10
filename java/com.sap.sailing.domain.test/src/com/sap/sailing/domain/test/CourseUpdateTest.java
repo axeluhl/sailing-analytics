@@ -11,7 +11,6 @@ import static org.mockito.Mockito.mock;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -22,7 +21,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
@@ -36,16 +34,17 @@ import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -56,11 +55,9 @@ import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
-import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.route.IControl;
 import com.tractrac.model.lib.api.route.IControlRoute;
-import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 import difflib.Chunk;
 import difflib.Delta;
@@ -81,9 +78,9 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     }
 
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, SubscriberInitializationException, ParseException, CreateModelException {
+    public void setUp() throws Exception {
         super.setUp();
-        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl((srlid)->null));
+        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory.TEST_RACE_LOG_RESOLVER));
         domainRegatta = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
                 getTracTracRace(), /* trackedRegattaRegistry */ null);
         trackedRegatta = new DynamicTrackedRegattaImpl(domainRegatta);
@@ -97,7 +94,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
                 },
                 /* delayToLiveInMillis */0l, /* millisecondsOverWhichToAverageWind */30000, /* simulator */null, /* courseDesignUpdateURI */
                 null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(),
-                /*ignoreTracTracMarkPassings*/false, mock(RaceLogResolver.class), mock(LeaderboardGroupResolver.class), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
+                /*ignoreTracTracMarkPassings*/false, mock(RaceLogAndTrackedRaceResolver.class), mock(LeaderboardGroupResolver.class), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
                 new DefaultRaceTrackingHandler()) {
             @Override
             protected void handleEvent(Triple<IControlRoute, Long, Void> event) {

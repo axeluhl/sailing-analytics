@@ -8,7 +8,7 @@ import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sse.common.Color;
 
-public interface SharedDomainFactory extends CompetitorFactory, BoatFactory {
+public interface SharedDomainFactory<RLR extends RaceLogResolver> extends CompetitorFactory, BoatFactory {
 
     /**
      * Looks up or, if not found, creates a {@link Nationality} object and re-uses <code>threeLetterIOCCode</code> also as the
@@ -107,7 +107,7 @@ public interface SharedDomainFactory extends CompetitorFactory, BoatFactory {
     
     ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(String id, String name, Mark left, Mark right);
     
-    RaceLogResolver getRaceLogResolver();
+    RLR getRaceLogResolver();
 
     Mark getOrCreateMark(String name, MarkType markType);
 

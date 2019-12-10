@@ -21,6 +21,7 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -372,16 +373,16 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     public Result getCorrectedScore(final Callable<Integer> trackedRankProvider, final Competitor competitor,
             final RaceColumn raceColumn, Leaderboard leaderboard, final TimePoint timePoint,
             final NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher,
-            final ScoringScheme scoringScheme) {
+            final ScoringScheme scoringScheme, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Double result;
         final AnnotatedMaxPointsReason maxPointsReason = getAnnotatedMaxPointsReason(competitor, raceColumn, timePoint);
         if (maxPointsReason.getMaxPointsReason() == MaxPointsReason.NONE) {
             // could be that there is a MaxPointsReason that just doesn't apply yet at timePoint; in this
             // case ignore the score correction and deliver the uncorrected result
             if (maxPointsReason.isMaxPointsReasonExistsButIsNotApplicableForTimePoint()) {
-                result = getUncorrectedScore(competitor, raceColumn, trackedRankProvider, scoringScheme, numberOfCompetitorsInLeaderboardFetcher, timePoint);
+                result = getUncorrectedScore(competitor, raceColumn, trackedRankProvider, scoringScheme, numberOfCompetitorsInLeaderboardFetcher, timePoint, cache);
             } else {
-                result = getCorrectedNonMaxedScore(competitor, raceColumn, trackedRankProvider, scoringScheme, numberOfCompetitorsInLeaderboardFetcher, timePoint);
+                result = getCorrectedNonMaxedScore(competitor, raceColumn, trackedRankProvider, scoringScheme, numberOfCompetitorsInLeaderboardFetcher, timePoint, cache);
             }
         } else {
             // allow explicit override even when max points reason is specified; calculation may be wrong,
@@ -451,9 +452,10 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      * Under the assumption that the competitor is not assigned the maximum score due to disqualification or other
      * reasons, computes the corrected score. If {@link #correctedScores} contains an entry for the
      * <code>competitor</code>'s key, it is used. Otherwise, the <code>uncorrectedScore</code> is returned.
-     * 
      * @param scoringScheme
      *            used to transform the tracked rank into a score if there is no score correction applied
+     * @param cache TODO
+     * 
      * @return <code>null</code> in case the <code>competitor</code> has no score assigned in that race which is the
      *         case if the score is not corrected by these score corrections, and the <code>trackedRankProvider</code>
      *         delivers 0 as the rank, or if the score is not corrected and the scoring scheme cannot find the
@@ -462,12 +464,13 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      */
     private Double getCorrectedNonMaxedScore(final Competitor competitor, final RaceColumn raceColumn,
             Callable<Integer> trackedRankProvider, ScoringScheme scoringScheme,
-            final NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint) {
+            final NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Double correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor));
         Double result;
         if (correctedNonMaxedScore == null || isCertainlyBeforeRaceFinish(timePoint, raceColumn, competitor)) {
             result = getUncorrectedScore(competitor, raceColumn, trackedRankProvider, scoringScheme,
-                    numberOfCompetitorsInLeaderboardFetcher, timePoint);
+                    numberOfCompetitorsInLeaderboardFetcher, timePoint, cache);
         } else {
             result = correctedNonMaxedScore;
         }
@@ -476,7 +479,8 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     private Double getUncorrectedScore(final Competitor competitor, final RaceColumn raceColumn,
             Callable<Integer> trackedRankProvider, ScoringScheme scoringScheme,
-            final NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint) {
+            final NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Double result;
         try {
             int trackedRank = trackedRankProvider.call();

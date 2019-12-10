@@ -23,7 +23,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockPanel;
-import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -377,7 +376,7 @@ public abstract class DataEntryDialog<T> {
     }
     
     private DoubleBox createDoubleBoxInternal(Double initialValue, int visibleLength) {
-        DoubleBox doubleBox = new DoubleBox();
+        final DoubleBox doubleBox = new DoubleBox();
         doubleBox.setVisibleLength(visibleLength);
         doubleBox.setValue(initialValue);
         DialogUtils.addFocusUponKeyUpToggler(doubleBox);

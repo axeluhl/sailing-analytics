@@ -1,7 +1,7 @@
 [Unit]
 Description=Ensures all files under /var/lib/mongo are owned by mongod user/group
-Requires=var-lib-mongo.mount
-After=var-lib-mongo.mount
+Requires=ephemeralvolume.service
+After=ephemeralvolume.service
 Before=mongod.service
 
 [Install]

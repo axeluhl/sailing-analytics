@@ -17,7 +17,6 @@ import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -53,6 +52,7 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -124,7 +124,7 @@ public class LeaderboardCourseChangeTest {
         ThresholdBasedResultDiscardingRule rule = new ThresholdBasedResultDiscardingRuleImpl(ruleRaw);
         Leaderboard leaderboard = createRegattaLeaderboard(mockedRegatta, rule);
         
-        DomainFactory baseDomainFactory = new DomainFactoryImpl((srlid)->null);
+        DomainFactory baseDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, raceColumnNames, false,
                 trackedRegattaRegistry, baseDomainFactory, /* fillTotalPointsUncorrected */ false);
 
@@ -152,7 +152,7 @@ public class LeaderboardCourseChangeTest {
         TrackedRace spyedTrackedRace = spy(new DynamicTrackedRaceImpl(mockedTrackedRegatta, mockedRace,
                 new HashSet<Sideline>(), EmptyWindStore.INSTANCE, 5000, 20000, 20000,
                 /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
-                mock(RaceLogResolver.class)));
+                mock(RaceLogAndTrackedRaceResolver.class), null));
 
         return spyedTrackedRace;
     }

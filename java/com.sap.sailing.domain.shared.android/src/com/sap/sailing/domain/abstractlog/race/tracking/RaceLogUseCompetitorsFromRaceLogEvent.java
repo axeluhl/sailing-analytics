@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.abstractlog.race.tracking;
 
 import com.sap.sailing.domain.abstractlog.Revokable;
+import com.sap.sailing.domain.abstractlog.race.InvalidatesLeaderboardCache;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogUsesOwnCompetitorsAnalyzer;
 
@@ -15,5 +16,5 @@ import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogUs
  * @author Jan Bross (D056848)
  *
  */
-public interface RaceLogUseCompetitorsFromRaceLogEvent extends RaceLogEvent, Revokable {
+public interface RaceLogUseCompetitorsFromRaceLogEvent extends RaceLogEvent, Revokable, InvalidatesLeaderboardCache {
 }

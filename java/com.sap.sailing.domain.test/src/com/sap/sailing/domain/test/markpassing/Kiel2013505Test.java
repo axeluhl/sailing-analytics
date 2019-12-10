@@ -1,9 +1,7 @@
 package com.sap.sailing.domain.test.markpassing;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.text.ParseException;
 
 import org.junit.Test;
 
@@ -13,8 +11,6 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.tractrac.model.lib.api.event.CreateModelException;
-import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class Kiel2013505Test extends AbstractMarkPassingTest {
 
@@ -26,8 +22,7 @@ public class Kiel2013505Test extends AbstractMarkPassingTest {
      * Marks the race as using a gate start
      */
     @Override
-    protected void setUp(String raceNumber) throws IOException, InterruptedException, URISyntaxException,
-            ParseException, SubscriberInitializationException, CreateModelException {
+    protected void setUp(String raceNumber) throws Exception {
         super.setUp(raceNumber);
         final RaceLog raceLog = new RaceLogImpl("505 Race Log");
         getTrackedRace().attachRaceLog(raceLog);
@@ -35,7 +30,7 @@ public class Kiel2013505Test extends AbstractMarkPassingTest {
     }
 
     @Test
-    public void testRace5() throws IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
+    public void testRace5() throws Exception {
         testRace("5");
     }
 

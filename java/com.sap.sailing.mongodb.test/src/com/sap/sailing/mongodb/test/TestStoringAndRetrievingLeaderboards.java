@@ -353,15 +353,15 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
-        final DomainFactory domainFactory = new DomainFactoryImpl((srlid)->null);
+        final DomainFactory domainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
         // create the competitor through the competitor store/factory here so that the DomainObjectFactory finds it and
         // resolves the score corrections appropriate
         Competitor competitor = domainFactory.getOrCreateCompetitor(123, "$$$Dr. Wolfgang+Hunger$$$", "WH", Color.RED, "someone@nowhere.de", null, new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
                         /* dateOfBirth */ null, "This is Rigo, the coach")),
-                        /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-        DynamicBoat boat = (DynamicBoat) domainFactory.getOrCreateBoat("boat", "Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null, null);
+                        /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true);
+        DynamicBoat boat = (DynamicBoat) domainFactory.getOrCreateBoat("boat", "Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null, null, /* storePersistently */ true);
         CompetitorWithBoat competitorWithBoat = new CompetitorWithBoatImpl(competitor, boat);
         TrackedRace raceWithOneCompetitor1 = new MockedTrackedRaceWithFixedRank(competitorWithBoat, /* rank */ 1, /* started */ true);
         TrackedRace raceWithOneCompetitor2 = new MockedTrackedRaceWithFixedRank(competitorWithBoat, /* rank */ 2, /* started */ true);

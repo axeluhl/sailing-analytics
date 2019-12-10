@@ -25,8 +25,10 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.race.InvalidatesLeaderboardCache;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -81,7 +83,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
-import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.Bearing;
@@ -89,7 +91,10 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimingStats;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.ThreadPoolUtil;
 import com.sap.sse.util.impl.FutureTaskWithTracingGet;
 
@@ -108,6 +113,11 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
     private String displayName;
 
     private transient Set<LeaderboardChangeListener> leaderboardChangeListeners;
+    
+    /**
+     * Keeps statistics about the re-calculation times in different short-term time ranges.
+     */
+    private transient TimingStats timingStats;
     
     /**
      * Used to remove all these listeners from their tracked races when this servlet is {@link #destroy() destroyed}.
@@ -216,9 +226,18 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         this.raceDetailsAtEndOfTrackingCache = new HashMap<>();
         this.cacheInvalidationListeners = new HashSet<>();
         this.leaderboardChangeListeners = new HashSet<>();
+        this.timingStats = createTimingStats();
         // When many updates are triggered in a short period of time by a single thread, ensure that the single thread
         // providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
         // core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
+    }
+    
+    /**
+     * Creates the {@link #timingStats} statistics keeper with a few time intervals, tracking
+     * the re-computing times.
+     */
+    private TimingStats createTimingStats() {
+        return new TimingStats(Duration.ONE_SECOND.times(5), Duration.ONE_SECOND.times(30), Duration.ONE_MINUTE);
     }
 
     @Override
@@ -358,7 +377,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             final boolean fillTotalPointsUncorrected)
             throws NoWindException {
         ShardingContext.checkConstraint(ShardingType.LEADERBOARDNAME, getName());
-        long startOfRequestHandling = System.currentTimeMillis();
+        final TimePoint startOfRequestHandling = MillisecondsTimePoint.now();
         final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
         final BoatClass boatClass = getBoatClass();
         final LeaderboardDTO result = new LeaderboardDTO(timePoint.asDate(), this.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ? null
@@ -412,7 +431,8 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race, isMetaLeaderboardColumn);
             }
             Future<List<CompetitorDTO>> task = executor.submit(
-                    () -> baseDomainFactory.getCompetitorDTOList(AbstractLeaderboardWithCache.this.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
+                    () -> baseDomainFactory.getCompetitorDTOList(AbstractLeaderboardWithCache.this.getCompetitorsFromBestToWorst(
+                            raceColumn, timePoint, cache)));
             competitorsFromBestToWorstTasks.put(raceColumn, task);
         }
         // wait for the competitor orderings to have been computed for all race columns before continuing; subsequent tasks may depend on these data
@@ -466,7 +486,8 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 }
             }
         }
-        for (final Competitor competitor : this.getCompetitorsFromBestToWorst(timePoint)) {
+        final Map<Pair<RaceColumn, Competitor>, RankingInfo> rankingInfoCache = new HashMap<>();
+        for (final Competitor competitor : this.getCompetitorsFromBestToWorst(timePoint, cache)) {
             CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
             LeaderboardRowDTO row = new LeaderboardRowDTO();
             row.competitor = competitorDTO;
@@ -480,14 +501,21 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             Map<String, Future<LeaderboardEntryDTO>> futuresForColumnName = new HashMap<String, Future<LeaderboardEntryDTO>>();
             final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint);
             for (final RaceColumn raceColumn : this.getRaceColumns()) {
+                final boolean computeLegDetails = namesOfRaceColumnsForWhichToLoadLegDetails != null &&
+                        namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName());
+                // if leg details are to be requested, the ranking info needs to be provided:
+                // TODO bug5143 (performance): shouldn't the rankingInfoCache be passed on because detail computations need them all?
+                final RankingInfo rankingInfo = computeLegDetails ? rankingInfoCache.computeIfAbsent(new Pair<>(raceColumn, competitor),
+                        raceColumnAndCompetitor->{
+                            final TrackedRace trackedRace = raceColumnAndCompetitor.getA().getTrackedRace(raceColumnAndCompetitor.getB());
+                            return trackedRace==null?null:trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
+                        }) : null;
                 Future<LeaderboardEntryDTO> future = executor.submit(() -> {
-                        Entry entry = AbstractLeaderboardWithCache.this.getEntry(competitor, raceColumn, timePoint, discardedRaceColumns);
-                        return getLeaderboardEntryDTO(entry, raceColumn, competitor, timePoint,
-                                namesOfRaceColumnsForWhichToLoadLegDetails != null
-                                        && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn
-                                                .getName()), waitForLatestAnalyses, legRanksCache, baseDomainFactory,
-                                                fillTotalPointsUncorrected, cache);
-                    });
+                    Entry entry = AbstractLeaderboardWithCache.this.getEntry(competitor, raceColumn, timePoint, discardedRaceColumns);
+                    return getLeaderboardEntryDTO(entry, raceColumn, competitor, timePoint, computeLegDetails,
+                            rankingInfo, waitForLatestAnalyses, legRanksCache, baseDomainFactory,
+                            fillTotalPointsUncorrected, cache);
+                });
                 futuresForColumnName.put(raceColumn.getName(), future);
             }
             for (Map.Entry<String, Future<LeaderboardEntryDTO>> raceColumnNameAndFuture : futuresForColumnName.entrySet()) {
@@ -509,7 +537,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                                     + ". Leaving empty.", e);
                 }
             }
-            
             if (addOverallDetails) {
                 //this reuses several prior calculated fields, so must be evaluated after them
                 row.totalScoredRaces = this.getTotalRaces(competitor, row, timePoint);
@@ -530,12 +557,35 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 }
             }
         }
+        final Duration computeTime = startOfRequestHandling.until(MillisecondsTimePoint.now());
         logger.info("computeLeaderboardByName(" + this.getName() + ", " + timePoint + ", "
                 + namesOfRaceColumnsForWhichToLoadLegDetails + ", addOverallDetails=" + addOverallDetails + ") took "
-                + (System.currentTimeMillis() - startOfRequestHandling) + "ms");
+                + computeTime);
+        updateStats(startOfRequestHandling, computeTime);
         return result;
     }
  
+    /**
+     * Updates statistics about how long it took to compute DTOs for this leaderboard.
+     * 
+     * @param startOfRequestHandling
+     *            when the request to compute the DTO was received
+     * @param computeDuration
+     *            how long it took to complete the DTO calculation request
+     */
+    private void updateStats(TimePoint startOfRequestHandling, Duration computeDuration) {
+        try {
+            timingStats.recordTiming(startOfRequestHandling, computeDuration);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Exception trying to update leaderboard compute time stats", e);
+        }
+    }
+    
+    @Override
+    public Map<Duration, Pair<Duration, Integer>> getComputationTimeStatistics() {
+        return timingStats.getAverageDurationsAndNumberOfRequests();
+    }
+
     private Integer getTotalRaces(Competitor competitor, LeaderboardRowDTO row, TimePoint timePoint) {
         int amount = 0;
         for (RaceColumn raceColumn : getRaceColumns()) {
@@ -569,6 +619,11 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
     }
 
     /**
+     * @param rankingInfo
+     *            must be provided when {@code addLegDetails} is {@code true}; it may, however, be the case that there
+     *            is no {@link TrackedRace} for the {@code competitor} for which this entry shall be computed; in such
+     *            cases it is permissible to pass {@code null} for this parameter despite {@code addLegDetails} being
+     *            set.
      * @param waitForLatestAnalyses
      *            if <code>false</code>, this method is allowed to read the maneuver analysis results from a cache that
      *            may not reflect all data already received; otherwise, the method will always block for the latest
@@ -581,11 +636,11 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
      *            the correction was removed.
      */
     private LeaderboardEntryDTO getLeaderboardEntryDTO(Entry entry, RaceColumn raceColumn, Competitor competitor,
-            TimePoint timePoint, boolean addLegDetails, boolean waitForLatestAnalyses,
-            Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache, DomainFactory baseDomainFactory,
-            boolean fillTotalPointsUncorrected, WindLegTypeAndLegBearingCache cache) {
+            TimePoint timePoint, boolean addLegDetails, RankingInfo rankingInfo,
+            boolean waitForLatestAnalyses, Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache,
+            DomainFactory baseDomainFactory, boolean fillTotalPointsUncorrected, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         LeaderboardEntryDTO entryDTO = new LeaderboardEntryDTO();
-        TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
+        final TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
         entryDTO.race = trackedRace == null ? null : trackedRace.getRaceIdentifier();
         Boat boat;
         if (trackedRace != null) {
@@ -630,7 +685,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         }
         if (addLegDetails && trackedRace != null) {
             try {
-                final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
                 RaceDetails raceDetails = getRaceDetails(trackedRace, competitor, timePoint, waitForLatestAnalyses,
                         legRanksCache, rankingInfo, cache);
                 entryDTO.legDetails = raceDetails.getLegDetails();
@@ -808,7 +862,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
      */
     private RaceDetails getRaceDetails(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint,
             boolean waitForLatestAnalyses, Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache,
-            RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) throws InterruptedException, ExecutionException {
+            RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws InterruptedException, ExecutionException {
         final RaceDetails raceDetails;
         if (trackedRace.getEndOfTracking() != null && trackedRace.getEndOfTracking().compareTo(timePoint) < 0) {
             raceDetails = getRaceDetailsForEndOfTrackingFromCacheOrCalculateAndCache(trackedRace, competitor, legRanksCache, rankingInfo, cache);
@@ -820,7 +874,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
 
     private RaceDetails getRaceDetailsForEndOfTrackingFromCacheOrCalculateAndCache(final TrackedRace trackedRace,
             final Competitor competitor, final Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache,
-            RankingInfo rankingInfo, final WindLegTypeAndLegBearingCache cache) throws InterruptedException, ExecutionException {
+            RankingInfo rankingInfo, final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws InterruptedException, ExecutionException {
         final com.sap.sse.common.Util.Pair<TrackedRace, Competitor> key = new com.sap.sse.common.Util.Pair<TrackedRace, Competitor>(trackedRace, competitor);
         RunnableFuture<RaceDetails> raceDetails;
         final boolean needToRunRaceDetails; // when found in cache, another call to this method is already running it; else, it needs to be run here
@@ -859,7 +913,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
 
     private RaceDetails calculateRaceDetails(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint,
             boolean waitForLatestAnalyses, Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache,
-            WindLegTypeAndLegBearingCache cache, final RankingInfo rankingInfo) {
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache, final RankingInfo rankingInfo) {
         final List<LegEntryDTO> legDetails = new ArrayList<LegEntryDTO>();
         final Course course = trackedRace.getRace().getCourse();
         course.lockForRead(); // hold back any course re-configurations while looping over the legs
@@ -899,7 +953,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             return new RaceDetails(legDetails, windwardDistanceToCompetitorFarthestAhead, averageAbsoluteCrossTrackError, averageSignedCrossTrackError,
                     trackedRace.getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, competitor, cache),
                     trackedRace.getTimeSailedSinceRaceStart(competitor, timePoint),
-                    trackedRace.getRankingMetric().getCorrectedTime(competitor, timePoint),
+                    competitorRankingInfo == null ? null : competitorRankingInfo.getCorrectedTime(),
                     competitorRankingInfo == null ? null : competitorRankingInfo.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead());
         } finally {
             course.unlockAfterRead();
@@ -908,7 +962,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
 
     private LegEntryDTO createLegEntry(TrackedLegOfCompetitor trackedLeg, TimePoint timePoint,
             boolean waitForLatestAnalyses, Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache,
-            RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+            RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         LegEntryDTO result;
         final Duration time = trackedLeg.getTime(timePoint);
         if (trackedLeg == null || time == null) {
@@ -1107,7 +1161,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         return result;
     }
 
-    private Duration getGapAtEndOfPreviousLeg(TrackedLegOfCompetitor trackedLeg, final RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+    private Duration getGapAtEndOfPreviousLeg(TrackedLegOfCompetitor trackedLeg, final RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Duration result;
         final Course course = trackedLeg.getTrackedLeg().getTrackedRace().getRace().getCourse();
         // if trackedLeg is the first leg, compute the gap at the start of this leg; otherwise, compute gap
@@ -1129,12 +1183,23 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         return getCompetitorsFromBestToWorst(timePoint).indexOf(competitor) + 1;
     }
 
-    public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
+    protected void regattaLogEventAdded(RegattaLogEvent event) {
+        invalidateCacheIfEventSaysSo(event);
+    }
+    
+    protected void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
+        invalidateCacheIfEventSaysSo(event);
+    }
+
+    private void invalidateCacheIfEventSaysSo(AbstractLogEvent<?> event) {
         if (event instanceof InvalidatesLeaderboardCache) {
             // make sure to invalidate the cache as this event indicates that
             // it changes values the cache could still hold
             if (leaderboardDTOCache != null) {
                 leaderboardDTOCache.invalidate(this);
+            }
+            synchronized (raceDetailsAtEndOfTrackingCache) {
+                raceDetailsAtEndOfTrackingCache.clear();
             }
         }
     }
