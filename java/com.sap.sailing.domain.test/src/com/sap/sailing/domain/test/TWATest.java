@@ -23,7 +23,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
@@ -65,7 +65,7 @@ public class TWATest {
         
         when(competitorTrack.getEstimatedSpeed((TimePoint) anyObject())).thenReturn(new KnotSpeedWithBearingImpl(10, boatToBearing));
         when(trackedRace.getTWA(Matchers.eq(competitor), (TimePoint) anyObject())).thenCallRealMethod();
-        when(trackedRace.getTWA(Matchers.eq(competitor), (TimePoint) anyObject(), (WindLegTypeAndLegBearingCache) anyObject())).thenCallRealMethod();
+        when(trackedRace.getTWA(Matchers.eq(competitor), (TimePoint) anyObject(), (WindLegTypeAndLegBearingAndORCPerformanceCurveCache) anyObject())).thenCallRealMethod();
     }
 
     @Test

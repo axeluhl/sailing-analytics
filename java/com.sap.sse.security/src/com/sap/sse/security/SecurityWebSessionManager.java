@@ -12,6 +12,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.concurrent.ConcurrentWeakHashMap;
+import com.sap.sse.security.impl.Activator;
 import com.sap.sse.util.TimerWithRunnable;
 
 /**
@@ -27,6 +28,13 @@ public class SecurityWebSessionManager extends DefaultWebSessionManager {
     private static final TimerWithRunnable timer = new TimerWithRunnable("Timer delaying Session.touch() onChange(s) notifications", /* isDaemon */ true);
     
     private static final Duration MAX_DURATION_ASSUMED_FOR_MESSAGE_DELIVERY = Duration.ONE_SECOND.times(30);
+    
+    /**
+     * When {@link SecurityService#getSharedAcrossSubdomainsOf()} returns a non-{@code null}
+     * domain, a different session cookie name is used to avoid collisions with more specific
+     * default session cookies.
+     */
+    private static final String GLOBAL_SESSION_ID_COOKIE_NAME = "JSESSIONID_GLOBAL";
     
     /**
      * Wait no longer than this duration before pinging / bumping the session. The session timeout may be
@@ -45,6 +53,15 @@ public class SecurityWebSessionManager extends DefaultWebSessionManager {
     public SecurityWebSessionManager() {
         super();
         getSessionIdCookie().setPath(Cookie.ROOT_PATH);
+        final Thread backgroundThreadWaitingForSecurityServiceToObtainSharedAcrossSubdomains = new Thread(()->{
+            final String domainForSecurityServiceSharing = Activator.getSecurityService().getSharedAcrossSubdomainsOf();
+            if (domainForSecurityServiceSharing != null) {
+                getSessionIdCookie().setDomain(domainForSecurityServiceSharing);
+                getSessionIdCookie().setName(GLOBAL_SESSION_ID_COOKIE_NAME);
+            }
+        }, "Background thread of "+getClass().getName()+" waiting for security service");
+        backgroundThreadWaitingForSecurityServiceToObtainSharedAcrossSubdomains.setDaemon(true);
+        backgroundThreadWaitingForSecurityServiceToObtainSharedAcrossSubdomains.start();
     }
 
     @Override

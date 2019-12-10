@@ -32,6 +32,14 @@ public class StructureImportListComposite extends RegattaListComposite implement
         super(sailingService, userService, regattaRefresher, errorReporter, stringMessages);
         this.regattaStructureProvider = regattaStructureProvider;
     }
+    
+    /**
+     * No update permission check for the objects shown by this panel; they are no real back-end
+     * regattas with ownerships or security information, and filtering in this context makes no sense.
+     */
+    protected void setUpdatePermissionFilter(final UserService userService) {
+    }
+
 
     // create Regatta Table in StructureImportManagementPanel
     @Override

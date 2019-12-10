@@ -98,8 +98,8 @@ public class BoatImpl extends RenamableImpl implements DynamicBoat {
     }
 
     @Override
-    public Boat resolve(SharedDomainFactory domainFactory) {
-        return domainFactory.getOrCreateBoat(getId(), getName(), getBoatClass(), getSailID(), getColor());
+    public Boat resolve(SharedDomainFactory<?> domainFactory) {
+        return domainFactory.getOrCreateBoat(getId(), getName(), getBoatClass(), getSailID(), getColor(), /* storePersistently */ true);
     }
 
     @Override

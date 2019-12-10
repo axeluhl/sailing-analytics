@@ -88,8 +88,8 @@ public class BoatReplicationTest extends AbstractServerReplicationTest {
                 new TeamImpl("STG", Collections.singleton(new PersonImpl("comp1", new NationalityImpl("GER"),
                 /* dateOfBirth */null, "This is famous name")), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("NED"), /* dateOfBirth */null, "This is Rigo, the coach")),
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
-        Boat boat = master.getBaseDomainFactory().getOrCreateBoat(UUID.randomUUID(), "Kielboat", boatClass, "GER 123", Color.RED);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
+        Boat boat = master.getBaseDomainFactory().getOrCreateBoat(UUID.randomUUID(), "Kielboat", boatClass, "GER 123", Color.RED, /* storePersistently */ true);
         Map<Competitor,Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(competitor, boat);
         final String raceName = "Test Race";
@@ -130,7 +130,7 @@ public class BoatReplicationTest extends AbstractServerReplicationTest {
         final RegattaAndRaceIdentifier raceIdentifier = masterRegatta.getRaceIdentifier(raceDefinition);
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,
                 EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
-                /* millisecondsOverWhichToAverageWind */ 30000l, /* millisecondsOverWhichToAverageSpeed */ 30000l));
+                /* millisecondsOverWhichToAverageWind */ 30000l, /* millisecondsOverWhichToAverageSpeed */ 30000l, null));
         trackedRace.getTrack(competitor).addGPSFix(new GPSFixMovingImpl(new DegreePosition(49.425, 8.293), MillisecondsTimePoint.now(),
                 new KnotSpeedWithBearingImpl(12.3, new DegreeBearingImpl(242.3))));
         Thread.sleep(1000);
@@ -147,7 +147,7 @@ public class BoatReplicationTest extends AbstractServerReplicationTest {
         final String boatName = "Kielzugvogel 123";
         
         BoatClass boatClass = new BoatClassImpl("Kielzugvogel", true);
-        Boat boat = master.getBaseDomainFactory().getOrCreateBoat(123, boatName, boatClass, "GER 123", null);
+        Boat boat = master.getBaseDomainFactory().getOrCreateBoat(123, boatName, boatClass, "GER 123", null, /* storePersistently */ true);
         Thread.sleep(1000);
         assertTrue(StreamSupport.stream(replica.getBaseDomainFactory().getCompetitorAndBoatStore().getBoats().spliterator(), /* parallel */ false).anyMatch(
                 b-> b.getId().equals(boat.getId())));

@@ -56,8 +56,9 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
                 leaderboardGroups.add(leaderboardGroupDeserializer.deserialize((JSONObject) lgJson));
             }
         }
+        boolean isTrackedByTracTrac = Boolean.TRUE.equals(eventJson.get(EventBaseJsonSerializer.Field_TRACKED_BY_TRACTRAC));
         StrippedEventImpl result = new StrippedEventImpl(name, startDate == null ? null : new MillisecondsTimePoint(startDate.longValue()),
-                endDate == null ? null : new MillisecondsTimePoint(endDate.longValue()), venue, /* is public */ true, id, leaderboardGroups);
+                endDate == null ? null : new MillisecondsTimePoint(endDate.longValue()), venue, /* is public */ true, id, leaderboardGroups, isTrackedByTracTrac);
         result.setDescription(description);
         if (officialWebsiteURLAsString != null) {
             try {

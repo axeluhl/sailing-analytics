@@ -29,6 +29,7 @@ import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.shared.dto.WildcardPermissionWithSecurityDTO;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
+import com.sap.sse.security.ui.shared.SecurityServiceSharingDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public interface UserManagementService extends RemoteService {
@@ -76,7 +77,7 @@ public interface UserManagementService extends RemoteService {
     void putRoleDefintionToUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString, boolean forAll)
             throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
-    void removeRoleDefintionFromUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString)
+    void removeRoleDefinitionFromUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString)
             throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
     Collection<UserDTO> getUserList() throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
@@ -218,4 +219,6 @@ public interface UserManagementService extends RemoteService {
             throws UserManagementException, org.apache.shiro.authz.UnauthorizedException;
 
     Boolean userGroupExists(String userGroupName) throws org.apache.shiro.authz.UnauthorizedException;
+
+    SecurityServiceSharingDTO getSharingConfiguration();
 }

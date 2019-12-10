@@ -5,7 +5,6 @@ import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -19,6 +18,7 @@ import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.util.ThreadLocalTransporter;
@@ -35,7 +35,7 @@ public interface RaceTrackingHandler {
             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator,
-            RaceLogResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter);
+            RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter, String trackingConnector);
     
     DynamicCompetitor getOrCreateCompetitor(CompetitorAndBoatStore competitorAndBoatStore, Serializable competitorId,
             String name, String shortName, Color displayColor, String email, URI flagImageURI, DynamicTeam team,
@@ -58,10 +58,10 @@ public interface RaceTrackingHandler {
                 Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
                 long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
                 DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator,
-                RaceLogResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter) {
+                RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter, String trackingConnector) {
             return trackedRegatta.createTrackedRace(raceDefinition, sidelines, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate,
-                    useMarkPassingCalculator, raceLogResolver, threadLocalTransporter);
+                    useMarkPassingCalculator, raceLogResolver, threadLocalTransporter, trackingConnector);
         }
 
         @Override
@@ -77,7 +77,7 @@ public interface RaceTrackingHandler {
                 Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
             return competitorStore.getOrCreateCompetitor(competitorId, name, shortName, displayColor, email,
                     flagImageURI, team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile,
-                    searchTag);
+                    searchTag, /* storePersistently */ true);
         }
 
         @Override
@@ -86,13 +86,13 @@ public interface RaceTrackingHandler {
                 URI flagImageURI, DynamicTeam team, Double timeOnTimeFactor,
                 Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
             return competitorStore.getOrCreateCompetitorWithBoat(competitorId, name, shortName, displayColor, email,
-                    flagImageURI, team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
+                    flagImageURI, team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat, /* storePersistently */ true);
         }
 
         @Override
         public DynamicBoat getOrCreateBoat(CompetitorAndBoatStore competitorAndBoatStore, Serializable id, String name,
                 BoatClass boatClass, String sailId, Color color) {
-            return competitorAndBoatStore.getOrCreateBoat(id, name, boatClass, sailId, color);
+            return competitorAndBoatStore.getOrCreateBoat(id, name, boatClass, sailId, color, /* storePersistently */ true);
         }
     }
 }

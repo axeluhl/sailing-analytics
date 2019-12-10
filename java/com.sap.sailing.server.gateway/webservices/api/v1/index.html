@@ -162,13 +162,17 @@ name to make sure you get to the event you're interested in.
         <td>Creates a competitor and adds it to the regatta</td>
     </tr>
 	<tr>
-		<td>/api/v1/regattas/{regattaname}/competitors/{competitorId}/add</td>
+		<td><a href="regattasCompetitorAdd.html">/api/v1/regattas/{regattaname}/competitors/{competitorId}/add</a></td>
 		<td>Registers a competitor with a regatta (POST)</td>
 	</tr>
 	<tr>
 		<td>/api/v1/regattas/{regattaname}/competitors/{competitorId}/remove</td>
 		<td>Removes a competitor from a regatta (POST)</td>
 	</tr>
+    <tr>
+        <td><a href="regattasTrackingDevicesGet.html">/api/v1/regattas/{regattaName}/tracking_devices</a></td>
+        <td>Gets the status for all GPS trackers associated to a regatta (GET)</td>
+    </tr>
 	<tr>
 		<td><a href="raceRunQueryGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/datamining/{queryidentifier}</a></td>
 		<td>Executes the query for the race and gets the result</td>
@@ -347,6 +351,30 @@ name to make sure you get to the event you're interested in.
     <tr>
         <td><a href="status.html">/api/v1/status</a></td>
         <td>Returns a status description for the "RacingEventService" core service</td>
+    </tr>
+    <tr>
+        <td><a href="trackedeventsGetDoc.html">/api/v1/trackedevents</a></td>
+        <td>Gets all tracked events with the associated device-to-competitor/boat/mark elements for the current user.</td>
+    </tr>
+    <tr>
+        <td><a href="trackedeventsPutDoc.html">/api/v1/trackedevents</a></td>
+        <td>Create or update a tracked event for the current user.</td>
+    </tr>
+    <tr>
+        <td><a href="trackedeventsPostDoc.html">/api/v1/trackedevents</a></td>
+        <td>Update the archived status of a tracked event for the current user.</td>
+    </tr>
+    <tr>
+        <td><a href="trackedeventsDeleteDoc.html">/api/v1/trackedevents</a></td>
+        <td>Delete a tracked event for the current user.</td>
+    </tr>
+    <tr>
+        <td><a href="trackingDeviceStatusGet.html">/api/v1/tracking_devices/{deviceUUID}</a></td>
+        <td>Gets the status of an app based tracking device (GET)</td>
+    </tr>
+    <tr>
+        <td><a href="trackingDeviceStatusesGet.html">/api/v1/tracking_devices</a></td>
+        <td>Gets the status of multiple app based tracking devices (GET)</td>
     </tr>
 </tbody>
 </table>

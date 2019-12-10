@@ -23,7 +23,7 @@ public class BoatResourceTest extends AbstractJaxRsApiTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        racingEventService.getBaseDomainFactory().getOrCreateBoat(id, boatName, boatClass, sailId, null);
+        racingEventService.getBaseDomainFactory().getOrCreateBoat(id, boatName, boatClass, sailId, null, /* storePersistently */ true);
     }
 
     @Test

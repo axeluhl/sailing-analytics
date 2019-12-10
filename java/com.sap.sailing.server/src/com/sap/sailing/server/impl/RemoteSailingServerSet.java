@@ -96,7 +96,7 @@ public class RemoteSailingServerSet {
      * @param scheduler
      *            Used to schedule the periodic updates of the {@link #cachedEventsForRemoteSailingServers event cache}
      */
-    public RemoteSailingServerSet(ScheduledExecutorService scheduler, SharedDomainFactory baseDomainFactory) {
+    public RemoteSailingServerSet(ScheduledExecutorService scheduler, SharedDomainFactory<?> baseDomainFactory) {
         this.statisticsJsonDeserializer = StatisticsJsonDeserializer.create(baseDomainFactory);
         remoteSailingServers = new ConcurrentHashMap<>();
         cachedEventsForRemoteSailingServers = new ConcurrentHashMap<>();

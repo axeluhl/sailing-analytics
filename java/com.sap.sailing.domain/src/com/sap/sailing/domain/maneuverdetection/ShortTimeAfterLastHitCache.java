@@ -49,13 +49,38 @@ public class ShortTimeAfterLastHitCache<K, V> {
                 Entry<K, ValueWithTimestampSinceLastHit<V>> entry = iterator.next();
                 if (entry.getValue().getTimestampSinceLastHit() < oldestToKeep) {
                     iterator.remove();
-                    if(cachedValueCleaningCallback != null) {
+                    if (cachedValueCleaningCallback != null) {
                         cachedValueCleaningCallback.cleanValue(entry.getKey(), entry.getValue().getValue());
                     }
                 }
             }
+            if (isInvalidatorHandleNecessary()) {
+                synchronized (cache) {
+                    if (invalidatorHandle != null && cache.isEmpty()) {
+                        invalidatorHandle.cancel(/* mayInterruptIfRunning */ false);
+                        invalidatorHandle = null;
+                    }
+                }
+            }
+        }
+    }
+
+    public void clearCache() {
+        if (cachedValueCleaningCallback != null) {
+            for (Iterator<Entry<K, ValueWithTimestampSinceLastHit<V>>> iterator = cache.entrySet().iterator(); iterator
+                    .hasNext();) {
+                Entry<K, ValueWithTimestampSinceLastHit<V>> entry = iterator.next();
+                iterator.remove();
+                if (cachedValueCleaningCallback != null) {
+                    cachedValueCleaningCallback.cleanValue(entry.getKey(), entry.getValue().getValue());
+                }
+            }
+        } else {
+            cache.clear();
+        }
+        if (isInvalidatorHandleNecessary()) {
             synchronized (cache) {
-                if (cache.isEmpty()) {
+                if (invalidatorHandle != null && cache.isEmpty()) {
                     invalidatorHandle.cancel(/* mayInterruptIfRunning */ false);
                     invalidatorHandle = null;
                 }
@@ -97,7 +122,7 @@ public class ShortTimeAfterLastHitCache<K, V> {
         this.cachedValueCleaningCallback = cachedValueCleaningCallback;
     }
 
-    private void add(K key, V value) {
+    public void addToCache(K key, V value) {
         final long timestamp = calculateCurrentTimestamp();
         synchronized (cache) {
             cache.put(key, new ValueWithTimestampSinceLastHit<>(value, timestamp));
@@ -116,14 +141,22 @@ public class ShortTimeAfterLastHitCache<K, V> {
     }
 
     public V getValue(K key) {
+        V value = getCachedValue(key);
+        if (value == null) {
+            value = uncachedValueRetrieverCallback.getUncachedValue(key);
+            if (value != null) {
+                addToCache(key, value);
+            }
+        }
+        return value;
+    }
+
+    public V getCachedValue(K key) {
         ValueWithTimestampSinceLastHit<V> valueWrapper = cache.get(key);
         V value;
         if (valueWrapper == null) {
             misses++;
-            value = uncachedValueRetrieverCallback.getUncachedValue(key);
-            if (value != null) {
-                add(key, value);
-            }
+            value = null;
         } else {
             hits++;
             valueWrapper.setTimestampSinceLastHit(calculateCurrentTimestamp());
@@ -139,11 +172,15 @@ public class ShortTimeAfterLastHitCache<K, V> {
      * Must be called while owning the {@link #cache} monitor (synchronized)
      */
     private void ensureTimerIsRunning() {
-        if (invalidatorHandle == null) {
+        if (isInvalidatorHandleNecessary() && invalidatorHandle == null) {
             invalidatorHandle = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor()
                     .scheduleAtFixedRate(new CacheInvalidator(), /* delay */ preserveHowManyMilliseconds,
                             preserveHowManyMilliseconds, TimeUnit.MILLISECONDS);
         }
+    }
+
+    private boolean isInvalidatorHandleNecessary() {
+        return preserveHowManyMilliseconds != Long.MAX_VALUE;
     }
 
     public interface UncachedValueRetrieverCallback<K, V> {

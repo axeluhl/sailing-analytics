@@ -93,7 +93,7 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
                             /* dateOfBirth */ null, "This is famous "+competitorName)),
                             new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
                             /* dateOfBirth */null, "This is Rigo, the coach")),
-                    /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
+                    /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true));
         }
         regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */1,
                 new String[] { "Default" },
@@ -138,7 +138,7 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
                 /* delayToLiveInMillis */ 5000, /* millisecondsOverWhichToAverageWind */ 15000,
                 /* millisecondsOverWhichToAverageSpeed */ 10000,
                 /* useInternalMarkPassingAlgorithm */ false, OneDesignRankingMetric::new,
-                /* raceLogResolver */ service);
+                /* raceLogResolver */ service, null);
         final Fleet fleet = f1Column.getFleets().iterator().next();
         f1Column.setTrackedRace(fleet, newF1);
         // Now add a CompetitorResult to the race log:
@@ -181,7 +181,7 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         int oneBasedRank = 1;
         final CompetitorResults results = new CompetitorResultsImpl();
         Boat storedBoat = DomainFactory.INSTANCE.getOrCreateBoat(UUID.randomUUID(), "SAP Extreme Sailing Team",
-                new BoatClassImpl("X40", false), "123", Color.RED);
+                new BoatClassImpl("X40", false), "123", Color.RED, /* storePersistently */ true);
         for (final Competitor c : competitors) {
             final MaxPointsReason mpr = new MaxPointsReason[] { null, MaxPointsReason.NONE, MaxPointsReason.DNF, MaxPointsReason.OCS }[oneBasedRank%4];
             final Double score = oneBasedRank%5 == 0 ? null : 20*Math.random();
@@ -319,7 +319,7 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
     private void setResultForCompetitor(final Competitor competitor, int oneBasedRank,
             final CompetitorResults results, MaxPointsReason maxPointsReason, Double explicitScore) {
         Boat storedBoat = DomainFactory.INSTANCE.getOrCreateBoat(UUID.randomUUID(), "SAP Extreme Sailing Team",
-                new BoatClassImpl("X40", false), "123", Color.RED);
+                new BoatClassImpl("X40", false), "123", Color.RED, /* storePersistently */ true);
         results.add(new CompetitorResultImpl(competitor.getId(), competitor.getName(),
                 competitor.getShortName(), storedBoat.getName(), storedBoat.getSailID(), oneBasedRank,
                 maxPointsReason, explicitScore, /* finishingTime */ null, /* comment */ null, MergeState.OK));

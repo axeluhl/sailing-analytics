@@ -235,14 +235,11 @@ public class RaceBoardPanel
         this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), mainCss.usermanagement_loggedin(), mainCss.usermanagement_open());
         this.userManagementMenuView.asWidget().setStyleName(mainCss.usermanagement_icon());
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
-
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndTheirBoats);
         competitorSelectionProvider = new RaceCompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider, competitorsAndTheirBoats);
-                
         raceMapResources.raceMapStyle().ensureInjected();
         RaceMapLifecycle raceMapLifecycle = lifecycle.getRaceMapLifecycle();
         RaceMapSettings defaultRaceMapSettings = settings.findSettingsByComponentId(raceMapLifecycle.getComponentId());
-
         RaceTimePanelLifecycle raceTimePanelLifecycle = lifecycle.getRaceTimePanelLifecycle();
         RaceTimePanelSettings raceTimePanelSettings = settings
                 .findSettingsByComponentId(raceTimePanelLifecycle.getComponentId());
@@ -299,19 +296,17 @@ public class RaceBoardPanel
                 }
             });
         }
-
         CompetitorFilterPanel competitorSearchTextBox = new CompetitorFilterPanel(competitorSelectionProvider, stringMessages, raceMap,
                 new LeaderboardFetcher() {
                     @Override
                     public LeaderboardDTO getLeaderboard() {
                         return leaderboardPanel.getLeaderboard();
                     }
-                }, selectedRaceIdentifier);
+                }, selectedRaceIdentifier, userService.getStorage());
         raceMap.getLeftHeaderPanel().add(raceInformationHeader);
         raceMap.getRightHeaderPanel().add(regattaAndRaceTimeInformationHeader);
         raceMap.getRightHeaderPanel().add(userManagementMenuView);
         addChildComponent(raceMap);
-        
         // add panel for tagging functionality, hidden if no URL parameter "tag" is passed 
         final String sharedTagURLParameter = settings.getPerspectiveOwnSettings().getJumpToTag();
         String sharedTagTitle = null;
@@ -333,7 +328,6 @@ public class RaceBoardPanel
                 raceTimesInfoProvider, sharedTagTimePoint, sharedTagTitle, leaderboardDTO);
         addChildComponent(taggingPanel);
         taggingPanel.setVisible(showTaggingPanel);
-        
         // Determine if the screen is large enough to initially display the leaderboard panel on the left side of the
         // map based on the initial screen width. Afterwards, the leaderboard panel visibility can be toggled as usual.
         boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard = Document.get().getClientWidth() >= 1024;
@@ -343,17 +337,13 @@ public class RaceBoardPanel
         leaderboardPanel.addVisibilityListener(visible->{
             quickRanksDTOProvider.setLeaderboardNotCurrentlyUpdating(!visible);
         });
-
         leaderboardPanel.setTitle(stringMessages.leaderboard());
         leaderboardPanel.getElement().getStyle().setMarginLeft(6, Unit.PX);
         leaderboardPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
         createOneScreenView(lifecycle, settings, leaderboardName, leaderboardGroupName, eventId, mainPanel,
                 isScreenLargeEnoughToInitiallyDisplayLeaderboard,
-                raceMap, userService, showChartMarkEditMediaButtonsAndVideo, leaderboardDTO, raceDTO); // initializes
-                                                                                                       // the raceMap
-                                                                                              // field
+                raceMap, userService, showChartMarkEditMediaButtonsAndVideo, leaderboardDTO, raceDTO); // initializes the raceMap field
         leaderboardPanel.addLeaderboardUpdateListener(this);
-        
         // in case the URL configuration contains the name of a competitors filter set we try to activate it
         // FIXME the competitorsFilterSets has now moved to CompetitorSearchTextBox (which should probably be renamed); pass on the parameters to the LeaderboardPanel and see what it does with it
         if (getPerspectiveSettings().getActiveCompetitorsFilterSetName() != null) {
@@ -458,8 +448,8 @@ public class RaceBoardPanel
             componentsForSideBySideViewer.add(editMarkPositionPanel);
         }
         mediaPlayerManagerComponent = new MediaPlayerManagerComponent(this, getComponentContext(), mediaPlayerLifecycle,
-                selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages,
-                errorReporter, userAgent, this, mediaPlayerSettings, raceDTO);
+                sailingService, selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService,
+                stringMessages, errorReporter, userAgent, this, mediaPlayerSettings, raceDTO);
 
         final LeaderboardWithSecurityFetcher asyncFetcher = new LeaderboardWithSecurityFetcher() {
             @Override
@@ -514,20 +504,12 @@ public class RaceBoardPanel
         Set<MediaTrack> videoPlaying = mediaPlayerManagerComponent.getPlayingVideoTracks();
         Set<MediaTrackWithSecurityDTO> audioPlaying = mediaPlayerManagerComponent.getPlayingAudioTrack();
         for (MediaTrack track : mediaPlayerManagerComponent.getAssignedMediaTracks()) {
-            double start = track.startTime.asMillis();
-            // do not show bars for very short videos but show for live streaming ones
-            if (track.duration == null || track.duration.asMinutes() > 1) {
-                TimePoint endTp = track.deriveEndTime();
-                double end;
-                if (endTp == null) {
-                    end = Double.MAX_VALUE;
-                } else {
-                    end = endTp.asMillis();
-                }
-                final boolean isPlaying = videoPlaying.contains(track) || audioPlaying.contains(track);
-                overlays.add(new BarOverlay(start, end, isPlaying,
-                        track.title));
-            }
+            final double start = track.startTime.asMillis();
+            final TimePoint endTp = track.deriveEndTime();
+            // set to max value if null
+            final double end = endTp == null ? Double.MAX_VALUE : endTp.asMillis();
+            final boolean isPlaying = videoPlaying.contains(track) || audioPlaying.contains(track);
+            overlays.add(new BarOverlay(start, end, isPlaying, track.title));
         }
         racetimePanel.setBarOverlays(overlays);
     }

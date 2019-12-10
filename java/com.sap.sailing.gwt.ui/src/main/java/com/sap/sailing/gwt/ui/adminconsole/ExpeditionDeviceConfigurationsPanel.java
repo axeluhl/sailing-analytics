@@ -88,7 +88,7 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
         filteredDeviceConfigurations.addDataDisplay(allDeviceConfigurations);
         final List<ExpeditionDeviceConfiguration> emptyList = Collections.emptyList();
         filterDeviceConfigurationsPanel = new LabeledAbstractFilterablePanel<ExpeditionDeviceConfiguration>(new Label(stringMessages.expeditionDeviceConfigurations()),
-                emptyList, filteredDeviceConfigurations) {
+                emptyList, filteredDeviceConfigurations, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(ExpeditionDeviceConfiguration t) {
                 Set<String> strings = new HashSet<>();

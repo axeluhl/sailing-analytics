@@ -17,6 +17,7 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
     public final static String ACTION_COMPETITOR_REGISTRATIONS = "ACTION_COMPETITOR_REGISTRATIONS";
     public final static String ACTION_DEFINE_COURSE = "ACTION_DEFINE_COURSE";
     public final static String ACTION_COPY = "ACTION_COPY";
+    public final static String ACTION_UNLINK = "ACTION_UNLINK";
     public final static String ACTION_EDIT = "ACTION_EDIT";
     public final static String ACTION_REFRESH_RACELOG = "ACTION_REFRESH_RACE_LOG";
     public final static String ACTION_SET_STARTTIME = "ACTION_SET_STARTTIME";
@@ -26,6 +27,9 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
     public final static String ACTION_STOP_TRACKING = "ACTION_STOP_TRACKING";
     public final static String ACTION_START_TRACKING = "ACTION_START_TRACKING";
     public final static String ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS = "ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS";
+    public static final String ACTION_CERTIFICATE_ASSIGNMENT = "ACTION_CERTIFICATE_ASSIGNMENT";
+    public static final String ACTION_SCRATCH_BOAT_SELECTION = "ACTION_SCRATCH_BOAT_SELECTION";
+    public static final String ACTION_SET_IMPLIED_WIND = "ACTION_SET_IMPLIED_WIND";
     
     private final StringMessages stringMessages;
     private SmartphoneTrackingEventManagementPanel smartphoneTrackingEventManagementPanel;
@@ -39,7 +43,7 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
  
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
-        List<ImageSpec> result = new ArrayList<ImageSpec>();
+        final List<ImageSpec> result = new ArrayList<ImageSpec>();
         RaceColumnDTOAndFleetDTOWithNameBasedEquality object = (RaceColumnDTOAndFleetDTOWithNameBasedEquality) getContext().getKey();
         if (! object.getA().getRaceLogTrackingInfo(object.getB()).raceLogTrackingState.isForTracking()) {
             result.add(new ImageSpec(ACTION_DENOTE_FOR_RACELOG_TRACKING, stringMessages.denoteForRaceLogTracking(), makeImagePrototype(resources.denoteForRaceLogTracking())));
@@ -50,12 +54,12 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
             result.add(new ImageSpec(ACTION_COPY, stringMessages.copyCourseAndCompetitors(), makeImagePrototype(resources.copy())));
         }
         result.add(new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(IconResources.INSTANCE.editIcon())));
+        result.add(new ImageSpec(ACTION_UNLINK, stringMessages.actionRaceUnlink(), makeImagePrototype(resources.unlinkIcon())));
         result.add(new ImageSpec(ACTION_REFRESH_RACELOG, stringMessages.refreshRaceLog(), makeImagePrototype(resources.reloadIcon())));
         result.add(new ImageSpec(ACTION_SET_STARTTIME, stringMessages.setStartTime(), makeImagePrototype(resources.clockIcon())));
         result.add(new ImageSpec(ACTION_SET_FINISHING_AND_FINISH_TIME, stringMessages.setFinishingAndFinishTime(), makeImagePrototype(resources.blueSmall())));
         result.add(new ImageSpec(ACTION_SHOW_RACELOG, stringMessages.raceLog(), makeImagePrototype(resources.flagIcon())));
         result.add(new ImageSpec(ACTION_SET_TRACKING_TIMES, stringMessages.setTrackingTimes(), makeImagePrototype(resources.setTrackingTimes())));
-        
         Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> startEndTrackingTime = smartphoneTrackingEventManagementPanel.getTrackingTimesFor(object);
         if (startEndTrackingTime == null) {
             result.add(new ImageSpec(ACTION_START_TRACKING, stringMessages.startTracking(), makeImagePrototype(resources.startRaceLogTracking())));
@@ -64,11 +68,25 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
                 result.add(new ImageSpec(ACTION_STOP_TRACKING, stringMessages.stopTracking(), makeImagePrototype(resources.stopRaceLogTracking())));
             }
         }
-        
         if (smartphoneTrackingEventManagementPanel.getSelectedLeaderboard().canBoatsOfCompetitorsChangePerRace) {
             result.add(new ImageSpec(ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS, stringMessages.actionShowCompetitorToBoatAssignments(), makeImagePrototype(resources.sailboatIcon())));
         }
-        
+        if (raceCouldHaveORCRankingMetric(object)) {
+            result.add(new ImageSpec(ACTION_CERTIFICATE_ASSIGNMENT, stringMessages.assignCertificates(), resources.updateCertificatesIcon()));
+            result.add(new ImageSpec(ACTION_SCRATCH_BOAT_SELECTION, stringMessages.selectScratchBoat(), resources.scratchBoatIcon()));
+            result.add(new ImageSpec(ACTION_SET_IMPLIED_WIND, stringMessages.setImpliedWind(), resources.impliedWindIcon()));
+        }
         return result;
+    }
+
+    /**
+     * The problem with these race log-dependent ORC PCS events is this: at a later point a user could theoretically
+     * attach an ORC PCS race to the same race column. Corner case... For now we always allow users to make statements
+     * about ORC certificates at race level.
+     * 
+     * @return {@code true}
+     */
+    private boolean raceCouldHaveORCRankingMetric(RaceColumnDTOAndFleetDTOWithNameBasedEquality object) {
+        return true;
     }
 }

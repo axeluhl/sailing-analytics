@@ -1,14 +1,12 @@
 #!/bin/sh
 ANDROID_RELEASE_BRANCH=android-xmake-release
-RELEASE_BRANCH=rel-1.4
+RELEASE_BRANCH=fa/rel-1.4
 APP_DIRS="mobile/com.sap.sailing.android.tracking.app/ mobile/com.sap.sailing.android.buoy.positioning.app/ mobile/com.sap.sailing.racecommittee.app/"
 APP_GRADLE_PROPERTIES="gradle.properties"
 FILES2SIGN=cfg/files2sign.json
 VERSION_FILE=cfg/VERSION
 GIT_REMOTE=origin
 
-# proxy can be requested with -x
-OPTION_PROXY_SETTINGS=
 OPTION_UPDATE_ANDROID_VERSIONS=1
 OPTION_PERFORM_GIT_OPERATIONS=1
 
@@ -66,12 +64,11 @@ do
 done
 
 # Parse the options
-options="mgxr:"
+options="mgr:"
 while getopts "$options" option
 do
   case $option in
     m) OPTION_UPDATE_ANDROID_VERSIONS=0;;
-    g) OPTION_PERFORM_GIT_OPERATIONS=0;;
     g) OPTION_PERFORM_GIT_OPERATIONS=0;;
     r) GIT_REMOTE=$OPTARG;;
     \?) exit 4;;
@@ -114,7 +111,7 @@ if [ "$OPTION_PERFORM_GIT_OPERATIONS" = "1" ]; then
 fi
 
 echo "Launch a stage build here: https://xmake-mobile-dev.wdf.sap.corp/job/sapsailingprogram/job/sapsailingcapture.android-SP-REL-common_directshipment/"
-echo "using rel-1.4 as the Treeish to build."
+echo "using $RELEASE_BRANCH as the Treeish to build."
 echo "When done, create a BCP update ticket. See https://wiki.wdf.sap.corp/wiki/display/NAAS/Mobile+Patch+Releases \(remove the saprole parameter from the URL\)"
 echo "Copy the description of, e.g., https://support.wdf.sap.corp/sap/support/message/1970099762 to start with and adjust versions and commit IDs."
 echo "Make sure you have your MoMa stuff updated, particularly the Release Notes section."

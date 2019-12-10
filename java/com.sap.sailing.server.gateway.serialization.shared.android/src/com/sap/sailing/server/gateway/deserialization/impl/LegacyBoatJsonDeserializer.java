@@ -21,7 +21,7 @@ import com.sap.sse.util.impl.UUIDHelper;
 public class LegacyBoatJsonDeserializer implements JsonDeserializer<DynamicBoat> {
     private final BoatClassJsonDeserializer boatClassDeserializer;
 
-    public static LegacyBoatJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
+    public static LegacyBoatJsonDeserializer create(SharedDomainFactory<?> baseDomainFactory) {
         return new LegacyBoatJsonDeserializer(baseDomainFactory, new BoatClassJsonDeserializer(baseDomainFactory));
     }
     

@@ -3,10 +3,8 @@ package com.sap.sailing.domain.test.markpassing;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.text.ParseException;
 import java.util.Collections;
 import java.util.Date;
 
@@ -26,8 +24,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.DateParser;
-import com.tractrac.model.lib.api.event.CreateModelException;
-import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class StarIDM2013MarkPassingTest extends AbstractMarkPassingTest {
 
@@ -36,8 +32,7 @@ public class StarIDM2013MarkPassingTest extends AbstractMarkPassingTest {
     }
 
     @Test
-    public void testRace5() throws IOException, InterruptedException, URISyntaxException, ParseException,
-            SubscriberInitializationException, CreateModelException, InvalidDateException {
+    public void testRace5() throws Exception {
         // Race 5 is really broken on TracTrac's side. I've tried re-calculating the mark passing to no avail.
         // Now it's even worse, and only the windward mark passings and the start mark passings are recognized
         // half-way reasonably, but no mark passings seem to have been detected for subsequent waypoints.
@@ -130,8 +125,7 @@ public class StarIDM2013MarkPassingTest extends AbstractMarkPassingTest {
     }
 
     @Test
-    public void testRace6() throws IOException, InterruptedException, URISyntaxException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void testRace6() throws Exception {
         testRace("6");
     }
 

@@ -23,6 +23,7 @@ GER140772GER5549 GER 5549    MOANA                   MARTEN 49 Mod     MARTEN MA
 
 ### Overview of Codes
 
+```
 | Code | Explanation |
 | ----------------- | --------------------------------------- |
 | **General** ||
@@ -88,10 +89,10 @@ GER140772GER5549 GER 5549    MOANA                   MARTEN 49 Mod     MARTEN MA
 | DA[6,8,10,12,14,16,20] | **Gybe Angles** for 6..20kt of Wind (in s/nm)
 |||
 | UP[6,8,10,12,14,16,20] | **Upwind** Time Allowances for 6..20kt of Wind (in s/nm)
-| R[52,60,75,90,110,120,135][6,8,10,12,14,16,20] | Time Allowances for 52..135° TWA with 6..20kt of Wind(in s/nm)  
+| R[52,60,75,90,110,120,135][6,8,10,12,14,16,20] | Time Allowances for 52..135Â° TWA with 6..20kt of Wind(in s/nm)  
 | D[6,8,10,12,14,16,20] | **Downwind** Time Allowances for 6..20kt of Wind (in s/nm)
 ||| 
-   
+```
 
 ---
 
@@ -110,11 +111,11 @@ Cyber Altura can be downloaded for free from its website, where there are also a
 
 [Cyber Altura](http://www.cyberaltura.com/orc/inicio/inicio_en.php)
 
-Velumn:
+Velum:
 ***
-Velum software is fully-compatible with ISAF and ORC scoring rules and can import data from RMS files. It is based on 30 years experience in 300 software licenses worldwide, countless regattas, numerous high-ranking championships, and is used in some of the world’s largest regattas (Nordsee-Woche, Kieler-Woche, Travemünder-Woche, etc.). Velum offers huge flexibility in defining the scoring groups: a yacht can be scored in many different ways and in different scoring groups that may also include other subgroups. Velum is available on its website for a certain fee depending on using the full version or just an update.
+Velum software is fully-compatible with ISAF and ORC scoring rules and can import data from RMS files. It is based on 30 years experience in 300 software licenses worldwide, countless regattas, numerous high-ranking championships, and is used in some of the world's largest regattas (Nordsee-Woche, Kieler-Woche, Travemünder-Woche, etc.). Velum offers huge flexibility in defining the scoring groups: a yacht can be scored in many different ways and in different scoring groups that may also include other subgroups. Velum is available on its website for a certain fee depending on using the full version or just an update.
 
-[Velumn](http://www.velumng.com/index.html)
+[Velum](http://www.velumng.com/index.html)
 
 **Scoring:**
 ***
@@ -122,7 +123,7 @@ Velum software is fully-compatible with ISAF and ORC scoring rules and can impor
 ***
 Corrected time is calculated as follows:
 
-Corrected time = Elapsed time – (ToD * Distance)
+Corrected time = Elapsed time â€“ (ToD * Distance)
 
 With Time-on-Distance (ToD) scoring, the coefficient of time allowance of one boat will not change with wind velocity, but will change with the length of the course. One boat will always give to another the same handicap in sec/mi, and it is easy to calculate the difference in elapsed time between two boats needed to determine a winner in corrected time.
 
@@ -181,7 +182,7 @@ Where is it shown in the certificate ?
 **Performance Line:**
 **Corrected time is calculated as follows:**
 
-**Corrected time = (PLT * Elapsed time) – (PLD * Distance)**
+**Corrected time = (PLT * Elapsed time) â€“ (PLD * Distance)**
 
 With the time coefficient PLT and distance coefficient PLD, two boats may be rated differently in light or heavy wind conditions, and it is possible that one boat is giving a handicap to another in light wind conditions, while the opposite may be true in heavy wind conditions.
  
@@ -209,7 +210,7 @@ This means that yachts of different designs will have different time allowances 
 
 ![Certificate](http://www.orc.org/images/certificates/2013/Performance%20Curve%20Scoring.png)
 
-An ORCi certificate provides a range of ratings (time allowances expressed in s/NM) for wind conditions in the range of 6 – 20 knots of true wind speed, and at angles varying from an optimum VMG beat to 52, 60, 75, 90, 110, 120, 135, 150 degrees of true wind angle, as well as the optimum VMG run angle.
+An ORCi certificate provides a range of ratings (time allowances expressed in s/NM) for wind conditions in the range of 6 - 20 knots of true wind speed, and at angles varying from an optimum VMG beat to 52, 60, 75, 90, 110, 120, 135, 150 degrees of true wind angle, as well as the optimum VMG run angle.
  
   
 Windward/Leeward (up and down) is a conventional course around windward and leeward marks where the race course consists of 50% upwind and 50% downwind legs. 
@@ -254,13 +255,13 @@ Performance curve for each boat:
 
 In a typical Performance Curve plot, the vertical axis represents the speed achieved in the race, expressed in seconds per mile. The horizontal axis represents the wind speed in knots. When the finishing time of Yacht A is known, its elapsed time is divided by the distance of the course to determine the average speed in seconds per mile. This number is represented by point A on the vertical axis. The computer then finds the point on the horizontal axis that corresponds for that course to the average speed obtained.
 
-This results in point Aw, the so-called “Implied Wind.” This means that the yacht has completed the course “as if” it has encountered that wind speed. The faster the boat has sailed, the higher the Implied Wind, which is the primary index used for scoring: the yacht with the highest Implied Wind wins the race. The Implied Wind can then be transformed into a corrected time.
+This results in point Aw, the so-called "Implied Wind." This means that the yacht has completed the course "as if" it has encountered that wind speed. The faster the boat has sailed, the higher the Implied Wind, which is the primary index used for scoring: the yacht with the highest Implied Wind wins the race. The Implied Wind can then be transformed into a corrected time.
 
-The Implied Wind is intended as an interpolation between time allowances, not an extrapolation. This means that when the Implied Wind drops below 6 knots or raises above 20 knots, the time allowances used for calculating the corrected times will be those of 6 knots and 20 knots respectively. This does not mean that ORC races need to be stopped (or not started) with wind below 6 knots or above 20. When the “implied wind” results calculate to be lass than 6 knots or more than 20, the corrected time values at these wind speeds are then used.
+The Implied Wind is intended as an interpolation between time allowances, not an extrapolation. This means that when the Implied Wind drops below 6 knots or raises above 20 knots, the time allowances used for calculating the corrected times will be those of 6 knots and 20 knots respectively. This does not mean that ORC races need to be stopped (or not started) with wind below 6 knots or above 20. When the "implied wind" results calculate to be lass than 6 knots or more than 20, the corrected time values at these wind speeds are then used.
 
-In order to present the result of the race in a comprehensive format we use a “Scratch Boat” (Figure 2). In most cases this is the potentially fastest boat of the fleet, shown in the example as yacht B. Being the fastest, her Performance Curve is the lowest in the figure. From the point where the vertical line yacht A intersects with the curve of the Scratch Boat, a horizontal line is drawn to the left towards the vertical axis. This point, Ac, produces the corrected time when the seconds per mile are multiplied by the distance of the course in miles. The corrected time of the Scratch Boat is, by definition, the same as its elapsed time. This exercise produces corrected times, expressed in hours, minutes and seconds, a familiar format for most sailors.
+In order to present the result of the race in a comprehensive format we use a "Scratch Boat" (Figure 2). In most cases this is the potentially fastest boat of the fleet, shown in the example as yacht B. Being the fastest, her Performance Curve is the lowest in the figure. From the point where the vertical line yacht A intersects with the curve of the Scratch Boat, a horizontal line is drawn to the left towards the vertical axis. This point, Ac, produces the corrected time when the seconds per mile are multiplied by the distance of the course in miles. The corrected time of the Scratch Boat is, by definition, the same as its elapsed time. This exercise produces corrected times, expressed in hours, minutes and seconds, a familiar format for most sailors.
 
-“Implied Wind” for the winning boat is thus normally in the range of the actual average wind strength for the race. However, in cases where the “Implied Wind” does not fairly represent the real wind strength during a race, the Fixed Wind method may be used to enter the performance curve with the predominant wind speed at the horizontal axis, thus obtaining the appropriate Time allowance at the vertical axis. Such a time allowance can then be used as a single number Time-on-Distance coefficient.
+"Implied Wind" for the winning boat is thus normally in the range of the actual average wind strength for the race. However, in cases where the "Implied Wind" does not fairly represent the real wind strength during a race, the Fixed Wind method may be used to enter the performance curve with the predominant wind speed at the horizontal axis, thus obtaining the appropriate Time allowance at the vertical axis. Such a time allowance can then be used as a single number Time-on-Distance coefficient.
 
 
 

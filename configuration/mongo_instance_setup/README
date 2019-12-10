@@ -1,3 +1,12 @@
 Deploy the .mount and .service units to /etc/systemd/system.
-Deploy the ephemeralvolume script to /usr/local/bin
+Deploy the ephemeralvolume and the patch-mongo-replicaset-name-from-ec2-metadata script to /usr/local/bin
 Deploy mongod.conf to /etc
+
+Run with optional EC2 user detail, e.g., as follows:
+
+  REPLICA_SET_NAME=archive
+  REPLICA_SET_PRIMARY=dbserver.internal.sapsailing.com:10201
+
+This will automatically patch /etc/mongod.conf such that the replSetName property
+is set to the value of REPLICA_SET_NAME. Then, the instance will be added to
+the REPLICA_SET_PRIMARY's replica set.

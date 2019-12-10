@@ -86,6 +86,10 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
                 public void onFinishedTimeChanged(ReadonlyRaceState state) {
                     trackedRace.setFinishedTime(state.getFinishedTime());
                 }
+                @Override
+                public void onFinishingTimeChanged(ReadonlyRaceState state) {
+                    trackedRace.setFinishingTime(state.getFinishingTime());
+                }
             });
         }
     }
@@ -94,6 +98,22 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         trackedRace.invalidateStartTime();
         trackedRace.invalidateEndTime();
         analyze(raceLog);
+    }
+
+    /**
+     * @return the first non-{@code null} {@link ReadonlyRaceState#getFinishingTime() finishing time} that is found in any
+     *         of the {@link RaceState}s constructed for all the {@link RaceLog}s observed by this listener, or {@code null}
+     *         if no {@link ReadonlyRaceState} exists that returns a non-{@code null} finishing time.
+     */
+    public TimePoint getFinishingTime() {
+        TimePoint result = null;
+        for (final ReadonlyRaceState raceState : raceLogs.values()) {
+            result = raceState.getFinishingTime();
+            if (result != null) {
+                break;
+            }
+        }
+        return result;
     }
 
     /**
@@ -192,6 +212,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     }
 
     private void analyze(RaceLog raceLog) {
+        trackedRace.setFinishingTime(getFinishingTime());
         trackedRace.setFinishedTime(getFinishedTime());
         analyzeCourseDesign(null);
         initializeWindTrack(raceLog);

@@ -12,7 +12,7 @@ import com.sap.sse.common.IsManagedByCache;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface Mark extends ControlPoint, IsManagedByCache<SharedDomainFactory> {
+public interface Mark extends ControlPoint, IsManagedByCache<SharedDomainFactory<?>> {
     public Color getColor();
     public String getShape();
     public String getPattern();

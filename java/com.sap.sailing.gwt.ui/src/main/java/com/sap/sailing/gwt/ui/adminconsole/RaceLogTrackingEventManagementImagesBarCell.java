@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -32,13 +33,15 @@ public class RaceLogTrackingEventManagementImagesBarCell extends ImagesBarCell {
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
         ArrayList<ImageSpec> result = new ArrayList<ImageSpec>();
-        
+        final StrippedLeaderboardDTOWithSecurity selectedLeaderboard = (StrippedLeaderboardDTOWithSecurity) getContext().getKey();
         result.add(new ImageSpec(ACTION_DENOTE_FOR_RACELOG_TRACKING, stringMessages.denoteAllRacesForRaceLogTrackingShorctut(),
                 makeImagePrototype(resources.denoteForRaceLogTracking())));
         result.add(new ImageSpec(ACTION_COMPETITOR_REGISTRATIONS, stringMessages.competitorRegistrations(),
                 makeImagePrototype(resources.competitorRegistrations())));
-        result.add(new ImageSpec(ACTION_BOAT_REGISTRATIONS, stringMessages.boatRegistrations(),
-                makeImagePrototype(resources.boatRegistrations())));
+        if (selectedLeaderboard.canBoatsOfCompetitorsChangePerRace) {
+            result.add(new ImageSpec(ACTION_BOAT_REGISTRATIONS, stringMessages.boatRegistrations(),
+                    makeImagePrototype(resources.boatRegistrations())));
+        }
         result.add(new ImageSpec(ACTION_MAP_DEVICES, stringMessages.mapDevices(),
                 makeImagePrototype(resources.mapDevices())));
         result.add(new ImageSpec(ACTION_INVITE_BUOY_TENDERS, stringMessages.inviteBuoyTenders(),

@@ -10,7 +10,6 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.support.SubjectThreadState;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -26,6 +25,7 @@ import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler;
@@ -103,11 +103,11 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator,
-            RaceLogResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter) {
+            RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter, String trackingConnector) {
         return setOwnershipForRace(new RegattaNameAndRaceName(trackedRegatta.getRegatta().getName(), raceDefinition.getName()),
                 () -> super.createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore, delayToLiveInMillis,
                         millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                        raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver, threadLocalTransporter));
+                        raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver, threadLocalTransporter, trackingConnector));
     }
 
     @Override
@@ -124,7 +124,7 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
             Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
         final DynamicCompetitor competitor = competitorStore.getOrCreateCompetitor(competitorId, name, shortName,
                 displayColor, email, flagImageURI, team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile,
-                searchTag);
+                searchTag, /* storePersistently */ true);
         createOwnershipIfMissing(competitor.getIdentifier());
         return competitor;
     }
@@ -136,7 +136,7 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
             Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
         final DynamicCompetitorWithBoat competitorWithBoat = competitorStore.getOrCreateCompetitorWithBoat(competitorId,
                 name, shortName, displayColor, email, flagImageURI,
-                team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
+                team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat, /* storePersistently */ true);
         createOwnershipIfMissing(competitorWithBoat.getIdentifier());
         createOwnershipIfMissing(competitorWithBoat.getBoat().getIdentifier());
         return competitorWithBoat;
@@ -145,7 +145,7 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
     @Override
     public DynamicBoat getOrCreateBoat(CompetitorAndBoatStore competitorAndBoatStore, Serializable id, String name,
             BoatClass boatClass, String sailId, Color color) {
-        final DynamicBoat boat = competitorAndBoatStore.getOrCreateBoat(id, name, boatClass, sailId, color);
+        final DynamicBoat boat = competitorAndBoatStore.getOrCreateBoat(id, name, boatClass, sailId, color, /* storePersistently */ true);
         createOwnershipIfMissing(boat.getIdentifier());
         return boat;
     }

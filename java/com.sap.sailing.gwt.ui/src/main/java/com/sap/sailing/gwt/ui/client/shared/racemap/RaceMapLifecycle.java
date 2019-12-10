@@ -54,7 +54,8 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings> {
                 settings.isShowWindStreamletColors(), settings.isShowWindStreamletOverlay(),
                 settings.isShowSimulationOverlay(), settings.isShowMapControls(), settings.getManeuverTypesToShow(),
                 settings.isShowDouglasPeuckerPoints(), settings.isShowEstimatedDuration(),
-                settings.getStartCountDownFontSizeScaling(), settings.isShowManeuverLossVisualization());
+                settings.getStartCountDownFontSizeScaling(), settings.isShowManeuverLossVisualization(),
+                settings.isShowSatelliteLayer());
     }
 
     @Override
@@ -67,6 +68,7 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings> {
                 settings.isShowWindStreamletColors(), settings.isShowWindStreamletOverlay(),
                 settings.isShowSimulationOverlay(), settings.isShowMapControls(), settings.getManeuverTypesToShow(),
                 settings.isShowDouglasPeuckerPoints(), settings.isShowEstimatedDuration(),
-                settings.getStartCountDownFontSizeScaling(), settings.isShowManeuverLossVisualization());
+                settings.getStartCountDownFontSizeScaling(), settings.isShowManeuverLossVisualization(),
+                settings.isShowSatelliteLayer());
     }
 }

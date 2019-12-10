@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.maneuverdetection.ApproximatedFixesCalculator;
 import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
+import com.sap.sailing.domain.maneuverdetection.TrackTimeInfo;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -26,6 +27,8 @@ import com.sap.sse.common.Util;
 
 /**
  * Maneuver detector implementation for GPS tracks with extremely low sampling rate such as 1 fix per 30 seconds.
+ * 
+ * FIXME The LowGPSSamplingRateManeuverDetectorImpl doesn't work very well; it recognizes many tacks only as bear-away and doesn't seem to have any noticeable benefits... See ORC Worlds 2019 ORC A Long Offshore
  * 
  * @author Vladislav Chumak (D069712)
  *
@@ -85,13 +88,20 @@ public class LowGPSSamplingRateManeuverDetectorImpl extends AbstractManeuverDete
         } catch (NoWindException e) {
         }
         ManeuverType maneuverType;
+        SpeedWithBearing lowestSpeed;
+        SpeedWithBearing highestSpeed;
+        if (speedWithBearingOnApproximationAtBeginning.compareTo(speedWithBearingOnApproximationAtBeginning) < 0) {
+            lowestSpeed = speedWithBearingOnApproximationAtBeginning;
+            highestSpeed = speedWithBearingOnApproximationAtEnd;
+        } else {
+            lowestSpeed = speedWithBearingOnApproximationAtEnd;
+            highestSpeed = speedWithBearingOnApproximationAtBeginning;
+        }
         ManeuverCurveBoundaries maneuverCurve = new ManeuverCurveBoundariesImpl(
                 maneuverTimePoint.minus(getApproximateManeuverDuration().divide(2)),
                 maneuverTimePoint.plus(getApproximateManeuverDuration().times(3.0)),
                 speedWithBearingOnApproximationAtBeginning, speedWithBearingOnApproximationAtEnd,
-                totalCourseChangeInDegrees,
-                speedWithBearingOnApproximationAtBeginning.compareTo(speedWithBearingOnApproximationAtBeginning) < 0
-                        ? speedWithBearingOnApproximationAtBeginning : speedWithBearingOnApproximationAtEnd);
+                totalCourseChangeInDegrees, lowestSpeed, highestSpeed);
 
         if (wind != null) {
             if (getNumberOfTacks(maneuverCurve, wind) > 0) {
@@ -106,7 +116,8 @@ public class LowGPSSamplingRateManeuverDetectorImpl extends AbstractManeuverDete
                 Bearing toWindAfterManeuver = windBearing
                         .getDifferenceTo(speedWithBearingOnApproximationAtEnd.getBearing());
                 maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver.getDegrees())
-                        ? ManeuverType.HEAD_UP : ManeuverType.BEAR_AWAY;
+                        ? ManeuverType.HEAD_UP
+                        : ManeuverType.BEAR_AWAY;
             }
         } else {
             // no wind information; marking as UNKNOWN

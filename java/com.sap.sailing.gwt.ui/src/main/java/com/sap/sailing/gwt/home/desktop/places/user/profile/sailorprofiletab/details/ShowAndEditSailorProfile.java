@@ -152,7 +152,7 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
 
     /** create tables for statistic types */
     private void setupTables(SailorProfileDTO entry) {
-        DataMiningQueryForSailorProfilesPersistor.removeDMQueriesFromLocalStorage();
+        DataMiningQueryForSailorProfilesPersistor.removeDMQueriesFromLocalStorage(userService.getStorage());
         for (SailorProfileNumericStatisticType type : SailorProfileNumericStatisticType.values()) {
             SailorProfileStatisticTable table = new SailorProfileStatisticTable(flagImageResolver, type, i18n,
                     userService);
@@ -202,7 +202,7 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
                             navigationUrl = "DataMining.html?q=" + identifier;
                             table.setNavigationTarget(this::func);
                             DataMiningQueryForSailorProfilesPersistor.writeDMQueriesToLocalStorageIfPossible(answer,
-                                    identifier);
+                                    identifier, userService.getStorage());
                         }
                         table.setData(data);
                     }

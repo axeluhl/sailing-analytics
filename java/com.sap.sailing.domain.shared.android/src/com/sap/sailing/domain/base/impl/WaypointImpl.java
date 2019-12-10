@@ -60,7 +60,7 @@ public class WaypointImpl implements Waypoint {
     }
 
     @Override
-    public Waypoint resolve(SharedDomainFactory domainFactory) {
+    public Waypoint resolve(SharedDomainFactory<?> domainFactory) {
         return domainFactory.getExistingWaypointByIdOrCache(this);
     }
 

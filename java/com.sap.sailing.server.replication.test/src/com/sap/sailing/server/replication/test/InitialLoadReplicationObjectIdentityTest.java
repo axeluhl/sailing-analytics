@@ -164,7 +164,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
                 /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, UUID.randomUUID(), series,
                 /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
-                /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric.CONSTRUCTOR);
+                /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
         assertNotNull(master.getRegatta(masterRegatta.getRegattaIdentifier()));
         assertTrue(master.getAllRegattas().iterator().hasNext());
         assertNull(replica.getRegatta(masterRegatta.getRegattaIdentifier()));
@@ -175,7 +175,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         masterRegatta.addRace(masterRace);
         DynamicTrackedRace masterTrackedRace = master.createTrackedRace(new RegattaNameAndRaceName(masterRegatta.getName(), masterRace.getName()),
                 master.getWindStore(), /* delayToLiveInMillis */ 3000,
-                /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 10000, /*ignoreTracTracMarkPassings*/ false);
+                /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 10000, /*ignoreTracTracMarkPassings*/ false, null);
         masterTrackedRace.setStartOfTrackingReceived(MillisecondsTimePoint.now());
         /* Leaderboard */
         final String leaderboardName = "Great Leaderboard";

@@ -108,7 +108,7 @@ public class UserGroupTableWrapper extends
                 u -> configACL.openDialog(u));
 
         filterField = new LabeledAbstractFilterablePanel<UserGroupDTO>(new Label(stringMessages.filterUserGroups()),
-                new ArrayList<UserGroupDTO>(), dataProvider) {
+                new ArrayList<UserGroupDTO>(), dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(UserGroupDTO t) {
                 List<String> string = new ArrayList<String>();
@@ -121,6 +121,7 @@ public class UserGroupTableWrapper extends
                 return table;
             }
         };
+        filterField.setUpdatePermissionFilterForCheckbox(userGroup -> userService.hasPermission(userGroup, DefaultActions.UPDATE));
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
 
         mainPanel.insert(filterField, 0);

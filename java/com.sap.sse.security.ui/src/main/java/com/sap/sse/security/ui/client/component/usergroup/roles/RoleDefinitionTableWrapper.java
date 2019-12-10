@@ -90,7 +90,7 @@ public class RoleDefinitionTableWrapper extends
             final UserGroupDTO selectedObject = userGroupSelectionModel.getSelectedObject();
             if (selectedObject != null) {
                 if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(rolePair.getA().getName()))) {
-                    userService.getUserManagementService().removeRoleDefintionFromUserGroup(
+                    userService.getUserManagementService().removeRoleDefinitionFromUserGroup(
                             selectedObject.getId().toString(), rolePair.getA().getId().toString(),
                             new AsyncCallback<Void>() {
 
@@ -114,7 +114,7 @@ public class RoleDefinitionTableWrapper extends
         // filter field configuration
         filterField = new LabeledAbstractFilterablePanel<Pair<StrippedRoleDefinitionDTO, Boolean>>(
                 new Label(stringMessages.filterRoles()), new ArrayList<Pair<StrippedRoleDefinitionDTO, Boolean>>(),
-                dataProvider) {
+                dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(Pair<StrippedRoleDefinitionDTO, Boolean> t) {
                 List<String> string = new ArrayList<String>();

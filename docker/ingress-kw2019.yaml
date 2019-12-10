@@ -4,11 +4,12 @@ kind: Ingress
 metadata:
   name: sailing-kw2019-master-ingress
   annotations:
-    kubernetes.io/ingress.class: "nginx"
+    kubernetes.io/ingress.class: "alb"
     nginx.ingress.kubernetes.io/app-root: /gwt/AdminConsole.html
+    alb.ingress.kubernetes.io/subnets: subnet-059dd464c43ef4f3a,subnet-035aae88e724ba538
 spec:
   rules:
-  - host: kw2019-master.k8s.sapsailing.com
+  - host: kw2019-master.wiesen-weg.de
     http:
       paths:
       - backend:
@@ -20,11 +21,12 @@ kind: Ingress
 metadata:
   name: sailing-kw2019-ingress
   annotations:
-    kubernetes.io/ingress.class: "nginx"
+    kubernetes.io/ingress.class: "alb"
     nginx.ingress.kubernetes.io/app-root: /gwt/Home.html#/event/:eventId=8e951308-7cd9-4549-a12d-6da665185726
+    alb.ingress.kubernetes.io/subnets: subnet-059dd464c43ef4f3asubnet-035aae88e724ba538
 spec:
   rules:
-  - host: kw2019.k8s.sapsailing.com
+  - host: kw2019.wiesen-weg.de
     http:
       paths:
       - backend:

@@ -56,7 +56,7 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
 
     @Before
     public void setUp() {
-        SharedDomainFactory factory = DomainFactory.INSTANCE;
+        SharedDomainFactory<?> factory = DomainFactory.INSTANCE;
         serializer = new RaceLogCourseDesignChangedEventSerializer(CompetitorJsonSerializer.create(), new CourseBaseJsonSerializer(
                 new WaypointJsonSerializer(new ControlPointJsonSerializer(new MarkJsonSerializer(),
                         new GateJsonSerializer(new MarkJsonSerializer())))));

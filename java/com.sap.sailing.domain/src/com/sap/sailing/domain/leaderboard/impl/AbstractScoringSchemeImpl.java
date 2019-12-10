@@ -24,8 +24,22 @@ import com.sap.sse.common.Util.Pair;
 public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
     private static final long serialVersionUID = 6830414905539642446L;
     
+    /**
+     * Compares two scores equal if their difference is less than {@link #THRESHOLD_FOR_EQUALITY}.
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     */
     private class ScoreComparator implements Comparator<Double>, Serializable {
         private static final long serialVersionUID = -2767385186133743330L;
+        
+        /**
+         * Adding scores using {@code double} as type can lead to small differences ranging around
+         * 10^-10 and less. If two scores vary by only this little they shall be considered equal.
+         * 
+         * See also bug 5145.
+         */
+        private static final double THRESHOLD_FOR_EQUALITY = 0.0000000001;
         
         private final boolean nullScoresAreBetter;
         
@@ -48,8 +62,20 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
                 if (o2 == null) {
                     result = nullScoresAreBetter ? 1 : -1;
                 } else {
-                    result = o1.compareTo(o2) * (isHigherBetter() ? -1 : 1);
+                    result = compareDoublesWithThreshold(o1, o2) * (isHigherBetter() ? -1 : 1);
                 }
+            }
+            return result;
+        }
+        
+        private int compareDoublesWithThreshold(double d1, double d2) {
+            final int result;
+            if (Math.abs(d1-d2) < THRESHOLD_FOR_EQUALITY) {
+                result = 0;
+            } else if (d1 > d2) {
+                result = 1;
+            } else {
+                result = -1;
             }
             return result;
         }
@@ -134,18 +160,19 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
             Competitor o2, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter,
             TimePoint timePoint, Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor) {
         final Comparator<Pair<RaceColumn, Double>> ruleA8_1ScoreComparator = getRuleA8_1ScoreComparator(nullScoresAreBetter);
+        final boolean includeDiscardedResults = isConsiderDiscardedScoresDuringBetterScoreTieBreak();
         // needs to compare net points; therefore, divide the total points by the column factor for comparison:
         List<Pair<RaceColumn, Double>> o1NetScores = new ArrayList<>();
         final Set<RaceColumn> o1Discards = discardedRaceColumnsPerCompetitor.get(o1);
         for (com.sap.sse.common.Util.Pair<RaceColumn, Double> o1ColumnAndScore : o1Scores) {
-            if (!o1Discards.contains(o1ColumnAndScore.getA())) {
+            if (includeDiscardedResults || !o1Discards.contains(o1ColumnAndScore.getA())) {
                 o1NetScores.add(new Pair<>(o1ColumnAndScore.getA(), o1ColumnAndScore.getB() / getScoreFactor(o1ColumnAndScore.getA())));
             }
         }
         List<Pair<RaceColumn, Double>> o2NetScores = new ArrayList<>();
         final Set<RaceColumn> o2Discards = discardedRaceColumnsPerCompetitor.get(o2);
         for (com.sap.sse.common.Util.Pair<RaceColumn, Double> o2ColumnAndScore : o2Scores) {
-            if (!o2Discards.contains(o2ColumnAndScore.getA())) {
+            if (includeDiscardedResults || !o2Discards.contains(o2ColumnAndScore.getA())) {
                 o2NetScores.add(new Pair<>(o2ColumnAndScore.getA(), o2ColumnAndScore.getB() / getScoreFactor(o2ColumnAndScore.getA())));
             }
         }
@@ -164,6 +191,17 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
             result = o1Iter.hasNext() ? -1 : 1;
         }
         return result;
+    }
+    
+    /**
+     * Usually, RRS A8.1-based rules will eliminate discarded results before starting to compare the remaining scores.
+     * Some specializations then consider final series scores before they consider qualification series scores (see
+     * {@link #getRuleA8_1ScoreComparator(boolean)} for details). This method tells whether or not to consider
+     * discarded results in {@link #compareByBetterScore(Competitor, List, Competitor, List, boolean, TimePoint, Leaderboard, Map)}.
+     * This implementation returns {@code false}, thus implementing the default RRS A8.1 rule.
+     */
+    protected boolean isConsiderDiscardedScoresDuringBetterScoreTieBreak() {
+        return false;
     }
 
     /**

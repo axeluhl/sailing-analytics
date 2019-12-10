@@ -4,13 +4,22 @@
 # command
 # Usage: archiveDb.sh <dbname>
 
+if [ "$1" = "-y" ]; then
+  CONFIRMATION="y"
+  shift
+else
+  CONFIRMATION=""
+fi
+
 DB=$1
 DUMPBASEDIR=/var/lib/mongodb
 
-echo -n "This will drop the database $DB in the archive DB before importing. Are you sure (y/n)? "
-read CONFIRMATION
-if [ "$CONFIRMATION" != "y" ]; then
-  exit 2;
+if [ "$CONFIRMATION" = "" ]; then
+  echo -n "This will drop the database $DB in the archive DB before importing. Are you sure (y/n)? "
+  read CONFIRMATION
+  if [ "$CONFIRMATION" != "y" ]; then
+    exit 2;
+  fi
 fi
 
 cd "$DUMPBASEDIR"

@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.cell.client.FieldUpdater;
@@ -8,6 +9,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
@@ -28,12 +30,10 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
     public RaceLogCourseManagementWidget(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages, final String leaderboardName, final String raceColumnName,
             final String fleetName, final UserService userService) {
-        super(sailingService, errorReporter, stringMessages, userService);
-
+        super(sailingService, errorReporter, stringMessages, userService, /* always show ORC OCS leg data actions */ ()->true);
         this.leaderboardName = leaderboardName;
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
-
         Button addMark = new Button(stringMessages.addMarkToRegatta());
         addMark.addClickHandler(new ClickHandler() {
             @Override
@@ -62,13 +62,11 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
             }
         });
         marksBtnsPanel.add(addMark);
-
         removeMark = new Button(stringMessages.remove(stringMessages.mark()));
         removeMark.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 Set<MarkDTO> marksToRemove = marks.getSelectionModel().getSelectedSet();
-
                 for (final MarkDTO markToRemove : marksToRemove) {
                     sailingService.revokeMarkDefinitionEventInRegattaLog(leaderboardName, markToRemove,
                             new AsyncCallback<Void>() {
@@ -86,10 +84,8 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                 }
             }
         });
-
         removeMark.setEnabled(false);
         marksBtnsPanel.add(removeMark);
-
         ImagesBarColumn<MarkDTO, RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell> actionColumn = new ImagesBarColumn<MarkDTO, RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell>(
                 new RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell(stringMessages));
         actionColumn.setFieldUpdater(new FieldUpdater<MarkDTO, String>() {
@@ -124,7 +120,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
         });
         marks.getTable().addColumn(actionColumn);
     }
-    
+
     @Override
     protected void markSelectionChanged() {
         Set<MarkDTO> marksToRemove = marks.getSelectionModel().getSelectedSet();
@@ -150,11 +146,33 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
 
     @Override
     public void refresh() {
+        refreshCourse();
+        refreshMarks();
+    }
+
+    private void refreshORCPerformanceCurveLegs() {
+        sailingService.getORCPerformanceCurveLegInfo(leaderboardName, raceColumnName, fleetName,
+                new AsyncCallback<Map<Integer, ORCPerformanceCurveLegImpl>>() {
+                    @Override
+                    public void onSuccess(Map<Integer, ORCPerformanceCurveLegImpl> result) {
+                        refreshORCPerformanceCurveLegs(result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Could not load ORC Performance Curve leg information: " + caught.getMessage());
+                    }
+                });
+    }
+
+    private void refreshCourse() {
         sailingService.getLastCourseDefinitionInRaceLog(leaderboardName, raceColumnName, fleetName,
                 new AsyncCallback<RaceCourseDTO>() {
                     @Override
                     public void onSuccess(RaceCourseDTO result) {
                         updateWaypointsAndControlPoints(result, leaderboardName);
+                        // check for ORC PCS leg info only after the waypoints have been received
+                        refreshORCPerformanceCurveLegs();
                     }
 
                     @Override
@@ -162,7 +180,6 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                         errorReporter.reportError("Could not load course: " + caught.getMessage());
                     }
                 });
-        refreshMarks();
     }
 
     /**
@@ -181,5 +198,11 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                 errorReporter.reportError("Could not load marks: " + caught.getMessage());
             }
         });
+    }
+
+    @Override
+    protected LegGeometrySupplier getLegGeometrySupplier() {
+        return (zeroBasedLegIndices, legTypes, callback)->
+            sailingService.getLegGeometry(leaderboardName, raceColumnName, fleetName, zeroBasedLegIndices, legTypes, callback);
     }
 }
