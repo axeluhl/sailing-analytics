@@ -154,7 +154,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
         int columnInResultingHeader = 0;
         for (int columnInHeader = 0; columnInHeader < headerTokens.length; columnInHeader++) {
             String header = headerTokens[columnInHeader];
-            if (header.equals(ORIGINAL_POSITION_HEADER)) {
+            if (header.toLowerCase().equals(ORIGINAL_POSITION_HEADER)) {
                 colIndicesInFile.put(COL_NAME_LAT.toLowerCase(), columnInResultingHeader++);
                 colIndicesInFile.put(COL_NAME_LON.toLowerCase(), columnInResultingHeader++);
             } else {
