@@ -244,7 +244,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         waypointTemplatesTable.setWidth("100%");
 
         final HideableAndEditableCell<WaypointTemplateDTO, String, TextInputCell> hideableShortNameCell = new HideableAndEditableCell<>(
-                new TextInputCell(), /* hidden */ null, /* editable */ wt -> !readOnly);
+                new TextInputCell(), /* hidden */ wt -> !hasTwoMarks(wt), /* editable */ wt -> !readOnly);
         Column<WaypointTemplateDTO, String> shortNameColumn = new Column<WaypointTemplateDTO, String>(
                 hideableShortNameCell) {
             @Override
