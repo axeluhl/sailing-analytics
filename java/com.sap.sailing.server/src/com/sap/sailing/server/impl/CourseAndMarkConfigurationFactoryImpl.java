@@ -183,12 +183,12 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 if (markConfiguration instanceof RegattaMarkConfiguration) {
                     final RegattaMarkConfiguration regattaMarkConfiguration = (RegattaMarkConfiguration) markConfiguration;
                     effectiveMarkConfiguration = new RegattaMarkConfigurationImpl(regattaMarkConfiguration.getMark(),
-                            /* optionalPositioning */ null, regattaMarkConfiguration.getEffectivePositioning(),
+                            markConfiguration.getOptionalPositioning(), regattaMarkConfiguration.getEffectivePositioning(),
                             regattaMarkConfiguration.getOptionalMarkTemplate(), markPropertiesOrNull,
                             false);
                 } else {
                     effectiveMarkConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(markPropertiesOrNull,
-                            markConfiguration.getOptionalMarkTemplate(), /* optionalPositioning */ null,
+                            markConfiguration.getOptionalMarkTemplate(), markConfiguration.getOptionalPositioning(),
                             getPositioningIfAvailable(markPropertiesOrNull),
                             false);
                 }
