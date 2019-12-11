@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.persistence.racelog.tracking;
+package com.sap.sailing.shared.persistence.device;
 
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifierSerializationHandler;
 

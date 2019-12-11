@@ -1,0 +1,296 @@
+package com.sap.sailing.shared.persistence.impl;
+
+import java.net.URL;
+import java.util.Map;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import org.bson.Document;
+
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
+import com.mongodb.WriteConcern;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.UpdateOptions;
+import com.sap.sailing.domain.common.DeviceIdentifier;
+import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
+import com.sap.sailing.domain.coursetemplate.CourseTemplate;
+import com.sap.sailing.domain.coursetemplate.MarkProperties;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
+import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
+import com.sap.sailing.shared.persistence.MongoObjectFactory;
+import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
+import com.sap.sailing.shared.persistence.device.impl.PlaceHolderDeviceIdentifierMongoHandler;
+import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.common.TypeBasedServiceFinderFactory;
+
+public class MongoObjectFactoryImpl implements MongoObjectFactory {
+    private static final Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
+    private final MongoDatabase database;
+    private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
+
+    public MongoObjectFactoryImpl(MongoDatabase mongoDatabase) {
+        this(mongoDatabase, /* serviceFinderFactory */ null);
+    }
+
+    public MongoObjectFactoryImpl(MongoDatabase mongoDatabase, TypeBasedServiceFinderFactory serviceFinderFactory) {
+        this.database = mongoDatabase;
+        if (serviceFinderFactory != null) {
+            this.deviceIdentifierServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
+            this.deviceIdentifierServiceFinder.setFallbackService(new PlaceHolderDeviceIdentifierMongoHandler());
+        } else {
+            this.deviceIdentifierServiceFinder = null;
+        }
+    }
+
+    @Override
+    public MongoDatabase getDatabase() {
+        return database;
+    }
+
+    @Override
+    public void storeMarkProperties(TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder,
+            MarkProperties markProperties) {
+        MongoCollection<Document> collection = database.getCollection(CollectionNames.MARK_PROPERTIES.name());
+        Document query = new Document(FieldNames.MARK_PROPERTIES_ID.name(), markProperties.getId().toString());
+        try {
+            Document entry = storeMarkPropertiesToDocument(deviceIdentifierServiceFinder, markProperties);
+            collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry,
+                    new UpdateOptions().upsert(true));
+        } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+            logger.log(Level.WARNING, "Could not load mark properties because device identifier could not be stored.",
+                    e);
+        }
+    }
+
+    private Document storeMarkPropertiesToDocument(
+            TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder,
+            MarkProperties markProperties) throws TransformationException, NoCorrespondingServiceRegisteredException {
+        final Document result = new Document();
+        result.put(FieldNames.MARK_PROPERTIES_ID.name(), markProperties.getId().toString());
+        storeCommonMarkProperties(markProperties, result);
+
+        final Position fixedPositionOrNull = markProperties.getFixedPosition();
+        if (fixedPositionOrNull != null) {
+            result.put(FieldNames.MARK_PROPERTIES_FIXED_POSITION.name(),
+                    storePosition(markProperties.getFixedPosition()));
+        }
+
+        BasicDBList tags = new BasicDBList();
+        markProperties.getTags().forEach(tags::add);
+        result.put(FieldNames.MARK_PROPERTIES_TAGS.name(), tags);
+
+        final DeviceIdentifier trackingDeviceIdentifierOrNull = markProperties.getTrackingDeviceIdentifier();
+        if (trackingDeviceIdentifierOrNull != null) {
+            result.put(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER.name(),
+                    storeDeviceId(deviceIdentifierServiceFinder, trackingDeviceIdentifierOrNull));
+        }
+
+        Map<String, Long> lastUsedTemplateMap = markProperties.getLastUsedTemplate().entrySet().stream()
+                .collect(Collectors.toMap(k -> k.getKey().getId().toString(), v -> v.getValue().asMillis()));
+        result.put(FieldNames.MARK_PROPERTIES_USED_TEMPLATE.name(), new BasicDBObject(lastUsedTemplateMap));
+
+        Map<String, Long> lastUsedRoleMap = markProperties.getLastUsedRole().entrySet().stream()
+                .collect(Collectors.toMap(k -> k.getKey().getId().toString(), v -> v.getValue().asMillis()));
+        result.put(FieldNames.MARK_PROPERTIES_USED_ROLE.name(), new BasicDBObject(lastUsedRoleMap));
+        return result;
+    }
+
+    public static Document storeDeviceId(
+                TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder, DeviceIdentifier device)
+                                throws TransformationException, NoCorrespondingServiceRegisteredException {
+        String type = device.getIdentifierType();
+        DeviceIdentifierMongoHandler handler = deviceIdentifierServiceFinder.findService(type);
+        com.sap.sse.common.Util.Pair<String, ? extends Object> pair = handler.serialize(device);
+        type = pair.getA();
+        Object deviceTypeSpecificId = pair.getB();
+        return new Document()
+                        .append(FieldNames.DEVICE_TYPE.name(), type)
+                        .append(FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), deviceTypeSpecificId)
+                        .append(FieldNames.DEVICE_STRING_REPRESENTATION.name(), device.getStringRepresentation());
+    }
+
+    private Document storePosition(Position position) {
+        Document result = new Document();
+        result.put(FieldNames.LAT_DEG.name(), position.getLatDeg());
+        result.put(FieldNames.LNG_DEG.name(), position.getLngDeg());
+        return result;
+    }
+
+    private void storeCommonMarkProperties(CommonMarkProperties markProperties, final Document result) {
+        if (markProperties.getColor() != null) {
+            result.put(FieldNames.COMMON_MARK_PROPERTIES_COLOR.name(), markProperties.getColor().getAsHtml());
+        }
+
+        result.put(FieldNames.COMMON_MARK_PROPERTIES_NAME.name(), markProperties.getName());
+        result.put(FieldNames.COMMON_MARK_PROPERTIES_PATTERN.name(), markProperties.getPattern());
+        result.put(FieldNames.COMMON_MARK_PROPERTIES_SHAPE.name(), markProperties.getShape());
+        result.put(FieldNames.COMMON_MARK_PROPERTIES_SHORT_NAME.name(), markProperties.getShortName());
+        result.put(FieldNames.COMMON_MARK_PROPERTIES_TYPE.name(),
+                markProperties.getType() == null ? null : markProperties.getType().name());
+    }
+
+    @Override
+    public void removeMarkProperties(UUID markPropertiesId) {
+        MongoCollection<Document> configurationsCollections = database
+                .getCollection(CollectionNames.MARK_PROPERTIES.name());
+        Document query = new Document(FieldNames.MARK_PROPERTIES_ID.name(), markPropertiesId.toString());
+        configurationsCollections.deleteOne(query);
+    }
+
+    @Override
+    public void storeMarkTemplate(MarkTemplate markTemplate) {
+        final MongoCollection<Document> collection = database.getCollection(CollectionNames.MARK_TEMPLATES.name());
+        final Document query = new Document(FieldNames.MARK_TEMPLATE_ID.name(), markTemplate.getId().toString());
+
+        final Document entry = storeMarkTemplateToDocument(markTemplate);
+        collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry,
+                new UpdateOptions().upsert(true));
+    }
+
+    private Document storeMarkTemplateToDocument(MarkTemplate markTemplate) {
+        final Document result = new Document(FieldNames.MARK_TEMPLATE_ID.name(), markTemplate.getId().toString());
+        storeCommonMarkProperties(markTemplate, result);
+        return result;
+    }
+
+    @Override
+    public void removeMarkTemplate(UUID markTemplateId) {
+        final MongoCollection<Document> configurationsCollections = database
+                .getCollection(CollectionNames.MARK_TEMPLATES.name());
+        final Document query = new Document(FieldNames.MARK_TEMPLATE_ID.name(), markTemplateId.toString());
+        configurationsCollections.deleteOne(query);
+    }
+
+    @Override
+    public void storeMarkRole(MarkRole markRole) {
+        final MongoCollection<Document> collection = database.getCollection(CollectionNames.MARK_ROLES.name());
+        final Document query = new Document(FieldNames.MARK_ROLE_ID.name(), markRole.getId().toString());
+
+        final Document entry = storeMarkRoleToDocument(markRole);
+        collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry,
+                new UpdateOptions().upsert(true));
+    }
+
+    private Document storeMarkRoleToDocument(MarkRole markRole) {
+        final Document result = new Document(FieldNames.MARK_ROLE_ID.name(), markRole.getId().toString());
+        result.put(FieldNames.MARK_ROLE_NAME.name(), markRole.getName());
+        return result;
+    }
+    
+    @Override
+    public void removeMarkRole(UUID markRoleId) {
+        final MongoCollection<Document> configurationsCollections = database
+                .getCollection(CollectionNames.MARK_ROLES.name());
+        final Document query = new Document(FieldNames.MARK_ROLE_ID.name(), markRoleId.toString());
+        configurationsCollections.deleteOne(query);
+    }
+
+    @Override
+    public void storeCourseTemplate(CourseTemplate courseTemplate) {
+        final MongoCollection<Document> collection = database.getCollection(CollectionNames.COURSE_TEMPLATES.name());
+        final Document query = new Document(FieldNames.COURSE_TEMPLATE_ID.name(), courseTemplate.getId().toString());
+
+        final Document entry = storeCourseTemplateToDocument(courseTemplate);
+        collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry,
+                new UpdateOptions().upsert(true));
+    }
+
+    private Document storeCourseTemplateToDocument(CourseTemplate courseTemplate) {
+        final Document result = new Document();
+
+        // store master data
+        result.put(FieldNames.COURSE_TEMPLATE_ID.name(), courseTemplate.getId().toString());
+        result.put(FieldNames.COURSE_TEMPLATE_NAME.name(), courseTemplate.getName());
+        result.put(FieldNames.COURSE_TEMPLATE_DEFAULT_NUMBER_OF_LAPS.name(), courseTemplate.getDefaultNumberOfLaps());
+        final URL optionalImageURL = courseTemplate.getOptionalImageURL();
+        if (optionalImageURL != null) {
+            result.put(FieldNames.COURSE_TEMPLATE_IMAGE_URL.name(), optionalImageURL.toExternalForm());
+        }
+        
+        // store mark template list including role names for those who have one defined
+        final BasicDBList markTemplates = new BasicDBList();
+        courseTemplate.getMarkTemplatesWithOptionalRoles().forEach((m, role) -> {
+            final BasicDBObject markTemplateObject = new BasicDBObject(
+                    FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ID.name(), m.getId().toString());
+            if (role != null) {
+                markTemplateObject.append(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ROLE_ID.name(), role.getId().toString());
+            }
+            markTemplates.add(markTemplateObject);
+        });
+        result.put(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATES.name(), markTemplates);
+
+        // store waypoint templates
+        final BasicDBList waypointTemplates = new BasicDBList();
+        for (WaypointTemplate waypointTemplate : courseTemplate.getWaypointTemplates()) {
+            BasicDBObject waypointTemplateObject = storeWaypointTemplate(waypointTemplate);
+            waypointTemplates.add(waypointTemplateObject);
+        }
+        result.put(FieldNames.COURSE_TEMPLATE_WAYPOINTS.name(), waypointTemplates);
+
+        // tags
+        final BasicDBList tags = new BasicDBList();
+        courseTemplate.getTags().forEach(tags::add);
+        result.put(FieldNames.COURSE_TEMPLATE_TAGS.name(), tags);
+
+        // repeatable part
+        if (courseTemplate.hasRepeatablePart()) {
+            final BasicDBObject repeatablePart = storeRepeatablePart(courseTemplate);
+            result.put(FieldNames.COURSE_TEMPLATE_REPEATABLE_PART.name(), repeatablePart);
+        }
+
+        return result;
+    }
+
+    private BasicDBObject storeWaypointTemplate(WaypointTemplate waypointTemplate) {
+        BasicDBObject waypointTemplateObject = new BasicDBObject();
+        waypointTemplateObject.put(FieldNames.WAYPOINT_TEMPLATE_PASSINGINSTRUCTION.name(),
+                getPassingInstructions(waypointTemplate.getPassingInstruction()));
+
+        waypointTemplateObject.put(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_NAME.name(),
+                waypointTemplate.getControlPointTemplate().getName());
+
+        waypointTemplateObject.put(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_SHORT_NAME.name(),
+                waypointTemplate.getControlPointTemplate().getShortName());
+
+        final BasicDBList markTemplates = new BasicDBList();
+        waypointTemplate.getControlPointTemplate().getMarks().forEach(m -> markTemplates.add(m.getId().toString()));
+        waypointTemplateObject.put(FieldNames.WAYPOINT_TEMPLATE_MARK_TEMPLATES.name(), markTemplates);
+        return waypointTemplateObject;
+    }
+
+    public static String getPassingInstructions(PassingInstruction passingInstructions) {
+        final String passing;
+        if (passingInstructions != null) {
+            passing = passingInstructions.name();
+        } else {
+            passing = null;
+        }
+        return passing;
+    }
+
+    private BasicDBObject storeRepeatablePart(CourseTemplate courseTemplate) {
+        final BasicDBObject repeatablePart = new BasicDBObject();
+        repeatablePart.put(FieldNames.REPEATABLE_PART_START.name(),
+                courseTemplate.getRepeatablePart().getZeroBasedIndexOfRepeatablePartStart());
+        repeatablePart.put(FieldNames.REPEATABLE_PART_END.name(),
+                courseTemplate.getRepeatablePart().getZeroBasedIndexOfRepeatablePartEnd());
+        return repeatablePart;
+    }
+
+    @Override
+    public void removeCourseTemplate(UUID courseTemplateId) {
+        final MongoCollection<Document> configurationsCollections = database
+                .getCollection(CollectionNames.COURSE_TEMPLATES.name());
+        final Document query = new Document(FieldNames.COURSE_TEMPLATE_ID.name(), courseTemplateId.toString());
+        configurationsCollections.deleteOne(query);
+    }
+}

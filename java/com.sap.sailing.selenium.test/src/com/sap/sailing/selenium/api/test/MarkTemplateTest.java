@@ -1,6 +1,6 @@
 package com.sap.sailing.selenium.api.test;
 
-import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
+import static com.sap.sailing.selenium.api.core.ApiContext.SHARED_SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -33,7 +33,7 @@ public class MarkTemplateTest extends AbstractSeleniumTest {
 
     @Test
     public void createMarkTemplateWithDeviceUuidTest() {
-        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
         MarkTemplate markTemplate = markTemplateApi.createMarkTemplate(ctx, MARK_TEMPLATE_NAME, MARK_TEMPLATE_SHORTNAME,
                 MARK_TEMPLATE_COLOR, MARK_TEMPLATE_SHAPE, MARK_TEMPLATE_PATTERN, MARK_TEMPLATE_TYPE);
         assertNotNull("read: no MarkTemplate returnded", markTemplate);
@@ -52,7 +52,7 @@ public class MarkTemplateTest extends AbstractSeleniumTest {
 
     @Test
     public void createAndGetMarkTemplateTest() {
-        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
         MarkTemplate createdMarkTemplate = markTemplateApi.createMarkTemplate(ctx, MARK_TEMPLATE_NAME,
                 MARK_TEMPLATE_SHORTNAME, MARK_TEMPLATE_COLOR, MARK_TEMPLATE_SHAPE, MARK_TEMPLATE_PATTERN,
                 MARK_TEMPLATE_TYPE);
@@ -62,7 +62,7 @@ public class MarkTemplateTest extends AbstractSeleniumTest {
 
     @Ignore
     public void createSeveralMarkTemplateAndGetAllTest() {
-        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
         MarkTemplate markTemplate1 = markTemplateApi.createMarkTemplate(ctx, MARK_TEMPLATE_NAME,
                 MARK_TEMPLATE_SHORTNAME, MARK_TEMPLATE_COLOR, MARK_TEMPLATE_SHAPE, MARK_TEMPLATE_PATTERN,
                 MARK_TEMPLATE_TYPE);

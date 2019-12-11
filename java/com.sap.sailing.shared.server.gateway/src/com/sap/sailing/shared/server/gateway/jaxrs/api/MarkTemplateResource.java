@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.jaxrs.api;
+package com.sap.sailing.shared.server.gateway.jaxrs.api;
 
 import java.util.UUID;
 
@@ -18,9 +18,9 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateImpl;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkTemplateJsonSerializer;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.RGBColor;
 import com.sun.jersey.api.client.ClientResponse.Status;

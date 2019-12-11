@@ -37,11 +37,7 @@ public class RestApiApplication extends Application {
         classes.add(StatusResource.class);
         classes.add(TrackedEventsResource.class);
         classes.add(TrackingDevicesResource.class);
-        classes.add(MarkPropertiesResource.class);
-        classes.add(MarkTemplateResource.class);
-        classes.add(CourseTemplateResource.class);
         classes.add(CourseConfigurationResource.class);
-        classes.add(MarkRoleResource.class);
         
         // Exception Mappers
         classes.add(ShiroAuthorizationExceptionTo401ResponseMapper.class);

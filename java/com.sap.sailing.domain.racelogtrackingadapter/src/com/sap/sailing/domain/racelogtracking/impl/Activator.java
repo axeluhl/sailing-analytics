@@ -13,7 +13,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
 import com.sap.sailing.domain.racelogsensortracking.impl.SensorFixMapperFactoryImpl;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
@@ -34,6 +33,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonH
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.GPSFixJsonHandlerImpl;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneUUIDJsonHandler;
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
 import com.sap.sse.MasterDataImportClassLoaderService;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.replication.Replicable;

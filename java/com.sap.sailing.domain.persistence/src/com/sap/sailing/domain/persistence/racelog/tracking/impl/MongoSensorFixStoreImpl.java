@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.persistence.racelog.tracking.impl;
 
-import static com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl.storeDeviceId;
+import static com.sap.sailing.shared.persistence.impl.MongoObjectFactoryImpl.storeDeviceId;
 import static com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl.storeTimeRange;
 
 import java.util.ArrayList;
@@ -31,10 +31,10 @@ import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
-import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoSensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
+import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;

@@ -26,6 +26,7 @@ import com.sun.jersey.api.representation.Form;
 public class ApiContext {
 
     public static final String SERVER_CONTEXT = "sailingserver"; //$NON-NLS-1$
+    public static final String SHARED_SERVER_CONTEXT = "sharedsailingserver"; //$NON-NLS-1$
     public static final String SECURITY_CONTEXT = "security"; //$NON-NLS-1$
     private static final String ADMIN_USERNAME = "admin"; //$NON-NLS-1$
     private static final String ADMIN_PASSWORD = "admin"; //$NON-NLS-1$

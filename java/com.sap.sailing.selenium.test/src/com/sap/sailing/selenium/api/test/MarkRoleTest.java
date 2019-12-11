@@ -1,6 +1,6 @@
 package com.sap.sailing.selenium.api.test;
 
-import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
+import static com.sap.sailing.selenium.api.core.ApiContext.SHARED_SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -27,7 +27,7 @@ public class MarkRoleTest extends AbstractSeleniumTest {
     public void createMarkRoleAdminTest() {
         final String roleName1 = "role_sb";
         final String roleName2 = "role_pe";
-        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
         final MarkRole markRole1 = markRoleApi.createMarkRole(ctx, roleName1);
         assertNotNull(markRole1.getId());
         assertEquals(roleName1, markRole1.getName());

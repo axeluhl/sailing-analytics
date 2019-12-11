@@ -34,7 +34,6 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.DoubleVectorFixMongoHandlerImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMongoHandlerImpl;
@@ -112,7 +111,7 @@ public class Activator implements BundleActivator {
 
     private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
 
-    private SharedSailingDataImpl sharedSailingData;
+    private ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker;
     
     public Activator() {
         clearPersistentCompetitors = Boolean
@@ -198,6 +197,7 @@ public class Activator implements BundleActivator {
         notificationService.stop();
         mailQueue.stop();
         mailServiceTracker.close();
+        sharedSailingDataTracker.close();
         securityServiceTracker.close();
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         mbs.unregisterMBean(mBeanName);
@@ -240,17 +240,12 @@ public class Activator implements BundleActivator {
         // instead.
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
         
-        sharedSailingData = new SharedSailingDataImpl(PersistenceFactory.INSTANCE
-                .getDefaultDomainObjectFactory(), PersistenceFactory.INSTANCE
-                .getDefaultMongoObjectFactory(serviceFinderFactory), serviceFinderFactory, securityServiceTracker);
-        registrations.add(context.registerService(SharedSailingData.class, sharedSailingData, /* properties */ null));
-        registrations.add(context.registerService(ClearStateTestSupport.class, sharedSailingData, /* properties */ null));
-        registrations.add(context.registerService(Replicable.class, sharedSailingData, /* properties */ null));
+        sharedSailingDataTracker = ServiceTrackerFactory.createAndOpen(context, SharedSailingData.class);
 
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors,
                 serviceFinderFactory, trackedRegattaListener, notificationService,
                 trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker,
-                sharedSailingData);
+                sharedSailingDataTracker);
         notificationService.setRacingEventService(racingEventService);
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,

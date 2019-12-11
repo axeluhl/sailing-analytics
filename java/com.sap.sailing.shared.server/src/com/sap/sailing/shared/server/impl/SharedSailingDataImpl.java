@@ -1,4 +1,4 @@
-package com.sap.sailing.server.impl;
+package com.sap.sailing.shared.server.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,9 +34,9 @@ import com.sap.sailing.domain.coursetemplate.impl.CourseTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkRoleImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateImpl;
-import com.sap.sailing.domain.persistence.DomainObjectFactory;
-import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
+import com.sap.sailing.shared.persistence.DomainObjectFactory;
+import com.sap.sailing.shared.persistence.MongoObjectFactory;
+import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;

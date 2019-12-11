@@ -1,7 +1,7 @@
 package com.sap.sailing.selenium.api.test;
 
 import static com.sap.sailing.selenium.api.core.ApiContext.SECURITY_CONTEXT;
-import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
+import static com.sap.sailing.selenium.api.core.ApiContext.SHARED_SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
 import static org.junit.Assert.assertEquals;
@@ -42,7 +42,7 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
     public void setUp() {
         clearState(getContextRoot(), /* headless */ true);
 
-        ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
         ctdf = new CourseTemplateDataFactory(ctx);
     }
 
@@ -60,7 +60,7 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
     public void cantUseOthersMarkTemplatesTest() {
         final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         new SecurityApi().createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
-        final ApiContext otherUserCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
+        final ApiContext otherUserCtx = createApiContext(getContextRoot(), SHARED_SERVER_CONTEXT, "donald", "daisy0815");
 
         try {
             courseTemplateApi.createCourseTemplate(otherUserCtx, ctdf.constructCourseTemplate());

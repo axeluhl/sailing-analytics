@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.jaxrs.api;
+package com.sap.sailing.shared.server.gateway.jaxrs.api;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,9 +22,9 @@ import org.json.simple.parser.JSONParser;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseTemplateJsonDeserializer;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseTemplateJsonSerializer;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/v1/coursetemplates")

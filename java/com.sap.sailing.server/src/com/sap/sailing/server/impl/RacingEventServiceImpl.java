@@ -598,7 +598,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     public RacingEventServiceImpl(boolean clearPersistentCompetitorAndBoatStore, final TypeBasedServiceFinderFactory serviceFinderFactory, boolean restoreTrackedRaces) {
         this(clearPersistentCompetitorAndBoatStore, serviceFinderFactory, null, /* sailingNotificationService */ null,
-                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null, /* sharedSailingData */ null);
+                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null, /* sharedSailingDataTracker */ null);
     }
 
     /**
@@ -624,7 +624,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             final TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListenerManager trackedRegattaListener,
             SailingNotificationService sailingNotificationService,
             TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces,
-            ServiceTracker<SecurityService, SecurityService> securityServiceTracker, SharedSailingData sharedSailingData) {
+            ServiceTracker<SecurityService, SecurityService> securityServiceTracker,
+            ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker) {
         this((final RaceLogAndTrackedRaceResolver raceLogResolver) -> {
             return new ConstructorParameters() {
                 private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE
@@ -655,7 +656,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             };
         }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), null, null, serviceFinderFactory, trackedRegattaListener,
                 sailingNotificationService, trackedRaceStatisticsCache, restoreTrackedRaces,
-                securityServiceTracker, sharedSailingData);
+                securityServiceTracker, sharedSailingDataTracker);
     }
 
     private RacingEventServiceImpl(final boolean clearPersistentCompetitorStore, WindStore windStore,
@@ -689,7 +690,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
             };
         }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), windStore, sensorFixStore, serviceFinderFactory, null,
-                sailingNotificationService, /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null, /* sharedSailingData */ null);
+                sailingNotificationService, /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null,
+                /* sharedSailingDataTracker */ null);
     }
 
     public RacingEventServiceImpl(final DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
@@ -717,7 +719,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
             };
         }, mediaDB, windStore, sensorFixStore, null, null, /* sailingNotificationService */ null,
-                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null, /* sharedSailingData */ null);
+                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null, /* sharedSailingDataTracker */ null);
     }
 
     /**
@@ -753,7 +755,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             SailingNotificationService sailingNotificationService,
             TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces,
             ServiceTracker<SecurityService, SecurityService> securityServiceTracker,
-            SharedSailingData sharedSailingData) {
+            ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker) {
         logger.info("Created " + this);
         this.securityServiceTracker = securityServiceTracker;
         this.numberOfTrackedRacesRestored = new AtomicInteger();
@@ -840,7 +842,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             logger.log(Level.SEVERE, "Exception trying to obtain MongoDB sensor fix store", e);
             throw new RuntimeException(e);
         }
-        this.courseAndMarkConfigurationFactory = new CourseAndMarkConfigurationFactoryImpl(sharedSailingData,
+        this.courseAndMarkConfigurationFactory = new CourseAndMarkConfigurationFactoryImpl(sharedSailingDataTracker,
                 this.sensorFixStore, this);
         this.raceManagerDeviceConfigurationsById = new HashMap<>();
         this.raceManagerDeviceConfigurationsByName = new HashMap<>();

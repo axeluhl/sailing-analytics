@@ -1,4 +1,4 @@
-package com.sap.sailing.server.security;
+package com.sap.sailing.shared.server.security;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;

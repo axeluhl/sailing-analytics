@@ -5,10 +5,8 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import org.bson.Document;
 
@@ -30,10 +28,6 @@ import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
-import com.sap.sailing.domain.coursetemplate.CourseTemplate;
-import com.sap.sailing.domain.coursetemplate.MarkProperties;
-import com.sap.sailing.domain.coursetemplate.MarkRole;
-import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.leaderboard.EventResolver;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -222,14 +216,4 @@ public interface DomainObjectFactory {
      * Loads all stored anniversary races.
      */
     Map<? extends Integer, ? extends Pair<DetailedRaceInfo, AnniversaryType>> getAnniversaryData() throws MalformedURLException;
-
-    Iterable<MarkProperties> loadAllMarkProperties(Function<UUID, MarkTemplate> markTemplateResolver,
-            Function<UUID, MarkRole> markRoleResolver);
-
-    Iterable<MarkTemplate> loadAllMarkTemplates();
-    
-    Iterable<MarkRole> loadAllMarkRoles();
-
-    Iterable<CourseTemplate> loadAllCourseTemplates(Function<UUID, MarkTemplate> markTemplateResolver,
-            Function<UUID, MarkRole> markRoleResolver);
 }

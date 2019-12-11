@@ -1,4 +1,4 @@
-package com.sap.sailing.server.security;
+package com.sap.sailing.shared.server.security;
 
 import com.sap.sse.ServerInfo;
 import com.sap.sse.security.BearerTokenOrBasicOrFormAuthenticationFilter;
