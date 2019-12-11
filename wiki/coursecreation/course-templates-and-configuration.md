@@ -13,14 +13,22 @@ We defined the model for course templating and configuration. In addition the va
 
 ## Mark template have the following properties
 
-* Appearance
+A mark template defines the appearance of a mark in a regatta independent representation. Mark templates represent marks in the waypoint sequence of a course template.
+
+Mark templates have the following properties:
+
+* Provide an appearance
 * Mark templates are immutable
 
 
 ## Mark properties
 
-* Appearance
-* Optional positioning information
+Mark properties also define the appearance of a mark. Despite the appearance it may contain a reference to a tracking device or a fixed mark position. They can be used to represent a catalogue of resusable mark definitions to describe real world marks or to supply a box of tracking devices.
+
+Mark properties have the following properties:
+
+* Provide an appearance
+* Optionally include positioning information. either of:
     * Fixed position
     * Tracking device identifier
 * Mark properties are mutable
@@ -28,12 +36,19 @@ We defined the model for course templating and configuration. In addition the va
 
 ### Course template
 
+A course template can be used to create a course based on mark templates and a sequence of waypoints. The sequence of waypoints may contain a repeatable sub sequence of waypoints which will insert repeating mark sequences for the number of laps specified when creating a course.
+
 * Set of mark templates to be created
 * Optional repeatable part
 * Course templates may contain mark templates that aren't part of the defined sequence
 * For every mark template that is part of the sequence, a distinct role name need to be provided
     * Distinct means it is a bijective mapping of marks in the sequence and role names
     * The role name may the same as the mark template being mapped
+
+
+### Mark role
+
+A mark role defines the purpose of a mark used in the waypoint sequences of a regatta course or course template and allows to swap out marks or mark templates without changing the the effective waypoint sequence. Having this a course template and regatta course may define a compatible waypoint sequence while being based on different mark definitions.
 
 
 ### Course configuration
@@ -87,10 +102,10 @@ When designing courses, the following aspects and data sources need to get inclu
 ## Mark configuration types and their carried information
 
 * Mark template based configuration
-    * Appearance is defined by mark template
+    * Appearance is defined by a mark template only
     * Optional positioning information to be used upon mark creation
 * Regatta mark based configuration
-    * Appearance is defined by mark. Changing is not supported which means in this case, a new mark needs to be defined in any supported way as replacement for new courses, while the old definition remains for old courses.
+    * Appearance is defined by mark. Changing is not supported which means in this case, a new mark needs to be defined in any supported way as replacement for new courses, while the old definition remains for existing courses.
     * Type is only available if the course is created in a regatta context
     * Optional positioning information (to update the regatta mark)
 * Mark properties based configuration
@@ -105,22 +120,60 @@ When designing courses, the following aspects and data sources need to get inclu
 
 ## Rules for the construction of mark configurations
 
+### Last usage based matching rules
+
+When creating course configurations, it is tried to match regatta marks as well as mark properties to mark templates based on the last usage. Because of the fact that a regatta mark or mark properties could be associated to different mark templates or roles historically, it could be the best match for more than one mark template.
+
+Example: A mark M was associated to role R1 in race 1. M was associated to role R2 in race 2. The roles R1 and R2 are distinctly used in one of the races. This means M would match both, R1 and R2. For R1 and R2 the only match would be M. In a course template including both R1 and R2 we can't match M to both roles. In this case it is checked if the best match in reverse direction leads to the same role. In this example, the latest (best) match for M is R2. Given that, R1 will not be matched to a mark at all.
+
+In general this means: A match based on last usage is only counted as match if both elements (e.g. Role and mark) reference each other as the only or latest match.
+
+This rule is always applied for at least the following cases:
+* Matching regatta marks by usage of their associated roles to mark templates
+* Matching marks properties by usage of their associated roles to mark templates
+* Matching marks properties by direct usage for mark templates
+
+
 ### Construction from course template
 
-* For each regatta mark, a mark configuration needs to be created.
-* If a mark was already mapped to a given role in an existing course, this is used. If there are multiple usages, the most recent one is used. A mark can only be mapped to one role within one regatta course to prevent information loss by mapping several "slots" of a course sequence to the same mark configuration.
-* Create mark configuration objects for all mark templates not existing in the regatta. Those are subsequently associated to the remaining roles.
-* For each role that remains unmapped (those ones a user unmapped manually or by side effects of editing the sequence), a new entry from the mark template is created and mapped to the role.
-* For each mark template based configuration referenced by a role, mark properties objects needs to be associated based on the last use of the mark properties for the role.
-* For all mark configurations created from mark templates the mark properties object needs to be associated based on the last use of the mark properties for the mark template.
+Construction from a course template means, a course template is directly loaded. No regatta course is involved in this process but as the course template may be loaded in a regatta context, existing regatta marks may be included in the course configuration.
+
+* If the course configuration is created in a regatta context
+    * If the configuration is created in a regatta context, for each existing regatta mark, a mark configuration needs to be created.
+    * For any mark template that is part of the course template a matching regatta mark is searched as replacement. As the first priority, last usage based matching (see above) is done on roles being associated to regatta marks as well as mark templates. For any mark template that could not be matched by role, a regatta mark can be associated if it was created based on that mark template.
+    * Create mark configuration objects for all mark templates not existing in the regatta. Those are subsequently associated to the remaining roles.
+* If the course template is created without a regatta context
+    * Create mark configuration objects for all mark templates being part of the course template
+* For each mark template based configuration associated to a role, mark properties objects are searched as replacement based on the last usage (see above) of the mark properties for the role.
+* For each remaining mark template based configuration, mark properties objects are searched as replacement based on the last usage (see above) of the mark properties for the nmark template.
+* The waypoint sequence of the course template is mapped to the course configuration by replacing the mark templates by the mark configurations identified in the steps before.
+* The potentially existing repeatable part is exactly the one being part of the course template
 
 
-### Construction from regatta course
+### Construction from a race of a regatta
 
-* For each regatta mark, a mark configuration needs to be created.
-* The mapping of mark configurations to roles is based on the optional mapping of a mark to a role in a course. 
-    * If the course is based on a course template, the set of roles needs to match the set of roles in the associated course template.
-    * If the course is not based on a course template, the role mapping is created from the course defaulting to the names of the marks.
+When loading a course from a race of a regatta, several constellations may occur:
+
+1. No course is associated to a race at all
+2. A course is associated to the race without being based on a course template. This can have multiple reasons:
+    * The course was created freely without using a course template
+    * The course sequence was changed so that it doesn't match the course template anymore
+    * The course template has been deleted in the meanwhile
+3. A course is based on a course template.
+
+In case a course template is referenced by a course, additional checks are necessary to distinct 2. and 3.
+
+Based on those effective constellations, the course configuration is constructed the following way:
+
+* For each regatta mark, a mark configuration is created.
+* In case of 1. an empty waypoint sequence is defined in the resulting course configuration
+* In case of 2., the waypoint sequence is exactly mapped using the mark configurations being created from the marks while no repeatable part is defined in the resulting course configuration
+* In case of 3.
+    * For each role of the course, a 1:1 match exists in the course template.
+    * Having said that, the waypoint sequence of the course template can be used in the course configuration by doing a replacement based on the roles.
+    * There may be rare cases where a course template with repeatable part is used to construct a course with 0 laps. This can cause roles and mark templates of the course template not having a match in the course. Those missing mark templates are required to explicitly be added to the course configuration.
+    * The repeatable part is directly taken from the course template. If a repeatable part is available for the course template, the effective lap count can be calculated based on the number of waypoints in the course and course template.
+    * Any mark template that is not mapped to a regatta mark already is tried to be mapped to mark properties using last usage based matching (see above).
 
 
 ## Roles and their significance
@@ -128,15 +181,15 @@ When designing courses, the following aspects and data sources need to get inclu
 When creating a course from a course template, the set of marks to be created is not limited to the ones used in the sequence. A set of spare marks is explicitly required to be exchanged by another mark without effectively changing the sequence. Especially using a mark for another waypoint as defined by the template, introduces an ambiguity to this model. Another ambiguity occurs when creating a new mark for a while using the original one in another position of the sequence. This requires to distinct:
 
 1. Originating mark template definition
-2. Originating position in the sequence/waypoint
+2. Originating slot in the sequence/waypoint
 
 As 1. is the meaning of creating marks from mark templates this requires the introduction of a new concept that defines "slots" to be filled when configuring a course based on a course template.
 
-Therefore we defined roles to distinctly name marks used in a sequence of waypoints.
+Therefore we defined mark roles to distinctly identify slots in a sequence of waypoints.
 
 In the UI model (while not having the concept of roles) it would be possible to just swap all uses of a mark with another one without modifying the sequence. Especially the case mentioned above would cause an ambiguity regarding how the mapping of marks of the course template is meant. The definition of roles in fact removes the dependency of the sequence to mark templates.
 
-Said that, it is necessary to provide a distinct and complete (bijective) mapping for mark templates to roles used in the sequence of a course template. Any regatta course that provides an equivalent and complete mapping for its marks is a valid candidate to reconstruct the course template definition without implying a data loss.
+Said that, it is necessary to provide a distinct and complete (bijective) mapping for mark templates to roles used in the sequence of a course template. Any regatta course that provides an equivalent mapping for its marks is a valid candidate to reconstruct the course template definition without implying a data loss. This especially included the reconstruction of the repeatable part and effective lap counts.
 
 
 ## Categorizing marks in course configurations
@@ -169,19 +222,8 @@ In addition, for marks used in the course sequence, a new freestyle mark configu
 
 When choosing a course template, as many parts of the configuration should get preselect as possible. In addition, when loading a course that was based on a template, also as much configuration as possible should be reconstructed. This requires us to track several usages:
 
-* Usage of mark properties to roles: Allows suggestions of mark properties for the role in question based on last usage (globally based on READ permissions)
-* Usage of mark properties to mark templates: Allows further suggestions of mark properties for marks referenced in course templates (globally based on READ permissions)
+* Usage of mark properties to roles: Allows suggestions of mark properties for the role in question based on last usage (globally limited by READ permissions)
+* Usage of mark properties to mark templates: Allows further suggestions of mark properties for marks referenced in course templates (globally limited by READ permissions)
 * Originating mark template for regatta mark: This allows to only create those marks based on templates that are not already present
 * Originating mark properties for regatta mark: This allows the user to export tracking information attached to a mark also to the originating mark properties.
 * Mapping of marks to roles in a regatta course: This allows to suggest mapping of either regatta marks or mark templates based on last usage to roles when creating a configuration based on a course template.
-
-
-## Selection of mark configuration for a role
-
-For each role being part of the course sequence, a replacement may be selected. The following substitutes are provided by their respective priority:
-
-1. Regatta marks not already used by another role
-2. Additional Mark configurations not used in the sequence
-3. Mark properties with usage of the intended role sorted by last usage
-4. Mark properties not having a usage recorded for the role yet
-

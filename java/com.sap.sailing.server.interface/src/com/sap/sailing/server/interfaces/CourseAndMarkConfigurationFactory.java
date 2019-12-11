@@ -35,6 +35,9 @@ import com.sap.sse.common.TimePoint;
  * 
  * {@link CourseAndMarkConfigurationFactory} provides the functionality to convert domain types to
  * {@link CourseConfiguration}s as well as creating or updating those types from {@link CourseConfiguration}s.
+ * <br>
+ * For details on how the {@link CourseConfiguration} model based on {@link Course}s as well as {@link CourseTemplate}s
+ * work, please consult the documentation found in /wiki/coursecreation/course-templates-and-configuration.md.
  * 
  * @author Axel Uhl (d043530)
  *
