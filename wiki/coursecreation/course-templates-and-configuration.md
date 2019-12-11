@@ -13,14 +13,22 @@ We defined the model for course templating and configuration. In addition the va
 
 ## Mark template have the following properties
 
-* Appearance
+A mark template defines the appearance of a mark in a regatta independent representation. Mark templates represent marks in the waypoint sequence of a course template.
+
+Mark templates have the following properties:
+
+* Provide an appearance
 * Mark templates are immutable
 
 
 ## Mark properties
 
-* Appearance
-* Optional positioning information
+Mark properties also define the appearance of a mark. Despite the appearance it may contain a reference to a tracking device or a fixed mark position. They can be used to represent a catalogue of resusable mark definitions to describe real world marks or to supply a box of tracking devices.
+
+Mark properties have the following properties:
+
+* Provide an appearance
+* Optionally include positioning information. either of:
     * Fixed position
     * Tracking device identifier
 * Mark properties are mutable
@@ -28,12 +36,19 @@ We defined the model for course templating and configuration. In addition the va
 
 ### Course template
 
+A course template can be used to create a course based on mark templates and a sequence of waypoints. The sequence of waypoints may contain a repeatable sub sequence of waypoints which will insert repeating mark sequences for the number of laps specified when creating a course.
+
 * Set of mark templates to be created
 * Optional repeatable part
 * Course templates may contain mark templates that aren't part of the defined sequence
 * For every mark template that is part of the sequence, a distinct role name need to be provided
     * Distinct means it is a bijective mapping of marks in the sequence and role names
     * The role name may the same as the mark template being mapped
+
+
+### Mark role
+
+A mark role defines the purpose of a mark used in the waypoint sequences of a regatta course or course template and allows to swap out marks or mark templates without changing the the effective waypoint sequence. Having this a course template and regatta course may define a compatible waypoint sequence while being based on different mark definitions.
 
 
 ### Course configuration

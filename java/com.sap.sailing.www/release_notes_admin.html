@@ -26,14 +26,10 @@
                         <li>Implemented API endpoints for configuring courses independently from regattas.
                             The model has been extended by the new domain types mark template, mark properties, mark role and course template.
                             <ul>
-                                <li>A mark template defines the appearance of a mark and is used to specify the marks in a course template.</li>
-                                <li>Mark properties contains the appearance attributes of a mark.
-                                    Despite the appearance it may contain a reference to a tracking device or a fixed mark position.
-                                    They can be used to create a catalogue of mark definitions to describe real world marks or to supply a box of tracking devices.</li>
-                                <li>A course template can be used to create a course based on mark templates and a sequence of waypoints. The sequence of waypoints may
-                                    contain a repeatable sub sequence of waypoints which will insert repeating mark sequences for the number of laps specified when creating a course.</li>
-                                <li>A mark role defines the purpose of a mark used in the waypoint sequences of a regatta course or course template and allows to change a mark in a 
-                                    course definition without modifying the sequence.</li>
+                                <li>A mark template defines the appearance of a mark in a regatta independent representation. Mark templates represent marks in the waypoint sequence of a course template.</li>
+                                <li>Mark properties also define the appearance of a mark. Despite the appearance it may contain a reference to a tracking device or a fixed mark position. They can be used to represent a catalogue of resusable mark definitions to describe real world marks or to supply a box of tracking devices.</li>
+                                <li>A course template can be used to create a course based on mark templates and a sequence of waypoints. The sequence of waypoints may contain a repeatable sub sequence of waypoints which will insert repeating mark sequences for the number of laps specified when creating a course.</li>
+                                <li>A mark role defines the purpose of a mark used in the waypoint sequences of a regatta course or course template and allows to swap out marks or mark templates without changing the the effective waypoint sequence. Having this a course template and regatta course may define a compatible waypoint sequence while being based on different mark definitions.</li>
                             </ul>
                             <p>Dialogs to create mark roles, mark template, mark properties and course templates are provided in the admin console accessible 
                             by a new menu point "Course Creation". There is currently no dialog to create a course from a coursetemplate.</p>
