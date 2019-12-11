@@ -54,15 +54,13 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 public class ExpeditionCourseInferrer {
     private static final Logger logger = Logger.getLogger(ExpeditionCourseInferrer.class.getName());
-    private static final String START_LINE_PORT_END_LAT = "Port lat";
-    private static final String START_LINE_PORT_END_LON = "Port lon";
-    private static final String START_LINE_STARBOARD_END_LAT = "Stbd lat";
-    private static final String START_LINE_STARBOARD_END_LON = "Stbd lon";
-    private static final String START_LINE_PORT_END_MARK_NAME = "Start P";
-    private static final String START_LINE_STARBOARD_END_MARK_NAME = "Start S";
-    private static final String START_LINE_PORT_END_MARK_SHORT_NAME = "S/P";
-    private static final String START_LINE_STARBOARD_END_MARK_SHORT_NAME = "S/S";
-    private static final String START_LINE_CONTROL_POINT_NAME = "Start";
+    private static final String START_LINE_PORT_END_LAT = "port lat";
+    private static final String START_LINE_PORT_END_LON = "port lon";
+    private static final String START_LINE_STARBOARD_END_LAT = "stbd lat";
+    private static final String START_LINE_STARBOARD_END_LON = "stbd lon";
+    private static final String START_LINE_PORT_END_MARK_NAME = "start p";
+    private static final String START_LINE_STARBOARD_END_MARK_NAME = "start s";
+    private static final String START_LINE_CONTROL_POINT_NAME = "start";
     
     private final RaceLogTrackingAdapter raceLogTrackingAdapter;
     
@@ -126,7 +124,7 @@ public class ExpeditionCourseInferrer {
     }
     
     private Double getColumnValue(String[] lineContentTokens, Map<String, Integer> columnsInFileFromHeader, String columnName) {
-        return getColumnValue(lineContentTokens, columnsInFileFromHeader.get(columnName));
+        return getColumnValue(lineContentTokens, columnsInFileFromHeader.get(columnName.toLowerCase()));
     }
 
     private Double getColumnValue(String[] lineContentTokens, final Integer columnIndex) {
@@ -150,9 +148,9 @@ public class ExpeditionCourseInferrer {
             }
             final DynamicTrackedRace anyTrackedRace = trackedRaces.iterator().next();
             logger.info("Adding mark pings for "+START_LINE_PORT_END_MARK_NAME+" using tracked race "+anyTrackedRace.getRace().getName());
-            final Mark portMark = getOrCreateMarkAndAddPings(anyTrackedRace, START_LINE_PORT_END_MARK_NAME, START_LINE_PORT_END_MARK_SHORT_NAME, startData.getStartLinePortFixes(), racingEventService);
+            final Mark portMark = getOrCreateMarkAndAddPings(anyTrackedRace, START_LINE_PORT_END_MARK_NAME, startData.getStartLinePortFixes(), racingEventService);
             logger.info("Adding mark pings for "+START_LINE_STARBOARD_END_MARK_NAME+" using tracked race "+anyTrackedRace.getRace().getName());
-            final Mark starboardMark = getOrCreateMarkAndAddPings(anyTrackedRace, START_LINE_STARBOARD_END_MARK_NAME, START_LINE_STARBOARD_END_MARK_SHORT_NAME, startData.getStartLineStarboardFixes(), racingEventService);
+            final Mark starboardMark = getOrCreateMarkAndAddPings(anyTrackedRace, START_LINE_STARBOARD_END_MARK_NAME, startData.getStartLineStarboardFixes(), racingEventService);
             for (final DynamicTrackedRace trackedRace : trackedRaces) {
                 setCourseWithStartLine(trackedRace, racingEventService, portMark, starboardMark);
             }
@@ -166,8 +164,7 @@ public class ExpeditionCourseInferrer {
             final Mark portMark, final Mark starboardMark) {
         logger.info("Creating start line in tracked race "+trackedRace.getRace().getName());
         final ControlPoint startLine = racingEventService.getBaseDomainFactory().getOrCreateControlPointWithTwoMarks(
-                UUID.randomUUID(), START_LINE_CONTROL_POINT_NAME, portMark, starboardMark,
-                START_LINE_CONTROL_POINT_NAME);
+                UUID.randomUUID(), START_LINE_CONTROL_POINT_NAME, portMark, starboardMark, START_LINE_CONTROL_POINT_NAME);
         final CourseBase course = new CourseDataImpl("Auto-Course "+trackedRace.getRace().getName());
         course.addWaypoint(0, new WaypointImpl(startLine, PassingInstruction.Line));
         final RaceLog raceLog = trackedRace.getAttachedRaceLogs().iterator().next();
@@ -176,8 +173,8 @@ public class ExpeditionCourseInferrer {
         raceLog.add(event);
     }
 
-    private Mark getOrCreateMarkAndAddPings(DynamicTrackedRace trackedRace, String markName, String markShortName, Iterable<GPSFix> markFixes, RacingEventService racingEventService) {
-        final Mark mark = getOrCreateMark(trackedRace, markName, markShortName, racingEventService);
+    private Mark getOrCreateMarkAndAddPings(DynamicTrackedRace trackedRace, String markName, Iterable<GPSFix> markFixes, RacingEventService racingEventService) {
+        final Mark mark = getOrCreateMark(trackedRace, markName, racingEventService);
         for (final GPSFix fix : markFixes) {
             recordFix(mark, fix, trackedRace, racingEventService);
         }
@@ -199,7 +196,7 @@ public class ExpeditionCourseInferrer {
      *            found in the race or regatta.
      * @return the mark found or created
      */
-    private Mark getOrCreateMark(DynamicTrackedRace trackedRace, String markName, String markShortName, RacingEventService racingEventService) {
+    private Mark getOrCreateMark(DynamicTrackedRace trackedRace, String markName, RacingEventService racingEventService) {
         Mark mark = null;
         final Regatta regatta = trackedRace.getTrackedRegatta().getRegatta();
         outer: for (final RaceColumn raceColumn : regatta.getRaceColumns()) {
@@ -214,7 +211,7 @@ public class ExpeditionCourseInferrer {
                         }
                     }
                     if (mark == null) {
-                        mark = racingEventService.getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), markName, markShortName);
+                        mark = racingEventService.getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), markName, markName);
                         final TimePoint now = MillisecondsTimePoint.now();
                         RegattaLogDefineMarkEventImpl defineMarkEvent = new RegattaLogDefineMarkEventImpl(now,
                                 racingEventService.getServerAuthor(), now, UUID.randomUUID(), mark);

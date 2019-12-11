@@ -1732,7 +1732,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String solutionsRaceHeadline();
     String solutionsInSightHeadline();
     String solutionsBuoyPingerHeadline();
-    String solutionsPostHeadline();
     String solutionsSimulatorHeadline();
     String sapInSailing();
     String contentSapInSailing1();
@@ -1761,9 +1760,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String sapSailingBuoyPinger();
     String contentSapSailingBuoyPinger();
     String sapSailingBuoyPingerReadMore();
-    String postRaceAnalytics();
-    String contentPostRaceAnalytics1();
-    String contentPostRaceAnalytics2();
     String strategySimulator();
     String contentStrategySimulator();
     String strategySimulatorReadMore();
