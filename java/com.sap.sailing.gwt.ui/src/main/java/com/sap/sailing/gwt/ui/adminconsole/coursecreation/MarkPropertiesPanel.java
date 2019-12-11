@@ -9,6 +9,7 @@ import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCe
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_UPDATE;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -32,6 +33,7 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleResources;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
@@ -297,8 +299,8 @@ public class MarkPropertiesPanel extends FlowPanel {
 
         final HasPermissions type = SecuredDomainType.MARK_PROPERTIES;
 
-        final AccessControlledActionsColumn<MarkPropertiesDTO, DefaultActionsImagesBarCell> actionsColumn = create(
-                new DefaultActionsImagesBarCell(stringMessages), userService);
+        final AccessControlledActionsColumn<MarkPropertiesDTO, MarkPropertiesImagesbarCell> actionsColumn = create(
+                new MarkPropertiesImagesbarCell(stringMessages), userService);
         final EditOwnershipDialog.DialogConfig<MarkPropertiesDTO> configOwnership = EditOwnershipDialog
                 .create(userService.getUserManagementService(), type, markProperties -> {
                     /* no refresh action */}, stringMessages);
@@ -322,6 +324,10 @@ public class MarkPropertiesPanel extends FlowPanel {
             }
         });
         actionsColumn.addAction(ACTION_UPDATE, UPDATE, this::openEditMarkPropertiesDialog);
+        actionsColumn.addAction(MarkPropertiesImagesbarCell.ACTION_SET_DEVICE_IDENTIFIER,
+                this::openEditMarkPropertiesDeviceIdentifierDialog);
+        actionsColumn.addAction(MarkPropertiesImagesbarCell.ACTION_SET_POSITION,
+                this::openEditMarkPropertiesPositionDialog);
         actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 markProperties -> configACL.openDialog(markProperties));
@@ -334,41 +340,75 @@ public class MarkPropertiesPanel extends FlowPanel {
         loadMarkProperties();
     }
 
-    void openEditMarkPropertiesDialog(final MarkPropertiesDTO originalMarkProperties) {
-        final MarkPropertiesEditDialog dialog = new MarkPropertiesEditDialog(stringMessages, originalMarkProperties,
-                new DialogCallback<MarkPropertiesDTO>() {
+    DialogCallback<MarkPropertiesDTO> createEditDialogCallback(final MarkPropertiesDTO originalMarkProperties) {
+        return new DialogCallback<MarkPropertiesDTO>() {
+            @Override
+            public void ok(MarkPropertiesDTO markProperties) {
+                sailingService.addOrUpdateMarkProperties(markProperties, new AsyncCallback<MarkPropertiesDTO>() {
                     @Override
-                    public void ok(MarkPropertiesDTO markProperties) {
-                        sailingService.addOrUpdateMarkProperties(markProperties,
-                                new AsyncCallback<MarkPropertiesDTO>() {
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        errorReporter.reportError(
-                                                "Error trying to update mark properties: " + caught.getMessage());
-                                    }
-
-                                    @Override
-                                    public void onSuccess(MarkPropertiesDTO updatedMarkProperties) {
-                                        int editedMarkPropertiesIndex = filterableMarkProperties
-                                                .indexOf(originalMarkProperties);
-                                        filterableMarkProperties.remove(originalMarkProperties);
-                                        if (editedMarkPropertiesIndex >= 0) {
-                                            filterableMarkProperties.add(editedMarkPropertiesIndex,
-                                                    updatedMarkProperties);
-                                        } else {
-                                            filterableMarkProperties.add(updatedMarkProperties);
-                                        }
-                                        markPropertiesListDataProvider.refresh();
-                                    }
-                                });
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error trying to update mark properties: " + caught.getMessage());
                     }
 
                     @Override
-                    public void cancel() {
+                    public void onSuccess(MarkPropertiesDTO updatedMarkProperties) {
+                        int editedMarkPropertiesIndex = filterableMarkProperties.indexOf(originalMarkProperties);
+                        filterableMarkProperties.remove(originalMarkProperties);
+                        if (editedMarkPropertiesIndex >= 0) {
+                            filterableMarkProperties.add(editedMarkPropertiesIndex, updatedMarkProperties);
+                        } else {
+                            filterableMarkProperties.add(updatedMarkProperties);
+                        }
+                        markPropertiesListDataProvider.refresh();
                     }
                 });
+            }
+
+            @Override
+            public void cancel() {
+            }
+        };
+    }
+
+    void openEditMarkPropertiesDialog(final MarkPropertiesDTO originalMarkProperties) {
+        final MarkPropertiesEditDialog dialog = new MarkPropertiesEditDialog(stringMessages, originalMarkProperties,
+                createEditDialogCallback(originalMarkProperties));
         dialog.ensureDebugId("MarkPropertiesEditDialog");
         dialog.show();
     }
 
+    void openEditMarkPropertiesDeviceIdentifierDialog(final MarkPropertiesDTO originalMarkProperties) {
+        final MarkPropertiesDeviceIdentifierEditDialog dialog = new MarkPropertiesDeviceIdentifierEditDialog(
+                stringMessages, originalMarkProperties, createEditDialogCallback(originalMarkProperties));
+        dialog.ensureDebugId("MarkPropertiesDeviceIdentifierEditDialog");
+        dialog.show();
+    }
+
+    void openEditMarkPropertiesPositionDialog(final MarkPropertiesDTO originalMarkProperties) {
+        final MarkPropertiesPositionEditDialog dialog = new MarkPropertiesPositionEditDialog(stringMessages,
+                originalMarkProperties, createEditDialogCallback(originalMarkProperties));
+        dialog.ensureDebugId("MarkPropertiesPositionEditDialog");
+        dialog.show();
+    }
+
+    private static class MarkPropertiesImagesbarCell extends DefaultActionsImagesBarCell {
+        private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
+        public static final String ACTION_SET_DEVICE_IDENTIFIER = "ACTION_SET_DEVICE_IDENTIFIER";
+        public static final String ACTION_SET_POSITION = "ACTION_SET_POSITION";
+        private final StringMessages stringMessages;
+
+        public MarkPropertiesImagesbarCell(StringMessages stringMessages) {
+            super(stringMessages);
+            this.stringMessages = stringMessages;
+        }
+
+        @Override
+        protected Iterable<ImageSpec> getImageSpecs() {
+            return Arrays.asList(getUpdateImageSpec(),
+                    new ImageSpec(ACTION_SET_DEVICE_IDENTIFIER, stringMessages.setDeviceIdentifier(),
+                            resources.mapDevices()),
+                    new ImageSpec(ACTION_SET_POSITION, stringMessages.setPosition(), resources.ping()),
+                    getDeleteImageSpec(), getChangeOwnershipImageSpec(), getChangeACLImageSpec());
+        }
+    }
 }

@@ -375,10 +375,10 @@ import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
-import com.sap.sailing.domain.racelogtracking.PlaceHolderDeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
+import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
@@ -9915,7 +9915,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private DeviceIdentifier convertDtoToDeviceIdentifier(DeviceIdentifierDTO deviceIdentifier) {
-        return new PlaceHolderDeviceIdentifier(deviceIdentifier.deviceType, deviceIdentifier.deviceId);
+        return new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceIdentifier.deviceId));
     }
 
     @Override
@@ -9925,7 +9925,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             getSecurityService().checkCurrentUserUpdatePermission(createdOrUpdatedMarkProperties);
             getSharedSailingData().updateMarkProperties(markProperties.getUuid(),
                     convertDtoToCommonMarkProperties(markProperties.getCommonMarkProperties()),
-                    markProperties.getPosition(), convertDtoToDeviceIdentifier(markProperties.getDeviceIdentifier()),
+                    markProperties.getPosition(),
+                    markProperties.getDeviceIdentifier() != null
+                            ? convertDtoToDeviceIdentifier(markProperties.getDeviceIdentifier())
+                            : null,
                     markProperties.getTags());
             createdOrUpdatedMarkProperties = getSharedSailingData().getMarkPropertiesById(createdOrUpdatedMarkProperties.getId());
         } else {
@@ -10079,7 +10082,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private MarkRoleDTO convertToMarkRoleDTO(final MarkRole markRole) {
-        final MarkRoleDTO markRoleDTO =  new MarkRoleDTO(markRole.getId(), markRole.getName());
+        final MarkRoleDTO markRoleDTO = new MarkRoleDTO(markRole.getId(), markRole.getName());
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), markRoleDTO, markRole.getIdentifier());
         return markRoleDTO;
     }

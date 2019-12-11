@@ -17,7 +17,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.impl.RadianPosition;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.Pattern;
 import com.sap.sailing.gwt.ui.shared.racemap.Shape;
@@ -38,6 +37,7 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
     private final Label labelShape;
     private final Label labelPattern;
     private final StringListEditorComposite tagsEditor;
+    private final MarkPropertiesDTO markPropertiesToEdit;
 
     private final UUID id;
 
@@ -61,6 +61,7 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
         this.ensureDebugId("MarkPropertiesToEditEditDialog");
         id = markPropertiesToEdit.getUuid();
         this.stringMessages = stringMessages;
+        this.markPropertiesToEdit = markPropertiesToEdit;
 
         this.markTypeValueListBox = new ValueListBox<>(new Renderer<MarkType>() {
             @Override
@@ -216,8 +217,8 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
         }
         // TODO: device identifier, position
         final MarkPropertiesDTO markProperties = new MarkPropertiesDTO(id, nameTextBox.getValue(),
-                tagsEditor.getValue(), new DeviceIdentifierDTO(null, null), new RadianPosition(0, 0),
-                shortNameTextBox.getValue(), color,
+                tagsEditor.getValue(), markPropertiesToEdit.getDeviceIdentifier(),
+                (RadianPosition) markPropertiesToEdit.getPosition(), shortNameTextBox.getValue(), color,
                 shapeValueListBox.getValue() == null ? "" : shapeValueListBox.getValue().name(),
                 patternValueListBox.getValue() == null ? "" : patternValueListBox.getValue().name(),
                 markTypeValueListBox.getValue());

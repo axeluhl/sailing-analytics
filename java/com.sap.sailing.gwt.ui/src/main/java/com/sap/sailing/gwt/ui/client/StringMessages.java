@@ -2354,4 +2354,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String defaultNumberOfLaps();
     String markRoleUsedTwice();
     String invalidImageURL();
+    String setDeviceIdentifier();
+    String setPosition();
 }
