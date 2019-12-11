@@ -121,6 +121,10 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
         patternValueListBox.setVisible(isBuoy);
         labelShape.setVisible(isBuoy);
         labelPattern.setVisible(isBuoy);
+        if (!isBuoy) {
+            shapeValueListBox.setValue(null);
+            patternValueListBox.setValue(null);
+        }
 
         validateAndUpdate();
     }

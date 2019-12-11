@@ -153,6 +153,10 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
         patternValueListBox.setVisible(isBuoy);
         labelShape.setVisible(isBuoy);
         labelPattern.setVisible(isBuoy);
+        if (!isBuoy) {
+            shapeValueListBox.setValue(null);
+            patternValueListBox.setValue(null);
+        }
 
         validateAndUpdate();
     }
