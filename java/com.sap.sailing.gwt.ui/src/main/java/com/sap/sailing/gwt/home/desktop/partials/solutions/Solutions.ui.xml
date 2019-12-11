@@ -27,9 +27,6 @@
 						<g:Anchor ui:field="buoyPingerAnchor" styleName="{local_res.css.solutions_nav_link}">
 							<ui:text from='{i18n.solutionsBuoyPingerHeadline}' />
 						</g:Anchor>
-						<g:Anchor ui:field="postRaceAnchor" styleName="{local_res.css.solutions_nav_link}">
-							<ui:text from='{i18n.solutionsPostHeadline}' />
-						</g:Anchor>
 						<g:Anchor ui:field="simulatorAnchor" styleName="{local_res.css.solutions_nav_link}">
 							<ui:text from='{i18n.solutionsSimulatorHeadline}' />
 						</g:Anchor>
@@ -167,23 +164,6 @@
 									<ui:text from='{i18n.sapSailingBuoyPingerReadMore}' />
 								</g:Anchor>
 							</div>
-						</div>
-					</div>
-				</div>
-				<div ui:field="postRaceDiv"
-					class="{local_res.css.solutions_content} {local_res.css.solutions_contentpost}">
-					<div class="{res.mediaCss.grid} {local_res.css.gridalternator}">
-						<div
-							class="{res.mediaCss.small5} {res.mediaCss.smalloffset7} {res.mediaCss.columns}">
-							<h2>
-								<ui:text from='{i18n.postRaceAnalytics}' />
-							</h2>
-							<p>
-								<ui:text from='{i18n.contentPostRaceAnalytics1}' />
-							</p>
-							<p>
-								<ui:text from='{i18n.contentPostRaceAnalytics2}' />
-							</p>
 						</div>
 					</div>
 				</div>
