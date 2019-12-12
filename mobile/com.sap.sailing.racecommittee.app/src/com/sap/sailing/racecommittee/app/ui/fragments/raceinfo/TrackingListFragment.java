@@ -707,10 +707,13 @@ public class TrackingListFragment extends BaseFragment
     private void adjustRanks(int fromPosition, int toPosition) {
         final int end = Math.min(toPosition, getFirstRankZeroPosition());
         for (int i = fromPosition; i <= end; i++) {
-            CompetitorResultWithIdImpl competitorToReplaceWithAdjustedPosition = mFinishedData.get(i);
-            final int newOneBasedRank = i + 1;
-            mFinishedData.set(i,
-                    cloneCompetitorResultAndAdjustRank(competitorToReplaceWithAdjustedPosition, newOneBasedRank));
+            CompetitorResultWithIdImpl result = mFinishedData.get(i);
+            final int rank = result.getOneBasedRank();
+            if (rank > 0) {
+                final int newOneBasedRank = i + 1;
+                mFinishedData.set(i,
+                        cloneCompetitorResultAndAdjustRank(result, newOneBasedRank));
+            }
         }
     }
 
