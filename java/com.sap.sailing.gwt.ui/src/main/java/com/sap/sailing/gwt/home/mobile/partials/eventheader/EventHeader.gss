@@ -59,7 +59,6 @@
 }
 
 .eventheader_info_subtitle_dataBy_logo_container{
- color: black;
  position:absolute;
  bottom:0.25em;
  right:0.25em;

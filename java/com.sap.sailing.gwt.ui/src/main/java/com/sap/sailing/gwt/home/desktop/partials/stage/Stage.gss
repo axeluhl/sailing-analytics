@@ -210,7 +210,6 @@
   transition: width 0.1s linear;
 }
 .stage_dataBy_logo_container{
-  color: white;
   padding: 0 0.4em;
   line-height: 4rem;
 }

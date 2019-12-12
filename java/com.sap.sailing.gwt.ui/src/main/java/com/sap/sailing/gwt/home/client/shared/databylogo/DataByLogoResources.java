@@ -24,5 +24,7 @@ public interface DataByLogoResources extends SharedHomeResources {
         String databylogo_logo();
         String databylogo_subtlelink();
         String databylogo_container();
+        String databylogo_white_text();
+        String databylogo_black_text();
     }
 }

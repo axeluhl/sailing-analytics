@@ -16,3 +16,11 @@
  font-size: 0.75em;
  cursor: pointer;
 }
+
+.databylogo_white_text{
+ color: white;
+}
+
+.databylogo_black_text{
+ color: black;
+}
