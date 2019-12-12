@@ -64,7 +64,7 @@ public interface CourseBase extends Named {
     void addRoleMapping(Mark mark, UUID role);
 
     default String internalToString() {
-        StringBuilder result = new StringBuilder(getName());
+        StringBuilder result = new StringBuilder(getName()==null?"":getName());
         result.append(": ");
         boolean first = true;
         for (Waypoint waypoint : getWaypoints()) {
