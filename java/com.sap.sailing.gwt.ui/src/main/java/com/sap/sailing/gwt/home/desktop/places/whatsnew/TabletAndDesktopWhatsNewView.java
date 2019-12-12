@@ -82,8 +82,6 @@ public class TabletAndDesktopWhatsNewView extends Composite implements WhatsNewV
             case InSightApp:
                 setActiveContent(inSightAppNotes, inSightAppNotesAnchor);
                 break;
-            case PostRaceAnalytics:
-                break;
             case RaceManagerApp:
                 setActiveContent(raceCommitteeAppNotes, raceCommitteeAppNotesAnchor);
                 break;

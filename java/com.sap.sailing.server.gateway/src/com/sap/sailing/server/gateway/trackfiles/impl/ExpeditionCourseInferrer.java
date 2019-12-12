@@ -54,13 +54,13 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 public class ExpeditionCourseInferrer {
     private static final Logger logger = Logger.getLogger(ExpeditionCourseInferrer.class.getName());
-    private static final String START_LINE_PORT_END_LAT = "Port lat";
-    private static final String START_LINE_PORT_END_LON = "Port lon";
-    private static final String START_LINE_STARBOARD_END_LAT = "Stbd lat";
-    private static final String START_LINE_STARBOARD_END_LON = "Stbd lon";
-    private static final String START_LINE_PORT_END_MARK_NAME = "Start P";
-    private static final String START_LINE_STARBOARD_END_MARK_NAME = "Start S";
-    private static final String START_LINE_CONTROL_POINT_NAME = "Start";
+    private static final String START_LINE_PORT_END_LAT = "port lat";
+    private static final String START_LINE_PORT_END_LON = "port lon";
+    private static final String START_LINE_STARBOARD_END_LAT = "stbd lat";
+    private static final String START_LINE_STARBOARD_END_LON = "stbd lon";
+    private static final String START_LINE_PORT_END_MARK_NAME = "start p";
+    private static final String START_LINE_STARBOARD_END_MARK_NAME = "start s";
+    private static final String START_LINE_CONTROL_POINT_NAME = "start";
     
     private final RaceLogTrackingAdapter raceLogTrackingAdapter;
     
@@ -124,7 +124,7 @@ public class ExpeditionCourseInferrer {
     }
     
     private Double getColumnValue(String[] lineContentTokens, Map<String, Integer> columnsInFileFromHeader, String columnName) {
-        return getColumnValue(lineContentTokens, columnsInFileFromHeader.get(columnName));
+        return getColumnValue(lineContentTokens, columnsInFileFromHeader.get(columnName.toLowerCase()));
     }
 
     private Double getColumnValue(String[] lineContentTokens, final Integer columnIndex) {
