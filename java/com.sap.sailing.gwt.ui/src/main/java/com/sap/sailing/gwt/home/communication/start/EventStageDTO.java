@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.home.communication.start;
 import java.util.Set;
 
 import com.sap.sailing.gwt.home.communication.event.EventLinkAndMetadataDTO;
-import com.sap.sailing.gwt.home.communication.eventview.TrackingConnectorInfoDTO;
+import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
 
 public class EventStageDTO extends EventLinkAndMetadataDTO {
 
