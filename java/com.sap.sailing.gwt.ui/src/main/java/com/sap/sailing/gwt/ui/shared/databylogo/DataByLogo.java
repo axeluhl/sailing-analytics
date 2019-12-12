@@ -67,10 +67,13 @@ public class DataByLogo extends Widget {
     }
 
     private void setUpTracTracLogo(boolean colorIfPossible) {
+        DataByLogoResources resources = DataByLogoResources.INSTANCE;
         if (colorIfPossible) {
-            logo.setSrc(DataByLogoResources.INSTANCE.tractracColor().getSafeUri().asString());
+            logo.setSrc(resources.tractracColor().getSafeUri().asString());
+            this.addStyleName(resources.css().databylogo_black_text());
         } else {
             logo.setSrc(DataByLogoResources.INSTANCE.tractracWhite().getSafeUri().asString());
+            this.addStyleName(resources.css().databylogo_white_text());
         }
     }
 

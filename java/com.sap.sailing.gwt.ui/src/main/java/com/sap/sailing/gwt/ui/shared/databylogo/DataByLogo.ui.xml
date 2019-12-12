@@ -4,7 +4,7 @@
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.ui.shared.databylogo.DataByLogoResources" />
 	<a ui:field="dataByContainer" target="_blank" href="" class="{local_res.css.databylogo_subtlelink} {local_res.css.databylogo_container}">
-	    <span><ui:text from="{i18n.dataBy}"/></span>
+	    <span class="{local_res.css.databylogo_text}"><ui:text from="{i18n.dataBy}"/></span>
 	    <img ui:field="logo" class="{local_res.css.databylogo_logo}"></img>
     </a>
 </ui:UiBinder> 

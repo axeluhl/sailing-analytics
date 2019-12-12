@@ -717,6 +717,12 @@ public class RaceBoardPanel
             regattaAndRaceTimeInformationHeader.clear();
             regattaAndRaceTimeInformationHeader.add(regattaNameAnchor);
             regattaAndRaceTimeInformationHeader.add(raceTimeLabel);
+            DataByLogo dataByLogo = new DataByLogo();
+            dataByLogo.setUp(trackingConnectorInfos, false);
+            if (dataByLogo.isVisible()) {
+                regattaAndRaceTimeInformationHeader.addStyleName("RegattaAndRaceTime-Header_with_databy");
+            }
+            regattaAndRaceTimeInformationHeader.add(dataByLogo);
             currentRaceHasBeenSelectedOnce = true;
             taggingPanel.updateRace(leaderboardName, raceColumn, fleet);
         }
@@ -785,12 +791,10 @@ public class RaceBoardPanel
         timeLineInnerPanel.add(timeLineInnerBgPanel);
         timeLineInnerPanel.addStyleName("timeLineInnerPanel");
         
-        DataByLogo dataByLogo = new DataByLogo();
-        dataByLogo.setUp(trackingConnectorInfos, true);
+        
         
         ResizableFlowPanel timelinePanel = new ResizableFlowPanel();
         timelinePanel.add(timeLineInnerPanel);
-        timelinePanel.add(dataByLogo);
         timelinePanel.addStyleName("timeLinePanel");
         
         return timelinePanel;

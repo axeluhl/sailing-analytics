@@ -1,5 +1,18 @@
 .databylogo_logo{
  height: 1.3333333em !important;
+ vertical-align: middle;
+}
+
+.databylogo_text{
+ vertical-align: middle;
+}
+
+.databylogo_white_text{
+ color: white;
+}
+
+.databylogo_black_text{
+ color: black;
 }
 
 .databylogo_subtlelink, 
