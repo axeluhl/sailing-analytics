@@ -54,7 +54,6 @@ import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 public class SharedSailingDataImpl implements ReplicatingSharedSailingData, ClearStateTestSupport {
-
     private final DomainObjectFactory domainObjectFactory;
     private final MongoObjectFactory mongoObjectFactory;
 
@@ -65,6 +64,20 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
     private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+    
+    // Replication related methods and fields
+    private final ConcurrentHashMap<OperationExecutionListener<ReplicatingSharedSailingData>, OperationExecutionListener<ReplicatingSharedSailingData>> operationExecutionListeners = new ConcurrentHashMap<>();
+    private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
+    private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
+    private final Set<OperationWithResultWithIdWrapper<ReplicatingSharedSailingData, ?>> operationsSentToMasterForReplication = new HashSet<>();
+    private ReplicationMasterDescriptor master;
+
+    /**
+     * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable. The
+     * {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
+     * {@link OperationsToMasterSendingQueue#scheduleForSending(OperationWithResult, OperationsToMasterSender)} method.
+     */
+    private OperationsToMasterSendingQueue unsentOperationsToMasterSender;
 
     public SharedSailingDataImpl(final DomainObjectFactory domainObjectFactory,
             final MongoObjectFactory mongoObjectFactory, TypeBasedServiceFinderFactory serviceFinderFactory,
@@ -212,7 +225,6 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         if (markProperties == null) {
             throw new NullPointerException(String.format("Could not find mark properties with id %s", uuid.toString()));
         }
-
         getSecurityService().checkCurrentUserUpdatePermission(markProperties);
         apply(s -> internalUpdateMarkProperties(uuid, properties, position, deviceIdentifier, tags));
         return getMarkPropertiesById(uuid);
@@ -241,7 +253,6 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         final MarkProperties markProperties = new MarkPropertiesBuilder(idOfNewMarkProperties, properties.getName(),
                 properties.getShortName(), properties.getColor(), properties.getShape(), properties.getPattern(),
                 properties.getType()).withTags(tags).build();
-
         mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
         markPropertiesById.put(markProperties.getId(), markProperties);
         return null;
@@ -264,12 +275,14 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     @Override
     public MarkProperties getMarkPropertiesById(UUID id) {
+        final MarkProperties markProperties;
         if (id == null) {
-            return null;
-        }
-        final MarkProperties markProperties = markPropertiesById.get(id);
-        if (markProperties != null) {
-            getSecurityService().checkCurrentUserReadPermission(markProperties);
+            markProperties = null;
+        } else {
+            markProperties = markPropertiesById.get(id);
+            if (markProperties != null) {
+                getSecurityService().checkCurrentUserReadPermission(markProperties);
+            }
         }
         return markProperties;
     }
@@ -429,7 +442,6 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         getSecurityService().checkCurrentUserUpdatePermission(markProperties);
         final UUID markPropertiesId = markProperties.getId();
         final UUID markTemplateId = markTemplate.getId();
-
         apply(s -> s.internalRecordUsage(markTemplateId, markPropertiesId));
     }
     
@@ -445,7 +457,6 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     public void recordUsage(final MarkProperties markProperties, final MarkRole roleName) {
         getSecurityService().checkCurrentUserUpdatePermission(markProperties);
         final UUID markPropertiesId = markProperties.getId();
-        
         apply(s -> s.internalRecordUsage(markPropertiesId, roleName));
     }
 
@@ -506,20 +517,6 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         }
         return null;
     }
-
-    // Replication related methods and fields
-    private final ConcurrentHashMap<OperationExecutionListener<ReplicatingSharedSailingData>, OperationExecutionListener<ReplicatingSharedSailingData>> operationExecutionListeners = new ConcurrentHashMap<>();
-    private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
-    private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
-    private final Set<OperationWithResultWithIdWrapper<ReplicatingSharedSailingData, ?>> operationsSentToMasterForReplication = new HashSet<>();
-    private ReplicationMasterDescriptor master;
-
-    /**
-     * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable. The
-     * {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
-     * {@link OperationsToMasterSendingQueue#scheduleForSending(OperationWithResult, OperationsToMasterSender)} method.
-     */
-    private OperationsToMasterSendingQueue unsentOperationsToMasterSender;
 
     @Override
     public Serializable getId() {
