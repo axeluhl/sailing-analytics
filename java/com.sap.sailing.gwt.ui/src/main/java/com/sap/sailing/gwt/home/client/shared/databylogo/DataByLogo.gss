@@ -1,5 +1,11 @@
-.databylogo_logo{
+img.databylogo_logo{
  height: 1.3333333em !important;
+ display: inline-block;
+ vertical-align: middle;
+}
+
+.databylogo_text{
+ vertical-align: middle;
 }
 
 .databylogo_subtlelink, 

@@ -10,16 +10,14 @@
 		
 	<ui:style>
 		.left {
-			display: inline;
-			position: absolute;
 			top: 0px;
 			left: 0px;
 			width: 50%;
 			vertical-align: middle;
 		}
 		.right {
-			display: inline;
-			position: absolute;
+            display: inline;
+            position: absolute;
 			top: 0px;
 			left: 50%;
 			right: 0px;
@@ -41,11 +39,11 @@
 		<div class="{local_res.css.stageteaser_content_band_text}" >
 			<div class="{local_res.css.stageteaser_content_band_text_name} {style.left}" >
 				<div ui:field="bandSubtitle" />
+				<s:databylogo.DataByLogo ui:field="dataByLogo" addStyleNames="{local_res.css.stageteaser_databylogo_container}" />
 			</div>
 			<div class="{style.right}">
 				<g:Anchor ui:field="actionLink"
 					styleName="{res.mainCss.button} {local_res.css.stageteaser_content_band_action}" />
-				<s:databylogo.DataByLogo ui:field="dataByLogo" addStyleNames="{local_res.css.stageteaser_databylogo_container}" />
 			</div>
 		</div>
 	</g:HTMLPanel>

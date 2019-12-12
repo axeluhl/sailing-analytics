@@ -207,8 +207,7 @@
 }
 
 .stageteaser_databylogo_container{
- padding: .6em 0.4em 0.6em .4em;
- float: right;
+ padding-top: .4em;
 }
 
 @external slick-dots, slick-active;

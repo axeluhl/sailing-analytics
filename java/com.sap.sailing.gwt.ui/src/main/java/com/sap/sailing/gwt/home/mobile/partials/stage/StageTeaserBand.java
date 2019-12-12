@@ -50,9 +50,6 @@ public abstract class StageTeaserBand extends Composite {
             dataByLogo.setVisible(false);
         }
         
-        // TODO currently hidden by default
-        dataByLogo.setVisible(false);
-        
         eventNavigation = placeNavigator.getEventNavigation(event.getId().toString(), event.getBaseURL(), event.isOnRemoteServer());
     }
 
