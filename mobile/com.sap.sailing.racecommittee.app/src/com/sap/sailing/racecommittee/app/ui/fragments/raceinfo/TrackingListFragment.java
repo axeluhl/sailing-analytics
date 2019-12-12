@@ -316,11 +316,6 @@ public class TrackingListFragment extends BaseFragment
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-    }
-
-    @Override
     public void onStart() {
         super.onStart();
 
