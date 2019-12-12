@@ -182,11 +182,13 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     
     @Override
     public void addDataMiningBundleClassLoader(ClassLoader classLoader) {
+        logger.info("Adding data mining bundle class loader "+classLoader);
         dataMiningClassLoaders.add(classLoader);
     }
     
     @Override
     public void removeDataMiningBundleClassLoader(ClassLoader classLoader) {
+        logger.info("Removing data mining bundle class loader "+classLoader);
         dataMiningClassLoaders.remove(classLoader);
     }
     
