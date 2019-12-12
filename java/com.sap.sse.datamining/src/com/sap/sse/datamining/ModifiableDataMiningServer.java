@@ -9,13 +9,11 @@ import com.sap.sse.datamining.components.management.QueryDefinitionDTORegistry;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
-import com.sap.sse.util.JoinedClassLoader;
 
 public interface ModifiableDataMiningServer extends DataMiningServer {
 
     void addDataMiningBundleClassLoader(ClassLoader classLoader);
     void removeDataMiningBundleClassLoader(ClassLoader classLoader);
-    JoinedClassLoader getJoinedClassLoader();
 
     void addStringMessages(ResourceBundleStringMessages stringMessages);
     void removeStringMessages(ResourceBundleStringMessages stringMessages);

@@ -13,7 +13,6 @@ import com.sap.sailing.server.impl.preferences.model.StoredDataMiningQueryPrefer
 import com.sap.sailing.server.impl.preferences.model.StoredDataMiningQueryPreferences;
 import com.sap.sse.common.Util;
 import com.sap.sse.datamining.DataMiningServer;
-import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.shared.DataMiningQuerySerializer;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.StoredDataMiningQueryDTO;
@@ -114,8 +113,7 @@ public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQuery
 
     /** Converts a {@link StoredDataMiningQueryPreference} to a {@link StoredDataMiningQueryDTO}. */
     private StoredDataMiningQueryDTO transform(StoredDataMiningQueryPreference pref) {
-        StatisticQueryDefinitionDTO query = DataMiningQuerySerializer.fromBase64String(pref.getSerializedQuery(),
-                ((ModifiableDataMiningServer) dataMiningServerTracker.getService()).getJoinedClassLoader());
+        StatisticQueryDefinitionDTO query = dataMiningServerTracker.getService().fromBase64String(pref.getSerializedQuery());
         return new StoredDataMiningQueryDTOImpl(pref.getName(), pref.getId(), query);
     }
 
