@@ -37,7 +37,6 @@ public class Solutions extends Composite {
     @UiField Anchor raceAnchor;
     @UiField Anchor inSightAnchor;
     @UiField Anchor buoyPingerAnchor;
-    @UiField Anchor postRaceAnchor;
     @UiField Anchor simulatorAnchor;
 
     @UiField DivElement sapInSailingDiv;
@@ -45,7 +44,6 @@ public class Solutions extends Composite {
     @UiField DivElement raceDiv;
     @UiField DivElement inSightDiv;
     @UiField DivElement buoyPingerDiv;
-    @UiField DivElement postRaceDiv;
     @UiField DivElement simulatorDiv;
 
     @UiField Anchor sailingAnalyticsDetailsAnchor;
@@ -59,7 +57,6 @@ public class Solutions extends Composite {
     private final PlaceNavigation<SolutionsPlace> raceCommitteeAppNavigation; 
     private final PlaceNavigation<SolutionsPlace> inSightAppNavigation;
     private final PlaceNavigation<SolutionsPlace> buoyPingerAppNavigation;
-    private final PlaceNavigation<SolutionsPlace> postRaceAnalyticsNavigation;
     private final PlaceNavigation<SolutionsPlace> sailingSimulatorNavigation; 
     
     private final SolutionsNavigationTabs navigationTab;
@@ -94,7 +91,6 @@ public class Solutions extends Composite {
         raceCommitteeAppNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.RaceManagerApp);
         inSightAppNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.InSightApp);
         buoyPingerAppNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.BuoyPingerApp);
-        postRaceAnalyticsNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.PostRaceAnalytics);
         sailingSimulatorNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingSimulator);
 
         sapInSailingAnchor.setHref(sapInSailingNavigation.getTargetUrl());
@@ -102,7 +98,6 @@ public class Solutions extends Composite {
         raceAnchor.setHref(raceCommitteeAppNavigation.getTargetUrl());
         inSightAnchor.setHref(inSightAppNavigation.getTargetUrl());
         buoyPingerAnchor.setHref(buoyPingerAppNavigation.getTargetUrl());
-        postRaceAnchor.setHref(postRaceAnalyticsNavigation.getTargetUrl());
         simulatorAnchor.setHref(sailingSimulatorNavigation.getTargetUrl());
     }
 
@@ -144,12 +139,6 @@ public class Solutions extends Composite {
         handleClickEventWithLocalNavigation(e, buoyPingerAppNavigation);
     }
 
-    @UiHandler("postRaceAnchor")
-    public void scrollToPostRace(ClickEvent e) {
-        scrollToView(SolutionsNavigationTabs.PostRaceAnalytics);
-        handleClickEventWithLocalNavigation(e, postRaceAnalyticsNavigation);
-    }
-
     @UiHandler("simulatorAnchor")
     public void scrollToSimulator(ClickEvent e) {
         scrollToView(SolutionsNavigationTabs.SailingSimulator);
@@ -185,9 +174,6 @@ public class Solutions extends Composite {
                 break;
             case RaceManagerApp:
                 raceDiv.scrollIntoView();
-                break;
-            case PostRaceAnalytics:
-                postRaceDiv.scrollIntoView();
                 break;
             case SailingSimulator:
                 simulatorDiv.scrollIntoView();
