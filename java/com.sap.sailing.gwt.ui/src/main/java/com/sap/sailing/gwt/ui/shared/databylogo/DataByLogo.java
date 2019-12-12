@@ -6,6 +6,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
@@ -30,12 +31,12 @@ public class DataByLogo extends Widget {
         setElement(uiBinder.createAndBindUi(this));
     }
 
-    public void setUp(Set<TrackingConnectorInfoDTO> trackingConnectorInfos, boolean colorIfPossible) {
+    public void setUp(Set<TrackingConnectorInfoDTO> trackingConnectorInfos, boolean colorIfPossible, boolean enforceTextColor) {
         TrackingConnectorInfoDTO mostProminentConnectorInfo = selectMostProminentConnectorInfo(trackingConnectorInfos);
         if (mostProminentConnectorInfo == null) {
             this.setVisible(false);
         } else {
-            setUpForConnectorType(colorIfPossible, mostProminentConnectorInfo);
+            setUpForConnectorType(colorIfPossible, enforceTextColor, mostProminentConnectorInfo);
         }
     }
 
@@ -59,21 +60,20 @@ public class DataByLogo extends Widget {
         }
     }
 
-    private void setUpForConnectorType(boolean colorIfPossible, TrackingConnectorInfoDTO trackingConnectorInfo) {
+    private void setUpForConnectorType(boolean colorIfPossible, boolean enforceTextColor, TrackingConnectorInfoDTO trackingConnectorInfo) {
         if (TRAC_TRAC.equals(trackingConnectorInfo.getTrackedBy())) {
-            setUpTracTracLogo(colorIfPossible);
+            setUpTracTracLogo(colorIfPossible, enforceTextColor);
         }
         setUrl(trackingConnectorInfo);
     }
 
-    private void setUpTracTracLogo(boolean colorIfPossible) {
-        DataByLogoResources resources = DataByLogoResources.INSTANCE;
-        if (colorIfPossible) {
-            logo.setSrc(resources.tractracColor().getSafeUri().asString());
-            this.addStyleName(resources.css().databylogo_black_text());
-        } else {
-            logo.setSrc(DataByLogoResources.INSTANCE.tractracWhite().getSafeUri().asString());
-            this.addStyleName(resources.css().databylogo_white_text());
+    private void setUpTracTracLogo(boolean colorIfPossible, boolean enforceTextColor) {
+        final DataByLogoResources resources = DataByLogoResources.INSTANCE;
+        final DataResource imageToSet = colorIfPossible ? resources.tractracColor() : resources.tractracWhite();
+        logo.setSrc(imageToSet.getSafeUri().asString());
+        if (enforceTextColor) {
+            this.addStyleName(colorIfPossible ? resources.css().databylogo_black_text()
+                    : resources.css().databylogo_white_text());
         }
     }
 

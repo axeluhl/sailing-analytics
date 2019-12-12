@@ -11,12 +11,12 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.shared.databylogo.DataByLogo;
 import com.sap.sailing.gwt.home.communication.start.EventStageDTO;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
+import com.sap.sailing.gwt.ui.shared.databylogo.DataByLogo;
 
 public abstract class StageTeaserBand extends Composite {
 
@@ -44,7 +44,7 @@ public abstract class StageTeaserBand extends Composite {
         
         isLiveDiv.getStyle().setDisplay(Display.NONE);
         
-        dataByLogo.setUp(event.getTrackingConnectorInfos(), false);
+        dataByLogo.setUp(event.getTrackingConnectorInfos(), false, true);
 
         eventNavigation = placeNavigator.getEventNavigation(event.getId().toString(), event.getBaseURL(), event.isOnRemoteServer());
     }

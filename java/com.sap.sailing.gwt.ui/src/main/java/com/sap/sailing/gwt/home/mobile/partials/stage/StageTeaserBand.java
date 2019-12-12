@@ -9,13 +9,13 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.shared.databylogo.DataByLogo;
 import com.sap.sailing.gwt.home.communication.event.EventLinkAndMetadataDTO;
 import com.sap.sailing.gwt.home.communication.start.EventStageDTO;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
+import com.sap.sailing.gwt.ui.shared.databylogo.DataByLogo;
 
 public abstract class StageTeaserBand extends Composite {
 
@@ -45,7 +45,7 @@ public abstract class StageTeaserBand extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         
         if (event instanceof EventStageDTO) {
-            dataByLogo.setUp(((EventStageDTO) event).getTrackingConnectorInfos(), false);
+            dataByLogo.setUp(((EventStageDTO) event).getTrackingConnectorInfos(), false, true);
         } else {
             dataByLogo.setVisible(false);
         }

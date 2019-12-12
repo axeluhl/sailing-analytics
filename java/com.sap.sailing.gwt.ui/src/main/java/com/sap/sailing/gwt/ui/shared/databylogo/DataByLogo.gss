@@ -1,29 +1,28 @@
-.databylogo_logo{
+img.databylogo_logo {
  height: 1.3333333em !important;
  vertical-align: middle;
+ display: inline-block;
 }
 
-.databylogo_text{
+.databylogo_text {
  vertical-align: middle;
 }
 
-.databylogo_white_text{
+.databylogo_white_text {
  color: white;
 }
 
-.databylogo_black_text{
+.databylogo_black_text {
  color: black;
 }
 
-.databylogo_subtlelink, 
-.databylogo_subtlelink:hover, 
-.databylogo_subtlelink:active, 
-.databylogo_subtlelink:visited, 
-.databylogo_subtlelink:focus {
-  text-decoration: none;
+.databylogo_subtlelink, .databylogo_subtlelink:hover,
+ .databylogo_subtlelink:active, .databylogo_subtlelink:visited,
+ .databylogo_subtlelink:focus {
+ text-decoration: none;
 }
 
-.databylogo_container{
+.databylogo_container {
  display: inline-block;
  white-space: nowrap;
  font-size: 0.75em;

@@ -17,7 +17,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.shared.databylogo.DataByLogo;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingButtons;
@@ -31,6 +30,7 @@ import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.utils.LogoUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.databylogo.DataByLogo;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.LinkUtil;
 
@@ -151,7 +151,7 @@ public class EventHeader extends Composite {
             }
             hide(competitors, races, courseAreaUi, eventCategory);
         }
-        dataByLogo.setUp(event.getTrackingConnectorInfos(), true);
+        dataByLogo.setUp(event.getTrackingConnectorInfos(), true, false);
         initTitleAndSelection(nameToShow);
     }
 

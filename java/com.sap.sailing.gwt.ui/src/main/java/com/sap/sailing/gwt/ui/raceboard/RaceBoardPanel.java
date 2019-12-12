@@ -718,7 +718,7 @@ public class RaceBoardPanel
             regattaAndRaceTimeInformationHeader.add(regattaNameAnchor);
             regattaAndRaceTimeInformationHeader.add(raceTimeLabel);
             DataByLogo dataByLogo = new DataByLogo();
-            dataByLogo.setUp(trackingConnectorInfos, false);
+            dataByLogo.setUp(trackingConnectorInfos, false, true);
             if (dataByLogo.isVisible()) {
                 regattaAndRaceTimeInformationHeader.addStyleName("RegattaAndRaceTime-Header_with_databy");
             }
