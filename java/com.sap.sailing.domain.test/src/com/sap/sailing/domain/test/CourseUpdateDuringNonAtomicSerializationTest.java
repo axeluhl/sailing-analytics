@@ -87,7 +87,8 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race, Collections.<Sideline> emptySet(),
                 EmptyWindStore.INSTANCE, 
                 /* delayToLiveInMillis */10000, /* millisecondsOverWhichToAverageWind */30000, /* millisecondsOverWhichToAverageSpeed */
-                7000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new, mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null) {
+                7000, /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
+                mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null) {
             private static final long serialVersionUID = 9114777576548711763L;
 
             @Override

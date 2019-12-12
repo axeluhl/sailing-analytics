@@ -35,8 +35,9 @@ public interface RaceTrackingHandler {
             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator,
-            RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter, TrackingConnectorInfo trackingConnectorInfo);
-    
+            RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter,
+            TrackingConnectorInfo trackingConnectorInfo);
+
     DynamicCompetitor getOrCreateCompetitor(CompetitorAndBoatStore competitorAndBoatStore, Serializable competitorId,
             String name, String shortName, Color displayColor, String email, URI flagImageURI, DynamicTeam team,
             Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag);
@@ -58,7 +59,8 @@ public interface RaceTrackingHandler {
                 Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
                 long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
                 DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator,
-                RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter, TrackingConnectorInfo trackingConnectorInfo) {
+                RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter,
+                TrackingConnectorInfo trackingConnectorInfo) {
             return trackedRegatta.createTrackedRace(raceDefinition, sidelines, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate,
                     useMarkPassingCalculator, raceLogResolver, threadLocalTransporter, trackingConnectorInfo);

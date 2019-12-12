@@ -121,9 +121,10 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
             }
         }
         
-        Set<TrackingConnectorInfoDTO> trackingConnectorInfos = event.getTrackingConnectorInfos()
-            .stream()
-            .map(trackingConnectorInfo -> new TrackingConnectorInfoDTO(trackingConnectorInfo.getTrackedBy(), mapURLToString(trackingConnectorInfo.getWebUrl()))).collect(Collectors.toSet());
+        Set<TrackingConnectorInfoDTO> trackingConnectorInfos = event.getTrackingConnectorInfos().stream()
+                .map(trackingConnectorInfo -> new TrackingConnectorInfoDTO(trackingConnectorInfo.getTrackedBy(),
+                        mapURLToString(trackingConnectorInfo.getWebUrl())))
+                .collect(Collectors.toSet());
         dto.setTrackingConnectorInfos(trackingConnectorInfos);
         return dto;
     }

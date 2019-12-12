@@ -106,7 +106,7 @@ public class EventImpl extends EventBaseImpl implements Event {
 
     @Override
     public Set<TrackingConnectorInfo> getTrackingConnectorInfos() {
-        Set<TrackingConnectorInfo> result = new HashSet<>();
+        final Set<TrackingConnectorInfo> result = new HashSet<>();
         for (LeaderboardGroup lbg : this.getLeaderboardGroups()) {
             for (Leaderboard lb : lbg.getLeaderboards()) {
                 for (TrackedRace tr : lb.getTrackedRaces()) {

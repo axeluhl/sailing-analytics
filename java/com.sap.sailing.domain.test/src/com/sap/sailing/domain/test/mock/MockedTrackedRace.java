@@ -658,7 +658,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     WindStore windStore, long delayToLiveInMillis,
                     long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
                     DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingcalculator,
-                    RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter, TrackingConnectorInfo trackingConnectorInfo) {
+                    RaceLogAndTrackedRaceResolver raceLogResolver,
+                    Optional<ThreadLocalTransporter> threadLocalTransporter,
+                    TrackingConnectorInfo trackingConnectorInfo) {
                 return null;
             }
 

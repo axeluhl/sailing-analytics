@@ -496,8 +496,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
                     assert SwissTimingRaceTrackerImpl.this.race == race;
                 }
             }, useInternalMarkPassingAlgorithm, raceLogResolver,
-                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(), 
-                    /*no api connection to query the event url*/new TrackingConnectorInfoImpl(SWISS_TIMING_IDENTIFIER, null));
+                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(),
+                    new TrackingConnectorInfoImpl(SWISS_TIMING_IDENTIFIER, /*no api connection to query the webUrl*/ null));
             addUpdateHandlers();
             notifyRaceCreationListeners();
             logger.info("Created SwissTiming RaceDefinition and TrackedRace for "+race.getName());

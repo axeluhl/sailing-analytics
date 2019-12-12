@@ -411,11 +411,11 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
             DynamicTrackedRace trackedRace = raceTrackingHandler.createTrackedRace(getTrackedRegatta(),
                     race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE,
                     TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS,
-                    WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 
+                    WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                     /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                     /* raceDefinitionSetToUpdate */ null, useInternalMarkPassingAlgorithm, raceLogResolver,
-                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(), 
-                    /*no api connection to query the event url*/new TrackingConnectorInfoImpl(SWISS_TIMING_IDENTIFIER, null));
+                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(),
+                    new TrackingConnectorInfoImpl(SWISS_TIMING_IDENTIFIER, /*no api connection to query the webUrl*/ null));
             trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0));
             TimePoint bestStartTimeKnownSoFar = bestStartTimePerRaceID.get(currentRaceID);
             if (bestStartTimeKnownSoFar != null) {
