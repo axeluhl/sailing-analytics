@@ -608,23 +608,7 @@ public class TrackingListFragment extends BaseFragment
                 updateItem(item, newItem);
             }
         });
-        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                CompetitorResultWithIdImpl newItem = new CompetitorResultWithIdImpl(item.getId(),
-                        item.getCompetitorId(), item.getName(), item.getShortName(),
-                        item.getBoatName(), item.getBoatSailId(), item.getOneBasedRank(),
-                        item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(),
-                        item.getComment(), MergeState.OK);
-                updateItem(item, newItem);
-            }
-        });
+        builder.setNegativeButton(android.R.string.cancel, null);
         AlertDialog dialog = builder.create();
         dialog.show();
         if (AppUtils.with(getContext()).isTablet()) {
