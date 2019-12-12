@@ -299,8 +299,14 @@ public class TrackingListFragment extends BaseFragment
                 @Override
                 public void onClick(View v) {
                     TimePoint now = MillisecondsTimePoint.now();
-                    getRaceState().setFinishPositioningListChanged(now, getCompetitorResultsDiff(mChangedData));
-                    getRaceState().setFinishPositioningConfirmed(now, getCompetitorResultsDiff(mConfirmedData));
+                    CompetitorResults diffChanged = getCompetitorResultsDiff(mChangedData);
+                    if (diffChanged.size() > 0) {
+                        getRaceState().setFinishPositioningListChanged(now, diffChanged);
+                    }
+                    CompetitorResults diffConfirmed = getCompetitorResultsDiff(mConfirmedData);
+                    if (diffConfirmed.size() > 0) {
+                        getRaceState().setFinishPositioningConfirmed(now, diffConfirmed);
+                    }
                     initializeFinishList();
                     initLocalData();
                     Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
