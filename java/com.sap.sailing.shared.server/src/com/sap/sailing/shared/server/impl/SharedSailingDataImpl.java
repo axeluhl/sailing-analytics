@@ -225,8 +225,10 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         if (markProperties == null) {
             throw new NullPointerException(String.format("Could not find mark properties with id %s", uuid.toString()));
         }
-        getSecurityService().checkCurrentUserUpdatePermission(markProperties);
-        apply(s -> internalUpdateMarkProperties(uuid, properties, position, deviceIdentifier, tags));
+        if (markProperties != properties) { // no update required if same object
+            getSecurityService().checkCurrentUserUpdatePermission(markProperties);
+            apply(s -> internalUpdateMarkProperties(uuid, properties, position, deviceIdentifier, tags));
+        }
         return getMarkPropertiesById(uuid);
     }
 
@@ -234,16 +236,18 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     public Void internalUpdateMarkProperties(UUID idOfMarkProperties, CommonMarkProperties properties,
             Position position, DeviceIdentifier deviceIdentifier, Iterable<String> tags) {
         final MarkPropertiesImpl markProperties = (MarkPropertiesImpl) markPropertiesById.get(idOfMarkProperties);
-        markProperties.setColor(properties.getColor());
-        markProperties.setFixedPosition(position);
-        markProperties.setPattern(properties.getPattern());
-        markProperties.setShape(properties.getShape());
-        markProperties.setShortName(properties.getShortName());
-        markProperties.setTrackingDeviceIdentifier(deviceIdentifier);
-        markProperties.setType(properties.getType());
-        markProperties.setTags(tags);
-        mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
-        markPropertiesById.put(idOfMarkProperties, markProperties);
+        if (markProperties != properties) { // no update required if same object
+            markProperties.setColor(properties.getColor());
+            markProperties.setFixedPosition(position);
+            markProperties.setPattern(properties.getPattern());
+            markProperties.setShape(properties.getShape());
+            markProperties.setShortName(properties.getShortName());
+            markProperties.setTrackingDeviceIdentifier(deviceIdentifier);
+            markProperties.setType(properties.getType());
+            markProperties.setTags(tags);
+            mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
+            markPropertiesById.put(idOfMarkProperties, markProperties);
+        }
         return null;
     }
 

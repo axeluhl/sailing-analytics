@@ -152,16 +152,14 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         final Map<MarkConfiguration, MarkConfiguration> effectiveConfigurations = new HashMap<>();
         for (MarkConfiguration markConfiguration : courseConfiguration.getAllMarks()) {
             if (markConfiguration.isStoreToInventory()) {
-                MarkProperties markPropertiesOrNull = null;
-                if (markConfiguration instanceof FreestyleMarkConfiguration) {
-                    markPropertiesOrNull = ((FreestyleMarkConfiguration) markConfiguration).getOptionalMarkProperties();
-                } else if (markConfiguration instanceof RegattaMarkConfiguration) {
-                    markPropertiesOrNull = ((RegattaMarkConfiguration) markConfiguration).getOptionalMarkProperties();
-                }
+                MarkProperties markPropertiesOrNull = markConfiguration.getOptionalMarkProperties();
                 if (markPropertiesOrNull == null) {
                     // If no mark properties exist yet, a new one is created
                     markPropertiesOrNull = getSharedSailingData().createMarkProperties(markConfiguration.getEffectiveProperties(), Collections.emptySet());
                 } else {
+                    // in the case of a MarkPropertiesBasedMarkConfiguration, the following call is expected to notice
+                    // the identity between the mark properties object to update and the mark properties that constitute
+                    // the effective properties and then skip the update.
                     getSharedSailingData().updateMarkProperties(markPropertiesOrNull.getId(), markConfiguration.getEffectiveProperties(), null, null, Collections.emptySet());
                 }
                 Positioning positioningOrNull = markConfiguration.getOptionalPositioning();
@@ -243,7 +241,6 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     public CourseConfiguration createCourseTemplateAndUpdatedConfiguration(
             final CourseConfiguration courseConfiguration, Iterable<String> tags) {
         final CourseConfigurationWithMarkRoles courseConfigurationAfterInventory = handleSaveToInventory(courseConfiguration);
-        
         final Map<MarkConfiguration, MarkTemplate> markTemplatesByMarkConfigurations = new HashMap<>();
         final Map<MarkConfiguration, MarkConfiguration> marksConfigurationsMapping = new HashMap<>();
         for (MarkConfiguration markConfiguration : courseConfigurationAfterInventory.getAllMarks()) {

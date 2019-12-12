@@ -12,11 +12,13 @@ package com.sap.sailing.domain.coursetemplate;
 public interface FreestyleMarkConfiguration extends MarkConfiguration {
     CommonMarkProperties getFreestyleProperties();
 
-    
     /**
-     * @return a non-{@code null} object if this mark configuration originated from a {@link MarkProperties}
-     * object where the {@link #getFreestyleProperties() freestyle properties} override one or more of the
-     * {@link MarkProperties}' attributes.
+     * @return a non-{@code null} object if this mark configuration originated from a {@link MarkProperties} object
+     *         where the {@link #getFreestyleProperties() freestyle properties} override one or more of the
+     *         {@link MarkProperties}' attributes. If {@link #isStoreToInventory()} is {@code true}, this means
+     *         that the {@link MarkProperties} object returned by this method shall be updated accordingly to
+     *         reflect the {@link #getFreestyleProperties() freestyle properties} after the update.
      */
+    @Override
     MarkProperties getOptionalMarkProperties();
 }
