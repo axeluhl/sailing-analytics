@@ -256,7 +256,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         final RaceLog raceLog = raceColumnByName.getRaceLog(fleetByName);
         raceLog.add(new RaceLogCourseDesignChangedEventImpl(timestampForLogEntries, getService().getServerAuthor(),
                 raceLog.getCurrentPassId(), course, CourseDesignerMode.BY_MARKS));
-        final CourseConfiguration courseConfigurationResult = getService().getCourseAndMarkConfigurationFactory().createCourseConfigurationFromRegatta(course, regatta, null);
+        final CourseConfiguration courseConfigurationResult = getService().getCourseAndMarkConfigurationFactory()
+                .createCourseConfigurationFromRegatta(course, regatta, /* tagsToFilterMarkProperties */ null);
         final String jsonString = courseConfigurationJsonSerializer.serialize(courseConfigurationResult).toJSONString();
         return Response.ok(jsonString).build();
     }

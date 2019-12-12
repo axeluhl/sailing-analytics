@@ -705,14 +705,10 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     public CourseConfiguration createCourseConfigurationFromRegatta(CourseBase course, Regatta regatta,
             Iterable<String> tagsToFilterMarkProperties) {
         assert regatta != null;
-        
         final Set<MarkConfiguration> allMarkConfigurations = new HashSet<>();
-
         final CourseTemplate courseTemplateOrNull = course == null ? null : resolveCourseTemplateSafe(course);
-        
         final Map<Mark, RegattaMarkConfiguration> markConfigurationsByMark = createMarkConfigurationsForRegatta(regatta, courseTemplateOrNull);
         allMarkConfigurations.addAll(markConfigurationsByMark.values());
-        
         final Map<MarkConfiguration, IsMarkRole> resultingRoleMapping = new HashMap<>();
         if (course != null) {
             for (Entry<Mark, UUID> entry : course.getAssociatedRoles().entrySet()) {
@@ -720,13 +716,11 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                         resolveMarkRole(entry.getValue(), courseTemplateOrNull));
             }
         }
-        
         String name = null;
         URL optionalImageURL = null;
         final List<WaypointWithMarkConfiguration> resultingWaypoints = new ArrayList<>();
         RepeatablePart optionalRepeatablePart = null;
         Integer numberOfLaps = null;
-        
         boolean handledByTemplate = false;
         if (courseTemplateOrNull != null && course != null) {
             final CourseToCourseTemplateMapper mapper = new CourseToCourseTemplateMapper(course, courseTemplateOrNull, markConfigurationsByMark);
@@ -735,7 +729,6 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 optionalImageURL = courseTemplateOrNull.getOptionalImageURL();
                 final Map<MarkTemplate, MarkConfiguration> markTemplatesToMarkConfigurations = new HashMap<>();
                 markTemplatesToMarkConfigurations.putAll(mapper.markTemplatesToMarkConfigurations);
-                
                 if (!mapper.markTemplatesNotIncluded.isEmpty()) {
                     for (MarkTemplate markTemplate : mapper.markTemplatesNotIncluded) {
                         final MarkConfiguration markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(
@@ -782,7 +775,6 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 }
             }
         }
-
         return new CourseConfigurationImpl(courseTemplateOrNull, allMarkConfigurations, resultingRoleMapping,
                 resultingWaypoints, optionalRepeatablePart, numberOfLaps, name, optionalImageURL);
     }
