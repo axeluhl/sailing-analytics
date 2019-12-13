@@ -2,8 +2,11 @@ package com.sap.sse.datamining.impl;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Logger;
 
@@ -14,6 +17,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.datamining.DataMiningBundleService;
 import com.sap.sse.datamining.DataMiningPredefinedQueryService;
 import com.sap.sse.datamining.DataMiningServer;
@@ -28,13 +32,13 @@ import com.sap.sse.datamining.components.management.FunctionRegistry;
 import com.sap.sse.datamining.components.management.QueryDefinitionDTORegistry;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDataCountAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDataCountDistinctAggregationProcessor;
-import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberPairCollectingProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataAverageAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataMaxAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataMedianAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataMinAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataSumAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberPairAverageAggregationProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberPairCollectingProcessor;
 import com.sap.sse.datamining.impl.components.management.AggregationProcessorDefinitionManager;
 import com.sap.sse.datamining.impl.components.management.DataRetrieverChainDefinitionManager;
 import com.sap.sse.datamining.impl.components.management.DataSourceProviderManager;
@@ -55,12 +59,14 @@ public class DataMiningFrameworkActivator implements BundleActivator {
     private ServiceTracker<DataMiningBundleService, DataMiningBundleService> dataMiningBundleServiceTracker;
     private ServiceTracker<DataMiningPredefinedQueryService, DataMiningPredefinedQueryService> dataMiningPredefinedQueryServiceTracker;
     private final Collection<ServiceRegistration<?>> serviceRegistrations;
+    private final Map<ClassLoader, Set<DataMiningBundleService>> dataMiningBundleServicesByTheirClassLoaders;
     
     private final ModifiableDataMiningServer dataMiningServer;
     
     public DataMiningFrameworkActivator() {
         dataMiningServer = createDataMiningServer();
         serviceRegistrations = new HashSet<>();
+        dataMiningBundleServicesByTheirClassLoaders = new HashMap<>();
     }
 
     private ModifiableDataMiningServer createDataMiningServer() {
@@ -100,7 +106,6 @@ public class DataMiningFrameworkActivator implements BundleActivator {
     @Override
     public void start(BundleContext context) throws Exception {
         INSTANCE = this;
-        
         dataMiningBundleServiceTracker = new ServiceTracker<>(context, DataMiningBundleService.class, new ServiceTrackerCustomizer<DataMiningBundleService, DataMiningBundleService>() {
             @Override
             public DataMiningBundleService addingService(ServiceReference<DataMiningBundleService> reference) {
@@ -116,7 +121,6 @@ public class DataMiningFrameworkActivator implements BundleActivator {
             }
         });
         dataMiningBundleServiceTracker.open();
-        
         dataMiningPredefinedQueryServiceTracker = new ServiceTracker<>(context, DataMiningPredefinedQueryService.class, new ServiceTrackerCustomizer<DataMiningPredefinedQueryService, DataMiningPredefinedQueryService>() {
             @Override
             public DataMiningPredefinedQueryService addingService(ServiceReference<DataMiningPredefinedQueryService> reference) {
@@ -136,13 +140,19 @@ public class DataMiningFrameworkActivator implements BundleActivator {
             }
         });
         dataMiningPredefinedQueryServiceTracker.open();
-
         serviceRegistrations.add(context.registerService(DataMiningServer.class, dataMiningServer, null));
     }
 
     private void registerDataMiningBundle(DataMiningBundleService dataMiningBundleService) {
         logger.info("Registering data mining bundle " + dataMiningBundleService);
-        dataMiningServer.addDataMiningBundleClassLoader(dataMiningBundleService.getClassLoader());
+        synchronized (dataMiningBundleServicesByTheirClassLoaders) {
+            final ClassLoader classLoader = dataMiningBundleService.getClassLoader();
+            Util.addToValueSet(dataMiningBundleServicesByTheirClassLoaders, classLoader, dataMiningBundleService);
+            if (dataMiningBundleServicesByTheirClassLoaders.get(classLoader).size() == 1) {
+                // first service added for this class loader; add the class loader to the data mining server
+                dataMiningServer.addDataMiningBundleClassLoader(classLoader);
+            }
+        }
         dataMiningServer.addStringMessages(dataMiningBundleService.getStringMessages());
         dataMiningServer.registerAllClasses(dataMiningBundleService.getClassesWithMarkedMethods());
         for (DataSourceProvider<?> dataSourceProvider : dataMiningBundleService.getDataSourceProviders()) {
@@ -158,7 +168,14 @@ public class DataMiningFrameworkActivator implements BundleActivator {
 
     private void unregisterDataMiningBundle(DataMiningBundleService dataMiningBundleService) {
         logger.info("Unregistering data mining bundle " + dataMiningBundleService);
-        dataMiningServer.removeDataMiningBundleClassLoader(dataMiningBundleService.getClassLoader());
+        synchronized (dataMiningBundleServicesByTheirClassLoaders) {
+            final ClassLoader classLoader = dataMiningBundleService.getClassLoader();
+            if (dataMiningBundleServicesByTheirClassLoaders.get(classLoader).size() == 1) {
+                // last service removed for this class loader; remove the class loader from the data mining server
+                dataMiningServer.removeDataMiningBundleClassLoader(dataMiningBundleService.getClassLoader());
+            }
+            Util.removeFromValueSet(dataMiningBundleServicesByTheirClassLoaders, classLoader, dataMiningBundleService);
+        }
         dataMiningServer.removeStringMessages(dataMiningBundleService.getStringMessages());
         dataMiningServer.unregisterAllFunctionsOf(dataMiningBundleService.getClassesWithMarkedMethods());
         for (DataSourceProvider<?> dataSourceProvider : dataMiningBundleService.getDataSourceProviders()) {
@@ -176,7 +193,6 @@ public class DataMiningFrameworkActivator implements BundleActivator {
     public void stop(BundleContext context) throws Exception {
         dataMiningBundleServiceTracker.close();
         dataMiningPredefinedQueryServiceTracker.close();
-        
         for (ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
             context.ungetService(serviceRegistration.getReference());
         }
@@ -188,5 +204,4 @@ public class DataMiningFrameworkActivator implements BundleActivator {
         }
         return INSTANCE;
     }
-
 }
