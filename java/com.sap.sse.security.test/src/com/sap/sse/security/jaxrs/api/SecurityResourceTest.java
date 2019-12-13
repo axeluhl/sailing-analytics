@@ -46,7 +46,7 @@ public class SecurityResourceTest {
     private static final String USERNAME = "user-123";
     private static final String PASSWORD = "pass-234";
     private SecurityResource servlet;
-    private SecurityServiceImpl service;
+    private SecurityService service;
     private Subject authenticatedAdmin;
     private UserStore store;
     private AccessControlStore accessControlStore;

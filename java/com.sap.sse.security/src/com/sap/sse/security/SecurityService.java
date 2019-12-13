@@ -61,6 +61,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     }
 
     String ALL_USERNAME = "<all>";
+    String TENANT_SUFFIX = "-tenant";
 
     SecurityManager getSecurityManager();
 

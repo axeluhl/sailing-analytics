@@ -512,7 +512,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 new Callable<User>() {
                     @Override
                     public User call() throws Exception {
-                        if (userGroupExists(username + "-tenant")) {
+                        if (userGroupExists(username + SecurityService.TENANT_SUFFIX)) {
                             throw new UserManagementException(
                                     "User tenant already exists, please chose a different username!");
                         }

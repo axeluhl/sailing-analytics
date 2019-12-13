@@ -19,7 +19,12 @@ public interface UserGroup extends SecurityUserGroup<RoleDefinition>, WithQualif
     @Override
     Map<RoleDefinition, Boolean> getRoleDefinitionMap();
 
-    void put(RoleDefinition roleDefinition, boolean forAll);
+    /**
+     * @return the value previously associated with {@code roleDefinition}, or in other words, what
+     *         {@link #getRoleAssociation(RoleDefinition) getRoleAssociation(roleDefinition)} would have returned before
+     *         calling this method.
+     */
+    Boolean put(RoleDefinition roleDefinition, boolean forAll);
 
     void remove(RoleDefinition roleDefinition);
 

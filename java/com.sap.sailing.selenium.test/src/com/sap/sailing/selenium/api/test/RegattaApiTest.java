@@ -45,6 +45,7 @@ import com.sap.sailing.selenium.api.regatta.RegattaDeviceStatus.CompetitorDevice
 import com.sap.sailing.selenium.api.regatta.RegattaRaces;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -205,7 +206,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         Competitor competitor = regattaApi.createAndAddCompetitor(userWithCompetitorCtx, EVENT_NAME, BOAT_CLASS, null, "donald", "USA");
         
         // ensure the reader can actually see the competitor
-        UserGroup group = usergroupApi.getUserGroupByName(userWithCompetitorAndSecurityCtx, "donald-tenant");
+        UserGroup group = usergroupApi.getUserGroupByName(userWithCompetitorAndSecurityCtx, "donald"+SecurityService.TENANT_SUFFIX);
         usergroupApi.addRoleToGroup(userWithCompetitorAndSecurityCtx, group.getGroupId(),
                 UUID.fromString(/* sailing viewer role id */"c42948df-517b-45cb-9fa9-d1e79f18e115"), true);
         
@@ -243,7 +244,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
                 "donald", "USA");
 
         // ensure the reader can actually see the competitor
-        UserGroup group = usergroupApi.getUserGroupByName(userWithCompetitorAndSecurityCtx, "donald-tenant");
+        UserGroup group = usergroupApi.getUserGroupByName(userWithCompetitorAndSecurityCtx, "donald"+SecurityService.TENANT_SUFFIX);
         usergroupApi.addRoleToGroup(userWithCompetitorAndSecurityCtx, group.getGroupId(),
                 UUID.fromString(/* sailing viewer role id */"c42948df-517b-45cb-9fa9-d1e79f18e115"), true);
 

@@ -47,6 +47,7 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -108,7 +109,7 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         DomainFactory receiverDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
         UserStore userStore = new UserStoreImpl("defaultTenant");
         userStore.clear();
-        UserGroup defaultTenant = userStore.createUserGroup(UUID.randomUUID(), "admin-tenant");
+        UserGroup defaultTenant = userStore.createUserGroup(UUID.randomUUID(), "admin"+SecurityService.TENANT_SUFFIX);
         User user = userStore.createUser("admin", "");
         defaultTenant.add(user);
         userStore.updateUserGroup(defaultTenant);
