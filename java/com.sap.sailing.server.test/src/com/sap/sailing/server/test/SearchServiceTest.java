@@ -357,15 +357,19 @@ public class SearchServiceTest {
 
     @Test
     public void testSerializeAndDeserializeSearchResult() throws JsonDeserializationException {
-        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Buhl" })));
+        Result<LeaderboardSearchResult> searchResults = server
+                .search(new KeywordQuery(Arrays.asList(new String[] { "Buhl" })));
         LeaderboardGroupBaseJsonSerializer leaderboardGroupBaseJsonSerializer = new LeaderboardGroupBaseJsonSerializer();
-        LeaderboardSearchResultJsonSerializer serializer = new LeaderboardSearchResultJsonSerializer(new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()),
-                leaderboardGroupBaseJsonSerializer, new TrackingConnectorInfoJsonSerializer()),
+        LeaderboardSearchResultJsonSerializer serializer = new LeaderboardSearchResultJsonSerializer(
+                new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()),
+                        leaderboardGroupBaseJsonSerializer, new TrackingConnectorInfoJsonSerializer()),
                 leaderboardGroupBaseJsonSerializer);
         LeaderboardGroupBaseJsonDeserializer leaderboardGroupBaseJsonDeserializer = new LeaderboardGroupBaseJsonDeserializer();
         LeaderboardSearchResultBaseJsonDeserializer deserializer = new LeaderboardSearchResultBaseJsonDeserializer(
-                new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
-                        leaderboardGroupBaseJsonDeserializer, new TrackingConnectorInfoJsonDeserializer()), leaderboardGroupBaseJsonDeserializer);
+                new EventBaseJsonDeserializer(
+                        new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
+                        leaderboardGroupBaseJsonDeserializer, new TrackingConnectorInfoJsonDeserializer()),
+                leaderboardGroupBaseJsonDeserializer);
         final LeaderboardSearchResult expected = searchResults.getHits().iterator().next();
         LeaderboardSearchResultBase deserialized = deserializer.deserialize(serializer.serialize(expected));
         assertEquals("Pfingstbusch (470)", deserialized.getRegattaName());

@@ -69,9 +69,12 @@ public class EventDataJsonSerializerWithNullValuesTest {
         when(event.getImages()).thenReturn(Collections.<ImageDescriptor>emptySet());
         when(event.getVideos()).thenReturn(Collections.<VideoDescriptor>emptySet());
         // ... and the serializer itself.		
-        serializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer(), new TrackingConnectorInfoJsonSerializer());
-        deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)), new LeaderboardGroupBaseJsonDeserializer(), new TrackingConnectorInfoJsonDeserializer());
-        
+        serializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()),
+                new LeaderboardGroupBaseJsonSerializer(), new TrackingConnectorInfoJsonSerializer());
+        deserializer = new EventBaseJsonDeserializer(
+                new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
+                new LeaderboardGroupBaseJsonDeserializer(), new TrackingConnectorInfoJsonDeserializer());
+
         when(expectedLeaderbaordGroup.getId()).thenReturn(UUID.randomUUID());
         when(expectedLeaderbaordGroup.getName()).thenReturn("LG");
         when(expectedLeaderbaordGroup.getDescription()).thenReturn("LG Description");

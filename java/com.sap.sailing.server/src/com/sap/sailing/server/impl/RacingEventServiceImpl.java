@@ -877,11 +877,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 final RaceHandle handle = addRace(/* addToRegatta==null means "default regatta" */ null, params, /* no timeout during mass loading */ -1,
                         new DefaultRaceTrackingHandler() {
                     @Override
-                    public DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition raceDefinition,
-                            Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
-                            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-                            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator,
-                            RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter, TrackingConnectorInfo trackingConnectorInfo) {
+                            public DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta,
+                                    RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
+                                    long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
+                                    long millisecondsOverWhichToAverageSpeed,
+                                    DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
+                                    boolean useMarkPassingCalculator, RaceLogAndTrackedRaceResolver raceLogResolver,
+                                    Optional<ThreadLocalTransporter> threadLocalTransporter,
+                                    TrackingConnectorInfo trackingConnectorInfo) {
                         final DynamicTrackedRace trackedRace = super.createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
                                         delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                                         millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate,
@@ -1970,7 +1973,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), windStore,
                 delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 /* raceDefinitionSetToUpdate */null, useMarkPassingCalculator, /* raceLogResolver */ this,
-                Optional.of(this.getThreadLocalTransporterForCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster()), trackingConnectorInfo);
+                Optional.of(this
+                        .getThreadLocalTransporterForCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster()),
+                trackingConnectorInfo);
     }
 
     private void ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(
@@ -4071,8 +4076,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     Object eventsAsObject = parser.parse(bufferedReader);
                     final LeaderboardGroupBaseJsonDeserializer leaderboardGroupBaseJsonDeserializer = new LeaderboardGroupBaseJsonDeserializer();
                     LeaderboardSearchResultBaseJsonDeserializer deserializer = new LeaderboardSearchResultBaseJsonDeserializer(
-                            new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(
-                                    DomainFactory.INSTANCE)), leaderboardGroupBaseJsonDeserializer, new TrackingConnectorInfoJsonDeserializer()),
+                            new EventBaseJsonDeserializer(
+                                    new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
+                                    leaderboardGroupBaseJsonDeserializer, new TrackingConnectorInfoJsonDeserializer()),
                             leaderboardGroupBaseJsonDeserializer);
                     result = new ResultImpl<LeaderboardSearchResultBase>(query,
                             new LeaderboardSearchResultBaseRanker<LeaderboardSearchResultBase>());

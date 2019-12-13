@@ -31,7 +31,8 @@ public class DataByLogo extends Widget {
         setElement(uiBinder.createAndBindUi(this));
     }
 
-    public void setUp(Set<TrackingConnectorInfoDTO> trackingConnectorInfos, boolean colorIfPossible, boolean enforceTextColor) {
+    public void setUp(Set<TrackingConnectorInfoDTO> trackingConnectorInfos, boolean colorIfPossible,
+            boolean enforceTextColor) {
         TrackingConnectorInfoDTO mostProminentConnectorInfo = selectMostProminentConnectorInfo(trackingConnectorInfos);
         if (mostProminentConnectorInfo == null) {
             this.setVisible(false);
@@ -60,7 +61,8 @@ public class DataByLogo extends Widget {
         }
     }
 
-    private void setUpForConnectorType(boolean colorIfPossible, boolean enforceTextColor, TrackingConnectorInfoDTO trackingConnectorInfo) {
+    private void setUpForConnectorType(boolean colorIfPossible, boolean enforceTextColor,
+            TrackingConnectorInfoDTO trackingConnectorInfo) {
         if (TRAC_TRAC.equals(trackingConnectorInfo.getTrackedBy())) {
             setUpTracTracLogo(colorIfPossible, enforceTextColor);
         }

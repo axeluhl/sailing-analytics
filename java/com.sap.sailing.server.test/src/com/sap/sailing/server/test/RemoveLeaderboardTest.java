@@ -103,9 +103,9 @@ public class RemoveLeaderboardTest {
         regatta.addRace(raceDef1);
         trackedRace = trackedRegatta1.createTrackedRace(raceDef1, Collections.<Sideline> emptyList(),
                 /* windStore */ EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l,
-                /* millisecondsOverWhichToAverageWind */ 0l,
-                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, /*useMarkPassingCalculator*/ false, mock(RaceLogAndTrackedRaceResolver.class),
-                Optional.empty(), /* trackingConnectorInfo */ null);
+                /* millisecondsOverWhichToAverageWind */ 0l, /* millisecondsOverWhichToAverageSpeed */ 0l,
+                /* raceDefinitionSetToUpdate */ null, /* useMarkPassingCalculator */ false,
+                mock(RaceLogAndTrackedRaceResolver.class), Optional.empty(), /* trackingConnectorInfo */ null);
     }
     
     @Test

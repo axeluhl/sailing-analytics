@@ -42,7 +42,8 @@ public class CreateTrackedRace extends AbstractRaceOperation<DynamicTrackedRace>
      *            won't be serialized. A receiver of this operation will therefore always use an {@link EmptyWindStore}.
      */
     public CreateTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore, long delayToLiveInMillis,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, TrackingConnectorInfo trackingConnectorInfo) {
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            TrackingConnectorInfo trackingConnectorInfo) {
         super(raceIdentifier);
         this.windStore = windStore;
         this.delayToLiveInMillis = delayToLiveInMillis;
@@ -66,9 +67,9 @@ public class CreateTrackedRace extends AbstractRaceOperation<DynamicTrackedRace>
     @Override
     public DynamicTrackedRace internalApplyTo(RacingEventService toState) {
         return toState.createTrackedRace(getRaceIdentifier(), windStore == null ? EmptyWindStore.INSTANCE : windStore,
-                delayToLiveInMillis, millisecondsOverWhichToAverageWind,
-                millisecondsOverWhichToAverageSpeed, /* useMarkPassingCalculator */ false, trackingConnectorInfo); 
-                // no separate mark passing calculations in replica;
+                delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+                /* useMarkPassingCalculator */ false, trackingConnectorInfo);
+        // no separate mark passing calculations in replica;
         // Mark passings are computed on master and are replicated separately.
         // See UpdateMarkPassings
     }

@@ -69,8 +69,10 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
             trackingConnectorInfos.add(trackingConnectorInfoDeserializer.deserialize((JSONObject) jsonPair));
         }
         
-        StrippedEventImpl result = new StrippedEventImpl(name, startDate == null ? null : new MillisecondsTimePoint(startDate.longValue()),
-                endDate == null ? null : new MillisecondsTimePoint(endDate.longValue()), venue, /* is public */ true, id, leaderboardGroups, trackingConnectorInfos);
+        StrippedEventImpl result = new StrippedEventImpl(name,
+                startDate == null ? null : new MillisecondsTimePoint(startDate.longValue()),
+                endDate == null ? null : new MillisecondsTimePoint(endDate.longValue()), venue, /* is public */ true,
+                id, leaderboardGroups, trackingConnectorInfos);
         result.setDescription(description);
         if (officialWebsiteURLAsString != null) {
             try {

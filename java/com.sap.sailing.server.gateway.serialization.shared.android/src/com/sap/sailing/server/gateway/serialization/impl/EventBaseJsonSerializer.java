@@ -56,7 +56,9 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
     private final JsonSerializer<? super LeaderboardGroupBase> leaderboardGroupBaseSerializer;
     private final JsonSerializer<TrackingConnectorInfo> trackingConnectorInfoSerializer;
 
-    public EventBaseJsonSerializer(JsonSerializer<Venue> venueSerializer, JsonSerializer<? super LeaderboardGroupBase> leaderboardGroupBaseSerializer, JsonSerializer<TrackingConnectorInfo> trackingConnectorInfoJsonSerializer) {
+    public EventBaseJsonSerializer(JsonSerializer<Venue> venueSerializer,
+            JsonSerializer<? super LeaderboardGroupBase> leaderboardGroupBaseSerializer,
+            JsonSerializer<TrackingConnectorInfo> trackingConnectorInfoJsonSerializer) {
         this.leaderboardGroupBaseSerializer = leaderboardGroupBaseSerializer;
         this.venueSerializer = venueSerializer;
         this.trackingConnectorInfoSerializer = trackingConnectorInfoJsonSerializer;

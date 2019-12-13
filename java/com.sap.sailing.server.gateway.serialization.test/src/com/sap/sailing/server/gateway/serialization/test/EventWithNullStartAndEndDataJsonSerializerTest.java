@@ -87,8 +87,11 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
         doReturn(expectedLeaderboardGroups).when(event).getLeaderboardGroups();
 
         // ... and the serializer itself.		
-        serializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer(), new TrackingConnectorInfoJsonSerializer());
-        deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)), new LeaderboardGroupBaseJsonDeserializer(), new TrackingConnectorInfoJsonDeserializer());
+        serializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()),
+                new LeaderboardGroupBaseJsonSerializer(), new TrackingConnectorInfoJsonSerializer());
+        deserializer = new EventBaseJsonDeserializer(
+                new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
+                new LeaderboardGroupBaseJsonDeserializer(), new TrackingConnectorInfoJsonDeserializer());
     }
 
     @Test

@@ -320,7 +320,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void updateStoredLeaderboardGroup(LeaderboardGroup leaderboardGroup);
 
     DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
-            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, boolean useMarkPassingCalculator, TrackingConnectorInfo trackingConnectorInfo);
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            boolean useMarkPassingCalculator, TrackingConnectorInfo trackingConnectorInfo);
 
     Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id);
 

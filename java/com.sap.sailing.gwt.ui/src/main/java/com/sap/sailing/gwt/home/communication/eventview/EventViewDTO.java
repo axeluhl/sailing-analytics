@@ -153,5 +153,4 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
     public void setTrackingConnectorInfos(Set<TrackingConnectorInfoDTO> trackingConnectorInfo) {
         this.trackingConnectorInfos = trackingConnectorInfo;
     }
-
 }

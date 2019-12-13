@@ -291,7 +291,8 @@ public class EventsResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     public Response getEvents(@QueryParam("showNonPublic") String showNonPublic) {
         JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(
-                new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer(), new TrackingConnectorInfoJsonSerializer());
+                new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer(),
+                new TrackingConnectorInfoJsonSerializer());
         JSONArray result = new JSONArray();
         for (Event event : getService().getAllEvents()) {
             if (getSecurityService().hasCurrentUserReadPermission(event)
@@ -330,7 +331,8 @@ public class EventsResource extends AbstractSailingServerResource {
                 getSecurityService().checkCurrentUserReadPermission(event);
             }
             JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(
-                    new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer(), new TrackingConnectorInfoJsonSerializer());
+                    new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer(),
+                    new TrackingConnectorInfoJsonSerializer());
             JSONObject eventJson = eventSerializer.serialize(event);
 
             String json = eventJson.toJSONString();
