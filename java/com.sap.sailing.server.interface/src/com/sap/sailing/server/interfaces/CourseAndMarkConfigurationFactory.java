@@ -45,13 +45,13 @@ import com.sap.sse.common.TimePoint;
 public interface CourseAndMarkConfigurationFactory {
 
     /**
-     * {@link CourseBase Courses} can optionally reference a {@link CourseTemplate} they were created from. This method can
-     * be used to obtain the associated {@link CourseTemplate} for a given {@link Course}. Due to the fact that
-     * {@link CourseTemplate} can be deleted without updating the {@link CourseBase}, references may be stale. In this case,
-     * the reference is handled equally to {@link CourseBase Courses} without a reference.
+     * {@link CourseBase Courses} can optionally reference a {@link CourseTemplate} they were created from. This method
+     * can be used to obtain the associated {@link CourseTemplate} for a given {@link Course}. Due to the fact that
+     * {@link CourseTemplate} can be deleted without updating the {@link CourseBase}, references may be stale. In this
+     * case, the reference is handled equally to {@link CourseBase Courses} without a reference.
      * 
-     * @return the {@link CourseTemplate} associated to the given {@link CourseBase} or null if none is associated or a
-     *         reference could not be resolved.
+     * @return the {@link CourseTemplate} associated to the given {@link CourseBase} or {@code null} if none is
+     *         associated or a reference could not be resolved.
      */
     CourseTemplate resolveCourseTemplate(CourseBase course);
     
@@ -77,14 +77,20 @@ public interface CourseAndMarkConfigurationFactory {
 
     /**
      * Creates a {@link CourseConfiguration} from a {@link CourseTemplate}. The resulting waypoint sequence is
-     * consistent with the one defined in the {@link CourseTemplate}. In case, no {@link Regatta} is given, the
-     * resulting {@link MarkConfiguration}s will 1:1 match the {@link MarkTemplate}s of the {@link CourseTemplate}. In
-     * case a {@link Regatta} is given, the {@link MarkTemplate}s are mapped to contained {@link Mark}s if possible. Any
+     * consistent with the one defined in the {@link CourseTemplate}. In case no {@link Regatta} is given, the resulting
+     * {@link MarkConfiguration}s will 1:1 match the {@link MarkTemplate}s of the {@link CourseTemplate}. In case a
+     * {@link Regatta} is given, the {@link MarkTemplate}s are mapped to contained {@link Mark}s if possible. Any
      * {@link MarkTemplate} not mapped to a {@link Mark} (in case, no {@link Regatta} is given, these are just all
      * {@link MarkTemplate}s), is a candidate to be mapped to a {@link MarkProperties} of the user's inventory. Matching
-     * of {@link MarkProperties} is primarily done based on associated role names for which a {@link MarkProperties} was
-     * last used. If no matching of {@link MarkProperties} using role names is possible, a direct association is done if
-     * a {@link MarkProperties} was explicitly mapped to a specific {@link MarkTemplate} before.
+     * of {@link MarkProperties} is primarily done based on associated roles for which a {@link MarkProperties} was last
+     * used (see {@link MarkProperties#getLastUsedRole()}. If no matching of {@link MarkProperties} using roles is
+     * possible, a direct association is done if a {@link MarkProperties} was explicitly mapped to a specific
+     * {@link MarkTemplate} before.
+     * <p>
+     * 
+     * The {@link CourseConfiguration#getNumberOfLaps() number of laps} matches the
+     * {@link CourseTemplate#getDefaultNumberOfLaps() template's default number of laps} which is relevant only if the
+     * {@link CourseTemplate} specifies a {@link CourseTemplate#getRepeatablePart() repeatable part}.
      * 
      * @param optionalRegatta
      *            If given, {@link MarkTemplate}s of the given {@link CourseTemplate} are automatically mapped to their

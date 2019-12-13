@@ -45,7 +45,7 @@ public class CourseImpl extends RenamableImpl implements Course {
     private final Map<Waypoint, Integer> waypointIndexes;
     private final List<Leg> legs;
     private final UUID originatingCourseTemplateId;
-    private final Map<Mark, UUID> associatedRoles = new HashMap<>();
+    private final Map<Mark, UUID> associatedRoles;
     private transient Set<CourseListener> listeners;
     private transient NamedReentrantReadWriteLock lock;
     
@@ -62,6 +62,7 @@ public class CourseImpl extends RenamableImpl implements Course {
 
     public CourseImpl(String name, Iterable<Waypoint> waypoints, UUID originatingCourseTemplateId) {
         super(name);
+        this.associatedRoles = new HashMap<>();
         this.originatingCourseTemplateId = originatingCourseTemplateId;
         updateMonitor = ""+new Random().nextDouble(); 
         lock = new NamedReentrantReadWriteLock("lock for CourseImpl "+name,

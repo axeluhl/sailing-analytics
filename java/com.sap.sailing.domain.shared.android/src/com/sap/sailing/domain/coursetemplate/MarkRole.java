@@ -10,7 +10,6 @@ import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 public interface MarkRole extends IsMarkRole, NamedWithUUID, WithQualifiedObjectIdentifier {
-
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(UUID markPropertiesUUID) {
         return new TypeRelativeObjectIdentifier(markPropertiesUUID.toString());
     }

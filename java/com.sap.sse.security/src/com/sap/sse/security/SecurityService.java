@@ -49,7 +49,9 @@ import com.sap.sse.security.shared.impl.UserGroup;
 
 /**
  * A service interface for security management. Intended to be used as an OSGi service that can be registered, e.g., by
- * {@link BundleContext#registerService(Class, Object, java.util.Dictionary)} and can be discovered by other bundles.
+ * {@link BundleContext#registerService(Class, Object, java.util.Dictionary)} and can be discovered by other bundles.<p>
+ * 
+ * Permission checks will throw a {@link org.apache.shiro.authz.AuthorizationException} in case the check fails.
  * 
  * @author Axel Uhl (D043530)
  * @author Benjamin Ebling

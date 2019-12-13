@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sse.common.Named;
 
 /**
@@ -56,8 +57,8 @@ public interface CourseBase extends Named {
     UUID getOriginatingCourseTemplateIdOrNull();
 
     /**
-     * @return the associated roles required for checking course template validity and when creating a new course
-     *         template from this course.
+     * @return an unmodifiable map with the IDs of the associated roles required for checking course template validity
+     *         and when creating a new course template from this course. See also {@link MarkRole}.
      */
     Map<Mark, UUID> getAssociatedRoles();
 

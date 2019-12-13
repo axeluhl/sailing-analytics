@@ -100,7 +100,10 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
         return waypoints;
     }
 
-    // TODO move to CourseTemplateConfigurations
+    /**
+     * Similar code can be found in {@link CourseConfigurationBaseImpl#getWaypoints(int)}; both methods
+     * rely on {@link RepeatablePart#createSequence(int, Iterable)} to do the actual work.
+     */
     @Override
     public Iterable<WaypointTemplate> getWaypointTemplates(int numberOfLaps) {
         final Iterable<WaypointTemplate> result;

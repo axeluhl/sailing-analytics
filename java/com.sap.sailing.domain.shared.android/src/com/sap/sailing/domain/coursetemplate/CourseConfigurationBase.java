@@ -44,9 +44,9 @@ public interface CourseConfigurationBase<R extends IsMarkRole> extends WithOptio
     Iterable<MarkConfiguration> getAllMarks();
 
     /**
-     * The waypoint sequence, without lap repetitions, with {@link MarkConfiguration configuration information}
-     * for the marks used. All {@link MarkConfiguration} objects referenced are part of the result of
-     * {@link #getAllMarks()}.
+     * The waypoint sequence, with a single occurrence of any repeatable part the course may have (similar to calling
+     * {@link #getWaypoints(int) getWaypoints(1)}), with {@link MarkConfiguration configuration information} for the
+     * marks used. All {@link MarkConfiguration} objects referenced are part of the result of {@link #getAllMarks()}.
      */
     Iterable<WaypointWithMarkConfiguration> getWaypoints();
     
@@ -70,6 +70,9 @@ public interface CourseConfigurationBase<R extends IsMarkRole> extends WithOptio
      * repeatable part}, the result is the same as that of {@link #getWaypoints()}. The result has
      * {@link MarkConfiguration configuration information} for the marks used. All {@link MarkConfiguration} objects
      * referenced are part of the result of {@link #getAllMarks()}.
+     * 
+     * @param numberOfLaps the repeatable part will be inserted {@code numberOfLaps-1} times. For example, a two-lap
+     * course will have the repeatable part exactly once.
      */
     Iterable<WaypointWithMarkConfiguration> getWaypoints(int numberOfLaps);
 }

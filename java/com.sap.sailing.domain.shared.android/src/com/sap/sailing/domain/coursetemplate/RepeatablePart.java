@@ -43,15 +43,11 @@ public interface RepeatablePart extends Serializable {
      */
     default <T> Iterable<T> createSequence(int laps, Iterable<T> sequenceWithRepeatablePart) {
         validateRepeatablePartForSequence(sequenceWithRepeatablePart);
-
         final int zeroBasedIndexOfRepeatablePartStart = getZeroBasedIndexOfRepeatablePartStart();
         final int zeroBasedIndexOfRepeatablePartEnd = getZeroBasedIndexOfRepeatablePartEnd();
-
         final List<T> sequenceWithRepeatablePartAsList = new ArrayList<>();
         Util.addAll(sequenceWithRepeatablePart, sequenceWithRepeatablePartAsList);
-
         final int sequenceLength = sequenceWithRepeatablePartAsList.size();
-
         final List<T> result = new ArrayList<>();
         // Non-repeatable start of the sequence
         for (int i = 0; i < zeroBasedIndexOfRepeatablePartStart; i++) {
@@ -80,7 +76,6 @@ public interface RepeatablePart extends Serializable {
      */
     default <T> void validateRepeatablePartForSequence(Iterable<T> sequenceWithRepeatablePart) {
         final int zeroBasedIndexOfRepeatablePartEnd = getZeroBasedIndexOfRepeatablePartEnd();
-
         final int sequenceLength = Util.size(sequenceWithRepeatablePart);
         if (sequenceLength < zeroBasedIndexOfRepeatablePartEnd) {
             throw new IllegalArgumentException("Repeatable part (" + getZeroBasedIndexOfRepeatablePartStart() + ", "
