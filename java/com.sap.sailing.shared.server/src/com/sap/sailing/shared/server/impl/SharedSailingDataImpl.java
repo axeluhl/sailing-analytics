@@ -237,6 +237,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
             Position position, DeviceIdentifier deviceIdentifier, Iterable<String> tags) {
         final MarkPropertiesImpl markProperties = (MarkPropertiesImpl) markPropertiesById.get(idOfMarkProperties);
         if (markProperties != properties) { // no update required if same object
+            markProperties.setName(properties.getName());
             markProperties.setColor(properties.getColor());
             markProperties.setFixedPosition(position);
             markProperties.setPattern(properties.getPattern());
