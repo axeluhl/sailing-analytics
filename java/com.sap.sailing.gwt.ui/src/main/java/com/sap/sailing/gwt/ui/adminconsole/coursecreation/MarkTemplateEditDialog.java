@@ -17,7 +17,7 @@ import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.Pattern;
 import com.sap.sailing.gwt.ui.shared.racemap.Shape;
 import com.sap.sse.common.Color;
-import com.sap.sse.common.impl.RGBColor;
+import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
@@ -50,7 +50,6 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
                 }, /* animationEnabled */true, callback);
         this.ensureDebugId("MarkTemplateToEditEditDialog");
         this.stringMessages = stringMessages;
-
         labelPattern = new Label(stringMessages.pattern());
         this.patternValueListBox = new ValueListBox<>(new Renderer<Pattern>() {
             @Override
@@ -63,7 +62,6 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
                 appendable.append(render(object));
             }
         });
-
         labelShape = new Label(stringMessages.shape());
         this.shapeValueListBox = new ValueListBox<>(new Renderer<Shape>() {
             @Override
@@ -77,7 +75,6 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
             }
         });
         this.markTypeValueListBox = new ValueListBox<>(new Renderer<MarkType>() {
-
             @Override
             public String render(MarkType object) {
                 return object == null ? "" : object.name();
@@ -89,14 +86,12 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
 
             }
         });
-
         this.nameTextBox = createTextBox(markTemplateToEdit.getName());
         this.shortNameTextBox = createTextBox(markTemplateToEdit.getCommonMarkProperties().getShortName());
         this.markTypeValueListBox.setValue(markTemplateToEdit.getCommonMarkProperties().getType() != null
                 ? markTemplateToEdit.getCommonMarkProperties().getType()
                 : MarkType.values()[0]);
         markTypeValueListBox.setAcceptableValues(Arrays.asList(MarkType.values()));
-
         markTypeValueListBox.addValueChangeHandler(v -> handleMarkTypeChange());
         if (markTemplateToEdit.getCommonMarkProperties().getColor() != null) {
             this.displayColorTextBox = createTextBox(
@@ -105,12 +100,10 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
         } else {
             this.displayColorTextBox = createTextBox("");
         }
-
         shapeValueListBox.setValue(null);
         shapeValueListBox.setAcceptableValues(Arrays.asList(Shape.values()));
         patternValueListBox.setValue(null);
         patternValueListBox.setAcceptableValues(Arrays.asList(Pattern.values()));
-
         handleMarkTypeChange();
     }
 
@@ -177,7 +170,7 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
             color = null;
         } else {
             try {
-                color = new RGBColor(displayColorTextBox.getText());
+                color = AbstractColor.getCssColor(displayColorTextBox.getText());
             } catch (IllegalArgumentException iae) {
                 color = new InvalidColor(iae);
             }
