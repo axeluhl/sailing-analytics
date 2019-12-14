@@ -4232,7 +4232,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public LeaderboardGroupDTO getLeaderboardGroupByName(String groupName, boolean withGeoLocationData) {
         final LeaderboardGroup leaderboardGroupByName = getService().getLeaderboardGroupByName(groupName);
         getSecurityService().checkCurrentUserReadPermission(leaderboardGroupByName);
-        return convertToLeaderboardGroupDTO(leaderboardGroupByName, withGeoLocationData, false);
+        return leaderboardGroupByName == null ? null : convertToLeaderboardGroupDTO(leaderboardGroupByName, withGeoLocationData, false);
     }
 
     private LeaderboardGroupDTO convertToLeaderboardGroupDTO(final LeaderboardGroup leaderboardGroup,

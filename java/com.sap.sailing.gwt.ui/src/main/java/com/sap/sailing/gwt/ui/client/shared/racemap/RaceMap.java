@@ -555,7 +555,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
-                showHeaderPanel, quickRanksDTOProvider, "", "");
+                showHeaderPanel, quickRanksDTOProvider, /* leaderboardName */ "", /* leaderboardGroupName */ "");
     }
     
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
@@ -733,7 +733,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     private void loadAvailableDetailTypes() {
         sailingService.determineDetailTypesForCompetitorChart(leaderboardGroupName, raceIdentifier,
-        //sailingService.getAvailableDetailTypesForLeaderboard(leaderboardName, raceIdentifier,
                 new AsyncCallback<Iterable<DetailType>>() {
                     @Override
                     public void onFailure(Throwable caught) {
