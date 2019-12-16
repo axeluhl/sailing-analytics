@@ -2271,10 +2271,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             BoatOverlay boatOverlay = boatOverlays.get(competitorDTO);
             if (boatOverlay == null) {
                 boatOverlay = createBoatOverlay(RaceMapOverlaysZIndexes.BOATS_ZINDEX, competitorDTO, displayHighlighted(competitorDTO));
-                boatOverlays.put(competitorDTO, boatOverlay);
-                boatOverlay.setDisplayMode(displayHighlighted(competitorDTO));
-                boatOverlay.setBoatFix(lastBoatFix, timeForPositionTransitionMillis);
-                boatOverlay.addToMap();
+                if (boatOverlay != null) {
+                    boatOverlays.put(competitorDTO, boatOverlay);
+                    boatOverlay.setDisplayMode(displayHighlighted(competitorDTO));
+                    boatOverlay.setBoatFix(lastBoatFix, timeForPositionTransitionMillis);
+                    boatOverlay.addToMap();
+                }
             } else {
                 usedExistingCanvas = true;
                 boatOverlay.setDisplayMode(displayHighlighted(competitorDTO));
@@ -2345,30 +2347,37 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
 
+    /**
+     * @return a valid {@link BoatOverlay} if a boat was found for the competitor, or {@code null} otherwise
+     */
     private BoatOverlay createBoatOverlay(int zIndex, final CompetitorDTO competitorDTO, DisplayMode displayMode) {
         final BoatDTO boatOfCompetitor = competitorSelection.getBoat(competitorDTO);
-        final BoatOverlay boatCanvas = new BoatOverlay(map, zIndex, boatOfCompetitor, competitorSelection.getColor(competitorDTO, raceIdentifier), coordinateSystem);
-        boatCanvas.setDisplayMode(displayMode);
-        boatCanvas.addClickHandler(event -> {
-            GPSFixDTOWithSpeedWindTackAndLegType latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime());
-            Widget content = getInfoWindowContent(competitorDTO, latestFixForCompetitor);
-            LatLng where = coordinateSystem.toLatLng(latestFixForCompetitor.position);
-            managedInfoWindow.openAtPosition(content, where);
-        });
-
-        boatCanvas.addMouseOverHandler(new MouseOverMapHandler() {
-            @Override
-            public void onEvent(MouseOverMapEvent event) {
-                map.setTitle(boatOfCompetitor.getSailId());
-            }
-        });
-        boatCanvas.addMouseOutMoveHandler(new MouseOutMapHandler() {
-            @Override
-            public void onEvent(MouseOutMapEvent event) {
-                map.setTitle("");
-            }
-        });
-
+        final BoatOverlay boatCanvas;
+        if (boatOfCompetitor == null) {
+            GWT.log("Error: no boat found for competitor "+competitorDTO.getName()+". Not showing on map.");
+            boatCanvas = null;
+        } else {
+            boatCanvas = new BoatOverlay(map, zIndex, boatOfCompetitor, competitorSelection.getColor(competitorDTO, raceIdentifier), coordinateSystem);
+            boatCanvas.setDisplayMode(displayMode);
+            boatCanvas.addClickHandler(event -> {
+                GPSFixDTOWithSpeedWindTackAndLegType latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime());
+                Widget content = getInfoWindowContent(competitorDTO, latestFixForCompetitor);
+                LatLng where = coordinateSystem.toLatLng(latestFixForCompetitor.position);
+                managedInfoWindow.openAtPosition(content, where);
+            });
+            boatCanvas.addMouseOverHandler(new MouseOverMapHandler() {
+                @Override
+                public void onEvent(MouseOverMapEvent event) {
+                    map.setTitle(boatOfCompetitor.getSailId());
+                }
+            });
+            boatCanvas.addMouseOutMoveHandler(new MouseOutMapHandler() {
+                @Override
+                public void onEvent(MouseOutMapEvent event) {
+                    map.setTitle("");
+                }
+            });
+        }
         return boatCanvas;
     }
 
