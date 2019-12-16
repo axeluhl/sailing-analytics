@@ -182,15 +182,17 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     public Double getRelativeScoreForCompetitor(Competitor competitor) {
         final TimePoint now = MillisecondsTimePoint.now();
         Double maxTotalPoints = 1.0; // avoid division by zero
-        Double totalPointsOfCompetitor = 0.0;
+        Double totalPointsOfCompetitor = null;
         for (final Competitor c : getLeaderboardContext().getLeaderboard().getCompetitors()) {
             final Double totalPoints = getLeaderboardContext().getLeaderboard().getTotalPoints(c, getRaceColumn(), now);
-            maxTotalPoints = Math.max(maxTotalPoints, totalPoints);
-            if (c == competitor) {
-                totalPointsOfCompetitor = totalPoints;
+            if (totalPoints != null) {
+                maxTotalPoints = Math.max(maxTotalPoints, totalPoints);
+                if (c == competitor) {
+                    totalPointsOfCompetitor = totalPoints;
+                }
             }
         }
-        return totalPointsOfCompetitor / maxTotalPoints;
+        return totalPointsOfCompetitor == null ? null : totalPointsOfCompetitor / maxTotalPoints;
     }
     
     @Override

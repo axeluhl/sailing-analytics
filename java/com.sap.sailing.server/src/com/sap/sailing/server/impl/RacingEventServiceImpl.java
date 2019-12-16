@@ -1718,7 +1718,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         if (persistent) {
             updateStoredRegatta(regatta);
         }
-
         return wasCreated;
     }
 
@@ -1726,8 +1725,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public void addRace(RegattaIdentifier addToRegatta, RaceDefinition raceDefinition) {
         Regatta regatta = getRegatta(addToRegatta);
         regatta.addRace(raceDefinition); // will trigger the raceAdded operation because this service is listening on
-                                         // all its regattas
-    }
+    }                                    // all its regattas
 
     /**
      * If the <code>regatta</code> {@link Regatta#isPersistent() is a persistent one}, the association of the race with
