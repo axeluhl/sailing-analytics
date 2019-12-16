@@ -418,7 +418,6 @@ public class EventsResource extends AbstractSailingServerResource {
         Regatta regatta = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.REGATTA, Regatta.getTypeRelativeObjectIdentifier(regattaName), 
                 regattaName, new Callable<Regatta>() {
-
                     @Override
                     public Regatta call() throws Exception {
                         return getService().apply(new AddSpecificRegatta(regattaName, boatClassName,
@@ -552,7 +551,6 @@ public class EventsResource extends AbstractSailingServerResource {
                 RoleDefinition roleDef = getSecurityService()
                         .getRoleDefinition(SailingViewerRole.getInstance().getId());
                 getSecurityService().putRoleDefinitionToUserGroup(ownerGroup, roleDef, true);
-
                 getSecurityService().addUserToUserGroup(ownerGroup, getCurrentUser());
                 return getSecurityService().doWithTemporaryDefaultTenant(ownerGroup, doCreationAction);
             } else {
