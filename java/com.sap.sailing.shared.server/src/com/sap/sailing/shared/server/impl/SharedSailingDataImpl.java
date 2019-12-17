@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -50,6 +51,7 @@ import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
@@ -204,8 +206,12 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
 
     @Override
-    public MarkProperties createMarkProperties(CommonMarkProperties properties, Iterable<String> tags) {
+    public MarkProperties createMarkProperties(CommonMarkProperties properties, Iterable<String> tags, Optional<UserGroup> optionalNonDefaultGroupOwnership) {
         final UUID idOfNewMarkProperties = UUID.randomUUID();
+        optionalNonDefaultGroupOwnership.ifPresent(userGroup->
+            getSecurityService().setOwnership(SecuredDomainType.MARK_PROPERTIES.getQualifiedObjectIdentifier(
+                    MarkProperties.getTypeRelativeObjectIdentifier(idOfNewMarkProperties)),
+                    getSecurityService().getCurrentUser(), userGroup));
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.MARK_PROPERTIES,
                 MarkProperties.getTypeRelativeObjectIdentifier(idOfNewMarkProperties),

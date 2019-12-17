@@ -3,6 +3,7 @@ package com.sap.sailing.domain.sharedsailingdata;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
@@ -17,6 +18,7 @@ import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.impl.UserGroup;
 
 /**
  * {@link com.sap.sailing.server.interfaces.RacingEventService RacingEventService} is scoped to one server
@@ -47,7 +49,13 @@ public interface SharedSailingData {
     
     MarkRole getMarkRoleById(UUID id);
 
-    MarkProperties createMarkProperties(CommonMarkProperties properties, Iterable<String> tags);
+    /**
+     * @param optionalNonDefaultGroupOwnership
+     *            if {@link Optional#isPresent() present}, defines the {@link UserGroup} to use for the new mark
+     *            properties object's group ownership. Otherwise, the session user's default creation group ownership
+     *            will be used for the current server.
+     */
+    MarkProperties createMarkProperties(CommonMarkProperties properties, Iterable<String> tags, Optional<UserGroup> optionalNonDefaultGroupOwnership);
     
     MarkProperties updateMarkProperties(UUID uuid, CommonMarkProperties properties, Position position,
             DeviceIdentifier deviceIdentifier, Iterable<String> tags);

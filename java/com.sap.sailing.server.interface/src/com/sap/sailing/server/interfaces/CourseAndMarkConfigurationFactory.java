@@ -1,6 +1,7 @@
 package com.sap.sailing.server.interfaces;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
@@ -23,6 +24,7 @@ import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.WithOptionalRepeatablePart;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.security.shared.impl.UserGroup;
 
 /**
  * {@link CourseConfiguration} is meant as an in memory model for all kinds of course definitions. This model is not
@@ -65,6 +67,7 @@ public interface CourseAndMarkConfigurationFactory {
      * referenced by these {@link WaypointTemplates} are those obtained by
      * {@link #getOrCreateMarkTemplate(MarkConfiguration)} for the respective {@link MarkConfiguration} objects used in
      * the {@link WaypointWithMarkConfiguration} objects.
+     * @param optionalNonDefaultGroupOwnership TODO
      * 
      * @return a course with its mark configurations and a {@link CourseTemplate} returned by
      *         {@link CourseConfiguration#getOptionalCourseTemplate()} that is always valid, never {@code null}. All
@@ -73,7 +76,7 @@ public interface CourseAndMarkConfigurationFactory {
      *         {@link CourseTemplate} obtained from {@link CourseConfiguration#getOptionalCourseTemplate()}.
      */
     CourseConfiguration createCourseTemplateAndUpdatedConfiguration(CourseConfiguration courseWithMarkConfiguration,
-            Iterable<String> tags);
+            Iterable<String> tags, Optional<UserGroup> optionalNonDefaultGroupOwnership);
 
     /**
      * Creates a {@link CourseConfiguration} from a {@link CourseTemplate}. The resulting waypoint sequence is
@@ -142,9 +145,10 @@ public interface CourseAndMarkConfigurationFactory {
      *            the regatta whose {@link RegattaLog} to use to define the new {@link Mark}s in.
      * @param author
      *            for {@link RegattaLogDefineMarkEvent}s and the {@link RegattaLogDeviceMappingEvent}s.
+     * @param optionalNonDefaultGroupOwnership TODO
      * @return the sequence of waypoints, obtained by expanding the
      */
     CourseBase createCourseFromConfigurationAndDefineMarksAsNeeded(Regatta regatta,
             CourseConfiguration courseConfiguration, TimePoint timePointForDefinitionOfMarksAndDeviceMappings,
-            AbstractLogEventAuthor author);
+            AbstractLogEventAuthor author, Optional<UserGroup> optionalNonDefaultGroupOwnership);
 }

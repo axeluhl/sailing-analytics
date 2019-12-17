@@ -1,6 +1,7 @@
 package com.sap.sailing.shared.server.gateway.jaxrs.api;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.ws.rs.DELETE;
@@ -114,7 +115,7 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         final MarkPropertiesBuilder markPropertiesBuilder = new MarkPropertiesBuilder(/* id */ null, name, effectiveShortName,
                 color, shape, pattern, type);
         final MarkProperties createdMarkProperties = getSharedSailingData()
-                .createMarkProperties(markPropertiesBuilder.build(), tags);
+                .createMarkProperties(markPropertiesBuilder.build(), tags, Optional.empty());
         if (deviceUuid != null && deviceUuid.length() > 0) {
             final DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
             getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(createdMarkProperties, device);

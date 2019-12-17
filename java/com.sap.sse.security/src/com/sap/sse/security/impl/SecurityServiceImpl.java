@@ -1691,7 +1691,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             } else {
                 logger.fine("Preexisting ownership found for " + identifier + ": " + preexistingOwnership);
             }
-
             if (doServerCreateObjectCheck) {
                 checkCurrentUserServerPermission(ServerActions.CREATE_OBJECT);
             }

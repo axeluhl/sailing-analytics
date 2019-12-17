@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -48,6 +49,7 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/v1/courseconfiguration")
@@ -175,7 +177,9 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
     @POST
     @Produces("application/json;charset=UTF-8")
     @Path("createCourseTemplate")
-    public Response createCourseTemplate(@QueryParam("regattaName") String regattaName, String json) throws Exception {
+    public Response createCourseTemplate(@QueryParam("regattaName") String regattaName,
+            @QueryParam("markPropertiesGroupOwnership") String markPropertiesGroupOwnership,
+            String json) throws Exception {
         if (json == null || json.isEmpty()) {
             return getBadCourseConfigurationValidationErrorResponse(
                     "Course configuration is required to be given as json object");
@@ -196,16 +200,31 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
                 .deserialize((JSONObject) parsedObject);
         final Iterable<String> tags = Arrays
                 .asList(ArrayUtils.nullToEmpty((String[]) ((JSONObject) parsedObject).get(FIELD_TAGS)));
+        final Optional<UserGroup> optionalUserGroupForNonDefaultMarkPropertiesOwnership = getOptionalGroupOwnership(
+                markPropertiesGroupOwnership);
         final CourseConfiguration courseTemplate = getService().getCourseAndMarkConfigurationFactory()
-                .createCourseTemplateAndUpdatedConfiguration(courseConfiguration, tags);
+                .createCourseTemplateAndUpdatedConfiguration(courseConfiguration, tags,
+                        optionalUserGroupForNonDefaultMarkPropertiesOwnership);
         final String jsonString = courseConfigurationJsonSerializer.serialize(courseTemplate).toJSONString();
         return Response.ok(jsonString).build();
+    }
+
+    private Optional<UserGroup> getOptionalGroupOwnership(String optionalGroupName) {
+        final Optional<UserGroup> optionalUserGroupForNonDefaultMarkPropertiesOwnership;
+        if (optionalGroupName != null) {
+            optionalUserGroupForNonDefaultMarkPropertiesOwnership = Optional.of(
+                    getService().getSecurityService().getUserGroupByName(optionalGroupName));
+        } else {
+            optionalUserGroupForNonDefaultMarkPropertiesOwnership = Optional.empty();
+        }
+        return optionalUserGroupForNonDefaultMarkPropertiesOwnership;
     }
 
     @POST
     @Produces("application/json;charset=UTF-8")
     @Path("createCourse/{regattaName}/{raceColumn}/{fleet}")
     public Response createCourse(@PathParam("regattaName") String regattaName,
+            @QueryParam("markPropertiesGroupOwnership") String markPropertiesGroupOwnership,
             @PathParam("raceColumn") String raceColumn, @PathParam("fleet") String fleet,
             String json) throws Exception {
         if (json == null || json.isEmpty()) {
@@ -234,9 +253,11 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         final CourseConfiguration courseConfiguration = getCourseConfigurationDeserializer(regatta)
                 .deserialize((JSONObject) parsedObject);
         final TimePoint timestampForLogEntries = MillisecondsTimePoint.now();
+        final Optional<UserGroup> optionalUserGroupForNonDefaultMarkPropertiesOwnership = getOptionalGroupOwnership(
+                markPropertiesGroupOwnership);
         final CourseBase course = getService().getCourseAndMarkConfigurationFactory()
                 .createCourseFromConfigurationAndDefineMarksAsNeeded(regatta, courseConfiguration,
-                        timestampForLogEntries, getService().getServerAuthor());
+                        timestampForLogEntries, getService().getServerAuthor(), optionalUserGroupForNonDefaultMarkPropertiesOwnership);
         final RaceLog raceLog = raceColumnByName.getRaceLog(fleetByName);
         raceLog.add(new RaceLogCourseDesignChangedEventImpl(timestampForLogEntries, getService().getServerAuthor(),
                 raceLog.getCurrentPassId(), course, CourseDesignerMode.BY_MARKS));

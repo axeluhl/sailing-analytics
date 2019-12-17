@@ -37,6 +37,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -9931,14 +9932,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     markProperties.getTags());
             createdOrUpdatedMarkProperties = getSharedSailingData().getMarkPropertiesById(createdOrUpdatedMarkProperties.getId());
         } else {
-
             createdOrUpdatedMarkProperties = getSecurityService()
                     .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.MARK_PROPERTIES,
                             MarkTemplate.getTypeRelativeObjectIdentifier(UUID.randomUUID()),
                             markProperties.getName(),
                             () -> getSharedSailingData()
                                     .createMarkProperties(convertDtoToCommonMarkProperties(
-                                            markProperties.getCommonMarkProperties()), markProperties.getTags()));
+                                            markProperties.getCommonMarkProperties()), markProperties.getTags(),
+                                            /* non-default mark properties group ownership */ Optional.empty()));
         }
         return convertToMarkPropertiesDTO(createdOrUpdatedMarkProperties);
     }

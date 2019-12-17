@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -94,6 +95,7 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.impl.UserGroup;
 
 public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfigurationFactory {
 
@@ -152,14 +154,15 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         return result;
     }
     
-    private CourseConfigurationWithMarkRoles handleSaveToInventory(CourseConfiguration courseConfiguration) {
+    private CourseConfigurationWithMarkRoles handleSaveToInventory(CourseConfiguration courseConfiguration, Optional<UserGroup> optionalNonDefaultGroupOwnership) {
         final Map<MarkConfiguration, MarkConfiguration> effectiveConfigurations = new HashMap<>();
         for (MarkConfiguration markConfiguration : courseConfiguration.getAllMarks()) {
             if (markConfiguration.isStoreToInventory()) {
                 MarkProperties markPropertiesOrNull = markConfiguration.getOptionalMarkProperties();
                 if (markPropertiesOrNull == null) {
                     // If no mark properties exist yet, a new one is created
-                    markPropertiesOrNull = getSharedSailingData().createMarkProperties(markConfiguration.getEffectiveProperties(), Collections.emptySet());
+                    markPropertiesOrNull = getSharedSailingData().createMarkProperties(markConfiguration.getEffectiveProperties(), /* tags */ Collections.emptySet(),
+                            optionalNonDefaultGroupOwnership);
                 } else {
                     // in the case of a MarkPropertiesBasedMarkConfiguration, the following call is expected to notice
                     // the identity between the mark properties object to update and the mark properties that constitute
@@ -242,8 +245,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
 
     @Override
     public CourseConfiguration createCourseTemplateAndUpdatedConfiguration(
-            final CourseConfiguration courseConfiguration, Iterable<String> tags) {
-        final CourseConfigurationWithMarkRoles courseConfigurationAfterInventory = handleSaveToInventory(courseConfiguration);
+            final CourseConfiguration courseConfiguration, Iterable<String> tags, Optional<UserGroup> optionalNonDefaultGroupOwnership) {
+        final CourseConfigurationWithMarkRoles courseConfigurationAfterInventory = handleSaveToInventory(courseConfiguration, optionalNonDefaultGroupOwnership);
         final Map<MarkConfiguration, MarkTemplate> markTemplatesByMarkConfigurations = new HashMap<>();
         final Map<MarkConfiguration, MarkConfiguration> marksConfigurationsMapping = new HashMap<>();
         for (MarkConfiguration markConfiguration : courseConfigurationAfterInventory.getAllMarks()) {
@@ -458,8 +461,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     @Override
     public CourseBase createCourseFromConfigurationAndDefineMarksAsNeeded(Regatta regatta,
             final CourseConfiguration courseConfiguration, TimePoint timePointForDefinitionOfMarksAndDeviceMappings,
-            AbstractLogEventAuthor author) {
-        final CourseConfigurationWithMarkRoles courseConfigurationAfterInventory = handleSaveToInventory(courseConfiguration);
+            AbstractLogEventAuthor author, Optional<UserGroup> optionalNonDefaultGroupOwnership) {
+        final CourseConfigurationWithMarkRoles courseConfigurationAfterInventory = handleSaveToInventory(courseConfiguration, optionalNonDefaultGroupOwnership);
         recordUsagesForMarkProperties(courseConfiguration.getWaypoints(), courseConfiguration.getAssociatedRoles());
         final Map<MarkConfiguration, Mark> marksByMarkConfigurations = new HashMap<>();
         final RegattaLog regattaLog = regatta.getRegattaLog();
