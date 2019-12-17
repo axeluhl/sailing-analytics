@@ -118,20 +118,16 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
             return getBadCourseConfigurationValidationErrorResponse(
                     "Course configuration is required to have a regatta name and a race name");
         }
-
         final Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             return getBadRegattaErrorResponse(regattaName);
         }
         getSecurityService().checkCurrentUserReadPermission(regatta);
-
         final RaceColumn raceColumnByName = findRaceColumnByName(regatta, raceColumn);
         final Fleet fleetByName = findFleetByName(raceColumnByName, fleet);
-
         if (raceColumnByName == null || fleetByName == null) {
             return getBadRaceErrorResponse(regattaName, raceColumn, fleet);
         }
-        
         final RaceDefinition raceDefinition = raceColumnByName.getRaceDefinition(fleetByName);
         final CourseBase courseBase;
         if (raceDefinition != null) {
@@ -140,7 +136,6 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
             final ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(getService(), raceColumnByName.getRaceLog(fleetByName));
             courseBase = raceState.getCourseDesign();
         }
-
         // courseBase may be null in case, no course is defined for the race yet.
         // createCourseConfigurationFromCourse returns a course configuration with an empty sequence in this case.
         // Any mark already defined in the regatta will be added to the included mark configurations as an initial
@@ -170,10 +165,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
                 return getBadRegattaErrorResponse(regattaName);
             }
         }
-
         final CourseConfiguration courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
                 .createCourseConfigurationFromTemplate(courseTemplate, regatta, tags);
-
         String jsonString = courseConfigurationJsonSerializer.serialize(courseConfiguration).toJSONString();
         return Response.ok(jsonString).build();
 
@@ -194,7 +187,6 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
                 return getBadRegattaErrorResponse(regattaName);
             }
         }
-
         final Object parsedObject = new JSONParser().parse(json);
         if (parsedObject == null || !(parsedObject instanceof JSONObject)) {
             getBadCourseConfigurationValidationErrorResponse(
@@ -202,10 +194,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         }
         final CourseConfiguration courseConfiguration = getCourseConfigurationDeserializer(regatta)
                 .deserialize((JSONObject) parsedObject);
-
         final Iterable<String> tags = Arrays
                 .asList(ArrayUtils.nullToEmpty((String[]) ((JSONObject) parsedObject).get(FIELD_TAGS)));
-
         final CourseConfiguration courseTemplate = getService().getCourseAndMarkConfigurationFactory()
                 .createCourseTemplateAndUpdatedConfiguration(courseConfiguration, tags);
         final String jsonString = courseConfigurationJsonSerializer.serialize(courseTemplate).toJSONString();
@@ -222,25 +212,20 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
             return getBadCourseConfigurationValidationErrorResponse(
                     "Course configuration is required to be given as json object");
         }
-
         if (regattaName == null || raceColumn == null || fleet == null) {
             return getBadCourseConfigurationValidationErrorResponse(
                     "Course configuration is required to have a regatta name and a race name");
         }
-
         final Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             return getBadRegattaErrorResponse(regattaName);
         }
         getSecurityService().checkCurrentUserUpdatePermission(regatta);
-
         final RaceColumn raceColumnByName = findRaceColumnByName(regatta, raceColumn);
         final Fleet fleetByName = findFleetByName(raceColumnByName, fleet);
-
         if (raceColumnByName == null || fleetByName == null) {
             return getBadRaceErrorResponse(regattaName, raceColumn, fleet);
         }
-
         final Object parsedObject = new JSONParser().parse(json);
         if (parsedObject == null || !(parsedObject instanceof JSONObject)) {
             getBadCourseConfigurationValidationErrorResponse(
@@ -248,7 +233,6 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         }
         final CourseConfiguration courseConfiguration = getCourseConfigurationDeserializer(regatta)
                 .deserialize((JSONObject) parsedObject);
-
         final TimePoint timestampForLogEntries = MillisecondsTimePoint.now();
         final CourseBase course = getService().getCourseAndMarkConfigurationFactory()
                 .createCourseFromConfigurationAndDefineMarksAsNeeded(regatta, courseConfiguration,
