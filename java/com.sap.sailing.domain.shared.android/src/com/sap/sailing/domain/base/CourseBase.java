@@ -52,7 +52,8 @@ public interface CourseBase extends Named {
     Leg getFirstLeg();
 
     /**
-     * @return the id of the course template that was used to create this course.
+     * @return the id of the course template that was used to create this course. This reference can remain in place
+     *         even if the actual course is being manipulated in ways incompatible with the original course template.
      */
     UUID getOriginatingCourseTemplateIdOrNull();
 

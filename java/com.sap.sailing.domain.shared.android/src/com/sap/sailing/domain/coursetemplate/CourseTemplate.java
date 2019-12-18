@@ -19,12 +19,18 @@ import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
  * {@link Course}.
  * <p>
  * 
- * The course template can define additional mark and control point templates that are not part of the waypoint
+ * The course template can define additional mark and control point templates that are not part of the waypoint template
  * sequence. This can be used, e.g., to define spare marks.
  * <p>
  * 
- * The course template has a {@link #getId() globally unique ID} and with this can have a life cycle. It is immutable.
- * If a logical copy is created, the new copy will have a different ID ("Save as...").
+ * All {@link MarkTemplate}s reachable through the {@link #getWaypointTemplates() waypoint template sequence} must refer
+ * to a corresponding {@link MarkRole}. This link is represented by the {@link #getAssociatedRoles()} method. Conversely,
+ * this means that mark templates for spare marks do not have a role assigned.
+ * <p>
+ * 
+ * The course template has a {@link #getId() globally unique ID} and with this can have a life cycle. Its
+ * {@link #getWaypointTemplates() waypoint template sequence} is immutable. If a logical copy is created, the new copy
+ * will have a different ID ("Save as...").
  * <p>
  * 
  * The {@link MarkTemplate}s also have their globally unique IDs. When creating a variant, the new copy can reference
@@ -59,9 +65,12 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
      * {@code Start/Finish, [1, 4p/4s], 1, Start/Finish}. For an "L1" course with only one lap, we'd like to have
      * {@code Start/Finish, 1, Start/Finish}, so the repeatable sub-sequence, enclosed by the brackets in the example
      * above, will occur zero times. For an "L2" the repeatable sub-sequence will occur once, and so on. However, an
-     * implementation is free to choose an interpretation of {@code numberOfLaps} that meets callers' expectations.
+     * implementation is free to choose an interpretation of {@code numberOfLaps} that meets callers' expectations.<p>
      * 
-     * @param numberOfLaps TODO remove this parameter and return only the base waypoint sequence; move to {@link CourseConfiguration}
+     * Note: this method is mostly intended for testing purposes; a client / UI would normally use a {@link CourseConfiguration}
+     * that refers to a {@link CourseTemplate} and then invoke {@link CourseConfiguration#getWaypoints(int)}.
+     * 
+     * @param numberOfLaps
      *            if the course defines a repeatable part, the number of laps at least needs to be {@code 1} for the
      *            default implementation, and an {@link IllegalArgumentException} shall be thrown in case a value less
      *            than {@code 1} is used if this template specifies a repeatable part. Note again that the number of
@@ -72,10 +81,24 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
 
     Iterable<WaypointTemplate> getWaypointTemplates();
 
+    /**
+     * @return the key set contains all {@link MarkTemplate}s reachable through the {@link #getWaypointTemplates()
+     *         waypoint template sequence}; the values are their corresponding roles.
+     */
     Map<MarkTemplate, MarkRole> getAssociatedRoles();
     
+    /**
+     * @return the key set contains all {@link MarkTemplate}s as returned by {@link #getMarkTemplates()}. The
+     *         corresponding values will match with those in {@link #getAssociatedRoles()} in case the key
+     *         {@link MarkTemplate} is reachable through the {@link #getWaypointTemplates() waypoint template sequence}
+     *         and hence also part of {@link #getAssociatedRoles()}' key set; it will be {@code null} otherwise,
+     *         representing a template for a spare mark.
+     */
     Map<MarkTemplate, MarkRole> getMarkTemplatesWithOptionalRoles();
     
+    /**
+     * Short for {@link #getMarkTemplatesWithOptionalRoles()}.{@link Map#get(Object) get(markTemplate)}
+     */
     MarkRole getOptionalAssociatedRole(MarkTemplate markTemplate);
     
     MarkRole getMarkRoleByIdIfContainedInCourseTemplate(UUID markRoleId);

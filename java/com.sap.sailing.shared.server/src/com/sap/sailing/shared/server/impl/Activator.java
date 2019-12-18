@@ -31,9 +31,7 @@ public class Activator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         Activator.context = context;
         securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
-
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
-
         sharedSailingData = new SharedSailingDataImpl(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(serviceFinderFactory),
                 PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory), serviceFinderFactory,
                 securityServiceTracker);

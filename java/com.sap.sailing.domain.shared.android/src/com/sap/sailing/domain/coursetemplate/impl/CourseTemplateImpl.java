@@ -34,7 +34,17 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     private final Integer defaultNumberOfLaps;
 
     
-    /** Creates a course template with a random UUID. */
+    /**
+     * Creates a course template with a random UUID.
+     * 
+     * @param marks
+     *            all mark templates made available in this course template
+     * @param waypoints
+     *            may refer only to {@link MarkTemplate}s provided in the {@code marks} parameter
+     * @param associatedRoles
+     *            the key set is a sub-set of the {@code marks} parameter and has to contain in its key set exactly
+     *            those {@link MarkTemplate}s reachable through the {@code waypoints}.
+     */
     public CourseTemplateImpl(String name, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
             Map<MarkTemplate, MarkRole> associatedRoles, URL optionalImageURL) {
         this(UUID.randomUUID(), name, marks, waypoints, associatedRoles, optionalImageURL);

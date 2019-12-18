@@ -949,14 +949,11 @@ public class RegattasResource extends AbstractSailingServerResource {
             return getBadRegattaErrorResponse(regattaName);
         }
         getSecurityService().checkCurrentUserReadPermission(regatta);
-
         RaceDefinition race = findRaceByName(regatta, raceName);
         if (race == null) {
             return getBadRaceErrorResponse(regattaName, raceName);
         }
-
         TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-
         TimePoint from;
         TimePoint to;
         try {
@@ -974,7 +971,6 @@ public class RegattasResource extends AbstractSailingServerResource {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Could not parse the 'to' time.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-
         JSONObject jsonRace = new JSONObject();
         jsonRace.put("name", trackedRace.getRace().getName());
         jsonRace.put("regatta", regatta.getName());
@@ -986,7 +982,6 @@ public class RegattasResource extends AbstractSailingServerResource {
                 marks.add(mark);
             }
         }
-
         for (Mark mark : marks) {
             JSONObject jsonMark = new JSONObject();
             jsonMark.put("name", mark.getName());
@@ -1012,7 +1007,6 @@ public class RegattasResource extends AbstractSailingServerResource {
                     addMarkFixToJsonFixes(jsonFixes, fix);
                     lastAdded = true;
                 }
-                
                 if (addLastKnown && !lastAdded) {
                     // find a fix earlier than the interval requested:
                     Iterator<GPSFix> earlierFixIter = track.getFixesDescendingIterator(from, /* inclusive */false);
@@ -1028,7 +1022,6 @@ public class RegattasResource extends AbstractSailingServerResource {
                         addMarkFixToJsonFixes(jsonFixes, fix);
                     }
                 }
-                
             } finally {
                 track.unlockAfterRead();
             }
@@ -1036,9 +1029,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             jsonMarks.add(jsonMark);
         }
         jsonRace.put("marks", jsonMarks);
-
         String json = jsonRace.toJSONString();
-
         return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 

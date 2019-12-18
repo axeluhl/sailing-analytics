@@ -409,7 +409,6 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             position = optionalAssociatedMarkProperties.getFixedPosition();
             deviceIdentifier = optionalAssociatedMarkProperties.getTrackingDeviceIdentifier();
         }
-
         if (position != null ^ deviceIdentifier != null) {
             final DeviceMappingWithRegattaLogEvent<Mark> existingDeviceMapping = CourseConfigurationBuilder.findMostRecentOrOngoingMapping(regatta, mark);
             boolean terminateOpenEndedDeviceMapping = false;
@@ -437,7 +436,6 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 if (update) {
                     // TODO check if we can use com.sap.sailing.domain.racelogtracking.impl.RaceLogTrackingAdapterImpl.pingMark(RegattaLog, Mark, GPSFix, RacingEventService)
                     final PingDeviceIdentifierImpl pingIdentifier = new PingDeviceIdentifierImpl(UUID.randomUUID());
-                    
                     sensorFixStore.storeFix(pingIdentifier,
                             new GPSFixImpl(position, timePointForDefinitionOfMarksAndDeviceMappings));
                     

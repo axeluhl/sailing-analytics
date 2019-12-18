@@ -41,14 +41,14 @@ A course template can be used to create a course based on mark templates and a s
 * Set of mark templates to be created
 * Optional repeatable part
 * Course templates may contain mark templates that aren't part of the defined sequence
-* For every mark template that is part of the sequence, a distinct role name need to be provided
-    * Distinct means it is a bijective mapping of marks in the sequence and role names
-    * The role name may the same as the mark template being mapped
+* For every mark template that is part of the sequence, a distinct mark role need to be provided
+    * Distinct means it is a bijective mapping of marks in the sequence and mark roles 
+    * The mark role may the same as the mark template being mapped
 
 
 ### Mark role
 
-A mark role defines the purpose of a mark used in the waypoint sequences of a regatta course or course template and allows to swap out marks or mark templates without changing the the effective waypoint sequence. Having this a course template and regatta course may define a compatible waypoint sequence while being based on different mark definitions.
+A mark role defines the purpose of a mark used in the waypoint sequences of a regatta course or course template and allows users to swap out marks or mark templates without changing the the effective waypoint sequence. Having this, a course template and regatta course may define a compatible waypoint sequence while being based on different mark definitions.
 
 
 ### Course configuration

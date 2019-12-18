@@ -14,9 +14,9 @@ import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
  * A template for creating a {@link Mark}. It has a globally unique ID and can be used in zero or more
- * {@link CourseTemplate}s. It is immutable. In addition to a {@link Mark}'s properties it offers an optional
- * {@link #getShortName() short name}. Being a special {@link ControlPointTemplate}, a {@link MarkTemplate}
- * returns a singleton collection containing itself when asked for its {@link #getMarks() marks}.
+ * {@link CourseTemplate}s. It is immutable and contains all {@link CommonMarkProperties common properties for a mark}.
+ * Being a special {@link ControlPointTemplate}, a {@link MarkTemplate} returns a singleton collection containing itself
+ * when asked for its {@link #getMarks() marks}.
  * 
  * @author Axel Uhl (d043530)
  *

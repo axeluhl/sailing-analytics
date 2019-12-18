@@ -18,19 +18,24 @@ import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.UserGroup;
 
 /**
- * {@link com.sap.sailing.server.interfaces.RacingEventService RacingEventService} is scoped to one server
- * only. To share data that is not exclusively bound to one specific server but relevant for several servers,
- * {@link SharedSailingData} provides an alternative replication scope. This means {@link SharedSailingData} may
- * be replicated in a similar way as {@link SecurityService}.<br>
+ * {@link com.sap.sailing.server.interfaces.RacingEventService RacingEventService} is scoped to one server only. To
+ * share data that is not exclusively bound to one specific server but relevant for several servers,
+ * {@link SharedSailingData} provides an alternative replication scope. This means {@link SharedSailingData} may be
+ * replicated in a similar way as {@link SecurityService}.<br>
  * {@link SharedSailingData} encapsulates persistence, replication and security aspects for the following domain types:
  * <ul>
  * <li>{@link MarkTemplate}s</li>
  * <li>{@link MarkProperties}</li>
  * <li>{@link CourseTemplate}s</li>
  * </ul>
+ * 
+ * In particular, the reading methods that produce iterables of entities, such as {@link #getAllMarkRoles()} or
+ * {@link #getAllMarkTemplates()}, will deliver a view restricted by the availability of the {@link DefaultActions#READ}
+ * permission of the user on whose behalf the request is being executed.
  * 
  * @author Axel Uhl (D043530)
  *

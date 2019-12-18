@@ -202,7 +202,6 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         if (course != null) {
             course.getWaypoints().forEach(wp -> Util.addAll(wp.getMarks(), marks));
         }
-
         for (RaceLog toRaceLog : toRaceLogs) {
             if (new RaceLogTrackingStateAnalyzer(toRaceLog).analyze().isForTracking()) {
                 if (course != null) {
@@ -219,7 +218,6 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                             passId, newCourse, CourseDesignerMode.ADMIN_CONSOLE);
                     toRaceLog.add(newCourseEvent);
                 }
-
             }
         }
     }
