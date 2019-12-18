@@ -90,7 +90,7 @@ public class MarkPropertiesDTO extends NamedDTO implements SecuredDTO {
     public CommonMarkPropertiesDTO getCommonMarkProperties() {
         return commonMarkProperties;
     }
-    
+
     public String getPositioningType() {
         return positioningType;
     }

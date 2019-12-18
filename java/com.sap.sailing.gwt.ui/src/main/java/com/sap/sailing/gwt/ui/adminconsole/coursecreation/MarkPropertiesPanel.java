@@ -13,11 +13,13 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -26,6 +28,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.CellPreviewEvent;
@@ -59,7 +62,12 @@ import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class MarkPropertiesPanel extends FlowPanel {
+    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
+    private static final AbstractImagePrototype positionImagePrototype = AbstractImagePrototype
+            .create(resources.ping());
+    private static final AbstractImagePrototype setDeviceIdentifierImagePrototype = AbstractImagePrototype
+            .create(resources.mapDevices());
 
     private final SailingServiceAsync sailingService;
     private final LabeledAbstractFilterablePanel<MarkPropertiesDTO> filterableMarkProperties;
@@ -90,7 +98,6 @@ public class MarkPropertiesPanel extends FlowPanel {
             @Override
             public void execute() {
                 openEditMarkPropertiesDialog(new MarkPropertiesDTO());
-                // TODO add action
             }
         });
 
@@ -282,10 +289,24 @@ public class MarkPropertiesPanel extends FlowPanel {
             }
         };
 
-        Column<MarkPropertiesDTO, String> positioningColumn = new Column<MarkPropertiesDTO, String>(new TextCell()) {
+        Column<MarkPropertiesDTO, AbstractImagePrototype> positioningColumn = new Column<MarkPropertiesDTO, AbstractImagePrototype>(
+                new AbstractCell<AbstractImagePrototype>() {
+
+                    @Override
+                    public void render(Context context, AbstractImagePrototype image, SafeHtmlBuilder sb) {
+                        if (image != null) sb.append(image.getSafeHtml());
+                    }
+                }) {
             @Override
-            public String getValue(MarkPropertiesDTO markProperties) {
-                return markProperties.getPositioningType();
+            public AbstractImagePrototype getValue(MarkPropertiesDTO markProperties) {
+                switch (markProperties.getPositioningType()) {
+                case "FIXED_POSITION":
+                    return positionImagePrototype;
+                case "DEVICE":
+                    return setDeviceIdentifierImagePrototype;
+                default:
+                    return null;
+                }
             }
         };
 
@@ -391,12 +412,13 @@ public class MarkPropertiesPanel extends FlowPanel {
                 stringMessages, null, new DialogCallback<DeviceIdentifierDTO>() {
                     @Override
                     public void ok(DeviceIdentifierDTO deviceIdentifier) {
-                        sailingService.updateMarkPropertiesPositioning(originalMarkProperties.getUuid(), deviceIdentifier, null,
-                                new AsyncCallback<MarkPropertiesDTO>() {
+                        sailingService.updateMarkPropertiesPositioning(originalMarkProperties.getUuid(),
+                                deviceIdentifier, null, new AsyncCallback<MarkPropertiesDTO>() {
                                     @Override
                                     public void onFailure(Throwable caught) {
                                         errorReporter.reportError(
-                                                "Error trying to update device identifier for mark properties: " + caught.getMessage());
+                                                "Error trying to update device identifier for mark properties: "
+                                                        + caught.getMessage());
                                     }
 
                                     @Override
@@ -424,12 +446,12 @@ public class MarkPropertiesPanel extends FlowPanel {
     }
 
     void openEditMarkPropertiesPositionDialog(final MarkPropertiesDTO originalMarkProperties) {
-        final MarkPropertiesPositionEditDialog dialog = new MarkPropertiesPositionEditDialog(stringMessages,
-                null, new DialogCallback<Position>() {
+        final MarkPropertiesPositionEditDialog dialog = new MarkPropertiesPositionEditDialog(stringMessages, null,
+                new DialogCallback<Position>() {
                     @Override
                     public void ok(Position fixedPosition) {
-                        sailingService.updateMarkPropertiesPositioning(originalMarkProperties.getUuid(), null, fixedPosition,
-                                new AsyncCallback<MarkPropertiesDTO>() {
+                        sailingService.updateMarkPropertiesPositioning(originalMarkProperties.getUuid(), null,
+                                fixedPosition, new AsyncCallback<MarkPropertiesDTO>() {
                                     @Override
                                     public void onFailure(Throwable caught) {
                                         errorReporter.reportError(
@@ -461,7 +483,6 @@ public class MarkPropertiesPanel extends FlowPanel {
     }
 
     private static class MarkPropertiesImagesbarCell extends DefaultActionsImagesBarCell {
-        private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
         public static final String ACTION_SET_DEVICE_IDENTIFIER = "ACTION_SET_DEVICE_IDENTIFIER";
         public static final String ACTION_SET_POSITION = "ACTION_SET_POSITION";
         private final StringMessages stringMessages;
