@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.RadianPosition;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sse.common.Color;
@@ -27,7 +26,7 @@ public class MarkPropertiesDTO extends NamedDTO implements SecuredDTO {
 
     private UUID uuid;
     private DeviceIdentifierDTO deviceIdentifier;
-    private RadianPosition position;
+    private Position position;
 
     private CommonMarkPropertiesDTO commonMarkProperties;
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
@@ -38,7 +37,7 @@ public class MarkPropertiesDTO extends NamedDTO implements SecuredDTO {
     }
 
     public MarkPropertiesDTO(UUID uuid, String name, Iterable<String> tags, DeviceIdentifierDTO deviceIdentifier,
-            RadianPosition position, String shortName, Color color, String shape, String pattern, MarkType type) {
+            Position position, String shortName, Color color, String shape, String pattern, MarkType type) {
         super(name);
         this.uuid = uuid;
         this.deviceIdentifier = deviceIdentifier;

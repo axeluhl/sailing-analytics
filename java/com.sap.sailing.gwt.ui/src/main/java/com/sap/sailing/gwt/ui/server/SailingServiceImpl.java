@@ -303,7 +303,6 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.PolarSheetsXYDiagramDataImpl;
-import com.sap.sailing.domain.common.impl.RadianPosition;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -9956,8 +9955,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 markProperties.getTrackingDeviceIdentifier().getIdentifierType(),
                         markProperties.getTrackingDeviceIdentifier().getStringRepresentation())
                 : null;
-        final RadianPosition position = markProperties.getFixedPosition() != null ? new RadianPosition(
-                markProperties.getFixedPosition().getLatRad(), markProperties.getFixedPosition().getLngRad()) : null;
+        final Position position = markProperties.getFixedPosition() != null ? new DegreePosition(
+                markProperties.getFixedPosition().getLatDeg(), markProperties.getFixedPosition().getLngDeg()) : null;
         final MarkPropertiesDTO markPropertiesDto = new MarkPropertiesDTO(markProperties.getId(),
                 markProperties.getName(), markProperties.getTags(), deviceIdentifier, position,
                 markProperties.getShortName(),

@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole.coursecreation;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.impl.RadianPosition;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -44,7 +44,7 @@ public class MarkPropertiesPositionEditDialog extends DataEntryDialog<MarkProper
     protected MarkPropertiesDTO getResult() {
         return new MarkPropertiesDTO(markPropertiesToEdit.getUuid(), markPropertiesToEdit.getName(),
                 markPropertiesToEdit.getTags(), /* deviceIdentifier */ null,
-                new RadianPosition(latDoubleBox.getValue() != null ? latDoubleBox.getValue() : ERROR_VAL,
+                new DegreePosition(latDoubleBox.getValue() != null ? latDoubleBox.getValue() : ERROR_VAL,
                         lngDoubleBox.getValue() != null ? lngDoubleBox.getValue() : ERROR_VAL),
                 markPropertiesToEdit.getCommonMarkProperties().getShortName(),
                 markPropertiesToEdit.getCommonMarkProperties().getColor(),
@@ -56,9 +56,9 @@ public class MarkPropertiesPositionEditDialog extends DataEntryDialog<MarkProper
     @Override
     protected Widget getAdditionalWidget() {
         Grid grid = new Grid(2, 2);
-        grid.setWidget(0, 0, new Label(stringMessages.latitude() + " (" + stringMessages.angleInRadian() + ")"));
+        grid.setWidget(0, 0, new Label(stringMessages.latitude() + " (" + stringMessages.degreesShort() + ")"));
         grid.setWidget(0, 1, latDoubleBox);
-        grid.setWidget(1, 0, new Label(stringMessages.longitude() + " (" + stringMessages.angleInRadian() + ")"));
+        grid.setWidget(1, 0, new Label(stringMessages.longitude() + " (" + stringMessages.degreesShort() + ")"));
         grid.setWidget(1, 1, lngDoubleBox);
         return grid;
     }
