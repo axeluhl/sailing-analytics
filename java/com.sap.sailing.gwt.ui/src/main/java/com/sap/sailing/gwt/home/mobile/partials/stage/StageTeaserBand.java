@@ -45,7 +45,7 @@ public abstract class StageTeaserBand extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         
         if (event instanceof EventStageDTO) {
-            dataByLogo.setUp(((EventStageDTO) event).getTrackingConnectorInfos(), false, true);
+            dataByLogo.setUp(((EventStageDTO) event).getTrackingConnectorInfos(), /** colorIfPossible **/ false, /** enforceTextColor **/ true);
         } else {
             dataByLogo.setVisible(false);
         }

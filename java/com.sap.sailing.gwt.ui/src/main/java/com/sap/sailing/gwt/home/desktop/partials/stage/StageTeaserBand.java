@@ -44,7 +44,7 @@ public abstract class StageTeaserBand extends Composite {
         
         isLiveDiv.getStyle().setDisplay(Display.NONE);
         
-        dataByLogo.setUp(event.getTrackingConnectorInfos(), false, true);
+        dataByLogo.setUp(event.getTrackingConnectorInfos(), /** colorIfPossible **/ false, /** enforceTextColor **/ true);
 
         eventNavigation = placeNavigator.getEventNavigation(event.getId().toString(), event.getBaseURL(), event.isOnRemoteServer());
     }
