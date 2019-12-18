@@ -341,7 +341,12 @@ public class UniqueIPsPerReferrer {
             final LogEntry entry = new LogEntry(line);
             final String hostname = entry.getHostname();
             final Writer fileWriterForHostname = getFileWriter(hostname, fileWritersPerHostname, this::getHostnameSpecificFile, /* gzipCompressed */ false, /* append */ true);
-            fileWriterForHostname.write(entry.getRequestorIpString()+" "+entry.getDateString()+" "+entry.getUserAgent()+"\n");
+            final String dateString = entry.getDateString();
+            final String requestorIpString = entry.getRequestorIpString();
+            final String userAgent = entry.getUserAgent();
+            if (dateString != null && requestorIpString != null && userAgent != null) {
+                fileWriterForHostname.write(requestorIpString+" "+dateString+" "+userAgent+"\n");
+            }
         }
         for (final Writer fw : fileWritersPerHostname.values()) {
             fw.close();

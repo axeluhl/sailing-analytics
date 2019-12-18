@@ -80,7 +80,6 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
         if (relativeScore == null) {
             return null;
         }
-        
         SailingClusterGroups clusterGroups = Activator.getClusterGroups();
         Cluster<Double> cluster = clusterGroups.getPercentageClusterGroup().getClusterFor(relativeScore);
         return new ClusterDTO(clusterGroups.getPercentageClusterFormatter().format(cluster));

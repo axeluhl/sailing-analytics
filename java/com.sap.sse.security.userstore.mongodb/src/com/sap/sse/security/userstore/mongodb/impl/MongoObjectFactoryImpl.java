@@ -171,7 +171,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbRoleDefinitionMap.add(dbRoleDef);
         }
         dbUserGroup.put(FieldNames.UserGroup.ROLE_DEFINITION_MAP.name(), dbRoleDefinitionMap);
-
         userGroupCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbUserGroup, new UpdateOptions().upsert(true));
     }
     
