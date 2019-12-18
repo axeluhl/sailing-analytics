@@ -408,8 +408,8 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         CourseTemplate existingCourseTemplate = courseTemplatesById.get(uuid);
         CourseTemplateImpl courseTemplate = new CourseTemplateImpl(uuid, name,
                 existingCourseTemplate.getMarkTemplates(), existingCourseTemplate.getWaypointTemplates(),
-                existingCourseTemplate.getAssociatedRoles(), optionalImageURL,
-                existingCourseTemplate.getRepeatablePart(), existingCourseTemplate.getDefaultNumberOfLaps());
+                existingCourseTemplate.getAssociatedRoles(), defaultMarkTemplatesForRoles,
+                optionalImageURL, existingCourseTemplate.getRepeatablePart(), existingCourseTemplate.getDefaultNumberOfLaps());
         courseTemplate.setTags(tags);
 
         mongoObjectFactory.storeCourseTemplate(courseTemplate);
@@ -423,7 +423,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
             Map<MarkTemplate, MarkRole> associatedRoles, RepeatablePart optionalRepeatablePart, Iterable<String> tags,
             URL optionalImageURL, Integer defaultNumberOfLaps) {
         final CourseTemplateImpl courseTemplate = new CourseTemplateImpl(idOfNewCourseTemplate, courseTemplateName,
-                marks, waypoints, associatedRoles, optionalImageURL, optionalRepeatablePart, defaultNumberOfLaps);
+                marks, waypoints, associatedRoles, defaultMarkTemplatesForRoles, optionalImageURL, optionalRepeatablePart, defaultNumberOfLaps);
         courseTemplate.setTags(tags);
         mongoObjectFactory.storeCourseTemplate(courseTemplate);
         courseTemplatesById.put(courseTemplate.getId(), courseTemplate);

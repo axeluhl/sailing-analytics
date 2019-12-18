@@ -2,17 +2,17 @@ package com.sap.sailing.domain.coursetemplate.impl;
 
 import java.util.Arrays;
 
-import com.sap.sailing.domain.coursetemplate.MarkPairTemplate;
-import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
+import com.sap.sailing.domain.coursetemplate.MarkRolePair;
 import com.sap.sse.common.impl.NamedImpl;
 
-public class MarkPairTemplateImpl extends NamedImpl implements MarkPairTemplate {
+public class MarkRolePairImpl extends NamedImpl implements MarkRolePair {
     private static final long serialVersionUID = -4966456947099578789L;
-    private final MarkTemplate left;
-    private final MarkTemplate right;
+    private final MarkRole left;
+    private final MarkRole right;
     private final String shortName;
 
-    public MarkPairTemplateImpl(String name, String shortName, MarkTemplate left, MarkTemplate right) {
+    public MarkRolePairImpl(String name, String shortName, MarkRole left, MarkRole right) {
         super(name);
         this.shortName = shortName;
         this.left = left;
@@ -20,17 +20,17 @@ public class MarkPairTemplateImpl extends NamedImpl implements MarkPairTemplate 
     }
 
     @Override
-    public Iterable<MarkTemplate> getMarks() {
+    public Iterable<MarkRole> getMarks() {
         return Arrays.asList(getLeft(), getRight());
     }
 
     @Override
-    public MarkTemplate getLeft() {
+    public MarkRole getLeft() {
         return left;
     }
 
     @Override
-    public MarkTemplate getRight() {
+    public MarkRole getRight() {
         return right;
     }
 
@@ -58,7 +58,7 @@ public class MarkPairTemplateImpl extends NamedImpl implements MarkPairTemplate 
             return false;
         if (getClass() != obj.getClass())
             return false;
-        MarkPairTemplateImpl other = (MarkPairTemplateImpl) obj;
+        MarkRolePairImpl other = (MarkRolePairImpl) obj;
         if (getName() == null) {
             if (other.getName() != null)
                 return false;

@@ -29,8 +29,8 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
-import com.sap.sailing.domain.coursetemplate.MarkPairTemplate;
-import com.sap.sailing.domain.coursetemplate.MarkPairTemplate.MarkPairTemplateFactory;
+import com.sap.sailing.domain.coursetemplate.MarkRolePair;
+import com.sap.sailing.domain.coursetemplate.MarkRolePair.MarkRolePairFactory;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBuilder;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
@@ -333,7 +333,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final ArrayList<?> waypointTemplatesList = dbObject.get(FieldNames.COURSE_TEMPLATE_WAYPOINTS.name(),
                 ArrayList.class);
         final List<WaypointTemplate> waypointTemplates = new ArrayList<>();
-        final MarkPairTemplateFactory markPairTemplateFactory = new MarkPairTemplateFactory();
+        final MarkRolePairFactory markPairTemplateFactory = new MarkRolePairFactory();
         for (final Object o : waypointTemplatesList) {
             if (o instanceof Document) {
 
@@ -362,14 +362,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
 
         final CourseTemplateImpl courseTemplateImpl = new CourseTemplateImpl(id, name, markTemplates, waypointTemplates,
-                associatedRoles, optionalImageURL, optionalRepeatablePart, defaultNumberOfLaps);
+                associatedRoles, defaultMarkTemplatesForRoles, optionalImageURL, optionalRepeatablePart, defaultNumberOfLaps);
         courseTemplateImpl.setTags(tags);
         return courseTemplateImpl;
     }
 
     private WaypointTemplate loadWaypointTemplate(Document bdo,
             Function<UUID, MarkTemplate> markTemplateResolver,
-            BiFunction<Pair<String, String>, List<MarkTemplate>, MarkPairTemplate> markPairResolver) {
+            BiFunction<Pair<String, String>, List<MarkTemplate>, MarkRolePair> markPairResolver) {
         // load passing instruction
         final PassingInstruction passingInstruction = PassingInstruction
                 .valueOf(bdo.get(FieldNames.WAYPOINT_TEMPLATE_PASSINGINSTRUCTION.name()).toString());

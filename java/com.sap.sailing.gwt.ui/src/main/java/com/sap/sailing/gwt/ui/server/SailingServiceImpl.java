@@ -338,7 +338,7 @@ import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
-import com.sap.sailing.domain.coursetemplate.MarkPairTemplate.MarkPairTemplateFactory;
+import com.sap.sailing.domain.coursetemplate.MarkRolePair.MarkRolePairFactory;
 import com.sap.sailing.domain.coursetemplate.Positioning.PositioningType;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
@@ -10010,7 +10010,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return new WaypointTemplateDTO(waypointTemplate.getControlPointTemplate().getName(),
                 waypointTemplate.getControlPointTemplate().getShortName(),
                 StreamSupport.stream(waypointTemplate.getControlPointTemplate().getMarks().spliterator(), false)
-                        .map(this::convertToMarkTemplateDTO).collect(Collectors.toList()),
+                        .map(this::convertToMarkRoleDTO).collect(Collectors.toList()),
                 waypointTemplate.getPassingInstruction());
     }
 
@@ -10019,15 +10019,15 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         getSharedSailingData().deleteCourseTemplate(getSharedSailingData().getCourseTemplateById(uuid));
     }
 
-    private WaypointTemplate convertToWaypointTemplate(WaypointTemplateDTO waypointTemplate, final MarkPairTemplateFactory markPairTemplateFactory) {
-        final List<MarkTemplate> resolvedMarkTemplates = waypointTemplate.getMarkTemplatesForControlPoint().stream()
-                .map(t -> getSharedSailingData().getMarkTemplateById(t.getUuid())).collect(Collectors.toList());
+    private WaypointTemplate convertToWaypointTemplate(WaypointTemplateDTO waypointTemplate, final MarkRolePairFactory markRolePairFactory) {
+        final List<MarkRole> resolvedMarkRoles = waypointTemplate.getMarkRolesForControlPoint().stream()
+                .map(t -> getSharedSailingData().getMarkRoleById(t.getUuid())).collect(Collectors.toList());
         final ControlPointTemplate controlPointTemplate;
-        if (resolvedMarkTemplates.size() == 1) {
-            controlPointTemplate = resolvedMarkTemplates.get(0);
-        } else if (resolvedMarkTemplates.size() == 2) {
-            controlPointTemplate = markPairTemplateFactory.create(waypointTemplate.getName(),
-                    waypointTemplate.getShortName(), resolvedMarkTemplates);
+        if (resolvedMarkRoles.size() == 1) {
+            controlPointTemplate = resolvedMarkRoles.get(0);
+        } else if (resolvedMarkRoles.size() == 2) {
+            controlPointTemplate = markRolePairFactory.create(waypointTemplate.getName(),
+                    waypointTemplate.getShortName(), resolvedMarkRoles);
         } else {
             throw new IllegalArgumentException("Waypoints must contain one or two marks");
         }
@@ -10052,7 +10052,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             throw new IllegalArgumentException(
                     String.format("Invalid URL: %s", courseTemplate.getOptionalImageUrl().get()));
         }
-
         final CourseTemplateDTO result;
         if (existingCourseTemplate != null) {
             getSecurityService().checkCurrentUserUpdatePermission(existingCourseTemplate);
@@ -10061,7 +10060,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         } else {
             final List<MarkTemplate> marks = courseTemplate.getMarkTemplates().stream()
                     .map(t -> getSharedSailingData().getMarkTemplateById(t.getUuid())).collect(Collectors.toList());
-            final MarkPairTemplateFactory markPairTemplateFactory = new MarkPairTemplateFactory();
+            final MarkRolePairFactory markPairTemplateFactory = new MarkRolePairFactory();
             final List<WaypointTemplate> waypoints = courseTemplate.getWaypointTemplates().stream()
                     .map(wp -> convertToWaypointTemplate(wp, markPairTemplateFactory)).collect(Collectors.toList());
             final Map<MarkTemplate, MarkRole> associatedRoles = courseTemplate.getAssociatedRoles().entrySet().stream()

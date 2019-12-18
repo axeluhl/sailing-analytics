@@ -58,8 +58,8 @@ import com.sap.sailing.domain.coursetemplate.FixedPositioning;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.IsMarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
-import com.sap.sailing.domain.coursetemplate.MarkPairTemplate;
-import com.sap.sailing.domain.coursetemplate.MarkPairTemplate.MarkPairTemplateFactory;
+import com.sap.sailing.domain.coursetemplate.MarkRolePair;
+import com.sap.sailing.domain.coursetemplate.MarkRolePair.MarkRolePairFactory;
 import com.sap.sailing.domain.coursetemplate.MarkPairWithConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
@@ -304,7 +304,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             marksConfigurationsMapping.put(markConfiguration, effectiveConfiguration);
         }
 
-        final MarkPairTemplateFactory markPairTemplateFactory = new MarkPairTemplateFactory();
+        final MarkRolePairFactory markPairTemplateFactory = new MarkRolePairFactory();
         
         final CourseConfigurationToCourseConfigurationMapper waypointConfigurationMapper = new CourseConfigurationToCourseConfigurationMapper(
                 courseConfigurationAfterInventory.getWaypoints(), courseConfigurationAfterInventory.getAssociatedRoles(),
@@ -675,7 +675,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 MarkTemplate markTemplate = (MarkTemplate) controlPointTemplate;
                 resultingControlPoint = markTemplatesToMarkConfigurations.get(markTemplate);
             } else {
-                final MarkPairTemplate markPairTemplate = (MarkPairTemplate) controlPointTemplate;
+                final MarkRolePair markPairTemplate = (MarkRolePair) controlPointTemplate;
                 final MarkConfiguration left = markTemplatesToMarkConfigurations.get(markPairTemplate.getLeft());
                 final MarkConfiguration right = markTemplatesToMarkConfigurations.get(markPairTemplate.getRight());
                 resultingControlPoint = new MarkPairWithConfigurationImpl(markPairTemplate.getName(), left, right,
@@ -814,32 +814,25 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     final Iterator<Waypoint> waypointIterator = course.getWaypoints().iterator();
                     while (waypointTemplateIterator.hasNext() && validCourseTemplateUsage) {
                         final WaypointTemplate waypointTemplate = waypointTemplateIterator.next();
-                        final Iterable<MarkTemplate> markTemplatesOfControlPoint = waypointTemplate
-                                .getControlPointTemplate().getMarks();
+                        final Iterable<MarkRole> markRolesOfControlPoint = waypointTemplate.getControlPointTemplate().getMarks();
                         final Waypoint waypoint = waypointIterator.next();
                         final Iterable<Mark> marksOfControlPoint = waypoint.getControlPoint().getMarks();
-                        if (Util.size(markTemplatesOfControlPoint) != Util.size(marksOfControlPoint)) {
+                        if (Util.size(markRolesOfControlPoint) != Util.size(marksOfControlPoint)) {
                             validCourseTemplateUsage = false;
                             break;
                         }
-                        final Iterator<MarkTemplate> markTemplateIterator = markTemplatesOfControlPoint.iterator();
+                        final Iterator<MarkRole> markRoleIterator = markRolesOfControlPoint.iterator();
                         final Iterator<Mark> markIterator = marksOfControlPoint.iterator();
-                        while (markTemplateIterator.hasNext()) {
-                            final MarkTemplate markTemplate = markTemplateIterator.next();
+                        while (markRoleIterator.hasNext()) {
+                            final MarkRole roleForMarkTemplate = markRoleIterator.next();
                             final Mark mark = markIterator.next();
-                            final MarkRole roleForMarkTempalte = courseTemplate.getOptionalAssociatedRole(markTemplate);
-                            if (roleForMarkTempalte == null) {
-                                validCourseTemplateUsage = false;
-                                break;
-                            }
                             final MarkRole roleForMarkOrNull = resolveMarkRole(course.getAssociatedRoles().get(mark), courseTemplate);
-                            if (!Util.equalsWithNull(roleForMarkTempalte, roleForMarkOrNull)) {
+                            if (!Util.equalsWithNull(roleForMarkTemplate, roleForMarkOrNull)) {
                                 validCourseTemplateUsage = false;
                                 break;
                             }
-                            final RegattaMarkConfiguration regattaMarkConfiguration = markConfigurationsByMark
-                                    .get(mark);
-                            markTemplatesToMarkConfigurations.putIfAbsent(markTemplate, regattaMarkConfiguration);
+                            final RegattaMarkConfiguration regattaMarkConfiguration = markConfigurationsByMark.get(mark);
+                            markTemplatesToMarkConfigurations.putIfAbsent(roleForMarkTemplate, regattaMarkConfiguration);
                         }
                     }
                 }

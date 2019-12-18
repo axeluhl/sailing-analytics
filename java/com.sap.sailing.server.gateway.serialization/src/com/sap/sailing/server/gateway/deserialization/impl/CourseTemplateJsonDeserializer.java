@@ -15,7 +15,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
-import com.sap.sailing.domain.coursetemplate.MarkPairTemplate.MarkPairTemplateFactory;
+import com.sap.sailing.domain.coursetemplate.MarkRolePair.MarkRolePairFactory;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
@@ -55,7 +55,6 @@ public class CourseTemplateJsonDeserializer implements JsonDeserializer<CourseTe
         if (tagsJSON != null) {
             tagsJSON.forEach(t -> tags.add(t.toString()));
         }
-        
         final Map<UUID, MarkTemplate> allMarkTemplatesById = new HashMap<UUID, MarkTemplate>();
         final Map<MarkTemplate, MarkRole> roles = new HashMap<>();
         final JSONArray allMarkTemplatesJSON = (JSONArray) json.get(CourseTemplateJsonSerializer.FIELD_ALL_MARK_TEMPLATES);
@@ -74,9 +73,8 @@ public class CourseTemplateJsonDeserializer implements JsonDeserializer<CourseTe
                 roles.put(resolvedMarkTemplate, resolvedMarkRole);
             }
         }
-        
         final List<WaypointTemplate> waypoints = new ArrayList<>();
-        final MarkPairTemplateFactory markPairTemplateFactory = new MarkPairTemplateFactory();
+        final MarkRolePairFactory markPairTemplateFactory = new MarkRolePairFactory();
         final JSONArray waypointsJSON = (JSONArray) json.get(CourseTemplateJsonSerializer.FIELD_WAYPOINTS);
         for (Object waypointObject : waypointsJSON) {
             final JSONObject waypointJSON = (JSONObject) waypointObject;
@@ -105,7 +103,6 @@ public class CourseTemplateJsonDeserializer implements JsonDeserializer<CourseTe
             
             waypoints.add(new WaypointTemplateImpl(controlPointTemplate, passingInstruction));
         }
-        
         final JSONObject repeatablePartJSON = (JSONObject) json.get(CourseTemplateJsonSerializer.FIELD_OPTIONAL_REPEATABLE_PART);
         final RepeatablePart optionalRepeatablePart;
         if (repeatablePartJSON == null) {
@@ -113,14 +110,12 @@ public class CourseTemplateJsonDeserializer implements JsonDeserializer<CourseTe
         } else {
             optionalRepeatablePart = repeatablePartJsonDeserializer.deserialize(repeatablePartJSON);
         }
-        
         final Number defaultNumberOfLapsNumber = (Number) json
                 .get(CourseTemplateJsonSerializer.FIELD_DEFAULT_NUMBER_OF_LAPS);
         final Integer defaultNumberOfLaps = defaultNumberOfLapsNumber == null ? null : defaultNumberOfLapsNumber.intValue();
-
         final CourseTemplateImpl courseTemplate = new CourseTemplateImpl(null, courseTemplateName,
-                allMarkTemplatesById.values(), waypoints, roles, optionalImageURL, optionalRepeatablePart,
-                defaultNumberOfLaps);
+                allMarkTemplatesById.values(), waypoints, roles, defaultMarkTemplatesForRoles, optionalImageURL,
+                optionalRepeatablePart, defaultNumberOfLaps);
         courseTemplate.setTags(tags);
         return courseTemplate;
     }

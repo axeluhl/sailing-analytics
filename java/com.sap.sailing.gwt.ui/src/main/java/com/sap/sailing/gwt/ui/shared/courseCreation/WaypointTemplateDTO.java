@@ -10,7 +10,7 @@ public class WaypointTemplateDTO implements Serializable {
     private static final long serialVersionUID = -3137039437059719498L;
 
     // using concrete type ArrayList because of GWT serialization
-    private ArrayList<MarkTemplateDTO> markTemplatesForControlPoint = new ArrayList<>();
+    private ArrayList<MarkRoleDTO> markRolesForControlPoint = new ArrayList<>();
 
     private String passingInstruction;
     private String name;
@@ -19,17 +19,17 @@ public class WaypointTemplateDTO implements Serializable {
     public WaypointTemplateDTO() {
     }
 
-    public WaypointTemplateDTO(String name, String shortName, Iterable<MarkTemplateDTO> markTemplatesForControlPoint,
+    public WaypointTemplateDTO(String name, String shortName, Iterable<MarkRoleDTO> markRolesForControlPoint,
             PassingInstruction passingInstruction) {
         super();
         this.shortName = shortName;
-        Util.addAll(markTemplatesForControlPoint, this.markTemplatesForControlPoint);
+        Util.addAll(markRolesForControlPoint, this.markRolesForControlPoint);
         this.passingInstruction = passingInstruction.name();
         this.name = name;
     }
 
-    public ArrayList<MarkTemplateDTO> getMarkTemplatesForControlPoint() {
-        return markTemplatesForControlPoint;
+    public ArrayList<MarkRoleDTO> getMarkRolesForControlPoint() {
+        return markRolesForControlPoint;
     }
 
     public PassingInstruction getPassingInstruction() {
@@ -55,5 +55,4 @@ public class WaypointTemplateDTO implements Serializable {
     public void setShortName(String shortName) {
         this.shortName = shortName;
     }
-
 }

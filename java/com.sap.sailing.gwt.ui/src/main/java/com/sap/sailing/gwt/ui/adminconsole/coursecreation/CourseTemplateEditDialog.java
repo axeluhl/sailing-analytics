@@ -96,7 +96,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                             if (wt.getPassingInstruction() == null) {
                                 sb.append(stringMessages.wayPointRequiresPassingInstruction()).append(". ");
                             } else {
-                                wt.getMarkTemplatesForControlPoint()
+                                wt.getMarkRolesForControlPoint()
                                         .forEach(wtmt -> unAssignedMarkTemplateUsed.set(unAssignedMarkTemplateUsed.get()
                                                 || valueToValidate.getMarkTemplates().stream()
                                                         .noneMatch(mt -> mt.getUuid().equals(wtmt.getUuid()))));
@@ -107,9 +107,9 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                                     if (wt.getName() == null) {
                                         sb.append(stringMessages.wayPointRequiresName()).append(". ");
                                     }
-                                    if (wt.getMarkTemplatesForControlPoint().size() == 2
-                                            && wt.getMarkTemplatesForControlPoint().get(0)
-                                                    .equals(wt.getMarkTemplatesForControlPoint().get(1))) {
+                                    if (wt.getMarkRolesForControlPoint().size() == 2
+                                            && wt.getMarkRolesForControlPoint().get(0)
+                                                    .equals(wt.getMarkRolesForControlPoint().get(1))) {
                                         sb.append(stringMessages.wayPointMarkTemplatesAreTheSame());
                                     }
                                 }
@@ -296,9 +296,9 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                 hideablemarkTemplate1Cell) {
             @Override
             public String getValue(WaypointTemplateDTO waypointTemplate) {
-                return waypointTemplate.getMarkTemplatesForControlPoint() != null
-                        && waypointTemplate.getMarkTemplatesForControlPoint().size() >= 1
-                                ? waypointTemplate.getMarkTemplatesForControlPoint().get(0).getName()
+                return waypointTemplate.getMarkRolesForControlPoint() != null
+                        && waypointTemplate.getMarkRolesForControlPoint().size() >= 1
+                                ? waypointTemplate.getMarkRolesForControlPoint().get(0).getName()
                                 : "";
             }
         };
@@ -307,10 +307,10 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
             public void update(int index, WaypointTemplateDTO waypointTemplate, String value) {
                 MarkTemplateDTO selectedMarkTemplate = allMarkTemplates.stream()
                         .filter(mt -> mt.getName().equals(value)).findFirst().get();
-                if (waypointTemplate.getMarkTemplatesForControlPoint().size() == 0) {
-                    waypointTemplate.getMarkTemplatesForControlPoint().add(selectedMarkTemplate);
+                if (waypointTemplate.getMarkRolesForControlPoint().size() == 0) {
+                    waypointTemplate.getMarkRolesForControlPoint().add(selectedMarkTemplate);
                 } else {
-                    waypointTemplate.getMarkTemplatesForControlPoint().set(0, selectedMarkTemplate);
+                    waypointTemplate.getMarkRolesForControlPoint().set(0, selectedMarkTemplate);
                 }
                 validateAndUpdate();
             }
@@ -322,9 +322,9 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                 hideablemarkTemplate2Cell) {
             @Override
             public String getValue(WaypointTemplateDTO waypointTemplate) {
-                return waypointTemplate.getMarkTemplatesForControlPoint() != null
-                        && waypointTemplate.getMarkTemplatesForControlPoint().size() == 2
-                                ? waypointTemplate.getMarkTemplatesForControlPoint().get(1).getName()
+                return waypointTemplate.getMarkRolesForControlPoint() != null
+                        && waypointTemplate.getMarkRolesForControlPoint().size() == 2
+                                ? waypointTemplate.getMarkRolesForControlPoint().get(1).getName()
                                 : null;
             }
         };
@@ -333,10 +333,10 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
             public void update(int index, WaypointTemplateDTO waypointTemplate, String value) {
                 MarkTemplateDTO selectedMarkTemplate = allMarkTemplates.stream()
                         .filter(mt -> mt.getName().equals(value)).findFirst().get();
-                if (waypointTemplate.getMarkTemplatesForControlPoint().size() == 1) {
-                    waypointTemplate.getMarkTemplatesForControlPoint().add(selectedMarkTemplate);
+                if (waypointTemplate.getMarkRolesForControlPoint().size() == 1) {
+                    waypointTemplate.getMarkRolesForControlPoint().add(selectedMarkTemplate);
                 } else {
-                    waypointTemplate.getMarkTemplatesForControlPoint().set(1, selectedMarkTemplate);
+                    waypointTemplate.getMarkRolesForControlPoint().set(1, selectedMarkTemplate);
                 }
                 validateAndUpdate();
             }
@@ -423,9 +423,9 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
             defaultNumberOfLaps = null;
         }
         waypointTemplates.forEach(wt -> {
-            if (!hasTwoMarks(wt) && wt.getMarkTemplatesForControlPoint() != null
-                    && wt.getMarkTemplatesForControlPoint().size() == 2) {
-                wt.getMarkTemplatesForControlPoint().remove(1);
+            if (!hasTwoMarks(wt) && wt.getMarkRolesForControlPoint() != null
+                    && wt.getMarkRolesForControlPoint().size() == 2) {
+                wt.getMarkRolesForControlPoint().remove(1);
             }
         });
         return new CourseTemplateDTO(id, nameTextBox.getValue(), markTemplates, waypointTemplates, associatedRoles,

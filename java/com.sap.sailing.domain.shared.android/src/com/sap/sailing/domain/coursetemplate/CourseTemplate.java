@@ -55,8 +55,6 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
     
     MarkTemplate getMarkTemplateByIdIfContainedInCourseTemplate(UUID markTemplateId);
     
-    Iterable<MarkTemplate> getMarkTemplatesInWaypoints();
-
     /**
      * Returns a sequence of {@link WaypointTemplate}s that can be use to construct a course. If this course template
      * defines a repeatable waypoint sub-sequence, the {@code numberOfLaps} parameter is used to decide how many times
@@ -96,6 +94,12 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
      */
     Map<MarkTemplate, MarkRole> getMarkTemplatesWithOptionalRoles();
     
+    /**
+     * Obtains the {@link MarkTemplate} that, when instantiating a course from this template, shall be used
+     * to create the {@link Mark} that acts in the role identified by {@code markRole}.
+     */
+    MarkTemplate getDefaultMarkTemplateForRole(MarkRole markRole);
+
     /**
      * Short for {@link #getMarkTemplatesWithOptionalRoles()}.{@link Map#get(Object) get(markTemplate)}
      */

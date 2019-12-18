@@ -11,7 +11,7 @@ import com.sap.sse.common.Named;
  *
  */
 public interface ControlPointTemplate extends Named {
-    Iterable<MarkTemplate> getMarks();
+    Iterable<MarkRole> getMarks();
 
     String getShortName();
 }

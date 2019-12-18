@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.coursetemplate.impl;
 
-import java.util.Collections;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.MarkType;
@@ -42,11 +41,6 @@ public class MarkTemplateImpl extends NamedWithUUIDImpl implements MarkTemplate 
         this.shape = commonMarkProperties.getShape();
         this.pattern = commonMarkProperties.getPattern();
         this.type = commonMarkProperties.getType();
-    }
-
-    @Override
-    public Iterable<MarkTemplate> getMarks() {
-        return Collections.singleton(this);
     }
 
     @Override
