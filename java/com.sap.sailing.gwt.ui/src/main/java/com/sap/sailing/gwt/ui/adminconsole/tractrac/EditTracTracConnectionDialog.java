@@ -34,15 +34,18 @@ public class EditTracTracConnectionDialog extends DataEntryDialog<TracTracConfig
      * @param userToEdit
      *            The 'userToEdit' parameter contains the user which should be changed or initialized.
      */
-    public EditTracTracConnectionDialog(final TracTracConfigurationWithSecurityDTO dtotoEdit,
+    public EditTracTracConnectionDialog(final TracTracConfigurationWithSecurityDTO dtoToEdit,
             final DialogCallback<TracTracConfigurationWithSecurityDTO> callback, final UserService userService,
             final ErrorReporter errorReporter) {
         super(stringMessages.editTracTracConnection(), null, stringMessages.ok(), stringMessages.cancel(),
                 /* validator */ null, /* animationEnabled */true, callback);
-        this.dtoToEdit = dtotoEdit;
+        this.dtoToEdit = dtoToEdit;
         this.ensureDebugId("EditTracTracConnectionDialog");
         createUi();
-        setData(dtotoEdit);
+        setData(dtoToEdit);
+        if (dtoToEdit.getJsonUrl() != null) {
+            jsonURLTextBox.setReadOnly(true);
+        }
     }
 
     private void setData(final TracTracConfigurationWithSecurityDTO dtotoEdit) {
@@ -79,6 +82,7 @@ public class EditTracTracConnectionDialog extends DataEntryDialog<TracTracConfig
         jsonURLTextBox = createTextBox("");
         jsonURLTextBox.ensureDebugId("JsonURLTextBox");
         jsonURLTextBox.setVisibleLength(100);
+        
         // validation: User should not create empty connections
         jsonURLTextBox.addKeyUpHandler(e -> super.getOkButton().setEnabled(!jsonURLTextBox.getText().isEmpty()));
         grid.setWidget(3, 0, jsonURLLabel);

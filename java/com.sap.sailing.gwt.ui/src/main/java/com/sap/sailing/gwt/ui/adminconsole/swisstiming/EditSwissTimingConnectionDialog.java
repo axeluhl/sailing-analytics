@@ -50,16 +50,19 @@ public class EditSwissTimingConnectionDialog extends DataEntryDialog<SwissTiming
      * @param userToEdit
      *            The 'userToEdit' parameter contains the user which should be changed or initialized.
      */
-    public EditSwissTimingConnectionDialog(final SwissTimingConfigurationWithSecurityDTO dtotoEdit,
+    public EditSwissTimingConnectionDialog(final SwissTimingConfigurationWithSecurityDTO dtoToEdit,
             final DialogCallback<SwissTimingConfigurationWithSecurityDTO> callback, final UserService userService,
             final ErrorReporter errorReporter) {
         super(stringMessages.editSwissTimingConnections(), null, stringMessages.ok(), stringMessages.cancel(),
                 /* validator */ new EmptyFieldValidator(),
                 /* animationEnabled */true, callback);
-        this.dtoToEdit = dtotoEdit;
-        this.ensureDebugId("EditTracTracConnectionDialog");
+        this.dtoToEdit = dtoToEdit;
+        this.ensureDebugId("EditSwissTimingConnectionDialog");
         createUi();
-        setData(dtotoEdit);
+        setData(dtoToEdit);
+        if (dtoToEdit.getJsonUrl() != null) {
+            manage2SailEventUrlJsonTextBox.setReadOnly(true);
+        }
     }
 
     private void setData(final SwissTimingConfigurationWithSecurityDTO dtoToEdit) {

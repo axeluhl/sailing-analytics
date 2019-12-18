@@ -52,6 +52,9 @@ public class EditSwissTimingArchivedConnectionDialog
         this.ensureDebugId("EditSwissTimingArchivedConnectionDialog");
         createUi();
         setData(dtoToEdit);
+        if (dtoToEdit.getJsonUrl() != null) {
+            jsonURLTextBox.setReadOnly(true);
+        }
     }
 
     private void setData(final SwissTimingArchiveConfigurationWithSecurityDTO dtotoEdit) {
