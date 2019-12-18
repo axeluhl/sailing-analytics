@@ -32,10 +32,12 @@ import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleResources;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
@@ -333,60 +335,119 @@ public class MarkPropertiesPanel extends FlowPanel {
                 markProperties -> configACL.openDialog(markProperties));
         markPropertiesTable.addColumn(idColumn, stringMessages.id());
         markPropertiesTable.addColumn(actionsColumn, stringMessages.actions());
-
     }
 
     public void refreshMarkProperties() {
         loadMarkProperties();
     }
 
-    DialogCallback<MarkPropertiesDTO> createEditDialogCallback(final MarkPropertiesDTO originalMarkProperties) {
-        return new DialogCallback<MarkPropertiesDTO>() {
-            @Override
-            public void ok(MarkPropertiesDTO markProperties) {
-                sailingService.addOrUpdateMarkProperties(markProperties, new AsyncCallback<MarkPropertiesDTO>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error trying to update mark properties: " + caught.getMessage());
-                    }
-
-                    @Override
-                    public void onSuccess(MarkPropertiesDTO updatedMarkProperties) {
-                        int editedMarkPropertiesIndex = filterableMarkProperties.indexOf(originalMarkProperties);
-                        filterableMarkProperties.remove(originalMarkProperties);
-                        if (editedMarkPropertiesIndex >= 0) {
-                            filterableMarkProperties.add(editedMarkPropertiesIndex, updatedMarkProperties);
-                        } else {
-                            filterableMarkProperties.add(updatedMarkProperties);
-                        }
-                        markPropertiesListDataProvider.refresh();
-                    }
-                });
-            }
-
-            @Override
-            public void cancel() {
-            }
-        };
-    }
-
     void openEditMarkPropertiesDialog(final MarkPropertiesDTO originalMarkProperties) {
         final MarkPropertiesEditDialog dialog = new MarkPropertiesEditDialog(stringMessages, originalMarkProperties,
-                createEditDialogCallback(originalMarkProperties));
+                new DialogCallback<MarkPropertiesDTO>() {
+                    @Override
+                    public void ok(MarkPropertiesDTO markProperties) {
+                        sailingService.addOrUpdateMarkProperties(markProperties,
+                                new AsyncCallback<MarkPropertiesDTO>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        errorReporter.reportError(
+                                                "Error trying to update mark properties: " + caught.getMessage());
+                                    }
+
+                                    @Override
+                                    public void onSuccess(MarkPropertiesDTO updatedMarkProperties) {
+                                        int editedMarkPropertiesIndex = filterableMarkProperties
+                                                .indexOf(originalMarkProperties);
+                                        filterableMarkProperties.remove(originalMarkProperties);
+                                        if (editedMarkPropertiesIndex >= 0) {
+                                            filterableMarkProperties.add(editedMarkPropertiesIndex,
+                                                    updatedMarkProperties);
+                                        } else {
+                                            filterableMarkProperties.add(updatedMarkProperties);
+                                        }
+                                        markPropertiesListDataProvider.refresh();
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                });
         dialog.ensureDebugId("MarkPropertiesEditDialog");
         dialog.show();
     }
 
     void openEditMarkPropertiesDeviceIdentifierDialog(final MarkPropertiesDTO originalMarkProperties) {
         final MarkPropertiesDeviceIdentifierEditDialog dialog = new MarkPropertiesDeviceIdentifierEditDialog(
-                stringMessages, originalMarkProperties, createEditDialogCallback(originalMarkProperties));
+                stringMessages, originalMarkProperties.getDeviceIdentifier(), new DialogCallback<DeviceIdentifierDTO>() {
+                    @Override
+                    public void ok(DeviceIdentifierDTO deviceIdentifier) {
+                        sailingService.updateMarkPropertiesPositioning(originalMarkProperties.getUuid(), deviceIdentifier, null,
+                                new AsyncCallback<MarkPropertiesDTO>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        errorReporter.reportError(
+                                                "Error trying to update device identifier for mark properties: " + caught.getMessage());
+                                    }
+
+                                    @Override
+                                    public void onSuccess(MarkPropertiesDTO updatedMarkProperties) {
+                                        int editedMarkPropertiesIndex = filterableMarkProperties
+                                                .indexOf(originalMarkProperties);
+                                        filterableMarkProperties.remove(originalMarkProperties);
+                                        if (editedMarkPropertiesIndex >= 0) {
+                                            filterableMarkProperties.add(editedMarkPropertiesIndex,
+                                                    updatedMarkProperties);
+                                        } else {
+                                            filterableMarkProperties.add(updatedMarkProperties);
+                                        }
+                                        markPropertiesListDataProvider.refresh();
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                });
         dialog.ensureDebugId("MarkPropertiesDeviceIdentifierEditDialog");
         dialog.show();
     }
 
     void openEditMarkPropertiesPositionDialog(final MarkPropertiesDTO originalMarkProperties) {
         final MarkPropertiesPositionEditDialog dialog = new MarkPropertiesPositionEditDialog(stringMessages,
-                originalMarkProperties, createEditDialogCallback(originalMarkProperties));
+                originalMarkProperties.getPosition(), new DialogCallback<Position>() {
+                    @Override
+                    public void ok(Position fixedPosition) {
+                        sailingService.updateMarkPropertiesPositioning(originalMarkProperties.getUuid(), null, fixedPosition,
+                                new AsyncCallback<MarkPropertiesDTO>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        errorReporter.reportError(
+                                                "Error trying to update mark properties: " + caught.getMessage());
+                                    }
+
+                                    @Override
+                                    public void onSuccess(MarkPropertiesDTO updatedMarkProperties) {
+                                        int editedMarkPropertiesIndex = filterableMarkProperties
+                                                .indexOf(originalMarkProperties);
+                                        filterableMarkProperties.remove(originalMarkProperties);
+                                        if (editedMarkPropertiesIndex >= 0) {
+                                            filterableMarkProperties.add(editedMarkPropertiesIndex,
+                                                    updatedMarkProperties);
+                                        } else {
+                                            filterableMarkProperties.add(updatedMarkProperties);
+                                        }
+                                        markPropertiesListDataProvider.refresh();
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                });
         dialog.ensureDebugId("MarkPropertiesPositionEditDialog");
         dialog.show();
     }

@@ -89,6 +89,7 @@ import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
@@ -1276,6 +1277,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     MarkTemplateDTO addOrUpdateMarkTemplate(MarkTemplateDTO markTemplate);
 
     MarkPropertiesDTO addOrUpdateMarkProperties(MarkPropertiesDTO markProperties);
+
+    MarkPropertiesDTO updateMarkPropertiesPositioning(UUID markPropertiesId, DeviceIdentifierDTO deviceIdentifier, Position position);
 
     Iterable<MarkPropertiesDTO> getMarkProperties();
 

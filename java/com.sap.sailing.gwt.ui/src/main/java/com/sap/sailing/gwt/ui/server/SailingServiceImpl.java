@@ -9914,7 +9914,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private DeviceIdentifier convertDtoToDeviceIdentifier(DeviceIdentifierDTO deviceIdentifier) {
-        return new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceIdentifier.deviceId));
+        return deviceIdentifier != null ? new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceIdentifier.deviceId))
+                : null;
     }
 
     @Override
@@ -9941,6 +9942,17 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                                             /* non-default mark properties group ownership */ Optional.empty()));
         }
         return convertToMarkPropertiesDTO(createdOrUpdatedMarkProperties);
+    }
+
+    @Override
+    public MarkPropertiesDTO updateMarkPropertiesPositioning(UUID markPropertiesId, DeviceIdentifierDTO deviceIdentifier,
+            Position fixedPosition) {
+        MarkProperties markProperties = getSharedSailingData().getMarkPropertiesById(markPropertiesId);
+        markProperties.setTrackingDeviceIdentifier(convertDtoToDeviceIdentifier(deviceIdentifier));
+        markProperties.setFixedPosition(fixedPosition);
+        return convertToMarkPropertiesDTO(getSharedSailingData().updateMarkProperties(markProperties.getId(),
+                (CommonMarkProperties) markProperties, fixedPosition, convertDtoToDeviceIdentifier(deviceIdentifier),
+                markProperties.getTags()));
     }
 
     @Override

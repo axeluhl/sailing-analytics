@@ -3,31 +3,30 @@ package com.sap.sailing.gwt.ui.adminconsole.coursecreation;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DoubleBox;
 
-public class MarkPropertiesPositionEditDialog extends DataEntryDialog<MarkPropertiesDTO> {
+public class MarkPropertiesPositionEditDialog extends DataEntryDialog<Position> {
 
-    private final MarkPropertiesDTO markPropertiesToEdit;
     private final DoubleBox latDoubleBox;
     private final DoubleBox lngDoubleBox;
     private final StringMessages stringMessages;
 
     private static final double ERROR_VAL = Double.MIN_VALUE;
 
-    public MarkPropertiesPositionEditDialog(final StringMessages stringMessages, MarkPropertiesDTO markPropertiesToEdit,
-            DialogCallback<MarkPropertiesDTO> callback) {
+    public MarkPropertiesPositionEditDialog(final StringMessages stringMessages, Position positionToEdit,
+            DialogCallback<Position> callback) {
         super(stringMessages.edit() + " " + stringMessages.markProperties() + ": " + stringMessages.setPosition(), null,
-                stringMessages.ok(), stringMessages.cancel(), new Validator<MarkPropertiesDTO>() {
+                stringMessages.ok(), stringMessages.cancel(), new Validator<Position>() {
                     @Override
-                    public String getErrorMessage(MarkPropertiesDTO valueToValidate) {
-                        if (valueToValidate.getPosition().getLatRad() == ERROR_VAL) {
+                    public String getErrorMessage(Position valueToValidate) {
+                        if (valueToValidate.getLatDeg() == ERROR_VAL) {
                             return stringMessages.pleaseEnterA(stringMessages.latitude());
                         }
-                        if (valueToValidate.getPosition().getLngRad() == ERROR_VAL) {
+                        if (valueToValidate.getLngDeg() == ERROR_VAL) {
                             return stringMessages.pleaseEnterA(stringMessages.longitude());
                         }
                         return null;
@@ -35,22 +34,14 @@ public class MarkPropertiesPositionEditDialog extends DataEntryDialog<MarkProper
                 }, /* animationEnabled */true, callback);
         this.ensureDebugId("MarkPropertiesPositionEditDialog");
         this.stringMessages = stringMessages;
-        this.markPropertiesToEdit = markPropertiesToEdit;
         this.latDoubleBox = createDoubleBox(10);
         this.lngDoubleBox = createDoubleBox(10);
     }
 
     @Override
-    protected MarkPropertiesDTO getResult() {
-        return new MarkPropertiesDTO(markPropertiesToEdit.getUuid(), markPropertiesToEdit.getName(),
-                markPropertiesToEdit.getTags(), /* deviceIdentifier */ null,
-                new DegreePosition(latDoubleBox.getValue() != null ? latDoubleBox.getValue() : ERROR_VAL,
-                        lngDoubleBox.getValue() != null ? lngDoubleBox.getValue() : ERROR_VAL),
-                markPropertiesToEdit.getCommonMarkProperties().getShortName(),
-                markPropertiesToEdit.getCommonMarkProperties().getColor(),
-                markPropertiesToEdit.getCommonMarkProperties().getShape(),
-                markPropertiesToEdit.getCommonMarkProperties().getPattern(),
-                markPropertiesToEdit.getCommonMarkProperties().getType());
+    protected Position getResult() {
+        return new DegreePosition(latDoubleBox.getValue() != null ? latDoubleBox.getValue() : ERROR_VAL,
+                        lngDoubleBox.getValue() != null ? lngDoubleBox.getValue() : ERROR_VAL);
     }
 
     @Override

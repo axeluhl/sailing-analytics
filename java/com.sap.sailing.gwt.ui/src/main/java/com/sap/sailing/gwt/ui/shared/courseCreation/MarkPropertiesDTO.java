@@ -46,6 +46,17 @@ public class MarkPropertiesDTO extends NamedDTO implements SecuredDTO {
         commonMarkProperties = new CommonMarkPropertiesDTO(name, shortName, color, shape, pattern, type);
     }
 
+    public MarkPropertiesDTO(MarkPropertiesDTO originalMarkPropertiesDTO, DeviceIdentifierDTO deviceIdentifier,
+            Position position) {
+        this(originalMarkPropertiesDTO.getUuid(), originalMarkPropertiesDTO.getName(),
+                originalMarkPropertiesDTO.getTags(), deviceIdentifier, position,
+                originalMarkPropertiesDTO.getCommonMarkProperties().getShortName(),
+                originalMarkPropertiesDTO.getCommonMarkProperties().getColor(),
+                originalMarkPropertiesDTO.getCommonMarkProperties().getShape(),
+                originalMarkPropertiesDTO.getCommonMarkProperties().getPattern(),
+                originalMarkPropertiesDTO.getCommonMarkProperties().getType());
+    }
+
     @Override
     public AccessControlListDTO getAccessControlList() {
         return securityInformation.getAccessControlList();
