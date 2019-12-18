@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.domain.coursetemplate.Positioning.PositioningType;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.HasPermissions;
