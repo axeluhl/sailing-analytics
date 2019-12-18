@@ -51,7 +51,7 @@ public class EventHeader extends Composite {
         if (logoNavigation != null) {
             logoNavigation.configureAnchorElement(eventLogoUi);
         }
-        dataByLogo.setUp(event.getTrackingConnectorInfos(), /** colorIfPossible **/ false, /** enforceTextColor **/ true);
+        dataByLogo.setUp(event.getTrackingConnectorInfos(), /** colorIfPossible **/ true, /** enforceTextColor **/ true);
         if (dataByLogo.isVisible()) {
             this.addStyleName(EventHeaderResources.INSTANCE.css().eventheader_with_logo());
         }
