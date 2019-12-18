@@ -893,7 +893,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     private String getDefaultTenantNameForUsername(final String username) {
-        return username + "-tenant";
+        return username + TENANT_SUFFIX;
     }
 
     @Override
@@ -1707,8 +1707,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                             "You are not permitted to create a \"{0}\" with name or identifier \"{1}\". "
                                     + "This is most probably caused by an already existing entry with the same name/identifier. "
                                     + "Please try to use a different name.",
-                            identifier.getTypeIdentifier(), identifier.getTypeRelativeObjectIdentifier().toString()),
-                            e);
+                            identifier.getTypeIdentifier(), identifier.getTypeRelativeObjectIdentifier().toString()), e);
                 }
             }
             result = actionWithResult.call();

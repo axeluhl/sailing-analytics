@@ -32,7 +32,6 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.impl.components.management.ReducedDimensions;
 import com.sap.sse.datamining.impl.data.QueryResultImpl;
-import com.sap.sse.datamining.shared.DataMiningQuerySerializer;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.SerializationDummy;
@@ -58,20 +57,17 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
     private static final long serialVersionUID = -7951930891674894528L;
 
     private final BundleContext context;
-
     private final ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker;
     private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
-
     private final StoredDataMiningQueryPersister storedDataMiningQueryPersistor;
-
     private final DataMiningDTOFactory dtoFactory;
 
     public DataMiningServiceImpl() {
         context = Activator.getDefault();
         dataMiningServerTracker = createAndOpenDataMiningServerTracker(context);
         securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
-
-        storedDataMiningQueryPersistor = new StoredDataMiningQueryPersisterImpl(getSecurityService());
+        storedDataMiningQueryPersistor = new StoredDataMiningQueryPersisterImpl(getSecurityService(),
+                dataMiningServerTracker);
         dtoFactory = new DataMiningDTOFactory();
     }
 
@@ -86,7 +82,7 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
     private DataMiningServer getDataMiningServer() {
         return dataMiningServerTracker.getService();
     }
-    
+
     private SecurityService getSecurityService() {
         return securityServiceTracker.getService();
     }
@@ -96,7 +92,7 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
         checkDataMiningPermission();
         return getDataMiningServer().getComponentsChangedTimepoint();
     }
-    
+
     @Override
     public FunctionDTO getIdentityFunction(String localeInfoName) {
         checkDataMiningPermission();
@@ -377,7 +373,7 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
         }
         return predefinedQueryNames;
     }
-    
+
     @Override
     public ModifiableStatisticQueryDefinitionDTO getPredefinedQueryDefinition(PredefinedQueryIdentifier identifier,
             String localeInfoName) {
@@ -399,13 +395,14 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
         }
         return null;
     }
-    
+
     @Override
     public ModifiableStatisticQueryDefinitionDTO localize(ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO,
             String localeInfoName) {
         checkDataMiningPermission();
         DataMiningServer dataMiningServer = getDataMiningServer();
-        StatisticQueryDefinition<?, ?, ?, ?> queryDefinition = dataMiningServer.getQueryDefinitionForDTO(queryDefinitionDTO);
+        StatisticQueryDefinition<?, ?, ?, ?> queryDefinition = dataMiningServer
+                .getQueryDefinitionForDTO(queryDefinitionDTO);
         Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         return (ModifiableStatisticQueryDefinitionDTO) dtoFactory.createQueryDefinitionDTO(queryDefinition,
                 dataMiningServer.getStringMessages(), locale, localeInfoName);
@@ -436,6 +433,6 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
 
     @Override
     public ModifiableStatisticQueryDefinitionDTO getDeserializedQuery(String serializedQuery) {
-        return (ModifiableStatisticQueryDefinitionDTO) DataMiningQuerySerializer.fromBase64String(serializedQuery);
+        return (ModifiableStatisticQueryDefinitionDTO) dataMiningServerTracker.getService().fromBase64String(serializedQuery);
     }
 }

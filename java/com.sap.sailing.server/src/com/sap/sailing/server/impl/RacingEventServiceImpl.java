@@ -1723,7 +1723,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         if (persistent) {
             updateStoredRegatta(regatta);
         }
-
         return wasCreated;
     }
 
@@ -1731,8 +1730,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public void addRace(RegattaIdentifier addToRegatta, RaceDefinition raceDefinition) {
         Regatta regatta = getRegatta(addToRegatta);
         regatta.addRace(raceDefinition); // will trigger the raceAdded operation because this service is listening on
-                                         // all its regattas
-    }
+    }                                    // all its regattas
 
     /**
      * If the <code>regatta</code> {@link Regatta#isPersistent() is a persistent one}, the association of the race with
@@ -2704,14 +2702,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 // remove any race; however, the event may already have been created by another tracker whose race hasn't
                 // arrived yet and therefore the races list is still empty; therefore, only remove the event if its
                 // race list became empty by the removal performed here.
-                final int oldSizeOfTrackedRaces;
-                final int newSizeOfTrackedRaces;
-                oldSizeOfTrackedRaces = Util.size(trackedRegatta.getTrackedRaces());
+                final boolean oldTrackedRacesIsEmpty = Util.isEmpty(trackedRegatta.getTrackedRaces());
                 try {
                     trackedRegatta.removeTrackedRace(trackedRace, Optional.of(
                             getThreadLocalTransporterForCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster()));
-                    newSizeOfTrackedRaces = Util.size(trackedRegatta.getTrackedRaces());
-                    isTrackedRacesBecameEmpty = (oldSizeOfTrackedRaces > 0 && newSizeOfTrackedRaces == 0);
+                    final boolean newTrackedRacesIsEmpty = Util.isEmpty(trackedRegatta.getTrackedRaces());
+                    isTrackedRacesBecameEmpty = (!oldTrackedRacesIsEmpty && newTrackedRacesIsEmpty);
                 } finally {
                     trackedRegatta.unlockTrackedRacesAfterWrite();
                 }

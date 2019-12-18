@@ -171,7 +171,7 @@ public class Activator implements BundleActivator {
         final ServiceTracker<HasPermissionsProvider, HasPermissionsProvider> hasPermissionsProviderTracker = new ServiceTracker<>(
                 bundleContext, HasPermissionsProvider.class, /* customizer */ null);
         hasPermissionsProviderTracker.open();
-        SecurityServiceImpl initialSecurityService = new SecurityServiceImpl(
+        SecurityService initialSecurityService = new SecurityServiceImpl(
                 ServiceTrackerFactory.createAndOpen(context, MailService.class), userStore, accessControlStore,
                 new OSGIHasPermissionsProvider(hasPermissionsProviderTracker), sharedAcrossSubdomainsOf, baseUrlForCrossDomainStorage);
         initialSecurityService.initialize();

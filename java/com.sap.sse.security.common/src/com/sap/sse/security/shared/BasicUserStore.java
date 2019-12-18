@@ -28,6 +28,8 @@ public interface BasicUserStore extends UserGroupProvider, Named {
     UserGroup getUserGroupByName(String name);
     
     UserGroup createUserGroup(UUID groupId, String name) throws UserGroupManagementException;
+
+    void addUserGroup(UserGroup group) throws UserGroupManagementException;
     
     void updateUserGroup(UserGroup userGroup);
     
@@ -51,6 +53,8 @@ public interface BasicUserStore extends UserGroupProvider, Named {
 
     User createUser(String name, String email, Account... accounts)
             throws UserManagementException;
+
+    void addUser(User user) throws UserManagementException;
 
     void updateUser(User user);
 
