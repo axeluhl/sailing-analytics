@@ -82,7 +82,8 @@
                 <li>zeroBasedIndexOfRepeatablePartStart (required): offset of the first waypoint to include in the repeatable part. Must not be out of range for 0 &lt;= i &lt; count(waypoints).</li>
                 <li>zeroBasedIndexOfRepeatablePartEnd (required): offset of the first waypoint that comes after the repeatable part. Must not be out of range for 1 &lt;= i &lt;= count(waypoints) and must be &gt; zeroBasedIndexOfRepeatablePartStart.</li>
             </ul>
-            numberOfLaps: The number of laps to create based on the repeatable part. Also required if a non-null optionalRepeatablePart is defined.
+            numberOfLaps: The number of laps to create based on the repeatable part. Also required if a non-null optionalRepeatablePart is defined.<br>
+            markPropertiesGroupOwnership: the name of the user group that shall be used as the group owner of MarkProperties objects created while executing the request
         </td>
     </tr>
     <tr>
