@@ -645,7 +645,7 @@ public class DomainFactoryImpl implements DomainFactory {
                         trackedRegatta.getRegatta().addRace(raceDefinition);
                         TrackingConnectorInfo trackingConnectorInfo = null;
                         if (tractracRace != null) {
-                            trackingConnectorInfo = new TrackingConnectorInfoImpl(TRAC_TRAC_IDENTIFIER,tractracRace.getEvent().getWebURL());
+                            trackingConnectorInfo = new TrackingConnectorInfoImpl(TRAC_TRAC_IDENTIFIER, tractracRace.getEvent().getWebURL());
                         }
                         trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
                                 delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, ignoreTracTracMarkPassings,
@@ -746,11 +746,13 @@ public class DomainFactoryImpl implements DomainFactory {
     private DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition race,
             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-            boolean useMarkPassingCalculator, RaceLogAndTrackedRaceResolver raceLogResolver, RaceTrackingHandler raceTrackingHandler, TrackingConnectorInfo trackingConnectorInfo) {
+            boolean useMarkPassingCalculator, RaceLogAndTrackedRaceResolver raceLogResolver,
+            RaceTrackingHandler raceTrackingHandler, TrackingConnectorInfo trackingConnectorInfo) {
         return raceTrackingHandler.createTrackedRace(trackedRegatta, race, sidelines,
                 windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
-                raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver, Optional.empty(), trackingConnectorInfo);
+                raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver, Optional.empty(),
+                trackingConnectorInfo);
     }
 
     /**
