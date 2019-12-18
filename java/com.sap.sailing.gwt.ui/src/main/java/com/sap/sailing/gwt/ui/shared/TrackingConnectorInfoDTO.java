@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 
 public class TrackingConnectorInfoDTO implements IsSerializable {
     private String trackedBy;
@@ -8,9 +10,10 @@ public class TrackingConnectorInfoDTO implements IsSerializable {
 
     TrackingConnectorInfoDTO() {} // GWT serialization
 
-    public TrackingConnectorInfoDTO(String trackedBy, String webUrl) {
-        this.trackedBy = trackedBy;
-        this.webUrl = webUrl;
+    @GwtIncompatible
+    public TrackingConnectorInfoDTO(TrackingConnectorInfo trackingConnectorInfo) {
+        this.trackedBy = trackingConnectorInfo.getTrackedBy();
+        this.webUrl = trackingConnectorInfo.getWebUrl() == null ? null : trackingConnectorInfo.getWebUrl().toString();
     }
 
     public String getTrackedBy() {

@@ -44,21 +44,19 @@ public class DataByLogo extends Widget {
     private TrackingConnectorInfoDTO selectMostProminentConnectorInfo(
             Set<TrackingConnectorInfoDTO> trackingConnectorInfos) {
         TrackingConnectorInfoDTO potentialConnectorInfo = null;
-        if (trackingConnectorInfos == null || trackingConnectorInfos.isEmpty()) {
-            return potentialConnectorInfo;
-        } else {
+        if (trackingConnectorInfos != null && !trackingConnectorInfos.isEmpty()) {
             for (TrackingConnectorInfoDTO trackingConnectorInfo : trackingConnectorInfos) {
                 // This logic currently only supports TracTrac as ConnectorInfo
                 if (TRAC_TRAC.equals(trackingConnectorInfo.getTrackedBy())) {
                     potentialConnectorInfo = trackingConnectorInfo;
                     String webUrl = trackingConnectorInfo.getWebUrl();
-                    if (webUrl != null && !"".equals(webUrl)) {
+                    if (webUrl != null && !webUrl.isEmpty()) {
                         break;
                     }
                 }
             }
-            return potentialConnectorInfo;
         }
+        return potentialConnectorInfo;
     }
 
     private void setUpForConnectorType(boolean colorIfPossible, boolean enforceTextColor,

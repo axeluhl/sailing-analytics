@@ -312,20 +312,11 @@ public final class HomeServiceUtil {
         dto.setBaseURL(baseURL.toString());
         dto.setOnRemoteServer(onRemoteServer);
         dto.setStageType(stageType);
-        Set<TrackingConnectorInfoDTO> trackingConnectorInfos = event.getTrackingConnectorInfos()
-                .stream()
-                .map(trackingConnectorInfo -> new TrackingConnectorInfoDTO(trackingConnectorInfo.getTrackedBy(), mapURLToString(trackingConnectorInfo.getWebUrl()))).collect(Collectors.toSet());
+        Set<TrackingConnectorInfoDTO> trackingConnectorInfos = event.getTrackingConnectorInfos().stream()
+                .map(TrackingConnectorInfoDTO::new).collect(Collectors.toSet());
         dto.setTrackingConnectorInfos(trackingConnectorInfos);
         dto.setStageImageURL(useTeaserImage ? findEventThumbnailImageUrlAsString(event) : getStageImageURLAsString(event));
         return dto;
-    }
-    
-    private static String mapURLToString(URL url) {
-        if(url != null) {
-            return url.toString();
-        }else {
-            return "";
-        }
     }
     
     public static EventListEventDTO convertToEventListDTO(EventBase event, URL baseURL, boolean onRemoteServer,

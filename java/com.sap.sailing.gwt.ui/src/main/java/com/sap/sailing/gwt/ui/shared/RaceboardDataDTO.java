@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.DetailType;
@@ -17,15 +16,15 @@ public class RaceboardDataDTO implements IsSerializable {
     private ArrayList<DetailType> detailTypesForCompetitorChart;
     private ArrayList<DetailType> availableDetailTypesForLeaderboard;
     private StrippedLeaderboardDTOWithSecurity leaderboard;
-    private Set<TrackingConnectorInfoDTO> trackingConnectorInfos;
-    
+    private TrackingConnectorInfoDTO trackingConnectorInfo;
 
     // for GWT
     RaceboardDataDTO() {}
     
     public RaceboardDataDTO(RaceWithCompetitorsAndBoatsDTO race,
             boolean isValidLeaderboardGroup, boolean isValidEvent, Iterable<DetailType> detailTypesForCompetitorChart,
-            Iterable<DetailType> availableDetailTypesForLeaderboard, StrippedLeaderboardDTOWithSecurity leaderboard, Set<TrackingConnectorInfoDTO> trackingConnectorInfos) {
+            Iterable<DetailType> availableDetailTypesForLeaderboard, StrippedLeaderboardDTOWithSecurity leaderboard,
+            TrackingConnectorInfoDTO trackingConnectorInfo) {
         this.race = race;
         this.isValidLeaderboardGroup = isValidLeaderboardGroup;
         this.isValidEvent = isValidEvent;
@@ -34,7 +33,7 @@ public class RaceboardDataDTO implements IsSerializable {
         this.availableDetailTypesForLeaderboard = new ArrayList<>();
         Util.addAll(availableDetailTypesForLeaderboard, this.availableDetailTypesForLeaderboard);
         this.leaderboard = leaderboard;
-        this.trackingConnectorInfos = trackingConnectorInfos;
+        this.trackingConnectorInfo = trackingConnectorInfo;
     }
 
     public StrippedLeaderboardDTOWithSecurity getLeaderboard() {
@@ -68,8 +67,8 @@ public class RaceboardDataDTO implements IsSerializable {
     public boolean isValidEvent() {
         return isValidEvent;
     }
-    
-    public Set<TrackingConnectorInfoDTO> getTrackingConnectorInfos() {
-        return trackingConnectorInfos;
+
+    public TrackingConnectorInfoDTO getTrackingConnectorInfo() {
+        return trackingConnectorInfo;
     }
 }

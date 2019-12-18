@@ -52,7 +52,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import java.util.zip.GZIPInputStream;
 
@@ -398,6 +397,7 @@ import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -2055,29 +2055,15 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     StrippedLeaderboardDTOWithSecurity leaderboardDTO = createStrippedLeaderboardDTOWithSecurity(
                             leaderboard, false,
                             false);
-                    Set<TrackingConnectorInfoDTO> trackingConnectorInfos;
-                    if(isValidEvent) {
-                        trackingConnectorInfos = event.getTrackingConnectorInfos()
-                                .stream()
-                                .map(trackingConnectorInfo -> new TrackingConnectorInfoDTO(trackingConnectorInfo.getTrackedBy(), mapURLToString(trackingConnectorInfo.getWebUrl())))
-                                .collect(Collectors.toSet());
-                    }else {
-                        trackingConnectorInfos = Collections.emptySet();
-                    }
+                    final TrackingConnectorInfo trackingConnectorInfo = trackedRace.getTrackingConnectorInfo();
+                    final TrackingConnectorInfoDTO trackingConnectorInfoDTO = trackingConnectorInfo == null ? null
+                            : new TrackingConnectorInfoDTO(trackingConnectorInfo);
                     result = new RaceboardDataDTO(raceDTO, isValidLeaderboardGroup, isValidEvent,
-                            detailTypesForCompetitorChart, availableDetailTypesForLeaderboard, leaderboardDTO, trackingConnectorInfos);
+                            detailTypesForCompetitorChart, availableDetailTypesForLeaderboard, leaderboardDTO, trackingConnectorInfoDTO);
                 }
             }
         }
         return result;
-    }
-    
-    private static String mapURLToString(URL url) {
-        if (url != null) {
-            return url.toString();
-        } else {
-            return "";
-        }
     }
 
     @Override
