@@ -277,8 +277,15 @@ public class MarkPropertiesPanel extends FlowPanel {
         // tags
         Column<MarkPropertiesDTO, String> tagsColumn = new Column<MarkPropertiesDTO, String>(new TextCell()) {
             @Override
-            public String getValue(MarkPropertiesDTO courseTemplate) {
-                return String.join(", ", courseTemplate.getTags());
+            public String getValue(MarkPropertiesDTO markProperties) {
+                return String.join(", ", markProperties.getTags());
+            }
+        };
+
+        Column<MarkPropertiesDTO, String> positioningColumn = new Column<MarkPropertiesDTO, String>(new TextCell()) {
+            @Override
+            public String getValue(MarkPropertiesDTO markProperties) {
+                return markProperties.getPositioningType();
             }
         };
 
@@ -295,6 +302,7 @@ public class MarkPropertiesPanel extends FlowPanel {
         markPropertiesTable.addColumn(shapeColumn, stringMessages.shape());
         markPropertiesTable.addColumn(patternColumn, stringMessages.pattern());
         markPropertiesTable.addColumn(typeColumn, stringMessages.type());
+        markPropertiesTable.addColumn(positioningColumn, stringMessages.position());
         markPropertiesTable.addColumn(tagsColumn, stringMessages.tags());
 
         SecuredDTOOwnerColumn.configureOwnerColumns(markPropertiesTable, sortHandler, stringMessages);
@@ -380,7 +388,7 @@ public class MarkPropertiesPanel extends FlowPanel {
 
     void openEditMarkPropertiesDeviceIdentifierDialog(final MarkPropertiesDTO originalMarkProperties) {
         final MarkPropertiesDeviceIdentifierEditDialog dialog = new MarkPropertiesDeviceIdentifierEditDialog(
-                stringMessages, originalMarkProperties.getDeviceIdentifier(), new DialogCallback<DeviceIdentifierDTO>() {
+                stringMessages, null, new DialogCallback<DeviceIdentifierDTO>() {
                     @Override
                     public void ok(DeviceIdentifierDTO deviceIdentifier) {
                         sailingService.updateMarkPropertiesPositioning(originalMarkProperties.getUuid(), deviceIdentifier, null,
@@ -417,7 +425,7 @@ public class MarkPropertiesPanel extends FlowPanel {
 
     void openEditMarkPropertiesPositionDialog(final MarkPropertiesDTO originalMarkProperties) {
         final MarkPropertiesPositionEditDialog dialog = new MarkPropertiesPositionEditDialog(stringMessages,
-                originalMarkProperties.getPosition(), new DialogCallback<Position>() {
+                null, new DialogCallback<Position>() {
                     @Override
                     public void ok(Position fixedPosition) {
                         sailingService.updateMarkPropertiesPositioning(originalMarkProperties.getUuid(), null, fixedPosition,

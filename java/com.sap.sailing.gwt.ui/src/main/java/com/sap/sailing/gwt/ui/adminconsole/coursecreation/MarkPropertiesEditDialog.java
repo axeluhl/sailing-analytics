@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.Pattern;
@@ -37,7 +36,6 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
     private final Label labelShape;
     private final Label labelPattern;
     private final StringListEditorComposite tagsEditor;
-    private final MarkPropertiesDTO markPropertiesToEdit;
 
     private final UUID id;
 
@@ -61,7 +59,6 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
         this.ensureDebugId("MarkPropertiesToEditEditDialog");
         id = markPropertiesToEdit.getUuid();
         this.stringMessages = stringMessages;
-        this.markPropertiesToEdit = markPropertiesToEdit;
 
         this.markTypeValueListBox = new ValueListBox<>(new Renderer<MarkType>() {
             @Override
@@ -215,13 +212,11 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
                 color = new InvalidColor(iae);
             }
         }
-        // TODO: device identifier, position
         final MarkPropertiesDTO markProperties = new MarkPropertiesDTO(id, nameTextBox.getValue(),
-                tagsEditor.getValue(), markPropertiesToEdit.getDeviceIdentifier(),
-                (DegreePosition) markPropertiesToEdit.getPosition(), shortNameTextBox.getValue(), color,
+                tagsEditor.getValue(), shortNameTextBox.getValue(), color,
                 shapeValueListBox.getValue() == null ? "" : shapeValueListBox.getValue().name(),
                 patternValueListBox.getValue() == null ? "" : patternValueListBox.getValue().name(),
-                markTypeValueListBox.getValue());
+                markTypeValueListBox.getValue(), null);
         return markProperties;
     }
 

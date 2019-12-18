@@ -339,6 +339,7 @@ import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkPairTemplate.MarkPairTemplateFactory;
+import com.sap.sailing.domain.coursetemplate.Positioning.PositioningType;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
@@ -9920,26 +9921,24 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public MarkPropertiesDTO addOrUpdateMarkProperties(MarkPropertiesDTO markProperties) {
-        MarkProperties createdOrUpdatedMarkProperties = getSharedSailingData().getMarkPropertiesById(markProperties.getUuid());
+        MarkProperties createdOrUpdatedMarkProperties = getSharedSailingData()
+                .getMarkPropertiesById(markProperties.getUuid());
         if (createdOrUpdatedMarkProperties != null) {
             getSecurityService().checkCurrentUserUpdatePermission(createdOrUpdatedMarkProperties);
             getSharedSailingData().updateMarkProperties(markProperties.getUuid(),
                     convertDtoToCommonMarkProperties(markProperties.getCommonMarkProperties()),
-                    markProperties.getPosition(),
-                    markProperties.getDeviceIdentifier() != null
-                            ? convertDtoToDeviceIdentifier(markProperties.getDeviceIdentifier())
-                            : null,
-                    markProperties.getTags());
-            createdOrUpdatedMarkProperties = getSharedSailingData().getMarkPropertiesById(createdOrUpdatedMarkProperties.getId());
+                    createdOrUpdatedMarkProperties.getFixedPosition(),
+                    createdOrUpdatedMarkProperties.getTrackingDeviceIdentifier(), markProperties.getTags());
+            createdOrUpdatedMarkProperties = getSharedSailingData()
+                    .getMarkPropertiesById(createdOrUpdatedMarkProperties.getId());
         } else {
             createdOrUpdatedMarkProperties = getSecurityService()
                     .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.MARK_PROPERTIES,
-                            MarkTemplate.getTypeRelativeObjectIdentifier(UUID.randomUUID()),
-                            markProperties.getName(),
-                            () -> getSharedSailingData()
-                                    .createMarkProperties(convertDtoToCommonMarkProperties(
-                                            markProperties.getCommonMarkProperties()), markProperties.getTags(),
-                                            /* non-default mark properties group ownership */ Optional.empty()));
+                            MarkTemplate.getTypeRelativeObjectIdentifier(UUID.randomUUID()), markProperties.getName(),
+                            () -> getSharedSailingData().createMarkProperties(
+                                    convertDtoToCommonMarkProperties(markProperties.getCommonMarkProperties()),
+                                    markProperties.getTags(),
+                                    /* non-default mark properties group ownership */ Optional.empty()));
         }
         return convertToMarkPropertiesDTO(createdOrUpdatedMarkProperties);
     }
@@ -9962,18 +9961,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private MarkPropertiesDTO convertToMarkPropertiesDTO(MarkProperties markProperties) {
-        final DeviceIdentifierDTO deviceIdentifier = markProperties.getTrackingDeviceIdentifier() != null
-                ? new DeviceIdentifierDTO(
-                markProperties.getTrackingDeviceIdentifier().getIdentifierType(),
-                        markProperties.getTrackingDeviceIdentifier().getStringRepresentation())
-                : null;
-        final Position position = markProperties.getFixedPosition() != null ? new DegreePosition(
-                markProperties.getFixedPosition().getLatDeg(), markProperties.getFixedPosition().getLngDeg()) : null;
         final MarkPropertiesDTO markPropertiesDto = new MarkPropertiesDTO(markProperties.getId(),
-                markProperties.getName(), markProperties.getTags(), deviceIdentifier, position,
-                markProperties.getShortName(),
+                markProperties.getName(), markProperties.getTags(), markProperties.getShortName(),
                 markProperties.getColor(), markProperties.getShape(), markProperties.getPattern(),
-                markProperties.getType());
+                markProperties.getType(), markProperties.getTrackingDeviceIdentifier() != null ? PositioningType.DEVICE.name()
+                        : markProperties.getFixedPosition() != null ? PositioningType.FIXED_POSITION.name() : null);
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), markPropertiesDto, markProperties.getIdentifier());
         return markPropertiesDto;
     }
