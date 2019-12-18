@@ -13,11 +13,13 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -26,16 +28,19 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleResources;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
@@ -57,7 +62,12 @@ import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class MarkPropertiesPanel extends FlowPanel {
+    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
+    private static final AbstractImagePrototype positionImagePrototype = AbstractImagePrototype
+            .create(resources.ping());
+    private static final AbstractImagePrototype setDeviceIdentifierImagePrototype = AbstractImagePrototype
+            .create(resources.mapDevices());
 
     private final SailingServiceAsync sailingService;
     private final LabeledAbstractFilterablePanel<MarkPropertiesDTO> filterableMarkProperties;
@@ -88,7 +98,6 @@ public class MarkPropertiesPanel extends FlowPanel {
             @Override
             public void execute() {
                 openEditMarkPropertiesDialog(new MarkPropertiesDTO());
-                // TODO add action
             }
         });
 
@@ -275,8 +284,29 @@ public class MarkPropertiesPanel extends FlowPanel {
         // tags
         Column<MarkPropertiesDTO, String> tagsColumn = new Column<MarkPropertiesDTO, String>(new TextCell()) {
             @Override
-            public String getValue(MarkPropertiesDTO courseTemplate) {
-                return String.join(", ", courseTemplate.getTags());
+            public String getValue(MarkPropertiesDTO markProperties) {
+                return String.join(", ", markProperties.getTags());
+            }
+        };
+
+        Column<MarkPropertiesDTO, AbstractImagePrototype> positioningColumn = new Column<MarkPropertiesDTO, AbstractImagePrototype>(
+                new AbstractCell<AbstractImagePrototype>() {
+
+                    @Override
+                    public void render(Context context, AbstractImagePrototype image, SafeHtmlBuilder sb) {
+                        if (image != null) sb.append(image.getSafeHtml());
+                    }
+                }) {
+            @Override
+            public AbstractImagePrototype getValue(MarkPropertiesDTO markProperties) {
+                switch (markProperties.getPositioningType()) {
+                case "FIXED_POSITION":
+                    return positionImagePrototype;
+                case "DEVICE":
+                    return setDeviceIdentifierImagePrototype;
+                default:
+                    return null;
+                }
             }
         };
 
@@ -293,6 +323,7 @@ public class MarkPropertiesPanel extends FlowPanel {
         markPropertiesTable.addColumn(shapeColumn, stringMessages.shape());
         markPropertiesTable.addColumn(patternColumn, stringMessages.pattern());
         markPropertiesTable.addColumn(typeColumn, stringMessages.type());
+        markPropertiesTable.addColumn(positioningColumn, stringMessages.position());
         markPropertiesTable.addColumn(tagsColumn, stringMessages.tags());
 
         SecuredDTOOwnerColumn.configureOwnerColumns(markPropertiesTable, sortHandler, stringMessages);
@@ -333,66 +364,125 @@ public class MarkPropertiesPanel extends FlowPanel {
                 markProperties -> configACL.openDialog(markProperties));
         markPropertiesTable.addColumn(idColumn, stringMessages.id());
         markPropertiesTable.addColumn(actionsColumn, stringMessages.actions());
-
     }
 
     public void refreshMarkProperties() {
         loadMarkProperties();
     }
 
-    DialogCallback<MarkPropertiesDTO> createEditDialogCallback(final MarkPropertiesDTO originalMarkProperties) {
-        return new DialogCallback<MarkPropertiesDTO>() {
-            @Override
-            public void ok(MarkPropertiesDTO markProperties) {
-                sailingService.addOrUpdateMarkProperties(markProperties, new AsyncCallback<MarkPropertiesDTO>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error trying to update mark properties: " + caught.getMessage());
-                    }
-
-                    @Override
-                    public void onSuccess(MarkPropertiesDTO updatedMarkProperties) {
-                        int editedMarkPropertiesIndex = filterableMarkProperties.indexOf(originalMarkProperties);
-                        filterableMarkProperties.remove(originalMarkProperties);
-                        if (editedMarkPropertiesIndex >= 0) {
-                            filterableMarkProperties.add(editedMarkPropertiesIndex, updatedMarkProperties);
-                        } else {
-                            filterableMarkProperties.add(updatedMarkProperties);
-                        }
-                        markPropertiesListDataProvider.refresh();
-                    }
-                });
-            }
-
-            @Override
-            public void cancel() {
-            }
-        };
-    }
-
     void openEditMarkPropertiesDialog(final MarkPropertiesDTO originalMarkProperties) {
         final MarkPropertiesEditDialog dialog = new MarkPropertiesEditDialog(stringMessages, originalMarkProperties,
-                createEditDialogCallback(originalMarkProperties));
+                new DialogCallback<MarkPropertiesDTO>() {
+                    @Override
+                    public void ok(MarkPropertiesDTO markProperties) {
+                        sailingService.addOrUpdateMarkProperties(markProperties,
+                                new AsyncCallback<MarkPropertiesDTO>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        errorReporter.reportError(
+                                                "Error trying to update mark properties: " + caught.getMessage());
+                                    }
+
+                                    @Override
+                                    public void onSuccess(MarkPropertiesDTO updatedMarkProperties) {
+                                        int editedMarkPropertiesIndex = filterableMarkProperties
+                                                .indexOf(originalMarkProperties);
+                                        filterableMarkProperties.remove(originalMarkProperties);
+                                        if (editedMarkPropertiesIndex >= 0) {
+                                            filterableMarkProperties.add(editedMarkPropertiesIndex,
+                                                    updatedMarkProperties);
+                                        } else {
+                                            filterableMarkProperties.add(updatedMarkProperties);
+                                        }
+                                        markPropertiesListDataProvider.refresh();
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                });
         dialog.ensureDebugId("MarkPropertiesEditDialog");
         dialog.show();
     }
 
     void openEditMarkPropertiesDeviceIdentifierDialog(final MarkPropertiesDTO originalMarkProperties) {
         final MarkPropertiesDeviceIdentifierEditDialog dialog = new MarkPropertiesDeviceIdentifierEditDialog(
-                stringMessages, originalMarkProperties, createEditDialogCallback(originalMarkProperties));
+                stringMessages, null, new DialogCallback<DeviceIdentifierDTO>() {
+                    @Override
+                    public void ok(DeviceIdentifierDTO deviceIdentifier) {
+                        sailingService.updateMarkPropertiesPositioning(originalMarkProperties.getUuid(),
+                                deviceIdentifier, null, new AsyncCallback<MarkPropertiesDTO>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        errorReporter.reportError(
+                                                "Error trying to update device identifier for mark properties: "
+                                                        + caught.getMessage());
+                                    }
+
+                                    @Override
+                                    public void onSuccess(MarkPropertiesDTO updatedMarkProperties) {
+                                        int editedMarkPropertiesIndex = filterableMarkProperties
+                                                .indexOf(originalMarkProperties);
+                                        filterableMarkProperties.remove(originalMarkProperties);
+                                        if (editedMarkPropertiesIndex >= 0) {
+                                            filterableMarkProperties.add(editedMarkPropertiesIndex,
+                                                    updatedMarkProperties);
+                                        } else {
+                                            filterableMarkProperties.add(updatedMarkProperties);
+                                        }
+                                        markPropertiesListDataProvider.refresh();
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                });
         dialog.ensureDebugId("MarkPropertiesDeviceIdentifierEditDialog");
         dialog.show();
     }
 
     void openEditMarkPropertiesPositionDialog(final MarkPropertiesDTO originalMarkProperties) {
-        final MarkPropertiesPositionEditDialog dialog = new MarkPropertiesPositionEditDialog(stringMessages,
-                originalMarkProperties, createEditDialogCallback(originalMarkProperties));
+        final MarkPropertiesPositionEditDialog dialog = new MarkPropertiesPositionEditDialog(stringMessages, null,
+                new DialogCallback<Position>() {
+                    @Override
+                    public void ok(Position fixedPosition) {
+                        sailingService.updateMarkPropertiesPositioning(originalMarkProperties.getUuid(), null,
+                                fixedPosition, new AsyncCallback<MarkPropertiesDTO>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        errorReporter.reportError(
+                                                "Error trying to update mark properties: " + caught.getMessage());
+                                    }
+
+                                    @Override
+                                    public void onSuccess(MarkPropertiesDTO updatedMarkProperties) {
+                                        int editedMarkPropertiesIndex = filterableMarkProperties
+                                                .indexOf(originalMarkProperties);
+                                        filterableMarkProperties.remove(originalMarkProperties);
+                                        if (editedMarkPropertiesIndex >= 0) {
+                                            filterableMarkProperties.add(editedMarkPropertiesIndex,
+                                                    updatedMarkProperties);
+                                        } else {
+                                            filterableMarkProperties.add(updatedMarkProperties);
+                                        }
+                                        markPropertiesListDataProvider.refresh();
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                });
         dialog.ensureDebugId("MarkPropertiesPositionEditDialog");
         dialog.show();
     }
 
     private static class MarkPropertiesImagesbarCell extends DefaultActionsImagesBarCell {
-        private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
         public static final String ACTION_SET_DEVICE_IDENTIFIER = "ACTION_SET_DEVICE_IDENTIFIER";
         public static final String ACTION_SET_POSITION = "ACTION_SET_POSITION";
         private final StringMessages stringMessages;

@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.RadianPosition;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.HasPermissions;
@@ -26,9 +23,7 @@ public class MarkPropertiesDTO extends NamedDTO implements SecuredDTO {
     private ArrayList<String> tags = new ArrayList<>();
 
     private UUID uuid;
-    private DeviceIdentifierDTO deviceIdentifier;
-    private RadianPosition position;
-
+    private String positioningType;
     private CommonMarkPropertiesDTO commonMarkProperties;
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
 
@@ -37,14 +32,13 @@ public class MarkPropertiesDTO extends NamedDTO implements SecuredDTO {
         commonMarkProperties = new CommonMarkPropertiesDTO();
     }
 
-    public MarkPropertiesDTO(UUID uuid, String name, Iterable<String> tags, DeviceIdentifierDTO deviceIdentifier,
-            RadianPosition position, String shortName, Color color, String shape, String pattern, MarkType type) {
+    public MarkPropertiesDTO(UUID uuid, String name, Iterable<String> tags, String shortName, Color color, String shape,
+            String pattern, MarkType type, String positioningType) {
         super(name);
         this.uuid = uuid;
-        this.deviceIdentifier = deviceIdentifier;
-        this.position = position;
         Util.addAll(tags, this.tags);
         commonMarkProperties = new CommonMarkPropertiesDTO(name, shortName, color, shape, pattern, type);
+        this.positioningType = positioningType;
     }
 
     @Override
@@ -89,19 +83,15 @@ public class MarkPropertiesDTO extends NamedDTO implements SecuredDTO {
         return uuid;
     }
 
-    public DeviceIdentifierDTO getDeviceIdentifier() {
-        return deviceIdentifier;
-    }
-
-    public Position getPosition() {
-        return position;
-    }
-
     public Iterable<String> getTags() {
         return tags;
     }
 
     public CommonMarkPropertiesDTO getCommonMarkProperties() {
         return commonMarkProperties;
+    }
+
+    public String getPositioningType() {
+        return positioningType;
     }
 }
