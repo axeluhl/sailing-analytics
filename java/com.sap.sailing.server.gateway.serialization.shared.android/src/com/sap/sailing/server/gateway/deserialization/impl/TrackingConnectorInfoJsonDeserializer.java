@@ -2,6 +2,8 @@ package com.sap.sailing.server.gateway.deserialization.impl;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.json.simple.JSONObject;
 
@@ -12,16 +14,19 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.TrackingConnectorInfoJsonSerializer;
 
 public class TrackingConnectorInfoJsonDeserializer implements JsonDeserializer<TrackingConnectorInfo> {
+    private static final Logger logger = Logger.getLogger(TrackingConnectorInfoJsonDeserializer.class.getName());
 
     public TrackingConnectorInfo deserialize(JSONObject object) throws JsonDeserializationException {
-        String trackedBy = Helpers.getNestedObjectSafe(object, TrackingConnectorInfoJsonSerializer.FIELD_TRACKED_BY).toJSONString();
+        final String trackedBy = (String) object.get(TrackingConnectorInfoJsonSerializer.FIELD_TRACKED_BY);
+        final String webUrlString = (String) object.get(TrackingConnectorInfoJsonSerializer.FIELD_WEB_URL);
         URL webUrl;
         try {
-            webUrl = new URL( (String) object.get(TrackingConnectorInfoJsonSerializer.FIELD_WEB_URL));
+            webUrl = webUrlString == null ? null : new URL(webUrlString);
         } catch (MalformedURLException e) {
-            throw new JsonDeserializationException(e);
+            logger.log(Level.WARNING, "Error while parsing webUrl of TrackingConnectorInfo", e);
+            webUrl = null;
         }
-        TrackingConnectorInfo trackingConnectorInfo = new TrackingConnectorInfoImpl(trackedBy, webUrl);
+        final TrackingConnectorInfo trackingConnectorInfo = new TrackingConnectorInfoImpl(trackedBy, webUrl);
         return trackingConnectorInfo;
     }
 }

@@ -1,5 +1,7 @@
 package com.sap.sailing.server.gateway.serialization.impl;
 
+import java.net.URL;
+
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
@@ -12,9 +14,11 @@ public class TrackingConnectorInfoJsonSerializer implements JsonSerializer<Track
     @Override
     public JSONObject serialize(TrackingConnectorInfo trackingConnectorInfo) {
         JSONObject result = new JSONObject();
+        URL webUrl = trackingConnectorInfo.getWebUrl();
         result.put(FIELD_TRACKED_BY, trackingConnectorInfo.getTrackedBy());
-        result.put(FIELD_WEB_URL, trackingConnectorInfo.getWebUrl());
+        if (webUrl != null) {
+            result.put(FIELD_WEB_URL, webUrl.toString());
+        }
         return result;
     }
 }
-

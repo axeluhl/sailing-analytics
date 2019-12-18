@@ -40,7 +40,7 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
     public static final String FIELD_CREATEDATDATE = "createdAtDate";
     public static final String FIELD_LOCALE = "locale";
     public static final String FIELD_TAGS = "tags";
-    public static final String FIELD_TRACKING_CONNECTOR_INFOS = "trackedBy";
+    public static final String FIELD_TRACKING_CONNECTOR_INFOS = "trackingConnectorInfos";
     // specific image fields
     public static final String FIELD_IMAGES = "images";
     public static final String FIELD_IMAGE_WIDTH_IN_PX = "widthInPixel";

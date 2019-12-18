@@ -63,12 +63,14 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
                 leaderboardGroups.add(leaderboardGroupDeserializer.deserialize((JSONObject) lgJson));
             }
         }
-        Set<TrackingConnectorInfo> trackingConnectorInfos = new HashSet<>();
-        JSONArray trackedByJson = Helpers.getNestedArraySafe(eventJson, EventBaseJsonSerializer.FIELD_TRACKING_CONNECTOR_INFOS);
-        for (Object jsonPair : trackedByJson) {
-            trackingConnectorInfos.add(trackingConnectorInfoDeserializer.deserialize((JSONObject) jsonPair));
+        final Set<TrackingConnectorInfo> trackingConnectorInfos = new HashSet<>();
+        final JSONArray trackingConnectorInfosJson = (JSONArray) eventJson
+                .get(EventBaseJsonSerializer.FIELD_TRACKING_CONNECTOR_INFOS);
+        if (trackingConnectorInfosJson != null) {
+            for (Object jsonPair : trackingConnectorInfosJson) {
+                trackingConnectorInfos.add(trackingConnectorInfoDeserializer.deserialize((JSONObject) jsonPair));
+            }
         }
-        
         StrippedEventImpl result = new StrippedEventImpl(name,
                 startDate == null ? null : new MillisecondsTimePoint(startDate.longValue()),
                 endDate == null ? null : new MillisecondsTimePoint(endDate.longValue()), venue, /* is public */ true,
