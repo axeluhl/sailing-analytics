@@ -113,7 +113,7 @@ public class MarkRolePanel extends FlowPanel {
 
     public void loadMarkRoles() {
         markRoleListDataProvider.getList().clear();
-        sailingService.getMarkRoles(new AsyncCallback<Iterable<MarkRoleDTO>>() {
+        sailingService.getMarkRoles(new AsyncCallback<List<MarkRoleDTO>>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -121,7 +121,7 @@ public class MarkRolePanel extends FlowPanel {
             }
 
             @Override
-            public void onSuccess(Iterable<MarkRoleDTO> result) {
+            public void onSuccess(List<MarkRoleDTO> result) {
                 markRoleListDataProvider.getList().clear();
                 Util.addAll(result, markRoleListDataProvider.getList());
                 filterableMarkRoles.updateAll(markRoleListDataProvider.getList());

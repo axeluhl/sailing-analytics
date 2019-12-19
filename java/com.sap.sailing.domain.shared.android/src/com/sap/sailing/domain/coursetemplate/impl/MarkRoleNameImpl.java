@@ -4,11 +4,17 @@ import com.sap.sailing.domain.coursetemplate.MarkRoleName;
 import com.sap.sse.common.impl.NamedImpl;
 
 public class MarkRoleNameImpl extends NamedImpl implements MarkRoleName {
-
     private static final long serialVersionUID = 3661478108460413196L;
+    private final String shortName;
 
-    public MarkRoleNameImpl(String name) {
+    public MarkRoleNameImpl(String name, String shortName) {
         super(name);
+        this.shortName = shortName;
+    }
+
+    @Override
+    public String getShortName() {
+        return shortName;
     }
 
     @Override

@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,18 +53,32 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
 
     private final TextBox nameTextBox;
+    private final TextBox shortNameTextBox;
     private final TextBox urlTextBox;
     private final TextBox numberOfLapsTextBox;
     private final StringMessages stringMessages;
-    private final Map<UUID, MarkRoleDTO> markRolesMap;
+    private final List<MarkRoleDTO> allMarkRoles;
+    private final List<String> allMarkRolesSelectionListPlusEmptyString;
     private final List<MarkTemplateDTO> allMarkTemplates;
-    private final List<String> allMarkTemplatesSelectionList;
-
-    private CellTable<MarkTemplateWithAssociatedRoleDTO> markTemplatesTable;
-    private List<MarkTemplateWithAssociatedRoleDTO> markTemplates = new ArrayList<>();
-    private final Button buttonAddMarkTemplate;
-    private CellTable<WaypointTemplateDTO> waypointTemplatesTable;
-    private Collection<WaypointTemplateDTO> waypointTemplates = new ArrayList<>();
+    private final List<String> allMarkTemplatesSelectionListPlusEmptyString;
+    
+    /**
+     * Contains the full set of mark roles resulting from the {@link WaypointTemplateDTO}s managed in {@link #waypointTemplates}.
+     * For those, it is a requirement that valid, non-{@code null} {@link MarkTemplateDTO}s are associated.
+     */
+    private final CellTable<MarkTemplateDTOAndMarkRoleDTO> markTemplatesForMarkRolesTable;
+    private final List<MarkTemplateDTOAndMarkRoleDTO> markTemplatesForMarkRoles;
+    
+    /**
+     * Contains optional additional mark templates with an optional assignment of a default role.
+     */
+    private final CellTable<MarkTemplateDTOAndMarkRoleDTO> spareMarkTemplatesAndTheirDefaultMarkRolesTable;
+    private final List<MarkTemplateDTOAndMarkRoleDTO> spareMarkTemplatesAndTheirDefaultMarkRoles;
+    
+    private final Button buttonAddMarkRoleToMarkTemplateMapping;
+    private final Button buttonAddSpareMarkTemplate;
+    private final CellTable<WaypointTemplateDTO> waypointTemplatesTable;
+    private final Collection<WaypointTemplateDTO> waypointTemplates = new ArrayList<>();
     private final Button buttonAddWaypointTemplate;
 
     private final UUID currentUuid;
@@ -75,7 +90,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
 
     public CourseTemplateEditDialog(final SailingServiceAsync sailingService, final UserService userService,
             final StringMessages stringMessages, CourseTemplateDTO courseTemplateToEdit,
-            Map<UUID, MarkRoleDTO> markRolesMap, List<MarkTemplateDTO> allMarkTemplates,
+            List<MarkRoleDTO> allMarkRoles, List<MarkTemplateDTO> allMarkTemplates,
             DialogCallback<CourseTemplateDTO> callback, final boolean isNew) {
         super(stringMessages.edit() + " " + stringMessages.courseTemplates(), null, stringMessages.ok(),
                 stringMessages.cancel(), new Validator<CourseTemplateDTO>() {
@@ -87,19 +102,18 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                             sb.append(stringMessages.pleaseEnterAName()).append(". ");
                         }
                         final Set<UUID> distinctUUIDs = new HashSet<>();
-                        if (valueToValidate.getAssociatedRoles().values().stream().map(u -> distinctUUIDs.add(u))
+                        if (valueToValidate.getDefaultMarkRolesForMarkTemplates().values().stream().map(u -> distinctUUIDs.add(u.getUuid()))
                                 .filter(b -> b == false).count() > 0) {
                             sb.append(stringMessages.markRoleUsedTwice()).append(". ");
                         }
-                        AtomicBoolean unAssignedMarkTemplateUsed = new AtomicBoolean(false);
+                        AtomicBoolean unAssignedMarkRoleUsed = new AtomicBoolean(false);
                         valueToValidate.getWaypointTemplates().forEach(wt -> {
                             if (wt.getPassingInstruction() == null) {
                                 sb.append(stringMessages.wayPointRequiresPassingInstruction()).append(". ");
                             } else {
                                 wt.getMarkRolesForControlPoint()
-                                        .forEach(wtmt -> unAssignedMarkTemplateUsed.set(unAssignedMarkTemplateUsed.get()
-                                                || valueToValidate.getMarkTemplates().stream()
-                                                        .noneMatch(mt -> mt.getUuid().equals(wtmt.getUuid()))));
+                                        .forEach(markRole -> unAssignedMarkRoleUsed.set(unAssignedMarkRoleUsed.get()
+                                                || valueToValidate.getDefaultMarkTemplatesForMarkRoles().get(markRole) == null));
                                 if (hasTwoMarks(wt)) {
                                     if (wt.getShortName() == null) {
                                         sb.append(stringMessages.wayPointRequiresShortName()).append(". ");
@@ -115,7 +129,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                                 }
                             }
                         });
-                        if (unAssignedMarkTemplateUsed.get()) {
+                        if (unAssignedMarkRoleUsed.get()) {
                             sb.append(stringMessages.wayPointMarkInSequenceMissing()).append(". ");
                         }
                         if (valueToValidate.getOptionalImageUrl().isPresent()) {
@@ -129,124 +143,136 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         this.currentUuid = courseTemplateToEdit.getUuid();
         this.ensureDebugId("CourseTemplateToEditEditDialog");
         this.stringMessages = stringMessages;
-
         this.nameTextBox = createTextBox(courseTemplateToEdit.getName());
+        this.shortNameTextBox = createTextBox(courseTemplateToEdit.getShortName());
         this.urlTextBox = createTextBox(courseTemplateToEdit.getOptionalImageUrl().orElse(""));
         this.numberOfLapsTextBox = createTextBox(courseTemplateToEdit.getDefaultNumberOfLaps() != null
                 ? courseTemplateToEdit.getDefaultNumberOfLaps().toString()
                 : null);
-
-        this.markRolesMap = markRolesMap;
         this.allMarkTemplates = allMarkTemplates;
-        this.allMarkTemplatesSelectionList = allMarkTemplates.stream().map(MarkTemplateDTO::getName)
-                .collect(Collectors.toList());
-
-        createMarkTemplateTable(/* readOnly */ !isNew, userService);
-        buttonAddMarkTemplate = new Button(stringMessages.add());
-        buttonAddMarkTemplate.addClickHandler(c -> {
-            markTemplates.add(new MarkTemplateWithAssociatedRoleDTO(allMarkTemplates.stream().findFirst().orElse(null),
-                    markRolesMap.values().stream().findFirst().orElse(null)));
-            refreshMarkTemplateTable();
+        this.allMarkTemplatesSelectionListPlusEmptyString = new LinkedList<>(allMarkTemplates.stream().map(MarkTemplateDTO::getName).collect(Collectors.toList()));
+        allMarkTemplatesSelectionListPlusEmptyString.add(0, ""); // prepend the empty selection
+        this.allMarkRoles = allMarkRoles;
+        this.allMarkRolesSelectionListPlusEmptyString = new LinkedList<>(allMarkRoles.stream().map(MarkRoleDTO::getName).collect(Collectors.toList()));
+        allMarkRolesSelectionListPlusEmptyString.add(0, ""); // prepend the empty selection
+        this.markTemplatesForMarkRoles = new ArrayList<>();
+        markTemplatesForMarkRolesTable = createMarkTemplateAndMarkRoleTable(/* readOnly */ !isNew, userService);
+        buttonAddMarkRoleToMarkTemplateMapping = new Button(stringMessages.add());
+        buttonAddMarkRoleToMarkTemplateMapping.addClickHandler(c -> {
+            markTemplatesForMarkRoles.add(new MarkTemplateDTOAndMarkRoleDTO(allMarkTemplates.stream().findFirst().orElse(null),
+                    allMarkRoles.stream().findFirst().orElse(null)));
+            refreshMarkTemplatesForMarkRolesTable();
             validateAndUpdate();
         });
-        buttonAddMarkTemplate.setEnabled(isNew);
-        markTemplates.addAll(courseTemplateToEdit.getAssociatedRoles().entrySet().stream()
-                .map(e -> new MarkTemplateWithAssociatedRoleDTO(e.getKey(), markRolesMap.get(e.getValue())))
+        this.spareMarkTemplatesAndTheirDefaultMarkRoles = new ArrayList<>();
+        spareMarkTemplatesAndTheirDefaultMarkRolesTable = createMarkTemplateAndMarkRoleTable(/* readOnly */ !isNew, userService);
+        buttonAddMarkRoleToMarkTemplateMapping.setEnabled(isNew);
+        buttonAddSpareMarkTemplate = new Button(stringMessages.add());
+        buttonAddSpareMarkTemplate.addClickHandler(c -> {
+            spareMarkTemplatesAndTheirDefaultMarkRoles.add(new MarkTemplateDTOAndMarkRoleDTO(allMarkTemplates.stream().findFirst().orElse(null),
+                    allMarkRoles.stream().findFirst().orElse(null)));
+            refreshSpareMarkTemplatesAndTheirDefaultMarkRolesTable();
+            validateAndUpdate();
+        });
+        buttonAddSpareMarkTemplate.setEnabled(isNew);
+        markTemplatesForMarkRoles.addAll(courseTemplateToEdit.getDefaultMarkTemplatesForMarkRoles().entrySet().stream()
+                .map(e -> new MarkTemplateDTOAndMarkRoleDTO(e.getValue(), e.getKey()))
                 .collect(Collectors.toList()));
-        refreshMarkTemplateTable();
-
-        createWaypointTemplateTable(/* readOnly */ !isNew);
+        refreshMarkTemplatesForMarkRolesTable();
+        spareMarkTemplatesAndTheirDefaultMarkRoles.addAll(courseTemplateToEdit.getDefaultMarkRolesForMarkTemplates().entrySet().stream()
+                .map(e -> new MarkTemplateDTOAndMarkRoleDTO(e.getKey(), e.getValue()))
+                .collect(Collectors.toList()));
+        refreshSpareMarkTemplatesAndTheirDefaultMarkRolesTable();
+        waypointTemplatesTable = createWaypointTemplateTable(/* readOnly */ !isNew);
         waypointTemplates.addAll(courseTemplateToEdit.getWaypointTemplates());
         refreshWaypointsTable();
         buttonAddWaypointTemplate = new Button(stringMessages.add());
         buttonAddWaypointTemplate.addClickHandler(c -> {
-            final MarkTemplateDTO firstMarkTemplate = allMarkTemplates.stream().findFirst().orElse(null);
+            final MarkRoleDTO firstMarkTemplate = allMarkRoles.stream().findFirst().orElse(null);
             waypointTemplates
-                    .add(new WaypointTemplateDTO(null, null, Arrays.asList(firstMarkTemplate, firstMarkTemplate),
+                    .add(new WaypointTemplateDTO(/* name */ null, /* shortName */ null, Arrays.asList(firstMarkTemplate, firstMarkTemplate),
                             Arrays.stream(PassingInstruction.relevantValues()).findFirst().orElse(null)));
             refreshWaypointsTable();
             validateAndUpdate();
         });
         buttonAddWaypointTemplate.setEnabled(isNew);
-
         nameTextBox.addKeyUpHandler(e -> validateAndUpdate());
         urlTextBox.addKeyUpHandler(e -> validateAndUpdate());
-
         tagsEditor = new StringListEditorComposite(courseTemplateToEdit.getTags(), stringMessages,
                 stringMessages.edit(stringMessages.tags()), IconResources.INSTANCE.removeIcon(),
                 Collections.emptyList(), stringMessages.tag());
     }
 
-    private void refreshMarkTemplateTable() {
-        markTemplatesTable.setRowCount(markTemplates.size());
-        markTemplatesTable.setRowData(0, markTemplates);
+    private void refreshMarkTemplatesForMarkRolesTable() {
+        markTemplatesForMarkRolesTable.setRowCount(markTemplatesForMarkRoles.size());
+        markTemplatesForMarkRolesTable.setRowData(0, markTemplatesForMarkRoles);
     }
 
-    private void createMarkTemplateTable(final boolean readOnly, final UserService userService) {
-        markTemplatesTable = new BaseCelltable<>(1000, tableResources);
-        markTemplatesTable.setWidth("100%");
-        final SelectionCell markTemplateSelectionCell = new SelectionCell(allMarkTemplatesSelectionList);
+    private void refreshSpareMarkTemplatesAndTheirDefaultMarkRolesTable() {
+        spareMarkTemplatesAndTheirDefaultMarkRolesTable.setRowCount(spareMarkTemplatesAndTheirDefaultMarkRoles.size());
+        spareMarkTemplatesAndTheirDefaultMarkRolesTable.setRowData(0, spareMarkTemplatesAndTheirDefaultMarkRoles);
+    }
+
+    private CellTable<MarkTemplateDTOAndMarkRoleDTO> createMarkTemplateAndMarkRoleTable(final boolean readOnly, final UserService userService) {
+        final CellTable<MarkTemplateDTOAndMarkRoleDTO> table = new BaseCelltable<>(1000, tableResources);
+        table.setWidth("100%");
+        final SelectionCell markTemplateSelectionCell = new SelectionCell(allMarkTemplatesSelectionListPlusEmptyString);
         final HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell> hideableMarkTemplateSelectionCell = new HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell>(
                 markTemplateSelectionCell, /* hidden */ null, /* editable */ wt -> !readOnly);
-        Column<MarkTemplateWithAssociatedRoleDTO, String> markTemplateColumn = new Column<MarkTemplateWithAssociatedRoleDTO, String>(
+        Column<MarkTemplateDTOAndMarkRoleDTO, String> markTemplateColumn = new Column<MarkTemplateDTOAndMarkRoleDTO, String>(
                 hideableMarkTemplateSelectionCell) {
             @Override
-            public String getValue(MarkTemplateWithAssociatedRoleDTO markTemplate) {
-                return markTemplate.getMarkTemplate() != null ? markTemplate.getMarkTemplate().getName() : "";
+            public String getValue(MarkTemplateDTOAndMarkRoleDTO markTemplateAndMarkRole) {
+                return markTemplateAndMarkRole.getMarkTemplate() != null ? markTemplateAndMarkRole.getMarkTemplate().getName() : "";
             }
         };
-        markTemplateColumn.setFieldUpdater(new FieldUpdater<MarkTemplateWithAssociatedRoleDTO, String>() {
+        markTemplateColumn.setFieldUpdater(new FieldUpdater<MarkTemplateDTOAndMarkRoleDTO, String>() {
             @Override
-            public void update(int index, MarkTemplateWithAssociatedRoleDTO markTemplate, String value) {
-                markTemplate.markTemplate = allMarkTemplates.stream().filter(mt -> mt.getName().equals(value))
-                        .findFirst().get();
+            public void update(final int index, final MarkTemplateDTOAndMarkRoleDTO markTemplateAndMarkRole, final String value) {
+                table.setRowData(index, Collections.singletonList(new MarkTemplateDTOAndMarkRoleDTO(allMarkTemplates.stream().filter(mt -> mt.getName().equals(value))
+                        .findFirst().get(), markTemplateAndMarkRole.getMarkRole())));
                 validateAndUpdate();
             }
         });
-        final SelectionCell associatedRoleSelectionCell = new SelectionCell(
-                markRolesMap.values().stream().map(MarkRoleDTO::getName).collect(Collectors.toList()));
+        final SelectionCell associatedRoleSelectionCell = new SelectionCell(allMarkRolesSelectionListPlusEmptyString);
         final HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell> hideableAssociatedRoleSelectionCell = new HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell>(
                 associatedRoleSelectionCell, /* hidden */ null, /* editable */ wt -> !readOnly);
-        Column<MarkTemplateWithAssociatedRoleDTO, String> associatedRoleColumn = new Column<MarkTemplateWithAssociatedRoleDTO, String>(
+        Column<MarkTemplateDTOAndMarkRoleDTO, String> markRoleColumn = new Column<MarkTemplateDTOAndMarkRoleDTO, String>(
                 hideableAssociatedRoleSelectionCell) {
-
             @Override
-            public String getValue(MarkTemplateWithAssociatedRoleDTO markTemplate) {
-                return markTemplate.getAssociatedRole() != null ? markTemplate.getAssociatedRole().getName() : "";
+            public String getValue(MarkTemplateDTOAndMarkRoleDTO markTemplate) {
+                return markTemplate.getMarkRole() != null ? markTemplate.getMarkRole().getName() : "";
             }
         };
-        associatedRoleColumn.setFieldUpdater(new FieldUpdater<MarkTemplateWithAssociatedRoleDTO, String>() {
+        markRoleColumn.setFieldUpdater(new FieldUpdater<MarkTemplateDTOAndMarkRoleDTO, String>() {
             @Override
-            public void update(int index, MarkTemplateWithAssociatedRoleDTO markTemplate, String value) {
-                markTemplate.setAssociatedRole(
-                        markRolesMap.values().stream().filter(mr -> mr.getName().equals(value)).findFirst().get());
+            public void update(final int index, final MarkTemplateDTOAndMarkRoleDTO markTemplateAndMarkRole, final String value) {
+                table.setRowData(index, Collections.singletonList(new MarkTemplateDTOAndMarkRoleDTO(markTemplateAndMarkRole.getMarkTemplate(),
+                        allMarkRoles.stream().filter(mr -> mr.getName().equals(value))
+                        .findFirst().get())));
                 validateAndUpdate();
-
             }
-
         });
         DefaultActionsImagesBarCell imagesBarCell = new DefaultActionsImagesBarCell(stringMessages) {
-
             @Override
             protected Iterable<ImageSpec> getImageSpecs() {
                 return readOnly ? Collections.emptyList() : Arrays.asList(getDeleteImageSpec());
             }
-
         };
-        ImagesBarColumn<MarkTemplateWithAssociatedRoleDTO, DefaultActionsImagesBarCell> actionsColumn = new ImagesBarColumn<>(
+        ImagesBarColumn<MarkTemplateDTOAndMarkRoleDTO, DefaultActionsImagesBarCell> actionsColumn = new ImagesBarColumn<>(
                 imagesBarCell);
-        actionsColumn.setFieldUpdater(new FieldUpdater<MarkTemplateWithAssociatedRoleDTO, String>() {
+        actionsColumn.setFieldUpdater(new FieldUpdater<MarkTemplateDTOAndMarkRoleDTO, String>() {
             @Override
-            public void update(int index, MarkTemplateWithAssociatedRoleDTO markTemplate, String value) {
-                markTemplates.remove(index);
+            public void update(int index, MarkTemplateDTOAndMarkRoleDTO markTemplate, String value) {
+                markTemplatesForMarkRoles.remove(index);
                 validateAndUpdate();
-                refreshMarkTemplateTable();
+                refreshMarkTemplatesForMarkRolesTable();
             }
         });
-
-        markTemplatesTable.addColumn(markTemplateColumn, stringMessages.markTemplate());
-        markTemplatesTable.addColumn(associatedRoleColumn, stringMessages.markRoles());
-        markTemplatesTable.addColumn(actionsColumn, stringMessages.actions());
+        table.addColumn(markTemplateColumn, stringMessages.markTemplate());
+        table.addColumn(markRoleColumn, stringMessages.markRoles());
+        table.addColumn(actionsColumn, stringMessages.actions());
+        return table;
     }
 
     private void refreshWaypointsTable() {
@@ -254,10 +280,9 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         waypointTemplatesTable.setRowData(0, (List<? extends WaypointTemplateDTO>) waypointTemplates);
     }
 
-    private void createWaypointTemplateTable(final boolean readOnly) {
-        waypointTemplatesTable = new BaseCelltable<>(1000, tableResources);
+    private CellTable<WaypointTemplateDTO> createWaypointTemplateTable(final boolean readOnly) {
+        final CellTable<WaypointTemplateDTO> waypointTemplatesTable = new BaseCelltable<>(1000, tableResources);
         waypointTemplatesTable.setWidth("100%");
-
         final HideableAndEditableCell<WaypointTemplateDTO, String, TextInputCell> hideableShortNameCell = new HideableAndEditableCell<>(
                 new TextInputCell(), /* hidden */ wt -> !hasTwoMarks(wt), /* editable */ wt -> !readOnly);
         Column<WaypointTemplateDTO, String> shortNameColumn = new Column<WaypointTemplateDTO, String>(
@@ -289,7 +314,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                 validateAndUpdate();
             }
         });
-        final SelectionCell markTemplate1SelectionCell = new SelectionCell(allMarkTemplatesSelectionList);
+        final SelectionCell markTemplate1SelectionCell = new SelectionCell(allMarkTemplatesSelectionListPlusEmptyString);
         final HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell> hideablemarkTemplate1Cell = new HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell>(
                 markTemplate1SelectionCell, /* hidden */ null, /* editable */ wt -> !readOnly);
         Column<WaypointTemplateDTO, String> markTemplateColumn1 = new Column<WaypointTemplateDTO, String>(
@@ -305,17 +330,17 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         markTemplateColumn1.setFieldUpdater(new FieldUpdater<WaypointTemplateDTO, String>() {
             @Override
             public void update(int index, WaypointTemplateDTO waypointTemplate, String value) {
-                MarkTemplateDTO selectedMarkTemplate = allMarkTemplates.stream()
-                        .filter(mt -> mt.getName().equals(value)).findFirst().get();
+                final MarkRoleDTO selectedMarkRole = allMarkRoles.stream()
+                        .filter(mr -> mr.getName().equals(value)).findFirst().get();
                 if (waypointTemplate.getMarkRolesForControlPoint().size() == 0) {
-                    waypointTemplate.getMarkRolesForControlPoint().add(selectedMarkTemplate);
+                    waypointTemplate.getMarkRolesForControlPoint().add(selectedMarkRole);
                 } else {
-                    waypointTemplate.getMarkRolesForControlPoint().set(0, selectedMarkTemplate);
+                    waypointTemplate.getMarkRolesForControlPoint().set(0, selectedMarkRole);
                 }
                 validateAndUpdate();
             }
         });
-        final SelectionCell markTemplate2SelectionCell = new SelectionCell(allMarkTemplatesSelectionList);
+        final SelectionCell markTemplate2SelectionCell = new SelectionCell(allMarkTemplatesSelectionListPlusEmptyString);
         final HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell> hideablemarkTemplate2Cell = new HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell>(
                 markTemplate2SelectionCell, /* hidden */ wt -> !hasTwoMarks(wt), /* editable */ wt -> !readOnly);
         Column<WaypointTemplateDTO, String> markTemplateColumn2 = new Column<WaypointTemplateDTO, String>(
@@ -331,12 +356,12 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         markTemplateColumn2.setFieldUpdater(new FieldUpdater<WaypointTemplateDTO, String>() {
             @Override
             public void update(int index, WaypointTemplateDTO waypointTemplate, String value) {
-                MarkTemplateDTO selectedMarkTemplate = allMarkTemplates.stream()
-                        .filter(mt -> mt.getName().equals(value)).findFirst().get();
+                final MarkRoleDTO selectedMarkRole = allMarkRoles.stream()
+                        .filter(mr -> mr.getName().equals(value)).findFirst().get();
                 if (waypointTemplate.getMarkRolesForControlPoint().size() == 1) {
-                    waypointTemplate.getMarkRolesForControlPoint().add(selectedMarkTemplate);
+                    waypointTemplate.getMarkRolesForControlPoint().add(selectedMarkRole);
                 } else {
-                    waypointTemplate.getMarkRolesForControlPoint().set(1, selectedMarkTemplate);
+                    waypointTemplate.getMarkRolesForControlPoint().set(1, selectedMarkRole);
                 }
                 validateAndUpdate();
             }
@@ -377,13 +402,13 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                 refreshWaypointsTable();
             }
         });
-
         waypointTemplatesTable.addColumn(passingInstructionColumn, stringMessages.passingInstructions());
         waypointTemplatesTable.addColumn(shortNameColumn, stringMessages.shortName());
         waypointTemplatesTable.addColumn(nameColumn, stringMessages.name());
         waypointTemplatesTable.addColumn(markTemplateColumn1, stringMessages.markTemplate1());
         waypointTemplatesTable.addColumn(markTemplateColumn2, stringMessages.markTemplate2());
         waypointTemplatesTable.addColumn(actionsColumn, stringMessages.actions());
+        return waypointTemplatesTable;
     }
 
     private static boolean hasTwoMarks(final WaypointTemplateDTO wt) {
@@ -402,15 +427,20 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
     protected CourseTemplateDTO getResult() {
         final UUID id = currentUuid == null ? UUID.randomUUID() : currentUuid;
         final ArrayList<MarkTemplateDTO> markTemplates = new ArrayList<MarkTemplateDTO>();
-        final Map<MarkTemplateDTO, UUID> associatedRoles = new HashMap<>();
+        final Map<MarkTemplateDTO, MarkRoleDTO> defaultMarkRolesForSpareMarkTemplates = new HashMap<>();
+        final Map<MarkRoleDTO, MarkTemplateDTO> defaultMarkTemplatesForMarkRoles = new HashMap<>();
         final String optionalUrl = urlTextBox.getText() != null && !urlTextBox.getText().isEmpty()
-                ? urlTextBox.getText()
-                : null;
-
-        this.markTemplates.stream().forEach(mt -> {
-            markTemplates.add(mt.markTemplate);
-            if (mt.getAssociatedRole() != null) {
-                associatedRoles.put(mt.getMarkTemplate(), mt.getAssociatedRole().getUuid());
+                ? urlTextBox.getText() : null;
+        this.markTemplatesForMarkRoles.stream().forEach(mt -> {
+            markTemplates.add(mt.getMarkTemplate());
+            if (mt.getMarkRole() != null) {
+                defaultMarkTemplatesForMarkRoles.put(mt.getMarkRole(), mt.getMarkTemplate());
+            }
+        });
+        this.spareMarkTemplatesAndTheirDefaultMarkRoles.stream().forEach(mt -> {
+            markTemplates.add(mt.getMarkTemplate());
+            if (mt.getMarkRole() != null) {
+                defaultMarkRolesForSpareMarkTemplates.put(mt.getMarkTemplate(), mt.getMarkRole());
             }
         });
         // TODO: repeatable part
@@ -428,56 +458,61 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                 wt.getMarkRolesForControlPoint().remove(1);
             }
         });
-        return new CourseTemplateDTO(id, nameTextBox.getValue(), markTemplates, waypointTemplates, associatedRoles,
-                optionalUrl, tagsEditor.getValue(), null, defaultNumberOfLaps);
+        return new CourseTemplateDTO(id, nameTextBox.getValue(), shortNameTextBox.getValue(), markTemplates,
+                waypointTemplates, defaultMarkRolesForSpareMarkTemplates, defaultMarkTemplatesForMarkRoles, optionalUrl,
+                tagsEditor.getValue(), null, defaultNumberOfLaps);
     }
 
     @Override
     protected Widget getAdditionalWidget() {
-        Grid result = new Grid(6, 2);
-        result.setWidget(0, 0, new Label(stringMessages.name()));
-        result.setWidget(0, 1, nameTextBox);
-        result.setWidget(1, 0, new Label(stringMessages.imageURL()));
-        result.setWidget(1, 1, urlTextBox);
-        result.setWidget(2, 0, buttonAddMarkTemplate);
-        result.setWidget(2, 1, markTemplatesTable);
-        result.setWidget(3, 0, buttonAddWaypointTemplate);
-        result.setWidget(3, 1, waypointTemplatesTable);
-        result.setWidget(4, 0, new Label(stringMessages.tags()));
-        result.setWidget(4, 1, tagsEditor);
-        result.setWidget(5, 0, new Label(stringMessages.defaultNumberOfLaps()));
-        result.setWidget(5, 1, numberOfLapsTextBox);
+        Grid result = new Grid(10, 2);
+        int row = 0;
+        result.setWidget(row, 0, new Label(stringMessages.name()));
+        result.setWidget(row++, 1, nameTextBox);
+        result.setWidget(row, 0, new Label(stringMessages.shortName()));
+        result.setWidget(row++, 1, shortNameTextBox);
+        result.setWidget(row, 0, new Label(stringMessages.imageURL()));
+        result.setWidget(row++, 1, urlTextBox);
+        result.setWidget(row++, 1, new Label(stringMessages.markRoles()));
+        result.setWidget(row, 0, buttonAddMarkRoleToMarkTemplateMapping);
+        result.setWidget(row++, 1, markTemplatesForMarkRolesTable);
+        result.setWidget(row, 0, buttonAddWaypointTemplate);
+        result.setWidget(row++, 1, waypointTemplatesTable);
+        result.setWidget(row++, 1, new Label(stringMessages.spareMarksAndTheirOptionalDefaultMarkRoles()));
+        result.setWidget(row, 0, buttonAddSpareMarkTemplate);
+        result.setWidget(row++, 1, spareMarkTemplatesAndTheirDefaultMarkRolesTable);
+        result.setWidget(row, 0, new Label(stringMessages.tags()));
+        result.setWidget(row++, 1, tagsEditor);
+        result.setWidget(row, 0, new Label(stringMessages.defaultNumberOfLaps()));
+        result.setWidget(row++, 1, numberOfLapsTextBox);
         return result;
     }
 
-    public static class MarkTemplateWithAssociatedRoleDTO {
-        private MarkTemplateDTO markTemplate;
-        private MarkRoleDTO associatedRole;
+    /**
+     * Used to describe connections between mark roles and mark templates in the context of a cell table's row type.
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     */
+    private static class MarkTemplateDTOAndMarkRoleDTO {
+        private final MarkTemplateDTO markTemplate;
+        private final MarkRoleDTO markRole;
 
-        public MarkTemplateWithAssociatedRoleDTO() {
-        }
-
-        public MarkTemplateWithAssociatedRoleDTO(final MarkTemplateDTO markTemplate, final MarkRoleDTO markRole) {
+        public MarkTemplateDTOAndMarkRoleDTO(final MarkTemplateDTO markTemplate, final MarkRoleDTO markRole) {
             this.markTemplate = markTemplate;
-            this.associatedRole = markRole;
+            this.markRole = markRole;
         }
 
         public MarkTemplateDTO getMarkTemplate() {
             return markTemplate;
         }
 
-        public MarkRoleDTO getAssociatedRole() {
-            return associatedRole;
+        public MarkRoleDTO getMarkRole() {
+            return markRole;
         }
-
-        public void setAssociatedRole(final MarkRoleDTO markRole) {
-            associatedRole = markRole;
-        }
-
     }
 
     public static class HideableAndEditableCell<DTO, V, T extends Cell<V>> implements Cell<V> {
-
         private final T concreteCell;
         private final Predicate<DTO> hiddenPredicate;
         private final Predicate<DTO> editablePredicate;

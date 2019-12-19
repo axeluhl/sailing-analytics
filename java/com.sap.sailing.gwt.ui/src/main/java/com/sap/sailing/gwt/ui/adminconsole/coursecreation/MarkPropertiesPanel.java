@@ -130,15 +130,14 @@ public class MarkPropertiesPanel extends FlowPanel {
 
     public void loadMarkProperties() {
         markPropertiesListDataProvider.getList().clear();
-        sailingService.getMarkProperties(new AsyncCallback<Iterable<MarkPropertiesDTO>>() {
-
+        sailingService.getMarkProperties(new AsyncCallback<List<MarkPropertiesDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.toString());
             }
 
             @Override
-            public void onSuccess(Iterable<MarkPropertiesDTO> result) {
+            public void onSuccess(List<MarkPropertiesDTO> result) {
                 markPropertiesListDataProvider.getList().clear();
                 Util.addAll(result, markPropertiesListDataProvider.getList());
                 filterableMarkProperties.updateAll(markPropertiesListDataProvider.getList());

@@ -171,7 +171,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
     
     @Override
-    public MarkRole createMarkRole(final String name) {
+    public MarkRole createMarkRole(final String name, String shortName) {
         final UUID idOfNewMarkRole = UUID.randomUUID();
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.MARK_ROLE,
@@ -179,15 +179,14 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
                 idOfNewMarkRole + "/" + name, () -> {
                     final UUID idOfNewMarkRoleForReplication = idOfNewMarkRole;
                     final String nameForReplication = name;
-                    apply(s -> s.internalCreateMarkRole(idOfNewMarkRoleForReplication, nameForReplication));
+                    apply(s -> s.internalCreateMarkRole(idOfNewMarkRoleForReplication, nameForReplication, shortName));
                 });
         return getMarkRoleById(idOfNewMarkRole);
     }
     
     @Override
-    public Void internalCreateMarkRole(UUID idOfNewMarkRole, String name) {
-        final MarkRole markRole = new MarkRoleImpl(idOfNewMarkRole, name);
-        
+    public Void internalCreateMarkRole(UUID idOfNewMarkRole, String name, String shortName) {
+        final MarkRole markRole = new MarkRoleImpl(idOfNewMarkRole, name, shortName);
         mongoObjectFactory.storeMarkRole(markRole);
         markRolesById.put(markRole.getId(), markRole);
         return null;
@@ -346,34 +345,29 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
 
     @Override
-    public CourseTemplate createCourseTemplate(String courseTemplateName, Iterable<MarkTemplate> marks,
-            Iterable<WaypointTemplate> waypoints, Map<MarkTemplate, MarkRole> associatedRoles,
+    public CourseTemplate createCourseTemplate(String courseTemplateName, String courseTemplateShortName, Iterable<MarkTemplate> marks,
+            Iterable<WaypointTemplate> waypoints, Map<MarkTemplate, MarkRole> defaultRolesForMarkTemplates,
+            Map<MarkRole, MarkTemplate> defaultMarkTemplatesForMarkRoles,
             RepeatablePart optionalRepeatablePart, Iterable<String> tags, URL optionalImageURL,
             Integer defaultNumberOfLaps) {
-        final Set<MarkTemplate> marksInSequence = new HashSet<>();
+        // check that all MarkRole objects reachable from the waypoints have a valid mapping to their default mark template
+        final Set<MarkRole> rolesAlreadyChecked = new HashSet<>();
         for (WaypointTemplate waypoint : waypoints) {
-            Util.addAll(waypoint.getControlPointTemplate().getMarks(), marksInSequence);
-        }
-        if (!Util.containsAll(marks, marksInSequence)) {
-            throw new IllegalArgumentException(
-                    "All marks contained in the sequence are expected to be part of the course template");
-        }
-        final Map<MarkTemplate, MarkRole> effectiveAssociatedRoles = new HashMap<>();
-        final Set<MarkRole> alreadyUsedRoles = new HashSet<>();
-        for (MarkTemplate markTemplate : marksInSequence) {
-            MarkRole roleNameForMarkInSequence = associatedRoles.get(markTemplate);
-            if (roleNameForMarkInSequence == null) {
-                // In case, no role name is explicitly given for a mark being part of the sequence,
-                // the role defaults to the mark's name
-                roleNameForMarkInSequence = createMarkRole(markTemplate.getName());
+            for (final MarkRole markRole : waypoint.getControlPointTemplate().getMarkRoles()) {
+                if (!rolesAlreadyChecked.contains(markRole)) {
+                    if (!defaultMarkTemplatesForMarkRoles.containsKey(markRole)) {
+                        throw new IllegalArgumentException(
+                                "All mark roles contained in the sequence are expected to have a mapping to a mark template");
+                    }
+                    final MarkTemplate mark = defaultMarkTemplatesForMarkRoles.get(markRole);
+                    if (!Util.contains(marks, mark)) {
+                        throw new IllegalArgumentException(
+                                "All marks contained in the sequence are expected to be part of the course template");
+                    }
+                    rolesAlreadyChecked.add(markRole);
+                }
             }
-            if (!alreadyUsedRoles.add(roleNameForMarkInSequence)) {
-                throw new IllegalArgumentException(
-                        "Role name " + roleNameForMarkInSequence + " can't be used twice in a course template");
-            }
-            effectiveAssociatedRoles.put(markTemplate, roleNameForMarkInSequence);
         }
-
         final UUID idOfNewCourseTemplate = UUID.randomUUID();
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.COURSE_TEMPLATE,
@@ -383,33 +377,33 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
                     final String courseTemplateNameForReplication = courseTemplateName;
                     final Iterable<MarkTemplate> marksForReplication = marks;
                     final Iterable<WaypointTemplate> waypointsForReplication = waypoints;
-                    final Map<MarkTemplate, MarkRole> effectiveAssociatedRolesForReplication = effectiveAssociatedRoles;
+                    final Map<MarkTemplate, MarkRole> effectiveAssociatedRolesForReplication = defaultRolesForMarkTemplates;
                     final RepeatablePart optionalRepeatablePartForReplication = optionalRepeatablePart;
                     final Iterable<String> tagsForReplication = tags;
                     final URL optionalImageURLForReplication = optionalImageURL;
                     final Integer defaultNumberOfLapsForReplication = defaultNumberOfLaps;
-                    apply(s -> s.internalCreateCourseTemplate(idOfNewCourseTemplateForReplication, courseTemplateNameForReplication, marksForReplication,
-                            waypointsForReplication, effectiveAssociatedRolesForReplication, optionalRepeatablePartForReplication, tagsForReplication, optionalImageURLForReplication,
-                            defaultNumberOfLapsForReplication));
+                    apply(s -> s.internalCreateCourseTemplate(idOfNewCourseTemplateForReplication, courseTemplateNameForReplication, courseTemplateShortName,
+                            marksForReplication, waypointsForReplication, effectiveAssociatedRolesForReplication, defaultMarkTemplatesForMarkRoles, optionalRepeatablePartForReplication,
+                            tagsForReplication, optionalImageURLForReplication, defaultNumberOfLapsForReplication));
                 });
         return getCourseTemplateById(idOfNewCourseTemplate);
     }
 
     @Override
-    public CourseTemplate updateCourseTemplate(UUID uuid, String name, URL optionalImageURL, ArrayList<String> tags) {
+    public CourseTemplate updateCourseTemplate(UUID uuid, String name, String shortName, URL optionalImageURL, ArrayList<String> tags) {
         getSecurityService().checkCurrentUserUpdatePermission(courseTemplatesById.get(uuid));
-        apply(s -> internalUpdateCourseTemplate(uuid, name, optionalImageURL, tags));
+        apply(s -> internalUpdateCourseTemplate(uuid, name, shortName, optionalImageURL, tags));
         return getCourseTemplateById(uuid);
     }
 
     @Override
-    public Void internalUpdateCourseTemplate(UUID uuid, String name, URL optionalImageURL,
-            ArrayList<String> tags) {
+    public Void internalUpdateCourseTemplate(UUID uuid, String name, String shortName,
+            URL optionalImageURL, ArrayList<String> tags) {
         CourseTemplate existingCourseTemplate = courseTemplatesById.get(uuid);
         CourseTemplateImpl courseTemplate = new CourseTemplateImpl(uuid, name,
-                existingCourseTemplate.getMarkTemplates(), existingCourseTemplate.getWaypointTemplates(),
-                existingCourseTemplate.getAssociatedRoles(), defaultMarkTemplatesForRoles,
-                optionalImageURL, existingCourseTemplate.getRepeatablePart(), existingCourseTemplate.getDefaultNumberOfLaps());
+                shortName, existingCourseTemplate.getMarkTemplates(),
+                existingCourseTemplate.getWaypointTemplates(), existingCourseTemplate.getDefaultMarkRolesForMarkTemplates(),
+                existingCourseTemplate.getDefaultMarkTemplatesForMarkRoles(), optionalImageURL, existingCourseTemplate.getRepeatablePart(), existingCourseTemplate.getDefaultNumberOfLaps());
         courseTemplate.setTags(tags);
 
         mongoObjectFactory.storeCourseTemplate(courseTemplate);
@@ -419,11 +413,13 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     @Override
     public Void internalCreateCourseTemplate(UUID idOfNewCourseTemplate, String courseTemplateName,
-            Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
-            Map<MarkTemplate, MarkRole> associatedRoles, RepeatablePart optionalRepeatablePart, Iterable<String> tags,
-            URL optionalImageURL, Integer defaultNumberOfLaps) {
+            String courseTemplateShortName, Iterable<MarkTemplate> marks,
+            Iterable<WaypointTemplate> waypoints,
+            Map<MarkTemplate, MarkRole> defaultMarkRolesForMarkTemplates, Map<MarkRole, MarkTemplate> defaultMarkTemplatesForMarkRoles,
+            RepeatablePart optionalRepeatablePart, Iterable<String> tags, URL optionalImageURL, Integer defaultNumberOfLaps) {
         final CourseTemplateImpl courseTemplate = new CourseTemplateImpl(idOfNewCourseTemplate, courseTemplateName,
-                marks, waypoints, associatedRoles, defaultMarkTemplatesForRoles, optionalImageURL, optionalRepeatablePart, defaultNumberOfLaps);
+                courseTemplateShortName, marks, waypoints, defaultMarkRolesForMarkTemplates,
+                defaultMarkTemplatesForMarkRoles, optionalImageURL, optionalRepeatablePart, defaultNumberOfLaps);
         courseTemplate.setTags(tags);
         mongoObjectFactory.storeCourseTemplate(courseTemplate);
         courseTemplatesById.put(courseTemplate.getId(), courseTemplate);

@@ -99,9 +99,11 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_ID);
                 final UUID markRoleIdOrNull = markRoleIdOrNullAsString == null ? null : UUID.fromString(markRoleIdOrNullAsString);
                 String markRoleNameOrNull = (String) markConfigurationJSON
-                        .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_ID);
+                        .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_NAME);
+                String markRoleShortNameOrNull = (String) markConfigurationJSON
+                        .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_SHORT_NAME);
                 if (markRoleIdOrNull != null || (markRoleNameOrNull != null && !markRoleNameOrNull.isEmpty())) {
-                    builder.setRole(markConfiguration, markRoleIdOrNull, markRoleNameOrNull);
+                    builder.setRole(markConfiguration, markRoleIdOrNull, markRoleNameOrNull, markRoleShortNameOrNull);
                 }
 
                 markConfigurationsByID.put(

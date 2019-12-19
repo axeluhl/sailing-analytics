@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole.coursecreation;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import com.google.gwt.user.client.Window;
@@ -29,15 +30,14 @@ public class MarkTemplateSuggestOracle extends AbstractListSuggestOracle<MarkTem
     }
 
     public void refresh() {
-        sailingServiceAsync.getMarkTemplates(new AsyncCallback<Iterable<MarkTemplateDTO>>() {
-
+        sailingServiceAsync.getMarkTemplates(new AsyncCallback<List<MarkTemplateDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(stringMessages.couldNotLoadMarkTemplates());
             }
 
             @Override
-            public void onSuccess(Iterable<MarkTemplateDTO> result) {
+            public void onSuccess(List<MarkTemplateDTO> result) {
                 allTemplates.clear();
                 Util.addAll(result, allTemplates);
                 setSelectableValues(allTemplates);

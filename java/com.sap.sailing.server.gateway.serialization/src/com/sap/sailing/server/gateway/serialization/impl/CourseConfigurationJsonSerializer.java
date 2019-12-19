@@ -34,7 +34,8 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
     public static final String FIELD_MARK_CONFIGURATION_MARK_ID = "markId";
     public static final String FIELD_MARK_CONFIGURATION_EFFECTIVE_PROPERTIES = "effectiveProperties";
     public static final String FIELD_MARK_CONFIGURATION_FREESTYLE_PROPERTIES = "freestyleProperties";
-    public static final String FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE = "associatedRole";
+    public static final String FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_NAME = "associatedRole";
+    public static final String FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_SHORT_NAME = "associatedRoleShortName";
     public static final String FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_ID = "associatedRoleId";
     public static final String FIELD_MARK_CONFIGURATION_POSITIONING = "positioning";
     public static final String FIELD_MARK_CONFIGURATION_EFFECTIVE_POSITIONING = "effectivePositioning";
@@ -84,7 +85,8 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
             }
             final IsMarkRole associatedRole = markWithOptionalRole.getValue();
             if (associatedRole != null) {
-                markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE, associatedRole.getName());
+                markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_NAME, associatedRole.getName());
+                markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_SHORT_NAME, associatedRole.getShortName());
                 if (associatedRole instanceof MarkRole) {
                     markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_ID, ((MarkRole)associatedRole).getId().toString());
                 }

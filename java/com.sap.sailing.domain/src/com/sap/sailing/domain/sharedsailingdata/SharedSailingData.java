@@ -50,7 +50,7 @@ public interface SharedSailingData {
     
     Iterable<MarkRole> getAllMarkRoles();
     
-    MarkRole createMarkRole(String name);
+    MarkRole createMarkRole(String name, String shortName);
     
     MarkRole getMarkRoleById(UUID id);
 
@@ -82,11 +82,13 @@ public interface SharedSailingData {
     MarkTemplate getMarkTemplateById(UUID id);
     
     /**
+     * @param courseTemplateShortName TODO
      * @param waypoints the waypoints in their defined order (iteration order equals order of waypoints in course)
      */
-    CourseTemplate createCourseTemplate(String courseTemplateName, Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
-            Map<MarkTemplate, MarkRole> associatedRoles, RepeatablePart optionalRepeatablePart, Iterable<String> tags,
-            URL optionalImageURL, Integer defaultNumberOfLaps);
+    CourseTemplate createCourseTemplate(String courseTemplateName, String courseTemplateShortName,
+            Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
+            Map<MarkTemplate, MarkRole> associatedRoles, Map<MarkRole, MarkTemplate> defaultMarkTemplatesForMarkRoles,
+            RepeatablePart optionalRepeatablePart, Iterable<String> tags, URL optionalImageURL, Integer defaultNumberOfLaps);
     
     CourseTemplate getCourseTemplateById(UUID id);
     
@@ -124,5 +126,5 @@ public interface SharedSailingData {
 
     Iterable<CourseTemplate> getAllCourseTemplates();
 
-    CourseTemplate updateCourseTemplate(UUID uuid, String name, URL optionalImageURL, ArrayList<String> tags);
+    CourseTemplate updateCourseTemplate(UUID uuid, String name, String shortName, URL optionalImageURL, ArrayList<String> tags);
 }

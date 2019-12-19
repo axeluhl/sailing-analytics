@@ -174,7 +174,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void storeMarkRole(MarkRole markRole) {
         final MongoCollection<Document> collection = database.getCollection(CollectionNames.MARK_ROLES.name());
         final Document query = new Document(FieldNames.MARK_ROLE_ID.name(), markRole.getId().toString());
-
         final Document entry = storeMarkRoleToDocument(markRole);
         collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry,
                 new UpdateOptions().upsert(true));
@@ -183,6 +182,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private Document storeMarkRoleToDocument(MarkRole markRole) {
         final Document result = new Document(FieldNames.MARK_ROLE_ID.name(), markRole.getId().toString());
         result.put(FieldNames.MARK_ROLE_NAME.name(), markRole.getName());
+        result.put(FieldNames.MARK_ROLE_SHORT_NAME.name(), markRole.getShortName());
         return result;
     }
     
@@ -198,7 +198,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void storeCourseTemplate(CourseTemplate courseTemplate) {
         final MongoCollection<Document> collection = database.getCollection(CollectionNames.COURSE_TEMPLATES.name());
         final Document query = new Document(FieldNames.COURSE_TEMPLATE_ID.name(), courseTemplate.getId().toString());
-
         final Document entry = storeCourseTemplateToDocument(courseTemplate);
         collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry,
                 new UpdateOptions().upsert(true));
@@ -206,19 +205,18 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     private Document storeCourseTemplateToDocument(CourseTemplate courseTemplate) {
         final Document result = new Document();
-
         // store master data
         result.put(FieldNames.COURSE_TEMPLATE_ID.name(), courseTemplate.getId().toString());
         result.put(FieldNames.COURSE_TEMPLATE_NAME.name(), courseTemplate.getName());
+        result.put(FieldNames.COURSE_TEMPLATE_SHORT_NAME.name(), courseTemplate.getShortName());
         result.put(FieldNames.COURSE_TEMPLATE_DEFAULT_NUMBER_OF_LAPS.name(), courseTemplate.getDefaultNumberOfLaps());
         final URL optionalImageURL = courseTemplate.getOptionalImageURL();
         if (optionalImageURL != null) {
             result.put(FieldNames.COURSE_TEMPLATE_IMAGE_URL.name(), optionalImageURL.toExternalForm());
         }
-        
         // store mark template list including role names for those who have one defined
         final BasicDBList markTemplates = new BasicDBList();
-        courseTemplate.getMarkTemplatesWithOptionalRoles().forEach((m, role) -> {
+        courseTemplate.getDefaultMarkRolesForMarkTemplates().forEach((m, role) -> {
             final BasicDBObject markTemplateObject = new BasicDBObject(
                     FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ID.name(), m.getId().toString());
             if (role != null) {
@@ -227,7 +225,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             markTemplates.add(markTemplateObject);
         });
         result.put(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATES.name(), markTemplates);
-
         // store waypoint templates
         final BasicDBList waypointTemplates = new BasicDBList();
         for (WaypointTemplate waypointTemplate : courseTemplate.getWaypointTemplates()) {
@@ -235,18 +232,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             waypointTemplates.add(waypointTemplateObject);
         }
         result.put(FieldNames.COURSE_TEMPLATE_WAYPOINTS.name(), waypointTemplates);
-
         // tags
         final BasicDBList tags = new BasicDBList();
         courseTemplate.getTags().forEach(tags::add);
         result.put(FieldNames.COURSE_TEMPLATE_TAGS.name(), tags);
-
         // repeatable part
         if (courseTemplate.hasRepeatablePart()) {
             final BasicDBObject repeatablePart = storeRepeatablePart(courseTemplate);
             result.put(FieldNames.COURSE_TEMPLATE_REPEATABLE_PART.name(), repeatablePart);
         }
-
         return result;
     }
 
@@ -254,16 +248,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         BasicDBObject waypointTemplateObject = new BasicDBObject();
         waypointTemplateObject.put(FieldNames.WAYPOINT_TEMPLATE_PASSINGINSTRUCTION.name(),
                 getPassingInstructions(waypointTemplate.getPassingInstruction()));
-
         waypointTemplateObject.put(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_NAME.name(),
                 waypointTemplate.getControlPointTemplate().getName());
-
         waypointTemplateObject.put(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_SHORT_NAME.name(),
                 waypointTemplate.getControlPointTemplate().getShortName());
-
-        final BasicDBList markTemplates = new BasicDBList();
-        waypointTemplate.getControlPointTemplate().getMarks().forEach(m -> markTemplates.add(m.getId().toString()));
-        waypointTemplateObject.put(FieldNames.WAYPOINT_TEMPLATE_MARK_TEMPLATES.name(), markTemplates);
+        final BasicDBList markRoles = new BasicDBList();
+        waypointTemplate.getControlPointTemplate().getMarkRoles().forEach(m -> markRoles.add(m.getId().toString()));
+        waypointTemplateObject.put(FieldNames.WAYPOINT_TEMPLATE_MARK_ROLES.name(), markRoles);
         return waypointTemplateObject;
     }
 

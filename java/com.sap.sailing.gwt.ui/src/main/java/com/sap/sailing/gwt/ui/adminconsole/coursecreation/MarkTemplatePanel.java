@@ -114,15 +114,14 @@ public class MarkTemplatePanel extends FlowPanel {
 
     public void loadMarkTemplates() {
         markTemplateListDataProvider.getList().clear();
-        sailingService.getMarkTemplates(new AsyncCallback<Iterable<MarkTemplateDTO>>() {
-
+        sailingService.getMarkTemplates(new AsyncCallback<List<MarkTemplateDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.toString());
             }
 
             @Override
-            public void onSuccess(Iterable<MarkTemplateDTO> result) {
+            public void onSuccess(List<MarkTemplateDTO> result) {
                 markTemplateListDataProvider.getList().clear();
                 Util.addAll(result, markTemplateListDataProvider.getList());
                 filterableMarkTemplates.updateAll(markTemplateListDataProvider.getList());

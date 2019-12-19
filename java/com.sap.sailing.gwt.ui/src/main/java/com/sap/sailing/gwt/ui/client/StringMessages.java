@@ -2356,4 +2356,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String invalidImageURL();
     String setDeviceIdentifier();
     String setPosition();
+    String spareMarksAndTheirOptionalDefaultMarkRoles();
 }

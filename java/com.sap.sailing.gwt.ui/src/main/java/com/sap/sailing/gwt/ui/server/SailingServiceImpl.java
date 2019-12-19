@@ -9880,7 +9880,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public Iterable<MarkTemplateDTO> getMarkTemplates() {
+    public List<MarkTemplateDTO> getMarkTemplates() {
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 getSharedSailingData().getAllMarkTemplates(), m -> convertToMarkTemplateDTO(m));
     }
@@ -9955,7 +9955,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public Iterable<MarkPropertiesDTO> getMarkProperties() {
+    public List<MarkPropertiesDTO> getMarkProperties() {
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 getSharedSailingData().getAllMarkProperties(), m -> convertToMarkPropertiesDTO(m));
     }
@@ -9971,15 +9971,18 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public Iterable<CourseTemplateDTO> getCourseTemplates() {
+    public List<CourseTemplateDTO> getCourseTemplates() {
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 getSharedSailingData().getAllCourseTemplates(), m -> convertToCourseTemplateDTO(m));
     }
 
     public CourseTemplateDTO convertToCourseTemplateDTO(CourseTemplate courseTemplate) {
-        final Map<MarkTemplateDTO, UUID> convertedAssociatedRoles = courseTemplate.getAssociatedRoles().entrySet()
+        final Map<MarkTemplateDTO, MarkRoleDTO> convertedDefaultMarkRolesForMarkTemplates = courseTemplate.getDefaultMarkRolesForMarkTemplates().entrySet()
                 .stream().collect(Collectors.toMap(entry -> convertToMarkTemplateDTO(entry.getKey()),
-                        entry -> entry.getValue().getId()));
+                        entry -> convertToMarkRoleDTO(entry.getValue())));
+        final Map<MarkRoleDTO, MarkTemplateDTO> convertedDefaultMarkTemplatesForMarkRoles = courseTemplate.getDefaultMarkTemplatesForMarkRoles().entrySet()
+                .stream().collect(Collectors.toMap(entry -> convertToMarkRoleDTO(entry.getKey()),
+                        entry -> convertToMarkTemplateDTO(entry.getValue())));
         final List<MarkTemplateDTO> convertedMarkTemplates = StreamSupport
                 .stream(courseTemplate.getMarkTemplates().spliterator(), false).map(this::convertToMarkTemplateDTO)
                 .collect(Collectors.toList());
@@ -9991,10 +9994,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 ? courseTemplate.getOptionalImageURL().toExternalForm()
                 : null;
         final CourseTemplateDTO result = new CourseTemplateDTO(courseTemplate.getId(), courseTemplate.getName(),
-                convertedMarkTemplates, convertedWaypointTemplates, convertedAssociatedRoles, optionalImageURL,
-                courseTemplate.getTags(), convertToRepeatablePartDTO(courseTemplate.getRepeatablePart()),
-                courseTemplate.getDefaultNumberOfLaps());
-
+                courseTemplate.getShortName(), convertedMarkTemplates, convertedWaypointTemplates,
+                convertedDefaultMarkRolesForMarkTemplates, convertedDefaultMarkTemplatesForMarkRoles, optionalImageURL,
+                courseTemplate.getTags(),
+                convertToRepeatablePartDTO(courseTemplate.getRepeatablePart()), courseTemplate.getDefaultNumberOfLaps());
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), result, courseTemplate.getIdentifier());
         return result;
     }
@@ -10009,7 +10012,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     private WaypointTemplateDTO convertToWaypointTemplateDTO(WaypointTemplate waypointTemplate) {
         return new WaypointTemplateDTO(waypointTemplate.getControlPointTemplate().getName(),
                 waypointTemplate.getControlPointTemplate().getShortName(),
-                StreamSupport.stream(waypointTemplate.getControlPointTemplate().getMarks().spliterator(), false)
+                StreamSupport.stream(waypointTemplate.getControlPointTemplate().getMarkRoles().spliterator(), false)
                         .map(this::convertToMarkRoleDTO).collect(Collectors.toList()),
                 waypointTemplate.getPassingInstruction());
     }
@@ -10056,24 +10059,28 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         if (existingCourseTemplate != null) {
             getSecurityService().checkCurrentUserUpdatePermission(existingCourseTemplate);
             result = convertToCourseTemplateDTO(getSharedSailingData().updateCourseTemplate(courseTemplate.getUuid(),
-                    courseTemplate.getName(), optionalImageURL, courseTemplate.getTags()));
+                    courseTemplate.getName(), courseTemplate.getShortName(), optionalImageURL, courseTemplate.getTags()));
         } else {
             final List<MarkTemplate> marks = courseTemplate.getMarkTemplates().stream()
                     .map(t -> getSharedSailingData().getMarkTemplateById(t.getUuid())).collect(Collectors.toList());
             final MarkRolePairFactory markPairTemplateFactory = new MarkRolePairFactory();
             final List<WaypointTemplate> waypoints = courseTemplate.getWaypointTemplates().stream()
                     .map(wp -> convertToWaypointTemplate(wp, markPairTemplateFactory)).collect(Collectors.toList());
-            final Map<MarkTemplate, MarkRole> associatedRoles = courseTemplate.getAssociatedRoles().entrySet().stream()
+            final Map<MarkTemplate, MarkRole> defaultMarkRolesForMarkTemplates = courseTemplate.getDefaultMarkRolesForMarkTemplates().entrySet().stream()
                     .collect(Collectors.toMap(
                             entry -> getSharedSailingData().getMarkTemplateById(entry.getKey().getUuid()),
-                            entry -> getSharedSailingData().getMarkRoleById(entry.getValue())));
+                            entry -> getSharedSailingData().getMarkRoleById(entry.getValue().getUuid())));
+            final Map<MarkRole, MarkTemplate> defaultMarkTemplatesForMarkRoles = courseTemplate.getDefaultMarkTemplatesForMarkRoles().entrySet().stream()
+                    .collect(Collectors.toMap(
+                            entry -> getSharedSailingData().getMarkRoleById(entry.getKey().getUuid()),
+                            entry -> getSharedSailingData().getMarkTemplateById(entry.getValue().getUuid())));
             final RepeatablePart optionalRepeatablePart = courseTemplate.getRepeatablePart() != null
                     ? convertToRepeatablePart(courseTemplate.getRepeatablePart())
                     : null;
             result = convertToCourseTemplateDTO(
-                    getSharedSailingData().createCourseTemplate(courseTemplate.getName(), marks, waypoints,
-                            associatedRoles, optionalRepeatablePart, courseTemplate.getTags(), optionalImageURL,
-                            courseTemplate.getDefaultNumberOfLaps()));
+                    getSharedSailingData().createCourseTemplate(courseTemplate.getName(), courseTemplate.getShortName(), marks,
+                            waypoints, defaultMarkRolesForMarkTemplates, defaultMarkTemplatesForMarkRoles,
+                            optionalRepeatablePart, courseTemplate.getTags(), optionalImageURL, courseTemplate.getDefaultNumberOfLaps()));
         }
         return result;
     }
@@ -10084,13 +10091,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private MarkRoleDTO convertToMarkRoleDTO(final MarkRole markRole) {
-        final MarkRoleDTO markRoleDTO = new MarkRoleDTO(markRole.getId(), markRole.getName());
+        final MarkRoleDTO markRoleDTO = new MarkRoleDTO(markRole.getId(), markRole.getName(), markRole.getShortName());
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), markRoleDTO, markRole.getIdentifier());
         return markRoleDTO;
     }
 
     @Override
-    public Iterable<MarkRoleDTO> getMarkRoles() {
+    public List<MarkRoleDTO> getMarkRoles() {
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(getSharedSailingData().getAllMarkRoles(),
                 m -> convertToMarkRoleDTO(m));
     }
@@ -10105,7 +10112,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             // markRole.getName()));
             throw new UnsupportedOperationException("Updating a mark role is not yet implemented!");
         } else {
-            result = convertToMarkRoleDTO(getSharedSailingData().createMarkRole(markRole.getName()));
+            result = convertToMarkRoleDTO(getSharedSailingData().createMarkRole(markRole.getName(), markRole.getShortName()));
         }
         return result;
     }

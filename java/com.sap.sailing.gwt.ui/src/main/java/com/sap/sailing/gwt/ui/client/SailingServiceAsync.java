@@ -1213,7 +1213,7 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void searchORCBoatCertificates(CountryCode country, Integer yearOfIssuance, String referenceNumber,
             String yachtName, String sailNumber, String boatClassName, AsyncCallback<Set<ORCCertificate>> callback);
     
-    void getMarkTemplates(AsyncCallback<Iterable<MarkTemplateDTO>> callback);
+    void getMarkTemplates(AsyncCallback<List<MarkTemplateDTO>> callback);
 
     void addOrUpdateMarkTemplate(MarkTemplateDTO markTemplate, AsyncCallback<MarkTemplateDTO> asyncCallback);
 
@@ -1221,9 +1221,9 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void updateMarkPropertiesPositioning(UUID markPropertiesId, DeviceIdentifierDTO deviceIdentifier, Position position, AsyncCallback<MarkPropertiesDTO> asyncCallback);
 
-    void getMarkProperties(AsyncCallback<Iterable<MarkPropertiesDTO>> asyncCallback);
+    void getMarkProperties(AsyncCallback<List<MarkPropertiesDTO>> asyncCallback);
 
-    void getCourseTemplates(AsyncCallback<Iterable<CourseTemplateDTO>> asyncCallback);
+    void getCourseTemplates(AsyncCallback<List<CourseTemplateDTO>> asyncCallback);
 
     void createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate, AsyncCallback<CourseTemplateDTO> asyncCallback);
 
@@ -1231,7 +1231,7 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void removeMarkProperties(UUID uuid, AsyncCallback<Void> asyncCallback);
 
-    void getMarkRoles(AsyncCallback<Iterable<MarkRoleDTO>> callback);
+    void getMarkRoles(AsyncCallback<List<MarkRoleDTO>> callback);
 
     void addOrUpdateMarkRole(MarkRoleDTO markRole, AsyncCallback<MarkRoleDTO> asyncCallback);
 }

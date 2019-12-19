@@ -10,10 +10,7 @@ import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCe
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
@@ -40,7 +37,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
-import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
@@ -70,8 +66,8 @@ public class CourseTemplatePanel extends FlowPanel {
     private CellTable<CourseTemplateDTO> courseTemplateTable;
     private ListDataProvider<CourseTemplateDTO> courseTemplateListDataProvider = new ListDataProvider<>();
     private RefreshableMultiSelectionModel<CourseTemplateDTO> refreshableSelectionModel;
-    private Map<UUID, MarkRoleDTO> markRolesMap = new HashMap<>();
-    private List<MarkTemplateDTO> markTemplates;
+    private List<MarkRoleDTO> allMarkRoles;
+    private List<MarkTemplateDTO> allMarkTemplates;
 
     public CourseTemplatePanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages, final UserService userService) {
@@ -125,17 +121,16 @@ public class CourseTemplatePanel extends FlowPanel {
 
     public void loadCourseTemplates() {
         courseTemplateListDataProvider.getList().clear();
-        sailingService.getCourseTemplates(new AsyncCallback<Iterable<CourseTemplateDTO>>() {
-
+        sailingService.getCourseTemplates(new AsyncCallback<List<CourseTemplateDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.toString());
             }
 
             @Override
-            public void onSuccess(Iterable<CourseTemplateDTO> result) {
+            public void onSuccess(List<CourseTemplateDTO> result) {
                 courseTemplateListDataProvider.getList().clear();
-                Util.addAll(result, courseTemplateListDataProvider.getList());
+                courseTemplateListDataProvider.getList().addAll(result);
                 filterableCourseTemplatePanel.updateAll(courseTemplateListDataProvider.getList());
                 courseTemplateListDataProvider.refresh();
             }
@@ -143,34 +138,30 @@ public class CourseTemplatePanel extends FlowPanel {
     }
 
     private void loadMarkRoles() {
-        sailingService.getMarkRoles(new AsyncCallback<Iterable<MarkRoleDTO>>() {
-
+        sailingService.getMarkRoles(new AsyncCallback<List<MarkRoleDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.toString());
             }
 
             @Override
-            public void onSuccess(Iterable<MarkRoleDTO> markRoles) {
-                markRoles.forEach(mr -> markRolesMap.put(mr.getUuid(), mr));
+            public void onSuccess(List<MarkRoleDTO> markRoles) {
+                allMarkRoles = markRoles;
             }
-
         });
     }
 
     private void loadMarkTemplates() {
-        sailingService.getMarkTemplates(new AsyncCallback<Iterable<MarkTemplateDTO>>() {
-
+        sailingService.getMarkTemplates(new AsyncCallback<List<MarkTemplateDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.toString());
             }
 
             @Override
-            public void onSuccess(Iterable<MarkTemplateDTO> markTemplateDTOs) {
-                markTemplates = Util.asList(markTemplateDTOs);
+            public void onSuccess(List<MarkTemplateDTO> markTemplateDTOs) {
+                allMarkTemplates = markTemplateDTOs;
             }
-
         });
     }
 
@@ -339,7 +330,6 @@ public class CourseTemplatePanel extends FlowPanel {
                 courseTemplate -> configACL.openDialog(courseTemplate));
         courseTemplateTable.addColumn(idColumn, stringMessages.id());
         courseTemplateTable.addColumn(actionsColumn, stringMessages.actions());
-
     }
 
     public void refreshCourseTemplates() {
@@ -351,7 +341,7 @@ public class CourseTemplatePanel extends FlowPanel {
     void openEditCourseTemplateDialog(final CourseTemplateDTO originalCourseTemplate, final UserService userService,
             final boolean isNew) {
         final CourseTemplateEditDialog dialog = new CourseTemplateEditDialog(sailingService, userService,
-                stringMessages, originalCourseTemplate, markRolesMap, markTemplates,
+                stringMessages, originalCourseTemplate, allMarkRoles, allMarkTemplates,
                 new DialogCallback<CourseTemplateDTO>() {
                     @Override
                     public void ok(CourseTemplateDTO courseTemplate) {

@@ -66,11 +66,11 @@ public class MarkRoleResource extends AbstractSailingServerResource {
 
     @POST
     @Produces("application/json;charset=UTF-8")
-    public Response createMarkRole(@FormParam("name") final String name) {
+    public Response createMarkRole(@FormParam("name") final String name, @FormParam("shortName") String shortName) {
         if (name == null || name.isEmpty()) {
             return getBadMarkRoleValidationErrorResponse("name must be given");
         }
-        final MarkRole markRole = getSharedSailingData().createMarkRole(name);
+        final MarkRole markRole = getSharedSailingData().createMarkRole(name, shortName);
         final JSONObject serializedMarkRole = markRoleSerializer.serialize(markRole);
         final String json = serializedMarkRole.toJSONString();
         return Response.ok(json).build();

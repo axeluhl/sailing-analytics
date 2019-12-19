@@ -20,7 +20,7 @@ public class MarkRolePairImpl extends NamedImpl implements MarkRolePair {
     }
 
     @Override
-    public Iterable<MarkRole> getMarks() {
+    public Iterable<MarkRole> getMarkRoles() {
         return Arrays.asList(getLeft(), getRight());
     }
 

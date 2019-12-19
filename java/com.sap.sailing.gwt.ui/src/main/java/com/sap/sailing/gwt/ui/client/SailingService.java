@@ -1272,7 +1272,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     Set<ORCCertificate> searchORCBoatCertificates(CountryCode country, Integer yearOfIssuance, String referenceNumber,
             String yachtName, String sailNumber, String boatClassName) throws Exception;
 
-    Iterable<MarkTemplateDTO> getMarkTemplates();
+    List<MarkTemplateDTO> getMarkTemplates();
 
     MarkTemplateDTO addOrUpdateMarkTemplate(MarkTemplateDTO markTemplate);
 
@@ -1280,9 +1280,9 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     MarkPropertiesDTO updateMarkPropertiesPositioning(UUID markPropertiesId, DeviceIdentifierDTO deviceIdentifier, Position position);
 
-    Iterable<MarkPropertiesDTO> getMarkProperties();
+    List<MarkPropertiesDTO> getMarkProperties();
 
-    Iterable<CourseTemplateDTO> getCourseTemplates();
+    List<CourseTemplateDTO> getCourseTemplates();
 
     CourseTemplateDTO createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate);
 
@@ -1290,7 +1290,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void removeMarkProperties(UUID uuid);
 
-    Iterable<MarkRoleDTO> getMarkRoles();
+    List<MarkRoleDTO> getMarkRoles();
 
     MarkRoleDTO addOrUpdateMarkRole(MarkRoleDTO markRole);
 }

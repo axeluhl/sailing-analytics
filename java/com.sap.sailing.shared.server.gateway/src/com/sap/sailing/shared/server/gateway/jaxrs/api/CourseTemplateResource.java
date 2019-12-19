@@ -90,10 +90,11 @@ public class CourseTemplateResource extends AbstractSailingServerResource {
         final CourseTemplate deserializedCourseTemplate = getCourseTemplateDeserializer()
                 .deserialize((JSONObject) parsedObject);
         final CourseTemplate createdCourseTemplate = getSharedSailingData().createCourseTemplate(
-                deserializedCourseTemplate.getName(), deserializedCourseTemplate.getMarkTemplates(),
-                deserializedCourseTemplate.getWaypointTemplates(), deserializedCourseTemplate.getAssociatedRoles(),
-                deserializedCourseTemplate.getRepeatablePart(), deserializedCourseTemplate.getTags(),
-                deserializedCourseTemplate.getOptionalImageURL(), deserializedCourseTemplate.getDefaultNumberOfLaps());
+                deserializedCourseTemplate.getName(), deserializedCourseTemplate.getShortName(),
+                deserializedCourseTemplate.getMarkTemplates(), deserializedCourseTemplate.getWaypointTemplates(),
+                deserializedCourseTemplate.getDefaultMarkRolesForMarkTemplates(),
+                deserializedCourseTemplate.getDefaultMarkTemplatesForMarkRoles(), deserializedCourseTemplate.getRepeatablePart(),
+                deserializedCourseTemplate.getTags(), deserializedCourseTemplate.getOptionalImageURL(), deserializedCourseTemplate.getDefaultNumberOfLaps());
         final JSONObject serializedMarkedProperties = courseTemplateSerializer.serialize(createdCourseTemplate);
         final String jsonResult = serializedMarkedProperties.toJSONString();
         return Response.ok(jsonResult).build();
@@ -106,7 +107,6 @@ public class CourseTemplateResource extends AbstractSailingServerResource {
         if (courseTemplate == null) {
             return getCourseTemplateNotFoundErrorResponse();
         }
-        
         getSharedSailingData().deleteCourseTemplate(courseTemplate);
         return Response.ok().build();
     }

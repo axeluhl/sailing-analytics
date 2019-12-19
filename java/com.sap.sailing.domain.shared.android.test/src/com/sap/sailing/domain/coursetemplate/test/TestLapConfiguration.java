@@ -46,6 +46,7 @@ public class TestLapConfiguration {
         startFinish = new MarkRolePairImpl("Start/Finish", "Start/Finish", startBoat, pin);
         gate = new MarkRolePairImpl("Leeward Gate", "Leeward Gate", gateLeft, gateRight);
         courseTemplate = new CourseTemplateImpl(UUID.randomUUID(), "L",
+                shortName,
                 /* marks */ Arrays.asList(startBoat, pin, top, gateLeft, gateRight),
                 /* waypoints */ Arrays.asList(new WaypointTemplateImpl(startFinish, PassingInstruction.Line),
                                               new WaypointTemplateImpl(top, PassingInstruction.Port),
@@ -54,9 +55,8 @@ public class TestLapConfiguration {
                                               new WaypointTemplateImpl(startFinish, PassingInstruction.Line)),
                 /* associatedRoles */ Collections.emptyMap(),
                 defaultMarkTemplatesForRoles,
-                /* optionaImageURL */ null,
-                new RepeatablePartImpl(/* zeroBasedIndexOfRepeatablePartStart */ 1,
-                        /* zeroBasedIndexOfRepeatablePartEnd */ 3), /* Default Number of Laps */ 1);
+                /* optionaImageURL */ null, new RepeatablePartImpl(/* zeroBasedIndexOfRepeatablePartStart */ 1,
+                                /* zeroBasedIndexOfRepeatablePartEnd */ 3), /* Default Number of Laps */ 1);
     }
     
     @Test
@@ -97,10 +97,10 @@ public class TestLapConfiguration {
         startFinish = new MarkRolePairImpl("Start/Finish","Start/Finish", startBoat, pin);
         try {
             courseTemplate = new CourseTemplateImpl("Test",
+                    shortName,
                     /* marks */ Arrays.asList(startBoat),
                     /* waypoints */ Arrays.asList(new WaypointTemplateImpl(startFinish, PassingInstruction.Line)),
-                    /* associatedRoles */ Collections.emptyMap(),
-                    defaultMarkTemplatesForRoles, /* optionaImageURL */ null);
+                    /* associatedRoles */ Collections.emptyMap(), defaultMarkTemplatesForRoles, /* optionaImageURL */ null);
             fail("Expected an IllegalArgumentException due to missing mark <pin> but it wasn't thrown");
         } catch (IllegalArgumentException e) {
             // expected
@@ -112,10 +112,10 @@ public class TestLapConfiguration {
         startBoat = new MarkTemplateImpl("Start Boat", "SB", /* color */ null, /* shape */ null, /* pattern */ null, MarkType.STARTBOAT);
         pin = new MarkTemplateImpl("Pin End", "Pin", /* color */ null, /* shape */ null, /* pattern */ null, MarkType.BUOY);
         startFinish = new MarkRolePairImpl("Start/Finish", "Start/Finish", startBoat, pin);
-        courseTemplate = new CourseTemplateImpl("Test", /* marks */ Arrays.asList(startBoat, pin),
+        courseTemplate = new CourseTemplateImpl("Test", shortName,
+                /* marks */ Arrays.asList(startBoat, pin),
                 /* waypoints */ Arrays.asList(new WaypointTemplateImpl(startFinish, PassingInstruction.Line)),
-                /* associatedRoles */ Collections.emptyMap(),
-                defaultMarkTemplatesForRoles, /* optionaImageURL */ null);
+                /* associatedRoles */ Collections.emptyMap(), defaultMarkTemplatesForRoles, /* optionaImageURL */ null);
         try {
             courseTemplate.getWaypointTemplates(0);
         } catch (IllegalArgumentException e) {

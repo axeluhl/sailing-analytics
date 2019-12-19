@@ -222,7 +222,7 @@ public class CourseConfigurationBuilder {
         waypoints.add(new WaypointWithMarkConfigurationImpl(markPair, passingInstruction));
     }
 
-    public void setRole(MarkConfiguration markConfiguration, UUID markRoleId, String roleName) {
+    public void setRole(MarkConfiguration markConfiguration, UUID markRoleId, String roleName, String roleShortName) {
         if (!markConfigurations.contains(markConfiguration)) {
             throw new IllegalArgumentException();
         }
@@ -230,9 +230,8 @@ public class CourseConfigurationBuilder {
         if (markRoleId != null) {
             candidate = resolveMarkRoleByID(markRoleId);
         } else {
-            candidate = new MarkRoleNameImpl(roleName);
+            candidate = new MarkRoleNameImpl(roleName, roleShortName);
         }
-        
         associatedRoles.forEach((mc, existingRole) -> {
             if (candidate.equals(existingRole) && !mc.equals(markConfiguration)) {
                 throw new IllegalArgumentException(

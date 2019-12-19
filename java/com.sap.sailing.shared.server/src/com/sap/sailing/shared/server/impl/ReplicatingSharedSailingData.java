@@ -19,7 +19,7 @@ import com.sap.sse.replication.ReplicableWithObjectInputStream;
 public interface ReplicatingSharedSailingData extends SharedSailingData,
         ReplicableWithObjectInputStream<ReplicatingSharedSailingData, OperationWithResult<ReplicatingSharedSailingData, ?>> {
     
-    Void internalCreateMarkRole(UUID idOfNewMarkRole, String name);
+    Void internalCreateMarkRole(UUID idOfNewMarkRole, String name, String shortName);
 
     Void internalCreateMarkProperties(UUID idOfNewMarkProperties, CommonMarkProperties properties,
             Iterable<String> tags);
@@ -30,9 +30,9 @@ public interface ReplicatingSharedSailingData extends SharedSailingData,
     Void internalCreateMarkTemplate(UUID idOfNewMarkTemplate, CommonMarkProperties properties);
     
     Void internalCreateCourseTemplate(UUID idOfNewCourseTemplate, String courseTemplateName,
-            Iterable<MarkTemplate> marks, Iterable<WaypointTemplate> waypoints,
-            Map<MarkTemplate, MarkRole> associatedRoles, RepeatablePart optionalRepeatablePart, Iterable<String> tags,
-            URL optionalImageURL, Integer defaultNumberOfLaps);
+            String courseTemplateShortName, Iterable<MarkTemplate> marks,
+            Iterable<WaypointTemplate> waypoints, Map<MarkTemplate, MarkRole> associatedRoles, Map<MarkRole, MarkTemplate> defaultMarkTemplatesForMarkRoles,
+            RepeatablePart optionalRepeatablePart, Iterable<String> tags, URL optionalImageURL, Integer defaultNumberOfLaps);
     
     Void internalSetTrackingDeviceIdentifierForMarkProperties(UUID markPropertiesUUID, DeviceIdentifier deviceIdentifier);
     
@@ -46,6 +46,6 @@ public interface ReplicatingSharedSailingData extends SharedSailingData,
     
     Void internalRecordUsage(UUID markPropertiesId, MarkRole roleName);
 
-    Void internalUpdateCourseTemplate(UUID uuid, String name, URL optionalImageURL, ArrayList<String> tags);
+    Void internalUpdateCourseTemplate(UUID uuid, String name, String shortName, URL optionalImageURL, ArrayList<String> tags);
 
 }

@@ -24,7 +24,7 @@ public interface MarkRole extends IsMarkRole, NamedWithUUID, WithQualifiedObject
     }
     
     @Override
-    default Iterable<MarkRole> getMarks() {
+    default Iterable<MarkRole> getMarkRoles() {
         return Collections.singleton(this);
     }
 

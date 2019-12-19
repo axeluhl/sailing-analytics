@@ -18,43 +18,47 @@ import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.SecurityInformationDTO;
 
 public class CourseTemplateDTO extends NamedDTO implements SecuredDTO {
-
     private static final long serialVersionUID = 4919350862920588863L;
 
     private UUID uuid;
 
+    private String shortName;
     // use concrete types instead of Iterable for GWT serialization
     private ArrayList<MarkTemplateDTO> markTemplates = new ArrayList<>();
     private ArrayList<WaypointTemplateDTO> waypointTemplates = new ArrayList<>();
-    private HashMap<MarkTemplateDTO, UUID> associatedRoles = new HashMap<>();
+    private HashMap<MarkTemplateDTO, MarkRoleDTO> defaultMarkRolesForMarkTemplates = new HashMap<>();
+    private HashMap<MarkRoleDTO, MarkTemplateDTO> defaultMarkTemplatesForMarkRoles = new HashMap<>();
     private ArrayList<String> tags = new ArrayList<>();
-
     private String optionalImageUrl;
-
     private RepeatablePartDTO repeatablePart;
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
-
     private Integer defaultNumberOfLaps;
     
     public CourseTemplateDTO() {
         // for GWT serialization
     }
 
-    public CourseTemplateDTO(UUID uuid, String name, Iterable<MarkTemplateDTO> markTemplates,
-            Iterable<WaypointTemplateDTO> waypointTemplates, Map<MarkTemplateDTO, UUID> associatedRoles,
-            String optionalImageUrl, Iterable<String> tags, RepeatablePartDTO repeatablePart,
-            Integer defaultNumberOfLaps) {
+    public CourseTemplateDTO(UUID uuid, String name, String shortName,
+            Iterable<MarkTemplateDTO> markTemplates, Iterable<WaypointTemplateDTO> waypointTemplates,
+            Map<MarkTemplateDTO, MarkRoleDTO> defaultMarkRolesForMarkTemplates, Map<MarkRoleDTO, MarkTemplateDTO> defaultMarkTemplatesForMarkRoles, String optionalImageUrl,
+            Iterable<String> tags, RepeatablePartDTO repeatablePart, Integer defaultNumberOfLaps) {
         super(name);
+        this.shortName = shortName;
         this.uuid = uuid;
         this.defaultNumberOfLaps = defaultNumberOfLaps;
         Util.addAll(markTemplates, this.markTemplates);
         Util.addAll(waypointTemplates, this.waypointTemplates);
-        this.associatedRoles.putAll(associatedRoles);
+        this.defaultMarkRolesForMarkTemplates.putAll(defaultMarkRolesForMarkTemplates);
+        this.defaultMarkTemplatesForMarkRoles.putAll(defaultMarkTemplatesForMarkRoles);
         this.optionalImageUrl = optionalImageUrl;
         Util.addAll(tags, this.tags);
         this.repeatablePart = repeatablePart;
     }
 
+    public String getShortName() {
+        return shortName;
+    }
+    
     @Override
     public AccessControlListDTO getAccessControlList() {
         return securityInformation.getAccessControlList();
@@ -105,8 +109,12 @@ public class CourseTemplateDTO extends NamedDTO implements SecuredDTO {
         return waypointTemplates;
     }
 
-    public HashMap<MarkTemplateDTO, UUID> getAssociatedRoles() {
-        return associatedRoles;
+    public HashMap<MarkTemplateDTO, MarkRoleDTO> getDefaultMarkRolesForMarkTemplates() {
+        return defaultMarkRolesForMarkTemplates;
+    }
+
+    public HashMap<MarkRoleDTO, MarkTemplateDTO> getDefaultMarkTemplatesForMarkRoles() {
+        return defaultMarkTemplatesForMarkRoles;
     }
 
     public Optional<String> getOptionalImageUrl() {

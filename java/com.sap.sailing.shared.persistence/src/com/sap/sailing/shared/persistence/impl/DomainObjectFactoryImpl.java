@@ -220,7 +220,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load mark templates.");
             logger.log(Level.SEVERE, "loadAllMarkTemplates", e);
         }
-
         return result;
     }
 
@@ -230,13 +229,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final String shortName = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_SHORT_NAME.name());
         final String pattern = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_PATTERN.name());
         final String shape = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_SHAPE.name());
-
         final String type = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_TYPE.name());
         final MarkType markType = type != null ? MarkType.valueOf(type) : null;
-
         final String storedColor = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_COLOR.name());
         final Color color = AbstractColor.getCssColor(storedColor);
-
         return new MarkTemplateImpl(id, name, shortName, color, shape, pattern, markType);
     }
     
@@ -254,15 +250,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load mark roles.");
             logger.log(Level.SEVERE, "loadAllMarkRoles", e);
         }
-        
         return result;
     }
     
     private MarkRole loadMarkRoleEntry(Document dbObject) {
         final UUID id = UUID.fromString(dbObject.getString(FieldNames.MARK_ROLE_ID.name()));
         final String name = dbObject.getString(FieldNames.MARK_ROLE_NAME.name());
-        
-        return new MarkRoleImpl(id, name);
+        final String shortName = dbObject.getString(FieldNames.MARK_ROLE_SHORT_NAME.name());
+        return new MarkRoleImpl(id, name, shortName);
     }
 
     @Override
@@ -280,7 +275,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load course templates.");
             logger.log(Level.SEVERE, "loadAllCourseTemplates", e);
         }
-
         return result;
     }
 
@@ -290,6 +284,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         // load master data
         final UUID id = UUID.fromString(dbObject.getString(FieldNames.COURSE_TEMPLATE_ID.name()));
         final String name = dbObject.getString(FieldNames.COURSE_TEMPLATE_NAME.name());
+        final String shortName = dbObject.getString(FieldNames.COURSE_TEMPLATE_SHORT_NAME.name());
         final String imageURLString = dbObject.getString(FieldNames.COURSE_TEMPLATE_IMAGE_URL.name());
         final Integer defaultNumberOfLaps = dbObject
                 .getInteger(FieldNames.COURSE_TEMPLATE_DEFAULT_NUMBER_OF_LAPS.name());
@@ -301,18 +296,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 logger.warning(String.format("Error parsing image URL %s for course template %s", imageURLString, id));
             }
         }
-        
         // load mark templates and associated roles
-        final ArrayList<?> markTemplatesList = dbObject.get(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATES.name(),
-                ArrayList.class);
+        final ArrayList<?> markTemplatesList = dbObject.get(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATES.name(), ArrayList.class);
         final Set<MarkTemplate> markTemplates = new HashSet<>();
         final Map<MarkTemplate, MarkRole> associatedRoles = new HashMap<>();
         for (Object entry : markTemplatesList) {
             if (entry instanceof Document) {
                 final Document entryObject = (Document) entry;
                 final UUID markTemplateUUID = UUID.fromString(entryObject.getString(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ID.name()));
-                final MarkTemplate markTemplate = markTemplateResolver.apply(
-                        markTemplateUUID);
+                final MarkTemplate markTemplate = markTemplateResolver.apply(markTemplateUUID);
                 if (markTemplate != null) {
                     markTemplates.add(markTemplate);
                     final String roleIdAsStringOrNull = entryObject.getString(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ROLE_ID.name());
@@ -321,29 +313,46 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         associatedRoles.put(markTemplate, markRoleOrNull);
                     }
                 } else {
-                    logger.warning(String.format("Could not resolve MarkTemplate with id %s for CourseTemplate %s.",
-                            markTemplateUUID, id));
+                    logger.warning(String.format("Could not resolve MarkTemplate with id %s for CourseTemplate %s.", markTemplateUUID, id));
                 }
             } else {
                 logger.warning(String.format("Unexpected entry for MarkTemplate found for CourseTemplate %s.", id));
             }
         }
-        
+        final Map<MarkRole, MarkTemplate> defaultMarkTemplatesForRoles = new HashMap<>();
+        final ArrayList<?> markRolesList = dbObject.get(FieldNames.COURSE_TEMPLATE_MARK_ROLES.name(), ArrayList.class);
+        final Set<MarkRole> markRoles = new HashSet<>();
+        for (Object entry : markRolesList) {
+            if (entry instanceof Document) {
+                final Document entryObject = (Document) entry;
+                final UUID markRoleUUID = UUID.fromString(entryObject.getString(FieldNames.COURSE_TEMPLATE_MARK_ROLE_ID.name()));
+                final MarkRole markRole = markRoleResolver.apply(markRoleUUID);
+                if (markRole != null) {
+                    markRoles.add(markRole);
+                    final String markTemplateIdAsString = entryObject.getString(FieldNames.COURSE_TEMPLATE_MARK_ROLE_DEFAULT_MARK_TEMPLATE_ID.name());
+                    final MarkTemplate markTemplate = markTemplateResolver.apply(UUID.fromString(markTemplateIdAsString));
+                    if (markTemplate != null) {
+                        defaultMarkTemplatesForRoles.put(markRole, markTemplate);
+                    }
+                } else {
+                    logger.warning(String.format("Could not resolve MarkTemplate with id %s for CourseTemplate %s.", markRoleUUID, id));
+                }
+            } else {
+                logger.warning(String.format("Unexpected entry for MarkTemplate found for CourseTemplate %s.", id));
+            }
+        }
         // load waypoints
-        final ArrayList<?> waypointTemplatesList = dbObject.get(FieldNames.COURSE_TEMPLATE_WAYPOINTS.name(),
-                ArrayList.class);
+        final ArrayList<?> waypointTemplatesList = dbObject.get(FieldNames.COURSE_TEMPLATE_WAYPOINTS.name(), ArrayList.class);
         final List<WaypointTemplate> waypointTemplates = new ArrayList<>();
-        final MarkRolePairFactory markPairTemplateFactory = new MarkRolePairFactory();
+        final MarkRolePairFactory markRolePairFactory = new MarkRolePairFactory();
         for (final Object o : waypointTemplatesList) {
             if (o instanceof Document) {
-
                 final Document bdo = (Document) o;
-            waypointTemplates.add(loadWaypointTemplate(bdo, markTemplateResolver, markPairTemplateFactory::create));
+                waypointTemplates.add(loadWaypointTemplate(bdo, markRoleResolver, markRolePairFactory::create));
             } else {
                 logger.warning(String.format("Could not load document  for CourseTemplate %s.", id));
             }
         }
-
         // load repeatable parts
         final BasicDBObject dbRepPart = (BasicDBObject) dbObject.get(FieldNames.COURSE_TEMPLATE_REPEATABLE_PART.name());
         final RepeatablePart optionalRepeatablePart;
@@ -354,57 +363,48 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             final int zeroBasedIndexOfRepeatablePartEnd = dbRepPart.getInt(FieldNames.REPEATABLE_PART_END.name());
             optionalRepeatablePart = new RepeatablePartImpl(zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd);
         }
-
         // load tags
         final ArrayList<?> tagsDbObject = dbObject.get(FieldNames.COURSE_TEMPLATE_TAGS.name(), ArrayList.class);
         final List<String> tags = new ArrayList<>();
         tagsDbObject.forEach(t -> tags.add(t.toString()));
-
-
-        final CourseTemplateImpl courseTemplateImpl = new CourseTemplateImpl(id, name, markTemplates, waypointTemplates,
-                associatedRoles, defaultMarkTemplatesForRoles, optionalImageURL, optionalRepeatablePart, defaultNumberOfLaps);
+        final CourseTemplateImpl courseTemplateImpl = new CourseTemplateImpl(id, name, shortName, markTemplates,
+                waypointTemplates, associatedRoles, defaultMarkTemplatesForRoles, optionalImageURL, optionalRepeatablePart, defaultNumberOfLaps);
         courseTemplateImpl.setTags(tags);
         return courseTemplateImpl;
     }
 
     private WaypointTemplate loadWaypointTemplate(Document bdo,
-            Function<UUID, MarkTemplate> markTemplateResolver,
-            BiFunction<Pair<String, String>, List<MarkTemplate>, MarkRolePair> markPairResolver) {
+            Function<UUID, MarkRole> markRoleResolver,
+            BiFunction<Pair<String, String>, List<MarkRole>, MarkRolePair> markRolePairResolver) {
         // load passing instruction
         final PassingInstruction passingInstruction = PassingInstruction
                 .valueOf(bdo.get(FieldNames.WAYPOINT_TEMPLATE_PASSINGINSTRUCTION.name()).toString());
-
         // load master data
         final String name = bdo.getString(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_NAME.name());
         final String shortName = bdo.getString(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_SHORT_NAME.name());
-
-        // load mark templates for control point
-        final ArrayList<?> markTemplateUUIDsDbList = bdo.get(FieldNames.WAYPOINT_TEMPLATE_MARK_TEMPLATES.name(),
-                ArrayList.class);
+        // load mark roles for control point
+        final ArrayList<?> markRoleUUIDsDbList = bdo.get(FieldNames.WAYPOINT_TEMPLATE_MARK_ROLES.name(), ArrayList.class);
         boolean hasParsingError = false;
-
-        final List<MarkTemplate> markTemplates = new ArrayList<>();
-        for (Object obj : markTemplateUUIDsDbList) {
-            final MarkTemplate markTemplate = markTemplateResolver.apply(UUID.fromString(obj.toString()));
-            if (markTemplate == null) {
-                logger.warning(String.format("Could not resolve MarkTemplate with id %s for WaypointTemplate.",
-                        obj.toString()));
+        final List<MarkRole> markRoles = new ArrayList<>();
+        for (Object obj : markRoleUUIDsDbList) {
+            final MarkRole markRole = markRoleResolver.apply(UUID.fromString(obj.toString()));
+            if (markRole == null) {
+                logger.warning(String.format("Could not resolve MarkRole with id %s for WaypointTemplate.", obj.toString()));
                 hasParsingError = true;
                 break;
             } else {
-                markTemplates.add(markTemplate);
+                markRoles.add(markRole);
             }
         }
         if (hasParsingError) {
             return null;
         }
-
         // create MarkTemplate or MarkTemplatePairImpl
         final ControlPointTemplate controlPointTemplate;
-        if (markTemplates.size() == 2) {
-            controlPointTemplate = markPairResolver.apply(new Pair<>(name, shortName), markTemplates);
+        if (markRoles.size() == 2) {
+            controlPointTemplate = markRolePairResolver.apply(new Pair<>(name, shortName), markRoles);
         } else {
-            controlPointTemplate = markTemplates.get(0);
+            controlPointTemplate = markRoles.get(0);
         }
         return new WaypointTemplateImpl(controlPointTemplate, passingInstruction);
     }
