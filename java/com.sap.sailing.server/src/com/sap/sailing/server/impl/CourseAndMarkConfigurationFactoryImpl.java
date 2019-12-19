@@ -303,17 +303,14 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             markTemplatesByMarkConfigurations.put(markConfiguration, effectiveMarkTemplate);
             marksConfigurationsMapping.put(markConfiguration, effectiveConfiguration);
         }
-
         final MarkRolePairFactory markPairTemplateFactory = new MarkRolePairFactory();
-        
         final CourseConfigurationToCourseConfigurationMapper waypointConfigurationMapper = new CourseConfigurationToCourseConfigurationMapper(
                 courseConfigurationAfterInventory.getWaypoints(), courseConfigurationAfterInventory.getAssociatedRoles(),
                 marksConfigurationsMapping);
         recordUsagesForMarkProperties(waypointConfigurationMapper.effectiveWaypoints, waypointConfigurationMapper.allAssociatedRoles);
-
         final CourseSequenceReplacementMapper<ControlPointTemplate, MarkRole, WaypointTemplate> waypointTemplateMapper = new CourseSequenceReplacementMapper<ControlPointTemplate, MarkRole, WaypointTemplate>(
-                courseConfigurationAfterInventory.getWaypoints(), courseConfigurationAfterInventory.getAssociatedRoles(),
-                markTemplatesByMarkConfigurations) {
+                courseConfigurationAfterInventory.getWaypoints(),
+                courseConfigurationAfterInventory.getAssociatedRoles(), markTemplatesByMarkConfigurations) {
             @Override
             protected ControlPointTemplate createMarkPair(MarkRole left, MarkRole right, String name,
                     String shortName) {
@@ -326,7 +323,6 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 return new WaypointTemplateImpl(controlPoint, passingInstruction);
             }
         };
-        
         final CourseTemplate newCourseTemplate = getSharedSailingData().createCourseTemplate(courseConfigurationAfterInventory.getName(), courseTemplateShortName,
                 new HashSet<>(markTemplatesByMarkConfigurations.values()), waypointTemplateMapper.effectiveWaypoints, ensureMarkRoles(waypointTemplateMapper.allAssociatedRoles),
                 courseConfigurationAfterInventory.getRepeatablePart(), tags,
