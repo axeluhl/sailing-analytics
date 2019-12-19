@@ -109,7 +109,7 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
     /**
      * @return the value set contains at least all {@link MarkRole}s reachable through the {@link #getWaypointTemplates()
      *         waypoint template sequence}; the keys for those values are what clients get when calling
-     *         {@link #getDefaultMarkTemplateForRole(MarkRole)} for the value. Optionally, additional default role
+     *         {@link #getDefaultMarkTemplateForMarkRole(MarkRole)} for the value. Optionally, additional default role
      *         assignment for "spare" marks, such as the "1" role for alternative windward mark templates may be returned
      *         by this method.
      */
@@ -135,7 +135,7 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
      * to create the {@link Mark} that acts in the role identified by {@code markRole}. Short for
      * {@link #getDefaultMarkTemplatesForMarkRoles()}.{@link Map#get(Object) get(markRole)}.
      */
-    MarkTemplate getDefaultMarkTemplateForRole(MarkRole markRole);
+    MarkTemplate getDefaultMarkTemplateForMarkRole(MarkRole markRole);
     
     MarkRole getMarkRoleByIdIfContainedInCourseTemplate(UUID markRoleId);
     

@@ -402,8 +402,8 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         CourseTemplate existingCourseTemplate = courseTemplatesById.get(uuid);
         CourseTemplateImpl courseTemplate = new CourseTemplateImpl(uuid, name,
                 shortName, existingCourseTemplate.getMarkTemplates(),
-                existingCourseTemplate.getWaypointTemplates(), existingCourseTemplate.getDefaultMarkRolesForMarkTemplates(),
-                existingCourseTemplate.getDefaultMarkTemplatesForMarkRoles(), optionalImageURL, existingCourseTemplate.getRepeatablePart(), existingCourseTemplate.getDefaultNumberOfLaps());
+                existingCourseTemplate.getWaypointTemplates(), existingCourseTemplate.getDefaultMarkTemplatesForMarkRoles(),
+                existingCourseTemplate.getDefaultMarkRolesForMarkTemplates(), optionalImageURL, existingCourseTemplate.getRepeatablePart(), existingCourseTemplate.getDefaultNumberOfLaps());
         courseTemplate.setTags(tags);
 
         mongoObjectFactory.storeCourseTemplate(courseTemplate);
@@ -418,8 +418,8 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
             Map<MarkTemplate, MarkRole> defaultMarkRolesForMarkTemplates, Map<MarkRole, MarkTemplate> defaultMarkTemplatesForMarkRoles,
             RepeatablePart optionalRepeatablePart, Iterable<String> tags, URL optionalImageURL, Integer defaultNumberOfLaps) {
         final CourseTemplateImpl courseTemplate = new CourseTemplateImpl(idOfNewCourseTemplate, courseTemplateName,
-                courseTemplateShortName, marks, waypoints, defaultMarkRolesForMarkTemplates,
-                defaultMarkTemplatesForMarkRoles, optionalImageURL, optionalRepeatablePart, defaultNumberOfLaps);
+                courseTemplateShortName, marks, waypoints, defaultMarkTemplatesForMarkRoles,
+                defaultMarkRolesForMarkTemplates, optionalImageURL, optionalRepeatablePart, defaultNumberOfLaps);
         courseTemplate.setTags(tags);
         mongoObjectFactory.storeCourseTemplate(courseTemplate);
         courseTemplatesById.put(courseTemplate.getId(), courseTemplate);

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,9 +26,9 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     
     private final ArrayList<WaypointTemplate> waypoints;
     
-    private final Map<MarkTemplate, MarkRole> defaultRolesForMarkTemplates;
+    private final Map<MarkTemplate, MarkRole> defaultMarkRolesForMarkTemplates;
 
-    private final Map<MarkRole, MarkTemplate> defaultMarkTemplatesForRoles;
+    private final Map<MarkRole, MarkTemplate> defaultMarkTemplatesForMarkRoles;
 
     private Iterable<String> tags = new ArrayList<>();
     
@@ -40,43 +41,45 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     
     /**
      * Creates a course template with a random UUID and no repeatable part.
-     * 
      * @param marks
      *            all mark templates made available in this course template
      * @param waypoints
      *            may refer only to {@link MarkTemplate}s provided in the {@code marks} parameter
-     * @param defaultRolesForMarkTemplates
+     * @param defaultMarkTemplatesForMarkRoles
+     *            all {@link MarkRole}s reachable through {@code waypoints} must appear as keys in this map's key set;
+     *            the values represent the {@link MarkTemplate} to use when instantiating this course template for the
+     *            key role
+     * @param defaultMarkRolesForMarkTemplates
      *            for those mark templates referenced as values in {@code defaultMarkTemplatesForRoles}, the value in
      *            this map has to be the key in {@code defaultMarkTemplatesForRoles}; for all other
      *            {@link MarkTemplates}s from {@code marks} it is optional whether a mapping to a default
      *            {@link MarkRole} is provided in this map
-     * @param defaultMarkTemplatesForRoles
-     *            all {@link MarkRole}s reachable through {@code waypoints} must appear as keys in this map's key set;
-     *            the values represent the {@link MarkTemplate} to use when instantiating this course template for the
-     *            key role
      */
     public CourseTemplateImpl(String name, String shortName, Iterable<MarkTemplate> marks,
-            Iterable<WaypointTemplate> waypoints,
-            Map<MarkTemplate, MarkRole> defaultRolesForMarkTemplates, Map<MarkRole, MarkTemplate> defaultMarkTemplatesForRoles, URL optionalImageURL) {
-        this(UUID.randomUUID(), name, shortName, marks, waypoints, defaultRolesForMarkTemplates,
-                defaultMarkTemplatesForRoles, optionalImageURL);
+            Iterable<WaypointTemplate> waypoints, Map<MarkRole, MarkTemplate> defaultMarkTemplatesForMarkRoles,
+            Map<MarkTemplate, MarkRole> defaultMarkRolesForMarkTemplates, URL optionalImageURL) {
+        this(UUID.randomUUID(), name, shortName, marks, waypoints, defaultMarkTemplatesForMarkRoles,
+                defaultMarkRolesForMarkTemplates, optionalImageURL);
     }
 
     /**
      * Creates a course with the given UUID and no repeatable part.
-     * @param shortName TODO
      */
     public CourseTemplateImpl(UUID id, String name, String shortName, Iterable<MarkTemplate> marks,
-            Iterable<WaypointTemplate> waypoints,
-            Map<MarkTemplate, MarkRole> defaultRolesForMarkTemplates, Map<MarkRole, MarkTemplate> defaultMarkTemplatesForRoles, URL optionalImageURL) {
-        this(id, name, shortName, marks, waypoints, defaultRolesForMarkTemplates, defaultMarkTemplatesForRoles,
+            Iterable<WaypointTemplate> waypoints, Map<MarkRole, MarkTemplate> defaultMarkTemplatesForMarkRoles,
+            Map<MarkTemplate, MarkRole> defaultMarkRolesForMarkTemplates, URL optionalImageURL) {
+        this(id, name, shortName, marks, waypoints, defaultMarkTemplatesForMarkRoles, defaultMarkRolesForMarkTemplates,
                 optionalImageURL, /* optionalRepeatablePart */ null, /* default number of laps */ null);
     }
     
+    /**
+     * @param defaultMarkRolesForMarkTemplates
+     *            will be extended according to and checked for consistency against {@code defaultMarkTemplatesForMarkRoles}
+     */
     public CourseTemplateImpl(UUID id, String name, String shortName, Iterable<MarkTemplate> marks,
-            Iterable<WaypointTemplate> waypoints,
-            Map<MarkTemplate, MarkRole> defaultRolesForMarkTemplates, Map<MarkRole, MarkTemplate> defaultMarkTemplatesForRoles,
-            URL optionalImageURL, RepeatablePart optionalRepeatablePart, Integer defaultNumberOfLaps) {
+            Iterable<WaypointTemplate> waypoints, Map<MarkRole, MarkTemplate> defaultMarkTemplatesForMarkRoles,
+            Map<MarkTemplate, MarkRole> defaultMarkRolesForMarkTemplates, URL optionalImageURL,
+            RepeatablePart optionalRepeatablePart, Integer defaultNumberOfLaps) {
         super(name, id);
         this.shortName = shortName;
         this.defaultNumberOfLaps = defaultNumberOfLaps;
@@ -89,8 +92,15 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
         Util.addAll(marks, this.marks);
         this.optionalImageURL = optionalImageURL;
         this.optionalRepeatablePart = optionalRepeatablePart;
-        this.defaultRolesForMarkTemplates = new HashMap<>(defaultRolesForMarkTemplates);
-        this.defaultMarkTemplatesForRoles = new HashMap<>(defaultMarkTemplatesForRoles);
+        this.defaultMarkRolesForMarkTemplates = new HashMap<>(defaultMarkRolesForMarkTemplates);
+        this.defaultMarkTemplatesForMarkRoles = new HashMap<>(defaultMarkTemplatesForMarkRoles);
+        for (final Entry<MarkRole, MarkTemplate> e : defaultMarkTemplatesForMarkRoles.entrySet()) {
+            final MarkRole previousDefaultMarkRole = this.defaultMarkRolesForMarkTemplates.put(e.getValue(), e.getKey());
+            if (previousDefaultMarkRole != null && previousDefaultMarkRole != e.getKey()) {
+                throw new IllegalArgumentException("Inconsistent default mark role assignment: mark template "+e.getValue()+
+                        " was assigned to mark role "+previousDefaultMarkRole+" but now shall default to mark role "+e.getKey());
+            }
+        }
         validateWaypointsAgainstRolesAndMappingSymmetry();
     }
 
@@ -103,20 +113,20 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     private void validateWaypointsAgainstRolesAndMappingSymmetry() {
         for (final WaypointTemplate waypoint : waypoints) {
             for (final MarkRole markRole : waypoint.getControlPointTemplate().getMarkRoles()) {
-                if (!defaultMarkTemplatesForRoles.containsKey(markRole)) {
+                if (!defaultMarkTemplatesForMarkRoles.containsKey(markRole)) {
                     throw new IllegalArgumentException("Mark role "+markRole+" used by waypoint template "+
                             waypoint+" in course template "+this+" is not providing a default mark template");
                 }
-                if (!Util.contains(marks, defaultMarkTemplatesForRoles.get(markRole))) {
-                    throw new IllegalArgumentException("Mark template " + defaultMarkTemplatesForRoles.get(markRole)
+                if (!Util.contains(marks, defaultMarkTemplatesForMarkRoles.get(markRole))) {
+                    throw new IllegalArgumentException("Mark template " + defaultMarkTemplatesForMarkRoles.get(markRole)
                             + " used by role " + markRole + " used by waypoint template " + waypoint
                             + " in course template " + this + " is not provided in the collection of marks");
                 }
-                if (!Util.equalsWithNull(defaultRolesForMarkTemplates.get(defaultMarkTemplatesForRoles.get(markRole)), markRole)) {
-                    throw new IllegalArgumentException("Mark template " + defaultMarkTemplatesForRoles.get(markRole)
+                if (!Util.equalsWithNull(defaultMarkRolesForMarkTemplates.get(defaultMarkTemplatesForMarkRoles.get(markRole)), markRole)) {
+                    throw new IllegalArgumentException("Mark template " + defaultMarkTemplatesForMarkRoles.get(markRole)
                             + " used as default for mark role " + markRole
                             + " does not use that same mark role as its default but instead refers to "
-                            + defaultRolesForMarkTemplates.get(defaultMarkTemplatesForRoles.get(markRole))
+                            + defaultMarkRolesForMarkTemplates.get(defaultMarkTemplatesForMarkRoles.get(markRole))
                             + " as its default role");
                 }
             }
@@ -129,13 +139,13 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     }
 
     @Override
-    public MarkTemplate getDefaultMarkTemplateForRole(MarkRole markRole) {
-        return defaultMarkTemplatesForRoles.get(markRole);
+    public MarkTemplate getDefaultMarkTemplateForMarkRole(MarkRole markRole) {
+        return defaultMarkTemplatesForMarkRoles.get(markRole);
     }
 
     @Override
     public Map<MarkRole, MarkTemplate> getDefaultMarkTemplatesForMarkRoles() {
-        return defaultMarkTemplatesForRoles;
+        return defaultMarkTemplatesForMarkRoles;
     }
 
     @Override
@@ -186,18 +196,18 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
 
     @Override
     public Map<MarkTemplate, MarkRole> getDefaultMarkRolesForMarkTemplates() {
-        return defaultRolesForMarkTemplates;
+        return defaultMarkRolesForMarkTemplates;
     }
 
     @Override
     public MarkRole getOptionalAssociatedRole(MarkTemplate markTemplate) {
-        return defaultRolesForMarkTemplates.get(markTemplate);
+        return defaultMarkRolesForMarkTemplates.get(markTemplate);
     }
 
     @Override
     public MarkRole getMarkRoleByIdIfContainedInCourseTemplate(UUID markRoleId) {
         MarkRole result = null;
-        for (MarkRole markRole : defaultRolesForMarkTemplates.values()) {
+        for (MarkRole markRole : defaultMarkRolesForMarkTemplates.values()) {
             if (markRole.getId().equals(markRoleId)) {
                 result = markRole;
                 break;
@@ -207,8 +217,8 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     }
 
     public void setAssociatedRoles(Map<MarkTemplate, MarkRole> associatedRoles) {
-        this.defaultRolesForMarkTemplates.clear();
-        this.defaultRolesForMarkTemplates.putAll(associatedRoles);
+        this.defaultMarkRolesForMarkTemplates.clear();
+        this.defaultMarkRolesForMarkTemplates.putAll(associatedRoles);
     }
     
     @Override

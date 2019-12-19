@@ -53,7 +53,7 @@ public class CourseTemplateJsonSerializer implements JsonSerializer<CourseTempla
         final JSONArray allMarkRoles = new JSONArray();
         courseTemplate.getMarkRoles().forEach(markRole -> {
             final JSONObject markRoleEntry = markRoleJsonSerializer.serialize(markRole);
-            markRoleEntry.put(FIELD_ASSOCIATED_MARK_TEMPLATE_ID, courseTemplate.getDefaultMarkTemplateForRole(markRole).getId().toString());
+            markRoleEntry.put(FIELD_ASSOCIATED_MARK_TEMPLATE_ID, courseTemplate.getDefaultMarkTemplateForMarkRole(markRole).getId().toString());
             allMarkRoles.add(markRoleEntry);
         });
         result.put(FIELD_ALL_MARK_ROLES, allMarkRoles);

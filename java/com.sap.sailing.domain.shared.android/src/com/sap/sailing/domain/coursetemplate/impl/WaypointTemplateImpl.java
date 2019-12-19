@@ -25,4 +25,9 @@ public class WaypointTemplateImpl implements WaypointTemplate {
         return passingInstruction;
     }
 
+    @Override
+    public String toString() {
+        return "WaypointTemplateImpl [passingInstruction=" + passingInstruction + ", controlPointTemplate="
+                + controlPointTemplate + "]";
+    }
 }
