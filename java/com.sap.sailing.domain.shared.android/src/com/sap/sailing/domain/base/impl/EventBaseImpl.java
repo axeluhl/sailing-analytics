@@ -56,6 +56,9 @@ public abstract class EventBaseImpl implements EventBase {
      */
     protected EventBaseImpl(String name, TimePoint startDate, TimePoint endDate, Venue venue, boolean isPublic, UUID id) {
         assert venue != null;
+        if (startDate != null && endDate != null && startDate.after(endDate)) {
+            throw new IllegalArgumentException("Event "+name+" cannot start after it ends. Start: "+startDate+", end: "+endDate);
+        }
         this.id = id;
         this.name = name;
         this.startDate = startDate;
