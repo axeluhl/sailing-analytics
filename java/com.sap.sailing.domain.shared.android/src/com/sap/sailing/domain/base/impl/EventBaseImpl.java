@@ -132,6 +132,9 @@ public abstract class EventBaseImpl implements EventBase {
 
     @Override
     public void setStartDate(TimePoint startDate) {
+        if (startDate != null && getEndDate() != null && getEndDate().before(startDate)) {
+            throw new IllegalArgumentException("Event start date ("+startDate+") for event "+this+" must not be after end date "+getEndDate());
+        }
         this.startDate = startDate;
     }
 
@@ -142,6 +145,9 @@ public abstract class EventBaseImpl implements EventBase {
 
     @Override
     public void setEndDate(TimePoint endDate) {
+        if (endDate != null && getStartDate() != null && getStartDate().after(endDate)) {
+            throw new IllegalArgumentException("Event end date ("+endDate+") for event "+this+" must not be before start date "+getStartDate());
+        }
         this.endDate = endDate;
     }
 
