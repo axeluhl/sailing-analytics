@@ -9,6 +9,7 @@ import com.sap.sailing.datamining.Activator;
 import com.sap.sailing.datamining.SailingClusterGroups;
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
+import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -44,18 +45,25 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
     private final RaceColumn raceColumn;
     private final Competitor competitor;
     private final PolarDataService polarDataService;
+    private final HasTrackedRaceContext trackedRaceContext;
 
     public RaceResultOfCompetitorWithContext(HasLeaderboardContext leaderboardWithContext, RaceColumn raceColumn,
-            Competitor competitor, PolarDataService polarDataService) {
+            Competitor competitor, PolarDataService polarDataService, HasTrackedRaceContext trackedRaceContext) {
         this.leaderboardWithContext = leaderboardWithContext;
         this.raceColumn = raceColumn;
         this.competitor = competitor;
         this.polarDataService = polarDataService;
+        this.trackedRaceContext = trackedRaceContext;
     }
 
     @Override
     public HasLeaderboardContext getLeaderboardContext() {
         return leaderboardWithContext;
+    }
+    
+    @Override
+    public HasTrackedRaceContext getTrackedRaceContext() {
+        return trackedRaceContext;
     }
 
     private Leaderboard getLeaderboard() {
