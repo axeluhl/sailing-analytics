@@ -6,7 +6,6 @@ import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
-import com.sap.sailing.domain.coursetemplate.StorablePositioning;
 
 public class RegattaMarkConfigurationImpl extends MarkConfigurationImpl implements RegattaMarkConfiguration {
     private static final long serialVersionUID = 329929810377510675L;
@@ -14,7 +13,7 @@ public class RegattaMarkConfigurationImpl extends MarkConfigurationImpl implemen
     private final Mark mark;
     private final MarkProperties optionalMarkProperties;
 
-    public RegattaMarkConfigurationImpl(Mark mark, StorablePositioning optionalPositioning,
+    public RegattaMarkConfigurationImpl(Mark mark, Positioning optionalPositioning,
             Positioning storedPositioning, MarkTemplate optionalMarkTemplate, MarkProperties optionalMarkProperties,
             boolean storeToInventory) {
         super(optionalMarkTemplate, optionalPositioning, storedPositioning, storeToInventory);

@@ -42,12 +42,17 @@ import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseConfigurationJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.DeviceIdentifierJsonDeserializer;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseConfigurationJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.PlaceHolderDeviceIdentifierJsonHandler;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sun.jersey.api.client.ClientResponse.Status;
@@ -58,17 +63,22 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
     
     private final JsonSerializer<CourseConfiguration> courseConfigurationJsonSerializer;
     private final Function<DeviceIdentifier, Position> positionResolver;
+    private final DeviceIdentifierJsonDeserializer deviceIdentifierDeserializer;
 
     public static final String FIELD_TAGS = "tags";
 
     public CourseConfigurationResource() {
-        courseConfigurationJsonSerializer = new CourseConfigurationJsonSerializer();
+        final TypeBasedServiceFinder<DeviceIdentifierJsonHandler> deviceJsonServiceFinder = getServiceFinderFactory()
+                .createServiceFinder(DeviceIdentifierJsonHandler.class);
+        deviceJsonServiceFinder.setFallbackService(new PlaceHolderDeviceIdentifierJsonHandler());
+        courseConfigurationJsonSerializer = new CourseConfigurationJsonSerializer(new DeviceIdentifierJsonSerializer(deviceJsonServiceFinder));
+        deviceIdentifierDeserializer = new DeviceIdentifierJsonDeserializer(deviceJsonServiceFinder);
         positionResolver = identifier -> {
             Position lastPosition = null;
             try {
+                // FIXME terribly slow! Furthermore, looking up by deviceIdentifier only misses any other position sources
                 final Map<DeviceIdentifier, Timed> lastFix = getService().getSensorFixStore()
                         .getLastFix(Collections.singleton(identifier));
-
                 final Timed t = lastFix.get(identifier);
                 if (t instanceof GPSFix) {
                     lastPosition = ((GPSFix) t).getPosition();
@@ -81,7 +91,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
     }
 
     private JsonDeserializer<CourseConfiguration> getCourseConfigurationDeserializer(final Regatta regatta) {
-        return new CourseConfigurationJsonDeserializer(this.getSharedSailingData(), regatta, positionResolver);
+        return new CourseConfigurationJsonDeserializer(this.getSharedSailingData(), deviceIdentifierDeserializer, regatta, positionResolver);
     }
 
     private Response getBadRegattaErrorResponse(String regattaName) {

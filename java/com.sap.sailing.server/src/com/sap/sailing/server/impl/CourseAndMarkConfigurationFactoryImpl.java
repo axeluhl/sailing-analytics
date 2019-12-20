@@ -117,9 +117,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         positionResolver = identifier -> {
             Position lastPosition = null;
             try {
-                final Map<DeviceIdentifier, Timed> lastFix = sensorFixStore
-                        .getLastFix(Collections.singleton(identifier));
-
+                final Map<DeviceIdentifier, Timed> lastFix = sensorFixStore.getLastFix(Collections.singleton(identifier));
                 final Timed t = lastFix.get(identifier);
                 if (t instanceof GPSFix) {
                     lastPosition = ((GPSFix) t).getPosition();
@@ -171,7 +169,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     // in the case of a MarkPropertiesBasedMarkConfiguration, the following call is expected to notice
                     // the identity between the mark properties object to update and the mark properties that constitute
                     // the effective properties and then skip the update.
-                    getSharedSailingData().updateMarkProperties(markPropertiesOrNull.getId(), markConfiguration.getEffectiveProperties(), null, null, Collections.emptySet());
+                    getSharedSailingData().updateMarkProperties(markPropertiesOrNull.getId(), markConfiguration.getEffectiveProperties(), positioningInformation, Collections.emptySet());
                 }
                 Positioning positioningOrNull = markConfiguration.getOptionalPositioning();
                 if (positioningOrNull == null && markConfiguration instanceof RegattaMarkConfiguration) {
@@ -401,12 +399,15 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         Position position = null;
         DeviceIdentifier deviceIdentifier = null;
         if (optionalExplicitPositioning != null) {
-            if (optionalExplicitPositioning instanceof FixedPositioning) {
+            switch (optionalExplicitPositioning.getType()) {
+            case FIXED_POSITION:
                 final FixedPositioning fixedPositioning = (FixedPositioning) optionalExplicitPositioning;
                 position = fixedPositioning.getPosition();
-            } else if (optionalExplicitPositioning instanceof SmartphoneUUIDPositioning) {
+                break;
+            case DEVICE:
                 final SmartphoneUUIDPositioning smartphoneUUIDPositioning = (SmartphoneUUIDPositioning) optionalExplicitPositioning;
                 deviceIdentifier = new SmartphoneUUIDIdentifierImpl(smartphoneUUIDPositioning.getDeviceUUID());
+                break;
             }
         }
         if (optionalAssociatedMarkProperties != null && position == null && deviceIdentifier == null) {

@@ -23,6 +23,7 @@ import com.sap.sailing.domain.base.Mark;
  * @author Axel Uhl (D043530)
  *
  */
-public interface RegattaMarkConfiguration extends MarkConfiguration {
+public interface RegattaMarkConfiguration<MarkConfigurationT extends MarkConfiguration<MarkConfigurationT>>
+        extends MarkConfiguration<MarkConfigurationT> {
     Mark getMark();
 }

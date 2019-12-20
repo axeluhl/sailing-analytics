@@ -166,10 +166,8 @@ public class MarkResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     public Response addMarkFix(String json)
             throws DoesNotHaveRegattaLogException, ParseException, JsonDeserializationException {
-
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
-
         String leaderboardName = (String) requestObject.get(LEADERBOARD_NAME);
         String raceColumnName = (String) requestObject.get(RACE_COLUMN_NAME);
         String fleetName = (String) requestObject.get(FLEET_NAME);
@@ -177,7 +175,6 @@ public class MarkResource extends AbstractSailingServerResource {
         String lonDeg = (String) requestObject.get(LON_DEG);
         String latDeg = (String) requestObject.get(LAT_DEG);
         String timeMillis = (String) requestObject.get(TIME_MILLIS);
-        
         final RaceLogTrackingAdapter raceLogTrackingAdapter = getRaceLogTrackingAdapter();
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {

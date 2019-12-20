@@ -2446,16 +2446,12 @@ public class RegattasResource extends AbstractSailingServerResource {
             // Deeper insights to tracking data is only available to users who can administer a regatta
             SecurityUtils.getSubject()
                     .checkPermission(regatta.getIdentifier().getStringPermission(DefaultActions.UPDATE));
-
             final TrackingDeviceStatusSerializer serializer = new TrackingDeviceStatusSerializer(
                     new DeviceIdentifierJsonSerializer(
                             getServiceFinderFactory().createServiceFinder(DeviceIdentifierJsonHandler.class)));
-
             final RegattaLogDeviceMappingFinder<WithID> regattaLogDeviceMappingFinder = new RegattaLogDeviceMappingFinder<WithID>(
                     regatta.getRegattaLog());
-            final Map<WithID, List<DeviceMappingWithRegattaLogEvent<WithID>>> foundMappings = regattaLogDeviceMappingFinder
-                    .analyze();
-
+            final Map<WithID, List<DeviceMappingWithRegattaLogEvent<WithID>>> foundMappings = regattaLogDeviceMappingFinder.analyze();
             final JSONObject result = new JSONObject();
             foundMappings.forEach((item, mappings) -> {
                 Map<DeviceIdentifier, DeviceMappingWithRegattaLogEvent<WithID>> mappingByDeviceID = new HashMap<>();

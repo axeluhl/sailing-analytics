@@ -10,13 +10,14 @@ import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
  * @author Axel Uhl (d043530)
  *
  */
-public interface MarkPairWithConfiguration extends ControlPointWithMarkConfiguration {
-    MarkConfiguration getLeft();
+public interface MarkPairWithConfiguration<MarkConfigurationT extends MarkConfiguration<MarkConfigurationT>>
+        extends ControlPointWithMarkConfiguration<MarkConfigurationT> {
+    MarkConfigurationT getLeft();
 
-    MarkConfiguration getRight();
+    MarkConfigurationT getRight();
 
     @Override
-    default Iterable<MarkConfiguration> getMarkConfigurations() {
+    default Iterable<MarkConfigurationT> getMarkConfigurations() {
         return Arrays.asList(getLeft(), getRight());
     }
 }

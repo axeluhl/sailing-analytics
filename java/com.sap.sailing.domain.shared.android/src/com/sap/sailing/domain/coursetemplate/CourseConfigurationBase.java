@@ -23,7 +23,8 @@ import com.sap.sse.common.Named;
  * The configuration for all marks are returned by {@link #getAllMarks()} because when pushing
  * this to a Regatta the marks for all these configurations have to be established.
  */
-public interface CourseConfigurationBase<R extends IsMarkRole> extends WithOptionalRepeatablePart, Named {
+public interface CourseConfigurationBase<R extends IsMarkRole, MarkConfigurationT extends MarkConfiguration<MarkConfigurationT>>
+extends WithOptionalRepeatablePart, Named {
     /**
      * If this course configuration has been obtained from a {@link CourseTemplate} without modifying the sequence of
      * waypoints and their mapping to {@link MarkTemplate}s, this method will return that {@link CourseTemplate}. In all
@@ -41,22 +42,22 @@ public interface CourseConfigurationBase<R extends IsMarkRole> extends WithOptio
      * <li>Any additional {@link MarkConfiguration} that is intended to be used as a spare mark.</li>
      * </ul>
      */
-    Iterable<MarkConfiguration> getAllMarks();
+    Iterable<? extends MarkConfigurationT> getAllMarks();
 
     /**
      * The waypoint sequence, with a single occurrence of any repeatable part the course may have (similar to calling
      * {@link #getWaypoints(int) getWaypoints(1)}), with {@link MarkConfiguration configuration information} for the
      * marks used. All {@link MarkConfiguration} objects referenced are part of the result of {@link #getAllMarks()}.
      */
-    Iterable<WaypointWithMarkConfiguration> getWaypoints();
+    Iterable<WaypointWithMarkConfiguration<MarkConfigurationT>> getWaypoints();
     
     /**
      * Returns all {@link MarkConfiguration MarkConfigurations} that are part of the {@link CourseConfigurationBase} and
      * have a role name explicitly associated.
      */
-    Map<MarkConfiguration, R> getAssociatedRoles();
+    Map<MarkConfigurationT, R> getAssociatedRoles();
     
-    Map<MarkConfiguration, R> getAllMarksWithOptionalRoles();
+    Map<MarkConfigurationT, R> getAllMarksWithOptionalRoles();
     
     /**
      * A {@link CourseConfigurationBase} having a {@link RepeatablePart} can optionally also specify a number of laps.
@@ -74,5 +75,5 @@ public interface CourseConfigurationBase<R extends IsMarkRole> extends WithOptio
      * @param numberOfLaps the repeatable part will be inserted {@code numberOfLaps-1} times. For example, a two-lap
      * course will have the repeatable part exactly once.
      */
-    Iterable<WaypointWithMarkConfiguration> getWaypoints(int numberOfLaps);
+    Iterable<WaypointWithMarkConfiguration<MarkConfigurationT>> getWaypoints(int numberOfLaps);
 }

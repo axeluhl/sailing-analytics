@@ -26,21 +26,30 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBuilder;
+import com.sap.sailing.domain.coursetemplate.Positioning;
+import com.sap.sailing.domain.coursetemplate.impl.FixedPositioningImpl;
+import com.sap.sailing.domain.coursetemplate.impl.TrackingDeviceBasedPositioningImpl;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkPropertiesJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.PlaceHolderDeviceIdentifierJsonHandler;
 import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.impl.RGBColor;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/v1/markproperties")
 public class MarkPropertiesResource extends AbstractSailingServerResource {
-    
     private final JsonSerializer<MarkProperties> markPropertiesSerializer;
     
     public MarkPropertiesResource() {
-        markPropertiesSerializer = new MarkPropertiesJsonSerializer();
+        final TypeBasedServiceFinder<DeviceIdentifierJsonHandler> deviceJsonServiceFinder = getServiceFinderFactory()
+                .createServiceFinder(DeviceIdentifierJsonHandler.class);
+        deviceJsonServiceFinder.setFallbackService(new PlaceHolderDeviceIdentifierJsonHandler());
+        markPropertiesSerializer = new MarkPropertiesJsonSerializer(new DeviceIdentifierJsonSerializer(deviceJsonServiceFinder));
     }
 
     private Response getBadMarkPropertiesValidationErrorResponse(String errorText) {
@@ -192,16 +201,16 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         }
         final MarkPropertiesBuilder markPropertiesBuilder = new MarkPropertiesBuilder(/* id */ null, name, effectiveShortName,
                 color, shape, pattern, type);
-        getSharedSailingData().updateMarkProperties(markPropertiesUUID, markPropertiesBuilder.build(), null, null, tags);
-        
+        final Positioning positioningInformation;
         if (deviceUuid != null && deviceUuid.length() > 0) {
-            final DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
-            getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(markProperties, device);
-        }
-        if (latDeg != null && lonDeg != null) {
+            positioningInformation = new TrackingDeviceBasedPositioningImpl(new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid)));
+        } else if (latDeg != null && lonDeg != null) {
             final Position fixedPosition = new DegreePosition(latDeg, lonDeg);
-            getSharedSailingData().setFixedPositionForMarkProperties(markProperties, fixedPosition);
+            positioningInformation = new FixedPositioningImpl(fixedPosition);
+        } else {
+            positioningInformation = null;
         }
+        getSharedSailingData().updateMarkProperties(markPropertiesUUID, markPropertiesBuilder.build(), positioningInformation, tags);
         final JSONObject serializedMarkedProperties = markPropertiesSerializer.serialize(markProperties);
         final String json = serializedMarkedProperties.toJSONString();
         return Response.ok(json).build();

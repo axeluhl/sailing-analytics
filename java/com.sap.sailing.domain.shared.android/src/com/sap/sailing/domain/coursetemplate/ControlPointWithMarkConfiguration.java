@@ -10,8 +10,8 @@ import com.sap.sse.common.Named;
  * @author Axel Uhl (d043530)
  *
  */
-public interface ControlPointWithMarkConfiguration extends Named {
-    Iterable<MarkConfiguration> getMarkConfigurations();
+public interface ControlPointWithMarkConfiguration<MarkConfigurationT extends MarkConfiguration<MarkConfigurationT>> extends Named {
+    Iterable<MarkConfigurationT> getMarkConfigurations();
 
     String getShortName();
 }

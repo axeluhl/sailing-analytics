@@ -21,9 +21,12 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
+import com.sap.sailing.domain.coursetemplate.FixedPositioning;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.PositioningVisitor;
+import com.sap.sailing.domain.coursetemplate.TrackingDeviceBasedPositioning;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.shared.persistence.MongoObjectFactory;
 import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
@@ -66,8 +69,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry,
                     new UpdateOptions().upsert(true));
         } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-            logger.log(Level.WARNING, "Could not load mark properties because device identifier could not be stored.",
-                    e);
+            logger.log(Level.WARNING, "Could not load mark properties because device identifier could not be stored.", e);
         }
     }
 
@@ -77,27 +79,33 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         final Document result = new Document();
         result.put(FieldNames.MARK_PROPERTIES_ID.name(), markProperties.getId().toString());
         storeCommonMarkProperties(markProperties, result);
+        if (markProperties.getPositioningInformation() != null) {
+            markProperties.getPositioningInformation().accept(new PositioningVisitor<Void>() {
+                @Override
+                public Void visit(FixedPositioning fixedPositioning) {
+                    result.put(FieldNames.MARK_PROPERTIES_FIXED_POSITION.name(),
+                            storePosition(fixedPositioning.getFixedPosition()));
+                    return null;
+                }
 
-        final Position fixedPositionOrNull = markProperties.getFixedPosition();
-        if (fixedPositionOrNull != null) {
-            result.put(FieldNames.MARK_PROPERTIES_FIXED_POSITION.name(),
-                    storePosition(markProperties.getFixedPosition()));
+                @Override
+                public Void visit(TrackingDeviceBasedPositioning trackingDeviceBasedPositioning) {
+                    try {
+                        result.put(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER.name(),
+                                storeDeviceId(deviceIdentifierServiceFinder, trackingDeviceBasedPositioning.getDeviceIdentifier()));
+                        return null;
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
         }
-
         BasicDBList tags = new BasicDBList();
         markProperties.getTags().forEach(tags::add);
         result.put(FieldNames.MARK_PROPERTIES_TAGS.name(), tags);
-
-        final DeviceIdentifier trackingDeviceIdentifierOrNull = markProperties.getTrackingDeviceIdentifier();
-        if (trackingDeviceIdentifierOrNull != null) {
-            result.put(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER.name(),
-                    storeDeviceId(deviceIdentifierServiceFinder, trackingDeviceIdentifierOrNull));
-        }
-
         Map<String, Long> lastUsedTemplateMap = markProperties.getLastUsedTemplate().entrySet().stream()
                 .collect(Collectors.toMap(k -> k.getKey().getId().toString(), v -> v.getValue().asMillis()));
         result.put(FieldNames.MARK_PROPERTIES_USED_TEMPLATE.name(), new BasicDBObject(lastUsedTemplateMap));
-
         Map<String, Long> lastUsedRoleMap = markProperties.getLastUsedRole().entrySet().stream()
                 .collect(Collectors.toMap(k -> k.getKey().getId().toString(), v -> v.getValue().asMillis()));
         result.put(FieldNames.MARK_PROPERTIES_USED_ROLE.name(), new BasicDBObject(lastUsedRoleMap));

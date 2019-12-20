@@ -88,7 +88,6 @@ public class MarkPropertiesPanel extends FlowPanel {
         add(buttonAndFilterPanel);
         allMarkProperties = new ArrayList<>();
         buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), new Command() {
-
             @Override
             public void execute() {
                 loadMarkProperties();
@@ -100,11 +99,9 @@ public class MarkPropertiesPanel extends FlowPanel {
                 openEditMarkPropertiesDialog(new MarkPropertiesDTO());
             }
         });
-
         Label lblFilterRaces = new Label(stringMessages.filterMarkPropertiesByName() + ":");
         lblFilterRaces.setWordWrap(false);
         buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
-
         this.filterableMarkProperties = new LabeledAbstractFilterablePanel<MarkPropertiesDTO>(lblFilterRaces,
                 allMarkProperties, markPropertiesListDataProvider, stringMessages) {
             @Override
@@ -131,7 +128,6 @@ public class MarkPropertiesPanel extends FlowPanel {
     public void loadMarkProperties() {
         markPropertiesListDataProvider.getList().clear();
         sailingService.getMarkProperties(new AsyncCallback<Iterable<MarkPropertiesDTO>>() {
-
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.toString());
@@ -149,17 +145,14 @@ public class MarkPropertiesPanel extends FlowPanel {
 
     private void createMarkPropertiesTable(final UserService userService) {
         // Create a CellTable.
-
         // Set a key provider that provides a unique key for each contact. If key is
         // used to identify contacts when fields (such as the name and address)
         // change.
         markPropertiesTable = new BaseCelltable<>(1000, tableResources);
         markPropertiesTable.setWidth("100%");
-
         // Attach a column sort handler to the ListDataProvider to sort the list.
         ListHandler<MarkPropertiesDTO> sortHandler = new ListHandler<>(markPropertiesListDataProvider.getList());
         markPropertiesTable.addColumnSortHandler(sortHandler);
-
         // Add a selection model so we can select cells.
         refreshableSelectionModel = new RefreshableMultiSelectionModel<>(
                 new EntityIdentityComparator<MarkPropertiesDTO>() {
@@ -205,7 +198,6 @@ public class MarkPropertiesPanel extends FlowPanel {
 
         // Initialize the columns.
         initTableColumns(sortHandler, userService);
-
         markPropertiesListDataProvider.addDataDisplay(markPropertiesTable);
         add(markPropertiesTable);
         allMarkProperties.clear();

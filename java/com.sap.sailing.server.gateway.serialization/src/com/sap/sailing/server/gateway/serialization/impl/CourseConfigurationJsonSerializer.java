@@ -19,7 +19,6 @@ import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
-import com.sap.sailing.domain.coursetemplate.StorablePositioning;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
@@ -51,13 +50,11 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
     private final JsonSerializer<RepeatablePart> repeatablePartJsonSerializer;
     private final JsonSerializer<CommonMarkProperties> commonMarkPropertiesJsonSerializer;
     private final JsonSerializer<Positioning> positioningJsonSerializer;
-    private final JsonSerializer<StorablePositioning> storablePositioningJsonSerializer;
 
-    public CourseConfigurationJsonSerializer() {
+    public CourseConfigurationJsonSerializer(DeviceIdentifierJsonSerializer deviceIdentifierSerializer) {
         repeatablePartJsonSerializer = new RepeatablePartJsonSerializer();
         commonMarkPropertiesJsonSerializer = new CommonMarkPropertiesJsonSerializer();
-        positioningJsonSerializer = new PositioningJsonSerializer();
-        storablePositioningJsonSerializer = new StorablePositioningJsonSerializer();
+        positioningJsonSerializer = new PositioningJsonSerializer(deviceIdentifierSerializer);
     }
 
     @Override
@@ -124,7 +121,7 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
             }
             if (markConfiguration.getOptionalPositioning() != null) {
                 markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_POSITIONING,
-                        storablePositioningJsonSerializer.serialize(markConfiguration.getOptionalPositioning()));
+                        positioningJsonSerializer.serialize(markConfiguration.getOptionalPositioning()));
             }
             markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_STORE_TO_INVENTORY,
                     markConfiguration.isStoreToInventory());

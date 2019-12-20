@@ -35,21 +35,18 @@ import com.sap.sailing.domain.base.Mark;
  * @author Axel Uhl (D043530)
  *
  */
-public interface MarkConfiguration extends ControlPointWithMarkConfiguration {
+public interface MarkConfiguration<MarkConfigurationT extends MarkConfiguration<MarkConfigurationT>>
+        extends ControlPointWithMarkConfiguration<MarkConfigurationT> {
     MarkTemplate getOptionalMarkTemplate();
     
     MarkProperties getOptionalMarkProperties();
     
     CommonMarkProperties getEffectiveProperties();
     
-    Positioning getEffectivePositioning();
-    
-    StorablePositioning getOptionalPositioning();
-    
-    boolean isStoreToInventory();
-    
     @Override
-    default Iterable<MarkConfiguration> getMarkConfigurations() {
-        return Collections.singleton(this);
+    default Iterable<MarkConfigurationT> getMarkConfigurations() {
+        @SuppressWarnings("unchecked")
+        final Iterable<MarkConfigurationT> result = (Iterable<MarkConfigurationT>) Collections.singleton(this);
+        return result;
     }
 }
