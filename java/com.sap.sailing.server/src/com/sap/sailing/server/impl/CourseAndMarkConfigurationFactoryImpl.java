@@ -32,6 +32,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMa
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -40,7 +41,6 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
-import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.PassingInstruction;
@@ -105,9 +105,13 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     private final SensorFixStore sensorFixStore;
     private final Function<DeviceIdentifier, Position> positionResolver;
     private final RaceLogResolver raceLogResolver;
+    private final DomainFactory domainFactory;
 
-    public CourseAndMarkConfigurationFactoryImpl(ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker, SensorFixStore sensorFixStore, RaceLogResolver raceLogResolver) {
+    public CourseAndMarkConfigurationFactoryImpl(
+            ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker,
+            SensorFixStore sensorFixStore, RaceLogResolver raceLogResolver, DomainFactory domainFactory) {
         this.sharedSailingDataTracker = sharedSailingDataTracker;
+        this.domainFactory = domainFactory;
         this.sensorFixStore = sensorFixStore;
         this.raceLogResolver = raceLogResolver;
         positionResolver = identifier -> {
@@ -483,9 +487,9 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     optionalMarkProperties = null;
                 }
                 final CommonMarkProperties effectiveProperties = markConfiguration.getEffectiveProperties();
-                final Mark markToCreate = new MarkImpl(UUID.randomUUID(), effectiveProperties.getName(),
-                        effectiveProperties.getShortName(), effectiveProperties.getType(),
-                        effectiveProperties.getColor(), effectiveProperties.getShape(),
+                final Mark markToCreate = domainFactory.getOrCreateMark(UUID.randomUUID(),
+                        effectiveProperties.getName(), effectiveProperties.getShortName(),
+                        effectiveProperties.getType(), effectiveProperties.getColor(), effectiveProperties.getShape(),
                         effectiveProperties.getPattern(),
                         optionalMarkTemplate == null ? null : optionalMarkTemplate.getId(),
                         optionalMarkProperties == null ? null : optionalMarkProperties.getId());
