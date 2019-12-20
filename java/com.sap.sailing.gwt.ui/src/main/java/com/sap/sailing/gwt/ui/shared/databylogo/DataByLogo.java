@@ -10,12 +10,11 @@ import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
 
 public class DataByLogo extends Widget {
 
-    private static final String TRAC_TRAC = "TracTrac";
-    private static final String TRAC_TRAC_DEFAULT_URL = "https://www.tractrac.com/";
     private static DataByLogoUiBinder uiBinder = GWT.create(DataByLogoUiBinder.class);
 
     interface DataByLogoUiBinder extends UiBinder<Element, DataByLogo> {
@@ -47,7 +46,7 @@ public class DataByLogo extends Widget {
         if (trackingConnectorInfos != null && !trackingConnectorInfos.isEmpty()) {
             for (TrackingConnectorInfoDTO trackingConnectorInfo : trackingConnectorInfos) {
                 // This logic currently only supports TracTrac as ConnectorInfo
-                if (TRAC_TRAC.equals(trackingConnectorInfo.getTrackedBy())) {
+                if (trackingConnectorInfo.getTrackingConnectorType() == TrackingConnectorType.TracTrac) {
                     potentialConnectorInfo = trackingConnectorInfo;
                     String webUrl = trackingConnectorInfo.getWebUrl();
                     if (webUrl != null && !webUrl.isEmpty()) {
@@ -61,7 +60,7 @@ public class DataByLogo extends Widget {
 
     private void setUpForConnectorType(boolean colorIfPossible, boolean enforceTextColor,
             TrackingConnectorInfoDTO trackingConnectorInfo) {
-        if (TRAC_TRAC.equals(trackingConnectorInfo.getTrackedBy())) {
+        if (trackingConnectorInfo.getTrackingConnectorType() == TrackingConnectorType.TracTrac) {
             setUpTracTracLogo(colorIfPossible, enforceTextColor);
         }
         setUrl(trackingConnectorInfo);
@@ -80,18 +79,8 @@ public class DataByLogo extends Widget {
     private void setUrl(TrackingConnectorInfoDTO trackingConnectorInfo) {
         String webUrl = trackingConnectorInfo.getWebUrl();
         if (webUrl == null || "".equals(trackingConnectorInfo.getWebUrl())) {
-            dataByContainer.setHref(getConnectorDefaultUrl(trackingConnectorInfo.getTrackedBy()));
-        } else {
-            dataByContainer.setHref(webUrl);
+            webUrl = trackingConnectorInfo.getTrackingConnectorType().getDefaultUrl();
         }
-    }
-
-    private String getConnectorDefaultUrl(String trackedBy) {
-        switch (trackedBy) {
-        case TRAC_TRAC:
-            return TRAC_TRAC_DEFAULT_URL;
-        default:
-            return null;
-        }
+        dataByContainer.setHref(webUrl);
     }
 }

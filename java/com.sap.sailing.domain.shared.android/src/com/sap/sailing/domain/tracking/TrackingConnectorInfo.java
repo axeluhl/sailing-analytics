@@ -3,6 +3,8 @@ package com.sap.sailing.domain.tracking;
 import java.io.Serializable;
 import java.net.URL;
 
+import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
+
 /**
  * Identifies the tracking connector that was used to create a TrackedRace.
  * Further the Connector can provide a webUrl, that leads to an event web page.
@@ -10,9 +12,9 @@ import java.net.URL;
 public interface TrackingConnectorInfo extends Serializable {
     
     /**
-     * gets a String representation of the Tracking-Service used to Track the Race
+     * gets the {@link TrackingConnectorType} associated with the tracking technology used for the Race
      */
-    String getTrackedBy();
+    TrackingConnectorType getTrackingConnectorType();
     
     /**
      * gets a {@link URL} representation of the web-URL associated with the Event; 

@@ -2,22 +2,22 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.net.URL;
 
+import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 
 public class TrackingConnectorInfoImpl implements TrackingConnectorInfo {
-    private static final long serialVersionUID = -1681930521305924294L;
-
-    private final String trackedBy;
+    private static final long serialVersionUID = 7970268841592389145L;
+    private final TrackingConnectorType trackingConnectorType;
     private final URL webUrl;
 
-    public TrackingConnectorInfoImpl(String trackedBy, URL webUrl) {
+    public TrackingConnectorInfoImpl(TrackingConnectorType trackingConnectorType, URL webUrl) {
         super();
-        this.trackedBy = trackedBy;
+        this.trackingConnectorType = trackingConnectorType;
         this.webUrl = webUrl;
     }
 
-    public String getTrackedBy() {
-        return trackedBy;
+    public TrackingConnectorType getTrackingConnectorType() {
+        return trackingConnectorType;
     }
 
     public URL getWebUrl() {
@@ -28,7 +28,7 @@ public class TrackingConnectorInfoImpl implements TrackingConnectorInfo {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((trackedBy == null) ? 0 : trackedBy.hashCode());
+        result = prime * result + ((trackingConnectorType == null) ? 0 : trackingConnectorType.hashCode());
         result = prime * result + ((webUrl == null) ? 0 : webUrl.hashCode());
         return result;
     }
@@ -42,10 +42,10 @@ public class TrackingConnectorInfoImpl implements TrackingConnectorInfo {
         if (getClass() != obj.getClass())
             return false;
         TrackingConnectorInfoImpl other = (TrackingConnectorInfoImpl) obj;
-        if (trackedBy == null) {
-            if (other.trackedBy != null)
+        if (trackingConnectorType == null) {
+            if (other.trackingConnectorType != null)
                 return false;
-        } else if (!trackedBy.equals(other.trackedBy))
+        } else if (!trackingConnectorType.equals(other.trackingConnectorType))
             return false;
         if (webUrl == null) {
             if (other.webUrl != null)

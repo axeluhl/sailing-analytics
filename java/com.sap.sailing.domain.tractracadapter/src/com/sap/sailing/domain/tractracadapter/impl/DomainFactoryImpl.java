@@ -55,6 +55,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -118,7 +119,6 @@ import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 import difflib.PatchFailedException;
 
 public class DomainFactoryImpl implements DomainFactory {
-    public static final String TRAC_TRAC_IDENTIFIER = "TracTrac";
 
     private static final Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
     
@@ -645,7 +645,7 @@ public class DomainFactoryImpl implements DomainFactory {
                         trackedRegatta.getRegatta().addRace(raceDefinition);
                         TrackingConnectorInfo trackingConnectorInfo = null;
                         if (tractracRace != null) {
-                            trackingConnectorInfo = new TrackingConnectorInfoImpl(TRAC_TRAC_IDENTIFIER, tractracRace.getEvent().getWebURL());
+                            trackingConnectorInfo = new TrackingConnectorInfoImpl(TrackingConnectorType.TracTrac, tractracRace.getEvent().getWebURL());
                         }
                         trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
                                 delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, ignoreTracTracMarkPassings,

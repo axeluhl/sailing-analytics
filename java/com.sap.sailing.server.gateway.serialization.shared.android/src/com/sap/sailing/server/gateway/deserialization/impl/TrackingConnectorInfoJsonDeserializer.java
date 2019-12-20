@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sailing.domain.tracking.impl.TrackingConnectorInfoImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -17,7 +18,8 @@ public class TrackingConnectorInfoJsonDeserializer implements JsonDeserializer<T
     private static final Logger logger = Logger.getLogger(TrackingConnectorInfoJsonDeserializer.class.getName());
 
     public TrackingConnectorInfo deserialize(JSONObject object) throws JsonDeserializationException {
-        final String trackedBy = (String) object.get(TrackingConnectorInfoJsonSerializer.FIELD_TRACKED_BY);
+        final TrackingConnectorType trackingConnectorType = TrackingConnectorType
+                .valueOf((String) object.get(TrackingConnectorInfoJsonSerializer.FIELD_TRACKING_CONNECTOR_TYPE));
         final String webUrlString = (String) object.get(TrackingConnectorInfoJsonSerializer.FIELD_WEB_URL);
         URL webUrl;
         try {
@@ -26,7 +28,8 @@ public class TrackingConnectorInfoJsonDeserializer implements JsonDeserializer<T
             logger.log(Level.WARNING, "Error while parsing webUrl of TrackingConnectorInfo", e);
             webUrl = null;
         }
-        final TrackingConnectorInfo trackingConnectorInfo = new TrackingConnectorInfoImpl(trackedBy, webUrl);
+        final TrackingConnectorInfo trackingConnectorInfo = new TrackingConnectorInfoImpl(trackingConnectorType,
+                webUrl);
         return trackingConnectorInfo;
     }
 }

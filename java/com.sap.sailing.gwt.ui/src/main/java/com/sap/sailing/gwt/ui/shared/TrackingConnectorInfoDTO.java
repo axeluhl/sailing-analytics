@@ -2,22 +2,24 @@ package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 
 public class TrackingConnectorInfoDTO implements IsSerializable {
-    private String trackedBy;
+    private TrackingConnectorType trackingConnectorType;
     private String webUrl;
 
-    TrackingConnectorInfoDTO() {} // GWT serialization
+    TrackingConnectorInfoDTO() {
+    } // GWT serialization
 
     @GwtIncompatible
     public TrackingConnectorInfoDTO(TrackingConnectorInfo trackingConnectorInfo) {
-        this.trackedBy = trackingConnectorInfo.getTrackedBy();
+        this.trackingConnectorType = trackingConnectorInfo.getTrackingConnectorType();
         this.webUrl = trackingConnectorInfo.getWebUrl() == null ? null : trackingConnectorInfo.getWebUrl().toString();
     }
 
-    public String getTrackedBy() {
-        return trackedBy;
+    public TrackingConnectorType getTrackingConnectorType() {
+        return trackingConnectorType;
     }
 
     public String getWebUrl() {
@@ -28,7 +30,7 @@ public class TrackingConnectorInfoDTO implements IsSerializable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((trackedBy == null) ? 0 : trackedBy.hashCode());
+        result = prime * result + ((trackingConnectorType == null) ? 0 : trackingConnectorType.hashCode());
         result = prime * result + ((webUrl == null) ? 0 : webUrl.hashCode());
         return result;
     }
@@ -42,10 +44,7 @@ public class TrackingConnectorInfoDTO implements IsSerializable {
         if (getClass() != obj.getClass())
             return false;
         TrackingConnectorInfoDTO other = (TrackingConnectorInfoDTO) obj;
-        if (trackedBy == null) {
-            if (other.trackedBy != null)
-                return false;
-        } else if (!trackedBy.equals(other.trackedBy))
+        if (trackingConnectorType != other.trackingConnectorType)
             return false;
         if (webUrl == null) {
             if (other.webUrl != null)

@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -270,7 +271,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
                 raceDefinitionSetToUpdate, useInternalMarkPassingAlgorithm, raceLogResolver,
                 /* ThreadLocalTransporter not needed because the RaceTracker is not active on a replica */ Optional
                         .empty(),
-                new TrackingConnectorInfoImpl(DomainFactoryImpl.TRAC_TRAC_IDENTIFIER, tractracRace.getEvent().getWebURL()));
+                new TrackingConnectorInfoImpl(TrackingConnectorType.TracTrac, tractracRace.getEvent().getWebURL()));
         if (runAfterCreatingTrackedRace != null) {
             runAfterCreatingTrackedRace.accept(trackedRace);
         }
