@@ -526,7 +526,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     public CourseConfiguration createCourseConfigurationFromTemplate(CourseTemplate courseTemplate,
             Regatta optionalRegatta, Iterable<String> tagsToFilterMarkProperties) {
         final Set<MarkConfiguration> allMarkConfigurations = new HashSet<>();
-        final Map<MarkTemplate, MarkConfiguration> markTemplatesToMarkConfigurations = new HashMap<>();
+        final Map<MarkRole, MarkConfiguration> markRolesToMarkConfigurations = new HashMap<>();
         if (optionalRegatta != null) {
             // If we have a regatta context, we first try to get all existing marks and their association to
             // MarkTemplates from the regatta
@@ -582,7 +582,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                                                 : existingTP);
                                 IsMarkRole roleName = resolveMarkRole(courseOrNull.getAssociatedRoles().get(mark), courseTemplate);
                                 if (roleName == null) {
-                                    roleName = new MarkRoleNameImpl(mark.getName(), shortName);
+                                    roleName = new MarkRoleNameImpl(mark.getName(), mark.getShortName());
                                 }
                                 usagesForRole.addUsage(regattaMarkConfiguration, roleName, effectiveUsageTP);
                             }
@@ -628,23 +628,23 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 }
             }
             allMarkConfigurations.addAll(markConfigurationsByMark.values());
-            markTemplatesToMarkConfigurations.putAll(markConfigurationsByMarkTemplate);
+            markRolesToMarkConfigurations.putAll(markConfigurationsByMarkTemplate);
         }
         for (MarkTemplate markTemplate : courseTemplate.getMarkTemplates()) {
             // For any MarkTemplate that wasn't resolved from the regatta, an explicit entry needs to get created
-            markTemplatesToMarkConfigurations.computeIfAbsent(markTemplate, mt -> {
+            markRolesToMarkConfigurations.computeIfAbsent(markTemplate, mt -> {
                 final MarkConfiguration markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(markTemplate,
                         null, /* storeToInventory */ false);
                 allMarkConfigurations.add(markConfiguration);
                 return markConfiguration;
             });
         }
-        replaceTemplateBasedConfigurationCandidatesBySuggestedProperties(markTemplatesToMarkConfigurations, allMarkConfigurations, tagsToFilterMarkProperties,
+        replaceTemplateBasedConfigurationCandidatesBySuggestedProperties(markRolesToMarkConfigurations, allMarkConfigurations, tagsToFilterMarkProperties,
                 courseTemplate.getDefaultMarkRolesForMarkTemplates());
         final Map<MarkConfiguration, IsMarkRole> resultingRoleMapping = createRoleMappingWithMarkTemplateMapping(
-                courseTemplate, markTemplatesToMarkConfigurations);
+                courseTemplate, markRolesToMarkConfigurations);
         final List<WaypointWithMarkConfiguration> resultingWaypoints = createWaypointConfigurationsWithMarkTemplateMapping(
-                courseTemplate, markTemplatesToMarkConfigurations);
+                courseTemplate, markRolesToMarkConfigurations);
         return new CourseConfigurationImpl(courseTemplate, allMarkConfigurations, resultingRoleMapping,
                 resultingWaypoints, courseTemplate.getRepeatablePart(), courseTemplate.getDefaultNumberOfLaps(),
                 courseTemplate.getName(), courseTemplate.getOptionalImageURL());

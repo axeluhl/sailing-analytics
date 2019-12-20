@@ -2,7 +2,7 @@
 
 Previously, marks as well as courses were exclusively bound to the regatta context. In addition the definition of courses was possible with existing regatta marks only. Having this kind of model, it is not easily possible to transfer courses including their respective tracking information to another regatta. In addition on the fly changes while doing so is another inconvenience.
 
-Therefore a regatta independent model is required that allows the definition of course sequences as well as tracking information. This new model is defined below and allows an easy bootstrapping of courses in different regatta contexts but based on the same masterdata.
+Therefore a regatta independent model is required that allows for the definition of course sequences as well as tracking information. This new model is defined below and allows for an easy bootstrapping of courses in different regatta contexts but based on the same masterdata.
 
 The new model is not intended to replace the regatta specific course and mark model but rather extends it to cover the newly emerged use cases. In addition the new model - while being able to map all cases - allows an entirely free definition of courses using just a subset of the possibilities in the UI.
 
@@ -11,7 +11,7 @@ The new model is not intended to replace the regatta specific course and mark mo
 
 We defined the model for course templating and configuration. In addition the various model elements have defined masterdata and other properties.
 
-## Mark template have the following properties
+## Mark templates have the following properties
 
 A mark template defines the appearance of a mark in a regatta independent representation. Mark templates represent marks in the waypoint sequence of a course template.
 
@@ -20,10 +20,19 @@ Mark templates have the following properties:
 * Provide an appearance
 * Mark templates are immutable
 
+## Mark Roles
+
+A mark role represents a "logical" course mark that can be assumed by a physical mark when instantiating the course. For example, the "Windward Mark (1)" is a role that marks can assume in a course, even different marks in the same race at different times, e.g., in different laps.
+
+Mark roles can best be imagined as the mark representations in a sailing instructions document where the course diagrams are displayed. There, the marks are usually drawn with symbols and have a name and/or short name assigned. 
+
+A mark role has a name (e.g., "Windward Mark") and a short name (e.g., "1").
+
+The concept of mark roles allows users to swap out marks or mark templates without changing the the effective waypoint sequence. Having this, a course template and regatta course may define a compatible waypoint sequence while being based on different mark definitions; hence, such regatta courses can still be "lap-aware" and allow users to easily increase or decrease the number of laps, leading to the course adjustments necessary. 
 
 ## Mark properties
 
-Mark properties also define the appearance of a mark. Despite the appearance it may contain a reference to a tracking device or a fixed mark position. They can be used to represent a catalogue of resusable mark definitions to describe real world marks or to supply a box of tracking devices.
+Mark properties also define the appearance of a mark. Despite the appearance it may contain a reference to a tracking device or a fixed mark position. They can be used to represent a catalog of reusable mark definitions to describe real world marks or to supply a reusable set of tracking devices.
 
 Mark properties have the following properties:
 
@@ -36,19 +45,15 @@ Mark properties have the following properties:
 
 ### Course template
 
-A course template can be used to create a course based on mark templates and a sequence of waypoints. The sequence of waypoints may contain a repeatable sub sequence of waypoints which will insert repeating mark sequences for the number of laps specified when creating a course.
+A course template can be used to create a course based on mark roles, mark templates and a sequence of waypoints. The sequence of waypoints may contain a repeatable sub-sequence of waypoints which can be used to easily adjust the course's mark sequence for the number of laps specified, both, during creation and later when editing the course.
 
-* Set of mark templates to be created
+A course template consists of the following parts:
+
+* A name and a short name (e.g., "Windward/Leeward with Leeward Finish" and "L", respectively)
+* The sequence of waypoint templates, each with the passing instructions and a reference to a control point template which can either be a single mark role (e.g., "1") or a pair of two mark roles (e.g., "3p/3s").
+* For each mark role use in the course template, a mapping of each role to a mark template that provides the default appearance attributes for the mark to be instantiated for the role
+* Optionally, additional mark templates, e.g., for spare marks, with an optional link to a default mark role
 * Optional repeatable part
-* Course templates may contain mark templates that aren't part of the defined sequence
-* For every mark template that is part of the sequence, a distinct mark role need to be provided
-    * Distinct means it is a bijective mapping of marks in the sequence and mark roles 
-    * The mark role may the same as the mark template being mapped
-
-
-### Mark role
-
-A mark role defines the purpose of a mark used in the waypoint sequences of a regatta course or course template and allows users to swap out marks or mark templates without changing the the effective waypoint sequence. Having this, a course template and regatta course may define a compatible waypoint sequence while being based on different mark definitions.
 
 
 ### Course configuration

@@ -390,22 +390,23 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
 
     @Override
-    public CourseTemplate updateCourseTemplate(UUID uuid, String name, String shortName, URL optionalImageURL, ArrayList<String> tags) {
+    public CourseTemplate updateCourseTemplate(UUID uuid, String name, String shortName, URL optionalImageURL, ArrayList<String> tags,
+            Integer defaultNumberOfLaps) {
         getSecurityService().checkCurrentUserUpdatePermission(courseTemplatesById.get(uuid));
-        apply(s -> internalUpdateCourseTemplate(uuid, name, shortName, optionalImageURL, tags));
+        apply(s -> internalUpdateCourseTemplate(uuid, name, shortName, optionalImageURL, tags, defaultNumberOfLaps));
         return getCourseTemplateById(uuid);
     }
 
     @Override
     public Void internalUpdateCourseTemplate(UUID uuid, String name, String shortName,
-            URL optionalImageURL, ArrayList<String> tags) {
+            URL optionalImageURL, ArrayList<String> tags, Integer defaultNumberOfLaps) {
         CourseTemplate existingCourseTemplate = courseTemplatesById.get(uuid);
         CourseTemplateImpl courseTemplate = new CourseTemplateImpl(uuid, name,
                 shortName, existingCourseTemplate.getMarkTemplates(),
                 existingCourseTemplate.getWaypointTemplates(), existingCourseTemplate.getDefaultMarkTemplatesForMarkRoles(),
-                existingCourseTemplate.getDefaultMarkRolesForMarkTemplates(), optionalImageURL, existingCourseTemplate.getRepeatablePart(), existingCourseTemplate.getDefaultNumberOfLaps());
+                existingCourseTemplate.getDefaultMarkRolesForMarkTemplates(), optionalImageURL,
+                existingCourseTemplate.getRepeatablePart(), defaultNumberOfLaps);
         courseTemplate.setTags(tags);
-
         mongoObjectFactory.storeCourseTemplate(courseTemplate);
         courseTemplatesById.put(courseTemplate.getId(), courseTemplate);
         return null;

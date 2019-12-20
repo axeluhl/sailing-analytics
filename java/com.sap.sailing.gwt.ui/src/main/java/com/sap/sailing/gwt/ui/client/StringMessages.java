@@ -2336,8 +2336,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String filterCourseTemplateByName();
     String courseTemplates();
     String markTemplate();
-    String markTemplate1();
-    String markTemplate2();
+    String markRole1();
+    String markRole2();
     String pleaseSelectAValidPassingInstruction();
     String pleaseSelectAValidMarkTemplate();
     String doYouReallyWantToRemoveCourseTemplate(String name);
@@ -2352,7 +2352,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String wayPointMarkTemplatesAreTheSame();
     String wayPointMarkInSequenceMissing();
     String defaultNumberOfLaps();
-    String markRoleUsedTwice();
     String invalidImageURL();
     String setDeviceIdentifier();
     String setPosition();

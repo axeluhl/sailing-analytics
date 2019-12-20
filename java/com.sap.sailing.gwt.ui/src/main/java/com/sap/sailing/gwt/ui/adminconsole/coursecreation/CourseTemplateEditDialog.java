@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -101,11 +100,6 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                         if (invalidName) {
                             sb.append(stringMessages.pleaseEnterAName()).append(". ");
                         }
-                        final Set<UUID> distinctUUIDs = new HashSet<>();
-                        if (valueToValidate.getDefaultMarkRolesForMarkTemplates().values().stream().map(u -> distinctUUIDs.add(u.getUuid()))
-                                .filter(b -> b == false).count() > 0) {
-                            sb.append(stringMessages.markRoleUsedTwice()).append(". ");
-                        }
                         AtomicBoolean unAssignedMarkRoleUsed = new AtomicBoolean(false);
                         valueToValidate.getWaypointTemplates().forEach(wt -> {
                             if (wt.getPassingInstruction() == null) {
@@ -156,33 +150,33 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         this.allMarkRolesSelectionListPlusEmptyString = new LinkedList<>(allMarkRoles.stream().map(MarkRoleDTO::getName).collect(Collectors.toList()));
         allMarkRolesSelectionListPlusEmptyString.add(0, ""); // prepend the empty selection
         this.markTemplatesForMarkRoles = new ArrayList<>();
-        markTemplatesForMarkRolesTable = createMarkTemplateAndMarkRoleTable(/* readOnly */ !isNew, userService);
+        markTemplatesForMarkRolesTable = createMarkTemplateAndMarkRoleTable(/* readOnly */ !isNew, markTemplatesForMarkRoles, userService);
         buttonAddMarkRoleToMarkTemplateMapping = new Button(stringMessages.add());
         buttonAddMarkRoleToMarkTemplateMapping.addClickHandler(c -> {
             markTemplatesForMarkRoles.add(new MarkTemplateDTOAndMarkRoleDTO(allMarkTemplates.stream().findFirst().orElse(null),
                     allMarkRoles.stream().findFirst().orElse(null)));
-            refreshMarkTemplatesForMarkRolesTable();
+            refreshTable(markTemplatesForMarkRolesTable, markTemplatesForMarkRoles);
             validateAndUpdate();
         });
         this.spareMarkTemplatesAndTheirDefaultMarkRoles = new ArrayList<>();
-        spareMarkTemplatesAndTheirDefaultMarkRolesTable = createMarkTemplateAndMarkRoleTable(/* readOnly */ !isNew, userService);
+        spareMarkTemplatesAndTheirDefaultMarkRolesTable = createMarkTemplateAndMarkRoleTable(/* readOnly */ !isNew, spareMarkTemplatesAndTheirDefaultMarkRoles, userService);
         buttonAddMarkRoleToMarkTemplateMapping.setEnabled(isNew);
         buttonAddSpareMarkTemplate = new Button(stringMessages.add());
         buttonAddSpareMarkTemplate.addClickHandler(c -> {
             spareMarkTemplatesAndTheirDefaultMarkRoles.add(new MarkTemplateDTOAndMarkRoleDTO(allMarkTemplates.stream().findFirst().orElse(null),
                     allMarkRoles.stream().findFirst().orElse(null)));
-            refreshSpareMarkTemplatesAndTheirDefaultMarkRolesTable();
+            refreshTable(spareMarkTemplatesAndTheirDefaultMarkRolesTable, spareMarkTemplatesAndTheirDefaultMarkRoles);
             validateAndUpdate();
         });
         buttonAddSpareMarkTemplate.setEnabled(isNew);
         markTemplatesForMarkRoles.addAll(courseTemplateToEdit.getDefaultMarkTemplatesForMarkRoles().entrySet().stream()
                 .map(e -> new MarkTemplateDTOAndMarkRoleDTO(e.getValue(), e.getKey()))
                 .collect(Collectors.toList()));
-        refreshMarkTemplatesForMarkRolesTable();
+        refreshTable(markTemplatesForMarkRolesTable, markTemplatesForMarkRoles);
         spareMarkTemplatesAndTheirDefaultMarkRoles.addAll(courseTemplateToEdit.getDefaultMarkRolesForMarkTemplates().entrySet().stream()
                 .map(e -> new MarkTemplateDTOAndMarkRoleDTO(e.getKey(), e.getValue()))
                 .collect(Collectors.toList()));
-        refreshSpareMarkTemplatesAndTheirDefaultMarkRolesTable();
+        refreshTable(spareMarkTemplatesAndTheirDefaultMarkRolesTable, spareMarkTemplatesAndTheirDefaultMarkRoles);
         waypointTemplatesTable = createWaypointTemplateTable(/* readOnly */ !isNew);
         waypointTemplates.addAll(courseTemplateToEdit.getWaypointTemplates());
         refreshWaypointsTable();
@@ -203,17 +197,13 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                 Collections.emptyList(), stringMessages.tag());
     }
 
-    private void refreshMarkTemplatesForMarkRolesTable() {
-        markTemplatesForMarkRolesTable.setRowCount(markTemplatesForMarkRoles.size());
-        markTemplatesForMarkRolesTable.setRowData(0, markTemplatesForMarkRoles);
+    private <T> void refreshTable(CellTable<T> table, List<T> elements) {
+        table.setRowCount(elements.size());
+        table.setRowData(0, elements);
     }
 
-    private void refreshSpareMarkTemplatesAndTheirDefaultMarkRolesTable() {
-        spareMarkTemplatesAndTheirDefaultMarkRolesTable.setRowCount(spareMarkTemplatesAndTheirDefaultMarkRoles.size());
-        spareMarkTemplatesAndTheirDefaultMarkRolesTable.setRowData(0, spareMarkTemplatesAndTheirDefaultMarkRoles);
-    }
-
-    private CellTable<MarkTemplateDTOAndMarkRoleDTO> createMarkTemplateAndMarkRoleTable(final boolean readOnly, final UserService userService) {
+    private CellTable<MarkTemplateDTOAndMarkRoleDTO> createMarkTemplateAndMarkRoleTable(final boolean readOnly,
+            final List<MarkTemplateDTOAndMarkRoleDTO> markTemplatesAndMarkRoles, final UserService userService) {
         final CellTable<MarkTemplateDTOAndMarkRoleDTO> table = new BaseCelltable<>(1000, tableResources);
         table.setWidth("100%");
         final SelectionCell markTemplateSelectionCell = new SelectionCell(allMarkTemplatesSelectionListPlusEmptyString);
@@ -229,8 +219,10 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         markTemplateColumn.setFieldUpdater(new FieldUpdater<MarkTemplateDTOAndMarkRoleDTO, String>() {
             @Override
             public void update(final int index, final MarkTemplateDTOAndMarkRoleDTO markTemplateAndMarkRole, final String value) {
-                table.setRowData(index, Collections.singletonList(new MarkTemplateDTOAndMarkRoleDTO(allMarkTemplates.stream().filter(mt -> mt.getName().equals(value))
-                        .findFirst().get(), markTemplateAndMarkRole.getMarkRole())));
+                final MarkTemplateDTOAndMarkRoleDTO newMarkTemplateAndMarkRole = new MarkTemplateDTOAndMarkRoleDTO(allMarkTemplates.stream().filter(mt -> mt.getName().equals(value))
+                        .findFirst().get(), markTemplateAndMarkRole.getMarkRole());
+                markTemplatesAndMarkRoles.set(index, newMarkTemplateAndMarkRole);
+                table.setRowData(index, Collections.singletonList(newMarkTemplateAndMarkRole));
                 validateAndUpdate();
             }
         });
@@ -247,9 +239,11 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         markRoleColumn.setFieldUpdater(new FieldUpdater<MarkTemplateDTOAndMarkRoleDTO, String>() {
             @Override
             public void update(final int index, final MarkTemplateDTOAndMarkRoleDTO markTemplateAndMarkRole, final String value) {
-                table.setRowData(index, Collections.singletonList(new MarkTemplateDTOAndMarkRoleDTO(markTemplateAndMarkRole.getMarkTemplate(),
+                final MarkTemplateDTOAndMarkRoleDTO newMarkTemplateAndMarkRole = new MarkTemplateDTOAndMarkRoleDTO(markTemplateAndMarkRole.getMarkTemplate(),
                         allMarkRoles.stream().filter(mr -> mr.getName().equals(value))
-                        .findFirst().get())));
+                        .findFirst().get());
+                markTemplatesAndMarkRoles.set(index, newMarkTemplateAndMarkRole);
+                table.setRowData(index, Collections.singletonList(newMarkTemplateAndMarkRole));
                 validateAndUpdate();
             }
         });
@@ -264,9 +258,9 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         actionsColumn.setFieldUpdater(new FieldUpdater<MarkTemplateDTOAndMarkRoleDTO, String>() {
             @Override
             public void update(int index, MarkTemplateDTOAndMarkRoleDTO markTemplate, String value) {
-                markTemplatesForMarkRoles.remove(index);
+                markTemplatesAndMarkRoles.remove(index);
                 validateAndUpdate();
-                refreshMarkTemplatesForMarkRolesTable();
+                refreshTable(table, markTemplatesAndMarkRoles);
             }
         });
         table.addColumn(markTemplateColumn, stringMessages.markTemplate());
@@ -314,11 +308,11 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                 validateAndUpdate();
             }
         });
-        final SelectionCell markTemplate1SelectionCell = new SelectionCell(allMarkTemplatesSelectionListPlusEmptyString);
-        final HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell> hideablemarkTemplate1Cell = new HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell>(
-                markTemplate1SelectionCell, /* hidden */ null, /* editable */ wt -> !readOnly);
-        Column<WaypointTemplateDTO, String> markTemplateColumn1 = new Column<WaypointTemplateDTO, String>(
-                hideablemarkTemplate1Cell) {
+        final SelectionCell markRole1SelectionCell = new SelectionCell(allMarkRolesSelectionListPlusEmptyString);
+        final HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell> hideableMarkRole1Cell = new HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell>(
+                markRole1SelectionCell, /* hidden */ null, /* editable */ wt -> !readOnly);
+        Column<WaypointTemplateDTO, String> markRoleColumn1 = new Column<WaypointTemplateDTO, String>(
+                hideableMarkRole1Cell) {
             @Override
             public String getValue(WaypointTemplateDTO waypointTemplate) {
                 return waypointTemplate.getMarkRolesForControlPoint() != null
@@ -327,7 +321,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                                 : "";
             }
         };
-        markTemplateColumn1.setFieldUpdater(new FieldUpdater<WaypointTemplateDTO, String>() {
+        markRoleColumn1.setFieldUpdater(new FieldUpdater<WaypointTemplateDTO, String>() {
             @Override
             public void update(int index, WaypointTemplateDTO waypointTemplate, String value) {
                 final MarkRoleDTO selectedMarkRole = allMarkRoles.stream()
@@ -340,11 +334,11 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                 validateAndUpdate();
             }
         });
-        final SelectionCell markTemplate2SelectionCell = new SelectionCell(allMarkTemplatesSelectionListPlusEmptyString);
-        final HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell> hideablemarkTemplate2Cell = new HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell>(
-                markTemplate2SelectionCell, /* hidden */ wt -> !hasTwoMarks(wt), /* editable */ wt -> !readOnly);
-        Column<WaypointTemplateDTO, String> markTemplateColumn2 = new Column<WaypointTemplateDTO, String>(
-                hideablemarkTemplate2Cell) {
+        final SelectionCell markRole2SelectionCell = new SelectionCell(allMarkRolesSelectionListPlusEmptyString);
+        final HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell> hideableMarkRole2Cell = new HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell>(
+                markRole2SelectionCell, /* hidden */ wt -> !hasTwoMarks(wt), /* editable */ wt -> !readOnly);
+        Column<WaypointTemplateDTO, String> markRoleColumn2 = new Column<WaypointTemplateDTO, String>(
+                hideableMarkRole2Cell) {
             @Override
             public String getValue(WaypointTemplateDTO waypointTemplate) {
                 return waypointTemplate.getMarkRolesForControlPoint() != null
@@ -353,7 +347,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                                 : null;
             }
         };
-        markTemplateColumn2.setFieldUpdater(new FieldUpdater<WaypointTemplateDTO, String>() {
+        markRoleColumn2.setFieldUpdater(new FieldUpdater<WaypointTemplateDTO, String>() {
             @Override
             public void update(int index, WaypointTemplateDTO waypointTemplate, String value) {
                 final MarkRoleDTO selectedMarkRole = allMarkRoles.stream()
@@ -405,8 +399,8 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         waypointTemplatesTable.addColumn(passingInstructionColumn, stringMessages.passingInstructions());
         waypointTemplatesTable.addColumn(shortNameColumn, stringMessages.shortName());
         waypointTemplatesTable.addColumn(nameColumn, stringMessages.name());
-        waypointTemplatesTable.addColumn(markTemplateColumn1, stringMessages.markTemplate1());
-        waypointTemplatesTable.addColumn(markTemplateColumn2, stringMessages.markTemplate2());
+        waypointTemplatesTable.addColumn(markRoleColumn1, stringMessages.markRole1());
+        waypointTemplatesTable.addColumn(markRoleColumn2, stringMessages.markRole2());
         waypointTemplatesTable.addColumn(actionsColumn, stringMessages.actions());
         return waypointTemplatesTable;
     }

@@ -67,7 +67,6 @@ public interface CourseAndMarkConfigurationFactory {
      * referenced by these {@link WaypointTemplates} are those obtained by
      * {@link #getOrCreateMarkTemplate(MarkConfiguration)} for the respective {@link MarkConfiguration} objects used in
      * the {@link WaypointWithMarkConfiguration} objects.
-     * @param optionalNonDefaultGroupOwnership TODO
      * 
      * @return a course with its mark configurations and a {@link CourseTemplate} returned by
      *         {@link CourseConfiguration#getOptionalCourseTemplate()} that is always valid, never {@code null}. All

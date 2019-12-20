@@ -10059,7 +10059,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         if (existingCourseTemplate != null) {
             getSecurityService().checkCurrentUserUpdatePermission(existingCourseTemplate);
             result = convertToCourseTemplateDTO(getSharedSailingData().updateCourseTemplate(courseTemplate.getUuid(),
-                    courseTemplate.getName(), courseTemplate.getShortName(), optionalImageURL, courseTemplate.getTags()));
+                    courseTemplate.getName(), courseTemplate.getShortName(), optionalImageURL, courseTemplate.getTags(),
+                    courseTemplate.getDefaultNumberOfLaps()));
         } else {
             final List<MarkTemplate> marks = courseTemplate.getMarkTemplates().stream()
                     .map(t -> getSharedSailingData().getMarkTemplateById(t.getUuid())).collect(Collectors.toList());

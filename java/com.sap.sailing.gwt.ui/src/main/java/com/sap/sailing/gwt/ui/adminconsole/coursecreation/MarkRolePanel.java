@@ -203,7 +203,6 @@ public class MarkRolePanel extends FlowPanel {
         };
         markRolesTable.addColumn(checkColumn, SafeHtmlUtils.fromSafeConstant("<br/>"));
         markRolesTable.setColumnWidth(checkColumn, 40, Unit.PX);
-
         // id
         Column<MarkRoleDTO, String> idColumn = new Column<MarkRoleDTO, String>(new TextCell()) {
             @Override
@@ -211,7 +210,6 @@ public class MarkRolePanel extends FlowPanel {
                 return markRole.getUuid().toString();
             }
         };
-
         // name
         Column<MarkRoleDTO, String> nameColumn = new Column<MarkRoleDTO, String>(new TextCell()) {
             @Override
@@ -219,16 +217,27 @@ public class MarkRolePanel extends FlowPanel {
                 return markRole.getName();
             }
         };
-
         nameColumn.setSortable(true);
         sortHandler.setComparator(nameColumn, new Comparator<MarkRoleDTO>() {
             public int compare(MarkRoleDTO markRole1, MarkRoleDTO markRole2) {
                 return markRole1.getName().compareTo(markRole2.getName());
             }
         });
-
+        // short name
+        Column<MarkRoleDTO, String> shortNameColumn = new Column<MarkRoleDTO, String>(new TextCell()) {
+            @Override
+            public String getValue(MarkRoleDTO markRole) {
+                return markRole.getShortName();
+            }
+        };
+        nameColumn.setSortable(true);
+        sortHandler.setComparator(nameColumn, new Comparator<MarkRoleDTO>() {
+            public int compare(MarkRoleDTO markRole1, MarkRoleDTO markRole2) {
+                return markRole1.getShortName().compareTo(markRole2.getShortName());
+            }
+        });
         markRolesTable.addColumn(nameColumn, stringMessages.name());
-
+        markRolesTable.addColumn(shortNameColumn, stringMessages.shortName());
         SecuredDTOOwnerColumn.configureOwnerColumns(markRolesTable, sortHandler, stringMessages);
         final AccessControlledActionsColumn<MarkRoleDTO, DefaultActionsImagesBarCell> actionsColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
@@ -248,7 +257,6 @@ public class MarkRolePanel extends FlowPanel {
     void openEditMarkRoleDialog(final MarkRoleDTO originalMarkRole) {
         final MarkRoleEditDialog dialog = new MarkRoleEditDialog(stringMessages, originalMarkRole,
                 new DialogCallback<MarkRoleDTO>() {
-
                     @Override
                     public void ok(MarkRoleDTO markRole) {
                         sailingService.addOrUpdateMarkRole(markRole, new AsyncCallback<MarkRoleDTO>() {
@@ -275,7 +283,6 @@ public class MarkRolePanel extends FlowPanel {
                     @Override
                     public void cancel() {
                     }
-
                 });
         dialog.ensureDebugId("MarkRoleEditDialog");
         dialog.show();

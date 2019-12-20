@@ -119,7 +119,6 @@ public class MarkResource extends AbstractSailingServerResource {
             // ignore since mark type value is optional
             LOG.warning("Invalid mark type '" + markTypeStr + "' received via REST endpoint was ignored.");
         }
-
         Color markColor = null;
         if (markColorStr != null && !markColorStr.isEmpty()) {
             try {
@@ -129,7 +128,6 @@ public class MarkResource extends AbstractSailingServerResource {
                 LOG.warning("Invalid color '" + markColorStr + "' received via REST endpoint was ignored.");
             }
         }
-
         UUID markId = UUID.randomUUID();
         UUID originatingMarkTemplateId = originatingMarkTemplateIdAsString != null
                 ? UUID.fromString(originatingMarkTemplateIdAsString)
@@ -166,10 +164,8 @@ public class MarkResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     public Response addMarkFix(String json)
             throws DoesNotHaveRegattaLogException, ParseException, JsonDeserializationException {
-
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
-
         String leaderboardName = (String) requestObject.get(LEADERBOARD_NAME);
         String raceColumnName = (String) requestObject.get(RACE_COLUMN_NAME);
         String fleetName = (String) requestObject.get(FLEET_NAME);
@@ -177,7 +173,6 @@ public class MarkResource extends AbstractSailingServerResource {
         String lonDeg = (String) requestObject.get(LON_DEG);
         String latDeg = (String) requestObject.get(LAT_DEG);
         String timeMillis = (String) requestObject.get(TIME_MILLIS);
-        
         final RaceLogTrackingAdapter raceLogTrackingAdapter = getRaceLogTrackingAdapter();
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {

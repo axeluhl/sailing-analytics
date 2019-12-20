@@ -214,6 +214,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         if (optionalImageURL != null) {
             result.put(FieldNames.COURSE_TEMPLATE_IMAGE_URL.name(), optionalImageURL.toExternalForm());
         }
+        // store mark role list including the mandatory mapping to mark templates
+        final BasicDBList markRoles = new BasicDBList();
+        courseTemplate.getDefaultMarkTemplatesForMarkRoles().forEach((role, mt) -> {
+            final BasicDBObject markRoleObject = new BasicDBObject(
+                    FieldNames.COURSE_TEMPLATE_MARK_ROLE_ID.name(), role.getId().toString());
+            markRoleObject.append(FieldNames.COURSE_TEMPLATE_MARK_TEMPLATE_ID.name(), mt.getId().toString());
+            markRoles.add(markRoleObject);
+        });
+        result.put(FieldNames.COURSE_TEMPLATE_MARK_ROLES.name(), markRoles);
         // store mark template list including role names for those who have one defined
         final BasicDBList markTemplates = new BasicDBList();
         courseTemplate.getDefaultMarkRolesForMarkTemplates().forEach((m, role) -> {
