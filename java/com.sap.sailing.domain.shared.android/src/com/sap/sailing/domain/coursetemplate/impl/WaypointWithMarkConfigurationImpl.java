@@ -2,15 +2,13 @@ package com.sap.sailing.domain.coursetemplate.impl;
 
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.coursetemplate.ControlPointWithMarkConfiguration;
-import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 
-public class WaypointWithMarkConfigurationImpl<MarkConfigurationT extends MarkConfiguration<MarkConfigurationT>>
-        implements WaypointWithMarkConfiguration<MarkConfigurationT> {
-    private final ControlPointWithMarkConfiguration<MarkConfigurationT> controlPoint;
+public class WaypointWithMarkConfigurationImpl<P> implements WaypointWithMarkConfiguration<P> {
+    private final ControlPointWithMarkConfiguration<P> controlPoint;
     private final PassingInstruction passingInstruction;
 
-    public WaypointWithMarkConfigurationImpl(ControlPointWithMarkConfiguration<MarkConfigurationT> controlPoint,
+    public WaypointWithMarkConfigurationImpl(ControlPointWithMarkConfiguration<P> controlPoint,
             PassingInstruction passingInstruction) {
         super();
         this.controlPoint = controlPoint;
@@ -18,7 +16,7 @@ public class WaypointWithMarkConfigurationImpl<MarkConfigurationT extends MarkCo
     }
 
     @Override
-    public ControlPointWithMarkConfiguration<MarkConfigurationT> getControlPoint() {
+    public ControlPointWithMarkConfiguration<P> getControlPoint() {
         return controlPoint;
     }
 

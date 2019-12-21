@@ -9,8 +9,7 @@ package com.sap.sailing.domain.coursetemplate;
  * @author Axel Uhl (D043530)
  *
  */
-public interface MarkPropertiesBasedMarkConfiguration<MarkConfigurationT extends MarkConfiguration<MarkConfigurationT>>
-        extends MarkConfiguration<MarkConfigurationT> {
+public interface MarkPropertiesBasedMarkConfiguration<P> extends MarkConfiguration<P> {
     MarkProperties getMarkProperties();
     
     /**
@@ -20,14 +19,5 @@ public interface MarkPropertiesBasedMarkConfiguration<MarkConfigurationT extends
     @Override
     default MarkProperties getOptionalMarkProperties() {
         return getMarkProperties();
-    }
-
-    /**
-     * No need to store a {@link MarkProperties} object to the inventory; we are using an unmodified
-     * {@link MarkProperties} object returned by {@link #getMarkProperties()} already.
-     */
-    @Override
-    default boolean isStoreToInventory() {
-        return false;
     }
 }

@@ -9,9 +9,13 @@ import com.sap.sse.common.Named;
  * 
  * @author Axel Uhl (d043530)
  *
+ * @param <P>
+ *            type of the annotation used to convey positioning-related information on the {@link MarkConfiguration}
+ *            objects contains; typical instantiations would, e.g., be with {@link MarkConfigurationRequestAnnotation} and
+ *            {@link MarkConfigurationResponseAnnotation}.
  */
-public interface ControlPointWithMarkConfiguration<MarkConfigurationT extends MarkConfiguration<MarkConfigurationT>> extends Named {
-    Iterable<MarkConfigurationT> getMarkConfigurations();
+public interface ControlPointWithMarkConfiguration<P> extends Named {
+    Iterable<MarkConfiguration<P>> getMarkConfigurations();
 
     String getShortName();
 }

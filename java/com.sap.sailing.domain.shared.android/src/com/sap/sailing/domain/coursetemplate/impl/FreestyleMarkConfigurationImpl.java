@@ -4,18 +4,16 @@ import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
-import com.sap.sailing.domain.coursetemplate.Positioning;
 
-public class FreestyleMarkConfigurationImpl extends MarkConfigurationImpl implements FreestyleMarkConfiguration {
+public class FreestyleMarkConfigurationImpl<P> extends MarkConfigurationImpl<P> implements FreestyleMarkConfiguration<P> {
     private static final long serialVersionUID = 8167307943855869321L;
 
     private final MarkProperties optionalMarkProperties;
     private final CommonMarkProperties freestyleProperties;
 
     public FreestyleMarkConfigurationImpl(MarkTemplate optionalMarkTemplate, MarkProperties optionalMarkProperties,
-            CommonMarkProperties freestyleProperties, Positioning optionalPositioning,
-            Positioning storedPositioning, boolean storeToInventory) {
-        super(optionalMarkTemplate, optionalPositioning, storedPositioning, storeToInventory);
+            CommonMarkProperties freestyleProperties, P annotation) {
+        super(optionalMarkTemplate, annotation);
         this.optionalMarkProperties = optionalMarkProperties;
         this.freestyleProperties = freestyleProperties;
     }

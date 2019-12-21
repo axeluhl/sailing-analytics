@@ -4,17 +4,15 @@ import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
-import com.sap.sailing.domain.coursetemplate.Positioning;
 
-public class MarkPropertiesBasedMarkConfigurationImpl extends MarkConfigurationImpl
-        implements MarkPropertiesBasedMarkConfiguration {
+public class MarkPropertiesBasedMarkConfigurationImpl<P> extends MarkConfigurationImpl<P>
+        implements MarkPropertiesBasedMarkConfiguration<P> {
     private static final long serialVersionUID = -1371019872646970791L;
 
     private final MarkProperties markProperties;
 
-    public MarkPropertiesBasedMarkConfigurationImpl(MarkProperties markProperties, MarkTemplate optionalMarkTemplate, Positioning optionalPositioning,
-            Positioning storedPositioning, boolean storeToInventory) {
-        super(optionalMarkTemplate, optionalPositioning, storedPositioning, storeToInventory);
+    public MarkPropertiesBasedMarkConfigurationImpl(MarkProperties markProperties, MarkTemplate optionalMarkTemplate, P annotation) {
+        super(optionalMarkTemplate, annotation);
         this.markProperties = markProperties;
     }
 

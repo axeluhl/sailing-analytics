@@ -20,7 +20,7 @@ import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
-import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequest;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation;
 import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
@@ -28,7 +28,7 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseConfigurationJsonSerializer;
 
-public class CourseConfigurationJsonDeserializer implements JsonDeserializer<CourseConfiguration<MarkConfigurationRequest>> {
+public class CourseConfigurationJsonDeserializer implements JsonDeserializer<CourseConfiguration<MarkConfigurationRequestAnnotation>> {
 
     private final SharedSailingData sharedSailingData;
     private final Function<DeviceIdentifier, Position> positionResolver;
@@ -49,7 +49,7 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
     }
 
     @Override
-    public CourseConfiguration<MarkConfigurationRequest> deserialize(JSONObject json) throws JsonDeserializationException {
+    public CourseConfiguration<MarkConfigurationRequestAnnotation> deserialize(JSONObject json) throws JsonDeserializationException {
         final String name = (String) json.get(CourseConfigurationJsonSerializer.FIELD_NAME);
         final String optionalImageURLAsString = (String) json.get(CourseConfigurationJsonSerializer.FIELD_OPTIONAL_IMAGE_URL);
         URL optionalImageURL;
@@ -65,7 +65,7 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
         }
         CourseConfigurationBuilder builder = new CourseConfigurationBuilder(sharedSailingData, regatta, optionalCourseTemplate,
                 name, optionalImageURL, positionResolver);
-        final Map<UUID, MarkConfigurationRequest> markConfigurationsByID = new HashMap<UUID, MarkConfigurationRequest>();
+        final Map<UUID, MarkConfigurationRequestAnnotation> markConfigurationsByID = new HashMap<UUID, MarkConfigurationRequestAnnotation>();
         final JSONArray markConfigurationsJSON = (JSONArray) json
                 .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATIONS);
         if (markConfigurationsJSON != null) {
@@ -88,7 +88,7 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
                         : null;
                 final boolean storeToInventory = Boolean.TRUE.equals(markConfigurationJSON
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_STORE_TO_INVENTORY));
-                final MarkConfiguration<? extends MarkConfigurationRequest> markConfiguration = builder.addMarkConfiguration(
+                final MarkConfiguration<? extends MarkConfigurationRequestAnnotation> markConfiguration = builder.addMarkConfiguration(
                         markTemplateID != null ? UUID.fromString(markTemplateID) : null,
                         markPropertiesID != null ? UUID.fromString(markPropertiesID) : null,
                         markID != null ? UUID.fromString(markID) : null, optionalFreestyleProperties,

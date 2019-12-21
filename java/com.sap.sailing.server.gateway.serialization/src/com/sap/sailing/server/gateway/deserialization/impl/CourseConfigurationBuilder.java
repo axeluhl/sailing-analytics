@@ -23,7 +23,7 @@ import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.IsMarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
-import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequest;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation;
 import com.sap.sailing.domain.coursetemplate.MarkPairWithConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
@@ -37,6 +37,7 @@ import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.impl.CourseConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.FixedPositioningImpl;
 import com.sap.sailing.domain.coursetemplate.impl.FreestyleMarkConfigurationImpl;
+import com.sap.sailing.domain.coursetemplate.impl.MarkConfigurationRequestAnnotationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPairWithConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesBasedMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkRoleNameImpl;
@@ -62,12 +63,12 @@ public class CourseConfigurationBuilder {
     private final String name;
     private final URL optionalImageUrl;
     // TODO decide if we should combine markConfigurations and roleMapping to one field
-    private Set<MarkConfigurationRequest> markConfigurations = new HashSet<>();
-    private Map<MarkConfigurationRequest, IsMarkRole> associatedRoles = new HashMap<>();
-    private List<WaypointWithMarkConfiguration<MarkConfigurationRequest>> waypoints = new ArrayList<>();
+    private Set<MarkConfiguration<MarkConfigurationRequestAnnotation>> markConfigurations = new HashSet<>();
+    private Map<MarkConfiguration<MarkConfigurationRequestAnnotation>, IsMarkRole> associatedRoles = new HashMap<>();
+    private List<WaypointWithMarkConfiguration<MarkConfigurationRequestAnnotation>> waypoints = new ArrayList<>();
     private RepeatablePart optionalRepeatablePart;
     private Integer numberOfLaps;
-    private Map<MarkPairWithConfiguration<MarkConfigurationRequest>, MarkPairWithConfiguration<MarkConfigurationRequest>> markPairCache = new HashMap<>();
+    private Map<MarkPairWithConfiguration<MarkConfigurationRequestAnnotation>, MarkPairWithConfiguration<MarkConfigurationRequestAnnotation>> markPairCache = new HashMap<>();
     private final Function<DeviceIdentifier, Position> positionResolver;
 
     public CourseConfigurationBuilder(SharedSailingData sharedSailingData, Regatta optionalRegatta,
@@ -80,10 +81,10 @@ public class CourseConfigurationBuilder {
         this.positionResolver = positionResolver;
     }
 
-    public MarkConfiguration<? extends MarkConfigurationRequest> addMarkConfiguration(UUID optionalMarkTemplateID, UUID optionalMarkPropertiesID,
+    public MarkConfiguration<MarkConfigurationRequestAnnotation> addMarkConfiguration(UUID optionalMarkTemplateID, UUID optionalMarkPropertiesID,
             UUID optionalMarkID, CommonMarkProperties commonMarkProperties, Positioning optionalPositioning,
             boolean storeToInventory) {
-        final MarkConfigurationRequest result;
+        final MarkConfiguration<MarkConfigurationRequestAnnotation> result;
         if (commonMarkProperties != null) {
             if (optionalMarkID != null) {
                 throw new IllegalArgumentException(
@@ -106,13 +107,13 @@ public class CourseConfigurationBuilder {
         return result;
     }
 
-    public MarkTemplateBasedMarkConfiguration<MarkConfigurationRequest> addMarkTemplateConfiguration(UUID markTemplateID,
+    public MarkTemplateBasedMarkConfiguration<MarkConfigurationRequestAnnotation> addMarkTemplateConfiguration(UUID markTemplateID,
             Positioning optionalPositioning, boolean storeToInventory) {
         final MarkTemplate resolvedMarkTemplate = resolveMarkTemplateByID(markTemplateID);
         if (resolvedMarkTemplate == null) {
             throw new IllegalStateException("Mark template with ID " + markTemplateID + " could not be resolved");
         }
-        final MarkTemplateBasedMarkConfiguration<MarkConfigurationRequest> result = new MarkTemplateBasedMarkConfigurationImpl(
+        final MarkTemplateBasedMarkConfiguration<MarkConfigurationRequestAnnotation> result = new MarkTemplateBasedMarkConfigurationImpl(
                 resolvedMarkTemplate, optionalPositioning, storeToInventory);
         markConfigurations.add(result);
         return result;
@@ -146,7 +147,7 @@ public class CourseConfigurationBuilder {
         return resolvedMarkRole;
     }
 
-    public MarkPropertiesBasedMarkConfiguration<MarkConfigurationRequest> addMarkPropertiesConfiguration(UUID markPropertiesID,
+    public MarkPropertiesBasedMarkConfiguration<MarkConfigurationRequestAnnotation> addMarkPropertiesConfiguration(UUID markPropertiesID,
             UUID optionalMarkTemplateID, Positioning optionalPositioning, boolean storeToInventory) {
         final MarkProperties resolvedMarkProperties = sharedSailingData.getMarkPropertiesById(markPropertiesID);
         if (resolvedMarkProperties == null) {
@@ -155,14 +156,14 @@ public class CourseConfigurationBuilder {
         }
         final MarkTemplate resolvedMarkTemplate = optionalMarkTemplateID == null ? null
                 : resolveMarkTemplateByID(optionalMarkTemplateID);
-        final MarkPropertiesBasedMarkConfiguration<MarkConfigurationRequest> result = new MarkPropertiesBasedMarkConfigurationImpl(
+        final MarkPropertiesBasedMarkConfiguration<MarkConfigurationRequestAnnotation> result = new MarkPropertiesBasedMarkConfigurationImpl(
                 resolvedMarkProperties, resolvedMarkTemplate, optionalPositioning,
                 getPositioningIfAvailable(resolvedMarkProperties, positionResolver), storeToInventory);
         markConfigurations.add(result);
         return result;
     }
 
-    public FreestyleMarkConfiguration<MarkConfigurationRequest> addFreestyleMarkConfiguration(UUID optionalMarkTemplateID,
+    public FreestyleMarkConfiguration<MarkConfigurationRequestAnnotation> addFreestyleMarkConfiguration(UUID optionalMarkTemplateID,
             UUID optionalMarkPropertiesID, CommonMarkProperties commonMarkProperties, Positioning optionalPositioning,
             boolean storeToInventory) {
         final MarkTemplate resolvedMarkTemplate = optionalMarkTemplateID == null ? null
@@ -171,14 +172,14 @@ public class CourseConfigurationBuilder {
         // TODO decide if it is fine if we can't resolve a MarkTemplate or MarkProperties here because all appearance
         // properties are available. This vcould potentially cause a lack of tracking information if the MarkProperties
         // isn't available.
-        final FreestyleMarkConfiguration<MarkConfigurationRequest> result = new FreestyleMarkConfigurationImpl(resolvedMarkTemplate,
+        final FreestyleMarkConfiguration<MarkConfigurationRequestAnnotation> result = new FreestyleMarkConfigurationImpl(resolvedMarkTemplate,
                 resolvedMarkProperties, commonMarkProperties, optionalPositioning, resolvedMarkProperties == null ? null
                         : getPositioningIfAvailable(resolvedMarkProperties, positionResolver), storeToInventory);
         markConfigurations.add(result);
         return result;
     }
 
-    public MarkConfigurationRequest addRegattaMarkConfiguration(UUID markID, Positioning optionalPositioning,
+    public MarkConfiguration<MarkConfigurationRequestAnnotation> addRegattaMarkConfiguration(UUID markID, Positioning optionalPositioning,
             boolean storeToInventory) {
         if (optionalRegatta == null) {
             throw new IllegalStateException();
@@ -192,7 +193,8 @@ public class CourseConfigurationBuilder {
                     final UUID markPropertiesIdOrNull = mark.getOriginatingMarkPropertiesIdOrNull();
                     final MarkProperties markPropertiesOrNull = markPropertiesIdOrNull == null ? null
                             : sharedSailingData.getMarkPropertiesById(markPropertiesIdOrNull);
-                    final RegattaMarkConfiguration<MarkConfigurationRequest> result = new RegattaMarkConfigurationImpl(mark, optionalPositioning,
+                    final RegattaMarkConfiguration<MarkConfigurationRequestAnnotation> result = new RegattaMarkConfigurationImpl(
+                            mark, new MarkConfigurationRequestAnnotationImpl(storeToInventory, optionalPositioning),
                             getPositioningIfAvailable(optionalRegatta, mark, positionResolver), markTemplateOrNull,
                             markPropertiesOrNull, storeToInventory);
                     markConfigurations.add(result);
@@ -204,24 +206,24 @@ public class CourseConfigurationBuilder {
                 "Mark " + markID + " could not be found in regatta " + optionalRegatta.getName());
     }
 
-    public void addWaypoint(MarkConfigurationRequest markConfiguration, PassingInstruction passingInstruction) {
+    public void addWaypoint(MarkConfigurationRequestAnnotation markConfiguration, PassingInstruction passingInstruction) {
         if (!markConfigurations.contains(markConfiguration)) {
             throw new IllegalArgumentException();
         }
         waypoints.add(new WaypointWithMarkConfigurationImpl(markConfiguration, passingInstruction));
     }
 
-    public void addWaypoint(MarkConfigurationRequest leftMark, MarkConfigurationRequest rightMark, String name,
+    public void addWaypoint(MarkConfigurationRequestAnnotation leftMark, MarkConfigurationRequestAnnotation rightMark, String name,
             PassingInstruction passingInstruction, String shortNameForMarkPair) {
         if (!markConfigurations.contains(leftMark) || !markConfigurations.contains(rightMark)) {
             throw new IllegalArgumentException();
         }
-        final MarkPairWithConfiguration<MarkConfigurationRequest> markPair = markPairCache
+        final MarkPairWithConfiguration<MarkConfigurationRequestAnnotation> markPair = markPairCache
                 .computeIfAbsent(new MarkPairWithConfigurationImpl(name, leftMark, rightMark, shortNameForMarkPair), mp -> mp);
         waypoints.add(new WaypointWithMarkConfigurationImpl(markPair, passingInstruction));
     }
 
-    public void setRole(MarkConfigurationRequest markConfiguration, UUID markRoleId, String roleName) {
+    public void setRole(MarkConfigurationRequestAnnotation markConfiguration, UUID markRoleId, String roleName) {
         if (!markConfigurations.contains(markConfiguration)) {
             throw new IllegalArgumentException();
         }
@@ -248,8 +250,8 @@ public class CourseConfigurationBuilder {
         this.numberOfLaps = numberOfLaps;
     }
 
-    public CourseConfiguration<MarkConfigurationRequest> build() {
-        return new CourseConfigurationImpl<MarkConfigurationRequest>(optionalCourseTemplate, markConfigurations,
+    public CourseConfiguration<MarkConfigurationRequestAnnotation> build() {
+        return new CourseConfigurationImpl<MarkConfigurationRequestAnnotation>(optionalCourseTemplate, markConfigurations,
                 associatedRoles, waypoints, optionalRepeatablePart, numberOfLaps, name, optionalImageUrl);
     }
     

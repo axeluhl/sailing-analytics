@@ -1,5 +1,4 @@
 package com.sap.sailing.domain.coursetemplate;
 
-public interface CourseConfiguration<MarkConfigurationT extends MarkConfiguration<MarkConfigurationT>>
-        extends CourseConfigurationBase<IsMarkRole, MarkConfigurationT> {
+public interface CourseConfiguration<P> extends CourseConfigurationBase<IsMarkRole, P> {
 }

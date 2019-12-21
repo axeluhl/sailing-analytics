@@ -13,24 +13,24 @@ import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 
-public abstract class CourseConfigurationBaseImpl<R extends IsMarkRole, MarkConfigurationT extends MarkConfiguration<MarkConfigurationT>>
-implements CourseConfigurationBase<R, MarkConfigurationT> {
+public abstract class CourseConfigurationBaseImpl<R extends IsMarkRole, P>
+implements CourseConfigurationBase<R, P> {
     
     private static final long serialVersionUID = -9189989170055144298L;
 
     private final CourseTemplate optionalCourseTemplate;
     // TODO decide if we should combine markConfigurations and roleMapping to one field
-    private final Set<MarkConfigurationT> markConfigurations;
-    private final Map<MarkConfigurationT, R> associatedRoles;
-    private final List<WaypointWithMarkConfiguration<MarkConfigurationT>> waypoints;
+    private final Set<MarkConfiguration<P>> markConfigurations;
+    private final Map<MarkConfiguration<P>, R> associatedRoles;
+    private final List<WaypointWithMarkConfiguration<P>> waypoints;
     private final RepeatablePart optionalRepeatablePart;
     private final Integer numberOfLaps;
     private final String name;
     private final URL optionalImageURL;
     
     public CourseConfigurationBaseImpl(CourseTemplate optionalCourseTemplate,
-            Set<MarkConfigurationT> markConfigurations, Map<MarkConfigurationT, R> associatedRoles,
-            List<WaypointWithMarkConfiguration<MarkConfigurationT>> waypoints,
+            Set<MarkConfiguration<P>> markConfigurations, Map<MarkConfiguration<P>, R> associatedRoles,
+            List<WaypointWithMarkConfiguration<P>> waypoints,
             RepeatablePart optionalRepeatablePart, Integer numberOfLaps, String name, URL optionalImageURL) {
         super();
         this.optionalCourseTemplate = optionalCourseTemplate;
@@ -54,24 +54,24 @@ implements CourseConfigurationBase<R, MarkConfigurationT> {
     }
 
     @Override
-    public Iterable<? extends MarkConfigurationT> getAllMarks() {
+    public Iterable<MarkConfiguration<P>> getAllMarks() {
         return markConfigurations;
     }
 
     @Override
-    public Iterable<WaypointWithMarkConfiguration<MarkConfigurationT>> getWaypoints() {
+    public Iterable<WaypointWithMarkConfiguration<P>> getWaypoints() {
         return waypoints;
     }
 
     @Override
-    public Map<MarkConfigurationT, R> getAssociatedRoles() {
+    public Map<MarkConfiguration<P>, R> getAssociatedRoles() {
         return associatedRoles;
     }
     
     @Override
-    public Map<MarkConfigurationT, R> getAllMarksWithOptionalRoles() {
-        final Map<MarkConfigurationT, R> result = new HashMap<>();
-        for (MarkConfigurationT mc : markConfigurations) {
+    public Map<MarkConfiguration<P>, R> getAllMarksWithOptionalRoles() {
+        final Map<MarkConfiguration<P>, R> result = new HashMap<>();
+        for (MarkConfiguration<P> mc : markConfigurations) {
             result.put(mc, associatedRoles.get(mc));
         }
         return result;
@@ -83,8 +83,8 @@ implements CourseConfigurationBase<R, MarkConfigurationT> {
     }
 
     @Override
-    public Iterable<WaypointWithMarkConfiguration<MarkConfigurationT>> getWaypoints(int numberOfLaps) {
-        final Iterable<WaypointWithMarkConfiguration<MarkConfigurationT>> result;
+    public Iterable<WaypointWithMarkConfiguration<P>> getWaypoints(int numberOfLaps) {
+        final Iterable<WaypointWithMarkConfiguration<P>> result;
         if (hasRepeatablePart()) {
             if (numberOfLaps < 1) {
                 throw new IllegalArgumentException("The course template "+this+" has a repeatable part, hence the number of laps needs to be at least 1.");
