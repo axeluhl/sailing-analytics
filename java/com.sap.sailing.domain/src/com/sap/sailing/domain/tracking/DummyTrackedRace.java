@@ -747,7 +747,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public String getTrackingConnector() {
+    public TrackingConnectorInfo getTrackingConnectorInfo() {
         return null;
     }
     

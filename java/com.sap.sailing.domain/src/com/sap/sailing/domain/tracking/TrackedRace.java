@@ -1249,7 +1249,8 @@ public interface TrackedRace
     }
     
     /**
-     * gets a String representation of the Tracking-Service used to Track the Race
+     * gets a {@link TrackingConnectorInfo}, which contains a String representation of the Tracking-Service used to Track the Race and a web-URL for the Event Event; 
+     * may be {@code null}, particularly in test set-ups
      */
-    String getTrackingConnector();
+    TrackingConnectorInfo getTrackingConnectorInfo();
 }
