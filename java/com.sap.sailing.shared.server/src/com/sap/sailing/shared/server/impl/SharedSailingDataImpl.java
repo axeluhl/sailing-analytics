@@ -231,7 +231,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     public MarkProperties updateMarkProperties(UUID uuid, CommonMarkProperties properties,
             Positioning positioningInformation, Iterable<String> tags) {
         final MarkProperties markProperties = updateMarkProperties(uuid, properties, tags);
-        if (markProperties != properties) { // no update required if same object
+        if (positioningInformation != null && markProperties != properties) { // no update required if same object
             apply(s -> internalSetPositioningInformationForMarkProperties(uuid, positioningInformation));
         }
         return getMarkPropertiesById(uuid);

@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
+import com.sap.sailing.domain.coursetemplate.FixedPositioning;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
@@ -65,6 +66,13 @@ public interface SharedSailingData {
     
     MarkProperties updateMarkProperties(UUID uuid, CommonMarkProperties properties, Iterable<String> tags);
 
+    /**
+     * @param positioningInformation
+     *            if {@code null}, no update will be performed to the positioning information of the
+     *            {@link MarkProperties} object identified by {@code uuid}. To clear the positioning information, pass
+     *            in a valid, non-{@code null} {@link Positioning} object that makes an "empty" specification, such as a
+     *            {@link FixedPositioning} with a {@code null} {@link FixedPositioning#getFixedPosition()} return.
+     */
     MarkProperties updateMarkProperties(UUID uuid, CommonMarkProperties properties, Positioning positioningInformation, Iterable<String> tags);
 
     /**

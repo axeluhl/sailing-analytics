@@ -182,7 +182,7 @@ public class CourseConfigurationBuilder {
     public MarkConfiguration<MarkConfigurationRequestAnnotation> addRegattaMarkConfiguration(UUID markID, Positioning optionalPositioning,
             boolean storeToInventory) {
         if (optionalRegatta == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Require a valid regatta in CourseConfigurationBuilder to add regatta mark with ID "+markID);
         }
         for (RaceColumn raceColumn : optionalRegatta.getRaceColumns()) {
             for (Mark mark : raceColumn.getAvailableMarks()) {
@@ -308,6 +308,14 @@ public class CourseConfigurationBuilder {
         return bestMatchingDeviceMapping;
     }
 
+    /**
+     * For a {@link MarkProperties} object finds its {@link MarkProperties#getPositioningInformation()} and if it is {@code null}, returns {@code null};
+     * otherwise, for a fixed position specification that position will be returned as the "last known position" and no device ID will be returned in this
+     * case, although practically, the fixed position at some point may be stored in a regatta context using a "PING" device mapping.<p>
+     * 
+     * For device identifier-based positioning requests the device identifier will be returned and a query for the last known position of that device will
+     * be launched using the {@code positionResolver}. If a last known position is found that way, it is included in the return value of this method.
+     */
     public static MarkConfigurationResponseAnnotation getPositioningIfAvailable(MarkProperties markProperties, Function<DeviceIdentifier, Position> positionResolver) {
         final MarkConfigurationResponseAnnotation result;
         final Positioning positioning = markProperties.getPositioningInformation();

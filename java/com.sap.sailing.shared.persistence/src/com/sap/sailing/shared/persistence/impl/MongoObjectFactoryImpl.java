@@ -128,21 +128,32 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public static Document storeDeviceId(
                 TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder, DeviceIdentifier device)
                                 throws TransformationException, NoCorrespondingServiceRegisteredException {
-        String type = device.getIdentifierType();
-        DeviceIdentifierMongoHandler handler = deviceIdentifierServiceFinder.findService(type);
-        com.sap.sse.common.Util.Pair<String, ? extends Object> pair = handler.serialize(device);
-        type = pair.getA();
-        Object deviceTypeSpecificId = pair.getB();
-        return new Document()
-                        .append(FieldNames.DEVICE_TYPE.name(), type)
-                        .append(FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), deviceTypeSpecificId)
-                        .append(FieldNames.DEVICE_STRING_REPRESENTATION.name(), device.getStringRepresentation());
+        final Document result;
+        if (device == null) {
+            result = null;
+        } else {
+            String type = device.getIdentifierType();
+            DeviceIdentifierMongoHandler handler = deviceIdentifierServiceFinder.findService(type);
+            com.sap.sse.common.Util.Pair<String, ? extends Object> pair = handler.serialize(device);
+            type = pair.getA();
+            Object deviceTypeSpecificId = pair.getB();
+            result = new Document()
+                            .append(FieldNames.DEVICE_TYPE.name(), type)
+                            .append(FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), deviceTypeSpecificId)
+                            .append(FieldNames.DEVICE_STRING_REPRESENTATION.name(), device.getStringRepresentation());
+        }
+        return result;
     }
 
     private Document storePosition(Position position) {
-        Document result = new Document();
-        result.put(FieldNames.LAT_DEG.name(), position.getLatDeg());
-        result.put(FieldNames.LNG_DEG.name(), position.getLngDeg());
+        final Document result;
+        if (position == null) {
+            result = null;
+        } else {
+            result = new Document();
+            result.put(FieldNames.LAT_DEG.name(), position.getLatDeg());
+            result.put(FieldNames.LNG_DEG.name(), position.getLngDeg());
+        }
         return result;
     }
 
@@ -150,7 +161,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         if (markProperties.getColor() != null) {
             result.put(FieldNames.COMMON_MARK_PROPERTIES_COLOR.name(), markProperties.getColor().getAsHtml());
         }
-
         result.put(FieldNames.COMMON_MARK_PROPERTIES_NAME.name(), markProperties.getName());
         result.put(FieldNames.COMMON_MARK_PROPERTIES_PATTERN.name(), markProperties.getPattern());
         result.put(FieldNames.COMMON_MARK_PROPERTIES_SHAPE.name(), markProperties.getShape());

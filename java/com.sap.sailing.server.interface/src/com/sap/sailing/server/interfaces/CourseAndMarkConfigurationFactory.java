@@ -21,6 +21,7 @@ import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationResponseAnnotation;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
@@ -62,14 +63,14 @@ public interface CourseAndMarkConfigurationFactory {
     /**
      * The {@link CourseConfiguration} contains everything required to produce a new {@link CourseTemplate} from it: the
      * {@link MarkTemplate}s can be obtained by mapping all {@link CourseConfiguration#getAllMarks() mark
-     * configurations} through {@link #getOrCreateMarkTemplate(MarkConfiguration)}. The
+     * configurations} through {@link MarkConfiguration#getOptionalMarkTemplate()}. The {@link MarkConfiguration} objects
+     * contained in the result course configuration will all be of type {@link MarkTemplateBasedMarkConfiguration}. The
      * {@link WithOptionalRepeatablePart repeatable part specification} is obtained immediately from the
      * {@link CourseConfiguration}. For each {@link CourseConfiguration#getWaypoints() waypoint configuration} of the
      * {@code courseWithMarkConfiguration}, a {@link WaypointTemplate} is created where the {@link MarkTemplate}s
      * referenced by these {@link WaypointTemplates} are those obtained by
-     * {@link #getOrCreateMarkTemplate(MarkConfiguration)} for the respective {@link MarkConfiguration} objects used in
+     * {@link MarkConfiguration#getOptionalMarkTemplate()} for the respective {@link MarkConfiguration} objects used in
      * the {@link WaypointWithMarkConfiguration} objects.
-     * @param optionalNonDefaultGroupOwnership TODO
      * 
      * @return a course with its mark configurations and a {@link CourseTemplate} returned by
      *         {@link CourseConfiguration#getOptionalCourseTemplate()} that is always valid, never {@code null}. All
@@ -111,14 +112,17 @@ public interface CourseAndMarkConfigurationFactory {
     /**
      * Creates a {@link CourseConfiguration} for a Regatta - either based on a {@link CourseBase} or independently. The
      * resulting waypoint sequence is consistent with the one defined in the {@link CourseBase}, if one is given. In
-     * case, no {@link CourseBase} is given, no waypoint sequence is constructed but existing {@link Mark}s of the
-     * {@link Regatta} are loaded as {@link MarkConfiguration}s.<br>
+     * case no {@link CourseBase} is given, no waypoint sequence is constructed but existing {@link Mark}s of the
+     * {@link Regatta} are loaded as {@link MarkConfiguration}s. All {@link MarkConfiguration} objects contained
+     * in the result will be of type {@link RegattaMarkConfiguration} as they all have been obtained from respective
+     * {@link Mark} objects that exist in the {@link Regatta}.<br>
      * 
      * If a given {@link CourseBase} is based on a {@link CourseTemplate}
      * ({@link CourseBase#getOriginatingCourseTemplateIdOrNull() references an existing and visible CourseTemplate} and
      * the waypoint sequences are compatible, the sequence is mapped back to the {@link CourseTemplate} instead of just
      * loading the {@link CourseBase}. This means, if a {@link CourseBase} was created for a {@link CourseTemplate}
-     * having a {@link RepeatablePart}, the lap count is reconstructed and the shortened waypoint sequence is used.<br>
+     * having a {@link RepeatablePart}, the lap count is reconstructed and the shortened waypoint sequence is used.
+     * TODO Really? What if during the second lap a different mark was used for the windward mark's role "1"?<br>
      * 
      * If no {@link CourseTemplate} can be obtained or the waypoint sequences aren't compatible, the
      * {@link CourseTemplate} is just ignored. No lap count and {@link RepeatablePart} is recognized and the whole

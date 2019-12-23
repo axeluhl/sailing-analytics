@@ -238,8 +238,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
     public Response createCourse(@PathParam("regattaName") String regattaName,
             @QueryParam("markPropertiesGroupOwnership") String markPropertiesGroupOwnership,
             @PathParam("raceColumn") String raceColumn, @PathParam("fleet") String fleet,
-            String json) throws Exception {
-        if (json == null || json.isEmpty()) {
+            String jsonCourseConfiguration) throws Exception {
+        if (jsonCourseConfiguration == null || jsonCourseConfiguration.isEmpty()) {
             return getBadCourseConfigurationValidationErrorResponse(
                     "Course configuration is required to be given as json object");
         }
@@ -257,7 +257,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         if (raceColumnByName == null || fleetByName == null) {
             return getBadRaceErrorResponse(regattaName, raceColumn, fleet);
         }
-        final Object parsedObject = new JSONParser().parse(json);
+        final Object parsedObject = new JSONParser().parse(jsonCourseConfiguration);
         if (parsedObject == null || !(parsedObject instanceof JSONObject)) {
             getBadCourseConfigurationValidationErrorResponse(
                     "Course configuration is required to be given as json object");

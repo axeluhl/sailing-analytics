@@ -27,7 +27,7 @@ public class MarkPropertiesBasedMarkConfigurationImpl<P> extends MarkConfigurati
     }
 
     @Override
-    public MarkProperties getMarkProperties() {
+    public MarkProperties getOptionalMarkProperties() {
         return markProperties;
     }
 

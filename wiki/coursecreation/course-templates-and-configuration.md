@@ -214,6 +214,7 @@ Said that, it is necessary to provide a distinct and complete (bijective) mappin
 New configurations may be created (e.g. by adding a new mark to the sequence or course configuration) as follows:
 * Freestyle configuration: Adding a new mark
 * Mark properties based configuration: By selecting a mark from the mark properties inventory
+* TODO Mark template based configuration?
 
 In addition, for marks used in the course sequence, a new freestyle mark configuration may be created replacing the original configuration in the role. This causes the previous configuration to remain unused but not to be deleted automatically.
 

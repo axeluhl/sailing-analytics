@@ -93,6 +93,7 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
                     markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_ID, ((MarkRole)associatedRole).getId().toString());
                 }
             }
+            // TODO introduce MarkConfiguration visitor pattern?
             if (markConfiguration instanceof FreestyleMarkConfiguration) {
                 final FreestyleMarkConfiguration<MarkConfigurationResponseAnnotation> freeStyleMarkConfiguration =
                         (FreestyleMarkConfiguration<MarkConfigurationResponseAnnotation>) markConfiguration;
@@ -107,7 +108,7 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
                 final MarkPropertiesBasedMarkConfiguration<MarkConfigurationResponseAnnotation> markPropertiesBasedMarkConfiguration =
                         (MarkPropertiesBasedMarkConfiguration<MarkConfigurationResponseAnnotation>) markConfiguration;
                 markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_PROPERTIES_ID,
-                        markPropertiesBasedMarkConfiguration.getMarkProperties().getId().toString());
+                        markPropertiesBasedMarkConfiguration.getOptionalMarkProperties().getId().toString());
                 if (markPropertiesBasedMarkConfiguration.getOptionalMarkTemplate() != null) {
                     markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_TEMPLATE_ID,
                             markPropertiesBasedMarkConfiguration.getOptionalMarkTemplate().getId().toString());
