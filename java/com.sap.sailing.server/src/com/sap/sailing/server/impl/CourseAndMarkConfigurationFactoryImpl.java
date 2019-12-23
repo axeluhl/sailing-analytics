@@ -184,7 +184,16 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
      * mark configuration, the mark configuration will be replaced in the result by a
      * {@link MarkPropertiesBasedMarkConfiguration} that references the {@link MarkProperties} object created or updated
      * based on the request.<br>
-     * TODO What is this replacement good for?
+     * 
+     * When the resulting {@link CourseConfiguration} is used to create a course from it, this ensures that all references
+     * of the resulting {@link Mark#getOriginatingMarkPropertiesIdOrNull()} will then point to the {@link MarkProperties} objects
+     * stored or updated to the "inventory." For example, if an existing {@link Mark} is referenced by an incoming
+     * {@link RegattaMarkConfiguration}, the result contains an augmented {@link RegattaMarkConfiguration} whose
+     * {@link RegattaMarkConfiguration#getOptionalMarkProperties()} refers to the {@link MarkProperties} that was created
+     * (which is only the case if the {@link Mark} did not reference a {@link MarkProperties} object before). For all
+     * other types of {@link MarkConfiguration} the new {@link MarkPropertiesBasedMarkConfiguration} ensures that a mark
+     * is created such that it has all the properties requested and points to the desired combination of {@link MarkProperties}
+     * and/or {@link MarkTemplate}.
      * 
      * @param optionalNonDefaultGroupOwnership
      *            in case {@link MarkProperties} objects have to be created then this parameter can be used to specify
@@ -229,6 +238,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 }
                 final MarkConfiguration<MarkConfigurationResponseAnnotation> effectiveMarkConfiguration;
                 if (markConfiguration instanceof RegattaMarkConfiguration) {
+                    // FIXME if the Mark referenced by this markConfiguration already references a MarkProperties by UUID, what if that's different from markPropertiesInInventory?
                     final RegattaMarkConfiguration<MarkConfigurationRequestAnnotation> regattaMarkConfiguration = (RegattaMarkConfiguration<MarkConfigurationRequestAnnotation>) markConfiguration;
                     effectiveMarkConfiguration = new RegattaMarkConfigurationImpl<MarkConfigurationResponseAnnotation>(regattaMarkConfiguration.getMark(),
                             CourseConfigurationBuilder.getPositioningIfAvailable(regatta, regattaMarkConfiguration.getMark(), positionResolver),
