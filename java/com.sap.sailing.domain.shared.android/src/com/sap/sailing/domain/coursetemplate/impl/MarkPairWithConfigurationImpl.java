@@ -4,16 +4,16 @@ import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkPairWithConfiguration;
 import com.sap.sse.common.impl.NamedImpl;
 
-public class MarkPairWithConfigurationImpl<MarkConfigurationT extends MarkConfiguration<MarkConfigurationT>>
-        extends NamedImpl implements MarkPairWithConfiguration<MarkConfigurationT> {
+public class MarkPairWithConfigurationImpl<P>
+        extends NamedImpl implements MarkPairWithConfiguration<P> {
     private static final long serialVersionUID = 159552983009183991L;
     
-    private final MarkConfigurationT right;
-    private final MarkConfigurationT left;
+    private final MarkConfiguration<P> right;
+    private final MarkConfiguration<P> left;
 
     private final String shortName;
 
-    public MarkPairWithConfigurationImpl(String name, MarkConfigurationT left, MarkConfigurationT right,
+    public MarkPairWithConfigurationImpl(String name, MarkConfiguration<P> left, MarkConfiguration<P> right,
             String shortName) {
         super(name);
         this.left = left;
@@ -27,12 +27,12 @@ public class MarkPairWithConfigurationImpl<MarkConfigurationT extends MarkConfig
     }
 
     @Override
-    public MarkConfigurationT getLeft() {
+    public MarkConfiguration<P> getLeft() {
         return left;
     }
 
     @Override
-    public MarkConfigurationT getRight() {
+    public MarkConfiguration<P> getRight() {
         return right;
     }
 

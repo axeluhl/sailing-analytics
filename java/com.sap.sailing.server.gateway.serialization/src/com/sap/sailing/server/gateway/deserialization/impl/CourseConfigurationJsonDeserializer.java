@@ -65,7 +65,7 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
         }
         CourseConfigurationBuilder builder = new CourseConfigurationBuilder(sharedSailingData, regatta, optionalCourseTemplate,
                 name, optionalImageURL, positionResolver);
-        final Map<UUID, MarkConfigurationRequestAnnotation> markConfigurationsByID = new HashMap<UUID, MarkConfigurationRequestAnnotation>();
+        final Map<UUID, MarkConfiguration<MarkConfigurationRequestAnnotation>> markConfigurationsByID = new HashMap<>();
         final JSONArray markConfigurationsJSON = (JSONArray) json
                 .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATIONS);
         if (markConfigurationsJSON != null) {
@@ -88,7 +88,7 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
                         : null;
                 final boolean storeToInventory = Boolean.TRUE.equals(markConfigurationJSON
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_STORE_TO_INVENTORY));
-                final MarkConfiguration<? extends MarkConfigurationRequestAnnotation> markConfiguration = builder.addMarkConfiguration(
+                final MarkConfiguration<MarkConfigurationRequestAnnotation> markConfiguration = builder.addMarkConfiguration(
                         markTemplateID != null ? UUID.fromString(markTemplateID) : null,
                         markPropertiesID != null ? UUID.fromString(markPropertiesID) : null,
                         markID != null ? UUID.fromString(markID) : null, optionalFreestyleProperties,
@@ -111,11 +111,11 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
         if (wayPointsJSON != null) {
             for (Object waypointObject : wayPointsJSON) {
                 final JSONObject waypointJSON = (JSONObject) waypointObject;
-                final List<MarkConfiguration> resolvedMarkConfigurations = new ArrayList<>();
+                final List<MarkConfiguration<MarkConfigurationRequestAnnotation>> resolvedMarkConfigurations = new ArrayList<>();
                 final JSONArray markConfigurationIDs = (JSONArray) waypointJSON
                         .get(CourseConfigurationJsonSerializer.FIELD_WAYPOINT_MARK_CONFIGURATION_IDS);
                 for (Object markConfigurationIdObject : markConfigurationIDs) {
-                    final MarkConfiguration resolvedMarkTemplate = markConfigurationsByID
+                    final MarkConfiguration<MarkConfigurationRequestAnnotation> resolvedMarkTemplate = markConfigurationsByID
                             .get(UUID.fromString(markConfigurationIdObject.toString()));
                     if (resolvedMarkTemplate == null) {
                         throw new JsonDeserializationException("Mark configuration with ID " + markConfigurationIdObject
@@ -152,7 +152,7 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
         if (numberOfLaps != null) {
             builder.setNumberOfLaps(numberOfLaps);
         }
-        final CourseConfiguration courseConfiguration = builder.build();
+        final CourseConfiguration<MarkConfigurationRequestAnnotation> courseConfiguration = builder.build();
         return courseConfiguration;
     }
 }

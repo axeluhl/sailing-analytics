@@ -27,6 +27,7 @@ import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.PositioningVisitor;
 import com.sap.sailing.domain.coursetemplate.TrackingDeviceBasedPositioning;
+import com.sap.sailing.domain.coursetemplate.TrackingDeviceBasedPositioningWithLastKnownPosition;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.shared.persistence.MongoObjectFactory;
 import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
@@ -97,6 +98,18 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
+                }
+
+                @Override
+                public Void visit(TrackingDeviceBasedPositioningWithLastKnownPosition trackingDeviceBasedPositioningWithLastKnownPosition) {
+                    this.visit((TrackingDeviceBasedPositioning) trackingDeviceBasedPositioningWithLastKnownPosition);
+                    if (trackingDeviceBasedPositioningWithLastKnownPosition.getLastKnownPosition() != null) {
+                        result.put(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_LAST_POSITION_LAT.name(),
+                                trackingDeviceBasedPositioningWithLastKnownPosition.getLastKnownPosition().getLatDeg());
+                        result.put(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_LAST_POSITION_LNG.name(),
+                                trackingDeviceBasedPositioningWithLastKnownPosition.getLastKnownPosition().getLngDeg());
+                    }    
+                    return null;
                 }
             });
         }

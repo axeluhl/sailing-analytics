@@ -346,6 +346,7 @@ import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.PositioningVisitor;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.TrackingDeviceBasedPositioning;
+import com.sap.sailing.domain.coursetemplate.TrackingDeviceBasedPositioningWithLastKnownPosition;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.impl.CommonMarkPropertiesImpl;
 import com.sap.sailing.domain.coursetemplate.impl.FixedPositioningImpl;
@@ -9977,6 +9978,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
                         @Override
                         public String visit(TrackingDeviceBasedPositioning trackingDeviceBasedPositioning) {
+                            return "DEVICE";
+                        }
+
+                        @Override
+                        public String visit(
+                                TrackingDeviceBasedPositioningWithLastKnownPosition trackingDeviceBasedPositioningWithLastKnownPosition) {
                             return "DEVICE";
                         }
                     }));

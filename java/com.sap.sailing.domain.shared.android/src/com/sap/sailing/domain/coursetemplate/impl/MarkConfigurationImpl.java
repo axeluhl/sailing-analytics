@@ -19,6 +19,7 @@ public abstract class MarkConfigurationImpl<P> implements MarkConfiguration<P> {
         return optionalMarkTemplate;
     }
 
+    @Override
     public P getAnnotationInfo() {
         return annotationInfo;
     }

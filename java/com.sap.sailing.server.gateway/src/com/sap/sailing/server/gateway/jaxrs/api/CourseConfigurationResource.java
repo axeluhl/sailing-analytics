@@ -40,6 +40,8 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationResponseAnnotation;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceIdentifierJsonDeserializer;
@@ -61,7 +63,7 @@ import com.sun.jersey.api.client.ClientResponse.Status;
 public class CourseConfigurationResource extends AbstractSailingServerResource {
     private static final Logger log = Logger.getLogger(CourseConfigurationResource.class.getName());
     
-    private final JsonSerializer<CourseConfiguration> courseConfigurationJsonSerializer;
+    private final JsonSerializer<CourseConfiguration<MarkConfigurationResponseAnnotation>> courseConfigurationJsonSerializer;
     private final Function<DeviceIdentifier, Position> positionResolver;
     private final DeviceIdentifierJsonDeserializer deviceIdentifierDeserializer;
 
@@ -90,7 +92,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         };
     }
 
-    private JsonDeserializer<CourseConfiguration> getCourseConfigurationDeserializer(final Regatta regatta) {
+    private JsonDeserializer<CourseConfiguration<MarkConfigurationRequestAnnotation>> getCourseConfigurationDeserializer(final Regatta regatta) {
         return new CourseConfigurationJsonDeserializer(this.getSharedSailingData(), deviceIdentifierDeserializer, regatta, positionResolver);
     }
 
@@ -153,7 +155,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         // Any mark already defined in the regatta will be added to the included mark configurations as an initial
         // set of marks to be used while defining a course for the regatta.
         // An additional call to get the marks defined in the regatta isn't necessary with the described behavior of this API.
-        final CourseConfiguration courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
+        final CourseConfiguration<MarkConfigurationResponseAnnotation> courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
                 .createCourseConfigurationFromRegatta(courseBase, regatta, tags);
         final JSONObject jsonResult = courseConfigurationJsonSerializer.serialize(courseConfiguration);
         return Response.ok(jsonResult.toJSONString()).build();
@@ -177,7 +179,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
                 return getBadRegattaErrorResponse(regattaName);
             }
         }
-        final CourseConfiguration courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
+        final CourseConfiguration<MarkConfigurationResponseAnnotation> courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
                 .createCourseConfigurationFromTemplate(courseTemplate, regatta, tags);
         String jsonString = courseConfigurationJsonSerializer.serialize(courseConfiguration).toJSONString();
         return Response.ok(jsonString).build();
@@ -206,13 +208,13 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
             getBadCourseConfigurationValidationErrorResponse(
                     "Course configuration is required to be given as json object");
         }
-        final CourseConfiguration courseConfiguration = getCourseConfigurationDeserializer(regatta)
+        final CourseConfiguration<MarkConfigurationRequestAnnotation> courseConfiguration = getCourseConfigurationDeserializer(regatta)
                 .deserialize((JSONObject) parsedObject);
         final Iterable<String> tags = Arrays
                 .asList(ArrayUtils.nullToEmpty((String[]) ((JSONObject) parsedObject).get(FIELD_TAGS)));
         final Optional<UserGroup> optionalUserGroupForNonDefaultMarkPropertiesOwnership = getOptionalGroupOwnership(
                 markPropertiesGroupOwnership);
-        final CourseConfiguration courseTemplate = getService().getCourseAndMarkConfigurationFactory()
+        final CourseConfiguration<MarkConfigurationResponseAnnotation> courseTemplate = getService().getCourseAndMarkConfigurationFactory()
                 .createCourseTemplateAndUpdatedConfiguration(courseConfiguration, tags,
                         optionalUserGroupForNonDefaultMarkPropertiesOwnership);
         final String jsonString = courseConfigurationJsonSerializer.serialize(courseTemplate).toJSONString();
@@ -260,7 +262,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
             getBadCourseConfigurationValidationErrorResponse(
                     "Course configuration is required to be given as json object");
         }
-        final CourseConfiguration courseConfiguration = getCourseConfigurationDeserializer(regatta)
+        final CourseConfiguration<MarkConfigurationRequestAnnotation> courseConfiguration = getCourseConfigurationDeserializer(regatta)
                 .deserialize((JSONObject) parsedObject);
         final TimePoint timestampForLogEntries = MillisecondsTimePoint.now();
         final Optional<UserGroup> optionalUserGroupForNonDefaultMarkPropertiesOwnership = getOptionalGroupOwnership(
@@ -271,7 +273,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         final RaceLog raceLog = raceColumnByName.getRaceLog(fleetByName);
         raceLog.add(new RaceLogCourseDesignChangedEventImpl(timestampForLogEntries, getService().getServerAuthor(),
                 raceLog.getCurrentPassId(), course, CourseDesignerMode.BY_MARKS));
-        final CourseConfiguration courseConfigurationResult = getService().getCourseAndMarkConfigurationFactory()
+        final CourseConfiguration<MarkConfigurationResponseAnnotation> courseConfigurationResult = getService().getCourseAndMarkConfigurationFactory()
                 .createCourseConfigurationFromRegatta(course, regatta, /* tagsToFilterMarkProperties */ null);
         final String jsonString = courseConfigurationJsonSerializer.serialize(courseConfigurationResult).toJSONString();
         return Response.ok(jsonString).build();

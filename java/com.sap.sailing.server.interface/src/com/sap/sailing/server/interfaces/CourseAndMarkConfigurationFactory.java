@@ -17,6 +17,8 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationResponseAnnotation;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
@@ -75,8 +77,9 @@ public interface CourseAndMarkConfigurationFactory {
      *         {@link MarkConfiguration#getOptionalMarkTemplate() mark template} that is part of the
      *         {@link CourseTemplate} obtained from {@link CourseConfiguration#getOptionalCourseTemplate()}.
      */
-    CourseConfiguration createCourseTemplateAndUpdatedConfiguration(CourseConfiguration courseWithMarkConfiguration,
-            Iterable<String> tags, Optional<UserGroup> optionalNonDefaultGroupOwnership);
+    CourseConfiguration<MarkConfigurationResponseAnnotation> createCourseTemplateAndUpdatedConfiguration(
+            CourseConfiguration<MarkConfigurationRequestAnnotation> courseWithMarkConfiguration, Iterable<String> tags,
+            Optional<UserGroup> optionalNonDefaultGroupOwnership);
 
     /**
      * Creates a {@link CourseConfiguration} from a {@link CourseTemplate}. The resulting waypoint sequence is
@@ -102,8 +105,8 @@ public interface CourseAndMarkConfigurationFactory {
      *            If given, any {@link MarkProperties} that is suggested to replace a {@link MarkTemplate} of the given
      *            {@link CourseTemplate} needs to match all given tags.
      */
-    CourseConfiguration createCourseConfigurationFromTemplate(CourseTemplate courseTemplate, Regatta optionalRegatta,
-            Iterable<String> tagsToFilterMarkProperties);
+    CourseConfiguration<MarkConfigurationResponseAnnotation> createCourseConfigurationFromTemplate(
+            CourseTemplate courseTemplate, Regatta optionalRegatta, Iterable<String> tagsToFilterMarkProperties);
 
     /**
      * Creates a {@link CourseConfiguration} for a Regatta - either based on a {@link CourseBase} or independently. The
@@ -128,14 +131,14 @@ public interface CourseAndMarkConfigurationFactory {
      *            If given, any {@link MarkProperties} that is suggested to replace a {@link MarkTemplate} of the given
      *            {@link CourseTemplate} needs to match all given tags.
      */
-    CourseConfiguration createCourseConfigurationFromRegatta(CourseBase optionalCourse, Regatta regatta,
+    CourseConfiguration<MarkConfigurationResponseAnnotation> createCourseConfigurationFromRegatta(CourseBase optionalCourse, Regatta regatta,
             Iterable<String> tagsToFilterMarkProperties);
 
     /**
      * TODO: not implemented yet
      */
     List<MarkProperties> createMarkPropertiesSuggestionsForMarkConfiguration(Regatta optionalRegatta,
-            MarkConfiguration markConfiguration, Iterable<String> tagsToFilterMarkProperties);
+            MarkConfiguration<MarkConfigurationRequestAnnotation> markConfiguration, Iterable<String> tagsToFilterMarkProperties);
 
     /**
      * Use the result to create a {@link RaceLogCourseDesignChangedEvent} or obtain the {@link ControlPoint} and
@@ -145,10 +148,9 @@ public interface CourseAndMarkConfigurationFactory {
      *            the regatta whose {@link RegattaLog} to use to define the new {@link Mark}s in.
      * @param author
      *            for {@link RegattaLogDefineMarkEvent}s and the {@link RegattaLogDeviceMappingEvent}s.
-     * @param optionalNonDefaultGroupOwnership TODO
      * @return the sequence of waypoints, obtained by expanding the
      */
     CourseBase createCourseFromConfigurationAndDefineMarksAsNeeded(Regatta regatta,
-            CourseConfiguration courseConfiguration, TimePoint timePointForDefinitionOfMarksAndDeviceMappings,
+            CourseConfiguration<MarkConfigurationRequestAnnotation> courseConfiguration, TimePoint timePointForDefinitionOfMarksAndDeviceMappings,
             AbstractLogEventAuthor author, Optional<UserGroup> optionalNonDefaultGroupOwnership);
 }
