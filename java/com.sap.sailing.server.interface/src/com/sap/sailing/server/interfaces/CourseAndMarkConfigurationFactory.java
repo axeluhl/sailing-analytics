@@ -78,7 +78,7 @@ public interface CourseAndMarkConfigurationFactory {
      *         {@link MarkConfiguration#getOptionalMarkTemplate() mark template} that is part of the
      *         {@link CourseTemplate} obtained from {@link CourseConfiguration#getOptionalCourseTemplate()}.
      */
-    CourseConfiguration<MarkConfigurationResponseAnnotation> createCourseTemplateAndUpdatedConfiguration(
+    CourseConfiguration<MarkConfigurationRequestAnnotation> createCourseTemplateAndUpdatedConfiguration(
             CourseConfiguration<MarkConfigurationRequestAnnotation> courseWithMarkConfiguration, Iterable<String> tags,
             Optional<UserGroup> optionalNonDefaultGroupOwnership);
 
@@ -86,8 +86,13 @@ public interface CourseAndMarkConfigurationFactory {
      * Creates a {@link CourseConfiguration} from a {@link CourseTemplate}. The resulting waypoint sequence is
      * consistent with the one defined in the {@link CourseTemplate}. In case no {@link Regatta} is given, the resulting
      * {@link MarkConfiguration}s will 1:1 match the {@link MarkTemplate}s of the {@link CourseTemplate}. In case a
-     * {@link Regatta} is given, the {@link MarkTemplate}s are mapped to contained {@link Mark}s if possible. Any
-     * {@link MarkTemplate} not mapped to a {@link Mark} (in case, no {@link Regatta} is given, these are just all
+     * {@link Regatta} is given, the {@link MarkTemplate}s are mapped to contained {@link Mark}s if possible.
+     * <p>
+     * 
+     * TODO how is this match-making performed? Looking at the Mark's getOriginatingMarkTemplateIdOrNull() values?
+     * <p>
+     * 
+     * Any {@link MarkTemplate} not mapped to a {@link Mark} (in case, no {@link Regatta} is given, these are just all
      * {@link MarkTemplate}s), is a candidate to be mapped to a {@link MarkProperties} of the user's inventory. Matching
      * of {@link MarkProperties} is primarily done based on associated roles for which a {@link MarkProperties} was last
      * used (see {@link MarkProperties#getLastUsedRole()}. If no matching of {@link MarkProperties} using roles is

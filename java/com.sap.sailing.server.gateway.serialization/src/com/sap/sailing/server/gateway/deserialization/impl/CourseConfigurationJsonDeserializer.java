@@ -7,15 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
@@ -31,17 +28,14 @@ import com.sap.sailing.server.gateway.serialization.impl.CourseConfigurationJson
 public class CourseConfigurationJsonDeserializer implements JsonDeserializer<CourseConfiguration<MarkConfigurationRequestAnnotation>> {
 
     private final SharedSailingData sharedSailingData;
-    private final Function<DeviceIdentifier, Position> positionResolver;
     private final CommonMarkPropertiesJsonDeserializer commonMarkPropertiesJsonDeserializer;
     private final JsonDeserializer<RepeatablePart> repeatablePartJsonDeserializer;
     private final Regatta regatta;
     private final PositioningJsonDeserializer positioningJsonDeserializer;
 
     public CourseConfigurationJsonDeserializer(final SharedSailingData sharedSailingData,
-            DeviceIdentifierJsonDeserializer deviceIdentifierDeserializer, final Regatta regatta,
-            Function<DeviceIdentifier, Position> positionResolver) {
+            DeviceIdentifierJsonDeserializer deviceIdentifierDeserializer, final Regatta regatta) {
         this.sharedSailingData = sharedSailingData;
-        this.positionResolver = positionResolver;
         commonMarkPropertiesJsonDeserializer = new CommonMarkPropertiesJsonDeserializer();
         repeatablePartJsonDeserializer = new RepeatablePartJsonDeserializer();
         positioningJsonDeserializer = new PositioningJsonDeserializer(deviceIdentifierDeserializer);
@@ -64,7 +58,7 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
             optionalCourseTemplate = sharedSailingData.getCourseTemplateById(UUID.fromString(courseTemplateIdString));
         }
         CourseConfigurationBuilder builder = new CourseConfigurationBuilder(sharedSailingData, regatta, optionalCourseTemplate,
-                name, optionalImageURL, positionResolver);
+                name, optionalImageURL);
         final Map<UUID, MarkConfiguration<MarkConfigurationRequestAnnotation>> markConfigurationsByID = new HashMap<>();
         final JSONArray markConfigurationsJSON = (JSONArray) json
                 .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATIONS);

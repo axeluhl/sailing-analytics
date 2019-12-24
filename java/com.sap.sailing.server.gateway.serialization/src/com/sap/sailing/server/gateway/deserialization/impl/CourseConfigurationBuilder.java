@@ -73,7 +73,7 @@ public class CourseConfigurationBuilder {
     private Map<MarkPairWithConfiguration<MarkConfigurationRequestAnnotation>, MarkPairWithConfiguration<MarkConfigurationRequestAnnotation>> markPairCache = new HashMap<>();
 
     public CourseConfigurationBuilder(SharedSailingData sharedSailingData, Regatta optionalRegatta,
-            CourseTemplate optionalCourseTemplate, String name, URL optionalImageUrl, Function<DeviceIdentifier, Position> positionResolver) {
+            CourseTemplate optionalCourseTemplate, String name, URL optionalImageUrl) {
         this.sharedSailingData = sharedSailingData;
         this.optionalRegatta = optionalRegatta;
         this.optionalCourseTemplate = optionalCourseTemplate;
@@ -316,9 +316,8 @@ public class CourseConfigurationBuilder {
      * For device identifier-based positioning requests the device identifier will be returned and a query for the last known position of that device will
      * be launched using the {@code positionResolver}. If a last known position is found that way, it is included in the return value of this method.
      */
-    public static MarkConfigurationResponseAnnotation getPositioningIfAvailable(MarkProperties markProperties, Function<DeviceIdentifier, Position> positionResolver) {
+    public static MarkConfigurationResponseAnnotation getPositioningIfAvailable(Positioning positioning, Function<DeviceIdentifier, Position> positionResolver) {
         final MarkConfigurationResponseAnnotation result;
-        final Positioning positioning = markProperties.getPositioningInformation();
         if (positioning != null) {
             result = positioning.accept(new PositioningVisitor<MarkConfigurationResponseAnnotation>() {
                 @Override

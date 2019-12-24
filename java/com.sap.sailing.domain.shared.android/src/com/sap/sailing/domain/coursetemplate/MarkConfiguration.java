@@ -39,6 +39,8 @@ import com.sap.sailing.domain.base.Mark;
  *
  */
 public interface MarkConfiguration<P> extends ControlPointWithMarkConfiguration<P> {
+    <T> T accept(MarkConfigurationVisitor<T, P> visitor);
+    
     MarkTemplate getOptionalMarkTemplate();
     
     MarkProperties getOptionalMarkProperties();

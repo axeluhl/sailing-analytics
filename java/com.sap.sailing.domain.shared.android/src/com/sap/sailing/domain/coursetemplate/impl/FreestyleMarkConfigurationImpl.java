@@ -2,6 +2,7 @@ package com.sap.sailing.domain.coursetemplate.impl;
 
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationVisitor;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 
@@ -16,6 +17,11 @@ public class FreestyleMarkConfigurationImpl<P> extends MarkConfigurationImpl<P> 
         super(optionalMarkTemplate, annotation);
         this.optionalMarkProperties = optionalMarkProperties;
         this.freestyleProperties = freestyleProperties;
+    }
+
+    @Override
+    public <T> T accept(MarkConfigurationVisitor<T, P> visitor) {
+        return visitor.visit(this);
     }
 
     @Override

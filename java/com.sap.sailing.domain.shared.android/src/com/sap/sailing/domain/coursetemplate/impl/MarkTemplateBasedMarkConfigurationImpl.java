@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.coursetemplate.impl;
 
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationVisitor;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
@@ -12,6 +13,11 @@ public class MarkTemplateBasedMarkConfigurationImpl<P> extends MarkConfiguration
 
     public MarkTemplateBasedMarkConfigurationImpl(MarkTemplate markTemplate, P annotation) {
         super(markTemplate, annotation);
+    }
+
+    @Override
+    public <T> T accept(MarkConfigurationVisitor<T, P> visitor) {
+        return visitor.visit(this);
     }
 
     @Override
