@@ -20,7 +20,6 @@ import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.StorablePositioning;
-import com.sap.sailing.domain.coursetemplate.StoredDeviceIdentifierPositioning;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
@@ -53,14 +52,12 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
     private final JsonSerializer<CommonMarkProperties> commonMarkPropertiesJsonSerializer;
     private final JsonSerializer<Positioning> positioningJsonSerializer;
     private final JsonSerializer<StorablePositioning> storablePositioningJsonSerializer;
-    private final JsonSerializer<StoredDeviceIdentifierPositioning> storedDeviceIdentifierPositioningJsonSerializer;
 
     public CourseConfigurationJsonSerializer() {
         repeatablePartJsonSerializer = new RepeatablePartJsonSerializer();
         commonMarkPropertiesJsonSerializer = new CommonMarkPropertiesJsonSerializer();
         positioningJsonSerializer = new PositioningJsonSerializer();
         storablePositioningJsonSerializer = new StorablePositioningJsonSerializer();
-        storedDeviceIdentifierPositioningJsonSerializer = new StoredDeviceIdentifierPositioningJsonSerializer();
     }
 
     @Override
@@ -122,12 +119,8 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
                     commonMarkPropertiesJsonSerializer.serialize(markConfiguration.getEffectiveProperties()));
 
             if (markConfiguration.getEffectivePositioning() != null) {
-                final Positioning positioning = markConfiguration.getEffectivePositioning();
-
                 markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_EFFECTIVE_POSITIONING,
-                        positioning instanceof StoredDeviceIdentifierPositioning ?
-                                storedDeviceIdentifierPositioningJsonSerializer.serialize((StoredDeviceIdentifierPositioning) positioning) :
-                                positioningJsonSerializer.serialize(positioning));
+                        positioningJsonSerializer.serialize(markConfiguration.getEffectivePositioning()));
             }
             if (markConfiguration.getOptionalPositioning() != null) {
                 markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_POSITIONING,
