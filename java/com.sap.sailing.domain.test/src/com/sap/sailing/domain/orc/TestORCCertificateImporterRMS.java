@@ -26,6 +26,7 @@ public class TestORCCertificateImporterRMS {
         assertNotNull(milan);
     }
     
+    @Ignore("Certificate used for testing no longer valid after 2019")
     @Test
     public void testSimpleOnlineRMSFileRead() throws IOException, ParseException {
         ORCCertificatesCollection certificates = ORCCertificatesImporter.INSTANCE.read(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=rms").openStream());

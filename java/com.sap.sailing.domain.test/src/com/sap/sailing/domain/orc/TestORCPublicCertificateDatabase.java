@@ -85,7 +85,7 @@ public class TestORCPublicCertificateDatabase {
         assertEquals(handle.getSailNumber(), result.getSailNumber());
     }
     
-    // TODO this test will probably break 2020 when 2019 certificates will no longer be returned as valid...
+    @Ignore("Certificate used for testing no longer valid after 2019")
     @Test
     public void testParallelFuzzySearch() throws InterruptedException, ExecutionException {
         final Future<Set<ORCCertificate>> soulmateCertificatesFuture = db.search("Soulmate", "DEN13", new BoatClassImpl("ORC", BoatClassMasterdata.ORC));
