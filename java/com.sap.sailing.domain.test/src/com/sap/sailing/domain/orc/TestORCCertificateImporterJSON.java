@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.json.simple.parser.ParseException;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.orc.ORCCertificate;
