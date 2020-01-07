@@ -637,6 +637,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName,
             @QueryParam(RaceLogServletConstants.PARAMS_TRACK_WIND) Boolean trackWind,
             @QueryParam(RaceLogServletConstants.PARAMS_CORRECT_WIND_DIRECTION_BY_MAGNETIC_DECLINATION) Boolean correctWindDirectionByMagneticDeclination,
+            @QueryParam(RaceLogServletConstants.PARAMS_TRACKED_RACE_NAME) String optionalTrackedRaceName,
             @QueryParam("secret") String secret)
                     throws NotDenotedForRaceLogTrackingException, Exception {
         final LeaderboardAndRaceColumnAndFleetAndResponse leaderboardAndRaceColumnAndFleetAndResponse = getLeaderboardAndRaceColumnAndFleet(
@@ -654,7 +655,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 jsonResult.put("addeddenotation", adapter.denoteRaceForRaceLogTracking(getService(),
                         leaderboardAndRaceColumnAndFleetAndResponse.getLeaderboard(),
                         leaderboardAndRaceColumnAndFleetAndResponse.getRaceColumn(),
-                        leaderboardAndRaceColumnAndFleetAndResponse.getFleet(), /* use default race name */ null));
+                        leaderboardAndRaceColumnAndFleetAndResponse.getFleet(), optionalTrackedRaceName));
                 final RaceHandle raceHandle = adapter.startTracking(getService(), leaderboardAndRaceColumnAndFleetAndResponse.getLeaderboard(),
                         leaderboardAndRaceColumnAndFleetAndResponse.getRaceColumn(),
                         leaderboardAndRaceColumnAndFleetAndResponse.getFleet(),

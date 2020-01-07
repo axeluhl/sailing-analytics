@@ -419,6 +419,7 @@ import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -516,6 +517,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
+import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
@@ -2031,7 +2033,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public RaceboardDataDTO getRaceboardData(String regattaName, String raceName, String leaderboardName,
             String leaderboardGroupName, UUID eventId) {
         RaceboardDataDTO result = new RaceboardDataDTO(null, false, false, Collections.emptyList(),
-                Collections.emptyList(), null, false);
+                Collections.emptyList(), null, null);
         RaceWithCompetitorsAndBoatsDTO raceDTO = null;
         Regatta regatta = getService().getRegattaByName(regattaName);
         if (regatta != null) {
@@ -2085,9 +2087,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     StrippedLeaderboardDTOWithSecurity leaderboardDTO = createStrippedLeaderboardDTOWithSecurity(
                             leaderboard, false,
                             false);
-                    boolean isTrackedByTracTrac = isValidEvent && event.isTrackedByTracTrac();
+                    final TrackingConnectorInfo trackingConnectorInfo = trackedRace.getTrackingConnectorInfo();
+                    final TrackingConnectorInfoDTO trackingConnectorInfoDTO = trackingConnectorInfo == null ? null
+                            : new TrackingConnectorInfoDTO(trackingConnectorInfo);
                     result = new RaceboardDataDTO(raceDTO, isValidLeaderboardGroup, isValidEvent,
-                            detailTypesForCompetitorChart, availableDetailTypesForLeaderboard, leaderboardDTO, isTrackedByTracTrac);
+                            detailTypesForCompetitorChart, availableDetailTypesForLeaderboard, leaderboardDTO, trackingConnectorInfoDTO);
                 }
             }
         }
