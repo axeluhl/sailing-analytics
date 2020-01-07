@@ -93,7 +93,7 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
                     markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_ID, ((MarkRole)associatedRole).getId().toString());
                 }
             }
-            // TODO introduce MarkConfiguration visitor pattern?
+            // TODO use MarkConfiguration visitor pattern!
             if (markConfiguration instanceof FreestyleMarkConfiguration) {
                 final FreestyleMarkConfiguration<MarkConfigurationResponseAnnotation> freeStyleMarkConfiguration =
                         (FreestyleMarkConfiguration<MarkConfigurationResponseAnnotation>) markConfiguration;

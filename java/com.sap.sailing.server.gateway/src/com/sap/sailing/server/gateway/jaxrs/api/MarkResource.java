@@ -113,13 +113,14 @@ public class MarkResource extends AbstractSailingServerResource {
         final String markShape = (String) requestObject.get(MARK_SHAPE);
         final String markTypeStr = (String) requestObject.get(MARK_TYPE);
         MarkType markType = null;
-        try {
-            markType = MarkType.valueOf(markTypeStr);
-        } catch (IllegalArgumentException | NullPointerException e) {
-            // ignore since mark type value is optional
-            LOG.warning("Invalid mark type '" + markTypeStr + "' received via REST endpoint was ignored.");
+        if (markTypeStr != null) {
+            try {
+                markType = MarkType.valueOf(markTypeStr);
+            } catch (IllegalArgumentException | NullPointerException e) {
+                // ignore since mark type value is optional
+                LOG.warning("Invalid mark type '" + markTypeStr + "' received via REST endpoint was ignored.");
+            }
         }
-
         Color markColor = null;
         if (markColorStr != null && !markColorStr.isEmpty()) {
             try {

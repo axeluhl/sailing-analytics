@@ -56,7 +56,6 @@ public class MarkPropertiesApi {
         }
         formParams.put(PARAM_FIXED_POSITION_LATDEG, latDeg != null ? latDeg.toString() : null);
         formParams.put(PARAM_FIXED_POSITION_LONDEG, latDeg != null ? lonDeg.toString() : null);
-
         JSONObject result = ctx.put(MARK_PROPERTIES + "/" + id.toString() + POSITIONING, null, formParams);
         return new MarkProperties(result);
     }
@@ -80,7 +79,6 @@ public class MarkPropertiesApi {
         for (String tag : tags) {
             formParams.put(PARAM_TAG, tag);
         }
-
         JSONObject result = ctx.put(MARK_PROPERTIES + "/" + id.toString(), null, formParams);
         return new MarkProperties(result);
     }
@@ -91,8 +89,7 @@ public class MarkPropertiesApi {
     }
 
     public Iterable<MarkProperties> getAllMarkProperties(final ApiContext ctx, final Iterable<String> tags) {
-        // FIXME: multiple query parameters with the same key sould be passed but cannot be put into Map<String,
-        // String>. Should use Map<String, Iterator<String>>. Will be fixed in bug4942.
+        // FIXME: multiple query parameters with the same key sould be passed but cannot be put into Map<String, String>. Should use Map<String, Iterator<String>>. Will be fixed in bug4942.
         final Map<String, String> queryParams = new TreeMap<>();
         for (String tag : tags) {
             queryParams.put(PARAM_TAG, tag);
