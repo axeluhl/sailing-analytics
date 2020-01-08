@@ -2,8 +2,6 @@ package com.sap.sailing.gwt.home.desktop.partials.eventheader;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.DataResource;
-import com.google.gwt.resources.client.DataResource.MimeType;
 import com.google.gwt.resources.client.ImageResource;
 import com.sap.sailing.gwt.home.desktop.resources.SharedDesktopResources;
 
@@ -15,10 +13,6 @@ public interface EventHeaderResources extends SharedDesktopResources {
     
     @Source("location-icon.png")
     ImageResource location();
-
-    @Source("tractrac-color.svg")
-    @MimeType("image/svg+xml")
-    DataResource tractrac();
 
     public interface LocalCss extends CssResource {
         String jsdropdown();
@@ -47,8 +41,6 @@ public interface EventHeaderResources extends SharedDesktopResources {
         String eventheader_status();
         String eventheader_status_title();
         String eventheader_status_body();
-        String eventheader_dataBy_logo();
-        String eventheader_dataBy_logo_container();
         String locationicon();
         String eventnavigation();
         String eventnavigationnormal();
@@ -60,5 +52,4 @@ public interface EventHeaderResources extends SharedDesktopResources {
         String navbar_button();
         String navbar_buttonhidden();
     }
-
 }

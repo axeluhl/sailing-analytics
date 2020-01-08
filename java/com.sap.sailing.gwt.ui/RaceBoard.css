@@ -697,6 +697,15 @@ img.openColumn {
 	color: white;
 }
 
+.RegattaAndRaceTime-Header_with_databy {
+    top: 3px;
+}
+
+.compactHeader .RegattaAndRaceTime-Header.RegattaAndRaceTime-Header_with_databy {
+    top: 0;
+    font-size: 90%;
+}
+
 .RegattaAndRaceTime-Header .RegattaName-Anchor {
 	font-size: 15px;
 	color: white;
@@ -715,6 +724,14 @@ img.openColumn {
 .RegattaAndRaceTime-Header .RaceTime-Label {
 	font-size: 15px;
 	margin-top: 5px;
+}
+
+.compactHeader .RegattaAndRaceTime-Header>* {
+    margin-top: 3px;
+}
+
+.RegattaAndRaceTime-Header_with_databy .RegattaName-Anchor, .RegattaAndRaceTime-Header_with_databy .RaceTime-Label {
+    font-size: 13px;
 }
 
 .compactHeader .RegattaRaceInformation-Header {

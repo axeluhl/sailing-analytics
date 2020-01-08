@@ -47,12 +47,13 @@ public class UpdateMarkPassingTest {
         when(race.getBoatClass()).thenReturn(new BoatClassImpl("49er", /* typicallyStartsUpwind */ true));
         when(race.getCompetitors()).thenReturn(Collections.singleton(competitor));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(
-        /* trackedRegatta */new DynamicTrackedRegattaImpl(new RegattaImpl("test", null, true, CompetitorRegistrationType.CLOSED, null, null, new HashSet<Series>(), false, null,
-                        "test", null, OneDesignRankingMetric::new,
-                        /* registrationLinkSecret */ UUID.randomUUID().toString())),
-                race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 
-        /* delayToLiveInMillis */1000, /* millisecondsOverWhichToAverageWind */30000,
-        /* millisecondsOverWhichToAverageSpeed */30000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new, mock(RaceLogAndTrackedRaceResolver.class), null);
+                /* trackedRegatta */new DynamicTrackedRegattaImpl(new RegattaImpl("test", null, true,
+                        CompetitorRegistrationType.CLOSED, null, null, new HashSet<Series>(), false, null, "test", null,
+                        OneDesignRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString())),
+                race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */1000,
+                /* millisecondsOverWhichToAverageWind */30000, /* millisecondsOverWhichToAverageSpeed */30000,
+                /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
+                mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null);
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = now.plus(1000);
         trackedRace.updateMarkPassings(competitor, Arrays.asList(new MarkPassing[] { new MarkPassingImpl(now, waypoint, competitor) }));

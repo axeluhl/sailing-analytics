@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -94,6 +95,8 @@ import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
+import com.sap.sailing.gwt.ui.shared.databylogo.DataByLogo;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -182,6 +185,7 @@ public class RaceBoardPanel
     private ManeuverTablePanel maneuverTablePanel;
 
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
+    private TrackingConnectorInfoDTO trackingConnectorInfo;
     
     /**
      * @param eventId
@@ -199,6 +203,7 @@ public class RaceBoardPanel
      * @param availableDetailTypes
      *            A list of all Detailtypes, that will be offered in the Settingsdialog. Can be used to hide settings no
      *            data exists for, eg Bravo, Expdition ect.
+     * @param trackingConnectorInfo 
      */
     public RaceBoardPanel(Component<?> parent,
             ComponentContext<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> componentContext,
@@ -211,7 +216,7 @@ public class RaceBoardPanel
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider,
             boolean showChartMarkEditMediaButtonsAndVideo, boolean showHeaderPanel,
             Iterable<DetailType> availableDetailTypes, StrippedLeaderboardDTOWithSecurity leaderboardDTO,
-            final RaceWithCompetitorsAndBoatsDTO raceDTO) {
+            final RaceWithCompetitorsAndBoatsDTO raceDTO, TrackingConnectorInfoDTO trackingConnectorInfo) {
         super(parent, componentContext, lifecycle, settings);
         this.sailingService = sailingService;
         this.mediaService = mediaService;
@@ -221,6 +226,7 @@ public class RaceBoardPanel
         this.userAgent = userAgent;
         this.timer = timer;
         this.eventId = eventId;
+        this.trackingConnectorInfo = trackingConnectorInfo;
         this.currentRaceHasBeenSelectedOnce = false;
         this.leaderboardName = leaderboardName;
         this.selectedRaceIdentifier = selectedRaceIdentifier;
@@ -712,6 +718,13 @@ public class RaceBoardPanel
             regattaAndRaceTimeInformationHeader.clear();
             regattaAndRaceTimeInformationHeader.add(regattaNameAnchor);
             regattaAndRaceTimeInformationHeader.add(raceTimeLabel);
+            DataByLogo dataByLogo = new DataByLogo();
+            dataByLogo.setUp(trackingConnectorInfo == null ? Collections.emptySet()
+                    : Collections.singleton(trackingConnectorInfo), /** colorIfPossible **/ false, /** enforceTextColor **/ true);
+            if (dataByLogo.isVisible()) {
+                regattaAndRaceTimeInformationHeader.addStyleName("RegattaAndRaceTime-Header_with_databy");
+            }
+            regattaAndRaceTimeInformationHeader.add(dataByLogo);
             currentRaceHasBeenSelectedOnce = true;
             taggingPanel.updateRace(leaderboardName, raceColumn, fleet);
         }
