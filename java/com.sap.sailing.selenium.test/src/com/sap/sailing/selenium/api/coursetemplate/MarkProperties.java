@@ -57,14 +57,16 @@ public class MarkProperties extends JsonWrapper {
     }
 
     public Boolean hasDevice() {
-        return ((JSONObject) get(FIELD_POSITIONING)).get(FIELD_POSITIONING_DEVICE_IDENTIFIER) != null;
+        return get(FIELD_POSITIONING) != null && ((JSONObject) get(FIELD_POSITIONING)).get(FIELD_POSITIONING_DEVICE_IDENTIFIER) != null;
     }
 
     public Double getLatDeg() {
-        return (Double) ((JSONObject) ((JSONObject) get(FIELD_POSITIONING)).get(FIELD_POSITIONING_POSITION)).get(FIELD_POSITIONING_FIXED_POSITION_LATDEG);
+        final JSONObject position = (JSONObject) ((JSONObject) get(FIELD_POSITIONING)).get(FIELD_POSITIONING_POSITION);
+        return (Double) (position == null ? null : position.get(FIELD_POSITIONING_FIXED_POSITION_LATDEG));
     }
 
     public Double getLonDeg() {
-        return (Double) ((JSONObject) ((JSONObject) get(FIELD_POSITIONING)).get(FIELD_POSITIONING_POSITION)).get(FIELD_POSITIONING_FIXED_POSITION_LONDEG);
+        final JSONObject position = (JSONObject) ((JSONObject) get(FIELD_POSITIONING)).get(FIELD_POSITIONING_POSITION);
+        return (Double) (position == null ? null : position.get(FIELD_POSITIONING_FIXED_POSITION_LONDEG));
     }
 }
