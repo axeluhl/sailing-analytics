@@ -12,13 +12,15 @@ public class MarkProperties extends JsonWrapper {
     private static final String FIELD_ID = "id";
     private static final String FIELD_NAME = "name";
     private static final String FIELD_SHORTNAME = "shortName";
-    private static final String FIELD_HAS_DEVICEUUID = "hasDeviceUuid";
     private static final String FIELD_COLOR = "color";
     private static final String FIELD_SHAPE = "shape";
     private static final String FIELD_PATTERN = "pattern";
     private static final String FIELD_MARKTYPE = "markType";
-    private static final String FIELD_FIXED_POSITION_LATDEG = "latDeg";
-    private static final String FIELD_FIXED_POSITION_LONDEG = "lonDeg";
+    private static final String FIELD_POSITIONING = "positioning";
+    private static final String FIELD_POSITIONING_POSITION = "position";
+    private static final String FIELD_POSITIONING_DEVICE_IDENTIFIER = "device_identifier";
+    private static final String FIELD_POSITIONING_FIXED_POSITION_LATDEG = "latitude_deg";
+    private static final String FIELD_POSITIONING_FIXED_POSITION_LONDEG = "longitude_deg";
 
     public MarkProperties(JSONObject json) {
         super(json);
@@ -55,14 +57,14 @@ public class MarkProperties extends JsonWrapper {
     }
 
     public Boolean hasDevice() {
-        return get(FIELD_HAS_DEVICEUUID);
+        return ((JSONObject) get(FIELD_POSITIONING)).get(FIELD_POSITIONING_DEVICE_IDENTIFIER) != null;
     }
 
     public Double getLatDeg() {
-        return get(FIELD_FIXED_POSITION_LATDEG);
+        return (Double) ((JSONObject) ((JSONObject) get(FIELD_POSITIONING)).get(FIELD_POSITIONING_POSITION)).get(FIELD_POSITIONING_FIXED_POSITION_LATDEG);
     }
 
     public Double getLonDeg() {
-        return get(FIELD_FIXED_POSITION_LONDEG);
+        return (Double) ((JSONObject) ((JSONObject) get(FIELD_POSITIONING)).get(FIELD_POSITIONING_POSITION)).get(FIELD_POSITIONING_FIXED_POSITION_LONDEG);
     }
 }

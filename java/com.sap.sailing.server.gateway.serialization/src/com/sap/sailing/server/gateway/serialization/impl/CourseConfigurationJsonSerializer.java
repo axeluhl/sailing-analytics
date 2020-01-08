@@ -40,7 +40,6 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
     public static final String FIELD_MARK_CONFIGURATION_CURRENT_TRACKING_DEVICE_ID = "currentTrackingDeviceId";
     public static final String FIELD_MARK_CONFIGURATION_LAST_KNOWN_POSITION = "lastKnownPosition";
     public static final String FIELD_MARK_CONFIGURATION_POSITIONING = "positioning";
-    public static final String FIELD_MARK_CONFIGURATION_EFFECTIVE_POSITIONING = "effectivePositioning";
     public static final String FIELD_MARK_CONFIGURATION_STORE_TO_INVENTORY = "storeToInventory";
     public static final String FIELD_WAYPOINTS = "waypoints";
     public static final String FIELD_WAYPOINT_CONTROL_POINT_NAME = "controlPointName";

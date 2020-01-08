@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.junit.Before;
@@ -63,7 +64,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
 public class CourseConfigurationTest extends AbstractSeleniumTest {
-
+    private static final Logger logger = Logger.getLogger(CourseConfigurationTest.class.getName());
+    
     private final CourseConfigurationApi courseConfigurationApi = new CourseConfigurationApi();
     private final CourseTemplateApi courseTemplateApi = new CourseTemplateApi();
     private final MarkTemplateApi markTemplateApi = new MarkTemplateApi();
@@ -115,9 +117,6 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                 srcAppearance = markConfiguration.getFreestyleProperties();
             }
             Positioning srcPositioning = markConfiguration.getPositioning();
-            if (srcPositioning == null) {
-                srcPositioning = markConfiguration.getEffectivePositioning();
-            }
             boolean found = false;
             for (final MarkConfiguration trgtMarkConfiguration : trgtMarkConfigurations) {
                 final MarkAppearance trgtAppearance = trgtMarkConfiguration.getEffectiveProperties();
@@ -154,18 +153,17 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                         assertEquals("shortName is different for " + msgIdentifier, srcAppearance.getShortName(),
                                 trgtAppearance.getShortName());
                     }
-                    boolean hasDeviceUUID = false;
+                    boolean hasNonPingDeviceIdentifier = trgtMarkConfiguration.getCurrentTrackingDeviceId() == null
+                            || !trgtMarkConfiguration.getCurrentTrackingDeviceId().getType().equals("PING");
                     if (srcPositioning != null) {
-                        final Positioning trgtPositioning = trgtMarkConfiguration.getEffectivePositioning();
-                        assertEquals("position.lat is different for " + msgIdentifier, srcPositioning.getLatitudeDeg(),
-                                trgtPositioning.getLatitudeDeg());
-                        assertEquals("position.lng is different for " + msgIdentifier,
-                                trgtPositioning.getLongitudeDeg(), trgtPositioning.getLongitudeDeg());
                         if (srcPositioning.getDeviceId() != null) {
-                            hasDeviceUUID = true;
-                            assertEquals("position.type is wrong for " + msgIdentifier, "DEVICE",
-                                    trgtPositioning.getType());
-                            assertNull("deviceId should be empty for " + msgIdentifier, trgtPositioning.getDeviceId());
+                            assertEquals("tracking device was not properly mapped for " + msgIdentifier,
+                                    srcPositioning.getDeviceId(), trgtMarkConfiguration.getCurrentTrackingDeviceId());
+                        } else if (srcPositioning.getLatitudeDeg() != null && srcPositioning.getLongitudeDeg() != null) {
+                            assertEquals("position.lat is different for " + msgIdentifier, srcPositioning.getLatitudeDeg(),
+                                    trgtMarkConfiguration.getLastKnownPosition().getLatDeg(), 0.0);
+                            assertEquals("position.lng is different for " + msgIdentifier,
+                                    srcPositioning.getLongitudeDeg(), trgtMarkConfiguration.getLastKnownPosition().getLngDeg(), 0.0);
                         }
                     }
                     if (markConfiguration.isStoreToInventory()) {
@@ -178,7 +176,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                             assertEquals(srcAppearance.getName(), markProperties.getName());
                             assertEquals(srcAppearance.getShortName(), markProperties.getShortName());
                         }
-                        assertEquals(markProperties.hasDevice(), hasDeviceUUID);
+                        assertEquals("device association differs for "+msgIdentifier, markProperties.hasDevice(), hasNonPingDeviceIdentifier);
                     }
                 }
             }
@@ -302,7 +300,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
 
         final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(sharedServerCtx,
                 ctdf.constructCourseTemplate(new Pair<>(1, 3), 2, Collections.emptyMap()));
-        System.out.println(createdCourseTemplate.getJson().toJSONString());
+        logger.info(createdCourseTemplate.getJson().toJSONString());
         final String regattaName = "test";
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
@@ -310,7 +308,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         // Create a course based on one of the templates
         CourseConfiguration courseConfiguration = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(
                 ctx, createdCourseTemplate.getId(), regattaName, /* tags */ null);
-        System.out.println(courseConfiguration.getJson().toJSONString());
+        logger.info(courseConfiguration.getJson().toJSONString());
 
         final CourseConfiguration createdCourse = courseConfigurationApi.createCourse(ctx, courseConfiguration,
                 regattaName, race.getRaceName(), "Default");
@@ -322,15 +320,15 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                         markRoleApi.getMarkRole(sharedServerCtx, UUID.fromString(mc.getAssociatedRoleId())));
             }
         });
-        templateRoleMap.entrySet().forEach(e -> System.out.println(e.getKey().getId() + " " + e.getValue().getId()));
+        templateRoleMap.entrySet().forEach(e -> logger.info(e.getKey().getId() + " " + e.getValue().getId()));
         final CourseTemplateDataFactory ctdf2 = new CourseTemplateDataFactory(sharedServerCtx);
         final CourseTemplate createdCourseTemplate2 = courseTemplateApi.createCourseTemplate(sharedServerCtx,
                 ctdf2.constructCourseTemplate(new Pair<>(1, 3), 3, templateRoleMap));
-        System.out.println(createdCourseTemplate2.getJson().toJSONString());
+        logger.info(createdCourseTemplate2.getJson().toJSONString());
         CourseConfiguration courseConfigurationBasedOnOtherTemplate = courseConfigurationApi
                 .createCourseConfigurationFromCourseTemplate(ctx, createdCourseTemplate2.getId(), regattaName,
                         /* tags */ null);
-        System.out.println(courseConfigurationBasedOnOtherTemplate.getJson().toJSONString());
+        logger.info(courseConfigurationBasedOnOtherTemplate.getJson().toJSONString());
         // All marks being part of the course sequence are required to be matched by role.
         // The single spare mark can not be matched by a role because no role was assigned to it.
         // This means a new spare mark will be suggested to be created.
@@ -416,7 +414,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                 "#FF0000", "shape", "pattern", "STARTBOAT", Collections.emptyList(), 1.0, 1.0);
         final MarkConfiguration mc2 = MarkConfiguration.createMarkPropertiesBased(mp1.getId(),
                 markRoleApi.createMarkRole(sharedServerCtx, "role_mp1").getId());
-        mc2.setFixedPosition(latDeg, longDeg);
+        mc2.setFixedPosition(latDeg, longDeg); // overrides the 1.0 / 1.0 as provided by the mp1 MarkProperties object
 
         final MarkConfiguration mc3 = MarkConfiguration.createFreestyle(null, null,
                 markRoleApi.createMarkRole(sharedServerCtx, "role_mp2").getId(), "mc3", "mc3", "#0000FF", null, null, null);
@@ -443,69 +441,72 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
 
         final CourseConfiguration courseConfiguration = new CourseConfiguration("my-course",
                 Arrays.asList(mc1, mc2, mc3, mc4, mc5), Arrays.asList(wp1, wp2, wp3));
-        System.out.println("initial: " + courseConfiguration.getJson());
+        logger.info("initial: " + courseConfiguration.getJson());
 
         final CourseConfiguration createdCourse = courseConfigurationApi.createCourse(ctx, courseConfiguration,
                 regattaName, race.getRaceName(), "Default");
-        System.out.println("createdCourse: " + createdCourse.getJson());
+        logger.info("createdCourse: " + createdCourse.getJson());
 
         final MarkConfiguration mc1a = createdCourse.getMarkConfigurationByEffectiveName("mc1");
-        assertNull(mc1a.getEffectivePositioning());
+        assertNull(mc1a.getCurrentTrackingDeviceId());
+        assertNull(mc1a.getLastKnownPosition());
         mc1a.setFixedPosition(updatedLatDeg, updatedLongDeg);
 
         final MarkConfiguration mc2a = createdCourse.getMarkConfigurationByEffectiveName("mc2");
-        assertNull(mc2a.getEffectivePositioning().getDeviceId());
-        assertEquals(latDeg, mc2a.getEffectivePositioning().getLatitudeDeg().doubleValue(), 0.0);
-        assertEquals(longDeg, mc2a.getEffectivePositioning().getLongitudeDeg().doubleValue(), 0.0);
+        // mc2a.getCurrentTrackingDeviceId() may describe the virtual PING device and hence shouldn't be expected to be null
+        assertEquals(latDeg, mc2a.getLastKnownPosition().getLatDeg(), 0.0);
+        assertEquals(longDeg, mc2a.getLastKnownPosition().getLngDeg(), 0.0);
         mc2a.setTrackingDeviceId(deviceId);
 
         final MarkConfiguration mc3a = createdCourse.getMarkConfigurationByEffectiveName("mc3");
-        assertEquals(latDeg, mc3a.getEffectivePositioning().getLatitudeDeg().doubleValue(), 0.0);
-        assertEquals(longDeg, mc3a.getEffectivePositioning().getLongitudeDeg().doubleValue(), 0.0);
+        assertEquals(latDeg, mc3a.getLastKnownPosition().getLatDeg(), 0.0);
+        assertEquals(longDeg, mc3a.getLastKnownPosition().getLngDeg(), 0.0);
         mc3a.unsetPositioning();
 
         final MarkConfiguration mc4a = createdCourse.getMarkConfigurationByEffectiveName("mc4");
-        assertNull(mc4a.getEffectivePositioning().getLatitudeDeg());
-        assertNull(mc4a.getEffectivePositioning().getLongitudeDeg());
+        assertNull(mc4a.getLastKnownPosition());
         mc4a.setFixedPosition(updatedLatDeg, updatedLongDeg);
 
         final MarkConfiguration mc5a = createdCourse.getMarkConfigurationByEffectiveName("mc5");
-        assertNull(mc5a.getEffectivePositioning().getDeviceId());
-        assertEquals(mc5a.getEffectivePositioning().getLatitudeDeg().doubleValue(), 1.0, 0.0);
-        assertEquals(mc5a.getEffectivePositioning().getLongitudeDeg().doubleValue(), 1.0, 0.0);
+        // mc5a.getCurrentTrackingDeviceId() may describe the virtual PING device and hence shouldn't be expected to be null
+        assertEquals(mc5a.getLastKnownPosition().getLatDeg(), 1.0, 0.0);
+        assertEquals(mc5a.getLastKnownPosition().getLngDeg(), 1.0, 0.0);
         mc5a.setFixedPosition(updatedLatDeg, updatedLongDeg);
         mc5a.setStoreToInventory(true);
 
-        System.out.println("createdCourseChanged: " + createdCourse);
+        logger.info("createdCourseChanged: " + createdCourse);
 
         CourseConfiguration updatedCourse = courseConfigurationApi.createCourse(ctx, createdCourse, regattaName,
                 race.getRaceName(), "Default");
-        System.out.println("updatedCourse: " + updatedCourse);
+        logger.info("updatedCourse: " + updatedCourse);
 
         final CourseConfiguration loadedCourse = courseConfigurationApi.createCourseConfigurationFromCourse(ctx,
                 regattaName, race.getRaceName(), "Default", null);
-        System.out.println(loadedCourse.getJson());
+        logger.info(loadedCourse.getJson().toJSONString());
         assertEquals(Util.size(createdCourse.getMarkConfigurations()), Util.size(loadedCourse.getMarkConfigurations()));
 
         final MarkConfiguration mc1b = loadedCourse.getMarkConfigurationByEffectiveName("mc1");
-        assertEquals("FIXED_POSITION", mc1b.getEffectivePositioning().getType());
-        assertEquals(updatedLatDeg, mc1b.getEffectivePositioning().getLatitudeDeg().doubleValue(), .0);
-        assertEquals(updatedLongDeg, mc1b.getEffectivePositioning().getLongitudeDeg().doubleValue(), .0);
+        assertNotNull(mc1b.getLastKnownPosition());
+        assertEquals(updatedLatDeg, mc1b.getLastKnownPosition().getLatDeg(), .0);
+        assertEquals(updatedLongDeg, mc1b.getLastKnownPosition().getLngDeg(), .0);
 
         final MarkConfiguration mc2b = loadedCourse.getMarkConfigurationByEffectiveName("mc2");
-        assertNull(mc2b.getEffectivePositioning().getDeviceId());
-        assertEquals("DEVICE", mc2b.getEffectivePositioning().getType());
-        assertNull(mc2b.getEffectivePositioning().getLatitudeDeg());
-        assertNull(mc2b.getEffectivePositioning().getLongitudeDeg());
+        assertNotNull(mc2b.getCurrentTrackingDeviceId());
+        // no new tracking data from the device, so the last known position is still expected to be the last pinged position:
+        assertEquals(latDeg, mc2b.getLastKnownPosition().getLatDeg(), 0.0);
+        assertEquals(longDeg, mc2b.getLastKnownPosition().getLngDeg(), 0.0);
 
-        // final MarkConfiguration mc3b = loadedCourse.getMarkConfigurationByEffectiveName("mc3");
-        // TODO: following assertfails, but mc3a.unsetPositioning(); was called (position: null)
-        // assertNull(mc3b.getEffectivePositioning());
+        final MarkConfiguration mc3b = loadedCourse.getMarkConfigurationByEffectiveName("mc3");
+        // TODO: following assertfails, but mc3a.unsetPositioning(); was called (position: null); but what's the intented semantics? If a tracking device is associated and a request does provide a null positioning, shall this terminate an existing device mapping? Starting at which time?
+//        assertNull(mc3b.getCurrentTrackingDeviceId());
+        // there is still the last known position caused by the ping:
+        assertEquals(latDeg, mc3b.getLastKnownPosition().getLatDeg(), 0.0);
+        assertEquals(longDeg, mc3b.getLastKnownPosition().getLngDeg(), 0.0);
 
         final MarkConfiguration mc4b = loadedCourse.getMarkConfigurationByEffectiveName("mc4");
-        assertEquals("FIXED_POSITION", mc4b.getEffectivePositioning().getType());
-        assertEquals(updatedLatDeg, mc4b.getEffectivePositioning().getLatitudeDeg().doubleValue(), .0);
-        assertEquals(updatedLongDeg, mc4b.getEffectivePositioning().getLongitudeDeg().doubleValue(), .0);
+        assertNotNull(mc4b.getLastKnownPosition());
+        assertEquals(updatedLatDeg, mc4b.getLastKnownPosition().getLatDeg(), .0);
+        assertEquals(updatedLongDeg, mc4b.getLastKnownPosition().getLngDeg(), .0);
 
         // final MarkConfiguration mc5b = loadedCourse.getMarkConfigurationByEffectiveName("mc5");
         // TODO: position is not updated when mc5a.setStoreToInventory(true), so following asserts fail
@@ -539,34 +540,26 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         final String regattaName = "test";
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
-
         final String pinEndName = "Start/Finish Pin";
         MarkConfiguration sfp = MarkConfiguration.createFreestyle(null, null, null, pinEndName, "SFP", null, null, null,
                 MarkType.BUOY.name());
         sfp.setFixedPosition(47.159776, 27.5891346);
         sfp.setStoreToInventory(true);
-
         MarkConfiguration sfb = MarkConfiguration.createFreestyle(null, null, null, "Start/Finish Boat", "SFB", null,
                 null, null, MarkType.STARTBOAT.name());
         sfp.setStoreToInventory(true);
-
         WaypointWithMarkConfiguration wp1 = new WaypointWithMarkConfiguration("Start", "S", PassingInstruction.Gate,
                 Arrays.asList(sfp.getId(), sfb.getId()));
         WaypointWithMarkConfiguration wp2 = new WaypointWithMarkConfiguration("Finish", "F", PassingInstruction.Gate,
                 Arrays.asList(sfp.getId(), sfb.getId()));
-
         CourseConfiguration courseConfiguration = new CourseConfiguration("my-freestyle-course",
                 Arrays.asList(sfp, sfb), Arrays.asList(wp1, wp2));
-
         CourseConfiguration createdCourseConfiguration = courseConfigurationApi.createCourse(ctx, courseConfiguration,
                 regattaName, race.getRaceName(), "Default");
-
         assertCourseConfigurationCompared(sharedServerCtx, courseConfiguration, createdCourseConfiguration);
-
         CourseConfiguration reloadedCourseConfiguration = courseConfigurationApi
                 .createCourseConfigurationFromCourse(ctx, regattaName, race.getRaceName(), "Default", null);
         assertCourseConfigurationCompared(sharedServerCtx, courseConfiguration, reloadedCourseConfiguration);
-
         MarkConfiguration startboatConfigurationResult = reloadedCourseConfiguration
                 .getMarkConfigurationByEffectiveName(pinEndName);
         assertNotNull(startboatConfigurationResult.getMarkPropertiesId());
@@ -577,12 +570,10 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                 startboatConfigurationResult.getMarkPropertiesId());
         assertEquals(startboatConfigurationResult.getMarkPropertiesId(), createdMarkProperties.getId());
         assertEquals(pinEndName, createdMarkProperties.getName());
-
         leaderboardApi.startRaceLogTracking(ctx, regattaName, race.getRaceName(), "Default");
         CourseConfiguration reloadedCourseConfigurationAfterTrackingStarted = courseConfigurationApi
                 .createCourseConfigurationFromCourse(ctx, regattaName, race.getRaceName(), "Default", null);
         assertCourseConfigurationCompared(sharedServerCtx, courseConfiguration, reloadedCourseConfigurationAfterTrackingStarted);
-
         Course course = regattaApi.getCourse(ctx, regattaName, race.getRaceName(), "Default");
         assertEquals(courseConfiguration.getName(), course.getName());
     }
@@ -746,7 +737,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     @Test
     public void testCreateCourseTemplateFromCourseConfiguration() {
         final CourseConfiguration simpleCourseConfiguration = createSimpleCourseConfiguration(sharedServerCtx);
-        System.out.println(simpleCourseConfiguration.getJson());
+        logger.info(simpleCourseConfiguration.getJson().toJSONString());
         final CourseConfiguration createdCourseConfiguration = courseConfigurationApi.createCourseTemplate(ctx,
                 simpleCourseConfiguration, /* optionalRegattaName */ null);
         assertConsistentCourseConfiguration(createdCourseConfiguration);
