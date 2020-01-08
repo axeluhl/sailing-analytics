@@ -10,9 +10,13 @@ public class Positioning extends JsonWrapper {
 
     private static final String FIELD_POSITION = "position";
     private static final String FIELD_TYPE = "type";
-    private static final String FIELD_DEVICE_UUID = "deviceUUID";
+    private static final String FIELD_DEVICE_IDENTIFIER = "device_identifier";
     private static final String FIELD_LATITUDE_DEG = "latitude_deg";
     private static final String FIELD_LONGITUDE_DEG = "longitude_deg";
+    private static final String FIELD_DEVICE_ID = "id";
+    private static final String FIELD_DEVICE_TYPE = "type";
+    private static final String FIELD_STRING_REPRESENTATION = "stringRepresentation";
+
 
     public Positioning(final JSONObject json) {
         super(json);
@@ -20,7 +24,11 @@ public class Positioning extends JsonWrapper {
 
     public Positioning(UUID deviceId) {
         super(new JSONObject());
-        getJson().put(FIELD_DEVICE_UUID, deviceId.toString());
+        final JSONObject deviceIdentifierJson = new JSONObject();
+        deviceIdentifierJson.put(FIELD_DEVICE_ID, deviceId.toString());
+        deviceIdentifierJson.put(FIELD_STRING_REPRESENTATION, deviceId.toString());
+        deviceIdentifierJson.put(FIELD_DEVICE_TYPE, "smartphoneUUID");
+        getJson().put(FIELD_DEVICE_IDENTIFIER, deviceIdentifierJson);
     }
 
     public Positioning(double latDeg, double lngDeg) {
@@ -46,7 +54,7 @@ public class Positioning extends JsonWrapper {
     }
 
     public UUID getDeviceId() {
-        final String deviceIdJson = get(FIELD_DEVICE_UUID);
-        return deviceIdJson != null ? UUID.fromString(deviceIdJson) : null;
+        final JSONObject deviceIdJson = get(FIELD_DEVICE_IDENTIFIER);
+        return deviceIdJson != null ? UUID.fromString((String) deviceIdJson.get(FIELD_DEVICE_ID)) : null;
     }
 }

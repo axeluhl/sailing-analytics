@@ -158,7 +158,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                     if (srcPositioning != null) {
                         if (srcPositioning.getDeviceId() != null) {
                             assertEquals("tracking device was not properly mapped for " + msgIdentifier,
-                                    srcPositioning.getDeviceId(), trgtMarkConfiguration.getCurrentTrackingDeviceId());
+                                    srcPositioning.getDeviceId().toString(), trgtMarkConfiguration.getCurrentTrackingDeviceId().getId());
                         } else if (srcPositioning.getLatitudeDeg() != null && srcPositioning.getLongitudeDeg() != null) {
                             assertEquals("position.lat is different for " + msgIdentifier, srcPositioning.getLatitudeDeg(),
                                     trgtMarkConfiguration.getLastKnownPosition().getLatDeg(), 0.0);
@@ -297,22 +297,18 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     // different.
     public void testDifferentCourseTemplatesWithCommonRolesInRegatta() {
         final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(sharedServerCtx);
-
         final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(sharedServerCtx,
                 ctdf.constructCourseTemplate(new Pair<>(1, 3), 2, Collections.emptyMap()));
         logger.info(createdCourseTemplate.getJson().toJSONString());
         final String regattaName = "test";
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
-
         // Create a course based on one of the templates
         CourseConfiguration courseConfiguration = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(
                 ctx, createdCourseTemplate.getId(), regattaName, /* tags */ null);
         logger.info(courseConfiguration.getJson().toJSONString());
-
         final CourseConfiguration createdCourse = courseConfigurationApi.createCourse(ctx, courseConfiguration,
                 regattaName, race.getRaceName(), "Default");
-
         final Map<MarkTemplate, MarkRole> templateRoleMap = new HashMap<>();
         courseConfiguration.getMarkConfigurations().forEach(mc -> {
             if (mc.getMarkTemplateId() != null && mc.getAssociatedRoleId() != null) {
@@ -334,9 +330,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         // This means a new spare mark will be suggested to be created.
         assertEquals(Util.size(createdCourse.getMarkConfigurations()) + 1,
                 Util.size(courseConfigurationBasedOnOtherTemplate.getMarkConfigurations()));
-
-        // TODO check that the marks are associated to the same role/position in the sequence as in the originally saved
-        // course.
+        // TODO check that the marks are associated to the same role/position in the sequence as in the originally saved course.
     }
 
     @Test
@@ -344,7 +338,6 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         final String regattaName = "test";
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
-
         MarkConfiguration sb = MarkConfiguration.createFreestyle(null, null,
                 markRoleApi.createMarkRole(sharedServerCtx, "role_sb").getId(), "startboat", "sb", null, null, null, null);
         sb.setFixedPosition(5.5, 7.1);
@@ -358,14 +351,11 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                 PassingInstruction.Line, Arrays.asList(sb.getId(), pe.getId()));
         WaypointWithMarkConfiguration wp2 = new WaypointWithMarkConfiguration(null, null, PassingInstruction.Port,
                 Arrays.asList(bl.getId()));
-
         CourseConfiguration courseConfiguration = new CourseConfiguration("my-freestyle-course",
                 Arrays.asList(sb, pe, bl), Arrays.asList(wp1, wp2, wp1));
-
         courseConfigurationApi.createCourse(ctx, courseConfiguration, regattaName, race.getRaceName(), "Default");
         CourseConfiguration createdCourseAsConfiguration = courseConfigurationApi
                 .createCourseConfigurationFromCourse(ctx, regattaName, race.getRaceName(), "Default", null);
-
         assertConsistentCourseConfiguration(createdCourseAsConfiguration);
         assertCourseConfigurationCompared(sharedServerCtx, courseConfiguration, createdCourseAsConfiguration);
     }

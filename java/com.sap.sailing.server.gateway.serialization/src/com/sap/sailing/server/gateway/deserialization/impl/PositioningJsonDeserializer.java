@@ -33,7 +33,7 @@ public class PositioningJsonDeserializer implements JsonDeserializer<Positioning
                     .deserialize((JSONObject) object.get(PositioningJsonSerializer.FIELD_POSITION)));
         } else if (object.containsKey(PositioningJsonSerializer.FIELD_DEVICE_IDENTIFIER)) {
             final DeviceIdentifier deviceIdentifier = deviceIdentifierDeserializer
-                    .deserialize((JSONObject) object.get(PositioningJsonSerializer.FIELD_POSITION));
+                    .deserialize((JSONObject) object.get(PositioningJsonSerializer.FIELD_DEVICE_IDENTIFIER));
             if (object.containsKey(PositioningJsonSerializer.FIELD_DEVICE_LAST_KNOWN_POSITION)) {
                 final Position lastKnownPosition = positionDeserializer
                         .deserialize((JSONObject) object.get(PositioningJsonSerializer.FIELD_DEVICE_LAST_KNOWN_POSITION));
