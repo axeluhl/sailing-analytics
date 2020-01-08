@@ -39,6 +39,11 @@ public class TrackedRaceRetrievalProcessor extends AbstractRetrievalProcessor<Ha
                     Regatta regatta = trackedRace.getTrackedRegatta().getRegatta();
                     HasTrackedRaceContext trackedRaceWithContext = new TrackedRaceWithContext(element, regatta, raceColumn, fleet, trackedRace);
                     trackedRacesWithContext.add(trackedRaceWithContext);
+                } 
+                else {
+                    //no tracked race found
+                    HasTrackedRaceContext trackedRaceWithContext = new TrackedRaceWithContext(element, null, raceColumn, fleet, null);
+                    trackedRacesWithContext.add(trackedRaceWithContext);
                 }
             }
         }
