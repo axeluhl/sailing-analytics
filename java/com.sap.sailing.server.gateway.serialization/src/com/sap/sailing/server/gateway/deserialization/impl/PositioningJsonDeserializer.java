@@ -5,11 +5,9 @@ import java.util.logging.Logger;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.impl.FixedPositioningImpl;
 import com.sap.sailing.domain.coursetemplate.impl.TrackingDeviceBasedPositioningImpl;
-import com.sap.sailing.domain.coursetemplate.impl.TrackingDeviceBasedPositioningWithLastKnownPositionImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.PositioningJsonSerializer;
@@ -34,13 +32,7 @@ public class PositioningJsonDeserializer implements JsonDeserializer<Positioning
         } else if (object.containsKey(PositioningJsonSerializer.FIELD_DEVICE_IDENTIFIER)) {
             final DeviceIdentifier deviceIdentifier = deviceIdentifierDeserializer
                     .deserialize((JSONObject) object.get(PositioningJsonSerializer.FIELD_DEVICE_IDENTIFIER));
-            if (object.containsKey(PositioningJsonSerializer.FIELD_DEVICE_LAST_KNOWN_POSITION)) {
-                final Position lastKnownPosition = positionDeserializer
-                        .deserialize((JSONObject) object.get(PositioningJsonSerializer.FIELD_DEVICE_LAST_KNOWN_POSITION));
-                result = new TrackingDeviceBasedPositioningWithLastKnownPositionImpl(deviceIdentifier, lastKnownPosition);
-            } else {
-                result = new TrackingDeviceBasedPositioningImpl(deviceIdentifier);
-            }
+            result = new TrackingDeviceBasedPositioningImpl(deviceIdentifier);
         } else {
             logger.warning("Unknown Positioning object type: "+object);
             result = null;

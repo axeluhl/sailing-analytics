@@ -73,7 +73,6 @@ import com.sap.sailing.domain.coursetemplate.PositioningVisitor;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.TrackingDeviceBasedPositioning;
-import com.sap.sailing.domain.coursetemplate.TrackingDeviceBasedPositioningWithLastKnownPosition;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.impl.CourseConfigurationImpl;
@@ -235,14 +234,6 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                         public Void visit(TrackingDeviceBasedPositioning trackingDeviceBasedPositioning) {
                             getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(markPropertiesInInventory,
                                     trackingDeviceBasedPositioning.getDeviceIdentifier());
-                            return null;
-                        }
-
-                        @Override
-                        public Void visit(
-                                TrackingDeviceBasedPositioningWithLastKnownPosition trackingDeviceBasedPositioningWithLastKnownPosition) {
-                            getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(markPropertiesInInventory,
-                                    trackingDeviceBasedPositioningWithLastKnownPosition.getDeviceIdentifier());
                             return null;
                         }
                     });
@@ -466,13 +457,6 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 @Override
                 public Void visit(TrackingDeviceBasedPositioning trackingDeviceBasedPositioning) {
                     deviceIdentifier[0] = trackingDeviceBasedPositioning.getDeviceIdentifier();
-                    return null;
-                }
-
-                @Override
-                public Void visit(
-                        TrackingDeviceBasedPositioningWithLastKnownPosition trackingDeviceBasedPositioningWithLastKnownPosition) {
-                    deviceIdentifier[0] = trackingDeviceBasedPositioningWithLastKnownPosition.getDeviceIdentifier();
                     return null;
                 }
             });

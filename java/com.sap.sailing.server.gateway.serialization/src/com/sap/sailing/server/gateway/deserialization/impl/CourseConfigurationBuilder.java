@@ -37,7 +37,6 @@ import com.sap.sailing.domain.coursetemplate.PositioningVisitor;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.TrackingDeviceBasedPositioning;
-import com.sap.sailing.domain.coursetemplate.TrackingDeviceBasedPositioningWithLastKnownPosition;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.impl.CourseConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.FreestyleMarkConfigurationImpl;
@@ -329,12 +328,6 @@ public class CourseConfigurationBuilder {
                 public MarkConfigurationResponseAnnotation visit(
                         TrackingDeviceBasedPositioning trackingDeviceBasedPositioning) {
                     return createMarkConfigurationResponseAnnotation(positionResolver, trackingDeviceBasedPositioning.getDeviceIdentifier());
-                }
-
-                @Override
-                public MarkConfigurationResponseAnnotation visit(
-                        TrackingDeviceBasedPositioningWithLastKnownPosition trackingDeviceBasedPositioningWithLastKnownPosition) {
-                    return createMarkConfigurationResponseAnnotation(positionResolver, trackingDeviceBasedPositioningWithLastKnownPosition.getDeviceIdentifier());
                 }
             });
         } else {

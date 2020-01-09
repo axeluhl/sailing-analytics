@@ -9,7 +9,6 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.coursetemplate.impl.FixedPositioningImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesImpl;
 import com.sap.sailing.domain.coursetemplate.impl.TrackingDeviceBasedPositioningImpl;
-import com.sap.sailing.domain.coursetemplate.impl.TrackingDeviceBasedPositioningWithLastKnownPositionImpl;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 
@@ -44,11 +43,6 @@ public class MarkPropertiesBuilder {
 
     public MarkPropertiesBuilder withDeviceId(DeviceIdentifier deviceId) {
         this.positioningInformation = new TrackingDeviceBasedPositioningImpl(deviceId);
-        return this;
-    }
-
-    public MarkPropertiesBuilder withDeviceIdAndLastKnownPosition(DeviceIdentifier deviceId, Position lastKnownPosition) {
-        this.positioningInformation = new TrackingDeviceBasedPositioningWithLastKnownPositionImpl(deviceId, lastKnownPosition);
         return this;
     }
 

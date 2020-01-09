@@ -118,23 +118,18 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final ArrayList<?> tagsList = dbObject.get(FieldNames.MARK_PROPERTIES_TAGS.name(), ArrayList.class);
         final Collection<String> tags = tagsList.stream().map(t -> t.toString()).collect(Collectors.toList());
         // all mandatory data are loaded -> create builder 
-        final MarkPropertiesBuilder builder = new MarkPropertiesBuilder(id, name, shortName, color, shape, pattern,
-                markType).withFixedPosition(fixedPosition).withTags(tags);
-        // load optional deviceId
-        try {
-            final Document deviceIdDocument = dbObject.get(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER.name(), Document.class);
-            final DeviceIdentifier deviceIdentifier = deviceIdDocument == null ? null : loadDeviceId(deviceIdentifierServiceFinder, deviceIdDocument);
-            if (dbObject.containsKey(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_LAST_POSITION_LAT.name()) &&
-                    dbObject.containsKey(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_LAST_POSITION_LNG.name())) {
-                final Position lastKnownPosition = new DegreePosition(
-                        ((Number) dbObject.get(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_LAST_POSITION_LAT.name())).doubleValue(),
-                        ((Number) dbObject.get(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_LAST_POSITION_LNG.name())).doubleValue());
-                builder.withDeviceIdAndLastKnownPosition(deviceIdentifier, lastKnownPosition);
-            } else {
+        final MarkPropertiesBuilder builder = new MarkPropertiesBuilder(id, name, shortName, color, shape, pattern, markType).withTags(tags);
+        if (fixedPosition != null) {
+            builder.withFixedPosition(fixedPosition);
+        } else {
+            // load optional deviceId
+            try {
+                final Document deviceIdDocument = dbObject.get(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER.name(), Document.class);
+                final DeviceIdentifier deviceIdentifier = deviceIdDocument == null ? null : loadDeviceId(deviceIdentifierServiceFinder, deviceIdDocument);
                 builder.withDeviceId(deviceIdentifier);
+            } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                logger.log(Level.WARNING, "Could not load deviceId for MarkProperties", e);
             }
-        } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-            logger.log(Level.WARNING, "Could not load deviceId for MarkProperties", e);
         }
         // load map of last used templates
         final Document lastUsedTemplateObject = dbObject.get(FieldNames.MARK_PROPERTIES_USED_TEMPLATE.name(), Document.class);
