@@ -7111,7 +7111,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
     
     private DeviceMappingDTO convertToDeviceMappingDTO(DeviceMapping<?> mapping) throws TransformationException {
-        final Map<DeviceIdentifier, Timed> lastFixes = getService().getSensorFixStore().getLastFix(Collections.singleton(mapping.getDevice()));
+        final Map<DeviceIdentifier, Timed> lastFixes = getService().getSensorFixStore().getFixLastReceived(Collections.singleton(mapping.getDevice()));
         final Timed lastFix;
         if (lastFixes != null && lastFixes.containsKey(mapping.getDevice())) {
             lastFix = lastFixes.get(mapping.getDevice());

@@ -364,39 +364,40 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         // load passing instruction
         final PassingInstruction passingInstruction = PassingInstruction
                 .valueOf(bdo.get(FieldNames.WAYPOINT_TEMPLATE_PASSINGINSTRUCTION.name()).toString());
-
         // load master data
         final String name = bdo.getString(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_NAME.name());
         final String shortName = bdo.getString(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_SHORT_NAME.name());
-
         // load mark templates for control point
         final ArrayList<?> markTemplateUUIDsDbList = bdo.get(FieldNames.WAYPOINT_TEMPLATE_MARK_TEMPLATES.name(),
                 ArrayList.class);
         boolean hasParsingError = false;
-
         final List<MarkTemplate> markTemplates = new ArrayList<>();
-        for (Object obj : markTemplateUUIDsDbList) {
-            final MarkTemplate markTemplate = markTemplateResolver.apply(UUID.fromString(obj.toString()));
-            if (markTemplate == null) {
-                logger.warning(String.format("Could not resolve MarkTemplate with id %s for WaypointTemplate.",
-                        obj.toString()));
-                hasParsingError = true;
-                break;
-            } else {
-                markTemplates.add(markTemplate);
+        if (markTemplateUUIDsDbList != null) {
+            for (Object obj : markTemplateUUIDsDbList) {
+                final MarkTemplate markTemplate = markTemplateResolver.apply(UUID.fromString(obj.toString()));
+                if (markTemplate == null) {
+                    logger.warning(String.format("Could not resolve MarkTemplate with id %s for WaypointTemplate.",
+                            obj.toString()));
+                    hasParsingError = true;
+                    break;
+                } else {
+                    markTemplates.add(markTemplate);
+                }
             }
         }
+        final WaypointTemplate result;
         if (hasParsingError) {
-            return null;
-        }
-
-        // create MarkTemplate or MarkTemplatePairImpl
-        final ControlPointTemplate controlPointTemplate;
-        if (markTemplates.size() == 2) {
-            controlPointTemplate = markPairResolver.apply(new Pair<>(name, shortName), markTemplates);
+            result = null;
         } else {
-            controlPointTemplate = markTemplates.get(0);
+            // create MarkTemplate or MarkTemplatePairImpl
+            final ControlPointTemplate controlPointTemplate;
+            if (markTemplates.size() == 2) {
+                controlPointTemplate = markPairResolver.apply(new Pair<>(name, shortName), markTemplates);
+            } else {
+                controlPointTemplate = markTemplates.get(0);
+            }
+            result = new WaypointTemplateImpl(controlPointTemplate, passingInstruction);
         }
-        return new WaypointTemplateImpl(controlPointTemplate, passingInstruction);
+        return result;
     }
 }

@@ -132,7 +132,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             // TODO could as well return the GPSFix object which conveniently would combine the position with the time point which may also be interesting to clients...
             Position lastPosition = null;
             try {
-                final Map<DeviceIdentifier, Timed> lastFix = sensorFixStore.getLastFix(Collections.singleton(identifier));
+                final Map<DeviceIdentifier, Timed> lastFix = sensorFixStore.getFixLastReceived(Collections.singleton(identifier));
                 final Timed t = lastFix.get(identifier);
                 if (t instanceof GPSFix) {
                     lastPosition = ((GPSFix) t).getPosition();

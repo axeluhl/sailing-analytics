@@ -145,7 +145,7 @@ public enum FieldNames {
     DEVICE_ID, GPSFIX_TYPE, GPSFIX,
     
     // GPSFixes metadata
-    TIMERANGE, NUM_FIXES,
+    TIMERANGE, NUM_FIXES, LAST_FIX_RECEIVED,
     
     // Timespan
     FROM_MILLIS, TO_MILLIS,
