@@ -48,9 +48,27 @@ public class Positioning extends JsonWrapper {
         return position != null ? (Double) position.get(FIELD_LATITUDE_DEG) : null;
     }
 
+    public void setLatitudeDeg(double latDeg) {
+        JSONObject position = get(FIELD_POSITION);
+        if (position == null) {
+            position = new JSONObject();
+            getJson().put(FIELD_POSITION, position);
+        }
+        position.put(FIELD_LATITUDE_DEG, latDeg);
+    }
+
     public Double getLongitudeDeg() {
         final JSONObject position = get(FIELD_POSITION);
         return position != null ? (Double) position.get(FIELD_LONGITUDE_DEG) : null;
+    }
+
+    public void setLongitudeDeg(double latDeg) {
+        JSONObject position = get(FIELD_POSITION);
+        if (position == null) {
+            position = new JSONObject();
+            getJson().put(FIELD_POSITION, position);
+        }
+        position.put(FIELD_LONGITUDE_DEG, latDeg);
     }
 
     public UUID getDeviceId() {

@@ -36,7 +36,9 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
             if (to == null) {
                 finalTo = null;
             } else {
-                finalTo = to.plus(1); // add the smallest increment possible with the current time point representation
+                // don't use TimePoint.plus in the following as it will "round" to EndOfTime which is influenced
+                // by JavaScript's short "mantissa" for time stamps.
+                finalTo = new MillisecondsTimePoint(to.asMillis()+1); 
             }
         } else {
             finalTo = to;

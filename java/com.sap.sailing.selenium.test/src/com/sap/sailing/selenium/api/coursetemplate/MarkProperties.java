@@ -59,6 +59,16 @@ public class MarkProperties extends JsonWrapper {
     public Boolean hasDevice() {
         return get(FIELD_POSITIONING) != null && ((JSONObject) get(FIELD_POSITIONING)).get(FIELD_POSITIONING_DEVICE_IDENTIFIER) != null;
     }
+    
+    public void setLatDeg(double latDeg) {
+        JSONObject jsonPositioning = get(FIELD_POSITIONING);
+        if (jsonPositioning == null) {
+            jsonPositioning = new JSONObject();
+            getJson().put(FIELD_POSITIONING, jsonPositioning);
+        }
+        final Positioning positioning = new Positioning(jsonPositioning);
+        positioning.setLatitudeDeg(latDeg);
+    }
 
     public Double getLatDeg() {
         final JSONObject position = (JSONObject) ((JSONObject) get(FIELD_POSITIONING)).get(FIELD_POSITIONING_POSITION);
@@ -68,5 +78,15 @@ public class MarkProperties extends JsonWrapper {
     public Double getLonDeg() {
         final JSONObject position = (JSONObject) ((JSONObject) get(FIELD_POSITIONING)).get(FIELD_POSITIONING_POSITION);
         return (Double) (position == null ? null : position.get(FIELD_POSITIONING_FIXED_POSITION_LONDEG));
+    }
+
+    public void setLonDeg(double lonDeg) {
+        JSONObject jsonPositioning = get(FIELD_POSITIONING);
+        if (jsonPositioning == null) {
+            jsonPositioning = new JSONObject();
+            getJson().put(FIELD_POSITIONING, jsonPositioning);
+        }
+        final Positioning positioning = new Positioning(jsonPositioning);
+        positioning.setLongitudeDeg(lonDeg);
     }
 }

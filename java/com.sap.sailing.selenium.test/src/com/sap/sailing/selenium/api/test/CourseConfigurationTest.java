@@ -641,8 +641,9 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     }
 
     private void testCreateCourseConfigurationWithStoreToInventory(final ApiContext ctx, final ApiContext sharedServerCtx) {
+        final String STARTBOAT_NAME = "startboat";
         MarkConfiguration sb = MarkConfiguration.createFreestyle(null, null,
-                markRoleApi.createMarkRole(sharedServerCtx, "role_sb").getId(), "startboat", "sb", null, null, null, null);
+                markRoleApi.createMarkRole(sharedServerCtx, "role_sb").getId(), STARTBOAT_NAME, "sb", null, null, null, null);
         sb.setFixedPosition(5.5, 7.1);
         sb.setStoreToInventory(true);
         MarkConfiguration pe = MarkConfiguration.createFreestyle(null, null,
@@ -657,7 +658,6 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         MarkConfiguration b2 = MarkConfiguration.createMarkTemplateBased(mtb2.getId(),
                 markRoleApi.createMarkRole(sharedServerCtx, "role_b2").getId());
         b2.setStoreToInventory(true);
-
         eventApi.createEvent(ctx, "testregatta", "", CompetitorRegistrationType.CLOSED, "");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, "testregatta", null, 1)[0];
         Mark mark = markApi.addMarkToRegatta(ctx, "testregatta", "mymark");
@@ -667,7 +667,6 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         MarkConfiguration b3 = MarkConfiguration.createMarkBased(mark.getMarkId(),
                 markRoleApi.createMarkRole(sharedServerCtx, "role_b3").getId());
         b3.setStoreToInventory(true);
-
         WaypointWithMarkConfiguration wp1 = new WaypointWithMarkConfiguration("start/end", "s/e",
                 PassingInstruction.Line, Arrays.asList(sb.getId(), pe.getId()));
         WaypointWithMarkConfiguration wp2 = new WaypointWithMarkConfiguration(null, null, PassingInstruction.Port,
@@ -676,27 +675,34 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                 PassingInstruction.Single_Unknown, Arrays.asList(b2.getId()));
         WaypointWithMarkConfiguration wp4 = new WaypointWithMarkConfiguration(null, null,
                 PassingInstruction.Single_Unknown, Arrays.asList(b3.getId()));
-
         CourseConfiguration courseConfiguration = new CourseConfiguration("my-course",
                 Arrays.asList(sb, pe, bl, b2, b3), Arrays.asList(wp1, wp2, wp1, wp3, wp4));
-
         CourseConfiguration courseConfigurationResult = courseConfigurationApi.createCourseTemplate(ctx,
                 courseConfiguration, "testregatta");
         assertCourseConfigurationCompared(sharedServerCtx, courseConfiguration, courseConfigurationResult);
-
         Set<UUID> expectedMarkProperties = new HashSet<>();
         courseConfigurationResult.getMarkConfigurations().forEach(mc -> {
             if (mc.getMarkPropertiesId() != null) {
                 expectedMarkProperties.add(mc.getMarkPropertiesId());
             }
         });
-
         Iterable<MarkProperties> allMarkProperties = markPropertiesApi.getAllMarkProperties(sharedServerCtx,
                 Collections.emptySet());
         Set<UUID> availableMarkProperties = new HashSet<>();
         allMarkProperties.forEach(mp -> availableMarkProperties.add(mp.getId()));
-
         assertEquals(expectedMarkProperties, availableMarkProperties);
+        final double newLatStartBoat = 123.4;
+        final double newLonStartBoat = 89.0;
+        for (final MarkProperties mp : allMarkProperties) {
+            // for the start boat verify that the fixed positioning has been copied to the MarkProperties object
+            if (mp.getName().equals(STARTBOAT_NAME)) {
+                assertEquals(mp.getLatDeg(), sb.getPositioning().getLatitudeDeg());
+                assertEquals(mp.getLonDeg(), sb.getPositioning().getLongitudeDeg());
+                // prepare for updating a new position specification to inventory
+                mp.setLatDeg(newLatStartBoat);
+                mp.setLonDeg(newLonStartBoat);
+            }
+        }
     }
 
     @Test
@@ -705,7 +711,6 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
         leaderboardApi.startRaceLogTracking(ctx, regattaName, race.getRaceName(), "Default");
-
         CourseConfiguration createdCourseConfiguration = courseConfigurationApi.createCourseConfigurationFromCourse(ctx,
                 regattaName, race.getRaceName(), "Default", /* tags */ null);
         assertConsistentCourseConfiguration(createdCourseConfiguration);
@@ -743,12 +748,10 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         markConfigurations.add(markConfiguration);
         List<String> markConfigurationIds = markConfigurations.stream().map(mc -> mc.getId())
                 .collect(Collectors.toList());
-
         List<WaypointWithMarkConfiguration> waypoints = new ArrayList<>();
         WaypointWithMarkConfiguration waypoint = new WaypointWithMarkConfiguration(null, null, PassingInstruction.Line,
                 markConfigurationIds);
         waypoints.add(waypoint);
-
         return new CourseConfiguration("test-course", markConfigurations, waypoints);
     }
 }

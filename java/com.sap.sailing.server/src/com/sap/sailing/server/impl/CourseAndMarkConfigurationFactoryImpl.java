@@ -461,11 +461,12 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 }
             });
         }
+        // TODO combine the code below with the visitor pattern for the Positioning object above
         if (position[0] != null ^ deviceIdentifier[0] != null) {
-            // FIXME this is a case for RaceLogTrackingAdapter.pingMark (however, RaceLogTrackingAdapter is not visible from here as it's part of a connector bundle)
             final DeviceMappingWithRegattaLogEvent<Mark> existingDeviceMapping = CourseConfigurationBuilder.findMostRecentOrOngoingMapping(regatta, mark);
             boolean terminateOpenEndedDeviceMapping = false;
             if (deviceIdentifier[0] != null) {
+                // establish a new device mapping
                 if (existingDeviceMapping == null || !(deviceIdentifier[0].equals(existingDeviceMapping.getDevice()) && existingDeviceMapping.getTimeRange().hasOpenEnd())) {
                     regatta.getRegattaLog()
                             .add(new RegattaLogDeviceMarkMappingEventImpl(
@@ -474,6 +475,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     terminateOpenEndedDeviceMapping = true;
                 }
             } else if (position[0] != null) {
+                // ping the mark with the position given
                 final boolean update;
                 if (existingDeviceMapping != null) {
                     if (!PingDeviceIdentifier.TYPE.equals(existingDeviceMapping.getDevice().getIdentifierType())) {
@@ -491,7 +493,6 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     final PingDeviceIdentifierImpl pingIdentifier = new PingDeviceIdentifierImpl(UUID.randomUUID());
                     sensorFixStore.storeFix(pingIdentifier,
                             new GPSFixImpl(position[0], timePointForDefinitionOfMarksAndDeviceMappings));
-                    
                     regatta.getRegattaLog()
                             .add(new RegattaLogDeviceMarkMappingEventImpl(
                                     timePointForDefinitionOfMarksAndDeviceMappings, author, mark, pingIdentifier,
