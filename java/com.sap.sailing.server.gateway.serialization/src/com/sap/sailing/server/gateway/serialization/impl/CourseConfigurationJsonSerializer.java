@@ -16,9 +16,11 @@ import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.IsMarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationResponseAnnotation;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationVisitor;
 import com.sap.sailing.domain.coursetemplate.MarkPairWithConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
+import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
@@ -92,36 +94,45 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
                     markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_ID, ((MarkRole)associatedRole).getId().toString());
                 }
             }
-            // TODO use MarkConfiguration visitor pattern!
-            if (markConfiguration instanceof FreestyleMarkConfiguration) {
-                final FreestyleMarkConfiguration<MarkConfigurationResponseAnnotation> freeStyleMarkConfiguration =
-                        (FreestyleMarkConfiguration<MarkConfigurationResponseAnnotation>) markConfiguration;
-                if (freeStyleMarkConfiguration.getOptionalMarkProperties() != null) {
+            markConfiguration.accept(new MarkConfigurationVisitor<Void, MarkConfigurationResponseAnnotation>() {
+                @Override
+                public Void visit(FreestyleMarkConfiguration<MarkConfigurationResponseAnnotation> freeStyleMarkConfiguration) {
+                    if (freeStyleMarkConfiguration.getOptionalMarkProperties() != null) {
+                        markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_PROPERTIES_ID,
+                                freeStyleMarkConfiguration.getOptionalMarkProperties().getId().toString());
+                    }
+                    markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_FREESTYLE_PROPERTIES,
+                            commonMarkPropertiesJsonSerializer
+                                    .serialize(freeStyleMarkConfiguration.getFreestyleProperties()));
+                    return null;
+                }
+
+                @Override
+                public Void visit(
+                        MarkPropertiesBasedMarkConfiguration<MarkConfigurationResponseAnnotation> markPropertiesBasedMarkConfiguration) {
                     markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_PROPERTIES_ID,
-                            freeStyleMarkConfiguration.getOptionalMarkProperties().getId().toString());
+                            markPropertiesBasedMarkConfiguration.getOptionalMarkProperties().getId().toString());
+                    return null;
                 }
-                markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_FREESTYLE_PROPERTIES,
-                        commonMarkPropertiesJsonSerializer
-                                .serialize(freeStyleMarkConfiguration.getFreestyleProperties()));
-            } else if (markConfiguration instanceof MarkPropertiesBasedMarkConfiguration) {
-                final MarkPropertiesBasedMarkConfiguration<MarkConfigurationResponseAnnotation> markPropertiesBasedMarkConfiguration =
-                        (MarkPropertiesBasedMarkConfiguration<MarkConfigurationResponseAnnotation>) markConfiguration;
-                markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_PROPERTIES_ID,
-                        markPropertiesBasedMarkConfiguration.getOptionalMarkProperties().getId().toString());
-                if (markPropertiesBasedMarkConfiguration.getOptionalMarkTemplate() != null) {
-                    markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_TEMPLATE_ID,
-                            markPropertiesBasedMarkConfiguration.getOptionalMarkTemplate().getId().toString());
+
+                @Override
+                public Void visit(
+                        MarkTemplateBasedMarkConfiguration<MarkConfigurationResponseAnnotation> markConfiguration) {
+                    // nothing to be done because the "optional" (in this case mandatory) getOptionalMarkTemplate() case
+                    // has already been considered above generally
+                    return null;
                 }
-            } else if (markConfiguration instanceof RegattaMarkConfiguration) {
-                final RegattaMarkConfiguration<MarkConfigurationResponseAnnotation> regattaMarkConfiguration =
-                        (RegattaMarkConfiguration<MarkConfigurationResponseAnnotation>) markConfiguration;
-                if (regattaMarkConfiguration.getOptionalMarkProperties() != null) {
-                    markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_PROPERTIES_ID,
-                            regattaMarkConfiguration.getOptionalMarkProperties().getId().toString());
+
+                @Override
+                public Void visit(RegattaMarkConfiguration<MarkConfigurationResponseAnnotation> regattaMarkConfiguration) {
+                    if (regattaMarkConfiguration.getOptionalMarkProperties() != null) {
+                        markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_PROPERTIES_ID,
+                                regattaMarkConfiguration.getOptionalMarkProperties().getId().toString());
+                    }
+                    markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_ID, regattaMarkConfiguration.getMark().getId().toString());
+                    return null;
                 }
-                markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_ID,
-                        regattaMarkConfiguration.getMark().getId().toString());
-            }
+            });
             markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_EFFECTIVE_PROPERTIES,
                     commonMarkPropertiesJsonSerializer.serialize(markConfiguration.getEffectiveProperties()));
             if (markConfiguration.getAnnotationInfo() != null) {
