@@ -113,7 +113,7 @@ TODO I find it confusing how MarkTemplate and MarkProperties may work together; 
 * Regatta mark based configuration
     * Appearance is defined by mark. Changing the appearance is not supported which means in this case, a new mark needs to be defined in any supported way as replacement for new courses, while the old definition remains for existing courses.
     * can only be used if the course is created in a regatta context
-    * Optional positioning information (to update the regatta mark)
+    * Optional positioning information (to update the regatta mark) TODO How do these updates work? Multiple mappings? Multiple Pings? First ping, then device? First device, then ping or other device? 
 * Mark properties based configuration
     * Appearance is defined by mark properties defaulting to the definition of the mark template if none is defined in the properties
     * Optional positioning information to be used upon mark creation (defaults to the positioning information carried by the mark properties if not given)
