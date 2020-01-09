@@ -143,6 +143,10 @@ public class MarkConfiguration extends JsonWrapper {
         final String markPropertiesId = (String) get(FIELD_MARK_PROPERTIES_ID);
         return markPropertiesId != null ? UUID.fromString(markPropertiesId) : null;
     }
+    
+    public void setMarkPropertiesId(UUID markPropertiesId) {
+        getJson().put(FIELD_MARK_PROPERTIES_ID, markPropertiesId.toString());
+    }
 
     public UUID getMarkId() {
         final String markId = (String) get(FIELD_MARK_ID);

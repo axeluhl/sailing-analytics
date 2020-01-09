@@ -644,7 +644,9 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         final String STARTBOAT_NAME = "startboat";
         MarkConfiguration sb = MarkConfiguration.createFreestyle(null, null,
                 markRoleApi.createMarkRole(sharedServerCtx, "role_sb").getId(), STARTBOAT_NAME, "sb", null, null, null, null);
-        sb.setFixedPosition(5.5, 7.1);
+        final double startBoatLatDeg = 5.5;
+        final double startBoatLonDeg = 7.1;
+        sb.setFixedPosition(startBoatLatDeg, startBoatLonDeg);
         sb.setStoreToInventory(true);
         MarkConfiguration pe = MarkConfiguration.createFreestyle(null, null,
                 markRoleApi.createMarkRole(sharedServerCtx, "role_pe").getId(), "pin end", "pe", null, null, null, null);
@@ -693,16 +695,31 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertEquals(expectedMarkProperties, availableMarkProperties);
         final double newLatStartBoat = 123.4;
         final double newLonStartBoat = 89.0;
+        UUID startBoatMarkPropertiesId = null;
         for (final MarkProperties mp : allMarkProperties) {
             // for the start boat verify that the fixed positioning has been copied to the MarkProperties object
             if (mp.getName().equals(STARTBOAT_NAME)) {
-                assertEquals(mp.getLatDeg(), sb.getPositioning().getLatitudeDeg());
-                assertEquals(mp.getLonDeg(), sb.getPositioning().getLongitudeDeg());
-                // prepare for updating a new position specification to inventory
-                mp.setLatDeg(newLatStartBoat);
-                mp.setLonDeg(newLonStartBoat);
+                startBoatMarkPropertiesId = mp.getId();
+                assertEquals(mp.getLatDeg(), startBoatLatDeg, 0.0);
+                assertEquals(mp.getLonDeg(), startBoatLonDeg, 0.0);
             }
         }
+        // prepare for updating a new position specification for the start boat, but at first not requesting store to inventory:
+        sb.setFixedPosition(newLatStartBoat, newLonStartBoat);
+        sb.setMarkPropertiesId(startBoatMarkPropertiesId);
+        sb.setStoreToInventory(false);
+        courseConfigurationApi.createCourseTemplate(ctx, courseConfiguration, "testregatta");
+        // now ensure that the MarkProperties object for the start boat has not been updated with the new position:
+        final MarkProperties newStartBoatMp = markPropertiesApi.getMarkProperties(sharedServerCtx, startBoatMarkPropertiesId);
+        assertEquals(newStartBoatMp.getLatDeg(), startBoatLatDeg, 0.0);
+        assertEquals(newStartBoatMp.getLonDeg(), startBoatLonDeg, 0.0);
+        // repeat the action, this time with storeToInventory==true
+        sb.setStoreToInventory(true);
+        courseConfigurationApi.createCourseTemplate(ctx, courseConfiguration, "testregatta");
+        // now ensure that the MarkProperties object for the start boat *has* been updated with the new position:
+        final MarkProperties newNewStartBoatMp = markPropertiesApi.getMarkProperties(sharedServerCtx, startBoatMarkPropertiesId);
+        assertEquals(newNewStartBoatMp.getLatDeg(), newLatStartBoat, 0.0);
+        assertEquals(newNewStartBoatMp.getLonDeg(), newLonStartBoat, 0.0);
     }
 
     @Test
