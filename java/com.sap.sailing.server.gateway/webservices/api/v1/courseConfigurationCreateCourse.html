@@ -52,7 +52,12 @@
                 </li>
                 <li>positioning (optional): Object that defines the positioning properties to set for the mark. Either of the following properties may be given:
                     <ul>
-                        <li>deviceUUID: defines a smartphone tracking device by its UUID</li>
+                        <li>device_identifier: defines a tracking device by its device identifier.
+                            The identifier is a JSON object that has three attributes:
+                            id, type, and stringRepresentation. Using "smartphoneUUID" for the
+                            "type" attribute and a stringified UUID for both, "id" and
+                            "stringRepresentation" will do the job for identifying a phone
+                            as a tracking device.</li>
                         <li>position: object that defines a fixed position for the mark with the required properties 'latitude_deg' and 'longitude_deg'</li>
                     </ul>
                 </li>
