@@ -10,7 +10,7 @@ import java.net.URL;
 import java.util.Collection;
 
 import org.json.simple.parser.ParseException;
-import org.junit.Ignore;
+import org.junit.Assume;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.orc.ORCCertificate;
@@ -27,10 +27,11 @@ public class TestORCCertificateImporterRMS {
         assertNotNull(milan);
     }
     
-    @Ignore("Certificate used for testing no longer valid after 2019")
+//    @Ignore("Certificate used for testing no longer valid after 2019")
     @Test
     public void testSimpleOnlineRMSFileRead() throws IOException, ParseException {
         ORCCertificatesCollection certificates = ORCCertificatesImporter.INSTANCE.read(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=rms").openStream());
+        Assume.assumeTrue(certificates.getCertificateIds().iterator().hasNext());
         ORCCertificate swan  = certificates.getCertificateById("GER140849GER5335");
         ORCCertificate moana = certificates.getCertificateById("GER140772GER5549");
         assertNotNull(swan);
