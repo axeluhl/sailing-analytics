@@ -121,19 +121,20 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
     MarkRole getOptionalAssociatedRole(MarkTemplate markTemplate);
 
     /**
-     * The key set contains exactly those {@link MarkRole}s one gets when enumerating all roles reachable
-     * through the {@link #getWaypointTemplates()} and their {@link WaypointTemplate#getControlPointTemplate()}'s
-     * {@link ControlPointTemplate#getMarkRoles() mark roles}. The values tell the {@link MarkTemplate} to use when
-     * instantiating a course from this template in place of the key role. All mark templates from the value set
-     * are guaranteed to be in {@link #getMarkTemplates()}, but {@link #getMarkTemplates()} may contain more elements,
-     * e.g., for spare marks.
+     * The key set contains exactly those {@link MarkRole}s one gets when enumerating all roles reachable through the
+     * {@link #getWaypointTemplates()} and their {@link WaypointTemplate#getControlPointTemplate()}'s
+     * {@link ControlPointTemplate#getMarkRoles() mark roles}, which is the same as calling {@link #getMarkRoles()}. The
+     * values tell the {@link MarkTemplate} to use when instantiating a course from this template in place of the key
+     * role. All mark templates from the value set are guaranteed to be in {@link #getMarkTemplates()}, but
+     * {@link #getMarkTemplates()} may contain more elements, e.g., for spare marks.
      */
     Map<MarkRole, MarkTemplate> getDefaultMarkTemplatesForMarkRoles();
     
     /**
      * Obtains the {@link MarkTemplate} that, when instantiating a course from this template, shall be used
      * to create the {@link Mark} that acts in the role identified by {@code markRole}. Short for
-     * {@link #getDefaultMarkTemplatesForMarkRoles()}.{@link Map#get(Object) get(markRole)}.
+     * {@link #getDefaultMarkTemplatesForMarkRoles()}.{@link Map#get(Object) get(markRole)}. For all {@link MarkRole}
+     * objects from {@link #getMarkRoles()} this has to return a valid non-{@code null} result.
      */
     MarkTemplate getDefaultMarkTemplateForMarkRole(MarkRole markRole);
     

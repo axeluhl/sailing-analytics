@@ -264,9 +264,9 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 if (markTemplateOrNull != null && markTemplateOrNull.hasEqualAppeareanceWith(markConfiguration.getEffectiveProperties())) {
                     effectiveMarkTemplate = markTemplateOrNull;
                 } else {
-                    effectiveMarkTemplate = getSharedSailingData()
-                            .createMarkTemplate(markConfiguration.getEffectiveProperties());
+                    effectiveMarkTemplate = getSharedSailingData().createMarkTemplate(markConfiguration.getEffectiveProperties());
                 }
+                // TODO how about using the bug5168 MarkConfigurationVisitor pattern here once bug5168 (through bug5085) has been merged into bug5165?
                 if (markConfiguration instanceof RegattaMarkConfiguration) {
                     // The configuration is used as is. We can't enrich the Mark with the newly created MarkTemplate.
                     // In the UI, the regatta Mark still needs to be selected to ensure that all connections to regatta
@@ -275,8 +275,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 } else if (markConfiguration instanceof MarkPropertiesBasedMarkConfiguration) {
                     // In this case the appearance of the created MarkTemplate is identical to the MarkProperties it is
                     // based on.
-                    final MarkProperties markProperties = ((MarkPropertiesBasedMarkConfiguration) markConfiguration)
-                            .getMarkProperties();
+                    final MarkProperties markProperties = ((MarkPropertiesBasedMarkConfiguration) markConfiguration).getMarkProperties();
                     effectiveConfiguration = new MarkPropertiesBasedMarkConfigurationImpl(markProperties,
                             effectiveMarkTemplate, markConfiguration.getOptionalPositioning(), getPositioningIfAvailable(markProperties),
                             /* storeToInventory */ false);
@@ -307,7 +306,9 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             markTemplatesByMarkConfigurations.put(markConfiguration, effectiveMarkTemplate);
             marksConfigurationsMapping.put(markConfiguration, effectiveConfiguration);
         }
-        final MarkRolePairFactory markPairTemplateFactory = new MarkRolePairFactory();
+        // now we should have a MarkTemplate for each MarkConfiguration from the CourseConfiguration;
+        // let's see which MarkRoles need to be created based on the waypoints in the CourseConfiguration
+        final MarkRolePairFactory markRolePairFactory = new MarkRolePairFactory();
         final CourseConfigurationToCourseConfigurationMapper waypointConfigurationMapper = new CourseConfigurationToCourseConfigurationMapper(
                 courseConfigurationAfterInventory.getWaypoints(), courseConfigurationAfterInventory.getAssociatedRoles(),
                 marksConfigurationsMapping);
@@ -318,7 +319,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             @Override
             protected ControlPointTemplate createMarkPair(MarkRole left, MarkRole right, String name,
                     String shortName) {
-                return markPairTemplateFactory.create(name, shortName, Arrays.asList(left, right));
+                return markRolePairFactory.create(name, shortName, Arrays.asList(left, right));
             }
 
             @Override
@@ -544,6 +545,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                                     m -> createMarkConfigurationForRegattaMark(courseTemplate, optionalRegatta, m));
                 }
             }
+            // record usages in races/courses in the regatta
             final LastUsageBasedAssociater<RegattaMarkConfiguration, IsMarkRole> usagesForRole = new LastUsageBasedAssociater<>(
                     new HashSet<IsMarkRole>(courseTemplate.getDefaultMarkRolesForMarkTemplates().values()));
             for (RaceColumn raceColumn : optionalRegatta.getRaceColumns()) {
@@ -714,7 +716,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 name = courseTemplateOrNull.getName();
                 optionalImageURL = courseTemplateOrNull.getOptionalImageURL();
                 final Map<MarkTemplate, MarkConfiguration> markTemplatesToMarkConfigurations = new HashMap<>();
-                markTemplatesToMarkConfigurations.putAll(mapper.markTemplatesToMarkConfigurations);
+                markTemplatesToMarkConfigurations.putAll(mapper.markRolesToMarkConfigurations);
                 if (!mapper.markTemplatesNotIncluded.isEmpty()) {
                     for (MarkTemplate markTemplate : mapper.markTemplatesNotIncluded) {
                         final MarkConfiguration markConfiguration = new MarkTemplateBasedMarkConfigurationImpl(
@@ -780,7 +782,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     private class CourseToCourseTemplateMapper {
         boolean validCourseTemplateUsage;
         Integer numberOfLaps;
-        final Map<MarkTemplate, MarkConfiguration> markTemplatesToMarkConfigurations = new HashMap<>();
+        final Map<MarkRole, MarkConfiguration> markRolesToMarkConfigurations = new HashMap<>();
         final Set<MarkTemplate> markTemplatesNotIncluded = new HashSet<>();
         
         public CourseToCourseTemplateMapper(CourseBase course, CourseTemplate courseTemplate, Map<Mark, RegattaMarkConfiguration> markConfigurationsByMark) {
@@ -832,13 +834,13 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                                 break;
                             }
                             final RegattaMarkConfiguration regattaMarkConfiguration = markConfigurationsByMark.get(mark);
-                            markTemplatesToMarkConfigurations.putIfAbsent(roleForMarkTemplate, regattaMarkConfiguration);
+                            markRolesToMarkConfigurations.putIfAbsent(roleForMarkTemplate, regattaMarkConfiguration);
                         }
                     }
                 }
             }
-            Util.addAll(courseTemplate.getMarkTemplatesInWaypoints(), markTemplatesNotIncluded);
-            markTemplatesNotIncluded.removeAll(markTemplatesToMarkConfigurations.keySet());
+            Util.addAll(courseTemplate.getMarkTemplates(), markTemplatesNotIncluded);
+            markTemplatesNotIncluded.removeAll(courseTemplate.getDefaultMarkTemplatesForMarkRoles().values());
         }
     }
 
@@ -964,6 +966,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     private abstract class CourseSequenceMapper<C, M extends C, W> {
         final Map<M, IsMarkRole> explicitAssociatedRoles = new HashMap<>();
         final Map<M, IsMarkRole> allAssociatedRoles = new HashMap<>();
+        // TODO should we remove this field and let calculateEffectiveWaypoints return the list instead; this will clean up the somewhat convoluted construction order for subclasses
         final List<W> effectiveWaypoints = new ArrayList<>();
         private final Iterable<WaypointWithMarkConfiguration> waypoints;
         private final Map<MarkConfiguration, ? extends IsMarkRole> existingRoleMapping;
@@ -973,8 +976,9 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             this.waypoints = waypoints;
             this.existingRoleMapping = existingRoleMapping;
         }
+        
         public void calculateEffectiveWaypoints() {
-            // all preexisting explicit roles are added to the result
+            // all pre-existing explicit roles are added to the result
             for (Entry<MarkConfiguration, ? extends IsMarkRole> entry : existingRoleMapping.entrySet()) {
                 explicitAssociatedRoles.put(mapMarkConfiguration(entry.getKey()), entry.getValue());
             }
@@ -1021,7 +1025,6 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     }
     
     private abstract class CourseSequenceReplacementMapper<C, M extends C, W> extends CourseSequenceMapper<C, M, W> {
-        
         private final Map<MarkConfiguration, M> existingMapping;
 
         public CourseSequenceReplacementMapper(Iterable<WaypointWithMarkConfiguration> waypoints,
@@ -1059,7 +1062,6 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     };
     
     private class LastUsageBasedAssociater<T1, T2> {
-        
         private final Map<T1, Map<T2, TimePoint>> usagesByT1 = new HashMap<>();
         private final Map<T2, Map<T1, TimePoint>> usagesByT2 = new HashMap<>();
         private final Predicate<T2> t2Filter;

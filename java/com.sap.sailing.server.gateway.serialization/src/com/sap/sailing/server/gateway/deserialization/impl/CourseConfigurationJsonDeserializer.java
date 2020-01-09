@@ -63,7 +63,6 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
         }
         CourseConfigurationBuilder builder = new CourseConfigurationBuilder(sharedSailingData, regatta, optionalCourseTemplate,
                 name, optionalImageURL, positionResolver);
-
         final Map<UUID, MarkConfiguration> markConfigurationsByID = new HashMap<UUID, MarkConfiguration>();
         final JSONArray markConfigurationsJSON = (JSONArray) json
                 .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATIONS);
@@ -80,16 +79,13 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_FREESTYLE_PROPERTIES);
                 final CommonMarkProperties optionalFreestyleProperties = freestylePropertiesObject == null ? null
                         : commonMarkPropertiesJsonDeserializer.deserialize(freestylePropertiesObject);
-                
                 final Object positioningObject = markConfigurationJSON
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_POSITIONING);
                 final StorablePositioning storablePositioning = positioningObject instanceof JSONObject
                         ? storablePositioningJsonDeserializer.deserialize((JSONObject) positioningObject)
                         : null;
-                        
                 final boolean storeToInventory = Boolean.TRUE.equals(markConfigurationJSON
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_STORE_TO_INVENTORY));
-                
                 final MarkConfiguration markConfiguration = builder.addMarkConfiguration(
                         markTemplateID != null ? UUID.fromString(markTemplateID) : null,
                         markPropertiesID != null ? UUID.fromString(markPropertiesID) : null,
@@ -105,14 +101,12 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
                 if (markRoleIdOrNull != null || (markRoleNameOrNull != null && !markRoleNameOrNull.isEmpty())) {
                     builder.setRole(markConfiguration, markRoleIdOrNull, markRoleNameOrNull, markRoleShortNameOrNull);
                 }
-
                 markConfigurationsByID.put(
                         UUID.fromString((String) markConfigurationJSON
                                 .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_ID)),
                         markConfiguration);
             }
         }
-
         final JSONArray wayPointsJSON = (JSONArray) json.get(CourseConfigurationJsonSerializer.FIELD_WAYPOINTS);
         if (wayPointsJSON != null) {
             for (Object waypointObject : wayPointsJSON) {
