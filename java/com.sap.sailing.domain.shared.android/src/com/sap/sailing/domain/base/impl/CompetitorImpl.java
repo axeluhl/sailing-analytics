@@ -128,7 +128,7 @@ public class CompetitorImpl implements DynamicCompetitor {
         return getTeam() == null ? null : getTeam().getNationality();
     }
 
-    public Competitor resolve(SharedDomainFactory domainFactory) {
+    public Competitor resolve(SharedDomainFactory<?> domainFactory) {
         Competitor result = domainFactory
                 .getOrCreateCompetitor(getId(), getName(), getShortName(), getColor(), getEmail(), getFlagImage(), getTeam(),
                         getTimeOnTimeFactor(), getTimeOnDistanceAllowancePerNauticalMile(), searchTag, /* storePersistently */ true);

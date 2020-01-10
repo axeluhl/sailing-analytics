@@ -28,6 +28,8 @@ import com.sap.sse.common.Util;
 /**
  * Maneuver detector implementation for GPS tracks with extremely low sampling rate such as 1 fix per 30 seconds.
  * 
+ * FIXME The LowGPSSamplingRateManeuverDetectorImpl doesn't work very well; it recognizes many tacks only as bear-away and doesn't seem to have any noticeable benefits... See ORC Worlds 2019 ORC A Long Offshore
+ * 
  * @author Vladislav Chumak (D069712)
  *
  */

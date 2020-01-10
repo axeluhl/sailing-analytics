@@ -10,10 +10,12 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.event.EventLinkAndMetadataDTO;
+import com.sap.sailing.gwt.home.communication.start.EventStageDTO;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
+import com.sap.sailing.gwt.ui.shared.databylogo.DataByLogo;
 
 public abstract class StageTeaserBand extends Composite {
 
@@ -26,7 +28,10 @@ public abstract class StageTeaserBand extends Composite {
     DivElement bandTitle;
     @UiField
     DivElement bandSubtitle;
-    @UiField Anchor actionLink;
+    @UiField
+    Anchor actionLink;
+    @UiField
+    DataByLogo dataByLogo;
 
     private final MobilePlacesNavigator placeNavigator;
     private final EventLinkAndMetadataDTO event;
@@ -38,7 +43,13 @@ public abstract class StageTeaserBand extends Composite {
         
         StageResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-
+        
+        if (event instanceof EventStageDTO) {
+            dataByLogo.setUp(((EventStageDTO) event).getTrackingConnectorInfos(), /** colorIfPossible **/ false, /** enforceTextColor **/ true);
+        } else {
+            dataByLogo.setVisible(false);
+        }
+        
         eventNavigation = placeNavigator.getEventNavigation(event.getId().toString(), event.getBaseURL(), event.isOnRemoteServer());
     }
 

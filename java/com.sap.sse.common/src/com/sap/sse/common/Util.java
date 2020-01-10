@@ -356,7 +356,7 @@ public class Util {
             }
         });
     }
-
+    
     /**
      * A null-safe check whether <code>t</code> is contained in <code>ts</code>. For <code>ts==null</code> the method
      * immediately returns <code>false</code>.
@@ -895,5 +895,31 @@ public class Util {
             }
         }
         return latest;
+    }
+    
+    /**
+     * Sorts a set of arrays according to the sorting operations to be applied
+     * to the {@code keys} array to sort that in ascending order. Any element
+     * index change in {@code keys} also applies to all {@code values} arrays.
+     */
+    public static void sort(double[] keys, double[]... values) {
+        List<double[]> arrays = new ArrayList<>();
+        for (int i=0; i<keys.length; i++) {
+            double[] array = new double[values.length+1];
+            array[0] = keys[i];
+            for (int j=0; j<values.length; j++) {
+                array[j+1] = values[j][i];
+            }
+            arrays.add(array);
+        }
+        Collections.sort(arrays, (a1, a2)->Double.compare(a1[0], a2[0]));
+        int c=0;
+        for (final double[] array : arrays) {
+            keys[c] = array[0];
+            for (int i=1; i<array.length; i++) {
+                values[i-1][c] = array[i];
+            }
+            c++;
+        }
     }
 }

@@ -17,6 +17,21 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+************* TracAPI 3.12.5 ***************
+********************************************
+
+1) Features
+
+Release date: 21/11/2019
+Build number: 27eb535e
+
+ - If the sport is Orienteering/Route sport the API wont't retrieve the control positions from the server (Requested
+ by Jorge Piera, 29/07/2019)
+ - If the start time type is Individual and the competitor has start time, the API discards the positions two minutes
+ before the start (Requested by Jorge Piera, 29/07/2019)
+ - Adding the method IEvent.getWebURL (Requested by Axel Uhl, 20/11/2019)
+
+********************************************
 ************* TracAPI 3.12.4 ***************
 ********************************************
 This is a final version. It fixes some bugs. It keeps the backward compatibility.

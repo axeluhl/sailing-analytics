@@ -8,11 +8,12 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.impl.RaceRankComparator;
 import com.sap.sailing.domain.tracking.impl.WindwardToGoComparator;
@@ -20,28 +21,31 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
-public class OneDesignRankingMetric extends AbstractRankingMetric {
+public class OneDesignRankingMetric extends NonPerformanceCurveRankingMetric {
     private static final long serialVersionUID = -8141113385324184349L;
     
-    public final static RankingMetricConstructor CONSTRUCTOR = OneDesignRankingMetric::new;
-
     public OneDesignRankingMetric(TrackedRace trackedRace) {
         super(trackedRace);
     }
 
     @Override
-    public Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public RankingMetrics getType() {
+        return RankingMetrics.ONE_DESIGN;
+    }
+
+    @Override
+    public Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return new RaceRankComparator(getTrackedRace(), timePoint, cache);
     }
 
     @Override
     public Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg,
-            TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+            TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return new WindwardToGoComparator(trackedLeg, timePoint, cache);
     }
 
     @Override
-    public Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache) {
+    public Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         // When the competitor is in the same leg as the leader (which in this ranking metric is always the boat
         // farthest ahead) then the competitor's duration to reach the current leader's position is estimated based on the
         // competitor's average VMG on the current leg.
@@ -109,7 +113,7 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
     }
 
     @Override
-    public Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return getActualTimeSinceStartOfRace(competitor, timePoint);
     }
 
@@ -118,7 +122,7 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
      * reach her current position since passing <code>fromWaypoint</code>.
      */
     @Override
-    protected Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint, TimePoint timePointOfTosPosition, WindLegTypeAndLegBearingCache cache) {
+    protected Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint, TimePoint timePointOfTosPosition, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final MarkPassing whenToPassedFromWaypoint = getTrackedRace().getMarkPassing(to, fromWaypoint);
         validateGetDurationToReachAtEqualPerformanceParameters(to, fromWaypoint, timePointOfTosPosition, whenToPassedFromWaypoint);
         return whenToPassedFromWaypoint.getTimePoint().until(timePointOfTosPosition);
@@ -132,12 +136,12 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
 
     @Override
     public Duration getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint,
-            final RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+            final RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return trackedLegOfCompetitor.getGapToLeader(timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
     }
 
     @Override
-    public RankingInfo getRankingInfo(final TimePoint timePoint, final WindLegTypeAndLegBearingCache cache) {
+    public RankingInfo getRankingInfo(final TimePoint timePoint, final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return new AbstractRankingInfo(timePoint) {
             private static final long serialVersionUID = 25689357311324825L;
 
@@ -166,7 +170,7 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
                     }
 
                     @Override
-                    public Duration getActualTime() {
+                    public Duration getActualRaceDuration() {
                         final TimePoint startOfRace = getTrackedRace().getStartOfRace();
                         final Duration result;
                         if (startOfRace == null) {
@@ -182,7 +186,7 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
                      */
                     @Override
                     public Duration getCorrectedTime() {
-                        return getActualTime();
+                        return getActualRaceDuration();
                     }
 
                     @Override
@@ -211,5 +215,4 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
             }
         };
     }
-    
 }

@@ -20,7 +20,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -28,6 +27,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
@@ -262,7 +262,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
      */
     TracTracRaceTrackerImpl(DomainFactory domainFactory, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
-            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
+            RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
             RaceTrackingHandler raceTrackingHandler)
             throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException {
         this(/* regatta */ null, domainFactory, raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry,
@@ -286,7 +286,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
      */
     TracTracRaceTrackerImpl(final Regatta regatta, DomainFactory domainFactory, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
-            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
+            RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
             RaceTrackingHandler raceTrackingHandler)
             throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException {
         super(connectivityParams);

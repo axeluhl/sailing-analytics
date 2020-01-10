@@ -1,6 +1,7 @@
 package com.sap.sailing.server.util;
 
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.UUID;
 
 import org.junit.Assert;
@@ -22,7 +23,7 @@ public class EventUtilTest {
         Calendar calendar = Calendar.getInstance();
         calendar.set(year, month - 1, date);
         MillisecondsTimePoint startEnd = new MillisecondsTimePoint(calendar.getTime());
-        return new StrippedEventImpl("Test", startEnd, startEnd, "Anywhere", true, UUID.randomUUID(), null);
+        return new StrippedEventImpl("Test", startEnd, startEnd, "Anywhere", true, UUID.randomUUID(), 
+                /** leaderBoardGroups **/ null, /** trackingConnectorInfos **/ Collections.emptySet());
     }
-
 }

@@ -4,6 +4,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sse.common.filter.AbstractListFilter;
+import com.sap.sse.gwt.client.StringMessages;
 
 /**
  * This Panel contains a label and a text box. Text entered into the text box filters the {@link CellTable} passed to
@@ -26,12 +27,9 @@ import com.sap.sse.common.filter.AbstractListFilter;
  * 
  */
 public abstract class LabeledAbstractFilterablePanel<T> extends AbstractFilterablePanel<T> {
-
-    /**
-     */
-    public LabeledAbstractFilterablePanel(Label label, Iterable<T> all, final ListDataProvider<T> filtered) {
-        super(all, filtered);
+    public LabeledAbstractFilterablePanel(Label label, Iterable<T> all, final ListDataProvider<T> filtered,
+            StringMessages stringMessages) {
+        super(all, filtered, stringMessages);
         insert(label, 0);
     }
-
 }

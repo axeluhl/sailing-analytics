@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -250,37 +251,71 @@ public class ReplicationServlet extends AbstractHttpServlet {
         InputStream is = req.getInputStream();
         DataInputStream dis = new DataInputStream(is);
         String replicableIdAsString = dis.readUTF();
-        try {
-            Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */ false);
-            if (replicable != null) {
-                logger.info("Received request to apply and replicate an operation from a replica for replicable "+replicable);
-                checkReplicatorPermission(ServerActions.REPLICATE);
+        Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */ false);
+        if (replicable != null) {
+            logger.info("Received request to apply and replicate an operation from a replica for replicable "+replicable);
+            checkReplicatorPermission(ServerActions.REPLICATE);
+            try {
                 applyOperationToReplicable(replicable, is);
-            } else {
-                logger.warning("Received operation for replicable "+replicableIdAsString+
-                        ", but a replicable with that ID couldn't be found. Ignoring the operation.");
+            } catch (InvocationTargetException ite) {
+                Throwable originalException = ite.getTargetException();
+                if (originalException instanceof RuntimeException && originalException.getCause() != null) {
+                    originalException = originalException.getCause();
+                }
+                logger.log(Level.SEVERE, "Unrecoverable error applying operation received from replica", originalException);
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Exception " + ite.getCause()
+                        + " occurred while trying to receive and apply operation initiated on replica. Please do not re-send.");
+            } catch (ClassNotFoundException cnfe) {
+                logger.log(Level.SEVERE,
+                        "Exception occurred while trying to de-serialize operation", cnfe);
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Exception " + cnfe
+                        + " occurred while trying to de-serialize operation initiated on replica. Please do not re-send");
+            } catch (IOException ioe) {
+                logger.log(Level.SEVERE,
+                        "Exception occurred while trying to receive and apply operation initiated on replica", ioe);
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Exception " + ioe
+                        + " occurred while trying to receive and apply operation initiated on replica. Re-trying can make sense.");
             }
-        } catch (ClassNotFoundException e) {
-            logger.log(Level.SEVERE,
-                    "Exception occurred while trying to receive and apply operation initiated on replica", e);
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Exception " + e
-                    + " occurred while trying to receive and apply operation initiated on replica");
+        } else {
+            logger.warning("Received operation for replicable "+replicableIdAsString+
+                    ", but a replicable with that ID couldn't be found. Ignoring the operation.");
         }
     }
 
     /**
      * Applies <code>operation</code> to the replicable identified by <code>replicableIdAsString</code>. If such a
      * replicable cannot be found on this server instance, a warning is logged and the operation is ignored.
+     * 
+     * @throws ClassNotFoundException
+     *             in case during the de-serialization of the operation received in the input stream {@code is} a type
+     *             cannot be resolved. This then is a permanent error and it makes little sense for a replica trying to
+     *             re-send the operation.
+     * 
+     * @throws IOException
+     *             in case something went wrong with the de-serialization of the operation; there is a good chance for
+     *             the client that sending it again succeeds because such an exception could mean an interrupted
+     *             connection.
+     *             
+     * @throws InvocationTargetException
+     *             in case an exception was thrown while executing the operation after successfully receiving and
+     *             de-serializing it. Again, there is little sense in sending it again. The operation failed, hopefully
+     *             it produced some useful log entry and the replica may choose to log this event, too, but it should
+     *             not try sending the operation again, and in particular not at the expense of later operations that
+     *             otherwise may keep queued forever (see also bug 5117). 
      */
     private <S, R> void applyOperationToReplicable(Replicable<S, ?> replicable, InputStream is)
-            throws ClassNotFoundException, IOException {
+            throws ClassNotFoundException, IOException, InvocationTargetException {
         ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(replicable.getClass().getClassLoader());
         OperationWithResult<S, ?> operation = replicable.readOperation(is);
         Thread.currentThread().setContextClassLoader(oldContextClassLoader);
         logger.info("Applying operation of type " + operation.getClass().getName()
                 + " received from replica to replicable " + replicable.toString());
-        replicable.apply(operation);
+        try {
+            replicable.apply(operation);
+        } catch (Exception e) {
+            throw new InvocationTargetException(e);
+        }
     }
 
     private void deregisterClientWithReplicationService(HttpServletRequest req, HttpServletResponse resp) throws IOException {

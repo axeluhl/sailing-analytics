@@ -18,7 +18,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
@@ -36,6 +35,8 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Course;
@@ -65,6 +66,7 @@ import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
+import com.sap.sailing.domain.tracking.impl.TrackingConnectorInfoImpl;
 import com.sap.sailing.domain.tracking.impl.UpdateHandler;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
@@ -76,6 +78,7 @@ import difflib.PatchFailedException;
 
 public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
         implements SwissTimingRaceTracker, SailMasterListener, TrackingDataLoader {
+
     private static final Logger logger = Logger.getLogger(SwissTimingRaceTrackerImpl.class.getName());
     
     private final SailMasterConnector connector;
@@ -112,7 +115,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
      */
     private final TMDMessageQueue tmdMessageQueue;
 
-    private final RaceLogResolver raceLogResolver;
+    private final RaceLogAndTrackedRaceResolver raceLogResolver;
 
     /**
      * If set to a non-{@code null}, non-{@link String#isEmpty() empty} value, updates about start time changes, course
@@ -131,7 +134,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
     
     protected SwissTimingRaceTrackerImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, DomainFactory domainFactory, SwissTimingFactory factory,
-            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogAndTrackedRaceResolver raceLogResolver,
             SwissTimingTrackingConnectivityParameters connectivityParams, RaceTrackingHandler raceTrackingHandler)
             throws InterruptedException, UnknownHostException, IOException, ParseException, URISyntaxException {
         this(/* regatta */ null, windStore, domainFactory, factory, trackedRegattaRegistry, raceLogStore,
@@ -140,7 +143,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
 
     protected SwissTimingRaceTrackerImpl(Regatta regatta, WindStore windStore, DomainFactory domainFactory,
             SwissTimingFactory factory, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogStore raceLogStore,
-            RegattaLogStore regattaLogStore, RaceLogResolver raceLogResolver,
+            RegattaLogStore regattaLogStore, RaceLogAndTrackedRaceResolver raceLogResolver,
             SwissTimingTrackingConnectivityParameters connectivityParams, RaceTrackingHandler raceTrackingHandler)
             throws InterruptedException, UnknownHostException, IOException, ParseException, URISyntaxException {
         super(connectivityParams);
@@ -493,7 +496,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
                     assert SwissTimingRaceTrackerImpl.this.race == race;
                 }
             }, useInternalMarkPassingAlgorithm, raceLogResolver,
-                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());
+                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(),
+                    new TrackingConnectorInfoImpl(TrackingConnectorType.SwissTiming, /*no api connection to query the webUrl*/ null));
             addUpdateHandlers();
             notifyRaceCreationListeners();
             logger.info("Created SwissTiming RaceDefinition and TrackedRace for "+race.getName());

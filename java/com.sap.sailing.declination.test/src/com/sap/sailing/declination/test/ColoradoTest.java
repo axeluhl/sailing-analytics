@@ -9,6 +9,7 @@ import java.util.TimeZone;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -17,6 +18,7 @@ import com.sap.sailing.declination.impl.ColoradoImporter;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+@Ignore("currently, http://magcalc.geomag.info/ seems down")
 public class ColoradoTest {
     @Test
     public void simpleDocumentParsingTest() throws SAXException, IOException, ParserConfigurationException {

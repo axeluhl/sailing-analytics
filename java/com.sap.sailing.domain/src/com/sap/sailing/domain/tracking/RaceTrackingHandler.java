@@ -5,7 +5,6 @@ import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -19,6 +18,7 @@ import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.util.ThreadLocalTransporter;
@@ -35,8 +35,9 @@ public interface RaceTrackingHandler {
             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator,
-            RaceLogResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter);
-    
+            RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter,
+            TrackingConnectorInfo trackingConnectorInfo);
+
     DynamicCompetitor getOrCreateCompetitor(CompetitorAndBoatStore competitorAndBoatStore, Serializable competitorId,
             String name, String shortName, Color displayColor, String email, URI flagImageURI, DynamicTeam team,
             Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag);
@@ -58,10 +59,11 @@ public interface RaceTrackingHandler {
                 Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
                 long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
                 DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator,
-                RaceLogResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter) {
+                RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter,
+                TrackingConnectorInfo trackingConnectorInfo) {
             return trackedRegatta.createTrackedRace(raceDefinition, sidelines, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate,
-                    useMarkPassingCalculator, raceLogResolver, threadLocalTransporter);
+                    useMarkPassingCalculator, raceLogResolver, threadLocalTransporter, trackingConnectorInfo);
         }
 
         @Override

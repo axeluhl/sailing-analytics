@@ -72,7 +72,23 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * Same as {@link #getWindwardDistanceToGo(TimePoint, WindPositionMode)}, only that a cache for wind and leg
      * type / bearing can be passed.
      */
-    Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode legMiddle, WindLegTypeAndLegBearingCache cache);
+    Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+
+    /**
+     * Like
+     * {@link #getWindwardDistanceToGo(TimePoint, WindPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)},
+     * but with the possibility to fix a {@link LegType} for analysis.
+     * 
+     * @param legTypeOrNull
+     *            if {@code null}, the result is as specified for
+     *            {@link #getWindwardDistanceToGo(TimePoint, WindPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}, and
+     *            the leg type will be inferred from the wind field at the middle of the leg for the given {@code timePoint}.
+     *            In all other cases, the {@link LegType} specified will be assumed for determining the distance; in particular,
+     *            for {@link LegType#REACHING reaching} legs, projection to the rhumb line instead of to the wind will be
+     *            used.
+     */
+    Distance getWindwardDistanceToGo(LegType legTypeOrNull, TimePoint timePoint, WindPositionMode windPositionMode,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Computes an approximation for the average velocity made good (windward / leeward speed) of this leg's competitor at
@@ -154,7 +170,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * Same as {@link #getRank(TimePoint)} with the additional option to provide a cache
      * that can help avoid redundant calculations of wind and leg data.
      */
-    int getRank(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+    int getRank(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Computes the gap in seconds to the leader / winner of this leg. Returns <code>null</code> in case this leg's
@@ -165,7 +181,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
     /**
      * Same as {@link #getGapToLeader(TimePoint, RankingInfo, WindPositionMode)}, only that a cache for wind and leg type data is used.
      */
-    Duration getGapToLeader(TimePoint timePoint, WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);
+    Duration getGapToLeader(TimePoint timePoint, WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * If a caller already went through the effort of computing the leg's leader at <code>timePoint</code>, it
@@ -179,7 +195,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * all can use the same basic information.
      */
     Duration getGapToLeader(TimePoint timePoint, Competitor leaderInLegAtTimePoint,
-            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);
+            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     boolean hasStartedLeg(TimePoint timePoint);
     
@@ -208,7 +224,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * Same as {@link #getVelocityMadeGood(TimePoint, WindPositionMode)}, only that a cache for wind data and leg type and bearing
      * is passed.
      */
-    SpeedWithBearing getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
+    SpeedWithBearing getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
 
     /**
@@ -219,7 +235,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
     /**
      * Same as {@link #getEstimatedTimeToNextMark(TimePoint, WindPositionMode)}, only that a cache for leg type calculation is passed.
      */
-    Duration getEstimatedTimeToNextMark(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
+    Duration getEstimatedTimeToNextMark(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet. If in the leg at
@@ -264,7 +280,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * Same as {@link #getWindwardDistanceToCompetitorFarthestAhead(TimePoint, WindPositionMode, RankingInfo)}, only that a cache for leg type
      * calculation is passed.
      */
-    Distance getWindwardDistanceToCompetitorFarthestAhead(TimePoint timePoint, WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);
+    Distance getWindwardDistanceToCompetitorFarthestAhead(TimePoint timePoint, WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Computes the average absolute cross track error for this leg. The cross track error for each fix is taken to be a
@@ -289,7 +305,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * Like {@link #getAverageVelocityMadeGood(TimePoint)}, only with an additional cache argument that allows the method to
      * use already computed values for wind and leg type, potentially also updating the cache as it goes.
      */
-    Speed getAverageVelocityMadeGood(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+    Speed getAverageVelocityMadeGood(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * If the {@link #getCompetitor() competitor} hasn't started the {@link #getTrackedLeg() leg} yet at

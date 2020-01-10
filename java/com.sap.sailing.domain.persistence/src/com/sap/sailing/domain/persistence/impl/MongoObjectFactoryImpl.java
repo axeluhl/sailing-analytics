@@ -27,6 +27,11 @@ import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
+import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
@@ -49,6 +54,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
@@ -99,6 +105,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
+import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -125,6 +132,8 @@ import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerialize
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorWithBoatRefJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.ImpliedWindSourceSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.ORCCertificateJsonSerializer;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -835,7 +844,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    private void storeRaceLogIdentifier(RaceLogIdentifier raceLogIdentifier, Document result) {
+    private void storeRaceLogIdentifier(SimpleRaceLogIdentifier raceLogIdentifier, Document result) {
         result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
     }
 
@@ -986,7 +995,77 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogSuppressedMarkPassingsEvent(event));
         return result;
     }
+    
+    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogORCLegDataEvent event) {
+        Document result = new Document();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeORCLegDataEvent(event));
+        return result;
+    }
 
+    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogORCCertificateAssignmentEvent event) {
+        Document result = new Document();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeORCCertificateAssignmentEvent(event));
+        return result;
+    }
+
+    private Document storeORCCertificateAssignmentEvent(RaceLogORCCertificateAssignmentEvent event) {
+        Document result = new Document();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCCertificateAssignmentEvent.class.getSimpleName());
+        result.append(FieldNames.RACE_LOG_BOAT_ID.name(), event.getBoatId());
+        result.append(FieldNames.ORC_CERTIFICATE.name(), createORCCertificateObject(event.getCertificate()));
+        return result;
+    }
+    
+    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogORCScratchBoatEvent event) {
+        Document result = new Document();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeORCScratchBoatEvent(event));
+        return result;
+    }
+
+    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogORCImpliedWindSourceEvent event) {
+        Document result = new Document();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeORCImpliedWindSourceEvent(event));
+        return result;
+    }
+    
+    private Document storeORCImpliedWindSourceEvent(RaceLogORCImpliedWindSourceEvent event) {
+        final Document result = new Document();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCImpliedWindSourceEvent.class.getSimpleName());
+        final Document impliedWindSourceDocument;
+        if (event.getImpliedWindSource() == null) {
+            impliedWindSourceDocument = null;
+        } else {
+            final JSONObject jsonSerializedImpliedWindSource = new ImpliedWindSourceSerializer().serialize(event.getImpliedWindSource());
+            impliedWindSourceDocument = Document.parse(jsonSerializedImpliedWindSource.toString());
+        }
+        result.put(FieldNames.ORC_IMPLIED_WIND_SOURCE.name(), impliedWindSourceDocument);
+        return result;
+    }
+
+    private Document storeORCScratchBoatEvent(RaceLogORCScratchBoatEvent event) {
+        Document result = new Document();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCScratchBoatEvent.class.getSimpleName());
+        return result;
+    }
+    
+    private Document storeORCLegDataEvent(RaceLogORCLegDataEvent event) {
+        Document result = new Document();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCLegDataEvent.class.getSimpleName());
+        result.put(FieldNames.ORC_LEG_NR.name(), event.getOneBasedLegNumber());
+        result.put(FieldNames.ORC_LEG_LENGTH_IN_NAUTICAL_MILES.name(), event.getLength()==null?null:event.getLength().getNauticalMiles());
+        result.put(FieldNames.ORC_LEG_TWA_IN_DEG.name(), event.getTwa()==null?null:event.getTwa().getDegrees());
+        result.put(FieldNames.ORC_LEG_TYPE.name(), event.getType().name());
+        return result;
+    }
+    
     private Object storeRaceLogWindFix(RaceLogWindFixEvent event) {
         Document result = new Document();
         storeRaceLogEventProperties(event, result);
@@ -1160,12 +1239,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeTimePoint(event.getCreatedAt(), result, FieldNames.RACE_LOG_EVENT_CREATED_AT);
         result.put(FieldNames.RACE_LOG_EVENT_ID.name(), event.getId());
         result.put(FieldNames.RACE_LOG_EVENT_PASS_ID.name(), event.getPassId());
-        result.put(FieldNames.RACE_LOG_EVENT_INVOLVED_BOATS.name(), storeInvolvedBoatsForRaceLogEvent(event.getInvolvedCompetitors()));
+        result.put(FieldNames.RACE_LOG_EVENT_INVOLVED_BOATS.name(), storeInvolvedCompetitorsForRaceLogEvent(event.getInvolvedCompetitors()));
         storeRaceLogEventAuthor(result, event.getAuthor());
     }
 
 
-    private BasicDBList storeInvolvedBoatsForRaceLogEvent(List<Competitor> competitors) {
+    private BasicDBList storeInvolvedCompetitorsForRaceLogEvent(List<Competitor> competitors) {
         BasicDBList dbInvolvedCompetitorIds = new BasicDBList();
         for (Competitor competitor : competitors) {
             dbInvolvedCompetitorIds.add(competitor.getId());
@@ -1222,7 +1301,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(finishPositioningListChangedEvent, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFinishPositioningListChangedEvent.class.getSimpleName());
         result.put(FieldNames.RACE_LOG_POSITIONED_COMPETITORS.name(), storePositionedCompetitors(finishPositioningListChangedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
-
         return result;
     }
 
@@ -1231,7 +1309,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(finishPositioningConfirmedEvent, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFinishPositioningConfirmedEvent.class.getSimpleName());
         result.put(FieldNames.RACE_LOG_POSITIONED_COMPETITORS.name(), storePositionedCompetitors(finishPositioningConfirmedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
-
         return result;
     }
     
@@ -1794,5 +1871,19 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    
+    private Document createORCCertificateObject(ORCCertificate certificate) {
+        final ORCCertificateJsonSerializer serializer = new ORCCertificateJsonSerializer();
+        final Document result = Document.parse(serializer.serialize(certificate).toString());
+        return result;
+    }
+
+    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeIdentifier, RegattaLogORCCertificateAssignmentEvent event) {
+        Document document = createBasicRegattaLogEventDBObject(event);
+        document.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogORCCertificateAssignmentEvent.class.getSimpleName());
+        document.append(FieldNames.RACE_LOG_BOAT_ID.name(), event.getBoatId());
+        document.append(FieldNames.ORC_CERTIFICATE.name(), createORCCertificateObject(event.getCertificate()));
+        storeRegattaLogEvent(regattaLikeIdentifier, document);
     }
 }

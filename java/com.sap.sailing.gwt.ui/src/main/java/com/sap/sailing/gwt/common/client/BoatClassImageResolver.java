@@ -62,6 +62,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.FARR_30.getDisplayName(), imageResources.Farr30Icon());
         boatClassIconsMap.put(BoatClassMasterdata.FARR_280.getDisplayName(), imageResources.Farr280Icon());
         boatClassIconsMap.put(BoatClassMasterdata.FINN.getDisplayName(), imageResources.FinnIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.FIRST_CLASS_7_5.getDisplayName(), imageResources.FirstClass75Icon());
         boatClassIconsMap.put(BoatClassMasterdata.FLYING_DUTCHMAN.getDisplayName(), imageResources.FlyingDutchmanIcon());
         boatClassIconsMap.put(BoatClassMasterdata.FLYING_JUNIOR.getDisplayName(), imageResources.FlyingJuniorIcon());
         boatClassIconsMap.put(BoatClassMasterdata.FLYING_PHANTOM.getDisplayName(), imageResources.FlyingPhantomIcon());
@@ -96,6 +97,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.MELGES_20.getDisplayName(), imageResources.Melges20Icon());
         boatClassIconsMap.put(BoatClassMasterdata.MELGES_24.getDisplayName(), imageResources.Melges24Icon());
         boatClassIconsMap.put(BoatClassMasterdata.MINI_TRANSAT.getDisplayName(), imageResources.MiniTransatIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.MOCRA.getDisplayName(), imageResources.MOCRAIcon());
         boatClassIconsMap.put(BoatClassMasterdata.MUSTO_SKIFF.getDisplayName(), imageResources.MustoSkiffIcon());
         boatClassIconsMap.put(BoatClassMasterdata.NACRA_15.getDisplayName(), imageResources.Nacra15Icon());
         boatClassIconsMap.put(BoatClassMasterdata.NACRA_17.getDisplayName(), imageResources.Nacra17Icon());        
@@ -131,6 +133,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.TECHNO_293.getDisplayName(), imageResources.Techno293Icon());
         boatClassIconsMap.put(BoatClassMasterdata.TECHNO_293_PLUS.getDisplayName(), imageResources.Techno293PlusIcon());
         boatClassIconsMap.put(BoatClassMasterdata.TEENY.getDisplayName(), imageResources.TeenyIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.TEMPEST.getDisplayName(), imageResources.TempestIcon());
         boatClassIconsMap.put(BoatClassMasterdata.TORNADO.getDisplayName(), imageResources.TornadoIcon());
         boatClassIconsMap.put(BoatClassMasterdata.TOM_28_MAX.getDisplayName(), imageResources.Tom28MaxIcon());
         boatClassIconsMap.put(BoatClassMasterdata.TP52.getDisplayName(), imageResources.TP52Icon());

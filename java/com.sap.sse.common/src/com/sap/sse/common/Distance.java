@@ -96,7 +96,7 @@ public interface Distance extends Comparable<Distance>, Serializable {
         }
     }
     
-    static final NullDistance NULL = new NullDistance();
+    static NullDistance NULL = new NullDistance();
     
     double getGeographicalMiles();
 

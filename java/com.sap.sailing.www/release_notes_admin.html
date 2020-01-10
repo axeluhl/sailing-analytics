@@ -21,7 +21,103 @@
 			<div class="mainContent">
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
-		    <h2 class="articleSubheadline">July 2019</h2>
+                    <h2 class="articleSubheadline">November 2019</h2>
+                    <ul class="bulletList">
+                        <li>Added system property <tt>security.sharedAcrossSubdomains</tt> which can be used to
+                            configure the security service as shared across several subdomains of the parent
+                            domain specified by the system property. Use, e.g., as in<pre>
+                              -Dsecurity.sharedAcrossSubdomainsOf=sapsailing.com
+                            </pre>
+                        </li>
+                        <li>Added system property <tt>security.baseUrlForCrossDomainStorage</tt> which can be used to
+                            configure which origin's local storage is used, e.g., for storing settings and the time point
+                            a user was seen last. Use, e.g., as in<pre>
+                              -Dsecurity.baseUrlForCrossDomainStorage=https://www.sapsailing.com
+                            </pre>
+                            This allows the settings to be shared across different sub-domains. Note that the instance
+                            of the SAP Sailing Analytics running at the base URL chosen needs to be configured to allow
+                            requests from the domain hosting your instance of the application.<p>
+                            The implementation includes an invisible <tt>iframe</tt> element in the page, loaded from the base URL provided
+                            in the system property and then uses cross-window, cross-domain messaging between the application
+                            and the <tt>iframe</tt> to request storage access and receive responses and storage events.
+                        </li>
+                        <li>Added system property <tt>gwt.acceptableCrossDomainStorageRequestOriginRegexp</tt> which can be used to
+                            configure which origins are permitted to access the local storage in the server instance. For example,
+                            to grant access to the local storage of www.sapsailing.com for all sub-domains of sapsailing.com including
+                            sapsailing.com itself, specify
+                            the following regular expression:<pre>
+                              -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sapsailing\.com$
+                            </pre> or, for allowing for an optional port specification, it could be something like<pre>
+                              -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sapsailing\.com(:[0-9]*)?$
+                            </pre>
+                            To represent this in the <tt>env.sh</tt> configuration file for an instance, use, e.g., something like this:<pre>
+                                ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\\.)?sapsailing\\.com\$"
+                            </pre>
+                            Note the escaping of the backslashes and the $ sign with a preceding backslash character in this Bash
+                            syntax.<p>
+                            This allows the <tt>iframe</tt> embedded in other instances for cross-domain local storage access to
+                            read from the local storage compartment for domain www.sapsailing.com (the example instance configured
+                            by the system property shown above) if the other instance's origin ends on ".sapsailing.com".<p>
+                            Note that the origin is presented as the scheme (e.g., "https://") plus the hostname, plus optionally
+                            the colon-separated port, so you may be seeing something like "https://lyc.sapsailing.com" or
+                            "http://127.0.0.1:8888".<p>
+                            If the system property is not specified, no origin will be permitted to use this instance's local storage
+                            through the cross-domain storage mechanism.
+                        </li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">October 2019</h2>
+                    <ul class="bulletList">
+                        <li>
+                            The ORC Performance Curve (PCS) ranking metric is now implemented. Two flavors exist, one
+                            as valid up until 2015 with ranking by implied wind and corrected times calculated
+                            using a scratch boat's performance curve; and the current default one valid starting
+                            from 2015, using each competitor's own performance curve to calculate the allowance
+                            based on the greatest implied wind achieved in the race and then computing the
+                            corrected time as the delta between time elapsed and individual allowance.<p>
+                            In the Regattas/Regattas tab the boat certificates can be managed with a new action
+                            button. Certificates can be uploaded, and certificates can be referenced by URL,
+                            e.g., pointing to the ORC web site's certificate database. Then, the certificates
+                            can be assigned to the boats one by one. Certifiate assignment can be overruled on
+                            a per-race basis in the Leaderboards/Leaderboards tab.<p>
+                            Furthermore, course definitions can be fixed for the ORC PCS rules; legs can be
+                            defined to be "constructed course" or any of the pre-defined types (windward/leeward,
+                            coastal long distance, non-spinnaker, and circular random). Tracking data can be used
+                            to pre-fill leg distance and true wind angle. Desired total course distances can be spread
+                            proportionally across the legs based on their estimated length. For more details
+                            see <a href="https://wiki.sapsailing.com/wiki/howto/setup-orc-regatta">https://wiki.sapsailing.com/wiki/howto/setup-orc-regatta</a>.
+                        </li>
+                        <li>
+                        	Loading a race using the TracTrac connector used to determine the race's boat class
+                        	based on the boat class of the majority of the race's competitors. This approach leads
+                        	to trouble specifically for non-one-design regattas where different boats compete against
+                        	each other, and the regatta is modeled with a "boat class" representing the handicap
+                        	rule set, such as IRC, ORC, or similar. Now, the race boat class is inferred from the
+                        	regatta boat class in which the race is created. Only in case a default regatta needs
+                        	to be created, the old majority rule applies to determining the regatta's (and
+                        	consequently the race's) boat class.
+                        </li>
+                    </ul>
+                    <h2 class="articleSubheadline">September 2019</h2>
+                    <ul class="bulletList">
+                        <li>
+                            The RaceBoard timeslider has been adjusted to react to blue flag events. In particular the
+                            timeslider will wait for a blue flag down event if a blue flag up event has occurred.
+                        </li>
+                    </ul>
+		    <h2 class="articleSubheadline">August 2019</h2>
+                    <ul class="bulletList">
+                        <li>New API endpoints were added to get the status of tracking devices. By now, just the last received GPS fix is returned in the status.
+                            Under /sailingserver/api/v1/tracking_devices/[deviceUUID] the status of smartphone tracking devices can be read by using the device's UUID.
+                            /sailingserver/api/v1/regattas/[regattaName]/tracking_devices the status for all tracking devices associated to a regatta is returned.
+                            While the first requires the non public device UUID to be included in the request, the latter requires a user to have UPDATE permission for the regatta in question.
+                        </li>
+                        <li>Added a filter to hide all elements the current user is not allowed to edit. The filter can 
+                            be applied for each table in the AdminConsole and is active per default.
+                        </li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">July 2019</h2>
                     <ul class="bulletList">
                         <li>Result and competitor import URLs are now only considered when the requesting user
                             has the permission to read that URL.</li>

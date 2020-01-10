@@ -55,11 +55,13 @@ import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeseria
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResultBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfoJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardSearchResultJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.TrackingConnectorInfoJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.interfaces.RacingEventService;
@@ -248,11 +250,11 @@ public class SearchServiceTest {
         server.apply(new AddRaceDefinition(pfingstbusch29er.getRegattaIdentifier(), pfingstbusch29erR3));
         // track only R1 and R3
         pfingstbusch29erTrackedR1 = server.apply(new CreateTrackedRace(pfingstbusch29er.getRaceIdentifier(pfingstbusch29erR1), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
-                /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000));
+                /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000, null));
         pfingstbusch29erTrackedR1.setStartOfTrackingReceived(pfingstbuschStartDate.plus(1));
         pfingstbusch29erLeaderboard.getRaceColumnByName("R1").setTrackedRace(pfingstbusch29erLeaderboard.getRaceColumnByName("R1").getFleetByName("Default"), pfingstbusch29erTrackedR1);
         pfingstbusch29erTrackedR3 = server.apply(new CreateTrackedRace(pfingstbusch29er.getRaceIdentifier(pfingstbusch29erR3), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
-                /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000));
+                /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000, null));
         pfingstbusch29erLeaderboard.getRaceColumnByName("R3").setTrackedRace(pfingstbusch29erLeaderboard.getRaceColumnByName("R3").getFleetByName("Default"), pfingstbusch29erTrackedR3);
 
         final RaceDefinitionImpl pfingstbush470R1 = new RaceDefinitionImpl("R1", new CourseImpl("up/down", Collections.<Waypoint>emptyList()), pfingstbusch470.getBoatClass(),
@@ -263,11 +265,11 @@ public class SearchServiceTest {
         server.apply(new AddRaceDefinition(pfingstbusch470.getRegattaIdentifier(), pfingstbush470R2));
         // track only R1 and R2
         pfingstbusch470TrackedR1 = server.apply(new CreateTrackedRace(pfingstbusch470.getRaceIdentifier(pfingstbush470R1), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
-                /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000));
+                /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000, null));
         pfingstbusch470TrackedR1.setStartOfTrackingReceived(pfingstbuschStartDate.plus(2)); // starts later than 29er
         pfingstbusch470Leaderboard.getRaceColumnByName("R1").setTrackedRace(pfingstbusch470Leaderboard.getRaceColumnByName("R1").getFleetByName("Default"), pfingstbusch470TrackedR1);
         pfingstbusch470TrackedR2 = server.apply(new CreateTrackedRace(pfingstbusch470.getRaceIdentifier(pfingstbush470R2), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
-                /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000));
+                /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000, null));
         pfingstbusch470Leaderboard.getRaceColumnByName("R2").setTrackedRace(pfingstbusch470Leaderboard.getRaceColumnByName("R2").getFleetByName("Default"), pfingstbusch470TrackedR2);
 
         final RaceDefinitionImpl aalOrcR1 = new RaceDefinitionImpl("R1", new CourseImpl("up/down", Collections.<Waypoint>emptyList()), aalRegatta.getBoatClass(),
@@ -278,11 +280,11 @@ public class SearchServiceTest {
         server.apply(new AddRaceDefinition(aalRegatta.getRegattaIdentifier(), aalOrcR2));
         // track only R1 and R2
         aalOrcTrackedR1 = server.apply(new CreateTrackedRace(aalRegatta.getRaceIdentifier(aalOrcR1), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
-                /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000));
+                /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000, null));
         aalOrcTrackedR1.setStartOfTrackingReceived(aalStartDate);
         aalRegattaLeaderboard.getRaceColumnByName("R1").setTrackedRace(aalRegattaLeaderboard.getRaceColumnByName("R1").getFleetByName("Default"), aalOrcTrackedR1);
         aalOrcTrackedR2 = server.apply(new CreateTrackedRace(aalRegatta.getRaceIdentifier(aalOrcR2), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
-                /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000));
+                /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000, null));
         aalRegattaLeaderboard.getRaceColumnByName("R2").setTrackedRace(aalRegattaLeaderboard.getRaceColumnByName("R2").getFleetByName("Default"), aalOrcTrackedR2);
     }
     
@@ -355,15 +357,19 @@ public class SearchServiceTest {
 
     @Test
     public void testSerializeAndDeserializeSearchResult() throws JsonDeserializationException {
-        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Buhl" })));
+        Result<LeaderboardSearchResult> searchResults = server
+                .search(new KeywordQuery(Arrays.asList(new String[] { "Buhl" })));
         LeaderboardGroupBaseJsonSerializer leaderboardGroupBaseJsonSerializer = new LeaderboardGroupBaseJsonSerializer();
-        LeaderboardSearchResultJsonSerializer serializer = new LeaderboardSearchResultJsonSerializer(new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()),
-                leaderboardGroupBaseJsonSerializer),
+        LeaderboardSearchResultJsonSerializer serializer = new LeaderboardSearchResultJsonSerializer(
+                new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()),
+                        leaderboardGroupBaseJsonSerializer, new TrackingConnectorInfoJsonSerializer()),
                 leaderboardGroupBaseJsonSerializer);
         LeaderboardGroupBaseJsonDeserializer leaderboardGroupBaseJsonDeserializer = new LeaderboardGroupBaseJsonDeserializer();
         LeaderboardSearchResultBaseJsonDeserializer deserializer = new LeaderboardSearchResultBaseJsonDeserializer(
-                new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
-                        leaderboardGroupBaseJsonDeserializer), leaderboardGroupBaseJsonDeserializer);
+                new EventBaseJsonDeserializer(
+                        new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
+                        leaderboardGroupBaseJsonDeserializer, new TrackingConnectorInfoJsonDeserializer()),
+                leaderboardGroupBaseJsonDeserializer);
         final LeaderboardSearchResult expected = searchResults.getHits().iterator().next();
         LeaderboardSearchResultBase deserialized = deserializer.deserialize(serializer.serialize(expected));
         assertEquals("Pfingstbusch (470)", deserialized.getRegattaName());

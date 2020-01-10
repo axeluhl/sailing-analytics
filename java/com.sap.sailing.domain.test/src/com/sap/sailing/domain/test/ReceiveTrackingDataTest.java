@@ -10,7 +10,6 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -18,6 +17,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.AddResult;
@@ -27,8 +27,8 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -89,7 +89,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                             public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                             }
                         },
-                        /* trackedRegattaRegistry */null, mock(RaceLogResolver.class), mock(LeaderboardGroupResolver.class), getTracTracRace(), /* courseDesignUpdateURI */
+                        /* trackedRegattaRegistry */null, mock(RaceLogAndTrackedRaceResolver.class), mock(LeaderboardGroupResolver.class), getTracTracRace(), /* courseDesignUpdateURI */
                         null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
                         new DefaultRaceTrackingHandler())) {
             receiver.subscribe();
@@ -103,7 +103,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                             @Override
                             public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                             }
-                        }, /* trackedRegattaRegistry */null, mock(RaceLogResolver.class), mock(LeaderboardGroupResolver.class), getTracTracRace(), /* courseDesignUpdateURI */
+                        }, /* trackedRegattaRegistry */null, mock(RaceLogAndTrackedRaceResolver.class), mock(LeaderboardGroupResolver.class), getTracTracRace(), /* courseDesignUpdateURI */
                         null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
                         new DefaultRaceTrackingHandler()));
     }

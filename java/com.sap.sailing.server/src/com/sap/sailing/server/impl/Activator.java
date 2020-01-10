@@ -133,8 +133,7 @@ public class Activator implements BundleActivator {
                         // only continue once we have the service, as some of the services require it to start properly
                         securityServiceTracker.waitForService(0);
                         internalStartBundle(context);
-                    } catch (InterruptedException | MalformedObjectNameException | InstanceAlreadyExistsException
-                            | MBeanRegistrationException | NotCompliantMBeanException | MalformedURLException e) {
+                    } catch (Exception e) {
                         logger.log(Level.SEVERE, "Could not start RacingEvent service properly", e);
                     }
                 };
@@ -204,39 +203,31 @@ public class Activator implements BundleActivator {
             InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException {
         mailQueue = new ExecutorMailQueue(mailServiceTracker);
         notificationService = new SailingNotificationServiceImpl(context, mailQueue);
-
         trackedRegattaListener = new OSGiBasedTrackedRegattaListener(context);
-
         registrations.add(context.registerService(HasPermissionsProvider.class,
                 (HasPermissionsProvider) SecuredDomainType::getAllInstances, null));
-        
         registrations.add(context.registerService(SecurityInitializationCustomizer.class,
                 (SecurityInitializationCustomizer) securityService -> {
                     final RoleDefinition sailingViewerRoleDefinition = securityService.getOrCreateRoleDefinitionFromPrototype(SailingViewerRole.getInstance());
                     if (securityService.isInitialOrMigration()) {
-                        
                         // The server is initially set to be public by adding sailing_viewer role to the server group
                         // with forAll=true
                         securityService.putRoleDefinitionToUserGroup(securityService.getDefaultTenant(),
                                 sailingViewerRoleDefinition, true);
-                        
                         // sailing_viewer role is publicly readable
                         securityService.addToAccessControlList(sailingViewerRoleDefinition.getIdentifier(), null, DefaultActions.READ.name());
                     }
                 }, null));
-
         final TrackedRaceStatisticsCache trackedRaceStatisticsCache = new TrackedRaceStatisticsCacheImpl();
         registrations.add(context.registerService(TrackedRaceStatisticsCache.class.getName(),
                 trackedRaceStatisticsCache, null));
         registrations.add(context.registerService(TrackedRegattaListener.class.getName(),
                 trackedRaceStatisticsCache, null));
-
         // At this point the OSGi resolver is used as device type service finder.
         // In the case that we are not in an OSGi context (e.g. running a JUnit test instead),
         // this code block is not run, and the test case can inject some other type of finder
         // instead.
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
-
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors,
                 serviceFinderFactory, trackedRegattaListener, notificationService,
                 trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker);

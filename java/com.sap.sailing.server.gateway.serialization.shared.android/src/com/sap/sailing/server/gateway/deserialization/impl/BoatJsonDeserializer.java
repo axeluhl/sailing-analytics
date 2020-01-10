@@ -35,11 +35,11 @@ public class BoatJsonDeserializer implements JsonDeserializer<DynamicBoat> {
      */
     private final boolean storeDeserializedCompetitorsPersistently;
     
-    public static BoatJsonDeserializer create(SharedDomainFactory baseDomainFactory, boolean storeDeserializedCompetitorsPersistently) {
+    public static BoatJsonDeserializer create(SharedDomainFactory<?> baseDomainFactory, boolean storeDeserializedCompetitorsPersistently) {
         return new BoatJsonDeserializer(baseDomainFactory, new BoatClassJsonDeserializer(baseDomainFactory), storeDeserializedCompetitorsPersistently);
     }
     
-    public static BoatJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
+    public static BoatJsonDeserializer create(SharedDomainFactory<?> baseDomainFactory) {
         return create(baseDomainFactory, /* storeDeserializedCompetitorsPersistently */ true);
     }
     

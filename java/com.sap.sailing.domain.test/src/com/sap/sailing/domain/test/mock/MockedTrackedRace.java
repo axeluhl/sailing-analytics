@@ -10,13 +10,13 @@ import java.util.TreeSet;
 import java.util.concurrent.Future;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -25,7 +25,6 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
@@ -49,6 +48,7 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.CompetitorProviderFromRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
@@ -77,8 +77,9 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
+import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
-import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindSummary;
@@ -117,6 +118,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public TimePoint getStartOfRace(boolean inferred) {
+        return null;
+    }
+
+    @Override
+    public TimePoint getFinishingTime() {
         return null;
     }
 
@@ -181,7 +187,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public int getRank(Competitor competitor, TimePoint timePoint) {
+    public int getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return 0;
     }
 
@@ -652,7 +658,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     WindStore windStore, long delayToLiveInMillis,
                     long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
                     DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingcalculator,
-                    RaceLogResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter) {
+                    RaceLogAndTrackedRaceResolver raceLogResolver,
+                    Optional<ThreadLocalTransporter> threadLocalTransporter,
+                    TrackingConnectorInfo trackingConnectorInfo) {
                 return null;
             }
 
@@ -826,7 +834,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint,
-            boolean waitForLatestAnalyses, WindLegTypeAndLegBearingCache cache) {
+            boolean waitForLatestAnalyses, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 
@@ -1017,6 +1025,17 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidenceWithNumberOfSamples(int numberOfSamples) {
+        return null;
+    }
+
+    @Override
+    public SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(TimePoint formTimePoint,
+            TimePoint toTimePoint, int numberOfSamples) {
+        return null;
+    }
+
+    @Override
     public Distance getCourseLength() {
         return null;
     }
@@ -1040,7 +1059,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint,
-            boolean waitForLatestAnalyses, WindLegTypeAndLegBearingCache cache) {
+            boolean waitForLatestAnalyses, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 
@@ -1126,17 +1145,17 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint,
-            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 
     @Override
-    public Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 
@@ -1146,7 +1165,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
+    public IsManagedByCache<DomainFactory> resolve(DomainFactory domainFactory) {
         return this;
     }
 
@@ -1156,6 +1175,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad) {
+    }
+
+    @Override
+    public void setFinishingTime(TimePoint newFinishingTime) {
     }
 
     @Override
@@ -1246,7 +1269,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint,
-            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 
@@ -1262,6 +1285,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public void setWindEstimation(IncrementalWindEstimation windEstimation) {
+    }
+
+    @Override
+    public TrackingConnectorInfo getTrackingConnectorInfo() {
+        return null;
     }
 
 }

@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.Serializable;
 
 import org.bson.Document;
+import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
 import com.mongodb.BasicDBList;
@@ -17,6 +18,7 @@ import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 
@@ -27,7 +29,7 @@ public class TestParseAndMigratePassingSideAndControlPointTwoMarks {
 
     @SuppressWarnings("deprecation")
     @Test
-    public void test() {
+    public void test() throws JsonDeserializationException, ParseException {
         DomainObjectFactoryImpl dof = new DomainObjectFactoryImpl(MongoDBConfiguration.getDefaultTestConfiguration()
                 .getService().getDB(), com.sap.sailing.domain.base.DomainFactory.INSTANCE);
         Document waypoint1 = new Document();

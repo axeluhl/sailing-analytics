@@ -4,11 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.ParseException;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -30,8 +28,6 @@ import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.ThreadPoolUtil;
-import com.tractrac.model.lib.api.event.CreateModelException;
-import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class ConcurrencyTest extends OnlineTracTracBasedTest {
     private static final Logger logger = Logger.getLogger(ConcurrencyTest.class.getName());
@@ -41,7 +37,7 @@ public class ConcurrencyTest extends OnlineTracTracBasedTest {
     }
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException, SubscriberInitializationException, CreateModelException {
+    public void setUp() throws Exception {
         super.setUp();
         // load Race8 of RC44 Cup in Sweden
         super.setUp("event_20110815_RCSwedenCu",

@@ -52,32 +52,30 @@ public class SailorProfileStatisticTable extends Composite {
     @UiField
     DivElement sectionTitleIconUi;
 
+    private final UserService userService;
+
     public SailorProfileStatisticTable(SailorProfileNumericStatisticType type, SailorProfileStatisticDTO statistic,
             FlagImageResolver flagImageResolver, StringMessages stringMessages, final UserService userService) {
+        this.userService = userService;
         initWidget(uiBinder.createAndBindUi(this));
         SailorProfileMobileResources.INSTANCE.css().ensureInjected();
         this.sectionTitleUi
                 .setInnerText(SailorProfileNumericStatisticTypeFormatter.getDisplayName(type, stringMessages));
-
         // add icon
         Image icon = new Image();
         icon.setUrl(SailorProfileNumericStatisticTypeFormatter.getIcon(type));
         icon.setSize("auto", "2em");
         this.sectionTitleIconUi.appendChild(icon.getElement());
-
         // add SailorProfileStatisticTableEntry objects
         Set<Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>>> entrySet = statistic.getResult().entrySet();
-
         // sort entries
         ArrayList<Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>>> data = new ArrayList<>();
         data.addAll(entrySet);
         data.sort((o1, o2) -> Double.compare(o1.getValue().size() > 0 ? o1.getValue().get(0).getValue() : 0,
                 o2.getValue().size() > 0 ? o2.getValue().get(0).getValue() : 0));
-
         boolean hasData = false;
         for (Entry<SimpleCompetitorWithIdDTO, ArrayList<SailorProfileStatisticDTO.SingleEntry>> entry : data) {
             hasData |= !entry.getValue().isEmpty();
-
             for (SingleEntry singleEntry : entry.getValue()) {
                 contentContainerStatistic.add(new SailorProfileStatisticEntry(type, entry.getKey(), singleEntry,
                         flagImageResolver, stringMessages, statistic.getDataMiningQuery()));
@@ -86,7 +84,6 @@ public class SailorProfileStatisticTable extends Composite {
         if (!hasData) {
             final Label lblEmpty = new Label(stringMessages.noStatisticsFoundForCompetitors());
             lblEmpty.addStyleName(DesktopAccordionResources.INSTANCE.css().accordionEmptyMessage());
-
             contentContainerStatistic.add(lblEmpty);
         }
         if (type.getAggregationType() == StatisticType.AVERAGE
@@ -108,8 +105,7 @@ public class SailorProfileStatisticTable extends Composite {
     /** store serialized data mining query into user store */
     private void handleLocalStorage(SailorProfileStatisticDTO dto) {
         final String identifier = SailingSettingsConstants.DATAMINING_QUERY_PREFIX + UUID.randomUUID().toString();
-        DataMiningQueryForSailorProfilesPersistor.writeDMQueriesToLocalStorageIfPossible(dto, identifier);
+        DataMiningQueryForSailorProfilesPersistor.writeDMQueriesToLocalStorageIfPossible(dto, identifier, userService.getStorage());
         Window.Location.assign("DataMining.html?q=" + identifier);
     }
-
 }

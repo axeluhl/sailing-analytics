@@ -12,6 +12,21 @@ import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sse.common.Util.Pair;
 
+/**
+ * A place that can be used to display QR codes that direct users to branch.io using deep links which then point to an
+ * app, together with configuration parameters that branch.io maps into the app runtime even through an installation
+ * process. See
+ * <a href="https://dashboard.branch.io/link-settings/general">https://dashboard.branch.io/link-settings/general</a>
+ * for details. There, as the "Default URL", this QRCodePlace is configured, using URLs looking like this:<p>
+ * 
+ * <pre>
+ *     https://my.sapsailing.com/gwt/Home.html#QRCodePlace:mode=COMPETITOR
+ * </pre>
+ * The URL fragment's {@code mode} parameter is used to configure the kind of link that is rendered in the QR code.
+ *
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class QRCodePlace extends AbstractBasePlace {
 
     public static final String PARAM_REGATTA_NAME = "regatta_name";

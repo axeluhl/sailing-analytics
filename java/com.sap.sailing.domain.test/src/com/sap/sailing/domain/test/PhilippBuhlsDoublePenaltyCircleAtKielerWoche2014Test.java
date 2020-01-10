@@ -4,7 +4,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,8 +28,6 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.tractrac.model.lib.api.event.CreateModelException;
-import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 /**
  * This is a test for bug 2009 (see http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2009).
@@ -50,7 +47,7 @@ public class PhilippBuhlsDoublePenaltyCircleAtKielerWoche2014Test extends Abstra
     }
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException, SubscriberInitializationException, CreateModelException {
+    public void setUp() throws Exception {
         super.setUp();
         URI storedUri = new URI("file:///"+new File("resources/event_20140619_KieleWoche-R1_Blue_Laser.mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(

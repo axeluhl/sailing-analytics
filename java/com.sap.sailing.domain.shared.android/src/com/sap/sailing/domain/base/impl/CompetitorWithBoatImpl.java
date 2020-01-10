@@ -35,7 +35,7 @@ public class CompetitorWithBoatImpl extends CompetitorImpl implements DynamicCom
         return this;
     }
 
-    public Competitor resolve(SharedDomainFactory domainFactory) {
+    public Competitor resolve(SharedDomainFactory<?> domainFactory) {
         final Competitor result;
         if (!hasBoat()) {
             // bug2822: this is a migrated competitor that had its default boat removed because it occurs in a boats-can-change regatta.

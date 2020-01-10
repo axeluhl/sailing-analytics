@@ -195,7 +195,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 u -> configACL.openDialog(u));
         
         filterField = new LabeledAbstractFilterablePanel<UserDTO>(new Label(stringMessages.filterUsers()),
-                new ArrayList<UserDTO>(), dataProvider) {
+                new ArrayList<UserDTO>(), dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(UserDTO t) {
                 List<String> string = new ArrayList<String>();
@@ -213,6 +213,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
             }
         };
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
+        filterField.setUpdatePermissionFilterForCheckbox(user -> userService.hasPermission(user, DefaultActions.UPDATE));
         
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(userColumnListHandler);

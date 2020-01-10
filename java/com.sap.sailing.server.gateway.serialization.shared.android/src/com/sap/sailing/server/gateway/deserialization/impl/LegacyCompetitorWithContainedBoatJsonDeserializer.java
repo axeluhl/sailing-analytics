@@ -29,7 +29,7 @@ public class LegacyCompetitorWithContainedBoatJsonDeserializer implements JsonDe
     protected final JsonDeserializer<DynamicBoat> boatJsonDeserializer;
     private static final Logger logger = Logger.getLogger(LegacyCompetitorWithContainedBoatJsonDeserializer.class.getName());
 
-    public static LegacyCompetitorWithContainedBoatJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
+    public static LegacyCompetitorWithContainedBoatJsonDeserializer create(SharedDomainFactory<?> baseDomainFactory) {
         return new LegacyCompetitorWithContainedBoatJsonDeserializer(baseDomainFactory, new TeamJsonDeserializer(new PersonJsonDeserializer(
                 new NationalityJsonDeserializer(baseDomainFactory))), new LegacyBoatJsonDeserializer(baseDomainFactory, new BoatClassJsonDeserializer(baseDomainFactory)));
     }

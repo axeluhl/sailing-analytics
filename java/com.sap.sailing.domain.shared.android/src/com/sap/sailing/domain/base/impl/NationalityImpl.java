@@ -4,7 +4,6 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.CountryCodeFactory;
-import com.sap.sse.common.IsManagedByCache;
 
 public class NationalityImpl implements Nationality {
     private static final long serialVersionUID = 238906193483424259L;
@@ -37,7 +36,7 @@ public class NationalityImpl implements Nationality {
     }
 
     @Override
-    public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
+    public Nationality resolve(SharedDomainFactory<?> domainFactory) {
         return domainFactory.getOrCreateNationality(getThreeLetterIOCAcronym());
     }
 

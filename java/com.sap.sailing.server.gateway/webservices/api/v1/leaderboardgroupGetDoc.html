@@ -9,10 +9,14 @@
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
-<h2>URL: /api/v1/leaderboardgroups/{name}</h2>
+<h2>URL: /api/v1/leaderboardgroups/{nameOrUUID}</h2>
 
 <b>Description:</b>
-<p>The service gets the details of a group of leaderboards</p>
+<p>The service gets the details of a group of leaderboards that can be identified by name or by UUID.
+If the path parameter has valid UUID format then it is interpreted as a UUID, otherwise as the leaderboard name.
+In the unlikely case of a leaderboard group whose name has UUID format and its UUID's string representation
+differs from its name, requesting such a leaderboard by name is not possible with this API, and its UUID must
+be used instead.</p>
 <br/>
 <table>
 	<tr>
@@ -37,7 +41,10 @@
 	</tr>
 	<tr>
 		<td>Example:</td>
-		<td><a href="http://www.sapsailing.com/sailingserver/api/v1/leaderboardgroups/505 Worlds 2013">http://www.sapsailing.com/sailingserver/api/v1/leaderboardgroups/505 Worlds 2013</a></td>
+		<td>
+		<a href="http://www.sapsailing.com/sailingserver/api/v1/leaderboardgroups/505 Worlds 2013">http://www.sapsailing.com/sailingserver/api/v1/leaderboardgroups/505 Worlds 2013</a><br>
+		<a href="http://www.sapsailing.com/sailingserver/api/v1/leaderboardgroups/444d5ce7-119e-4c9e-9f81-e914519bdc92">http://www.sapsailing.com/sailingserver/api/v1/leaderboardgroups/444d5ce7-119e-4c9e-9f81-e914519bdc92</a><br>
+		</td>
 	</tr>
 </table>
 <div style="height: 1em;"></div>

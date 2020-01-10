@@ -20,7 +20,6 @@ import java.util.UUID;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -53,6 +52,7 @@ import com.sap.sailing.domain.common.tracking.impl.CompactionNotPossibleExceptio
 import com.sap.sailing.domain.common.tracking.impl.VeryCompactWindImpl;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
@@ -317,7 +317,7 @@ public class WindTest {
                 EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 1000,
                         /* millisecondsOverWhichToAverageWind */ 30000,
                         /* millisecondsOverWhichToAverageSpeed */ 30000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new,
-                        mock(RaceLogResolver.class));
+                        mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null);
         TimePoint start = MillisecondsTimePoint.now();
         TimePoint topMarkRounding = start.plus(30000);
         TimePoint finish = topMarkRounding.plus(30000);

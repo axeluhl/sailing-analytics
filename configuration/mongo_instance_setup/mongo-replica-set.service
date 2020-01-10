@@ -11,3 +11,4 @@ Type=oneshot
 RemainAfterExit=true
 ExecStart=/usr/local/bin/add-as-replica
 ExecStop=/usr/local/bin/remove-as-replica
+TimeoutStopSpec=120s

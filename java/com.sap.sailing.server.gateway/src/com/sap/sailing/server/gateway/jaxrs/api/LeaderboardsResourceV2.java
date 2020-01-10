@@ -141,7 +141,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             for (CompetitorDTO competitor : filteredCompetitorsFromBestToWorst) {
                 LeaderboardRowDTO row = leaderboardDTO.rows.get(competitor);
                 LeaderboardEntryDTO leaderboardEntry = row.fieldsByRaceColumnName.get(raceColumnName);
-                FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
+                FleetDTO fleetOfCompetitor = leaderboardEntry==null?null:leaderboardEntry.fleet;
                 if (fleetOfCompetitor != null && fleetOfCompetitor.getName() != null) {
                     Map<CompetitorDTO, Integer> competitorsOfFleet = competitorsOrderedByFleets.get(fleetOfCompetitor.getName());
                     if (competitorsOfFleet == null) {
@@ -195,58 +195,60 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 JSONObject jsonEntry = new JSONObject();
                 jsonRaceColumns.put(raceColumnName, jsonEntry);
                 LeaderboardEntryDTO leaderboardEntry = leaderboardRowDTO.fieldsByRaceColumnName.get(raceColumnName);
-                BoatDTO entryBoatDTO = leaderboardEntry.boat;
-                if (entryBoatDTO != null) {
-                    JSONObject jsonBoat = new JSONObject();
-                    writeBoatData(jsonBoat, entryBoatDTO, competitorAndBoatIdsOnly);
-                    jsonEntry.put("boat", jsonBoat);
-                }
-                final FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
-                jsonEntry.put("fleet", fleetOfCompetitor == null ? "" : fleetOfCompetitor.getName());
-                jsonEntry.put("totalPoints", leaderboardEntry.totalPoints);
-                jsonEntry.put("uncorrectedTotalPoints", leaderboardEntry.totalPoints);
-                jsonEntry.put("netPoints", leaderboardEntry.netPoints);
-                MaxPointsReason maxPointsReason = leaderboardEntry.reasonForMaxPoints;
-                jsonEntry.put("maxPointsReason", maxPointsReason != null ? maxPointsReason.toString() : null);
-                jsonEntry.put("isDiscarded", leaderboardEntry.discarded);
-                jsonEntry.put("isCorrected", leaderboardEntry.hasScoreCorrection());
-                // if we have no fleet information there is no way to know in which fleet the competitor was racing
-                Integer rank = null;
-                if (fleetOfCompetitor != null && fleetOfCompetitor.getName() != null) {
-                    Map<String, Map<CompetitorDTO, Integer>> rcMap = competitorRanksPerRaceColumnsAndFleets.get(raceColumnName);
-                    if (rcMap != null && !rcMap.isEmpty()) {
-                        Map<CompetitorDTO, Integer> rankMap = rcMap.get(fleetOfCompetitor.getName());
-                        if (rankMap != null && !rankMap.isEmpty()) {
-                            rank = rankMap.get(competitor);
+                if (leaderboardEntry != null) {
+                    BoatDTO entryBoatDTO = leaderboardEntry.boat;
+                    if (entryBoatDTO != null) {
+                        JSONObject jsonBoat = new JSONObject();
+                        writeBoatData(jsonBoat, entryBoatDTO, competitorAndBoatIdsOnly);
+                        jsonEntry.put("boat", jsonBoat);
+                    }
+                    final FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
+                    jsonEntry.put("fleet", fleetOfCompetitor == null ? "" : fleetOfCompetitor.getName());
+                    jsonEntry.put("totalPoints", leaderboardEntry.totalPoints);
+                    jsonEntry.put("uncorrectedTotalPoints", leaderboardEntry.totalPoints);
+                    jsonEntry.put("netPoints", leaderboardEntry.netPoints);
+                    MaxPointsReason maxPointsReason = leaderboardEntry.reasonForMaxPoints;
+                    jsonEntry.put("maxPointsReason", maxPointsReason != null ? maxPointsReason.toString() : null);
+                    jsonEntry.put("isDiscarded", leaderboardEntry.discarded);
+                    jsonEntry.put("isCorrected", leaderboardEntry.hasScoreCorrection());
+                    // if we have no fleet information there is no way to know in which fleet the competitor was racing
+                    Integer rank = null;
+                    if (fleetOfCompetitor != null && fleetOfCompetitor.getName() != null) {
+                        Map<String, Map<CompetitorDTO, Integer>> rcMap = competitorRanksPerRaceColumnsAndFleets.get(raceColumnName);
+                        if (rcMap != null && !rcMap.isEmpty()) {
+                            Map<CompetitorDTO, Integer> rankMap = rcMap.get(fleetOfCompetitor.getName());
+                            if (rankMap != null && !rankMap.isEmpty()) {
+                                rank = rankMap.get(competitor);
+                            }
                         }
                     }
-                }
-                jsonEntry.put("rank", rank);
-                LegEntryDTO detailsOfLastAvailableLeg =  getDetailsOfLastAvailableLeg(leaderboardEntry);
-                jsonEntry.put("trackedRank", detailsOfLastAvailableLeg != null ? detailsOfLastAvailableLeg.rank : null);
-                boolean finished = false;
-                LegEntryDTO detailsOfLastCourseLeg = getDetailsOfLastCourseLeg(leaderboardEntry);
-                if (detailsOfLastCourseLeg != null) {
-                    finished = detailsOfLastCourseLeg.finished;
-                }
-                jsonEntry.put("finished", finished);
-                if (!raceDetailsToShow.isEmpty() && leaderboardEntry.race != null) {
-                    LegEntryDTO currentLegEntry = null;
-                    int currentLegNumber = leaderboardEntry.getOneBasedCurrentLegNumber();
-                    if (leaderboardEntry.legDetails != null && currentLegNumber > 0 && currentLegNumber <= leaderboardEntry.legDetails.size()) {
-                        currentLegEntry = leaderboardEntry.legDetails.get(currentLegNumber-1);
-                        if (currentLegEntry != null) {
-                            jsonEntry.put("trackedRank", currentLegEntry.rank);
-                        }
+                    jsonEntry.put("rank", rank);
+                    LegEntryDTO detailsOfLastAvailableLeg =  getDetailsOfLastAvailableLeg(leaderboardEntry);
+                    jsonEntry.put("trackedRank", detailsOfLastAvailableLeg != null ? detailsOfLastAvailableLeg.rank : null);
+                    boolean finished = false;
+                    LegEntryDTO detailsOfLastCourseLeg = getDetailsOfLastCourseLeg(leaderboardEntry);
+                    if (detailsOfLastCourseLeg != null) {
+                        finished = detailsOfLastCourseLeg.finished;
                     }
-                    JSONObject jsonRaceDetails = new JSONObject();
-                    jsonEntry.put("data", jsonRaceDetails);
-                    for (DetailType type : raceDetailsToShow) {
-                        Pair<String, Object> valueForRaceDetailType = getValueForRaceDetailType(type, leaderboardRowDTO, leaderboardEntry, currentLegEntry);
-                        if (valueForRaceDetailType != null && valueForRaceDetailType.getA() != null && valueForRaceDetailType.getB() != null) {
-                            jsonRaceDetails.put(valueForRaceDetailType.getA(), valueForRaceDetailType.getB());
+                    jsonEntry.put("finished", finished);
+                    if (!raceDetailsToShow.isEmpty() && leaderboardEntry.race != null) {
+                        LegEntryDTO currentLegEntry = null;
+                        int currentLegNumber = leaderboardEntry.getOneBasedCurrentLegNumber();
+                        if (leaderboardEntry.legDetails != null && currentLegNumber > 0 && currentLegNumber <= leaderboardEntry.legDetails.size()) {
+                            currentLegEntry = leaderboardEntry.legDetails.get(currentLegNumber-1);
+                            if (currentLegEntry != null) {
+                                jsonEntry.put("trackedRank", currentLegEntry.rank);
+                            }
                         }
-                    }                    
+                        JSONObject jsonRaceDetails = new JSONObject();
+                        jsonEntry.put("data", jsonRaceDetails);
+                        for (DetailType type : raceDetailsToShow) {
+                            Pair<String, Object> valueForRaceDetailType = getValueForRaceDetailType(type, leaderboardRowDTO, leaderboardEntry, currentLegEntry);
+                            if (valueForRaceDetailType != null && valueForRaceDetailType.getA() != null && valueForRaceDetailType.getB() != null) {
+                                jsonRaceDetails.put(valueForRaceDetailType.getA(), valueForRaceDetailType.getB());
+                            }
+                        }                    
+                    }
                 }
             }
             competitorCounter++;

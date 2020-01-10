@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -17,7 +19,8 @@ public class RegattaConfigImagesBarCell extends ImagesBarCell {
     public static final String ACTION_DELETE = DefaultActions.DELETE.name();
     public static final String ACTION_CHANGE_OWNERSHIP = DefaultActions.CHANGE_OWNERSHIP.name();
     public static final String ACTION_CHANGE_ACL = DefaultActions.CHANGE_ACL.name();
-    public final static String ACTION_STOP_TRACKING = "ACTION_STOP_TRACKING";
+    public static final String ACTION_STOP_TRACKING = "ACTION_STOP_TRACKING";
+    public static final String ACTION_CERTIFICATES_UPDATE = "ACTION_CERTIFICATES_UPDATE";
 
     private final StringMessages stringMessages;
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
@@ -48,6 +51,11 @@ public class RegattaConfigImagesBarCell extends ImagesBarCell {
                 makeImagePrototype(IconResources.INSTANCE.changeOwnershipIcon())));
         result.add(new ImageSpec(ACTION_CHANGE_ACL, stringMessages.actionChangeACL(),
                 makeImagePrototype(IconResources.INSTANCE.changeACLIcon())));
+        if (getContext().getKey() instanceof RegattaDTO &&
+                (((RegattaDTO) getContext().getKey()).rankingMetricType == RankingMetrics.ORC_PERFORMANCE_CURVE ||
+                        ((RegattaDTO) getContext().getKey()).rankingMetricType == RankingMetrics.ORC_PERFORMANCE_CURVE_BY_IMPLIED_WIND)) {
+            result.add(new ImageSpec(ACTION_CERTIFICATES_UPDATE, stringMessages.updateCertificates(), resources.updateCertificatesIcon()));
+        }
         return result;
     }
 }
