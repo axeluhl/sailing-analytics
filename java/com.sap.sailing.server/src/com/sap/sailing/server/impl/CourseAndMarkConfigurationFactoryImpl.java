@@ -319,7 +319,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             @Override
             protected ControlPointTemplate createMarkPair(MarkRole left, MarkRole right, String name,
                     String shortName) {
-                return markRolePairFactory.create(name, shortName, Arrays.asList(left, right));
+                return markRolePairFactory.create(name, shortName, left, right);
             }
 
             @Override
@@ -963,7 +963,37 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         return regattaMarkConfiguration;
     }
 
-    private abstract class CourseSequenceMapper<C, M extends C, W> {
+    /**
+     * Provided with a mapping from {@link MarkConfiguration} to {@link MarkRole}, and provided with a waypoint sequence
+     * in the form used by a {@link CourseConfiguration}, namely as {@link WaypointWithMarkConfiguration} objects, a
+     * course sequence mapper finds a mark-like object of type {@code M} for all {@link MarkConfiguration} objects, as
+     * defined by the {@link #getOrCreateMarkReplacement(MarkConfiguration)} method that subclasses have to define. If
+     * the original {@link MarkConfiguration} had an {@link #existingRoleMapping existing mapping to a mark role}, that
+     * mapping is also stored for the resulting {@code M} object in the {@link #explicitAssociatedRoles} map.
+     * <p>
+     * 
+     * Furthermore, for all {@link MarkConfiguration}s that don't have an {@link #existingRoleMapping explicit existing
+     * role mapping}, new roles are created as defaults, in case the caller wants to create a new {@link CourseTemplate}
+     * based on the waypoint sequence provided to this mapper. FIXME only the course template creation use case requires
+     * these roles, and they are then created from the IsMarkRole / MarkRoleName objects; couldn't the creation of
+     * MarkRoles for the course template be delayed and then be performed based on the MarkConfiguration information
+     * available at that point?
+     * <p>
+     * 
+     * Eventually, a list of {@code W} waypoint-like objects is created, one for each
+     * {@link WaypointWithMarkConfiguration} in the original list provided to the constructor, based on the {@code M}
+     * objects to which the mark configurations were mapped.
+     *
+     * @param <CP>
+     *            a control point-like type; something that is one or has two object(s) of type {@code M}.
+     * @param <M>
+     *            a mark-like type; something that in particular is something like a control point, hence this type has
+     *            to extend the {@code CP} type
+     * @param <W>
+     *            a waypoint-like type; something that references a control point-like object of type {@code CP} and
+     *            adds {@link PassingInstruction passing instructions} information
+     */
+    private abstract class CourseSequenceMapper<CP, M extends CP, W> {
         final Map<M, IsMarkRole> explicitAssociatedRoles = new HashMap<>();
         final Map<M, IsMarkRole> allAssociatedRoles = new HashMap<>();
         // TODO should we remove this field and let calculateEffectiveWaypoints return the list instead; this will clean up the somewhat convoluted construction order for subclasses
@@ -982,27 +1012,22 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             for (Entry<MarkConfiguration, ? extends IsMarkRole> entry : existingRoleMapping.entrySet()) {
                 explicitAssociatedRoles.put(mapMarkConfiguration(entry.getKey()), entry.getValue());
             }
-            allAssociatedRoles.putAll(explicitAssociatedRoles);
+            allAssociatedRoles.putAll(explicitAssociatedRoles); // FIXME isn't this redundant? mapMarkConfiguration will put explicit role mappings into allAssociatedRoles
             // Cache to allow reusing ControlPointWithTwoMarks objects that are based on the same MarkPairWithConfiguration
-            final Map<MarkPairWithConfiguration, C> markPairCache = new HashMap<>();
-            
+            final Map<MarkPairWithConfiguration, CP> markPairCache = new HashMap<>();
             for (WaypointWithMarkConfiguration waypointWithMarkConfiguration : waypoints) {
-                final ControlPointWithMarkConfiguration controlPointWithMarkConfiguration = waypointWithMarkConfiguration
-                        .getControlPoint();
-
+                final ControlPointWithMarkConfiguration controlPointWithMarkConfiguration = waypointWithMarkConfiguration.getControlPoint();
                 if (controlPointWithMarkConfiguration instanceof MarkConfiguration) {
                     final MarkConfiguration markConfiguration = (MarkConfiguration) controlPointWithMarkConfiguration;
-                    effectiveWaypoints.add(
-                            getOrCreateWaypoint(mapMarkConfiguration(markConfiguration), waypointWithMarkConfiguration.getPassingInstruction()));
+                    effectiveWaypoints.add(getOrCreateWaypoint(mapMarkConfiguration(markConfiguration), waypointWithMarkConfiguration.getPassingInstruction()));
                 } else {
-                    final C controlPoint = markPairCache
+                    final CP controlPoint = markPairCache
                             .computeIfAbsent((MarkPairWithConfiguration) controlPointWithMarkConfiguration, mpwc -> {
                                 final M left = mapMarkConfiguration(mpwc.getLeft());
                                 final M right = mapMarkConfiguration(mpwc.getRight());
                                 return createMarkPair(left, right, mpwc.getName(), mpwc.getShortName());
                             });
-                    effectiveWaypoints.add(
-                            getOrCreateWaypoint(controlPoint, waypointWithMarkConfiguration.getPassingInstruction()));
+                    effectiveWaypoints.add(getOrCreateWaypoint(controlPoint, waypointWithMarkConfiguration.getPassingInstruction()));
                 }
             }
         }
@@ -1019,11 +1044,15 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         
         protected abstract M getOrCreateMarkReplacement(MarkConfiguration markConfiguration);
         
-        protected abstract C createMarkPair(M left, M right, String name, String shortName);
+        protected abstract CP createMarkPair(M left, M right, String name, String shortName);
         
-        protected abstract W getOrCreateWaypoint(C controlPoint, PassingInstruction passingInstruction);
+        protected abstract W getOrCreateWaypoint(CP controlPoint, PassingInstruction passingInstruction);
     }
     
+    /**
+     * Uses a pre-defined mapping from {@link MarkConfiguration}s to {@code M} "mark" objects that has to be
+     * specified as constructor argument.
+     */
     private abstract class CourseSequenceReplacementMapper<C, M extends C, W> extends CourseSequenceMapper<C, M, W> {
         private final Map<MarkConfiguration, M> existingMapping;
 

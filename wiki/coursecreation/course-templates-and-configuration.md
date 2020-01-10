@@ -26,9 +26,9 @@ A mark role represents a "logical" course mark that can be assumed by a physical
 
 Mark roles can best be imagined as the mark representations in a sailing instructions document where the course diagrams are displayed. There, the marks are usually drawn with symbols and have a name and/or short name assigned. 
 
-A mark role has a name (e.g., "Windward Mark") and a short name (e.g., "1").
+A mark role has a name (e.g., "Windward Mark") and a short name (e.g., "1") and is an entity with a stable ID.
 
-The concept of mark roles allows users to swap out marks or mark templates without changing the the effective waypoint sequence. Having this, a course template and regatta course may define a compatible waypoint sequence while being based on different mark definitions; hence, such regatta courses can still be "lap-aware" and allow users to easily increase or decrease the number of laps, leading to the course adjustments necessary. 
+The concept of mark roles allows users to swap out marks or mark templates without changing the effective waypoint sequence. Having this, a course template and regatta course may define a compatible waypoint sequence while being based on different mark definitions, even different marks in different laps assuming the same role, such as a replacement mark being used for the windward mark starting from the second lap onwards; hence, such regatta courses can still be "lap-aware" and allow users to easily increase or decrease the number of laps, leading to the course adjustments necessary.
 
 ## Mark properties
 

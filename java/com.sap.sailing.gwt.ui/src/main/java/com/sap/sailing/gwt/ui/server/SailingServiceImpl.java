@@ -10030,7 +10030,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             controlPointTemplate = resolvedMarkRoles.get(0);
         } else if (resolvedMarkRoles.size() == 2) {
             controlPointTemplate = markRolePairFactory.create(waypointTemplate.getName(),
-                    waypointTemplate.getShortName(), resolvedMarkRoles);
+                    waypointTemplate.getShortName(), resolvedMarkRoles.get(0), resolvedMarkRoles.get(1));
         } else {
             throw new IllegalArgumentException("Waypoints must contain one or two marks");
         }
