@@ -93,6 +93,7 @@ public class CompetitorEditLayout extends ScrollView
         }
 
         mCalendar = (GregorianCalendar) GregorianCalendar.getInstance();
+        mCalendar.set(Calendar.MILLISECOND, 0); // new times to be entered as full seconds only
         if (mCompetitor.getFinishingTime() != null) {
             mCalendar.setTimeInMillis(mCompetitor.getFinishingTime().asMillis());
         }
@@ -274,6 +275,7 @@ public class CompetitorEditLayout extends ScrollView
     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
         if (mCalendar == null) {
             mCalendar = (GregorianCalendar) Calendar.getInstance();
+            mCalendar.set(Calendar.MILLISECOND, 0);
         }
         mCalendar.set(Calendar.YEAR, year);
         mCalendar.set(Calendar.MONTH, monthOfYear);
@@ -285,6 +287,7 @@ public class CompetitorEditLayout extends ScrollView
     public void onTimeSet(FullTimePickerDialog dialog, int hourOfDay, int minute, int second) {
         if (mCalendar == null) {
             mCalendar = (GregorianCalendar) Calendar.getInstance();
+            mCalendar.set(Calendar.MILLISECOND, 0);
         }
         mCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
         mCalendar.set(Calendar.MINUTE, minute);

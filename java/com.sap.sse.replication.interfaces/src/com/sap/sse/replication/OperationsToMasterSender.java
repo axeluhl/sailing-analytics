@@ -42,7 +42,6 @@ public interface OperationsToMasterSender<S, O extends OperationWithResult<S, ?>
         ReplicationMasterDescriptor masterDescriptor = getMasterDescriptor();
         assert masterDescriptor != null;
         final OperationWithResultWithIdWrapper<S, T> operationWithResultWithIdWrapper = new OperationWithResultWithIdWrapper<S, T>(operation);
-        // TODO bug4018: if sending the operation fails, e.g., because of an HTTP response code != 2xx, enqueue the operation for retry
         addOperationSentToMasterForReplication(operationWithResultWithIdWrapper);
         URL url = masterDescriptor.getSendReplicaInitiatedOperationToMasterURL(this.getId().toString());
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -58,8 +57,17 @@ public interface OperationsToMasterSender<S, O extends OperationWithResult<S, ?>
         DataOutputStream dos = new DataOutputStream(outputStream);
         dos.writeUTF(getId().toString());
         this.writeOperation(operationWithResultWithIdWrapper, outputStream, /* closeStream */ true);
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        bufferedReader.close();
+        final int responseCode = connection.getResponseCode();
+        if (responseCode < 300 || responseCode >= 500) {
+            // if OK or an internal error, process as usual; in case of >= 500 this will throw an exception
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            bufferedReader.close();
+        } else {
+            logger.warning(
+                    "An HTTP error " + responseCode + " was returned from the master when trying to apply operation "
+                            + operationWithResultWithIdWrapper
+                            + ". The operation is expected to have failed on the server and will not be enqueued for retry.");
+        }
     }
 
     /**

@@ -11,11 +11,11 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
@@ -90,6 +90,11 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public TimePoint getStartOfRace(boolean inferred) {
+        return null;
+    }
+
+    @Override
+    public TimePoint getFinishingTime() {
         return null;
     }
 
@@ -174,7 +179,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public int getRank(Competitor competitor, TimePoint timePoint) {
+    public int getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return 0;
     }
 
@@ -395,7 +400,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint,
-            boolean waitForLatestAnalyses, WindLegTypeAndLegBearingCache cache) {
+            boolean waitForLatestAnalyses, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 
@@ -407,7 +412,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint,
-            boolean waitForLatestAnalyses, WindLegTypeAndLegBearingCache cache) {
+            boolean waitForLatestAnalyses, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 
@@ -529,6 +534,17 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
+    public SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidenceWithNumberOfSamples(int numberOfSamples) {
+        return null;
+    }
+
+    @Override
+    public SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(TimePoint formTimePoint,
+            TimePoint toTimePoint, int numberOfSamples) {
+        return null;
+    }
+
+    @Override
     public Distance getCourseLength() {
         return null;
     }
@@ -607,17 +623,17 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint,
-            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 
     @Override
-    public Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 
@@ -645,7 +661,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
+    public IsManagedByCache<DomainFactory> resolve(DomainFactory domainFactory) {
         return this;
     }
 
@@ -702,7 +718,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint,
-            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 
@@ -728,6 +744,11 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public void setWindEstimation(IncrementalWindEstimation windEstimation) {
+    }
+
+    @Override
+    public TrackingConnectorInfo getTrackingConnectorInfo() {
+        return null;
     }
     
 }

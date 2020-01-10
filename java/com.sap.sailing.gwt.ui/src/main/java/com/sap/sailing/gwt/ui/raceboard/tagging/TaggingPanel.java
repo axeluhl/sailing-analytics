@@ -6,17 +6,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.CellPreviewEvent.Handler;
@@ -47,6 +52,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
@@ -73,6 +79,8 @@ public class TaggingPanel extends ComponentWithoutSettings
             CREATE_TAG, EDIT_TAG
     }
 
+    private static final int FOOTERPANEL_ANIMATION_PERIOD_MS = 500;
+
     // HTML5 Storage for notifying other instances of tag changes
     private static final String LOCAL_STORAGE_UPDATE_KEY = "private-tags-changed";
 
@@ -88,10 +96,33 @@ public class TaggingPanel extends ComponentWithoutSettings
     private final List<TagButton> tagButtons;
 
     // UI elements
-    private final HeaderPanel taggingPanel;
+    //        taggingPanel
+    // +--------------------------+
+    // |    -content / center-    |
+    // | filterbarAndContentPanel |
+    // | +----------------------+ |
+    // | |       -header-       | |
+    // | |    filterBarPanel    | |
+    // | |    +============+    | |
+    // | +----------------------+ |
+    // | |  -content / center-  | |
+    // | |     contentPanel     | |
+    // | |     +==========+     | |
+    // | +----------------------+ |
+    // +--------------------------+
+    // |         -south-          |
+    // |       footerPanel        |
+    // |    +----------------+    |
+    // |    | tagFooterPanel |    |
+    // |    | +============+ |    |
+    // |    +----------------+    |
+    // +--------------------------+
+    private final DockLayoutPanel taggingPanel;
+    private final HeaderPanel filterbarAndContentPanel;
     private final TagFilterPanel filterbarPanel;
     private final Panel contentPanel;
-    private final TagFooterPanel footerPanel;
+    private final ScrollPanel footerPanel;
+    private final TagFooterPanel tagFooterPanel;
     private final Button createTagsButton;
 
     // misc. elements
@@ -161,8 +192,16 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         tagButtons = new ArrayList<TagButton>();
 
-        taggingPanel = new HeaderPanel();
-        footerPanel = new TagFooterPanel(this, sailingService, stringMessages, userService);
+        taggingPanel = new DockLayoutPanel(Style.Unit.PX) {
+            @Override
+            public void onResize() {
+                super.onResize();
+                taggingPanel.setWidgetSize(footerPanel, calculateFooterPanelHeight());
+            }
+        };
+        filterbarAndContentPanel = new HeaderPanel();
+        tagFooterPanel = new TagFooterPanel(this, sailingService, stringMessages, userService);
+        footerPanel = new ScrollPanel(tagFooterPanel);
         filterbarPanel = new TagFilterPanel(this, stringMessages, userService);
         contentPanel = new FlowPanel();
         createTagsButton = new Button();
@@ -183,13 +222,14 @@ public class TaggingPanel extends ComponentWithoutSettings
     private void initializePanel() {
         taggingPanel.setStyleName(style.taggingPanel());
 
-        // header
-        taggingPanel.setHeaderWidget(filterbarPanel);
+        // taggingPanel content / center
+        filterbarAndContentPanel.setHeaderWidget(filterbarPanel);
+        filterbarAndContentPanel.setContentWidget(contentPanel);
 
-        // footer
-        taggingPanel.setFooterWidget(footerPanel);
+        // taggingPanel footer
+        taggingPanel.addSouth(footerPanel, 0);
 
-        // content (tags)
+        // contentPanel (tags)
         contentPanel.addStyleName(style.tagCellListPanel());
         contentPanel.add(tagCellList);
         contentPanel.add(createTagsButton);
@@ -232,7 +272,8 @@ public class TaggingPanel extends ComponentWithoutSettings
         createTagsButton.addClickHandler(event -> {
             setCurrentState(State.CREATE_TAG);
         });
-        taggingPanel.setContentWidget(contentPanel);
+        taggingPanel.add(filterbarAndContentPanel);
+        taggingPanel.forceLayout();
         updateContent();
     }
 
@@ -251,14 +292,14 @@ public class TaggingPanel extends ComponentWithoutSettings
     /**
      * Notifies other instances that the private tags have changed.
      */
-    private void firePrivateTagUpdateEvent() {
-        if (Storage.isSupported()) {
-            if (Storage.getLocalStorageIfSupported().getItem(LOCAL_STORAGE_UPDATE_KEY).equals(id)) {
+    private void firePrivateTagUpdateEvent(CrossDomainStorage storage) {
+        storage.getItem(LOCAL_STORAGE_UPDATE_KEY, value->{
+            if (value.equals(id)) {
                 // This instance fired the last update. To fire another one we have to change our id
                 generateRandomId();
             }
-            Storage.getLocalStorageIfSupported().setItem(LOCAL_STORAGE_UPDATE_KEY, id);
-        }
+            storage.setItem(LOCAL_STORAGE_UPDATE_KEY, id, null);
+        });
     }
 
     /**
@@ -417,7 +458,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                                 // reload private tags if added tag is private
                                 if (!visibleForPublic) {
                                     reloadPrivateTags();
-                                    firePrivateTagUpdateEvent();
+                                    firePrivateTagUpdateEvent(userService.getStorage());
                                 }
                             } else {
                                 Notification.notify(stringMessages.tagNotSavedReason(result.getMessage()),
@@ -465,7 +506,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                             if (!silent) {
                                 Notification.notify(stringMessages.tagRemovedSuccessfully(), NotificationType.SUCCESS);
                             }
-                            firePrivateTagUpdateEvent();
+                            firePrivateTagUpdateEvent(userService.getStorage());
                         } else {
                             Notification.notify(stringMessages.tagNotRemoved() + " " + result.getMessage(),
                                     NotificationType.ERROR);
@@ -509,7 +550,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                                     // refresh UI.
                                     if (!tagToUpdate.isVisibleForPublic() || !visibleForPublic) {
                                         reloadPrivateTags();
-                                        firePrivateTagUpdateEvent();
+                                        firePrivateTagUpdateEvent(userService.getStorage());
                                     } else {
                                         updateContent();
                                     }
@@ -590,7 +631,7 @@ public class TaggingPanel extends ComponentWithoutSettings
      * Forces {@link #contentPanel} to rerender.
      */
     protected void refreshContentPanel() {
-        taggingPanel.setContentWidget(contentPanel);
+        filterbarAndContentPanel.setContentWidget(contentPanel);
     }
 
     /**
@@ -661,16 +702,37 @@ public class TaggingPanel extends ComponentWithoutSettings
      * {@link UserService#getCurrentUser() current user} is logged in.
      */
     private void ensureFooterPanelVisibility() {
-        // Setting footerPanel.setVisible(false) is not sufficient as panel would still be
-        // rendered as 20px high white space instead of being hidden.
-        // Fix: remove panel completely from footer.
         if (currentState != null && (!currentState.equals(State.VIEW)
                 || (currentState.equals(State.VIEW) && !getTagButtons().isEmpty()))) {
-            taggingPanel.setFooterWidget(footerPanel);
-            footerPanel.setCurrentState(currentState);
+            if (taggingPanel.getWidgetIndex(footerPanel) != -1) {
+                // Expand panel to 1 px which causes the browser to calculate its size
+                taggingPanel.setWidgetSize(footerPanel, 1);
+                // The scheduled command will execute after the browser has determined the size
+                Scheduler.get().scheduleFinally(new RepeatingCommand() {
+                    @Override
+                    public boolean execute() {
+                        taggingPanel.setWidgetSize(footerPanel, calculateFooterPanelHeight());
+                        taggingPanel.animate(FOOTERPANEL_ANIMATION_PERIOD_MS);
+                        return false;
+                    }
+                });
+            }
+            tagFooterPanel.setCurrentState(currentState);
         } else {
-            taggingPanel.setFooterWidget(null);
+            if (taggingPanel.getWidgetIndex(footerPanel) != -1) {
+                taggingPanel.setWidgetSize(footerPanel, 0);
+                taggingPanel.animate(FOOTERPANEL_ANIMATION_PERIOD_MS);
+            }
         }
+    }
+
+    private int calculateFooterPanelHeight() {
+        // Start with footerPanel content height
+        int height = footerPanel.getWidget().getElement().getOffsetHeight();
+        // Limit size if we take up the entire height of the viewing area
+        // to make sure we don't get pushed out of it at the top making parts of the footerPanel inaccessible
+        height = Math.min(height, taggingPanel.getOffsetHeight());
+        return height;
     }
 
     /**
@@ -697,7 +759,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         });
         reloadPrivateTags();
         filterbarPanel.loadTagFilterSets();
-        footerPanel.loadAllTagButtons();
+        tagFooterPanel.loadAllTagButtons();
     }
 
     /**

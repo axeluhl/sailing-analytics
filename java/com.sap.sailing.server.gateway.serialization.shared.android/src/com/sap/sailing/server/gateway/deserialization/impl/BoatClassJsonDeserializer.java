@@ -10,9 +10,9 @@ import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer
 
 public class BoatClassJsonDeserializer implements JsonDeserializer<BoatClass> {
 
-    private SharedDomainFactory domainFactory;
+    private SharedDomainFactory<?> domainFactory;
 
-    public BoatClassJsonDeserializer(SharedDomainFactory factory) {
+    public BoatClassJsonDeserializer(SharedDomainFactory<?> factory) {
         this.domainFactory = factory;
     }
 

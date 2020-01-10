@@ -150,7 +150,7 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
                 return table;
             }
         };
-        filterField.setCheckboxEnabledFilter(comp -> userService.hasPermission(comp, DefaultActions.UPDATE));
+        filterField.setUpdatePermissionFilterForCheckbox(comp -> userService.hasPermission(comp, DefaultActions.UPDATE));
 
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         mainPanel.insert(filterField, 0);

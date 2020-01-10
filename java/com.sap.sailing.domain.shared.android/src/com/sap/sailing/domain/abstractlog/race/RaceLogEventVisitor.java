@@ -1,58 +1,69 @@
 package com.sap.sailing.domain.abstractlog.race;
 
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 
-
 public interface RaceLogEventVisitor {
-    public void visit(RaceLogRevokeEvent event);
+    void visit(RaceLogRevokeEvent event);
     
-    public void visit(RaceLogFlagEvent event);
+    void visit(RaceLogFlagEvent event);
 
-    public void visit(RaceLogPassChangeEvent event);
+    void visit(RaceLogPassChangeEvent event);
 
-    public void visit(RaceLogRaceStatusEvent event);
+    void visit(RaceLogRaceStatusEvent event);
 
-    public void visit(RaceLogStartTimeEvent event);
+    void visit(RaceLogStartTimeEvent event);
 
-    public void visit(RaceLogCourseDesignChangedEvent event);
+    void visit(RaceLogCourseDesignChangedEvent event);
     
-    public void visit(RaceLogFinishPositioningListChangedEvent event);
+    void visit(RaceLogFinishPositioningListChangedEvent event);
     
-    public void visit(RaceLogFinishPositioningConfirmedEvent event);
+    void visit(RaceLogFinishPositioningConfirmedEvent event);
     
-    public void visit(RaceLogPathfinderEvent event);
+    void visit(RaceLogPathfinderEvent event);
     
-    public void visit(RaceLogGateLineOpeningTimeEvent event);
+    void visit(RaceLogGateLineOpeningTimeEvent event);
     
-    public void visit(RaceLogStartProcedureChangedEvent event);
+    void visit(RaceLogStartProcedureChangedEvent event);
 
-    public void visit(RaceLogProtestStartTimeEvent event);
+    void visit(RaceLogProtestStartTimeEvent event);
     
-    public void visit(RaceLogWindFixEvent event);
+    void visit(RaceLogWindFixEvent event);
     
-    public void visit(RaceLogDenoteForTrackingEvent event);
+    void visit(RaceLogDenoteForTrackingEvent event);
     
-    public void visit(RaceLogStartTrackingEvent event);
+    void visit(RaceLogStartTrackingEvent event);
 
-    public void visit(RaceLogRegisterCompetitorEvent event);
+    void visit(RaceLogRegisterCompetitorEvent event);
 
-    public void visit(RaceLogAdditionalScoringInformationEvent additionalScoringInformation);
+    void visit(RaceLogAdditionalScoringInformationEvent additionalScoringInformation);
     
-    public void visit(RaceLogFixedMarkPassingEvent event);
+    void visit(RaceLogFixedMarkPassingEvent event);
     
-    public void visit(RaceLogSuppressedMarkPassingsEvent event);
+    void visit(RaceLogSuppressedMarkPassingsEvent event);
     
-    public void visit(RaceLogDependentStartTimeEvent event);
+    void visit(RaceLogDependentStartTimeEvent event);
     
-    public void visit(RaceLogStartOfTrackingEvent event);
+    void visit(RaceLogStartOfTrackingEvent event);
     
-    public void visit(RaceLogEndOfTrackingEvent event);
+    void visit(RaceLogEndOfTrackingEvent event);
 
-    public void visit(RaceLogUseCompetitorsFromRaceLogEvent event);
+    void visit(RaceLogUseCompetitorsFromRaceLogEvent event);
 
-    public void visit(RaceLogTagEvent event);
+    void visit(RaceLogTagEvent event);
+
+    void visit(RaceLogORCLegDataEvent event);
+    
+    void visit(RaceLogORCCertificateAssignmentEvent event);
+    
+    void visit(RaceLogORCScratchBoatEvent event);
+
+    void visit(RaceLogORCImpliedWindSourceEvent event);
 }

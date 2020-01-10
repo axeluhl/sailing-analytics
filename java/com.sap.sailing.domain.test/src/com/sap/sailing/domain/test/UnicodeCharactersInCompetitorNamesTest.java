@@ -15,9 +15,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -38,7 +38,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
 
     @Before
     public void setUp() {
-        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl((srlid)->null));
+        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory.TEST_RACE_LOG_RESOLVER));
     }
     
     public static void main(String[] args) throws Exception {
@@ -55,7 +55,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
                         EmptyRaceLogStore.INSTANCE,
                         EmptyRegattaLogStore.INSTANCE,
                         EmptyWindStore.INSTANCE, new DummyTrackedRegattaRegistry(),
-                        mock(RaceLogResolver.class), mock(LeaderboardGroupResolver.class), new RaceTrackingConnectivityParametersImpl(new URL(
+                        mock(RaceLogAndTrackedRaceResolver.class), mock(LeaderboardGroupResolver.class), new RaceTrackingConnectivityParametersImpl(new URL(
                                 "http://"
                                         + TracTracConnectionConstants.HOST_NAME
                                         + "/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=5b08a9ee-9933-11e0-85be-406186cbf87c"),

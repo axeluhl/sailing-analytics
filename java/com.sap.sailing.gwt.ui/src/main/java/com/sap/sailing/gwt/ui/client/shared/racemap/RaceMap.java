@@ -29,11 +29,11 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.LoadApi;
 import com.google.gwt.maps.client.LoadApi.LoadLibrary;
 import com.google.gwt.maps.client.MapOptions;
+import com.google.gwt.maps.client.MapTypeId;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.controls.ControlPosition;
-import com.google.gwt.maps.client.controls.MapTypeControlOptions;
 import com.google.gwt.maps.client.controls.MapTypeStyle;
 import com.google.gwt.maps.client.controls.PanControlOptions;
 import com.google.gwt.maps.client.controls.ZoomControlOptions;
@@ -555,7 +555,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
-                showHeaderPanel, quickRanksDTOProvider, "", "");
+                showHeaderPanel, quickRanksDTOProvider, /* leaderboardName */ "", /* leaderboardGroupName */ "");
     }
     
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
@@ -685,7 +685,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     coordinateSystem.setCoordinateSystem(new RotateAndTranslateCoordinateSystem(centerOfCourse,
                             lastCombinedTrueWindFromDirection.add(new DegreeBearingImpl(90))));
                     if (map != null) {
-                        mapOptions = getMapOptions(settings.isShowMapControls(), /* wind-up */ true);
+                        mapOptions = getMapOptions(settings.isShowMapControls(), /* wind-up */ true,
+                                settings.isShowSatelliteLayer());
                     } else {
                         mapOptions = null;
                     }
@@ -702,7 +703,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         } else {
             if (map != null) {
-                mapOptions = getMapOptions(settings.isShowMapControls(), /* wind-up */ false);
+                mapOptions = getMapOptions(settings.isShowMapControls(), /* wind-up */ false,
+                        settings.isShowSatelliteLayer());
             } else {
                 mapOptions = null;
             }
@@ -731,7 +733,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     private void loadAvailableDetailTypes() {
         sailingService.determineDetailTypesForCompetitorChart(leaderboardGroupName, raceIdentifier,
-        //sailingService.getAvailableDetailTypesForLeaderboard(leaderboardName, raceIdentifier,
                 new AsyncCallback<Iterable<DetailType>>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -747,7 +748,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 });
     }
 
-    private void loadMapsAPIV3(final boolean showMapControls, final boolean showHeaderPanel) {
+    private void loadMapsAPIV3(final boolean showMapControls, final boolean showHeaderPanel,
+            final boolean showSatelliteLayer) {
         // load all the libs for use in the maps
         ArrayList<LoadLibrary> loadLibraries = new ArrayList<LoadApi.LoadLibrary>();
         loadLibraries.add(LoadLibrary.DRAWING);
@@ -756,7 +758,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         Runnable onLoad = new Runnable() {
             @Override
             public void run() {
-                MapOptions mapOptions = getMapOptions(showMapControls, /* wind up */ false);
+                MapOptions mapOptions = getMapOptions(showMapControls, /* wind up */ false, showSatelliteLayer);
                 map = new MapWidget(mapOptions);
                 rootPanel.add(map, 0, 0);
                 if (showHeaderPanel) {
@@ -2269,10 +2271,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             BoatOverlay boatOverlay = boatOverlays.get(competitorDTO);
             if (boatOverlay == null) {
                 boatOverlay = createBoatOverlay(RaceMapOverlaysZIndexes.BOATS_ZINDEX, competitorDTO, displayHighlighted(competitorDTO));
-                boatOverlays.put(competitorDTO, boatOverlay);
-                boatOverlay.setDisplayMode(displayHighlighted(competitorDTO));
-                boatOverlay.setBoatFix(lastBoatFix, timeForPositionTransitionMillis);
-                boatOverlay.addToMap();
+                if (boatOverlay != null) {
+                    boatOverlays.put(competitorDTO, boatOverlay);
+                    boatOverlay.setDisplayMode(displayHighlighted(competitorDTO));
+                    boatOverlay.setBoatFix(lastBoatFix, timeForPositionTransitionMillis);
+                    boatOverlay.addToMap();
+                }
             } else {
                 usedExistingCanvas = true;
                 boatOverlay.setDisplayMode(displayHighlighted(competitorDTO));
@@ -2343,30 +2347,37 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
 
+    /**
+     * @return a valid {@link BoatOverlay} if a boat was found for the competitor, or {@code null} otherwise
+     */
     private BoatOverlay createBoatOverlay(int zIndex, final CompetitorDTO competitorDTO, DisplayMode displayMode) {
         final BoatDTO boatOfCompetitor = competitorSelection.getBoat(competitorDTO);
-        final BoatOverlay boatCanvas = new BoatOverlay(map, zIndex, boatOfCompetitor, competitorSelection.getColor(competitorDTO, raceIdentifier), coordinateSystem);
-        boatCanvas.setDisplayMode(displayMode);
-        boatCanvas.addClickHandler(event -> {
-            GPSFixDTOWithSpeedWindTackAndLegType latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime());
-            Widget content = getInfoWindowContent(competitorDTO, latestFixForCompetitor);
-            LatLng where = coordinateSystem.toLatLng(latestFixForCompetitor.position);
-            managedInfoWindow.openAtPosition(content, where);
-        });
-
-        boatCanvas.addMouseOverHandler(new MouseOverMapHandler() {
-            @Override
-            public void onEvent(MouseOverMapEvent event) {
-                map.setTitle(boatOfCompetitor.getSailId());
-            }
-        });
-        boatCanvas.addMouseOutMoveHandler(new MouseOutMapHandler() {
-            @Override
-            public void onEvent(MouseOutMapEvent event) {
-                map.setTitle("");
-            }
-        });
-
+        final BoatOverlay boatCanvas;
+        if (boatOfCompetitor == null) {
+            GWT.log("Error: no boat found for competitor "+competitorDTO.getName()+". Not showing on map.");
+            boatCanvas = null;
+        } else {
+            boatCanvas = new BoatOverlay(map, zIndex, boatOfCompetitor, competitorSelection.getColor(competitorDTO, raceIdentifier), coordinateSystem);
+            boatCanvas.setDisplayMode(displayMode);
+            boatCanvas.addClickHandler(event -> {
+                GPSFixDTOWithSpeedWindTackAndLegType latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime());
+                Widget content = getInfoWindowContent(competitorDTO, latestFixForCompetitor);
+                LatLng where = coordinateSystem.toLatLng(latestFixForCompetitor.position);
+                managedInfoWindow.openAtPosition(content, where);
+            });
+            boatCanvas.addMouseOverHandler(new MouseOverMapHandler() {
+                @Override
+                public void onEvent(MouseOverMapEvent event) {
+                    map.setTitle(boatOfCompetitor.getSailId());
+                }
+            });
+            boatCanvas.addMouseOutMoveHandler(new MouseOutMapHandler() {
+                @Override
+                public void onEvent(MouseOutMapEvent event) {
+                    map.setTitle("");
+                }
+            });
+        }
         return boatCanvas;
     }
 
@@ -2843,6 +2854,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         boolean requiresRedraw = false;
         boolean requiresUpdateCoordinateSystem = false;
 
+        if (newSettings.isShowSatelliteLayer() != settings.isShowSatelliteLayer()) {
+            requiresUpdateCoordinateSystem = true;
+        }
+
         if (newSettings.isShowManeuverLossVisualization() != settings.isShowManeuverLossVisualization()) {
             showManeuverLossChanged = true;
         }
@@ -3031,7 +3046,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     @Override
     public void initializeData(boolean showMapControls, boolean showHeaderPanel) {
-        loadMapsAPIV3(showMapControls, showHeaderPanel);
+        loadMapsAPIV3(showMapControls, showHeaderPanel, this.settings.isShowSatelliteLayer());
     }
 
     @Override
@@ -3212,44 +3227,42 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return new BoatsBoundsCalculator().calculateNewBounds(RaceMap.this);
     }
 
-    private MapOptions getMapOptions(final boolean showMapControls, boolean windUp) {
+    private MapOptions getMapOptions(final boolean showMapControls, boolean windUp, boolean showSatelliteLayer) {
         MapOptions mapOptions = MapOptions.newInstance();
-          mapOptions.setScrollWheel(true);
-          mapOptions.setMapTypeControl(showMapControls && !windUp);
-          mapOptions.setPanControl(showMapControls);
-          mapOptions.setZoomControl(showMapControls);
-          mapOptions.setScaleControl(true);
-          if (windUp) {
-              mapOptions.setMinZoom(8);
-          } else {
-              mapOptions.setMinZoom(0);
-          }
-          MapTypeStyle[] mapTypeStyles = new MapTypeStyle[4];
-          
-          // hide all transit lines including ferry lines
-          mapTypeStyles[0] = GoogleMapStyleHelper.createHiddenStyle(MapTypeStyleFeatureType.TRANSIT);
-          // hide points of interest
-          mapTypeStyles[1] = GoogleMapStyleHelper.createHiddenStyle(MapTypeStyleFeatureType.POI);
-          // simplify road display
-          mapTypeStyles[2] = GoogleMapStyleHelper.createSimplifiedStyle(MapTypeStyleFeatureType.ROAD);
-          // set water color
-          mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, WATER_COLOR);
-          
-          MapTypeControlOptions mapTypeControlOptions = MapTypeControlOptions.newInstance();
-          mapTypeControlOptions.setPosition(ControlPosition.BOTTOM_RIGHT);
-          mapOptions.setMapTypeControlOptions(mapTypeControlOptions);
+        // Google Maps API does not support rotated satellite images
+        mapOptions.setMapTypeId(showSatelliteLayer && !windUp ? MapTypeId.SATELLITE : MapTypeId.ROADMAP);
+        mapOptions.setScrollWheel(true);
+        mapOptions.setMapTypeControl(false);
+        mapOptions.setPanControl(showMapControls);
+        mapOptions.setZoomControl(showMapControls);
+        mapOptions.setScaleControl(true);
+        if (windUp) {
+            mapOptions.setMinZoom(8);
+        } else {
+            mapOptions.setMinZoom(0);
+        }
+        MapTypeStyle[] mapTypeStyles = new MapTypeStyle[4];
 
-          mapOptions.setMapTypeStyles(mapTypeStyles);
-          // no need to try to position the scale control; it always ends up at the right bottom corner
-          mapOptions.setStreetViewControl(false);
-          if (showMapControls) {
-              ZoomControlOptions zoomControlOptions = ZoomControlOptions.newInstance();
-              zoomControlOptions.setPosition(ControlPosition.RIGHT_TOP);
-              mapOptions.setZoomControlOptions(zoomControlOptions);
-              PanControlOptions panControlOptions = PanControlOptions.newInstance();
-              panControlOptions.setPosition(ControlPosition.RIGHT_TOP);
-              mapOptions.setPanControlOptions(panControlOptions);
-          }
+        // hide all transit lines including ferry lines
+        mapTypeStyles[0] = GoogleMapStyleHelper.createHiddenStyle(MapTypeStyleFeatureType.TRANSIT);
+        // hide points of interest
+        mapTypeStyles[1] = GoogleMapStyleHelper.createHiddenStyle(MapTypeStyleFeatureType.POI);
+        // simplify road display
+        mapTypeStyles[2] = GoogleMapStyleHelper.createSimplifiedStyle(MapTypeStyleFeatureType.ROAD);
+        // set water color
+        mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, WATER_COLOR);
+
+        mapOptions.setMapTypeStyles(mapTypeStyles);
+        // no need to try to position the scale control; it always ends up at the right bottom corner
+        mapOptions.setStreetViewControl(false);
+        if (showMapControls) {
+            ZoomControlOptions zoomControlOptions = ZoomControlOptions.newInstance();
+            zoomControlOptions.setPosition(ControlPosition.RIGHT_TOP);
+            mapOptions.setZoomControlOptions(zoomControlOptions);
+            PanControlOptions panControlOptions = PanControlOptions.newInstance();
+            panControlOptions.setPosition(ControlPosition.RIGHT_TOP);
+            mapOptions.setPanControlOptions(panControlOptions);
+        }
         return mapOptions;
     }
 

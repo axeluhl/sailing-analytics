@@ -8,9 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
@@ -93,7 +93,7 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     @Override
     public SwissTimingRaceTracker createRaceTracker(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry,
-            RaceLogResolver raceLogResolver, SwissTimingTrackingConnectivityParameters connectivityParams,
+            RaceLogAndTrackedRaceResolver raceLogResolver, SwissTimingTrackingConnectivityParameters connectivityParams,
             RaceTrackingHandler raceTrackingHandler)
             throws InterruptedException, UnknownHostException, IOException, ParseException, URISyntaxException {
         return new SwissTimingRaceTrackerImpl(raceLogStore, regattaLogStore, windStore, domainFactory, this,
@@ -102,7 +102,7 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, WindStore windStore, DomainFactory domainFactory,
-            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, RaceLogStore raceLogStore,
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogAndTrackedRaceResolver raceLogResolver, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, SwissTimingTrackingConnectivityParameters connectivityParams,
             RaceTrackingHandler raceTrackingHandler)
             throws UnknownHostException, InterruptedException, IOException, ParseException, URISyntaxException {

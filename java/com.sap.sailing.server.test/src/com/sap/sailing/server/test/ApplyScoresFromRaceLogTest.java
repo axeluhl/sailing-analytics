@@ -138,7 +138,7 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
                 /* delayToLiveInMillis */ 5000, /* millisecondsOverWhichToAverageWind */ 15000,
                 /* millisecondsOverWhichToAverageSpeed */ 10000,
                 /* useInternalMarkPassingAlgorithm */ false, OneDesignRankingMetric::new,
-                /* raceLogResolver */ service);
+                /* raceLogResolver */ service, /* trackingConnectorInfo */ null);
         final Fleet fleet = f1Column.getFleets().iterator().next();
         f1Column.setTrackedRace(fleet, newF1);
         // Now add a CompetitorResult to the race log:

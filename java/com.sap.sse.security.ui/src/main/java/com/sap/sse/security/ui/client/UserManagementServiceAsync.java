@@ -24,6 +24,7 @@ import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.shared.dto.WildcardPermissionWithSecurityDTO;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
+import com.sap.sse.security.ui.shared.SecurityServiceSharingDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public interface UserManagementServiceAsync {
@@ -72,7 +73,7 @@ public interface UserManagementServiceAsync {
     void putRoleDefintionToUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString, boolean forAll,
             AsyncCallback<Void> callback);
 
-    void removeRoleDefintionFromUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString,
+    void removeRoleDefinitionFromUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString,
             AsyncCallback<Void> callback);
 
     /**
@@ -193,4 +194,10 @@ public interface UserManagementServiceAsync {
     void getRolesAndPermissionsForUser(String username, AsyncCallback<RolesAndPermissionsForUserDTO> callback);
 
     void userGroupExists(String userGroupName, AsyncCallback<Boolean> callback);
+    
+    /**
+     * Provides information about whether and how the security service to which this RPC service talks is shared
+     * across a server landscape with different domain/sub-domain constellations.
+     */
+    void getSharingConfiguration(AsyncCallback<SecurityServiceSharingDTO> callback);
 }

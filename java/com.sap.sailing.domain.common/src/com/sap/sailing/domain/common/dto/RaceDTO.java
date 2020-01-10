@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.common.dto;
 
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
@@ -38,18 +39,25 @@ public class RaceDTO extends BasicRaceDTO implements SecuredDTO {
     private String regattaName;
     public String boatClass;
     
+    private RankingMetrics rankingMetricType;
+    
     public RaceDTO() {}
 
-    public RaceDTO(RegattaAndRaceIdentifier raceIdentifier, TrackedRaceDTO trackedRace, boolean isCurrentlyTracked) {
+    public RaceDTO(RegattaAndRaceIdentifier raceIdentifier, TrackedRaceDTO trackedRace, boolean isCurrentlyTracked, RankingMetrics rankingMetricType) {
         super(raceIdentifier, trackedRace);
         this.regattaName = raceIdentifier.getRegattaName();
         this.isTracked = isCurrentlyTracked;
+        this.rankingMetricType = rankingMetricType;
     }
 
     public RegattaAndRaceIdentifier getRaceIdentifier() {
         return new RegattaNameAndRaceName(regattaName, getName());
     }
 
+    public RankingMetrics getRankingMetricType() {
+        return rankingMetricType;
+    }
+    
     public String getRegattaName() {
         return regattaName;
     }

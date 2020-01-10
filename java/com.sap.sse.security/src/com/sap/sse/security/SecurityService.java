@@ -61,6 +61,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     }
 
     String ALL_USERNAME = "<all>";
+    String TENANT_SUFFIX = "-tenant";
 
     SecurityManager getSecurityManager();
 
@@ -621,5 +622,28 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * type} and the given {@link ServerActions action}.
      */
     void checkCurrentUserServerPermission(ServerActions action);
+
+    /**
+     * In case this security service is shared across multiple replica sets that are published under different
+     * sub-domains, session cookies and the local store shall be arranged such that sessions and content are identified
+     * regardless the sub-domain used. For example, if there are two events, A, and B, published through
+     * {@code a.sapsailing.com} and {@code b.sapsailing.com}, respectively, by default the full sub-domain name will be
+     * used for the {@code JSESSIONID} cookie as well as for the identification of content in the browser's local store.
+     */
+    String getSharedAcrossSubdomainsOf();
+
+    /**
+     * In the browser client, a {@code CrossDomainStorage} implementation is used to either run requests for a local
+     * browser storage against the application's local storage under the URL/origin used to access the application, or a
+     * shared local storage across several sub-domains may be configured so that data stored while in the context of one
+     * sub-domain is also available to the application when loaded from a different sub-domain.
+     * 
+     * @return the base URL where the {@code /gwt-base/StorageMessaging.html} entry point can be found; if {@code null},
+     *         clients should configure their {@code CrossDomainStorage} such that the application's origin is used for
+     *         isolated local storage; otherwise, the result should be used to get a {@code CrossDomainStorage}
+     *         implementation that accesses a local store shared across all application instances that use the same base
+     *         URL for cross-domain storage.
+     */
+    String getBaseUrlForCrossDomainStorage();
 
 }

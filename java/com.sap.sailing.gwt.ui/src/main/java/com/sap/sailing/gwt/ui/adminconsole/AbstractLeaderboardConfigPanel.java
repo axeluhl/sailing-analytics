@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -30,9 +31,12 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sailing.gwt.ui.adminconsole.RaceColumnInLeaderboardDialog.RaceColumnDescriptor;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
@@ -54,7 +58,6 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
-import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
@@ -201,7 +204,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         };
         filterLeaderboardPanel.getTextBox().ensureDebugId("LeaderboardsFilterTextBox");
         filterLeaderboardPanel
-                .setCheckboxEnabledFilter(leaderboard -> userService.hasPermission(leaderboard, DefaultActions.UPDATE));
+                .setUpdatePermissionFilterForCheckbox(leaderboard -> userService.hasPermission(leaderboard, DefaultActions.UPDATE));
 
         leaderboardsPanel.add(filterLeaderboardPanel);
         leaderboardTable.ensureDebugId("AvailableLeaderboardsTable");
@@ -342,11 +345,9 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
             leaderboardRaceColumnSelectionChanged();
         });
         vPanel.add(raceColumnTable);
-
         HorizontalPanel selectedLeaderboardRaceButtonPanel = new HorizontalPanel();
         selectedLeaderboardRaceButtonPanel.setSpacing(5);
         vPanel.add(selectedLeaderboardRaceButtonPanel);
-
         addSelectedLeaderboardRacesControls(selectedLeaderboardRaceButtonPanel);
     }
 
@@ -373,18 +374,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
                 tableResources.cellTableStyle().cellTableCheckboxSelected(),
                 tableResources.cellTableStyle().cellTableCheckboxDeselected(),
                 tableResources.cellTableStyle().cellTableCheckboxColumnCell(),
-                new EntityIdentityComparator<StrippedLeaderboardDTOWithSecurity>() {
-                    @Override
-                    public boolean representSameEntity(StrippedLeaderboardDTOWithSecurity dto1,
-                            StrippedLeaderboardDTOWithSecurity dto2) {
-                        return dto1.getName().equals(dto2.getName());
-                    }
-
-                    @Override
-                    public int hashCode(StrippedLeaderboardDTOWithSecurity t) {
-                        return t.getName().hashCode();
-                    }
-                }, listDataProvider, leaderboardTable);
+                new NameBasedStrippedLeaderboardDTOEntityIdentityComparator(), listDataProvider, leaderboardTable);
         selectionCheckboxColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(selectionCheckboxColumn,
                 (o1, o2) -> (leaderboardTable.getSelectionModel().isSelected(o1) ? 1 : 0)
@@ -808,5 +798,108 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
             }
         }
         return regatta;
+    }
+
+    protected void assignCertificates(RaceColumnDTOAndFleetDTOWithNameBasedEquality object) {
+        BoatCertificateAssignmentDialog dialog = new BoatCertificateAssignmentDialog(sailingService, userService,
+                stringMessages, errorReporter, new RaceBoatCertificatesPanel(sailingService, userService, object.getC(), object.getA(), object.getB(), stringMessages, errorReporter));
+        dialog.show();
+    }
+
+    protected void selectScratchBoat(RaceColumnDTOAndFleetDTOWithNameBasedEquality object) {
+        sailingService.getORCPerformanceCurveScratchBoat(object.getC().getName(), object.getA().getName(), object.getB().getName(), new AsyncCallback<CompetitorDTO>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(stringMessages.errorObtainingScratchBoat(caught.getMessage()), /* silent */ true);
+            }
+
+            @Override
+            public void onSuccess(CompetitorDTO scratchBoatSoFar) {
+                new CompetitorSelectionDialog(sailingService, userService, errorReporter,
+                        stringMessages.selectScratchBoat(), stringMessages.selectScratchBoat(), getRaceCompetitorProvider(object), stringMessages, scratchBoatSoFar,
+                        new DialogCallback<CompetitorDTO>() {
+                            @Override
+                            public void ok(CompetitorDTO newScratchBoat) {
+                                sailingService.setORCPerformanceCurveScratchBoat(object.getC().getName(), object.getA().getName(), object.getB().getName(),
+                                        newScratchBoat, new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        errorReporter.reportError(stringMessages.errorSettingScratchBoat(caught.getMessage()), /* silent */ true);
+                                    }
+
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        Notification.notify(stringMessages.scratchBoatSetSuccessfully(), NotificationType.SUCCESS);
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void cancel() {}
+                }).show();
+            }
+        });
+    }
+    
+    protected void setImpliedWind(RaceColumnDTOAndFleetDTOWithNameBasedEquality object) {
+        final String raceDisplayName = object.getC().getName() + "/" + object.getA().getName() + "/" + object.getB().getName();
+        sailingService.getImpliedWindSource(object.getC().getName(), object.getA().getName(), object.getB().getName(),
+                new AsyncCallback<ImpliedWindSource>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.errorObtainingImpliedWindSourceForRace(
+                                raceDisplayName,
+                                caught.getMessage()));
+                    }
+
+                    @Override
+                    public void onSuccess(ImpliedWindSource result) {
+                        new ImpliedWindSourceEditDialog(object, result, availableLeaderboardList, stringMessages, errorReporter, sailingService, userService, new DialogCallback<ImpliedWindSource>() {
+                            @Override
+                            public void ok(ImpliedWindSource editedObject) {
+                                sailingService.setImpliedWindSource(object.getC().getName(), object.getA().getName(), object.getB().getName(), editedObject,
+                                        new AsyncCallback<Void>() {
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                errorReporter.reportError(
+                                                        stringMessages.errorSettingImpliedWindSourceForRace(raceDisplayName,
+                                                                caught.getMessage()));
+                                            }
+
+                                            @Override
+                                            public void onSuccess(Void result) {
+                                                Notification.notify(stringMessages.impliedWindForRaceSetSuccessfully(raceDisplayName), NotificationType.SUCCESS);
+                                            }
+                                });
+                            }
+
+                            @Override
+                            public void cancel() {
+                            }
+                        }).show();
+                    }
+        });
+    }
+
+    /**
+     * Helps in obtaining competitors for a specific "race slot" identified by leaderboard name, race column name and
+     * fleet name. In particular, the implementation is expected to return a consumer that when called with a callback
+     * fetches the competitors for the particular race identified by {@code raceSlotIdentifier} and sends them to the
+     * callback's {@link AsyncCallback#onSuccess(Object)} method.
+     */
+    protected Consumer<AsyncCallback<Iterable<? extends CompetitorDTO>>> getRaceCompetitorProvider(
+            RaceColumnDTOAndFleetDTOWithNameBasedEquality raceSlotIdentifier) {
+        return callback -> sailingService.getCompetitorsAndBoatsOfRace(raceSlotIdentifier.getC().getName(),
+                raceSlotIdentifier.getA().getName(), raceSlotIdentifier.getB().getName(), new AsyncCallback<Map<? extends CompetitorDTO, BoatDTO>>() {
+            @Override
+            public void onFailure(Throwable e) {
+                callback.onFailure(e);
+            }
+            
+            @Override
+            public void onSuccess(Map<? extends CompetitorDTO, BoatDTO> competitorToBoatMap) {
+                callback.onSuccess(competitorToBoatMap.keySet());
+            }
+        });
     }
 }

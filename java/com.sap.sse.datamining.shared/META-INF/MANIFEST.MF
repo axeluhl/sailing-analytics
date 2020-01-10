@@ -13,5 +13,6 @@ Export-Package: com.sap.sse.datamining.shared,
  com.sap.sse.datamining.shared.util
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sse.datamining.annotations,
- com.sap.sse.common
+ com.sap.sse.common,
+ com.sap.sse.shared.android
 Automatic-Module-Name: com.sap.sse.datamining.shared

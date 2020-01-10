@@ -41,7 +41,7 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<DynamicCompe
     
     private static final Logger logger = Logger.getLogger(CompetitorJsonDeserializer.class.getName());
 
-    public static CompetitorJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
+    public static CompetitorJsonDeserializer create(SharedDomainFactory<?> baseDomainFactory) {
         return new CompetitorJsonDeserializer(baseDomainFactory, new TeamJsonDeserializer(new PersonJsonDeserializer(
                 new NationalityJsonDeserializer(baseDomainFactory))), new BoatJsonDeserializer(baseDomainFactory, new BoatClassJsonDeserializer(baseDomainFactory)));
     }

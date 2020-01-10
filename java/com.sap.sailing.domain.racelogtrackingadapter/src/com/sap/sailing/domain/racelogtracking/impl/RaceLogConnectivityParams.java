@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceInformationFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -20,6 +19,7 @@ import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogExcep
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -66,7 +66,7 @@ public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityP
 
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
+            RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
             RaceTrackingHandler raceTrackingHandler) {
         return createRaceTracker(regatta, trackedRegattaRegistry, windStore, raceLogResolver, leaderboardGroupResolver, timeoutInMilliseconds,
                 raceTrackingHandler);
@@ -74,7 +74,7 @@ public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityP
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
-            WindStore windStore, RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
+            WindStore windStore, RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
             RaceTrackingHandler raceTrackingHandler) {
         if (regatta == null) {
             BoatClass boatClass = new RaceInformationFinder(getRaceLog()).analyze().getBoatClass();

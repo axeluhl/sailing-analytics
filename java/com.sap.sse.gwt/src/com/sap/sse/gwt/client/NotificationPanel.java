@@ -1,16 +1,18 @@
 package com.sap.sse.gwt.client;
 
+import java.util.function.Consumer;
+
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
 
 /**
  * Utility class to show non obstructive warning / info messages using a small notification at the bottom of the page.
@@ -29,7 +31,7 @@ public class NotificationPanel {
 
     private boolean alreadyShown = false;
     private HandlerRegistration registration;
-
+    private static CrossDomainStorage storage;
 
     public NotificationPanel(String message, NotificationType type, Panel parent) {
         this.message = message;
@@ -87,25 +89,34 @@ public class NotificationPanel {
         };
     }
     
+    public static void setStorage(CrossDomainStorage storage) {
+        NotificationPanel.storage = storage;
+    }
     /**
      * Displays notification at UI.
      */
     public void show() {
-        final Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-        int timeout = NOTIFICATION_TIME;
-        if (localStorageIfSupported != null) {
-            final String customTimeOut = localStorageIfSupported.getItem("sse.notification.customTimeOutInSeconds");
-            if (customTimeOut != null && !customTimeOut.isEmpty()) {
-                try {
-                    timeout = Integer.parseInt(customTimeOut) * 1000;
-                } catch (Exception e) {
-                    // If the value can't be parsed, we just use the default
-                }
+        final Consumer<Integer> showAnimationWithTimeout = timeout->{
+            if (!animation.isRunning()) {
+                parent.add(panel);
+                animation.run(timeout);
             }
-        }
-        if (!animation.isRunning()) {
-            parent.add(panel);
-            animation.run(timeout);
+        };
+        if (storage != null) {
+            storage.getItem("sse.notification.customTimeOutInSeconds", customTimeOut->{
+                if (customTimeOut != null && !customTimeOut.isEmpty()) {
+                    int timeout;
+                    try {
+                        timeout = Integer.parseInt(customTimeOut) * 1000;
+                    } catch (Exception e) {
+                        // If the value can't be parsed, we just use the default
+                        timeout = NOTIFICATION_TIME;
+                    }
+                    showAnimationWithTimeout.accept(timeout);
+                }
+            });
+        } else {
+            showAnimationWithTimeout.accept(NOTIFICATION_TIME);
         }
     }
     

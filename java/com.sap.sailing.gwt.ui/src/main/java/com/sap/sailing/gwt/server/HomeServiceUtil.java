@@ -41,6 +41,7 @@ import com.sap.sailing.gwt.home.communication.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
 import com.sap.sailing.gwt.home.communication.start.EventStageDTO;
 import com.sap.sailing.gwt.home.communication.start.StageEventType;
+import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.common.TimePoint;
@@ -311,6 +312,9 @@ public final class HomeServiceUtil {
         dto.setBaseURL(baseURL.toString());
         dto.setOnRemoteServer(onRemoteServer);
         dto.setStageType(stageType);
+        Set<TrackingConnectorInfoDTO> trackingConnectorInfos = event.getTrackingConnectorInfos().stream()
+                .map(TrackingConnectorInfoDTO::new).collect(Collectors.toSet());
+        dto.setTrackingConnectorInfos(trackingConnectorInfos);
         dto.setStageImageURL(useTeaserImage ? findEventThumbnailImageUrlAsString(event) : getStageImageURLAsString(event));
         return dto;
     }

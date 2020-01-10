@@ -70,6 +70,18 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
     private final boolean filterCompetitorsWithBoat;
     private final boolean filterCompetitorsWithoutBoat;
     
+    /**
+     * @param filterCompetitorsWithBoat
+     *            relevant if {@link #refreshCompetitorList(String)} or {@link #refreshCompetitorList(String, Callback)}
+     *            will be called using {@code null} for the leaderboard name, hence requesting <em>all</em> competitors
+     *            to be loaded. In this case, competitors with boat will be fetched only if this flag is
+     *            {@code false}.
+     * @param filterCompetitorsWithoutBoat
+     *            relevant if {@link #refreshCompetitorList(String)} or {@link #refreshCompetitorList(String, Callback)}
+     *            will be called using {@code null} for the leaderboard name, hence requesting <em>all</em> competitors
+     *            to be loaded. In this case, competitors without boat will be fetched only if this flag is
+     *            {@code false}.
+     */
     public CompetitorTableWrapper(SailingServiceAsync sailingService, UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat) {
         super(sailingService, stringMessages, errorReporter, multiSelection, enablePager,
@@ -86,7 +98,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         this.filterCompetitorsWithBoat = filterCompetitorsWithBoat;
         this.filterCompetitorsWithoutBoat = filterCompetitorsWithoutBoat;
         ListHandler<CompetitorDTO> competitorColumnListHandler = getColumnSortHandler();
-        
         // competitors table
         TextColumn<CompetitorDTO> competitorNameColumn = new TextColumn<CompetitorDTO>() {
             @Override
@@ -102,7 +113,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 return comparator.compare(o1.getName(), o2.getName());
             }
         });
-
         TextColumn<CompetitorDTO> competitorShortNameColumn = new TextColumn<CompetitorDTO>() {
             @Override
             public String getValue(CompetitorDTO competitor) {
@@ -117,7 +127,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 return comparator.compare(o1.getShortName(), o2.getShortName());
             }
         });
-
         TextColumn<CompetitorDTO> boatClassColumn = new TextColumn<CompetitorDTO>() {
             @Override
             public String getValue(CompetitorDTO competitor) {
@@ -141,7 +150,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 return comparator.compare(boat1.getBoatClass().getName(), boat2.getBoatClass().getName());
             }
         });
-
         Column<CompetitorDTO, SafeHtml> flagImageColumn = new Column<CompetitorDTO, SafeHtml>(new SafeHtmlCell()) {
             @Override
             public SafeHtml getValue(CompetitorDTO competitor) {
@@ -174,7 +182,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 return comparator.compare(o1.getThreeLetterIocCountryCode(), o2.getThreeLetterIocCountryCode());
             }
         });
-
         TextColumn<CompetitorDTO> sailIdColumn = new TextColumn<CompetitorDTO>() {
             @Override
             public String getValue(CompetitorDTO competitor) {
@@ -198,14 +205,12 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 return comparator.compare(boat1.getSailId(), boat2.getSailId());
             }
         });
-
         Column<CompetitorDTO, SafeHtml> displayColorColumn = new ColorColumn<>(new ColorRetriever<CompetitorDTO>() {
             @Override
             public Color getColor(CompetitorDTO t) {
                 return t.getColor();
             }
         });
-        
         Column<CompetitorDTO, SafeHtml> imageColumn = new Column<CompetitorDTO, SafeHtml>(new SafeHtmlCell()) {
             @Override
             public SafeHtml getValue(CompetitorDTO competitor) {
@@ -225,7 +230,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 return comparator.compare(o1.getImageURL(), o2.getImageURL());
             }
         });
-
         TextColumn<CompetitorDTO> competitorIdColumn = new TextColumn<CompetitorDTO>() {
             @Override
             public String getValue(CompetitorDTO competitor) {
@@ -239,7 +243,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 return new NaturalComparator(false).compare(o1.getIdAsString(), o2.getIdAsString());
             }
         });
-
         TextColumn<CompetitorDTO> competitorEMailColumn = new TextColumn<CompetitorDTO>() {
             @Override
             public String getValue(CompetitorDTO competitor) {
@@ -253,7 +256,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 return new NaturalComparator(false).compare(o1.getEmail(), o2.getEmail());
             }
         });
-
         TextColumn<CompetitorDTO> competitorSearchTagColumn = new TextColumn<CompetitorDTO>() {
             @Override
             public String getValue(CompetitorDTO competitor) {
@@ -299,7 +301,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                                         o2.getTimeOnDistanceAllowancePerNauticalMile());
                     }
         });
-        
         filterField = new LabeledAbstractFilterablePanel<CompetitorDTO>(new Label(getStringMessages().filterCompetitors()),
                 new ArrayList<CompetitorDTO>(), dataProvider, stringMessages) {
             @Override
@@ -321,9 +322,8 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 return table;
             }
         };
-        filterField.setCheckboxEnabledFilter(comp -> userService.hasPermission(comp, DefaultActions.UPDATE));
+        filterField.setUpdatePermissionFilterForCheckbox(comp -> userService.hasPermission(comp, DefaultActions.UPDATE));
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
-        
         // CompetitorTableEditFeatures
         final HasPermissions type = SecuredDomainType.COMPETITOR;
         AccessControlledActionsColumn<CompetitorDTO, CompetitorConfigImagesBarCell> competitorActionColumn = create(
@@ -334,12 +334,10 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 null, stringMessages);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 editOwnerShipDialog::openDialog);
-        
         final EditACLDialog.DialogConfig<CompetitorDTO> configACL = EditACLDialog
                 .create(userService.getUserManagementService(), type, null, stringMessages);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);
-        
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(competitorColumnListHandler);
         table.addColumn(competitorNameColumn, getStringMessages().name());
@@ -366,7 +364,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         return filterField;
     }
     
-    public void refreshCompetitorList(Iterable<CompetitorDTO> competitors) {
+    public void refreshCompetitorList(Iterable<? extends CompetitorDTO> competitors) {
         getFilteredCompetitors(competitors);
     }
     
@@ -375,10 +373,13 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
     }
     
     /**
-     * @param leaderboardName If null, all existing competitors are loaded
+     * @param leaderboardName
+     *            If {@code null}, all existing competitors are loaded.
+     * @param callback
+     *            if not {@code null}, its {@code AsyncCallback#onSuccess(Object)} method will be called after
+     *            successfully refreshing the competitors
      */
-    public void refreshCompetitorList(String leaderboardName, final Callback<Iterable<CompetitorDTO>,
-            Throwable> callback) {
+    public void refreshCompetitorList(String leaderboardName, final Callback<Iterable<CompetitorDTO>, Throwable> callback) {
         final AsyncCallback<Iterable<CompetitorDTO>> myCallback = new AsyncCallback<Iterable<CompetitorDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -404,7 +405,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         }
     }
 
-    private void getFilteredCompetitors(Iterable<CompetitorDTO> result) {
+    private void getFilteredCompetitors(Iterable<? extends CompetitorDTO> result) {
         filterField.updateAll(result);
     }
 

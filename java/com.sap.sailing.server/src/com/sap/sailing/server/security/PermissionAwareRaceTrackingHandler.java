@@ -10,7 +10,6 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.support.SubjectThreadState;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -26,12 +25,14 @@ import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
@@ -103,11 +104,14 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator,
-            RaceLogResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter) {
-        return setOwnershipForRace(new RegattaNameAndRaceName(trackedRegatta.getRegatta().getName(), raceDefinition.getName()),
+            RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter,
+            TrackingConnectorInfo trackingConnectorInfo) {
+        return setOwnershipForRace(
+                new RegattaNameAndRaceName(trackedRegatta.getRegatta().getName(), raceDefinition.getName()),
                 () -> super.createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore, delayToLiveInMillis,
                         millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                        raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver, threadLocalTransporter));
+                        raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver, threadLocalTransporter,
+                        trackingConnectorInfo));
     }
 
     @Override

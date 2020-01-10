@@ -90,7 +90,7 @@ public class RoleDefinitionTableWrapper extends
             final UserGroupDTO selectedObject = userGroupSelectionModel.getSelectedObject();
             if (selectedObject != null) {
                 if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(rolePair.getA().getName()))) {
-                    userService.getUserManagementService().removeRoleDefintionFromUserGroup(
+                    userService.getUserManagementService().removeRoleDefinitionFromUserGroup(
                             selectedObject.getId().toString(), rolePair.getA().getId().toString(),
                             new AsyncCallback<Void>() {
 

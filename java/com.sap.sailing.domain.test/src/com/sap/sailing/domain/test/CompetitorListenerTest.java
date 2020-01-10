@@ -66,7 +66,7 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
     
     @Before
     public void setUp() {
-        baseDomainFactory = new DomainFactoryImpl((srlid)->null);
+        baseDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
         competitor = (DynamicCompetitor) TrackBasedTest.createCompetitorWithBoat("Hasso");
         nationalityChanged = false;
         whatChangedNationality = null;
@@ -265,7 +265,7 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
     
     @Test
     public void testCompetitorSerializationLosesAllExternalListeners() throws ClassNotFoundException, IOException {
-        DomainFactory baseDomainFactory = new DomainFactoryImpl((srlid)->null);
+        DomainFactory baseDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
         DynamicCompetitor clonedCompetitor = cloneBySerialization(competitor, baseDomainFactory);
         clonedCompetitor.setName("Dr. Hasso Plattner");
         final RGBColor myNewColor = new RGBColor(123, 12, 234);

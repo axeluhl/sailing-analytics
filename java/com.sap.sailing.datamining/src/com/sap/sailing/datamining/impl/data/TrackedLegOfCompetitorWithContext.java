@@ -70,14 +70,16 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     
     @Override
     public ClusterDTO getPercentageClusterForRelativeScoreInRace() {
+        final ClusterDTO result;
         Double relativeScore = getTrackedLegContext().getTrackedRaceContext().getRelativeScoreForCompetitor(getCompetitor());
         if (relativeScore == null) {
-            return null;
+            result = null;
+        } else {
+            SailingClusterGroups clusterGroups = Activator.getClusterGroups();
+            Cluster<Double> cluster = clusterGroups.getPercentageClusterGroup().getClusterFor(relativeScore);
+            result = new ClusterDTO(clusterGroups.getPercentageClusterFormatter().format(cluster));
         }
-        
-        SailingClusterGroups clusterGroups = Activator.getClusterGroups();
-        Cluster<Double> cluster = clusterGroups.getPercentageClusterGroup().getClusterFor(relativeScore);
-        return new ClusterDTO(clusterGroups.getPercentageClusterFormatter().format(cluster));
+        return result;
     }
     
     protected <R> R getSomethingForLegTrackingInterval(BiFunction<TimePoint, TimePoint, R> resultSupplier) {

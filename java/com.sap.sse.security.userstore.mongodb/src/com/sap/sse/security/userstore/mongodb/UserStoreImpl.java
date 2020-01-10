@@ -579,20 +579,35 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public UserGroupImpl createUserGroup(UUID groupId, String name) throws UserGroupManagementException {
+        checkGroupNameAndIdUniqueness(groupId, name);
+        logger.info("Creating user group: " + groupId + " with name " + name);
+        UserGroupImpl group = new UserGroupImpl(groupId, name);
+        if (mongoObjectFactory != null) {
+            mongoObjectFactory.storeUserGroup(group);
+        }
+        addGroupToInternalMaps(group);
+        return group;
+    }
+
+    private void addGroupToInternalMaps(UserGroup group) {
+        userGroups.put(group.getId(), group);
+        userGroupsByName.put(group.getName(), group);
+    }
+
+    private void checkGroupNameAndIdUniqueness(UUID groupId, String name) throws UserGroupManagementException {
         if (userGroupsByName.contains(name)) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
         }
         if (userGroups.contains(groupId)) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
         }
-        logger.info("Creating user group: " + groupId + " with name " + name);
-        UserGroupImpl group = new UserGroupImpl(groupId, name);
-        if (mongoObjectFactory != null) {
-            mongoObjectFactory.storeUserGroup(group);
-        }
-        userGroups.put(groupId, group);
-        userGroupsByName.put(name, group);
-        return group;
+    }
+
+    @Override
+    public void addUserGroup(UserGroup group) throws UserGroupManagementException {
+        checkGroupNameAndIdUniqueness(group.getId(), group.getName());
+        addGroupToInternalMaps(group);
+        updateUserGroup(group);
     }
 
     @Override
@@ -665,18 +680,33 @@ public class UserStoreImpl implements UserStore {
     @Override
     public User createUser(String name, String email, Account... accounts)
             throws UserManagementException {
-        if (getUserByName(name) != null) {
-            throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
-        }
+        checkUsernameUniqueness(name);
         ConcurrentHashMap<String, UserGroup> tenantsForServer = new ConcurrentHashMap<>();
         User user = new UserImpl(name, email, tenantsForServer, /* user group provider */ this, accounts);
         logger.info("Creating user: " + user + " with e-mail " + email);
+        addAndStoreUserInternal(user);
+        return user;
+    }
+
+    private void addAndStoreUserInternal(User user) {
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUser(user);
         }
-        users.put(name, user);
+        users.put(user.getName(), user);
         addToUsersByEmail(user);
-        return user;
+    }
+
+    private void checkUsernameUniqueness(String name) throws UserManagementException {
+        if (getUserByName(name) != null) {
+            throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
+        }
+    }
+    
+    @Override
+    public void addUser(User user) throws UserManagementException {
+        checkUsernameUniqueness(user.getName());
+        logger.info("Adding user: "+user);
+        addAndStoreUserInternal(user);
     }
 
     @Override

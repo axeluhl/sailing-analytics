@@ -3,7 +3,9 @@ package com.sap.sailing.domain.base;
 import java.net.URL;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
+import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.Renamable;
 import com.sap.sse.common.TimePoint;
@@ -105,4 +107,13 @@ public interface EventBase extends NamedWithID, WithDescription, Renamable, With
      * Sets and converts all event images and videos from the old URL based format to the new richer format 
      * */ 
     boolean setMediaURLs(Iterable<URL> imageURLs, Iterable<URL> sponsorImageURLs, Iterable<URL> videoURLs, URL logoImageURL, Map<URL, ImageSize> imageSizes);
+    
+    /**
+     * Gets all TrackingConnectorInfos containing information over what TrackingConnectors are involved in tracking this
+     * event
+     * 
+     * @return a Set of {@link TrackingConnectorInfo}; the set returned is never {@code null} and never contains
+     *         {@code null} values, but it may be empty
+     */
+    Set<TrackingConnectorInfo> getTrackingConnectorInfos();
 }

@@ -1,10 +1,10 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
@@ -67,7 +67,7 @@ public class SwissTimingTrackingConnectivityParameters extends AbstractRaceTrack
 
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
+            RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
             RaceTrackingHandler raceTrackingHandler) throws Exception {
         return swissTimingFactory.createRaceTracker(raceLogStore, regattaLogStore, windStore, domainFactory, trackedRegattaRegistry, raceLogResolver,
                 this, raceTrackingHandler);
@@ -75,7 +75,7 @@ public class SwissTimingTrackingConnectivityParameters extends AbstractRaceTrack
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
-            WindStore windStore, RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
+            WindStore windStore, RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
             RaceTrackingHandler raceTrackingHandler) throws Exception {
         return swissTimingFactory.createRaceTracker(regatta, windStore, domainFactory, trackedRegattaRegistry, raceLogResolver, raceLogStore,
                 regattaLogStore, this, raceTrackingHandler);

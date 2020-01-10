@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Date;
+import java.util.Map;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -8,6 +9,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.sap.sailing.domain.common.RankingMetrics;
+import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -31,11 +34,9 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
 
     public RaceCourseManagementPanel(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, final StringMessages stringMessages, final UserService userService) {
-        super(sailingService, userService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ false,
-                stringMessages);
-        
+        super(sailingService, userService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ false, stringMessages);
         courseManagementWidget = new CourseManagementWidget(sailingService, errorReporter, stringMessages,
-                userService) {
+                userService, ()->selectedRaceHasOrcPcsRankingMetric()) {
             @Override
             protected void save() {
                 sailingService.updateRaceCourse(singleSelectedRace, createWaypointPairs(), new AsyncCallback<Void>() {
@@ -47,20 +48,37 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                     @Override
                     public void onSuccess(Void result) {
                         Notification.notify(stringMessages.successfullyUpdatedCourse(), NotificationType.INFO);
-                        refreshSelectedRaceData();
+                        sailingService.setORCPerformanceCurveLegInfo(singleSelectedRace, getORCPerformanceCurveLegInfoByOneBasedWaypointIndex(), new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(stringMessages.errorUpdatingRaceCourse(caught.getMessage()));
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                refreshSelectedRaceData();
+                            }
+                        });
                     }
                 });
             }
             
             @Override
+            protected LegGeometrySupplier getLegGeometrySupplier() {
+                return (zeroBasedLegIndices, legTypes, callback)->
+                    sailingService.getLegGeometry(singleSelectedRace, zeroBasedLegIndices, legTypes, callback);
+            }
+
+            @Override
             public void refresh() {
                 if (singleSelectedRace != null && selectedRaceDTO != null) {
                     mainPanel.setVisible(true);
                     // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"; this one is not so urgent as it is reached only in the AdminConsole and we expect administrators to have proper client-side time settings
-                    sailingService.getRaceCourse(singleSelectedRace, new Date(),  new AsyncCallback<RaceCourseDTO>() {
+                    sailingService.getRaceCourse(singleSelectedRace, new Date(), new AsyncCallback<RaceCourseDTO>() {
                         @Override
                         public void onSuccess(RaceCourseDTO raceCourseDTO) {
                             updateWaypointsAndControlPoints(raceCourseDTO, selectedRaceDTO);
+                            refreshORCPerformanceCurveLegs();
                             marks.refresh(raceCourseDTO.getMarks());
                         }
             
@@ -75,13 +93,27 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                     mainPanel.setVisible(false);
                 }
             }
+            
+            private void refreshORCPerformanceCurveLegs() {
+                if (singleSelectedRace != null) {
+                    sailingService.getORCPerformanceCurveLegInfo(singleSelectedRace,
+                            new AsyncCallback<Map<Integer, ORCPerformanceCurveLegImpl>>() {
+                                @Override
+                                public void onSuccess(Map<Integer, ORCPerformanceCurveLegImpl> result) {
+                                    refreshORCPerformanceCurveLegs(result);
+                                }
+    
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError("Could not load ORC Performance Curve leg information: " + caught.getMessage());
+                                }
+                            });
+                }
+            }
         };
-        
         FlowPanel courseManagementPanel = new FlowPanel();
         courseManagementPanel.add(courseManagementWidget);
-
         HorizontalPanel buttonsPanel = new HorizontalPanel();
-
         Button refreshBtn = new Button(stringMessages.refresh());
         refreshBtn.addClickHandler(new ClickHandler() {
                 @Override
@@ -89,9 +121,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                     courseManagementWidget.refresh();
                 }
         });
-        
         buttonsPanel.add(refreshBtn);
-        
         Button saveBtn = new Button(stringMessages.save());
         saveBtn.addClickHandler(new ClickHandler() {
                 @Override
@@ -99,14 +129,19 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                     courseManagementWidget.save();
                 }
             });
-        
         trackedRacesListComposite.getSelectionModel().addSelectionChangeHandler(h -> {
             saveBtn.setVisible(userService.hasPermission(selectedRaceDTO, DefaultActions.UPDATE));
         });
-
         buttonsPanel.add(saveBtn);
         this.selectedRaceContentPanel.add(courseManagementWidget);
         this.selectedRaceContentPanel.add(buttonsPanel);
+    }
+
+    private boolean selectedRaceHasOrcPcsRankingMetric() {
+        final RankingMetrics rankingMetricType = selectedRaceDTO == null ? null : selectedRaceDTO.getRankingMetricType();
+        return rankingMetricType == RankingMetrics.ORC_PERFORMANCE_CURVE ||
+                rankingMetricType == RankingMetrics.ORC_PERFORMANCE_CURVE_BY_IMPLIED_WIND ||
+                rankingMetricType == RankingMetrics.ORC_PERFORMANCE_CURVE_LEADER_FOR_BASELINE;
     }
 
     @Override

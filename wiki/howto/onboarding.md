@@ -8,21 +8,23 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 
 #### Installations
 
-1. Eclipse (Eclipse IDE for Eclipse Committers, version 4.11.0 ["2019-03"]https://www.eclipse.org/downloads/packages/release/2019-03/r/eclipse-ide-eclipse-committers)), [http://www.eclipse.org](http://www.eclipse.org)
-2. Install the eclipse plugins (see Automatic Eclipse plugin installation below)
-3. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)
-4. MongoDB (e.g. Production Release 3.6.12), download: [https://www.mongodb.com/](https://www.mongodb.com/)
-5. RabbitMQ, download from [http://www.rabbitmq.com](http://www.rabbitmq.com). Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang. Some sources report that there may be trouble with latest versions of RabbitMQ. In some cases, McAffee seems to block the installation of the latest version on SAP hardware; in other cases connection problems to newest versions have been reported. We know that version 3.6.8 works well. [https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8](https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8) is the link.
-6. JDK 1.8 (Java SE 8), [http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) --- Alternatively you can use the SAPJVM 1.8: Go to [http://sapjvm.wdf.sap.corp:1080/downloads](http://sapjvm.wdf.sap.corp:1080/downloads), select JVM 1.8, extract the downloaded .zip into desired location (e.g. C:\Program Files\Java), then Go to Window -> Preferences -> Java -> Installed JREs and add the VM.
-7. Maven 3.1.1 (or higher), [http://maven.apache.org](http://maven.apache.org)
-8. GWT SDK 2.8.2 ([http://www.gwtproject.org/download.html](http://www.gwtproject.org/download.html))
-9. Standalone Android SDK (see section "Additional steps required for Android projects"). OPTIONALLY: You may additionally install Android Studio ([https://developer.android.com/tools/studio/index.html](https://developer.android.com/tools/studio/index.html)) or IntelliJ IDEA ([https://www.jetbrains.com/idea/download/](https://www.jetbrains.com/idea/download/)).
+1. Eclipse (Eclipse IDE for Eclipse Committers, version 4.13.0 ["2019-09"]https://www.eclipse.org/downloads/packages/release/2019-09/r/eclipse-ide-eclipse-committers)), [http://www.eclipse.org](http://www.eclipse.org)
+2. Get the content of the git repository (see 
+Steps to build and run the Race Analysis Suite below)
+3. Install the eclipse plugins (see Automatic Eclipse plugin installation below)
+4. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)
+5. MongoDB (e.g. Production Release 3.6.12), download: [https://www.mongodb.com/](https://www.mongodb.com/)
+6. RabbitMQ, download from [http://www.rabbitmq.com](http://www.rabbitmq.com). Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang. Some sources report that there may be trouble with latest versions of RabbitMQ. In some cases, McAffee seems to block the installation of the latest version on SAP hardware; in other cases connection problems to newest versions have been reported. We know that version 3.6.8 works well. [https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8](https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8) is the link.
+7. JDK 1.8 (Java SE 8), [http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) --- Alternatively you can use the SAPJVM 1.8: Go to [http://sapjvm.wdf.sap.corp:1080/downloads](http://sapjvm.wdf.sap.corp:1080/downloads), select JVM 1.8, extract the downloaded .zip into desired location (e.g. C:\Program Files\Java), then Go to Window -> Preferences -> Java -> Installed JREs and add the VM.
+8. Maven 3.1.1 (or higher), [http://maven.apache.org](http://maven.apache.org)
+9. GWT SDK 2.8.2 ([http://www.gwtproject.org/download.html](http://www.gwtproject.org/download.html))
+10. Standalone Android SDK (see section "Additional steps required for Android projects"). OPTIONALLY: You may additionally install Android Studio ([https://developer.android.com/tools/studio/index.html](https://developer.android.com/tools/studio/index.html)) or IntelliJ IDEA ([https://www.jetbrains.com/idea/download/](https://www.jetbrains.com/idea/download/)).
 
 #### Automatic Eclipse plugin installation
 
-The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.11.0 "2019-03"](https://www.eclipse.org/downloads/packages/release/2019-03/r/eclipse-ide-eclipse-committers) by using the script "configuration/installPluginsForEclipse2019-03.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
+The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.11.0 "2019-09"](https://www.eclipse.org/downloads/packages/release/2019-09/r/eclipse-ide-eclipse-committers) by using the script "configuration/installPluginsForEclipse2019-09.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
 
-    ./installPluginsForEclipse2019-03.sh "/some/path/on/my/computer/eclipse"
+    ./installPluginsForEclipse2019-09.sh "/some/path/on/my/computer/eclipse"
 
 Be aware that with this script it's not possible to update the plugins to newer versions. Instead you can install a new version by unpacking the base package and executing the script.
 
@@ -107,7 +109,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Rebuild all projects
 4. Run the Race Analysis Suite
   * Start the MongoDB (cd /somePathTo MongoDB/mongodb/bin; rm c:/data/SAP/sailing/mongodb/mongod.lock; ./mongod --dbpath c:/data/SAP/sailing/mongodb)
-  * Start the appropriate Eclipse launch configuration (e.g. 'Sailing Server (Proxy)') You´ll find this in the debug dropdown
+  * Start the appropriate Eclipse launch configuration (e.g. 'Sailing Server (no Proxy)') You´ll find this in the debug dropdown
   * <del>Run "Security UI sdm" in the debug dropdown</del> (obsolete)
   * Run "SailingGWT sdm" in the debug dropdown
 5. Import races within the Race Analysis Suite

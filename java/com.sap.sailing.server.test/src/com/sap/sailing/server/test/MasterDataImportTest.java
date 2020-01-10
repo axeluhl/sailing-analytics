@@ -221,7 +221,7 @@ public class MasterDataImportTest {
 
         Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
 
-        DomainFactory sourceDomainFactory = new DomainFactoryImpl((srlid) -> null);
+        DomainFactory sourceDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
 
         DomainObjectFactory dbFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE,
                 sourceDomainFactory);

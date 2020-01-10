@@ -16,7 +16,6 @@ import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -37,7 +36,9 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
@@ -58,6 +59,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
+import com.sap.sailing.domain.tracking.impl.TrackingConnectorInfoImpl;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -79,6 +81,7 @@ import difflib.PatchFailedException;
  *
  */
 public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter implements TrackingDataLoader {
+
     private static final int THRESHOLD_FOR_EARLIEST_MARK_PASSING_BEFORE_START_IN_MILLIS = 30000;
 
     private static final Logger logger = Logger.getLogger(SwissTimingReplayToDomainAdapter.class.getName());
@@ -149,7 +152,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
     
     private final boolean useInternalMarkPassingAlgorithm;
     
-    private final RaceLogResolver raceLogResolver;
+    private final RaceLogAndTrackedRaceResolver raceLogResolver;
 
     private final String raceName;
     
@@ -183,7 +186,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
      */
     public SwissTimingReplayToDomainAdapter(Regatta regatta, String raceName, String raceIdForRaceDefinition,
             BoatClass boatClass, DomainFactory domainFactory,
-            TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm, RaceLogResolver raceLogResolver,
+            TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm, RaceLogAndTrackedRaceResolver raceLogResolver,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, TrackerConstructor trackerConstructor,
             RaceTrackingHandler raceTrackingHandler) {
         this.tracker = trackerConstructor == null ? null : trackerConstructor.createTracker(this);
@@ -408,10 +411,11 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
             DynamicTrackedRace trackedRace = raceTrackingHandler.createTrackedRace(getTrackedRegatta(),
                     race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE,
                     TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS,
-                    WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 
+                    WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                     /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                     /* raceDefinitionSetToUpdate */ null, useInternalMarkPassingAlgorithm, raceLogResolver,
-                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());
+                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(),
+                    new TrackingConnectorInfoImpl(TrackingConnectorType.SwissTiming, /*no api connection to query the webUrl*/ null));
             trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0));
             TimePoint bestStartTimeKnownSoFar = bestStartTimePerRaceID.get(currentRaceID);
             if (bestStartTimeKnownSoFar != null) {

@@ -167,7 +167,7 @@ public class SwissTimingConnectionTableWrapper extends
             }
         };
         filterField
-                .setCheckboxEnabledFilter(connection -> userService.hasPermission(connection, DefaultActions.UPDATE));
+                .setUpdatePermissionFilterForCheckbox(connection -> userService.hasPermission(connection, DefaultActions.UPDATE));
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(swissTimingConectionColumnListHandler);

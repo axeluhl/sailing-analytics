@@ -17,7 +17,6 @@ import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
@@ -43,6 +42,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoSensorFixStoreImpl;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.EmptySensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
@@ -108,7 +108,7 @@ public class RaceLogFixTrackerManagerTest {
                 /* registrationLinkSecret */ UUID.randomUUID().toString()));
         trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline> emptyList(),
                 EmptyWindStore.INSTANCE, 0, 0, 0, /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
-                mock(RaceLogResolver.class));
+                mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null);
     }
 
     /**
