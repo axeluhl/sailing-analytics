@@ -30,6 +30,7 @@ import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.utils.LogoUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.databylogo.DataByLogo;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.LinkUtil;
 
@@ -60,7 +61,7 @@ public class EventHeader extends Composite {
     @UiField DivElement courseAreaUi;
     @UiField FlowPanel dropdownContent;
     @UiField SharingButtons sharing;
-    @UiField AnchorElement tractracLogoContainer;
+    @UiField DataByLogo dataByLogo;
 
     private EventViewDTO event;
     private Presenter presenter;
@@ -150,9 +151,7 @@ public class EventHeader extends Composite {
             }
             hide(competitors, races, courseAreaUi, eventCategory);
         }
-        if(!event.isTrackedByTracTrac()) {
-            hide(tractracLogoContainer);
-        }
+        dataByLogo.setUp(event.getTrackingConnectorInfos(), /** colorIfPossible **/ true, /** enforceTextColor **/ false);
         initTitleAndSelection(nameToShow);
     }
 
