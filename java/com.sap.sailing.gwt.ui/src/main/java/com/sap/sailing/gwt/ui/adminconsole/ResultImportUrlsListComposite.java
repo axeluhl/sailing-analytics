@@ -5,7 +5,6 @@ import java.util.Set;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -20,7 +19,6 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TextfieldEntryDialog;
 import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -34,7 +32,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 /**
  * A composite for showing and managing a list of all result import URLs.
  * 
- * @author Tim Hessenmüller (D062243)
+ * @author Tim Hessenmï¿½ller (D062243)
  */
 public class ResultImportUrlsListComposite extends Composite {
     private final SailingServiceAsync sailingService;
