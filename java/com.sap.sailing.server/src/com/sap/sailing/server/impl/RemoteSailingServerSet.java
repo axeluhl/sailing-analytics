@@ -41,6 +41,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserial
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.StatisticsByYearJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.StatisticsJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfoJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.DetailedRaceInfoJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.SimpleRaceInfoJsonSerializer;
@@ -249,7 +250,7 @@ public class RemoteSailingServerSet {
                 Object eventsAsObject = parser.parse(bufferedReader);
                 EventBaseJsonDeserializer deserializer = new EventBaseJsonDeserializer(
                         new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
-                        new LeaderboardGroupBaseJsonDeserializer());
+                        new LeaderboardGroupBaseJsonDeserializer(), new TrackingConnectorInfoJsonDeserializer());
                 JSONArray eventsAsJsonArray = (JSONArray) eventsAsObject;
                 final Set<EventBase> events = new HashSet<>();
                 for (Object eventAsObject : eventsAsJsonArray) {

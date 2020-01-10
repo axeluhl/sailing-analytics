@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.utils.LogoUtil;
+import com.sap.sailing.gwt.ui.shared.databylogo.DataByLogo;
 
 public class EventHeader extends Composite {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
@@ -29,7 +30,7 @@ public class EventHeader extends Composite {
     @UiField DivElement eventDateUi;
     @UiField DivElement eventLocationUi;
     @UiField DivElement eventHeader;
-    @UiField AnchorElement tractracLogoContainer;
+    @UiField DataByLogo dataByLogo;
 
     public EventHeader(EventViewDTO event, String optionalRegattaDisplayName, PlaceNavigation<?> logoNavigation) {
         EventHeaderResources.INSTANCE.css().ensureInjected();
@@ -50,10 +51,9 @@ public class EventHeader extends Composite {
         if (logoNavigation != null) {
             logoNavigation.configureAnchorElement(eventLogoUi);
         }
-        if (event.isTrackedByTracTrac()) {
-            eventHeader.addClassName(EventHeaderResources.INSTANCE.css().eventheader_with_logo());
-        } else {
-            tractracLogoContainer.removeFromParent();
+        dataByLogo.setUp(event.getTrackingConnectorInfos(), /** colorIfPossible **/ true, /** enforceTextColor **/ true);
+        if (dataByLogo.isVisible()) {
+            this.addStyleName(EventHeaderResources.INSTANCE.css().eventheader_with_logo());
         }
         eventDateUi.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate()));
         eventLocationUi.setInnerText(event.getLocationAndVenueAndCountry());
