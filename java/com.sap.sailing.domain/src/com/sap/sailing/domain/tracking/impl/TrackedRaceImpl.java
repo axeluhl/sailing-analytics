@@ -144,6 +144,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRaceWithWindEssentials;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -188,7 +189,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     private TrackedRaceStatus status;
     
-    private final String trackingConnector;
+    private final TrackingConnectorInfo trackingConnectorInfo;
 
     private final Object statusNotifier;
 
@@ -434,10 +435,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final Iterable<Sideline> sidelines,
             final WindStore windStore, long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation,
-            boolean useInternalMarkPassingAlgorithm, RaceLogAndTrackedRaceResolver raceLogResolver, String trackedBy) {
+            boolean useInternalMarkPassingAlgorithm, RaceLogAndTrackedRaceResolver raceLogResolver, TrackingConnectorInfo trackingConnectorInfo) {
         this(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 millisecondsOverWhichToAverageSpeed, delayForWindEstimationCacheInvalidation,
-                useInternalMarkPassingAlgorithm, OneDesignRankingMetric::new, raceLogResolver, trackedBy);
+                useInternalMarkPassingAlgorithm, OneDesignRankingMetric::new, raceLogResolver, trackingConnectorInfo);
     }
     
     /**
@@ -451,10 +452,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             final WindStore windStore, long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation,
             boolean useInternalMarkPassingAlgorithm, RankingMetricConstructor rankingMetricConstructor,
-            RaceLogAndTrackedRaceResolver raceLogResolver, String trackingConnector) {
+            RaceLogAndTrackedRaceResolver raceLogResolver, TrackingConnectorInfo trackingConnectorInfo) {
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
         this.raceLogResolver = raceLogResolver;
-        this.trackingConnector = trackingConnector;
+        this.trackingConnectorInfo = trackingConnectorInfo;
         raceStates = new WeakHashMap<>();
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
         locksForMarkPassings = new ConcurrentHashMap<IdentityWrapper<Iterable<MarkPassing>>, NamedReentrantReadWriteLock>();
@@ -3974,7 +3975,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     @Override
-    public String getTrackingConnector() {
-        return trackingConnector;
+    public TrackingConnectorInfo getTrackingConnectorInfo() {
+        return trackingConnectorInfo;
     }
 }

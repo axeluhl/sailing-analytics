@@ -17,6 +17,7 @@ import org.apache.commons.math.MaxIterationsExceededException;
 import org.json.simple.parser.ParseException;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
@@ -237,6 +238,7 @@ public class TestORCPerformanceCurve {
     /**
      * Tests to make sure, that the structure of the certificate files didn't change and performance curves can be built
      */
+    @Ignore("Certificate used for testing no longer valid after 2019")
     @Test
     public void testOnlineImport() throws FunctionEvaluationException {
         assertFalse(Util.isEmpty(importerOnline.getCertificateIds()));
