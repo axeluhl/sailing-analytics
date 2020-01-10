@@ -1,6 +1,7 @@
 package com.sap.sse.security.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -17,6 +18,7 @@ import org.junit.Test;
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.SecurityService;
@@ -30,6 +32,7 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
@@ -39,6 +42,7 @@ public class LoginTest {
     private static final String DEFAULT_TENANT_NAME = "TestDefaultTenant";
     private UserStoreImpl userStore;
     private AccessControlStore accessControlStore;
+    private SecurityService securityService;
 
     @Before
     public void setUp() throws UnknownHostException, MongoException, UserGroupManagementException, UserManagementException {
@@ -55,12 +59,31 @@ public class LoginTest {
         userStore.ensureDefaultRolesExist();
         userStore.ensureDefaultTenantExists();
         accessControlStore = new AccessControlStoreImpl(userStore);
-        
         Activator.setTestStores(userStore, accessControlStore);
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // to enable shiro to find classes from com.sap.sse.security
-        Activator.setSecurityService(new SecurityServiceImpl(userStore, accessControlStore));
+        securityService = new SecurityServiceImpl(userStore, accessControlStore);
+        Activator.setSecurityService(securityService);
     }
 
+    @Test
+    public void testDeleteUser() throws UserManagementException, MailException, UserGroupManagementException {
+        final String username = "TheNewUser";
+        final String specialUserGroupName1 = "TheSpecialUserGroup1";
+        final String specialUserGroupName2 = "TheSpecialUserGroup2";
+        final User user = securityService.createSimpleUser(username, "u@a.b", "Humba", "The New User", /* company */ null, /* locale */ null, /* validationBaseURL */ null, /* owning group */ null);
+        final UserGroup defaultUserGroup = securityService.getUserGroupByName(username+SecurityService.TENANT_SUFFIX);
+        final UserGroup specialUserGroup1 = securityService.createUserGroup(UUID.randomUUID(), specialUserGroupName1);
+        final UserGroup specialUserGroup2 = securityService.createUserGroup(UUID.randomUUID(), specialUserGroupName2);
+        securityService.addUserToUserGroup(specialUserGroup1, user);
+        securityService.addUserToUserGroup(specialUserGroup2, user);
+        assertNotNull(defaultUserGroup);
+        assertTrue(Util.contains(defaultUserGroup.getUsers(), user));
+        securityService.deleteUser(username);
+        assertNull(securityService.getUserByName(username));
+        assertFalse(Util.contains(specialUserGroup1.getUsers(), user));
+        assertFalse(Util.contains(specialUserGroup2.getUsers(), user));
+    }
+    
     @Test
     public void testGetUser() {
         assertNotNull("Subject should not be null: ", SecurityUtils.getSubject());

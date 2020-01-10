@@ -192,7 +192,13 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         tagButtons = new ArrayList<TagButton>();
 
-        taggingPanel = new DockLayoutPanel(Style.Unit.PX);
+        taggingPanel = new DockLayoutPanel(Style.Unit.PX) {
+            @Override
+            public void onResize() {
+                super.onResize();
+                taggingPanel.setWidgetSize(footerPanel, calculateFooterPanelHeight());
+            }
+        };
         filterbarAndContentPanel = new HeaderPanel();
         tagFooterPanel = new TagFooterPanel(this, sailingService, stringMessages, userService);
         footerPanel = new ScrollPanel(tagFooterPanel);
@@ -705,15 +711,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                 Scheduler.get().scheduleFinally(new RepeatingCommand() {
                     @Override
                     public boolean execute() {
-                        // Default size of 2/3 the TaggingPanel
-                        int height = (int) Math.round(taggingPanel.getOffsetHeight() / 3f * 2f);
-                        // Get actual size of the footerPanel which might be 0 if the browser screwed up
-                        final int vScroll = footerPanel.getWidget().getElement().getScrollHeight();
-                        if (vScroll != 0) {
-                            height = Math.min(height, vScroll);
-                        }
-                        height = Math.max(200, height);
-                        taggingPanel.setWidgetSize(footerPanel, height);
+                        taggingPanel.setWidgetSize(footerPanel, calculateFooterPanelHeight());
                         taggingPanel.animate(FOOTERPANEL_ANIMATION_PERIOD_MS);
                         return false;
                     }
@@ -726,6 +724,15 @@ public class TaggingPanel extends ComponentWithoutSettings
                 taggingPanel.animate(FOOTERPANEL_ANIMATION_PERIOD_MS);
             }
         }
+    }
+
+    private int calculateFooterPanelHeight() {
+        // Start with footerPanel content height
+        int height = footerPanel.getWidget().getElement().getOffsetHeight();
+        // Limit size if we take up the entire height of the viewing area
+        // to make sure we don't get pushed out of it at the top making parts of the footerPanel inaccessible
+        height = Math.min(height, taggingPanel.getOffsetHeight());
+        return height;
     }
 
     /**
