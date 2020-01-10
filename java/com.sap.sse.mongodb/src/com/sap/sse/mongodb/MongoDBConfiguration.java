@@ -132,4 +132,9 @@ public class MongoDBConfiguration {
         }
         return result;
     }
+
+    @Override
+    public String toString() {
+        return mongoClientURI.toString();
+    }
 }

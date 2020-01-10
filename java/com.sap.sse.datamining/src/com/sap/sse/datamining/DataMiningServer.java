@@ -26,6 +26,7 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
+import com.sap.sse.util.JoinedClassLoader;
 
 
 public interface DataMiningServer {
@@ -52,6 +53,8 @@ public interface DataMiningServer {
     <DataSourceType, ResultType> Query<ResultType> createQuery(StatisticQueryDefinition<DataSourceType, ?, ?, ResultType> queryDefinition);
     <ResultType> QueryResult<ResultType> runNewQueryAndAbortPreviousQueries(DataMiningSession session, Query<ResultType> query);
     int getNumberOfRunningQueries();
+    JoinedClassLoader getJoinedClassLoader();
+    StatisticQueryDefinitionDTO fromBase64String(String string);
     
     //-----------------------------------------------------------------------------------------------------------------
     // Component Accessors as default methods
@@ -128,5 +131,4 @@ public interface DataMiningServer {
     default ModifiableStatisticQueryDefinitionDTO getPredefinedQueryDefinitionDTO(PredefinedQueryIdentifier identifier) {
         return getQueryDefinitionDTOProvider().get(identifier);
     }
-    
 }

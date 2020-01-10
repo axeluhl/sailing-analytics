@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Storemerging
+Bundle-SymbolicName: com.sap.sse.security.storemerging
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Automatic-Module-Name: com.sap.sse.security.storemerging
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: com.sap.sse.mongodb,
+ org.mongodb.mongo-java-driver,
+ com.sap.sse.security.interface,
+ com.sap.sse.security.userstore.mongodb,
+ com.sap.sse.common
+Import-Package: com.sap.sse.security

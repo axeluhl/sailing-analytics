@@ -1,9 +1,7 @@
 package com.sap.sse.datamining.shared;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.logging.Logger;
 
@@ -28,27 +26,5 @@ public final class DataMiningQuerySerializer {
             LOG.warning("Could not store query: " + e.getMessage());
         }
         return "";
-    }
-
-    /** @return the {@link StatisticQueryDefinitionDTO} from a base 64 string deserialized with java serialization */
-    public static StatisticQueryDefinitionDTO fromBase64String(final String string) {
-        byte[] bytes;
-        try {
-            bytes = Base64Utils.fromBase64(string);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-
-        try (ByteArrayInputStream stream = new ByteArrayInputStream(bytes)) {
-            ObjectInputStream in;
-            in = new ObjectInputStream(stream);
-            Object o = in.readObject();
-            if (o instanceof StatisticQueryDefinitionDTO) {
-                return (StatisticQueryDefinitionDTO) o;
-            }
-        } catch (IOException | ClassNotFoundException e) {
-            LOG.warning("Could not load query: " + e.getMessage());
-        }
-        return null;
     }
 }

@@ -90,7 +90,7 @@ public class RaceTrackerStartStopTest {
                 /* windStore */ EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l,
                 /* millisecondsOverWhichToAverageWind */ 0l,
                 /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, /*useMarkPassingCalculator*/ false, mock(RaceLogAndTrackedRaceResolver.class),
-                Optional.empty(), null);
+                Optional.empty(), /* trackingConnectorInfo */ null);
         regatta.addRace(raceDef2);
         trackedRegatta1.createTrackedRace(raceDef2, Collections.<Sideline> emptyList(),
                 /* windStore */ EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l,

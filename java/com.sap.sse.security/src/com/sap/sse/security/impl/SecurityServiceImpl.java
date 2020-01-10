@@ -893,7 +893,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     private String getDefaultTenantNameForUsername(final String username) {
-        return username + "-tenant";
+        return username + TENANT_SUFFIX;
     }
 
     @Override
@@ -1203,7 +1203,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             // remove all permissions the user has
             accessControlStore.removeAllOwnershipsFor(userToDelete);
             store.removeAllQualifiedRolesForUser(userToDelete);
-
             final String defaultTenantNameForUsername = getDefaultTenantNameForUsername(username);
             final UserGroup defaultTenantUserGroup = getUserGroupByName(defaultTenantNameForUsername);
             if (defaultTenantUserGroup != null) {
@@ -1218,7 +1217,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 }
             }
             // also remove from all usergroups
-            for (UserGroup userGroup : userToDelete.getUserGroups()) {
+            final Iterable<UserGroup> userGroups = userToDelete.getUserGroups();
+            final Collection<UserGroup> userGroupsToLoopOver = new ArrayList<>();
+            Util.addAll(userGroups, userGroupsToLoopOver); // avoid concurrent modification exception
+            for (UserGroup userGroup : userGroupsToLoopOver) {
                 if (userGroup != defaultTenantUserGroup) { // the defaultTenantUserGroup has already been deleted above
                     internalRemoveUserFromUserGroup(userGroup.getId(), userToDelete.getName());
                 }
@@ -1707,8 +1709,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                             "You are not permitted to create a \"{0}\" with name or identifier \"{1}\". "
                                     + "This is most probably caused by an already existing entry with the same name/identifier. "
                                     + "Please try to use a different name.",
-                            identifier.getTypeIdentifier(), identifier.getTypeRelativeObjectIdentifier().toString()),
-                            e);
+                            identifier.getTypeIdentifier(), identifier.getTypeRelativeObjectIdentifier().toString()), e);
                 }
             }
             result = actionWithResult.call();
