@@ -148,7 +148,7 @@ public class Activator implements BundleActivator {
     }
 
     /**
-     * This method will clean the userStore and AccessControllStore, and reset the securityService. It will then
+     * This method will clean the userStore and AccessControlStore, and reset the securityService. It will then
      * reinitialize them in the same fashion an empty server will do.
      */
     protected void clearState() throws InterruptedException, UserGroupManagementException, UserManagementException {
