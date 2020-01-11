@@ -140,7 +140,6 @@ public class Activator implements BundleActivator {
             waitForUserStoreService(bundleContext);
         }
         context.registerService(ClearStateTestSupport.class, new ClearStateTestSupport() {
-            
             @Override
             public void clearState() throws Exception {
                 Activator.this.clearState();
