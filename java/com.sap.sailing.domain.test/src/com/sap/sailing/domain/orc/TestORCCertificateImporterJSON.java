@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.json.simple.parser.ParseException;
-import org.junit.Assume;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.orc.ORCCertificate;
@@ -18,6 +18,10 @@ import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 
 public class TestORCCertificateImporterJSON {
     private static final String RESOURCES = "resources/orc/";
+    
+    @Rule
+    public CustomIgnoreRule customIgnoreRule = new CustomIgnoreRule();
+    
     
     @Test
     public void testSimpleLocalJSONFileRead() throws IOException, ParseException {
@@ -28,10 +32,10 @@ public class TestORCCertificateImporterJSON {
     }
     
 //    @Ignore("Certificate used for testing no longer valid after 2019")
+    @CustomIgnore
     @Test
     public void testSimpleOnlineJSONFileRead() throws IOException, ParseException {
         ORCCertificatesCollection importer = ORCCertificatesImporter.INSTANCE.read(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
-        Assume.assumeTrue(importer.getCertificateIds().iterator().hasNext());
         ORCCertificate swan  = importer.getCertificateById("GER140849GER5335");
         ORCCertificate moana = importer.getCertificateById("GER140772GER5549");
         assertNotNull(swan);

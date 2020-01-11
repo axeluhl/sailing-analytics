@@ -16,9 +16,7 @@ import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.MaxIterationsExceededException;
 import org.json.simple.parser.ParseException;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
@@ -53,6 +51,8 @@ public class TestORCPerformanceCurve {
     private static ORCCertificatesCollection importerOnline;
     
     private static final String RESOURCES = "resources/orc/";
+    @Rule
+    public CustomIgnoreRule customIgnoreRule = new CustomIgnoreRule();
 
     @Rule
     public ErrorCollector collector = new ErrorCollector();
@@ -240,9 +240,9 @@ public class TestORCPerformanceCurve {
      * Tests to make sure, that the structure of the certificate files didn't change and performance curves can be built
      */
 //    @Ignore("Certificate used for testing no longer valid after 2019")
+    @CustomIgnore
     @Test
     public void testOnlineImport() throws FunctionEvaluationException {
-        Assume.assumeTrue(importerOnline.getCertificateIds().iterator().hasNext());
         assertFalse(Util.isEmpty(importerOnline.getCertificateIds()));
         for (final ORCCertificate certificate : importerOnline.getCertificates()) {
             new ORCPerformanceCurveImpl(certificate, alturaCourse);

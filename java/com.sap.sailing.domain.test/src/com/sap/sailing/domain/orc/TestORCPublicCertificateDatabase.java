@@ -14,6 +14,7 @@ import java.util.concurrent.Future;
 
 import org.junit.Assume;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
@@ -25,6 +26,9 @@ import com.sap.sse.common.Util;
 
 public class TestORCPublicCertificateDatabase {
     private ORCPublicCertificateDatabase db;
+    @Rule
+    public CustomIgnoreRule customIgnoreRule = new CustomIgnoreRule();
+    
     
     @Before
     public void setUp() {
@@ -87,6 +91,7 @@ public class TestORCPublicCertificateDatabase {
     }
     
 //    @Ignore("Certificate used for testing no longer valid after 2019")
+    @CustomIgnore
     @Test
     public void testParallelFuzzySearch() throws InterruptedException, ExecutionException {
         final Future<Set<ORCCertificate>> soulmateCertificatesFuture = db.search("Soulmate", "DEN13", new BoatClassImpl("ORC", BoatClassMasterdata.ORC));
@@ -94,7 +99,6 @@ public class TestORCPublicCertificateDatabase {
         final Set<ORCCertificate> soulmateCertificates = soulmateCertificatesFuture.get();
         final Set<ORCCertificate> amarettoCertificates = amarettoCertificatesFuture.get();
         boolean isYearFound = assertFoundYear(soulmateCertificates, 2019) || assertFoundYear(amarettoCertificates, 2019);
-        Assume.assumeTrue(isYearFound);
         assertTrue(isYearFound);
     }
 
