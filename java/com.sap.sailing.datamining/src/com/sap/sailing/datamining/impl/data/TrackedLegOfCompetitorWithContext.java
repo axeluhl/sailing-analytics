@@ -120,8 +120,11 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
 
     @Override
     public Distance getDistanceTraveled() {
-        TimePoint timePoint = getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getEndOfTracking();
-        return getTrackedLegOfCompetitor().getDistanceTraveled(timePoint);
+        if(getTrackedLegContext().getTrackedRaceContext().getTrackedRace() != null) {
+            TimePoint timePoint = getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getEndOfTracking();
+            return getTrackedLegOfCompetitor().getDistanceTraveled(timePoint);
+        }
+        return null;
     }
     
     @Override
@@ -148,13 +151,16 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     }
     
     private Integer getRankAtStart() {
-        if (!isRankAtStartInitialized) {
-            TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
-            int rank = trackedRace.getRank(getCompetitor(), getTrackedLegOfCompetitor().getStartTime());
-            rankAtStart = rank == 0 ? null : rank;
-            isRankAtStartInitialized = true;
+        if(getTrackedLegContext().getTrackedRaceContext().getTrackedRace() != null) {
+            if (!isRankAtStartInitialized) {
+                TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
+                int rank = trackedRace.getRank(getCompetitor(), getTrackedLegOfCompetitor().getStartTime());
+                rankAtStart = rank == 0 ? null : rank;
+                isRankAtStartInitialized = true;
+            }
+            return rankAtStart;
         }
-        return rankAtStart;
+        return null;
     }
 
     @Override

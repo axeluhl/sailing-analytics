@@ -182,34 +182,26 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
         final TimePoint now = MillisecondsTimePoint.now();
         final double competitorCountInRace;
         final TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
-        //
-        double highest = 0;
+        double highest = -1000;
         double lowest = 1000;
-        //
         if (trackedRace != null) {
             competitorCountInRace = Util.size(trackedRace.getRace().getCompetitors());
         } else {
             // no tracked race; try to determine the number of competitors based on the scores in the column:
-            // needs customization for high or low point system
             double maxNonPenaltyScoreInColumn = 0.0;
             final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(now);
             for (final Competitor c : leaderboard.getCompetitors()) {
                 final MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(c, raceColumn, now);
-                if (maxPointsReason != null /*&& maxPointsReason != MaxPointsReason.NONE*//* is this if-case even needed? */) {
+                if (maxPointsReason != null && maxPointsReason == MaxPointsReason.NONE) {
                     final Double totalPoints = leaderboard.getTotalPoints(c, raceColumn, now, cache);
-                    /*
-                    if (totalPoints != null && maxNonPenaltyScoreInColumn < totalPoints) {
-                        maxNonPenaltyScoreInColumn = totalPoints;
-                    }
-                    */
                     if (leaderboard.getScoringScheme().isHigherBetter()) {
-                        // high-point scheme ,not correct if starting at 10 and stopping at 3 points for placement
-                        // remember highest and lowest point and subtract this should be better then
+                        // high-point scheme
+                        // remember highest and lowest point and subtract to get competitor count better
                         if (totalPoints > highest) highest = totalPoints;
                         if (totalPoints < lowest) lowest = totalPoints;
-                        double diff = highest - lowest;
+                        // Add 1 because last boat gets 1 point
+                        double diff = highest - lowest + 1;
                         if (totalPoints != null && maxNonPenaltyScoreInColumn < diff) {
-                            //maxNonPenaltyScoreInColumn = totalPoints;
                             maxNonPenaltyScoreInColumn = diff;
                         }
                     } else {
@@ -217,7 +209,10 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
                         if (totalPoints != null && maxNonPenaltyScoreInColumn < totalPoints) {
                             maxNonPenaltyScoreInColumn = totalPoints;
                         }
-                        //
+                        // add 1 competitor if a 'n/a' (no score is entered in this race for the competitor) is found in the leaderboard
+                        if(totalPoints == null) {
+                            maxNonPenaltyScoreInColumn += 1;
+                        }
                     }
                 }
             }

@@ -59,7 +59,10 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     
     @Override
     public CourseArea getCourseArea() {
-        return getRegatta().getDefaultCourseArea();
+        if(getRegatta()!=null) {
+            return getRegatta().getDefaultCourseArea();
+        }
+        return null;
     }
     
     @Override
@@ -79,7 +82,10 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     
     @Override
     public RaceDefinition getRace() {
-        return getTrackedRace().getRace();
+        if(getTrackedRace() != null) {
+            return getTrackedRace().getRace();
+        }
+        return null;
     }
 
     @Override
@@ -92,72 +98,93 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     }
 
     private Integer calculateYear() {
-        TimePoint startOfRace = getTrackedRace().getStartOfRace();
-        TimePoint time = startOfRace != null ? startOfRace : getTrackedRace().getStartOfTracking();
-        final Integer result;
-        if (time == null) {
-            result = 0;
-        } else {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(time.asDate());
-            result = calendar.get(Calendar.YEAR);
+        if(getTrackedRace() != null) {
+            TimePoint startOfRace = getTrackedRace().getStartOfRace();
+            TimePoint time = startOfRace != null ? startOfRace : getTrackedRace().getStartOfTracking();
+            final Integer result;
+            if (time == null) {
+                result = 0;
+            } else {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(time.asDate());
+                result = calendar.get(Calendar.YEAR);
+            }
+            return result;
         }
-        return result;
+        return null;
     }
     
     @Override
     public NauticalSide getAdvantageousEndOfLine() {
-        LineDetails startLine = getTrackedRace().getStartLine(getTrackedRace().getStartOfRace());
-        return startLine.getAdvantageousSideWhileApproachingLine();
+        if(getTrackedRace() != null) {
+            LineDetails startLine = getTrackedRace().getStartLine(getTrackedRace().getStartOfRace());
+            return startLine.getAdvantageousSideWhileApproachingLine();
+        }
+        return null;
     }
     
     @Override
     public Boolean isMedalRace() {
-        return getLeaderboardContext().getLeaderboard().getRaceColumnAndFleet(getTrackedRace()).getA().isMedalRace();
+        if(getTrackedRace() != null) {
+            return getLeaderboardContext().getLeaderboard().getRaceColumnAndFleet(getTrackedRace()).getA().isMedalRace();
+        }
+        return null;
     }
 
     @Override
     public Boolean isTracked() {
-        return getTrackedRace().hasStarted(MillisecondsTimePoint.now());
+        if(getTrackedRace() != null) {
+            return getTrackedRace().hasStarted(MillisecondsTimePoint.now());
+        }
+        return null;
     }
     
     @Override
     public Duration getDuration() {
-        Duration duration = null;
-        TrackedRace race = getTrackedRace();
-        TimePoint start = race.getStartOfRace();
-        if (start == null) {
-            start = race.getStartOfTracking();
-        }
-        if (start != null) {
-            TimePoint end = race.getEndOfRace();
-            if (end == null) {
-                end = race.getEndOfTracking();
+        if(getTrackedRace() != null) {
+            Duration duration = null;
+            TrackedRace race = getTrackedRace();
+            TimePoint start = race.getStartOfRace();
+            if (start == null) {
+                start = race.getStartOfTracking();
             }
-            if (end != null) {
-                duration = new MillisecondsDurationImpl(end.asMillis() - start.asMillis());
+            if (start != null) {
+                TimePoint end = race.getEndOfRace();
+                if (end == null) {
+                    end = race.getEndOfTracking();
+                }
+                if (end != null) {
+                    duration = new MillisecondsDurationImpl(end.asMillis() - start.asMillis());
+                }
             }
+            return duration;
         }
-        return duration;
+        return null;
     }
 
     private <T> int getNumberOfRawFixes(Iterable<T> tracksFor, BiFunction<T, TrackedRace, Track<?>> trackProvider) {
-        int number = 0;
-        for (T trackedObject : tracksFor) {
-            Track<?> track = trackProvider.apply(trackedObject, getTrackedRace());
-            track.lockForRead();
-            try {
-                number += Util.size(track.getRawFixes());
-            } finally {
-                track.unlockAfterRead();
+        if(getTrackedRace() != null) {
+            int number = 0;
+            for (T trackedObject : tracksFor) {
+                Track<?> track = trackProvider.apply(trackedObject, getTrackedRace());
+                track.lockForRead();
+                try {
+                    number += Util.size(track.getRawFixes());
+                } finally {
+                    track.unlockAfterRead();
+                }
             }
+            return number;
         }
-        return number;
+        return 0;
     }
     
     @Override
     public int getNumberOfCompetitorFixes() {
-        return getNumberOfRawFixes(getRace().getCompetitors(), (competitor, trackedRace)->trackedRace.getTrack(competitor));
+        if(getTrackedRace() != null) {
+            return getNumberOfRawFixes(getRace().getCompetitors(), (competitor, trackedRace)->trackedRace.getTrack(competitor));
+        }
+        return 0;
     }
 
     @Override
@@ -167,15 +194,18 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     
     @Override
     public int getNumberOfWindFixes() {
-        final Iterable<WindSource> windSources = getTrackedRace().getWindSources();
-        final Iterable<WindSource> windSourcesToExclude = getTrackedRace().getWindSourcesToExclude();
-        final Iterable<WindSource> windSourcesToUse = StreamSupport
-                .stream(windSources.spliterator(), /* parallel */ false)
-                .filter(ws -> !Util.contains(windSourcesToExclude, ws))
-                .filter(ws -> ws.getType() != WindSourceType.TRACK_BASED_ESTIMATION
-                        && ws.getType() != WindSourceType.MANEUVER_BASED_ESTIMATION)
-                .collect(Collectors.toList());
-        return getNumberOfRawFixes(windSourcesToUse, (windSource, trackedRace)->trackedRace.getOrCreateWindTrack(windSource));
+        if(getTrackedRace() != null) {
+            final Iterable<WindSource> windSources = getTrackedRace().getWindSources();
+            final Iterable<WindSource> windSourcesToExclude = getTrackedRace().getWindSourcesToExclude();
+            final Iterable<WindSource> windSourcesToUse = StreamSupport
+                    .stream(windSources.spliterator(), /* parallel */ false)
+                    .filter(ws -> !Util.contains(windSourcesToExclude, ws))
+                    .filter(ws -> ws.getType() != WindSourceType.TRACK_BASED_ESTIMATION
+                            && ws.getType() != WindSourceType.MANEUVER_BASED_ESTIMATION)
+                    .collect(Collectors.toList());
+            return getNumberOfRawFixes(windSourcesToUse, (windSource, trackedRace)->trackedRace.getOrCreateWindTrack(windSource));
+        }
+        return 0;
     }
 
     // Convenience methods for race dependent calculation to avoid code duplication
@@ -197,63 +227,75 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     
     @Override
     public Integer getRankAtFinishForCompetitor(Competitor competitor) {
-        int rank = getTrackedRace().getRank(competitor, getTrackedRace().getEndOfTracking());
-        return rank == 0 ? null : rank;
+        if(getTrackedRace() != null) {
+            int rank = getTrackedRace().getRank(competitor, getTrackedRace().getEndOfTracking());
+            return rank == 0 ? null : rank;
+        }
+        return null;
     }
 
     @Override
     public Distance getAdvantageOfStarboardSideOfStartline() {
-        final Distance result;
-        if (getTrackedRace().getStartOfRace() != null) {
-            final LineDetails startLine = getTrackedRace().getStartLine(getTrackedRace().getStartOfRace());
-            if (startLine == null) {
-                result = null;
+        if(getTrackedRace() != null) {
+            final Distance result;
+            if (getTrackedRace().getStartOfRace() != null) {
+                final LineDetails startLine = getTrackedRace().getStartLine(getTrackedRace().getStartOfRace());
+                if (startLine == null) {
+                    result = null;
+                } else {
+                    final Distance absoluteAdvantage = startLine.getAdvantage();
+                    result = startLine.getAdvantageousSideWhileApproachingLine() == NauticalSide.STARBOARD ?
+                            absoluteAdvantage : absoluteAdvantage.scale(-1);
+                }
             } else {
-                final Distance absoluteAdvantage = startLine.getAdvantage();
-                result = startLine.getAdvantageousSideWhileApproachingLine() == NauticalSide.STARBOARD ?
-                        absoluteAdvantage : absoluteAdvantage.scale(-1);
+                result = null;
             }
-        } else {
-            result = null;
+            return result;
         }
-        return result;
+        return null;
     }
 
     @Override
     public Bearing getTrueWindAngleOfStartLineFromStarboardSide() {
-        final Bearing result;
-        if (getTrackedRace().getStartOfRace() != null) {
-            final LineDetails startLine = getTrackedRace().getStartLine(getTrackedRace().getStartOfRace());
-            if (startLine == null) {
-                result = null;
-            } else {
-                final Bearing angleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind = startLine.getAngleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind();
-                if (angleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind == null) {
+        if(getTrackedRace() != null) {
+            final Bearing result;
+            if (getTrackedRace().getStartOfRace() != null) {
+                final LineDetails startLine = getTrackedRace().getStartLine(getTrackedRace().getStartOfRace());
+                if (startLine == null) {
                     result = null;
                 } else {
-                    result = new DegreeBearingImpl(-180).add(angleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind);
+                    final Bearing angleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind = startLine.getAngleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind();
+                    if (angleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind == null) {
+                        result = null;
+                    } else {
+                        result = new DegreeBearingImpl(-180).add(angleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind);
+                    }
                 }
+            } else {
+                result = null;
             }
-        } else {
-            result = null;
+            return result;
         }
-        return result;
+        return null;
     }
 
     @Override
     public Distance getStartLineLength() {
-        final Distance result;
-        if (getTrackedRace().getStartOfRace() != null) {
-            final LineDetails startLine = getTrackedRace().getStartLine(getTrackedRace().getStartOfRace());
-            if (startLine == null) {
-                result = null;
+        if(getTrackedRace() != null) {
+            final Distance result;
+            if (getTrackedRace().getStartOfRace() != null) {
+                final LineDetails startLine = getTrackedRace().getStartLine(getTrackedRace().getStartOfRace());
+                if (startLine == null) {
+                    result = null;
+                } else {
+                    result = startLine.getLength();
+                }
             } else {
-                result = startLine.getLength();
+                result = null;
             }
-        } else {
-            result = null;
+            return result;
         }
-        return result;
+        return null;
     }
 
     @Override
