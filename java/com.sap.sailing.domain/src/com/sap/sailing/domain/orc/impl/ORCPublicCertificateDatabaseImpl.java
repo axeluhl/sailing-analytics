@@ -330,7 +330,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
                 builder = child.getTextContent();
                 break;
             case "dxtDate":
-                issueDate = new MillisecondsTimePoint(isoTimestampFormat.parse(child.getTextContent()+"+0000")); // assume UTC
+                issueDate = new MillisecondsTimePoint(isoTimestampFormat.parse(child.getTextContent().replaceAll("Z", "+0000"))); // assume UTC
                 break;
             case "CertType":
                 certType = Integer.valueOf(child.getTextContent().trim());
