@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.json.simple.parser.ParseException;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.orc.ORCCertificate;
@@ -26,6 +27,7 @@ public class TestORCCertificateImporterJSON {
         assertNotNull(milan);
     }
     
+    @Ignore("Certificate used for testing no longer valid after 2019")
     @Test
     public void testSimpleOnlineJSONFileRead() throws IOException, ParseException {
         ORCCertificatesCollection importer = ORCCertificatesImporter.INSTANCE.read(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());

@@ -35,6 +35,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
@@ -65,6 +66,7 @@ import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
+import com.sap.sailing.domain.tracking.impl.TrackingConnectorInfoImpl;
 import com.sap.sailing.domain.tracking.impl.UpdateHandler;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
@@ -76,7 +78,6 @@ import difflib.PatchFailedException;
 
 public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
         implements SwissTimingRaceTracker, SailMasterListener, TrackingDataLoader {
-    private static final String SWISS_TIMING = "swissTiming";
 
     private static final Logger logger = Logger.getLogger(SwissTimingRaceTrackerImpl.class.getName());
     
@@ -495,7 +496,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
                     assert SwissTimingRaceTrackerImpl.this.race == race;
                 }
             }, useInternalMarkPassingAlgorithm, raceLogResolver,
-                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(), SWISS_TIMING);
+                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(),
+                    new TrackingConnectorInfoImpl(TrackingConnectorType.SwissTiming, /*no api connection to query the webUrl*/ null));
             addUpdateHandlers();
             notifyRaceCreationListeners();
             logger.info("Created SwissTiming RaceDefinition and TrackedRace for "+race.getName());

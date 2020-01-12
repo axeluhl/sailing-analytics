@@ -32,6 +32,7 @@ import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
@@ -103,11 +104,14 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator,
-            RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter, String trackingConnector) {
-        return setOwnershipForRace(new RegattaNameAndRaceName(trackedRegatta.getRegatta().getName(), raceDefinition.getName()),
+            RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter,
+            TrackingConnectorInfo trackingConnectorInfo) {
+        return setOwnershipForRace(
+                new RegattaNameAndRaceName(trackedRegatta.getRegatta().getName(), raceDefinition.getName()),
                 () -> super.createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore, delayToLiveInMillis,
                         millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                        raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver, threadLocalTransporter, trackingConnector));
+                        raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver, threadLocalTransporter,
+                        trackingConnectorInfo));
     }
 
     @Override
