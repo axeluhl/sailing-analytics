@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.deserialization.impl;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -349,7 +350,13 @@ public class CourseConfigurationBuilder {
         final Map<WithID, List<DeviceMappingWithRegattaLogEvent<WithID>>> deviceMappings = new RegattaLogDeviceMappingFinder<>(
                 regatta.getRegattaLog()).analyze();
         final List<DeviceMappingWithRegattaLogEvent<WithID>> foundMappings = deviceMappings.get(mark);
-        return foundMappings.stream().map(dm -> new Pair<>(dm.getDevice(), dm.getTimeRange())).collect(Collectors.toList());
+        final Iterable<Pair<DeviceIdentifier, TimeRange>> result;
+        if (foundMappings == null) {
+            result = Collections.emptySet();
+        } else {
+            result = foundMappings.stream().map(dm -> new Pair<>(dm.getDevice(), dm.getTimeRange())).collect(Collectors.toList());
+        }
+        return result;
     }
 
     /**
