@@ -8,20 +8,20 @@ import java.util.Set;
 
 import com.sap.sailing.domain.coursetemplate.CourseConfigurationBase;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
-import com.sap.sailing.domain.coursetemplate.IsMarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 
-public abstract class CourseConfigurationBaseImpl<R extends IsMarkRole, P>
-implements CourseConfigurationBase<R, P> {
+public abstract class CourseConfigurationBaseImpl<P> implements CourseConfigurationBase<P> {
     
     private static final long serialVersionUID = -9189989170055144298L;
 
+    private final String shortName;
     private final CourseTemplate optionalCourseTemplate;
     // TODO decide if we should combine markConfigurations and roleMapping to one field
     private final Set<MarkConfiguration<P>> markConfigurations;
-    private final Map<MarkConfiguration<P>, R> associatedRoles;
+    private final Map<MarkConfiguration<P>, MarkRole> associatedRoles;
     private final List<WaypointWithMarkConfiguration<P>> waypoints;
     private final RepeatablePart optionalRepeatablePart;
     private final Integer numberOfLaps;
@@ -29,9 +29,9 @@ implements CourseConfigurationBase<R, P> {
     private final URL optionalImageURL;
     
     public CourseConfigurationBaseImpl(CourseTemplate optionalCourseTemplate,
-            Set<MarkConfiguration<P>> markConfigurations, Map<MarkConfiguration<P>, R> associatedRoles,
+            Set<MarkConfiguration<P>> markConfigurations, Map<MarkConfiguration<P>, MarkRole> associatedRoles,
             List<WaypointWithMarkConfiguration<P>> waypoints,
-            RepeatablePart optionalRepeatablePart, Integer numberOfLaps, String name, URL optionalImageURL) {
+            RepeatablePart optionalRepeatablePart, Integer numberOfLaps, String name, String shortName, URL optionalImageURL) {
         super();
         this.optionalCourseTemplate = optionalCourseTemplate;
         this.markConfigurations = markConfigurations;
@@ -40,7 +40,13 @@ implements CourseConfigurationBase<R, P> {
         this.optionalRepeatablePart = optionalRepeatablePart;
         this.numberOfLaps = numberOfLaps;
         this.name = name;
+        this.shortName = shortName;
         this.optionalImageURL = optionalImageURL;
+    }
+
+    @Override
+    public String getShortName() {
+        return shortName;
     }
 
     @Override
@@ -64,13 +70,13 @@ implements CourseConfigurationBase<R, P> {
     }
 
     @Override
-    public Map<MarkConfiguration<P>, R> getAssociatedRoles() {
+    public Map<MarkConfiguration<P>, MarkRole> getAssociatedRoles() {
         return associatedRoles;
     }
     
     @Override
-    public Map<MarkConfiguration<P>, R> getAllMarksWithOptionalRoles() {
-        final Map<MarkConfiguration<P>, R> result = new HashMap<>();
+    public Map<MarkConfiguration<P>, MarkRole> getAllMarksWithOptionalRoles() {
+        final Map<MarkConfiguration<P>, MarkRole> result = new HashMap<>();
         for (MarkConfiguration<P> mc : markConfigurations) {
             result.put(mc, associatedRoles.get(mc));
         }

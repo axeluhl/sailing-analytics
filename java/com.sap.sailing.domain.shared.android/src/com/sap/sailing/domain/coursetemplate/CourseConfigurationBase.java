@@ -23,7 +23,9 @@ import com.sap.sse.common.Named;
  * The configuration for all marks are returned by {@link #getAllMarks()} because when pushing
  * this to a Regatta the marks for all these configurations have to be established.
  */
-public interface CourseConfigurationBase<R extends IsMarkRole, P> extends WithOptionalRepeatablePart, Named {
+public interface CourseConfigurationBase<P> extends WithOptionalRepeatablePart, Named {
+    String getShortName();
+    
     /**
      * If this course configuration has been obtained from a {@link CourseTemplate} without modifying the sequence of
      * waypoints and their mapping to {@link MarkTemplate}s, this method will return that {@link CourseTemplate}. In all
@@ -60,14 +62,14 @@ public interface CourseConfigurationBase<R extends IsMarkRole, P> extends WithOp
      * configuration ("save as...") because then the roles to which the mark configurations refer can be (re-)used in
      * the new course template constructed from this configuration.
      */
-    Map<MarkConfiguration<P>, R> getAssociatedRoles();
+    Map<MarkConfiguration<P>, MarkRole> getAssociatedRoles();
     
     /**
      * Returns a map whose key set equals the result of {@link #getAllMarks()} and whose values are the result
      * of mapping the key through the result of {@link #getAssociatedRoles()}. If a mark configuration does not
      * have a role assigned, {@code null} will be the associated value in the map returned by this method.
      */
-    Map<MarkConfiguration<P>, R> getAllMarksWithOptionalRoles();
+    Map<MarkConfiguration<P>, MarkRole> getAllMarksWithOptionalRoles();
     
     /**
      * A {@link CourseConfigurationBase} having a {@link RepeatablePart} can optionally also specify a number of laps.

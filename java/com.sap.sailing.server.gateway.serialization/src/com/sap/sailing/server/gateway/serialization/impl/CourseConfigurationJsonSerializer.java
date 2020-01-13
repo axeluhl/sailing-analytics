@@ -13,7 +13,6 @@ import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.ControlPointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
-import com.sap.sailing.domain.coursetemplate.IsMarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationResponseAnnotation;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationVisitor;
@@ -31,6 +30,7 @@ import com.sap.sse.common.Util.Pair;
 public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseConfiguration<MarkConfigurationResponseAnnotation>> {
 
     public static final String FIELD_NAME = "name";
+    public static final String FIELD_SHORT_NAME = "shortName";
     public static final String FIELD_OPTIONAL_IMAGE_URL = "optionalImageUrl";
     public static final String FIELD_OPTIONAL_COURSE_TEMPLATE_UUID = "courseTemplateId";
     public static final String FIELD_MARK_CONFIGURATIONS = "markConfigurations";
@@ -73,6 +73,7 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
     public JSONObject serialize(CourseConfiguration<MarkConfigurationResponseAnnotation> courseConfiguration) {
         final JSONObject result = new JSONObject();
         result.put(FIELD_NAME, courseConfiguration.getName());
+        result.put(FIELD_SHORT_NAME, courseConfiguration.getShortName());
         if (courseConfiguration.getOptionalCourseTemplate() != null) {
             result.put(FIELD_OPTIONAL_COURSE_TEMPLATE_UUID,
                     courseConfiguration.getOptionalCourseTemplate().getId().toString());
@@ -82,7 +83,7 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
         }
         final Map<MarkConfiguration<MarkConfigurationResponseAnnotation>, UUID> markConfigurationsToTempIdMap = new HashMap<>();
         final JSONArray markConfigurationsJSON = new JSONArray();
-        for (Map.Entry<MarkConfiguration<MarkConfigurationResponseAnnotation>, IsMarkRole> markWithOptionalRole : courseConfiguration
+        for (Map.Entry<MarkConfiguration<MarkConfigurationResponseAnnotation>, MarkRole> markWithOptionalRole : courseConfiguration
                 .getAllMarksWithOptionalRoles().entrySet()) {
             final MarkConfiguration<MarkConfigurationResponseAnnotation> markConfiguration = markWithOptionalRole.getKey();
             JSONObject markConfigurationsEntry = new JSONObject();
@@ -92,12 +93,12 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
                 markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_MARK_TEMPLATE_ID,
                         markConfiguration.getOptionalMarkTemplate().getId().toString());
             }
-            final IsMarkRole associatedRole = markWithOptionalRole.getValue();
+            final MarkRole associatedRole = markWithOptionalRole.getValue();
             if (associatedRole != null) {
                 markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_NAME, associatedRole.getName());
                 markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_SHORT_NAME, associatedRole.getShortName());
                 if (associatedRole instanceof MarkRole) {
-                    markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_ID, ((MarkRole)associatedRole).getId().toString());
+                    markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_ID, ((MarkRole) associatedRole).getId().toString());
                 }
             }
             markConfiguration.accept(new MarkConfigurationVisitor<Void, MarkConfigurationResponseAnnotation>() {

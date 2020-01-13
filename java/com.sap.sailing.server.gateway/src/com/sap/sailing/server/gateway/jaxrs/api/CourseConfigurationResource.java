@@ -48,7 +48,7 @@ import com.sap.sailing.domain.coursetemplate.ControlPointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
-import com.sap.sailing.domain.coursetemplate.IsMarkRole;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationResponseAnnotation;
@@ -247,8 +247,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         for (final MarkConfiguration<MarkConfigurationRequestAnnotation> sourceMark : courseConfiguration.getAllMarks()) {
             annotateWithLastKnownPositionInformation(regatta, sourceMark, markConfigMap);
         }
-        final Map<MarkConfiguration<MarkConfigurationResponseAnnotation>, IsMarkRole> targetAssociatedRoles = new HashMap<>();
-        for (final Entry<MarkConfiguration<MarkConfigurationRequestAnnotation>, IsMarkRole> e : courseConfiguration.getAssociatedRoles().entrySet()) {
+        final Map<MarkConfiguration<MarkConfigurationResponseAnnotation>, MarkRole> targetAssociatedRoles = new HashMap<>();
+        for (final Entry<MarkConfiguration<MarkConfigurationRequestAnnotation>, MarkRole> e : courseConfiguration.getAssociatedRoles().entrySet()) {
             targetAssociatedRoles.put(markConfigMap.get(e.getKey()), e.getValue());
         }
         final List<WaypointWithMarkConfiguration<MarkConfigurationResponseAnnotation>> targetWaypoints = new ArrayList<>();
@@ -260,7 +260,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
                 courseConfiguration.getOptionalCourseTemplate(),
                 new HashSet<>(markConfigMap.values()), targetAssociatedRoles, targetWaypoints,
                 courseConfiguration.getRepeatablePart(), courseConfiguration.getNumberOfLaps(),
-                courseConfiguration.getName(), courseConfiguration.getOptionalImageURL());
+                courseConfiguration.getName(), courseConfiguration.getShortName(), courseConfiguration.getOptionalImageURL());
     }
 
     private ControlPointWithMarkConfiguration<MarkConfigurationResponseAnnotation> annotateWithLastKnownPositionInformation(

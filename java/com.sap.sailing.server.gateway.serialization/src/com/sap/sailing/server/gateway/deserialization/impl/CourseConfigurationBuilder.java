@@ -25,7 +25,6 @@ import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.FixedPositioning;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
-import com.sap.sailing.domain.coursetemplate.IsMarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationResponseAnnotation;
@@ -47,7 +46,6 @@ import com.sap.sailing.domain.coursetemplate.impl.MarkConfigurationRequestAnnota
 import com.sap.sailing.domain.coursetemplate.impl.MarkConfigurationResponseAnnotationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPairWithConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesBasedMarkConfigurationImpl;
-import com.sap.sailing.domain.coursetemplate.impl.MarkRoleNameImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateBasedMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.RegattaMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointWithMarkConfigurationImpl;
@@ -71,20 +69,22 @@ public class CourseConfigurationBuilder {
     private final Regatta optionalRegatta;
     private final CourseTemplate optionalCourseTemplate;
     private final String name;
+    private final String shortName;
     private final URL optionalImageUrl;
     private Set<MarkConfiguration<MarkConfigurationRequestAnnotation>> markConfigurations = new HashSet<>();
-    private Map<MarkConfiguration<MarkConfigurationRequestAnnotation>, IsMarkRole> associatedRoles = new HashMap<>();
+    private Map<MarkConfiguration<MarkConfigurationRequestAnnotation>, MarkRole> associatedRoles = new HashMap<>();
     private List<WaypointWithMarkConfiguration<MarkConfigurationRequestAnnotation>> waypoints = new ArrayList<>();
     private RepeatablePart optionalRepeatablePart;
     private Integer numberOfLaps;
     private Map<MarkPairWithConfiguration<MarkConfigurationRequestAnnotation>, MarkPairWithConfiguration<MarkConfigurationRequestAnnotation>> markPairCache = new HashMap<>();
 
     public CourseConfigurationBuilder(SharedSailingData sharedSailingData, Regatta optionalRegatta,
-            CourseTemplate optionalCourseTemplate, String name, URL optionalImageUrl) {
+            CourseTemplate optionalCourseTemplate, String name, String shortName, URL optionalImageUrl) {
         this.sharedSailingData = sharedSailingData;
         this.optionalRegatta = optionalRegatta;
         this.optionalCourseTemplate = optionalCourseTemplate;
         this.name = name;
+        this.shortName = shortName;
         this.optionalImageUrl = optionalImageUrl;
     }
 
@@ -235,11 +235,11 @@ public class CourseConfigurationBuilder {
         if (!markConfigurations.contains(markConfiguration)) {
             throw new IllegalArgumentException();
         }
-        final IsMarkRole candidate;
+        final MarkRole candidate;
         if (markRoleId != null) {
             candidate = resolveMarkRoleByID(markRoleId);
         } else {
-            candidate = new MarkRoleNameImpl(roleName, roleShortName);
+            candidate = new MarkRoleNameImpl(roleName, roleShortName); // FIXME annotate the MarkConfiguration with the role name/shortName
         }
         associatedRoles.forEach((mc, existingRole) -> {
             if (candidate.equals(existingRole) && !mc.equals(markConfiguration)) {
@@ -260,7 +260,7 @@ public class CourseConfigurationBuilder {
 
     public CourseConfiguration<MarkConfigurationRequestAnnotation> build() {
         return new CourseConfigurationImpl<MarkConfigurationRequestAnnotation>(optionalCourseTemplate, markConfigurations,
-                associatedRoles, waypoints, optionalRepeatablePart, numberOfLaps, name, optionalImageUrl);
+                associatedRoles, waypoints, optionalRepeatablePart, numberOfLaps, name, shortName, optionalImageUrl);
     }
     
     public static MarkConfigurationResponseAnnotation getPositioningIfAvailable(Regatta regatta,

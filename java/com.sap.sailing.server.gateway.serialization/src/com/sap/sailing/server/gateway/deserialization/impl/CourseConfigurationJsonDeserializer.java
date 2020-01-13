@@ -45,6 +45,7 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
     @Override
     public CourseConfiguration<MarkConfigurationRequestAnnotation> deserialize(JSONObject json) throws JsonDeserializationException {
         final String name = (String) json.get(CourseConfigurationJsonSerializer.FIELD_NAME);
+        final String shortName = (String) json.get(CourseConfigurationJsonSerializer.FIELD_SHORT_NAME);
         final String optionalImageURLAsString = (String) json.get(CourseConfigurationJsonSerializer.FIELD_OPTIONAL_IMAGE_URL);
         URL optionalImageURL;
         try {
@@ -58,7 +59,7 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
             optionalCourseTemplate = sharedSailingData.getCourseTemplateById(UUID.fromString(courseTemplateIdString));
         }
         CourseConfigurationBuilder builder = new CourseConfigurationBuilder(sharedSailingData, regatta, optionalCourseTemplate,
-                name, optionalImageURL);
+                name, shortName, optionalImageURL);
         final Map<UUID, MarkConfiguration<MarkConfigurationRequestAnnotation>> markConfigurationsByID = new HashMap<>();
         final JSONArray markConfigurationsJSON = (JSONArray) json
                 .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATIONS);

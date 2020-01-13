@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,11 +28,10 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
-import com.sap.sailing.domain.coursetemplate.MarkRolePair;
-import com.sap.sailing.domain.coursetemplate.MarkRolePair.MarkRolePairFactory;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBuilder;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
+import com.sap.sailing.domain.coursetemplate.MarkRolePair.MarkRolePairFactory;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
@@ -51,7 +49,6 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -334,7 +331,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         for (final Object o : waypointTemplatesList) {
             if (o instanceof Document) {
                 final Document bdo = (Document) o;
-                waypointTemplates.add(loadWaypointTemplate(bdo, markRoleResolver, markRolePairFactory::create));
+                waypointTemplates.add(loadWaypointTemplate(bdo, markRoleResolver, markRolePairFactory));
             } else {
                 logger.warning(String.format("Could not load document  for CourseTemplate %s.", id));
             }
@@ -361,7 +358,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private WaypointTemplate loadWaypointTemplate(Document bdo,
             Function<UUID, MarkRole> markRoleResolver,
-            BiFunction<Pair<String, String>, List<MarkRole>, MarkRolePair> markRolePairResolver) {
+            MarkRolePairFactory markRolePairResolver) {
         // load passing instruction
         final PassingInstruction passingInstruction = PassingInstruction
                 .valueOf(bdo.get(FieldNames.WAYPOINT_TEMPLATE_PASSINGINSTRUCTION.name()).toString());
@@ -376,20 +373,20 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             final MarkRole markRole = markRoleResolver.apply(UUID.fromString(obj.toString()));
             if (markRole == null) {
                 logger.warning(String.format("Could not resolve MarkRole with id %s for WaypointTemplate.", obj.toString()));
-                    hasParsingError = true;
-                    break;
-                } else {
+                hasParsingError = true;
+                break;
+            } else {
                 markRoles.add(markRole);
-                }
             }
         }
+        final WaypointTemplate result;
         if (hasParsingError) {
             result = null;
         } else {
             // create MarkTemplate or MarkTemplatePairImpl
             final ControlPointTemplate controlPointTemplate;
             if (markRoles.size() == 2) {
-                controlPointTemplate = markRolePairResolver.apply(new Pair<>(name, shortName), markRoles);
+                controlPointTemplate = markRolePairResolver.create(name, shortName, markRoles.get(0), markRoles.get(1));
             } else {
                 controlPointTemplate = markRoles.get(0);
             }
