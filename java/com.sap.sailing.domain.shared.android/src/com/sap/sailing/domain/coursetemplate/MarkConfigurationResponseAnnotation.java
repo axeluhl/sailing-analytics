@@ -16,5 +16,6 @@ import com.sap.sse.common.Util.Pair;
 public interface MarkConfigurationResponseAnnotation {
     // TODO decide if it would be beneficial to use GPSFix instead. Most but not all code paths may provide a GPSFix but MarkProperties with a fixed position does not have a TimePoint associated with the Position.
     Position getLastKnownPosition();
+    // TODO include the last known position per mapping
     Iterable<Pair<DeviceIdentifier, TimeRange>> getDeviceMappings();
 }
