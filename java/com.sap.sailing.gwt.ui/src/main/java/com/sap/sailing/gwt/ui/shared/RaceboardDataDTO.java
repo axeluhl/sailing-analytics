@@ -16,15 +16,15 @@ public class RaceboardDataDTO implements IsSerializable {
     private ArrayList<DetailType> detailTypesForCompetitorChart;
     private ArrayList<DetailType> availableDetailTypesForLeaderboard;
     private StrippedLeaderboardDTOWithSecurity leaderboard;
-    private boolean isTrackedByTracTrac;
-    
+    private TrackingConnectorInfoDTO trackingConnectorInfo;
 
     // for GWT
     RaceboardDataDTO() {}
     
     public RaceboardDataDTO(RaceWithCompetitorsAndBoatsDTO race,
             boolean isValidLeaderboardGroup, boolean isValidEvent, Iterable<DetailType> detailTypesForCompetitorChart,
-            Iterable<DetailType> availableDetailTypesForLeaderboard, StrippedLeaderboardDTOWithSecurity leaderboard, boolean isTrackedByTracTrac) {
+            Iterable<DetailType> availableDetailTypesForLeaderboard, StrippedLeaderboardDTOWithSecurity leaderboard,
+            TrackingConnectorInfoDTO trackingConnectorInfo) {
         this.race = race;
         this.isValidLeaderboardGroup = isValidLeaderboardGroup;
         this.isValidEvent = isValidEvent;
@@ -33,7 +33,7 @@ public class RaceboardDataDTO implements IsSerializable {
         this.availableDetailTypesForLeaderboard = new ArrayList<>();
         Util.addAll(availableDetailTypesForLeaderboard, this.availableDetailTypesForLeaderboard);
         this.leaderboard = leaderboard;
-        this.isTrackedByTracTrac = isTrackedByTracTrac;
+        this.trackingConnectorInfo = trackingConnectorInfo;
     }
 
     public StrippedLeaderboardDTOWithSecurity getLeaderboard() {
@@ -67,8 +67,8 @@ public class RaceboardDataDTO implements IsSerializable {
     public boolean isValidEvent() {
         return isValidEvent;
     }
-    
-    public boolean isTrackedByTracTrac() {
-        return isTrackedByTracTrac;
+
+    public TrackingConnectorInfoDTO getTrackingConnectorInfo() {
+        return trackingConnectorInfo;
     }
 }

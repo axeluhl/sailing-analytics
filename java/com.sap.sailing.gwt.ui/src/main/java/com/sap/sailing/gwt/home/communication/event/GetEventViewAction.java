@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
@@ -22,6 +23,7 @@ import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.EventActionUtil.LeaderboardCallback;
 import com.sap.sailing.gwt.home.server.LeaderboardContext;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
+import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
@@ -118,8 +120,10 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
                         singleLeaderboardGroup.getId(), eventAndLeaderboardReferencesForSeriesOrdered));
             }
         }
-        dto.setTrackedByTracTrac(event.isTrackedByTracTrac());
         
+        Set<TrackingConnectorInfoDTO> trackingConnectorInfos = event.getTrackingConnectorInfos().stream()
+                .map(TrackingConnectorInfoDTO::new).collect(Collectors.toSet());
+        dto.setTrackingConnectorInfos(trackingConnectorInfos);
         return dto;
     }
 

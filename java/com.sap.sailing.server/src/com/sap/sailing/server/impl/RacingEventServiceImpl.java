@@ -212,6 +212,7 @@ import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
+import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.server.Replicator;
@@ -223,6 +224,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeseria
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResultBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfoJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
 import com.sap.sailing.server.interfaces.DataImportLockWithProgress;
@@ -884,15 +886,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 final RaceHandle handle = addRace(/* addToRegatta==null means "default regatta" */ null, params, /* no timeout during mass loading */ -1,
                         new DefaultRaceTrackingHandler() {
                     @Override
-                    public DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition raceDefinition,
-                            Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
-                            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-                            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator,
-                            RaceLogAndTrackedRaceResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter, String trackingConnector) {
+                            public DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta,
+                                    RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
+                                    long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
+                                    long millisecondsOverWhichToAverageSpeed,
+                                    DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
+                                    boolean useMarkPassingCalculator, RaceLogAndTrackedRaceResolver raceLogResolver,
+                                    Optional<ThreadLocalTransporter> threadLocalTransporter,
+                                    TrackingConnectorInfo trackingConnectorInfo) {
                         final DynamicTrackedRace trackedRace = super.createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
                                         delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                                         millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate,
-                                        useMarkPassingCalculator, raceLogResolver, threadLocalTransporter, trackingConnector);
+                                        useMarkPassingCalculator, raceLogResolver, threadLocalTransporter, trackingConnectorInfo);
                         getSecurityService().migrateOwnership(trackedRace);
                         return trackedRace;
                     }
@@ -1969,13 +1974,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
-            long millisecondsOverWhichToAverageSpeed, boolean useMarkPassingCalculator, String trackingConnector) {
+            long millisecondsOverWhichToAverageSpeed, boolean useMarkPassingCalculator, TrackingConnectorInfo trackingConnectorInfo) {
         DynamicTrackedRegatta trackedRegatta = getOrCreateTrackedRegatta(getRegatta(raceIdentifier));
         RaceDefinition race = getRace(raceIdentifier);
         return trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), windStore,
                 delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 /* raceDefinitionSetToUpdate */null, useMarkPassingCalculator, /* raceLogResolver */ this,
-                Optional.of(this.getThreadLocalTransporterForCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster()), trackingConnector);
+                Optional.of(this
+                        .getThreadLocalTransporterForCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster()),
+                trackingConnectorInfo);
     }
 
     private void ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(
@@ -2036,7 +2043,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             // replicate the addition of the tracked race:
             CreateTrackedRace op = new CreateTrackedRace(trackedRace.getRaceIdentifier(), trackedRace.getWindStore(),
                     trackedRace.getDelayToLiveInMillis(), trackedRace.getMillisecondsOverWhichToAverageWind(),
-                    trackedRace.getMillisecondsOverWhichToAverageSpeed(), trackedRace.getTrackingConnector());
+                    trackedRace.getMillisecondsOverWhichToAverageSpeed(), trackedRace.getTrackingConnectorInfo());
             replicate(op);
             linkRaceToConfiguredLeaderboardColumns(trackedRace);
             TrackedRaceReplicatorAndNotifier trackedRaceReplicator = new TrackedRaceReplicatorAndNotifier(trackedRace);
@@ -4074,8 +4081,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     Object eventsAsObject = parser.parse(bufferedReader);
                     final LeaderboardGroupBaseJsonDeserializer leaderboardGroupBaseJsonDeserializer = new LeaderboardGroupBaseJsonDeserializer();
                     LeaderboardSearchResultBaseJsonDeserializer deserializer = new LeaderboardSearchResultBaseJsonDeserializer(
-                            new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(
-                                    DomainFactory.INSTANCE)), leaderboardGroupBaseJsonDeserializer),
+                            new EventBaseJsonDeserializer(
+                                    new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
+                                    leaderboardGroupBaseJsonDeserializer, new TrackingConnectorInfoJsonDeserializer()),
                             leaderboardGroupBaseJsonDeserializer);
                     result = new ResultImpl<LeaderboardSearchResultBase>(query,
                             new LeaderboardSearchResultBaseRanker<LeaderboardSearchResultBase>());
