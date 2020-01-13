@@ -24,7 +24,6 @@ import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 public interface MarkTemplate extends NamedWithUUID, CommonMarkProperties,
         WithQualifiedObjectIdentifier, IsManagedByCache<MarkTemplateResolver> {
     public interface MarkTemplateResolver {
-        
         MarkTemplate getOrCreate(MarkTemplate markTemplate);
     }
     

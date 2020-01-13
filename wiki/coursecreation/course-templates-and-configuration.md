@@ -2,7 +2,7 @@
 
 Previously, marks as well as courses were exclusively bound to the regatta context. In addition the definition of courses was possible with existing regatta marks only. Having this kind of model, it is not easily possible to transfer courses including their respective tracking information to another regatta. In addition on the fly changes while doing so is another inconvenience.
 
-Therefore a regatta independent model is required that allows for the definition of course sequences as well as tracking information. This new model is defined below and allows for an easy bootstrapping of courses in different regatta contexts but based on the same masterdata.
+Therefore a regatta-independent model is required that allows for the definition of course sequences as well as tracking information. This new model is defined below and allows for an easy bootstrapping of courses in different regatta contexts but based on the same masterdata.
 
 The new model is not intended to replace the regatta specific course and mark model but rather extends it to cover the newly emerged use cases. In addition the new model - while being able to map all cases - allows an entirely free definition of courses using just a subset of the possibilities in the UI.
 
@@ -11,7 +11,7 @@ The new model is not intended to replace the regatta specific course and mark mo
 
 We defined the model for course templating and configuration. In addition the various model elements have defined masterdata and other properties.
 
-## Mark templates have the following properties
+## Mark templates
 
 A mark template defines the appearance of a mark in a regatta independent representation. Mark templates represent marks in the waypoint sequence of a course template.
 
@@ -43,7 +43,7 @@ Mark properties have the following properties:
 * Mark properties are mutable
 
 
-### Course template
+## Course template
 
 A course template can be used to create a course based on mark roles, mark templates and a sequence of waypoints. The sequence of waypoints may contain a repeatable sub-sequence of waypoints which can be used to easily adjust the course's mark sequence for the number of laps specified, both, during creation and later when editing the course.
 
@@ -55,13 +55,16 @@ A course template consists of the following parts:
 * Optionally, additional mark templates, e.g., for spare marks, with an optional link to a default mark role
 * Optional repeatable part
 
+## Mark role
 
-### Course configuration
+A mark role defines the purpose of a mark used in the waypoint sequences of a regatta course or course template and allows users to swap out marks or mark templates without changing the the effective waypoint sequence. Having this, a course template and regatta course may define a compatible waypoint sequence while being based on different mark definitions.
+
+## Course configuration
 
 * In memory representation with optional references to domain objects
     * If freely created, no references to domain objects exist yet
     * When created based on a course template or regatta course, the created elements are based on the elements of the originating source
-    * While changing a course configuration in the UI, a mix of different definitions may show up
+    * While changing a course configuration in the UI, a mix of different definitions may show up; TODO I don't understand this sentence
 
 * A sequence of waypoints
     * Including an optional repeatable part
@@ -106,13 +109,19 @@ When designing courses, the following aspects and data sources need to get inclu
 
 ## Mark configuration types and their carried information
 
+Mark configuration objects are used primarily to request the creation of marks in a course (in the scope of a regatta) or mark templates in a course template (usually without providing a regatta as context). They are part of a course configuration which can be used to request the creation of a course or a course template.
+
+A mark configuration may also be used in communicating to the client the result of a course or course template construction, and it can as well document a race's current course set-up to the client. Such a "responding" mark configuration cannot have the exact same positioning data structures as a "requesting" mark configuration, in particular because an existing regatta mark may have positioning data coming from anywhere, including external connectors, and as such may not be representable as a "requesting" regatta mark configuration. 
+
+TODO I find it confusing how MarkTemplate and MarkProperties may work together; when as a client I'd like to bind, say, the positioning information from a MarkProperties to a MarkTemplate when constructing a course from a CourseTemplate, how do I need to do that? Create a MarkPropertiesBasedMarkConfiguration referencing a MarkTemplate, or create a MarkTemplateBasedMarkConfiguration that has the positioning information from the MarkProperties object?
+
 * Mark template based configuration
     * Appearance is defined by a mark template only
     * Optional positioning information to be used upon mark creation
 * Regatta mark based configuration
-    * Appearance is defined by mark. Changing is not supported which means in this case, a new mark needs to be defined in any supported way as replacement for new courses, while the old definition remains for existing courses.
-    * Type is only available if the course is created in a regatta context
-    * Optional positioning information (to update the regatta mark)
+    * Appearance is defined by mark. Changing the appearance is not supported which means in this case, a new mark needs to be defined in any supported way as replacement for new courses, while the old definition remains for existing courses.
+    * can only be used if the course is created in a regatta context
+    * Optional positioning information (to update the regatta mark) TODO How do these updates work? Multiple mappings? Multiple Pings? First ping, then device? First device, then ping or other device? 
 * Mark properties based configuration
     * Appearance is defined by mark properties defaulting to the definition of the mark template if none is defined in the properties
     * Optional positioning information to be used upon mark creation (defaults to the positioning information carried by the mark properties if not given)
@@ -124,6 +133,8 @@ When designing courses, the following aspects and data sources need to get inclu
 
 
 ## Rules for the construction of mark configurations
+
+TODO For whom is this? For clients construction mark configurations for a request? Probably not. Is it explaining what the server does? If so, when?
 
 ### Last usage based matching rules
 
@@ -219,6 +230,7 @@ Said that, it is necessary to provide a distinct and complete (bijective) mappin
 New configurations may be created (e.g. by adding a new mark to the sequence or course configuration) as follows:
 * Freestyle configuration: Adding a new mark
 * Mark properties based configuration: By selecting a mark from the mark properties inventory
+* TODO Mark template based configuration?
 
 In addition, for marks used in the course sequence, a new freestyle mark configuration may be created replacing the original configuration in the role. This causes the previous configuration to remain unused but not to be deleted automatically.
 

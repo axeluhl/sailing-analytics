@@ -10,9 +10,11 @@ import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
+import com.sap.sailing.domain.coursetemplate.FixedPositioning;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sse.common.TimePoint;
@@ -62,8 +64,16 @@ public interface SharedSailingData {
      */
     MarkProperties createMarkProperties(CommonMarkProperties properties, Iterable<String> tags, Optional<UserGroup> optionalNonDefaultGroupOwnership);
     
-    MarkProperties updateMarkProperties(UUID uuid, CommonMarkProperties properties, Position position,
-            DeviceIdentifier deviceIdentifier, Iterable<String> tags);
+    MarkProperties updateMarkProperties(UUID uuid, CommonMarkProperties properties, Iterable<String> tags);
+
+    /**
+     * @param positioningInformation
+     *            if {@code null}, no update will be performed to the positioning information of the
+     *            {@link MarkProperties} object identified by {@code uuid}. To clear the positioning information, pass
+     *            in a valid, non-{@code null} {@link Positioning} object that makes an "empty" specification, such as a
+     *            {@link FixedPositioning} with a {@code null} {@link FixedPositioning#getFixedPosition()} return.
+     */
+    MarkProperties updateMarkProperties(UUID uuid, CommonMarkProperties properties, Positioning positioningInformation, Iterable<String> tags);
 
     /**
      * This overrides a previously set fixed position or associated tracking device.

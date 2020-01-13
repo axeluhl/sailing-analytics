@@ -17,12 +17,16 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationResponseAnnotation;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.WithOptionalRepeatablePart;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.shared.impl.UserGroup;
 
@@ -60,12 +64,13 @@ public interface CourseAndMarkConfigurationFactory {
     /**
      * The {@link CourseConfiguration} contains everything required to produce a new {@link CourseTemplate} from it: the
      * {@link MarkTemplate}s can be obtained by mapping all {@link CourseConfiguration#getAllMarks() mark
-     * configurations} through {@link #getOrCreateMarkTemplate(MarkConfiguration)}. The
+     * configurations} through {@link MarkConfiguration#getOptionalMarkTemplate()}. The {@link MarkConfiguration} objects
+     * contained in the result course configuration will all be of type {@link MarkTemplateBasedMarkConfiguration}. The
      * {@link WithOptionalRepeatablePart repeatable part specification} is obtained immediately from the
      * {@link CourseConfiguration}. For each {@link CourseConfiguration#getWaypoints() waypoint configuration} of the
      * {@code courseWithMarkConfiguration}, a {@link WaypointTemplate} is created where the {@link MarkTemplate}s
      * referenced by these {@link WaypointTemplates} are those obtained by
-     * {@link #getOrCreateMarkTemplate(MarkConfiguration)} for the respective {@link MarkConfiguration} objects used in
+     * {@link MarkConfiguration#getOptionalMarkTemplate()} for the respective {@link MarkConfiguration} objects used in
      * the {@link WaypointWithMarkConfiguration} objects.
      * 
      * @return a course with its mark configurations and a {@link CourseTemplate} returned by
@@ -74,15 +79,21 @@ public interface CourseAndMarkConfigurationFactory {
      *         {@link MarkConfiguration#getOptionalMarkTemplate() mark template} that is part of the
      *         {@link CourseTemplate} obtained from {@link CourseConfiguration#getOptionalCourseTemplate()}.
      */
-    CourseConfiguration createCourseTemplateAndUpdatedConfiguration(CourseConfiguration courseWithMarkConfiguration,
-            Iterable<String> tags, Optional<UserGroup> optionalNonDefaultGroupOwnership);
+    CourseConfiguration<MarkConfigurationRequestAnnotation> createCourseTemplateAndUpdatedConfiguration(
+            CourseConfiguration<MarkConfigurationRequestAnnotation> courseWithMarkConfiguration, Iterable<String> tags,
+            Optional<UserGroup> optionalNonDefaultGroupOwnership);
 
     /**
      * Creates a {@link CourseConfiguration} from a {@link CourseTemplate}. The resulting waypoint sequence is
      * consistent with the one defined in the {@link CourseTemplate}. In case no {@link Regatta} is given, the resulting
      * {@link MarkConfiguration}s will 1:1 match the {@link MarkTemplate}s of the {@link CourseTemplate}. In case a
-     * {@link Regatta} is given, the {@link MarkTemplate}s are mapped to contained {@link Mark}s if possible. Any
-     * {@link MarkTemplate} not mapped to a {@link Mark} (in case, no {@link Regatta} is given, these are just all
+     * {@link Regatta} is given, the {@link MarkTemplate}s are mapped to contained {@link Mark}s if possible.
+     * <p>
+     * 
+     * TODO how is this match-making performed? Looking at the Mark's getOriginatingMarkTemplateIdOrNull() values?
+     * <p>
+     * 
+     * Any {@link MarkTemplate} not mapped to a {@link Mark} (in case, no {@link Regatta} is given, these are just all
      * {@link MarkTemplate}s), is a candidate to be mapped to a {@link MarkProperties} of the user's inventory. Matching
      * of {@link MarkProperties} is primarily done based on associated roles for which a {@link MarkProperties} was last
      * used (see {@link MarkProperties#getLastUsedRole()}. If no matching of {@link MarkProperties} using roles is
@@ -101,20 +112,23 @@ public interface CourseAndMarkConfigurationFactory {
      *            If given, any {@link MarkProperties} that is suggested to replace a {@link MarkTemplate} of the given
      *            {@link CourseTemplate} needs to match all given tags.
      */
-    CourseConfiguration createCourseConfigurationFromTemplate(CourseTemplate courseTemplate, Regatta optionalRegatta,
-            Iterable<String> tagsToFilterMarkProperties);
+    CourseConfiguration<MarkConfigurationResponseAnnotation> createCourseConfigurationFromTemplate(
+            CourseTemplate courseTemplate, Regatta optionalRegatta, Iterable<String> tagsToFilterMarkProperties);
 
     /**
      * Creates a {@link CourseConfiguration} for a Regatta - either based on a {@link CourseBase} or independently. The
      * resulting waypoint sequence is consistent with the one defined in the {@link CourseBase}, if one is given. In
-     * case, no {@link CourseBase} is given, no waypoint sequence is constructed but existing {@link Mark}s of the
-     * {@link Regatta} are loaded as {@link MarkConfiguration}s.<br>
+     * case no {@link CourseBase} is given, no waypoint sequence is constructed but existing {@link Mark}s of the
+     * {@link Regatta} are loaded as {@link MarkConfiguration}s. All {@link MarkConfiguration} objects contained
+     * in the result will be of type {@link RegattaMarkConfiguration} as they all have been obtained from respective
+     * {@link Mark} objects that exist in the {@link Regatta}.<br>
      * 
      * If a given {@link CourseBase} is based on a {@link CourseTemplate}
      * ({@link CourseBase#getOriginatingCourseTemplateIdOrNull() references an existing and visible CourseTemplate} and
      * the waypoint sequences are compatible, the sequence is mapped back to the {@link CourseTemplate} instead of just
      * loading the {@link CourseBase}. This means, if a {@link CourseBase} was created for a {@link CourseTemplate}
-     * having a {@link RepeatablePart}, the lap count is reconstructed and the shortened waypoint sequence is used.<br>
+     * having a {@link RepeatablePart}, the lap count is reconstructed and the shortened waypoint sequence is used.
+     * TODO Really? What if during the second lap a different mark was used for the windward mark's role "1"?<br>
      * 
      * If no {@link CourseTemplate} can be obtained or the waypoint sequences aren't compatible, the
      * {@link CourseTemplate} is just ignored. No lap count and {@link RepeatablePart} is recognized and the whole
@@ -127,14 +141,14 @@ public interface CourseAndMarkConfigurationFactory {
      *            If given, any {@link MarkProperties} that is suggested to replace a {@link MarkTemplate} of the given
      *            {@link CourseTemplate} needs to match all given tags.
      */
-    CourseConfiguration createCourseConfigurationFromRegatta(CourseBase optionalCourse, Regatta regatta,
-            Iterable<String> tagsToFilterMarkProperties);
+    CourseConfiguration<MarkConfigurationResponseAnnotation> createCourseConfigurationFromRegatta(CourseBase optionalCourse, Regatta regatta,
+            TrackedRace optionalRace, Iterable<String> tagsToFilterMarkProperties);
 
     /**
      * TODO: not implemented yet
      */
     List<MarkProperties> createMarkPropertiesSuggestionsForMarkConfiguration(Regatta optionalRegatta,
-            MarkConfiguration markConfiguration, Iterable<String> tagsToFilterMarkProperties);
+            MarkConfiguration<MarkConfigurationRequestAnnotation> markConfiguration, Iterable<String> tagsToFilterMarkProperties);
 
     /**
      * Use the result to create a {@link RaceLogCourseDesignChangedEvent} or obtain the {@link ControlPoint} and
@@ -144,10 +158,9 @@ public interface CourseAndMarkConfigurationFactory {
      *            the regatta whose {@link RegattaLog} to use to define the new {@link Mark}s in.
      * @param author
      *            for {@link RegattaLogDefineMarkEvent}s and the {@link RegattaLogDeviceMappingEvent}s.
-     * @param optionalNonDefaultGroupOwnership TODO
      * @return the sequence of waypoints, obtained by expanding the
      */
     CourseBase createCourseFromConfigurationAndDefineMarksAsNeeded(Regatta regatta,
-            CourseConfiguration courseConfiguration, TimePoint timePointForDefinitionOfMarksAndDeviceMappings,
+            CourseConfiguration<MarkConfigurationRequestAnnotation> courseConfiguration, TimePoint timePointForDefinitionOfMarksAndDeviceMappings,
             AbstractLogEventAuthor author, Optional<UserGroup> optionalNonDefaultGroupOwnership);
 }

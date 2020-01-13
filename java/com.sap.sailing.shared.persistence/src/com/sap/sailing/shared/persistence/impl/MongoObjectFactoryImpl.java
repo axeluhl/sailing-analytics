@@ -21,9 +21,12 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
+import com.sap.sailing.domain.coursetemplate.FixedPositioning;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.PositioningVisitor;
+import com.sap.sailing.domain.coursetemplate.TrackingDeviceBasedPositioning;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.shared.persistence.MongoObjectFactory;
 import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
@@ -66,8 +69,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry,
                     new UpdateOptions().upsert(true));
         } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-            logger.log(Level.WARNING, "Could not load mark properties because device identifier could not be stored.",
-                    e);
+            logger.log(Level.WARNING, "Could not load mark properties because device identifier could not be stored.", e);
         }
     }
 
@@ -77,27 +79,33 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         final Document result = new Document();
         result.put(FieldNames.MARK_PROPERTIES_ID.name(), markProperties.getId().toString());
         storeCommonMarkProperties(markProperties, result);
+        if (markProperties.getPositioningInformation() != null) {
+            markProperties.getPositioningInformation().accept(new PositioningVisitor<Void>() {
+                @Override
+                public Void visit(FixedPositioning fixedPositioning) {
+                    result.put(FieldNames.MARK_PROPERTIES_FIXED_POSITION.name(),
+                            storePosition(fixedPositioning.getFixedPosition()));
+                    return null;
+                }
 
-        final Position fixedPositionOrNull = markProperties.getFixedPosition();
-        if (fixedPositionOrNull != null) {
-            result.put(FieldNames.MARK_PROPERTIES_FIXED_POSITION.name(),
-                    storePosition(markProperties.getFixedPosition()));
+                @Override
+                public Void visit(TrackingDeviceBasedPositioning trackingDeviceBasedPositioning) {
+                    try {
+                        result.put(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER.name(),
+                                storeDeviceId(deviceIdentifierServiceFinder, trackingDeviceBasedPositioning.getDeviceIdentifier()));
+                        return null;
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
         }
-
         BasicDBList tags = new BasicDBList();
         markProperties.getTags().forEach(tags::add);
         result.put(FieldNames.MARK_PROPERTIES_TAGS.name(), tags);
-
-        final DeviceIdentifier trackingDeviceIdentifierOrNull = markProperties.getTrackingDeviceIdentifier();
-        if (trackingDeviceIdentifierOrNull != null) {
-            result.put(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER.name(),
-                    storeDeviceId(deviceIdentifierServiceFinder, trackingDeviceIdentifierOrNull));
-        }
-
         Map<String, Long> lastUsedTemplateMap = markProperties.getLastUsedTemplate().entrySet().stream()
                 .collect(Collectors.toMap(k -> k.getKey().getId().toString(), v -> v.getValue().asMillis()));
         result.put(FieldNames.MARK_PROPERTIES_USED_TEMPLATE.name(), new BasicDBObject(lastUsedTemplateMap));
-
         Map<String, Long> lastUsedRoleMap = markProperties.getLastUsedRole().entrySet().stream()
                 .collect(Collectors.toMap(k -> k.getKey().getId().toString(), v -> v.getValue().asMillis()));
         result.put(FieldNames.MARK_PROPERTIES_USED_ROLE.name(), new BasicDBObject(lastUsedRoleMap));
@@ -107,21 +115,32 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public static Document storeDeviceId(
                 TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder, DeviceIdentifier device)
                                 throws TransformationException, NoCorrespondingServiceRegisteredException {
-        String type = device.getIdentifierType();
-        DeviceIdentifierMongoHandler handler = deviceIdentifierServiceFinder.findService(type);
-        com.sap.sse.common.Util.Pair<String, ? extends Object> pair = handler.serialize(device);
-        type = pair.getA();
-        Object deviceTypeSpecificId = pair.getB();
-        return new Document()
-                        .append(FieldNames.DEVICE_TYPE.name(), type)
-                        .append(FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), deviceTypeSpecificId)
-                        .append(FieldNames.DEVICE_STRING_REPRESENTATION.name(), device.getStringRepresentation());
+        final Document result;
+        if (device == null) {
+            result = null;
+        } else {
+            String type = device.getIdentifierType();
+            DeviceIdentifierMongoHandler handler = deviceIdentifierServiceFinder.findService(type);
+            com.sap.sse.common.Util.Pair<String, ? extends Object> pair = handler.serialize(device);
+            type = pair.getA();
+            Object deviceTypeSpecificId = pair.getB();
+            result = new Document()
+                            .append(FieldNames.DEVICE_TYPE.name(), type)
+                            .append(FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), deviceTypeSpecificId)
+                            .append(FieldNames.DEVICE_STRING_REPRESENTATION.name(), device.getStringRepresentation());
+        }
+        return result;
     }
 
     private Document storePosition(Position position) {
-        Document result = new Document();
-        result.put(FieldNames.LAT_DEG.name(), position.getLatDeg());
-        result.put(FieldNames.LNG_DEG.name(), position.getLngDeg());
+        final Document result;
+        if (position == null) {
+            result = null;
+        } else {
+            result = new Document();
+            result.put(FieldNames.LAT_DEG.name(), position.getLatDeg());
+            result.put(FieldNames.LNG_DEG.name(), position.getLngDeg());
+        }
         return result;
     }
 
@@ -129,7 +148,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         if (markProperties.getColor() != null) {
             result.put(FieldNames.COMMON_MARK_PROPERTIES_COLOR.name(), markProperties.getColor().getAsHtml());
         }
-
         result.put(FieldNames.COMMON_MARK_PROPERTIES_NAME.name(), markProperties.getName());
         result.put(FieldNames.COMMON_MARK_PROPERTIES_PATTERN.name(), markProperties.getPattern());
         result.put(FieldNames.COMMON_MARK_PROPERTIES_SHAPE.name(), markProperties.getShape());

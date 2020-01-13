@@ -21,7 +21,6 @@ import com.sap.sailing.domain.base.Mark;
  * information. All of those are optional in a {@link MarkProperties} object. Those present will take precedence and
  * will be merged with the properties obtained from the {@link #getOptionalMarkTemplate() mark template} and the
  * properties obtained from an existing {@link #getMark() mark}.</li>
- * <li></li>
  * </ul>
  * 
  * The combined set of properties merged according to the rules above can be obtained by calling
@@ -32,24 +31,27 @@ import com.sap.sailing.domain.base.Mark;
  * {@link Mark}, the {@link #getEffectiveProperties() effective mark properties} shall be recorded as a new
  * {@link MarkProperties} object in the inventory.
  * 
+ * @param <P>
+ *            type of the annotation used to convey positioning-related information; typical instantiations would, e.g.,
+ *            be with {@link MarkConfigurationRequestAnnotation} and {@link MarkConfigurationResponseAnnotation}.
+ * 
  * @author Axel Uhl (D043530)
  *
  */
-public interface MarkConfiguration extends ControlPointWithMarkConfiguration {
+public interface MarkConfiguration<P> extends ControlPointWithMarkConfiguration<P> {
+    <T> T accept(MarkConfigurationVisitor<T, P> visitor);
+    
     MarkTemplate getOptionalMarkTemplate();
     
     MarkProperties getOptionalMarkProperties();
     
     CommonMarkProperties getEffectiveProperties();
     
-    Positioning getEffectivePositioning();
-    
-    StorablePositioning getOptionalPositioning();
-    
-    boolean isStoreToInventory();
+    P getAnnotationInfo();
     
     @Override
-    default Iterable<MarkConfiguration> getMarkConfigurations() {
-        return Collections.singleton(this);
+    default Iterable<MarkConfiguration<P>> getMarkConfigurations() {
+        final Iterable<MarkConfiguration<P>> result = (Iterable<MarkConfiguration<P>>) Collections.singleton(this);
+        return result;
     }
 }

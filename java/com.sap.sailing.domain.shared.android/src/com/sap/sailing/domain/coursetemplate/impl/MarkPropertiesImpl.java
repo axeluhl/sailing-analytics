@@ -4,20 +4,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 
 public class MarkPropertiesImpl extends CommonMarkPropertiesImpl implements MarkProperties {
     private static final long serialVersionUID = -5588202720707030502L;
-    private DeviceIdentifier trackingDeviceIdentifier;
-    private Position fixedPosition;
+    private Positioning positioningInformation;
     private Iterable<String> tags;
     private UUID id;
 
@@ -70,23 +68,13 @@ public class MarkPropertiesImpl extends CommonMarkPropertiesImpl implements Mark
     }
 
     @Override
-    public DeviceIdentifier getTrackingDeviceIdentifier() {
-        return trackingDeviceIdentifier;
+    public Positioning getPositioningInformation() {
+        return positioningInformation;
     }
 
     @Override
-    public void setTrackingDeviceIdentifier(DeviceIdentifier trackingDeviceIdentifier) {
-        this.trackingDeviceIdentifier = trackingDeviceIdentifier;
-    }
-
-    @Override
-    public Position getFixedPosition() {
-        return fixedPosition;
-    }
-
-    @Override
-    public void setFixedPosition(Position fixedPosition) {
-        this.fixedPosition = fixedPosition;
+    public void setPositioningInformation(Positioning positioningInformation) {
+        this.positioningInformation = positioningInformation;
     }
 
     @Override

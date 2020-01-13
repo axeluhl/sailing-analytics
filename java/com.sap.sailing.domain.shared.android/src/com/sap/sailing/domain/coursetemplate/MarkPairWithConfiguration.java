@@ -9,14 +9,17 @@ import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
  * 
  * @author Axel Uhl (d043530)
  *
+ * @param <P>
+ *            type of the annotation used to convey positioning-related information; typical instantiations would, e.g.,
+ *            be with {@link MarkConfigurationRequestAnnotation} and {@link MarkConfigurationResponseAnnotation}.
  */
-public interface MarkPairWithConfiguration extends ControlPointWithMarkConfiguration {
-    MarkConfiguration getLeft();
+public interface MarkPairWithConfiguration<P> extends ControlPointWithMarkConfiguration<P> {
+    MarkConfiguration<P> getLeft();
 
-    MarkConfiguration getRight();
+    MarkConfiguration<P> getRight();
 
     @Override
-    default Iterable<MarkConfiguration> getMarkConfigurations() {
+    default Iterable<MarkConfiguration<P>> getMarkConfigurations() {
         return Arrays.asList(getLeft(), getRight());
     }
 }

@@ -7,5 +7,5 @@ package com.sap.sailing.domain.coursetemplate;
  * @author Axel Uhl (D043530)
  *
  */
-public interface MarkTemplateBasedMarkConfiguration extends MarkConfiguration {
+public interface MarkTemplateBasedMarkConfiguration<P> extends MarkConfiguration<P> {
 }

@@ -10,9 +10,11 @@ import com.sap.sailing.domain.base.Mark;
  * <p>
  * 
  * An optional non-{@code null} {@link MarkTemplate} may be returned from {@link #getOptionalMarkTemplate()} which then
- * leads to recording a usage relation between the regatta {@link Mark} and said {@link MarkTemplate}.
+ * leads to recording a usage relation between the regatta {@link Mark} and said {@link MarkTemplate}. This relation can be
+ * requested using {@link Mark#getOriginatingMarkTemplateIdOrNull()}.
  * {@link #getOptionalMarkProperties()} can reference a {@link MarkProperties} object if the {@link #getMark mark} was
- * originally created from that {@link MarkProperties} object.
+ * originally created from that {@link MarkProperties} object. Again, the resulting usage relation can be requested using
+ * {@link Mark#getOriginatingMarkPropertiesIdOrNull()}.
  * <p>
  * 
  * The {@link #getEffectiveProperties() effective properties} will contain
@@ -23,6 +25,6 @@ import com.sap.sailing.domain.base.Mark;
  * @author Axel Uhl (D043530)
  *
  */
-public interface RegattaMarkConfiguration extends MarkConfiguration {
+public interface RegattaMarkConfiguration<P> extends MarkConfiguration<P> {
     Mark getMark();
 }

@@ -221,21 +221,28 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
                 String url = DeviceMappingConstants.getDeviceMappingForRegattaLogUrl(baseUrlWithoutTrailingSlash,
                         eventIdAsString, leaderboardName, mappedItemType, mappedItemId, regattaRegisterSecret,
                         GwtUrlHelper.INSTANCE);
-                if (mailInvitationType == MailInvitationType.LEGACY) {
+                switch (mailInvitationType) {
+                case LEGACY:
                     // URL is already legacy
-                } else if (mailInvitationType == MailInvitationType.SailInsight1) {
+                    break;
+                case SailInsight1:
                     url = BranchIOConstants.SAILINSIGHT_APP_BRANCHIO + "?"
                             + BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH + "="
                             + GwtUrlHelper.INSTANCE.encodeQueryString(url);
-                } else if (mailInvitationType == MailInvitationType.SailInsight2) {
+                    break;
+                case SailInsight2:
                     url = BranchIOConstants.SAILINSIGHT_2_APP_BRANCHIO + "?"
                             + BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO_PATH + "="
                             + GwtUrlHelper.INSTANCE.encodeQueryString(url);
-                }
-                else {
+                    break;
+                case SailInsight3:
+                    url = BranchIOConstants.SAILINSIGHT_3_APP_BRANCHIO + "?"
+                            + BranchIOConstants.OPEN_REGATTA_3_APP_BRANCHIO_PATH + "="
+                            + GwtUrlHelper.INSTANCE.encodeQueryString(url);
+                    break;
+                default:
                     throw new QRCodeURLCreationException("Unknown mail invitation type: " + mailInvitationType);
                 }
-
                 return url;
             }
         });

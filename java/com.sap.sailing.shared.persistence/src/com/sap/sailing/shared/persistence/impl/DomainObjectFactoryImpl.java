@@ -103,50 +103,38 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private MarkProperties loadMarkPropertiesEntry(final Document dbObject,
             Function<UUID, MarkTemplate> markTemplateResolver,
             Function<UUID, MarkRole> markRoleResolver) {
-        //load all mandatory data
+        // load all mandatory data
         final UUID id = UUID.fromString(dbObject.getString(FieldNames.MARK_PROPERTIES_ID.name()));
         final String name = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_NAME.name());
         final String shortName = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_SHORT_NAME.name());
         final String pattern = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_PATTERN.name());
         final String shape = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_SHAPE.name());
-
         final String type = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_TYPE.name());
         final MarkType markType = MarkType.valueOf(type);
-
         final String storedColor = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_COLOR.name());
         final Color color = AbstractColor.getCssColor(storedColor);
-
-
-        final Document positionDocument = dbObject.get(FieldNames.MARK_PROPERTIES_FIXED_POSITION.name(),
-                Document.class);
+        final Document positionDocument = dbObject.get(FieldNames.MARK_PROPERTIES_FIXED_POSITION.name(), Document.class);
         final Position fixedPosition = positionDocument == null ? null : loadPosition(positionDocument);
-
         final ArrayList<?> tagsList = dbObject.get(FieldNames.MARK_PROPERTIES_TAGS.name(), ArrayList.class);
         final Collection<String> tags = tagsList.stream().map(t -> t.toString()).collect(Collectors.toList());
-
-        //all mandatory data are loaded -> create builder 
-        final MarkPropertiesBuilder builder = new MarkPropertiesBuilder(id, name, shortName, color, shape, pattern,
-                markType).withFixedPosition(fixedPosition).withTags(tags);
-
-        //load optional deviceId
-        try {
-            final Document deviceIdDocument = dbObject.get(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER.name(),
-                    Document.class);
-            final DeviceIdentifier deviceIdentifier = deviceIdDocument == null ? null
-                    : loadDeviceId(deviceIdentifierServiceFinder,
-                    deviceIdDocument);
-            builder.withDeviceId(deviceIdentifier);
-        } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-            logger.log(Level.WARNING, "Could not load deviceId for MarkProperties", e);
+        // all mandatory data are loaded -> create builder 
+        final MarkPropertiesBuilder builder = new MarkPropertiesBuilder(id, name, shortName, color, shape, pattern, markType).withTags(tags);
+        if (fixedPosition != null) {
+            builder.withFixedPosition(fixedPosition);
+        } else {
+            // load optional deviceId
+            try {
+                final Document deviceIdDocument = dbObject.get(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER.name(), Document.class);
+                final DeviceIdentifier deviceIdentifier = deviceIdDocument == null ? null : loadDeviceId(deviceIdentifierServiceFinder, deviceIdDocument);
+                builder.withDeviceId(deviceIdentifier);
+            } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                logger.log(Level.WARNING, "Could not load deviceId for MarkProperties", e);
+            }
         }
-
-        //load map of last used templates
-        final Document lastUsedTemplateObject = dbObject.get(FieldNames.MARK_PROPERTIES_USED_TEMPLATE.name(),
-                Document.class);
-
+        // load map of last used templates
+        final Document lastUsedTemplateObject = dbObject.get(FieldNames.MARK_PROPERTIES_USED_TEMPLATE.name(), Document.class);
         final Map<Object, Object> mapLastUsedTemplate = new HashMap<>();
         lastUsedTemplateObject.forEach((k, v) -> mapLastUsedTemplate.put(k, v));
-
         final Map<MarkTemplate, TimePoint> lastUsedTemplate = new HashMap<>();
         for (Map.Entry<Object, Object> e : mapLastUsedTemplate.entrySet()) {
             MarkTemplate markTemplate = markTemplateResolver.apply(UUID.fromString(e.getKey().toString()));
@@ -159,8 +147,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         }
         builder.withLastUsedTemplate(lastUsedTemplate);
-
-        //load map of last used roles
+        // load map of last used roles
         final Document lastUsedRoleObject = dbObject.get(FieldNames.MARK_PROPERTIES_USED_ROLE.name(), Document.class);
         final Map<Object, Object> mapUsedRole = new HashMap<>();
         lastUsedRoleObject.forEach((k, v) -> mapUsedRole.put(k, v));
@@ -169,7 +156,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         (Object markRoleIdObject) -> markRoleResolver.apply(UUID.fromString((String) markRoleIdObject)),
                         v -> parseTimePoint(v)));
         builder.withLastUsedRole(lastUsedRole);
-
         return builder.build();
     }
 
@@ -390,22 +376,25 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             final MarkRole markRole = markRoleResolver.apply(UUID.fromString(obj.toString()));
             if (markRole == null) {
                 logger.warning(String.format("Could not resolve MarkRole with id %s for WaypointTemplate.", obj.toString()));
-                hasParsingError = true;
-                break;
-            } else {
+                    hasParsingError = true;
+                    break;
+                } else {
                 markRoles.add(markRole);
+                }
             }
         }
         if (hasParsingError) {
-            return null;
-        }
-        // create MarkTemplate or MarkTemplatePairImpl
-        final ControlPointTemplate controlPointTemplate;
-        if (markRoles.size() == 2) {
-            controlPointTemplate = markRolePairResolver.apply(new Pair<>(name, shortName), markRoles);
+            result = null;
         } else {
-            controlPointTemplate = markRoles.get(0);
+            // create MarkTemplate or MarkTemplatePairImpl
+            final ControlPointTemplate controlPointTemplate;
+            if (markRoles.size() == 2) {
+                controlPointTemplate = markRolePairResolver.apply(new Pair<>(name, shortName), markRoles);
+            } else {
+                controlPointTemplate = markRoles.get(0);
+            }
+            result = new WaypointTemplateImpl(controlPointTemplate, passingInstruction);
         }
-        return new WaypointTemplateImpl(controlPointTemplate, passingInstruction);
+        return result;
     }
 }

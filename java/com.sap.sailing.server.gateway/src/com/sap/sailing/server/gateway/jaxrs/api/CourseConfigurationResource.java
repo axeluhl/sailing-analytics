@@ -1,11 +1,16 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,6 +35,7 @@ import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -38,16 +44,40 @@ import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.coursetemplate.ControlPointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
+import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.IsMarkRole;
+import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationResponseAnnotation;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationVisitor;
+import com.sap.sailing.domain.coursetemplate.MarkPairWithConfiguration;
+import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.impl.CourseConfigurationImpl;
+import com.sap.sailing.domain.coursetemplate.impl.FreestyleMarkConfigurationImpl;
+import com.sap.sailing.domain.coursetemplate.impl.MarkPairWithConfigurationImpl;
+import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesBasedMarkConfigurationImpl;
+import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateBasedMarkConfigurationImpl;
+import com.sap.sailing.domain.coursetemplate.impl.RegattaMarkConfigurationImpl;
+import com.sap.sailing.domain.coursetemplate.impl.WaypointWithMarkConfigurationImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CourseConfigurationBuilder;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseConfigurationJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.DeviceIdentifierJsonDeserializer;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseConfigurationJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.PlaceHolderDeviceIdentifierJsonHandler;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sun.jersey.api.client.ClientResponse.Status;
@@ -56,32 +86,32 @@ import com.sun.jersey.api.client.ClientResponse.Status;
 public class CourseConfigurationResource extends AbstractSailingServerResource {
     private static final Logger log = Logger.getLogger(CourseConfigurationResource.class.getName());
     
-    private final JsonSerializer<CourseConfiguration> courseConfigurationJsonSerializer;
-    private final Function<DeviceIdentifier, Position> positionResolver;
+    private JsonSerializer<CourseConfiguration<MarkConfigurationResponseAnnotation>> courseConfigurationJsonSerializer;
+    private final BiFunction<Regatta, DeviceIdentifier, Position> positionResolver;
+    private DeviceIdentifierJsonDeserializer deviceIdentifierDeserializer;
+    private TypeBasedServiceFinder<DeviceIdentifierJsonHandler> deviceJsonServiceFinder;
 
     public static final String FIELD_TAGS = "tags";
 
     public CourseConfigurationResource() {
-        courseConfigurationJsonSerializer = new CourseConfigurationJsonSerializer();
-        positionResolver = identifier -> {
+        positionResolver = (regatta, deviceIdentifier) -> {
             Position lastPosition = null;
             try {
-                final Map<DeviceIdentifier, Timed> lastFix = getService().getSensorFixStore()
-                        .getLastFix(Collections.singleton(identifier));
-
-                final Timed t = lastFix.get(identifier);
+                // FIXME terribly slow! Furthermore, looking up by deviceIdentifier only misses any other position sources; use regatta?
+                final Map<DeviceIdentifier, Timed> lastFix = getService().getSensorFixStore().getFixLastReceived(Collections.singleton(deviceIdentifier));
+                final Timed t = lastFix.get(deviceIdentifier);
                 if (t instanceof GPSFix) {
                     lastPosition = ((GPSFix) t).getPosition();
                 }
             } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-                log.log(Level.WARNING, "Could not load associated fix for device " + identifier, e);
+                log.log(Level.WARNING, "Could not load associated fix for device " + deviceIdentifier, e);
             }
             return lastPosition;
         };
     }
 
-    private JsonDeserializer<CourseConfiguration> getCourseConfigurationDeserializer(final Regatta regatta) {
-        return new CourseConfigurationJsonDeserializer(this.getSharedSailingData(), regatta, positionResolver);
+    private JsonDeserializer<CourseConfiguration<MarkConfigurationRequestAnnotation>> getCourseConfigurationDeserializer(final Regatta regatta) {
+        return new CourseConfigurationJsonDeserializer(this.getSharedSailingData(), getDeviceIdentifierDeserializer(), regatta);
     }
 
     private Response getBadRegattaErrorResponse(String regattaName) {
@@ -143,9 +173,10 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         // Any mark already defined in the regatta will be added to the included mark configurations as an initial
         // set of marks to be used while defining a course for the regatta.
         // An additional call to get the marks defined in the regatta isn't necessary with the described behavior of this API.
-        final CourseConfiguration courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
-                .createCourseConfigurationFromRegatta(courseBase, regatta, tags);
-        final JSONObject jsonResult = courseConfigurationJsonSerializer.serialize(courseConfiguration);
+        final CourseConfiguration<MarkConfigurationResponseAnnotation> courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
+                .createCourseConfigurationFromRegatta(courseBase, regatta, raceColumnByName.getTrackedRace(fleetByName),
+                        tags);
+        final JSONObject jsonResult = getCourseConfigurationJsonSerializer().serialize(courseConfiguration);
         return Response.ok(jsonResult.toJSONString()).build();
     }
 
@@ -167,9 +198,9 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
                 return getBadRegattaErrorResponse(regattaName);
             }
         }
-        final CourseConfiguration courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
+        final CourseConfiguration<MarkConfigurationResponseAnnotation> courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
                 .createCourseConfigurationFromTemplate(courseTemplate, regatta, tags);
-        String jsonString = courseConfigurationJsonSerializer.serialize(courseConfiguration).toJSONString();
+        String jsonString = getCourseConfigurationJsonSerializer().serialize(courseConfiguration).toJSONString();
         return Response.ok(jsonString).build();
 
     }
@@ -196,17 +227,124 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
             getBadCourseConfigurationValidationErrorResponse(
                     "Course configuration is required to be given as json object");
         }
-        final CourseConfiguration courseConfiguration = getCourseConfigurationDeserializer(regatta)
+        final CourseConfiguration<MarkConfigurationRequestAnnotation> courseConfiguration = getCourseConfigurationDeserializer(regatta)
                 .deserialize((JSONObject) parsedObject);
         final Iterable<String> tags = Arrays
                 .asList(ArrayUtils.nullToEmpty((String[]) ((JSONObject) parsedObject).get(FIELD_TAGS)));
         final Optional<UserGroup> optionalUserGroupForNonDefaultMarkPropertiesOwnership = getOptionalGroupOwnership(
                 markPropertiesGroupOwnership);
-        final CourseConfiguration courseTemplate = getService().getCourseAndMarkConfigurationFactory()
-                .createCourseTemplateAndUpdatedConfiguration(courseConfiguration, tags,
-                        optionalUserGroupForNonDefaultMarkPropertiesOwnership);
-        final String jsonString = courseConfigurationJsonSerializer.serialize(courseTemplate).toJSONString();
+        final CourseConfiguration<MarkConfigurationResponseAnnotation> courseTemplate = annotateWithLastKnownPositionInformation(
+                regatta, getService().getCourseAndMarkConfigurationFactory()
+                    .createCourseTemplateAndUpdatedConfiguration(courseConfiguration, tags,
+                        optionalUserGroupForNonDefaultMarkPropertiesOwnership));
+        final String jsonString = getCourseConfigurationJsonSerializer().serialize(courseTemplate).toJSONString();
         return Response.ok(jsonString).build();
+    }
+
+    private CourseConfiguration<MarkConfigurationResponseAnnotation> annotateWithLastKnownPositionInformation(
+            Regatta regatta, CourseConfiguration<MarkConfigurationRequestAnnotation> courseConfiguration) {
+        final Map<MarkConfiguration<MarkConfigurationRequestAnnotation>, MarkConfiguration<MarkConfigurationResponseAnnotation>> markConfigMap = new HashMap<>();
+        for (final MarkConfiguration<MarkConfigurationRequestAnnotation> sourceMark : courseConfiguration.getAllMarks()) {
+            annotateWithLastKnownPositionInformation(regatta, sourceMark, markConfigMap);
+        }
+        final Map<MarkConfiguration<MarkConfigurationResponseAnnotation>, IsMarkRole> targetAssociatedRoles = new HashMap<>();
+        for (final Entry<MarkConfiguration<MarkConfigurationRequestAnnotation>, IsMarkRole> e : courseConfiguration.getAssociatedRoles().entrySet()) {
+            targetAssociatedRoles.put(markConfigMap.get(e.getKey()), e.getValue());
+        }
+        final List<WaypointWithMarkConfiguration<MarkConfigurationResponseAnnotation>> targetWaypoints = new ArrayList<>();
+        for (final WaypointWithMarkConfiguration<MarkConfigurationRequestAnnotation> sourceWaypoint : courseConfiguration.getWaypoints()) {
+            targetWaypoints.add(new WaypointWithMarkConfigurationImpl<MarkConfigurationResponseAnnotation>(
+                    annotateWithLastKnownPositionInformation(sourceWaypoint.getControlPoint(), regatta, markConfigMap), sourceWaypoint.getPassingInstruction()));
+        }
+        return new CourseConfigurationImpl<MarkConfigurationResponseAnnotation>(
+                courseConfiguration.getOptionalCourseTemplate(),
+                new HashSet<>(markConfigMap.values()), targetAssociatedRoles, targetWaypoints,
+                courseConfiguration.getRepeatablePart(), courseConfiguration.getNumberOfLaps(),
+                courseConfiguration.getName(), courseConfiguration.getOptionalImageURL());
+    }
+
+    private ControlPointWithMarkConfiguration<MarkConfigurationResponseAnnotation> annotateWithLastKnownPositionInformation(
+            ControlPointWithMarkConfiguration<MarkConfigurationRequestAnnotation> controlPoint, Regatta regatta,
+            Map<MarkConfiguration<MarkConfigurationRequestAnnotation>, MarkConfiguration<MarkConfigurationResponseAnnotation>> markConfigMap) {
+        final ControlPointWithMarkConfiguration<MarkConfigurationResponseAnnotation> result;
+        if (controlPoint instanceof MarkPairWithConfiguration) {
+            final MarkPairWithConfiguration<MarkConfigurationRequestAnnotation> sourceMarkPair = (MarkPairWithConfiguration<MarkConfigurationRequestAnnotation>) controlPoint;
+            result = new MarkPairWithConfigurationImpl<MarkConfigurationResponseAnnotation>(sourceMarkPair.getName(),
+                    annotateWithLastKnownPositionInformation(regatta, sourceMarkPair.getLeft(), markConfigMap),
+                    annotateWithLastKnownPositionInformation(regatta, sourceMarkPair.getRight(), markConfigMap),
+                    sourceMarkPair.getShortName());
+        } else if (controlPoint instanceof MarkConfiguration) {
+            result = annotateWithLastKnownPositionInformation(regatta,
+                    ((MarkConfiguration<MarkConfigurationRequestAnnotation>) controlPoint), markConfigMap);
+        } else {
+            throw new IllegalStateException("Unknown ControlPointWithMarkConfiguration subclass: "+controlPoint.getClass().getName());
+        }
+        return result;
+    }
+
+    /**
+     * @param markConfigMap
+     *            used for look-up of {@code sourceMark}; if found, the value is returned; otherwise, a new value is
+     *            computed, entered into {@code markConfigMap} and the value is returned.
+     */
+    private MarkConfiguration<MarkConfigurationResponseAnnotation> annotateWithLastKnownPositionInformation(
+            Regatta regatta, MarkConfiguration<MarkConfigurationRequestAnnotation> sourceMark,
+            Map<MarkConfiguration<MarkConfigurationRequestAnnotation>, MarkConfiguration<MarkConfigurationResponseAnnotation>> markConfigMap) {
+        return markConfigMap.computeIfAbsent(sourceMark,
+                sm->sm.accept(new MarkConfigurationVisitor<MarkConfiguration<MarkConfigurationResponseAnnotation>, MarkConfigurationRequestAnnotation>() {
+            @Override
+            public MarkConfiguration<MarkConfigurationResponseAnnotation> visit(
+                    FreestyleMarkConfiguration<MarkConfigurationRequestAnnotation> markConfiguration) {
+                return new FreestyleMarkConfigurationImpl<MarkConfigurationResponseAnnotation>(markConfiguration.getOptionalMarkTemplate(),
+                        markConfiguration.getOptionalMarkProperties(), markConfiguration.getFreestyleProperties(),
+                        getLastKnownPositionInformation(markConfiguration.getAnnotationInfo(),
+                            /* regatta mark */ null, positionResolver, regatta));
+            }
+
+            @Override
+            public MarkConfiguration<MarkConfigurationResponseAnnotation> visit(
+                    MarkPropertiesBasedMarkConfiguration<MarkConfigurationRequestAnnotation> markConfiguration) {
+                        return new MarkPropertiesBasedMarkConfigurationImpl<MarkConfigurationResponseAnnotation>(
+                                markConfiguration.getOptionalMarkProperties(),
+                                markConfiguration.getOptionalMarkTemplate(),
+                                getLastKnownPositionInformation(markConfiguration.getAnnotationInfo(), /* regattaMark */ null, positionResolver, regatta));
+                    }
+
+            @Override
+            public MarkConfiguration<MarkConfigurationResponseAnnotation> visit(
+                    MarkTemplateBasedMarkConfiguration<MarkConfigurationRequestAnnotation> markConfiguration) {
+                return new MarkTemplateBasedMarkConfigurationImpl<MarkConfigurationResponseAnnotation>(
+                        markConfiguration.getOptionalMarkTemplate(),
+                        getLastKnownPositionInformation(markConfiguration.getAnnotationInfo(), /* regattaMark */ null, positionResolver, regatta));
+            }
+
+            @Override
+            public MarkConfiguration<MarkConfigurationResponseAnnotation> visit(
+                    RegattaMarkConfiguration<MarkConfigurationRequestAnnotation> markConfiguration) {
+                return new RegattaMarkConfigurationImpl<MarkConfigurationResponseAnnotation>(
+                        markConfiguration.getMark(), getLastKnownPositionInformation(markConfiguration.getAnnotationInfo(),
+                                markConfiguration.getMark(), positionResolver, regatta), 
+                        markConfiguration.getOptionalMarkTemplate(), markConfiguration.getOptionalMarkProperties());
+            }
+        }));
+    }
+
+    private MarkConfigurationResponseAnnotation getLastKnownPositionInformation(MarkConfigurationRequestAnnotation positioningAnnotation,
+            Mark regattaMark, BiFunction<Regatta, DeviceIdentifier, Position> positionResolver, Regatta regatta) {
+        final MarkConfigurationResponseAnnotation result;
+        final Function<DeviceIdentifier, Position> positionResolverFromDeviceIdentifier = deviceIdentifier->positionResolver.apply(regatta, deviceIdentifier);
+        if (regattaMark == null) {
+            if (positioningAnnotation != null) {
+                result = CourseConfigurationBuilder.getPositioningIfAvailable(positioningAnnotation.getOptionalPositioning(),
+                        positionResolverFromDeviceIdentifier);
+            } else {
+                result = null;
+            }
+        } else {
+            result = CourseConfigurationBuilder.getPositioningIfAvailable(regatta, /* optionalRace */ null, regattaMark,
+                    positionResolverFromDeviceIdentifier);
+        }
+        return result;
     }
 
     private Optional<UserGroup> getOptionalGroupOwnership(String optionalGroupName) {
@@ -226,8 +364,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
     public Response createCourse(@PathParam("regattaName") String regattaName,
             @QueryParam("markPropertiesGroupOwnership") String markPropertiesGroupOwnership,
             @PathParam("raceColumn") String raceColumn, @PathParam("fleet") String fleet,
-            String json) throws Exception {
-        if (json == null || json.isEmpty()) {
+            String jsonCourseConfiguration) throws Exception {
+        if (jsonCourseConfiguration == null || jsonCourseConfiguration.isEmpty()) {
             return getBadCourseConfigurationValidationErrorResponse(
                     "Course configuration is required to be given as json object");
         }
@@ -245,12 +383,12 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         if (raceColumnByName == null || fleetByName == null) {
             return getBadRaceErrorResponse(regattaName, raceColumn, fleet);
         }
-        final Object parsedObject = new JSONParser().parse(json);
+        final Object parsedObject = new JSONParser().parse(jsonCourseConfiguration);
         if (parsedObject == null || !(parsedObject instanceof JSONObject)) {
             getBadCourseConfigurationValidationErrorResponse(
                     "Course configuration is required to be given as json object");
         }
-        final CourseConfiguration courseConfiguration = getCourseConfigurationDeserializer(regatta)
+        final CourseConfiguration<MarkConfigurationRequestAnnotation> courseConfiguration = getCourseConfigurationDeserializer(regatta)
                 .deserialize((JSONObject) parsedObject);
         final TimePoint timestampForLogEntries = MillisecondsTimePoint.now();
         final Optional<UserGroup> optionalUserGroupForNonDefaultMarkPropertiesOwnership = getOptionalGroupOwnership(
@@ -261,9 +399,32 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         final RaceLog raceLog = raceColumnByName.getRaceLog(fleetByName);
         raceLog.add(new RaceLogCourseDesignChangedEventImpl(timestampForLogEntries, getService().getServerAuthor(),
                 raceLog.getCurrentPassId(), course, CourseDesignerMode.BY_MARKS));
-        final CourseConfiguration courseConfigurationResult = getService().getCourseAndMarkConfigurationFactory()
-                .createCourseConfigurationFromRegatta(course, regatta, /* tagsToFilterMarkProperties */ null);
-        final String jsonString = courseConfigurationJsonSerializer.serialize(courseConfigurationResult).toJSONString();
+        final CourseConfiguration<MarkConfigurationResponseAnnotation> courseConfigurationResult = getService().getCourseAndMarkConfigurationFactory()
+                .createCourseConfigurationFromRegatta(course, regatta, raceColumnByName.getTrackedRace(fleetByName),
+                        /* tagsToFilterMarkProperties */ null);
+        final String jsonString = getCourseConfigurationJsonSerializer().serialize(courseConfigurationResult).toJSONString();
         return Response.ok(jsonString).build();
+    }
+
+    private synchronized JsonSerializer<CourseConfiguration<MarkConfigurationResponseAnnotation>> getCourseConfigurationJsonSerializer() {
+        if (courseConfigurationJsonSerializer == null) {
+            courseConfigurationJsonSerializer = new CourseConfigurationJsonSerializer();
+        }
+        return courseConfigurationJsonSerializer;
+    }
+
+    private DeviceIdentifierJsonDeserializer getDeviceIdentifierDeserializer() {
+        if (deviceIdentifierDeserializer == null) {
+            deviceIdentifierDeserializer = new DeviceIdentifierJsonDeserializer(getDeviceJsonServiceFinder());
+        }
+        return deviceIdentifierDeserializer;
+    }
+
+    private synchronized TypeBasedServiceFinder<DeviceIdentifierJsonHandler> getDeviceJsonServiceFinder() {
+        if (deviceJsonServiceFinder == null) {
+            deviceJsonServiceFinder = getServiceFinderFactory().createServiceFinder(DeviceIdentifierJsonHandler.class);
+            deviceJsonServiceFinder.setFallbackService(new PlaceHolderDeviceIdentifierJsonHandler());
+        }
+        return deviceJsonServiceFinder;
     }
 }

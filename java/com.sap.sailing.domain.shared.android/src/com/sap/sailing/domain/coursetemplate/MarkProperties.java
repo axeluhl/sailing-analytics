@@ -4,9 +4,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.NamedWithUUID;
@@ -53,41 +51,18 @@ public interface MarkProperties extends CommonMarkProperties, NamedWithUUID, Has
     void setShortName(String shortName);
 
     /**
-     * If not {@code null} then a device identifier that can be used to create a device mapping
-     * in the scope of a regatta such that the tracking device with the ID returned will be used
-     * to track the mark to which these properties are applied. No timing for any device mapping is
-     * provided here. It is up to the process of creating and configuring the regatta marks to decide
-     * about device mapping time intervals.
+     * {@code null} or a specification as to how to obtain position data for the mark; could, e.g., be
+     * a fixed position specification or the specification of a tracking device identifier. See the
+     * specializations of {@link Positioning} for an overview.
      */
-    DeviceIdentifier getTrackingDeviceIdentifier();
-
-    /**
-     * Returns a fixed position to be used to "ping" the mark to which these properties are applied; or {@code null} in
-     * case the mark is not at a fixed position or no position is known. In particular, it is considered an error to
-     * provide a non-{@code null} fixed position when a non-{@code null} {@link #getTrackingDeviceIdentifier() tracking
-     * device identifier} has been provided for these mark properties.
-     */
-    Position getFixedPosition();
-
-    /**
-     * Updates this properties object such that the next call to {@link #getTrackingDeviceIdentifier()} returns the
-     * {@code deviceIdentifier} provided to this call. The {@code deviceIdentifier} may be {@code null}, meaning that no
-     * default tracking device mapping is desired for marks configured with these properties. It is an error, and an
-     * {@link IllegalStateException} will be thrown, if a non-{@code null} {@link #getFixedPosition() fixed position} is
-     * currently defined by these properties because a mark cannot have a fixed position and be tracked by a device at
-     * the same time.
-     */
-    void setTrackingDeviceIdentifier(DeviceIdentifier deviceIdentifier);
+    Positioning getPositioningInformation();
     
     /**
-     * Provides a fixed position to be set by means of a "ping" when these properties are applied to a mark. The
-     * {@code fixedPosition} parameter can be {@code null}, meaning that no fixed position is known (anymore). It is an
-     * error, and an {@link IllegalStateException} will be thrown, if a non-{@code null}
-     * {@link #getTrackingDeviceIdentifier() tracking device identifier} is currently defined for these mark properties
-     * because a mark cannot have a fixed position and be tracked by a device at the same time.
+     * Updates this properties object such that the next call to {@link #getPositioningInformation()} returns the
+     * {@code positioningInformation} object provided to this call.
      */
-    void setFixedPosition(Position fixedPosition);
-
+    void setPositioningInformation(Positioning positioningInformation);
+    
     Map<MarkTemplate, TimePoint> getLastUsedTemplate();
 
     Map<MarkRole, TimePoint> getLastUsedRole();

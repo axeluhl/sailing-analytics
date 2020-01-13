@@ -4,15 +4,16 @@ import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkPairWithConfiguration;
 import com.sap.sse.common.impl.NamedImpl;
 
-public class MarkPairWithConfigurationImpl extends NamedImpl implements MarkPairWithConfiguration {
+public class MarkPairWithConfigurationImpl<P>
+        extends NamedImpl implements MarkPairWithConfiguration<P> {
     private static final long serialVersionUID = 159552983009183991L;
     
-    private final MarkConfiguration right;
-    private final MarkConfiguration left;
+    private final MarkConfiguration<P> right;
+    private final MarkConfiguration<P> left;
 
     private final String shortName;
 
-    public MarkPairWithConfigurationImpl(String name, MarkConfiguration left, MarkConfiguration right,
+    public MarkPairWithConfigurationImpl(String name, MarkConfiguration<P> left, MarkConfiguration<P> right,
             String shortName) {
         super(name);
         this.left = left;
@@ -26,12 +27,12 @@ public class MarkPairWithConfigurationImpl extends NamedImpl implements MarkPair
     }
 
     @Override
-    public MarkConfiguration getLeft() {
+    public MarkConfiguration<P> getLeft() {
         return left;
     }
 
     @Override
-    public MarkConfiguration getRight() {
+    public MarkConfiguration<P> getRight() {
         return right;
     }
 
@@ -53,7 +54,7 @@ public class MarkPairWithConfigurationImpl extends NamedImpl implements MarkPair
             return false;
         if (getClass() != obj.getClass())
             return false;
-        MarkPairWithConfigurationImpl other = (MarkPairWithConfigurationImpl) obj;
+        MarkPairWithConfigurationImpl<?> other = (MarkPairWithConfigurationImpl<?>) obj;
         if (getName() == null) {
             if (other.getName() != null)
                 return false;

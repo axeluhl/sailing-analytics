@@ -1,5 +1,10 @@
 package com.sap.sailing.domain.coursetemplate;
 
-public interface FixedPositioning extends StorablePositioning {
+import com.sap.sailing.domain.common.Position;
 
+public interface FixedPositioning extends Positioning {
+    Position getFixedPosition();
+    default <T> T accept(PositioningVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
 }

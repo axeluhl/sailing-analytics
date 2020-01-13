@@ -9,7 +9,7 @@ package com.sap.sailing.domain.coursetemplate;
  * @author Axel Uhl (D043530)
  *
  */
-public interface FreestyleMarkConfiguration extends MarkConfiguration {
+public interface FreestyleMarkConfiguration<P> extends MarkConfiguration<P> {
     CommonMarkProperties getFreestyleProperties();
 
     /**

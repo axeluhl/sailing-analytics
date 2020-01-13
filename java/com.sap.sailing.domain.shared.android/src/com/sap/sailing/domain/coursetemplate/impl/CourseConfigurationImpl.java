@@ -12,15 +12,15 @@ import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 
-public class CourseConfigurationImpl extends CourseConfigurationBaseImpl<IsMarkRole> implements CourseConfiguration {
-
+public class CourseConfigurationImpl<P> extends CourseConfigurationBaseImpl<IsMarkRole, P> implements CourseConfiguration<P> {
     private static final long serialVersionUID = 4471259140392773170L;
 
-    public CourseConfigurationImpl(CourseTemplate optionalCourseTemplate, Set<MarkConfiguration> markConfigurations,
-            Map<MarkConfiguration, IsMarkRole> associatedRoles, List<WaypointWithMarkConfiguration> waypoints,
+    public CourseConfigurationImpl(CourseTemplate optionalCourseTemplate,
+            Set<MarkConfiguration<P>> markConfigurations,
+            Map<MarkConfiguration<P>, IsMarkRole> associatedRoles,
+            List<WaypointWithMarkConfiguration<P>> waypoints,
             RepeatablePart optionalRepeatablePart, Integer numberOfLaps, String name, URL optionalImageURL) {
         super(optionalCourseTemplate, markConfigurations, associatedRoles, waypoints, optionalRepeatablePart,
                 numberOfLaps, name, optionalImageURL);
     }
-
 }

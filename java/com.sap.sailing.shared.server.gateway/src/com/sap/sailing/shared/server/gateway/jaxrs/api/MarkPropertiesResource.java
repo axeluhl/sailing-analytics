@@ -26,21 +26,26 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBuilder;
+import com.sap.sailing.domain.coursetemplate.Positioning;
+import com.sap.sailing.domain.coursetemplate.impl.FixedPositioningImpl;
+import com.sap.sailing.domain.coursetemplate.impl.TrackingDeviceBasedPositioningImpl;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkPropertiesJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.PlaceHolderDeviceIdentifierJsonHandler;
 import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.impl.RGBColor;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/v1/markproperties")
 public class MarkPropertiesResource extends AbstractSailingServerResource {
-    
-    private final JsonSerializer<MarkProperties> markPropertiesSerializer;
+    private JsonSerializer<MarkProperties> markPropertiesSerializer;
     
     public MarkPropertiesResource() {
-        markPropertiesSerializer = new MarkPropertiesJsonSerializer();
     }
 
     private Response getBadMarkPropertiesValidationErrorResponse(String errorText) {
@@ -58,7 +63,7 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         Iterable<MarkProperties> markPropertiesList = getSharedSailingData().getAllMarkProperties(tags);
         JSONArray result = new JSONArray();
         for (MarkProperties markProperties : markPropertiesList) {
-            result.add(markPropertiesSerializer.serialize(markProperties));
+            result.add(getMarkPropertiesSerializer().serialize(markProperties));
         }
         final String json = result.toJSONString();
         return Response.ok(json).build();
@@ -72,7 +77,7 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         if (markProperties == null) {
             return getMarkPropertiesNotFoundErrorResponse();
         }
-        final JSONObject serializedMarkedProperties = markPropertiesSerializer.serialize(markProperties);
+        final JSONObject serializedMarkedProperties = getMarkPropertiesSerializer().serialize(markProperties);
         final String json = serializedMarkedProperties.toJSONString();
         return Response.ok(json).build();
     }
@@ -124,7 +129,7 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
             final Position fixedPosition = new DegreePosition(latDeg, lonDeg);
             getSharedSailingData().setFixedPositionForMarkProperties(createdMarkProperties, fixedPosition);
         }
-        final JSONObject serializedMarkedProperties = markPropertiesSerializer.serialize(createdMarkProperties);
+        final JSONObject serializedMarkedProperties = getMarkPropertiesSerializer().serialize(createdMarkProperties);
         final String json = serializedMarkedProperties.toJSONString();
         return Response.ok(json).build();
     }
@@ -147,7 +152,7 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
             final Position fixedPosition = new DegreePosition(latDeg, lonDeg);
             getSharedSailingData().setFixedPositionForMarkProperties(markProperties, fixedPosition);
         }
-        final JSONObject serializedMarkedProperties = markPropertiesSerializer.serialize(markProperties);
+        final JSONObject serializedMarkedProperties = getMarkPropertiesSerializer().serialize(markProperties);
         final String json = serializedMarkedProperties.toJSONString();
         return Response.ok(json).build();
     }
@@ -192,17 +197,17 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         }
         final MarkPropertiesBuilder markPropertiesBuilder = new MarkPropertiesBuilder(/* id */ null, name, effectiveShortName,
                 color, shape, pattern, type);
-        getSharedSailingData().updateMarkProperties(markPropertiesUUID, markPropertiesBuilder.build(), null, null, tags);
-        
+        final Positioning positioningInformation;
         if (deviceUuid != null && deviceUuid.length() > 0) {
-            final DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
-            getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(markProperties, device);
-        }
-        if (latDeg != null && lonDeg != null) {
+            positioningInformation = new TrackingDeviceBasedPositioningImpl(new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid)));
+        } else if (latDeg != null && lonDeg != null) {
             final Position fixedPosition = new DegreePosition(latDeg, lonDeg);
-            getSharedSailingData().setFixedPositionForMarkProperties(markProperties, fixedPosition);
+            positioningInformation = new FixedPositioningImpl(fixedPosition);
+        } else {
+            positioningInformation = null;
         }
-        final JSONObject serializedMarkedProperties = markPropertiesSerializer.serialize(markProperties);
+        getSharedSailingData().updateMarkProperties(markPropertiesUUID, markPropertiesBuilder.build(), positioningInformation, tags);
+        final JSONObject serializedMarkedProperties = getMarkPropertiesSerializer().serialize(markProperties);
         final String json = serializedMarkedProperties.toJSONString();
         return Response.ok(json).build();
     }
@@ -216,5 +221,15 @@ public class MarkPropertiesResource extends AbstractSailingServerResource {
         }
         getSharedSailingData().deleteMarkProperties(markProperties);
         return Response.ok().build();
+    }
+
+    private synchronized JsonSerializer<MarkProperties> getMarkPropertiesSerializer() {
+        if (markPropertiesSerializer == null) {
+            final TypeBasedServiceFinder<DeviceIdentifierJsonHandler> deviceJsonServiceFinder = getServiceFinderFactory()
+                    .createServiceFinder(DeviceIdentifierJsonHandler.class);
+            deviceJsonServiceFinder.setFallbackService(new PlaceHolderDeviceIdentifierJsonHandler());
+            markPropertiesSerializer = new MarkPropertiesJsonSerializer(new DeviceIdentifierJsonSerializer(deviceJsonServiceFinder));
+        }
+        return markPropertiesSerializer;
     }
 }

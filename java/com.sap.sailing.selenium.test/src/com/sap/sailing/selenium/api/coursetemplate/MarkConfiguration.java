@@ -1,9 +1,17 @@
 package com.sap.sailing.selenium.api.coursetemplate;
 
-import java.util.UUID;
+import static org.junit.Assert.assertEquals;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.selenium.api.core.JsonWrapper;
 
 public class MarkConfiguration extends JsonWrapper {
@@ -16,8 +24,12 @@ public class MarkConfiguration extends JsonWrapper {
     private static final String FIELD_EFFECTIVE_PROPERTIES = "effectiveProperties";
     private static final String FIELD_MARK_ID = "markId";
     private static final String FIELD_POSITIONING = "positioning";
-    private static final String FIELD_EFFECTIVE_POSITIONING = "effectivePositioning";
     private static final String FIELD_STORE_TO_INVENTORY = "storeToInventory";
+    public static final String FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_MAPPINGS = "trackingDevices";
+    private static final String FIELD_MARK_CONFIGURATION_LAST_KNOWN_POSITION = "lastKnownPosition";
+    private static final String FIELD_LATITUDE_DEG = "latitude_deg";
+    private static final String FIELD_LONGITUDE_DEG = "longitude_deg";
+
 
     public MarkConfiguration(final JSONObject json) {
         super(json);
@@ -84,7 +96,7 @@ public class MarkConfiguration extends JsonWrapper {
     public void setFixedPosition(double latDeg, double lngDeg) {
         getJson().put(FIELD_POSITIONING, new Positioning(latDeg, lngDeg).getJson());
     }
-
+    
     public Positioning getPositioning() {
         final JSONObject positioningObject = (JSONObject) get(FIELD_POSITIONING);
         return positioningObject == null ? null : new Positioning(positioningObject);
@@ -94,9 +106,29 @@ public class MarkConfiguration extends JsonWrapper {
         getJson().put(FIELD_POSITIONING, null);
     }
 
-    public Positioning getEffectivePositioning() {
-        final JSONObject positioningJson = (JSONObject) get(FIELD_EFFECTIVE_POSITIONING);
-        return positioningJson != null ? new Positioning(positioningJson) : null;
+    public List<DeviceMapping> getDeviceMappings() {
+        final JSONArray deviceMappings = get(FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_MAPPINGS);
+        final List<DeviceMapping> result;
+        if (deviceMappings == null) {
+            result = Collections.emptyList();
+        } else {
+            result = deviceMappings.stream().map(m -> new DeviceMapping((JSONObject) m)).collect(Collectors.toList());
+        }
+        
+        return result;
+    }
+    
+    public DeviceMapping getSingleDeviceMapping() {
+        final List<DeviceMapping> deviceMappings = getDeviceMappings();
+        assertEquals(1, deviceMappings.size());
+        return deviceMappings.get(0);
+    }
+    
+    public Position getLastKnownPosition() {
+        final JSONObject positionJson = (JSONObject) get(FIELD_MARK_CONFIGURATION_LAST_KNOWN_POSITION);
+        return positionJson != null
+                ? new DegreePosition(((Number) positionJson.get(FIELD_LATITUDE_DEG)).doubleValue(),
+                        ((Number) positionJson.get(FIELD_LONGITUDE_DEG)).doubleValue()) : null;
     }
 
     public UUID getMarkTemplateId() {
@@ -129,6 +161,10 @@ public class MarkConfiguration extends JsonWrapper {
     public UUID getMarkPropertiesId() {
         final String markPropertiesId = (String) get(FIELD_MARK_PROPERTIES_ID);
         return markPropertiesId != null ? UUID.fromString(markPropertiesId) : null;
+    }
+    
+    public void setMarkPropertiesId(UUID markPropertiesId) {
+        getJson().put(FIELD_MARK_PROPERTIES_ID, markPropertiesId.toString());
     }
 
     public UUID getMarkId() {

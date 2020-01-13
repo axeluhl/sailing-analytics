@@ -29,12 +29,15 @@ import com.sap.sailing.domain.coursetemplate.MarkPropertiesBuilder;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate.MarkTemplateResolver;
+import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.impl.CourseTemplateImpl;
+import com.sap.sailing.domain.coursetemplate.impl.FixedPositioningImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkRoleImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateImpl;
+import com.sap.sailing.domain.coursetemplate.impl.TrackingDeviceBasedPositioningImpl;
 import com.sap.sailing.shared.persistence.DomainObjectFactory;
 import com.sap.sailing.shared.persistence.MongoObjectFactory;
 import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
@@ -66,7 +69,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
 
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
     private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
-    
+
     // Replication related methods and fields
     private final ConcurrentHashMap<OperationExecutionListener<ReplicatingSharedSailingData>, OperationExecutionListener<ReplicatingSharedSailingData>> operationExecutionListeners = new ConcurrentHashMap<>();
     private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
@@ -93,7 +96,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
 
     private void load() {
-        // load mark templates and mark roles  before mark properties and course templates
+        // load mark templates and mark roles before mark properties and course templates
         domainObjectFactory.loadAllMarkTemplates().forEach(m -> markTemplatesById.put(m.getId(), m));
         domainObjectFactory.loadAllMarkRoles().forEach(m -> markRolesById.put(m.getId(), m));
         domainObjectFactory.loadAllMarkProperties(markTemplatesById::get, markRolesById::get)
@@ -169,21 +172,19 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         return markRolesById.values().stream().filter(getSecurityService()::hasCurrentUserReadPermission)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     public MarkRole createMarkRole(final String name, String shortName) {
         final UUID idOfNewMarkRole = UUID.randomUUID();
-        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.MARK_ROLE,
-                MarkRole.getTypeRelativeObjectIdentifier(idOfNewMarkRole),
-                idOfNewMarkRole + "/" + name, () -> {
+        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.MARK_ROLE,
+                MarkRole.getTypeRelativeObjectIdentifier(idOfNewMarkRole), idOfNewMarkRole + "/" + name, () -> {
                     final UUID idOfNewMarkRoleForReplication = idOfNewMarkRole;
                     final String nameForReplication = name;
                     apply(s -> s.internalCreateMarkRole(idOfNewMarkRoleForReplication, nameForReplication, shortName));
                 });
         return getMarkRoleById(idOfNewMarkRole);
     }
-    
+
     @Override
     public Void internalCreateMarkRole(UUID idOfNewMarkRole, String name, String shortName) {
         final MarkRole markRole = new MarkRoleImpl(idOfNewMarkRole, name, shortName);
@@ -191,7 +192,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         markRolesById.put(markRole.getId(), markRole);
         return null;
     }
-    
+
     @Override
     public MarkRole getMarkRoleById(UUID id) {
         if (id == null) {
@@ -205,12 +206,13 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
 
     @Override
-    public MarkProperties createMarkProperties(CommonMarkProperties properties, Iterable<String> tags, Optional<UserGroup> optionalNonDefaultGroupOwnership) {
+    public MarkProperties createMarkProperties(CommonMarkProperties properties, Iterable<String> tags,
+            Optional<UserGroup> optionalNonDefaultGroupOwnership) {
         final UUID idOfNewMarkProperties = UUID.randomUUID();
-        optionalNonDefaultGroupOwnership.ifPresent(userGroup->
-            getSecurityService().setOwnership(SecuredDomainType.MARK_PROPERTIES.getQualifiedObjectIdentifier(
-                    MarkProperties.getTypeRelativeObjectIdentifier(idOfNewMarkProperties)),
-                    getSecurityService().getCurrentUser(), userGroup));
+        optionalNonDefaultGroupOwnership.ifPresent(userGroup -> getSecurityService().setOwnership(
+                SecuredDomainType.MARK_PROPERTIES.getQualifiedObjectIdentifier(
+                        MarkProperties.getTypeRelativeObjectIdentifier(idOfNewMarkProperties)),
+                getSecurityService().getCurrentUser(), userGroup));
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.MARK_PROPERTIES,
                 MarkProperties.getTypeRelativeObjectIdentifier(idOfNewMarkProperties),
@@ -218,37 +220,45 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
                     final UUID idOfNewMarkPropertiesForReplication = idOfNewMarkProperties;
                     final CommonMarkProperties propertiesForReplication = properties;
                     final Iterable<String> tagsForReplication = tags;
-                    apply(s -> s.internalCreateMarkProperties(idOfNewMarkPropertiesForReplication, propertiesForReplication, tagsForReplication));
+                    apply(s -> s.internalCreateMarkProperties(idOfNewMarkPropertiesForReplication,
+                            propertiesForReplication, tagsForReplication));
                 });
         return getMarkPropertiesById(idOfNewMarkProperties);
     }
 
     @Override
-    public MarkProperties updateMarkProperties(UUID uuid, CommonMarkProperties properties, Position position,
-            DeviceIdentifier deviceIdentifier, Iterable<String> tags) {
+    public MarkProperties updateMarkProperties(UUID uuid, CommonMarkProperties properties,
+            Positioning positioningInformation, Iterable<String> tags) {
+        final MarkProperties markProperties = updateMarkProperties(uuid, properties, tags);
+        if (positioningInformation != null && markProperties != properties) { // no update required if same object
+            apply(s -> internalSetPositioningInformationForMarkProperties(uuid, positioningInformation));
+        }
+        return getMarkPropertiesById(uuid);
+    }
+
+    @Override
+    public MarkProperties updateMarkProperties(UUID uuid, CommonMarkProperties properties, Iterable<String> tags) {
         final MarkProperties markProperties = markPropertiesById.get(uuid);
         if (markProperties == null) {
             throw new NullPointerException(String.format("Could not find mark properties with id %s", uuid.toString()));
         }
         if (markProperties != properties) { // no update required if same object
             getSecurityService().checkCurrentUserUpdatePermission(markProperties);
-            apply(s -> internalUpdateMarkProperties(uuid, properties, position, deviceIdentifier, tags));
+            apply(s -> internalUpdateMarkProperties(uuid, properties, tags));
         }
         return getMarkPropertiesById(uuid);
     }
 
     @Override
     public Void internalUpdateMarkProperties(UUID idOfMarkProperties, CommonMarkProperties properties,
-            Position position, DeviceIdentifier deviceIdentifier, Iterable<String> tags) {
+            Iterable<String> tags) {
         final MarkPropertiesImpl markProperties = (MarkPropertiesImpl) markPropertiesById.get(idOfMarkProperties);
         if (markProperties != properties) { // no update required if same object
             markProperties.setName(properties.getName());
             markProperties.setColor(properties.getColor());
-            markProperties.setFixedPosition(position);
             markProperties.setPattern(properties.getPattern());
             markProperties.setShape(properties.getShape());
             markProperties.setShortName(properties.getShortName());
-            markProperties.setTrackingDeviceIdentifier(deviceIdentifier);
             markProperties.setType(properties.getType());
             markProperties.setTags(tags);
             mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
@@ -271,16 +281,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     @Override
     public void setFixedPositionForMarkProperties(final MarkProperties markProperties, final Position position) {
         final UUID markPropertiesUUID = markProperties.getId();
-        apply(s -> s.internalSetFixedPositionForMarkProperties(markPropertiesUUID, position));
-    }
-
-    @Override
-    public Void internalSetFixedPositionForMarkProperties(UUID markPropertiesId, Position position) {
-        final MarkProperties markProperties = markPropertiesById.get(markPropertiesId);
-        markProperties.setTrackingDeviceIdentifier(null);
-        markProperties.setFixedPosition(position);
-        mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
-        return null;
+        apply(s -> s.internalSetPositioningInformationForMarkProperties(markPropertiesUUID, new FixedPositioningImpl(position)));
     }
 
     @Override
@@ -301,15 +302,15 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     public void setTrackingDeviceIdentifierForMarkProperties(final MarkProperties markProperties,
             final DeviceIdentifier deviceIdentifier) {
         final UUID markPropertiesUUID = markProperties.getId();
-        apply(s -> s.internalSetTrackingDeviceIdentifierForMarkProperties(markPropertiesUUID, deviceIdentifier));
+        apply(s -> s.internalSetPositioningInformationForMarkProperties(markPropertiesUUID,
+                new TrackingDeviceBasedPositioningImpl(deviceIdentifier)));
     }
 
     @Override
-    public Void internalSetTrackingDeviceIdentifierForMarkProperties(UUID markPropertiesId,
-            DeviceIdentifier deviceIdentifier) {
+    public Void internalSetPositioningInformationForMarkProperties(UUID markPropertiesId,
+            Positioning positioningInformation) {
         final MarkProperties markProperties = markPropertiesById.get(markPropertiesId);
-        markProperties.setFixedPosition(null);
-        markProperties.setTrackingDeviceIdentifier(deviceIdentifier);
+        markProperties.setPositioningInformation(positioningInformation);
         mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
         return null;
     }
@@ -322,7 +323,8 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
                 idOfNewMarkTemplate + "/" + properties.getName(), () -> {
                     final UUID idOfNewMarkTemplateForReplication = idOfNewMarkTemplate;
                     final CommonMarkProperties propertiesForReplication = properties;
-                    apply(s -> s.internalCreateMarkTemplate(idOfNewMarkTemplateForReplication, propertiesForReplication));
+                    apply(s -> s.internalCreateMarkTemplate(idOfNewMarkTemplateForReplication,
+                            propertiesForReplication));
                 });
         return getMarkTemplateById(idOfNewMarkTemplate);
     }
@@ -452,7 +454,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         final UUID markTemplateId = markTemplate.getId();
         apply(s -> s.internalRecordUsage(markTemplateId, markPropertiesId));
     }
-    
+
     @Override
     public Void internalRecordUsage(final UUID markPropertiesId, final MarkRole roleName) {
         final MarkProperties markProperties = markPropertiesById.get(markPropertiesId);
@@ -460,7 +462,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
         return null;
     }
-    
+
     @Override
     public void recordUsage(final MarkProperties markProperties, final MarkRole roleName) {
         getSecurityService().checkCurrentUserUpdatePermission(markProperties);
@@ -478,7 +480,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         }
         return recordedUsage;
     }
-    
+
     @Override
     public Map<MarkProperties, TimePoint> getUsedMarkProperties(MarkRole roleName) {
         final Map<MarkProperties, TimePoint> recordedUsage = new HashMap<>();

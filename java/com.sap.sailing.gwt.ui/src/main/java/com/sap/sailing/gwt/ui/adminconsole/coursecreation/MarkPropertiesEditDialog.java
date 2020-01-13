@@ -216,7 +216,7 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
                 tagsEditor.getValue(), shortNameTextBox.getValue(), color,
                 shapeValueListBox.getValue() == null ? "" : shapeValueListBox.getValue().name(),
                 patternValueListBox.getValue() == null ? "" : patternValueListBox.getValue().name(),
-                markTypeValueListBox.getValue(), null);
+                markTypeValueListBox.getValue(), /* positioning type */ null);
         return markProperties;
     }
 

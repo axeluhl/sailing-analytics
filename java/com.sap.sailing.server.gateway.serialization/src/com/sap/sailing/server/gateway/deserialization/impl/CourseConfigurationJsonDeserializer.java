@@ -7,47 +7,43 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation;
+import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
-import com.sap.sailing.domain.coursetemplate.StorablePositioning;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseConfigurationJsonSerializer;
 
-public class CourseConfigurationJsonDeserializer implements JsonDeserializer<CourseConfiguration> {
+public class CourseConfigurationJsonDeserializer implements JsonDeserializer<CourseConfiguration<MarkConfigurationRequestAnnotation>> {
 
     private final SharedSailingData sharedSailingData;
-    private final Function<DeviceIdentifier, Position> positionResolver;
     private final CommonMarkPropertiesJsonDeserializer commonMarkPropertiesJsonDeserializer;
     private final JsonDeserializer<RepeatablePart> repeatablePartJsonDeserializer;
     private final Regatta regatta;
-    private final StorablePositioningJsonDeserializer storablePositioningJsonDeserializer;
+    private final PositioningJsonDeserializer positioningJsonDeserializer;
 
-    public CourseConfigurationJsonDeserializer(final SharedSailingData sharedSailingData, final Regatta regatta,
-            Function<DeviceIdentifier, Position> positionResolver) {
+    public CourseConfigurationJsonDeserializer(final SharedSailingData sharedSailingData,
+            DeviceIdentifierJsonDeserializer deviceIdentifierDeserializer, final Regatta regatta) {
         this.sharedSailingData = sharedSailingData;
-        this.positionResolver = positionResolver;
         commonMarkPropertiesJsonDeserializer = new CommonMarkPropertiesJsonDeserializer();
         repeatablePartJsonDeserializer = new RepeatablePartJsonDeserializer();
-        storablePositioningJsonDeserializer = new StorablePositioningJsonDeserializer();
+        positioningJsonDeserializer = new PositioningJsonDeserializer(deviceIdentifierDeserializer);
         this.regatta = regatta;
     }
 
     @Override
-    public CourseConfiguration deserialize(JSONObject json) throws JsonDeserializationException {
+    public CourseConfiguration<MarkConfigurationRequestAnnotation> deserialize(JSONObject json) throws JsonDeserializationException {
         final String name = (String) json.get(CourseConfigurationJsonSerializer.FIELD_NAME);
         final String optionalImageURLAsString = (String) json.get(CourseConfigurationJsonSerializer.FIELD_OPTIONAL_IMAGE_URL);
         URL optionalImageURL;
@@ -62,8 +58,8 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
             optionalCourseTemplate = sharedSailingData.getCourseTemplateById(UUID.fromString(courseTemplateIdString));
         }
         CourseConfigurationBuilder builder = new CourseConfigurationBuilder(sharedSailingData, regatta, optionalCourseTemplate,
-                name, optionalImageURL, positionResolver);
-        final Map<UUID, MarkConfiguration> markConfigurationsByID = new HashMap<UUID, MarkConfiguration>();
+                name, optionalImageURL);
+        final Map<UUID, MarkConfiguration<MarkConfigurationRequestAnnotation>> markConfigurationsByID = new HashMap<>();
         final JSONArray markConfigurationsJSON = (JSONArray) json
                 .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATIONS);
         if (markConfigurationsJSON != null) {
@@ -81,16 +77,16 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
                         : commonMarkPropertiesJsonDeserializer.deserialize(freestylePropertiesObject);
                 final Object positioningObject = markConfigurationJSON
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_POSITIONING);
-                final StorablePositioning storablePositioning = positioningObject instanceof JSONObject
-                        ? storablePositioningJsonDeserializer.deserialize((JSONObject) positioningObject)
+                final Positioning positioning = positioningObject instanceof JSONObject
+                        ? positioningJsonDeserializer.deserialize((JSONObject) positioningObject)
                         : null;
                 final boolean storeToInventory = Boolean.TRUE.equals(markConfigurationJSON
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_STORE_TO_INVENTORY));
-                final MarkConfiguration markConfiguration = builder.addMarkConfiguration(
+                final MarkConfiguration<MarkConfigurationRequestAnnotation> markConfiguration = builder.addMarkConfiguration(
                         markTemplateID != null ? UUID.fromString(markTemplateID) : null,
                         markPropertiesID != null ? UUID.fromString(markPropertiesID) : null,
                         markID != null ? UUID.fromString(markID) : null, optionalFreestyleProperties,
-                        storablePositioning, storeToInventory);
+                                positioning, storeToInventory);
                 final String markRoleIdOrNullAsString = (String) markConfigurationJSON
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_ID);
                 final UUID markRoleIdOrNull = markRoleIdOrNullAsString == null ? null : UUID.fromString(markRoleIdOrNullAsString);
@@ -111,11 +107,11 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
         if (wayPointsJSON != null) {
             for (Object waypointObject : wayPointsJSON) {
                 final JSONObject waypointJSON = (JSONObject) waypointObject;
-                final List<MarkConfiguration> resolvedMarkConfigurations = new ArrayList<>();
+                final List<MarkConfiguration<MarkConfigurationRequestAnnotation>> resolvedMarkConfigurations = new ArrayList<>();
                 final JSONArray markConfigurationIDs = (JSONArray) waypointJSON
                         .get(CourseConfigurationJsonSerializer.FIELD_WAYPOINT_MARK_CONFIGURATION_IDS);
                 for (Object markConfigurationIdObject : markConfigurationIDs) {
-                    final MarkConfiguration resolvedMarkTemplate = markConfigurationsByID
+                    final MarkConfiguration<MarkConfigurationRequestAnnotation> resolvedMarkTemplate = markConfigurationsByID
                             .get(UUID.fromString(markConfigurationIdObject.toString()));
                     if (resolvedMarkTemplate == null) {
                         throw new JsonDeserializationException("Mark configuration with ID " + markConfigurationIdObject
@@ -140,7 +136,6 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
                 }
             }
         }
-
         final JSONObject repeatablePartJSON = (JSONObject) json
                 .get(CourseConfigurationJsonSerializer.FIELD_OPTIONAL_REPEATABLE_PART);
         if (repeatablePartJSON != null) {
@@ -148,15 +143,12 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
                     .deserialize(repeatablePartJSON);
             builder.setOptionalRepeatablePart(optionalRepeatablePart);
         }
-
         final Number numberOfLapsNumber = (Number) json.get(CourseConfigurationJsonSerializer.FIELD_NUMBER_OF_LAPS);
         final Integer numberOfLaps = numberOfLapsNumber == null ? null : numberOfLapsNumber.intValue();
         if (numberOfLaps != null) {
             builder.setNumberOfLaps(numberOfLaps);
         }
-
-        final CourseConfiguration courseConfiguration = builder.build();
+        final CourseConfiguration<MarkConfigurationRequestAnnotation> courseConfiguration = builder.build();
         return courseConfiguration;
     }
-
 }

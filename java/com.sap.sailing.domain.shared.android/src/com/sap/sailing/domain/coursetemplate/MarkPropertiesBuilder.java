@@ -6,12 +6,13 @@ import java.util.UUID;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.coursetemplate.impl.FixedPositioningImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesImpl;
+import com.sap.sailing.domain.coursetemplate.impl.TrackingDeviceBasedPositioningImpl;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 
 public class MarkPropertiesBuilder {
-
     private final UUID id;
     private final String name;
     private final String shortName;
@@ -20,8 +21,7 @@ public class MarkPropertiesBuilder {
     private final String pattern;
     private final MarkType type;
     private Iterable<String> tags;
-    private DeviceIdentifier deviceId;
-    private Position position;
+    private Positioning positioningInformation;
     private Map<MarkTemplate, TimePoint> lastUsedTemplate;
     private Map<MarkRole, TimePoint> lastUsedRole;
 
@@ -42,12 +42,12 @@ public class MarkPropertiesBuilder {
     }
 
     public MarkPropertiesBuilder withDeviceId(DeviceIdentifier deviceId) {
-        this.deviceId = deviceId;
+        this.positioningInformation = new TrackingDeviceBasedPositioningImpl(deviceId);
         return this;
     }
 
     public MarkPropertiesBuilder withFixedPosition(Position position) {
-        this.position = position;
+        this.positioningInformation = new FixedPositioningImpl(position);
         return this;
     }
 
@@ -56,13 +56,8 @@ public class MarkPropertiesBuilder {
         if (tags != null) {
             impl.setTags(tags);
         }
-
-        if (deviceId != null) {
-            impl.setTrackingDeviceIdentifier(deviceId);
-        }
-
-        if (position != null) {
-            impl.setFixedPosition(position);
+        if (positioningInformation != null) {
+            impl.setPositioningInformation(positioningInformation);
         }
         if (lastUsedTemplate != null) {
             impl.setLastUsedTemplate(lastUsedTemplate);

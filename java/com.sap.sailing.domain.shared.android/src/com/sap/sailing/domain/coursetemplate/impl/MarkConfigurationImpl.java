@@ -2,24 +2,16 @@ package com.sap.sailing.domain.coursetemplate.impl;
 
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
-import com.sap.sailing.domain.coursetemplate.Positioning;
-import com.sap.sailing.domain.coursetemplate.StorablePositioning;
 
-public abstract class MarkConfigurationImpl implements MarkConfiguration {
+public abstract class MarkConfigurationImpl<P> implements MarkConfiguration<P> {
     private static final long serialVersionUID = -1130451024516101231L;
-    
     private final MarkTemplate optionalMarkTemplate;
-    private final boolean storeToInventory;
-    private final StorablePositioning optionalPositioning;
-    private final Positioning storedPositioning;
+    private final P annotationInfo;
 
-    public MarkConfigurationImpl(MarkTemplate optionalMarkTemplate, StorablePositioning optionalPositioning,
-            Positioning storedPositioning, boolean storeToInventory) {
+    public MarkConfigurationImpl(MarkTemplate optionalMarkTemplate, P annotationInfo) {
         super();
         this.optionalMarkTemplate = optionalMarkTemplate;
-        this.optionalPositioning = optionalPositioning;
-        this.storedPositioning = storedPositioning;
-        this.storeToInventory = storeToInventory;
+        this.annotationInfo = annotationInfo;
     }
 
     @Override
@@ -28,17 +20,7 @@ public abstract class MarkConfigurationImpl implements MarkConfiguration {
     }
 
     @Override
-    public boolean isStoreToInventory() {
-        return storeToInventory;
-    }
-
-    @Override
-    public StorablePositioning getOptionalPositioning() {
-        return optionalPositioning;
-    }
-    
-    @Override
-    public Positioning getEffectivePositioning() {
-        return optionalPositioning != null ? optionalPositioning : storedPositioning;
+    public P getAnnotationInfo() {
+        return annotationInfo;
     }
 }
