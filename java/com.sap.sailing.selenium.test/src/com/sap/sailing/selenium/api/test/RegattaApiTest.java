@@ -167,7 +167,6 @@ public class RegattaApiTest extends AbstractSeleniumTest {
     public void testRegisterExistingCompetitorWithSecret() {
         final AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
         adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
-        
         SecurityApi securityApi = new SecurityApi();
         final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), ApiContext.SECURITY_CONTEXT);
         securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
@@ -176,22 +175,17 @@ public class RegattaApiTest extends AbstractSeleniumTest {
                 ApiContext.SECURITY_CONTEXT, "donald", "daisy0815");
         securityApi.createUser(adminSecurityCtx, "dagobert", "Dagobert Duck", null, "daisy1337");
         final ApiContext userOwningEventCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "dagobert", "daisy1337");
-        
         // TODO we currently can't just create a competitor using the API. This is only possible by using a temporary Event/Regatta.
         eventApi.createEvent(userWithCompetitorCtx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
         Competitor competitor = regattaApi.createAndAddCompetitor(userWithCompetitorCtx, EVENT_NAME, BOAT_CLASS, null, "donald", "USA");
-        
         // ensure the reader can actually see the competitor
         UserGroup group = usergroupApi.getUserGroupByName(userWithCompetitorAndSecurityCtx, "donald"+SecurityService.TENANT_SUFFIX);
         usergroupApi.addRoleToGroup(userWithCompetitorAndSecurityCtx, group.getGroupId(),
                 UUID.fromString(/* sailing viewer role id */"c42948df-517b-45cb-9fa9-d1e79f18e115"), true);
-        
         // This is the event to register the existing competitor for
         Event eventToRegisterExistingCompetitor = eventApi.createEvent(userOwningEventCtx, OTHER_EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.OPEN_UNMODERATED, "default");
         regattaApi.addCompetitor(userWithCompetitorCtx, OTHER_EVENT_NAME, competitor.getId(), Optional.of(eventToRegisterExistingCompetitor.getSecret()));
-        
         Competitor[] competitors = regattaApi.getCompetitors(userOwningEventCtx, OTHER_EVENT_NAME);
-        
         assertEquals(1, competitors.length);
         assertEquals(competitor.getId(), competitors[0].getId());
     }
