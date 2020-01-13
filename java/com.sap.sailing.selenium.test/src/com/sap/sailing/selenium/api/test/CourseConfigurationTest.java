@@ -8,6 +8,7 @@ import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
 import static com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage.goToPage;
 import static java.lang.System.currentTimeMillis;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -37,6 +38,7 @@ import com.sap.sailing.selenium.api.coursetemplate.CourseConfiguration;
 import com.sap.sailing.selenium.api.coursetemplate.CourseConfigurationApi;
 import com.sap.sailing.selenium.api.coursetemplate.CourseTemplate;
 import com.sap.sailing.selenium.api.coursetemplate.CourseTemplateApi;
+import com.sap.sailing.selenium.api.coursetemplate.DeviceMapping;
 import com.sap.sailing.selenium.api.coursetemplate.MarkAppearance;
 import com.sap.sailing.selenium.api.coursetemplate.MarkConfiguration;
 import com.sap.sailing.selenium.api.coursetemplate.MarkProperties;
@@ -153,12 +155,13 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                         assertEquals("shortName is different for " + msgIdentifier, srcAppearance.getShortName(),
                                 trgtAppearance.getShortName());
                     }
-                    boolean hasNonPingDeviceIdentifier = trgtMarkConfiguration.getCurrentTrackingDeviceId() != null
-                            && !trgtMarkConfiguration.getCurrentTrackingDeviceId().getType().equals("PING");
+                    List<DeviceMapping> trgtDeviceMappings = trgtMarkConfiguration.getDeviceMappings();
+                    boolean hasNonPingDeviceIdentifier = !trgtDeviceMappings.isEmpty()
+                            && !trgtDeviceMappings.get(0).getType().equals("PING");
                     if (srcPositioning != null) {
                         if (srcPositioning.getDeviceId() != null) {
                             assertEquals("tracking device was not properly mapped for " + msgIdentifier,
-                                    srcPositioning.getDeviceId().toString(), trgtMarkConfiguration.getCurrentTrackingDeviceId().getId());
+                                    "smartphoneUUID", trgtDeviceMappings.get(0).getType());
                         } else if (srcPositioning.getLatitudeDeg() != null && srcPositioning.getLongitudeDeg() != null) {
                             assertEquals("position.lat is different for " + msgIdentifier, srcPositioning.getLatitudeDeg(),
                                     trgtMarkConfiguration.getLastKnownPosition().getLatDeg(), 0.0001);
@@ -438,7 +441,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         logger.info("createdCourse: " + createdCourse.getJson());
 
         final MarkConfiguration mc1a = createdCourse.getMarkConfigurationByEffectiveName("mc1");
-        assertNull(mc1a.getCurrentTrackingDeviceId());
+        assertTrue(mc1a.getDeviceMappings().isEmpty());
         assertNull(mc1a.getLastKnownPosition());
         mc1a.setFixedPosition(updatedLatDeg, updatedLongDeg);
 
@@ -481,7 +484,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertEquals(updatedLongDeg, mc1b.getLastKnownPosition().getLngDeg(), .0);
 
         final MarkConfiguration mc2b = loadedCourse.getMarkConfigurationByEffectiveName("mc2");
-        assertNotNull(mc2b.getCurrentTrackingDeviceId());
+        assertFalse(mc2b.getDeviceMappings().isEmpty());
         // no new tracking data from the device, but the way it's currently defined, the last known position will reflect only
         // a position coming from the device identified above, so we expect to find no last known position here (TODO this seems wrong as a last position *is* known based on the ping)
         assertNull(mc2b.getLastKnownPosition());

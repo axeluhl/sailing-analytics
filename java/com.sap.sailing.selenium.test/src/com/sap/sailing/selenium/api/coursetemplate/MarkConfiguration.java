@@ -1,7 +1,13 @@
 package com.sap.sailing.selenium.api.coursetemplate;
 
-import java.util.UUID;
+import static org.junit.Assert.assertEquals;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.Position;
@@ -19,7 +25,7 @@ public class MarkConfiguration extends JsonWrapper {
     private static final String FIELD_MARK_ID = "markId";
     private static final String FIELD_POSITIONING = "positioning";
     private static final String FIELD_STORE_TO_INVENTORY = "storeToInventory";
-    private static final String FIELD_MARK_CONFIGURATION_CURRENT_TRACKING_DEVICE_ID = "currentTrackingDeviceId";
+    public static final String FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_MAPPINGS = "trackingDevices";
     private static final String FIELD_MARK_CONFIGURATION_LAST_KNOWN_POSITION = "lastKnownPosition";
     private static final String FIELD_LATITUDE_DEG = "latitude_deg";
     private static final String FIELD_LONGITUDE_DEG = "longitude_deg";
@@ -100,9 +106,22 @@ public class MarkConfiguration extends JsonWrapper {
         getJson().put(FIELD_POSITIONING, null);
     }
 
-    public DeviceIdentifier getCurrentTrackingDeviceId() {
-        final JSONObject deviceIdentifierJson = (JSONObject) get(FIELD_MARK_CONFIGURATION_CURRENT_TRACKING_DEVICE_ID);
-        return deviceIdentifierJson == null ? null : new DeviceIdentifier(deviceIdentifierJson);
+    public List<DeviceMapping> getDeviceMappings() {
+        final JSONArray deviceMappings = get(FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_MAPPINGS);
+        final List<DeviceMapping> result;
+        if (deviceMappings == null) {
+            result = Collections.emptyList();
+        } else {
+            result = deviceMappings.stream().map(m -> new DeviceMapping((JSONObject) m)).collect(Collectors.toList());
+        }
+        
+        return result;
+    }
+    
+    public DeviceMapping getSingleDeviceMapping() {
+        final List<DeviceMapping> deviceMappings = getDeviceMappings();
+        assertEquals(1, deviceMappings.size());
+        return deviceMappings.get(0);
     }
     
     public Position getLastKnownPosition() {
