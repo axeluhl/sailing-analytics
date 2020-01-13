@@ -590,7 +590,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 for (Mark mark : raceColumn.getAvailableMarks()) {
                     markConfigurationsByMark
                             .computeIfAbsent(mark,
-                                    m -> createMarkConfigurationForRegattaMark(courseTemplate, optionalRegatta, m));
+                                    m -> createMarkConfigurationForRegattaMark(courseTemplate, optionalRegatta, /* optionalRace */ null, m));
                 }
             }
             final LastUsageBasedAssociater<RegattaMarkConfiguration<MarkConfigurationResponseAnnotation>, IsMarkRole> usagesForRole = new LastUsageBasedAssociater<>(
@@ -629,7 +629,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                                 // FIXME the following can never be "absent" because all race columns have been enumerated and all their getAllAvailableMarks() have been mapped in markConfigurationsByMark already
                                 final RegattaMarkConfiguration<MarkConfigurationResponseAnnotation> regattaMarkConfiguration = markConfigurationsByMark
                                         .computeIfAbsent(mark,
-                                                m -> createMarkConfigurationForRegattaMark(courseTemplate, optionalRegatta, m));
+                                                m -> createMarkConfigurationForRegattaMark(courseTemplate, optionalRegatta, /* optionalRace */ null, m));
                                 lastUsages.compute(regattaMarkConfiguration,
                                         (mc, existingTP) -> (existingTP == null || existingTP.before(effectiveUsageTP))
                                         ? effectiveUsageTP
@@ -738,11 +738,12 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
 
     @Override
     public CourseConfiguration<MarkConfigurationResponseAnnotation> createCourseConfigurationFromRegatta(CourseBase course, Regatta regatta,
-            Iterable<String> tagsToFilterMarkProperties) {
+            TrackedRace optionalRace, Iterable<String> tagsToFilterMarkProperties) {
         assert regatta != null;
         final Set<MarkConfiguration<MarkConfigurationResponseAnnotation>> allMarkConfigurations = new HashSet<>();
         final CourseTemplate courseTemplateOrNull = course == null ? null : resolveCourseTemplateSafe(course);
-        final Map<Mark, RegattaMarkConfiguration<MarkConfigurationResponseAnnotation>> markConfigurationsByMark = createMarkConfigurationsForRegatta(regatta, courseTemplateOrNull);
+        final Map<Mark, RegattaMarkConfiguration<MarkConfigurationResponseAnnotation>> markConfigurationsByMark = createMarkConfigurationsForRegatta(
+                regatta, optionalRace, courseTemplateOrNull);
         allMarkConfigurations.addAll(markConfigurationsByMark.values());
         final Map<MarkConfiguration<MarkConfigurationResponseAnnotation>, IsMarkRole> resultingRoleMapping = new HashMap<>();
         if (course != null) {
@@ -814,13 +815,14 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 resultingWaypoints, optionalRepeatablePart, numberOfLaps, name, optionalImageURL);
     }
     
-    private Map<Mark, RegattaMarkConfiguration<MarkConfigurationResponseAnnotation>> createMarkConfigurationsForRegatta(Regatta regatta, CourseTemplate courseTemplate) {
+    private Map<Mark, RegattaMarkConfiguration<MarkConfigurationResponseAnnotation>> createMarkConfigurationsForRegatta(
+            Regatta regatta, TrackedRace optionalRace, CourseTemplate courseTemplate) {
         final Map<Mark, RegattaMarkConfiguration<MarkConfigurationResponseAnnotation>> result = new HashMap<>();
         for (RaceColumn raceColumn : regatta.getRaceColumns()) {
             for (Mark mark : raceColumn.getAvailableMarks()) {
                 result
                 .computeIfAbsent(mark,
-                        m -> createMarkConfigurationForRegattaMark(courseTemplate, regatta, m));
+                        m -> createMarkConfigurationForRegattaMark(courseTemplate, regatta, optionalRace, m));
             }
         }
         return result;
@@ -965,8 +967,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         }
     }
 
-    private MarkConfigurationResponseAnnotation getPositioningIfAvailable(Regatta regatta, Mark mark) {
-        return CourseConfigurationBuilder.getPositioningIfAvailable(regatta, mark, lastKnownPositionResolver);
+    private MarkConfigurationResponseAnnotation getPositioningIfAvailable(Regatta regatta, TrackedRace optionalRace, Mark mark) {
+        return CourseConfigurationBuilder.getPositioningIfAvailable(regatta, optionalRace, mark, lastKnownPositionResolver);
     }
 
     private MarkConfigurationResponseAnnotation getPositioningIfAvailable(MarkProperties markProperties) {
@@ -1003,14 +1005,14 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     }
 
     private RegattaMarkConfiguration<MarkConfigurationResponseAnnotation> createMarkConfigurationForRegattaMark(CourseTemplate courseTemplate,
-            Regatta regatta, Mark mark) {
+            Regatta regatta, TrackedRace optionalRace, Mark mark) {
         final UUID markTemplateIdOrNull = mark.getOriginatingMarkTemplateIdOrNull();
         final MarkTemplate markTemplateOrNull = markTemplateIdOrNull == null ? null : resolveMarkTemplateByID(courseTemplate, markTemplateIdOrNull);
         final UUID markPropertiesIdOrNull = mark.getOriginatingMarkPropertiesIdOrNull();
         final MarkProperties markPropertiesOrNull = markPropertiesIdOrNull == null ? null
                 : getSharedSailingData().getMarkPropertiesById(markPropertiesIdOrNull);
         final RegattaMarkConfiguration<MarkConfigurationResponseAnnotation> regattaMarkConfiguration = new RegattaMarkConfigurationImpl<MarkConfigurationResponseAnnotation>(
-                mark, getPositioningIfAvailable(regatta, mark), markTemplateOrNull, markPropertiesOrNull);
+                mark, getPositioningIfAvailable(regatta, optionalRace, mark), markTemplateOrNull, markPropertiesOrNull);
         return regattaMarkConfiguration;
     }
 

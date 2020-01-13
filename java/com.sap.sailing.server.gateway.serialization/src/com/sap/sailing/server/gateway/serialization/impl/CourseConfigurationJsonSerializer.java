@@ -25,6 +25,8 @@ import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Util.Pair;
 
 public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseConfiguration<MarkConfigurationResponseAnnotation>> {
 
@@ -39,7 +41,11 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
     public static final String FIELD_MARK_CONFIGURATION_FREESTYLE_PROPERTIES = "freestyleProperties";
     public static final String FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE = "associatedRole";
     public static final String FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_ID = "associatedRoleId";
-    public static final String FIELD_MARK_CONFIGURATION_CURRENT_TRACKING_DEVICE_ID = "currentTrackingDeviceId";
+    public static final String FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_MAPPINGS = "trackingDevices";
+    public static final String FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_TYPE = "trackingDeviceType";
+    public static final String FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_HASH = "trackingDeviceHash";
+    public static final String FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_MAPPED_FROM = "trackingDeviceMappedFromMillis";
+    public static final String FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_MAPPED_TO = "trackingDeviceMappedToMillis";
     public static final String FIELD_MARK_CONFIGURATION_LAST_KNOWN_POSITION = "lastKnownPosition";
     public static final String FIELD_MARK_CONFIGURATION_POSITIONING = "positioning";
     public static final String FIELD_MARK_CONFIGURATION_STORE_TO_INVENTORY = "storeToInventory";
@@ -55,13 +61,11 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
     private final JsonSerializer<RepeatablePart> repeatablePartJsonSerializer;
     private final JsonSerializer<CommonMarkProperties> commonMarkPropertiesJsonSerializer;
     private final JsonSerializer<Position> positionJsonSerializer;
-    private final JsonSerializer<DeviceIdentifier> deviceIdentifierJsonSerializer;
 
-    public CourseConfigurationJsonSerializer(DeviceIdentifierJsonSerializer deviceIdentifierSerializer) {
+    public CourseConfigurationJsonSerializer() {
         repeatablePartJsonSerializer = new RepeatablePartJsonSerializer();
         commonMarkPropertiesJsonSerializer = new CommonMarkPropertiesJsonSerializer();
         this.positionJsonSerializer = new PositionJsonSerializer();
-        this.deviceIdentifierJsonSerializer = deviceIdentifierSerializer;
     }
 
     @Override
@@ -136,9 +140,27 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
             markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_EFFECTIVE_PROPERTIES,
                     commonMarkPropertiesJsonSerializer.serialize(markConfiguration.getEffectiveProperties()));
             if (markConfiguration.getAnnotationInfo() != null) {
-                if (markConfiguration.getAnnotationInfo().getCurrentTrackingDevice() != null) {
-                    markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_CURRENT_TRACKING_DEVICE_ID,
-                            deviceIdentifierJsonSerializer.serialize(markConfiguration.getAnnotationInfo().getCurrentTrackingDevice()));
+                final JSONArray deviceMappings = new JSONArray();
+                markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_MAPPINGS,
+                        deviceMappings);
+                for (Pair<DeviceIdentifier, TimeRange> deviceMapping : markConfiguration.getAnnotationInfo()
+                        .getDeviceMappings()) {
+                    final JSONObject deviceMappingObject = new JSONObject();
+                    final DeviceIdentifier deviceIdentifier = deviceMapping.getA();
+                    deviceMappingObject.put(FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_TYPE,
+                            deviceIdentifier.getIdentifierType());
+                    deviceMappingObject.put(FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_HASH,
+                            HashedStringUtil.toHashedString(deviceIdentifier.getStringRepresentation()));
+                    final TimeRange mappedTimeRange = deviceMapping.getB();
+                    if (!mappedTimeRange.hasOpenBeginning()) {
+                        deviceMappingObject.put(FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_MAPPED_FROM,
+                                mappedTimeRange.from().asMillis());
+                    }
+                    if (!mappedTimeRange.hasOpenEnd()) {
+                        deviceMappingObject.put(FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_MAPPED_TO,
+                                mappedTimeRange.to().asMillis());
+                    }
+                    deviceMappings.add(deviceMappingObject);
                 }
                 if (markConfiguration.getAnnotationInfo().getLastKnownPosition() != null) {
                     markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_LAST_KNOWN_POSITION,

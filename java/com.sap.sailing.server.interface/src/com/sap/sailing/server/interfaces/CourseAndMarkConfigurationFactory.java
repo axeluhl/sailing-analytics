@@ -26,6 +26,7 @@ import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.WithOptionalRepeatablePart;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.shared.impl.UserGroup;
 
@@ -141,7 +142,7 @@ public interface CourseAndMarkConfigurationFactory {
      *            {@link CourseTemplate} needs to match all given tags.
      */
     CourseConfiguration<MarkConfigurationResponseAnnotation> createCourseConfigurationFromRegatta(CourseBase optionalCourse, Regatta regatta,
-            Iterable<String> tagsToFilterMarkProperties);
+            TrackedRace optionalRace, Iterable<String> tagsToFilterMarkProperties);
 
     /**
      * TODO: not implemented yet

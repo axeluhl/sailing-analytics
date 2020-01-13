@@ -72,7 +72,6 @@ import com.sap.sailing.server.gateway.deserialization.impl.DeviceIdentifierJsonD
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseConfigurationJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.PlaceHolderDeviceIdentifierJsonHandler;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -175,7 +174,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         // set of marks to be used while defining a course for the regatta.
         // An additional call to get the marks defined in the regatta isn't necessary with the described behavior of this API.
         final CourseConfiguration<MarkConfigurationResponseAnnotation> courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
-                .createCourseConfigurationFromRegatta(courseBase, regatta, tags);
+                .createCourseConfigurationFromRegatta(courseBase, regatta, raceColumnByName.getTrackedRace(fleetByName),
+                        tags);
         final JSONObject jsonResult = getCourseConfigurationJsonSerializer().serialize(courseConfiguration);
         return Response.ok(jsonResult.toJSONString()).build();
     }
@@ -341,7 +341,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
                 result = null;
             }
         } else {
-            result = CourseConfigurationBuilder.getPositioningIfAvailable(regatta, regattaMark, positionResolverFromDeviceIdentifier);
+            result = CourseConfigurationBuilder.getPositioningIfAvailable(regatta, /* optionalRace */ null, regattaMark,
+                    positionResolverFromDeviceIdentifier);
         }
         return result;
     }
@@ -399,14 +400,15 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         raceLog.add(new RaceLogCourseDesignChangedEventImpl(timestampForLogEntries, getService().getServerAuthor(),
                 raceLog.getCurrentPassId(), course, CourseDesignerMode.BY_MARKS));
         final CourseConfiguration<MarkConfigurationResponseAnnotation> courseConfigurationResult = getService().getCourseAndMarkConfigurationFactory()
-                .createCourseConfigurationFromRegatta(course, regatta, /* tagsToFilterMarkProperties */ null);
+                .createCourseConfigurationFromRegatta(course, regatta, raceColumnByName.getTrackedRace(fleetByName),
+                        /* tagsToFilterMarkProperties */ null);
         final String jsonString = getCourseConfigurationJsonSerializer().serialize(courseConfigurationResult).toJSONString();
         return Response.ok(jsonString).build();
     }
 
     private synchronized JsonSerializer<CourseConfiguration<MarkConfigurationResponseAnnotation>> getCourseConfigurationJsonSerializer() {
         if (courseConfigurationJsonSerializer == null) {
-            courseConfigurationJsonSerializer = new CourseConfigurationJsonSerializer(new DeviceIdentifierJsonSerializer(getDeviceJsonServiceFinder()));
+            courseConfigurationJsonSerializer = new CourseConfigurationJsonSerializer();
         }
         return courseConfigurationJsonSerializer;
     }
