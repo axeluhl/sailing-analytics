@@ -161,9 +161,9 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                                     srcPositioning.getDeviceId().toString(), trgtMarkConfiguration.getCurrentTrackingDeviceId().getId());
                         } else if (srcPositioning.getLatitudeDeg() != null && srcPositioning.getLongitudeDeg() != null) {
                             assertEquals("position.lat is different for " + msgIdentifier, srcPositioning.getLatitudeDeg(),
-                                    trgtMarkConfiguration.getLastKnownPosition().getLatDeg(), 0.0);
+                                    trgtMarkConfiguration.getLastKnownPosition().getLatDeg(), 0.0001);
                             assertEquals("position.lng is different for " + msgIdentifier,
-                                    srcPositioning.getLongitudeDeg(), trgtMarkConfiguration.getLastKnownPosition().getLngDeg(), 0.0);
+                                    srcPositioning.getLongitudeDeg(), trgtMarkConfiguration.getLastKnownPosition().getLngDeg(), 0.0001);
                         }
                     }
                     if (markConfiguration.isStoreToInventory()) {
