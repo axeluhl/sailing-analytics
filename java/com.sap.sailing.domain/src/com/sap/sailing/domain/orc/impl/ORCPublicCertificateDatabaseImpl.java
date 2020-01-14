@@ -355,50 +355,49 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     }
 
     public Date parseDate(final String dateString) throws ParseException {
-        DateFormat dateFormat= null;
-        if(dateString.contains("GMT")) {
+        DateFormat dateFormat = null;
+        if (dateString.contains("GMT")) {
             try {
                 return timeAsGmt(dateString);
-            } catch(Exception ex) {
-                
+            } catch (Exception ex) {
+
             }
         }
-        for(String df: dateFormatsWithTimeZone) {
+        for (String df : dateFormatsWithTimeZone) {
             try {
                 dateFormat = new SimpleDateFormat(df);
                 return dateFormat.parse(dateString);
-            } catch(Exception ex) {
-                
+            } catch (Exception ex) {
+
             }
         }
-        for(String df: dateFormatsWithoutTimeZone) {
+        for (String df : dateFormatsWithoutTimeZone) {
             try {
-                TimeZone timeZone =  TimeZone.getTimeZone("UTC");
-                dateFormat= new SimpleDateFormat(df);
+                TimeZone timeZone = TimeZone.getTimeZone("UTC");
+                dateFormat = new SimpleDateFormat(df);
                 dateFormat.setTimeZone(timeZone);
                 return dateFormat.parse(dateString);
-            } catch(Exception ex) {
-                
+            } catch (Exception ex) {
+
             }
         }
-        
+
         return null;
     }
     
     private Date timeAsGmt(String dateTimeWithGMT) throws ParseException {
         final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-        String []dateSplit = dateTimeWithGMT.split(" ");
-        if( dateSplit.length <2 ) {
+        String[] dateSplit = dateTimeWithGMT.split(" ");
+        if (dateSplit.length < 2) {
             dateSplit = dateTimeWithGMT.split("GMT");
-            sdf.setTimeZone(TimeZone.getTimeZone("GMT"+dateSplit[1]));
+            sdf.setTimeZone(TimeZone.getTimeZone("GMT" + dateSplit[1]));
             return sdf.parse(dateSplit[0]);
         } else {
             sdf.setTimeZone(TimeZone.getTimeZone(dateSplit[1]));
             return sdf.parse(dateSplit[0]);
         }
-        
-      
-     }
+
+    }
 
     @Override
     public ORCCertificate getCertificate(String referenceNumber) throws Exception {
