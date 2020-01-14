@@ -16,17 +16,18 @@ import com.sap.sse.security.ui.client.UserService;
  * Edits a {@link TracTracConfigurationWithSecurityDTO} object. Can be accessed from
  * {@link TracTracConnectionTableWrapper}
  */
-public class EditTracTracConnectionDialog extends DataEntryDialog<TracTracConfigurationWithSecurityDTO> {
+public class TracTracConnectionDialog extends DataEntryDialog<TracTracConfigurationWithSecurityDTO> {
     private static final StringMessages stringMessages = StringMessages.INSTANCE;
     private Grid grid;
 
-    private TextBox storedURITextBox;
-    private TextBox liveURITextBox;
-    private TextBox jsonURLTextBox;
-    private TextBox tracTracUpdateURITextBox;
-    private TextBox tractracUsernameTextBox;
-    private PasswordTextBox tractracPasswordTextBox;
-    private final TracTracConfigurationWithSecurityDTO dtoToEdit;
+    protected TextBox storedURITextBox;
+    protected TextBox liveURITextBox;
+    protected TextBox jsonURLTextBox;
+    protected TextBox tracTracUpdateURITextBox;
+    protected TextBox tractracUsernameTextBox;
+    protected PasswordTextBox tractracPasswordTextBox;
+    protected String creatorName;
+    protected String name;
 
     /**
      * The class creates the UI-dialog to type in the Data about a the selected trac trac account.
@@ -34,28 +35,13 @@ public class EditTracTracConnectionDialog extends DataEntryDialog<TracTracConfig
      * @param userToEdit
      *            The 'userToEdit' parameter contains the user which should be changed or initialized.
      */
-    public EditTracTracConnectionDialog(final TracTracConfigurationWithSecurityDTO dtoToEdit,
+    public TracTracConnectionDialog(
             final DialogCallback<TracTracConfigurationWithSecurityDTO> callback, final UserService userService,
             final ErrorReporter errorReporter) {
-        super(stringMessages.editTracTracConnection(), null, stringMessages.ok(), stringMessages.cancel(),
+        super(stringMessages.tracTracConnection(), /* message */null, stringMessages.ok(), stringMessages.cancel(),
                 /* validator */ null, /* animationEnabled */true, callback);
-        this.dtoToEdit = dtoToEdit;
-        this.ensureDebugId("EditTracTracConnectionDialog");
+        this.ensureDebugId("TracTracConnectionDialog");
         createUi();
-        setData(dtoToEdit);
-        if (dtoToEdit.getJsonUrl() != null) {
-            jsonURLTextBox.setReadOnly(true);
-        }
-    }
-
-    private void setData(final TracTracConfigurationWithSecurityDTO dtotoEdit) {
-        storedURITextBox.setText(dtotoEdit.getStoredDataURI());
-        liveURITextBox.setText(dtotoEdit.getLiveDataURI());
-        jsonURLTextBox.setText(dtotoEdit.getJsonUrl());
-        tracTracUpdateURITextBox.setText(dtotoEdit.getCourseDesignUpdateURI());
-        tractracUsernameTextBox.setText(dtotoEdit.getTracTracUsername());
-        tractracPasswordTextBox.setText(dtotoEdit.getTracTracPassword());
-        super.getOkButton().setEnabled(!jsonURLTextBox.getText().isEmpty());
     }
 
     private void createUi() {
@@ -123,8 +109,8 @@ public class EditTracTracConnectionDialog extends DataEntryDialog<TracTracConfig
         final String tractracUsername = tractracUsernameTextBox.getValue();
         final String tractracPassword = tractracPasswordTextBox.getValue();
 
-        return new TracTracConfigurationWithSecurityDTO(dtoToEdit.getName(), jsonURL, liveDataURI, storedDataURI,
-                courseDesignUpdateURI, tractracUsername, tractracPassword, dtoToEdit.getCreatorName());
+        return new TracTracConfigurationWithSecurityDTO(name, jsonURL, liveDataURI, storedDataURI,
+                courseDesignUpdateURI, tractracUsername, tractracPassword, creatorName);
     }
 
     @Override
