@@ -27,8 +27,8 @@ public class MarkConfiguration extends JsonWrapper {
     private static final String FIELD_STORE_TO_INVENTORY = "storeToInventory";
     public static final String FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_MAPPINGS = "trackingDevices";
     private static final String FIELD_MARK_CONFIGURATION_LAST_KNOWN_POSITION = "lastKnownPosition";
-    private static final String FIELD_LATITUDE_DEG = "latitude_deg";
-    private static final String FIELD_LONGITUDE_DEG = "longitude_deg";
+    private static final String FIELD_LATITUDE_DEG = "lat_deg";
+    private static final String FIELD_LONGITUDE_DEG = "lon_deg";
 
 
     public MarkConfiguration(final JSONObject json) {
