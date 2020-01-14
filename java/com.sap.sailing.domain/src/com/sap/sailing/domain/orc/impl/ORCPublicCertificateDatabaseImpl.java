@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -72,6 +73,8 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     private static final String ROOT_ELEMENT = "ROOT";
     private static final String DATA_ELEMENT = "DATA";
     private static final String ROW_ELEMENT = "ROW";
+    private static final String[] dateFormatsWithTimeZone = new String[] {"yyyy-MM-dd'T'HH:mm:ssX","yyyy-MM-dd'T'HH:mm:ss.SSSX"};
+    private static final String[] dateFormatsWithoutTimeZone = new String[] {"yyyy-MM-dd'T'HH:mm:ss.SSS","yyyy-MM-dd'T'HH:mm:ss"};
     private static final DateFormat isoTimestampFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     
     /**
@@ -351,18 +354,51 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
                 sailNumber, boatClassName, designer, builder, yearBuilt, issueDate, certType, isOneDesign, isProvisional);
     }
 
-    private Date parseDate(String dateString) throws ParseException {
-        StringBuilder stringBuilder = new StringBuilder(dateString);
-        char timeZoneCharacter = stringBuilder.charAt(stringBuilder.length()-1);
-        if(timeZoneCharacter== 'z' || timeZoneCharacter == 'Z'|| timeZoneCharacter == 'X') {
-            stringBuilder.deleteCharAt(stringBuilder.length()-1);
+    public Date parseDate(final String dateString) throws ParseException {
+        DateFormat dateFormat= null;
+        if(dateString.contains("GMT")) {
+            try {
+                return timeAsGmt(dateString);
+            } catch(Exception ex) {
+                
+            }
         }
-       if(false == stringBuilder.toString().contains("+")) {
-           stringBuilder.append("+0000");
-       }
-
-        return isoTimestampFormat.parse(stringBuilder.toString());
+        for(String df: dateFormatsWithTimeZone) {
+            try {
+                dateFormat = new SimpleDateFormat(df);
+                return dateFormat.parse(dateString);
+            } catch(Exception ex) {
+                
+            }
+        }
+        for(String df: dateFormatsWithoutTimeZone) {
+            try {
+                TimeZone timeZone =  TimeZone.getTimeZone("UTC");
+                dateFormat= new SimpleDateFormat(df);
+                dateFormat.setTimeZone(timeZone);
+                return dateFormat.parse(dateString);
+            } catch(Exception ex) {
+                
+            }
+        }
+        
+        return null;
     }
+    
+    private Date timeAsGmt(String dateTimeWithGMT) throws ParseException {
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+        String []dateSplit = dateTimeWithGMT.split(" ");
+        if( dateSplit.length <2 ) {
+            dateSplit = dateTimeWithGMT.split("GMT");
+            sdf.setTimeZone(TimeZone.getTimeZone("GMT"+dateSplit[1]));
+            return sdf.parse(dateSplit[0]);
+        } else {
+            sdf.setTimeZone(TimeZone.getTimeZone(dateSplit[1]));
+            return sdf.parse(dateSplit[0]);
+        }
+        
+      
+     }
 
     @Override
     public ORCCertificate getCertificate(String referenceNumber) throws Exception {
