@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -330,7 +331,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
                 builder = child.getTextContent();
                 break;
             case "dxtDate":
-                issueDate = new MillisecondsTimePoint(isoTimestampFormat.parse(child.getTextContent().replaceAll("Z", "+0000"))); // assume UTC
+                issueDate = new MillisecondsTimePoint(parseDate(child.getTextContent())); // assume UTC
                 break;
             case "CertType":
                 certType = Integer.valueOf(child.getTextContent().trim());
@@ -348,6 +349,19 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         }
         return new CertificateHandleImpl(issuingCountry, gph, sssid, datInGID, referenceNumber, yachtName,
                 sailNumber, boatClassName, designer, builder, yearBuilt, issueDate, certType, isOneDesign, isProvisional);
+    }
+
+    private Date parseDate(String dateString) throws ParseException {
+        StringBuilder stringBuilder = new StringBuilder(dateString);
+        char timeZoneCharacter = stringBuilder.charAt(stringBuilder.length()-1);
+        if(timeZoneCharacter== 'z' || timeZoneCharacter == 'Z'|| timeZoneCharacter == 'X') {
+            stringBuilder.deleteCharAt(stringBuilder.length()-1);
+        }
+       if(false == stringBuilder.toString().contains("+")) {
+           stringBuilder.append("+0000");
+       }
+
+        return isoTimestampFormat.parse(stringBuilder.toString());
     }
 
     @Override
