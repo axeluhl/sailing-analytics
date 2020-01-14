@@ -18,8 +18,8 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
@@ -56,7 +56,7 @@ import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimeRange;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -264,14 +264,14 @@ public class CourseConfigurationBuilder {
     }
     
     public static MarkConfigurationResponseAnnotation getPositioningIfAvailable(Regatta regatta,
-            TrackedRace optionalRace, Mark mark, Function<DeviceIdentifier, Position> positionResolver) {
-        return createMarkConfigurationResponseAnnotation(optionalRace, mark, positionResolver,
-                findAllDevicesAndMappedRangesForMark(regatta, mark));
+            TrackedRace optionalRace, Mark mark, Function<DeviceIdentifier, GPSFix> positionResolver) {
+        return createMarkConfigurationResponseAnnotation(optionalRace, mark,
+                findAllDevicesAndMappedRangesForMark(regatta, mark, positionResolver));
     }
     
     private static MarkConfigurationResponseAnnotation createMarkConfigurationResponseAnnotation(
-            Function<DeviceIdentifier, Position> positionResolver, final DeviceIdentifier identifier) {
-        final Position position;
+            Function<DeviceIdentifier, GPSFix> positionResolver, final DeviceIdentifier identifier) {
+        final GPSFix position;
         if (identifier != null) {
             position = positionResolver.apply(identifier);
         } else {
@@ -282,41 +282,34 @@ public class CourseConfigurationBuilder {
 
     private static MarkConfigurationResponseAnnotation createMarkConfigurationResponseAnnotation(
             TrackedRace optionalRace, Mark mark,
-            Function<DeviceIdentifier, Position> positionResolver,
-            Iterable<Pair<DeviceIdentifier, TimeRange>> deviceMappings) {
-        Position position = null;
+            Iterable<Triple<DeviceIdentifier, TimeRange, GPSFix>> deviceMappings) {
+        GPSFix position = null;
         if (optionalRace != null) {
             final GPSFixTrack<Mark, GPSFix> trackForMark = optionalRace.getTrack(mark);
             if (trackForMark != null) {
-                final GPSFix lastFixOrNull = trackForMark.getLastFixAtOrBefore(MillisecondsTimePoint.now());
-                if (lastFixOrNull != null) {
-                    position = lastFixOrNull.getPosition();
-                }
+                position = trackForMark.getLastFixAtOrBefore(MillisecondsTimePoint.now());
             }
         }
         if (position == null) {
-            final Pair<DeviceIdentifier,TimeRange> mostRecentOrOngoingMapping = findMostRecentOrOngoingMapping(deviceMappings);
-            if (mostRecentOrOngoingMapping != null) {
-                position = positionResolver.apply(mostRecentOrOngoingMapping.getA());
-            }
+            position = findGpsFixForMostRecentOrOngoingMapping(deviceMappings);
         }
         return new MarkConfigurationResponseAnnotationImpl(position, deviceMappings);
     }
     
-    public static Pair<DeviceIdentifier, TimeRange> findMostRecentOrOngoingMapping(
-            Iterable<Pair<DeviceIdentifier, TimeRange>> deviceMappings) {
-        Pair<DeviceIdentifier, TimeRange> bestMatchingDeviceMapping = null;
-        for (Pair<DeviceIdentifier, TimeRange> deviceMapping : deviceMappings) {
-            if (bestMatchingDeviceMapping == null
+    public static GPSFix findGpsFixForMostRecentOrOngoingMapping(
+            Iterable<Triple<DeviceIdentifier, TimeRange, GPSFix>> deviceMappings) {
+        Triple<DeviceIdentifier, TimeRange, GPSFix> bestMatchingDeviceMapping = null;
+        for (Triple<DeviceIdentifier, TimeRange, GPSFix> deviceMapping : deviceMappings) {
+            if (deviceMapping.getC() != null && (bestMatchingDeviceMapping == null
                     || (deviceMapping.getB().hasOpenEnd() && !bestMatchingDeviceMapping.getB().hasOpenEnd())
                     || (deviceMapping.getB().hasOpenEnd() && bestMatchingDeviceMapping.getB().hasOpenEnd()
                             && deviceMapping.getB().startsAfter(bestMatchingDeviceMapping.getB()))
                     || (!deviceMapping.getB().hasOpenEnd() && !bestMatchingDeviceMapping.getB().hasOpenEnd()
-                            && deviceMapping.getB().endsAfter(bestMatchingDeviceMapping.getB()))) {
+                            && deviceMapping.getB().endsAfter(bestMatchingDeviceMapping.getB())))) {
                 bestMatchingDeviceMapping = deviceMapping;
             }
         }
-        return bestMatchingDeviceMapping;
+        return bestMatchingDeviceMapping == null ? null : bestMatchingDeviceMapping.getC();
     }
     
     /**
@@ -345,16 +338,18 @@ public class CourseConfigurationBuilder {
         return bestMatchingDeviceMapping;
     }
     
-    public static Iterable<Pair<DeviceIdentifier, TimeRange>> findAllDevicesAndMappedRangesForMark(
-            final Regatta regatta, Mark mark) {
+    public static Iterable<Triple<DeviceIdentifier, TimeRange, GPSFix>> findAllDevicesAndMappedRangesForMark(
+            final Regatta regatta, Mark mark, Function<DeviceIdentifier, GPSFix> positionResolver) {
         final Map<WithID, List<DeviceMappingWithRegattaLogEvent<WithID>>> deviceMappings = new RegattaLogDeviceMappingFinder<>(
                 regatta.getRegattaLog()).analyze();
         final List<DeviceMappingWithRegattaLogEvent<WithID>> foundMappings = deviceMappings.get(mark);
-        final Iterable<Pair<DeviceIdentifier, TimeRange>> result;
+        final Iterable<Triple<DeviceIdentifier, TimeRange, GPSFix>> result;
         if (foundMappings == null) {
             result = Collections.emptySet();
         } else {
-            result = foundMappings.stream().map(dm -> new Pair<>(dm.getDevice(), dm.getTimeRange())).collect(Collectors.toList());
+            result = foundMappings.stream()
+                    .map(dm -> new Triple<>(dm.getDevice(), dm.getTimeRange(), positionResolver.apply(dm.getDevice())))
+                    .collect(Collectors.toList());
         }
         return result;
     }
@@ -367,13 +362,13 @@ public class CourseConfigurationBuilder {
      * For device identifier-based positioning requests the device identifier will be returned and a query for the last known position of that device will
      * be launched using the {@code positionResolver}. If a last known position is found that way, it is included in the return value of this method.
      */
-    public static MarkConfigurationResponseAnnotation getPositioningIfAvailable(Positioning positioning, Function<DeviceIdentifier, Position> positionResolver) {
+    public static MarkConfigurationResponseAnnotation getPositioningIfAvailable(Positioning positioning, Function<DeviceIdentifier, GPSFix> positionResolver) {
         final MarkConfigurationResponseAnnotation result;
         if (positioning != null) {
             result = positioning.accept(new PositioningVisitor<MarkConfigurationResponseAnnotation>() {
                 @Override
                 public MarkConfigurationResponseAnnotation visit(FixedPositioning fixedPositioning) {
-                    return new MarkConfigurationResponseAnnotationImpl(fixedPositioning.getFixedPosition());
+                    return new MarkConfigurationResponseAnnotationImpl(new GPSFixImpl(fixedPositioning.getFixedPosition(), MillisecondsTimePoint.now()));
                 }
 
                 @Override

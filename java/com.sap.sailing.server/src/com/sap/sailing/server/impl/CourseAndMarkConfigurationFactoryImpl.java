@@ -115,7 +115,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
      * with the current implementation, queries of this type can take a long time to complete, especially when posed
      * to the archive server.
      */
-    private final Function<DeviceIdentifier, Position> lastKnownPositionResolver;
+    private final Function<DeviceIdentifier, GPSFix> lastKnownPositionResolver;
     private final RaceLogResolver raceLogResolver;
     private final DomainFactory domainFactory;
 
@@ -128,13 +128,12 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         this.raceLogResolver = raceLogResolver;
         lastKnownPositionResolver = identifier -> {
             // FIXME see above; doesn't work on replicas due to lack of valid DB, and can take a long time especially on the archive server
-            // TODO could as well return the GPSFix object which conveniently would combine the position with the time point which may also be interesting to clients...
-            Position lastPosition = null;
+            GPSFix lastPosition = null;
             try {
                 final Map<DeviceIdentifier, Timed> lastFix = sensorFixStore.getFixLastReceived(Collections.singleton(identifier));
                 final Timed t = lastFix.get(identifier);
                 if (t instanceof GPSFix) {
-                    lastPosition = ((GPSFix) t).getPosition();
+                    lastPosition = ((GPSFix) t);
                 }
             } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                 logger.log(Level.WARNING, "Could not load associated fix for device " + identifier, e);
@@ -482,7 +481,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                         update = true;
                         terminateOpenEndedDeviceMapping = true;
                     } else {
-                        final Position lastPingedPositionOrNull = lastKnownPositionResolver.apply(existingDeviceMapping.getDevice());
+                        final GPSFix lastFixOrNull = lastKnownPositionResolver.apply(existingDeviceMapping.getDevice());
+                        final Position lastPingedPositionOrNull = lastFixOrNull == null ? null : lastFixOrNull.getPosition();
                         update = lastPingedPositionOrNull == null || !lastPingedPositionOrNull.equals(position[0]);
                     }
                 } else {

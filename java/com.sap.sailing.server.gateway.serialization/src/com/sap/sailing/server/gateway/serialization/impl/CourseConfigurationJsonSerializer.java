@@ -8,7 +8,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.ControlPointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
@@ -26,7 +26,7 @@ import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.TimeRange;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 
 public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseConfiguration<MarkConfigurationResponseAnnotation>> {
 
@@ -44,6 +44,7 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
     public static final String FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_MAPPINGS = "trackingDevices";
     public static final String FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_TYPE = "trackingDeviceType";
     public static final String FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_HASH = "trackingDeviceHash";
+    public static final String FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_LAST_KNOWN_POSITION = "trackingDeviceLastKnownPosition";
     public static final String FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_MAPPED_FROM = "trackingDeviceMappedFromMillis";
     public static final String FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_MAPPED_TO = "trackingDeviceMappedToMillis";
     public static final String FIELD_MARK_CONFIGURATION_LAST_KNOWN_POSITION = "lastKnownPosition";
@@ -60,12 +61,12 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
 
     private final JsonSerializer<RepeatablePart> repeatablePartJsonSerializer;
     private final JsonSerializer<CommonMarkProperties> commonMarkPropertiesJsonSerializer;
-    private final JsonSerializer<Position> positionJsonSerializer;
+    private final JsonSerializer<GPSFix> gpsFixJsonSerializer;
 
     public CourseConfigurationJsonSerializer() {
-        repeatablePartJsonSerializer = new RepeatablePartJsonSerializer();
-        commonMarkPropertiesJsonSerializer = new CommonMarkPropertiesJsonSerializer();
-        this.positionJsonSerializer = new PositionJsonSerializer();
+        this.repeatablePartJsonSerializer = new RepeatablePartJsonSerializer();
+        this.commonMarkPropertiesJsonSerializer = new CommonMarkPropertiesJsonSerializer();
+        this.gpsFixJsonSerializer = new GPSFixJsonSerializer();
     }
 
     @Override
@@ -143,7 +144,7 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
                 final JSONArray deviceMappings = new JSONArray();
                 markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_MAPPINGS,
                         deviceMappings);
-                for (Pair<DeviceIdentifier, TimeRange> deviceMapping : markConfiguration.getAnnotationInfo()
+                for (Triple<DeviceIdentifier, TimeRange, GPSFix> deviceMapping : markConfiguration.getAnnotationInfo()
                         .getDeviceMappings()) {
                     final JSONObject deviceMappingObject = new JSONObject();
                     final DeviceIdentifier deviceIdentifier = deviceMapping.getA();
@@ -160,11 +161,16 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
                         deviceMappingObject.put(FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_MAPPED_TO,
                                 mappedTimeRange.to().asMillis());
                     }
+                    final GPSFix lastKnownPosition = deviceMapping.getC();
+                    if (lastKnownPosition != null) {
+                        deviceMappingObject.put(FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_LAST_KNOWN_POSITION,
+                                gpsFixJsonSerializer.serialize(lastKnownPosition));
+                    }
                     deviceMappings.add(deviceMappingObject);
                 }
                 if (markConfiguration.getAnnotationInfo().getLastKnownPosition() != null) {
                     markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_LAST_KNOWN_POSITION,
-                            positionJsonSerializer.serialize(markConfiguration.getAnnotationInfo().getLastKnownPosition()));
+                            gpsFixJsonSerializer.serialize(markConfiguration.getAnnotationInfo().getLastKnownPosition()));
                 }
             }
             markConfigurationsToTempIdMap.put(markConfiguration, markConfigurationId);

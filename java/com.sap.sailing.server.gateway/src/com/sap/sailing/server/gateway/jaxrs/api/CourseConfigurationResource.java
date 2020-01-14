@@ -41,7 +41,6 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.coursetemplate.ControlPointWithMarkConfiguration;
@@ -87,7 +86,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
     private static final Logger log = Logger.getLogger(CourseConfigurationResource.class.getName());
     
     private JsonSerializer<CourseConfiguration<MarkConfigurationResponseAnnotation>> courseConfigurationJsonSerializer;
-    private final BiFunction<Regatta, DeviceIdentifier, Position> positionResolver;
+    private final BiFunction<Regatta, DeviceIdentifier, GPSFix> positionResolver;
     private DeviceIdentifierJsonDeserializer deviceIdentifierDeserializer;
     private TypeBasedServiceFinder<DeviceIdentifierJsonHandler> deviceJsonServiceFinder;
 
@@ -95,13 +94,13 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
 
     public CourseConfigurationResource() {
         positionResolver = (regatta, deviceIdentifier) -> {
-            Position lastPosition = null;
+            GPSFix lastPosition = null;
             try {
                 // FIXME terribly slow! Furthermore, looking up by deviceIdentifier only misses any other position sources; use regatta?
                 final Map<DeviceIdentifier, Timed> lastFix = getService().getSensorFixStore().getFixLastReceived(Collections.singleton(deviceIdentifier));
                 final Timed t = lastFix.get(deviceIdentifier);
                 if (t instanceof GPSFix) {
-                    lastPosition = ((GPSFix) t).getPosition();
+                    lastPosition = ((GPSFix) t);
                 }
             } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                 log.log(Level.WARNING, "Could not load associated fix for device " + deviceIdentifier, e);
@@ -330,9 +329,9 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
     }
 
     private MarkConfigurationResponseAnnotation getLastKnownPositionInformation(MarkConfigurationRequestAnnotation positioningAnnotation,
-            Mark regattaMark, BiFunction<Regatta, DeviceIdentifier, Position> positionResolver, Regatta regatta) {
+            Mark regattaMark, BiFunction<Regatta, DeviceIdentifier, GPSFix> positionResolver, Regatta regatta) {
         final MarkConfigurationResponseAnnotation result;
-        final Function<DeviceIdentifier, Position> positionResolverFromDeviceIdentifier = deviceIdentifier->positionResolver.apply(regatta, deviceIdentifier);
+        final Function<DeviceIdentifier, GPSFix> positionResolverFromDeviceIdentifier = deviceIdentifier->positionResolver.apply(regatta, deviceIdentifier);
         if (regattaMark == null) {
             if (positioningAnnotation != null) {
                 result = CourseConfigurationBuilder.getPositioningIfAvailable(positioningAnnotation.getOptionalPositioning(),
