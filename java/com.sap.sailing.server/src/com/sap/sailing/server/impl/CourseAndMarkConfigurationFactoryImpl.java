@@ -2,6 +2,7 @@ package com.sap.sailing.server.impl;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,6 +58,7 @@ import com.sap.sailing.domain.coursetemplate.FixedPositioning;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation.MarkRoleCreationRequest;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationResponseAnnotation;
 import com.sap.sailing.domain.coursetemplate.MarkPairWithConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
@@ -241,13 +243,13 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     final RegattaMarkConfiguration<MarkConfigurationRequestAnnotation> regattaMarkConfiguration = (RegattaMarkConfiguration<MarkConfigurationRequestAnnotation>) markConfiguration;
                     effectiveMarkConfiguration = new RegattaMarkConfigurationImpl<MarkConfigurationRequestAnnotation>(regattaMarkConfiguration.getMark(),
                             new MarkConfigurationRequestAnnotationImpl(/* storeToInventory */ true,
-                                    regattaMarkConfiguration.getAnnotationInfo().getOptionalPositioning()),
+                                    regattaMarkConfiguration.getAnnotationInfo().getOptionalPositioning(), /* optionalMarkRoleCreationRequest */ null),
                             regattaMarkConfiguration.getOptionalMarkTemplate(), markPropertiesInInventory);
                 } else {
                     effectiveMarkConfiguration = new MarkPropertiesBasedMarkConfigurationImpl<>(markPropertiesInInventory,
                             markConfiguration.getOptionalMarkTemplate(), new MarkConfigurationRequestAnnotationImpl(/* storeToInventory */ true,
                                     // use the MarkProperty's own positioning information (which should be up to date here with the request annotation):
-                                    markPropertiesInInventory.getPositioningInformation()));
+                                    markPropertiesInInventory.getPositioningInformation(), /* optionalMarkRoleCreationRequest */ null));
                 }
                 effectiveConfigurations.put(markConfiguration, effectiveMarkConfiguration);
             } else {
@@ -262,7 +264,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 effectiveConfigurations);
         return new CourseConfigurationWithMarkRolesImpl<>(courseConfiguration.getOptionalCourseTemplate(),
                 new HashSet<>(effectiveConfigurations.values()),
-                ensureMarkRoles(waypointConfigurationMapper.explicitAssociatedRoles),
+                waypointConfigurationMapper.explicitAssociatedRoles,
                 waypointConfigurationMapper.effectiveWaypoints, courseConfiguration.getRepeatablePart(),
                 courseConfiguration.getNumberOfLaps(), courseConfiguration.getName(),
                 courseConfiguration.getShortName(), courseConfiguration.getOptionalImageURL());
@@ -285,26 +287,33 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     }
     
     private MarkRole resolveMarkRole(UUID markRoleId, CourseTemplate optionalCourseTemplate) {
+        final MarkRole result;
         if (markRoleId == null) {
-            return null;
+            result = null;
+        } else {
+            MarkRole markRole = null;
+            if (optionalCourseTemplate != null) {
+                markRole = optionalCourseTemplate.getMarkRoleByIdIfContainedInCourseTemplate(markRoleId);
+            }
+            if (markRole == null) {
+                markRole = getSharedSailingData().getMarkRoleById(markRoleId);
+            }
+            result = markRole;
         }
-        MarkRole markRole = null;
-        if (optionalCourseTemplate != null) {
-            markRole = optionalCourseTemplate.getMarkRoleByIdIfContainedInCourseTemplate(markRoleId);
-        }
-        if (markRole == null) {
-            markRole = getSharedSailingData().getMarkRoleById(markRoleId);
-        }
-        return markRole;
+        return result;
     }
 
     @Override
     public CourseConfiguration<MarkConfigurationRequestAnnotation> createCourseTemplateAndUpdatedConfiguration(
             final CourseConfiguration<MarkConfigurationRequestAnnotation> courseConfiguration, Iterable<String> tags,
             Optional<UserGroup> optionalNonDefaultGroupOwnership) {
+        final Set<MarkRole> allMarkRolesInNewCourseTemplate = new HashSet<>(courseConfiguration.getAssociatedRoles().values());
         final CourseConfigurationWithMarkRoles<MarkConfigurationRequestAnnotation> courseConfigurationAfterInventory = handleSaveToInventory(courseConfiguration, optionalNonDefaultGroupOwnership);
         final Map<MarkConfiguration<MarkConfigurationRequestAnnotation>, MarkRole> markRolesByMarkConfigurations = new HashMap<>();
         final Map<MarkConfiguration<MarkConfigurationRequestAnnotation>, MarkConfiguration<MarkConfigurationRequestAnnotation>> marksConfigurationsMapping = new HashMap<>();
+        final Set<MarkTemplate> allMarkTemplatesInNewCourseTemplate = new HashSet<>();
+        final Map<MarkTemplate, MarkRole> defaultMarkRolesForMarkTemplates = new HashMap<>();
+        final Map<MarkRole, MarkTemplate> defaultMarkTemplatesForMarkRoles = new HashMap<>();
         for (MarkConfiguration<MarkConfigurationRequestAnnotation> markConfiguration : courseConfigurationAfterInventory.getAllMarks()) {
             final MarkConfiguration<MarkConfigurationRequestAnnotation> effectiveConfiguration;
             // TODO visitor pattern for MarkConfiguration?
@@ -331,7 +340,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 } else if (markConfiguration instanceof MarkPropertiesBasedMarkConfiguration) {
                     // In this case the appearance of the created MarkTemplate is identical to the MarkProperties it is
                     // based on.
-                    final MarkProperties markProperties = ((MarkPropertiesBasedMarkConfiguration<MarkConfigurationRequestAnnotation>) markConfiguration).getOptionalMarkProperties();
+                    effectiveConfiguration = markConfiguration;
                 } else if (markConfiguration instanceof FreestyleMarkConfiguration) {
                     final MarkProperties markPropertiesOrNull = markConfiguration.getOptionalMarkProperties();
                     if (markPropertiesOrNull != null) {
@@ -351,10 +360,22 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     throw new IllegalStateException("Unknown mark configuration type found");
                 }
             }
-            final MarkRole effectiveMarkRole = courseConfiguration.getAssociatedRoles().get(markConfiguration);
-            if (effectiveMarkRole != null) {
-                markRolesByMarkConfigurations.put(markConfiguration, effectiveMarkRole);
+            allMarkTemplatesInNewCourseTemplate.add(effectiveMarkTemplate);
+            MarkRole effectiveMarkRole = courseConfiguration.getAssociatedRoles().get(markConfiguration);
+            if (effectiveMarkRole == null) {
+                // no existing MarkRole specified for the mark configuration; we now need to look for a MarkRoleCreationRequest annotation:
+                final MarkRoleCreationRequest optionalMarkRoleCreationRequest = markConfiguration.getAnnotationInfo().getOptionalMarkRoleCreationRequest();
+                if (optionalMarkRoleCreationRequest != null) {
+                    effectiveMarkRole = getOrCreateMarkRole(allMarkRolesInNewCourseTemplate, optionalMarkRoleCreationRequest);
+                    allMarkRolesInNewCourseTemplate.add(effectiveMarkRole); // could replace effectiveMarkRole by itself, but that's no problem
+                }
             }
+            assert effectiveMarkTemplate != null;
+            if (effectiveMarkRole != null) {
+                defaultMarkRolesForMarkTemplates.put(effectiveMarkTemplate, effectiveMarkRole);
+                defaultMarkTemplatesForMarkRoles.put(effectiveMarkRole, effectiveMarkTemplate); // several different mark templates may refer to the same mark role; last wins for the default
+            }
+            markRolesByMarkConfigurations.put(markConfiguration, effectiveMarkRole);
             marksConfigurationsMapping.put(markConfiguration, effectiveConfiguration);
         }
         // now we should have a MarkTemplate for each MarkConfiguration from the CourseConfiguration;
@@ -369,21 +390,20 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 courseConfigurationAfterInventory.getWaypoints(),
                 courseConfigurationAfterInventory.getAssociatedRoles(), markRolesByMarkConfigurations) {
             @Override
-            protected ControlPointTemplate createMarkPair(MarkRole left, MarkRole right, String name,
-                    String shortName) {
+            protected ControlPointTemplate createMarkPair(MarkRole left, MarkRole right, String name, String shortName) {
                 return markRolePairFactory.create(name, shortName, left, right);
             }
 
             @Override
-            protected WaypointTemplate createWaypoint(ControlPointTemplate controlPoint,
-                    PassingInstruction passingInstruction) {
+            protected WaypointTemplate createWaypoint(ControlPointTemplate controlPoint, PassingInstruction passingInstruction) {
                 return new WaypointTemplateImpl(controlPoint, passingInstruction);
             }
         };
         final CourseTemplate newCourseTemplate = getSharedSailingData().createCourseTemplate(courseConfigurationAfterInventory.getName(), courseConfigurationAfterInventory.getShortName(),
-                new HashSet<>(markRolesByMarkConfigurations.values()), waypointTemplateMapper.effectiveWaypoints, ensureMarkRoles(waypointTemplateMapper.allAssociatedRoles),
+                allMarkTemplatesInNewCourseTemplate, waypointTemplateMapper.effectiveWaypoints,
+                defaultMarkRolesForMarkTemplates, defaultMarkTemplatesForMarkRoles,
                 courseConfigurationAfterInventory.getRepeatablePart(), tags,
-                courseConfigurationAfterInventory.getOptionalImageURL(), courseConfigurationAfterInventory.getNumberOfLaps(), defaultMarkTemplatesForMarkRoles);
+                courseConfigurationAfterInventory.getOptionalImageURL(), courseConfigurationAfterInventory.getNumberOfLaps());
         return new CourseConfigurationImpl<MarkConfigurationRequestAnnotation>(newCourseTemplate,
                 new HashSet<>(marksConfigurationsMapping.values()),
                 waypointConfigurationMapper.allAssociatedRoles, waypointConfigurationMapper.effectiveWaypoints, courseConfigurationAfterInventory.getRepeatablePart(),
@@ -391,12 +411,32 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 courseConfigurationAfterInventory.getName(), courseConfigurationAfterInventory.getShortName(), courseConfigurationAfterInventory.getOptionalImageURL());
     }
     
+    /**
+     * Based on the {@code markRoleCreationRequest} looks for a {@link MarkRole} in {@code markRoles}
+     * that matches all properties requested (name and short name being equal to the values, including {@code null},
+     * as requested in {@code markRoleCreationRequest}. If none are found, a new {@link MarkRole} entity is
+     * created with the properties requested and returned. It is the caller's responsibility to add it to the
+     * {@code markRoles} collection for subsequent calls. It isn't added here.<p>
+     * 
+     * If one is found, it is returned.
+     */
+    private MarkRole getOrCreateMarkRole(Iterable<MarkRole> markRoles,
+            MarkRoleCreationRequest markRoleCreationRequest) {
+        for (final MarkRole markRole : markRoles) {
+            if (Util.equalsWithNull(markRole.getName(), markRoleCreationRequest.getMarkRoleName()) &&
+                    Util.equalsWithNull(markRole.getShortName(), markRoleCreationRequest.getMarkRoleShortName())) {
+                return markRole;
+            }
+        }
+        return getSharedSailingData().createMarkRole(markRoleCreationRequest.getMarkRoleName(), markRoleCreationRequest.getMarkRoleShortName());
+    }
+
     private <P> void recordUsagesForMarkProperties(Iterable<WaypointWithMarkConfiguration<P>> effectiveWaypoints,
             Map<MarkConfiguration<P>, MarkRole> allAssociatedRoles) {
         for (MarkConfiguration<P> markConfiguration : getAllMarkConfigurations(effectiveWaypoints)) {
             final MarkProperties markProperties = markConfiguration.getOptionalMarkProperties();
             if (markProperties != null) {
-                final MarkRole role = getExplicitOrImplicitMarkRole(allAssociatedRoles, markConfiguration);
+                final MarkRole role = allAssociatedRoles.get(markConfiguration);
                 try {
                     getSharedSailingData().recordUsage(markProperties, ensureMarkRole(role));
                 } catch (Exception e) {
@@ -417,15 +457,6 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         }
     }
 
-    private <P> MarkRole getExplicitOrImplicitMarkRole(Map<MarkConfiguration<P>, ? extends MarkRole> associatedRoles, MarkConfiguration<P> markConfiguration) {
-        MarkRole effectiveRole = associatedRoles.get(markConfiguration);
-        if (effectiveRole == null) {
-            // FIXME annotate mark configuration accordingly instead
-            effectiveRole = new MarkRoleNameImpl(markConfiguration.getEffectiveProperties().getName(), markConfiguration.getEffectiveProperties().getShortName());
-        }
-        return effectiveRole;
-    }
-    
     private <P> Iterable<MarkConfiguration<P>> getAllMarkConfigurations(Iterable<WaypointWithMarkConfiguration<P>> waypoints) {
         final Set<MarkConfiguration<P>> result = new HashSet<>();
         for (WaypointWithMarkConfiguration<P> waypoint : waypoints) {
@@ -636,12 +667,10 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                                         (mc, existingTP) -> (existingTP == null || existingTP.before(effectiveUsageTP))
                                         ? effectiveUsageTP
                                                 : existingTP);
-                                MarkRole roleName = resolveMarkRole(courseOrNull.getAssociatedRoles().get(mark), courseTemplate);
-                                if (roleName == null) {
-                                    // FIXME annotate mark configuration accordingly instead
-                                    roleName = new MarkRoleNameImpl(mark.getName(), mark.getShortName());
+                                MarkRole markRole = resolveMarkRole(courseOrNull.getAssociatedRoles().get(mark), courseTemplate);
+                                if (markRole != null) {
+                                    usagesForRole.addUsage(regattaMarkConfiguration, markRole, effectiveUsageTP);
                                 }
-                                usagesForRole.addUsage(regattaMarkConfiguration, roleName, effectiveUsageTP);
                             }
                         }
                     }
@@ -1063,7 +1092,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             for (Entry<MarkConfiguration<P>, ? extends MarkRole> entry : existingRoleMapping.entrySet()) {
                 explicitAssociatedRoles.put(mapMarkConfiguration(entry.getKey()), entry.getValue());
             }
-            allAssociatedRoles.putAll(explicitAssociatedRoles); // FIXME isn't this redundant? mapMarkConfiguration will put explicit role mappings into allAssociatedRoles
+            allAssociatedRoles.putAll(explicitAssociatedRoles);
             // Cache to allow reusing ControlPointWithTwoMarks objects that are based on the same MarkPairWithConfiguration
             final Map<MarkPairWithConfiguration<P>, CP> markPairCache = new HashMap<>();
             for (WaypointWithMarkConfiguration<P> waypointWithMarkConfiguration : waypoints) {
@@ -1089,7 +1118,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 throw new IllegalStateException("Non declared mark found in waypoint sequence");
             }
             // If an explicit role mapping isn't given -> default to the mark's name
-            allAssociatedRoles.computeIfAbsent(mark, m -> getExplicitOrImplicitMarkRole(existingRoleMapping, markConfiguration));
+            allAssociatedRoles.computeIfAbsent(mark, m -> existingRoleMapping.get(markConfiguration));
             return mark;
         }
         

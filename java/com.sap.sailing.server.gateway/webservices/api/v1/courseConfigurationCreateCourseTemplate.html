@@ -34,7 +34,8 @@
             <ul>
                 <li>id (required): A string ID (e.g. UUID) that identifies the mark configuration in this course configuration. The ID defined here is used to form the waypoint sequence. The IDs defined here are in no way stored and can freely be regenerated for every API call.</li>
                 <li>associatedRoleId (optional): For mark templates that are used in the waypoint sequence, an optional but unique role may be specified by its ID.</li>
-                <li>associatedRole (optional): Alternatively to the associatedRoleId the name of a role can be passed. If a role with this name does not exist it will be created.</li>
+                <li>associatedRole (optional): Alternatively to the associatedRoleId the name of a role can be passed. A role with this name will then be created.</li>
+                <li>associatedRoleShortName (optional, if associatedRole is provided): Alternatively to the associatedRoleId and additional to associatedRole, this attribute can be used to specify the short name of a new role to be created for this mark configuration in the course template.</li>
                 <li>markId (optional): Only applicable if a regatta context is specified (query parameter). The ID of a mark being available in the specified regatta. This mark is used as is regarding the appearance. Any additional properties (excluding positioning) is ignored.</li>
                 <li>markTemplateId (optional): The ID of a mark template a mark to create is based on.</li>
                 <li>markPropertiesId (optional): Only applicable if no markId is defined. The ID of a mark properties entry a mark to create is based on. If given, available appearance properties overwrite those of a given mark template when creating a mark. If available, the positioning information of the mark properties is used for the created mark.</li>

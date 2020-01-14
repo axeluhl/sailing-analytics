@@ -18,8 +18,10 @@ import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation.MarkRoleCreationRequest;
 import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
+import com.sap.sailing.domain.coursetemplate.impl.MarkConfigurationRequestAnnotationImpl.MarkRoleCreationRequestImpl;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -83,20 +85,26 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
                         : null;
                 final boolean storeToInventory = Boolean.TRUE.equals(markConfigurationJSON
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_STORE_TO_INVENTORY));
-                final MarkConfiguration<MarkConfigurationRequestAnnotation> markConfiguration = builder.addMarkConfiguration(
-                        markTemplateID != null ? UUID.fromString(markTemplateID) : null,
-                        markPropertiesID != null ? UUID.fromString(markPropertiesID) : null,
-                        markID != null ? UUID.fromString(markID) : null, optionalFreestyleProperties,
-                                positioning, storeToInventory);
-                final String markRoleIdOrNullAsString = (String) markConfigurationJSON
-                        .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_ID);
-                final UUID markRoleIdOrNull = markRoleIdOrNullAsString == null ? null : UUID.fromString(markRoleIdOrNullAsString);
                 String markRoleNameOrNull = (String) markConfigurationJSON
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_NAME);
                 String markRoleShortNameOrNull = (String) markConfigurationJSON
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_SHORT_NAME);
-                if (markRoleIdOrNull != null || (markRoleNameOrNull != null && !markRoleNameOrNull.isEmpty())) {
-                    builder.setRole(markConfiguration, markRoleIdOrNull, markRoleNameOrNull, markRoleShortNameOrNull);
+                final MarkRoleCreationRequest markRoleCreationRequestOrNull;
+                if (markRoleNameOrNull != null) {
+                    markRoleCreationRequestOrNull = new MarkRoleCreationRequestImpl(markRoleNameOrNull, markRoleShortNameOrNull);
+                } else {
+                    markRoleCreationRequestOrNull = null;
+                }
+                final MarkConfiguration<MarkConfigurationRequestAnnotation> markConfiguration = builder.addMarkConfiguration(
+                        markTemplateID != null ? UUID.fromString(markTemplateID) : null,
+                        markPropertiesID != null ? UUID.fromString(markPropertiesID) : null,
+                        markID != null ? UUID.fromString(markID) : null, optionalFreestyleProperties,
+                                positioning, storeToInventory, markRoleCreationRequestOrNull);
+                final String markRoleIdOrNullAsString = (String) markConfigurationJSON
+                        .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_ID);
+                final UUID markRoleIdOrNull = markRoleIdOrNullAsString == null ? null : UUID.fromString(markRoleIdOrNullAsString);
+                if (markRoleIdOrNull != null) {
+                    builder.setRole(markConfiguration, markRoleIdOrNull);
                 }
                 markConfigurationsByID.put(
                         UUID.fromString((String) markConfigurationJSON
