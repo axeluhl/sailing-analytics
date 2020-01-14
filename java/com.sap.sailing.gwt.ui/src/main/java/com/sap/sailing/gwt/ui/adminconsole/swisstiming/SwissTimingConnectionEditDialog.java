@@ -6,15 +6,15 @@ import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Edits a {@link SwissTimingConfigurationWithSecurityDTO} object. Can be accessed from
- * {@link SwissTimingConnectionTableWrapper}. The Manage2Sail event ID and the complete URL field update each other
- * mutually upon manual update.
+ * {@link SwissTimingConnectionTableWrapper}.The Manage2Sail event ID and the complete URL
+ * field update each other mutually upon manual update.
  */
 public class SwissTimingConnectionEditDialog extends SwissTimingConnectionDialog {
     /**
-     * The class creates the UI-dialog to type in the Data about a the selected swiss timing account.
+     * The class creates the UI-dialog to edit a selected {@link SwissTimingConfigurationWithSecurityDTO}.
      * 
-     * @param userToEdit
-     *            The 'userToEdit' parameter contains the user which should be changed or initialized.
+     * @param dtoToEdit
+     *            The 'dtoToEdit' parameter contains the {@link SwissTimingConfigurationWithSecurityDTO} which should be edited.
      */
     public SwissTimingConnectionEditDialog(final SwissTimingConfigurationWithSecurityDTO dtoToEdit,
             final DialogCallback<SwissTimingConfigurationWithSecurityDTO> callback, final UserService userService,

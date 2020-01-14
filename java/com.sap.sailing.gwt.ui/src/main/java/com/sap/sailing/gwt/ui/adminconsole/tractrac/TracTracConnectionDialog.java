@@ -13,8 +13,8 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
- * Edits a {@link TracTracConfigurationWithSecurityDTO} object. Can be accessed from
- * {@link TracTracConnectionTableWrapper}
+ * Creates a {@link TracTracConfigurationWithSecurityDTO} object. Can be accessed from
+ * {@link TracTracEventManagementPanel}
  */
 public class TracTracConnectionDialog extends DataEntryDialog<TracTracConfigurationWithSecurityDTO> {
     private static final StringMessages stringMessages = StringMessages.INSTANCE;
@@ -30,10 +30,7 @@ public class TracTracConnectionDialog extends DataEntryDialog<TracTracConfigurat
     protected String name;
 
     /**
-     * The class creates the UI-dialog to type in the Data about a the selected trac trac account.
-     * 
-     * @param userToEdit
-     *            The 'userToEdit' parameter contains the user which should be changed or initialized.
+     * The class creates the UI-dialog to create a {@link TracTracConfigurationWithSecurityDTO}.
      */
     public TracTracConnectionDialog(
             final DialogCallback<TracTracConfigurationWithSecurityDTO> callback, final UserService userService,

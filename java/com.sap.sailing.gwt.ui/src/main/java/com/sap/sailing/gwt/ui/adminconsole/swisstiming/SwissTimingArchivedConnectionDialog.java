@@ -12,8 +12,8 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
- * Edits a {@link SwissTimingArchiveConfigurationWithSecurityDTO} object. Can be accessed from
- * {@link SwissTimingArchivedConnectionTableWrapper}
+ * Creates a {@link SwissTimingArchiveConfigurationWithSecurityDTO} object. Can be accessed from
+ * {@link SwissTimingReplayConnectorPanel}
  */
 public class SwissTimingArchivedConnectionDialog
         extends DataEntryDialog<SwissTimingArchiveConfigurationWithSecurityDTO> {
@@ -37,10 +37,7 @@ public class SwissTimingArchivedConnectionDialog
     }
     
     /**
-     * The class creates the UI-dialog to type in the Data about a the selected swiss timing account.
-     * 
-     * @param userToEdit
-     *            The 'userToEdit' parameter contains the user which should be changed or initialized.
+     * The class creates the UI-dialog to create a new {@link SwissTimingArchiveConfigurationWithSecurityDTO}.
      */
     public SwissTimingArchivedConnectionDialog(
             final DialogCallback<SwissTimingArchiveConfigurationWithSecurityDTO> callback,

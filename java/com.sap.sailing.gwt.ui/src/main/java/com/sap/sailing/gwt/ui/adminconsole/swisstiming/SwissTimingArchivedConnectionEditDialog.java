@@ -10,10 +10,10 @@ import com.sap.sse.security.ui.client.UserService;
  */
 public class SwissTimingArchivedConnectionEditDialog extends SwissTimingArchivedConnectionDialog {
     /**
-     * The class creates the UI-dialog to type in the Data about a the selected swiss timing account.
+     * The class creates the UI-dialog to the selected {@link SwissTimingArchiveConfigurationWithSecurityDTO}.
      * 
-     * @param userToEdit
-     *            The 'userToEdit' parameter contains the user which should be changed or initialized.
+     * @param dtoToEdit
+     *            The 'dtoToEdit' parameter contains the {@link SwissTimingArchiveConfigurationWithSecurityDTO} which should be changed
      */
     public SwissTimingArchivedConnectionEditDialog(final SwissTimingArchiveConfigurationWithSecurityDTO dtoToEdit,
             final DialogCallback<SwissTimingArchiveConfigurationWithSecurityDTO> callback,

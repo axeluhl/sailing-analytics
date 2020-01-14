@@ -10,10 +10,10 @@ import com.sap.sse.security.ui.client.UserService;
  */
 public class TracTracConnectionEditDialog extends TracTracConnectionDialog {
     /**
-     * The class creates the UI-dialog to type in the Data about a the selected trac trac account.
+     * The class creates the UI-dialog to edit the selected {@link TracTracConfigurationWithSecurityDTO}.
      * 
-     * @param userToEdit
-     *            The 'userToEdit' parameter contains the user which should be changed or initialized.
+     * @param dtoToEdit
+     *            The 'dtoToEdit' parameter contains the {@link TracTracConfigurationWithSecurityDTO} which should be edited.
      */
     public TracTracConnectionEditDialog(final TracTracConfigurationWithSecurityDTO dtoToEdit,
             final DialogCallback<TracTracConfigurationWithSecurityDTO> callback, final UserService userService,

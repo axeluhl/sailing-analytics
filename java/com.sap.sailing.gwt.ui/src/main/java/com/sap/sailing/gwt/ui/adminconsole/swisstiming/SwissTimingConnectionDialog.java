@@ -13,8 +13,8 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
- * Edits a {@link SwissTimingConfigurationWithSecurityDTO} object. Can be accessed from
- * {@link SwissTimingConnectionTableWrapper}. The Manage2Sail event ID and the complete URL
+ * Creates a {@link SwissTimingConfigurationWithSecurityDTO} object. Can be accessed from
+ * {@link SwissTimingEventManagementPanel}. The Manage2Sail event ID and the complete URL
  * field update each other mutually upon manual update.
  */
 public class SwissTimingConnectionDialog extends DataEntryDialog<SwissTimingConfigurationWithSecurityDTO> {
@@ -47,10 +47,7 @@ public class SwissTimingConnectionDialog extends DataEntryDialog<SwissTimingConf
     }
 
     /**
-     * The class creates the UI-dialog to type in the Data about a the selected swiss timing account.
-     * 
-     * @param userToEdit
-     *            The 'userToEdit' parameter contains the user which should be changed or initialized.
+     * The class creates the UI-dialog create a new {@link SwissTimingConfigurationWithSecurityDTO}.
      */
     public SwissTimingConnectionDialog(final DialogCallback<SwissTimingConfigurationWithSecurityDTO> callback,
             final UserService userService, final ErrorReporter errorReporter) {
