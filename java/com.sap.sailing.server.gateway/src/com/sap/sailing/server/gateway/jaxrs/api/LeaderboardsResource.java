@@ -273,10 +273,9 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     @Path("{name}/update")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces("application/json;charset=UTF-8")
-    public Response updateLeaderboard(String json) throws ParseException, JsonDeserializationException {
+    public Response updateLeaderboard(@PathParam("name") String leaderboardName, String json) throws ParseException, JsonDeserializationException {
         final Object requestBody = JSONValue.parseWithException(json);
         final JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
-        final String leaderboardName = (String) requestObject.get("leaderboardName");
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(
