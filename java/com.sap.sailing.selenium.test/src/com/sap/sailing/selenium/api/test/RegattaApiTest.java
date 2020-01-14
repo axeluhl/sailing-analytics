@@ -183,8 +183,8 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         RaceColumn[] result = regattaApi.addRaceColumn(ctx, EVENT_NAME, "T", 5);
         assertEquals("read: racecolumn.seriesname is different", "Default", result[0].getSeriesName());
         assertEquals("read: racecolumn.racename is different", "T1", result[0].getRaceName());
-        // assertEquals("read: racecolumn.seriesname is different", "Default", result[4].getSeriesName());
-        // assertEquals("read: racecolumn.racename is different", "T5", result[4].getRaceName());
+        assertEquals("read: racecolumn.seriesname is different", "Default", result[4].getSeriesName());
+        assertEquals("read: racecolumn.racename is different", "T5", result[4].getRaceName());
     }
     
     @Test
