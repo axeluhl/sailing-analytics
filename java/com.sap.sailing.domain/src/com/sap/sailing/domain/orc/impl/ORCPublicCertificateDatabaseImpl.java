@@ -354,13 +354,14 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
                 sailNumber, boatClassName, designer, builder, yearBuilt, issueDate, certType, isOneDesign, isProvisional);
     }
 
-    public Date parseDate(final String dateString) throws ParseException {
+    @Override
+    public Date parseDate(final String dateString) {
         DateFormat dateFormat = null;
         if (dateString.contains("GMT")) {
             try {
                 return timeAsGmt(dateString);
             } catch (Exception ex) {
-
+                logger.fine("Date is not in GMT format :"+dateString);
             }
         }
         for (String df : dateFormatsWithTimeZone) {
@@ -368,7 +369,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
                 dateFormat = new SimpleDateFormat(df);
                 return dateFormat.parse(dateString);
             } catch (Exception ex) {
-
+                logger.fine("Date is not parsable by "+df+" format :"+dateString);
             }
         }
         for (String df : dateFormatsWithoutTimeZone) {
@@ -378,10 +379,10 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
                 dateFormat.setTimeZone(timeZone);
                 return dateFormat.parse(dateString);
             } catch (Exception ex) {
-
+                logger.fine("Date is not parsable by "+df+" format :"+dateString);
             }
         }
-
+        logger.fine("Date is not parsable by any of the format :"+dateString);
         return null;
     }
     

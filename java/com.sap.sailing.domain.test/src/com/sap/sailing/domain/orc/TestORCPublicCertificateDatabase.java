@@ -12,6 +12,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -111,6 +112,31 @@ public class TestORCPublicCertificateDatabase {
             }
         }
         assertTrue(foundYear);
+    }
+    
+    @Test
+    public void testParseDateSuccessCases() {
+        Assert.assertNotNull(db.parseDate("2019-02-21T10:38:00Z"));
+        Assert.assertNotNull(db.parseDate("2019-02-21T10:38:00.000GMT+2"));
+        Assert.assertNotNull(db.parseDate("2019-02-21T10:38:00.000 GMT+2"));
+        Assert.assertNotNull(db.parseDate("2019-02-21T10:38:00.000+0800"));
+        Assert.assertNotNull(db.parseDate("2019-02-21T10:38:00.000+08:00"));
+        Assert.assertNotNull(db.parseDate("2019-02-21T10:38:00.000-08"));
+        Assert.assertNotNull(db.parseDate("2019-02-21T10:38:00.000Z"));
+        Assert.assertNotNull(db.parseDate("2019-02-21T10:38:00.000z"));
+        Assert.assertNotNull(db.parseDate("2019-02-21T10:38:00z"));
+    }
+    
+    @Test
+    public void testParseDateFailureCases() {
+        Assert.assertNull(db.parseDate("2019-02-21"));
+        Assert.assertNull(db.parseDate("2019-02-21T10:38GMT+2"));
+        Assert.assertNull(db.parseDate("2019-02-21T10:38+0800"));
+        Assert.assertNull(db.parseDate("2019-02-21T10:38+08:00"));
+        Assert.assertNull(db.parseDate("2019-02-21T10:38-08"));
+        Assert.assertNull(db.parseDate("2019-02-21T10:38Z"));
+        Assert.assertNull(db.parseDate("2019-02-21T10z"));
+        Assert.assertNull(db.parseDate("2019-02-21T10:38z"));
     }
 
     private void assertSoulmate(final String referenceNumber, CertificateHandle handle) {
