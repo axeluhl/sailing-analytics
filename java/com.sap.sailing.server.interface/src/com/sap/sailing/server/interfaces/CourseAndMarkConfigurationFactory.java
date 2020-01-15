@@ -94,11 +94,12 @@ public interface CourseAndMarkConfigurationFactory {
      * <p>
      * 
      * Any {@link MarkTemplate} not mapped to a {@link Mark} (in case, no {@link Regatta} is given, these are just all
-     * {@link MarkTemplate}s), is a candidate to be mapped to a {@link MarkProperties} of the user's inventory. Matching
-     * of {@link MarkProperties} is primarily done based on associated roles for which a {@link MarkProperties} was last
-     * used (see {@link MarkProperties#getLastUsedRole()}. If no matching of {@link MarkProperties} using roles is
-     * possible, a direct association is done if a {@link MarkProperties} was explicitly mapped to a specific
-     * {@link MarkTemplate} before.
+     * {@link MarkTemplate}s) is a candidate to be mapped to a {@link MarkProperties} of the user's "inventory" (the set
+     * of {@link MarkProperties} readable by the current user). Matching of {@link MarkProperties} is primarily done
+     * based on associated roles for which a {@link MarkProperties} was last used (see
+     * {@link MarkProperties#getLastUsedRole()}. If no matching of {@link MarkProperties} using roles is possible, a
+     * direct association is done if a {@link MarkProperties} was explicitly mapped to a specific {@link MarkTemplate}
+     * before (see {@link MarkProperties#getLastUsedTemplate()}).
      * <p>
      * 
      * The {@link CourseConfiguration#getNumberOfLaps() number of laps} matches the

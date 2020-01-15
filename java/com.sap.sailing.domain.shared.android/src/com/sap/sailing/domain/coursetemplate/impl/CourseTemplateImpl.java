@@ -171,7 +171,7 @@ public class CourseTemplateImpl extends NamedWithUUIDImpl implements CourseTempl
     }
 
     /**
-     * Similar code can be found in {@link CourseConfigurationBaseImpl#getWaypoints(int)}; both methods
+     * Similar code can be found in {@link CourseConfigurationImpl#getWaypoints(int)}; both methods
      * rely on {@link RepeatablePart#createSequence(int, Iterable)} to do the actual work.
      */
     @Override

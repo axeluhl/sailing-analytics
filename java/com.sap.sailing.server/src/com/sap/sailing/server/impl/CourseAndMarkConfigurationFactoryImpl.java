@@ -2,7 +2,6 @@ package com.sap.sailing.server.impl;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,7 +51,6 @@ import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.ControlPointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
-import com.sap.sailing.domain.coursetemplate.CourseConfigurationWithMarkRoles;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.FixedPositioning;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
@@ -76,7 +74,6 @@ import com.sap.sailing.domain.coursetemplate.TrackingDeviceBasedPositioning;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.impl.CourseConfigurationImpl;
-import com.sap.sailing.domain.coursetemplate.impl.CourseConfigurationWithMarkRolesImpl;
 import com.sap.sailing.domain.coursetemplate.impl.FreestyleMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkConfigurationRequestAnnotationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPairWithConfigurationImpl;
@@ -199,7 +196,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
      *            their group owner which otherwise will default to the calling subject user's default creation group
      *            for the server / replica set on which this request is executed.
      */
-    private CourseConfigurationWithMarkRoles<MarkConfigurationRequestAnnotation> handleSaveToInventory(
+    private CourseConfiguration<MarkConfigurationRequestAnnotation> handleSaveToInventory(
             CourseConfiguration<MarkConfigurationRequestAnnotation> courseConfiguration,
             Optional<UserGroup> optionalNonDefaultGroupOwnership) {
         final Map<MarkConfiguration<MarkConfigurationRequestAnnotation>, MarkConfiguration<MarkConfigurationRequestAnnotation>> effectiveConfigurations = new HashMap<>();
@@ -262,7 +259,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 new CourseConfigurationToCourseConfigurationMapper<MarkConfigurationRequestAnnotation>(
                 courseConfiguration.getWaypoints(), courseConfiguration.getAssociatedRoles(),
                 effectiveConfigurations);
-        return new CourseConfigurationWithMarkRolesImpl<>(courseConfiguration.getOptionalCourseTemplate(),
+        return new CourseConfigurationImpl<>(courseConfiguration.getOptionalCourseTemplate(),
                 new HashSet<>(effectiveConfigurations.values()),
                 waypointConfigurationMapper.explicitAssociatedRoles,
                 waypointConfigurationMapper.effectiveWaypoints, courseConfiguration.getRepeatablePart(),
@@ -308,7 +305,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             final CourseConfiguration<MarkConfigurationRequestAnnotation> courseConfiguration, Iterable<String> tags,
             Optional<UserGroup> optionalNonDefaultGroupOwnership) {
         final Set<MarkRole> allMarkRolesInNewCourseTemplate = new HashSet<>(courseConfiguration.getAssociatedRoles().values());
-        final CourseConfigurationWithMarkRoles<MarkConfigurationRequestAnnotation> courseConfigurationAfterInventory = handleSaveToInventory(courseConfiguration, optionalNonDefaultGroupOwnership);
+        final CourseConfiguration<MarkConfigurationRequestAnnotation> courseConfigurationAfterInventory = handleSaveToInventory(courseConfiguration, optionalNonDefaultGroupOwnership);
         final Map<MarkConfiguration<MarkConfigurationRequestAnnotation>, MarkRole> markRolesByMarkConfigurations = new HashMap<>();
         final Map<MarkConfiguration<MarkConfigurationRequestAnnotation>, MarkConfiguration<MarkConfigurationRequestAnnotation>> marksConfigurationsMapping = new HashMap<>();
         final Set<MarkTemplate> allMarkTemplatesInNewCourseTemplate = new HashSet<>();
@@ -547,7 +544,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             final CourseConfiguration<MarkConfigurationRequestAnnotation> courseConfiguration,
             TimePoint timePointForDefinitionOfMarksAndDeviceMappings,
             AbstractLogEventAuthor author, Optional<UserGroup> optionalNonDefaultGroupOwnership) {
-        final CourseConfigurationWithMarkRoles<MarkConfigurationRequestAnnotation> courseConfigurationAfterInventory =
+        final CourseConfiguration<MarkConfigurationRequestAnnotation> courseConfigurationAfterInventory =
                 handleSaveToInventory(courseConfiguration, optionalNonDefaultGroupOwnership);
         recordUsagesForMarkProperties(courseConfiguration.getWaypoints(), courseConfiguration.getAssociatedRoles());
         final Map<MarkConfiguration<MarkConfigurationRequestAnnotation>, Mark> marksByMarkConfigurations = new HashMap<>();
