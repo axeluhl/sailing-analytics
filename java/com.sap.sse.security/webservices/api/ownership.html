@@ -12,14 +12,14 @@
 <h2>URL: /api/restsecurity/onwership</h2>
 
 <b>Description:</b>
-<p>The service changes the ownership of object.</p>
+<p>The service obtains or changes the ownership of object, or obtains or changes access control list (ACL) properties of an object.</p>
 <br/>
 
 <b>Change Ownership</b>
 <table>
     <tr>
         <td>Request Method:</td>
-        <td>POST</td>
+        <td>PUT /{objectType}/{typeRelativeObjectId}</td>
     </tr>
     <tr>
         <td>Output format:</td>
@@ -28,24 +28,97 @@
         </td>
     </tr>
      <tr>
-        <td>Parameter (JSON Body):</td>
+        <td>Parameter (path and body):</td>
         <td>
-            <div>objectId</div> Unique Object id.
+            <div>typeRelativeObjectId</div> Unique Object id.
             <div>objectType</div> Object type represents the type of object to change the ownership.
-            <div>groupId</div> GroupId to assign given group to ownership of object object.
-            <div>username</div> Username to search the user in order to attach it with given Object ownership.
+            <div>groupId</div> GroupId to assign given group to ownership of object object. If the property is missing in the body,
+                               the group ownership is not touched. If it is null, the group ownership is reset to null.
+            <div>username</div> Username to search the user in order to attach it with given Object ownership. If the property is missing in the body,
+                               the user ownership is not touched. If it is null, the user ownership is reset to null.
         </td>
     </tr>
     <tr>
         <td>Example:</td>
         <td><code>curl -X POST -d '{
-             	"objectId":"427ebd42-ac69-4f74-a171-376d9bea9457",
-             	"objectType":"USER_GROUP",
              	"groupId":"admin-tenant",
              	"username":"admin"
-            }' "http://admin:admin@127.0.0.1:8888/security/api/restsecurity/ownership"</code><br>
+            }' -H 'Content-type: application/json' "http://admin:admin@127.0.0.1:8888/security/api/restsecurity/ownership/USER_GROUP/427ebd42-ac69-4f74-a171-376d9bea9457"</code><br>
                 Will provide a JSON document as explained above.</td>
     </tr>
+
+    <tr>
+        <td>Request Method:</td>
+        <td>GET /{objectType}/{typeRelativeObjectId}</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>a JSON document of the following format<br>
+            <pre>{"objectType":"USER_GROUP","objectId":"82832851-07ac-47ee-9ddf-6f4f9eaa7823","groupId":"82832851-07ac-47ee-9ddf-6f4f9eaa7823","username":"admin"}</pre>
+        </td>
+    </tr>
+     <tr>
+        <td>Parameter (path)</td>
+        <td>
+            <div>objectType</div> Object type represents the type of object to change the ownership.
+            <div>objectId</div> Unique Object id.
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl "http://127.0.0.1:8888/security/api/restsecurity/ownership/USER_GROUP/82832851-07ac-47ee-9ddf-6f4f9eaa7823"</code><br>
+                Will provide a JSON document as explained above.</td>
+    </tr>
+    
+    <tr>
+        <td>Request Method:</td>
+        <td>GET /{objectType}/{typeRelativeObjectId}/acl</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>a JSON document of the following format<br>
+            <pre>{"objectType":"USER_GROUP","objectId":"82832851-07ac-47ee-9ddf-6f4f9eaa7823","displayName": null,"acl":[{"groupId":null,"actions":["READ","!DELETE"]},{"groupId":"82832851-07ac-47ee-9ddf-6f4f9eaa7823","actions":["READ","!UPDATE"]}]}
+</pre>
+        </td>
+    </tr>
+     <tr>
+        <td>Parameter (path)</td>
+        <td>
+            <div>objectType</div> Object type represents the type of object to request the ACL information for
+            <div>objectId</div> Unique Object id.
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl -i -X GET "http://admin:admin@127.0.0.1:8888/security/api/restsecurity/ownership/USER_GROUP/82832851-07ac-47ee-9ddf-6f4f9eaa7823/acl"</code><br>
+                Will provide a JSON document as explained above.</td>
+    </tr>
+    
+    <tr>
+        <td>Request Method:</td>
+        <td>PUT /{objectType}/{typeRelativeObjectId}/acl</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>a JSON document of the following format<br>
+            <pre>{ "responseStatus": "true", "responseMessage": "Ownership changed successfully"}</pre>
+        </td>
+    </tr>
+     <tr>
+        <td>Parameter (path, body)</td>
+        <td>
+            <div>objectType</div> Object type represents the type of object to request the ACL information for
+            <div>objectId</div> Unique Object id.
+            <div>The body must contain a document as the one returned by the GET method, only that the objectType and objectId fields are not required in
+            the body and will be ignored as these parameters are expected to be provided in the path.</div>
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl -i -X PUT -H 'Content-Type: application/json' -d '{"objectType":"USER_GROUP","objectId":"82832851-07ac-47ee-9ddf-6f4f9eaa7823","displayName":"The Admin Tenant ACL","acl":[{"groupId":null,"actions":["READ","!UPDATE"]},{"groupId":"82832851-07ac-47ee-9ddf-6f4f9eaa7823","actions":["READ","!DELETE"]}]}' "http://admin:admin@127.0.0.1:8888/security/api/restsecurity/ownership/USER_GROUP/82832851-07ac-47ee-9ddf-6f4f9eaa7823/acl"</code><br>
+                Will provide a JSON document as explained above.</td>
+    </tr>
+    
 </table>
 </body>
 </html>
