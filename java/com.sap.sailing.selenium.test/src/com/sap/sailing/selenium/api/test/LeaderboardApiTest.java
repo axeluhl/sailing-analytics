@@ -67,6 +67,7 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
     public void testUpdatingResultDiscardingThresholds() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         eventApi.createEvent(ctx, LEADERBOARD_NAME, BOATCLASSNAME, CLOSED, "default");
+        final Leaderboard leaderboardOriginal = leaderboardApi.getLeaderboard(ctx, LEADERBOARD_NAME);
 
         // updating
         final int[] newResultDiscardingThresholds = new int[] { 1, 2, 3, 4, 5 };
@@ -83,7 +84,7 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
         leaderboardReloaded = leaderboardApi.getLeaderboard(ctx, LEADERBOARD_NAME);
         assertArrayEquals(newEmptyResultDiscardingThresholds,
                 leaderboardReloaded.getDiscardIndexResultsStartingWithHowManyRaces());
-        
+
         // passing null should not change anything
         leaderboardApi.updateLeaderboard(ctx, LEADERBOARD_NAME, newResultDiscardingThresholds);
         leaderboardReloaded = leaderboardApi.getLeaderboard(ctx, LEADERBOARD_NAME);
@@ -92,6 +93,10 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
         leaderboardApi.updateLeaderboard(ctx, LEADERBOARD_NAME, null);
         assertArrayEquals(newResultDiscardingThresholds,
                 leaderboardReloaded.getDiscardIndexResultsStartingWithHowManyRaces());
+
+        // check that no other atributes have been changed
+        assertEquals(leaderboardOriginal.getName(), leaderboardReloaded.getName());
+        assertEquals(leaderboardOriginal.getDisplayName(), leaderboardReloaded.getDisplayName());
     }
 
     @Test

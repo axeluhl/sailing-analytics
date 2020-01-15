@@ -27,6 +27,8 @@ public class LeaderboardApi {
             + "/{leaderboardname}/settrackingtimes";
     private static final String START_TRACKING_URL = LEADERBOARDS_V1_RESOURCE_URL + "/{leaderboardname}/starttracking";
     private static final String UPDATE_LEADERBOARD_URL = LEADERBOARDS_V1_RESOURCE_URL + "/{leaderboardname}/update";
+    
+    private static final String PARAM_RESULT_DISCARDING_THRESHOLDS = "resultDiscardingThresholds";
 
     public JSONArray getLeaderboards(ApiContext ctx) {
         return ctx.get(LEADERBOARDS_LIST_URL);
@@ -48,7 +50,8 @@ public class LeaderboardApi {
                 resultDiscardingThresholdsJsonArray.add(resultDiscardingThresholds[i]);
             }
         }
-        requestJson.put("resultDiscardingThresholds", resultDiscardingThresholds != null ? resultDiscardingThresholdsJsonArray : null);
+        requestJson.put(PARAM_RESULT_DISCARDING_THRESHOLDS,
+                resultDiscardingThresholds != null ? resultDiscardingThresholdsJsonArray : null);
         System.out.println(requestJson.toJSONString());
         ctx.post(toUrl(UPDATE_LEADERBOARD_URL, leaderboardName), null, requestJson);
     }
