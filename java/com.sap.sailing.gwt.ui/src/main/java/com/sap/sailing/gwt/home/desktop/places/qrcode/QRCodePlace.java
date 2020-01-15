@@ -166,6 +166,7 @@ public class QRCodePlace extends AbstractBasePlace {
     }
 
     public String getPublicInviteBranchIOUrl() {
+        // TODO why is this specific to version 2 and not considering the default server setting for mailInvitationType?
         return BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO + "?" + QRCodePlace.PARAM_REGATTA_NAME + "="
                 + encodeUrl(publicRegattaName) + "&" + QRCodePlace.PARAM_REGATTA_SECRET + "="
                 + encodeUrl(regattaRegistrationLinkSecret) + "&" + QRCodePlace.PARAM_SERVER + "="

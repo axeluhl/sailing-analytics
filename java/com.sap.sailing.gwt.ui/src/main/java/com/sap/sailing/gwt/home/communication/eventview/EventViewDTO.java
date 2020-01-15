@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 
 import com.sap.sailing.domain.common.WindSource;
@@ -11,6 +12,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.HasLogo;
+import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
@@ -27,7 +29,7 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
     private String sailorsInfoWebsiteURL;
     private String description;
     private List<SpotDTO> allWindFinderSpotIdsUsedByEvent;
-    private boolean isTrackedByTracTrac;
+    private Set<TrackingConnectorInfoDTO> trackingConnectorInfos;
 
 
     public Collection<RegattaMetadataDTO> getRegattas() {
@@ -143,12 +145,12 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
     public boolean isMultiRegatta() {
         return multiRegatta;
     }
-    
-    public boolean isTrackedByTracTrac() {
-        return isTrackedByTracTrac;
+
+    public Set<TrackingConnectorInfoDTO> getTrackingConnectorInfos() {
+        return trackingConnectorInfos;
     }
-    
-    public void setTrackedByTracTrac(boolean isTrackedByTracTrac) {
-        this.isTrackedByTracTrac = isTrackedByTracTrac;
+
+    public void setTrackingConnectorInfos(Set<TrackingConnectorInfoDTO> trackingConnectorInfo) {
+        this.trackingConnectorInfos = trackingConnectorInfo;
     }
 }

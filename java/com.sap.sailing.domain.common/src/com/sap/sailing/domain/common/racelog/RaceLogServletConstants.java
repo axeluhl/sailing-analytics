@@ -14,4 +14,5 @@ public interface RaceLogServletConstants {
     static final String PARAMS_COURSE_AREA_FILTER = "courseArea";
     static final String PARAMS_TRACK_WIND = "trackWind";
     static final String PARAMS_CORRECT_WIND_DIRECTION_BY_MAGNETIC_DECLINATION = "correctWindDirectionByMagneticDeclination";
+    static final String PARAMS_TRACKED_RACE_NAME = "trackedRaceName";
 }

@@ -56,6 +56,9 @@ public abstract class EventBaseImpl implements EventBase {
      */
     protected EventBaseImpl(String name, TimePoint startDate, TimePoint endDate, Venue venue, boolean isPublic, UUID id) {
         assert venue != null;
+        if (startDate != null && endDate != null && startDate.after(endDate)) {
+            throw new IllegalArgumentException("Event "+name+" cannot start after it ends. Start: "+startDate+", end: "+endDate);
+        }
         this.id = id;
         this.name = name;
         this.startDate = startDate;
@@ -132,6 +135,9 @@ public abstract class EventBaseImpl implements EventBase {
 
     @Override
     public void setStartDate(TimePoint startDate) {
+        if (startDate != null && getEndDate() != null && getEndDate().before(startDate)) {
+            throw new IllegalArgumentException("Event start date ("+startDate+") for event "+this+" must not be after end date "+getEndDate());
+        }
         this.startDate = startDate;
     }
 
@@ -142,6 +148,9 @@ public abstract class EventBaseImpl implements EventBase {
 
     @Override
     public void setEndDate(TimePoint endDate) {
+        if (endDate != null && getStartDate() != null && getStartDate().after(endDate)) {
+            throw new IllegalArgumentException("Event end date ("+endDate+") for event "+this+" must not be before start date "+getStartDate());
+        }
         this.endDate = endDate;
     }
 
