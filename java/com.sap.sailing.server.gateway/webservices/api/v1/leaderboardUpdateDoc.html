@@ -12,7 +12,7 @@
 <h2>URL: /api/v1/leaderboard/{name}/update</h2>
 
 <b>Description:</b>
-<p>The service can modify some of the details of a leaderboard. Currently this allows to update the discarding thresholds of a leaderboard.</p>
+<p>The service can modify some of the details of a leaderboard. Currently this allows to update the discarding thresholds of a leaderboard and the leaderboard display name.</p>
 <br/>
 <table>
 	<tr>
@@ -37,10 +37,14 @@
 	</tr>
 	<tr>
 		<td>Payload:</td>
-		<td>*(optional) resultDiscardingThresholds: if parameter is
-			absent or value is null, the discarding thresholds will not change.
-			If passing an empty array[] the discarding thresholds will be
-			cleared.</td>
+		
+		<td>format: json<br /> *(optional) resultDiscardingThresholds: if
+			parameter is absent or value is null, the discarding thresholds will
+			not change. If passing an empty array the discarding thresholds
+			will be cleared.<br/>
+			*(optional) leaderboardDisplayName: if parameter is absent or value is null,
+			the displayName will not change.
+		</td>
 	</tr>
 	<tr>
 		<td>Example:</td>
@@ -50,7 +54,8 @@
 		Request: 
 		<pre>
 		{
-		  "resultDiscardingThresholds":[1,2]
+		  "resultDiscardingThresholds":[1,2],
+		  "leaderboardDisplayName":"505 Worlds 2014"
 		}
 		</pre>
 		Response: Status 200

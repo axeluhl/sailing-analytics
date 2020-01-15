@@ -27,8 +27,9 @@ public class LeaderboardApi {
             + "/{leaderboardname}/settrackingtimes";
     private static final String START_TRACKING_URL = LEADERBOARDS_V1_RESOURCE_URL + "/{leaderboardname}/starttracking";
     private static final String UPDATE_LEADERBOARD_URL = LEADERBOARDS_V1_RESOURCE_URL + "/{leaderboardname}/update";
-    
+
     private static final String PARAM_RESULT_DISCARDING_THRESHOLDS = "resultDiscardingThresholds";
+    private static final String PARAM_LEADERBOARD_DISPLAY_NAME = "leaderboardDisplayName";
 
     public JSONArray getLeaderboards(ApiContext ctx) {
         return ctx.get(LEADERBOARDS_LIST_URL);
@@ -42,7 +43,7 @@ public class LeaderboardApi {
         return new DeviceMappingRequest(ctx, leaderboardName);
     }
 
-    public void updateLeaderboard(ApiContext ctx, String leaderboardName, int[] resultDiscardingThresholds) {
+    public void updateLeaderboard(ApiContext ctx, String leaderboardName, String leaderboardDisplayName, int[] resultDiscardingThresholds) {
         JSONObject requestJson = new JSONObject();
         JSONArray resultDiscardingThresholdsJsonArray = new JSONArray();
         if (resultDiscardingThresholds != null) {
@@ -52,6 +53,7 @@ public class LeaderboardApi {
         }
         requestJson.put(PARAM_RESULT_DISCARDING_THRESHOLDS,
                 resultDiscardingThresholds != null ? resultDiscardingThresholdsJsonArray : null);
+        requestJson.put(PARAM_LEADERBOARD_DISPLAY_NAME, leaderboardDisplayName);
         System.out.println(requestJson.toJSONString());
         ctx.post(toUrl(UPDATE_LEADERBOARD_URL, leaderboardName), null, requestJson);
     }

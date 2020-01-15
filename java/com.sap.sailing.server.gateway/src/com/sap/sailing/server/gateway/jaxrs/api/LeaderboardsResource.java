@@ -281,6 +281,13 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         if (leaderboard != null) {
             SecurityUtils.getSubject().checkPermission(
                     SecuredDomainType.LEADERBOARD.getStringPermissionForObject(DefaultActions.UPDATE, leaderboard));
+            String newLeaderboardDisplayName = leaderboard.getDisplayName();
+            if (requestObject.containsKey("leaderboardDisplayName")) {
+                final String newLeaderboardDisplayNameRaw = (String) requestObject.get("leaderboardDisplayName");
+                if (newLeaderboardDisplayNameRaw != null && newLeaderboardDisplayNameRaw.length() > 0) {
+                    newLeaderboardDisplayName = newLeaderboardDisplayNameRaw;
+                }
+            }
             int[] resultDiscardingThresholds = null;
             if (requestObject.containsKey("resultDiscardingThresholds")) {
                 final JSONArray resultDiscardingThresholdsRaw = (JSONArray) requestObject
@@ -292,9 +299,9 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     }
                 }
             }
-            getService().apply(
-                    new UpdateLeaderboard(leaderboard.getName(), leaderboard.getName(), leaderboard.getDisplayName(),
-                            resultDiscardingThresholds, leaderboard.getDefaultCourseArea().getId()));
+            getService().apply(new UpdateLeaderboard(/* leaderboardName */ leaderboard.getName(),
+                    /* newLeaderboardName */ leaderboard.getName(), newLeaderboardDisplayName,
+                    resultDiscardingThresholds, leaderboard.getDefaultCourseArea().getId()));
         } else {
             return Response.status(Status.NOT_FOUND).entity(
                     "Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
