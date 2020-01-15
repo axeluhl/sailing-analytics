@@ -48,7 +48,7 @@ public class LeaderboardApi {
                 resultDiscardingThresholdsJsonArray.add(resultDiscardingThresholds[i]);
             }
         }
-        requestJson.put("resultDiscardingThresholds", resultDiscardingThresholdsJsonArray);
+        requestJson.put("resultDiscardingThresholds", resultDiscardingThresholds != null ? resultDiscardingThresholdsJsonArray : null);
         System.out.println(requestJson.toJSONString());
         ctx.post(toUrl(UPDATE_LEADERBOARD_URL, leaderboardName), null, requestJson);
     }

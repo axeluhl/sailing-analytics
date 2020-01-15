@@ -273,19 +273,23 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     @Path("{name}/update")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces("application/json;charset=UTF-8")
-    public Response updateLeaderboard(@PathParam("name") String leaderboardName, String json) throws ParseException, JsonDeserializationException {
+    public Response updateLeaderboard(@PathParam("name") String leaderboardName, String json)
+            throws ParseException, JsonDeserializationException {
         final Object requestBody = JSONValue.parseWithException(json);
         final JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(
-                    DefaultActions.UPDATE, leaderboard));
+            SecurityUtils.getSubject().checkPermission(
+                    SecuredDomainType.LEADERBOARD.getStringPermissionForObject(DefaultActions.UPDATE, leaderboard));
             int[] resultDiscardingThresholds = null;
             if (requestObject.containsKey("resultDiscardingThresholds")) {
-                JSONArray resultDiscardingThresholdsRaw = (JSONArray) requestObject.get("resultDiscardingThresholds");
-                resultDiscardingThresholds = new int[resultDiscardingThresholdsRaw.size()];
-                for (int i = 0; i < resultDiscardingThresholdsRaw.size(); i++) {
-                    resultDiscardingThresholds[i] = ((Long) resultDiscardingThresholdsRaw.get(i)).intValue();
+                final JSONArray resultDiscardingThresholdsRaw = (JSONArray) requestObject
+                        .get("resultDiscardingThresholds");
+                if (resultDiscardingThresholdsRaw != null) {
+                    resultDiscardingThresholds = new int[resultDiscardingThresholdsRaw.size()];
+                    for (int i = 0; i < resultDiscardingThresholdsRaw.size(); i++) {
+                        resultDiscardingThresholds[i] = ((Long) resultDiscardingThresholdsRaw.get(i)).intValue();
+                    }
                 }
             }
             getService().apply(
