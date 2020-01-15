@@ -43,7 +43,8 @@ public class LeaderboardApi {
         return new DeviceMappingRequest(ctx, leaderboardName);
     }
 
-    public void updateLeaderboard(ApiContext ctx, String leaderboardName, String leaderboardDisplayName, int[] resultDiscardingThresholds) {
+    public void updateLeaderboard(ApiContext ctx, String leaderboardName, String leaderboardDisplayName,
+            int[] resultDiscardingThresholds) {
         JSONObject requestJson = new JSONObject();
         JSONArray resultDiscardingThresholdsJsonArray = new JSONArray();
         if (resultDiscardingThresholds != null) {
@@ -54,7 +55,26 @@ public class LeaderboardApi {
         requestJson.put(PARAM_RESULT_DISCARDING_THRESHOLDS,
                 resultDiscardingThresholds != null ? resultDiscardingThresholdsJsonArray : null);
         requestJson.put(PARAM_LEADERBOARD_DISPLAY_NAME, leaderboardDisplayName);
-        System.out.println(requestJson.toJSONString());
+        ctx.post(toUrl(UPDATE_LEADERBOARD_URL, leaderboardName), null, requestJson);
+    }
+
+    public void updateLeaderboardDisplayName(ApiContext ctx, String leaderboardName, String leaderboardDisplayName) {
+        JSONObject requestJson = new JSONObject();
+        requestJson.put(PARAM_LEADERBOARD_DISPLAY_NAME, leaderboardDisplayName);
+        ctx.post(toUrl(UPDATE_LEADERBOARD_URL, leaderboardName), null, requestJson);
+    }
+
+    public void updateLeaderboardResultDiscardingThresholds(ApiContext ctx, String leaderboardName,
+            int[] resultDiscardingThresholds) {
+        JSONObject requestJson = new JSONObject();
+        JSONArray resultDiscardingThresholdsJsonArray = new JSONArray();
+        if (resultDiscardingThresholds != null) {
+            for (int i = 0; i < resultDiscardingThresholds.length; i++) {
+                resultDiscardingThresholdsJsonArray.add(resultDiscardingThresholds[i]);
+            }
+        }
+        requestJson.put(PARAM_RESULT_DISCARDING_THRESHOLDS,
+                resultDiscardingThresholds != null ? resultDiscardingThresholdsJsonArray : null);
         ctx.post(toUrl(UPDATE_LEADERBOARD_URL, leaderboardName), null, requestJson);
     }
 

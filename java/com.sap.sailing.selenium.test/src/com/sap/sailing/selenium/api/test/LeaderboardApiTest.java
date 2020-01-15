@@ -69,9 +69,9 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
         eventApi.createEvent(ctx, LEADERBOARD_NAME, BOATCLASSNAME, CLOSED, "default");
         final Leaderboard leaderboardOriginal = leaderboardApi.getLeaderboard(ctx, LEADERBOARD_NAME);
 
-        // updating
+        // updating resultDiscardingThresholds
         final int[] newResultDiscardingThresholds = new int[] { 1, 2, 3, 4, 5 };
-        leaderboardApi.updateLeaderboard(ctx, LEADERBOARD_NAME, /* leaderboardDisplayName */ null,
+        leaderboardApi.updateLeaderboard(ctx, LEADERBOARD_NAME, leaderboardOriginal.getDisplayName(),
                 newResultDiscardingThresholds);
 
         // reloading and check if updated
@@ -81,19 +81,19 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
 
         // remove and check again
         final int[] newEmptyResultDiscardingThresholds = new int[] {};
-        leaderboardApi.updateLeaderboard(ctx, LEADERBOARD_NAME, /* leaderboardDisplayName */ null,
+        leaderboardApi.updateLeaderboard(ctx, LEADERBOARD_NAME, leaderboardOriginal.getDisplayName(),
                 newEmptyResultDiscardingThresholds);
         leaderboardReloaded = leaderboardApi.getLeaderboard(ctx, LEADERBOARD_NAME);
         assertArrayEquals(newEmptyResultDiscardingThresholds,
                 leaderboardReloaded.getDiscardIndexResultsStartingWithHowManyRaces());
 
         // passing null should not change anything
-        leaderboardApi.updateLeaderboard(ctx, LEADERBOARD_NAME, /* leaderboardDisplayName */ null,
+        leaderboardApi.updateLeaderboard(ctx, LEADERBOARD_NAME, leaderboardOriginal.getDisplayName(),
                 newResultDiscardingThresholds);
         leaderboardReloaded = leaderboardApi.getLeaderboard(ctx, LEADERBOARD_NAME);
         assertArrayEquals(newResultDiscardingThresholds,
                 leaderboardReloaded.getDiscardIndexResultsStartingWithHowManyRaces());
-        leaderboardApi.updateLeaderboard(ctx, LEADERBOARD_NAME, /* leaderboardDisplayName */ null, null);
+        leaderboardApi.updateLeaderboard(ctx, LEADERBOARD_NAME, leaderboardOriginal.getDisplayName(), null);
         assertArrayEquals(newResultDiscardingThresholds,
                 leaderboardReloaded.getDiscardIndexResultsStartingWithHowManyRaces());
 
@@ -117,6 +117,34 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
         leaderboardReloaded = leaderboardApi.getLeaderboard(ctx, LEADERBOARD_NAME);
         assertEquals("another display name 2", leaderboardReloaded.getDisplayName());
         assertArrayEquals(newResultDiscardingThresholds2, newResultDiscardingThresholds2);
+
+        // update leaderboardDisplayName to null, this result in the name of the leaderboard
+        leaderboardApi.updateLeaderboard(ctx, LEADERBOARD_NAME, /* leaderboardDisplayName */ null, newResultDiscardingThresholds2);
+        leaderboardReloaded = leaderboardApi.getLeaderboard(ctx, LEADERBOARD_NAME);
+        // if display name is null, the name of the leaderboard is returned
+        assertEquals(leaderboardReloaded.getName(), leaderboardReloaded.getDisplayName());
+    }
+
+    @Test
+    public void testUpdatingLeaderboardDisplayNameToNull() {
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        eventApi.createEvent(ctx, LEADERBOARD_NAME, BOATCLASSNAME, CLOSED, "default");
+        
+        // update to not null values
+        final int[] newResultDiscardingThresholds = new int[] { 1, 2, 3, 4, 5 };
+        leaderboardApi.updateLeaderboard(ctx, LEADERBOARD_NAME, "newLeaderboardDisplayName",
+                newResultDiscardingThresholds);
+        Leaderboard leaderboardReloaded = leaderboardApi.getLeaderboard(ctx, LEADERBOARD_NAME);
+        assertEquals("newLeaderboardDisplayName", leaderboardReloaded.getDisplayName());
+        assertArrayEquals(newResultDiscardingThresholds,
+                leaderboardReloaded.getDiscardIndexResultsStartingWithHowManyRaces());
+
+        // update to display name to null
+        leaderboardApi.updateLeaderboardDisplayName(ctx, LEADERBOARD_NAME, null);
+        leaderboardReloaded = leaderboardApi.getLeaderboard(ctx, LEADERBOARD_NAME);
+        assertEquals(LEADERBOARD_NAME, leaderboardReloaded.getDisplayName());
+        assertArrayEquals(newResultDiscardingThresholds,
+                leaderboardReloaded.getDiscardIndexResultsStartingWithHowManyRaces());
     }
 
     @Test
