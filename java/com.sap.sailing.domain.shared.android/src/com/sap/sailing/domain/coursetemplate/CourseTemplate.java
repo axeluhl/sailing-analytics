@@ -9,6 +9,7 @@ import java.util.UUID;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.NamedWithUUID;
+import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
@@ -65,6 +66,19 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
      */
     Iterable<MarkTemplate> getMarkTemplates();
     
+    /**
+     * Returns all {@link MarkTemplate}s from {@link #getMarkTemplates()} which are not the default mark template
+     * for {@link #getMarkRoles() any mark role used by this course template}.
+     */
+    default Iterable<MarkTemplate> getMarkTemplatesNotIncludedInCourse() {
+        final Set<MarkTemplate> result = new HashSet<>();
+        Util.addAll(getMarkTemplates(), result);
+        for (final MarkRole markRole : getMarkRoles()) {
+            result.remove(getDefaultMarkTemplateForMarkRole(markRole));
+        }
+        return result;
+    }
+
     /**
      * The set of {@link MarkRole}s one gets when enumerating all {@link #getWaypointTemplates() waypoint templates},
      * fetching their {@link WaypointTemplate#getControlPointTemplate() control point template} and from it all
@@ -157,5 +171,4 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
     default HasPermissions getPermissionType() {
         return SecuredDomainType.COURSE_TEMPLATE;
     }
-
 }
