@@ -4,8 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -26,10 +32,21 @@ import com.sap.sse.common.Util;
 
 public class TestORCPublicCertificateDatabase {
     private ORCPublicCertificateDatabase db;
-    
+    Map<String, String> dateComparisonMap = new LinkedHashMap<String, String>();
     @Before
     public void setUp() {
         db = new ORCPublicCertificateDatabaseImpl();
+        dateComparisonMap.put("2019-02-21T10:38:59Z", "2019-02-21 10:38:59");
+        dateComparisonMap.put("2019-02-21T12:00:00.000GMT+2", "2019-02-21 10:00:00");
+        dateComparisonMap.put("2019-02-21T15:00:00.000 GMT+2", "2019-02-21 13:00:00");
+        dateComparisonMap.put("2019-02-21T10:38:55.000-0800", "2019-02-21 18:38:55");
+        dateComparisonMap.put("2019-02-21T10:38:32.000+08:00", "2019-02-21 02:38:32");
+        dateComparisonMap.put("2019-02-21T10:38:09.000-06", "2019-02-21 16:38:09");
+        dateComparisonMap.put("2019-02-21T10:38:22.000Z", "2019-02-21 10:38:22");
+        dateComparisonMap.put("2019-02-21T10:38:00.000z", "2019-02-21 10:38:00");
+        dateComparisonMap.put("2019-02-21T10:38:46z", "2019-02-21 10:38:46");
+        dateComparisonMap.put("2019-02-21T10:38:17", "2019-02-21 10:38:17");
+        dateComparisonMap.put("2019-02-21T10:38:33.000", "2019-02-21 10:38:33");
     }
     
     @Test
@@ -115,21 +132,19 @@ public class TestORCPublicCertificateDatabase {
     }
     
     @Test
-    public void testParseDateSuccessCases() {
-        Assert.assertNotNull(db.parseDate("2019-02-21T10:38:00Z"));
-        Assert.assertNotNull(db.parseDate("2019-02-21T10:38:00.000GMT+2"));
-        Assert.assertNotNull(db.parseDate("2019-02-21T10:38:00.000 GMT+2"));
-        Assert.assertNotNull(db.parseDate("2019-02-21T10:38:00.000+0800"));
-        Assert.assertNotNull(db.parseDate("2019-02-21T10:38:00.000+08:00"));
-        Assert.assertNotNull(db.parseDate("2019-02-21T10:38:00.000-08"));
-        Assert.assertNotNull(db.parseDate("2019-02-21T10:38:00.000Z"));
-        Assert.assertNotNull(db.parseDate("2019-02-21T10:38:00.000z"));
-        Assert.assertNotNull(db.parseDate("2019-02-21T10:38:00z"));
+    public void testParseDateSuccessCases() throws ParseException {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        for (String date : dateComparisonMap.keySet()) {
+            Date convertedDate = db.parseDate(date);
+            Assert.assertEquals(convertedDate.getTime() / 1000,
+                    dateFormat.parse(dateComparisonMap.get(date)).getTime() / 1000);
+        }
     }
     
     @Test
     public void testParseDateFailureCases() {
-        Assert.assertNull(db.parseDate("2019-02-21"));
+        Assert.assertNull(db.parseDate("2019-02-21T20:38"));
         Assert.assertNull(db.parseDate("2019-02-21T10:38GMT+2"));
         Assert.assertNull(db.parseDate("2019-02-21T10:38+0800"));
         Assert.assertNull(db.parseDate("2019-02-21T10:38+08:00"));
