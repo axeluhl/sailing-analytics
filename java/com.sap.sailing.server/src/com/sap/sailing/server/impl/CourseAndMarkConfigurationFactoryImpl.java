@@ -266,23 +266,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 courseConfiguration.getShortName(), courseConfiguration.getOptionalImageURL());
     }
 
-    private <C> Map<C, MarkRole> ensureMarkRoles(Map<C, MarkRole> explicitAssociatedRoles) {
-        final Map<C, MarkRole> result = new HashMap<>();
-        explicitAssociatedRoles.forEach((c, r) -> result.put(c, ensureMarkRole(r)));
-        return result;
-    }
-    
-    private MarkRole ensureMarkRole(MarkRole r) {
-        final MarkRole mr;
-        if (r instanceof MarkRole) {
-            mr = (MarkRole) r;
-        } else {
-            mr = getSharedSailingData().createMarkRole(r.getName(), r.getShortName());
-        }
-        return mr;
-    }
-    
-    private MarkRole resolveMarkRole(UUID markRoleId, CourseTemplate optionalCourseTemplate) {
+    private MarkRole resolveMarkRoleByID(UUID markRoleId, CourseTemplate optionalCourseTemplate) {
         final MarkRole result;
         if (markRoleId == null) {
             result = null;
@@ -434,7 +418,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             if (markProperties != null) {
                 final MarkRole role = allAssociatedRoles.get(markConfiguration);
                 try {
-                    getSharedSailingData().recordUsage(markProperties, ensureMarkRole(role));
+                    getSharedSailingData().recordUsage(markProperties, role);
                 } catch (Exception e) {
                     logger.log(Level.WARNING,
                             "Could not record usage for mark properties " + markProperties + " and role " + role,
@@ -599,15 +583,13 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             }
         };
         courseSequenceMapper.effectiveWaypoints.forEach(wp -> course.addWaypoint(Util.size(course.getWaypoints()), wp));
-        ensureMarkRoles(courseSequenceMapper.explicitAssociatedRoles)
-                .forEach((m, mr) -> course.addRoleMapping(m, mr.getId()));
+        courseSequenceMapper.explicitAssociatedRoles.forEach((m, mr) -> course.addRoleMapping(m, mr.getId()));
         return course;
     }
 
     @Override
     public CourseConfiguration<MarkConfigurationResponseAnnotation> createCourseConfigurationFromTemplate(CourseTemplate courseTemplate,
             Regatta optionalRegatta, Iterable<String> tagsToFilterMarkProperties) {
-        final Set<MarkConfiguration<MarkConfigurationResponseAnnotation>> allMarkConfigurations = new HashSet<>();
         final Map<MarkTemplate, MarkConfiguration<MarkConfigurationResponseAnnotation>> markTemplatesToMarkConfigurations = new HashMap<>();
         if (optionalRegatta != null) {
             // If we have a regatta context, we first try to get all existing marks and their association to
@@ -664,7 +646,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                                         (mc, existingTP) -> (existingTP == null || existingTP.before(effectiveUsageTP))
                                         ? effectiveUsageTP
                                                 : existingTP);
-                                MarkRole markRole = resolveMarkRole(courseOrNull.getAssociatedRoles().get(mark), courseTemplate);
+                                MarkRole markRole = resolveMarkRoleByID(courseOrNull.getAssociatedRoles().get(mark), courseTemplate);
                                 if (markRole != null) {
                                     usagesForRole.addUsage(regattaMarkConfiguration, markRole, effectiveUsageTP);
                                 }
@@ -709,7 +691,6 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     });
                 }
             }
-            allMarkConfigurations.addAll(markConfigurationsByMark.values());
             markTemplatesToMarkConfigurations.putAll(markConfigurationsByMarkTemplate);
         }
         for (MarkTemplate markTemplate : courseTemplate.getMarkTemplates()) {
@@ -717,17 +698,16 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             markTemplatesToMarkConfigurations.computeIfAbsent(markTemplate, mt -> {
                 final MarkConfiguration<MarkConfigurationResponseAnnotation> markConfiguration = new MarkTemplateBasedMarkConfigurationImpl<>(markTemplate,
                         /* no positioning information for a MarkTemplate-based mark configuration */ null);
-                allMarkConfigurations.add(markConfiguration);
                 return markConfiguration;
             });
         }
-        replaceTemplateBasedConfigurationCandidatesBySuggestedProperties(markTemplatesToMarkConfigurations, allMarkConfigurations, tagsToFilterMarkProperties,
+        replaceTemplateBasedConfigurationCandidatesBySuggestedPropertiesInPlace(markTemplatesToMarkConfigurations, tagsToFilterMarkProperties,
                 courseTemplate.getDefaultMarkRolesForMarkTemplates());
         final Map<MarkConfiguration<MarkConfigurationResponseAnnotation>, MarkRole> resultingRoleMapping = createRoleMappingWithMarkTemplateMapping(
                 courseTemplate, markTemplatesToMarkConfigurations);
         final List<WaypointWithMarkConfiguration<MarkConfigurationResponseAnnotation>> resultingWaypoints = createWaypointConfigurationsWithMarkTemplateMapping(
                 courseTemplate, markTemplatesToMarkConfigurations);
-        return new CourseConfigurationImpl<MarkConfigurationResponseAnnotation>(courseTemplate, allMarkConfigurations, resultingRoleMapping,
+        return new CourseConfigurationImpl<MarkConfigurationResponseAnnotation>(courseTemplate, markTemplatesToMarkConfigurations.values(), resultingRoleMapping,
                 resultingWaypoints, courseTemplate.getRepeatablePart(), courseTemplate.getDefaultNumberOfLaps(),
                 courseTemplate.getName(), courseTemplate.getShortName(), courseTemplate.getOptionalImageURL());
     }
@@ -783,82 +763,96 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         assert regatta != null;
         final Set<MarkConfiguration<MarkConfigurationResponseAnnotation>> allMarkConfigurations = new HashSet<>();
         final CourseTemplate courseTemplateOrNull = course == null ? null : resolveCourseTemplateSafe(course);
+        // the RegattaMarkConfigurations returned by the following call will reference the MarkTemplates that their
+        // underlying Marks referenced by UUID. For those we shall adopt the MarkTemplate-->MarkConfiguration mapping.
         final Map<Mark, RegattaMarkConfiguration<MarkConfigurationResponseAnnotation>> markConfigurationsByMark = createMarkConfigurationsForRegatta(
                 regatta, optionalRace, courseTemplateOrNull);
         allMarkConfigurations.addAll(markConfigurationsByMark.values());
-        final Map<MarkConfiguration<MarkConfigurationResponseAnnotation>, MarkRole> resultingRoleMapping = new HashMap<>();
-        if (course != null) {
-            for (Entry<Mark, UUID> entry : course.getAssociatedRoles().entrySet()) {
-                resultingRoleMapping.put(markConfigurationsByMark.get(entry.getKey()),
-                        resolveMarkRole(entry.getValue(), courseTemplateOrNull));
-            }
-        }
         String name = null;
         String shortName = null;
         URL optionalImageURL = null;
         final List<WaypointWithMarkConfiguration<MarkConfigurationResponseAnnotation>> resultingWaypoints = new ArrayList<>();
         RepeatablePart optionalRepeatablePart = null;
-        Integer numberOfLaps = null;
-        boolean handledByTemplate = false;
+        final Integer numberOfLapsOrNullIfNoValidCourseTemplateInstance;
         if (courseTemplateOrNull != null && course != null) {
-            final CourseToCourseTemplateMapper mapper = new CourseToCourseTemplateMapper(course, courseTemplateOrNull, markConfigurationsByMark);
-            if (mapper.validCourseTemplateUsage) {
+            numberOfLapsOrNullIfNoValidCourseTemplateInstance = isCourseInstanceOfCourseTemplate(course, courseTemplateOrNull);
+            if (numberOfLapsOrNullIfNoValidCourseTemplateInstance != null) {
+                // The course is a valid instance of the template. The resulting CourseConfiguration shall reflect this fact.
+                // We'll copy the course template properties and the number of laps we identified.
                 name = courseTemplateOrNull.getName();
                 shortName = courseTemplateOrNull.getShortName();
                 optionalImageURL = courseTemplateOrNull.getOptionalImageURL();
-                final Map<MarkTemplate, MarkConfiguration<MarkConfigurationResponseAnnotation>> markTemplatesToMarkConfigurations = new HashMap<>();
-                markTemplatesToMarkConfigurations.putAll(mapper.markTemplatesToMarkConfigurations);
-                final Iterable<MarkTemplate> markTemplatesNotIncludedInCourse = courseTemplateOrNull.getMarkTemplatesNotIncludedInCourse();
-                if (!Util.isEmpty(markTemplatesNotIncludedInCourse)) {
-                    for (MarkTemplate markTemplate : markTemplatesNotIncludedInCourse) {
-                        final MarkConfiguration<MarkConfigurationResponseAnnotation> markConfiguration = new MarkTemplateBasedMarkConfigurationImpl<MarkConfigurationResponseAnnotation>(
-                                markTemplate, /* response annotation: nothing known about positioning */ null);
-                        markTemplatesToMarkConfigurations.put(markTemplate, markConfiguration);
-                        resultingRoleMapping.put(markConfiguration,
-                                courseTemplateOrNull.getOptionalAssociatedRole(markTemplate));
-                    }
-                    replaceTemplateBasedConfigurationCandidatesBySuggestedProperties(
-                            markTemplatesToMarkConfigurations, allMarkConfigurations, tagsToFilterMarkProperties,
-                            courseTemplateOrNull.getDefaultMarkRolesForMarkTemplates());
-                }
-                resultingWaypoints.addAll(createWaypointConfigurationsWithMarkTemplateMapping(courseTemplateOrNull,
-                        markTemplatesToMarkConfigurations));
-                numberOfLaps = mapper.numberOfLaps;
                 optionalRepeatablePart = courseTemplateOrNull.getRepeatablePart();
-                handledByTemplate = true;
-            }
-        }
-        if (!handledByTemplate) {
-            if (course != null) {
-                for (Entry<Mark, UUID> markWithRole : course.getAssociatedRoles().entrySet()) {
-                    resultingRoleMapping.put(
-                            markConfigurationsByMark.get(markWithRole.getKey()),
-                            resolveMarkRole(markWithRole.getValue(), courseTemplateOrNull));
-                }
-                for (Waypoint waypoint : course.getWaypoints()) {
-                    final ControlPoint controlPoint = waypoint.getControlPoint();
-                    final ControlPointWithMarkConfiguration<MarkConfigurationResponseAnnotation> resultingControlPoint;
-                    if (controlPoint instanceof Mark) {
-                        final Mark mark = (Mark) controlPoint;
-                        resultingControlPoint = markConfigurationsByMark.get(mark);
-                    } else {
-                        final ControlPointWithTwoMarks markPairTemplate = (ControlPointWithTwoMarks) controlPoint;
-                        final MarkConfiguration<MarkConfigurationResponseAnnotation> left = markConfigurationsByMark
-                                .get(markPairTemplate.getLeft());
-                        final MarkConfiguration<MarkConfigurationResponseAnnotation> right = markConfigurationsByMark
-                                .get(markPairTemplate.getRight());
-                        resultingControlPoint = new MarkPairWithConfigurationImpl<>(markPairTemplate.getName(), left, right,
-                                markPairTemplate.getShortName());
+                // Next, we need to generate additional MarkTemplateBasedMarkConfigurations for all MarkTemplates from
+                // the CourseTemplate that have no corresponding RegattaMarkConfiguration
+                // that points back to it in its getOptionalMarkTemplate():
+                final Set<MarkTemplate> markTemplatesReferencedByMarksInRegatta = markConfigurationsByMark.values()
+                        .stream().map(regattaMarkConfig -> regattaMarkConfig.getOptionalMarkTemplate())
+                        .filter(mt -> mt != null).collect(Collectors.toSet());
+                final Map<MarkTemplate, MarkTemplateBasedMarkConfiguration<MarkConfigurationResponseAnnotation>> markConfigurationsForUnusedMarkTemplates = new HashMap<>();
+                for (final MarkTemplate markTemplate : courseTemplateOrNull.getMarkTemplates()) {
+                    if (!markTemplatesReferencedByMarksInRegatta.contains(markTemplate)) {
+                        // This MarkTemplate doesn't have a MarkConfiguration assigned yet, so no Mark in the regatta
+                        // referenced it by UUID. Therefore, we'll create a MarkTemplateBasedMarkConfiguration here as
+                        // the default for such "unused" MarkTemplates.
+                        final MarkTemplateBasedMarkConfiguration<MarkConfigurationResponseAnnotation> markConfiguration = new MarkTemplateBasedMarkConfigurationImpl<MarkConfigurationResponseAnnotation>(
+                                markTemplate, /* response annotation: nothing known about positioning */ null);
+                        markConfigurationsForUnusedMarkTemplates.put(markTemplate, markConfiguration);
                     }
-                    resultingWaypoints.add(new WaypointWithMarkConfigurationImpl<>(resultingControlPoint,
-                            waypoint.getPassingInstructions()));
+                    // now check if we have good MarkProperties matches for any of those MarkTemplates; if so,
+                    // their MarkTemplateBasedMarkConfiguration is replaced by a MarkPropertiesBasedMarkConfiguration
+                    // that refers back to the MarkTemplate
+                    final Map<MarkTemplate, MarkConfiguration<MarkConfigurationResponseAnnotation>> markConfigurationsForUnusedMarkTemplatesWithMatchingMarkProperties =
+                            replaceTemplateBasedConfigurationCandidatesBySuggestedProperties(
+                            markConfigurationsForUnusedMarkTemplates, tagsToFilterMarkProperties,
+                            courseTemplateOrNull.getDefaultMarkRolesForMarkTemplates());
+                    allMarkConfigurations.addAll(markConfigurationsForUnusedMarkTemplatesWithMatchingMarkProperties.values());
                 }
+            }
+        } else {
+            numberOfLapsOrNullIfNoValidCourseTemplateInstance = null;
+        }
+        // resultingRoleMapping does not contain mappings for MarkTemplates that are the default for a MarkRole; only
+        // the role associations from the marks in the regatta are considered.
+        final Map<MarkConfiguration<MarkConfigurationResponseAnnotation>, MarkRole> resultingRoleMapping = new HashMap<>();
+        if (course != null) {
+            for (Entry<Mark, UUID> markWithRole : course.getAssociatedRoles().entrySet()) {
+                final MarkRole markRoleForMark = resolveMarkRoleByID(markWithRole.getValue(), courseTemplateOrNull);
+                if (markRoleForMark != null) {
+                    resultingRoleMapping.put(markConfigurationsByMark.get(markWithRole.getKey()), markRoleForMark);
+                }
+            }
+            for (Waypoint waypoint : course.getWaypoints()) {
+                final ControlPoint controlPoint = waypoint.getControlPoint();
+                final ControlPointWithMarkConfiguration<MarkConfigurationResponseAnnotation> resultingControlPoint;
+                if (controlPoint instanceof Mark) {
+                    final Mark mark = (Mark) controlPoint;
+                    resultingControlPoint = markConfigurationsByMark.get(mark);
+                } else {
+                    final ControlPointWithTwoMarks markPair = (ControlPointWithTwoMarks) controlPoint;
+                    final MarkConfiguration<MarkConfigurationResponseAnnotation> left = markConfigurationsByMark
+                            .get(markPair.getLeft());
+                    final MarkConfiguration<MarkConfigurationResponseAnnotation> right = markConfigurationsByMark
+                            .get(markPair.getRight());
+                    resultingControlPoint = new MarkPairWithConfigurationImpl<>(markPair.getName(), left, right,
+                            markPair.getShortName());
+                }
+                resultingWaypoints.add(new WaypointWithMarkConfigurationImpl<>(resultingControlPoint,
+                        waypoint.getPassingInstructions()));
             }
         }
         return new CourseConfigurationImpl<MarkConfigurationResponseAnnotation>(courseTemplateOrNull, allMarkConfigurations, resultingRoleMapping,
-                resultingWaypoints, optionalRepeatablePart, numberOfLaps, name, shortName, optionalImageURL);
+                resultingWaypoints, optionalRepeatablePart, numberOfLapsOrNullIfNoValidCourseTemplateInstance, name, shortName, optionalImageURL);
     }
     
+    /**
+     * Creates a {@link RegattaMarkConfiguration} for all {@link Mark}s {@link RaceColumn#getAvailableMarks() discovered} across all the
+     * regatta's {@link Regatta#getRaceColumns() race columns}. If a {@link Mark} in the regatta references a {@link MarkTemplate}
+     * through its {@link Mark#getOriginatingMarkTemplateIdOrNull()} then the {@link RegattaMarkConfiguration#getOptionalMarkTemplate()}
+     * will refer to the resolved {@link MarkTemplate}. Likewise, if the {@link Mark#getOriginatingMarkPropertiesIdOrNull()} ID can
+     * be resolved to a {@link MarkProperties} object successfully, that object will then be what you get by calling
+     * {@link RegattaMarkConfiguration#getOptionalMarkProperties()} on the mark configuration created for that mark.
+     */
     private Map<Mark, RegattaMarkConfiguration<MarkConfigurationResponseAnnotation>> createMarkConfigurationsForRegatta(
             Regatta regatta, TrackedRace optionalRace, CourseTemplate courseTemplate) {
         final Map<Mark, RegattaMarkConfiguration<MarkConfigurationResponseAnnotation>> result = new HashMap<>();
@@ -874,99 +868,111 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     
     /**
      * Takes a {@link CourseBase} and a {@link CourseTemplate} and checks whether the {@link CourseBase} is a valid
-     * "instance" of the {@link CourseTemplate}. A course is a valid instance of a course template if for all marks in
-     * the course there is a role {@link CourseBase#getAssociatedRoles()} with the mark, and that role is consistent
-     * with the role at the corresponding place in the course template. Furthermore, the waypoint sequence of the
-     * course needs to conform to the course template's waypoint sequence, modulo the number of laps.<p>
+     * "instance" of the {@link CourseTemplate}. A course is a valid instance of a course template if for all marks
+     * in the course there is a role {@link CourseBase#getAssociatedRoles()} with the mark, and that role is
+     * consistent with the role at the corresponding place in the course template. Furthermore, the waypoint
+     * sequence of the course needs to conform to the course template's waypoint sequence, modulo the number of
+     * laps. The result is the number of laps if the {@link CourseTemplate} has a
+     * {@link CourseTemplate#getRepeatablePart() repeatable part}, or {@code -1} if the course does not have a
+     * repeatable part, and {@code null} if the course is not a valid instance of the course template.
+     * <p>
      * 
-     * This means in particular that the course can use different marks for the same role in different laps and still
-     * conform to the course template.
+     * This means in particular that the course can use different marks for the same role in different laps and
+     * still conform to the course template.
+     * <p>
+     * 
+     * @return the number of laps if the {@link CourseTemplate} has a {@link CourseTemplate#getRepeatablePart()
+     *         repeatable part}, or {@code -1} if the course does not have a repeatable part, and {@code null} if
+     *         the course is not a valid instance of the course template
      */
-    private class CourseToCourseTemplateMapper {
-        boolean validCourseTemplateUsage;
-        Integer numberOfLaps;
-        final Map<MarkTemplate, MarkConfiguration<MarkConfigurationResponseAnnotation>> markTemplatesToMarkConfigurations = new HashMap<>();
-        
-        public CourseToCourseTemplateMapper(CourseBase course, CourseTemplate courseTemplate,
-                Map<Mark, RegattaMarkConfiguration<MarkConfigurationResponseAnnotation>> markConfigurationsByMark) {
-            assert course != null;
-            assert courseTemplate != null;
-            RepeatablePart optionalRepeatablePart = null;
-            numberOfLaps = null;
-            validCourseTemplateUsage = true;
-            final Iterable<WaypointTemplate> effectiveCourseSequence;
-            if (courseTemplate.hasRepeatablePart()) {
-                optionalRepeatablePart = courseTemplate.getRepeatablePart();
-                final int numberOfWaypointsInTemplate = Util.size(courseTemplate.getWaypointTemplates());
-                final int numberOfWaypointsInCourse = Util.size(course.getWaypoints());
-                final int lengthOfRepeatablePart = optionalRepeatablePart.getZeroBasedIndexOfRepeatablePartEnd()
-                        - optionalRepeatablePart.getZeroBasedIndexOfRepeatablePartStart();
-                final int lengthOfNonRepeatablePart = numberOfWaypointsInTemplate - lengthOfRepeatablePart;
-                final int lengthOfRepetitions = numberOfWaypointsInCourse - lengthOfNonRepeatablePart;
-                if (lengthOfRepetitions % lengthOfRepeatablePart == 0) {
-                    numberOfLaps = lengthOfRepetitions / lengthOfRepeatablePart + 1;
-                    // FIXME the following seems wrong to me: it computes only the repeatable sequence, repeated numberOfLaps times but omits the non-repeatable parts of the course template
-                    effectiveCourseSequence = optionalRepeatablePart.createSequence(numberOfLaps,
-                            courseTemplate.getWaypointTemplates());
-                } else {
-                    validCourseTemplateUsage = false;
-                    effectiveCourseSequence = courseTemplate.getWaypointTemplates();
-                }
+    private Integer isCourseInstanceOfCourseTemplate(CourseBase course, CourseTemplate courseTemplate) {
+        assert course != null;
+        assert courseTemplate != null;
+        int numberOfLaps = -1;
+        boolean validCourseTemplateUsage = true;
+        final Iterable<WaypointTemplate> effectiveCourseSequence;
+        if (courseTemplate.hasRepeatablePart()) {
+            final RepeatablePart optionalRepeatablePart = courseTemplate.getRepeatablePart();
+            final int numberOfWaypointsInTemplate = Util.size(courseTemplate.getWaypointTemplates());
+            final int numberOfWaypointsInCourse = Util.size(course.getWaypoints());
+            final int lengthOfRepeatablePart = optionalRepeatablePart.getZeroBasedIndexOfRepeatablePartEnd()
+                    - optionalRepeatablePart.getZeroBasedIndexOfRepeatablePartStart();
+            final int lengthOfNonRepeatablePart = numberOfWaypointsInTemplate - lengthOfRepeatablePart;
+            final int lengthOfRepetitions = numberOfWaypointsInCourse - lengthOfNonRepeatablePart;
+            if (lengthOfRepetitions % lengthOfRepeatablePart == 0) {
+                numberOfLaps = lengthOfRepetitions / lengthOfRepeatablePart + 1;
+                effectiveCourseSequence = courseTemplate.getWaypointTemplates(numberOfLaps);
             } else {
+                validCourseTemplateUsage = false;
                 effectiveCourseSequence = courseTemplate.getWaypointTemplates();
             }
-            if (validCourseTemplateUsage) {
-                final Iterator<WaypointTemplate> waypointTemplateIterator = effectiveCourseSequence.iterator();
-                final Iterator<Waypoint> waypointIterator = course.getWaypoints().iterator();
-                while (waypointTemplateIterator.hasNext() && validCourseTemplateUsage) {
-                    final WaypointTemplate waypointTemplate = waypointTemplateIterator.next();
-                    final Iterable<MarkRole> markRolesOfControlPoint = waypointTemplate.getControlPointTemplate().getMarkRoles();
-                    final Waypoint waypoint = waypointIterator.next();
-                    final Iterable<Mark> marksOfControlPoint = waypoint.getControlPoint().getMarks();
-                    if (Util.size(markRolesOfControlPoint) != Util.size(marksOfControlPoint)) {
-                        validCourseTemplateUsage = false;
-                    } else {
-                        final Iterator<MarkRole> markRoleIterator = markRolesOfControlPoint.iterator();
-                        final Iterator<Mark> markIterator = marksOfControlPoint.iterator();
-                        while (markRoleIterator.hasNext()) {
-                            final MarkRole markRoleFromCourseTemplate = markRoleIterator.next();
-                            final Mark markFromRegatta = markIterator.next();
-                            final MarkRole roleForMarkOrNull = resolveMarkRole(course.getAssociatedRoles().get(markFromRegatta), courseTemplate);
-                            if (!Util.equalsWithNull(markRoleFromCourseTemplate, roleForMarkOrNull)) {
-                                validCourseTemplateUsage = false;
-                            } else {
-                                final RegattaMarkConfiguration<MarkConfigurationResponseAnnotation> regattaMarkConfiguration = markConfigurationsByMark.get(markFromRegatta);
-                                markTemplatesToMarkConfigurations.putIfAbsent(courseTemplate.getDefaultMarkTemplateForMarkRole(markRoleFromCourseTemplate), regattaMarkConfiguration);
-                            }
+        } else {
+            effectiveCourseSequence = courseTemplate.getWaypointTemplates();
+        }
+        if (validCourseTemplateUsage) {
+            final Iterator<WaypointTemplate> waypointTemplateIterator = effectiveCourseSequence.iterator();
+            final Iterator<Waypoint> waypointIterator = course.getWaypoints().iterator();
+            while (waypointTemplateIterator.hasNext() && validCourseTemplateUsage) {
+                final WaypointTemplate waypointTemplate = waypointTemplateIterator.next();
+                final Iterable<MarkRole> markRolesOfControlPoint = waypointTemplate.getControlPointTemplate().getMarkRoles();
+                final Waypoint waypoint = waypointIterator.next();
+                final Iterable<Mark> marksOfControlPoint = waypoint.getControlPoint().getMarks();
+                if (Util.size(markRolesOfControlPoint) != Util.size(marksOfControlPoint)) {
+                    validCourseTemplateUsage = false;
+                } else {
+                    final Iterator<MarkRole> markRoleIterator = markRolesOfControlPoint.iterator();
+                    final Iterator<Mark> markIterator = marksOfControlPoint.iterator();
+                    while (markRoleIterator.hasNext()) {
+                        final MarkRole markRoleFromCourseTemplate = markRoleIterator.next();
+                        final Mark markFromRegatta = markIterator.next();
+                        final MarkRole roleForMarkOrNull = resolveMarkRoleByID(course.getAssociatedRoles().get(markFromRegatta), courseTemplate);
+                        if (!Util.equalsWithNull(markRoleFromCourseTemplate, roleForMarkOrNull)) {
+                            validCourseTemplateUsage = false;
                         }
                     }
                 }
             }
         }
+        return validCourseTemplateUsage ? numberOfLaps : null;
     }
 
     /**
-     * Replaces {@link MarkTemplateBasedMarkConfiguration}s in {@code markTemplatesToMarkConfigurationsToReplace}'s value set by
-     * {@link MarkPropertiesBasedMarkConfiguration}s in case a usage of a {@link MarkProperties} object for the respective mark template
-     * is found. TODO where?
+     * Replaces {@link MarkTemplateBasedMarkConfiguration}s in {@code markTemplatesToMarkConfigurationsToReplace}'s
+     * value set by {@link MarkPropertiesBasedMarkConfiguration}s which
+     * {@link MarkPropertiesBasedMarkConfiguration#getOptionalMarkTemplate() refer} to the respective
+     * {@link MarkTemplate} in case a usage of a {@link MarkProperties} object for the respective mark template is
+     * found in {@link MarkProperties#getLastUsedRole()} or {@link MarkProperties#getLastUsedTemplate()}.
+     * All {@link MarkProperties} delivered from {@link SharedSailingData#getAllMarkProperties(Iterable)}, filtered
+     * by the {@code tagsToFilterMarkProperties}, are considered.
+     * <p>
      */
-    private void replaceTemplateBasedConfigurationCandidatesBySuggestedProperties(
+    private void replaceTemplateBasedConfigurationCandidatesBySuggestedPropertiesInPlace(
             Map<MarkTemplate, MarkConfiguration<MarkConfigurationResponseAnnotation>> markTemplatesToMarkConfigurationsToReplace,
-            Set<MarkConfiguration<MarkConfigurationResponseAnnotation>> markConfigurationsToEdit, Iterable<String> tagsToFilterMarkProperties,
-            Map<MarkTemplate, MarkRole> associatedRoles) {
+            Iterable<String> tagsToFilterMarkProperties, Map<MarkTemplate, MarkRole> associatedRoles) {
         // find candidates for replacement of mark configuration
         final Map<MarkTemplate, MarkTemplateBasedMarkConfiguration<MarkConfigurationResponseAnnotation>> replacementCandidates = markTemplatesToMarkConfigurationsToReplace
                 .entrySet().stream().filter(e -> e.getValue() instanceof MarkTemplateBasedMarkConfiguration)
                 .collect(Collectors.toMap(s -> s.getKey(), s -> (MarkTemplateBasedMarkConfiguration<MarkConfigurationResponseAnnotation>) s.getValue()));
+        final Map<MarkTemplate, MarkConfiguration<MarkConfigurationResponseAnnotation>> mapWithReplacements = replaceTemplateBasedConfigurationCandidatesBySuggestedProperties(
+                replacementCandidates, tagsToFilterMarkProperties, associatedRoles);
+        for (final Entry<MarkTemplate, MarkConfiguration<MarkConfigurationResponseAnnotation>> e : mapWithReplacements.entrySet()) {
+            markTemplatesToMarkConfigurationsToReplace.put(e.getKey(), e.getValue());
+        }
+    }
+
+    private Map<MarkTemplate, MarkConfiguration<MarkConfigurationResponseAnnotation>> replaceTemplateBasedConfigurationCandidatesBySuggestedProperties(
+            final Map<MarkTemplate, MarkTemplateBasedMarkConfiguration<MarkConfigurationResponseAnnotation>> replacementCandidates,
+            Iterable<String> tagsToFilterMarkProperties, Map<MarkTemplate, MarkRole> associatedRoles) {
+        final Map<MarkTemplate, MarkConfiguration<MarkConfigurationResponseAnnotation>> result = new HashMap<>();
+        result.putAll(replacementCandidates);
         final Set<MarkProperties> markPropertiesCandidates = new HashSet<>();
         Util.addAll(getSharedSailingData().getAllMarkProperties(tagsToFilterMarkProperties), markPropertiesCandidates);
         // Already included mark properties may not get associated again
-        markPropertiesCandidates.removeAll(markConfigurationsToEdit.stream()
+        markPropertiesCandidates.removeAll(replacementCandidates.values().stream()
                 .map(mp->mp.getOptionalMarkProperties()).filter(v -> v != null).collect(Collectors.toSet()));
         final LastUsageBasedAssociater<MarkProperties, MarkRole> roleBasedAssociater = new LastUsageBasedAssociater<>(
                 replacementCandidates.keySet().stream().map(associatedRoles::get).filter(v -> v != null)
                         .collect(Collectors.toSet()));
-        // TODO why isn't MarkProperties.getLastUsedTemplate() used here?
         for (MarkProperties mp : markPropertiesCandidates) {
             roleBasedAssociater.addUsages(mp, mp.getLastUsedRole());
         }
@@ -974,9 +980,9 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         for (Iterator<Entry<MarkTemplate, MarkTemplateBasedMarkConfiguration<MarkConfigurationResponseAnnotation>>> iterator = replacementCandidates.entrySet().iterator(); iterator
                 .hasNext();) {
             Entry<MarkTemplate, MarkTemplateBasedMarkConfiguration<MarkConfigurationResponseAnnotation>> entry = iterator.next();
-            final MarkRole roleName = associatedRoles.get(entry.getKey());
-            if (roleName != null) {
-                final MarkProperties bestMatchOrNull = roleBasedAssociater.getBestMatchForT2(roleName);
+            final MarkRole markRole = associatedRoles.get(entry.getKey());
+            if (markRole != null) {
+                final MarkProperties bestMatchOrNull = roleBasedAssociater.getBestMatchForT2(markRole);
                 if (bestMatchOrNull != null) {
                     suggestedMappings.put(entry.getKey(), bestMatchOrNull);
                     iterator.remove();
@@ -988,7 +994,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         final LastUsageBasedAssociater<MarkProperties, MarkTemplate> templateBasedAssociater = new LastUsageBasedAssociater<>(
                 new HashSet<>(replacementCandidates.keySet()));
         for (MarkProperties mp : markPropertiesCandidates) {
-            roleBasedAssociater.addUsages(mp, mp.getLastUsedRole());
+            templateBasedAssociater.addUsages(mp, mp.getLastUsedTemplate());
         }
         for (Entry<MarkTemplate, MarkTemplateBasedMarkConfiguration<MarkConfigurationResponseAnnotation>> entry : replacementCandidates.entrySet()) {
             final MarkProperties bestMatchOrNull = templateBasedAssociater.getBestMatchForT2(entry.getKey());
@@ -1001,14 +1007,13 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             final MarkTemplate keyTemplate = entr.getKey();
             if (suggestedMappings.containsKey(keyTemplate)) {
                 final MarkProperties suggestedPropertiesMapping = suggestedMappings.get(keyTemplate);
-                final MarkPropertiesBasedMarkConfigurationImpl<MarkConfigurationResponseAnnotation> newMarkPropertiesBasedConfiguration =
+                final MarkPropertiesBasedMarkConfiguration<MarkConfigurationResponseAnnotation> newMarkPropertiesBasedConfiguration =
                         new MarkPropertiesBasedMarkConfigurationImpl<>(suggestedPropertiesMapping, keyTemplate,
                                 getPositioningIfAvailable(suggestedPropertiesMapping));
-                markTemplatesToMarkConfigurationsToReplace.put(keyTemplate, newMarkPropertiesBasedConfiguration);
-                markConfigurationsToEdit.remove(entr.getValue());
-                markConfigurationsToEdit.add(newMarkPropertiesBasedConfiguration);
+                result.put(keyTemplate, newMarkPropertiesBasedConfiguration);
             }
         }
+        return result;
     }
 
     private MarkConfigurationResponseAnnotation getPositioningIfAvailable(Regatta regatta, TrackedRace optionalRace, Mark mark) {
@@ -1031,7 +1036,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
      * access to a course template to use all mark templates being included even if they don't have explicit read
      * permissions for those.
      */
-    private MarkTemplate resolveMarkTemplateByID(CourseTemplate courseTemplate, UUID markTemplateID) {
+    private MarkTemplate resolveMarkTemplateByID(UUID markTemplateID, CourseTemplate courseTemplate) {
         MarkTemplate resolvedMarkTemplate = null;
         if (courseTemplate != null) {
             resolvedMarkTemplate = courseTemplate.getMarkTemplateByIdIfContainedInCourseTemplate(markTemplateID);
@@ -1048,10 +1053,16 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         return resolvedMarkTemplate;
     }
 
+    /**
+     * The resulting mark configurations has {@link MarkConfiguration#getOptionalMarkProperties()} set if the {@code mark}
+     * has a {@link Mark#getOriginatingMarkPropertiesIdOrNull() mark properties reference} that can be resolved successfully;
+     * the {@link MarkConfiguration#getOptionalMarkTemplate()} will be set if the {@code mark} has a
+     * {@link Mark#getOriginatingMarkTemplateIdOrNull() mark template reference} that can be resolved successfully.
+     */
     private RegattaMarkConfiguration<MarkConfigurationResponseAnnotation> createMarkConfigurationForRegattaMark(CourseTemplate courseTemplate,
             Regatta regatta, TrackedRace optionalRace, Mark mark) {
         final UUID markTemplateIdOrNull = mark.getOriginatingMarkTemplateIdOrNull();
-        final MarkTemplate markTemplateOrNull = markTemplateIdOrNull == null ? null : resolveMarkTemplateByID(courseTemplate, markTemplateIdOrNull);
+        final MarkTemplate markTemplateOrNull = markTemplateIdOrNull == null ? null : resolveMarkTemplateByID(markTemplateIdOrNull, courseTemplate);
         final UUID markPropertiesIdOrNull = mark.getOriginatingMarkPropertiesIdOrNull();
         final MarkProperties markPropertiesOrNull = markPropertiesIdOrNull == null ? null
                 : getSharedSailingData().getMarkPropertiesById(markPropertiesIdOrNull);

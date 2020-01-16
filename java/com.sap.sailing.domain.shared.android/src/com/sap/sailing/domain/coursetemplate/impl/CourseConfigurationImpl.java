@@ -4,7 +4,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
@@ -19,7 +18,7 @@ public class CourseConfigurationImpl<P> implements CourseConfiguration<P> {
     private final String shortName;
     private final CourseTemplate optionalCourseTemplate;
     // TODO decide if we should combine markConfigurations and roleMapping to one field
-    private final Set<MarkConfiguration<P>> markConfigurations;
+    private final Iterable<MarkConfiguration<P>> markConfigurations;
     private final Map<MarkConfiguration<P>, MarkRole> associatedRoles;
     private final List<WaypointWithMarkConfiguration<P>> waypoints;
     private final RepeatablePart optionalRepeatablePart;
@@ -28,10 +27,11 @@ public class CourseConfigurationImpl<P> implements CourseConfiguration<P> {
     private final URL optionalImageURL;
     
     public CourseConfigurationImpl(CourseTemplate optionalCourseTemplate,
-            Set<MarkConfiguration<P>> markConfigurations, Map<MarkConfiguration<P>, MarkRole> associatedRoles,
+            Iterable<MarkConfiguration<P>> markConfigurations, Map<MarkConfiguration<P>, MarkRole> associatedRoles,
             List<WaypointWithMarkConfiguration<P>> waypoints,
             RepeatablePart optionalRepeatablePart, Integer numberOfLaps, String name, String shortName, URL optionalImageURL) {
         super();
+        assert !associatedRoles.values().contains(null);
         this.optionalCourseTemplate = optionalCourseTemplate;
         this.markConfigurations = markConfigurations;
         this.associatedRoles = associatedRoles;
