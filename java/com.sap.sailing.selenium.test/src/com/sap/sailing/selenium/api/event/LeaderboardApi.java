@@ -28,6 +28,9 @@ public class LeaderboardApi {
     private static final String SET_TRACKING_TIMES_URL = LEADERBOARDS_V1_RESOURCE_URL
             + "/{leaderboardname}/settrackingtimes";
     private static final String START_TRACKING_URL = LEADERBOARDS_V1_RESOURCE_URL + "/{leaderboardname}/starttracking";
+    private static final String UPDATE_LEADERBOARD_URL = LEADERBOARDS_V1_RESOURCE_URL + "/{leaderboardname}/update";
+    private static final String PARAM_RESULT_DISCARDING_THRESHOLDS = "resultDiscardingThresholds";
+    private static final String PARAM_LEADERBOARD_DISPLAY_NAME = "leaderboardDisplayName";
     private static final String GET_MARK_URL = LEADERBOARDS_V1_RESOURCE_URL + "/{leaderboardname}/marks/";
     private static final String START_TIME_URL = LEADERBOARDS_V1_RESOURCE_URL + "/{leaderboardname}/starttime";
     private static final String PARAM_RACE_COLUMN_NAME = "race_column";
@@ -46,12 +49,47 @@ public class LeaderboardApi {
         return ctx.get(LEADERBOARDS_LIST_URL);
     }
 
-    public JSONObject getLeaderboard(final ApiContext ctx, final String leaderboardName) {
-        return ctx.get(toUrl(LEADERBOARD_URL, leaderboardName));
+    public Leaderboard getLeaderboard(ApiContext ctx, String leaderboardName) {
+        return new Leaderboard(ctx.get(toUrl(LEADERBOARD_URL, leaderboardName)));
     }
 
     public DeviceMappingRequest createDeviceMappingRequest(final ApiContext ctx, final String leaderboardName) {
         return new DeviceMappingRequest(ctx, leaderboardName);
+    }
+
+    public void updateLeaderboard(ApiContext ctx, String leaderboardName, String leaderboardDisplayName,
+            int[] resultDiscardingThresholds) {
+        JSONObject requestJson = new JSONObject();
+        JSONArray resultDiscardingThresholdsJsonArray = new JSONArray();
+        if (resultDiscardingThresholds != null) {
+            for (int i = 0; i < resultDiscardingThresholds.length; i++) {
+                resultDiscardingThresholdsJsonArray.add(resultDiscardingThresholds[i]);
+            }
+        }
+        requestJson.put(PARAM_RESULT_DISCARDING_THRESHOLDS,
+                resultDiscardingThresholds != null ? resultDiscardingThresholdsJsonArray : null);
+        requestJson.put(PARAM_LEADERBOARD_DISPLAY_NAME, leaderboardDisplayName);
+        ctx.post(toUrl(UPDATE_LEADERBOARD_URL, leaderboardName), null, requestJson);
+    }
+
+    public void updateLeaderboardDisplayName(ApiContext ctx, String leaderboardName, String leaderboardDisplayName) {
+        JSONObject requestJson = new JSONObject();
+        requestJson.put(PARAM_LEADERBOARD_DISPLAY_NAME, leaderboardDisplayName);
+        ctx.post(toUrl(UPDATE_LEADERBOARD_URL, leaderboardName), null, requestJson);
+    }
+
+    public void updateLeaderboardResultDiscardingThresholds(ApiContext ctx, String leaderboardName,
+            int[] resultDiscardingThresholds) {
+        JSONObject requestJson = new JSONObject();
+        JSONArray resultDiscardingThresholdsJsonArray = new JSONArray();
+        if (resultDiscardingThresholds != null) {
+            for (int i = 0; i < resultDiscardingThresholds.length; i++) {
+                resultDiscardingThresholdsJsonArray.add(resultDiscardingThresholds[i]);
+            }
+        }
+        requestJson.put(PARAM_RESULT_DISCARDING_THRESHOLDS,
+                resultDiscardingThresholds != null ? resultDiscardingThresholdsJsonArray : null);
+        ctx.post(toUrl(UPDATE_LEADERBOARD_URL, leaderboardName), null, requestJson);
     }
 
     public TrackingTimes setTrackingTimes(final ApiContext ctx, final String leaderboardName,
@@ -100,6 +138,77 @@ public class LeaderboardApi {
 
     private String toUrl(final String urlTemplate, final String leaderboardName) {
         return urlTemplate.replace("{leaderboardname}", leaderboardName);
+    }
+
+    public class Leaderboard extends JsonWrapper {
+
+        public Leaderboard(JSONObject json) {
+            super(json);
+        }
+
+        public String getName() {
+            return get("name");
+        }
+
+        public String getDisplayName() {
+            return get("displayName");
+        }
+
+        public Long getResultTimePoint() {
+            return get("resultTimepoint");
+        }
+
+        public String getResultState() {
+            return get("resultState");
+        }
+
+        public String getType() {
+            return get("type");
+        }
+
+        public String getShardingLeaderboardName() {
+            return get("shardingLeaderboardName");
+        }
+
+        public int[] getDiscardIndexResultsStartingWithHowManyRaces() {
+            final JSONArray resultDiscardingThresholdsRaw = (JSONArray) get(
+                    "discardIndexResultsStartingWithHowManyRaces");
+            final int[] resultDiscardingThresholds = new int[resultDiscardingThresholdsRaw.size()];
+            for (int i = 0; i < resultDiscardingThresholdsRaw.size(); i++) {
+                resultDiscardingThresholds[i] = ((Long) resultDiscardingThresholdsRaw.get(i)).intValue();
+            }
+            return resultDiscardingThresholds;
+        }
+
+        public Boolean canBoatsOfCompetitorsChangePerRace() {
+            return get("canBoatsOfCompetitorsChangePerRace");
+        }
+
+        public Long getMaxCompetitorsCount() {
+            return get("maxCompetitorsCount");
+        }
+
+        public String getScoringComment() {
+            return get("scoringComment");
+        }
+
+        public Long getLastScoringUpdate() {
+            return get("lastScoringUpdate");
+        }
+
+        public String[] getColumnNames() {
+            final JSONArray columnNamesRaw = (JSONArray) get("columnNames");
+            final String[] columnNames = new String[columnNamesRaw.size()];
+            for (int i = 0; i < columnNamesRaw.size(); i++) {
+                columnNames[i] = (String) columnNamesRaw.get(i);
+            }
+            return columnNames;
+        }
+
+        public JSONArray getCompetitors() {
+            return get("competitors");
+        }
+
     }
 
     public Mark getMark(ApiContext ctx, String leaderboardName, UUID markUUID) {

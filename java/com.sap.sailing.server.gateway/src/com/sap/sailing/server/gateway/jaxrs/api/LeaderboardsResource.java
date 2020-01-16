@@ -128,6 +128,7 @@ import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
+import com.sap.sailing.server.operationaltransformation.UpdateLeaderboard;
 import com.sap.sailing.server.security.PermissionAwareRaceTrackingHandler;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Bearing;
@@ -271,6 +272,45 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             counter++;
         }
         return jsonLeaderboard;
+    }
+
+    @POST
+    @Path("{name}/update")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces("application/json;charset=UTF-8")
+    public Response updateLeaderboard(@PathParam("name") String leaderboardName, String json)
+            throws ParseException, JsonDeserializationException {
+        final Object requestBody = JSONValue.parseWithException(json);
+        final JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            SecurityUtils.getSubject().checkPermission(
+                    SecuredDomainType.LEADERBOARD.getStringPermissionForObject(DefaultActions.UPDATE, leaderboard));
+            String newLeaderboardDisplayName = leaderboard.getDisplayName();
+            if (requestObject.containsKey("leaderboardDisplayName")) {
+                newLeaderboardDisplayName = (String) requestObject.get("leaderboardDisplayName");
+            }
+            int[] resultDiscardingThresholds = null;
+            if (requestObject.containsKey("resultDiscardingThresholds")) {
+                final JSONArray resultDiscardingThresholdsRaw = (JSONArray) requestObject
+                        .get("resultDiscardingThresholds");
+                if (resultDiscardingThresholdsRaw != null) {
+                    resultDiscardingThresholds = new int[resultDiscardingThresholdsRaw.size()];
+                    for (int i = 0; i < resultDiscardingThresholdsRaw.size(); i++) {
+                        resultDiscardingThresholds[i] = ((Long) resultDiscardingThresholdsRaw.get(i)).intValue();
+                    }
+                }
+            }
+            getService().apply(new UpdateLeaderboard(/* leaderboardName */ leaderboard.getName(),
+                    /* newLeaderboardName */ leaderboard.getName(), newLeaderboardDisplayName,
+                    resultDiscardingThresholds,
+                    leaderboard.getDefaultCourseArea() != null ? leaderboard.getDefaultCourseArea().getId() : null));
+        } else {
+            return Response.status(Status.NOT_FOUND).entity(
+                    "Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
+        return Response.ok().header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
     @POST
