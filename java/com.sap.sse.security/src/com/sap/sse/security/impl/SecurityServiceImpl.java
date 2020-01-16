@@ -524,6 +524,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    public AccessControlList overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            Map<UserGroup, Set<String>> permissionMap, String displayNameOfAccessControlledObject) {
+        accessControlStore.removeAccessControlList(idOfAccessControlledObject);
+        accessControlStore.setEmptyAccessControlList(idOfAccessControlledObject, displayNameOfAccessControlledObject);
+        return updateAccessControlList(idOfAccessControlledObject, permissionMap);
+    }
+
+    @Override
     public AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             Map<UserGroup, Set<String>> permissionMap) {
         if (getAccessControlList(idOfAccessControlledObject) == null) {
