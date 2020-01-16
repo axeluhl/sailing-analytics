@@ -485,9 +485,8 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
 
         final MarkConfiguration mc2b = loadedCourse.getMarkConfigurationByEffectiveName("mc2");
         assertFalse(mc2b.getDeviceMappings().isEmpty());
-        // no new tracking data from the device, but the way it's currently defined, the last known position will reflect only
-        // a position coming from the device identified above, so we expect to find no last known position here (TODO this seems wrong as a last position *is* known based on the ping)
-        assertNull(mc2b.getLastKnownPosition());
+        assertEquals(latDeg, mc2b.getLastKnownPosition().getLatDeg(), 0.0001);
+        assertEquals(longDeg, mc2b.getLastKnownPosition().getLngDeg(), 0.0001);
 
         final MarkConfiguration mc3b = loadedCourse.getMarkConfigurationByEffectiveName("mc3");
         // TODO: following assertfails, but mc3a.unsetPositioning(); was called (position: null); but what's the intented semantics? If a tracking device is associated and a request does provide a null positioning, shall this terminate an existing device mapping? Starting at which time?

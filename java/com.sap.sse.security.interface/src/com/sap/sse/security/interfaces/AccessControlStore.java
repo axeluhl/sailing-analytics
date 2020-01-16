@@ -35,6 +35,7 @@ public interface AccessControlStore extends Named {
     void removeAclDenial(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action);
 
     void denyAclPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action);
+
     void removeAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
     
     Iterable<OwnershipAnnotation> getOwnerships();
@@ -50,9 +51,11 @@ public interface AccessControlStore extends Named {
     
     OwnershipAnnotation setOwnership(QualifiedObjectIdentifier idOfOwnedObject, User userOwner, UserGroup tenantOwner,
             String displayNameOfOwnedObject);
+    
     void removeOwnership(QualifiedObjectIdentifier idOfOwnedObject);
     
     void clear();
+
     void replaceContentsFrom(AccessControlStore newAccessControlStore);
 
     /**
