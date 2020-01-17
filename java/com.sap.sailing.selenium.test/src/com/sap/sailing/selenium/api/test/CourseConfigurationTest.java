@@ -268,7 +268,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     public void testReconstructionOfLapsForCourseBasedOnTemplate() {
         final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(sharedServerCtx);
         final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(sharedServerCtx,
-                ctdf.constructCourseTemplate(new Pair<>(1, 3), null, Collections.emptyMap()));
+                ctdf.constructCourseTemplate(new Pair<>(1, 3), null));
         final String regattaName = "test";
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];

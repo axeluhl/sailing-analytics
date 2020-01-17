@@ -341,7 +341,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 }
             }
             allMarkTemplatesInNewCourseTemplate.add(effectiveMarkTemplate);
-            MarkRole effectiveMarkRole = courseConfiguration.getAssociatedRoles().get(markConfiguration);
+            MarkRole effectiveMarkRole = courseConfigurationAfterInventory.getAssociatedRoles().get(markConfiguration);
             if (effectiveMarkRole == null) {
                 // no existing MarkRole specified for the mark configuration; we now need to look for a MarkRoleCreationRequest annotation:
                 final MarkRoleCreationRequest optionalMarkRoleCreationRequest = markConfiguration.getAnnotationInfo().getOptionalMarkRoleCreationRequest();
@@ -1144,7 +1144,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         private M mapMarkConfiguration(MarkConfiguration<P> markConfiguration) {
             final M mark = getOrCreateMarkReplacement(markConfiguration);
             if (mark == null) {
-                throw new IllegalStateException("Non declared mark found in waypoint sequence");
+                throw new IllegalStateException("Non declared mark "+markConfiguration.getName()+" found in waypoint sequence");
             }
             // If an explicit role mapping isn't given -> default to the mark's name
             allAssociatedRoles.computeIfAbsent(mark, m -> existingRoleMapping.get(markConfiguration));
