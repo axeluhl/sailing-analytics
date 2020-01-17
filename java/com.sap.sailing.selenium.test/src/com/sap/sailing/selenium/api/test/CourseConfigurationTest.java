@@ -239,20 +239,16 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     public void testCreateCourseFromCourseTemplateWithoutChanges() {
         final int numberOfLaps = 2;
         final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(sharedServerCtx);
-
         final Map<MarkRole, MarkTemplate> associatedRoles = new HashMap<>();
-        associatedRoles.put(markRoleApi.createMarkRole(sharedServerCtx, "Startboat", /* shortName */ null), ctdf.sb);
-        associatedRoles.put(markRoleApi.createMarkRole(sharedServerCtx, "Pinend", /* shortName */ null), ctdf.pe);
-        associatedRoles.put(markRoleApi.createMarkRole(sharedServerCtx, "1", /* shortName */ null), ctdf.b1);
-        associatedRoles.put(markRoleApi.createMarkRole(sharedServerCtx, "4s", /* shortName */ null), ctdf.b4s);
-        associatedRoles.put(markRoleApi.createMarkRole(sharedServerCtx, "4p", /* shortName */ null), ctdf.b4p);
-
+        associatedRoles.put(ctdf.sbRole, ctdf.sb);
+        associatedRoles.put(ctdf.peRole, ctdf.pe);
+        associatedRoles.put(ctdf.b1Role, ctdf.b1);
+        associatedRoles.put(ctdf.b4sRole, ctdf.b4s);
+        associatedRoles.put(ctdf.b4pRole, ctdf.b4p);
         final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(sharedServerCtx,
                 ctdf.constructCourseTemplate(new Pair<>(1, 3), numberOfLaps, associatedRoles));
-
         CourseConfiguration courseConfiguration = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(
                 ctx, createdCourseTemplate.getId(), /* optionalRegattaName */ null, /* tags */ null);
-
         final String regattaName = "test";
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
@@ -271,14 +267,11 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     @Test
     public void testReconstructionOfLapsForCourseBasedOnTemplate() {
         final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(sharedServerCtx);
-
         final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(sharedServerCtx,
                 ctdf.constructCourseTemplate(new Pair<>(1, 3), null, Collections.emptyMap()));
-
         final String regattaName = "test";
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
-
         for (int numberOfLaps = 1; numberOfLaps <= 3; numberOfLaps++) {
             CourseConfiguration courseConfiguration = courseConfigurationApi
                     .createCourseConfigurationFromCourseTemplate(ctx, createdCourseTemplate.getId(), regattaName,
@@ -287,7 +280,6 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
             courseConfigurationApi.createCourse(ctx, courseConfiguration, regattaName, race.getRaceName(), "Default");
             CourseConfiguration createdCourseAsConfiguration = courseConfigurationApi
                     .createCourseConfigurationFromCourse(ctx, regattaName, race.getRaceName(), "Default", null);
-
             assertEquals(createdCourseTemplate.getId(), createdCourseAsConfiguration.getOptionalCourseTemplateId());
             assertEquals(numberOfLaps, createdCourseAsConfiguration.getNumberOfLaps());
         }
