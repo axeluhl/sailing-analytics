@@ -2328,6 +2328,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorWhileLoadingUserSettings(String errorMessage);
     String certificates();
     String dataBy();
+    String currentPositionLatitudeTooltip();
+    String currentPositionLongitudeTooltip();
     String courseCreation();
     String filterMarkTemplateByName();
     String markTemplates();

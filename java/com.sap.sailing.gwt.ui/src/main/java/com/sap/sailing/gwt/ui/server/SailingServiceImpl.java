@@ -3538,11 +3538,26 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     result = (speedOverGround == null) ? null : speedOverGround.getKnots();
                 }
                 break;
+            case RACE_CURRENT_COURSE_OVER_GROUND_IN_TRUE_DEGREES:
             case CHART_COURSE_OVER_GROUND_TRUE_DEGREES:
                 final GPSFixTrack<Competitor, GPSFixMoving> cogTrack = trackedRace.getTrack(competitor);
                 if (cogTrack != null) {
                     SpeedWithBearing speedOverGround = cogTrack.getEstimatedSpeed(timePoint);
                     result = (speedOverGround == null) ? null : speedOverGround.getBearing().getDegrees();
+                }
+                break;
+            case RACE_CURRENT_POSITION_LAT_DEG:
+                final GPSFixTrack<Competitor, GPSFixMoving> latTrack = trackedRace.getTrack(competitor);
+                if (latTrack != null) {
+                    Position position = latTrack.getEstimatedPosition(timePoint, /* extrapolate */ true);
+                    result = (position == null) ? null : position.getLatDeg();
+                }
+                break;
+            case RACE_CURRENT_POSITION_LNG_DEG:
+                final GPSFixTrack<Competitor, GPSFixMoving> lngTrack = trackedRace.getTrack(competitor);
+                if (lngTrack != null) {
+                    Position position = lngTrack.getEstimatedPosition(timePoint, /* extrapolate */ true);
+                    result = (position == null) ? null : position.getLngDeg();
                 }
                 break;
             case LEG_VELOCITY_MADE_GOOD_IN_KNOTS:
