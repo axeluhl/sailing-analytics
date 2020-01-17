@@ -16,6 +16,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -71,7 +75,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     private Course course;
     private Regatta domainRegatta;
     private DynamicTrackedRegatta trackedRegatta;
-    private final IControlRoute[] routeData = new IControlRoute[1];
+    private CompletableFuture<IControlRoute> routeDataFuture;
     private DomainFactory domainFactory;
 
     public CourseUpdateTest() throws URISyntaxException, MalformedURLException {
@@ -81,6 +85,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
+        routeDataFuture = new CompletableFuture<>();
         domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory.TEST_RACE_LOG_RESOLVER));
         domainRegatta = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
                 getTracTracRace(), /* trackedRegattaRegistry */ null);
@@ -100,9 +105,8 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
             @Override
             protected void handleEvent(Triple<IControlRoute, Long, Void> event) {
                 super.handleEvent(event);
-                synchronized (routeData) {
-                    routeData[0] = event.getA();
-                    routeData.notifyAll();
+                if (!event.getA().getControls().isEmpty()) {
+                    routeDataFuture.complete(event.getA());
                 }
             }
         });
@@ -133,20 +137,25 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
 
     private void testLegStructure(int minimalNumberOfLegsExpected) throws InterruptedException {
         waitForRouteData();
-        assertTrue(course.getLegs().size() >= minimalNumberOfLegsExpected);
-        TrackedRace trackedRace = trackedRegatta.getTrackedRace(race);
-        assertEquals(course.getLegs().size(), Util.size(trackedRace.getTrackedLegs()));
-        Iterator<Leg> legIter = course.getLegs().iterator();
-        for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
-            assertTrue(legIter.hasNext());
-            Leg leg = legIter.next();
-            assertSame(leg, trackedLeg.getLeg());
-            for (Competitor competitor : race.getCompetitors()) {
-                TrackedLegOfCompetitor tloc = trackedLeg.getTrackedLeg(competitor);
-                assertNotNull(tloc);
-                assertSame(competitor, tloc.getCompetitor());
-                assertSame(leg, tloc.getLeg());
+        course.lockForRead();
+        try {
+            assertTrue(course.getLegs().size() >= minimalNumberOfLegsExpected);
+            TrackedRace trackedRace = trackedRegatta.getTrackedRace(race);
+            assertEquals(course.getLegs().size(), Util.size(trackedRace.getTrackedLegs()));
+            Iterator<Leg> legIter = course.getLegs().iterator();
+            for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
+                assertTrue(legIter.hasNext());
+                Leg leg = legIter.next();
+                assertSame(leg, trackedLeg.getLeg());
+                for (Competitor competitor : race.getCompetitors()) {
+                    TrackedLegOfCompetitor tloc = trackedLeg.getTrackedLeg(competitor);
+                    assertNotNull(tloc);
+                    assertSame(competitor, tloc.getCompetitor());
+                    assertSame(leg, tloc.getLeg());
+                }
             }
+        } finally {
+            course.unlockAfterRead();
         }
     }
     
@@ -209,8 +218,8 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     @Test
     public void testLastWaypointRemoved() throws PatchFailedException, InterruptedException {
         final boolean[] result = new boolean[1];
-        waitForRouteData();
-        final List<IControl> controlPoints = new ArrayList<>(routeData[0].getControls());
+        final IControlRoute routeData = waitForRouteData();
+        final List<IControl> controlPoints = new ArrayList<>(routeData.getControls());
         final IControl removedControlPoint = controlPoints.remove(controlPoints.size()-1);
         course.addCourseListener(new CourseListener() {
             @Override
@@ -233,8 +242,8 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     @Test
     public void testLastButOneWaypointRemoved() throws PatchFailedException, InterruptedException {
         final boolean[] result = new boolean[1];
-        waitForRouteData();
-        final List<IControl> controlPoints = new ArrayList<>(routeData[0].getControls());
+        final IControlRoute routeData = waitForRouteData();
+        final List<IControl> controlPoints = new ArrayList<>(routeData.getControls());
         final IControl removedControlPoint = controlPoints.remove(1);
         course.addCourseListener(new CourseListener() {
             @Override
@@ -254,11 +263,11 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         testLegStructure(1);
     }
 
-    private void waitForRouteData() throws InterruptedException {
-        synchronized (routeData) {
-            while (routeData[0] == null) {
-                routeData.wait();
-            }
+    private IControlRoute waitForRouteData() {
+        try {
+            return routeDataFuture.get(1, TimeUnit.MINUTES);
+        } catch (ExecutionException | TimeoutException | InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -266,8 +275,8 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     public void testWaypointAddedAtEnd() throws PatchFailedException, InterruptedException {
         final boolean[] result = new boolean[1];
         final IControl cp1 = createMockedControlPoint("CP1", 1, UUID.randomUUID());
-        waitForRouteData();
-        final List<IControl> controlPoints = new ArrayList<>(routeData[0].getControls());
+        final IControlRoute routeData = waitForRouteData();
+        final List<IControl> controlPoints = new ArrayList<>(routeData.getControls());
         controlPoints.add(cp1);
         course.addCourseListener(new CourseListener() {
             @Override
@@ -304,8 +313,8 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     public void testTrackedRacesTrackedLegsUpdatedProperly() throws InterruptedException, PatchFailedException {
         final boolean[] result = new boolean[1];
         final IControl cp1 = createMockedControlPoint("CP1", 1, UUID.randomUUID());
-        waitForRouteData();
-        final List<IControl> controlPoints = new ArrayList<>(routeData[0].getControls());
+        final IControlRoute routeData = waitForRouteData();
+        final List<IControl> controlPoints = new ArrayList<>(routeData.getControls());
         controlPoints.add(cp1);
         course.addCourseListener(new CourseListener() {
             @Override
@@ -328,6 +337,6 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     @After
     public void tearDown() throws MalformedURLException, IOException, InterruptedException {
         super.tearDown();
-        routeData[0] = null;
+        routeDataFuture = null;
     }
 }
