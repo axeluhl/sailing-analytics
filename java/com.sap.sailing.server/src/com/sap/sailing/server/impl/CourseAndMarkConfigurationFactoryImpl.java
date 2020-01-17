@@ -768,6 +768,15 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         final Map<Mark, RegattaMarkConfiguration<MarkConfigurationResponseAnnotation>> markConfigurationsByMark = createMarkConfigurationsForRegatta(
                 regatta, optionalRace, courseTemplateOrNull);
         allMarkConfigurations.addAll(markConfigurationsByMark.values());
+        final Map<MarkConfiguration<MarkConfigurationResponseAnnotation>, MarkRole> resultingRoleMapping = new HashMap<>();
+        if (course != null) {
+            for (Entry<Mark, UUID> markWithRole : course.getAssociatedRoles().entrySet()) {
+                final MarkRole markRoleForMark = resolveMarkRoleByID(markWithRole.getValue(), courseTemplateOrNull);
+                if (markRoleForMark != null) {
+                    resultingRoleMapping.put(markConfigurationsByMark.get(markWithRole.getKey()), markRoleForMark);
+                }
+            }
+        }
         String name = null;
         String shortName = null;
         URL optionalImageURL = null;
@@ -783,46 +792,37 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 shortName = courseTemplateOrNull.getShortName();
                 optionalImageURL = courseTemplateOrNull.getOptionalImageURL();
                 optionalRepeatablePart = courseTemplateOrNull.getRepeatablePart();
-                // Next, we need to generate additional MarkTemplateBasedMarkConfigurations for all MarkTemplates from
-                // the CourseTemplate that have no corresponding RegattaMarkConfiguration
-                // that points back to it in its getOptionalMarkTemplate():
-                final Set<MarkTemplate> markTemplatesReferencedByMarksInRegatta = markConfigurationsByMark.values()
-                        .stream().map(regattaMarkConfig -> regattaMarkConfig.getOptionalMarkTemplate())
-                        .filter(mt -> mt != null).collect(Collectors.toSet());
-                final Map<MarkTemplate, MarkTemplateBasedMarkConfiguration<MarkConfigurationResponseAnnotation>> markConfigurationsForUnusedMarkTemplates = new HashMap<>();
-                for (final MarkTemplate markTemplate : courseTemplateOrNull.getMarkTemplates()) {
-                    // FIXME do this ONLY for mark templates that are referred to by roles for which no regatta mark exists (the 1-lap, 0-repetition case)
-                    if (!markTemplatesReferencedByMarksInRegatta.contains(markTemplate)) {
-                        // This MarkTemplate doesn't have a MarkConfiguration assigned yet, so no Mark in the regatta
-                        // referenced it by UUID. Therefore, we'll create a MarkTemplateBasedMarkConfiguration here as
-                        // the default for such "unused" MarkTemplates.
+                final Map<MarkTemplate, MarkTemplateBasedMarkConfiguration<MarkConfigurationResponseAnnotation>> markConfigurationsForUnusedMarkRoles = new HashMap<>();
+                // Now we know that the Course conforms to the CourseTemplate, and we have RegattaMarkConfigurations for all marks in the regatta.
+                // But the course could be a one-lapper, with zero repetitions of the repeatable part (example: no leeward gate if
+                // only one lap is sailed in a windward-leeward course). There may not be Marks in the regatta for the roles used
+                // in the CourseTemplate's repeatable part.
+                // We need to ensure that the resulting CourseConfiguration has MarkConfigurations for all MarkRoles used in
+                // the CourseTemplate, so a client can create repetitions of the repeatable part. Therefore, if there are MarkRoles
+                // in the CourseTemplate for 
+                for (final Entry<MarkRole, MarkTemplate> e : courseTemplateOrNull.getDefaultMarkTemplatesForMarkRoles().entrySet()) {
+                    if (!resultingRoleMapping.values().contains(e.getKey())) {
+                        final MarkTemplate markTemplateForMarkRoleWithoutMarkConfigurationSoFar = e.getValue();
+                        // We found a MarkRole used in the CourseTemplate that does not have a MarkConfiguration mapping to it.
+                        // We need to use the default MarkTemplate for that MarkRole and create a MarkConfiguration for it:
                         final MarkTemplateBasedMarkConfiguration<MarkConfigurationResponseAnnotation> markConfiguration = new MarkTemplateBasedMarkConfigurationImpl<MarkConfigurationResponseAnnotation>(
-                                markTemplate, /* response annotation: nothing known about positioning */ null);
-                        markConfigurationsForUnusedMarkTemplates.put(markTemplate, markConfiguration);
+                                markTemplateForMarkRoleWithoutMarkConfigurationSoFar, /* response annotation: nothing known about positioning */ null);
+                        markConfigurationsForUnusedMarkRoles.put(markTemplateForMarkRoleWithoutMarkConfigurationSoFar, markConfiguration);
                     }
                     // now check if we have good MarkProperties matches for any of those MarkTemplates; if so,
                     // their MarkTemplateBasedMarkConfiguration is replaced by a MarkPropertiesBasedMarkConfiguration
                     // that refers back to the MarkTemplate
-                    final Map<MarkTemplate, MarkConfiguration<MarkConfigurationResponseAnnotation>> markConfigurationsForUnusedMarkTemplatesWithMatchingMarkProperties =
+                    final Map<MarkTemplate, MarkConfiguration<MarkConfigurationResponseAnnotation>> markConfigurationsForUnusedMarkRolesWithMatchingMarkProperties =
                             replaceTemplateBasedConfigurationCandidatesBySuggestedProperties(
-                            markConfigurationsForUnusedMarkTemplates, tagsToFilterMarkProperties,
+                            markConfigurationsForUnusedMarkRoles, tagsToFilterMarkProperties,
                             courseTemplateOrNull.getDefaultMarkRolesForMarkTemplates());
-                    allMarkConfigurations.addAll(markConfigurationsForUnusedMarkTemplatesWithMatchingMarkProperties.values());
+                    allMarkConfigurations.addAll(markConfigurationsForUnusedMarkRolesWithMatchingMarkProperties.values());
                 }
             }
         } else {
             numberOfLapsOrNullIfNoValidCourseTemplateInstance = null;
         }
-        // resultingRoleMapping does not contain mappings for MarkTemplates that are the default for a MarkRole; only
-        // the role associations from the marks in the regatta are considered.
-        final Map<MarkConfiguration<MarkConfigurationResponseAnnotation>, MarkRole> resultingRoleMapping = new HashMap<>();
         if (course != null) {
-            for (Entry<Mark, UUID> markWithRole : course.getAssociatedRoles().entrySet()) {
-                final MarkRole markRoleForMark = resolveMarkRoleByID(markWithRole.getValue(), courseTemplateOrNull);
-                if (markRoleForMark != null) {
-                    resultingRoleMapping.put(markConfigurationsByMark.get(markWithRole.getKey()), markRoleForMark);
-                }
-            }
             for (Waypoint waypoint : course.getWaypoints()) {
                 final ControlPoint controlPoint = waypoint.getControlPoint();
                 final ControlPointWithMarkConfiguration<MarkConfigurationResponseAnnotation> resultingControlPoint;
