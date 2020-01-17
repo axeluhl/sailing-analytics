@@ -16,6 +16,7 @@ public class MarkTemplate extends JsonWrapper {
     private static final String FIELD_SHAPE = "shape";
     private static final String FIELD_PATTERN = "pattern";
     private static final String FIELD_MARKTYPE = "markType";
+    private static final String FIELD_ASSOCIATED_MARK_ROLE_ID = "associatedRoleId";
 
     public MarkTemplate(JSONObject json) {
         super(json);
@@ -46,6 +47,11 @@ public class MarkTemplate extends JsonWrapper {
         return get(FIELD_PATTERN);
     }
 
+    public UUID getAssociatedMarkRoleId() {
+        final String uuid = get(FIELD_ASSOCIATED_MARK_ROLE_ID);
+        return uuid == null ? null : UUID.fromString(uuid);
+    }
+    
     public MarkType getMarkType() {
         String markType = get(FIELD_MARKTYPE);
         return markType != null ? MarkType.valueOf(markType) : null;

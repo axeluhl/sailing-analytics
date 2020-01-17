@@ -15,10 +15,12 @@ public class MarkRoleApi {
 
     private static final String MARK_ROLES = "/api/v1/markroles";
     private static final String PARAM_NAME = "name";
+    private static final String PARAM_SHORT_NAME = "shortName";
 
-    public MarkRole createMarkRole(final ApiContext ctx, final String name) {
+    public MarkRole createMarkRole(final ApiContext ctx, final String name, String shortName) {
         final Map<String, String> formParams = new TreeMap<>();
         formParams.put(PARAM_NAME, name);
+        formParams.put(PARAM_SHORT_NAME, shortName);
         JSONObject result = ctx.post(MARK_ROLES, null, formParams);
         return new MarkRole(result);
     }

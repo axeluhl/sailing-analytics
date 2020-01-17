@@ -28,13 +28,13 @@ public class MarkRoleTest extends AbstractSeleniumTest {
         final String roleName1 = "role_sb";
         final String roleName2 = "role_pe";
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
-        final MarkRole markRole1 = markRoleApi.createMarkRole(ctx, roleName1);
+        final MarkRole markRole1 = markRoleApi.createMarkRole(ctx, roleName1, /* shortName */ null);
         assertNotNull(markRole1.getId());
         assertEquals(roleName1, markRole1.getName());
         final MarkRole markRoleReloaded = markRoleApi.getMarkRole(ctx, markRole1.getId());
         assertNotNull(markRoleReloaded.getId());
         assertEquals(roleName1, markRoleReloaded.getName());
-        final MarkRole markRole2 = markRoleApi.createMarkRole(ctx, roleName2);
+        final MarkRole markRole2 = markRoleApi.createMarkRole(ctx, roleName2, /* shortName */ null);
         final Iterable<MarkRole> markRoles = markRoleApi.getAllMarkRoles(ctx);
         for (MarkRole markRole : markRoles) {
             assertTrue(markRole.getId().equals(markRole1.getId()) || markRole.getId().equals(markRole2.getId()));

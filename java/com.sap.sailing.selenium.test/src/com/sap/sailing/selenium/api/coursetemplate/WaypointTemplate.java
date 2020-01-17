@@ -13,29 +13,29 @@ import com.sap.sailing.selenium.api.core.JsonWrapper;
 
 public class WaypointTemplate extends JsonWrapper {
     private static final String FIELD_CONTROL_POINT_NAME = "controlPointName";
-    private static final String FIELD_MARK_TEMPLATE_IDS = "markTemplateIds";
     private static final String FIELD_PASSING_INSTRUCTION = "passingInstruction";
+    private static final String FIELD_MARK_ROLE_IDS = "markRoleIds";
 
-    private final Iterable<MarkTemplate> marks;
+    private final Iterable<MarkRole> markRoles;
     private final PassingInstruction passingInstruction;
 
-    public WaypointTemplate(String name, PassingInstruction passingInstruction, Iterable<MarkTemplate> marks) {
+    public WaypointTemplate(String name, PassingInstruction passingInstruction, Iterable<MarkRole> markRoles) {
         super(new JSONObject());
         this.passingInstruction = passingInstruction;
-        this.marks = marks;
+        this.markRoles = markRoles;
         getJson().put(FIELD_CONTROL_POINT_NAME, name);
         getJson().put(FIELD_PASSING_INSTRUCTION, passingInstruction.name());
-        final JSONArray markIds = new JSONArray();
-        marks.forEach(mt -> markIds.add(mt.getId().toString()));
-        getJson().put(FIELD_MARK_TEMPLATE_IDS, markIds);
+        final JSONArray roleIds = new JSONArray();
+        markRoles.forEach(mr -> roleIds.add(mr.getId().toString()));
+        getJson().put(FIELD_MARK_ROLE_IDS, roleIds);
     }
 
-    public WaypointTemplate(JSONObject json, Function<UUID, MarkTemplate> markTemplateResolver) {
+    public WaypointTemplate(JSONObject json, Function<UUID, MarkRole> markRoleResolver) {
         super(json);
-        final JSONArray markIds = get(FIELD_MARK_TEMPLATE_IDS);
-        final List<MarkTemplate> marks = markIds.stream().map(idObject -> UUID.fromString(idObject.toString()))
-                .map(markTemplateResolver::apply).collect(Collectors.toList());
-        this.marks = marks;
+        final JSONArray markRoleIds = get(FIELD_MARK_ROLE_IDS);
+        final List<MarkRole> markRoles = markRoleIds.stream().map(idObject -> UUID.fromString(idObject.toString()))
+                .map(markRoleResolver::apply).collect(Collectors.toList());
+        this.markRoles = markRoles;
         passingInstruction = PassingInstruction.valueOf(get(FIELD_PASSING_INSTRUCTION));
     }
 
@@ -43,7 +43,7 @@ public class WaypointTemplate extends JsonWrapper {
         return passingInstruction;
     }
 
-    public Iterable<MarkTemplate> getMarks() {
-        return marks;
+    public Iterable<MarkRole> getMarkRoles() {
+        return markRoles;
     }
 }

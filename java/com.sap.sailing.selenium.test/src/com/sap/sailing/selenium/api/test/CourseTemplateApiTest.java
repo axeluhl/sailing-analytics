@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeSet;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.junit.Before;
@@ -86,7 +85,6 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
         final Pair<Integer, Integer> repeatablePart = new Pair<>(1, 6);
         final CourseTemplate courseTemplateToSave = ctdf.constructCourseTemplate(repeatablePart,
                 /* defaultNumberOfLaps */null);
-
         try {
             courseTemplateApi.createCourseTemplate(ctx, courseTemplateToSave);
             fail();
@@ -97,19 +95,17 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
 
     @Test
     public void createCourseTemplateWithRoleMappingTest() {
-        final Map<MarkTemplate, MarkRole> associatedRoles = new HashMap<>();
-        associatedRoles.put(ctdf.sb, markRoleApi.createMarkRole(ctx, "Startboat"));
-        associatedRoles.put(ctdf.pe, markRoleApi.createMarkRole(ctx, "Pinend"));
-        associatedRoles.put(ctdf.b1, markRoleApi.createMarkRole(ctx, "1"));
-        associatedRoles.put(ctdf.b4s, markRoleApi.createMarkRole(ctx, "4s"));
-        associatedRoles.put(ctdf.b4p, markRoleApi.createMarkRole(ctx, "4p"));
-
+        final Map<MarkRole, MarkTemplate> associatedRoles = new HashMap<>();
+        associatedRoles.put(markRoleApi.createMarkRole(ctx, "Startboat", /* shortName */ null), ctdf.sb);
+        associatedRoles.put(markRoleApi.createMarkRole(ctx, "Pinend", /* shortName */ null), ctdf.pe);
+        associatedRoles.put(markRoleApi.createMarkRole(ctx, "1", /* shortName */ null), ctdf.b1);
+        associatedRoles.put(markRoleApi.createMarkRole(ctx, "4s", /* shortName */ null), ctdf.b4s);
+        associatedRoles.put(markRoleApi.createMarkRole(ctx, "4p", /* shortName */ null), ctdf.b4p);
         final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(ctx,
                 ctdf.constructCourseTemplate(null, /* defaultNumberOfLaps */null, associatedRoles));
-
         assertEquals(new TreeSet<>(associatedRoles.values()),
-                new TreeSet<MarkRole>(createdCourseTemplate.getRoleMapping().values().stream()
-                        .map(r -> markRoleApi.getMarkRole(ctx, UUID.fromString(r))).collect(Collectors.toSet())));
+                new TreeSet<MarkRole>(createdCourseTemplate.getRoleMapping().keySet().stream()
+                        .map(r -> markRoleApi.getMarkRole(ctx, r.getAssociatedMarkRoleId())).collect(Collectors.toSet())));
     }
 
     @Test
@@ -119,36 +115,32 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
         assertEquals(
                 new HashSet<>(Arrays.asList(ctdf.sb.getName(), ctdf.pe.getName(), ctdf.b1.getName(), ctdf.b4s.getName(),
                         ctdf.b4p.getName())),
-                new HashSet<>(createdCourseTemplate.getRoleMapping().values().stream()
-                        .map(r -> markRoleApi.getMarkRole(ctx, UUID.fromString(r)).getName())
+                new HashSet<>(createdCourseTemplate.getRoleMapping().keySet().stream()
+                        .map(r -> markRoleApi.getMarkRole(ctx, r.getAssociatedMarkRoleId()).getName())
                         .collect(Collectors.toSet())));
     }
 
     @Test
     public void createCourseTemplateWithPartialRoleMappingTest() {
-        final Map<MarkTemplate, MarkRole> associatedRoles = new HashMap<>();
-        associatedRoles.put(ctdf.b1, markRoleApi.createMarkRole(ctx, "1"));
-        associatedRoles.put(ctdf.b4s, markRoleApi.createMarkRole(ctx, "4s"));
-        associatedRoles.put(ctdf.b4p, markRoleApi.createMarkRole(ctx, "4p"));
-
+        final Map<MarkRole, MarkTemplate> associatedRoles = new HashMap<>();
+        associatedRoles.put(markRoleApi.createMarkRole(ctx, "1", /* shortName */ null), ctdf.b1);
+        associatedRoles.put(markRoleApi.createMarkRole(ctx, "4s", /* shortName */ null), ctdf.b4s);
+        associatedRoles.put(markRoleApi.createMarkRole(ctx, "4p", /* shortName */ null), ctdf.b4p);
         final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(ctx,
                 ctdf.constructCourseTemplate(null, /* defaultNumberOfLaps */null, associatedRoles));
         assertEquals(new HashSet<>(Arrays.asList(ctdf.sb.getName(), ctdf.pe.getName(), "1", "4s", "4p")),
-                new HashSet<>(createdCourseTemplate.getRoleMapping().values().stream()
-                        .map(r -> markRoleApi.getMarkRole(ctx, UUID.fromString(r)).getName())
+                new HashSet<>(createdCourseTemplate.getRoleMapping().keySet().stream()
+                        .map(r -> markRoleApi.getMarkRole(ctx, r.getAssociatedMarkRoleId()).getName())
                         .collect(Collectors.toSet())));
     }
 
     @Test
     public void createCourseTemplateWithInvalidRoleMappingTest() {
-        final Map<MarkTemplate, MarkRole> associatedRoles = new HashMap<>();
-        final MarkRole markRole = markRoleApi.createMarkRole(ctx, "4");
-        associatedRoles.put(ctdf.b4s, markRole);
-        associatedRoles.put(ctdf.b4p, markRole);
-
-        final CourseTemplate courseTemplateToSave = ctdf.constructCourseTemplate(null, /* defaultNumberOfLaps */null,
-                associatedRoles);
-
+        final Map<MarkRole, MarkTemplate> associatedRoles = new HashMap<>();
+        final MarkRole markRole = markRoleApi.createMarkRole(ctx, "4", /* shortName */ null);
+        associatedRoles.put(markRole, ctdf.b4s);
+        associatedRoles.put(markRole, ctdf.b4p);
+        final CourseTemplate courseTemplateToSave = ctdf.constructCourseTemplate(null, /* defaultNumberOfLaps */null, associatedRoles);
         try {
             courseTemplateApi.createCourseTemplate(ctx, courseTemplateToSave);
             fail();

@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -23,11 +24,11 @@ public class CourseTemplate extends JsonWrapper {
     private static final String FIELD_TAGS = "tags";
     private static final String FIELD_OPTIONAL_IMAGE_URL = "optionalImageURL";
     private static final String FIELD_ALL_MARK_TEMPLATES = "allMarkTemplates";
+    private static final String FIELD_ALL_MARK_ROLES = "allMarkRoles";
     private static final String FIELD_WAYPOINTS = "waypoints";
     private static final String FIELD_ASSOCIATED_ROLE_ID = "associatedRoleId";
     private static final String FIELD_OPTIONAL_REPEATABLE_PART = "optionalRepeatablePart";
     private static final String FIELD_DEFAULT_NUMBER_OF_LAPS = "defaultNumberOfLaps";
-
     private static final String FIELD_REPEATABLE_PART_START = "zeroBasedIndexOfRepeatablePartStart";
     private static final String FIELD_REPEATABLE_PART_END = "zeroBasedIndexOfRepeatablePartEnd";
 
@@ -38,7 +39,9 @@ public class CourseTemplate extends JsonWrapper {
     private final Integer defaultNumberOfLaps;
     private final Iterable<String> tags;
     private final Iterable<MarkTemplate> allMarkTemplates;
-    private final Map<MarkTemplate, String> roleMapping;
+    private final Iterable<MarkRole> allMarkRoles;
+    private final Map<MarkRole, MarkTemplate> defaultMarkTemplateForMarkRole;
+    private final Map<MarkTemplate, MarkRole> defaultMarkRoleForMarkTemplate;
     private final Iterable<WaypointTemplate> waypoints;
 
     public CourseTemplate(JSONObject json) {
@@ -59,23 +62,34 @@ public class CourseTemplate extends JsonWrapper {
         } else {
             tags = tagsJSON.stream().map(Object::toString).collect(Collectors.toSet());
         }
+        JSONArray markRolesJSON = get(FIELD_ALL_MARK_ROLES);
+        HashMap<UUID, MarkRole> markRolesById = new HashMap<>();
+        markRolesJSON.forEach(o -> {
+            final JSONObject mrJSON = (JSONObject) o;
+            final MarkRole markRole = new MarkRole(mrJSON);
+            markRolesById.put(markRole.getId(), markRole);
+        });
+        allMarkRoles = markRolesById.values();
         JSONArray markTemplatesJSON = get(FIELD_ALL_MARK_TEMPLATES);
         HashMap<UUID, MarkTemplate> markTemplatesById = new HashMap<>();
-        roleMapping = new HashMap<>();
+        defaultMarkRoleForMarkTemplate = new HashMap<>();
         markTemplatesJSON.forEach(o -> {
             final JSONObject mtJSON = (JSONObject) o;
             final MarkTemplate markTemplate = new MarkTemplate(mtJSON);
             markTemplatesById.put(markTemplate.getId(), markTemplate);
-            String roleIdOrNull = (String) mtJSON.get(FIELD_ASSOCIATED_ROLE_ID);
-            
+            final UUID roleIdOrNull = markTemplate.getAssociatedMarkRoleId();
             if (roleIdOrNull != null) {
-                roleMapping.put(markTemplate, roleIdOrNull);
+                defaultMarkRoleForMarkTemplate.put(markTemplate, markRolesById.get(roleIdOrNull));
             }
         });
         allMarkTemplates = markTemplatesById.values();
+        defaultMarkTemplateForMarkRole = new HashMap<>();
+        for (final MarkRole markRole : allMarkRoles) {
+            defaultMarkTemplateForMarkRole.put(markRole, markTemplatesById.get(markRole.getAssociatedMarkTemplateId()));
+        }
         final List<WaypointTemplate> waypoints = new ArrayList<WaypointTemplate>();
         JSONArray waypointsJSON = get(FIELD_WAYPOINTS);
-        waypointsJSON.forEach(wpObject -> waypoints.add(new WaypointTemplate((JSONObject)wpObject, markTemplatesById::get)));
+        waypointsJSON.forEach(wpObject -> waypoints.add(new WaypointTemplate((JSONObject) wpObject, markRolesById::get)));
         this.waypoints = waypoints;
         final JSONObject repeatablePartJSON = get(FIELD_OPTIONAL_REPEATABLE_PART);
         if (repeatablePartJSON != null) {
@@ -87,9 +101,30 @@ public class CourseTemplate extends JsonWrapper {
         }
     }
 
-    public CourseTemplate(String name, List<MarkTemplate> allMarkTemplates, Map<MarkTemplate, String> roleMapping,
-            Iterable<WaypointTemplate> waypoints, Pair<Integer, Integer> optionalRepeatablePart, Iterable<String> tags,
-            URL optionalImageURL, Integer defaultNumberOfLaps) {
+    public CourseTemplate(String name, String shortName, List<MarkTemplate> allMarkTemplates,
+            Map<MarkRole, MarkTemplate> roleMapping,
+            Iterable<WaypointTemplate> waypoints, Pair<Integer, Integer> optionalRepeatablePart,
+            Iterable<String> tags, URL optionalImageURL, Integer defaultNumberOfLaps) {
+        this(name, shortName, allMarkTemplates, roleMapping, getDefaultMarkRolesForMarkTemplates(roleMapping),
+                waypoints, optionalRepeatablePart, tags, optionalImageURL, defaultNumberOfLaps);
+    }
+    
+    /**
+     * Create the default reverse mapping from the role-to-marktemplate mapping
+     */
+    private static Map<MarkTemplate, MarkRole> getDefaultMarkRolesForMarkTemplates(
+            Map<MarkRole, MarkTemplate> roleMapping) {
+        final Map<MarkTemplate, MarkRole> result = new HashMap<>();
+        for (final Entry<MarkRole, MarkTemplate> e : roleMapping.entrySet()) {
+            result.put(e.getValue(), e.getKey());
+        }
+        return result;
+    }
+
+    public CourseTemplate(String name, String shortName, List<MarkTemplate> allMarkTemplates,
+            Map<MarkRole, MarkTemplate> roleMapping,
+            Map<MarkTemplate, MarkRole> defaultRolesForMarks, Iterable<WaypointTemplate> waypoints, Pair<Integer, Integer> optionalRepeatablePart,
+            Iterable<String> tags, URL optionalImageURL, Integer defaultNumberOfLaps) {
         super(new JSONObject());
         this.optionalRepeatablePart = optionalRepeatablePart;
         this.optionalImageURL = optionalImageURL;
@@ -97,18 +132,18 @@ public class CourseTemplate extends JsonWrapper {
         this.id = null;
         this.name = name;
         this.allMarkTemplates = allMarkTemplates;
-        this.roleMapping = roleMapping;
+        this.allMarkRoles = roleMapping.keySet();
+        this.defaultMarkRoleForMarkTemplate = defaultRolesForMarks;
+        this.defaultMarkTemplateForMarkRole = roleMapping;
         this.waypoints = waypoints;
         this.tags = tags;
-        
         getJson().put(FIELD_NAME, name);
-
         final JSONArray markTemplatesJSON = new JSONArray();
         allMarkTemplates.forEach(mt -> {
             final JSONObject markTemplateEntry = mt.getJson();
-            final String roleIdOrNull = roleMapping.get(mt);
-            if (roleIdOrNull != null) {
-                markTemplateEntry.put(FIELD_ASSOCIATED_ROLE_ID, roleIdOrNull);
+            final MarkRole markRole = defaultRolesForMarks.get(mt);
+            if (markRole != null) {
+                markTemplateEntry.put(FIELD_ASSOCIATED_ROLE_ID, markRole.getId().toString());
             }
             markTemplatesJSON.add(markTemplateEntry);
         });
@@ -149,8 +184,8 @@ public class CourseTemplate extends JsonWrapper {
         return allMarkTemplates;
     }
 
-    public Map<MarkTemplate, String> getRoleMapping() {
-        return roleMapping;
+    public Map<MarkTemplate, MarkRole> getRoleMapping() {
+        return defaultMarkRoleForMarkTemplate;
     }
 
     public Iterable<WaypointTemplate> getWaypoints() {

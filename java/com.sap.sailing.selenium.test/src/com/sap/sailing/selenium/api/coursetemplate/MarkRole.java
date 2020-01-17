@@ -10,6 +10,8 @@ public class MarkRole extends JsonWrapper implements Comparable<MarkRole> {
 
     private static final String FIELD_ID = "id";
     private static final String FIELD_NAME = "name";
+    private static final String FIELD_SHORT_NAME = "short_name";
+    private static final String FIELD_ASSOCIATED_MARK_TEMPLATE_ID = "associatedMarkTemplateId";
 
     public MarkRole(JSONObject json) {
         super(json);
@@ -22,6 +24,15 @@ public class MarkRole extends JsonWrapper implements Comparable<MarkRole> {
 
     public String getName() {
         return get(FIELD_NAME);
+    }
+
+    public String getShortName() {
+        return get(FIELD_SHORT_NAME);
+    }
+    
+    public UUID getAssociatedMarkTemplateId() {
+        final String uuid = get(FIELD_ASSOCIATED_MARK_TEMPLATE_ID);
+        return uuid == null ? null : UUID.fromString(uuid);
     }
 
     @Override
