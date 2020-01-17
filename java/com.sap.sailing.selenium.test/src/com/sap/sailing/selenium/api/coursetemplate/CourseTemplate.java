@@ -27,6 +27,7 @@ public class CourseTemplate extends JsonWrapper {
     private static final String FIELD_ALL_MARK_ROLES = "allMarkRoles";
     private static final String FIELD_WAYPOINTS = "waypoints";
     private static final String FIELD_ASSOCIATED_ROLE_ID = "associatedRoleId";
+    private static final String FIELD_ASSOCIATED_MARK_TEMPLATE_ID = "associatedMarkTemplateId";
     private static final String FIELD_OPTIONAL_REPEATABLE_PART = "optionalRepeatablePart";
     private static final String FIELD_DEFAULT_NUMBER_OF_LAPS = "defaultNumberOfLaps";
     private static final String FIELD_REPEATABLE_PART_START = "zeroBasedIndexOfRepeatablePartStart";
@@ -148,6 +149,16 @@ public class CourseTemplate extends JsonWrapper {
             markTemplatesJSON.add(markTemplateEntry);
         });
         getJson().put(FIELD_ALL_MARK_TEMPLATES, markTemplatesJSON);
+        final JSONArray markRolesJSON = new JSONArray();
+        allMarkRoles.forEach(mr -> {
+            final JSONObject markRoleEntry = mr.getJson();
+            final MarkTemplate markTemplate = defaultMarkTemplateForMarkRole.get(mr);
+            if (markTemplate != null) {
+                markRoleEntry.put(FIELD_ASSOCIATED_MARK_TEMPLATE_ID, markTemplate.getId().toString());
+            }
+            markRolesJSON.add(markRoleEntry);
+        });
+        getJson().put(FIELD_ALL_MARK_ROLES, markRolesJSON);
         final JSONArray waypointsJSON = new JSONArray();
         waypoints.forEach(wpJSON -> waypointsJSON.add(wpJSON.getJson()));
         getJson().put(FIELD_WAYPOINTS, waypointsJSON);
@@ -186,6 +197,10 @@ public class CourseTemplate extends JsonWrapper {
 
     public Map<MarkTemplate, MarkRole> getRoleMapping() {
         return defaultMarkRoleForMarkTemplate;
+    }
+    
+    public Map<MarkRole, MarkTemplate> getDefaultMarkTemplatesForMarkRoles() {
+        return defaultMarkTemplateForMarkRole;
     }
 
     public Iterable<WaypointTemplate> getWaypoints() {

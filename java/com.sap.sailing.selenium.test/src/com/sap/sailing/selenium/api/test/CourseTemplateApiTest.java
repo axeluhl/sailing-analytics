@@ -19,6 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
+import com.sap.sailing.selenium.api.core.HttpException;
 import com.sap.sailing.selenium.api.coursetemplate.CourseTemplate;
 import com.sap.sailing.selenium.api.coursetemplate.CourseTemplateApi;
 import com.sap.sailing.selenium.api.coursetemplate.MarkRole;
@@ -123,29 +124,14 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
     @Test
     public void createCourseTemplateWithPartialRoleMappingTest() {
         final Map<MarkRole, MarkTemplate> associatedRoles = new HashMap<>();
-        associatedRoles.put(markRoleApi.createMarkRole(ctx, "1", /* shortName */ null), ctdf.b1);
-        associatedRoles.put(markRoleApi.createMarkRole(ctx, "4s", /* shortName */ null), ctdf.b4s);
-        associatedRoles.put(markRoleApi.createMarkRole(ctx, "4p", /* shortName */ null), ctdf.b4p);
-        final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(ctx,
-                ctdf.constructCourseTemplate(null, /* defaultNumberOfLaps */null, associatedRoles));
-        assertEquals(new HashSet<>(Arrays.asList(ctdf.sb.getName(), ctdf.pe.getName(), "1", "4s", "4p")),
-                new HashSet<>(createdCourseTemplate.getRoleMapping().keySet().stream()
-                        .map(r -> markRoleApi.getMarkRole(ctx, r.getAssociatedMarkRoleId()).getName())
-                        .collect(Collectors.toSet())));
-    }
-
-    @Test
-    public void createCourseTemplateWithInvalidRoleMappingTest() {
-        final Map<MarkRole, MarkTemplate> associatedRoles = new HashMap<>();
-        final MarkRole markRole = markRoleApi.createMarkRole(ctx, "4", /* shortName */ null);
-        associatedRoles.put(markRole, ctdf.b4s);
-        associatedRoles.put(markRole, ctdf.b4p);
-        final CourseTemplate courseTemplateToSave = ctdf.constructCourseTemplate(null, /* defaultNumberOfLaps */null, associatedRoles);
+        associatedRoles.put(ctdf.b1Role, ctdf.b1);
+        associatedRoles.put(ctdf.b4sRole, ctdf.b4s);
+        associatedRoles.put(ctdf.b4pRole, ctdf.b4p);
         try {
-            courseTemplateApi.createCourseTemplate(ctx, courseTemplateToSave);
-            fail();
-        } catch (Exception e) {
-            assertTrue(e.getMessage().contains("Role name 4 can't be used twice in a course template"));
+            courseTemplateApi.createCourseTemplate(ctx, ctdf.constructCourseTemplate(null, /* defaultNumberOfLaps */null, associatedRoles));
+            fail("Expected HttpException because all mark roles require a mark template to be assigned");
+        } catch (HttpException e) {
+            assertEquals(400, e.getHttpStatusCode());
         }
     }
 }
