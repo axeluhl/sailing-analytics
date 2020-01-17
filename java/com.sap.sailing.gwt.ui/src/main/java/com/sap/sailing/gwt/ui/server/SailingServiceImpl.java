@@ -2635,7 +2635,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 controlPoints.add(new Pair<>(getOrCreateControlPoint(waypointDTO.getA()), waypointDTO.getB()));
             }
             try {
-                course.update(controlPoints, course.getAssociatedRoles(), baseDomainFactory);
+                course.update(controlPoints, course.getAssociatedRoles(), course.getOriginatingCourseTemplateIdOrNull(),
+                        baseDomainFactory);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -6988,7 +6989,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         Course course = new CourseImpl(courseName, lastPublishedCourse.getWaypoints());
         
         try {
-            course.update(controlPoints, lastPublishedCourse.getAssociatedRoles(), baseDomainFactory);
+            course.update(controlPoints, lastPublishedCourse.getAssociatedRoles(),
+                    lastPublishedCourse.getOriginatingCourseTemplateIdOrNull(), baseDomainFactory);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

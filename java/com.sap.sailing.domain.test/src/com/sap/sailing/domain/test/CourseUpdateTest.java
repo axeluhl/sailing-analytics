@@ -198,7 +198,8 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         changedControlPoints.add(new Pair<>(wp2.getControlPoint(), wp2.getPassingInstructions()));
         changedControlPoints.add(new Pair<>(wp3.getControlPoint(), wp3.getPassingInstructions()));
         changedControlPoints.add(new Pair<>(wp4.getControlPoint(), wp4.getPassingInstructions()));
-        course.update(changedControlPoints, new HashMap<>(), com.sap.sailing.domain.base.DomainFactory.INSTANCE);
+        course.update(changedControlPoints, new HashMap<>(), course.getOriginatingCourseTemplateIdOrNull(),
+                com.sap.sailing.domain.base.DomainFactory.INSTANCE);
         
         assertNotSame(wp1, Util.get(course.getWaypoints(), 0));
         assertSame(wp2, Util.get(course.getWaypoints(), 1));

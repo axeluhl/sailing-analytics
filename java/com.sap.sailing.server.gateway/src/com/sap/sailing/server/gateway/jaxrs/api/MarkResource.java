@@ -272,7 +272,8 @@ public class MarkResource extends AbstractSailingServerResource {
         }
         Course course = new CourseImpl(courseName, lastPublishedCourse.getWaypoints(), originatingCourseTemplateId);
         try {
-            course.update(controlPoints, lastPublishedCourse.getAssociatedRoles(), getService().getBaseDomainFactory());
+            course.update(controlPoints, lastPublishedCourse.getAssociatedRoles(),
+                    lastPublishedCourse.getOriginatingCourseTemplateIdOrNull(), getService().getBaseDomainFactory());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

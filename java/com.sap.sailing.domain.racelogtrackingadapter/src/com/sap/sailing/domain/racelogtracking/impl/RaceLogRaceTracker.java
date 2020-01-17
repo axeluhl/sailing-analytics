@@ -262,7 +262,8 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
             }
             try {
                 final Course course = trackedRace.getRace().getCourse();
-                course.update(update, event.getCourseDesign().getAssociatedRoles(), params.getDomainFactory());
+                course.update(update, event.getCourseDesign().getAssociatedRoles(),
+                        event.getCourseDesign().getOriginatingCourseTemplateIdOrNull(), params.getDomainFactory());
                 if (base.getName() != null) {
                     course.setName(base.getName());
                 }
