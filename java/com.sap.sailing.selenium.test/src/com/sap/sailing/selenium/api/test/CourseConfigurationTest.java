@@ -601,18 +601,20 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
 
     @Test
     public void testCreateCourseConfigurationFromTemplate() {
-        final List<MarkRole> markRoles = new ArrayList<>();
-        MarkRole mr1 = markRoleApi.createMarkRole(sharedServerCtx, "mark role 1", "mr1", "#FFFFFF", "Cylinder",
+        final List<MarkRole> markRolesInWpt1 = new ArrayList<>();
+        final List<MarkTemplate> markTemplates = new ArrayList<>();
+        MarkRole mr1 = markRoleApi.createMarkRole(sharedServerCtx, "mark role 1", "mr1");
+        markRolesInWpt1.add(mr1);
+        MarkTemplate mt1 = markTemplateApi.createMarkTemplate(sharedServerCtx, "mark role 1", "mr1", "#FFFFFF", "Cylinder",
                 "Checkered", MarkType.BUOY.name());
-        MarkRole mr1 = markRoleApi.createMarkRole(sharedServerCtx, "mark role 1", "mr1", "#FFFFFF", "Cylinder",
-                "Checkered", MarkType.BUOY.name());
-        markRoles.add(mr1);
+        markTemplates.add(mt1);
         final Map<MarkRole, MarkTemplate> roleMapping = new HashMap<>();
+        roleMapping.put(mr1, mt1);
         final List<WaypointTemplate> waypointTemplates = new ArrayList<>();
-        WaypointTemplate wpt1 = new WaypointTemplate("wpt1", PassingInstruction.FixedBearing, markRoles);
+        WaypointTemplate wpt1 = new WaypointTemplate("wpt1", PassingInstruction.FixedBearing, markRolesInWpt1);
         waypointTemplates.add(wpt1);
         final List<String> tags = new ArrayList<>();
-        CourseTemplate courseTemplate = new CourseTemplate("test", "t", markRoles, roleMapping, waypointTemplates, null,
+        CourseTemplate courseTemplate = new CourseTemplate("test", "t", markTemplates, roleMapping, waypointTemplates, null,
                 tags, null, null);
         CourseTemplate srcCourseTemplate = courseTemplateApi.createCourseTemplate(sharedServerCtx, courseTemplate);
         CourseConfiguration courseConfiguration = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(
