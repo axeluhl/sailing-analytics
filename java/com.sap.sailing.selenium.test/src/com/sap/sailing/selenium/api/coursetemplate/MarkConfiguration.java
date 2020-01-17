@@ -25,11 +25,12 @@ public class MarkConfiguration extends JsonWrapper {
     private static final String FIELD_MARK_ID = "markId";
     private static final String FIELD_POSITIONING = "positioning";
     private static final String FIELD_STORE_TO_INVENTORY = "storeToInventory";
-    public static final String FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_MAPPINGS = "trackingDevices";
+    private static final String FIELD_MARK_CONFIGURATION_TRACKING_DEVICE_MAPPINGS = "trackingDevices";
     private static final String FIELD_MARK_CONFIGURATION_LAST_KNOWN_POSITION = "lastKnownPosition";
     private static final String FIELD_LATITUDE_DEG = "lat_deg";
     private static final String FIELD_LONGITUDE_DEG = "lon_deg";
-
+    private static final String FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_NAME = "associatedRole";
+    private static final String FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_SHORT_NAME = "associatedRoleShortName";
 
     public MarkConfiguration(final JSONObject json) {
         super(json);
@@ -156,6 +157,14 @@ public class MarkConfiguration extends JsonWrapper {
 
     public String getAssociatedRoleId() {
         return (String) get(FIELD_ASSOCIATED_ROLE_ID);
+    }
+    
+    public void setNameOfMarkRoleToCreate(String markRoleName) {
+        getJson().put(FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_NAME, markRoleName);
+    }
+
+    public void setShortNameOfMarkRoleToCreate(String markRoleShortName) {
+        getJson().put(FIELD_MARK_CONFIGURATION_ASSOCIATED_ROLE_SHORT_NAME, markRoleShortName);
     }
 
     public UUID getMarkPropertiesId() {
