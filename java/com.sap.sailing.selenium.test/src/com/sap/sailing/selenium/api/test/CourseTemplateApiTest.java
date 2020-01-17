@@ -32,7 +32,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
 public class CourseTemplateApiTest extends AbstractSeleniumTest {
-
     private final CourseTemplateApi courseTemplateApi = new CourseTemplateApi();
     private final MarkRoleApi markRoleApi = new MarkRoleApi();
     private ApiContext ctx;
@@ -41,7 +40,6 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
     @Before
     public void setUp() {
         clearState(getContextRoot(), /* headless */ true);
-
         ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
         ctdf = new CourseTemplateDataFactory(ctx);
     }
@@ -49,9 +47,7 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
     @Test
     public void createSimpleCourseTemplateTest() {
         final CourseTemplate courseTemplateToSave = ctdf.constructCourseTemplate();
-
         final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(ctx, courseTemplateToSave);
-
         assertEquals(courseTemplateToSave.getName(), createdCourseTemplate.getName());
         assertEquals(ctdf.waypointSequence.size(), Util.size(createdCourseTemplate.getWaypoints()));
     }
@@ -97,15 +93,15 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
     @Test
     public void createCourseTemplateWithRoleMappingTest() {
         final Map<MarkRole, MarkTemplate> associatedRoles = new HashMap<>();
-        associatedRoles.put(markRoleApi.createMarkRole(ctx, "Startboat", /* shortName */ null), ctdf.sb);
-        associatedRoles.put(markRoleApi.createMarkRole(ctx, "Pinend", /* shortName */ null), ctdf.pe);
-        associatedRoles.put(markRoleApi.createMarkRole(ctx, "1", /* shortName */ null), ctdf.b1);
-        associatedRoles.put(markRoleApi.createMarkRole(ctx, "4s", /* shortName */ null), ctdf.b4s);
-        associatedRoles.put(markRoleApi.createMarkRole(ctx, "4p", /* shortName */ null), ctdf.b4p);
+        associatedRoles.put(ctdf.sbRole, ctdf.sb);
+        associatedRoles.put(ctdf.peRole, ctdf.pe);
+        associatedRoles.put(ctdf.b1Role, ctdf.b1);
+        associatedRoles.put(ctdf.b4sRole, ctdf.b4s);
+        associatedRoles.put(ctdf.b4pRole, ctdf.b4p);
         final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(ctx,
                 ctdf.constructCourseTemplate(null, /* defaultNumberOfLaps */null, associatedRoles));
-        assertEquals(new TreeSet<>(associatedRoles.values()),
-                new TreeSet<MarkRole>(createdCourseTemplate.getRoleMapping().keySet().stream()
+        assertEquals(new TreeSet<>(associatedRoles.keySet()),
+                new TreeSet<>(createdCourseTemplate.getRoleMapping().keySet().stream()
                         .map(r -> markRoleApi.getMarkRole(ctx, r.getAssociatedMarkRoleId())).collect(Collectors.toSet())));
     }
 

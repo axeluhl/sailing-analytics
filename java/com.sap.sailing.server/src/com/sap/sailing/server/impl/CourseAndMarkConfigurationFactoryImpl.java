@@ -791,6 +791,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                         .filter(mt -> mt != null).collect(Collectors.toSet());
                 final Map<MarkTemplate, MarkTemplateBasedMarkConfiguration<MarkConfigurationResponseAnnotation>> markConfigurationsForUnusedMarkTemplates = new HashMap<>();
                 for (final MarkTemplate markTemplate : courseTemplateOrNull.getMarkTemplates()) {
+                    // FIXME do this ONLY for mark templates that are referred to by roles for which no regatta mark exists (the 1-lap, 0-repetition case)
                     if (!markTemplatesReferencedByMarksInRegatta.contains(markTemplate)) {
                         // This MarkTemplate doesn't have a MarkConfiguration assigned yet, so no Mark in the regatta
                         // referenced it by UUID. Therefore, we'll create a MarkTemplateBasedMarkConfiguration here as

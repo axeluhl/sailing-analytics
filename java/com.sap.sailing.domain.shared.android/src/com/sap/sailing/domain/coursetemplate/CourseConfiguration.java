@@ -23,7 +23,10 @@ import com.sap.sse.common.Named;
  * The configuration for all marks are returned by {@link #getAllMarks()} because when pushing
  * this to a Regatta the marks for all these configurations have to be established.
  */
-public interface CourseConfiguration<P> extends WithOptionalRepeatablePart, Named {
+public interface CourseConfiguration<P> extends /* FIXME A course configuration is NOT a WithOptionalRepeatablePart regarding its
+waypoints because the waypoints contain 0..* specifically-configured copies of the repeatable part; in order to allow the user
+to change the number of laps, instead "Repetitions" should be described, and the repeatable part may need to be a separate object
+to also cover the case where currently no repetition is part of the waypoints. */ WithOptionalRepeatablePart, Named {
     String getShortName();
     
     /**
@@ -32,6 +35,7 @@ public interface CourseConfiguration<P> extends WithOptionalRepeatablePart, Name
      * other cases it will return {@code null}. If not {@code null}, the methods of {@link WithOptionalRepeatablePart}
      * delegate to the {@link CourseTemplate} returned by this method.
      */
+    // TODO it should be recognizable whether this CourseConfiguration still conforms to the course template if returned by this method
     CourseTemplate getOptionalCourseTemplate();
     
     URL getOptionalImageURL();
