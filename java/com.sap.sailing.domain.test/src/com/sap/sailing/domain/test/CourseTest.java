@@ -193,7 +193,8 @@ public class CourseTest {
         courseToUpdate.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(wp2.getMarks().iterator().next(), wp2.getPassingInstructions()));
         courseToUpdate.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(wp3.getMarks().iterator().next(), wp3.getPassingInstructions()));
         courseToUpdate.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(wp1.getMarks().iterator().next(), wp1.getPassingInstructions()));
-        course.update(courseToUpdate, new HashMap<>(), DomainFactory.INSTANCE);
+        course.update(courseToUpdate, new HashMap<>(), course.getOriginatingCourseTemplateIdOrNull(),
+                DomainFactory.INSTANCE);
         assertWaypointIndexes(course);
     }
     
@@ -231,7 +232,8 @@ public class CourseTest {
         courseToUpdate.add(new Pair<>(red.getControlPoint(), red.getPassingInstructions()));
         courseToUpdate.add(new Pair<>(yellow.getControlPoint(), yellow.getPassingInstructions()));
         courseToUpdate.add(new Pair<>(finishPoleCylinder.getControlPoint(), finishPoleCylinder.getPassingInstructions()));
-        course.update(courseToUpdate, new HashMap<>(), DomainFactory.INSTANCE);
+        course.update(courseToUpdate, new HashMap<>(), course.getOriginatingCourseTemplateIdOrNull(),
+                DomainFactory.INSTANCE);
         assertWaypointIndexes(course);
         List<ControlPoint> newControlPoints = new ArrayList<>();
         for (Waypoint newWp : course.getWaypoints()) {
