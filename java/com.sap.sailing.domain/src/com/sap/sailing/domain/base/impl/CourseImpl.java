@@ -368,9 +368,6 @@ public class CourseImpl extends RenamableImpl implements Course {
                     newWaypointList.add(waypoint);
                 }
                 patch = DiffUtils.diff(courseWaypoints, newWaypointList);
-
-                this.getAssociatedRoles().clear();
-                this.getAssociatedRoles().putAll(associatedRoles);
             } finally {
                 unlockAfterRead();
             }
@@ -378,6 +375,8 @@ public class CourseImpl extends RenamableImpl implements Course {
                 lockForWrite();
                 try {
                     logger.info("applying course update " + patch + " to course " + this);
+                    this.getAssociatedRoles().clear();
+                    this.getAssociatedRoles().putAll(associatedRoles);
                     CourseAsWaypointList courseAsWaypointList = new CourseAsWaypointList(this);
                     patch.applyToInPlace(courseAsWaypointList);
                 } finally {
