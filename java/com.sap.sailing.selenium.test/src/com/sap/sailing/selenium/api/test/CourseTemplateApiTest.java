@@ -62,7 +62,8 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
             courseTemplateApi.createCourseTemplate(otherUserCtx, ctdf.constructCourseTemplate());
             fail();
         } catch (Exception e) {
-            assertTrue(e.getMessage().contains("Subject does not have permission [MARK_TEMPLATE:READ:"));
+            final String expected = "Subject does not have permission [MARK_ROLE:READ:";
+            assertTrue("Expected "+e.getMessage()+" to contain "+expected, e.getMessage().contains(expected));
         }
     }
 

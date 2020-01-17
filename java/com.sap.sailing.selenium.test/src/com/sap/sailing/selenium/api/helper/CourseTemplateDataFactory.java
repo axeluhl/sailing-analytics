@@ -2,6 +2,7 @@ package com.sap.sailing.selenium.api.helper;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +43,7 @@ public class CourseTemplateDataFactory {
         b1Role = markRoleApi.createMarkRole(ctx, "blue", "blue");
         b4sRole = markRoleApi.createMarkRole(ctx, "red", "red");
         b4pRole = markRoleApi.createMarkRole(ctx, "green", "green");
-
+        // default waypoint sequence
         waypointSequence = Arrays.asList(
                 new WaypointTemplate("Start/End", PassingInstruction.Line, Arrays.asList(sbRole, peRole)),
                 new WaypointTemplate(null, PassingInstruction.Port, Arrays.asList(b1Role)),
@@ -56,7 +57,13 @@ public class CourseTemplateDataFactory {
     }
 
     public CourseTemplate constructCourseTemplate(Pair<Integer, Integer> optionalRepeatablePart, Integer defaultNumberOfLaps) {
-        return this.constructCourseTemplate(optionalRepeatablePart, defaultNumberOfLaps, Collections.emptyMap());
+        final Map<MarkRole, MarkTemplate> defaultAssociatedRoles = new HashMap<>();
+        defaultAssociatedRoles.put(sbRole, sb);
+        defaultAssociatedRoles.put(peRole, pe);
+        defaultAssociatedRoles.put(b1Role, b1);
+        defaultAssociatedRoles.put(b4sRole, b4s);
+        defaultAssociatedRoles.put(b4pRole, b4p);
+        return this.constructCourseTemplate(optionalRepeatablePart, defaultNumberOfLaps, defaultAssociatedRoles);
     }
 
     public CourseTemplate constructCourseTemplate(Pair<Integer, Integer> optionalRepeatablePart,
