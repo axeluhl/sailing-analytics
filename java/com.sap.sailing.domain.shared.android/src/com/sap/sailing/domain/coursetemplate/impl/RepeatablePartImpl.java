@@ -31,4 +31,9 @@ public class RepeatablePartImpl implements RepeatablePart {
     public int getZeroBasedIndexOfRepeatablePartEnd() {
         return zeroBasedIndexOfRepeatablePartEnd;
     }
+
+    @Override
+    public String toString() {
+        return "["+getZeroBasedIndexOfRepeatablePartStart()+".."+getZeroBasedIndexOfRepeatablePartEnd()+"]";
+    }
 }

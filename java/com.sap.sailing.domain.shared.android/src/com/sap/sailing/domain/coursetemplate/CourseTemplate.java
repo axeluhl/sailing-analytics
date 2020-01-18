@@ -118,6 +118,12 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
      */
     Iterable<WaypointTemplate> getWaypointTemplates(int numberOfLaps);
 
+    /**
+     * The sequence of waypoint templates that are used to define the course. If this course template defines
+     * a {@link #getRepeatablePart() repeatable part} then this repeatable part refers to this waypoint sequence
+     * by indices. It is therefore essential that the repeatable part then occurs in this waypoint template
+     * sequence at least (and usually exactly) once.
+     */
     Iterable<WaypointTemplate> getWaypointTemplates();
 
     /**

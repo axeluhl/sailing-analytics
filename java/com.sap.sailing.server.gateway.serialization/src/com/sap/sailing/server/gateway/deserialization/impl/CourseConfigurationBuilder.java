@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
+import com.sap.sailing.domain.coursetemplate.CourseTemplateCompatibilityChecker;
 import com.sap.sailing.domain.coursetemplate.FixedPositioning;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
@@ -79,6 +80,13 @@ public class CourseConfigurationBuilder {
     private Integer numberOfLaps;
     private Map<MarkPairWithConfiguration<MarkConfigurationRequestAnnotation>, MarkPairWithConfiguration<MarkConfigurationRequestAnnotation>> markPairCache = new HashMap<>();
 
+    /**
+     * @param optionalCourseTemplate if not {@code null} but the course configuration that is
+     * constructed with this builder eventually does not comply with the {@link CourseTemplate},
+     * the {@link CourseConfiguration} resulting from the {@link #build()} method will not
+     * have the {@link CourseTemplate} set and hence will return {@code null} from its
+     * {@link CourseConfiguration#getOptionalCourseTemplate()} method.
+     */
     public CourseConfigurationBuilder(SharedSailingData sharedSailingData, Regatta optionalRegatta,
             CourseTemplate optionalCourseTemplate, String name, String shortName, URL optionalImageUrl) {
         this.sharedSailingData = sharedSailingData;
@@ -244,13 +252,58 @@ public class CourseConfigurationBuilder {
         this.optionalRepeatablePart = optionalRepeatablePart;
     }
 
+    private class CourseTemplateCompatibilityCheckerForBuilder extends
+    CourseTemplateCompatibilityChecker<CourseConfigurationBuilder, MarkConfiguration<MarkConfigurationRequestAnnotation>, WaypointWithMarkConfiguration<MarkConfigurationRequestAnnotation>> {
+        public CourseTemplateCompatibilityCheckerForBuilder() {
+            super(CourseConfigurationBuilder.this, optionalCourseTemplate);
+        }
+
+        @Override
+        protected MarkRole getMarkRole(MarkConfiguration<MarkConfigurationRequestAnnotation> markFromCourse) {
+            return associatedRoles.get(markFromCourse);
+        }
+
+        @Override
+        protected Iterable<MarkConfiguration<MarkConfigurationRequestAnnotation>> getMarks(
+                WaypointWithMarkConfiguration<MarkConfigurationRequestAnnotation> waypoint) {
+            return waypoint.getControlPoint().getMarkConfigurations();
+        }
+
+        @Override
+        protected Iterable<WaypointWithMarkConfiguration<MarkConfigurationRequestAnnotation>> getWaypoints(
+                CourseConfigurationBuilder course) {
+            assert course == CourseConfigurationBuilder.this;
+            return waypoints;
+        }
+    }
+    
     public void setNumberOfLaps(Integer numberOfLaps) {
         this.numberOfLaps = numberOfLaps;
     }
 
+    private Integer checkComplianceWithCourseTemplate() {
+        final Integer numberOfLaps;
+        if (optionalCourseTemplate == null) {
+            numberOfLaps = null;
+        } else {
+            numberOfLaps = new CourseTemplateCompatibilityCheckerForBuilder().isCourseInstanceOfCourseTemplate();
+        }
+        return numberOfLaps;
+    }
+
+    /**
+     * Builds the course configuration from what has been added to this builder so far.
+     * If the configuration is not compliant with a {@link #optionalCourseTemplate} that
+     * was provided to the constructor, the resulting course configuration will not have a
+     * {@link CourseConfiguration#getOptionalCourseTemplate() reference} to a {@link CourseTemplate}.
+     * Otherwise, the reference is installed in the resulting {@link CourseConfiguration},
+     * and the number of laps is set as inferred during the compatibility check.
+     */
     public CourseConfiguration<MarkConfigurationRequestAnnotation> build() {
-        return new CourseConfigurationImpl<MarkConfigurationRequestAnnotation>(optionalCourseTemplate, markConfigurations,
-                associatedRoles, waypoints, optionalRepeatablePart, numberOfLaps, name, shortName, optionalImageUrl);
+        final Integer compliantOrNull = checkComplianceWithCourseTemplate();
+        return new CourseConfigurationImpl<MarkConfigurationRequestAnnotation>(
+                compliantOrNull == null ? null : optionalCourseTemplate, markConfigurations, associatedRoles, waypoints,
+                optionalRepeatablePart, compliantOrNull == null ? null : numberOfLaps, name, shortName, optionalImageUrl);
     }
     
     public static MarkConfigurationResponseAnnotation getPositioningIfAvailable(Regatta regatta,

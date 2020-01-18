@@ -28,6 +28,10 @@ public interface RepeatablePart extends Serializable {
      */
     int getZeroBasedIndexOfRepeatablePartEnd();
 
+    default int length() {
+        return getZeroBasedIndexOfRepeatablePartEnd()-getZeroBasedIndexOfRepeatablePartStart();
+    }
+    
     /**
      * Returns a sequence of waypoints (T) that can be use to construct a course. If this course template
      * defines a repeatable waypoint sub-sequence, the {@code numberOfLaps} parameter is used to decide how many times

@@ -18,7 +18,8 @@ import com.sap.sse.common.Named;
  * how marks are mapped to {@link MarkTemplate}s and how marks are generally configured in terms of their base
  * properties and tracking/positioning information. Any change that is incompatible with a non-{@code null}
  * {@link CourseTemplate} returned by {@link #getOptionalCourseTemplate()} leads to breaking this connection such that
- * {@link #getOptionalCourseTemplate()} from that point on will return {@code null}.
+ * {@link #getOptionalCourseTemplate()} from that point on will return {@code null}. In particular,
+ * the base {@link #getWaypoints() waypoints sequence} must 
  * <p>
  * 
  * The configuration for all marks are returned by {@link #getAllMarks()} because when pushing this to a Regatta the
@@ -29,10 +30,7 @@ import com.sap.sse.common.Named;
  *            this course configuration. Different annotations are expected to be used for course configurations used in
  *            requests sent to a service and for responses produced by a service.
  */
-public interface CourseConfiguration<P> extends /* FIXME A course configuration is NOT a WithOptionalRepeatablePart regarding its
-waypoints because the waypoints contain 0..* specifically-configured copies of the repeatable part; in order to allow the user
-to change the number of laps, instead "Repetitions" should be described, and the repeatable part may need to be a separate object
-to also cover the case where currently no repetition is part of the waypoints. */ WithOptionalRepeatablePart, Named {
+public interface CourseConfiguration<P> extends WithOptionalRepeatablePart, Named {
     String getShortName();
     
     /**
@@ -41,7 +39,6 @@ to also cover the case where currently no repetition is part of the waypoints. *
      * other cases it will return {@code null}. If not {@code null}, the methods of {@link WithOptionalRepeatablePart}
      * delegate to the {@link CourseTemplate} returned by this method.
      */
-    // TODO it should be recognizable whether this CourseConfiguration still conforms to the course template if returned by this method
     CourseTemplate getOptionalCourseTemplate();
     
     URL getOptionalImageURL();
@@ -56,9 +53,10 @@ to also cover the case where currently no repetition is part of the waypoints. *
     Iterable<MarkConfiguration<P>> getAllMarks();
 
     /**
-     * The waypoint sequence, with a single occurrence of any repeatable part the course may have (similar to calling
-     * {@link #getWaypoints(int) getWaypoints(1)}), with {@link MarkConfiguration configuration information} for the
-     * marks used. All {@link MarkConfiguration} objects referenced are part of the result of {@link #getAllMarks()}.
+     * The waypoint sequence. If a repeatable part is specified, the sequence returned must contain at least one
+     * occurrence of the repeatable part. All {@link MarkConfiguration} objects referenced are part of the result of
+     * {@link #getAllMarks()}. If you want the waypoint sequence including as many occurrences
+     * of any repeatable part, call {@link #getWaypoints(int) getWaypoints(}{@link #getNumberOfLaps() getNumberOfLaps())}.
      */
     Iterable<WaypointWithMarkConfiguration<P>> getWaypoints();
     
@@ -94,8 +92,10 @@ to also cover the case where currently no repetition is part of the waypoints. *
      * {@link MarkConfiguration configuration information} for the marks used. All {@link MarkConfiguration} objects
      * referenced are part of the result of {@link #getAllMarks()}.
      * 
-     * @param numberOfLaps the repeatable part will be inserted {@code numberOfLaps-1} times. For example, a two-lap
-     * course will have the repeatable part exactly once.
+     * @param numberOfLaps
+     *            the repeatable part will be inserted {@code numberOfLaps-1} times. For example, a two-lap course will
+     *            have the repeatable part exactly once. Use {@link #getNumberOfLaps()} to
+     *            obtain the waypoint sequence as specified by this course configuration.
      */
     Iterable<WaypointWithMarkConfiguration<P>> getWaypoints(int numberOfLaps);
 }

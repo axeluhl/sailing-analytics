@@ -252,11 +252,9 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         final String regattaName = "test";
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
-
         courseConfigurationApi.createCourse(ctx, courseConfiguration, regattaName, race.getRaceName(), "Default");
         CourseConfiguration createdCourseAsConfiguration = courseConfigurationApi
                 .createCourseConfigurationFromCourse(ctx, regattaName, race.getRaceName(), "Default", null);
-
         assertEquals(6, Util.size(createdCourseAsConfiguration.getMarkConfigurations()));
         assertEquals(createdCourseTemplate.getId(), createdCourseAsConfiguration.getOptionalCourseTemplateId());
         assertCourseConfigurationCompared(ctx, courseConfiguration, createdCourseAsConfiguration);

@@ -52,6 +52,7 @@ import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.ControlPointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
+import com.sap.sailing.domain.coursetemplate.CourseTemplateCompatibilityChecker;
 import com.sap.sailing.domain.coursetemplate.FixedPositioning;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
@@ -416,13 +417,15 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         for (MarkConfiguration<P> markConfiguration : getAllMarkConfigurations(effectiveWaypoints)) {
             final MarkProperties markProperties = markConfiguration.getOptionalMarkProperties();
             if (markProperties != null) {
-                final MarkRole role = allAssociatedRoles.get(markConfiguration);
-                try {
-                    getSharedSailingData().recordUsage(markProperties, role);
-                } catch (Exception e) {
-                    logger.log(Level.WARNING,
-                            "Could not record usage for mark properties " + markProperties + " and role " + role,
-                            e);
+                final MarkRole markRole = allAssociatedRoles.get(markConfiguration);
+                if (markRole != null) {
+                    try {
+                        getSharedSailingData().recordUsage(markProperties, markRole);
+                    } catch (Exception e) {
+                        logger.log(Level.WARNING,
+                                "Could not record usage for mark properties " + markProperties + " and role " + markRole,
+                                e);
+                    }
                 }
                 final MarkTemplate markTemplateOrNull = markConfiguration.getOptionalMarkTemplate();
                 if (markTemplateOrNull != null) {
@@ -867,74 +870,36 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         return result;
     }
     
+    private class CourseTemplateCompatibilityCheckerForCourseBase
+            extends CourseTemplateCompatibilityChecker<CourseBase, Mark, Waypoint> {
+        public CourseTemplateCompatibilityCheckerForCourseBase(CourseBase course, CourseTemplate courseTemplate) {
+            super(course, courseTemplate);
+        }
+
+        @Override
+        protected MarkRole getMarkRole(Mark markFromRegatta) {
+            return resolveMarkRoleByID(getCourse().getAssociatedRoles().get(markFromRegatta), getCourseTemplate());
+        }
+
+        @Override
+        protected Iterable<Mark> getMarks(Waypoint waypoint) {
+            return waypoint.getMarks();
+        }
+
+        @Override
+        protected Iterable<Waypoint> getWaypoints(CourseBase course) {
+            return course.getWaypoints();
+        }
+    }
+
     /**
-     * Takes a {@link CourseBase} and a {@link CourseTemplate} and checks whether the {@link CourseBase} is a valid
-     * "instance" of the {@link CourseTemplate}. A course is a valid instance of a course template if for all marks
-     * in the course there is a role {@link CourseBase#getAssociatedRoles()} with the mark, and that role is
-     * consistent with the role at the corresponding place in the course template. Furthermore, the waypoint
-     * sequence of the course needs to conform to the course template's waypoint sequence, modulo the number of
-     * laps. The result is the number of laps if the {@link CourseTemplate} has a
-     * {@link CourseTemplate#getRepeatablePart() repeatable part}, or {@code -1} if the course does not have a
-     * repeatable part, and {@code null} if the course is not a valid instance of the course template.
-     * <p>
-     * 
-     * This means in particular that the course can use different marks for the same role in different laps and
-     * still conform to the course template.
-     * <p>
-     * 
-     * @return the number of laps if the {@link CourseTemplate} has a {@link CourseTemplate#getRepeatablePart()
-     *         repeatable part}, or {@code -1} if the course does not have a repeatable part, and {@code null} if
-     *         the course is not a valid instance of the course template
+     * Checks compatibility of the {@code course} with the {@code courseTemplate} and return {@code null} if
+     * incompatible, or the number of laps if compatible, where {@code -1} is used in case the {@link CourseTemplate}
+     * has no {@link CourseTemplate#getRepeatablePart() repeatable part}. See {@link CourseTemplateCompatibilityChecker}
+     * for details.
      */
     private Integer isCourseInstanceOfCourseTemplate(CourseBase course, CourseTemplate courseTemplate) {
-        assert course != null;
-        assert courseTemplate != null;
-        int numberOfLaps = -1;
-        boolean validCourseTemplateUsage = true;
-        final Iterable<WaypointTemplate> effectiveCourseSequence;
-        if (courseTemplate.hasRepeatablePart()) {
-            final RepeatablePart optionalRepeatablePart = courseTemplate.getRepeatablePart();
-            final int numberOfWaypointsInTemplate = Util.size(courseTemplate.getWaypointTemplates());
-            final int numberOfWaypointsInCourse = Util.size(course.getWaypoints());
-            final int lengthOfRepeatablePart = optionalRepeatablePart.getZeroBasedIndexOfRepeatablePartEnd()
-                    - optionalRepeatablePart.getZeroBasedIndexOfRepeatablePartStart();
-            final int lengthOfNonRepeatablePart = numberOfWaypointsInTemplate - lengthOfRepeatablePart;
-            final int lengthOfRepetitions = numberOfWaypointsInCourse - lengthOfNonRepeatablePart;
-            if (lengthOfRepetitions % lengthOfRepeatablePart == 0) {
-                numberOfLaps = lengthOfRepetitions / lengthOfRepeatablePart + 1;
-                effectiveCourseSequence = courseTemplate.getWaypointTemplates(numberOfLaps);
-            } else {
-                validCourseTemplateUsage = false;
-                effectiveCourseSequence = courseTemplate.getWaypointTemplates();
-            }
-        } else {
-            effectiveCourseSequence = courseTemplate.getWaypointTemplates();
-        }
-        if (validCourseTemplateUsage) {
-            final Iterator<WaypointTemplate> waypointTemplateIterator = effectiveCourseSequence.iterator();
-            final Iterator<Waypoint> waypointIterator = course.getWaypoints().iterator();
-            while (waypointTemplateIterator.hasNext() && validCourseTemplateUsage) {
-                final WaypointTemplate waypointTemplate = waypointTemplateIterator.next();
-                final Iterable<MarkRole> markRolesOfControlPoint = waypointTemplate.getControlPointTemplate().getMarkRoles();
-                final Waypoint waypoint = waypointIterator.next();
-                final Iterable<Mark> marksOfControlPoint = waypoint.getControlPoint().getMarks();
-                if (Util.size(markRolesOfControlPoint) != Util.size(marksOfControlPoint)) {
-                    validCourseTemplateUsage = false;
-                } else {
-                    final Iterator<MarkRole> markRoleIterator = markRolesOfControlPoint.iterator();
-                    final Iterator<Mark> markIterator = marksOfControlPoint.iterator();
-                    while (markRoleIterator.hasNext()) {
-                        final MarkRole markRoleFromCourseTemplate = markRoleIterator.next();
-                        final Mark markFromRegatta = markIterator.next();
-                        final MarkRole roleForMarkOrNull = resolveMarkRoleByID(course.getAssociatedRoles().get(markFromRegatta), courseTemplate);
-                        if (!Util.equalsWithNull(markRoleFromCourseTemplate, roleForMarkOrNull)) {
-                            validCourseTemplateUsage = false;
-                        }
-                    }
-                }
-            }
-        }
-        return validCourseTemplateUsage ? numberOfLaps : null;
+        return new CourseTemplateCompatibilityCheckerForCourseBase(course, courseTemplate).isCourseInstanceOfCourseTemplate();
     }
 
     /**
