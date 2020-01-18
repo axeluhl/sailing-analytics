@@ -60,10 +60,10 @@ public class MarkPropertiesBuilder {
             impl.setPositioningInformation(positioningInformation);
         }
         if (lastUsedTemplate != null) {
-            impl.setLastUsedTemplate(lastUsedTemplate);
+            impl.setLastUsedMarkTemplate(lastUsedTemplate);
         }
         if (lastUsedRole != null) {
-            impl.setLastUsedRole(lastUsedRole);
+            impl.setLastUsedMarkRole(lastUsedRole);
         }
         return impl;
     }

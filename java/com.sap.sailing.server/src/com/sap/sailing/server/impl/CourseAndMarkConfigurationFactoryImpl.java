@@ -907,7 +907,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
      * value set by {@link MarkPropertiesBasedMarkConfiguration}s which
      * {@link MarkPropertiesBasedMarkConfiguration#getOptionalMarkTemplate() refer} to the respective
      * {@link MarkTemplate} in case a usage of a {@link MarkProperties} object for the respective mark template is
-     * found in {@link MarkProperties#getLastUsedRole()} or {@link MarkProperties#getLastUsedTemplate()}.
+     * found in {@link MarkProperties#getLastUsedMarkRole()} or {@link MarkProperties#getLastUsedMarkTemplate()}.
      * All {@link MarkProperties} delivered from {@link SharedSailingData#getAllMarkProperties(Iterable)}, filtered
      * by the {@code tagsToFilterMarkProperties}, are considered.
      * <p>
@@ -940,7 +940,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 replacementCandidates.keySet().stream().map(associatedRoles::get).filter(v -> v != null)
                         .collect(Collectors.toSet()));
         for (MarkProperties mp : markPropertiesCandidates) {
-            roleBasedAssociater.addUsages(mp, mp.getLastUsedRole());
+            roleBasedAssociater.addUsages(mp, mp.getLastUsedMarkRole());
         }
         final Map<MarkTemplate, MarkProperties> suggestedMappings = new HashMap<>();
         for (Iterator<Entry<MarkTemplate, MarkTemplateBasedMarkConfiguration<MarkConfigurationResponseAnnotation>>> iterator = replacementCandidates.entrySet().iterator(); iterator
@@ -960,7 +960,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         final LastUsageBasedAssociater<MarkProperties, MarkTemplate> templateBasedAssociater = new LastUsageBasedAssociater<>(
                 new HashSet<>(replacementCandidates.keySet()));
         for (MarkProperties mp : markPropertiesCandidates) {
-            templateBasedAssociater.addUsages(mp, mp.getLastUsedTemplate());
+            templateBasedAssociater.addUsages(mp, mp.getLastUsedMarkTemplate());
         }
         for (Entry<MarkTemplate, MarkTemplateBasedMarkConfiguration<MarkConfigurationResponseAnnotation>> entry : replacementCandidates.entrySet()) {
             final MarkProperties bestMatchOrNull = templateBasedAssociater.getBestMatchForT2(entry.getKey());

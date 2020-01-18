@@ -103,10 +103,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         BasicDBList tags = new BasicDBList();
         markProperties.getTags().forEach(tags::add);
         result.put(FieldNames.MARK_PROPERTIES_TAGS.name(), tags);
-        Map<String, Long> lastUsedTemplateMap = markProperties.getLastUsedTemplate().entrySet().stream()
+        Map<String, Long> lastUsedTemplateMap = markProperties.getLastUsedMarkTemplate().entrySet().stream()
                 .collect(Collectors.toMap(k -> k.getKey().getId().toString(), v -> v.getValue().asMillis()));
         result.put(FieldNames.MARK_PROPERTIES_USED_TEMPLATE.name(), new BasicDBObject(lastUsedTemplateMap));
-        Map<String, Long> lastUsedRoleMap = markProperties.getLastUsedRole().entrySet().stream()
+        Map<String, Long> lastUsedRoleMap = markProperties.getLastUsedMarkRole().entrySet().stream()
                 .collect(Collectors.toMap(k -> k.getKey().getId().toString(), v -> v.getValue().asMillis()));
         result.put(FieldNames.MARK_PROPERTIES_USED_ROLE.name(), new BasicDBObject(lastUsedRoleMap));
         return result;

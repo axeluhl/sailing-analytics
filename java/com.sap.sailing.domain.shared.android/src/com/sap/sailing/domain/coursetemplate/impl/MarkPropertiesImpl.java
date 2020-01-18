@@ -1,8 +1,9 @@
 package com.sap.sailing.domain.coursetemplate.impl;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
@@ -19,8 +20,8 @@ public class MarkPropertiesImpl extends CommonMarkPropertiesImpl implements Mark
     private Iterable<String> tags;
     private UUID id;
 
-    private final Map<MarkTemplate, TimePoint> lastUsedTemplate = new HashMap<>();
-    private final Map<MarkRole, TimePoint> lastUsedRole = new HashMap<>();
+    private final ConcurrentHashMap<MarkTemplate, TimePoint> lastUsedMarkTemplate = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<MarkRole, TimePoint> lastUsedMarkRole = new ConcurrentHashMap<>();
 
     public MarkPropertiesImpl(String name, String shortName, Color color, String shape, String pattern, MarkType type) {
         this(UUID.randomUUID(), name, shortName, color, shape, pattern, type);
@@ -87,23 +88,42 @@ public class MarkPropertiesImpl extends CommonMarkPropertiesImpl implements Mark
     }
 
     @Override
-    public Map<MarkTemplate, TimePoint> getLastUsedTemplate() {
-        return lastUsedTemplate;
+    public Map<MarkTemplate, TimePoint> getLastUsedMarkTemplate() {
+        return Collections.unmodifiableMap(lastUsedMarkTemplate);
+    }
+
+    private <T> void recordUsageTimePoint(T object, TimePoint usageTimePoint, Map<T, TimePoint> lastUsedMap) {
+        if (usageTimePoint == null) {
+            throw new IllegalArgumentException("Usage time point must not be null");
+        }
+        if (!lastUsedMap.containsKey(object) || usageTimePoint.after(lastUsedMap.get(object))) {
+            lastUsedMap.put(object, usageTimePoint);
+        }
+    }
+    
+    @Override
+    public void addMarkTemplateUsage(MarkTemplate markTemplate, TimePoint usageTimePoint) {
+        recordUsageTimePoint(markTemplate, usageTimePoint, lastUsedMarkTemplate);
     }
 
     @Override
-    public Map<MarkRole, TimePoint> getLastUsedRole() {
-        return lastUsedRole;
+    public Map<MarkRole, TimePoint> getLastUsedMarkRole() {
+        return Collections.unmodifiableMap(lastUsedMarkRole);
     }
 
-    public void setLastUsedRole(Map<MarkRole, TimePoint> lastUsedRole) {
-        this.lastUsedRole.clear();
-        this.lastUsedRole.putAll(lastUsedRole);
+    @Override
+    public void addMarkRoleUsage(MarkRole markRole, TimePoint usageTimePoint) {
+        recordUsageTimePoint(markRole, usageTimePoint, lastUsedMarkRole);
+    }
+    
+    public void setLastUsedMarkRole(Map<MarkRole, TimePoint> lastUsedRole) {
+        this.lastUsedMarkRole.clear();
+        this.lastUsedMarkRole.putAll(lastUsedRole);
     }
 
-    public void setLastUsedTemplate(Map<MarkTemplate, TimePoint> lastUsedTemplate) {
-        this.lastUsedTemplate.clear();
-        this.lastUsedTemplate.putAll(lastUsedTemplate);
+    public void setLastUsedMarkTemplate(Map<MarkTemplate, TimePoint> lastUsedTemplate) {
+        this.lastUsedMarkTemplate.clear();
+        this.lastUsedMarkTemplate.putAll(lastUsedTemplate);
     }
 
 }

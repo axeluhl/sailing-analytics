@@ -442,7 +442,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     public Void internalRecordUsage(UUID markTemplateId, UUID markPropertiesId) {
         final MarkProperties markProperties = markPropertiesById.get(markPropertiesId);
         final MarkTemplate markTemplate = markTemplatesById.get(markTemplateId);
-        markProperties.getLastUsedTemplate().put(markTemplate, new MillisecondsTimePoint(System.currentTimeMillis()));
+        markProperties.addMarkTemplateUsage(markTemplate, MillisecondsTimePoint.now());
         mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
         return null;
     }
@@ -458,7 +458,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     @Override
     public Void internalRecordUsage(final UUID markPropertiesId, final MarkRole markRole) {
         final MarkProperties markProperties = markPropertiesById.get(markPropertiesId);
-        markProperties.getLastUsedRole().put(markRole, new MillisecondsTimePoint(System.currentTimeMillis()));
+        markProperties.addMarkRoleUsage(markRole, MillisecondsTimePoint.now());
         mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
         return null;
     }
@@ -474,8 +474,8 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     public Map<MarkProperties, TimePoint> getUsedMarkProperties(MarkTemplate markTemplate) {
         final Map<MarkProperties, TimePoint> recordedUsage = new HashMap<>();
         for (final MarkProperties mp : markPropertiesById.values()) {
-            if (mp.getLastUsedTemplate().containsKey(markTemplate)) {
-                recordedUsage.put(mp, mp.getLastUsedTemplate().get(markTemplate));
+            if (mp.getLastUsedMarkTemplate().containsKey(markTemplate)) {
+                recordedUsage.put(mp, mp.getLastUsedMarkTemplate().get(markTemplate));
             }
         }
         return recordedUsage;
@@ -485,8 +485,8 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     public Map<MarkProperties, TimePoint> getUsedMarkProperties(MarkRole roleName) {
         final Map<MarkProperties, TimePoint> recordedUsage = new HashMap<>();
         for (final MarkProperties mp : markPropertiesById.values()) {
-            if (mp.getLastUsedRole().containsKey(roleName)) {
-                recordedUsage.put(mp, mp.getLastUsedRole().get(roleName));
+            if (mp.getLastUsedMarkRole().containsKey(roleName)) {
+                recordedUsage.put(mp, mp.getLastUsedMarkRole().get(roleName));
             }
         }
         return recordedUsage;

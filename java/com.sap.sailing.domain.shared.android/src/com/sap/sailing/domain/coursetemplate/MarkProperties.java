@@ -63,10 +63,32 @@ public interface MarkProperties extends CommonMarkProperties, NamedWithUUID, Has
      */
     void setPositioningInformation(Positioning positioningInformation);
     
-    Map<MarkTemplate, TimePoint> getLastUsedTemplate();
+    /**
+     * Returns an immutable map that tells all {@link #addMarkTemplateUsage(MarkTemplate, TimePoint) recorded}
+     * usages of this {@link MarkProperties} object for a {@link MarkTemplate}.
+     */
+    Map<MarkTemplate, TimePoint> getLastUsedMarkTemplate();
 
-    Map<MarkRole, TimePoint> getLastUsedRole();
-    
+    /**
+     * Records a usage of this {@link MarkProperties} object in conjunction with the
+     * {@code markTemplate} provided. If this usage is later than that in
+     * {@link #getLastUsedMarkTemplate()}, it will replace the previously last usage.
+     */
+    void addMarkTemplateUsage(MarkTemplate markTemplate, TimePoint usageTimePoint);
+
+    /**
+     * Returns an immutable map that tells all {@link #addMarkRoleUsage(MarkRole, TimePoint) recorded}
+     * usages of this {@link MarkProperties} object for a {@link MarkRole}.
+     */
+    Map<MarkRole, TimePoint> getLastUsedMarkRole();
+
+    /**
+     * Records a usage of this {@link MarkProperties} object in conjunction with the
+     * {@code markRole} provided. If this usage is later than that in
+     * {@link #getLastUsedMarkRole()}, it will replace the previously last usage.
+     */
+    void addMarkRoleUsage(MarkRole markRole, TimePoint usageTmePoint);
+
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(UUID markPropertiesUUID) {
         return new TypeRelativeObjectIdentifier(markPropertiesUUID.toString());
     }
