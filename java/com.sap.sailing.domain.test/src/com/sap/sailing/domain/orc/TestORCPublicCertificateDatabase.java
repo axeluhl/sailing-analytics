@@ -7,10 +7,13 @@ import static org.junit.Assert.assertTrue;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
@@ -33,6 +36,8 @@ import com.sap.sse.common.Util;
 public class TestORCPublicCertificateDatabase {
     private ORCPublicCertificateDatabase db;
     Map<String, String> dateComparisonMap = new LinkedHashMap<String, String>();
+    List<String> dateFailureCases =null;
+    
     @Before
     public void setUp() {
         db = new ORCPublicCertificateDatabaseImpl();
@@ -47,6 +52,9 @@ public class TestORCPublicCertificateDatabase {
         dateComparisonMap.put("2019-02-21T10:38:46z", "2019-02-21 10:38:46");
         dateComparisonMap.put("2019-02-21T10:38:17", "2019-02-21 10:38:17");
         dateComparisonMap.put("2019-02-21T10:38:33.000", "2019-02-21 10:38:33");
+        dateFailureCases = Arrays.asList("2019-02-21T10:44GMT+2","2019-02-21T10:38+0800","2019-02-21T10:38+08:00",
+                "2019-02-21T10:38-08","2019-02-21T10:38Z","2019-02-21T10z","2019-02-21T10:38z");
+
     }
     
     @Test
@@ -143,15 +151,17 @@ public class TestORCPublicCertificateDatabase {
     }
     
     @Test
-    public void testParseDateFailureCases() {
-        Assert.assertNull(db.parseDate("2019-02-21T20:38"));
-        Assert.assertNull(db.parseDate("2019-02-21T10:38GMT+2"));
-        Assert.assertNull(db.parseDate("2019-02-21T10:38+0800"));
-        Assert.assertNull(db.parseDate("2019-02-21T10:38+08:00"));
-        Assert.assertNull(db.parseDate("2019-02-21T10:38-08"));
-        Assert.assertNull(db.parseDate("2019-02-21T10:38Z"));
-        Assert.assertNull(db.parseDate("2019-02-21T10z"));
-        Assert.assertNull(db.parseDate("2019-02-21T10:38z"));
+    public void testParseDateFailureCases() throws ParseException {
+        for(String dateString: dateFailureCases) {
+            try {
+                db.parseDate(dateString);
+                Assert.fail(dateString+" is parsable"); // as date must not be parsable
+            } catch(ParseException e) {
+                // ignoring exception as date must fail.
+            }
+        }
+        Assert.assertTrue(true);
+        
     }
 
     private void assertSoulmate(final String referenceNumber, CertificateHandle handle) {

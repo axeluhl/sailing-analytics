@@ -169,5 +169,5 @@ public interface ORCPublicCertificateDatabase {
      */
     Future<Set<ORCCertificate>> search(String yachtName, String sailNumber, BoatClass boatClass);
     
-    Date parseDate(final String dateString);
+    Date parseDate(final String dateString) throws ParseException;
 }

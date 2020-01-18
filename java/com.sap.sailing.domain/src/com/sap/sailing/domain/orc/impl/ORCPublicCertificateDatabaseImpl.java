@@ -355,7 +355,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     }
 
     @Override
-    public Date parseDate(final String dateString) {
+    public Date parseDate(final String dateString) throws ParseException {
         DateFormat dateFormat = null;
         if (dateString.contains("GMT")) {
             try {
@@ -383,7 +383,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
             }
         }
         logger.fine("Date is not parsable by any of the format :" + dateString);
-        return null;
+        throw new ParseException("Date is not parsable by any of the format :" + dateString,0);
     }
     
     private Date timeAsGmt(String dateTimeWithGMT) throws ParseException {
