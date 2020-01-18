@@ -417,13 +417,13 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         for (MarkConfiguration<P> markConfiguration : getAllMarkConfigurations(effectiveWaypoints)) {
             final MarkProperties markProperties = markConfiguration.getOptionalMarkProperties();
             if (markProperties != null) {
-                final MarkRole markRole = allAssociatedRoles.get(markConfiguration);
-                if (markRole != null) {
+                final MarkRole markRoleOrNull = allAssociatedRoles.get(markConfiguration);
+                if (markRoleOrNull != null) {
                     try {
-                        getSharedSailingData().recordUsage(markProperties, markRole);
+                        getSharedSailingData().recordUsage(markProperties, markRoleOrNull);
                     } catch (Exception e) {
                         logger.log(Level.WARNING,
-                                "Could not record usage for mark properties " + markProperties + " and role " + markRole,
+                                "Could not record usage for mark properties " + markProperties + " and role " + markRoleOrNull,
                                 e);
                     }
                 }
