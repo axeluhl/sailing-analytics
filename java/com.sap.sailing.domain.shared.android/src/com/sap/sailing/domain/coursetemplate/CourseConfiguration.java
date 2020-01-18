@@ -8,7 +8,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sse.common.Named;
 
 /**
- * A course that does not consist of {@link Mark}s existing in a regatta but instead is defined by
+ * A course that does not necessarily consist of {@link Mark}s existing in a regatta but instead is defined by
  * {@link MarkConfiguration}s. This means changes to the model are easily possible without requiring to pollute the
  * {@link RegattaLog}. The effective Marks will then be created upon Course creation based on the
  * {@link MarkConfiguration}s.
@@ -17,11 +17,17 @@ import com.sap.sse.common.Named;
  * This is the model represented in a course editor which deals with editing the waypoint sequence as well as changing
  * how marks are mapped to {@link MarkTemplate}s and how marks are generally configured in terms of their base
  * properties and tracking/positioning information. Any change that is incompatible with a non-{@code null}
- * {@link CourseTemplate} returned by {@link #getOptionalCourseTemplate()} leads to breaking this connection
- * such that {@link #getOptionalCourseTemplate()} from that point on will return {@code null}.<p>
+ * {@link CourseTemplate} returned by {@link #getOptionalCourseTemplate()} leads to breaking this connection such that
+ * {@link #getOptionalCourseTemplate()} from that point on will return {@code null}.
+ * <p>
  * 
- * The configuration for all marks are returned by {@link #getAllMarks()} because when pushing
- * this to a Regatta the marks for all these configurations have to be established.
+ * The configuration for all marks are returned by {@link #getAllMarks()} because when pushing this to a Regatta the
+ * marks for all these configurations have to be established.
+ *
+ * @param <P>
+ *            the type used to {@link MarkConfiguration#getAnnotationInfo() annotate} the {@link MarkProperties} used in
+ *            this course configuration. Different annotations are expected to be used for course configurations used in
+ *            requests sent to a service and for responses produced by a service.
  */
 public interface CourseConfiguration<P> extends /* FIXME A course configuration is NOT a WithOptionalRepeatablePart regarding its
 waypoints because the waypoints contain 0..* specifically-configured copies of the repeatable part; in order to allow the user
