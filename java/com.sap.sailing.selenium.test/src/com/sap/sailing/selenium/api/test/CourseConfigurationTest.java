@@ -283,6 +283,25 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         }
     }
 
+    @Test
+    public void testWithoutRepeatablePart() {
+        final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(sharedServerCtx);
+        final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(sharedServerCtx,
+                ctdf.constructCourseTemplate(null, null));
+        // create course configuration from template without repeatable part
+        final CourseConfiguration ccfg = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(ctx,
+                createdCourseTemplate.getId(), /* optionalRegattaName */ null, /* tags */ null);
+        assertNull(ccfg.getRepeatablePart());
+
+        // create a course and make sure it has no repeatable part
+        final String regattaName = "test";
+        eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
+        final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
+        final CourseConfiguration course = courseConfigurationApi.createCourse(ctx, ccfg, "test", race.getRaceName(),
+                "Default");
+        assertNull(course.getRepeatablePart());
+    }
+
     @Test @Ignore
     //TODO: Need to clarify this test. The two course template don't seem to get merged by
     // MarkRole. Perhaps the cause is, that the MarkTemplate/MarkRole-map of the first
