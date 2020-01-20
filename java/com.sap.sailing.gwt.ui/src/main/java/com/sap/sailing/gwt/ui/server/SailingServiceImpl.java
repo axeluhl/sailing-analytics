@@ -5318,11 +5318,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public String validateResultImportUrl(String resultProviderName, UrlDTO urlDTO) {
         if (urlDTO == null || urlDTO.getUrl() == null || urlDTO.getUrl().isEmpty()) {
-            return serverStringMessages.get(getClientLocale(), "pleaseEnterNonEmptyUrl"); //TODO Test: java.util.MissingResourceException: Can't find resource for bundle java.util.PropertyResourceBundle, key pleaseEnterNonEmptyUrl
+            return serverStringMessages.get(getClientLocale(), "pleaseEnterNonEmptyUrl");
         }
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
         if (urlBasedScoreCorrectionProvider == null) {
-            return serverStringMessages.get(getClientLocale(), "scoreCorrectionProviderNotFound"); //TODO add key to stringMessages
+            return serverStringMessages.get(getClientLocale(), "scoreCorrectionProviderNotFound");
         }
         String errorMessage = null;
         try {

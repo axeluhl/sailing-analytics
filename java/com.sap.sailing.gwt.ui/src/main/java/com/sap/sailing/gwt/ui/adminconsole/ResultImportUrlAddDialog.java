@@ -35,7 +35,7 @@ public class ResultImportUrlAddDialog extends DataEntryDialog<UrlDTO> {
                 } else {
                     sailingService.validateResultImportUrl(urlProvider, valueToValidate, cb);
                 }
-            }, new AsyncCallback<String>() { //TODO category
+            }, new AsyncCallback<String>() {
                 @Override
                 public void onSuccess(String result) {
                     callback.onSuccess(result);
@@ -58,9 +58,8 @@ public class ResultImportUrlAddDialog extends DataEntryDialog<UrlDTO> {
         this.setValidator(new UrlDTOValidator());
 
         textBox = super.createTextBox(null, 120);
-        textBox.getElement().setPropertyString("placeholder", "Event ID or URL"); //TODO i18n
+        textBox.getElement().setPropertyString("placeholder", stringMessages.eventIdOrUrl());
         textBox.setFocus(true);
-        
     }
 
     @Override
@@ -72,6 +71,4 @@ public class ResultImportUrlAddDialog extends DataEntryDialog<UrlDTO> {
     protected Widget getAdditionalWidget() {
         return textBox;
     }
-
-    
 }

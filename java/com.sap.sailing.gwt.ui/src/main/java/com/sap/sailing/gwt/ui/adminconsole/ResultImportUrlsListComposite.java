@@ -2,10 +2,10 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.List;
 import java.util.Set;
-
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -32,7 +32,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 /**
  * A composite for showing and managing a list of all result import URLs.
  * 
- * @author Tim Hessenm�ller (D062243)
+ * @author Tim Hessenmüller (D062243)
  */
 public class ResultImportUrlsListComposite extends Composite {
     private final SailingServiceAsync sailingService;
@@ -60,7 +60,9 @@ public class ResultImportUrlsListComposite extends Composite {
         final Button remove = buttonPanel.addRemoveAction(stringMessages.remove(), new Command() {
             @Override
             public void execute() {
-                removeUrls(table.getSelectionModel().getSelectedSet()); // TODO Ask user to confirm
+                if (Window.confirm(stringMessages.doYouReallyWantToRemoveResultImportUrls())) {
+                    removeUrls(table.getSelectionModel().getSelectedSet());
+                }
             }
         });
         remove.setEnabled(false);
