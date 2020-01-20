@@ -17,13 +17,25 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+************* TracAPI 3.13.0 ***************
+********************************************
+This is a final version. It changes the enumerate RaceStatusType, breaking the backward compatibility:
+
+ - RaceStatusType.FINAL is renamed to RaceStatusType.OFFICIAL
+ - RaceStatusType.FINISHED is renamed to RaceStatusType.UNOFFICIAL
+
+Release date: 15/01/2019
+Build number: 41b9774f520978e2bc4596d82da891c5c77d8da8
+
+********************************************
 ************* TracAPI 3.12.5 ***************
 ********************************************
-
-1) Features
+This is a final version. It adds a some features. It keeps the backward compatibility.
 
 Release date: 21/11/2019
 Build number: 27eb535e
+
+1) Features
 
  - If the sport is Orienteering/Route sport the API wont't retrieve the control positions from the server (Requested
  by Jorge Piera, 29/07/2019)
