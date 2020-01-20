@@ -474,18 +474,24 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     /**
      * Checks if the current user has the {@link DefaultActions#UPDATE UPDATE} permission on the {@code object} identified.
      * If {@code object} is {@code null}, the check will always pass.
+     * 
+     * @throws AuthorizationException in case the current user is not permitted to update {@code object}
      */
     void checkCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object);
 
     /**
      * Checks if the current user has the {@link DefaultActions#DELETE DELETE} permission on the {@code object} identified.
      * If {@code object} is {@code null}, the check will always pass.
+     * 
+     * @throws AuthorizationException in case the current user is not permitted to delete {@code object}
      */
     void checkCurrentUserDeletePermission(WithQualifiedObjectIdentifier object);
 
     /**
      * Checks if the current user has the {@link DefaultActions#DELETE DELETE} permission on the {@code object} identified.
      * If {@code object} is {@code null}, the check will always pass.
+     * 
+     * @throws AuthorizationException in case the current user is not permitted to delete {@code object}
      */
     void checkCurrentUserDeletePermission(QualifiedObjectIdentifier object);
 
