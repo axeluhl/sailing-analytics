@@ -17,6 +17,7 @@ public class UserGroupApi {
 
     private static final String KEY_GROUP_NAME = "groupName";
     private static final String KEY_GROUP_ID = "groupId";
+    private static final String KEY_USER_NAME = "userName";
     private static final String KEY_USERS = "users";
     private static final String KEY_ROLES = "roles";
     private static final String KEY_FOR_ALL = "forAll";
@@ -24,6 +25,7 @@ public class UserGroupApi {
 
     private static final String USERGROUP_URL = "/api/restsecurity/usergroup/";
     private static final String SET_DEFAULT_TENANT_FOR_CURRENT_USER = "/api/v1/usergroups/setDefaultTenantForCurrentServerAndUser";
+    private static final String ADD_USER_TO_USERGROUP_URL = "/api/v1/usergroups/addAnyUserToGroup";
 
     public UserGroup getUserGroup(ApiContext ctx, UUID groupId) {
         return new UserGroup(ctx.get(USERGROUP_URL + groupId.toString()));
@@ -67,6 +69,13 @@ public class UserGroupApi {
         final Map<String, String> queryParams = new HashMap<>();
         queryParams.put(KEY_TENANT_GROUP_UUID, tenantUuid.toString());
         ctx.post(SET_DEFAULT_TENANT_FOR_CURRENT_USER, queryParams);
+    }
+
+    public void addUserToUserGroupWithoutPermissionOnUser(ApiContext ctx, String userName, UUID userGroupId) {
+        final Map<String, String> queryParams = new HashMap<>();
+        queryParams.put(KEY_USER_NAME, userName);
+        queryParams.put(KEY_GROUP_ID, userGroupId != null ? userGroupId.toString() : null);
+        ctx.post(ADD_USER_TO_USERGROUP_URL, queryParams);
     }
 
     public class UserGroup extends JsonWrapper {

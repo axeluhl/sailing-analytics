@@ -12,6 +12,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.shiro.authz.AuthorizationException;
 import org.json.simple.JSONArray;
@@ -20,6 +21,7 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.User;
@@ -62,6 +64,41 @@ public class UserGroupsResource extends AbstractSailingServerResource {
             response = Response.ok().build();
         } else {
             response = Response.status(401).build();
+        }
+        return response;
+    }
+
+    @POST
+    @Path("addAnyUserToGroup")
+    @Produces("application/json;charset=UTF-8")
+    public Response addGroupToUserWithoutPermissionOnUser(@QueryParam("userName") String userName,
+            @QueryParam("groupId") UUID userGroupId) {
+        Response response = null;
+        final User user = getSecurityService().getUserByName(userName);
+        if (user != null) {
+            final UserGroup userGroup = getSecurityService().getUserGroup(userGroupId);
+            if (userGroup != null) {
+                if (!Util.contains(userGroup.getUsers(), user)) {
+                    if (getSecurityService().hasCurrentUserUpdatePermission(userGroup)) {
+                        if (!getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionsWithQualification(
+                                userGroup.getRoleDefinitionMap().keySet(), new Ownership(null, userGroup))) {
+                            response = Response.status(Status.UNAUTHORIZED).build();
+                        } else {
+                            getSecurityService().addUserToUserGroup(userGroup, user);
+                            response = Response.ok().build();
+                        }
+                    } else {
+                        response = Response.status(Status.UNAUTHORIZED).build();
+                    }
+                } else {
+                    response = Response.status(Status.BAD_REQUEST).entity("User is already in this group.").build();
+                }
+                response = Response.ok().build();
+            } else {
+                response = Response.status(Status.BAD_REQUEST).entity("User Group does not exist.").build();
+            }
+        } else {
+            response = Response.status(Status.BAD_REQUEST).entity("User does not exist.").build();
         }
         return response;
     }

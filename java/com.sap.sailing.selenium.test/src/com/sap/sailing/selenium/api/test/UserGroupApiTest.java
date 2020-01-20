@@ -184,6 +184,28 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
     }
 
     @Test
+    public void addUserToOwnGroupWithoutPermissionOnUserTest() {
+        final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+        
+        securityApi.createUser(adminSecurityCtx, "groupowner", "groupowner", null, "daisy0815");
+        securityApi.createUser(adminSecurityCtx, "usertoadd", "", null, "daisy0815");
+        
+        final ApiContext groupownerSecurityCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "groupowner", "daisy0815");
+        // create group owned by "groupowner"
+        final UserGroup privateUserGroup = userGroupApi.createUserGroup(groupownerSecurityCtx, "mygroup");
+        
+        // add user "usertoadd" to private user group
+        final ApiContext groupownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "groupowner", "daisy0815");
+        userGroupApi.addUserToUserGroupWithoutPermissionOnUser(groupownerCtx, "usertoadd", privateUserGroup.getGroupId());
+        //TODO: check that user was added to group
+        
+        // create group by admin and try to add user to it
+        final UserGroup adminUserGroup = userGroupApi.createUserGroup(adminSecurityCtx, "admingroup");
+        userGroupApi.addUserToUserGroupWithoutPermissionOnUser(groupownerCtx, "usertoadd", adminUserGroup.getGroupId());
+        //TODO: should fail, but doesn't
+    }
+
+    @Test
     public void changeRolesAssociatedToUserGroup() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
 
