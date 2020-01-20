@@ -1,6 +1,7 @@
 package com.sap.sailing.yachtscoring.resultimport;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,6 +35,9 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
     private static final long serialVersionUID = 222663322974305822L;
 
     public static final String NAME = "Yachtscoring XRR Result Importer";
+
+    public static final String EVENT_ID_REGEX = "^\\d+$";
+    public static final String EVENT_ID_TEMPLATE = "http://www.yachtscoring.com/results_xrr_auto.cfm?eid=%s";
 
     private final ParserFactory parserFactory;
     private final ResultUrlRegistry resultUrlRegistry;
@@ -129,6 +133,16 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
     @Override
     public Iterable<URL> getUrls() {
         return resultUrlRegistry.getResultUrls(NAME);
+    }
+
+    @Override
+    public URL resolveUrl(String url) throws MalformedURLException {
+        String completedUrl = url;
+        if (url.matches(EVENT_ID_REGEX)) {
+            completedUrl = String.format(EVENT_ID_TEMPLATE, url);
+        }
+        //TODO Check url
+        return new URL(completedUrl); //TODO Find a better way to check if a URL is valid
     }
 
     @Override

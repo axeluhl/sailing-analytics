@@ -31,14 +31,14 @@ public class ResultImportUrlAddDialog extends DataEntryDialog<UrlDTO> {
             validationExecutor.execute(cb -> {
                 String clientValidation = getErrorMessage(valueToValidate);
                 if (clientValidation != null) {
-                    cb.onFailure(new Throwable(clientValidation));
+                    cb.onSuccess(clientValidation);
                 } else {
                     sailingService.validateResultImportUrl(urlProvider, valueToValidate, cb);
                 }
-            }, new AsyncCallback<Void>() { //TODO category
+            }, new AsyncCallback<String>() { //TODO category
                 @Override
-                public void onSuccess(Void result) {
-                    callback.onSuccess(null);
+                public void onSuccess(String result) {
+                    callback.onSuccess(result);
                 }
                 @Override
                 public void onFailure(Throwable caught) {
@@ -65,7 +65,7 @@ public class ResultImportUrlAddDialog extends DataEntryDialog<UrlDTO> {
 
     @Override
     protected UrlDTO getResult() {
-        return new UrlDTO(textBox.getValue()); //TODO SecurityDTO
+        return new UrlDTO(textBox.getValue().trim()); //TODO SecurityDTO
     }
 
     @Override

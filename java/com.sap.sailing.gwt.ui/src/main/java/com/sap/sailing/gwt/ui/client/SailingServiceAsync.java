@@ -543,7 +543,12 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void addResultImportUrl(String resultProviderName, UrlDTO urlDTO, AsyncCallback<Void> callback);
 
-    void validateResultImportUrl(String resultProviderName, UrlDTO urlDTO, AsyncCallback<Void> callback);
+    /*
+     * Validates if a {@link UrlDTO} which could contain a URL / event ID / event short-name can be used by the
+     * specified {@link ResultUrlProvider}.
+     * @returns {@code null} if valid, otherwise {@link String} containing error message.
+     */
+    void validateResultImportUrl(String resultProviderName, UrlDTO urlDTO, AsyncCallback<String> callback);
 
     void getUrlResultProviderNamesAndOptionalSampleURL(AsyncCallback<List<Pair<String, String>>> callback);
 

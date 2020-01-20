@@ -496,7 +496,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void addResultImportUrl(String resultProviderName, UrlDTO url) throws UnauthorizedException, Exception;
 
-    void validateResultImportUrl(String resultProviderName, UrlDTO urlDTO);
+    String validateResultImportUrl(String resultProviderName, UrlDTO urlDTO);
 
     void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
             String comment) throws UnauthorizedException;

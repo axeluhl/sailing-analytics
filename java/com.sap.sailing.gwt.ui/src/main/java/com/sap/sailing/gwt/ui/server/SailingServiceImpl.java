@@ -5288,7 +5288,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public void removeResultImportURLs(String resultProviderName, Set<UrlDTO> toRemove) throws Exception {
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
-        ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry(); //TODO Unresolved urls
+        ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
         if (urlBasedScoreCorrectionProvider != null) {
             for (UrlDTO urlToRemove : toRemove) {
                 getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(
@@ -5307,29 +5307,30 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
             getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredDomainType.RESULT_IMPORT_URL,
-                    new TypeRelativeObjectIdentifier(urlBasedScoreCorrectionProvider.getName(),
-                            urlDTO.getUrl().toString()), urlDTO.getUrl().toString(),
-                    () -> resultUrlRegistry.registerResultUrl(resultProviderName, new URL(urlDTO.getUrl())));
+                    new TypeRelativeObjectIdentifier(urlBasedScoreCorrectionProvider.getName(), urlDTO.getUrl()),
+                    urlDTO.getUrl(), () -> {
+                        resultUrlRegistry.registerResultUrl(resultProviderName,
+                                urlBasedScoreCorrectionProvider.resolveUrl(urlDTO.getUrl()));
+                    });
         }
     }
 
     @Override
-    public void validateResultImportUrl(String resultProviderName, UrlDTO urlDTO) throws IllegalArgumentException {
+    public String validateResultImportUrl(String resultProviderName, UrlDTO urlDTO) {
         if (urlDTO == null || urlDTO.getUrl() == null || urlDTO.getUrl().isEmpty()) {
-            throw new IllegalArgumentException("No URL given.");
+            return serverStringMessages.get(getClientLocale(), "pleaseEnterNonEmptyUrl"); //TODO Test: java.util.MissingResourceException: Can't find resource for bundle java.util.PropertyResourceBundle, key pleaseEnterNonEmptyUrl
         }
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
-        URL url = null;
-        try {
-            url = new URL(urlDTO.getUrl()); //TODO Check if exists?
-            return;
-        } catch (MalformedURLException e) {
-            //TODO Find better way to determine if url is invalid
-            //TODO Resolve id or short name
-            
-            //TODO Check if exists?
+        if (urlBasedScoreCorrectionProvider == null) {
+            return serverStringMessages.get(getClientLocale(), "scoreCorrectionProviderNotFound"); //TODO add key to stringMessages
         }
-        return;
+        String errorMessage = null;
+        try {
+            urlBasedScoreCorrectionProvider.resolveUrl(urlDTO.getUrl());
+        } catch (MalformedURLException e) {
+            errorMessage = e.getMessage();
+        }
+        return errorMessage;
     }
 
     private ResultUrlRegistry getResultUrlRegistry() {
