@@ -1,7 +1,10 @@
 package com.sap.sailing.selenium.api.test;
 
 import static com.sap.sailing.selenium.api.core.ApiContext.SECURITY_CONTEXT;
+import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
+import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
+import static com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage.goToPage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -12,12 +15,17 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
+import com.sap.sailing.selenium.api.event.EventApi;
+import com.sap.sailing.selenium.api.event.EventApi.Event;
 import com.sap.sailing.selenium.api.event.RoleApi;
 import com.sap.sailing.selenium.api.event.RoleApi.Role;
 import com.sap.sailing.selenium.api.event.SecurityApi;
+import com.sap.sailing.selenium.api.event.SecurityApi.User;
 import com.sap.sailing.selenium.api.event.UserGroupApi;
 import com.sap.sailing.selenium.api.event.UserGroupApi.UserGroup;
+import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 import com.sap.sse.common.Util;
 
@@ -25,10 +33,12 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
 
     private final UserGroupApi userGroupApi = new UserGroupApi();
     private final RoleApi roleApi = new RoleApi();
+    private final SecurityApi securityApi = new SecurityApi();
 
     @Before
     public void setUp() {
         clearState(getContextRoot());
+        super.setUp();
     }
 
     @Test
@@ -146,6 +156,31 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
                 userGroupAfterUserRemove.getGroupName());
         assertSameElements(userGroupCreated.getRoles(), userGroupAfterUserRemove.getRoles());
         assertSameElements(userGroupCreated.getUsers(), userGroupAfterUserRemove.getUsers());
+    }
+
+    @Test
+    public void setDefaultTenantForCurrentServerAndUserTest() {
+        final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+        securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
+        final ApiContext ownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
+        final AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
+        adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
+
+        final EventApi eventApi = new EventApi();
+        final Event eventCreatedWithDefaultTenant = eventApi.createEvent(ownerCtx, "testevent", "GC 32",
+                CompetitorRegistrationType.CLOSED, "somewhere");
+        assertEquals("testevent", eventCreatedWithDefaultTenant.getName());
+
+        final UserGroup newUserGroup = userGroupApi.createUserGroup(adminSecurityCtx, "NewGroup");
+        userGroupApi.setDefaultTenantForCurrentServerAndUser(ownerCtx, newUserGroup.getGroupId());
+
+        User user = securityApi.getUser(adminSecurityCtx, "donald");
+        System.out.println(user.getJson().toJSONString());
+
+        final Event eventCreatedWithNewGroupTenant = eventApi.createEvent(ownerCtx, "testevent2", "GC 32",
+                CompetitorRegistrationType.CLOSED, "somewhere");
+        assertEquals("testevent2", eventCreatedWithNewGroupTenant.getName());
+        // TODO: verify that the tenant_owner is NewGroup.
     }
 
     @Test

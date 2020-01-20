@@ -20,8 +20,10 @@ public class UserGroupApi {
     private static final String KEY_USERS = "users";
     private static final String KEY_ROLES = "roles";
     private static final String KEY_FOR_ALL = "forAll";
+    private static final String KEY_TENANT_GROUP_UUID = "tenantGroup";
 
     private static final String USERGROUP_URL = "/api/restsecurity/usergroup/";
+    private static final String SET_DEFAULT_TENANT_FOR_CURRENT_USER = "/api/v1/usergroups/setDefaultTenantForCurrentServerAndUser";
 
     public UserGroup getUserGroup(ApiContext ctx, UUID groupId) {
         return new UserGroup(ctx.get(USERGROUP_URL + groupId.toString()));
@@ -59,6 +61,12 @@ public class UserGroupApi {
 
     public void removeRoleFromGroup(ApiContext ctx, UUID groupId, UUID roleId) {
         ctx.delete(USERGROUP_URL + groupId.toString() + "/role/" + roleId.toString());
+    }
+
+    public void setDefaultTenantForCurrentServerAndUser(ApiContext ctx, UUID tenantUuid) {
+        final Map<String, String> queryParams = new HashMap<>();
+        queryParams.put(KEY_TENANT_GROUP_UUID, tenantUuid.toString());
+        ctx.post(SET_DEFAULT_TENANT_FOR_CURRENT_USER, queryParams);
     }
 
     public class UserGroup extends JsonWrapper {
