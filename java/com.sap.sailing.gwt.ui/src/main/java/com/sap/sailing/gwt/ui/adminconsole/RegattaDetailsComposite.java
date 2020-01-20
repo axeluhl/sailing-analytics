@@ -144,12 +144,9 @@ public class RegattaDetailsComposite extends Composite {
         Button button = new Button(stringMessages.registrationLinkShare(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-
                 RegistrationLinkWithQRCode registrationLinkWithQRCode = new RegistrationLinkWithQRCode();
                 registrationLinkWithQRCode.setSecret(regatta.registrationLinkSecret);
-
                 sailingService.getMailType(new AsyncCallback<MailInvitationType>() {
-
                     @Override
                     public void onFailure(Throwable caught) {
                         logger.log(Level.SEVERE, "Could not determine MailInvitationType", caught);
