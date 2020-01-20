@@ -286,6 +286,7 @@ public class ImagesListComposite extends Composite {
                             callResizingServiceAndUpdateTable(resizingTask, null);
                         } else {
                             imageListDataProvider.getList().add(resizingTask.getImage());
+                            updateTableVisisbilty();
                         }
                     }
                 });
@@ -306,6 +307,7 @@ public class ImagesListComposite extends Composite {
                         } else {
                             imageListDataProvider.getList().remove(selectedImage);
                             imageListDataProvider.getList().add(resizingTask.getImage());
+                            updateTableVisisbilty();
                         }
                     }
                 });
@@ -358,7 +360,6 @@ public class ImagesListComposite extends Composite {
         imageSelectionModel.clear();
         imageListDataProvider.getList().clear();
         imageListDataProvider.getList().addAll(images);
-        
         updateTableVisisbilty();
     }
 
