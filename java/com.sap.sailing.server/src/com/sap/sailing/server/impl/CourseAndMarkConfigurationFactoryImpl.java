@@ -59,6 +59,7 @@ import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation.MarkRoleCreationRequest;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationResponseAnnotation;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationVisitor;
 import com.sap.sailing.domain.coursetemplate.MarkPairWithConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
@@ -95,6 +96,7 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.impl.UserGroup;
 
 public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfigurationFactory {
@@ -107,10 +109,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
     /**
      * Obtains a "last known position" for a {@link DeviceIdentifier}.<p>
      * 
-     * FIXME The current implementation is broken in several ways: the {@link SensorFixStore} employed here does not
-     * exist in a replica, so valid results can be obtained only on a master instance which is bad. Furthermore, at least
-     * with the current implementation, queries of this type can take a long time to complete, especially when posed
-     * to the archive server.
+     * Note: the resolver will only work on a "master" instance of a master/replica cluster ("replica set") because
+     * it accesses the persistence layer which is only defined on the master instance.
      */
     private final Function<DeviceIdentifier, GPSFix> lastKnownPositionResolver;
     private final RaceLogResolver raceLogResolver;
@@ -124,7 +124,6 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         this.sensorFixStore = sensorFixStore;
         this.raceLogResolver = raceLogResolver;
         lastKnownPositionResolver = identifier -> {
-            // FIXME see above; doesn't work on replicas due to lack of valid DB, and can take a long time especially on the archive server
             GPSFix lastPosition = null;
             try {
                 final Map<DeviceIdentifier, Timed> lastFix = sensorFixStore.getFixLastReceived(Collections.singleton(identifier));
@@ -297,32 +296,14 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         final Map<MarkRole, MarkTemplate> defaultMarkTemplatesForMarkRoles = new HashMap<>();
         for (MarkConfiguration<MarkConfigurationRequestAnnotation> markConfiguration : courseConfigurationAfterInventory.getAllMarks()) {
             final MarkConfiguration<MarkConfigurationRequestAnnotation> effectiveConfiguration;
-            // TODO visitor pattern for MarkConfiguration?
             final MarkTemplate effectiveMarkTemplate;
-            if (markConfiguration instanceof MarkTemplateBasedMarkConfiguration) {
-                final MarkTemplateBasedMarkConfiguration<MarkConfigurationRequestAnnotation> markTemplateBasedMarkConfiguration =
-                        (MarkTemplateBasedMarkConfiguration<MarkConfigurationRequestAnnotation>) markConfiguration;
-                effectiveConfiguration = new MarkTemplateBasedMarkConfigurationImpl<>(markTemplateBasedMarkConfiguration.getOptionalMarkTemplate(),
-                        /* no positioning information known for a mark template */ null);
-                effectiveMarkTemplate = effectiveConfiguration.getOptionalMarkTemplate();
-            } else {
-                final MarkTemplate markTemplateOrNull = markConfiguration.getOptionalMarkTemplate();
-                if (markTemplateOrNull != null && markTemplateOrNull.hasEqualAppeareanceWith(markConfiguration.getEffectiveProperties())) {
-                    effectiveMarkTemplate = markTemplateOrNull;
-                } else {
-                    effectiveMarkTemplate = getSharedSailingData().createMarkTemplate(markConfiguration.getEffectiveProperties());
-                }
-                // TODO how about using the bug5168 MarkConfigurationVisitor pattern here once bug5168 (through bug5085) has been merged into bug5165?
-                if (markConfiguration instanceof RegattaMarkConfiguration) {
-                    // The configuration is used as is. We can't enrich the Mark with the newly created MarkTemplate.
-                    // In the UI, the regatta Mark still needs to be selected to ensure that all connections to regatta
-                    // Marks are unchanged when saving the course to a race afterwards.
-                    effectiveConfiguration = markConfiguration;
-                } else if (markConfiguration instanceof MarkPropertiesBasedMarkConfiguration) {
-                    // In this case the appearance of the created MarkTemplate is identical to the MarkProperties it is
-                    // based on.
-                    effectiveConfiguration = markConfiguration;
-                } else if (markConfiguration instanceof FreestyleMarkConfiguration) {
+            final Pair<MarkConfiguration<MarkConfigurationRequestAnnotation>, MarkTemplate> effectiveConfigurationAndEffectiveMarkTemplate = markConfiguration.accept(
+                    new MarkConfigurationVisitor<Pair<MarkConfiguration<MarkConfigurationRequestAnnotation>, MarkTemplate>, MarkConfigurationRequestAnnotation>() {
+                @Override
+                public Pair<MarkConfiguration<MarkConfigurationRequestAnnotation>, MarkTemplate> visit(
+                        FreestyleMarkConfiguration<MarkConfigurationRequestAnnotation> markConfiguration) {
+                    final MarkConfiguration<MarkConfigurationRequestAnnotation> effectiveConfiguration;
+                    final MarkTemplate effectiveMarkTemplate = getEffectiveMarkTemplate(markConfiguration);
                     final MarkProperties markPropertiesOrNull = markConfiguration.getOptionalMarkProperties();
                     if (markPropertiesOrNull != null) {
                         if (markPropertiesOrNull.hasEqualAppeareanceWith(effectiveMarkTemplate)) {
@@ -336,11 +317,37 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                         effectiveConfiguration = new MarkTemplateBasedMarkConfigurationImpl<>(effectiveMarkTemplate,
                                 markConfiguration.getAnnotationInfo());
                     }
-                } else {
-                    // Should never happen but could in case a new MarkConfiguration type is defined
-                    throw new IllegalStateException("Unknown mark configuration type found");
+                    return new Pair<>(effectiveConfiguration, effectiveMarkTemplate);
                 }
-            }
+
+                @Override
+                public Pair<MarkConfiguration<MarkConfigurationRequestAnnotation>, MarkTemplate> visit(
+                        MarkPropertiesBasedMarkConfiguration<MarkConfigurationRequestAnnotation> markConfiguration) {
+                    // In this case the appearance of the created MarkTemplate is identical to the MarkProperties it is
+                    // based upon.
+                    return new Pair<>(markConfiguration, getEffectiveMarkTemplate(markConfiguration));
+                }
+
+                @Override
+                public Pair<MarkConfiguration<MarkConfigurationRequestAnnotation>, MarkTemplate> visit(
+                        MarkTemplateBasedMarkConfiguration<MarkConfigurationRequestAnnotation> markConfiguration) {
+                    final MarkTemplateBasedMarkConfigurationImpl<MarkConfigurationRequestAnnotation> effectiveConfiguration =
+                            new MarkTemplateBasedMarkConfigurationImpl<>(markConfiguration.getOptionalMarkTemplate(), /* no positioning information known for a mark template */ null);
+                    final MarkTemplate effectiveMarkTemplate = effectiveConfiguration.getOptionalMarkTemplate();
+                    return new Pair<>(effectiveConfiguration, effectiveMarkTemplate);
+                }
+
+                @Override
+                public Pair<MarkConfiguration<MarkConfigurationRequestAnnotation>, MarkTemplate> visit(
+                        RegattaMarkConfiguration<MarkConfigurationRequestAnnotation> markConfiguration) {
+                    // The configuration is used as is. We can't enrich the Mark with the newly created MarkTemplate.
+                    // In the UI, the regatta Mark still needs to be selected to ensure that all connections to regatta
+                    // Marks are unchanged when saving the course to a race afterwards.
+                    return new Pair<>(markConfiguration, getEffectiveMarkTemplate(markConfiguration));
+                }
+            });
+            effectiveConfiguration = effectiveConfigurationAndEffectiveMarkTemplate.getA();
+            effectiveMarkTemplate = effectiveConfigurationAndEffectiveMarkTemplate.getB();
             allMarkTemplatesInNewCourseTemplate.add(effectiveMarkTemplate);
             MarkRole effectiveMarkRole = courseConfigurationAfterInventory.getAssociatedRoles().get(markConfiguration);
             if (effectiveMarkRole == null) {
@@ -390,6 +397,18 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 waypointConfigurationMapper.allAssociatedRoles, waypointConfigurationMapper.effectiveWaypoints, courseConfigurationAfterInventory.getRepeatablePart(),
                 courseConfigurationAfterInventory.getNumberOfLaps(),
                 courseConfigurationAfterInventory.getName(), courseConfigurationAfterInventory.getShortName(), courseConfigurationAfterInventory.getOptionalImageURL());
+    }
+
+    private MarkTemplate getEffectiveMarkTemplate(
+            MarkConfiguration<MarkConfigurationRequestAnnotation> markConfiguration) {
+        final MarkTemplate effectiveMarkTemplate;
+        final MarkTemplate markTemplateOrNull = markConfiguration.getOptionalMarkTemplate();
+        if (markTemplateOrNull != null && markTemplateOrNull.hasEqualAppeareanceWith(markConfiguration.getEffectiveProperties())) {
+            effectiveMarkTemplate = markTemplateOrNull;
+        } else {
+            effectiveMarkTemplate = getSharedSailingData().createMarkTemplate(markConfiguration.getEffectiveProperties());
+        }
+        return effectiveMarkTemplate;
     }
     
     /**
@@ -641,10 +660,10 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                         final TimePoint effectiveUsageTP = usage;
                         for (Waypoint waypoint : courseOrNull.getWaypoints()) {
                             for (Mark mark : waypoint.getMarks()) {
-                                // FIXME the following can never be "absent" because all race columns have been enumerated and all their getAllAvailableMarks() have been mapped in markConfigurationsByMark already
-                                final RegattaMarkConfiguration<MarkConfigurationResponseAnnotation> regattaMarkConfiguration = markConfigurationsByMark
-                                        .computeIfAbsent(mark,
-                                                m -> createMarkConfigurationForRegattaMark(courseTemplate, optionalRegatta, /* optionalRace */ null, m));
+                                // the mark can be expected to be in the markConfigurationsByMark because all race columns have been enumerated
+                                // and all their getAllAvailableMarks() have been mapped in markConfigurationsByMark already
+                                final RegattaMarkConfiguration<MarkConfigurationResponseAnnotation> regattaMarkConfiguration = markConfigurationsByMark.get(mark);
+                                assert regattaMarkConfiguration != null;
                                 lastUsages.compute(regattaMarkConfiguration,
                                         (mc, existingTP) -> (existingTP == null || existingTP.before(effectiveUsageTP))
                                         ? effectiveUsageTP
@@ -1044,14 +1063,6 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
      * defined by the {@link #getOrCreateMarkReplacement(MarkConfiguration)} method that subclasses have to define. If
      * the original {@link MarkConfiguration} had an {@link #existingRoleMapping existing mapping to a mark role}, that
      * mapping is also stored for the resulting {@code M} object in the {@link #explicitAssociatedRoles} map.
-     * <p>
-     * 
-     * Furthermore, for all {@link MarkConfiguration}s that don't have an {@link #existingRoleMapping explicit existing
-     * role mapping}, new roles are created as defaults, in case the caller wants to create a new {@link CourseTemplate}
-     * based on the waypoint sequence provided to this mapper. FIXME only the course template creation use case requires
-     * these roles, and they are then created from the MarkRole / MarkRoleName objects; couldn't the creation of
-     * MarkRoles for the course template be delayed and then be performed based on the MarkConfiguration information
-     * available at that point?
      * <p>
      * 
      * Eventually, a list of {@code W} waypoint-like objects is created, one for each

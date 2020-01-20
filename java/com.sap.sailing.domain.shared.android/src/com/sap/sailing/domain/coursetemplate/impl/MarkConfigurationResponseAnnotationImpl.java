@@ -14,15 +14,11 @@ public class MarkConfigurationResponseAnnotationImpl implements MarkConfiguratio
     private final Iterable<Triple<DeviceIdentifier, TimeRange, GPSFix>> deviceMappings;
 
     public MarkConfigurationResponseAnnotationImpl(GPSFix lastKnownPosition) {
-        super();
-        this.lastKnownPosition = lastKnownPosition;
-        this.deviceMappings = Collections.emptySet();
+        this(lastKnownPosition, Collections.emptySet());
     }
     
     public MarkConfigurationResponseAnnotationImpl(GPSFix lastKnownPosition, DeviceIdentifier currentTrackingDevice) {
-        super();
-        this.lastKnownPosition = lastKnownPosition;
-        this.deviceMappings = Collections.singleton(new Triple<>(currentTrackingDevice, new TimeRangeImpl(null, null), null));
+        this(lastKnownPosition, Collections.singleton(new Triple<>(currentTrackingDevice, new TimeRangeImpl(null, null), null)));
     }
 
     public MarkConfigurationResponseAnnotationImpl(GPSFix lastKnownPosition,
