@@ -3,20 +3,16 @@ package com.sap.sse.gwt.adminconsole;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 
 public class SystemInformationPanel extends FlowPanel {
 
-    private final FlowPanel panel;
     private final Label buildVersionText;
-    private final String fullVersionText;
-    private final Button collapseButton;
+    private String fullVersionText;
     private boolean expanded;
 
     public SystemInformationPanel(final ServerInfoDTO serverInfo, final ErrorReporter errorReporter,
@@ -32,18 +28,13 @@ public class SystemInformationPanel extends FlowPanel {
                 + "eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, "
                 + "no sea takimata sanctus est Lorem ipsum dolor sit amet.";
         buildVersionText = new Label("");
-        collapseButton = new Button("+");
-        collapseButton.addClickHandler(new ClickHandler() {
+        buildVersionText.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 toggleExpand();
             }
         });
-        panel = new FlowPanel();
-        panel.add(collapseButton);
-        panel.add(buildVersionText);
-        
-        addFloatingWidget(panel);
+        addFloatingWidget(buildVersionText);
         buildVersionText.setText("Version information is hidden (click to expand)");
         // if (serverInfo != null) {
         // buildVersionText.setText(stringMessages.version(serverInfo.getBuildVersion()));
@@ -55,16 +46,15 @@ public class SystemInformationPanel extends FlowPanel {
     protected void toggleExpand() {
         if (expanded) {
             buildVersionText.setText("Version information is hidden (click to expand)");
-            collapseButton.setText("+");
         } else {
             buildVersionText.setText(fullVersionText);
-            collapseButton.setText("-");
         }
         expanded = !expanded;
     }
 
     private void addFloatingWidget(Widget w) {
         w.getElement().getStyle().setFloat(Style.Float.LEFT);
+        w.getElement().getStyle().setCursor(Style.Cursor.POINTER);
         add(w);
     }
 }
