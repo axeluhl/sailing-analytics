@@ -138,9 +138,9 @@ public class CourseConfigurationBuilder {
     }
 
     /**
-     * First tries to resolve from the course template and then by ID using sharedSailingData. This allows users having
-     * access to a course template to use all mark templates being included even if they don't have explicit read
-     * permissions for those.
+     * First tries to resolve from the {@link #optionalCourseTemplate} and then by ID using {@link #sharedSailingData}. This
+     * allows users having access to a course template to use all mark templates being included even if they don't have
+     * explicit read permissions for those.
      */
     private MarkTemplate resolveMarkTemplateByID(UUID markTemplateID) {
         MarkTemplate resolvedMarkTemplate = null;
@@ -154,6 +154,11 @@ public class CourseConfigurationBuilder {
         return resolvedMarkTemplate;
     }
     
+    /**
+     * First tries to resolve from the {@link #optionalCourseTemplate} and then by ID using {@link #sharedSailingData}. This
+     * allows users having access to a course template to use all mark roles being included even if they don't have
+     * explicit read permissions for those.
+     */
     private MarkRole resolveMarkRoleByID(UUID markRoleID) {
         MarkRole resolvedMarkRole = null;
         if (optionalCourseTemplate != null) {

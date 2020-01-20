@@ -96,7 +96,6 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         positionResolver = (regatta, deviceIdentifier) -> {
             GPSFix lastPosition = null;
             try {
-                // FIXME terribly slow! Furthermore, looking up by deviceIdentifier only misses any other position sources; use regatta?
                 final Map<DeviceIdentifier, Timed> lastFix = getService().getSensorFixStore().getFixLastReceived(Collections.singleton(deviceIdentifier));
                 final Timed t = lastFix.get(deviceIdentifier);
                 if (t instanceof GPSFix) {
