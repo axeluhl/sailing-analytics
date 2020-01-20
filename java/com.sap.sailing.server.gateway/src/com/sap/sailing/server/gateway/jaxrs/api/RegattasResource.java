@@ -488,7 +488,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (subject.isAuthenticated() && getSecurityService().hasCurrentUserUpdatePermission(regatta)) {
             registerCompetitor = true;
             if (regatta.getCompetitorRegistrationType().isOpen() && registrationLinkSecret != null && registrationLinkSecret.length() > 0) {
-                // => case 2: aauthenticated user is registering himself for open regatta
+                // => case 2: authenticated user is registering himself for open regatta
                 checkInCompetitor = true;
             } else {
                 // case 1: registering any competitor
