@@ -63,14 +63,10 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
         this.invitationType = invitationType;
         this.registrationLinkWithQRCode = registrationLinkWithQRCode == null ? new RegistrationLinkWithQRCode()
                 : registrationLinkWithQRCode;
-
-
         registrationLinkPanel = new CaptionPanel(stringMessages.registrationLinkUrl());
         registrationLinkPanelContent = new VerticalPanel();
         registrationLinkPanel.add(registrationLinkPanelContent);
-
         final Label eventExplain = new Label(stringMessages.event());
-
         events = createGenericListBox(new ValueBuilder<EventDTO>() {
             @Override
             public String getValue(EventDTO item) {
@@ -98,10 +94,8 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
                 updateDisplayWidgets();
             }
         });
-
         registrationLinkPanelContent.add(eventExplain);
         registrationLinkPanelContent.add(events);
-
         registrationLinkExplain = new Label(stringMessages.registrationLinkUrlExplain());
         registrationLinkPanelContent.add(registrationLinkExplain);
         urlTextBox = createTextBox("URL", 100);
@@ -109,7 +103,6 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
         registrationLinkPanelContent.add(urlTextBox);
         Anchor copyAnchor = new Anchor(stringMessages.registrationLinkUrlCopy());
         copyAnchor.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 urlTextBox.setFocus(true);
@@ -118,7 +111,6 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
             }
         });
         registrationLinkPanelContent.add(copyAnchor);
-
         barcodePanel = new CaptionPanel(stringMessages.registrationLinkDialogQrcode());
         barcodePanelContent = new VerticalPanel();
         barcodePanel.add(barcodePanelContent);
@@ -144,7 +136,6 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
         }
         final VerticalPanel dialogPanel = new VerticalPanel();
         panel.add(dialogPanel);
-
         dialogPanel.add(registrationLinkPanel);
         dialogPanel.add(barcodePanel);
         return panel;
@@ -155,29 +146,27 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
             Notification.notify(stringMessages.noEventSelected(), NotificationType.ERROR);
             return;
         }
-
         String baseUrl = GWT.getHostPageBaseURL();
         if (baseUrl.endsWith("/")) {
             baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf("/"));
             baseUrl = baseUrl.substring(0, baseUrl.indexOf("/gwt"));
         }
-
         final String eventIdAsString = events.getValue().id.toString();
-
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put("regatta_name", regattaName);
         parameters.put("secret", secret);
         parameters.put("server", baseUrl);
         parameters.put("event_id", eventIdAsString);
+        // TODO decide OPEN_REGATTA link variant based on invitationType
         String deeplinkUrl = BranchIO.generateLink(BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO, parameters,
                 URL::encodeQueryString);
         urlTextBox.setText(deeplinkUrl);
-        if (invitationType != MailInvitationType.SailInsight2) {
+        if (invitationType != MailInvitationType.SailInsight2 &&
+                invitationType != MailInvitationType.SailInsight3) { // TODO it would be better to make it a property of an enum literal whether open regatta invitation is possible
             getStatusLabel().setText(stringMessages.warningSailInsightVersion());
             getStatusLabel().setStyleName("errorLabel");
         }
         sailingService.openRegattaRegistrationQrCode(deeplinkUrl, new AsyncCallback<String>() {
-
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log("Qrcode generation failed: ", caught);
@@ -187,9 +176,7 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
             public void onSuccess(String result) {
                 GWT.log("Qrcode generated for url: " + deeplinkUrl);
                 qrCodeImage.setUrl("data:image/png;base64, " + result);
-
             }
-
         });
     }
 

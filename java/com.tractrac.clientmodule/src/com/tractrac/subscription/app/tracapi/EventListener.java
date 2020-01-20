@@ -7,27 +7,18 @@
  */
 package com.tractrac.subscription.app.tracapi;
 
-import java.net.URI;
-import java.util.Date;
-import java.util.UUID;
-
-import com.tractrac.model.lib.api.data.IControlPassings;
-import com.tractrac.model.lib.api.data.IMessageData;
-import com.tractrac.model.lib.api.data.IPosition;
-import com.tractrac.model.lib.api.data.IPositionOffset;
-import com.tractrac.model.lib.api.data.IPositionSnapped;
-import com.tractrac.model.lib.api.data.IStartStopData;
-import com.tractrac.model.lib.api.event.DataSource;
-import com.tractrac.model.lib.api.event.ICompetitor;
-import com.tractrac.model.lib.api.event.IEvent;
-import com.tractrac.model.lib.api.event.IRace;
-import com.tractrac.model.lib.api.event.IRaceCompetitor;
+import com.tractrac.model.lib.api.data.*;
+import com.tractrac.model.lib.api.event.*;
 import com.tractrac.model.lib.api.route.IControl;
 import com.tractrac.model.lib.api.route.IControlRoute;
 import com.tractrac.model.lib.api.sensor.ISensorData;
 import com.tractrac.subscription.lib.api.event.ILiveDataEvent;
 import com.tractrac.subscription.lib.api.event.IStoredDataEvent;
 import com.tractrac.util.lib.api.TimeUtils;
+
+import java.net.URI;
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * 
@@ -38,10 +29,17 @@ public class EventListener extends AbstractListener {
 	private static void show(Object obj) {
 		System.out.println(String.valueOf(TimeUtils.formatDateInMillis(new Date().getTime())) + ": " + obj);
 	}
+
+	private static long controlPos = 0;
+	private static long compPos = 0;
 		
 	@Override
 	public void gotStoredDataEvent(IStoredDataEvent storedDataEvent) {
 		show(storedDataEvent);
+		if (storedDataEvent.getType() == IStoredDataEvent.Type.End) {
+			System.out.println("CONTROLS: " + controlPos);
+			System.out.println("COMPETITORS: " + compPos);
+		}
 	}
 
 	@Override
@@ -63,7 +61,8 @@ public class EventListener extends AbstractListener {
 	@Override
 	public void gotControlPassings(IRaceCompetitor raceCompetitor,
 			IControlPassings markPassings) {
-		show("New markpassings " + markPassings + " for the competitor " + raceCompetitor.getCompetitor().toString());				
+		//show("New markpassings " + markPassings + " for the competitor " + raceCompetitor.getCompetitor().toString());
+
 	}
 
 	@Override
@@ -73,6 +72,7 @@ public class EventListener extends AbstractListener {
 		message.append("\t").append(control.getShortName()).append("\t");
 		message.append(position.toString());
 		show(message.toString());
+		controlPos++;
 	}
 
 	@Override
@@ -95,7 +95,8 @@ public class EventListener extends AbstractListener {
 			message.append("\t").append(raceCompetitor.getCompetitor().getShortName()).append("\t");
 		}
 		message.append(position.toString());
-		show(message.toString());
+	//	show(message.toString());
+		compPos++;
 	}
 
 	@Override
@@ -163,6 +164,22 @@ public class EventListener extends AbstractListener {
 	public void deleteControl(UUID controlId) {
 		show("DELETE CONTROL " + controlId);
 	}
+
+	@Override
+	public void addRaceCompetitor(IRaceCompetitor raceCompetitor) {
+		show("ADD RACE COMPETITOR " + raceCompetitor.toString());
+	}
+
+	@Override
+	public void updateRaceCompetitor(IRaceCompetitor raceCompetitor) {
+		show("UPDATE RACE COMPETITOR " + raceCompetitor.toString());
+	}
+
+	@Override
+	public void deleteRaceCompetitor(UUID competitorId) {
+		show("DELETE RACE COMPETITOR " + competitorId);
+	}
+
 
 	@Override
 	public void updateRace(IRace race) {

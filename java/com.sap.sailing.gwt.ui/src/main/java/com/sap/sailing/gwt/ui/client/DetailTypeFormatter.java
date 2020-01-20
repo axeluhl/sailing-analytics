@@ -40,6 +40,12 @@ public class DetailTypeFormatter {
             return stringMessages.currentOrAverageSpeedOverGroundInKnots();
         case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.currentSpeedOverGroundInKnots();
+        case RACE_CURRENT_COURSE_OVER_GROUND_IN_TRUE_DEGREES:
+            return stringMessages.courseOverGroundTrueDegrees();
+        case RACE_CURRENT_POSITION_LAT_DEG:
+            return stringMessages.latitude();
+        case RACE_CURRENT_POSITION_LNG_DEG:
+            return stringMessages.longitude();
         case BRAVO_LEG_CURRENT_RIDE_HEIGHT_IN_METERS:
             return stringMessages.currentOrAverageRideHeightInMeters();
         case BRAVOEXTENDED_LEG_CURRENT_DISTANCE_FOILED_IN_METERS:
@@ -433,6 +439,9 @@ public class DetailTypeFormatter {
             return stringMessages.millimetersUnit();
             
         case CHART_COURSE_OVER_GROUND_TRUE_DEGREES:
+        case RACE_CURRENT_COURSE_OVER_GROUND_IN_TRUE_DEGREES:
+        case RACE_CURRENT_POSITION_LAT_DEG:
+        case RACE_CURRENT_POSITION_LNG_DEG:
         case BRAVO_LEG_CURRENT_HEEL_IN_DEGREES:
         case BRAVO_LEG_CURRENT_PITCH_IN_DEGREES:
         case BRAVOEXTENDED_RACE_CURRENT_MAST_ROTATION_IN_DEGREES:
@@ -657,6 +666,12 @@ public class DetailTypeFormatter {
             return stringMessages.currentOrAverageSpeedOverGroundInKnotsTooltip();
         case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.currentSpeedOverGroundInKnotsTooltip();
+        case RACE_CURRENT_COURSE_OVER_GROUND_IN_TRUE_DEGREES:
+            return stringMessages.courseOverGroundTrueDegreesTooltip();
+        case RACE_CURRENT_POSITION_LAT_DEG:
+            return stringMessages.currentPositionLatitudeTooltip();
+        case RACE_CURRENT_POSITION_LNG_DEG:
+            return stringMessages.currentPositionLongitudeTooltip();
         case BRAVO_LEG_CURRENT_RIDE_HEIGHT_IN_METERS:
             return stringMessages.currentOrAverageRideHeightInMetersTooltip();
         case BRAVOEXTENDED_LEG_CURRENT_DISTANCE_FOILED_IN_METERS:
