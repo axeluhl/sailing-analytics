@@ -38,6 +38,7 @@ import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializ
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.server.operationaltransformation.UpdateCompetitor;
 import com.sap.sse.common.Util;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
@@ -187,11 +188,11 @@ public class CompetitorsResource extends AbstractSailingServerResource {
             throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR)
                     .entity("Could not store competitor image").type(MediaType.TEXT_PLAIN).build());
         }
-        getService().getCompetitorAndBoatStore().updateCompetitor(competitorId, competitor.getName(), competitor.getShortName(), 
-                competitor.getColor(), competitor.getEmail(), 
-                competitor.getTeam().getNationality(), imageUri, competitor.getFlagImage(),
-                /* timeOnTimeFactor */ competitor.getTimeOnTimeFactor(),
-                /* timeOnDistanceAllowancePerNauticalMile */ competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag(), /* storePersistently */ true);
+        getService().apply(new UpdateCompetitor(competitorId, competitor.getName(), competitor.getShortName(),
+                competitor.getColor(), competitor.getEmail(), competitor.getTeam().getNationality(), imageUri,
+                competitor.getFlagImage(), /* timeOnTimeFactor */ competitor.getTimeOnTimeFactor(),
+                /* timeOnDistanceAllowancePerNauticalMile */ competitor.getTimeOnDistanceAllowancePerNauticalMile(),
+                competitor.getSearchTag()));
         logger.log(Level.INFO, "Set team image for competitor " + competitor.getName());
         JSONObject result = new JSONObject();
         result.put(DeviceMappingConstants.JSON_TEAM_IMAGE_URI, imageUri.toString());
