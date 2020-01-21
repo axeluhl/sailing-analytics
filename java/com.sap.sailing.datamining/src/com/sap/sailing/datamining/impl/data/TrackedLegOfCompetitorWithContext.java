@@ -120,11 +120,8 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
 
     @Override
     public Distance getDistanceTraveled() {
-        if(getTrackedLegContext().getTrackedRaceContext().getTrackedRace() != null) {
-            TimePoint timePoint = getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getEndOfTracking();
-            return getTrackedLegOfCompetitor().getDistanceTraveled(timePoint);
-        }
-        return null;
+        TimePoint timePoint = getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getEndOfTracking();
+        return getTrackedLegOfCompetitor().getDistanceTraveled(timePoint);
     }
     
     @Override
@@ -151,16 +148,13 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     }
     
     private Integer getRankAtStart() {
-        if(getTrackedLegContext().getTrackedRaceContext().getTrackedRace() != null) {
-            if (!isRankAtStartInitialized) {
-                TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
-                int rank = trackedRace.getRank(getCompetitor(), getTrackedLegOfCompetitor().getStartTime());
-                rankAtStart = rank == 0 ? null : rank;
-                isRankAtStartInitialized = true;
-            }
-            return rankAtStart;
+        if (!isRankAtStartInitialized) {
+            TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
+            int rank = trackedRace.getRank(getCompetitor(), getTrackedLegOfCompetitor().getStartTime());
+            rankAtStart = rank == 0 ? null : rank;
+            isRankAtStartInitialized = true;
         }
-        return null;
+        return rankAtStart;
     }
 
     @Override
@@ -268,14 +262,11 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     private int getNumberOf(ManeuverType maneuverType, TimePoint start, TimePoint end) {
         TrackedRace trackedRace = getTrackedRace();
         int number = 0;
-
-        if (trackedRace != null)
-            for (Maneuver maneuver : trackedRace.getManeuvers(getCompetitor(), start, end, false)) {
-                if (maneuver.getType() == maneuverType) {
-                    number++;
-                }
+        for (Maneuver maneuver : trackedRace.getManeuvers(getCompetitor(), start, end, false)) {
+            if (maneuver.getType() == maneuverType) {
+                number++;
             }
-
+        }
         return number;
     }
 }
