@@ -27,7 +27,7 @@ import com.sap.sse.common.Util;
 public class TestORCPublicCertificateDatabase {
     private ORCPublicCertificateDatabase db;
     @Rule
-    public CustomIgnoreRule customIgnoreRule = new CustomIgnoreRule();
+    public IgnoreInvalidOrcCerticatesRule customIgnoreRule = new IgnoreInvalidOrcCerticatesRule();
     
     
     @Before
@@ -91,7 +91,7 @@ public class TestORCPublicCertificateDatabase {
     }
     
 //    @Ignore("Certificate used for testing no longer valid after 2019")
-    @CustomIgnore
+    @IgnoreInvalidOrcCerticates
     @Test
     public void testParallelFuzzySearch() throws InterruptedException, ExecutionException {
         final Future<Set<ORCCertificate>> soulmateCertificatesFuture = db.search("Soulmate", "DEN13", new BoatClassImpl("ORC", BoatClassMasterdata.ORC));

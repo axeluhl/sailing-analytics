@@ -19,7 +19,7 @@ import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 public class TestORCCertificateImporterRMS {
     private static final String RESOURCES = "resources/orc/";
     @Rule
-    public CustomIgnoreRule customIgnoreRule = new CustomIgnoreRule();
+    public IgnoreInvalidOrcCerticatesRule customIgnoreRule = new IgnoreInvalidOrcCerticatesRule();
     
     
     @Test
@@ -31,7 +31,7 @@ public class TestORCCertificateImporterRMS {
     }
     
 //    @Ignore("Certificate used for testing no longer valid after 2019")
-    @CustomIgnore
+    @IgnoreInvalidOrcCerticates
     @Test
     public void testSimpleOnlineRMSFileRead() throws IOException, ParseException {
         ORCCertificatesCollection certificates = ORCCertificatesImporter.INSTANCE.read(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=rms").openStream());

@@ -10,7 +10,7 @@ import org.junit.runners.model.Statement;
 
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 
-public class CustomIgnoreRule implements TestRule {
+public class IgnoreInvalidOrcCerticatesRule implements TestRule {
     
     @Override
     public Statement apply(Statement base, Description description) {
@@ -26,7 +26,7 @@ public class CustomIgnoreRule implements TestRule {
         @Override
         public void evaluate() throws Throwable {
             boolean certificateExists = true;
-            CustomIgnore annotation = description.getAnnotation(CustomIgnore.class);
+            IgnoreInvalidOrcCerticates annotation = description.getAnnotation(IgnoreInvalidOrcCerticates.class);
             if(annotation != null) {
                 ORCCertificatesCollection importer = ORCCertificatesImporter.INSTANCE.read(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
                 certificateExists= importer.getCertificates()!=null && importer.getCertificates().iterator().hasNext();

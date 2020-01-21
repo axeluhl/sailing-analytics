@@ -20,7 +20,7 @@ public class TestORCCertificateImporterJSON {
     private static final String RESOURCES = "resources/orc/";
     
     @Rule
-    public CustomIgnoreRule customIgnoreRule = new CustomIgnoreRule();
+    public IgnoreInvalidOrcCerticatesRule customIgnoreRule = new IgnoreInvalidOrcCerticatesRule();
     
     
     @Test
@@ -32,7 +32,7 @@ public class TestORCCertificateImporterJSON {
     }
     
 //    @Ignore("Certificate used for testing no longer valid after 2019")
-    @CustomIgnore
+    @IgnoreInvalidOrcCerticates
     @Test
     public void testSimpleOnlineJSONFileRead() throws IOException, ParseException {
         ORCCertificatesCollection importer = ORCCertificatesImporter.INSTANCE.read(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
