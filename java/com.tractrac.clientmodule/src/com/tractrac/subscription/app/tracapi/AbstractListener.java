@@ -31,6 +31,7 @@ import com.tractrac.subscription.lib.api.event.IConnectionStatusListener;
 import com.tractrac.subscription.lib.api.event.IEventMessageListener;
 import com.tractrac.subscription.lib.api.event.ILiveDataEvent;
 import com.tractrac.subscription.lib.api.event.IStoredDataEvent;
+import com.tractrac.subscription.lib.api.race.IRaceCompetitorListener;
 import com.tractrac.subscription.lib.api.race.IRaceMessageListener;
 import com.tractrac.subscription.lib.api.race.IRaceStartStopTimesChangeListener;
 import com.tractrac.subscription.lib.api.race.IRacesListener;
@@ -43,7 +44,7 @@ public abstract class AbstractListener  implements IEventMessageListener,
         IPositionSnappedListener, IConnectionStatusListener, IControlPointPositionListener,
         IControlPassingsListener, IRaceStartStopTimesChangeListener,
         IControlRouteChangeListener, ICompetitorSensorDataListener,
-        IRacesListener, ICompetitorsListener, IControlsListener {
+        IRacesListener, ICompetitorsListener, IControlsListener, IRaceCompetitorListener {
 
     @Override
     public void gotStoredDataEvent(IStoredDataEvent storedDataEvent) {
@@ -185,6 +186,26 @@ public abstract class AbstractListener  implements IEventMessageListener,
 
     @Override
     public void dataSourceChanged(IRace race, DataSource oldDataSource, URI oldLiveURI, URI oldStoredURI) {
+
+    }
+
+    @Override
+    public void addRaceCompetitor(IRaceCompetitor raceCompetitor) {
+
+    }
+
+    @Override
+    public void updateRaceCompetitor(IRaceCompetitor raceCompetitor) {
+
+    }
+
+    @Override
+    public void deleteRaceCompetitor(UUID competitorId) {
+
+    }
+
+    @Override
+    public void removeOffsetPositions(UUID competitorId, int offset) {
 
     }
 }

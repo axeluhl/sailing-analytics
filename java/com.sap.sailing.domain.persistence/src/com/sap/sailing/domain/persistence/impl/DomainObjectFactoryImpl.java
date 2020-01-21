@@ -1159,6 +1159,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         UUID id = (UUID) eventDBObject.get(FieldNames.EVENT_ID.name());
         TimePoint startDate = loadTimePoint(eventDBObject, FieldNames.EVENT_START_DATE);
         TimePoint endDate = loadTimePoint(eventDBObject, FieldNames.EVENT_END_DATE);
+        if (endDate.before(startDate)) {
+            logger.warning("End date "+endDate+" of event "+name+" with ID "+id+" is before its start date "+
+                    startDate+"; adjusting such that end date equals start date.");
+            endDate = startDate;
+        }
         boolean isPublic = eventDBObject.get(FieldNames.EVENT_IS_PUBLIC.name()) != null
                 ? (Boolean) eventDBObject.get(FieldNames.EVENT_IS_PUBLIC.name()) : false;
         Venue venue = loadVenue((Document) eventDBObject.get(FieldNames.VENUE.name()));
