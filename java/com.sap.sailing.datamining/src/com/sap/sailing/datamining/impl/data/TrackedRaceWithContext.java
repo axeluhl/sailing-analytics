@@ -40,6 +40,7 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     private boolean yearHasBeenInitialized;
 
     public TrackedRaceWithContext(HasLeaderboardContext leaderboardContext, Regatta regatta, RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        assert trackedRace != null;
         this.leaderboardContext = leaderboardContext;
         this.regatta = regatta;
         this.raceColumn = raceColumn;
