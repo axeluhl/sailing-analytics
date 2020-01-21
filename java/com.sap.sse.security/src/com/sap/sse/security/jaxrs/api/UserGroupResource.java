@@ -268,19 +268,17 @@ public class UserGroupResource extends AbstractSecurityResource {
     public Response addRoleToUserGroup(@PathParam(KEY_GROUP_ID) String userGroupId,
             @PathParam(KEY_ROLE_ID) String roleIdString, String body) {
         Response response;
-
         try {
             final UUID groupId = UUID.fromString(userGroupId);
-            final UserGroup usergroup = getService().getUserGroup(groupId);
-
             final UUID roleId = UUID.fromString(roleIdString);
+            final UserGroup usergroup = getService().getUserGroup(groupId);
             if (usergroup == null) {
-                response = Response.status(Status.BAD_REQUEST).entity("Usergroup with this name does not exist.")
-                        .build();
+                response = Response.status(Status.BAD_REQUEST).entity(
+                        String.format("Usergroup with ID %s does not exist.", userGroupId)).build();
             } else {
                 final RoleDefinition role = getService().getRoleDefinition(roleId);
                 if (role == null) {
-                    response = Response.status(Status.BAD_REQUEST).entity("Role with this id does not exist.").build();
+                    response = Response.status(Status.BAD_REQUEST).entity(String.format("Role with ID %s does not exist.", roleId)).build();
                 } else {
                     if (getService().hasCurrentUserUpdatePermission(usergroup)
                             && getService().hasCurrentUserReadPermission(role)) {
@@ -291,15 +289,16 @@ public class UserGroupResource extends AbstractSecurityResource {
                             if (!getService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(role,
                                     new Ownership(null, usergroup))) {
                                 response = Response.status(Status.UNAUTHORIZED)
-                                        .entity(String.format("Not permitted to add role %s to group", role.getName()))
-                                        .build();
+                                        .entity(String.format("Not permitted to add role %s to group %s",
+                                                role.getName(), usergroup.getName())).build();
                             } else {
                                 getService().putRoleDefinitionToUserGroup(usergroup, role, roleForAll);
                                 response = Response.ok().build();
                             }
                         } else {
                             response = Response.status(Status.BAD_REQUEST)
-                                    .entity("Role was already added to the group.").build();
+                                    .entity(String.format("Role %s was already added to group %s.", role.getName(),
+                                            usergroup.getName())).build();
                         }
                     } else {
                         response = Response.status(Status.UNAUTHORIZED).build();
