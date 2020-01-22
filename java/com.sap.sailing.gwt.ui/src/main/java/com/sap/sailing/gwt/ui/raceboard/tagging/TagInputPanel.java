@@ -108,8 +108,8 @@ public class TagInputPanel extends FlowPanel {
             return super.getStatusLabel();
         }
 
-        public boolean validateAndUpdate() {
-            return super.validateAndUpdate();
+        public void validateAndUpdate() {
+            super.validateAndUpdate();
         }
 
         /**
