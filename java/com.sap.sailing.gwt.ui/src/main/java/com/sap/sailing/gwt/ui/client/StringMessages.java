@@ -421,6 +421,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pleaseEnterNonEmptyUrlOrUploadImage();
     String addResultImportUrl();
     String errorAddingResultImportUrl(String message);
+    String eventIdOrUrl();
+    String doYouReallyWantToRemoveResultImportUrls();
     String remoteServerInstances();
     String localServer();
     String errorRefreshingSailingServers(String message);
