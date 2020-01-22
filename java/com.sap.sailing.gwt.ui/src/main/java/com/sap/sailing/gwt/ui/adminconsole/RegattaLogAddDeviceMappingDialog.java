@@ -216,7 +216,6 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
                 if (events.getValue() == null) {
                     throw new QRCodeURLCreationException(stringMessages.noEventSelected());
                 }
-
                 final String eventIdAsString = events.getValue().id.toString();
                 String url = DeviceMappingConstants.getDeviceMappingForRegattaLogUrl(baseUrlWithoutTrailingSlash,
                         eventIdAsString, leaderboardName, mappedItemType, mappedItemId, regattaRegisterSecret,
