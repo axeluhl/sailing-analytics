@@ -2,6 +2,7 @@ package com.sap.sailing.freg.resultimport.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
@@ -70,6 +71,11 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
     @Override
     public Iterable<URL> getUrls() {
         return resultUrlRegistry.getResultUrls(PROVIDER_NAME);
+    }
+
+    @Override
+    public URL resolveUrl(String url) throws MalformedURLException {
+        return new URL(url);
     }
 
     @Override
