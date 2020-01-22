@@ -1,9 +1,11 @@
 package com.sap.sailing.domain.common;
 
 public enum MailInvitationType {
+    // Legacy invitations do not need any Branch.io information because
+    // links are constructed by different implementation.
     LEGACY(/* supportsOpenRegattas */ false,
-           /* branchIOinviteURL */ BranchIOConstants.SAILINSIGHT_APP_BRANCHIO,
-           /* branchIOcheckinPath */ BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH,
+           /* branchIOinviteURL */ null,
+           /* branchIOcheckinPath */ null,
            /* branchIOopenRegattaURL */ null),
     SailInsight1(/* supportsOpenRegattas */ false,
                  /* branchIOinviteURL */ BranchIOConstants.SAILINSIGHT_APP_BRANCHIO,
