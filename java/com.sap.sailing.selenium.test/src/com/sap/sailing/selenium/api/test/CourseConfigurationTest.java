@@ -339,13 +339,13 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         createCourseFromTemplateBasedCourseConfiguration(10, 8, 1, 3);
     }
 
-    
     @Test
     public void testCreateCourseWithMoreNoOfLapsThanRepeatableParts() {
         final Pair<CourseConfiguration, CourseConfiguration> result = createCourseFromTemplateBasedCourseConfiguration(
-                2, 2, 1, 2);
+                10, 12, 1, 3);
         logger.info(result.getA().getJson().toJSONString());
         logger.info(result.getB().getJson().toJSONString());
+        // todo check the fill up
     }
 
     /**
@@ -370,7 +370,9 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
             final int zeroBasedIndexOfRepeatablePartEnd) {
         final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(sharedServerCtx);
         final CourseTemplate template = courseTemplateApi.createCourseTemplate(sharedServerCtx,
-                ctdf.constructCourseTemplate(new Pair<>(zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd), numberOfLaps));
+                ctdf.constructCourseTemplate(
+                        new Pair<>(zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd),
+                        numberOfLaps));
         // create course configuration from template
         final CourseConfiguration courseConfiguration = courseConfigurationApi
                 .createCourseConfigurationFromCourseTemplate(ctx, template.getId(), /* optionalRegattaName */ null,
