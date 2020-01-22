@@ -104,10 +104,18 @@ public interface CourseTemplate extends WithOptionalRepeatablePart, NamedWithUUI
      * {@code Start/Finish, [1, 4p/4s], 1, Start/Finish}. For an "L1" course with only one lap, we'd like to have
      * {@code Start/Finish, 1, Start/Finish}, so the repeatable sub-sequence, enclosed by the brackets in the example
      * above, will occur zero times. For an "L2" the repeatable sub-sequence will occur once, and so on. However, an
-     * implementation is free to choose an interpretation of {@code numberOfLaps} that meets callers' expectations.<p>
+     * implementation is free to choose an interpretation of {@code numberOfLaps} that meets callers' expectations.
+     * <p>
      * 
-     * Note: this method is mostly intended for testing purposes; a client / UI would normally use a {@link CourseConfiguration}
-     * that refers to a {@link CourseTemplate} and then invoke {@link CourseConfiguration#getWaypoints(int)}.
+     * Note that usually a value of {@code 1} for the {@code numberOfLaps} parameter will lead to no occurrence of a
+     * repeatable part in the result. When building a course configuration for this course template, waypoint
+     * configurations for at least one occurrence of the repeatable part are expected to be present, meaning that at
+     * least a lap count of 2 would be required to meet that requirement.
+     * <p>
+     * 
+     * Note: this method is mostly intended for testing purposes; a client / UI would normally use a
+     * {@link CourseConfiguration} that refers to a {@link CourseTemplate} and then invoke
+     * {@link CourseConfiguration#getWaypoints(int)}.
      * 
      * @param numberOfLaps
      *            if the course defines a repeatable part, the number of laps at least needs to be {@code 1} for the

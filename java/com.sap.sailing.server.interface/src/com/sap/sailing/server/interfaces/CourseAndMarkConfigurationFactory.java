@@ -105,16 +105,16 @@ public interface CourseAndMarkConfigurationFactory {
      * The {@link CourseConfiguration#getNumberOfLaps() number of laps} matches the
      * {@link CourseTemplate#getDefaultNumberOfLaps() template's default number of laps} which is relevant only if the
      * {@link CourseTemplate} specifies a {@link CourseTemplate#getRepeatablePart() repeatable part}.
-     * 
      * @param optionalRegatta
      *            If given, {@link MarkTemplate}s of the given {@link CourseTemplate} are automatically mapped to their
      *            {@link Mark} counterpart of the {@link Regatta}.
      * @param tagsToFilterMarkProperties
      *            If given, any {@link MarkProperties} that is suggested to replace a {@link MarkTemplate} of the given
      *            {@link CourseTemplate} needs to match all given tags.
+     * @param optionalNumberOfLaps TODO
      */
     CourseConfiguration<MarkConfigurationResponseAnnotation> createCourseConfigurationFromTemplate(
-            CourseTemplate courseTemplate, Regatta optionalRegatta, Iterable<String> tagsToFilterMarkProperties);
+            CourseTemplate courseTemplate, Regatta optionalRegatta, Iterable<String> tagsToFilterMarkProperties, Integer optionalNumberOfLaps);
 
     /**
      * Creates a {@link CourseConfiguration} for a Regatta - either based on a {@link CourseBase} or independently. The

@@ -17,9 +17,10 @@ public class CourseConfigurationApi {
     private static final String TO_COURSE = "/createCourse/";
     private static final String PARAM_TAG = "tag";
     private static final String PARAM_REGATTA_NAME = "regattaName";
+    private static final String PARAM_NUMBER_OF_LAPS = "numberOfLaps";
 
     public CourseConfiguration createCourseConfigurationFromCourseTemplate(final ApiContext ctx,
-            final UUID courseTemplateId, final String optionalRegattaName, final Iterable<String> tags) {
+            final UUID courseTemplateId, final String optionalRegattaName, final Iterable<String> tags, Integer optionalNumberOfLaps) {
         final String url = COURSE_CONFIGURATION + FROM_COURSE_TEMPLATE + courseTemplateId.toString();
         final Map<String, String> queryParams = new TreeMap<>();
         if (tags != null) {
@@ -28,7 +29,10 @@ public class CourseConfigurationApi {
             }
         }
         if (optionalRegattaName != null) {
-            queryParams.put("regattaName", optionalRegattaName);
+            queryParams.put(PARAM_REGATTA_NAME, optionalRegattaName);
+        }
+        if (optionalNumberOfLaps != null) {
+            queryParams.put(PARAM_NUMBER_OF_LAPS, optionalNumberOfLaps.toString());
         }
         final JSONObject result = ctx.get(url, queryParams);
         return new CourseConfiguration(result);

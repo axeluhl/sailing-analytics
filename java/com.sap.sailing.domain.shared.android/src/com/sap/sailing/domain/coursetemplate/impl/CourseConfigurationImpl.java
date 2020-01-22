@@ -60,6 +60,13 @@ public class CourseConfigurationImpl<P> implements CourseConfiguration<P> {
     private final String name;
     private final URL optionalImageURL;
     
+    /**
+     * @param numberOfLaps
+     *            {@code null} if a non-{@code null} {@code optionalCourseTemplate} is provided but the course is not
+     *            compatible with that template; {@code -1} if there is no course template specified, or the course
+     *            template has a {@code null} {@link CourseTemplate#getRepeatablePart() repeatable part}; otherwise the
+     *            number of laps (number of occurrences of the repeatable part plus one).
+     */
     public CourseConfigurationImpl(CourseTemplate optionalCourseTemplate,
             Iterable<MarkConfiguration<P>> markConfigurations, Map<MarkConfiguration<P>, MarkRole> associatedRoles,
             List<WaypointWithMarkConfiguration<P>> waypoints,
@@ -78,10 +85,6 @@ public class CourseConfigurationImpl<P> implements CourseConfiguration<P> {
         this.name = name;
         this.shortName = shortName;
         this.optionalImageURL = optionalImageURL;
-        if (optionalCourseTemplate != null && getNumberOfRepeatablePartOccurrencesInWaypoints() == null) {
-            throw new IllegalArgumentException("The waypoints provided in course configuration "+name+
-                    " do not comply with the course template "+optionalCourseTemplate+" specified for the configuration");
-        }
     }
 
     @Override
@@ -170,7 +173,6 @@ public class CourseConfigurationImpl<P> implements CourseConfiguration<P> {
             final Integer numberOfRepeatablePartOccurrences = getNumberOfRepeatablePartOccurrencesInWaypoints();
             assert numberOfRepeatablePartOccurrences != null; // expected to be enforced by a check in the constructor
             final List<WaypointWithMarkConfiguration<P>> waypointsWithCorrectNumberOfLaps = new LinkedList<>();
-            // FIXME bug5183: waypoints has 1..* repetitions of the repeatable part; replicate the last occurrence for more!
             // Copy the prefix of the repeatable part without modifications:
             for (int i=0; i<getRepeatablePart().getZeroBasedIndexOfRepeatablePartStart(); i++) {
                 waypointsWithCorrectNumberOfLaps.add(waypoints.get(i));

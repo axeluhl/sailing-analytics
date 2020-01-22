@@ -181,7 +181,8 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
         }
         result.put(FIELD_MARK_CONFIGURATIONS, markConfigurationsJSON);
         final JSONArray waypoints = new JSONArray();
-        for (final WaypointWithMarkConfiguration<MarkConfigurationResponseAnnotation> waypoint : courseConfiguration.getNumberOfLaps() != null
+        for (final WaypointWithMarkConfiguration<MarkConfigurationResponseAnnotation> waypoint :
+            courseConfiguration.getNumberOfLaps() != null && courseConfiguration.getNumberOfLaps() > 1
                 ? courseConfiguration.getWaypoints(courseConfiguration.getNumberOfLaps())
                 : courseConfiguration.getWaypoints()) {
             final JSONObject waypointEntry = new JSONObject();

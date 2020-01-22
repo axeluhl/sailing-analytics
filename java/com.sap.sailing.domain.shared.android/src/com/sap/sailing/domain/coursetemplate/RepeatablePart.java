@@ -13,7 +13,7 @@ import com.sap.sse.common.Util;
  * <ul>
  * <li>The {@link #getZeroBasedIndexOfRepeatablePartStart()} and {@link #getZeroBasedIndexOfRepeatablePartEnd()} are
  * required to be >=0</li>
- * <li>{@link #getZeroBasedIndexOfRepeatablePartStart()} is <= {@link #getZeroBasedIndexOfRepeatablePartEnd()}</li>
+ * <li>{@link #getZeroBasedIndexOfRepeatablePartStart()} is truly less than {@link #getZeroBasedIndexOfRepeatablePartEnd()}</li>
  * </ul>
  */
 public interface RepeatablePart extends Serializable {
