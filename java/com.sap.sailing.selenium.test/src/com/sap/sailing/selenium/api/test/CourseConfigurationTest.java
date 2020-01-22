@@ -294,6 +294,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         final CourseConfiguration courseConfiguration = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(ctx,
                 template.getId(), /* optionalRegattaName */ null, /* tags */ null, /* optionalNumberOfLaps */ null);
         assertEquals(templateWaypoints, Util.size(courseConfiguration.getWaypoints()));
+
         assertNull("repeatable part of course configuration is not null", courseConfiguration.getRepeatablePart());
         assertEquals(numberOfLaps, courseConfiguration.getNumberOfLaps());
         // create a course and make sure it has no repeatable part
@@ -306,7 +307,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertEquals(-1, course.getNumberOfLaps()); // the course template does not specify a repeatable part
     }
 
-    @Test 
+    @Test
     public void testWithRepeatablePartOfSizeOneAndDifferentNumbersOfLaps() {
         final int defaultNumberOfLaps = 2;
         final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(sharedServerCtx);
@@ -334,30 +335,40 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     }
 
     @Test
-    public void testRepeatablePartAgainstNoOfLaps() {
+    public void testCreateCourseWithLessNoOfLapsThanRepeatableParts() {
+        final int zeroBasedIndexOfRepeatablePartStart = 1;
+        final int zeroBasedIndexOfRepeatablePartEnd = 3;
+        final int numberOfLaps = 10;
+        final int numberOfLapsForCourse = 8;
         final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(sharedServerCtx);
-        final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(sharedServerCtx,
-                ctdf.constructCourseTemplate(new Pair<>(1,3), /* numberOfLaps */ 10));
-        // create course configuration from template without repeatable part
-        final CourseConfiguration ccfg = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(ctx,
-                createdCourseTemplate.getId(), /* optionalRegattaName */ null, /* tags */ null, /* optionalNumberOfLaps */ null);
-        assertTrue(ccfg.getRepeatablePart().getZeroBasedIndexOfRepeatablePartStart() == 1);
-        assertTrue(ccfg.getRepeatablePart().getZeroBasedIndexOfRepeatablePartEnd() == 3);
+        final CourseTemplate template = courseTemplateApi.createCourseTemplate(sharedServerCtx,
+                ctdf.constructCourseTemplate(new Pair<>(1, 3), numberOfLaps));
+        // create course configuration from template
+        final CourseConfiguration courseConfiguration = courseConfigurationApi
+                .createCourseConfigurationFromCourseTemplate(ctx, template.getId(), /* optionalRegattaName */ null,
+                        /* tags */ null, /* optional number of laps */ null);
+        assertTrue(courseConfiguration.getRepeatablePart().getZeroBasedIndexOfRepeatablePartStart() == 1);
+        assertTrue(courseConfiguration.getRepeatablePart().getZeroBasedIndexOfRepeatablePartEnd() == 3);
 
-        // create a course and make sure it has no repeatable part
+        final int expectedNumberOfWaypoints = numberOfLaps
+                * (zeroBasedIndexOfRepeatablePartEnd - zeroBasedIndexOfRepeatablePartStart)
+                + Util.size(template.getWaypoints()) - zeroBasedIndexOfRepeatablePartEnd
+                - zeroBasedIndexOfRepeatablePartStart;
+        assertEquals(expectedNumberOfWaypoints, Util.size(courseConfiguration.getWaypoints()));
+
+        // reduce number of laps in the course configuration an create a course out of it
+        courseConfiguration.setNumberOfLaps(numberOfLapsForCourse);
         final String regattaName = "test";
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
-        final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
-        final CourseConfiguration course = courseConfigurationApi.createCourse(ctx, ccfg, "test", race.getRaceName(),
-                "Default");
-        
-        leaderboardApi.startRaceLogTracking(ctx, regattaName, race.getRaceName(), "Default");
-        leaderboardApi.setTrackingTimes(ctx, regattaName, race.getRaceName(), "Default", currentTimeMillis(),
-                currentTimeMillis() + 600_000L);
-        
-        assertTrue(course.getRepeatablePart().getZeroBasedIndexOfRepeatablePartStart() == 1);
-        assertTrue(course.getRepeatablePart().getZeroBasedIndexOfRepeatablePartEnd() == 3);
-        System.out.println(course.getJson().toJSONString());
+        final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, null, 1)[0];
+        final CourseConfiguration course = courseConfigurationApi.createCourse(ctx, courseConfiguration, "test",
+                race.getRaceName(), "Default");
+
+        final int expectedNumberOfWaypointsOfCourse = numberOfLapsForCourse
+                * (zeroBasedIndexOfRepeatablePartEnd - zeroBasedIndexOfRepeatablePartStart)
+                + Util.size(template.getWaypoints()) - zeroBasedIndexOfRepeatablePartEnd
+                - zeroBasedIndexOfRepeatablePartStart;
+        assertEquals(expectedNumberOfWaypointsOfCourse, Util.size(course.getWaypoints()));
     }
 
     @Test @Ignore
