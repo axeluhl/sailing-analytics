@@ -428,6 +428,12 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 name = "maxSpeedOverGroundInKnots";
                 value = leaderboardRowDTO.maximumSpeedOverGroundInKnots==null?null:roundDouble(leaderboardRowDTO.maximumSpeedOverGroundInKnots, 2);
                 break;
+            case LEG_WINDWARD_DISTANCE_TO_GO_IN_METERS:
+                name = "legWindwardDistanceToGoInMeters";
+                if (currentLegEntry != null && currentLegEntry.windwardDistanceToGoInMeters != null) {
+                    value = currentLegEntry.windwardDistanceToGoInMeters;
+                }
+                break;
             default:
                 name = null;
                 break;
