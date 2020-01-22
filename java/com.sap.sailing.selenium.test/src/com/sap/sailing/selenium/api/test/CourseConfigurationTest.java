@@ -285,13 +285,58 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
 
     @Test
     public void testWithoutRepeatablePart() {
+        final int numberOfLaps = 2;
+        final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(sharedServerCtx);
+        final CourseTemplate template = courseTemplateApi.createCourseTemplate(sharedServerCtx,
+                ctdf.constructCourseTemplate(/* repeatable part  new Pair<>(1,2) */ null , numberOfLaps));
+        final int templatewWaypoints = Util.size(template.getWaypoints());
+        System.out.println(template.getJson().toJSONString());
+        
+        // create course configuration from template without repeatable part and expect same number of waypoints and no repeatable part
+        final CourseConfiguration courseConfiguration = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(ctx,
+                template.getId(), /* optionalRegattaName */ null, /* tags */ null);
+        assertEquals(templatewWaypoints, Util.size(courseConfiguration.getWaypoints()));
+        assertNull("repeatable part of course configuration is not null", courseConfiguration.getRepeatablePart());
+        assertEquals(numberOfLaps, courseConfiguration.getNumberOfLaps());
+        System.out.println(courseConfiguration.getJson().toJSONString());
+
+        // create a course and make sure it has no repeatable part
+        final String regattaName = "test";
+        eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
+        final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, null, 1)[0];
+        final CourseConfiguration course = courseConfigurationApi.createCourse(ctx, courseConfiguration, "test", race.getRaceName(),
+                "Default");
+        System.out.println(course.getJson().toJSONString());
+
+        assertEquals(templatewWaypoints, Util.size(course.getWaypoints()));
+        assertNull("repeatable part of course is not null", course.getRepeatablePart());
+        assertEquals(numberOfLaps, course.getNumberOfLaps());
+    }
+
+    @Test 
+    public void testWithRepeatablePartOfSize1() {
+        final int numberOfLaps = 2;
+        final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(sharedServerCtx);
+        final CourseTemplate template = courseTemplateApi.createCourseTemplate(sharedServerCtx,
+                ctdf.constructCourseTemplate(/* repeatable part */ new Pair<>(1,1) , numberOfLaps));
+        final int templatewWaypoints = Util.size(template.getWaypoints());
+        System.out.println(template.getJson().toJSONString());
+        
+        // create course configuration from template without repeatable part and expect same number of waypoints and no repeatable part
+        final CourseConfiguration courseConfiguration = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(ctx,
+                template.getId(), /* optionalRegattaName */ null, /* tags */ null);
+    }
+
+    @Test
+    public void testRepeatablePartAgainstNoOfLaps() {
         final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(sharedServerCtx);
         final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(sharedServerCtx,
-                ctdf.constructCourseTemplate(null, null));
+                ctdf.constructCourseTemplate(new Pair<>(1,3), /* numberOfLaps */ 10));
         // create course configuration from template without repeatable part
         final CourseConfiguration ccfg = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(ctx,
                 createdCourseTemplate.getId(), /* optionalRegattaName */ null, /* tags */ null);
-        assertNull(ccfg.getRepeatablePart());
+        assertTrue(ccfg.getRepeatablePart().getZeroBasedIndexOfRepeatablePartStart() == 1);
+        assertTrue(ccfg.getRepeatablePart().getZeroBasedIndexOfRepeatablePartEnd() == 3);
 
         // create a course and make sure it has no repeatable part
         final String regattaName = "test";
@@ -299,7 +344,14 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
         final CourseConfiguration course = courseConfigurationApi.createCourse(ctx, ccfg, "test", race.getRaceName(),
                 "Default");
-        assertNull(course.getRepeatablePart());
+        
+        leaderboardApi.startRaceLogTracking(ctx, regattaName, race.getRaceName(), "Default");
+        leaderboardApi.setTrackingTimes(ctx, regattaName, race.getRaceName(), "Default", currentTimeMillis(),
+                currentTimeMillis() + 600_000L);
+        
+        assertTrue(course.getRepeatablePart().getZeroBasedIndexOfRepeatablePartStart() == 1);
+        assertTrue(course.getRepeatablePart().getZeroBasedIndexOfRepeatablePartEnd() == 3);
+        System.out.println(course.getJson().toJSONString());
     }
 
     @Test @Ignore
