@@ -7,7 +7,7 @@ import java.util.UUID;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.google.gwt.user.client.Window;
-import com.sap.sailing.domain.common.BranchIOConstants;
+import com.sap.sailing.domain.common.MailInvitationType;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sse.common.Util.Pair;
@@ -46,17 +46,39 @@ public class QRCodePlace extends AbstractBasePlace {
     private String targetServer;
 
     public enum InvitationMode {
-        COMPETITOR_2,
-        COMPETITOR,
-        PUBLIC_INVITE,
-        BOUY_TENDER
+        COMPETITOR(MailInvitationType.SailInsight1, /* isCompetitorBoatMarkMode */ true, /* isPublicInvite */ false),
+        COMPETITOR_2(MailInvitationType.SailInsight2, /* isCompetitorBoatMarkMode */ true, /* isPublicInvite */ false),
+        COMPETITOR_3(MailInvitationType.SailInsight3, /* isCompetitorBoatMarkMode */ true, /* isPublicInvite */ false),
+        PUBLIC_INVITE(MailInvitationType.SailInsight2, /* isCompetitorBoatMarkMode */ false, /* isPublicInvite */ true),
+        PUBLIC_INVITE3(MailInvitationType.SailInsight3, /* isCompetitorBoatMarkMode */ false, /* isPublicInvite */ true),
+        BOUY_TENDER(null, /* isCompetitorBoatMarkMode */ false, /* isPublicInvite */ false);
+        
+        private InvitationMode(MailInvitationType mailInvitationType, boolean isCompetitorBoatMarkMode, boolean isPublicInvite) {
+            this.mailInvitationType = mailInvitationType;
+            this.isCompetitorBoatMarkMode = isCompetitorBoatMarkMode;
+            this.isPublicInvite = isPublicInvite;
+        }
+        
+        public MailInvitationType getMailInvitationType() {
+            return mailInvitationType;
+        }
+        public boolean isCompetitorBoatMarkMode() {
+            return isCompetitorBoatMarkMode;
+        }
+        public boolean isPublicInvite() {
+            return isPublicInvite;
+        }
+
+        private final MailInvitationType mailInvitationType;
+        private final boolean isCompetitorBoatMarkMode;
+        private final boolean isPublicInvite;
     }
 
     public QRCodePlace(String token) {
         super(token);
         try {
             mode = InvitationMode.valueOf(getParameter(PARAM_MODE));
-            if (mode == InvitationMode.PUBLIC_INVITE) {
+            if (mode.isPublicInvite()) {
                 // alternative direct link version
                 targetServer = Window.Location.getParameter(PARAM_SERVER);
                 publicRegattaName = Window.Location.getParameter(PARAM_REGATTA_NAME);
@@ -165,9 +187,8 @@ public class QRCodePlace extends AbstractBasePlace {
         return pairs;
     }
 
-    public String getPublicInviteBranchIOUrl() {
-        // TODO why is this specific to version 2 and not considering the default server setting for mailInvitationType?
-        return BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO + "?" + QRCodePlace.PARAM_REGATTA_NAME + "="
+    public String getPublicInviteBranchIOUrl(MailInvitationType mailInvitationType) {
+        return mailInvitationType.getBranchIOopenRegattaURL() + "?" + QRCodePlace.PARAM_REGATTA_NAME + "="
                 + encodeUrl(publicRegattaName) + "&" + QRCodePlace.PARAM_REGATTA_SECRET + "="
                 + encodeUrl(regattaRegistrationLinkSecret) + "&" + QRCodePlace.PARAM_SERVER + "="
                 + encodeUrl(targetServer);
