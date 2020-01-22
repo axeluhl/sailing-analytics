@@ -354,13 +354,9 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             mail = new LegacyRaceLogTrackingInvitationMailBuilder(locale);
             break;
         case SailInsight1:
-            mail = new BranchIO1RaceLogTrackingInvitationMailBuilder(locale);
-            break;
         case SailInsight2:
-            mail = new BranchIO2RaceLogTrackingInvitationMailBuilder(locale);
-            break;
         case SailInsight3:
-            mail = new BranchIO3RaceLogTrackingInvitationMailBuilder(locale);
+            mail = new BranchIORaceLogTrackingInvitationMailBuilder(locale, type);
             break;
         default:
             throw new IllegalArgumentException("Unhandled mail type");

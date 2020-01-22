@@ -154,7 +154,7 @@ import com.sap.sse.shared.media.VideoDescriptor;
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final MongoDatabase database;
-    private final CompetitorWithBoatRefJsonSerializer competitorWithBoatRefSerializer = CompetitorWithBoatRefJsonSerializer.create();
+    private final CompetitorWithBoatRefJsonSerializer competitorWithBoatRefSerializer = CompetitorWithBoatRefJsonSerializer.create(/* serializeNonPublicCompetitorFields */ true);
     private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create(
             /* serialize boat */ true, /* serializeNonPublicCompetitorFields */ true, /* verboseBoatClassSerializer */ false);
     private final BoatJsonSerializer boatSerializer = new BoatJsonSerializer(new BoatClassJsonSerializer(/* verbose */ false));

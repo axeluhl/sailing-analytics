@@ -19,7 +19,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.BranchIO;
-import com.sap.sailing.domain.common.BranchIOConstants;
 import com.sap.sailing.domain.common.MailInvitationType;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -157,27 +156,26 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
         parameters.put("secret", secret);
         parameters.put("server", baseUrl);
         parameters.put("event_id", eventIdAsString);
-        // TODO decide OPEN_REGATTA link variant based on invitationType
-        String deeplinkUrl = BranchIO.generateLink(BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO, parameters,
-                URL::encodeQueryString);
-        urlTextBox.setText(deeplinkUrl);
-        if (invitationType != MailInvitationType.SailInsight2 &&
-                invitationType != MailInvitationType.SailInsight3) { // TODO it would be better to make it a property of an enum literal whether open regatta invitation is possible
+        if (invitationType.isSupportsOpenRegattas()) {
+            String deeplinkUrl = BranchIO.generateLink(invitationType.getBranchIOopenRegattaURL(), parameters,
+                    URL::encodeQueryString);
+            urlTextBox.setText(deeplinkUrl);
+            sailingService.openRegattaRegistrationQrCode(deeplinkUrl, new AsyncCallback<String>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    GWT.log("Qrcode generation failed: ", caught);
+                }
+    
+                @Override
+                public void onSuccess(String result) {
+                    GWT.log("Qrcode generated for url: " + deeplinkUrl);
+                    qrCodeImage.setUrl("data:image/png;base64, " + result);
+                }
+            });
+        } else {
             getStatusLabel().setText(stringMessages.warningSailInsightVersion());
             getStatusLabel().setStyleName("errorLabel");
         }
-        sailingService.openRegattaRegistrationQrCode(deeplinkUrl, new AsyncCallback<String>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT.log("Qrcode generation failed: ", caught);
-            }
-
-            @Override
-            public void onSuccess(String result) {
-                GWT.log("Qrcode generated for url: " + deeplinkUrl);
-                qrCodeImage.setUrl("data:image/png;base64, " + result);
-            }
-        });
     }
 
     private static native boolean copyToClipboard() /*-{
