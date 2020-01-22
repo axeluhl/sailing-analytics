@@ -1,8 +1,10 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
+import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -19,6 +21,7 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
+import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
@@ -41,10 +44,11 @@ public class ResultImportUrlsTableWrapper<S extends RefreshableSelectionModel<Ur
     public ResultImportUrlsTableWrapper(SailingServiceAsync sailingService, UserService userService,
             StringMessages stringMessages, ErrorReporter errorReporter) {
         super(sailingService, stringMessages, errorReporter, true, false, new UrlDTOEntityIdentityComparator());
+        ListHandler<UrlDTO> listHandler = super.getColumnSortHandler();
 
-        TextColumn<UrlDTO> urlColumn = new AbstractSortableTextColumn<UrlDTO>(
-                url -> url.getUrl());
+        TextColumn<UrlDTO> urlColumn = new AbstractSortableTextColumn<UrlDTO>(url -> url.getUrl());
         urlColumn.setSortable(true);
+        listHandler.setComparator(urlColumn, Comparator.comparing(UrlDTO::getUrl));
         urlColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
 
         AccessControlledActionsColumn<UrlDTO, DefaultActionsImagesBarCell> actionsColumn = AccessControlledActionsColumn
@@ -61,6 +65,7 @@ public class ResultImportUrlsTableWrapper<S extends RefreshableSelectionModel<Ur
                 e -> configACL.openDialog(e));
 
         super.table.addColumn(urlColumn, stringMessages.url());
+        SecuredDTOOwnerColumn.configureOwnerColumns(super.table, listHandler, stringMessages);
         super.table.addColumn(actionsColumn, stringMessages.actions());
     }
 

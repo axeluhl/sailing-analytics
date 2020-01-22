@@ -5304,13 +5304,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public void addResultImportUrl(String resultProviderName, UrlDTO urlDTO) throws Exception {
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
         if (urlBasedScoreCorrectionProvider != null) {
+            URL url = urlBasedScoreCorrectionProvider.resolveUrl(urlDTO.getUrl());
             ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
             getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredDomainType.RESULT_IMPORT_URL,
-                    new TypeRelativeObjectIdentifier(urlBasedScoreCorrectionProvider.getName(), urlDTO.getUrl()),
-                    urlDTO.getUrl(), () -> {
-                        resultUrlRegistry.registerResultUrl(resultProviderName,
-                                urlBasedScoreCorrectionProvider.resolveUrl(urlDTO.getUrl()));
+                    new TypeRelativeObjectIdentifier(urlBasedScoreCorrectionProvider.getName(), url.toString()),
+                    url.toString(), () -> {
+                        resultUrlRegistry.registerResultUrl(resultProviderName, url);
                     });
         }
     }

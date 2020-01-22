@@ -64,7 +64,7 @@ public class ResultImportUrlAddDialog extends DataEntryDialog<UrlDTO> {
 
     @Override
     protected UrlDTO getResult() {
-        return new UrlDTO(textBox.getValue().trim()); //TODO SecurityDTO
+        return new UrlDTO(textBox.getValue().trim());
     }
 
     @Override

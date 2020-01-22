@@ -43,7 +43,6 @@ public abstract class AbstractManage2SailProvider implements ResultUrlProvider {
         if (url.matches(EVENT_ID_REGEX)) {
             completedUrl = String.format(EVENT_ID_TEMPLATE, url);
         }
-        //TODO Check url
         return new URL(completedUrl); //TODO Find a better way to check if a URL is valid
     }
 
