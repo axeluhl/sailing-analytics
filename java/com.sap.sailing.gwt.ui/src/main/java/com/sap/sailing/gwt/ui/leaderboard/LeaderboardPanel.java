@@ -93,6 +93,8 @@ import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.DataExtractor;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.CountryCode;
+import com.sap.sse.common.CountryCodeFactory;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.InvertibleComparator;
@@ -188,7 +190,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     }
 
     public interface LeaderBoardStyle {
-        void renderNationalityFlag(ImageResource nationalityFlagImageResource, SafeHtmlBuilder sb);
+        void renderNationalityFlag(ImageResource nationalityFlagImageResource, CountryCode countryCode, SafeHtmlBuilder sb);
 
         void renderFlagImage(String flagImageURL, SafeHtmlBuilder sb, CompetitorDTO competitor);
 
@@ -3583,6 +3585,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             final String flagImageURL = competitor.getFlagImageURL();
             if (isShowCompetitorNationality || flagImageURL == null || flagImageURL.isEmpty()) {
                 final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
+                final CountryCode countryCode = CountryCodeFactory.INSTANCE.getFromTwoLetterISOName(twoLetterIsoCountryCode);
                 final ImageResource nationalityFlagImageResource;
                 if (twoLetterIsoCountryCode == null || twoLetterIsoCountryCode.isEmpty()) {
                     nationalityFlagImageResource = flagImageResolver.getEmptyFlagImageResource();
@@ -3590,7 +3593,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     nationalityFlagImageResource = flagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
                 }
                 if (nationalityFlagImageResource != null) {
-                    style.renderNationalityFlag(nationalityFlagImageResource, sb);
+                    style.renderNationalityFlag(nationalityFlagImageResource, countryCode, sb);
                     sb.appendHtmlConstant("&nbsp;");
                 }
             }

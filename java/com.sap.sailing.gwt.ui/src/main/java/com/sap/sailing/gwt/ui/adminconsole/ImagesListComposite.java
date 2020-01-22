@@ -223,7 +223,7 @@ public class ImagesListComposite extends Composite {
             public void update(int index, ImageDTO image, String value) {
                 if (ImageConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
                     imageListDataProvider.getList().remove(image);
-                    updateTableVisisbilty();
+                    updateTableVisibility();
                 } else if (ImageConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                     openEditImageDialog(image);
                 }
@@ -286,6 +286,7 @@ public class ImagesListComposite extends Composite {
                             callResizingServiceAndUpdateTable(resizingTask, null);
                         } else {
                             imageListDataProvider.getList().add(resizingTask.getImage());
+                            updateTableVisibility();
                         }
                     }
                 });
@@ -306,6 +307,7 @@ public class ImagesListComposite extends Composite {
                         } else {
                             imageListDataProvider.getList().remove(selectedImage);
                             imageListDataProvider.getList().add(resizingTask.getImage());
+                            updateTableVisibility();
                         }
                     }
                 });
@@ -337,14 +339,14 @@ public class ImagesListComposite extends Composite {
                     imageListDataProvider.getList().add(image);
                 }
                 imageListDataProvider.getList().remove(originalImage);
-                updateTableVisisbilty();
+                updateTableVisibility();
                 Notification.notify(stringMessages.resizeSuccessfull(), NotificationType.SUCCESS);
             }
         });
 
     }
 
-    private void updateTableVisisbilty() {
+    private void updateTableVisibility() {
         if (imageListDataProvider.getList().isEmpty()) {
             imageTable.setVisible(false);
             noImagesLabel.setVisible(true);
@@ -358,8 +360,7 @@ public class ImagesListComposite extends Composite {
         imageSelectionModel.clear();
         imageListDataProvider.getList().clear();
         imageListDataProvider.getList().addAll(images);
-        
-        updateTableVisisbilty();
+        updateTableVisibility();
     }
 
     public List<ImageDTO> getAllImages() {
