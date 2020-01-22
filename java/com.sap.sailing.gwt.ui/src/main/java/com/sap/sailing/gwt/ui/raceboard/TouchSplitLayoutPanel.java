@@ -38,6 +38,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
@@ -201,7 +202,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
      * 
      * @author Simon Marcel Pamies, Axel Uhl
      */
-    abstract class Splitter extends AbsolutePanel {
+    abstract class Splitter extends AbsolutePanel implements RequiresResize, ProvidesResize {
         protected final Widget target;
 
         private int offset;
@@ -375,6 +376,11 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
             }
         }
 
+        @Override
+        public void onResize() {
+            setAssociatedWidgetSize(getTargetSize(), /* defer */ false);
+        }
+
         protected abstract int getAbsolutePosition();
         protected abstract double getCenterSize();
         protected abstract int getEventPosition(Event event);
@@ -409,7 +415,11 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
 
         @Override
         protected double getCenterSize() {
-            return getCenterWidth();
+            int offsetWidth = 0;
+            if (getToggleButton() != null) {
+                offsetWidth = getToggleButton().getOffsetHeight(); // Buttons are rotated by 90 degrees
+            }
+            return getCenterWidth() - offsetWidth;
         }
 
         @Override
@@ -462,7 +472,11 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
 
         @Override
         protected double getCenterSize() {
-            return getCenterHeight();
+            int offsetHeight = 0;
+            if (getToggleButton() != null) {
+                offsetHeight = getToggleButton().getOffsetHeight();
+            }
+            return getCenterHeight() - offsetHeight;
         }
 
         @Override
