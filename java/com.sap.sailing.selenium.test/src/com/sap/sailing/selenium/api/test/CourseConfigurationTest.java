@@ -333,19 +333,49 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
 
     @Test
     public void testCreateCourseWithLessNoOfLapsThanRepeatableParts() {
-        final int zeroBasedIndexOfRepeatablePartStart = 1;
-        final int zeroBasedIndexOfRepeatablePartEnd = 3;
-        final int numberOfLaps = 10;
-        final int numberOfLapsForCourse = 8;
+        createCourseFromTemplateBasedCourseConfiguration(10, 8, 1, 3);
+    }
+
+    
+    @Test
+    public void testCreateCourseWithMoreNoOfLapsThanRepeatableParts() {
+        final Pair<CourseConfiguration, CourseConfiguration> result = createCourseFromTemplateBasedCourseConfiguration(
+                2, 2, 1, 2);
+        logger.info(result.getA().getJson().toJSONString());
+        logger.info(result.getB().getJson().toJSONString());
+    }
+
+    /**
+     * Creates a course based on a coursetemplate. This validates that the waypoint numbers are correct for the
+     * following rule
+     * 
+     * #waypoints = #laps * sizeOfRepeatingPart + #templateWaypoints - sizeOfRepeatingPart
+     * 
+     * @param numberOfLaps
+     *            number of laps to construct the course template
+     * @param numberOfLapsForCourse
+     *            number of laps for constructing the course
+     * @param zeroBasedIndexOfRepeatablePartStart
+     *            start index of repeatable part
+     * @param zeroBasedIndexOfRepeatablePartEnd
+     *            end index of repeatable part
+     * @return Pair of (A) source course configuration based on the template and (B) the result course configuration of
+     *         the created regatta course
+     */
+    private Pair<CourseConfiguration, CourseConfiguration> createCourseFromTemplateBasedCourseConfiguration(
+            final int numberOfLaps, final int numberOfLapsForCourse, final int zeroBasedIndexOfRepeatablePartStart,
+            final int zeroBasedIndexOfRepeatablePartEnd) {
         final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(sharedServerCtx);
         final CourseTemplate template = courseTemplateApi.createCourseTemplate(sharedServerCtx,
-                ctdf.constructCourseTemplate(new Pair<>(1, 3), numberOfLaps));
+                ctdf.constructCourseTemplate(new Pair<>(zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd), numberOfLaps));
         // create course configuration from template
         final CourseConfiguration courseConfiguration = courseConfigurationApi
                 .createCourseConfigurationFromCourseTemplate(ctx, template.getId(), /* optionalRegattaName */ null,
                         /* tags */ null);
-        assertTrue(courseConfiguration.getRepeatablePart().getZeroBasedIndexOfRepeatablePartStart() == 1);
-        assertTrue(courseConfiguration.getRepeatablePart().getZeroBasedIndexOfRepeatablePartEnd() == 3);
+        assertEquals(courseConfiguration.getRepeatablePart().getZeroBasedIndexOfRepeatablePartStart().intValue(),
+                zeroBasedIndexOfRepeatablePartStart);
+        assertEquals(courseConfiguration.getRepeatablePart().getZeroBasedIndexOfRepeatablePartEnd().intValue(),
+                zeroBasedIndexOfRepeatablePartEnd);
 
         final int expectedNumberOfWaypoints = numberOfLaps
                 * (zeroBasedIndexOfRepeatablePartEnd - zeroBasedIndexOfRepeatablePartStart)
@@ -366,6 +396,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                 + Util.size(template.getWaypoints()) - zeroBasedIndexOfRepeatablePartEnd
                 - zeroBasedIndexOfRepeatablePartStart;
         assertEquals(expectedNumberOfWaypointsOfCourse, Util.size(course.getWaypoints()));
+        return new Pair<>(courseConfiguration, course);
     }
 
     @Test @Ignore
@@ -376,11 +407,11 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     public void testDifferentCourseTemplatesWithCommonRolesInRegatta() {
         final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(sharedServerCtx);
         final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(sharedServerCtx,
-                ctdf.constructCourseTemplate(new Pair<>(1, 3), 2, Collections.emptyMap()));
+                ctdf.constructCourseTemplate(new Pair<>(1, 3), /* numberOfLaps */ 2));
         logger.info(createdCourseTemplate.getJson().toJSONString());
         final String regattaName = "test";
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
-        final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
+        final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, /* numberOfRaces */ 1)[0];
         // Create a course based on one of the templates
         CourseConfiguration courseConfiguration = courseConfigurationApi.createCourseConfigurationFromCourseTemplate(
                 ctx, createdCourseTemplate.getId(), regattaName, /* tags */ null);
@@ -393,7 +424,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                 roleTemplateMap.put(markRoleApi.getMarkRole(sharedServerCtx, UUID.fromString(mc.getAssociatedRoleId())), markTemplateApi.getMarkTemplate(sharedServerCtx, mc.getMarkTemplateId()));
             }
         });
-        roleTemplateMap.entrySet().forEach(e -> logger.info(e.getKey().getId() + " " + e.getValue().getId()));
+        roleTemplateMap.entrySet().forEach(e -> logger.info("XXXXXXXXXXXXXXXXXXXXXX" + e.getKey().getShortName() + " " + e.getValue().getName()));
         final CourseTemplateDataFactory ctdf2 = new CourseTemplateDataFactory(sharedServerCtx);
         final CourseTemplate createdCourseTemplate2 = courseTemplateApi.createCourseTemplate(sharedServerCtx,
                 ctdf2.constructCourseTemplate(new Pair<>(1, 3), 3, roleTemplateMap));
