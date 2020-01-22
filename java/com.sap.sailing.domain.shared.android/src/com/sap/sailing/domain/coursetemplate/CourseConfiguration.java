@@ -16,10 +16,22 @@ import com.sap.sse.common.Named;
  * 
  * This is the model represented in a course editor which deals with editing the waypoint sequence as well as changing
  * how marks are mapped to {@link MarkTemplate}s and how marks are generally configured in terms of their base
- * properties and tracking/positioning information. Any change that is incompatible with a non-{@code null}
- * {@link CourseTemplate} returned by {@link #getOptionalCourseTemplate()} leads to breaking this connection such that
- * {@link #getOptionalCourseTemplate()} from that point on will return {@code null}. In particular,
- * the base {@link #getWaypoints() waypoints sequence} must 
+ * properties and tracking/positioning information. This configuration can reference a non-{@code null}
+ * {@link CourseTemplate} (returned by {@link #getOptionalCourseTemplate()}). Being an "editor model" this means that
+ * the actual {@link #getWaypoints() waypoint sequence} may be inconsistent with what the course template demands. When
+ * requesting a course update, the waypoint sequence takes precedence over a course template. Likewise, the
+ * {@link #getNumberOfLaps() number of laps} in a request to create a course may be inconsistent with the waypoint
+ * sequence which then should be interpreted such that the request processor shall adjust the waypoint sequence such
+ * that the number of laps requested is reflected in the waypoint sequence consistently.
+ * <p>
+ * 
+ * When used in a request to create a course template, the {@link #getRepeatablePart()} will be used as the
+ * new course template's {@link CourseTemplate#getRepeatablePart() repeatable part}.<p>
+ * 
+ * In particular, the base {@link #getWaypoints() waypoints sequence}, when returned by a request, has at least one
+ * occurrence of a repeatable part, should the configuration specify a course template, be consistent with it, and
+ * should the course template specify a repeatable part. As a response, this configuration will tell the
+ * {@link #getNumberOfLaps()} found or created during the request.
  * <p>
  * 
  * The configuration for all marks are returned by {@link #getAllMarks()} because when pushing this to a Regatta the
@@ -80,9 +92,19 @@ public interface CourseConfiguration<P> extends WithOptionalRepeatablePart, Name
     Map<MarkConfiguration<P>, MarkRole> getAllMarksWithOptionalRoles();
     
     /**
-     * A {@link CourseConfigurationBase} having a {@link RepeatablePart} can optionally also specify a number of laps.
-     * Depending on the use-case this can be omitted (saving a course template) or is required (creating a regatta
-     * course).
+     * A {@link CourseConfigurationBase} having a {@link #getOptionalCourseTemplate() course template} can optionally
+     * also tell the number of laps in case this configuration is used to create or update a course. In a request this
+     * number can be used to override the {@link CourseTemplate#getDefaultNumberOfLaps() default number of laps} that
+     * the course template would use. Depending on the use-case this may be ignored (saving a course template) or is
+     * required (creating a regatta course from a configuration with a course template that specifies a repeatable
+     * part).
+     * <p>
+     * 
+     * In a response the number of laps is reported as {@code null} if a non-{@code null}
+     * {@link #getOptionalCourseTemplate() course template} is provided but the course is not compatible with that
+     * template; {@code -1} if there is no course template specified, or the course template has no
+     * {@link CourseTemplate#getRepeatablePart() repeatable part}; otherwise the number of laps (number of occurrences
+     * of the repeatable part plus one).
      */
     Integer getNumberOfLaps();
 

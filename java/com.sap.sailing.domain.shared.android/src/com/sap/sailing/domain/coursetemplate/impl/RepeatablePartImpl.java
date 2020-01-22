@@ -11,12 +11,12 @@ public class RepeatablePartImpl implements RepeatablePart {
 
     public RepeatablePartImpl(int zeroBasedIndexOfRepeatablePartStart, int zeroBasedIndexOfRepeatablePartEnd) {
         super();
-        if (zeroBasedIndexOfRepeatablePartStart <0 || zeroBasedIndexOfRepeatablePartEnd < 0) {
+        if (zeroBasedIndexOfRepeatablePartStart < 0 || zeroBasedIndexOfRepeatablePartEnd < 0) {
             throw new IllegalArgumentException("No negative indices are possible for the repeatable part.");
         }
-        if (zeroBasedIndexOfRepeatablePartStart > zeroBasedIndexOfRepeatablePartEnd) {
+        if (zeroBasedIndexOfRepeatablePartStart >= zeroBasedIndexOfRepeatablePartEnd) {
             throw new IllegalArgumentException(
-                    "The start of the repeatable part needs to be less or equal to the end.");
+                    "The start of the repeatable part needs to be less than the end such that the repeatable part has at least one element.");
         }
         this.zeroBasedIndexOfRepeatablePartStart = zeroBasedIndexOfRepeatablePartStart;
         this.zeroBasedIndexOfRepeatablePartEnd = zeroBasedIndexOfRepeatablePartEnd;

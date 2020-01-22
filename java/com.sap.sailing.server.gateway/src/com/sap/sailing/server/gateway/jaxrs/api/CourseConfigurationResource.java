@@ -183,7 +183,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
     @Path("getFromCourseTemplate/{courseTemplateId}")
     public Response createCourseConfigurationFromCourseTemplate(@PathParam("courseTemplateId") String courseTemplateId,
             @QueryParam("regattaName") String regattaName,
-            @QueryParam("tag") List<String> tags) {
+            @QueryParam("tag") List<String> tags,
+            @QueryParam("numberOfLaps") Integer optionalNumberOfLaps) {
         final CourseTemplate courseTemplate = this.getSharedSailingData()
                 .getCourseTemplateById(UUID.fromString(courseTemplateId));
         if (courseTemplate == null) {
@@ -197,7 +198,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
             }
         }
         final CourseConfiguration<MarkConfigurationResponseAnnotation> courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
-                .createCourseConfigurationFromTemplate(courseTemplate, regatta, tags);
+                .createCourseConfigurationFromTemplate(courseTemplate, regatta, tags, optionalNumberOfLaps);
         String jsonString = getCourseConfigurationJsonSerializer().serialize(courseConfiguration).toJSONString();
         return Response.ok(jsonString).build();
 
