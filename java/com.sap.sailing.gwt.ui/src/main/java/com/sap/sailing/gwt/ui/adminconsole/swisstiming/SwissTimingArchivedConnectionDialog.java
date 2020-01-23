@@ -12,16 +12,16 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
- * Edits a {@link SwissTimingArchiveConfigurationWithSecurityDTO} object. Can be accessed from
- * {@link SwissTimingArchivedConnectionTableWrapper}
+ * Creates a {@link SwissTimingArchiveConfigurationWithSecurityDTO} object. Can be accessed from
+ * {@link SwissTimingReplayConnectorPanel}
  */
-public class EditSwissTimingArchivedConnectionDialog
+public class SwissTimingArchivedConnectionDialog
         extends DataEntryDialog<SwissTimingArchiveConfigurationWithSecurityDTO> {
     private static final StringMessages stringMessages = StringMessages.INSTANCE;
     private Grid grid;
 
-    private TextBox jsonURLTextBox;
-    private final SwissTimingArchiveConfigurationWithSecurityDTO dtoToEdit;
+    protected TextBox jsonURLTextBox;
+    protected String creatorName;
 
     private static class EmptyTextValidator implements Validator<SwissTimingArchiveConfigurationWithSecurityDTO> {
         @Override
@@ -37,26 +37,15 @@ public class EditSwissTimingArchivedConnectionDialog
     }
     
     /**
-     * The class creates the UI-dialog to type in the Data about a the selected swiss timing account.
-     * 
-     * @param userToEdit
-     *            The 'userToEdit' parameter contains the user which should be changed or initialized.
+     * The class creates the UI-dialog to create a new {@link SwissTimingArchiveConfigurationWithSecurityDTO}.
      */
-    public EditSwissTimingArchivedConnectionDialog(final SwissTimingArchiveConfigurationWithSecurityDTO dtoToEdit,
+    public SwissTimingArchivedConnectionDialog(
             final DialogCallback<SwissTimingArchiveConfigurationWithSecurityDTO> callback,
-            final UserService userService,
-            final ErrorReporter errorReporter) {
-        super(stringMessages.editSwissTimingAchivedConnection(), null, stringMessages.ok(), stringMessages.cancel(),
+            final UserService userService, final ErrorReporter errorReporter) {
+        super(stringMessages.swissTimingAchivedConnection(), null, stringMessages.ok(), stringMessages.cancel(),
                 /* validator */ new EmptyTextValidator(), /* animationEnabled */true, callback);
-        this.dtoToEdit = dtoToEdit;
-        this.ensureDebugId("EditSwissTimingArchivedConnectionDialog");
+        this.ensureDebugId("SwissTimingArchivedConnectionDialog");
         createUi();
-        setData(dtoToEdit);
-    }
-
-    private void setData(final SwissTimingArchiveConfigurationWithSecurityDTO dtotoEdit) {
-        jsonURLTextBox.setText(dtotoEdit.getJsonUrl());
-        validateAndUpdate();
     }
 
     private void createUi() {
@@ -80,7 +69,7 @@ public class EditSwissTimingArchivedConnectionDialog
     @Override
     protected SwissTimingArchiveConfigurationWithSecurityDTO getResult() {
         final String jsonURL = jsonURLTextBox.getValue();
-        return new SwissTimingArchiveConfigurationWithSecurityDTO(jsonURL, dtoToEdit.getCreatorName());
+        return new SwissTimingArchiveConfigurationWithSecurityDTO(jsonURL, creatorName);
     }
 
     @Override

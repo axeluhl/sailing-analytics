@@ -13,23 +13,25 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
- * Edits a {@link SwissTimingConfigurationWithSecurityDTO} object. Can be accessed from
- * {@link SwissTimingConnectionTableWrapper}. The Manage2Sail event ID and the complete URL
+ * Creates a {@link SwissTimingConfigurationWithSecurityDTO} object. Can be accessed from
+ * {@link SwissTimingEventManagementPanel}. The Manage2Sail event ID and the complete URL
  * field update each other mutually upon manual update.
  */
-public class EditSwissTimingConnectionDialog extends DataEntryDialog<SwissTimingConfigurationWithSecurityDTO> {
+public class SwissTimingConnectionDialog extends DataEntryDialog<SwissTimingConfigurationWithSecurityDTO> {
     private static final StringMessages stringMessages = StringMessages.INSTANCE;
 
     private Grid grid;
 
-    private TextBox manage2SailEventIdTextBox;
-    private TextBox manage2SailEventUrlJsonTextBox;
-    private TextBox hostnameTextBox;
-    private TextBox portTextBox;
-    private TextBox updateUrlTextBox;
-    private TextBox updateUsernameTextBox;
-    private PasswordTextBox updatePasswordTextBox;
-    private final SwissTimingConfigurationWithSecurityDTO dtoToEdit;
+    protected TextBox manage2SailEventIdTextBox;
+    protected TextBox manage2SailEventUrlJsonTextBox;
+    protected TextBox hostnameTextBox;
+    protected TextBox portTextBox;
+    protected TextBox updateUrlTextBox;
+    protected TextBox updateUsernameTextBox;
+    protected PasswordTextBox updatePasswordTextBox;
+    protected String name;
+    protected String creatorName;
+    
     
     private static class EmptyFieldValidator implements Validator<SwissTimingConfigurationWithSecurityDTO> {
         @Override
@@ -45,31 +47,14 @@ public class EditSwissTimingConnectionDialog extends DataEntryDialog<SwissTiming
     }
 
     /**
-     * The class creates the UI-dialog to type in the Data about a the selected swiss timing account.
-     * 
-     * @param userToEdit
-     *            The 'userToEdit' parameter contains the user which should be changed or initialized.
+     * The class creates the UI-dialog create a new {@link SwissTimingConfigurationWithSecurityDTO}.
      */
-    public EditSwissTimingConnectionDialog(final SwissTimingConfigurationWithSecurityDTO dtotoEdit,
-            final DialogCallback<SwissTimingConfigurationWithSecurityDTO> callback, final UserService userService,
-            final ErrorReporter errorReporter) {
-        super(stringMessages.editSwissTimingConnections(), null, stringMessages.ok(), stringMessages.cancel(),
-                /* validator */ new EmptyFieldValidator(),
-                /* animationEnabled */true, callback);
-        this.dtoToEdit = dtotoEdit;
-        this.ensureDebugId("EditTracTracConnectionDialog");
+    public SwissTimingConnectionDialog(final DialogCallback<SwissTimingConfigurationWithSecurityDTO> callback,
+            final UserService userService, final ErrorReporter errorReporter) {
+        super(stringMessages.swissTimingConnections(), null, stringMessages.ok(), stringMessages.cancel(),
+                /* validator */ new EmptyFieldValidator(), /* animationEnabled */true, callback);
+        this.ensureDebugId("SwissTimingConnectionEditDialog");
         createUi();
-        setData(dtotoEdit);
-    }
-
-    private void setData(final SwissTimingConfigurationWithSecurityDTO dtoToEdit) {
-        manage2SailEventUrlJsonTextBox.setText(dtoToEdit.getJsonUrl());
-        hostnameTextBox.setText(dtoToEdit.getHostname());
-        portTextBox.setText(dtoToEdit.getPort() == null ? "" : ("" + dtoToEdit.getPort()));
-        updateUrlTextBox.setText(dtoToEdit.getUpdateURL());
-        updateUsernameTextBox.setText(dtoToEdit.getUpdateUsername());
-        updatePasswordTextBox.setText(dtoToEdit.getUpdatePassword());
-        validateAndUpdate();
     }
 
     private void createUi() {
@@ -170,10 +155,10 @@ public class EditSwissTimingConnectionDialog extends DataEntryDialog<SwissTiming
             }
         }
 
-        return new SwissTimingConfigurationWithSecurityDTO(dtoToEdit.getName(),
+        return new SwissTimingConfigurationWithSecurityDTO(name,
                 manage2SailEventUrlJsonTextBox.getValue(), hostnameTextBox.getValue(), port,
                 updateUrlTextBox.getValue(), updateUsernameTextBox.getValue(), updatePasswordTextBox.getValue(),
-                dtoToEdit.getCreatorName());
+                creatorName);
     }
 
     @Override
