@@ -971,7 +971,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (MediaTrack mediaTrack : this.mediaLibrary.allTracks()) {
             mediaTrackDeleted(mediaTrack);
         }
-        // TODO clear user store? See bug 2430.
         this.competitorAndBoatStore.clear();
         this.windStore.clear();
         raceManagerDeviceConfigurationsById.clear();
@@ -1014,7 +1013,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         securityService.assumeOwnershipMigrated(SecuredDomainType.EVENT.getName());
         for (Regatta regatta : getAllRegattas()) {
             securityService.migrateOwnership(regatta);
-            // FIXME add listener for all TrackedRaces here and migrate them as they become available!
             DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
             if (trackedRegatta != null) {
                 trackedRegatta.lockTrackedRacesForRead();
