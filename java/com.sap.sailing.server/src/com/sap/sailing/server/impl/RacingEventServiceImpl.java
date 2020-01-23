@@ -1542,11 +1542,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     @Override
     public Map<RemoteSailingServerReference, com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception>> getPublicEventsOfAllSailingServers() {
-        return remoteSailingServerSet.getCachedEventsForRemoteSailingServers(); // FIXME should probably add our own
-                                                                                // stuff here... Is it enough to pass on
-                                                                                // the remote reference URL to the
-                                                                                // client for leaderboard group URL
-                                                                                // construction?
+        return remoteSailingServerSet.getCachedEventsForRemoteSailingServers();
     }
 
     @Override
@@ -3090,7 +3086,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             ScoringScheme scoringScheme, int[] discardThresholds) {
         final Leaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup, scoringScheme,
                 new ThresholdBasedResultDiscardingRuleImpl(discardThresholds));
-        // FIXME bug5081 ownership?
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(overallLeaderboard.getName()),
                 overallLeaderboard.getDisplayName(),
