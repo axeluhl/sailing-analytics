@@ -139,7 +139,7 @@ public class TracTracEventManagementPanelPO extends PageArea {
     
     public AddTracTracConnectionDialogPO addConnection() {
         addConnectionButton.click();
-        final WebElement dialog = findElementBySeleniumId(this.driver, "EditTracTracConnectionDialog");
+        final WebElement dialog = findElementBySeleniumId(this.driver, "TracTracConnectionDialog");
         return new AddTracTracConnectionDialogPO(this.driver, dialog);
     }
 
