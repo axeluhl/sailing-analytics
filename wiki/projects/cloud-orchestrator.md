@@ -10,7 +10,106 @@ We believe that a central *orchestrator* approach should be used to solve this c
 
 ![](https://wiki.sapsailing.com/wiki/images/orchestration/architecture.png)
 
-## Orchestrator Architecture
+## Overview of Cloud Configuration
+
+As of this writing (January 2020), our cloud setup has the following essential components:
+
+### Application
+
+- A Route53 DNS zone for all of sapsailing.com
+- Two Application Load Balancers (ALB)
+  - a default ALB for dynamic mapping, receiving all &ast;.sapsailing.com requests
+  - one targeted by specific DNS rules
+- Target Groups for each ALB rule
+  - separate target groups for "-master", explicitly routing to the master instance of a replica set
+  - target groups for sharding scenarios with ALB rules based on leaderboard path suffix in URL
+- For replica sets with active replicas a dedicated "-master" ALB rule and target group
+- A central Apache reverse proxy catching all requests not caught by a specific rule in the default ALB
+- A central RabbitMQ instance
+- A MongoDB replica set with two fast-writing (ephemeral NVMe-based) and one hidden EBS-based replica
+- A multi-instance server node hosting many small application JVMs with fast, big NVMe-based swap space
+- A production archive server (currently still with big RAM (~240GB))
+- A fail-over archive server, also with ~240GB, running a previous version
+- master/replica instances for dedicated events, each on their own AWS EC2 host, each with their own Apache reverse proxy on that host
+- a central log store, NFS-mounted on all application instances, with regular log rotation from the instances to the central store, as well as upon instance shut-down.
+
+### Development Support
+
+- dev.sapsailing.com as a test server to which anybody with access can deploy any release at any time
+- Hudson server, launching slaves on demand; co-deployed on the host running dev.sapsailing.com
+- Bugzilla server, co-deployed on the central Apache reverse proxy web server
+- git, hosted at sapsailing.com:/home/trac/git on the same instance running the central Apache reverse proxy
+- releases.sapsailing.com, at sapsailing.com:/home/trac/releases, including the environments/ subdirectory targeted by the ``USE_ENVIRONMENT`` directive of the instance details variables.
+
+### Critique, Problem Description
+
+While the landscape set-up has carried us through approximately 17,000 races at hundreds of events, it doesn't lend itself well for a larger-scale self service with many anonymous users in various regions, creating a large number of tracks, also at peak times concurrently. What are the current issues?
+
+#### Subdomain-based level-7 routing
+
+Except for the sharding feature where we encode the leaderboard name in the URL path and then can direct such requests to specific target groups, all other ALB routing decisions are usually based on the subdomain name. Using per-event subdomains makes for a relatively easy routing configuration: if no DNS record is created for the subdomain, the default ALB receives the request, and a rule for that subdomain can easily be added there. When later the event is archived, a reverse proxy rule is added to the central Apache reverse proxy, and the ALB rule can be removed.
+
+The problem with this approach is that it *requires* a dedicated subdomain for knowing how to route traffic for an event. All traffic addressed to www.sapsailing.com is routed to the archive server, and no re-direct is in place, nor would it be useful or scalable given the "horizontal traffic" this would generate and how it would make the archive server a bandwidth bottleneck.
+
+The problem is aggravated by the kind of request we're typically facing with GWT RPCs: by default, these are all HTTP POST requests sent to the same URL, with no query parameters or any other information useful for an ALB's routing decision. The only trick we can play, like we already do for the sharding feature, is artificially extending the GWT RPC service URL's path and providing a server-side web.xml configuration that ignores any path suffix, routing all requests with the correct path prefix to the service implementation.
+
+If we want to avoid *having* to use subdomains then we need to come up with something like "scopes" which the client uses to add a suffix to the request path and that the ALB can use in its routing decision. The challenge with this approach could be that so far the application's domain model does not have a single object hierarchy that would help in defining a unique scope for each object. Noteworthy, in particular, is the dichotomy of the LeaderboardGroup/Event relation where a LeaderboardGroup can be a part of a larger event that hosts several LeaderboardGroups; or it can be a series of events, hosting leaderboards from several events, such as in a national sailing league season.
+
+We may need to define scopes as a transitive closure of the LeaderboardGroup/Event association, just like today we handle the separation of events and event series from the archive server and their later import into the archive.
+
+Likewise, we should work on [bug 5187 (Avoid need for "-master" URLs  / sub-domain)](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5187) to allow for splitting up GWT RPC requests depending on where they need to go: master or replica.
+
+#### Scalability limits during tracking data ingestion and fix loading
+
+When sensors submit their fixes, they currently need to send them straight to the master instance of the replica set hosting the scope to which the fixes apply. The master writes the fixes to the ``SensorFixStore`` which currently is backed by the MongoDB replica set. This set-up requires a sensor to manage different ingestion points for different scopes and makes a master a single point of failure for the ingestion process. When a master becomes unavailable, all depends on the devices' capabilities to buffer and re-send the data that currently cannot be delivered. Furthermore, replicas depend on the single master being available in order to be supplied with the sensor data.
+
+Another bottleneck is the fact that we currently run all application instances based on a single MongoDB replica set which has its own single PRIMARY instance. All MongoDB write requests need to go through this PRIMARY as long as no MongoDB Sharding Controller is established that splits the write load across several clusters based on a sharding key.
+
+Loading the time-index fixes for a race from a single MongoDB collection quickly reaches limits in case the index size outgrows the amount of RAM available to the MongoDB servers. While this query scenario currently mostly applies when re-starting a master server (including the archive server), the archive data has already reached a size that requires us to launch a MongoDB replica with more RAM in order to keep archive server restart times acceptable (hours instead of days).
+
+We should also consider alternatives to MongoDB, at least for the storage of the sensor fixes. [Cassandra](http://cassandra.apache.org/) seems an interesting approach that promises high availability and virtually unlimited scalability. 
+
+#### No automatic fail-over for archive server
+
+When the archive server fails, a few people get an SMS/text message notification. Manually switching the central reverse proxy configuration in /etc/httpd/conf.d/000-macros.conf is then necessary, followed by a ``service httpd reload`` command to switch to the failover archive server. This process needs automation. A special configuration of "availability" checks between production and failover archive server will be required. We have to figure out where best to put this failover feature: is it something the ALB / target group set-up can do for us? How would the central reverse proxy/proxies route the requests then?
+
+#### No good approach for dynamic scale-up
+
+As a server fills up, be it the archive or an event server or a shared, multi-tenant server such as we currently run under my.sapsailing.com, the server resources may at some point not suffice to host more data. Moving scopes out of the server can be one approach, involving master data import and other less automated steps such as starting the tracking again for the races on the receiving side (we should consider sending and executing the RaceTrackingConnectivityParameters to the importing server, optionally restoring everything automatically). But in other cases, a scope may not be splittable and may already live in its dedicated replica set. In this case, the instances of the replica set must be scaled up.
+
+Scaling up replicas is easy (add bigger replicas, terminate smaller replicas after enough bigger replicas have become available), but usually it is not the replicas only, but the master typically also requires scaling up. Based on the current architecture, a master is the single ingestion point, especially for any request that impacts persistent storage, such as smartphone GPS fixes, race log entries or updates requested by the administration console. Since we need to read a consistent snapshot from the database and will typically not read from the persistence layer again for the remainder of the instance's runtime, we must make sure that once reading has started, not writes occur until reading has finished. Furthermore, all writes from this point on need to target the new master.
+
+In other words, all updates need to be rejected for that replica set when the new master starts up. When the new master is ready, update requests will be accepted again and will be targeted to the new master. The old master can then be terminated. Since the new master will send updates into the same RabbitMQ fanout exchange, existing replicas will continue to receive updates after the master switch. If the replicas configured the HTTP channel to the master such that the new master is reached through the existing channel (e.g., through a load balancer's target group or an elastic IP or maybe some DNS configuration) then even "reverse replication" will continue to run smoothly. Replicas buffer reverse replication requests that cannot be delivered to the master currently, and they will try a re-send later.
+
+The problem with this approach is that the master re-start takes time, more so if the scope that needs to be loaded is bigger. For live scenarios this can easily be a show stopper. It would be much nicer if an existing replica could be turned into a master on the fly. It would have most in-memory content, so no long-running loading from the database would be required. But replicas currently have no consistent database state in their phony database, and they do not run any tracking connectors but receive updates only through the RabbitMQ queues. A replica would need to start all the active "trackers" including establishing connections to external systems such as the TracTrac system as well as the smartphone tracking listeners, and it would become the target of all update requests, similar to how a MongoDB can change a replica set member's role from SECONDARY to PRIMARY and have it accept write requests.
+
+#### Vast RAM requirements for "cold" storage
+
+Today this affects mostly the archive server, but increasingly, as self service usage becomes more popular, large amounts of data may be accumulated on what today is the "my.sapsailing.com" scope. The typical access pattern for regular use of the application is that users look at an event. As they click through the event, race tracking data is read. The data of a single race is usually not too big, compared to the RAM sizes we usually discuss. Also, given the average throughput of a well-configured storage system, all the data of one race can most certainly be loaded in less than a second. With this in mind it is a shame to "waste" expensive RAM only to have all this rarely used data available and accessible.
+
+More challenging are DataMining requests. See also below ("DataMining in the presence of distribution"). A single data mining request can potentially read from very many races, touching a large data set. How would we keep up the good performance of the data mining framework when "cold" storage is much slower to read than in-memory data? Is super-fast but still inexpensive swap space a possible solution? I am starting to experiment with ab i3.2xlarge instance type with a 1.9TB NVMe local SSD that seems to give decent throughput. ``hdparm`` reports more than 500MB/s even under load, and I'm testing an archive server set-up on such an instance with "only" 64GB of RAM and 1.9TB of swap space. This set-up also seems a lot faster than an r5d.2xlarge with similar CPU/RAM configuration. It seems, the "storage-optimized" i-family of instances gets much better NVMe throughput compared to the r-family of instances which are "memory-optimized."
+
+Alternatively, we could start thinking about storing the race data in files that needs to be loaded upon request / demand and that can get unloaded at a later point. It seems, though, that a good operating system-level memory manager should perform equally well, if not better, when swapping in the data required.
+
+#### Late SSL Offloading
+
+We currently forward the HTTPS requests from the ALB to the reverse proxies using again HTTPS requests. This requires us to have the certificate deployed to all reverse proxies as well as the ALBs, with all the burdens of upgrading it in all places when the time comes. We should offload SSL/TLS at the ALB and use only HTTP internally.
+
+#### Reverse Proxy Strategy
+
+Reverse proxies allow us to configure re-write rules, expanding URLs to they lead users to specific events or event series landing pages, and handle logging. With AWStats and the ``com.sap.sse.util.apachelog`` package we have two components currently helping with log analysis. Our host shutdown script takes care of moving all log files to a central log store where they are evaluated on a weekly basis by said tools.
+
+Currently we have a central reverse proxy receiving all requests not handled by a DNS-mapped ALB and falling through to the default rule of the default ALB. This currently includes requests for Hudson, Bugzilla, HTTPS-based git access, access to releases.sapsailing.com, as well as all rewrite rules targeting the archive server, including www.sapsailing.com which leads to the landing page /gwt/Home.html and all subdomain URLs for all archived events/leagues/scopes. Furthermore, each EC2 host that runs one or more JVM application processes has its own reverse proxy running on it.
+
+Only thanks to the high reliability of the AWS infrastructure and the maturity of the Apache web server, nothing really bad has happened with our central reverse proxy web server. Still, this is not a good and scalable approach. At least, having more than one instance, ideally in different availability zones, that share a central configuration, the ALB would easily survive a restart or other unavailability of one of these reverse proxy instances.
+
+We could also change the landscape such that the archive servers are in a target group that receives the requests ending up ad the ALB's default rule. We would only create dedicated rules for those subdomains currently also handled by the central reverse proxy that are not archived events (hudson, bugzilla, git, releases, jobs, p2, gitlist, wiki, maven, status, analysis, static). Any archive server (production, failover) could then according to the usual pattern run its own reverse proxy, again sharing their configuration. The health check for the two archive servers then has to work such that the production instance does its regular health check whereas the failover server always reports "unhealthy" as long as the production server is "healthy." For this, the failover instance needs to know one or more other servers to probe. Only if all of those report "unhealthy" and the failover itself is healthy, it will report "healthy" as its status. See also [bug 5188 (Implement a "failover for" setting that lets a health check pass only if all other instances are unhealthy)](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5188).
+
+#### DataMining in the presence of distribution
+
+#### Lack of automation
+
+## Idea: Orchestrator Architecture Based on Java and com.sap.sse
 
 In order to authenticate and authorize user requests the orchestrator will benefit from a powerful security infrastructure. The *Shiro* framework that is being used by the SAP Sailing Analytics has proven to be sufficiently configurable, powerful and extensible to support all our needs. It seems desirable to share the security service between the orchestrator and the application servers in the landscape. This will allow us to extend landscape-related permissions to users that can already be authenticated by the application and which can then make requests to the orchestrator, such as providing a new event with a new dedicated database, install a sub-domain prefix with the corresponding load balancer settings, or move an event to a dedicated server/replica cluster with its own scalability limits based on the user's credentials.
 
@@ -62,9 +161,9 @@ Those hold the nodes responding to requests. In a replication cluster we usually
 
 There are a number of disk volumes that are critical to monitor and, where necessary, scale. This includes:
 
-- Backup server (*/home/backup*)
 - Database server (*/var/lib/mongodb* and sub-mounts, */var/lib/mysql*)
-- Central Webserver (*/var/log/old*, */var/log/old/cache*, */var/www/static*, */var/www/home* hosting the git repository)
+- RabbitMQ persistent queues
+- Central Webserver / Reverse Proxy (*/var/log/old*, */var/log/old/cache*, */var/www/static*, */var/www/home* hosting the git repository) (although we should really consider getting rid of a central, single-point-of-failure reverse proxy approach)
 
 Through the AWS API the read/write throughputs can be observed, and peaks as well as bottlenecks may be identified. At least as importantly, the file system fill state has to be observed which is not possible through the AWS API and needs to happen through the respective instances' operating systems.
 
@@ -100,9 +199,11 @@ All our hosts can run their own Apache httpd process. Currently, the two archive
 
 The interface for such a web server will need to allow the orchestrator to add and remove such rewrite macro usages, configure the macro parameters such as the event ID to use for the Event-SSL-Redirect macro, and to tell the *httpd* process to re-load its configuration to make any changes effective.
 
-### Java Application Instances and their Health
+### Java Application Instances and their Health, "Replica Sets"
 
-Application nodes have to provide a REST API with reliable health information.
+Application processes are Java Virtual Machines (JVM) that need memory and a database connection (MongoDB), optionally a RabbitMQ configuration in case replication is being used. The JVM can hold the data of a number of events. It can be configured as a master or a replica. A replica replicates a single master. The master plus all its current direct and transitive replicas are called a "replica set." The master must have a valid database connection to the database actually holding the data. Replicas point to a phony "ephemeral" database whose consistency is not guaranteed and whose contents must never be queried. A JVM can be configured at launch to be a replica, providing information about the master instance and the RabbitMQ fan-out exchange to which to subscribe. An instance can also be dynamically turned into a replica, making it lose all its application data it had so far, and fetching an initial load from its new master. This approach, however, is currently not recommended, mostly because of the phony database problem: an instance turned into a replica will cause its database to become potentially inconsistent, and we currently have no way of changing the database connectivity on the fly for a running instance.
+
+Application nodes have to provide a REST API with reliable health information. /gwt/status is a good start as it now also provides reliable information about (initial) replication status.
 
 A replica is not healthy while its initial load is about to start, or is still on-going or its replication queue is yet to drain after the initial load has finished. A replica will take harm from requests received while the initial load is received or being processed. Requests may be permitted after the initial load has finished processing and while the replication queue is being drained, although the replica will not yet have reached the state that the master is in.
 
