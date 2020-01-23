@@ -2254,13 +2254,13 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String doYouReallyWantToRemoveDeviceConfiguration(String name);
     String errorFetchingSimulationData(String message);
     String addTracTracConnection();
-    String editTracTracConnection();
+    String tracTracConnection();
     String filterTracTracConnections();
     String creatorName();
-    String editSwissTimingAchivedConnection();
+    String swissTimingAchivedConnection();
     String addSwissTimingAchivedConnection();
     String filterSwissTimingAchivedConnections();
-    String editSwissTimingConnections();
+    String swissTimingConnections();
     String filterSwissTimingConnections();
     String updateURL();
     String addSwissTimingConnection();

@@ -38,7 +38,7 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
  * URI, the Stored Uri, the JSON URL, the TracTrac Server Update URI, the TracTrac user name, the TracTrac password, the
  * name of the creator, the group and user each user group is owned by. There are options edit or to delete the
  * connection, change the ownership or edit the associated ACL. Editing the connection will open a new instance of
- * {@link EditTracTracConnectionDialog}.
+ * {@link TracTracConnectionDialog}.
  */
 public class TracTracConnectionTableWrapper extends
         TableWrapper<TracTracConfigurationWithSecurityDTO, RefreshableSingleSelectionModel<TracTracConfigurationWithSecurityDTO>, StringMessages, CellTableWithCheckboxResources> {
@@ -86,7 +86,7 @@ public class TracTracConnectionTableWrapper extends
         final AccessControlledActionsColumn<TracTracConfigurationWithSecurityDTO, DefaultActionsImagesBarCell> actionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_UPDATE, DefaultActions.UPDATE, dto -> {
-            new EditTracTracConnectionDialog(dto, new DialogCallback<TracTracConfigurationWithSecurityDTO>() {
+            new TracTracConnectionEditDialog(dto, new DialogCallback<TracTracConfigurationWithSecurityDTO>() {
                 @Override
                 public void ok(final TracTracConfigurationWithSecurityDTO editedObject) {
                     sailingServiceAsync.updateTracTracConfiguration(editedObject,
