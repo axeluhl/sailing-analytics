@@ -115,6 +115,8 @@ If we had this in place, moving scopes around the landscape would be much more n
 
 #### Lack of automation
 
+All processes around scaling, infrastructure provisioning, moving scopes such as performing a "Master Data Import" or creating a dedicated replica set, monitoring and instance size selection are manual, hence error-prone. If we want to survive a growing number of self-service users we need to automate all aspects of the infrastructure.
+
 ## Idea: Orchestrator Architecture Based on Java and com.sap.sse
 
 In order to authenticate and authorize user requests the orchestrator will benefit from a powerful security infrastructure. The *Shiro* framework that is being used by the SAP Sailing Analytics has proven to be sufficiently configurable, powerful and extensible to support all our needs. It seems desirable to share the security service between the orchestrator and the application servers in the landscape. This will allow us to extend landscape-related permissions to users that can already be authenticated by the application and which can then make requests to the orchestrator, such as providing a new event with a new dedicated database, install a sub-domain prefix with the corresponding load balancer settings, or move an event to a dedicated server/replica cluster with its own scalability limits based on the user's credentials.
