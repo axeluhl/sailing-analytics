@@ -107,6 +107,12 @@ We could also change the landscape such that the archive servers are in a target
 
 #### DataMining in the presence of distribution
 
+With scopes split out to separate replica sets, the connections that may hold these scopes together are the "remote server references" like we use them to point from the archive server to all current event replica sets. The DataMining.html module so far works only locally on a single instance. It would be nice if it could as well follow those remote server references and retrieve data from those other replica sets / scopes as well. This would require serializing the query with its retriever chain and settings, filter conditions, grouping dimensions and extraction function. All steps including the grouping of extracted statistics can then happen on the remote replica set, and the grouped extracted values will need to be serialized back to the instance where the query originally is executed. There, the aggregation will take place.
+
+[Bug 5189 (Enabling data mining queries to follow remote server references)](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5189) documents this as a feature request in Bugzilla.
+
+If we had this in place, moving scopes around the landscape would be much more natural.
+
 #### Lack of automation
 
 ## Idea: Orchestrator Architecture Based on Java and com.sap.sse
