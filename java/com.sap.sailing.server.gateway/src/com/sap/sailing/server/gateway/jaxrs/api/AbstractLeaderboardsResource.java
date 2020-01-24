@@ -176,10 +176,14 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
                     trackedRaceInfo = null;
                 } else {
                     trackedRaceInfo = new JSONObject();
-                    trackedRaceInfo.put("name", trackedRace.getName());
+                    trackedRaceInfo.put("name", trackedRace.getRace().getName());
                     trackedRaceInfo.put("id", trackedRace.getRace().getId().toString());
-                    trackedRaceInfo.put("startTimeMillis", trackedRace.getStartOfRace().asMillis());
-                    trackedRaceInfo.put("live", trackedRace.isLive(new MillisecondsTimePoint(resultTimePoint)));
+                    final TimePoint startOfRace = trackedRace.getStartOfRace();
+                    trackedRaceInfo.put("startTimeMillis", startOfRace==null?null:startOfRace.asMillis());
+                    trackedRaceInfo.put("live", trackedRace.isLive(
+                            resultTimePoint == null
+                                    ? MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis())
+                                    : new MillisecondsTimePoint(resultTimePoint)));
                     trackedRaceInfo.put("delayToLiveInMillis", trackedRace.getDelayToLiveInMillis());
                 }
                 fleetJson.put("trackedRace", trackedRaceInfo);
