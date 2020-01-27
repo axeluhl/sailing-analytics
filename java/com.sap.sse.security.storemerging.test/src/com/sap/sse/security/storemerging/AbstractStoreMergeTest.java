@@ -66,7 +66,10 @@ import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
  *
  */
 public abstract class AbstractStoreMergeTest {
-    private final static String importSourceMongoDbUri = "mongodb://localhost/"+UUID.randomUUID();
+    private final static String importSourceMongoDbUri = MongoDBConfiguration.getDefaultTestConfiguration()
+            .getMongoClientURI().getURI()
+            .replace(MongoDBConfiguration.getDefaultTestConfiguration().getMongoClientURI().getDatabase(),
+                    UUID.randomUUID().toString());
     protected final static String defaultCreationGroupNameForSource = "dummy-default-creation-group-for-source";
     protected final static String defaultCreationGroupNameForTarget = "dummy-default-creation-group-for-target";
     protected MongoDBConfiguration cfgForSource;
