@@ -93,7 +93,6 @@ public class TestORCPublicCertificateDatabase {
         assertEquals(handle.getSailNumber(), result.getSailNumber());
     }
     
-//    @Ignore("Certificate used for testing no longer valid after 2019")
     @IgnoreInvalidOrcCerticates
     @Test
     public void testParallelFuzzySearch() throws InterruptedException, ExecutionException {
