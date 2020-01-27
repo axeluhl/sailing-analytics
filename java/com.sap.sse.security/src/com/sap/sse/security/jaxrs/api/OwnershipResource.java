@@ -51,8 +51,8 @@ public class OwnershipResource extends AbstractSecurityResource {
     public Response setOwnership(@PathParam("objectType") String objectType,
             @PathParam("typeRelativeObjectId") String typeRelativeObjectId, String jsonBody) throws OwnershipException {
         final JSONObject json = (JSONObject) JSONValue.parse(jsonBody);
-        QualifiedObjectIdentifier identifier = new QualifiedObjectIdentifierImpl((String) json.get(KEY_OBJECT_TYPE),
-                new TypeRelativeObjectIdentifier((String) json.get(KEY_OBJECT_ID)));
+        QualifiedObjectIdentifier identifier = new QualifiedObjectIdentifierImpl(objectType,
+                new TypeRelativeObjectIdentifier(typeRelativeObjectId));
         try {
             SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.CHANGE_OWNERSHIP));
         } catch (Exception ex) {
