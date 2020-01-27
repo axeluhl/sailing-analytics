@@ -30,7 +30,6 @@ public class TestORCCertificateImporterRMS {
         assertNotNull(milan);
     }
     
-//    @Ignore("Certificate used for testing no longer valid after 2019")
     @IgnoreInvalidOrcCerticates
     @Test
     public void testSimpleOnlineRMSFileRead() throws IOException, ParseException {

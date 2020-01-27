@@ -31,7 +31,6 @@ public class TestORCCertificateImporterJSON {
         assertNotNull(milan);
     }
     
-//    @Ignore("Certificate used for testing no longer valid after 2019")
     @IgnoreInvalidOrcCerticates
     @Test
     public void testSimpleOnlineJSONFileRead() throws IOException, ParseException {

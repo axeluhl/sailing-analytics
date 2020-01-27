@@ -239,7 +239,6 @@ public class TestORCPerformanceCurve {
     /**
      * Tests to make sure, that the structure of the certificate files didn't change and performance curves can be built
      */
-//    @Ignore("Certificate used for testing no longer valid after 2019")
     @IgnoreInvalidOrcCerticates
     @Test
     public void testOnlineImport() throws FunctionEvaluationException {
