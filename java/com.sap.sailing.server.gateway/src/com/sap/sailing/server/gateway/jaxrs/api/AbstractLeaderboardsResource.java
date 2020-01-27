@@ -31,6 +31,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class AbstractLeaderboardsResource extends AbstractSailingServerResource {
     private static final Logger logger = Logger.getLogger(AbstractLeaderboardsResource.class.getName());
@@ -129,23 +130,23 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         jsonLeaderboard.put("resultState", resultState.name());
         jsonLeaderboard.put("type", leaderboard.getLeaderboardType().name());
         jsonLeaderboard.put("shardingLeaderboardName", ShardingType.LEADERBOARDNAME.encodeIfNeeded(leaderboard.getName()));
-        ResultDiscardingRule resultDiscardingRule = leaderboard.getResultDiscardingRule();
+        final ResultDiscardingRule resultDiscardingRule = leaderboard.getResultDiscardingRule();
         if (resultDiscardingRule instanceof ThresholdBasedResultDiscardingRule) {
             final ThresholdBasedResultDiscardingRule thresholdBasedResultDiscardingRule = (ThresholdBasedResultDiscardingRule) resultDiscardingRule;
-            JSONArray discardIndices = new JSONArray();
+            final JSONArray discardIndices = new JSONArray();
             jsonLeaderboard.put("discardIndexResultsStartingWithHowManyRaces", discardIndices);
             for (int index : thresholdBasedResultDiscardingRule.getDiscardIndexResultsStartingWithHowManyRaces()) {
                 discardIndices.add(index);
             }
         }
         if (leaderboard instanceof RegattaLeaderboard) {
-            RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+            final RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
             jsonLeaderboard.put("canBoatsOfCompetitorsChangePerRace", regattaLeaderboard.getRegatta().canBoatsOfCompetitorsChangePerRace());
         } else {
             jsonLeaderboard.put("canBoatsOfCompetitorsChangePerRace", false);
         }
         jsonLeaderboard.put("maxCompetitorsCount", maxCompetitorsCount);
-        SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
+        final SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
         if (scoreCorrection != null) {
             jsonLeaderboard.put("scoringComment", scoreCorrection.getComment());
             TimePoint lastUpdateTimepoint = scoreCorrection.getTimePointOfLastCorrectionsValidity();
@@ -154,10 +155,39 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
             jsonLeaderboard.put("scoringComment", null);
             jsonLeaderboard.put("lastScoringUpdate", null);
         }
-        JSONArray jsonColumnNames = new JSONArray();
+        final JSONArray jsonColumnNames = new JSONArray();
+        final JSONArray trackedRacesInfo = new JSONArray();
         jsonLeaderboard.put("columnNames", jsonColumnNames);
+        jsonLeaderboard.put("trackedRacesInfo", trackedRacesInfo);
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             jsonColumnNames.add(raceColumn.getName());
+            final JSONObject raceColumnJson = new JSONObject();
+            trackedRacesInfo.add(raceColumnJson);
+            raceColumnJson.put("raceColumnName", raceColumn.getName());
+            final JSONArray fleetsJson = new JSONArray();
+            raceColumnJson.put("fleets", fleetsJson);
+            for (final Fleet fleet : raceColumn.getFleets()) {
+                final JSONObject fleetJson = new JSONObject();
+                fleetsJson.add(fleetJson);
+                fleetJson.put("name", fleet.getName());
+                final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                final JSONObject trackedRaceInfo;
+                if (trackedRace == null) {
+                    trackedRaceInfo = null;
+                } else {
+                    trackedRaceInfo = new JSONObject();
+                    trackedRaceInfo.put("name", trackedRace.getRace().getName());
+                    trackedRaceInfo.put("id", trackedRace.getRace().getId().toString());
+                    final TimePoint startOfRace = trackedRace.getStartOfRace();
+                    trackedRaceInfo.put("startTimeMillis", startOfRace==null?null:startOfRace.asMillis());
+                    trackedRaceInfo.put("live", trackedRace.isLive(
+                            resultTimePoint == null
+                                    ? MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis())
+                                    : new MillisecondsTimePoint(resultTimePoint)));
+                    trackedRaceInfo.put("delayToLiveInMillis", trackedRace.getDelayToLiveInMillis());
+                }
+                fleetJson.put("trackedRace", trackedRaceInfo);
+            }
         }
     }
 
