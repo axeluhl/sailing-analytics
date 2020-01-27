@@ -37,11 +37,11 @@ public class UrlDTO implements SecuredDTO {
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(new TypeRelativeObjectIdentifier(url));
+        return getPermissionType().getQualifiedObjectIdentifier(new TypeRelativeObjectIdentifier(url));
     }
 
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredDomainType.RESULT_IMPORT_URL;
     }
 
