@@ -1,12 +1,15 @@
 package com.sap.sse.gwt.client.async;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 
@@ -83,6 +86,8 @@ public class AsyncActionsExecutor {
     private final Map<String, Integer> actionsPerTypeCounter;
     private final Map<String, ExecutionJob<?>> lastRequestedActionsNotBeingSentOut;
     private final Map<String, TimePoint> timePointOfTypeLastBeingExecuted;
+    private final Map<String, Set<Runnable>> runAfterLastActionForCategoryReturned;
+    private final Set<Runnable> runAfterLastActionReturned;
     
     private int numPendingCalls = 0;
     private TimePoint timePointOfFirstExecutorInit = null;
@@ -96,6 +101,8 @@ public class AsyncActionsExecutor {
         if (maxPendingCalls < maxPendingCallsPerType) {
             throw new RuntimeException("The number of max pending calls can not be lower than the number of max pending calls per type.");
         }
+        this.runAfterLastActionForCategoryReturned = new HashMap<>();
+        this.runAfterLastActionReturned = new HashSet<>();
         this.maxPendingCalls = maxPendingCalls;
         this.maxPendingCallsPerType = maxPendingCallsPerType;
         this.durationAfterToResetQueue = durationAfterToResetQueue;
@@ -103,6 +110,32 @@ public class AsyncActionsExecutor {
         this.lastRequestedActionsNotBeingSentOut = new HashMap<>();
         this.timePointOfTypeLastBeingExecuted = new HashMap<>();
         this.timePointOfFirstExecutorInit = MillisecondsTimePoint.now(); // triggering duration to reset
+    }
+    
+    /**
+     * If there are no calls for the {@code category} whose results are still outstanding, the {@code callback}
+     * is invoked immediately. Otherwise, the {@code callback} is stored and will be invoked once there are
+     * no more outstanding responses for the {@code category}.
+     */
+    public void runAfterLastActionReturned(String category, Runnable callback) {
+        if (getNumberOfPendingActionsPerType(category) == 0) {
+            callback.run();
+        } else {
+            Util.addToValueSet(runAfterLastActionForCategoryReturned, category, callback);
+        }
+    }
+    
+    /**
+     * If there are no calls for this executor whose results are still outstanding, the {@code callback}
+     * is invoked immediately. Otherwise, the {@code callback} is stored and will be invoked once there are
+     * no more outstanding responses for this executor.
+     */
+    public void runAfterLastActionReturned(Runnable callback) {
+        if (getNumberOfPendingActions() == 0) {
+            callback.run();
+        } else {
+            runAfterLastActionReturned.add(callback);
+        }
     }
     
     public <T> void execute(AsyncAction<T> action, AsyncCallback<T> callback) {
@@ -164,8 +197,18 @@ public class AsyncActionsExecutor {
         Integer numActionsPerType = actionsPerTypeCounter.get(type);
         if (numActionsPerType != null && numActionsPerType > 0) {
             actionsPerTypeCounter.put(type, numActionsPerType-1);
+            if (numActionsPerType-1 == 0) {
+                final Set<Runnable> callbacks = runAfterLastActionForCategoryReturned.get(type);
+                if (callbacks != null) {
+                    callbacks.forEach(callback->callback.run());
+                }
+            }
+
         }
         numPendingCalls--;
+        if (numPendingCalls == 0) {
+            runAfterLastActionReturned.forEach(callback->callback.run());
+        }
         timePointOfTypeLastBeingExecuted.put(type, MillisecondsTimePoint.now());
         checkForEmptyCallQueue(type);
     }

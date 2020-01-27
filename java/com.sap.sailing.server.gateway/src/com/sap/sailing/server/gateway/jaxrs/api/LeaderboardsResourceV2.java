@@ -161,7 +161,6 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         }
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
-        jsonLeaderboard.put("ShardingLeaderboardName", ShardingType.LEADERBOARDNAME.encodeIfNeeded(leaderboard.getName()));
         final int[] regattaRankCounter = new int[] { 1 };
         // Remark: leaderboardDTO.competitors are ordered by total rank
         List<CompetitorDTO> filteredCompetitors = new ArrayList<>();
@@ -427,6 +426,12 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             case OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS:
                 name = "maxSpeedOverGroundInKnots";
                 value = leaderboardRowDTO.maximumSpeedOverGroundInKnots==null?null:roundDouble(leaderboardRowDTO.maximumSpeedOverGroundInKnots, 2);
+                break;
+            case LEG_WINDWARD_DISTANCE_TO_GO_IN_METERS:
+                name = "legWindwardDistanceToGoInMeters";
+                if (currentLegEntry != null && currentLegEntry.windwardDistanceToGoInMeters != null) {
+                    value = currentLegEntry.windwardDistanceToGoInMeters;
+                }
                 break;
             default:
                 name = null;

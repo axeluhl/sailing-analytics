@@ -112,9 +112,9 @@ public class ORCPerformanceCurveAllLegsDialog extends AbstractORCPerformanceCurv
     }
     
     @Override
-    protected boolean validateAndUpdate() {
+    protected void validateAndUpdate() {
         updateTotalDistanceLabel();
-        return super.validateAndUpdate();
+        super.validateAndUpdate();
     }
     
     private Distance getEffectiveTotalDistance(ORCPerformanceCurveLegImpl[] explicitLegSpecs) {

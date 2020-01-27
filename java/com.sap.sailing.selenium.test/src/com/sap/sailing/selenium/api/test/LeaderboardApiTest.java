@@ -58,9 +58,9 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
         assertEquals("read: leaderboard.columnNames should be empty", 0, leaderBoard.getColumnNames().length);
         assertEquals("read: leaderboard.competitors should be empty", 0,
                 ((JSONArray) leaderBoard.get("competitors")).size());
-        assertEquals("read: leaderboard.ShardingLeaderboardName is different",
+        assertEquals("read: leaderboard.shardingLeaderboardName is different",
                 "/leaderboard/" + LEADERBOARD_NAME.replaceAll(" ", "_").replaceAll("<", "_").replaceAll(">", "_"),
-                leaderBoard.get("ShardingLeaderboardName"));
+                leaderBoard.get("shardingLeaderboardName"));
     }
 
     @Test

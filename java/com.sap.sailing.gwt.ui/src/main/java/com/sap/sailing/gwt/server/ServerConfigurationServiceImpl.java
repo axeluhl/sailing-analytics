@@ -19,7 +19,6 @@ public class ServerConfigurationServiceImpl extends ProxiedRemoteServiceServlet 
 
     public ServerConfigurationServiceImpl() {
         BundleContext context = Activator.getDefault();
-        
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
     }
 
