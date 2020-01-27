@@ -980,7 +980,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (MediaTrack mediaTrack : this.mediaLibrary.allTracks()) {
             mediaTrackDeleted(mediaTrack);
         }
-        // TODO clear user store? See bug 2430.
         this.competitorAndBoatStore.clear();
         this.windStore.clear();
         raceManagerDeviceConfigurationsById.clear();
@@ -1023,7 +1022,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         securityService.assumeOwnershipMigrated(SecuredDomainType.EVENT.getName());
         for (Regatta regatta : getAllRegattas()) {
             securityService.migrateOwnership(regatta);
-            // FIXME add listener for all TrackedRaces here and migrate them as they become available!
             DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
             if (trackedRegatta != null) {
                 trackedRegatta.lockTrackedRacesForRead();
@@ -1553,11 +1551,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     @Override
     public Map<RemoteSailingServerReference, com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception>> getPublicEventsOfAllSailingServers() {
-        return remoteSailingServerSet.getCachedEventsForRemoteSailingServers(); // FIXME should probably add our own
-                                                                                // stuff here... Is it enough to pass on
-                                                                                // the remote reference URL to the
-                                                                                // client for leaderboard group URL
-                                                                                // construction?
+        return remoteSailingServerSet.getCachedEventsForRemoteSailingServers();
     }
 
     @Override
@@ -3101,7 +3095,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             ScoringScheme scoringScheme, int[] discardThresholds) {
         final Leaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup, scoringScheme,
                 new ThresholdBasedResultDiscardingRuleImpl(discardThresholds));
-        // FIXME bug5081 ownership?
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(overallLeaderboard.getName()),
                 overallLeaderboard.getDisplayName(),

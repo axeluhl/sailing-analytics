@@ -373,8 +373,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     courseConfigurationAfterInventory.getWaypoints(), courseConfigurationAfterInventory.getAssociatedRoles(),
                     marksConfigurationsMapping);
         recordUsagesForMarkProperties(waypointConfigurationMapper.effectiveWaypoints, waypointConfigurationMapper.allAssociatedRoles);
-        final CourseSequenceReplacementMapper<ControlPointTemplate, MarkRole, WaypointTemplate, MarkConfigurationRequestAnnotation> waypointTemplateMapper =
-                new CourseSequenceReplacementMapper<ControlPointTemplate, MarkRole, WaypointTemplate, MarkConfigurationRequestAnnotation>(
+        final CourseSequenceMapper<ControlPointTemplate, MarkRole, WaypointTemplate, MarkConfigurationRequestAnnotation> waypointTemplateMapper =
+                new CourseSequenceMapper<ControlPointTemplate, MarkRole, WaypointTemplate, MarkConfigurationRequestAnnotation>(
                 courseConfigurationAfterInventory.getWaypoints(),
                 courseConfigurationAfterInventory.getAssociatedRoles(), markRolesByMarkConfigurations) {
             @Override
@@ -591,8 +591,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         } else {
             waypoints = courseConfigurationAfterInventory.getWaypoints();
         }
-        final CourseSequenceReplacementMapper<ControlPoint, Mark, Waypoint, MarkConfigurationRequestAnnotation> courseSequenceMapper =
-                new CourseSequenceReplacementMapper<ControlPoint, Mark, Waypoint, MarkConfigurationRequestAnnotation>(
+        final CourseSequenceMapper<ControlPoint, Mark, Waypoint, MarkConfigurationRequestAnnotation> courseSequenceMapper =
+                new CourseSequenceMapper<ControlPoint, Mark, Waypoint, MarkConfigurationRequestAnnotation>(
                         waypoints, courseConfigurationAfterInventory.getAssociatedRoles(), marksByMarkConfigurations) {
             @Override
             protected ControlPointWithTwoMarks createMarkPair(Mark left, Mark right, String name, String shortName) {
@@ -1163,16 +1163,15 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         final Map<M, MarkRole> allAssociatedRoles = new HashMap<>();
         // TODO should we remove this field and let calculateEffectiveWaypoints return the list instead; this will clean up the somewhat convoluted construction order for subclasses
         final List<W> effectiveWaypoints = new ArrayList<>();
-        private final Iterable<WaypointWithMarkConfiguration<P>> waypoints;
         private final Map<MarkConfiguration<P>, ? extends MarkRole> existingRoleMapping;
-        
+        private final Map<MarkConfiguration<P>, M> existingMapping;
+
         public CourseSequenceMapper(Iterable<WaypointWithMarkConfiguration<P>> waypoints,
-                Map<MarkConfiguration<P>, ? extends MarkRole> existingRoleMapping) {
-            this.waypoints = waypoints;
+                Map<MarkConfiguration<P>, ? extends MarkRole> existingRoleMapping,
+                Map<MarkConfiguration<P>, M> existingMapping) {
             this.existingRoleMapping = existingRoleMapping;
-        }
-        
-        public void calculateEffectiveWaypoints() {
+            this.existingMapping = existingMapping;
+            
             // all pre-existing explicit roles are added to the result
             for (Entry<MarkConfiguration<P>, ? extends MarkRole> entry : existingRoleMapping.entrySet()) {
                 explicitAssociatedRoles.put(mapMarkConfiguration(entry.getKey()), entry.getValue());
@@ -1207,35 +1206,17 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
             return mark;
         }
         
-        protected abstract M getOrCreateMarkReplacement(MarkConfiguration<P> markConfiguration);
+        private M getOrCreateMarkReplacement(MarkConfiguration<P> markConfiguration) {
+            return existingMapping.get(markConfiguration);
+        }
         
         protected abstract CP createMarkPair(M left, M right, String name, String shortName);
         
         protected abstract W createWaypoint(CP controlPoint, PassingInstruction passingInstruction);
     }
     
-    /**
-     * Uses a pre-defined mapping from {@link MarkConfiguration}s to {@code M} "mark" objects that has to be
-     * specified as constructor argument.
-     */
-    private abstract class CourseSequenceReplacementMapper<CP, M extends CP, W, P> extends CourseSequenceMapper<CP, M, W, P> {
-        private final Map<MarkConfiguration<P>, M> existingMapping;
-
-        public CourseSequenceReplacementMapper(Iterable<WaypointWithMarkConfiguration<P>> waypoints,
-                Map<MarkConfiguration<P>, ? extends MarkRole> existingRoleMapping, Map<MarkConfiguration<P>, M> existingMapping) {
-            super(waypoints, existingRoleMapping);
-            this.existingMapping = existingMapping;
-            calculateEffectiveWaypoints();
-        }
-
-        @Override
-        protected M getOrCreateMarkReplacement(MarkConfiguration<P> markConfiguration) {
-            return existingMapping.get(markConfiguration);
-        }
-    }
-    
     private class CourseConfigurationToCourseConfigurationMapper<P> extends
-            CourseSequenceReplacementMapper<ControlPointWithMarkConfiguration<P>, MarkConfiguration<P>, WaypointWithMarkConfiguration<P>, P> {
+            CourseSequenceMapper<ControlPointWithMarkConfiguration<P>, MarkConfiguration<P>, WaypointWithMarkConfiguration<P>, P> {
         public CourseConfigurationToCourseConfigurationMapper(Iterable<WaypointWithMarkConfiguration<P>> waypoints,
                 Map<MarkConfiguration<P>, ? extends MarkRole> existingRoleMapping,
                 Map<MarkConfiguration<P>, MarkConfiguration<P>> existingMapping) {
