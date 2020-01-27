@@ -1234,6 +1234,28 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         }
     };
     
+    /**
+     * When creating course configurations, it is tried to match regatta marks as well as mark properties to mark
+     * templates based on the last usage. Because of the fact that a regatta mark or mark properties could be associated
+     * to different mark templates or roles historically, it could be the best match for more than one mark template.
+     * 
+     * Example: A mark M was associated to role R1 in race 1. M was associated to role R2 in race 2. The roles R1 and R2
+     * are distinctly used in one of the races. This means M would match both, R1 and R2. For R1 and R2 the only match
+     * would be M. In a course template including both R1 and R2 we can't match M to both roles. In this case it is
+     * checked if the best match in reverse direction leads to the same role. In this example, the latest (best) match
+     * for M is R2. Given that, R1 will not be matched to a mark at all.
+     * 
+     * In general this means: A match based on last usage is only counted as match if both elements (e.g. Role and mark)
+     * reference each other as the only or latest match.
+     * 
+     * This rule is always applied for at least the following cases:
+     * <ul>
+     *   <li>Matching regatta marks by usage of their associated roles to mark templates</li>
+     *   <li>Matching marks properties by usage of their associated roles to mark templates</li>
+     *   <li>Matching marks properties by direct usage for mark templates</li>
+     * </ul>
+     *
+     */
     private class LastUsageBasedAssociater<T1, T2> {
         private final Map<T1, Map<T2, TimePoint>> usagesByT1 = new HashMap<>();
         private final Map<T2, Map<T1, TimePoint>> usagesByT2 = new HashMap<>();
