@@ -120,8 +120,14 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
 
     @Override
     public Distance getDistanceTraveled() {
-        TimePoint timePoint = getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getEndOfTracking();
-        return getTrackedLegOfCompetitor().getDistanceTraveled(timePoint);
+        final Distance result;
+        if (getTrackedLegContext().getTrackedRaceContext().getTrackedRace() != null) {
+            TimePoint timePoint = getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getEndOfTracking();
+            result = getTrackedLegOfCompetitor().getDistanceTraveled(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
     }
     
     @Override
@@ -148,13 +154,19 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     }
     
     private Integer getRankAtStart() {
-        if (!isRankAtStartInitialized) {
-            TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
-            int rank = trackedRace.getRank(getCompetitor(), getTrackedLegOfCompetitor().getStartTime());
-            rankAtStart = rank == 0 ? null : rank;
-            isRankAtStartInitialized = true;
+        final Integer result;
+        if (getTrackedLegContext().getTrackedRaceContext().getTrackedRace() != null) {
+            if (!isRankAtStartInitialized) {
+                TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
+                int rank = trackedRace.getRank(getCompetitor(), getTrackedLegOfCompetitor().getStartTime());
+                rankAtStart = rank == 0 ? null : rank;
+                isRankAtStartInitialized = true;
+            }
+            result = rankAtStart;
+        } else {
+            result = null;
         }
-        return rankAtStart;
+        return result;
     }
 
     @Override
@@ -262,9 +274,11 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     private int getNumberOf(ManeuverType maneuverType, TimePoint start, TimePoint end) {
         TrackedRace trackedRace = getTrackedRace();
         int number = 0;
-        for (Maneuver maneuver : trackedRace.getManeuvers(getCompetitor(), start, end, false)) {
-            if (maneuver.getType() == maneuverType) {
-                number++;
+        if (trackedRace != null) {
+            for (Maneuver maneuver : trackedRace.getManeuvers(getCompetitor(), start, end, false)) {
+                if (maneuver.getType() == maneuverType) {
+                    number++;
+                }
             }
         }
         return number;

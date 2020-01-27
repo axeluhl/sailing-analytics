@@ -42,7 +42,7 @@ public class TrackedRaceRetrievalProcessor extends AbstractRetrievalProcessor<Ha
                 } 
                 else {
                     //no tracked race found
-                    HasTrackedRaceContext trackedRaceWithContext = new TrackedRaceWithContext(element, null, raceColumn, fleet, null);
+                    HasTrackedRaceContext trackedRaceWithContext = new TrackedRaceWithContext(element, /* regatta */ null, raceColumn, fleet, /* trackedRace */ null);
                     trackedRacesWithContext.add(trackedRaceWithContext);
                 }
             }

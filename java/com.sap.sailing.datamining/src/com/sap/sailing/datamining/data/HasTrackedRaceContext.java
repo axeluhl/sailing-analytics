@@ -21,10 +21,13 @@ public interface HasTrackedRaceContext {
     public HasLeaderboardContext getLeaderboardContext();
     
     /**
-     * Never {@code null}
+     * May be {@code null}
      */
     public TrackedRace getTrackedRace();
     
+    /**
+     * May be {@code null}
+     */
     @Connector(messageKey="Regatta", ordinal=0)
     public Regatta getRegatta();
     
