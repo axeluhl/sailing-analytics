@@ -26,7 +26,7 @@ public class TestPreferenceMerging extends AbstractStoreMergeTest {
     }
     
     @Test
-    public void testImportFromSource1ToTarget1() throws UserGroupManagementException, UserManagementException {
+    public void testPreferenceMerging() throws UserGroupManagementException, UserManagementException {
         // assertions against unmodified target
         assertNull(targetUserStore.getPreference("admin", PREF_A));
         assertNull(targetUserStore.getPreference("admin", PREF_B));
