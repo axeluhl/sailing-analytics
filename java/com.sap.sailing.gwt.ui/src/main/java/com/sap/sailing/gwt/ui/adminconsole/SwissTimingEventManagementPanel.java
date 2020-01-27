@@ -24,7 +24,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.adminconsole.swisstiming.EditSwissTimingConnectionDialog;
+import com.sap.sailing.gwt.ui.adminconsole.swisstiming.SwissTimingConnectionDialog;
 import com.sap.sailing.gwt.ui.adminconsole.swisstiming.SwissTimingConnectionTableWrapper;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -91,7 +91,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 () -> connectionsTable.refreshSwissTimingConnectionList());
         // Add SwissTiming Connection
         buttonPanel.addCreateAction(stringMessages.addSwissTimingConnection(),
-                () -> new EditSwissTimingConnectionDialog(new SwissTimingConfigurationWithSecurityDTO(),
+                () -> new SwissTimingConnectionDialog(
                         new DialogCallback<SwissTimingConfigurationWithSecurityDTO>() {
                             @Override
                             public void ok(SwissTimingConfigurationWithSecurityDTO editedConnection) {

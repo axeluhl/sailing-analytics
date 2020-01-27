@@ -73,7 +73,7 @@ public class SwissTimingArchivedConnectionTableWrapper extends
         final AccessControlledActionsColumn<SwissTimingArchiveConfigurationWithSecurityDTO, DefaultActionsImagesBarCell> actionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_UPDATE, DefaultActions.UPDATE, dto -> {
-            new EditSwissTimingArchivedConnectionDialog(dto,
+            new SwissTimingArchivedConnectionEditDialog(dto,
                     new DialogCallback<SwissTimingArchiveConfigurationWithSecurityDTO>() {
                 @Override
                         public void ok(final SwissTimingArchiveConfigurationWithSecurityDTO editedObject) {
