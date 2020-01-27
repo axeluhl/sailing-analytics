@@ -26,16 +26,14 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 
-public class TestSimpleUserAndPreferenceMerge extends AbstractStoreMergeTest {
+public class TestComplexUserAndGroupMerge extends AbstractStoreMergeTest {
     @Before
-    public void setUp() throws IOException {
-        setUp("source1", "target1");
+    public void setUp() throws IOException, UserGroupManagementException, UserManagementException {
+        setUp("source_TestComplexUserAndGroupMerge", "target_TestComplexUserAndGroupMerge");
     }
     
     @Test
     public void testImportFromSource1ToTarget1() throws UserGroupManagementException, UserManagementException {
-        final SecurityStoreMerger merger = new SecurityStoreMerger(cfgForTarget, defaultCreationGroupNameForTarget);
-        final UserStore targetUserStore = merger.getTargetUserStore();
         assertNotNull(targetUserStore.getUserByName("admin"));
         assertNotNull(targetUserStore.getUserByName("<all>"));
         assertNotNull(targetUserStore.getUserByName("uhl"));
@@ -53,7 +51,6 @@ public class TestSimpleUserAndPreferenceMerge extends AbstractStoreMergeTest {
         assertNull(targetUserStore.getUserGroupByName("test-server"));
         assertEquals(1, Util.size(targetUserStore.getUserGroupByName("uhl-tenant").getUsers()));
         assertSame(targetUserStore.getUserByName("uhl"), targetUserStore.getUserGroupByName("uhl-tenant").getUsers().iterator().next());
-        final AccessControlStore targetAccessControlStore = merger.getTargetAccessControlStore();
         final Pair<UserStore, AccessControlStore> sourceStores = merger.importStores(cfgForSource, defaultCreationGroupNameForSource);
         final UserStore sourceUserStore = sourceStores.getA();
         // Should we need the source access control store, here it is:

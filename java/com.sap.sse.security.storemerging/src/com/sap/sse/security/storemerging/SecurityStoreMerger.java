@@ -99,11 +99,23 @@ public class SecurityStoreMerger {
         }
     }
 
-    Pair<UserStore, AccessControlStore> importStores(MongoDBConfiguration cfgForSource, String defaultCreationGroupNameForSource) throws UserGroupManagementException, UserManagementException {
+    public Pair<UserStore, AccessControlStore> importStores(MongoDBConfiguration cfgForSource, String defaultCreationGroupNameForSource) throws UserGroupManagementException, UserManagementException {
+        final Pair<UserStore, AccessControlStore> sourceStores = readStores(cfgForSource, defaultCreationGroupNameForSource);
         logger.info("Importing user store and access control store read from "+cfgForSource);
+        importStores(sourceStores.getA(), sourceStores.getB());
+        return sourceStores;
+    }
+    
+    Pair<UserStore, AccessControlStore> readStores(MongoDBConfiguration cfgForSource, String defaultCreationGroupNameForSource) throws UserGroupManagementException, UserManagementException {
+        logger.info("Reading user store and access control store from "+cfgForSource);
         final PersistenceFactory sourcePf = PersistenceFactory.create(cfgForSource.getService());
         final UserStore sourceUserStore = loadUserStore(sourcePf, defaultCreationGroupNameForSource);
         final AccessControlStore sourceAccessControlStore = loadAccessControlStore(sourcePf, sourceUserStore);
+        return new Pair<>(sourceUserStore, sourceAccessControlStore);
+    }
+    
+    void importStores(final UserStore sourceUserStore, final AccessControlStore sourceAccessControlStore) throws UserGroupManagementException, UserManagementException {
+        logger.info("Importing user store and access control store");
         // the following maps work like this: The keys are source objects to be imported.
         // If the key object is to be added to the target, it is its own value;
         // if it is to be dropped, the key is not part of the map. If it is to be merged with an object in the target,
@@ -119,7 +131,6 @@ public class SecurityStoreMerger {
         mergePreferences(sourceUserStore, userMap);
         mergeOwnerships(sourceAccessControlStore, ownershipsToTryToImport);
         mergeAccessControlLists(sourceAccessControlStore, userGroupMap);
-        return new Pair<>(sourceUserStore, sourceAccessControlStore);
     }
 
     private Map<User, User> markUsersForAddMergeOrDrop(UserStore sourceUserStore) {
