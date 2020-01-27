@@ -14,19 +14,16 @@ public class SystemInformationPanel extends FlowPanel {
     private final Label buildVersionText;
     private String fullVersionText;
     private boolean expanded;
+    private StringMessages stringMessages;
 
     public SystemInformationPanel(final ServerInfoDTO serverInfo, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
         super();
-        fullVersionText = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, "
-                + "sed diam nonumy eirmod tempor invidunt ut labore et dolore magna "
-                + "aliquyam erat, sed diam voluptua. At vero eos et accusam et justo "
-                + "duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata "
-                + "sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, "
-                + "consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt "
-                + "ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero "
-                + "eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, "
-                + "no sea takimata sanctus est Lorem ipsum dolor sit amet.";
+        this.stringMessages = stringMessages;
+        fullVersionText = ""
+                + "Version: 94fdf889aea829180a09fae3f7283703cd2deb1c-build-202001222210 "
+                + "System: :dbserver.internal.sapsailing.com:10202/dev-2010-rabbit.internal.sapsailing.com:/sapsailinganalytics-dev "
+                + "Started: 202001222249";
         buildVersionText = new Label("");
         buildVersionText.addClickHandler(new ClickHandler() {
             @Override
@@ -35,7 +32,7 @@ public class SystemInformationPanel extends FlowPanel {
             }
         });
         addFloatingWidget(buildVersionText);
-        buildVersionText.setText("Version information is hidden (click to expand)");
+        buildVersionText.setText(stringMessages.versionInfoHidden());
         // if (serverInfo != null) {
         // buildVersionText.setText(stringMessages.version(serverInfo.getBuildVersion()));
         // } else {
@@ -45,7 +42,7 @@ public class SystemInformationPanel extends FlowPanel {
 
     protected void toggleExpand() {
         if (expanded) {
-            buildVersionText.setText("Version information is hidden (click to expand)");
+            buildVersionText.setText(stringMessages.versionInfoHidden());
         } else {
             buildVersionText.setText(fullVersionText);
         }

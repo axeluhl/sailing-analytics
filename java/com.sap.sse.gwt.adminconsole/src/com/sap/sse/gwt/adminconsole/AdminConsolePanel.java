@@ -200,13 +200,19 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
             }
         };
         final DockPanel informationPanel = new DockPanel();
-        informationPanel.setWidth("100%");
+//        informationPanel.setWidth("100%");
         informationPanel.setSpacing(10);
-        informationPanel.add(errorReporter.getPersistentInformationWidget(), DockPanel.CENTER);
+        Widget persistentInformationWidget = errorReporter.getPersistentInformationWidget();
+        persistentInformationWidget.addStyleName("footerInfoPanel");
+        informationPanel.add(persistentInformationWidget, DockPanel.CENTER);
         SystemInformationPanel sysinfoPanel = new SystemInformationPanel(serverInfo, errorReporter, stringMessages);
+        sysinfoPanel.addStyleName("footerInfoPanel");
+        sysinfoPanel.addStyleName("systemInformationPanel");
         sysinfoPanel.ensureDebugId("SystemInformation");
         final Anchor releaseNotesLink = new Anchor(new SafeHtmlBuilder().appendEscaped(releaseNotesAnchorLabel).toSafeHtml(), releaseNotesURL);
-        sysinfoPanel.add(releaseNotesLink);
+        releaseNotesLink.addStyleName("footerInfoPanel");
+        //        sysinfoPanel.add(releaseNotesLink);
+        informationPanel.add(releaseNotesLink, DockPanel.EAST);
         informationPanel.add(sysinfoPanel, DockPanel.EAST);
         informationPanel.setCellHorizontalAlignment(sysinfoPanel, HasHorizontalAlignment.ALIGN_RIGHT);
         this.setFooterWidget(informationPanel);

@@ -76,6 +76,16 @@ fieldset legend {
 	clear: both;
 }
 
+.footerInfoPanel {
+    text-align: center;
+    padding: 0px 50px 0px 0px;
+}
+
+.systemInformationPanel {
+    cursor: pointer;
+    
+}
+
 .errorLabel {
 	color: #FF0000;
 }
