@@ -1741,7 +1741,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String contentSapInSailing3();
     String contentSapInSailing4();
     String contentSapInSailing5();
-    String contentSapInSailing6();
     String contentSapInSailing7();
     String contentSapInSailing8();
     String contentSapInSailing9();
