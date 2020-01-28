@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -389,6 +390,7 @@ public class SecurityStoreMerger {
                 targetUserStore.addPermissionForUser(targetUser.getName(), permission);
             }
         }
+        boolean updated = false;
         if (!targetUser.isEmailValidated() && sourceUser.isEmailValidated()) {
             final String validationSecret;
             if (targetUser.getValidationSecret() == null) {
@@ -400,8 +402,32 @@ public class SecurityStoreMerger {
             logger.info("Validating e-mail address "+targetUser.getEmail()+" of target user "+targetUser.getName()+
                     " because it was validated successfully on the source side");
             targetUser.validate(validationSecret);
+            updated = true;
+        }
+        updated = copyNonNullValue(sourceUser.getCompany(), targetUser.getCompany(), targetUser::setCompany);
+        updated = copyNonNullValue(sourceUser.getFullName(), targetUser.getFullName(), targetUser::setFullName);
+        updated = copyNonNullValue(sourceUser.getLocale(), targetUser.getLocale(), targetUser::setLocale);
+        if (updated) {
             targetUserStore.updateUser(targetUser);
         }
+    }
+
+    /**
+     * If the {@code sourceValue} is a non-{@code null} value, and {@code targetValue} is a {@code null}
+     * value, the {@code setterOnTargetUser} is used to copy the {@code sourceValue} to the target user.
+     * In this case, {@code true} is returned.
+     * 
+     * @return {@code true} if and only if the {@code setter} was called to update the {@code targetUser}
+     */
+    private <T> boolean copyNonNullValue(T sourceValue, T targetValue, Consumer<T> setterOnTargetUser) {
+        final boolean updated;
+        if (sourceValue != null && targetValue == null) {
+            setterOnTargetUser.accept(sourceValue);
+            updated = true;
+        } else {
+            updated = false;
+        }
+        return updated;
     }
 
     private void mergePreferences(UserStore sourceUserStore, Map<User, User> userMap) {
