@@ -32,7 +32,7 @@ There are a few dedicated server instances with their DBs:
 
 bartlomiejkapusta is empty. Removing. benjaminalhadef is largely empty. Removing. mandy is basically empty. Removing. filip is empty. Removing. thorbennowak empty. Removing. lukasgrallert basically empty. Removing. konradlipski only imported old stuff. Removing. gustavhultgren was not even started and had only one old test event. Removing. oriolmahiques has only empty events. Removing. thorechristiansen empty other than Bundesliga imports. Removing. tamarafischer basically empty. Removing. emilienpochet contains only empty events. Removing. paulbakker empty, removing. guentherpachschwoell only has league imports. Removing. rolandregnemer empty; removing. ditlevleth empty; removing. frederiksivertsen empty; removing. jassiskogman empty; removing. jyrikuivalainen empty; removing. martinmaursundrishovd empty; removing. The janekbalster and peterwagner DBs have remained, and their server instances have now been moved to the common multi-instance server. The "SL Multi-Instance Kiel" server has been terminated by now. YCL is completely empty. Removed.
 
-On the "SL Multi-Instance Sailing Server NVMe" server some cleanup is possible, too. I'll remove the ``ubilabs-test`` instance and DB. In particular, "49er" is empty and dead. I'll remove that now.
+On the "SL Multi-Instance Sailing Server NVMe" server some cleanup is possible, too. I'll remove the ``ubilabs-test`` instance and DB. In particular, "49er" is empty and dead. I'll remove that now. After checking back with Rasmus Koestner, I also got permission to dismantle the extreme-team.sapsailing.com instance with its ess-team-training DB.
 
 So the list of remaining active, non-isolated server database names other than ``winddb`` for the archive server is:
 * AARHUSSEJLKLUB
@@ -43,7 +43,6 @@ So the list of remaining active, non-isolated server database names other than `
 * baldeneysee
 * BYC
 * DUTCH_FEDERATION
-* ess-team-training
 * formula18
 * galvestaure
 * HNV
