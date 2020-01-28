@@ -200,7 +200,8 @@ public class DomainFactoryImpl implements DomainFactory {
             com.sap.sailing.domain.base.ControlPoint newDomainControlPoint = getOrCreateControlPoint(tractracControlPoint.getA());
             newDomainControlPoints.add(new com.sap.sse.common.Util.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>(newDomainControlPoint, tractracControlPoint.getB()));
         }
-        courseToUpdate.update(newDomainControlPoints, baseDomainFactory);
+        courseToUpdate.update(newDomainControlPoints, courseToUpdate.getAssociatedRoles(),
+                courseToUpdate.getOriginatingCourseTemplateIdOrNull(), baseDomainFactory);
     }
 
     @Override
@@ -224,8 +225,9 @@ public class DomainFactoryImpl implements DomainFactory {
                 List<Mark> marks = new ArrayList<Mark>();
                 for (ControlPointMetaData markMetadata : controlPointMetadata) {
                     Mark mark = baseDomainFactory.getOrCreateMark(markMetadata.getId(), markMetadata.getName(),
-                            markMetadata.getType(), markMetadata.getColor(), markMetadata.getShape(),
-                            markMetadata.getPattern());
+                            /* no separate short name; use name as short name, too */ markMetadata.getName(),
+                            markMetadata.getType(), markMetadata.getColor(),
+                            markMetadata.getShape(), markMetadata.getPattern());
                     marks.add(mark);
                 }
                 if (controlPoint.getHasTwoPoints()) {
@@ -233,7 +235,8 @@ public class DomainFactoryImpl implements DomainFactory {
                     Iterator<Mark> markIter = marks.iterator();
                     Mark mark1 = markIter.next();
                     Mark mark2 = markIter.next();
-                    domainControlPoint = baseDomainFactory.createControlPointWithTwoMarks(controlPoint.getId(), mark1, mark2, controlPoint.getName());
+                    domainControlPoint = baseDomainFactory.createControlPointWithTwoMarks(controlPoint.getId(), mark1,
+                            mark2, controlPoint.getName(), controlPoint.getShortName());
                 } else {
                     Mark mark = marks.iterator().next();
                     domainControlPoint = mark;

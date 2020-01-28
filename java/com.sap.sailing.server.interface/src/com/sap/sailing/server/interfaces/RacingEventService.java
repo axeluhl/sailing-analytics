@@ -899,4 +899,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
         }
         return result;
     }
+    
+    CourseAndMarkConfigurationFactory getCourseAndMarkConfigurationFactory();
 }

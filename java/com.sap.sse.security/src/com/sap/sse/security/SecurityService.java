@@ -49,7 +49,9 @@ import com.sap.sse.security.shared.impl.UserGroup;
 
 /**
  * A service interface for security management. Intended to be used as an OSGi service that can be registered, e.g., by
- * {@link BundleContext#registerService(Class, Object, java.util.Dictionary)} and can be discovered by other bundles.
+ * {@link BundleContext#registerService(Class, Object, java.util.Dictionary)} and can be discovered by other bundles.<p>
+ * 
+ * Permission checks will throw a {@link org.apache.shiro.authz.AuthorizationException} in case the check fails.
  * 
  * @author Axel Uhl (D043530)
  * @author Benjamin Ebling
@@ -472,18 +474,24 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     /**
      * Checks if the current user has the {@link DefaultActions#UPDATE UPDATE} permission on the {@code object} identified.
      * If {@code object} is {@code null}, the check will always pass.
+     * 
+     * @throws AuthorizationException in case the current user is not permitted to update {@code object}
      */
     void checkCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object);
 
     /**
      * Checks if the current user has the {@link DefaultActions#DELETE DELETE} permission on the {@code object} identified.
      * If {@code object} is {@code null}, the check will always pass.
+     * 
+     * @throws AuthorizationException in case the current user is not permitted to delete {@code object}
      */
     void checkCurrentUserDeletePermission(WithQualifiedObjectIdentifier object);
 
     /**
      * Checks if the current user has the {@link DefaultActions#DELETE DELETE} permission on the {@code object} identified.
      * If {@code object} is {@code null}, the check will always pass.
+     * 
+     * @throws AuthorizationException in case the current user is not permitted to delete {@code object}
      */
     void checkCurrentUserDeletePermission(QualifiedObjectIdentifier object);
 

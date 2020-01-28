@@ -9,8 +9,8 @@ public class GateDTO extends ControlPointDTO {
     
     public GateDTO() {}
     
-    public GateDTO(String idAsString, String name, MarkDTO left, MarkDTO right) {
-        super(idAsString, name);
+    public GateDTO(String idAsString, String name, MarkDTO left, MarkDTO right, String shortName) {
+        super(idAsString, name, shortName);
         this.left = left;
         this.right = right;
     }

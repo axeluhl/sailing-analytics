@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 
-interface AdminConsoleResources extends ClientBundle {
+public interface AdminConsoleResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/magnifier.png")
     ImageResource magnifierIcon();
 

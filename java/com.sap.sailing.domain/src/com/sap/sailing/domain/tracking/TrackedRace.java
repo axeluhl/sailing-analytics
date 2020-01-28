@@ -1218,7 +1218,7 @@ public interface TrackedRace
     }
 
     @Override
-    default HasPermissions getType() {
+    default HasPermissions getPermissionType() {
         return getSecuredDomainType();
     }
     

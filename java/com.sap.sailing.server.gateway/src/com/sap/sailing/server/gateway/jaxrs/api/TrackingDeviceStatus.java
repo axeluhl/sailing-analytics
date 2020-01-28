@@ -34,7 +34,7 @@ public final class TrackingDeviceStatus {
     
     public static TrackingDeviceStatus calculateDeviceStatus(DeviceIdentifier deviceIdentifier, RacingEventService service) {
         try {
-            Map<DeviceIdentifier, Timed> lastFixMap = service.getSensorFixStore().getLastFix(Collections.singletonList(deviceIdentifier));
+            Map<DeviceIdentifier, Timed> lastFixMap = service.getSensorFixStore().getFixLastReceived(Collections.singletonList(deviceIdentifier));
             Timed lastFix = lastFixMap.get(deviceIdentifier);
             GPSFix lastGPSFix = lastFix instanceof GPSFix ? (GPSFix) lastFix : null;
             return new TrackingDeviceStatus(deviceIdentifier, lastGPSFix);

@@ -724,7 +724,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
 
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
@@ -740,7 +740,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     }
 
     @Override
-    default HasPermissions getType() {
+    default HasPermissions getPermissionType() {
         return SecuredDomainType.LEADERBOARD;
     }
     

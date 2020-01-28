@@ -24,6 +24,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -86,6 +87,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.RaceColumnConstants;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
@@ -98,7 +100,6 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
-import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
@@ -120,6 +121,9 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJson
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.BaseRaceLogEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartProcedureChangedEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartTimeEventSerializer;
 import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
@@ -135,6 +139,7 @@ import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -645,7 +650,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         final Response result;
         if (leaderboardAndRaceColumnAndFleetAndResponse.getFleet() != null) {
             final RaceLog raceLog = leaderboardAndRaceColumnAndFleetAndResponse.getRaceColumn().getRaceLog(leaderboardAndRaceColumnAndFleetAndResponse.getFleet());
-            final LogEventAuthorImpl author = new LogEventAuthorImpl(SecurityUtils.getSubject().getPrincipal().toString(), /* priority */ 0);
+            final AbstractLogEventAuthor author = getService().getServerAuthor();
             JSONObject jsonResult = new JSONObject();
             if (startOfTrackingAsISO != null || startOfTrackingAsMillis != null) {
                 final TimePoint startOfTracking = parseTimePoint(startOfTrackingAsISO, startOfTrackingAsMillis, null);
@@ -895,11 +900,11 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                             fromStartBoatToPinEnd.reverse(), LINE_MARGIN);
                     final Position pinEndPosition = leftmostAndRightmostPositionsAtStart.getA().translateGreatCircle(
                             fromStartBoatToPinEnd, LINE_MARGIN);
-                    final Mark startBoat = getService().getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), "Auto "+waypointName+" Boat");
+                    final Mark startBoat = getService().getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), "Auto "+waypointName+" Boat", waypointName+"/S");
                     RegattaLogDefineMarkEventImpl defineStartBoatEvent = new RegattaLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
                             getService().getServerAuthor(), timePointForMarkFixes, UUID.randomUUID(), startBoat);
                     regattaLog.add(defineStartBoatEvent);
-                    final Mark pinEnd = getService().getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), "Auto "+waypointName+" Pin End");
+                    final Mark pinEnd = getService().getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), "Auto "+waypointName+" Pin End", waypointName+"/P");
                     RegattaLogDefineMarkEventImpl definePinEndEvent = new RegattaLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
                             getService().getServerAuthor(), timePointForMarkFixes, UUID.randomUUID(), pinEnd);
                     regattaLog.add(definePinEndEvent);
@@ -907,7 +912,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     getRaceLogTrackingAdapter().pingMark(regattaLog, pinEnd, new GPSFixImpl(pinEndPosition, timePointForMarkFixes), getService());
                     // TODO identify existing automatically-created equal-named marks and re-use. The "Auto..." pattern should be sufficiently unique for this application
                     final ControlPoint startLineControlPoint = getService().getBaseDomainFactory().getOrCreateControlPointWithTwoMarks(
-                            UUID.randomUUID(), "Auto "+waypointName+" Line", pinEnd, startBoat);
+                                    UUID.randomUUID(), "Auto " + waypointName + " Line", pinEnd, startBoat,
+                                    "Auto " + waypointName + " Line");
                     result = getService().getBaseDomainFactory().createWaypoint(startLineControlPoint, PassingInstruction.Line);
                 } else {
                     result = null;
@@ -1158,7 +1164,87 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         result.put("marks", array);
         return Response.ok(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
-
+    
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{leaderboardName}/starttime")
+    public Response getStartTime(@PathParam("leaderboardName") String leaderboardName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null) {
+            return Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
+        getSecurityService().checkCurrentUserReadPermission(leaderboard);
+        RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+        if (raceColumn == null) {
+            return Response
+                    .status(Status.NOT_FOUND)
+                    .entity("Could not find a race column '" + StringEscapeUtils.escapeHtml(raceColumnName) + "' in leaderboard '"
+                            + StringEscapeUtils.escapeHtml(leaderboardName) + "'.").type(MediaType.TEXT_PLAIN).build();
+        }
+        Fleet fleet = raceColumn.getFleetByName(fleetName);
+        if (fleet == null) {
+            return Response
+                    .status(Status.NOT_FOUND)
+                    .entity("Could not find a fleet '" + StringEscapeUtils.escapeHtml(fleetName) + "' in raceColumn '"
+                            + StringEscapeUtils.escapeHtml(raceColumnName) + "'.").type(MediaType.TEXT_PLAIN).build();
+        }
+        final Triple<TimePoint, Integer, RacingProcedureType> result = getService().getStartTimeAndProcedure(leaderboardName, raceColumnName, fleetName);
+        final JSONObject responseJson = new JSONObject();
+        if (result != null) {
+            responseJson.put("startTimeAsMillis", result.getA()==null?null:result.getA().asMillis());
+            responseJson.put("passId", result.getB());
+            responseJson.put("racingProcedureType", result.getC()==null?null:result.getC().name());
+        }
+        return Response.status(Status.OK)
+                .entity(responseJson.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+    }
+    
+    @PUT
+    @Produces("application/json;charset=UTF-8")
+    @Path("{leaderboardName}/starttime")
+    public Response setStartTime(@PathParam("leaderboardName") String leaderboardName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName,
+            @QueryParam(BaseRaceLogEventSerializer.FIELD_AUTHOR_NAME) String authorName,
+            @QueryParam(BaseRaceLogEventSerializer.FIELD_AUTHOR_PRIORITY) Integer authorPriority,
+            @QueryParam(BaseRaceLogEventSerializer.FIELD_PASS_ID) Integer passId,
+            @QueryParam(RaceLogStartTimeEventSerializer.FIELD_START_TIME) Long startTime,
+            @QueryParam(RaceLogStartProcedureChangedEventSerializer.FIELD_START_PROCEDURE_TYPE) String racingProcedure) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null) {
+            return Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
+        RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+        if (raceColumn == null) {
+            return Response
+                    .status(Status.NOT_FOUND)
+                    .entity("Could not find a race column '" + StringEscapeUtils.escapeHtml(raceColumnName) + "' in leaderboard '"
+                            + StringEscapeUtils.escapeHtml(leaderboardName) + "'.").type(MediaType.TEXT_PLAIN).build();
+        }
+        Fleet fleet = raceColumn.getFleetByName(fleetName);
+        if (fleet == null) {
+            return Response
+                    .status(Status.NOT_FOUND)
+                    .entity("Could not find a fleet '" + StringEscapeUtils.escapeHtml(fleetName) + "' in raceColumn '"
+                            + StringEscapeUtils.escapeHtml(raceColumnName) + "'.").type(MediaType.TEXT_PLAIN).build();
+        }
+        final TimePoint effectiveStartTime = getService().setStartTimeAndProcedure(
+                leaderboardName, raceColumnName, fleetName, authorName, authorPriority, passId, MillisecondsTimePoint.now(),
+                new MillisecondsTimePoint(startTime),
+                racingProcedure==null?null:RacingProcedureType.valueOf(racingProcedure));
+        final JSONObject responseJson = new JSONObject();
+        responseJson.put("startTimeAsMillis", effectiveStartTime.asMillis());
+        return Response.status(Status.OK)
+                .entity(responseJson.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+    }
+    
     /**
      * @return the actual or anticipated start order for the race identified by {@code raceColumnName}, {@code fleetName}.
      * Those competitors for which a start mark passing is already known are sorted by those start mark passings. All other
@@ -1315,13 +1401,6 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     private final MarkJsonSerializerWithPosition markWithPositionSerializer = new MarkJsonSerializerWithPosition(
             markSerializer, new FlatGPSFixJsonSerializer());
     private final FlatGPSFixJsonDeserializer fixDeserializer = new FlatGPSFixJsonDeserializer();
-
-    /**
-     * Mockito requires this to be public in order to be able to mock it :-(
-     */
-    public RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
-        return getService(RaceLogTrackingAdapterFactory.class).getAdapter(getService().getBaseDomainFactory());
-    }
 
     /**
      * Expects one GPS Fix in the format understood by {@link #fixDeserializer} in the POST message body, parses that fix,

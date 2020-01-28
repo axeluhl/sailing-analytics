@@ -186,6 +186,7 @@ import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
+import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.statistics.Statistics;
 import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -225,6 +226,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJ
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResultBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfoJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
+import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
 import com.sap.sailing.server.interfaces.DataImportLockWithProgress;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.SimulationService;
@@ -556,6 +558,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
 
+    private final CourseAndMarkConfigurationFactory courseAndMarkConfigurationFactory;
+
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
      * in some cases because containment and initialization order of some types is fairly tightly coupled.
@@ -596,7 +600,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     public RacingEventServiceImpl(boolean clearPersistentCompetitorAndBoatStore, final TypeBasedServiceFinderFactory serviceFinderFactory, boolean restoreTrackedRaces) {
         this(clearPersistentCompetitorAndBoatStore, serviceFinderFactory, null, /* sailingNotificationService */ null,
-                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null);
+                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null, /* sharedSailingDataTracker */ null);
     }
 
     /**
@@ -622,7 +626,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             final TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListenerManager trackedRegattaListener,
             SailingNotificationService sailingNotificationService,
             TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces,
-            ServiceTracker<SecurityService, SecurityService> securityServiceTracker) {
+            ServiceTracker<SecurityService, SecurityService> securityServiceTracker,
+            ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker) {
         this((final RaceLogAndTrackedRaceResolver raceLogResolver) -> {
             return new ConstructorParameters() {
                 private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE
@@ -653,7 +658,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             };
         }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), null, null, serviceFinderFactory, trackedRegattaListener,
                 sailingNotificationService, trackedRaceStatisticsCache, restoreTrackedRaces,
-                securityServiceTracker);
+                securityServiceTracker, sharedSailingDataTracker);
     }
 
     private RacingEventServiceImpl(final boolean clearPersistentCompetitorStore, WindStore windStore,
@@ -687,7 +692,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
             };
         }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), windStore, sensorFixStore, serviceFinderFactory, null,
-                sailingNotificationService, /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null);
+                sailingNotificationService, /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null,
+                /* sharedSailingDataTracker */ null);
     }
 
     public RacingEventServiceImpl(final DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
@@ -715,7 +721,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
             };
         }, mediaDB, windStore, sensorFixStore, null, null, /* sailingNotificationService */ null,
-                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null);
+                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null, /* sharedSailingDataTracker */ null);
     }
 
     /**
@@ -750,7 +756,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListenerManager trackedRegattaListener,
             SailingNotificationService sailingNotificationService,
             TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces,
-            ServiceTracker<SecurityService, SecurityService> securityServiceTracker) {
+            ServiceTracker<SecurityService, SecurityService> securityServiceTracker,
+            ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker) {
         logger.info("Created " + this);
         this.securityServiceTracker = securityServiceTracker;
         this.numberOfTrackedRacesRestored = new AtomicInteger();
@@ -837,6 +844,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             logger.log(Level.SEVERE, "Exception trying to obtain MongoDB sensor fix store", e);
             throw new RuntimeException(e);
         }
+        this.courseAndMarkConfigurationFactory = new CourseAndMarkConfigurationFactoryImpl(sharedSailingDataTracker,
+                this.sensorFixStore, this, getBaseDomainFactory());
         this.raceManagerDeviceConfigurationsById = new HashMap<>();
         this.raceManagerDeviceConfigurationsByName = new HashMap<>();
         this.serviceFinderFactory = serviceFinderFactory;
@@ -4278,9 +4287,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         if (regattaLike != null) {
             raceColumn = regattaLike.getRaceColumnByName(identifier.getRaceColumnName());
-        } else {
+                } else {
             raceColumn = null;
-        }
+                }
         return raceColumn;
     }
 
@@ -4672,6 +4681,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     public SecurityService getSecurityService() {
         return securityServiceTracker.getService();
+    }
+    
+    @Override
+    public CourseAndMarkConfigurationFactory getCourseAndMarkConfigurationFactory() {
+        return courseAndMarkConfigurationFactory;
     }
 
     public void setUnsentOperationToMasterSender(OperationsToMasterSendingQueue service) {
