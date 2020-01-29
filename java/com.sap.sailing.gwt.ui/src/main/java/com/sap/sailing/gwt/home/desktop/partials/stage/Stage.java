@@ -24,14 +24,12 @@ public class Stage extends Composite {
     SimplePanel widgetCarouselContainerUi;
     
     private StageTeaser stageTeaser;
-    private List<StageTeaser> stageTeaserComposites;
     private final DesktopPlacesNavigator placeNavigator;
 
     public Stage(DesktopPlacesNavigator placeNavigator) {
         this.placeNavigator = placeNavigator;
         StageResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        stageTeaserComposites = new ArrayList<StageTeaser>();
     }
 
     public void setFeaturedEvents(List<EventStageDTO> list) {
@@ -50,7 +48,6 @@ public class Stage extends Composite {
                 break;
             }
             widgetCarousel.addWidget(stageTeaser);
-            stageTeaserComposites.add(stageTeaser);
         }
         this.widgetCarouselContainerUi.setWidget(widgetCarousel);
     }
