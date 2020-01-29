@@ -296,7 +296,7 @@ Groups will be added if none with the same UUID or an equal name exists on the i
 
 Users with a name for which no user exists in the target will be marked for "add". If a target user exists with a name equal to that of the source user the source user will be marked for merge into the target user if the e-mail addresses are equal. Otherwise, the source user is marked for dropping. For objects marked for merging, the merge target is recorded for each merge source.
 
-Ownerships can only be marked for add or drop. They are added if no ownership exist in the target for the object ID yet and group or user owner will exist in the target (either added or merged); they are dropped otherwise, or if all owner references (group and/or user) point to objects marked for drop.
+Ownerships can only be marked for add or drop. They are added if no ownership exists in the target for the object ID yet and group or user owner will exist in the target (either added or merged); they are dropped otherwise, or if all owner references (group and/or user) point to objects marked for drop.
 
 Access control lists (ACLs) for object IDs for which no ACL exists in the target are marked for add. ACLs for object IDs for which an ACL exists already in the target are marked for merge. ACLs for which all groups used by it are marked for drop will be marked for drop.
 

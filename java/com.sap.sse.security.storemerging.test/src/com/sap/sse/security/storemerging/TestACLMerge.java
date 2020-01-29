@@ -1,0 +1,93 @@
+package com.sap.sse.security.storemerging;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.interfaces.AccessControlStore;
+import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.shared.UserGroupManagementException;
+import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
+
+public class TestACLMerge extends AbstractStoreMergeTest {
+    @Before
+    public void setUp() throws IOException, UserGroupManagementException, UserManagementException {
+        setUp("source_TestACLMerge", "target_TestACLMerge");
+    }
+    
+    /**
+     * Validates that an ACL for an object for which the target has an ACL is merged correctly: groups for which no
+     * action permissions have been specified in the target are added; action permission sets for groups for which the
+     * target already has permissions are merged
+     */
+    @Test
+    public void testACLMerge() throws UserGroupManagementException, UserManagementException {
+        final String NAME_OF_USER_TO_BE_DROPPED = "userWithACL";
+        final String NAME_OF_NEW_GROUP_WITH_NEW_ACTIONS = "newGroup";
+        // *********** assertions against unmodified target ***********
+        final User targetUserWithACL = targetUserStore.getUserByName(NAME_OF_USER_TO_BE_DROPPED);
+        assertNotNull(targetUserWithACL);
+        assertNull(targetUserStore.getUserGroupByName(NAME_OF_NEW_GROUP_WITH_NEW_ACTIONS));
+        final User targetAdmin = targetUserStore.getUserByName("admin");
+        final UserGroup targetAdminTenant = targetUserStore.getUserGroupByName("admin"+SecurityService.TENANT_SUFFIX);
+        assertNotNull(targetAdmin);
+        final AccessControlList targetUserWithAclACL = targetAccessControlStore.getAccessControlList(targetUserWithACL.getIdentifier()).getAnnotation();
+        assertNotNull(targetUserWithAclACL);
+        assertTrue(targetUserWithAclACL.getActionsByUserGroup().get(null).contains("READ_PUBLIC"));
+        assertTrue(targetUserWithAclACL.getActionsByUserGroup().get(null).contains("!DELETE"));
+        assertTrue(targetUserWithAclACL.getActionsByUserGroup().get(targetAdminTenant).contains("UPDATE"));
+        assertFalse(targetUserWithAclACL.getActionsByUserGroup().get(targetAdminTenant).contains("DELETE"));
+        // *********** reading source stores ***********
+        final Pair<UserStore, AccessControlStore> sourceStores = readSourceStores();
+        final UserStore sourceUserStore = sourceStores.getA();
+        final AccessControlStore sourceAccessControlStore = sourceStores.getB();
+        // *********** assertions against unmodified source ***********
+        final User sourceUserWithACL = sourceUserStore.getUserByName(NAME_OF_USER_TO_BE_DROPPED);
+        assertNotNull(sourceUserWithACL);
+        assertNotNull(sourceUserStore.getUserGroupByName(NAME_OF_NEW_GROUP_WITH_NEW_ACTIONS));
+        final User sourceAdmin = sourceUserStore.getUserByName("admin");
+        final UserGroup sourceAdminTenant = sourceUserStore.getUserGroupByName("admin"+SecurityService.TENANT_SUFFIX);
+        assertNotNull(sourceAdmin);
+        final UserGroup sourceNewGroup = sourceUserStore.getUserGroupByName(NAME_OF_NEW_GROUP_WITH_NEW_ACTIONS);
+        assertNotNull(sourceNewGroup);
+        final AccessControlList sourceUserWithAclACL = sourceAccessControlStore.getAccessControlList(sourceUserWithACL.getIdentifier()).getAnnotation();
+        assertNotNull(sourceUserWithAclACL);
+        assertFalse(sourceUserWithAclACL.getActionsByUserGroup().get(null).contains("READ_PUBLIC"));
+        assertTrue(sourceUserWithAclACL.getActionsByUserGroup().get(null).contains("READ"));
+        assertFalse(sourceUserWithAclACL.getActionsByUserGroup().get(null).contains("!DELETE"));
+        assertFalse(sourceUserWithAclACL.getActionsByUserGroup().get(sourceAdminTenant).contains("UPDATE"));
+        assertTrue(sourceUserWithAclACL.getActionsByUserGroup().get(sourceAdminTenant).contains("DELETE"));
+        assertTrue(sourceUserWithAclACL.getActionsByUserGroup().get(sourceAdminTenant).contains("CHANGE_ACL"));
+        assertTrue(sourceUserWithAclACL.getActionsByUserGroup().get(sourceNewGroup).contains("CHANGE_OWNERSHIP"));
+        assertTrue(sourceUserWithAclACL.getActionsByUserGroup().get(sourceNewGroup).contains("!FORCE_OVERWRITE_PASSWORD"));
+        // *********** merge ***********
+        mergeSourceIntoTarget(sourceUserStore, sourceAccessControlStore);
+        // *********** assertions for merge result ***********
+        final User newTargetUserWithACL = targetUserStore.getUserByName(NAME_OF_USER_TO_BE_DROPPED);
+        assertNotNull(newTargetUserWithACL);
+        assertNotNull(targetUserStore.getUserGroupByName(NAME_OF_NEW_GROUP_WITH_NEW_ACTIONS));
+        final UserGroup targetNewGroup = sourceUserStore.getUserGroupByName(NAME_OF_NEW_GROUP_WITH_NEW_ACTIONS);
+        assertNotNull(targetNewGroup);
+        final AccessControlList newTargetUserWithAclACL = targetAccessControlStore.getAccessControlList(newTargetUserWithACL.getIdentifier()).getAnnotation();
+        assertNotNull(newTargetUserWithAclACL);
+        assertTrue(newTargetUserWithAclACL.getActionsByUserGroup().get(null).contains("READ_PUBLIC"));
+        assertTrue(newTargetUserWithAclACL.getActionsByUserGroup().get(null).contains("READ"));
+        assertTrue(newTargetUserWithAclACL.getActionsByUserGroup().get(null).contains("!DELETE"));
+        assertTrue(newTargetUserWithAclACL.getActionsByUserGroup().get(targetAdminTenant).contains("UPDATE"));
+        assertTrue(newTargetUserWithAclACL.getActionsByUserGroup().get(targetAdminTenant).contains("DELETE"));
+        assertTrue(newTargetUserWithAclACL.getActionsByUserGroup().get(targetAdminTenant).contains("CHANGE_ACL"));
+        assertTrue(newTargetUserWithAclACL.getActionsByUserGroup().get(targetNewGroup).contains("CHANGE_OWNERSHIP"));
+        assertTrue(newTargetUserWithAclACL.getActionsByUserGroup().get(targetNewGroup).contains("!FORCE_OVERWRITE_PASSWORD"));
+    }
+}

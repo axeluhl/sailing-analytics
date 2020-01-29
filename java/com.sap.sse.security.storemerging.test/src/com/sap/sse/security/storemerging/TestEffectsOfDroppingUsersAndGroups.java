@@ -2,6 +2,7 @@ package com.sap.sse.security.storemerging;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
@@ -19,8 +20,10 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 
@@ -45,6 +48,10 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         assertNull(targetSameEmail.getFullName());
         assertNull(targetSameEmail.getCompany());
         assertNull(targetSameEmail.getLocale());
+        assertFalse(targetSameEmail.isEmailValidated());
+        final UsernamePasswordAccount targetSameEmailAccount = (UsernamePasswordAccount) targetSameEmail.getAccount(AccountType.USERNAME_PASSWORD);
+        final byte[] targetSameEmailAccountSalt = targetSameEmailAccount.getSalt();
+        final String targetSameEmailAccountSaltedPassword = targetSameEmailAccount.getSaltedPassword();
         assertNull(targetUserStore.getPreference(targetSameEmail.getName(), PREFERENCE_NAME));
         assertTrue(Util.isEmpty(targetSameEmail.getPermissions()));
         final UserGroup targetGroup1 = targetUserStore.getUserGroupByName("Group1");
@@ -62,6 +69,12 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         assertNotNull(sourceSameEmail.getCompany());
         assertNotNull(sourceSameEmail.getLocale());
         assertNotSame(sourceSameEmail, targetSameEmail);
+        final UsernamePasswordAccount sourceSameEmailAccount = (UsernamePasswordAccount) sourceSameEmail.getAccount(AccountType.USERNAME_PASSWORD);
+        final byte[] sourceSameEmailAccountSalt = sourceSameEmailAccount.getSalt();
+        assertNotEquals(targetSameEmailAccountSalt, sourceSameEmailAccountSalt);
+        final String sourceSameEmailAccountSaltedPassword = sourceSameEmailAccount.getSaltedPassword();
+        assertNotEquals(targetSameEmailAccountSaltedPassword, sourceSameEmailAccountSaltedPassword);
+        assertTrue(sourceSameEmail.isEmailValidated());
         // we expect the following permissions on sourceSameEmail:
         // LEADERBOARD:UPDATE, SERVER:DATA_MINING and SERVER:DATA_MINING:unknown server name-server
         assertFalse(Util.isEmpty(Util.filter(sourceSameEmail.getPermissions(), p->p.getParts().size() == 2 &&
@@ -122,6 +135,13 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         assertEquals(sourceSameEmail.getFullName(), updatedTargetSameEmail.getFullName());
         assertEquals(sourceSameEmail.getCompany(), updatedTargetSameEmail.getCompany());
         assertEquals(sourceSameEmail.getLocale(), updatedTargetSameEmail.getLocale());
+        // expect email to be validated because it was validated in the source
+        assertTrue(updatedTargetSameEmail.isEmailValidated());
+        // expect original account/password information to be unchanged:
+        final UsernamePasswordAccount newTargetSameEmailAccount = (UsernamePasswordAccount) targetUserStore.getUserByName("same-email").getAccount(AccountType.USERNAME_PASSWORD);
+        assertEquals(targetSameEmailAccountSalt, newTargetSameEmailAccount.getSalt());
+        final String newTargetSameEmailAccountSaltedPassword = newTargetSameEmailAccount.getSaltedPassword();
+        assertEquals(targetSameEmailAccountSaltedPassword, newTargetSameEmailAccountSaltedPassword);
         // the aaa-tenant group is a tricky case: its only user is expected to have been dropped,
         // but its name equals that of a group in target, and originally it had an "aaa" user in it;
         // drop or merge?
