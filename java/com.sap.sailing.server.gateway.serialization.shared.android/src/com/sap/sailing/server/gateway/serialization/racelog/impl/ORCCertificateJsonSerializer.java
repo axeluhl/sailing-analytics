@@ -28,6 +28,7 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
     public static final String ORC_CERTIFICATE_ID = "ID";
     public static final String ORC_CERTIFICATE_LENGTH = "length";
     public static final String ORC_CERTIFICATE_ISSUE_DATE = "issueDate";
+    public static final String ORC_CERTIFICATE_TWS = "ORC_CERTIFICATE_TWS_";
     public static final String ORC_CERTIFICATE_TWS_6KT = "ORC_CERTIFICATE_TWS_6KT";
     public static final String ORC_CERTIFICATE_TWS_8KT = "ORC_CERTIFICATE_TWS_8KT";
     public static final String ORC_CERTIFICATE_TWS_10KT = "ORC_CERTIFICATE_TWS_10KT";
@@ -35,6 +36,8 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
     public static final String ORC_CERTIFICATE_TWS_14KT = "ORC_CERTIFICATE_TWS_14KT";
     public static final String ORC_CERTIFICATE_TWS_16KT = "ORC_CERTIFICATE_TWS_16KT";
     public static final String ORC_CERTIFICATE_TWS_20KT = "ORC_CERTIFICATE_TWS_20KT";
+
+    public static final String ORC_CERTIFICATE_R = "ORC_CERTIFICATE_R";
     public static final String ORC_CERTIFICATE_R52_PREDICTION = "ORC_CERTIFICATE_R52_PREDICTION";
     public static final String ORC_CERTIFICATE_R60_PREDICTION = "ORC_CERTIFICATE_R60_PREDICTION";
     public static final String ORC_CERTIFICATE_R75_PREDICTION = "ORC_CERTIFICATE_R75_PREDICTION";
@@ -43,6 +46,8 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
     public static final String ORC_CERTIFICATE_R120_PREDICTION = "ORC_CERTIFICATE_R120_PREDICTION";
     public static final String ORC_CERTIFICATE_R135_PREDICTION = "ORC_CERTIFICATE_R135_PREDICTION";
     public static final String ORC_CERTIFICATE_R150_PREDICTION = "ORC_CERTIFICATE_R150_PREDICTION";
+    public static final String ORC_CERTIFICATE_CUSTOM_TRUE_WIND_SPEED = "customTrueWindSpeed";
+    public static final String ORC_CERTIFICATE_CUSTOM_TRUE_WIND_ANGLE = "customTrueWindSpeed";
 
     @Override
     public JSONObject serialize(ORCCertificate certificate) {
@@ -54,8 +59,9 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
         result.put(ORC_CERTIFICATE_GPH, certificate.getGPHInSecondsToTheMile());
         result.put(ORC_CERTIFICATE_CDL, certificate.getCDL());
         result.put(ORC_CERTIFICATE_LENGTH, certificate.getLengthOverAll().getMeters());
-        result.put(ORC_CERTIFICATE_ISSUE_DATE, certificate.getIssueDate()==null?null:certificate.getIssueDate().asMillis());
-        
+        result.put(ORC_CERTIFICATE_ISSUE_DATE,
+                certificate.getIssueDate() == null ? null : certificate.getIssueDate().asMillis());
+
         JSONObject beatAngles = new JSONObject();
         JSONObject runAngles = new JSONObject();
         JSONObject beatAllowances = new JSONObject();
@@ -67,7 +73,7 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
         JSONObject longDistancePredictions = new JSONObject();
         JSONObject nonSpinnakerPredictions = new JSONObject();
         JSONObject velocityPredictionsPerTrueWindSpeedAndAngle = new JSONObject();
-        for (Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
+        for (Speed tws : certificate.getTrueWindSpeed()) {
             String keyTWS = speedToKnotsString(tws);
             JSONObject velocityPredictionsPerTrueWindAngle = new JSONObject();
             beatAngles.put(keyTWS, certificate.getBeatAngles().get(tws).getDegrees());
@@ -80,13 +86,14 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
             circularRandomPredictions.put(keyTWS, certificate.getCircularRandomSpeedPredictions().get(tws).getKnots());
             longDistancePredictions.put(keyTWS, certificate.getLongDistanceSpeedPredictions().get(tws).getKnots());
             nonSpinnakerPredictions.put(keyTWS, certificate.getNonSpinnakerSpeedPredictions().get(tws).getKnots());
-            for (Bearing twa : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES) {
+            for (Bearing twa : certificate.getTrueWindAngle()) {
                 String keyTWA = bearingToDegreeString(twa);
-                velocityPredictionsPerTrueWindAngle.put(keyTWA, certificate.getVelocityPredictionPerTrueWindSpeedAndAngle().get(tws).get(twa).getKnots());
+                velocityPredictionsPerTrueWindAngle.put(keyTWA,
+                        certificate.getVelocityPredictionPerTrueWindSpeedAndAngle().get(tws).get(twa).getKnots());
             }
             velocityPredictionsPerTrueWindSpeedAndAngle.put(keyTWS, velocityPredictionsPerTrueWindAngle);
         }
-        
+
         result.put(ORC_CERTIFICATE_BEAT_ANGLES, beatAngles);
         result.put(ORC_CERTIFICATE_RUN_ANGLES, runAngles);
         result.put(ORC_CERTIFICATE_BEAT_ALLOWANCES, beatAllowances);
@@ -98,6 +105,8 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
         result.put(ORC_CERTIFICATE_CIRCULAR_RANDOM_SPEED_PREDICTIONS, circularRandomPredictions);
         result.put(ORC_CERTIFICATE_NON_SPINNAKER_SPEED_PREDICTIONS, nonSpinnakerPredictions);
         result.put(ORC_CERTIFICATE_TWA_SPEED_PREDICTIONS, velocityPredictionsPerTrueWindSpeedAndAngle);
+//        result.put(ORC_CERTIFICATE_CUSTOM_TRUE_WIND_ANGLE, certificate.getTrueWindAngle()); TODO: need to convert the values into json array
+//        result.put(ORC_CERTIFICATE_CUSTOM_TRUE_WIND_SPEED, certificate.getTrueWindSpeed()); TODO: need to convert the values into json array
         return result;
     }
 
@@ -117,6 +126,8 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
             result = ORC_CERTIFICATE_TWS_16KT;
         } else if (speed.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[6])) {
             result = ORC_CERTIFICATE_TWS_20KT;
+        } else {
+            result = ORC_CERTIFICATE_TWS.concat(String.valueOf(speed.getKnots())).concat("KT");
         }
         return result;
     }
@@ -139,6 +150,8 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
             result = ORC_CERTIFICATE_R135_PREDICTION;
         } else if (bearing.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES[7])) {
             result = ORC_CERTIFICATE_R150_PREDICTION;
+        } else {
+            result = ORC_CERTIFICATE_R.concat(String.valueOf(bearing.getDegrees())).concat("_PREDICTION");
         }
         return result;
     }

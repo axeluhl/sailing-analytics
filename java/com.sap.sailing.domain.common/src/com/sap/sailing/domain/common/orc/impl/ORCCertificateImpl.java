@@ -255,4 +255,14 @@ public class ORCCertificateImpl implements ORCCertificate {
         return "Certificate with ID \""+getId()+"\" for "+getSailNumber()+" / "+getBoatName() + " - Issued on: " + (getIssueDate()==null?"n/a":getIssueDate().asDate())+" with GPH "+
                 Util.padPositiveValue(getGPHInSecondsToTheMile(), 1, 1, /* round */ true);
     }
+
+    @Override
+    public Speed[] getTrueWindSpeed() {
+        return ALLOWANCES_TRUE_WIND_SPEEDS;
+    }
+
+    @Override
+    public Bearing[] getTrueWindAngle() {
+        return ALLOWANCES_TRUE_WIND_ANGLES;
+    }
 }

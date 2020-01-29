@@ -128,4 +128,7 @@ public interface ORCCertificate extends WithID, Serializable {
     Map<Speed, Map<Bearing, Speed>> getVelocityPredictionPerTrueWindSpeedAndAngle();
 
     String getBoatName();
+    
+    Speed[] getTrueWindSpeed();
+    Bearing[] getTrueWindAngle();
 }
