@@ -20,12 +20,15 @@ import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
@@ -122,20 +125,20 @@ public class SecurityStoreMerger {
         // If the key object is to be added to the target, it is its own value;
         // if it is to be dropped, the key is not part of the map. If it is to be merged with an object in the target,
         // the corresponding target object is the value.
-        final Map<User, User> userMap = markUsersForAddMergeOrDrop(sourceUserStore);
+        final Map<User, User> userMap = markUsersForAddMergeOrDrop(sourceUserStore, sourceAccessControlStore);
         final Map<UserGroup, UserGroup> userGroupMap = markUserGroupsForAddMergeOrDrop(sourceUserStore, userMap);
-        replaceSourceUserReferencesToUsersAndGroups(userMap, userGroupMap);
+        replaceSourceUserReferencesToUsersAndGroups(userMap, userGroupMap, sourceAccessControlStore);
         replaceSourceUserGroupReferencesToUsers(userMap, userGroupMap);
         final Set<OwnershipAnnotation> ownershipsToTryToImport =
                 replaceSourceOwnershipReferencesToUsersAndGroups(sourceAccessControlStore, userMap, userGroupMap);
         replaceSourceAccessControlListReferencesToGroups(sourceAccessControlStore, userGroupMap);
-        mergeUsersAndGroups(sourceUserStore, userMap, userGroupMap);
+        mergeUsersAndGroups(sourceUserStore, userMap, userGroupMap, sourceAccessControlStore);
         mergePreferences(sourceUserStore, userMap);
         mergeOwnerships(sourceAccessControlStore, ownershipsToTryToImport);
         mergeAccessControlLists(sourceAccessControlStore, userGroupMap);
     }
 
-    private Map<User, User> markUsersForAddMergeOrDrop(UserStore sourceUserStore) {
+    private Map<User, User> markUsersForAddMergeOrDrop(UserStore sourceUserStore, AccessControlStore sourceAccessControlStore) {
         final Map<User, User> userMap = new HashMap<>();
         for (final User user : sourceUserStore.getUsers()) {
             final User targetUserWithEqualName = targetUserStore.getUserByName(user.getName());
@@ -147,6 +150,13 @@ public class SecurityStoreMerger {
                 } else {
                     logger.info("Found user " + user.getName() + " in target, but e-mail addresses " + user.getEmail()
                             + " and " + targetUserWithEqualName.getEmail() + " don't match. Dropping.");
+                    // remove all permission and role association's ownerships and ACLs:
+                    for (final Role role : user.getRoles()) {
+                        removeRoleAssociationOwnershipAndACL(role, user, sourceAccessControlStore);
+                    }
+                    for (final WildcardPermission permission : user.getPermissions()) {
+                        removePermissionAssociationOwnershipAndACL(permission, user, sourceAccessControlStore);
+                    }
                 }
             } else {
                 logger.info("User "+user.getName()+" not found in target. Marking for adding.");
@@ -188,7 +198,7 @@ public class SecurityStoreMerger {
     }
 
     private void replaceSourceUserReferencesToUsersAndGroups(Map<User, User> userMap,
-            Map<UserGroup, UserGroup> userGroupMap) {
+            Map<UserGroup, UserGroup> userGroupMap, AccessControlStore sourceAccessControlStore) {
         for (final User sourceUser : userMap.keySet()) {
             final Set<Role> rolesToRemoveBecauseOfLostOrMissingQualifier = new HashSet<>();
             final Map<Role, Role> rolesToReplaceDueToChangingQualifierObject = new HashMap<>();
@@ -235,14 +245,46 @@ public class SecurityStoreMerger {
             }
             for (final Role roleToRemove : rolesToRemoveBecauseOfLostOrMissingQualifier) {
                 sourceUser.removeRole(roleToRemove);
+                // also remove ownership/ACL information for the corresponding role association:
+                removeRoleAssociationOwnershipAndACL(roleToRemove, sourceUser, sourceAccessControlStore);
             }
             for (final Entry<Role, Role> e : rolesToReplaceDueToChangingQualifierObject.entrySet()) {
+                // the role may change its security ID by replacing the group ID; therefore, we need to
+                // move the ownership / ACL information from old to new; redundant if only the user was
+                // replaced because the username would remain unchanged.
+                final QualifiedObjectIdentifier idOfOldRoleAssociation = SecuredSecurityTypes.ROLE_ASSOCIATION
+                        .getQualifiedObjectIdentifier(PermissionAndRoleAssociation.get(e.getKey(), sourceUser));
+                final OwnershipAnnotation oldRoleAssociationOwnership = sourceAccessControlStore.getOwnership(idOfOldRoleAssociation);
+                final AccessControlListAnnotation oldRoleAssociationACL = sourceAccessControlStore.getAccessControlList(idOfOldRoleAssociation);
                 sourceUser.removeRole(e.getKey());
+                sourceAccessControlStore.removeOwnership(idOfOldRoleAssociation);
+                sourceAccessControlStore.removeAccessControlList(idOfOldRoleAssociation);
                 sourceUser.addRole(e.getValue());
+                // now apply the copied ownership / ACL information to the new role association:
+                final QualifiedObjectIdentifier idOfNewRoleAssociation = SecuredSecurityTypes.ROLE_ASSOCIATION
+                    .getQualifiedObjectIdentifier(PermissionAndRoleAssociation.get(e.getValue(), sourceUser));
+                if (oldRoleAssociationOwnership != null) {
+                    sourceAccessControlStore.setOwnership(idOfNewRoleAssociation,
+                            oldRoleAssociationOwnership.getAnnotation().getUserOwner(),
+                            oldRoleAssociationOwnership.getAnnotation().getTenantOwner(),
+                            oldRoleAssociationOwnership.getDisplayNameOfAnnotatedObject());
+                }
+                if (oldRoleAssociationACL != null) {
+                    for (final Entry<UserGroup, Set<String>> permissionMap : oldRoleAssociationACL.getAnnotation().getActionsByUserGroup().entrySet()) {
+                        sourceAccessControlStore.setAclPermissions(idOfNewRoleAssociation, permissionMap.getKey(), permissionMap.getValue());
+                    }
+                }
             }
         }
     }
     
+    private void removeRoleAssociationOwnershipAndACL(Role roleToRemove, User sourceUser, AccessControlStore sourceAccessControlStore) {
+        final QualifiedObjectIdentifier idOfRoleAssociation = SecuredSecurityTypes.ROLE_ASSOCIATION
+                .getQualifiedObjectIdentifier(PermissionAndRoleAssociation.get(roleToRemove, sourceUser));
+        sourceAccessControlStore.removeOwnership(idOfRoleAssociation);
+        sourceAccessControlStore.removeAccessControlList(idOfRoleAssociation);
+    }
+
     private void replaceSourceUserGroupReferencesToUsers(Map<User, User> userMap,
             Map<UserGroup, UserGroup> userGroupMap) {
         // two passes to avoid ConcurrentModificationException
@@ -324,7 +366,7 @@ public class SecurityStoreMerger {
     }
 
     private void mergeUsersAndGroups(UserStore sourceUserStore, Map<User, User> userMap,
-            Map<UserGroup, UserGroup> userGroupMap) throws UserGroupManagementException, UserManagementException {
+            Map<UserGroup, UserGroup> userGroupMap, AccessControlStore sourceAccessControlStore) throws UserGroupManagementException, UserManagementException {
         for (final UserGroup sourceGroup : sourceUserStore.getUserGroups()) {
             final UserGroup targetGroup = userGroupMap.get(sourceGroup);
             if (targetGroup != null) {
@@ -343,7 +385,7 @@ public class SecurityStoreMerger {
                     // places the existing user into the target user store
                     targetUserStore.addUser(targetUser);
                 } else {
-                    mergeSecondUserIntoFirst(targetUser, sourceUser, userGroupMap);
+                    mergeSecondUserIntoFirst(targetUser, sourceUser, userGroupMap, sourceAccessControlStore);
                 }
             } // else drop
         }
@@ -371,7 +413,7 @@ public class SecurityStoreMerger {
         }
     }
 
-    private void mergeSecondUserIntoFirst(User targetUser, User sourceUser, Map<UserGroup, UserGroup> userGroupMap) throws UserManagementException {
+    private void mergeSecondUserIntoFirst(User targetUser, User sourceUser, Map<UserGroup, UserGroup> userGroupMap, AccessControlStore sourceAccessControlStore) throws UserManagementException {
         assert Util.equalsWithNull(targetUser.getEmail(), sourceUser.getEmail());
         for (final Role role : sourceUser.getRoles()) {
             if (role.getQualifiedForTenant() == null && role.getQualifiedForUser() == null) {
@@ -391,6 +433,8 @@ public class SecurityStoreMerger {
         for (final WildcardPermission permission : sourceUser.getPermissions()) {
             if (Util.isEmpty(permission.getQualifiedObjectIdentifiers())) {
                 logger.severe("Dropping unqualified permission "+permission+" for user "+sourceUser.getName());
+                // make sure that the permission association's ownership/ACL are not copied to target:
+                removePermissionAssociationOwnershipAndACL(permission, sourceUser, sourceAccessControlStore);
             } else {
                 logger.info("Adding qualified permission "+permission+" to target user "+targetUser.getName());
                 targetUserStore.addPermissionForUser(targetUser.getName(), permission);
@@ -417,6 +461,14 @@ public class SecurityStoreMerger {
         if (updated) {
             targetUserStore.updateUser(targetUser);
         }
+    }
+
+    private void removePermissionAssociationOwnershipAndACL(final WildcardPermission permission,
+            User sourceUser, AccessControlStore sourceAccessControlStore) {
+        final QualifiedObjectIdentifier idOfOldPermissionAssociation = SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                .getQualifiedObjectIdentifier(PermissionAndRoleAssociation.get(permission, sourceUser));
+        sourceAccessControlStore.removeOwnership(idOfOldPermissionAssociation);
+        sourceAccessControlStore.removeAccessControlList(idOfOldPermissionAssociation);
     }
 
     private boolean mergeDefaultCreationGroups(User targetUser, User sourceUser, Map<UserGroup, UserGroup> userGroupMap) {
