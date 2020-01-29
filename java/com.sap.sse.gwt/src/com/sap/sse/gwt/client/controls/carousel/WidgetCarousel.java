@@ -84,7 +84,7 @@ public class WidgetCarousel extends Composite {
 
     public void onAfterChange() {
         for (Iterator<Widget> iterator = items.iterator(); iterator.hasNext();) {
-            Widget widget = (Widget) iterator.next();
+            Widget widget = iterator.next();
             final Element parent = widget.getElement();
 
             if (parent != null) {
