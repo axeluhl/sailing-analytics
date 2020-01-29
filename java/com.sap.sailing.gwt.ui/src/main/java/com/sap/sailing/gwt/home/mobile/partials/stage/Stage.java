@@ -37,6 +37,7 @@ public class Stage extends Composite {
     }
 
     public void setFeaturedEvents(List<? extends EventLinkAndMetadataDTO> list) {
+        final List<Widget> stageWidgets = new ArrayList<>();
         for (EventLinkAndMetadataDTO event : list) {
             switch (event.getStageType()) {
             case POPULAR:
@@ -49,7 +50,8 @@ public class Stage extends Composite {
                 stageTeaser = new UpcomingEventStageTeaser(event, placeNavigator);
                 break;
             }
-            widgetCarousel.addWidget(stageTeaser);
+            stageWidgets.add(stageTeaser);
+            widgetCarousel.setWidgets(stageWidgets);
         }
     }
 }

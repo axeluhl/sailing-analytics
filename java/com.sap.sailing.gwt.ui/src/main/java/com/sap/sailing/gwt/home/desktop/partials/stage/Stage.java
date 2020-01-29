@@ -33,8 +33,7 @@ public class Stage extends Composite {
     }
 
     public void setFeaturedEvents(List<EventStageDTO> list) {
-        final WidgetCarousel widgetCarousel = new WidgetCarousel();
-        widgetCarousel.setShowDots(false);
+        final List<Widget> stageWidgets = new ArrayList<>();
         for (EventStageDTO event : list) {
             switch (event.getStageType()) {
             case POPULAR:
@@ -47,8 +46,11 @@ public class Stage extends Composite {
                 stageTeaser = new UpcomingEventStageTeaser(event, placeNavigator);
                 break;
             }
-            widgetCarousel.addWidget(stageTeaser);
+            stageWidgets.add(stageTeaser);
         }
+        final WidgetCarousel widgetCarousel = new WidgetCarousel();
+        widgetCarousel.setShowDots(false);
+        widgetCarousel.setWidgets(stageWidgets);
         this.widgetCarouselContainerUi.setWidget(widgetCarousel);
     }
 }

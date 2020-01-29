@@ -66,6 +66,8 @@ public class WidgetCarousel extends Composite {
     private boolean showArrows = true;
 
     private LinkedList<Widget> items = new LinkedList<Widget>();
+    
+    private boolean initialized;
 
     /**
      * Widget constructor
@@ -76,10 +78,25 @@ public class WidgetCarousel extends Composite {
         sliderMainUi.addStyleName(uniqueId);
     }
     
+    private void initializeIfRequired() {
+        // Slick slider may only get initialized when it is attached to DOM, visible and items are added
+        // Rendering bugs may occur otherwise
+        if (!initialized && !items.isEmpty() && isAttached() && isVisible()) {
+            init();
+            initialized = true;
+        }
+    }
+    
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        initializeIfRequired();
+    }
+    
     @Override
     protected void onLoad() {
         super.onLoad();
-        init();
+        initializeIfRequired();
     }
 
     public void onAfterChange() {
@@ -116,7 +133,6 @@ public class WidgetCarousel extends Composite {
      * @param uniqueId
      */
     native void setupSlider(WidgetCarousel sliderReference) /*-{
-
         $wnd
                 .$(
                         '.'
@@ -160,16 +176,26 @@ public class WidgetCarousel extends Composite {
      * @param url
      * 
      */
-    public void addWidget(Widget slide) {
-        if (items.isEmpty()) {
-            if (slide instanceof LazyLoadable) {
-                LazyLoadable lazyLoadable = (LazyLoadable) slide;
-                lazyLoadable.doInitializeLazyComponents();
-            }
+    public void setWidgets(Iterable<Widget> slides) {
+        for (Widget slide : slides) {
+            items.add(slide);
+            sliderMainUi.add(slide);
         }
-        items.add(slide);
-        sliderMainUi.add(slide);
-        onAfterChange();
+        if (!items.isEmpty()) {
+            ensureInitialized(items.getFirst());
+            if (items.size() > 1) {
+                ensureInitialized(items.get(1));
+            }
+            ensureInitialized(items.getLast());
+        }
+        initializeIfRequired();
+    }
+    
+    private void ensureInitialized(Widget slide) {
+        if (slide instanceof LazyLoadable) {
+            LazyLoadable lazyLoadable = (LazyLoadable) slide;
+            lazyLoadable.doInitializeLazyComponents();
+        }
     }
 
     /**
