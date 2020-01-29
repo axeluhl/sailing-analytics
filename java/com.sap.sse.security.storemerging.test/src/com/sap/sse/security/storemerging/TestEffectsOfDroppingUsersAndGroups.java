@@ -47,6 +47,7 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         final User targetAaa = targetUserStore.getUserByName("aaa");
         assertNotNull(targetAaa);
         assertNull(targetAccessControlStore.getOwnership(targetAaa.getIdentifier()).getAnnotation().getTenantOwner());
+        assertNull(targetAccessControlStore.getAccessControlList(targetAaa.getIdentifier()));
         assertNull(targetUserStore.getPreference(targetAaa.getName(), PREFERENCE_NAME));
         final UserGroup targetAaaTenant = targetUserStore.getUserGroupByName("aaa-tenant");
         assertNotNull(targetAaaTenant);
@@ -113,6 +114,8 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         // that those ownerships and ACLs don't show up in target because the unqualified role will be dropped
         final QualifiedObjectIdentifier idOfAdminRoleAssociationOnSameEmail = SecuredSecurityTypes.ROLE_ASSOCIATION.getQualifiedObjectIdentifier(
                 PermissionAndRoleAssociation.get(sourceAdminRoleOnSameEmail, sourceSameEmail));
+        assertNull(targetAccessControlStore.getOwnership(idOfAdminRoleAssociationOnSameEmail));
+        assertNull(targetAccessControlStore.getAccessControlList(idOfAdminRoleAssociationOnSameEmail));
         assertNotNull(sourceAccessControlStore.getOwnership(idOfAdminRoleAssociationOnSameEmail));
         assertNotNull(sourceAccessControlStore.getAccessControlList(idOfAdminRoleAssociationOnSameEmail));
         // same for the unqualified LEADERBOARD:UPDATE permission on same-email:
@@ -122,6 +125,8 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         assertNotNull(sourceLeaderboardUpdatePermissionOnSameEmail);
         final QualifiedObjectIdentifier idOfLeaderboardUpdatePermissionAssociationOnSameEmail = SecuredSecurityTypes.PERMISSION_ASSOCIATION.getQualifiedObjectIdentifier(
                 PermissionAndRoleAssociation.get(sourceLeaderboardUpdatePermissionOnSameEmail, sourceSameEmail));
+        assertNull(targetAccessControlStore.getOwnership(idOfLeaderboardUpdatePermissionAssociationOnSameEmail));
+        assertNull(targetAccessControlStore.getAccessControlList(idOfLeaderboardUpdatePermissionAssociationOnSameEmail));
         assertNotNull(sourceAccessControlStore.getOwnership(idOfLeaderboardUpdatePermissionAssociationOnSameEmail));
         assertNotNull(sourceAccessControlStore.getAccessControlList(idOfLeaderboardUpdatePermissionAssociationOnSameEmail));
         final UserGroup sourceGroup1 = sourceUserStore.getUserGroupByName("Group1");
@@ -208,7 +213,7 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         // import source had a modified ownership for the user that was dropped, adding a group owner
         // we want to validate that this did not reach the target
         assertNull(targetAccessControlStore.getOwnership(targetAaa.getIdentifier()).getAnnotation().getTenantOwner());
-        // there is an ACL in the source access control store for the user that has be dropped;
+        // there is an ACL in the source access control store for the user that has been dropped;
         // validate that this ACL doesn't show up in the target for the user that was kept and not merged:
         assertNull(targetAccessControlStore.getAccessControlList(targetAaa.getIdentifier()));
         // the source group with same name but different ID is expected to have been dropped

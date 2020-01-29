@@ -126,13 +126,15 @@ public class SecurityStoreMerger {
         // if it is to be dropped, the key is not part of the map. If it is to be merged with an object in the target,
         // the corresponding target object is the value.
         final Map<User, User> userMap = markUsersForAddMergeOrDrop(sourceUserStore, sourceAccessControlStore);
-        final Map<UserGroup, UserGroup> userGroupMap = markUserGroupsForAddMergeOrDrop(sourceUserStore, userMap);
+        final Map<UserGroup, UserGroup> userGroupMap = markUserGroupsForAddMergeOrDrop(sourceUserStore, sourceAccessControlStore, userMap);
         replaceSourceUserReferencesToUsersAndGroups(userMap, userGroupMap, sourceAccessControlStore);
         replaceSourceUserGroupReferencesToUsers(userMap, userGroupMap);
-        final Set<OwnershipAnnotation> ownershipsToTryToImport =
-                replaceSourceOwnershipReferencesToUsersAndGroups(sourceAccessControlStore, userMap, userGroupMap);
         replaceSourceAccessControlListReferencesToGroups(sourceAccessControlStore, userGroupMap);
         mergeUsersAndGroups(sourceUserStore, userMap, userGroupMap, sourceAccessControlStore);
+        // analyze ownerships after mergeUsersAndGroups because mergeUsersAndGroups may remove
+        // role and permission association ownerships from sourceAccessControlStore
+        final Set<OwnershipAnnotation> ownershipsToTryToImport =
+                replaceSourceOwnershipReferencesToUsersAndGroups(sourceAccessControlStore, userMap, userGroupMap);
         mergePreferences(sourceUserStore, userMap);
         mergeOwnerships(sourceAccessControlStore, ownershipsToTryToImport);
         mergeAccessControlLists(sourceAccessControlStore, userGroupMap);
@@ -157,6 +159,9 @@ public class SecurityStoreMerger {
                     for (final WildcardPermission permission : user.getPermissions()) {
                         removePermissionAssociationOwnershipAndACL(permission, user, sourceAccessControlStore);
                     }
+                    // remove ownership and ACL for the user object itself so nothing of that is imported into the target
+                    sourceAccessControlStore.removeOwnership(user.getIdentifier());
+                    sourceAccessControlStore.removeAccessControlList(user.getIdentifier());
                 }
             } else {
                 logger.info("User "+user.getName()+" not found in target. Marking for adding.");
@@ -167,11 +172,16 @@ public class SecurityStoreMerger {
     }
 
     /**
-     * Operates on the yet unmodified groups where user references have not yet been replaced. The modifications
-     * that will later be applied to the source groups are described by the {@code userMap} which tells whether
-     * source users will be added to the target, merged with a target user, or dropped.
+     * Operates on the yet unmodified groups where user references have not yet been replaced. The modifications that
+     * will later be applied to the source groups are described by the {@code userMap} which tells whether source users
+     * will be added to the target, merged with a target user, or dropped. For groups dropped, ownership and ACL
+     * information will be removed from the {@code sourceAccessControlStore} so it doesn't get imported into the target
+     * 
+     * @return the mapping of source user groups to target user groups; no mapping for source groups to be dropped;
+     *         mapping key to itself means "add," mapping source group to target group means "merge."
      */
-    private Map<UserGroup, UserGroup> markUserGroupsForAddMergeOrDrop(UserStore sourceUserStore, Map<User, User> userMap) {
+    private Map<UserGroup, UserGroup> markUserGroupsForAddMergeOrDrop(UserStore sourceUserStore,
+            AccessControlStore sourceAccessControlStore, Map<User, User> userMap) {
         final Map<UserGroup, UserGroup> userGroupMap = new HashMap<>();
         for (final UserGroup sourceGroup : sourceUserStore.getUserGroups()) {
             final UserGroup targetGroupWithSameID = targetUserStore.getUserGroup(sourceGroup.getId());
@@ -187,6 +197,9 @@ public class SecurityStoreMerger {
                     } else {
                         logger.warning("Found existing target user group "+targetGroupWithEqualName+" but source group "+
                                 sourceGroup+" is not considered identical. Dropping.");
+                        // remove ownership and ACL information for dropped group so it doesn't get imported into target:
+                        sourceAccessControlStore.removeOwnership(sourceGroup.getIdentifier());
+                        sourceAccessControlStore.removeAccessControlList(sourceGroup.getIdentifier());
                     }
                 } else {
                     logger.info("No target user group found for source group "+sourceGroup+". Marking for adding");
