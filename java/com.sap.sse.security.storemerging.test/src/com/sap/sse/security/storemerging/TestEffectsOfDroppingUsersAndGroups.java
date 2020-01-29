@@ -30,9 +30,12 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
     
     @Test
     public void testImportFromSource1ToTarget1() throws UserGroupManagementException, UserManagementException {
+        final String PREFERENCE_NAME = "preference";
+        final String PREFERENCE_VALUE = "value";
         // *********** assertions against unmodified target ***********
         final User targetAaa = targetUserStore.getUserByName("aaa");
         assertNotNull(targetAaa);
+        assertNull(targetUserStore.getPreference(targetAaa.getName(), PREFERENCE_NAME));
         final UserGroup targetAaaTenant = targetUserStore.getUserGroupByName("aaa-tenant");
         assertNotNull(targetAaaTenant);
         final User targetSameEmail = targetUserStore.getUserByName("same-email");
@@ -40,6 +43,7 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         assertNull(targetSameEmail.getFullName());
         assertNull(targetSameEmail.getCompany());
         assertNull(targetSameEmail.getLocale());
+        assertNull(targetUserStore.getPreference(targetSameEmail.getName(), PREFERENCE_NAME));
         final UserGroup targetGroup1 = targetUserStore.getUserGroupByName("Group1");
         final UUID targetGroup1Id = targetGroup1.getId();
         assertNotNull(targetGroup1);
@@ -77,6 +81,9 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         assertNotSame(sourceAaaTenant, targetAaaTenant);
         assertTrue(sourceAaaTenant.contains(sourceAaa));
         assertTrue(sourceAaaTenant.contains(sourceSameEmail)); // to see if that gets merged into targetAaaTenant
+        // setting a preference on a source user that will be merged:
+        sourceUserStore.setPreference(sourceSameEmail.getName(), PREFERENCE_NAME, PREFERENCE_VALUE);
+        sourceUserStore.setPreference(sourceAaa.getName(), PREFERENCE_NAME, PREFERENCE_VALUE);
         // *********** merge ***********
         mergeSourceIntoTarget(sourceUserStore, sourceAccessControlStore);
         // *********** assertions for merge result ***********
@@ -105,5 +112,10 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         // the sailing_viewer role qualified for the aaa-tenant user (which is expected to be dropped because its user is dropped) is expected to be dropped
         assertFalse(StreamSupport.stream(targetSameEmail.getRoles().spliterator(), /* parallel */ false).
             filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForTenant()!=null&&rd.getQualifiedForTenant().getName().equals("aaa-tenant")).findAny().isPresent());
+        // validate preference handling:
+        // the aaa user got dropped; so should its preference from the source
+        assertNull(targetUserStore.getPreference(targetAaa.getName(), PREFERENCE_NAME));
+        // the same-email user got merged; so should its preference
+        assertEquals(PREFERENCE_VALUE, targetUserStore.getPreference(targetSameEmail.getName(), PREFERENCE_NAME));
     }
 }
