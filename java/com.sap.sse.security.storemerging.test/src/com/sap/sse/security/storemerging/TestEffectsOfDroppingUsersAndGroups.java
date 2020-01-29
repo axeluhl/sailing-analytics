@@ -59,17 +59,20 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         assertNotNull(sourceSameEmail.getLocale());
         assertNotSame(sourceSameEmail, targetSameEmail);
         // the sailing_viewer role qualified for the admin user (which is merged with the target's admin user) is expected to be kept
-        assertNotNull(StreamSupport.stream(sourceSameEmail.getRoles().spliterator(), /* parallel */ false).
-            filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForUser()!=null&&rd.getQualifiedForUser().getName().equals("admin")).findAny().get());
+        assertTrue(StreamSupport.stream(sourceSameEmail.getRoles().spliterator(), /* parallel */ false).
+            filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForUser()!=null&&rd.getQualifiedForUser().getName().equals("admin")).findAny().isPresent());
         // the sailing_viewer role qualified for the admin-tenant group (which is merged with the target's admin-tenant group) is expected to be kept
-        assertNotNull(StreamSupport.stream(sourceSameEmail.getRoles().spliterator(), /* parallel */ false).
-            filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForTenant()!=null&&rd.getQualifiedForTenant().getName().equals("admin-tenant")).findAny().get());
+        assertTrue(StreamSupport.stream(sourceSameEmail.getRoles().spliterator(), /* parallel */ false).
+            filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForTenant()!=null&&rd.getQualifiedForTenant().getName().equals("admin-tenant")).findAny().isPresent());
         // the sailing_viewer role qualified for the aaa user (which is dropped) is expected to be dropped
-        assertNotNull(StreamSupport.stream(sourceSameEmail.getRoles().spliterator(), /* parallel */ false).
-            filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForUser()!=null&&rd.getQualifiedForUser().getName().equals("aaa")).findAny().get());
+        assertTrue(StreamSupport.stream(sourceSameEmail.getRoles().spliterator(), /* parallel */ false).
+            filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForUser()!=null&&rd.getQualifiedForUser().getName().equals("aaa")).findAny().isPresent());
         // the sailing_viewer role qualified for the aaa-tenant user (which is expected to be dropped because its user is dropped) is expected to be dropped
-        assertNotNull(StreamSupport.stream(sourceSameEmail.getRoles().spliterator(), /* parallel */ false).
-            filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForTenant()!=null&&rd.getQualifiedForTenant().getName().equals("aaa-tenant")).findAny().get());
+        assertTrue(StreamSupport.stream(sourceSameEmail.getRoles().spliterator(), /* parallel */ false).
+            filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForTenant()!=null&&rd.getQualifiedForTenant().getName().equals("aaa-tenant")).findAny().isPresent());
+        // the unqualified admin role is expected to be dropped
+        assertTrue(StreamSupport.stream(sourceSameEmail.getRoles().spliterator(), /* parallel */ false).
+            filter(rd->rd.getName().equals("admin") && rd.getQualifiedForTenant()==null && rd.getQualifiedForUser()==null).findAny().isPresent());
         final UserGroup sourceGroup1 = sourceUserStore.getUserGroupByName("Group1");
         assertNotSame(sourceGroup1, targetUserStore.getUserGroupByName("Group1"));
         final UUID sourceGroup1Id = sourceGroup1.getId();
@@ -101,17 +104,20 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         assertFalse(targetAaaTenant.contains(targetSameEmail)); // expecting the group to have been dropped
         // If the sourceAaaTenant group was dropped then so have to be roles qualified by it
         // the sailing_viewer role qualified for the admin user (which is merged with the target's admin user) is expected to be kept
-        assertNotNull(StreamSupport.stream(targetSameEmail.getRoles().spliterator(), /* parallel */ false).
-                filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForUser()!=null&&rd.getQualifiedForUser().getName().equals("admin")).findAny().get());
+        assertTrue(StreamSupport.stream(targetSameEmail.getRoles().spliterator(), /* parallel */ false).
+                filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForUser()!=null&&rd.getQualifiedForUser().getName().equals("admin")).findAny().isPresent());
         // the sailing_viewer role qualified for the admin-tenant group (which is merged with the target's admin-tenant group) is expected to be kept
-        assertNotNull(StreamSupport.stream(targetSameEmail.getRoles().spliterator(), /* parallel */ false).
-            filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForTenant()!=null&&rd.getQualifiedForTenant().getName().equals("admin-tenant")).findAny().get());
+        assertTrue(StreamSupport.stream(targetSameEmail.getRoles().spliterator(), /* parallel */ false).
+            filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForTenant()!=null&&rd.getQualifiedForTenant().getName().equals("admin-tenant")).findAny().isPresent());
         // the sailing_viewer role qualified for the aaa user (which is dropped) is expected to be dropped
         assertFalse(StreamSupport.stream(targetSameEmail.getRoles().spliterator(), /* parallel */ false).
             filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForUser()!=null&&rd.getQualifiedForUser().getName().equals("aaa")).findAny().isPresent());
         // the sailing_viewer role qualified for the aaa-tenant user (which is expected to be dropped because its user is dropped) is expected to be dropped
         assertFalse(StreamSupport.stream(targetSameEmail.getRoles().spliterator(), /* parallel */ false).
             filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForTenant()!=null&&rd.getQualifiedForTenant().getName().equals("aaa-tenant")).findAny().isPresent());
+        // the unqualified admin role is expected to be dropped
+        assertFalse(StreamSupport.stream(sourceSameEmail.getRoles().spliterator(), /* parallel */ false).
+            filter(rd->rd.getName().equals("admin") && rd.getQualifiedForTenant()==null && rd.getQualifiedForUser()==null).findAny().isPresent());
         // validate preference handling:
         // the aaa user got dropped; so should its preference from the source
         assertNull(targetUserStore.getPreference(targetAaa.getName(), PREFERENCE_NAME));
