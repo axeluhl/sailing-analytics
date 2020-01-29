@@ -14,6 +14,7 @@ import java.util.stream.StreamSupport;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
@@ -44,9 +45,11 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         assertNull(targetSameEmail.getCompany());
         assertNull(targetSameEmail.getLocale());
         assertNull(targetUserStore.getPreference(targetSameEmail.getName(), PREFERENCE_NAME));
+        assertTrue(Util.isEmpty(targetSameEmail.getPermissions()));
         final UserGroup targetGroup1 = targetUserStore.getUserGroupByName("Group1");
         final UUID targetGroup1Id = targetGroup1.getId();
         assertNotNull(targetGroup1);
+        // *********** reading source stores ***********
         final Pair<UserStore, AccessControlStore> sourceStores = readSourceStores();
         final UserStore sourceUserStore = sourceStores.getA();
         final AccessControlStore sourceAccessControlStore = sourceStores.getB();
@@ -58,6 +61,17 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         assertNotNull(sourceSameEmail.getCompany());
         assertNotNull(sourceSameEmail.getLocale());
         assertNotSame(sourceSameEmail, targetSameEmail);
+        // we expect the following permissions on sourceSameEmail:
+        // LEADERBOARD:UPDATE, SERVER:DATA_MINING and SERVER:DATA_MINING:unknown server name-server
+        assertFalse(Util.isEmpty(Util.filter(sourceSameEmail.getPermissions(), p->p.getParts().size() == 2 &&
+                p.getParts().get(0).contains("LEADERBOARD") &&
+                p.getParts().get(1).contains("UPDATE"))));
+        assertFalse(Util.isEmpty(Util.filter(sourceSameEmail.getPermissions(), p->p.getParts().size() == 2 &&
+                p.getParts().get(0).contains("SERVER") &&
+                p.getParts().get(1).contains("DATA_MINING"))));
+        assertFalse(Util.isEmpty(Util.filter(sourceSameEmail.getPermissions(), p->p.getParts().size() == 3 &&
+                p.getParts().get(0).contains("SERVER") &&
+                p.getParts().get(1).contains("DATA_MINING") && p.getParts().get(2).contains("unknown server name-server"))));
         // the sailing_viewer role qualified for the admin user (which is merged with the target's admin user) is expected to be kept
         assertTrue(StreamSupport.stream(sourceSameEmail.getRoles().spliterator(), /* parallel */ false).
             filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForUser()!=null&&rd.getQualifiedForUser().getName().equals("admin")).findAny().isPresent());
@@ -123,5 +137,18 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         assertNull(targetUserStore.getPreference(targetAaa.getName(), PREFERENCE_NAME));
         // the same-email user got merged; so should its preference
         assertEquals(PREFERENCE_VALUE, targetUserStore.getPreference(targetSameEmail.getName(), PREFERENCE_NAME));
+        // we expect the following permissions on targetSameEmail:
+        // SERVER:DATA_MINING:unknown server name-server
+        // (the LEADERBOARD:UPDATE and SERVER:DATA_MINING permissions are expected to have been dropped
+        // for lack of object qualification)
+        assertTrue(Util.isEmpty(Util.filter(targetSameEmail.getPermissions(), p->p.getParts().size() == 2 &&
+                p.getParts().get(0).contains("LEADERBOARD") &&
+                p.getParts().get(1).contains("UPDATE"))));
+        assertTrue(Util.isEmpty(Util.filter(targetSameEmail.getPermissions(), p->p.getParts().size() == 2 &&
+                p.getParts().get(0).contains("SERVER") &&
+                p.getParts().get(1).contains("DATA_MINING"))));
+        assertFalse(Util.isEmpty(Util.filter(targetSameEmail.getPermissions(), p->p.getParts().size() == 3 &&
+                p.getParts().get(0).contains("SERVER") &&
+                p.getParts().get(1).contains("DATA_MINING") && p.getParts().get(2).contains("unknown server name-server"))));
     }
 }
