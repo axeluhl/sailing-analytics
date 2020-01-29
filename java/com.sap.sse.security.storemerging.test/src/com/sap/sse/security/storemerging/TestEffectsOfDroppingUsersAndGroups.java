@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -21,9 +22,14 @@ import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account.AccountType;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
+import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
+import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 
@@ -40,6 +46,7 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         // *********** assertions against unmodified target ***********
         final User targetAaa = targetUserStore.getUserByName("aaa");
         assertNotNull(targetAaa);
+        assertNull(targetAccessControlStore.getOwnership(targetAaa.getIdentifier()).getAnnotation().getTenantOwner());
         assertNull(targetUserStore.getPreference(targetAaa.getName(), PREFERENCE_NAME));
         final UserGroup targetAaaTenant = targetUserStore.getUserGroupByName("aaa-tenant");
         assertNotNull(targetAaaTenant);
@@ -99,14 +106,64 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         assertTrue(StreamSupport.stream(sourceSameEmail.getRoles().spliterator(), /* parallel */ false).
             filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForTenant()!=null&&rd.getQualifiedForTenant().getName().equals("aaa-tenant")).findAny().isPresent());
         // the unqualified admin role is expected to be dropped
-        assertTrue(StreamSupport.stream(sourceSameEmail.getRoles().spliterator(), /* parallel */ false).
-            filter(rd->rd.getName().equals("admin") && rd.getQualifiedForTenant()==null && rd.getQualifiedForUser()==null).findAny().isPresent());
+        final Role sourceAdminRoleOnSameEmail = StreamSupport.stream(sourceSameEmail.getRoles().spliterator(), /* parallel */ false).
+                filter(rd->rd.getName().equals("admin") && rd.getQualifiedForTenant()==null && rd.getQualifiedForUser()==null).findAny().get();
+        assertNotNull(sourceAdminRoleOnSameEmail);
+        // and there are ownership and ACL defined for the role association; we will later check
+        // that those ownerships and ACLs don't show up in target because the unqualified role will be dropped
+        final QualifiedObjectIdentifier idOfAdminRoleAssociationOnSameEmail = SecuredSecurityTypes.ROLE_ASSOCIATION.getQualifiedObjectIdentifier(
+                PermissionAndRoleAssociation.get(sourceAdminRoleOnSameEmail, sourceSameEmail));
+        assertNotNull(sourceAccessControlStore.getOwnership(idOfAdminRoleAssociationOnSameEmail));
+        assertNotNull(sourceAccessControlStore.getAccessControlList(idOfAdminRoleAssociationOnSameEmail));
+        // same for the unqualified LEADERBOARD:UPDATE permission on same-email:
+        final WildcardPermission sourceLeaderboardUpdatePermissionOnSameEmail = StreamSupport.stream(sourceSameEmail.getPermissions().spliterator(), /* parallel */ false).
+                filter(wp->wp.getParts().get(0).contains("LEADERBOARD") &&
+                        wp.getParts().get(1).contains("UPDATE")).findAny().get();
+        assertNotNull(sourceLeaderboardUpdatePermissionOnSameEmail);
+        final QualifiedObjectIdentifier idOfLeaderboardUpdatePermissionAssociationOnSameEmail = SecuredSecurityTypes.PERMISSION_ASSOCIATION.getQualifiedObjectIdentifier(
+                PermissionAndRoleAssociation.get(sourceLeaderboardUpdatePermissionOnSameEmail, sourceSameEmail));
+        assertNotNull(sourceAccessControlStore.getOwnership(idOfLeaderboardUpdatePermissionAssociationOnSameEmail));
+        assertNotNull(sourceAccessControlStore.getAccessControlList(idOfLeaderboardUpdatePermissionAssociationOnSameEmail));
         final UserGroup sourceGroup1 = sourceUserStore.getUserGroupByName("Group1");
         assertNotSame(sourceGroup1, targetUserStore.getUserGroupByName("Group1"));
         final UUID sourceGroup1Id = sourceGroup1.getId();
         assertNotNull(sourceGroup1);
+        // a modified ownership for the group that will be dropped; we want to validate that this does not reach the target
+        assertSame(sourceSameEmail, sourceAccessControlStore.getOwnership(sourceGroup1.getIdentifier()).getAnnotation().getUserOwner());
+        // there is an ACL in the source for the group that will be dropped:
+        assertNotNull(sourceAccessControlStore.getAccessControlList(sourceGroup1.getIdentifier()));
         final User sourceAaa = sourceUserStore.getUserByName("aaa");
         assertNotNull(sourceAaa);
+        assertNotEquals(targetAaa.getEmail(), sourceAaa.getEmail()); // the criterion that shall let sourceAaa get dropped
+        // there is an ACL in the source for the "aaa" user that will be dropped:
+        assertNotNull(sourceAccessControlStore.getAccessControlList(sourceAaa.getIdentifier()));
+        // there is a group ownership set in the source for "aaa":
+        assertNotNull(sourceAccessControlStore.getOwnership(sourceAaa.getIdentifier()).getAnnotation().getTenantOwner());
+        // in the source, "aaa" has the "admin" role assigned, qualified with the "unknown server name-server" group:
+        final Role sourceAdminRoleOnAaa = StreamSupport
+                .stream(sourceAaa.getRoles().spliterator(), /* parallel */ false)
+                .filter(rd -> rd.getName().equals("admin") && rd.getQualifiedForTenant() != null
+                        && rd.getQualifiedForTenant().getName().equals("unknown server name-server"))
+                .findAny().get();
+        assertNotNull(sourceAdminRoleOnAaa);
+        // this sourceAdminRoleOnAaa role association has an ownership and an ACL in source:
+        final QualifiedObjectIdentifier idOfAdminRoleAssociationOnAaa = SecuredSecurityTypes.ROLE_ASSOCIATION.getQualifiedObjectIdentifier(
+                PermissionAndRoleAssociation.get(sourceAdminRoleOnAaa, sourceAaa));
+        assertNotNull(sourceAccessControlStore.getOwnership(idOfAdminRoleAssociationOnAaa));
+        assertNotNull(sourceAccessControlStore.getAccessControlList(idOfAdminRoleAssociationOnAaa));
+        // in the source, "aaa" has a SERVER:REPLICATE permission assigned, constrained to the "unknown server name-server":
+        final WildcardPermission sourceServerReplicatePermissionOnAaa = StreamSupport
+                .stream(sourceAaa.getPermissions().spliterator(), /* parallel */ false)
+                .filter(wp -> wp.getParts().get(0).contains("SERVER") &&
+                        wp.getParts().get(1).contains("REPLICATE") &&
+                        wp.getParts().get(2).contains("unknown server name-server"))
+                .findAny().get();
+        assertNotNull(sourceServerReplicatePermissionOnAaa);
+        // this sourceServerReplicatePermissionOnAaa role association has an ownership and an ACL in source:
+        final QualifiedObjectIdentifier idOfServerReplicatePermissionAssociationOnAaa = SecuredSecurityTypes.PERMISSION_ASSOCIATION.getQualifiedObjectIdentifier(
+                PermissionAndRoleAssociation.get(sourceServerReplicatePermissionOnAaa, sourceAaa));
+        assertNotNull(sourceAccessControlStore.getOwnership(idOfServerReplicatePermissionAssociationOnAaa));
+        assertNotNull(sourceAccessControlStore.getAccessControlList(idOfServerReplicatePermissionAssociationOnAaa));
         final AccessControlListAnnotation sourceSameEmailACL = sourceAccessControlStore.getAccessControlList(sourceSameEmail.getIdentifier());
         assertNotNull(sourceSameEmailACL);
         // we expect the source user "same-email" to have an ACL on it that allows READ for Group1 which is dropped:
@@ -128,6 +185,32 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         mergeSourceIntoTarget(sourceUserStore, sourceAccessControlStore);
         // *********** assertions for merge result ***********
         assertEquals(targetGroup1Id, targetUserStore.getUserGroupByName("Group1").getId());
+        assertSame(targetAaa, targetUserStore.getUserByName("aaa"));
+        // ensure that admin role association of dropped role association has no ownership/ACL in target:
+        assertNull(targetAccessControlStore.getOwnership(idOfServerReplicatePermissionAssociationOnAaa));
+        assertNull(targetAccessControlStore.getAccessControlList(idOfServerReplicatePermissionAssociationOnAaa));
+        // ensure that the permission association of dropped SERVER:REPLICATE permission has no ownership/ACL in target:
+        assertNull(targetAccessControlStore.getOwnership(idOfServerReplicatePermissionAssociationOnAaa));
+        assertNull(targetAccessControlStore.getAccessControlList(idOfServerReplicatePermissionAssociationOnAaa));
+        // ensure that ownership/ACL does not show up for a role association of a role dropped for lack of qualification:
+        assertNull(targetAccessControlStore.getOwnership(idOfAdminRoleAssociationOnSameEmail));
+        assertNull(targetAccessControlStore.getAccessControlList(idOfAdminRoleAssociationOnSameEmail));
+        // ensure that ownership/ACL does not show up for a permission association of a permission dropped for lack of qualification:
+        assertNull(targetAccessControlStore.getOwnership(idOfLeaderboardUpdatePermissionAssociationOnSameEmail));
+        assertNull(targetAccessControlStore.getAccessControlList(idOfLeaderboardUpdatePermissionAssociationOnSameEmail));
+        assertNull(targetUserStore.getUserGroup(sourceGroup1.getId()));
+        // import source had a modified ownership for the group that was dropped;
+        // we want to validate that this did not reach the target, explicitly using the source group's ID:
+        assertNull(targetAccessControlStore.getOwnership(sourceGroup1.getIdentifier()));
+        // there is an ACL in the source access control store for the group that has be dropped;
+        // validate that this ACL doesn't show up in the target for the source group's ID:
+        assertNull(targetAccessControlStore.getAccessControlList(sourceGroup1.getIdentifier()));
+        // import source had a modified ownership for the user that was dropped, adding a group owner
+        // we want to validate that this did not reach the target
+        assertNull(targetAccessControlStore.getOwnership(targetAaa.getIdentifier()).getAnnotation().getTenantOwner());
+        // there is an ACL in the source access control store for the user that has be dropped;
+        // validate that this ACL doesn't show up in the target for the user that was kept and not merged:
+        assertNull(targetAccessControlStore.getAccessControlList(targetAaa.getIdentifier()));
         // the source group with same name but different ID is expected to have been dropped
         assertNull(targetUserStore.getUserGroup(sourceGroup1Id));
         // expect user properties of user "same-email" to have been merged:
@@ -138,7 +221,7 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         // expect email to be validated because it was validated in the source
         assertTrue(updatedTargetSameEmail.isEmailValidated());
         // expect original account/password information to be unchanged:
-        final UsernamePasswordAccount newTargetSameEmailAccount = (UsernamePasswordAccount) targetUserStore.getUserByName("same-email").getAccount(AccountType.USERNAME_PASSWORD);
+        final UsernamePasswordAccount newTargetSameEmailAccount = (UsernamePasswordAccount) updatedTargetSameEmail.getAccount(AccountType.USERNAME_PASSWORD);
         assertEquals(targetSameEmailAccountSalt, newTargetSameEmailAccount.getSalt());
         final String newTargetSameEmailAccountSaltedPassword = newTargetSameEmailAccount.getSaltedPassword();
         assertEquals(targetSameEmailAccountSaltedPassword, newTargetSameEmailAccountSaltedPassword);
