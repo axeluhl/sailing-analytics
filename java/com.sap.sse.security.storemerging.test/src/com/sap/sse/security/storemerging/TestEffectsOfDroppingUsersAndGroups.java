@@ -18,6 +18,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
@@ -93,6 +94,15 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         assertNotNull(sourceGroup1);
         final User sourceAaa = sourceUserStore.getUserByName("aaa");
         assertNotNull(sourceAaa);
+        final AccessControlListAnnotation sourceSameEmailACL = sourceAccessControlStore.getAccessControlList(sourceSameEmail.getIdentifier());
+        assertNotNull(sourceSameEmailACL);
+        // we expect the source user "same-email" to have an ACL on it that allows READ for Group1 which is dropped:
+        assertTrue(sourceSameEmailACL.getAnnotation().getActionsByUserGroup().get(sourceGroup1).contains("READ"));
+        // we expect the source user "same-email" to have an ACL on it that allows READ_PUBLIC for all users (null group):
+        assertTrue(sourceSameEmailACL.getAnnotation().getActionsByUserGroup().get(null).contains("READ_PUBLIC"));
+        // we expect the source user "same-email" to have an ACL on it that allows * for admin-tenant:
+        assertTrue(sourceSameEmailACL.getAnnotation().getActionsByUserGroup().get(
+                sourceUserStore.getUserGroupByName("admin-tenant")).contains("*"));
         final UserGroup sourceAaaTenant = sourceUserStore.getUserGroupByName("aaa-tenant");
         assertNotNull(sourceAaaTenant);
         assertNotSame(sourceAaaTenant, targetAaaTenant);
@@ -150,5 +160,14 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         assertFalse(Util.isEmpty(Util.filter(targetSameEmail.getPermissions(), p->p.getParts().size() == 3 &&
                 p.getParts().get(0).contains("SERVER") &&
                 p.getParts().get(1).contains("DATA_MINING") && p.getParts().get(2).contains("unknown server name-server"))));
+        // we expect the ACL on same-email for Group1 that granted READ to have been dropped because Group1 was dropped
+        final AccessControlListAnnotation targetSameEmailACL = targetAccessControlStore.getAccessControlList(targetSameEmail.getIdentifier());
+        // we expect the target user "same-email" to have no ACL for Group1 which is dropped:
+        assertTrue(targetSameEmailACL == null || targetSameEmailACL.getAnnotation().getActionsByUserGroup().get(targetGroup1) == null);
+        // we expect the target user "same-email" to have an ACL for the null group (all users) granting READ_PUBLIC
+        assertTrue(targetSameEmailACL.getAnnotation().getActionsByUserGroup().get(null).contains("READ_PUBLIC"));
+        // we expect the target user "same-email" to have an ACL on it that allows * for admin-tenant because that group was merged
+        assertTrue(targetSameEmailACL.getAnnotation().getActionsByUserGroup().get(
+                targetUserStore.getUserGroupByName("admin-tenant")).contains("*"));
     }
 }

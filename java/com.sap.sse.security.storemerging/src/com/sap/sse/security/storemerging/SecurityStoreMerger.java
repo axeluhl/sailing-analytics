@@ -299,7 +299,7 @@ public class SecurityStoreMerger {
             for (final UserGroup sourceGroup : groupsInAcl) {
                 final Set<String> actionsForGroup = new HashSet<>(actionsByUserGroup.get(sourceGroup));
                 final UserGroup targetGroup = userGroupMap.get(sourceGroup);
-                if (targetGroup == null) {
+                if (sourceGroup != null && targetGroup == null) {
                     // drop; check that we don't grow permissions:
                     for (final String action : actionsForGroup) {
                         if (action.startsWith("!")) {
