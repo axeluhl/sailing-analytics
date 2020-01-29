@@ -343,7 +343,7 @@ public class SecurityStoreMerger {
                     // places the existing user into the target user store
                     targetUserStore.addUser(targetUser);
                 } else {
-                    mergeSecondUserIntoFirst(targetUser, sourceUser);
+                    mergeSecondUserIntoFirst(targetUser, sourceUser, userGroupMap);
                 }
             } // else drop
         }
@@ -371,7 +371,7 @@ public class SecurityStoreMerger {
         }
     }
 
-    private void mergeSecondUserIntoFirst(User targetUser, User sourceUser) throws UserManagementException {
+    private void mergeSecondUserIntoFirst(User targetUser, User sourceUser, Map<UserGroup, UserGroup> userGroupMap) throws UserManagementException {
         assert Util.equalsWithNull(targetUser.getEmail(), sourceUser.getEmail());
         for (final Role role : sourceUser.getRoles()) {
             if (role.getQualifiedForTenant() == null && role.getQualifiedForUser() == null) {
@@ -413,9 +413,27 @@ public class SecurityStoreMerger {
         updated = copyNonNullValue(sourceUser.getCompany(), targetUser.getCompany(), targetUser::setCompany);
         updated = copyNonNullValue(sourceUser.getFullName(), targetUser.getFullName(), targetUser::setFullName);
         updated = copyNonNullValue(sourceUser.getLocale(), targetUser.getLocale(), targetUser::setLocale);
+        updated = mergeDefaultCreationGroups(targetUser, sourceUser, userGroupMap) || updated;
         if (updated) {
             targetUserStore.updateUser(targetUser);
         }
+    }
+
+    private boolean mergeDefaultCreationGroups(User targetUser, User sourceUser, Map<UserGroup, UserGroup> userGroupMap) {
+        boolean updated = false;
+        for (final Entry<String, UserGroup> e : sourceUser.getDefaultTenantMap().entrySet()) {
+            if (targetUser.getDefaultTenant(e.getKey()) == null) {
+                final UserGroup mappedDefaultCreationGroup = userGroupMap.get(e.getValue());
+                if (mappedDefaultCreationGroup != null) {
+                    targetUser.setDefaultTenant(mappedDefaultCreationGroup, e.getKey());
+                    updated = true;
+                } else {
+                    logger.warning("Default creation group "+e.getValue().getName()+" for user "+targetUser.getName()+
+                            " on server "+e.getKey()+" not merged because that groups was dropped.");
+                }
+            }
+        }
+        return updated;
     }
 
     /**

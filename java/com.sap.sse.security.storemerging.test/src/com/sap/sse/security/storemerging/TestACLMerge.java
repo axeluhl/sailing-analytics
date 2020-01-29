@@ -3,6 +3,7 @@ package com.sap.sse.security.storemerging;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -29,7 +30,11 @@ public class TestACLMerge extends AbstractStoreMergeTest {
     /**
      * Validates that an ACL for an object for which the target has an ACL is merged correctly: groups for which no
      * action permissions have been specified in the target are added; action permission sets for groups for which the
-     * target already has permissions are merged
+     * target already has permissions are merged<p>
+     * 
+     * As a "drive-by," this test also validates that a default creation group for a server for which the
+     * target already has one set for a user is not overwritten, and that default creation group settings
+     * are added if the target user has no default creation group set yet for that server name.
      */
     @Test
     public void testACLMerge() throws UserGroupManagementException, UserManagementException {
@@ -38,6 +43,10 @@ public class TestACLMerge extends AbstractStoreMergeTest {
         // *********** assertions against unmodified target ***********
         final User targetUserWithACL = targetUserStore.getUserByName(NAME_OF_USER_TO_BE_DROPPED);
         assertNotNull(targetUserWithACL);
+        final UserGroup targetUserWithACLTenant = targetUserStore.getUserGroupByName(NAME_OF_USER_TO_BE_DROPPED+SecurityService.TENANT_SUFFIX);
+        assertNotNull(targetUserWithACLTenant);
+        assertSame(targetUserWithACLTenant, targetUserWithACL.getDefaultTenant("unknown server name"));
+        assertNull(targetUserWithACL.getDefaultTenant("ARCHIVE"));
         assertNull(targetUserStore.getUserGroupByName(NAME_OF_NEW_GROUP_WITH_NEW_ACTIONS));
         final User targetAdmin = targetUserStore.getUserByName("admin");
         final UserGroup targetAdminTenant = targetUserStore.getUserGroupByName("admin"+SecurityService.TENANT_SUFFIX);
@@ -55,10 +64,15 @@ public class TestACLMerge extends AbstractStoreMergeTest {
         // *********** assertions against unmodified source ***********
         final User sourceUserWithACL = sourceUserStore.getUserByName(NAME_OF_USER_TO_BE_DROPPED);
         assertNotNull(sourceUserWithACL);
+        final UserGroup sourceUserWithACLTenant = sourceUserStore.getUserGroupByName(NAME_OF_USER_TO_BE_DROPPED+SecurityService.TENANT_SUFFIX);
+        assertNotNull(sourceUserWithACLTenant);
         assertNotNull(sourceUserStore.getUserGroupByName(NAME_OF_NEW_GROUP_WITH_NEW_ACTIONS));
         final User sourceAdmin = sourceUserStore.getUserByName("admin");
         final UserGroup sourceAdminTenant = sourceUserStore.getUserGroupByName("admin"+SecurityService.TENANT_SUFFIX);
         assertNotNull(sourceAdmin);
+        assertNotNull(sourceAdminTenant);
+        assertSame(sourceAdminTenant, sourceUserWithACL.getDefaultTenant("unknown server name"));
+        assertSame(sourceUserWithACLTenant, sourceUserWithACL.getDefaultTenant("ARCHIVE"));
         final UserGroup sourceNewGroup = sourceUserStore.getUserGroupByName(NAME_OF_NEW_GROUP_WITH_NEW_ACTIONS);
         assertNotNull(sourceNewGroup);
         final AccessControlList sourceUserWithAclACL = sourceAccessControlStore.getAccessControlList(sourceUserWithACL.getIdentifier()).getAnnotation();
@@ -89,5 +103,9 @@ public class TestACLMerge extends AbstractStoreMergeTest {
         assertTrue(newTargetUserWithAclACL.getActionsByUserGroup().get(targetAdminTenant).contains("CHANGE_ACL"));
         assertTrue(newTargetUserWithAclACL.getActionsByUserGroup().get(targetNewGroup).contains("CHANGE_OWNERSHIP"));
         assertTrue(newTargetUserWithAclACL.getActionsByUserGroup().get(targetNewGroup).contains("!FORCE_OVERWRITE_PASSWORD"));
+        // validate that default creation group/tenant is not touched in target for existing "unknown server name"
+        // and merged for new "ARCHIVE" record:
+        assertSame(targetUserWithACLTenant, newTargetUserWithACL.getDefaultTenant("unknown server name"));
+        assertSame(targetUserWithACLTenant, newTargetUserWithACL.getDefaultTenant("ARCHIVE"));
     }
 }
