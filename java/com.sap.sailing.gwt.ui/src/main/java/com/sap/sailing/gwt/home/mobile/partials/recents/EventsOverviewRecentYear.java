@@ -44,10 +44,15 @@ public class EventsOverviewRecentYear extends Composite {
     
     private boolean isContentVisible;
     
+    private boolean isStageInitialized;
+    
     private final CollapseAnimation animation;
+
+    private final List<EventListEventDTO> events;
     
     public EventsOverviewRecentYear(EventListYearDTO yearDTO, MobilePlacesNavigator navigator, boolean showInitial) {
-        List<EventListEventDTO> events = yearDTO.getEvents();
+        isContentVisible = showInitial;
+        events = yearDTO.getEvents();
         eventStage = new Stage(navigator, false);
         EventsOverviewRecentResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
@@ -80,8 +85,7 @@ public class EventsOverviewRecentYear extends Composite {
         statisticsBox.getElement().getStyle().setPaddingRight(1, Unit.EM);
         recentEventsTeaserPanel.add(statisticsBox);
         
-        eventStage.setFeaturedEvents(events);
-//        eventStage.removeFromParent();
+        initStageContents();
         headerDiv.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -89,9 +93,15 @@ public class EventsOverviewRecentYear extends Composite {
             }
         }, ClickEvent.getType());
 
-        isContentVisible = showInitial;
         animation = new CollapseAnimation(contentDiv, showInitial);
         updateAccordionState();
+    }
+
+    private void initStageContents() {
+        if (!isStageInitialized) {
+            eventStage.setFeaturedEvents(events);
+            isStageInitialized = true;
+        }
     }
 
     void onHeaderClicked() {
@@ -101,6 +111,7 @@ public class EventsOverviewRecentYear extends Composite {
     
     private void updateContentVisibility() {
         animation.animate(isContentVisible);
+        initStageContents();
         updateAccordionState();
     }
 
