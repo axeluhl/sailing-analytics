@@ -90,6 +90,28 @@ public class AccessControlStoreTest {
     }
     
     @Test
+    public void testCreateSimpleAccessControlListForAll() throws UserGroupManagementException {
+        accessControlStore.addAclPermission(testId, null, "READ");
+        assertNotNull(accessControlStore.getAccessControlList(testId));
+        assertTrue(accessControlStore.getAccessControlList(testId).getAnnotation().getActionsByUserGroup().get(null).contains("READ"));
+        newStores();
+        assertNotNull(accessControlStore.getAccessControlList(testId));
+        assertTrue(accessControlStore.getAccessControlList(testId).getAnnotation().getActionsByUserGroup().get(null).contains("READ"));
+    }
+    
+    @Test
+    public void testCreateSimpleAccessControlListForGroup() throws UserGroupManagementException {
+        final UserGroup group = userStore.getDefaultTenant();
+        accessControlStore.addAclPermission(testId, group, "READ");
+        assertNotNull(accessControlStore.getAccessControlList(testId));
+        assertTrue(accessControlStore.getAccessControlList(testId).getAnnotation().getActionsByUserGroup().get(group).contains("READ"));
+        newStores();
+        assertNotNull(accessControlStore.getAccessControlList(testId));
+        final UserGroup newGroup = userStore.getDefaultTenant();
+        assertTrue(accessControlStore.getAccessControlList(testId).getAnnotation().getActionsByUserGroup().get(newGroup).contains("READ"));
+    }
+    
+    @Test
     public void testDeleteAccessControlList() throws UserGroupManagementException {
         accessControlStore.setEmptyAccessControlList(testId, testDisplayName);
         accessControlStore.removeAccessControlList(testId);

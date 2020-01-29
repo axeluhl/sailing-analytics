@@ -166,12 +166,8 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     private AccessControlListAnnotation getOrCreateAcl(QualifiedObjectIdentifier idOfAccessControlledObject) {
-        AccessControlListAnnotation acl = accessControlLists.get(idOfAccessControlledObject);
-        if (acl == null) {
-            acl = new AccessControlListAnnotation(new AccessControlList(), idOfAccessControlledObject,
-                    /* display name */ null);
-        }
-        return acl;
+        return accessControlLists.computeIfAbsent(idOfAccessControlledObject,
+                id->new AccessControlListAnnotation(new AccessControlList(), id, /* display name */ null));
     }
 
     @Override
