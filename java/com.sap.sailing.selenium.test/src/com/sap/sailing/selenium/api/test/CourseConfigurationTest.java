@@ -335,17 +335,51 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     }
 
     @Test
-    public void testCreateCourseWithLessNoOfLapsThanRepeatableParts() {
-        createCourseFromTemplateBasedCourseConfiguration(10, 8, 1, 3);
+    public void testCreateCourseWithLessNoOfLapsThanRepeatablePartOccurences() {
+        createCourseFromTemplateBasedCourseConfiguration(/* numberOfLaps */ 10, /* numberOfLapsForCOurse */ 8,
+                /* repeatable part start */ 1, /* repeatable part end */ 3, true);
     }
 
     @Test
-    public void testCreateCourseWithMoreNoOfLapsThanRepeatableParts() {
+    public void testCreateCourseWithMoreNoOfLapsThanRepeatablePartOccurences() {
+        final int numberOfLaps = 2;
+        final int numberOfLapsForCourse = 50;
+        final int repeatablePartStart = 1;
+        final int repeatablePartEnd = 3;
+        final int repeatablePartLength = repeatablePartEnd - repeatablePartStart;
         final Pair<CourseConfiguration, CourseConfiguration> result = createCourseFromTemplateBasedCourseConfiguration(
-                10, 12, 1, 3);
-        logger.info(result.getA().getJson().toJSONString());
-        logger.info(result.getB().getJson().toJSONString());
-        // todo check the fill up
+                numberOfLaps, numberOfLapsForCourse, repeatablePartStart, repeatablePartEnd, true);
+        result.getA().getWaypoints().forEach(System.out::println);
+        result.getB().getWaypoints().forEach(System.out::println);
+        // get repeatable part sequence from template configuration
+        List<WaypointWithMarkConfiguration> repeatablePartWpsA = new ArrayList<>(
+                repeatablePartEnd - repeatablePartStart);
+        for (int i = repeatablePartStart; i < repeatablePartEnd; i++) {
+            repeatablePartWpsA.add(Util.get(result.getA().getWaypoints(), i));
+        }
+        // compare each waypoint of the course configuration against the repeatable part of the template configuration
+        for (int lap = numberOfLaps; lap < numberOfLapsForCourse; lap++) {
+            for (int i = repeatablePartStart; i < repeatablePartEnd; i++) {
+                final WaypointWithMarkConfiguration wpA = repeatablePartWpsA.get(i - repeatablePartStart);
+                final WaypointWithMarkConfiguration wpB = Util.get(result.getB().getWaypoints(),
+                        (lap - 1) * repeatablePartLength + i);
+                assertEquals(wpA.getPassingInstruction(), wpB.getPassingInstruction());
+                assertEquals(Util.get(Util.get(result.getB().getWaypoints(), i).getMarkConfigurationIds(), 0),
+                        Util.get(wpB.getMarkConfigurationIds(), 0));
+            }
+        }
+    }
+
+    @Test
+    public void testCreateCourseLineup() {
+        createCourseFromTemplateBasedCourseConfiguration(/* numberOfLaps */ 2, /* numberOfLapsForCourse */ 2,
+                /* repeatable part start */ 0, /* repeatable part end */ 1, /* strict */ true);
+        createCourseFromTemplateBasedCourseConfiguration(/* numberOfLaps */ 2, /* numberOfLapsForCourse */ 1,
+                /* repeatable part start */ 0, /* repeatable part end */ 5, true);
+        createCourseFromTemplateBasedCourseConfiguration(/* numberOfLaps */ 10, /* numberOfLapsForCourse */ 1,
+                /* repeatable part start */ 0, /* repeatable part end */ 5, true);
+        createCourseFromTemplateBasedCourseConfiguration(/* numberOfLaps */ 10000, /* numberOfLapsForCourse */ 20000,
+                /* repeatable part start */ 0, /* repeatable part end */ 5, true);
     }
 
     /**
@@ -362,12 +396,14 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
      *            start index of repeatable part
      * @param zeroBasedIndexOfRepeatablePartEnd
      *            end index of repeatable part
+     * @param strict
+     *            if false, no asserts are checked
      * @return Pair of (A) source course configuration based on the template and (B) the result course configuration of
      *         the created regatta course
      */
     private Pair<CourseConfiguration, CourseConfiguration> createCourseFromTemplateBasedCourseConfiguration(
             final int numberOfLaps, final int numberOfLapsForCourse, final int zeroBasedIndexOfRepeatablePartStart,
-            final int zeroBasedIndexOfRepeatablePartEnd) {
+            final int zeroBasedIndexOfRepeatablePartEnd, final boolean strict) {
         final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(sharedServerCtx);
         final CourseTemplate template = courseTemplateApi.createCourseTemplate(sharedServerCtx,
                 ctdf.constructCourseTemplate(
@@ -377,30 +413,32 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         final CourseConfiguration courseConfiguration = courseConfigurationApi
                 .createCourseConfigurationFromCourseTemplate(ctx, template.getId(), /* optionalRegattaName */ null,
                         /* tags */ null, /* optional number of laps */ null);
-        assertEquals(courseConfiguration.getRepeatablePart().getZeroBasedIndexOfRepeatablePartStart().intValue(),
-                zeroBasedIndexOfRepeatablePartStart);
-        assertEquals(courseConfiguration.getRepeatablePart().getZeroBasedIndexOfRepeatablePartEnd().intValue(),
-                zeroBasedIndexOfRepeatablePartEnd);
+        if (strict) {
+            assertEquals(courseConfiguration.getRepeatablePart().getZeroBasedIndexOfRepeatablePartStart().intValue(),
+                    zeroBasedIndexOfRepeatablePartStart);
+            assertEquals(courseConfiguration.getRepeatablePart().getZeroBasedIndexOfRepeatablePartEnd().intValue(),
+                    zeroBasedIndexOfRepeatablePartEnd);
+            final int expectedNumberOfWaypoints = (numberOfLaps - 1)
+                    * (zeroBasedIndexOfRepeatablePartEnd - zeroBasedIndexOfRepeatablePartStart)
+                    + Util.size(template.getWaypoints())
+                    - (zeroBasedIndexOfRepeatablePartEnd - zeroBasedIndexOfRepeatablePartStart);
+            assertEquals(expectedNumberOfWaypoints, Util.size(courseConfiguration.getWaypoints()));
+        }
 
-        final int expectedNumberOfWaypoints = numberOfLaps
-                * (zeroBasedIndexOfRepeatablePartEnd - zeroBasedIndexOfRepeatablePartStart)
-                + Util.size(template.getWaypoints()) - zeroBasedIndexOfRepeatablePartEnd
-                - zeroBasedIndexOfRepeatablePartStart;
-        assertEquals(expectedNumberOfWaypoints, Util.size(courseConfiguration.getWaypoints()));
-
-        // reduce number of laps in the course configuration an create a course out of it
+        // set number of laps in the course configuration an create a course out of it
         courseConfiguration.setNumberOfLaps(numberOfLapsForCourse);
-        final String regattaName = "test";
+        final String regattaName = UUID.randomUUID().toString();
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, null, 1)[0];
-        final CourseConfiguration course = courseConfigurationApi.createCourse(ctx, courseConfiguration, "test",
+        final CourseConfiguration course = courseConfigurationApi.createCourse(ctx, courseConfiguration, regattaName,
                 race.getRaceName(), "Default");
-
-        final int expectedNumberOfWaypointsOfCourse = numberOfLapsForCourse
-                * (zeroBasedIndexOfRepeatablePartEnd - zeroBasedIndexOfRepeatablePartStart)
-                + Util.size(template.getWaypoints()) - zeroBasedIndexOfRepeatablePartEnd
-                - zeroBasedIndexOfRepeatablePartStart;
-        assertEquals(expectedNumberOfWaypointsOfCourse, Util.size(course.getWaypoints()));
+        if (strict) {
+            final int expectedNumberOfWaypointsOfCourse = (numberOfLapsForCourse - 1)
+                    * (zeroBasedIndexOfRepeatablePartEnd - zeroBasedIndexOfRepeatablePartStart)
+                    + Util.size(template.getWaypoints())
+                    - (zeroBasedIndexOfRepeatablePartEnd - zeroBasedIndexOfRepeatablePartStart);
+            assertEquals(expectedNumberOfWaypointsOfCourse, Util.size(course.getWaypoints()));
+        }
         return new Pair<>(courseConfiguration, course);
     }
 
