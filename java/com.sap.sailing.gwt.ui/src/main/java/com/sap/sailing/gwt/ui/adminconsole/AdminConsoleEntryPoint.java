@@ -16,6 +16,10 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
+import com.sap.sailing.gwt.ui.adminconsole.coursecreation.CourseTemplatePanel;
+import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkPropertiesPanel;
+import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkRolePanel;
+import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkTemplatePanel;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
@@ -447,6 +451,55 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<FileStoragePanel>(fileStoragePanel),
                 getStringMessages().fileStorage(), SecuredSecurityTypes.SERVER.getPermissionForObject(
                         SecuredSecurityTypes.ServerActions.CONFIGURE_FILE_STORAGE, serverInfo));
+
+        /* COURSE CREATION */
+        final HorizontalTabLayoutPanel courseCreationTabPanel = panel
+                .addVerticalTab(getStringMessages().courseCreation(), "CourseCreationTab");
+
+        final MarkTemplatePanel markTemplatePanel = new MarkTemplatePanel(getSailingService(), this,
+                getStringMessages(), getUserService());
+        panel.addToTabPanel(courseCreationTabPanel,
+                new DefaultRefreshableAdminConsolePanel<MarkTemplatePanel>(markTemplatePanel) {
+            @Override
+            public void refreshAfterBecomingVisible() {
+                        markTemplatePanel.refreshMarkTemplates();
+            }
+                }, getStringMessages().markTemplates(),
+                SecuredDomainType.MARK_TEMPLATE.getPermission(DefaultActions.MUTATION_ACTIONS));
+
+        final MarkPropertiesPanel markPropertiesPanel = new MarkPropertiesPanel(getSailingService(), this,
+                getStringMessages(), getUserService());
+        panel.addToTabPanel(courseCreationTabPanel,
+                new DefaultRefreshableAdminConsolePanel<MarkPropertiesPanel>(markPropertiesPanel) {
+                    @Override
+                    public void refreshAfterBecomingVisible() {
+                        markPropertiesPanel.refreshMarkProperties();
+                    }
+                }, getStringMessages().markProperties(),
+                SecuredDomainType.MARK_PROPERTIES.getPermission(DefaultActions.MUTATION_ACTIONS));
+
+        final CourseTemplatePanel courseTemplatePanel = new CourseTemplatePanel(getSailingService(), this,
+                getStringMessages(), getUserService());
+        panel.addToTabPanel(courseCreationTabPanel,
+                new DefaultRefreshableAdminConsolePanel<CourseTemplatePanel>(courseTemplatePanel) {
+                    @Override
+                    public void refreshAfterBecomingVisible() {
+                        courseTemplatePanel.refreshCourseTemplates();
+                    }
+                }, getStringMessages().courseTemplates(),
+                SecuredDomainType.COURSE_TEMPLATE.getPermission(DefaultActions.MUTATION_ACTIONS));
+
+        final MarkRolePanel markRolePanel = new MarkRolePanel(getSailingService(), this, getStringMessages(),
+                getUserService());
+        panel.addToTabPanel(courseCreationTabPanel,
+                new DefaultRefreshableAdminConsolePanel<MarkRolePanel>(markRolePanel) {
+                    @Override
+                    public void refreshAfterBecomingVisible() {
+                        markRolePanel.refreshMarkRoles();
+                    }
+                }, getStringMessages().markRoles(),
+                SecuredDomainType.MARK_ROLE.getPermission(DefaultActions.MUTATION_ACTIONS));
+
         panel.initUI();
         fillRegattas();
         fillLeaderboardGroups();

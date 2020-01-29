@@ -10,6 +10,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 public class CourseBaseJsonSerializer implements JsonSerializer<CourseBase> {
     public static final String FIELD_NAME = "name";
     public static final String FIELD_WAYPOINTS = "waypoints";
+    public static final String FIELD_ORIGINATING_COURSE_TEMPLATE_ID = "originatingCourseTemplateId";
 
     private final JsonSerializer<Waypoint> waypointSerializer;
 
@@ -22,6 +23,9 @@ public class CourseBaseJsonSerializer implements JsonSerializer<CourseBase> {
         JSONObject result = new JSONObject();
 
         result.put(FIELD_NAME, object.getName());
+        if (object.getOriginatingCourseTemplateIdOrNull() != null) {
+            result.put(FIELD_ORIGINATING_COURSE_TEMPLATE_ID, object.getOriginatingCourseTemplateIdOrNull());
+        }
 
         JSONArray waypoints = new JSONArray();
         for (Waypoint waypoint : object.getWaypoints()) {

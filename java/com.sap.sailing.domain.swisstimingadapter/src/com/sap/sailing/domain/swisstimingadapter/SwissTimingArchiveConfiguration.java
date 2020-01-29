@@ -19,11 +19,11 @@ public interface SwissTimingArchiveConfiguration extends WithQualifiedObjectIden
 
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     @Override
-    default HasPermissions getType() {
+    default HasPermissions getPermissionType() {
         return SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT;
     }
 

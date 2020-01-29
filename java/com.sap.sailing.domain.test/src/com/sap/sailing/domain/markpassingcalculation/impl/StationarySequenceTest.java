@@ -45,10 +45,10 @@ public class StationarySequenceTest extends AbstractCandidateFilterTestSupport {
         final TimePoint now = MillisecondsTimePoint.now();
         final Waypoint w3 = new WaypointImpl(new ControlPointWithTwoMarksImpl(
                 UUID.randomUUID(), new MarkImpl(UUID.randomUUID(), "3p"),
-                new MarkImpl(UUID.randomUUID(), "3s"), "Leeward Gate"));
+                new MarkImpl(UUID.randomUUID(), "3s"), "Leeward Gate", "Leeward Gate"));
         final Waypoint w5 = new WaypointImpl(new ControlPointWithTwoMarksImpl(
                 UUID.randomUUID(), new MarkImpl(UUID.randomUUID(), "Committee Boat"),
-                new MarkImpl(UUID.randomUUID(), "Pin"), "Start/Finish"));
+                new MarkImpl(UUID.randomUUID(), "Pin"), "Start/Finish", "Start/Finish"));
         c1 = candidate(now, "c1", w3);
         c2 = candidate(c1.getTimePoint().plus(Duration.ONE_SECOND.times(10)), "c2", w5);
         c3 = candidate(c2.getTimePoint().plus(Duration.ONE_SECOND.times(10)), "c3", w3);

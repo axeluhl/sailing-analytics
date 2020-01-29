@@ -59,7 +59,7 @@ public class UserProxy implements User {
     }
 
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         throw new UnsupportedOperationException();
     }
 

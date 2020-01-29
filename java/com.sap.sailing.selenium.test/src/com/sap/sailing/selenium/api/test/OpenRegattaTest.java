@@ -23,8 +23,8 @@ import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.EventApi.Event;
 import com.sap.sailing.selenium.api.event.GpsFixApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
+import com.sap.sailing.selenium.api.event.Mark;
 import com.sap.sailing.selenium.api.event.MarkApi;
-import com.sap.sailing.selenium.api.event.MarkApi.Mark;
 import com.sap.sailing.selenium.api.event.SecurityApi;
 import com.sap.sailing.selenium.api.regatta.Competitor;
 import com.sap.sailing.selenium.api.regatta.RaceColumn;
@@ -100,8 +100,8 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
         final Mark mark1 = markApi.addMarkToRegatta(ownerCtx, EVENT_NAME, "FirstMark");
 
         final Double longitude = 9.12, latitude = .599;
-        markApi.addMarkFix(ownerCtx, EVENT_NAME, race.getRaceName(), "Default", mark1.getMarkId(), longitude, latitude,
-                currentTimeMillis());
+        markApi.addMarkFix(ownerCtx, EVENT_NAME, race.getRaceName(), "Default", mark1.getMarkId(), null, null,
+                longitude, latitude, currentTimeMillis());
     }
 
 }

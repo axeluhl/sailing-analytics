@@ -9,8 +9,13 @@ import javax.ws.rs.core.Context;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
+import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.interfaces.RacingEventService;
@@ -62,13 +67,19 @@ public abstract class AbstractSailingServerResource {
         return tracker.getService(); 
     }
     
+    protected SharedSailingData getSharedSailingData() {
+        @SuppressWarnings("unchecked")
+        ServiceTracker<SharedSailingData, SharedSailingData> tracker = (ServiceTracker<SharedSailingData, SharedSailingData>) servletContext.getAttribute(RestServletContainer.SHARED_SAILING_DATA_TRACKER_NAME);
+        return tracker.getService(); 
+    }
+    
     protected SecurityService getSecurityService() {
         @SuppressWarnings("unchecked")
         ServiceTracker<SecurityService, SecurityService> tracker = (ServiceTracker<SecurityService, SecurityService>) servletContext.getAttribute(RestServletContainer.SECURITY_SERVICE_TRACKER_NAME);
         return tracker.getService(); 
     }
     
-    public ReplicationService getReplicationService() {
+    protected ReplicationService getReplicationService() {
         @SuppressWarnings("unchecked")
         ServiceTracker<ReplicationService, ReplicationService> tracker = (ServiceTracker<ReplicationService, ReplicationService>) servletContext.getAttribute(RestServletContainer.REPLICATION_SERVICE_TRACKER_NAME);
         return tracker.getService(); 
@@ -80,6 +91,22 @@ public abstract class AbstractSailingServerResource {
             regatta = getService().getRegattaByName(regattaName.replaceAll(SLASH_ENCODING, "/"));
         }
         return regatta;
+    }
+    
+    protected RaceColumn findRaceColumnByName(Regatta regatta, String raceColumnName) {
+        RaceColumn raceColumn = regatta.getRaceColumnByName(raceColumnName);
+        if (raceColumn == null && raceColumnName.contains(SLASH_ENCODING)) {
+            raceColumn = regatta.getRaceColumnByName(raceColumnName.replaceAll(SLASH_ENCODING, "/"));
+        }
+        return raceColumn;
+    }
+    
+    protected Fleet findFleetByName(RaceColumn raceColumn, String fleetName) {
+        Fleet fleet = raceColumn.getFleetByName(fleetName);
+        if (fleet == null && fleetName.contains(SLASH_ENCODING)) {
+            fleet = raceColumn.getFleetByName(fleetName.replaceAll(SLASH_ENCODING, "/"));
+        }
+        return fleet;
     }
 
     protected RaceDefinition findRaceByName(Regatta regatta, String raceName) {
@@ -120,5 +147,9 @@ public abstract class AbstractSailingServerResource {
         BigDecimal bigDecimal = new BigDecimal(value);
         bigDecimal = bigDecimal.setScale(places, RoundingMode.HALF_UP);
         return bigDecimal.doubleValue();
+    }
+    
+    public RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
+        return getService(RaceLogTrackingAdapterFactory.class).getAdapter(getService().getBaseDomainFactory());
     }
 }

@@ -210,11 +210,6 @@
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
-                  <id>com.sap.sailing.windestimation</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
                   <id>com.sap.sailing.monitoring</id>
                   <level>7</level>
                   <autoStart>true</autoStart>
@@ -260,6 +255,11 @@
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
+                  <id>com.sap.sailing.windestimation</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
                   <id>com.sap.sailing.polars.datamining</id>
                   <level>5</level>
                   <autoStart>true</autoStart>
@@ -281,6 +281,16 @@
                 </bundle>
                 <bundle>
                   <id>com.sap.sailing.domain.igtimiadapter.gateway</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.shared.server</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.shared.server.gateway</id>
                   <level>5</level>
                   <autoStart>true</autoStart>
                 </bundle>

@@ -63,9 +63,13 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
     
     boolean startsBefore(TimeRange other);
     
+    boolean startsBefore(TimePoint other);
+    
     boolean startsAtOrAfter(TimePoint timePoint);
     
     boolean startsAfter(TimeRange other);
+
+    boolean startsAfter(TimePoint timePoint);
     
     boolean endsAfter(TimeRange other);
     
@@ -125,4 +129,19 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
      * Short for {@link #from()}.{@link TimePoint#until(TimePoint) until}({@link #to()}).
      */
     Duration getDuration();
+
+    /**
+     * Produces a {@link TimeRange} that {@link TimeRange#includes(TimeRange) includes} {@code this} and
+     * {@link TimeRange#includes(TimePoint) includes} {@code timePoint}. If {@code this} time range already
+     * {@link #includes(TimePoint)} {@code timePoint}, {@code this} is returned.
+     */
+    TimeRange extend(TimePoint timePoint);
+
+    /**
+     * Produces a {@link TimeRange} that {@link TimeRange#includes(TimeRange) includes} both, {@code this} and
+     * {@code other}. Other than {@link #union(TimeRange)}, this will also work in case {@code other} does not
+     * {@link #touches(TimeRange) touch} {@code this} time range. If {@code this} already {@link #includes(TimeRange)}
+     * {@code other}, {@code this} time range is returned.
+     */
+    TimeRange extend(TimeRange other);
 }

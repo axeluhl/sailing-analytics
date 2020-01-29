@@ -63,7 +63,7 @@ public class RegattaNameAndRaceName extends RegattaName implements RegattaAndRac
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     @Override
@@ -76,7 +76,7 @@ public class RegattaNameAndRaceName extends RegattaName implements RegattaAndRac
     }
 
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredDomainType.TRACKED_RACE;
     }
 

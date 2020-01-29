@@ -246,7 +246,7 @@ public interface Regatta
 
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
@@ -262,7 +262,7 @@ public interface Regatta
     }
 
     @Override
-    default HasPermissions getType() {
+    default HasPermissions getPermissionType() {
         return SecuredDomainType.REGATTA;
     }
 
