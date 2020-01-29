@@ -1,9 +1,11 @@
 package com.sap.sse.security.storemerging;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -15,7 +17,6 @@ import org.junit.Test;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
-import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
@@ -29,11 +30,11 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
     
     @Test
     public void testImportFromSource1ToTarget1() throws UserGroupManagementException, UserManagementException {
-        final RoleDefinition sailingViewerRoleInTargetStore = StreamSupport.stream(targetUserStore.getRoleDefinitions().spliterator(), /* parallel */ false).
-                filter(rd->rd.getName().equals("sailing_viewer")).findAny().get();
-        // assertions against unmodified target
+        // *********** assertions against unmodified target ***********
         final User targetAaa = targetUserStore.getUserByName("aaa");
         assertNotNull(targetAaa);
+        final UserGroup targetAaaTenant = targetUserStore.getUserGroupByName("aaa-tenant");
+        assertNotNull(targetAaaTenant);
         final User targetSameEmail = targetUserStore.getUserByName("same-email");
         assertNotNull(targetSameEmail);
         assertNull(targetSameEmail.getFullName());
@@ -45,22 +46,40 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         final Pair<UserStore, AccessControlStore> sourceStores = readSourceStores();
         final UserStore sourceUserStore = sourceStores.getA();
         final AccessControlStore sourceAccessControlStore = sourceStores.getB();
-        // assertions against unmodified source
+        // *********** assertions against unmodified source ***********
         final User sourceSameEmail = sourceUserStore.getUserByName("same-email");
         assertNotNull(sourceSameEmail);
         assertNotSame(sourceSameEmail, targetSameEmail);
         assertNotNull(sourceSameEmail.getFullName());
         assertNotNull(sourceSameEmail.getCompany());
         assertNotNull(sourceSameEmail.getLocale());
-        assertNotSame(sourceSameEmail, targetAaa);
+        assertNotSame(sourceSameEmail, targetSameEmail);
+        // the sailing_viewer role qualified for the admin user (which is merged with the target's admin user) is expected to be kept
+        assertNotNull(StreamSupport.stream(sourceSameEmail.getRoles().spliterator(), /* parallel */ false).
+            filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForUser()!=null&&rd.getQualifiedForUser().getName().equals("admin")).findAny().get());
+        // the sailing_viewer role qualified for the admin-tenant group (which is merged with the target's admin-tenant group) is expected to be kept
+        assertNotNull(StreamSupport.stream(sourceSameEmail.getRoles().spliterator(), /* parallel */ false).
+            filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForTenant()!=null&&rd.getQualifiedForTenant().getName().equals("admin-tenant")).findAny().get());
+        // the sailing_viewer role qualified for the aaa user (which is dropped) is expected to be dropped
+        assertNotNull(StreamSupport.stream(sourceSameEmail.getRoles().spliterator(), /* parallel */ false).
+            filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForUser()!=null&&rd.getQualifiedForUser().getName().equals("aaa")).findAny().get());
+        // the sailing_viewer role qualified for the aaa-tenant user (which is expected to be dropped because its user is dropped) is expected to be dropped
+        assertNotNull(StreamSupport.stream(sourceSameEmail.getRoles().spliterator(), /* parallel */ false).
+            filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForTenant()!=null&&rd.getQualifiedForTenant().getName().equals("aaa-tenant")).findAny().get());
         final UserGroup sourceGroup1 = sourceUserStore.getUserGroupByName("Group1");
+        assertNotSame(sourceGroup1, targetUserStore.getUserGroupByName("Group1"));
         final UUID sourceGroup1Id = sourceGroup1.getId();
         assertNotNull(sourceGroup1);
         final User sourceAaa = sourceUserStore.getUserByName("aaa");
         assertNotNull(sourceAaa);
-        assertNotSame(sourceGroup1, targetUserStore.getUserGroupByName("Group1"));
+        final UserGroup sourceAaaTenant = sourceUserStore.getUserGroupByName("aaa-tenant");
+        assertNotNull(sourceAaaTenant);
+        assertNotSame(sourceAaaTenant, targetAaaTenant);
+        assertTrue(sourceAaaTenant.contains(sourceAaa));
+        assertTrue(sourceAaaTenant.contains(sourceSameEmail)); // to see if that gets merged into targetAaaTenant
+        // *********** merge ***********
         mergeSourceIntoTarget(sourceUserStore, sourceAccessControlStore);
-        // assertions for merge result
+        // *********** assertions for merge result ***********
         assertEquals(targetGroup1Id, targetUserStore.getUserGroupByName("Group1").getId());
         // the source group with same name but different ID is expected to have been dropped
         assertNull(targetUserStore.getUserGroup(sourceGroup1Id));
@@ -69,5 +88,22 @@ public class TestEffectsOfDroppingUsersAndGroups extends AbstractStoreMergeTest 
         assertEquals(sourceSameEmail.getFullName(), updatedTargetSameEmail.getFullName());
         assertEquals(sourceSameEmail.getCompany(), updatedTargetSameEmail.getCompany());
         assertEquals(sourceSameEmail.getLocale(), updatedTargetSameEmail.getLocale());
+        // the aaa-tenant group is a tricky case: its only user is expected to have been dropped,
+        // but its name equals that of a group in target, and originally it had an "aaa" user in it;
+        // drop or merge?
+        assertFalse(targetAaaTenant.contains(targetSameEmail)); // expecting the group to have been dropped
+        // If the sourceAaaTenant group was dropped then so have to be roles qualified by it
+        // the sailing_viewer role qualified for the admin user (which is merged with the target's admin user) is expected to be kept
+        assertNotNull(StreamSupport.stream(targetSameEmail.getRoles().spliterator(), /* parallel */ false).
+                filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForUser()!=null&&rd.getQualifiedForUser().getName().equals("admin")).findAny().get());
+        // the sailing_viewer role qualified for the admin-tenant group (which is merged with the target's admin-tenant group) is expected to be kept
+        assertNotNull(StreamSupport.stream(targetSameEmail.getRoles().spliterator(), /* parallel */ false).
+            filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForTenant()!=null&&rd.getQualifiedForTenant().getName().equals("admin-tenant")).findAny().get());
+        // the sailing_viewer role qualified for the aaa user (which is dropped) is expected to be dropped
+        assertFalse(StreamSupport.stream(targetSameEmail.getRoles().spliterator(), /* parallel */ false).
+            filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForUser()!=null&&rd.getQualifiedForUser().getName().equals("aaa")).findAny().isPresent());
+        // the sailing_viewer role qualified for the aaa-tenant user (which is expected to be dropped because its user is dropped) is expected to be dropped
+        assertFalse(StreamSupport.stream(targetSameEmail.getRoles().spliterator(), /* parallel */ false).
+            filter(rd->rd.getName().equals("sailing_viewer") && rd.getQualifiedForTenant()!=null&&rd.getQualifiedForTenant().getName().equals("aaa-tenant")).findAny().isPresent());
     }
 }

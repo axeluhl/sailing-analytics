@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.StreamSupport;
 
 import com.mongodb.MongoClientURI;
 import com.sap.sse.common.Util;
@@ -122,7 +123,7 @@ public class SecurityStoreMerger {
         // if it is to be dropped, the key is not part of the map. If it is to be merged with an object in the target,
         // the corresponding target object is the value.
         final Map<User, User> userMap = markUsersForAddMergeOrDrop(sourceUserStore);
-        final Map<UserGroup, UserGroup> userGroupMap = markUserGroupsForAddMergeOrDrop(sourceUserStore);
+        final Map<UserGroup, UserGroup> userGroupMap = markUserGroupsForAddMergeOrDrop(sourceUserStore, userMap);
         replaceSourceUserReferencesToUsersAndGroups(userMap, userGroupMap);
         replaceSourceUserGroupReferencesToUsers(userMap, userGroupMap);
         final Set<OwnershipAnnotation> ownershipsToTryToImport =
@@ -155,7 +156,12 @@ public class SecurityStoreMerger {
         return userMap;
     }
 
-    private Map<UserGroup, UserGroup> markUserGroupsForAddMergeOrDrop(UserStore sourceUserStore) {
+    /**
+     * Operates on the yet unmodified groups where user references have not yet been replaced. The modifications
+     * that will later be applied to the source groups are described by the {@code userMap} which tells whether
+     * source users will be added to the target, merged with a target user, or dropped.
+     */
+    private Map<UserGroup, UserGroup> markUserGroupsForAddMergeOrDrop(UserStore sourceUserStore, Map<User, User> userMap) {
         final Map<UserGroup, UserGroup> userGroupMap = new HashMap<>();
         for (final UserGroup sourceGroup : sourceUserStore.getUserGroups()) {
             final UserGroup targetGroupWithSameID = targetUserStore.getUserGroup(sourceGroup.getId());
@@ -165,7 +171,7 @@ public class SecurityStoreMerger {
             } else {
                 final UserGroup targetGroupWithEqualName = targetUserStore.getUserGroupByName(sourceGroup.getName());
                 if (targetGroupWithEqualName != null) {
-                    if (considerGroupsIdentical(targetGroupWithEqualName, sourceGroup)) {
+                    if (considerGroupsIdentical(targetGroupWithEqualName, sourceGroup, userMap)) {
                         logger.info("Identical target group (though different ID) found: "+targetGroupWithEqualName+". Merging...");
                         userGroupMap.put(sourceGroup, targetGroupWithEqualName);
                     } else {
@@ -468,17 +474,24 @@ public class SecurityStoreMerger {
     /**
      * If the groups have equal {@link UserGroup#getId() IDs} then they are considered identical. If both groups have
      * different IDs but equal names and the names match the pattern {@code <username>-tenant} and both contain a user
-     * named {@code <username>} then they will be considered identical, too. In all other cases they are considered
-     * distinct.
+     * named {@code <username>} and the source user will not be dropped (see {@code userMap}) then they will be
+     * considered identical, too. In all other cases they are considered distinct.
+     * 
+     * @param userMap
+     *            tells what happens with the users from the imported source; if not in the keys, the user will be
+     *            dropped. If the value is identical to the key, the user is added. Otherwise, the value tells the
+     *            equal-named user in the target with which they key source user will be merged.
      */
-    static boolean considerGroupsIdentical(final UserGroup g1, final UserGroup g2) {
-        final String g1TenantGroupUserName, g2TenantGroupUserName;
-        return g1.getId().equals(g2.getId()) ||
-                (g1TenantGroupUserName=getTenantGroupUserName(g1)) != null &&
-                (g2TenantGroupUserName=getTenantGroupUserName(g2)) != null &&
-                g1TenantGroupUserName.equals(g2TenantGroupUserName) &&
-                hasUserNamed(g1, g1TenantGroupUserName) &&
-                hasUserNamed(g2, g2TenantGroupUserName);
+    static boolean considerGroupsIdentical(final UserGroup targetGroup, final UserGroup sourceGroup, Map<User, User> userMap) {
+        final String targetTenantGroupUserName, sourceTenantGroupUserName;
+        return targetGroup.getId().equals(sourceGroup.getId()) ||
+                (targetTenantGroupUserName=getTenantGroupUserName(targetGroup)) != null &&
+                (sourceTenantGroupUserName=getTenantGroupUserName(sourceGroup)) != null &&
+                targetTenantGroupUserName.equals(sourceTenantGroupUserName) &&
+                hasUserNamed(targetGroup, targetTenantGroupUserName) &&
+                hasUserNamed(sourceGroup, sourceTenantGroupUserName) &&
+                userMap.get(StreamSupport.stream(sourceGroup.getUsers().spliterator(), /* parallel */ false).
+                        filter(u->u.getName().equals(sourceTenantGroupUserName)).findAny().get()) != null;
     }
 
     private static boolean hasUserNamed(UserGroup group, String username) {

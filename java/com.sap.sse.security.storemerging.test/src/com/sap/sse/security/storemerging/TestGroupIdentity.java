@@ -3,6 +3,8 @@ package com.sap.sse.security.storemerging;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -21,7 +23,7 @@ public class TestGroupIdentity {
         final UUID commonUuid2 = UUID.fromString(commonUuid1.toString());
         final UserGroup g1 = new UserGroupImpl(commonUuid1, "SomeName");
         final UserGroup g2 = new UserGroupImpl(commonUuid2, "SomeName");
-        assertTrue(SecurityStoreMerger.considerGroupsIdentical(g1, g2));
+        assertTrue(SecurityStoreMerger.considerGroupsIdentical(g1, g2, Collections.emptyMap()));
     }
     
     @Test
@@ -30,7 +32,7 @@ public class TestGroupIdentity {
         final UUID uuid2 = UUID.randomUUID();
         final UserGroup g1 = new UserGroupImpl(uuid1, "SomeName1");
         final UserGroup g2 = new UserGroupImpl(uuid2, "SomeName2");
-        assertFalse(SecurityStoreMerger.considerGroupsIdentical(g1, g2));
+        assertFalse(SecurityStoreMerger.considerGroupsIdentical(g1, g2, Collections.emptyMap()));
     }
     
     @Test
@@ -39,7 +41,7 @@ public class TestGroupIdentity {
         final UUID uuid2 = UUID.randomUUID();
         final UserGroup g1 = new UserGroupImpl(uuid1, "SomeName");
         final UserGroup g2 = new UserGroupImpl(uuid2, "SomeName");
-        assertFalse(SecurityStoreMerger.considerGroupsIdentical(g1, g2));
+        assertFalse(SecurityStoreMerger.considerGroupsIdentical(g1, g2, Collections.emptyMap()));
     }
     
     @Test
@@ -51,7 +53,7 @@ public class TestGroupIdentity {
         final User user = new UserImpl(username, /* email */ null, (Map<String, UserGroup>) /* defaultTenantForServer */ null, /* userGroupProvider */ null);
         g1.add(user);
         final UserGroup g2 = new UserGroupImpl(uuid2, username+SecurityService.TENANT_SUFFIX);
-        assertFalse(SecurityStoreMerger.considerGroupsIdentical(g1, g2));
+        assertFalse(SecurityStoreMerger.considerGroupsIdentical(g1, g2, Collections.emptyMap()));
     }
     
     @Test
@@ -65,6 +67,8 @@ public class TestGroupIdentity {
         final UserGroup g2 = new UserGroupImpl(uuid2, username+SecurityService.TENANT_SUFFIX);
         final User user2 = new UserImpl(username, /* email */ null, (Map<String, UserGroup>) /* defaultTenantForServer */ null, /* userGroupProvider */ null);
         g2.add(user2);
-        assertTrue(SecurityStoreMerger.considerGroupsIdentical(g1, g2));
+        final Map<User, User> userMap = new HashMap<>();
+        userMap.put(user2, user1); // user2 assumed to get merged with user1
+        assertTrue(SecurityStoreMerger.considerGroupsIdentical(g1, g2, userMap));
     }
 }

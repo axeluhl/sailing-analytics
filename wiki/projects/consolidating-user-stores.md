@@ -292,7 +292,7 @@ Merging the ``USER_GROUPS``, ``USERS``, ``PREFERENCES``, ``OWNERSHIPS`` and ``AC
 
 In the first pass the decision is made for each object of type ``User``, ``UserGroup``, ``Ownership``, ``AccessControlList`` and the user preferences whether it will be added, merged or dropped. Warnings will be issued for objects dropped.
 
-Groups will be added if none with the same UUID or an equal name exists on the importing side. Should a user group with the same ID exist, it will be marked for merge. If a user group exists on the importing side that has an equal name but a different ID, the groups will only be marked for merge if their equal names have the format``"&lt;username&gt;-tenant"`` and a user named ``&lt;username&gt;`` exists in both groups. Otherwise, the source group will be marked for dropping.
+Groups will be added if none with the same UUID or an equal name exists on the importing side. Should a user group with the same ID exist, it will be marked for merge. If a user group exists on the importing side that has an equal name but a different ID, the groups will only be marked for merge if their equal names have the format``"&lt;username&gt;-tenant"`` and a user named ``&lt;username&gt;`` exists in both groups and the user in the imported group is merged with the corresponding user in the importing group. Otherwise, the source group will be marked for dropping.
 
 Users with a name for which no user exists in the target will be marked for "add". If a target user exists with a name equal to that of the source user the source user will be marked for merge into the target user if the e-mail addresses are equal. Otherwise, the source user is marked for dropping. For objects marked for merging, the merge target is recorded for each merge source.
 
