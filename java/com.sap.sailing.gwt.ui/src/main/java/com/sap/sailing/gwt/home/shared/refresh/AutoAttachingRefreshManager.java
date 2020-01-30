@@ -34,7 +34,11 @@ public class AutoAttachingRefreshManager extends LifecycleRefreshManager {
     
     @Override
     protected void onSuccessfulUpdate() {
-        if(container != null) {
+        attachContent();
+    }
+
+    public void attachContent() {
+        if (container != null) {
             LOG.log(Level.FINE, "Attaching refreshable content to container");
             container.setWidget(content);
             container = null;
