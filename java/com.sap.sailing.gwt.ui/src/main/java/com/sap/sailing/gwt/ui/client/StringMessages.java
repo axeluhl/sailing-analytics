@@ -1188,7 +1188,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showWindStreamletColors();
     String showSimulationOverlay();
     String simulationLegendTooltip();
-    String regattaNameMustNotContainSlashes();
     String racesScored();
     String racesScoredTooltip();
     String averageNumberOfOperationsPerMessage();
