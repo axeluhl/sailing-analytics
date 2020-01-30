@@ -10,9 +10,9 @@ import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBException;
 
+import com.sap.sailing.domain.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
-import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.xrr.resultimport.Parser;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.schema.RegattaResults;

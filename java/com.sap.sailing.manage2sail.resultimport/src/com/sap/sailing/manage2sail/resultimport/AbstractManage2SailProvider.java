@@ -3,7 +3,7 @@ package com.sap.sailing.manage2sail.resultimport;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import com.sap.sailing.resultimport.ResultUrlProvider;
+import com.sap.sailing.domain.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 

@@ -27,6 +27,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
@@ -43,6 +44,7 @@ import com.sap.sailing.domain.racelog.tracking.SensorFixStoreSupplier;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
+import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.RacingEventServiceMXBean;
 import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreferences;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
@@ -241,11 +243,15 @@ public class Activator implements BundleActivator {
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
         
         sharedSailingDataTracker = ServiceTrackerFactory.createAndOpen(context, SharedSailingData.class);
+        ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker =
+                ServiceTrackerFactory.createAndOpen(context, ScoreCorrectionProvider.class);
+        ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker = ServiceTrackerFactory
+                .createAndOpen(context, ResultUrlRegistry.class);
 
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors,
                 serviceFinderFactory, trackedRegattaListener, notificationService,
                 trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker,
-                sharedSailingDataTracker);
+                sharedSailingDataTracker, scoreCorrectionProviderServiceTracker, resultUrlRegistryServiceTracker);
         notificationService.setRacingEventService(racingEventService);
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,

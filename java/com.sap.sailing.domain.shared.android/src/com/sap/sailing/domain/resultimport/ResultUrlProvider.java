@@ -1,4 +1,4 @@
-package com.sap.sailing.resultimport;
+package com.sap.sailing.domain.resultimport;
 
 import java.net.MalformedURLException;
 import java.net.URL;

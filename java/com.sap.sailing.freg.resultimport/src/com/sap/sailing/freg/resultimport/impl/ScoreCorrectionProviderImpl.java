@@ -12,8 +12,8 @@ import java.util.Set;
 
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
+import com.sap.sailing.domain.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.RegattaResults;
-import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.resultimport.impl.RegattaScoreCorrectionsImpl;
 import com.sap.sse.common.TimePoint;
