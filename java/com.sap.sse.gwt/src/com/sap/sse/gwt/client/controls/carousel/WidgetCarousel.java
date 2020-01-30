@@ -82,11 +82,22 @@ public class WidgetCarousel extends Composite {
         // Slick slider may only get initialized when it is attached to DOM, visible and items are added
         // Rendering bugs may occur otherwise
         if (!initialized && !items.isEmpty() && isAttached() && isVisible()) {
-            init();
             initialized = true;
+            initAfterReflow();
         }
     }
     
+    private void initAfterReflow() {
+        // Slick slider initialization will produce layout problems when the content widget sizes aren't calculated yet.
+        // Until the initial reflow happened, widget size are reported as 0. If that's the case,
+        // initialization is deferred after the reflow.
+        if (items.getFirst().getElement().getOffsetWidth() > 0) {
+            init();
+        } else {
+            Scheduler.get().scheduleDeferred(this::initAfterReflow);
+        }
+    }
+
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
@@ -96,6 +107,8 @@ public class WidgetCarousel extends Composite {
     @Override
     protected void onLoad() {
         super.onLoad();
+        // onLoad is called before the element is completely attached to the DOM.
+        // Using scheduleFinally ensures, this is finished before continuing with the initialization.
         Scheduler.get().scheduleFinally(this::initializeIfRequired);
     }
 
