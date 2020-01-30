@@ -5124,11 +5124,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
             boolean persistent, ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType) {
-
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.REGATTA, Regatta.getTypeRelativeObjectIdentifier(regattaName),
                 regattaName, new Callable<RegattaDTO>() {
-
                     @Override
                     public RegattaDTO call() throws Exception {
                         TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
