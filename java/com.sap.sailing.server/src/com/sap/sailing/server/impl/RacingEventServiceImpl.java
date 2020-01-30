@@ -3494,8 +3494,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         event.setName(eventName);
         event.setDescription(eventDescription);
-        event.setStartDate(startDate);
-        event.setEndDate(endDate);
+        event.setStartAndEndDate(startDate, endDate);
         event.setPublic(isPublic);
         event.getVenue().setName(venueName);
         List<LeaderboardGroup> leaderboardGroups = new ArrayList<>();
