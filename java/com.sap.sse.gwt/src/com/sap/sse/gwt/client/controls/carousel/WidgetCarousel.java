@@ -96,7 +96,7 @@ public class WidgetCarousel extends Composite {
     @Override
     protected void onLoad() {
         super.onLoad();
-        initializeIfRequired();
+        Scheduler.get().scheduleFinally(this::initializeIfRequired);
     }
 
     public void onAfterChange() {
