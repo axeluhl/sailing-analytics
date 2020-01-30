@@ -51,7 +51,7 @@ public class Stage extends Composite {
                 break;
             }
             stageWidgets.add(stageTeaser);
-            widgetCarousel.setWidgets(stageWidgets);
         }
+        widgetCarousel.setWidgets(stageWidgets);
     }
 }
