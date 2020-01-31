@@ -7,6 +7,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Command;
@@ -76,6 +77,7 @@ public class WidgetCarousel extends Composite {
         initWidget(ourUiBinder.createAndBindUi(this));
         uniqueId = Document.get().createUniqueId();
         sliderMainUi.addStyleName(uniqueId);
+        sliderMainUi.getElement().getStyle().setOverflowY(Overflow.HIDDEN);
     }
     
     private void initializeIfRequired() {
@@ -93,6 +95,7 @@ public class WidgetCarousel extends Composite {
         // initialization is deferred after the reflow.
         if (items.getFirst().getElement().getOffsetWidth() > 0) {
             init();
+            Scheduler.get().scheduleDeferred(sliderMainUi.getElement().getStyle()::clearOverflowY);
         } else {
             Scheduler.get().scheduleDeferred(this::initAfterReflow);
         }
