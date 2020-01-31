@@ -1,5 +1,7 @@
 package com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.common.orc.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,6 +45,8 @@ public class ORCCertificateImpl_CustomFieldSerializer extends CustomFieldSeriali
         streamWriter.writeObject(new HashMap<>(instance.getLongDistanceSpeedPredictions()));
         streamWriter.writeObject(new HashMap<>(instance.getCircularRandomSpeedPredictions()));
         streamWriter.writeObject(new HashMap<>(instance.getNonSpinnakerSpeedPredictions()));
+        streamWriter.writeObject(Arrays.asList(instance.getTrueWindAngles()));
+        streamWriter.writeObject(Arrays.asList(instance.getTrueWindSpeeds()));
     }
 
     @Override
@@ -88,12 +92,42 @@ public class ORCCertificateImpl_CustomFieldSerializer extends CustomFieldSeriali
         final Map<Speed, Speed> circularRandomSpeedPredictionsPerTrueWindSpeed = (Map<Speed, Speed>) streamReader.readObject();
         @SuppressWarnings("unchecked")
         final Map<Speed, Speed> nonSpinnakerSpeedPredictionsPerTrueWindSpeed = (Map<Speed, Speed>) streamReader.readObject();
-        return new ORCCertificateImpl(idConsistingOfNatAuthCertNoAndBIN, sailnumber, boatName, boatclass, length, gph,
+        
+        final Bearing[] trueWindAngles = getTrueWindAnglesFromStream(streamReader);
+        final Speed[] trueWindSpeeds = getTrueWindSpeedsFromStream(streamReader);
+        
+        return new ORCCertificateImpl(trueWindSpeeds,trueWindAngles,idConsistingOfNatAuthCertNoAndBIN, sailnumber, boatName, boatclass, length, gph,
                 cdl, issueDate, velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles,
                 beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed, runAngles,
                 runVMGPredictionPerTrueWindSpeed, runAllowancePerTrueWindSpeed,
                 windwardLeewardSpeedPredictionsPerTrueWindSpeed, longDistanceSpeedPredictionsPerTrueWindSpeed,
                 circularRandomSpeedPredictionsPerTrueWindSpeed, nonSpinnakerSpeedPredictionsPerTrueWindSpeed);
+    }
+
+    private static Speed[] getTrueWindSpeedsFromStream(SerializationStreamReader streamReader) {
+        Speed[] trueWindSpeeds = null;
+        try {
+            Object trueWindSpeedsObject = streamReader.readObject();
+            if(trueWindSpeedsObject != null) {
+                trueWindSpeeds = (Speed[]) trueWindSpeedsObject;
+            }
+        } catch (SerializationException e) {
+            trueWindSpeeds = ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS;
+        }
+        return trueWindSpeeds;
+    }
+
+    private static Bearing[] getTrueWindAnglesFromStream(SerializationStreamReader streamReader) {
+        Bearing[] trueWindAngles = null;
+        try {
+            Object trueWindAnglesObject = streamReader.readObject();
+            if(trueWindAnglesObject != null) {
+                trueWindAngles = (Bearing[]) trueWindAnglesObject;
+            }
+        } catch (SerializationException e) {
+            trueWindAngles = ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES;
+        }
+        return trueWindAngles;
     }
 
     @Override

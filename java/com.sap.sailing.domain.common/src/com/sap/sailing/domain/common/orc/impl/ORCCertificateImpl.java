@@ -110,20 +110,22 @@ public class ORCCertificateImpl implements ORCCertificate {
     private final Map<Speed, Speed> circularRandomSpeedPredictionPerTrueWindSpeed;
     
     private final Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed;
-
-    public ORCCertificateImpl(String idConsistingOfNatAuthCertNoAndBIN,
-            String sailnumber, String boatName, String boatClassName,
-            Distance length, Duration gph,
-            Double cdl, TimePoint issueDate,
-            Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle, 
-            Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
-            Map<Speed, Duration> beatAllowancePerTrueWindSpeed, Map<Speed, Bearing> runAngles,
-            Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed,
+    private final Speed[] allowancesTrueWindSpeeds;
+    private final Bearing[] allowancesTrueWindAngles;
+    
+    public ORCCertificateImpl(Speed[] dynamicTrueWindSpeed, Bearing[] dynamicTrueWindAngle,
+            String idConsistingOfNatAuthCertNoAndBIN, String sailnumber, String boatName, String boatClassName,
+            Distance length, Duration gph, Double cdl, TimePoint issueDate,
+            Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle, Map<Speed, Bearing> beatAngles,
+            Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed, Map<Speed, Duration> beatAllowancePerTrueWindSpeed,
+            Map<Speed, Bearing> runAngles, Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed,
             Map<Speed, Duration> runAllowancePerTrueWindSpeed,
             Map<Speed, Speed> windwardLeewardSpeedPredictionsPerTrueWindSpeed,
             Map<Speed, Speed> longDistanceSpeedPredictionsPerTrueWindSpeed,
             Map<Speed, Speed> circularRandomSpeedPredictionsPerTrueWindSpeed,
             Map<Speed, Speed> nonSpinnakerSpeedPredictionsPerTrueWindSpeed) {
+        this.allowancesTrueWindAngles = dynamicTrueWindAngle;
+        this.allowancesTrueWindSpeeds = dynamicTrueWindSpeed;
         this.idConsistingOfNatAuthCertNoAndBIN = idConsistingOfNatAuthCertNoAndBIN;
         this.sailNumber = sailnumber;
         this.boatName = boatName;
@@ -144,6 +146,26 @@ public class ORCCertificateImpl implements ORCCertificate {
         this.longDistanceSpeedPredictionPerTrueWindSpeed = Collections.unmodifiableMap(longDistanceSpeedPredictionsPerTrueWindSpeed);
         this.circularRandomSpeedPredictionPerTrueWindSpeed = Collections.unmodifiableMap(circularRandomSpeedPredictionsPerTrueWindSpeed);
         this.nonSpinnakerSpeedPredictionPerTrueWindSpeed = Collections.unmodifiableMap(nonSpinnakerSpeedPredictionsPerTrueWindSpeed);
+    }
+    public ORCCertificateImpl(String idConsistingOfNatAuthCertNoAndBIN,
+            String sailnumber, String boatName, String boatClassName,
+            Distance length, Duration gph,
+            Double cdl, TimePoint issueDate,
+            Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle, 
+            Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
+            Map<Speed, Duration> beatAllowancePerTrueWindSpeed, Map<Speed, Bearing> runAngles,
+            Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed,
+            Map<Speed, Duration> runAllowancePerTrueWindSpeed,
+            Map<Speed, Speed> windwardLeewardSpeedPredictionsPerTrueWindSpeed,
+            Map<Speed, Speed> longDistanceSpeedPredictionsPerTrueWindSpeed,
+            Map<Speed, Speed> circularRandomSpeedPredictionsPerTrueWindSpeed,
+            Map<Speed, Speed> nonSpinnakerSpeedPredictionsPerTrueWindSpeed) {
+        this(ALLOWANCES_TRUE_WIND_SPEEDS,ALLOWANCES_TRUE_WIND_ANGLES,idConsistingOfNatAuthCertNoAndBIN, sailnumber, boatName, boatClassName, length, gph, cdl, issueDate,
+                velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
+                beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
+                runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionsPerTrueWindSpeed,
+                longDistanceSpeedPredictionsPerTrueWindSpeed, circularRandomSpeedPredictionsPerTrueWindSpeed,
+                nonSpinnakerSpeedPredictionsPerTrueWindSpeed);
     }
 
     @Override
@@ -257,12 +279,12 @@ public class ORCCertificateImpl implements ORCCertificate {
     }
 
     @Override
-    public Speed[] getTrueWindSpeed() {
-        return ALLOWANCES_TRUE_WIND_SPEEDS;
+    public Speed[] getTrueWindSpeeds() {
+        return allowancesTrueWindSpeeds;
     }
 
     @Override
-    public Bearing[] getTrueWindAngle() {
-        return ALLOWANCES_TRUE_WIND_ANGLES;
+    public Bearing[] getTrueWindAngles() {
+        return allowancesTrueWindAngles;
     }
 }

@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Predicate;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
@@ -18,7 +17,6 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
-import com.sap.sailing.domain.common.orc.impl.ORCCertificateCustomBinsImpl;
 import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
@@ -93,19 +91,17 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
         Map<Speed, Bearing> beatAngles = new HashMap<>();
         Map<Speed, Bearing> gybeAngles = new HashMap<>();
         Map<Speed, Map<Bearing, Speed>> velocityPredictionPerTrueWindSpeedAndAngle = new HashMap<>();
-        Map<Bearing, Map<Speed, Duration>> allowanceDurationsPerTrueWindAngleAndSpeed = new HashMap<>(); // per
-                                                                                                         // nautical
-                                                                                                         // mile
+        Map<Bearing, Map<Speed, Duration>> allowanceDurationsPerTrueWindAngleAndSpeed = new HashMap<>();  // per
+                                                                                                          // nautical
+                                                                                                          // mile
         Map<String, Map<Speed, Duration>> predefinedAllowanceDurationsPerTrueWindSpeed = new HashMap<>(); // per
                                                                                                           // nautical
                                                                                                           // mile
         boolean isNewFormatTWA = false; // determine whether use default TWS and TWA values or custom TWS and TWA values
-        Map<Double, Speed> trueWindSpeedMap = new TreeMap<Double, Speed>();// Using TreeMap implementation to save the
-                                                                           // TrueWindSpeed
-                                                                           // So that it first sort the entries as well
-                                                                           // as no duplicates
-        Map<Double, Bearing> trueWindAngleMap = new TreeMap<Double, Bearing>();// Same like trueWindSpeedMap
-        Pattern p = Pattern.compile("^([R][0-9]{1,9}[.]{0,1}[0-9]{1})$"); // Pattern to recognize the new pattern
+        Map<Double, Speed> trueWindSpeedMap = new TreeMap<Double,Speed>();// Using TreeMap implementation to save the TrueWindSpeed
+                                                                          // So that it first sort the entries as well as no duplicates
+        Map<Double, Bearing> trueWindAngleMap = new TreeMap<Double,Bearing>();// Same like trueWindSpeedMap
+        Pattern p = Pattern.compile("^([R][0-9]{1,9}[.]{0,1}[0-9]{1})$");       //Pattern to recognize the new pattern
         JSONObject object = certificateJsonObjectsByCertificateId.get(certificateId);
         if (object == null) {
             // TODO Throw Exception for certificate by id not found. InvalidArgumentException?
@@ -138,89 +134,66 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                 break;
             case ALLOWANCES:
                 final JSONObject allowances = (JSONObject) object.get(ALLOWANCES);
-
-                // Finding out the new format bins
-                Predicate<String> isDefaultTrueWindAngle = (s) -> {
-                    switch (s) {
-                    case "R52":
-                    case "R60":
-                    case "R75":
-                    case "R90":
-                    case "R110":
-                    case "R120":
-                    case "R135":
-                    case "R150":
-                        return true;
-                    default:
-                        return false;
-                    }
-                };
-                // Before going further into parsing Allowances, First need to check whether
-                // The bins are with old format or New, If New Format is given then need to parse
-                // and calculate the bins accordingly
+                
+               // Before going further into parsing Allowances, First need to check whether 
+               // The bins are with old format or New, If New Format is given then need to parse
+               // and calculate the bins accordingly
                 for (final Object aKey : allowances.keySet()) {
                     String keyString = (String) aKey;
                     boolean found = p.matcher(keyString).lookingAt();
-                    if (found && !isDefaultTrueWindAngle.test(keyString)) {
-                        isNewFormatTWA = true;
-                        Map<Speed, Duration> twsMap = new HashMap<>(); // This map is use to save all the True wind
-                                                                       // speed and allowances per nautical miles
-                                                                       // against the True wind angle provide with new
-                                                                       // format.
+                    if (found) {
                         final JSONArray array = (JSONArray) allowances.get(keyString);
+                        if(array.size()<1 || ! (array.get(0) instanceof JSONObject)) {
+                            break;
+                        }
+                        isNewFormatTWA = true;
+                        Map<Speed, Duration> twsMap = new HashMap<>(); // This map is use to save all the True wind speed and allowances per nautical miles against the True wind angle provide with new format.
+                       
                         for (int i = 0; i < array.size(); i++) {
                             JSONObject twa = (JSONObject) array.get(i);
                             Double twsValue = (Double) twa.get("twsInKts");
-                            trueWindSpeedMap.put(twsValue, new KnotSpeedImpl(twsValue));
+                            trueWindSpeedMap.put(twsValue,new KnotSpeedImpl(twsValue));
                             twsMap.put(trueWindSpeedMap.get(twsValue),
                                     new SecondsDurationImpl((Double) twa.get("allInSPNM")));
                         }
                         Double trueWindAngleValue = Double.parseDouble((keyString).substring(1));
-                        trueWindAngleMap.put(trueWindAngleValue, new DegreeBearingImpl(trueWindAngleValue));
-                        allowanceDurationsPerTrueWindAngleAndSpeed.put(trueWindAngleMap.get(trueWindAngleValue),
-                                twsMap);
+                        trueWindAngleMap.put(trueWindAngleValue,new DegreeBearingImpl(trueWindAngleValue));
+                        allowanceDurationsPerTrueWindAngleAndSpeed
+                                .put(trueWindAngleMap.get(trueWindAngleValue), twsMap);
                     }
                 }
-                // Finding out the new bins end here
-
-                final Double[] trueWindSpeedArray = new Double[trueWindSpeedMap.size()];
+                //Finding out the new bins end here
+                
+                final Double [] trueWindSpeedArray = new Double[trueWindSpeedMap.size()];
                 trueWindSpeedMap.keySet().toArray(trueWindSpeedArray);
                 for (final Object aKey : allowances.keySet()) {
                     final JSONArray array = (JSONArray) allowances.get(aKey);
                     if (((String) aKey).equals(BEAT_ANGLE)) {
                         for (int i = 0; i < array.size(); i++) {
-                            beatAngles.put(
-                                    isNewFormatTWA ? new KnotSpeedImpl(trueWindSpeedArray[i])
-                                            : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i],
+                            beatAngles.put(isNewFormatTWA?new KnotSpeedImpl(trueWindSpeedArray[i]):ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i],
                                     new DegreeBearingImpl(((Number) array.get(i)).doubleValue()));
                         }
                         continue;
                     }
                     if (((String) aKey).equals(GYBE_ANGLE)) {
                         for (int i = 0; i < array.size(); i++) {
-                            gybeAngles.put(
-                                    isNewFormatTWA ? new KnotSpeedImpl(trueWindSpeedArray[i])
-                                            : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i],
+                            gybeAngles.put(isNewFormatTWA?new KnotSpeedImpl(trueWindSpeedArray[i]):ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i],
                                     new DegreeBearingImpl(((Number) array.get(i)).doubleValue()));
                         }
                         continue;
                     }
                     Map<Speed, Duration> twsMap = new HashMap<>();
-                    // As we don't want to calculate the allowancesDuarationPerTrueWindAngleAndSpeed for new format TWS
-                    // and TWA
-                    // So we need to ignore that parsing. If the TWS and TWA are with old format then this calculation
-                    // occure's here
-                    if (!isNewFormatTWA) {
+                    // As we don't want to calculate the allowancesDuarationPerTrueWindAngleAndSpeed for new format TWS and TWA
+                    // So we need to ignore that parsing. If the TWS and TWA are with old format then this calculation occure's here
+                    if(!isNewFormatTWA){
                         for (int i = 0; i < array.size(); i++) {
                             twsMap.put(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i],
                                     new SecondsDurationImpl(((Number) array.get(i)).doubleValue()));
                         }
-                    }
-                    if (isNewFormatTWA && !p.matcher((String) aKey).lookingAt()) {
+                    } 
+                    if(isNewFormatTWA && !p.matcher((String) aKey).lookingAt()) {
                         for (int i = 0; i < array.size(); i++) {
-                            twsMap.put(
-                                    isNewFormatTWA ? new KnotSpeedImpl(trueWindSpeedArray[i])
-                                            : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i],
+                            twsMap.put(isNewFormatTWA?new KnotSpeedImpl(trueWindSpeedArray[i]):ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i],
                                     new SecondsDurationImpl(((Number) array.get(i)).doubleValue()));
                         }
                     }
@@ -233,8 +206,8 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                     case "R120":
                     case "R135":
                     case "R150":
-                        allowanceDurationsPerTrueWindAngleAndSpeed
-                                .put(new DegreeBearingImpl(Integer.parseInt(((String) aKey).substring(1))), twsMap);
+                            allowanceDurationsPerTrueWindAngleAndSpeed
+                                    .put(new DegreeBearingImpl(Integer.parseInt(((String) aKey).substring(1))), twsMap);
                         break;
                     case BEAT:
                     case RUN:
@@ -250,12 +223,12 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                 break;
             }
         }
-        if (isNewFormatTWA) {
-            trueWindSpeedMap.keySet().forEach(tws -> {
+        if(isNewFormatTWA) {
+            trueWindSpeedMap.keySet().forEach(tws->{
                 velocityPredictionPerTrueWindSpeedAndAngle.put(trueWindSpeedMap.get(tws), new HashMap<>());
             });
-
-        } else {
+           
+        }else {
             for (Speed tws : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
                 velocityPredictionPerTrueWindSpeedAndAngle.put(tws, new HashMap<>());
             }
@@ -290,25 +263,27 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
             nonSpinnakerSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE
                     .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(NON_SPINNAKER).get(tws)));
         }
-
-        // Need to populate the ORCCertificateImpl with custom TWA and TWS that's why there are two constructor's are
-        // being used.
-        if (isNewFormatTWA) {
-
-            return new ORCCertificateCustomBinsImpl(trueWindSpeedMap.values(), trueWindAngleMap.values(), getId(object),
-                    sailNumber, boatName, boatclass, length, gph, cdl, issueDate,
+        
+        // Need to populate the ORCCertificateImpl with custom TWA and TWS that's why there are two constructor's are being used.
+        if(isNewFormatTWA) {
+            Bearing [] dynamicAllowancesTrueWindAngles = new Bearing[trueWindAngleMap.values().size()];
+            Speed [] dynamicAllowancesTrueWindSpeeds = new Speed[trueWindSpeedMap.values().size()];
+            trueWindAngleMap.values().toArray(dynamicAllowancesTrueWindAngles);
+            trueWindSpeedMap.values().toArray(dynamicAllowancesTrueWindSpeeds);
+           
+            return new ORCCertificateImpl(dynamicAllowancesTrueWindSpeeds,dynamicAllowancesTrueWindAngles,getId(object), sailNumber, boatName, boatclass, length, gph, cdl, issueDate,
                     velocityPredictionPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
                     beatAllowancePerTrueWindSpeed, gybeAngles, runVMGPredictionPerTrueWindSpeed,
                     runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
                     longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
                     nonSpinnakerSpeedPredictionPerTrueWindSpeed);
-        } else {
-            return new ORCCertificateImpl(getId(object), sailNumber, boatName, boatclass, length, gph, cdl, issueDate,
-                    velocityPredictionPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
-                    beatAllowancePerTrueWindSpeed, gybeAngles, runVMGPredictionPerTrueWindSpeed,
-                    runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
-                    longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
-                    nonSpinnakerSpeedPredictionPerTrueWindSpeed);
+        }else {
+        return new ORCCertificateImpl(getId(object), sailNumber, boatName, boatclass, length, gph, cdl, issueDate,
+                velocityPredictionPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
+                beatAllowancePerTrueWindSpeed, gybeAngles, runVMGPredictionPerTrueWindSpeed,
+                runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
+                longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
+                nonSpinnakerSpeedPredictionPerTrueWindSpeed);
         }
     }
 

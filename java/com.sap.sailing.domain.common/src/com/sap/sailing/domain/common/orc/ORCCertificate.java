@@ -129,6 +129,6 @@ public interface ORCCertificate extends WithID, Serializable {
 
     String getBoatName();
     
-    Speed[] getTrueWindSpeed();
-    Bearing[] getTrueWindAngle();
+    Speed[] getTrueWindSpeeds();
+    Bearing[] getTrueWindAngles();
 }
