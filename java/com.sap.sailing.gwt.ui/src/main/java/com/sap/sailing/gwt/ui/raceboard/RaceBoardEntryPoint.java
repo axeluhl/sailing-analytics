@@ -112,13 +112,13 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint implements Pr
                 raceboardData.getAvailableDetailTypesForLeaderboard(), raceboardData.getRace());
         RaceBoardComponentContext componentContext = new RaceBoardComponentContext(lifeCycle, getUserService(),
                 storageDefinition);
-
+        
         componentContext.getInitialSettings(
                 new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>() {
                     @Override
                     public void onSuccess(PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings) {
                         createPerspective(mode, componentContext, settings, raceboardData, lifeCycle,
-                                raceboardData.getAvailableDetailTypesForLeaderboard());
+                                raceboardData.getAvailableDetailTypesForLeaderboard(), raceboardContextDefinition);
                     }
                 });
     }
@@ -139,7 +139,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint implements Pr
     private void createPerspective(final RaceBoardModes raceBoardMode,
             ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> context,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, RaceboardDataDTO raceboardData,
-            RaceBoardPerspectiveLifecycle raceLifeCycle, Iterable<DetailType> availableDetailTypes) {
+            RaceBoardPerspectiveLifecycle raceLifeCycle, Iterable<DetailType> availableDetailTypes, RaceboardContextDefinition raceboardContextDefinition) {
         final Timer timer = new Timer(PlayModes.Replay, 1000l);
         final boolean showChartMarkEditMediaButtonsAndVideo = !DeviceDetector.isMobile();
 
@@ -155,7 +155,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint implements Pr
                 raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
                 raceboardContextDefinition.getEventId(), RaceBoardEntryPoint.this, getStringMessages(), userAgent,
                 raceTimesInfoProvider, showChartMarkEditMediaButtonsAndVideo, true, availableDetailTypes,
-                raceboardData.getLeaderboard(), selectedRace, raceboardData.getTrackingConnectorInfo());
+                raceboardData.getLeaderboard(), selectedRace, raceboardData.getTrackingConnectorInfo(), raceboardContextDefinition);
         RootLayoutPanel.get().add(raceBoardPerspective.getEntryWidget());
 
         if (raceBoardMode != null) {

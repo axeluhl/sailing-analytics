@@ -48,6 +48,7 @@ import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.gwt.common.authentication.SailingAuthenticationEntryPointLinkFactory;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProvider;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -111,6 +112,7 @@ import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
@@ -176,6 +178,7 @@ public class RaceBoardPanel
     
     private final FlowPanel raceInformationHeader;
     private final FlowPanel regattaAndRaceTimeInformationHeader;
+    private final Button shareButton;
     private final AuthenticationMenuView userManagementMenuView;
     private boolean currentRaceHasBeenSelectedOnce;
     
@@ -204,6 +207,7 @@ public class RaceBoardPanel
      *            A list of all Detailtypes, that will be offered in the Settingsdialog. Can be used to hide settings no
      *            data exists for, eg Bravo, Expdition ect.
      * @param trackingConnectorInfo 
+     * @param raceboardContextDefinition 
      */
     public RaceBoardPanel(Component<?> parent,
             ComponentContext<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> componentContext,
@@ -216,7 +220,7 @@ public class RaceBoardPanel
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider,
             boolean showChartMarkEditMediaButtonsAndVideo, boolean showHeaderPanel,
             Iterable<DetailType> availableDetailTypes, StrippedLeaderboardDTOWithSecurity leaderboardDTO,
-            final RaceWithCompetitorsAndBoatsDTO raceDTO, TrackingConnectorInfoDTO trackingConnectorInfo) {
+            final RaceWithCompetitorsAndBoatsDTO raceDTO, TrackingConnectorInfoDTO trackingConnectorInfo, RaceboardContextDefinition raceboardContextDefinition) {
         super(parent, componentContext, lifecycle, settings);
         this.sailingService = sailingService;
         this.mediaService = mediaService;
@@ -238,6 +242,15 @@ public class RaceBoardPanel
         raceInformationHeader.setStyleName("RegattaRaceInformation-Header");
         regattaAndRaceTimeInformationHeader = new FlowPanel();
         regattaAndRaceTimeInformationHeader.setStyleName("RegattaAndRaceTime-Header");
+        this.shareButton = new Button("share");
+        
+        this.shareButton.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                GWT.log(new LinkWithSettingsGenerator<>("/gwt/RaceBoard.html", raceboardContextDefinition).createUrl(getSettings()));
+            }
+        });
         this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), mainCss.usermanagement_loggedin(), mainCss.usermanagement_open());
         this.userManagementMenuView.asWidget().setStyleName(mainCss.usermanagement_icon());
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
@@ -311,6 +324,7 @@ public class RaceBoardPanel
                 }, selectedRaceIdentifier, userService.getStorage());
         raceMap.getLeftHeaderPanel().add(raceInformationHeader);
         raceMap.getRightHeaderPanel().add(regattaAndRaceTimeInformationHeader);
+        raceMap.getRightHeaderPanel().add(shareButton);
         raceMap.getRightHeaderPanel().add(userManagementMenuView);
         addChildComponent(raceMap);
         // add panel for tagging functionality, hidden if no URL parameter "tag" is passed 
