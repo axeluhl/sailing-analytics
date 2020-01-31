@@ -280,12 +280,10 @@ public class Activator implements BundleActivator {
                 }
             }
         }
-        
         final QualifiedObjectIdentifier serverIdentifier = SecuredSecurityTypes.SERVER
                 .getQualifiedObjectIdentifier(
                         new TypeRelativeObjectIdentifier(ServerInfo.getName()));
         securityService.migrateOwnership(serverIdentifier, serverIdentifier.toString());
-
         securityService.checkMigration(SecuredSecurityTypes.getAllInstances());
     }
     

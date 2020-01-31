@@ -334,7 +334,6 @@ public class Activator implements BundleActivator {
 
     private class PolarDataServiceTrackerCustomizer
             implements ServiceTrackerCustomizer<PolarDataService, PolarDataService> {
-
         private final BundleContext context;
         private RacingEventServiceImpl racingEventService;
 
