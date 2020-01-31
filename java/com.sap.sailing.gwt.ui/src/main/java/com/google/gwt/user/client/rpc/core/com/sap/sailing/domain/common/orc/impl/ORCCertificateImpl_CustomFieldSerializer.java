@@ -3,6 +3,7 @@ package com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.common.orc.im
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.CustomFieldSerializer;
@@ -109,7 +110,10 @@ public class ORCCertificateImpl_CustomFieldSerializer extends CustomFieldSeriali
         try {
             Object trueWindSpeedsObject = streamReader.readObject();
             if(trueWindSpeedsObject != null) {
-                trueWindSpeeds = (Speed[]) trueWindSpeedsObject;
+                @SuppressWarnings("unchecked")
+                List<Speed> trueWIndSpeedList =  (List<Speed>) trueWindSpeedsObject;
+                trueWindSpeeds = new Speed[trueWIndSpeedList.size()];
+                trueWIndSpeedList.toArray(trueWindSpeeds);
             }
         } catch (SerializationException e) {
             trueWindSpeeds = ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS;
@@ -122,7 +126,10 @@ public class ORCCertificateImpl_CustomFieldSerializer extends CustomFieldSeriali
         try {
             Object trueWindAnglesObject = streamReader.readObject();
             if(trueWindAnglesObject != null) {
-                trueWindAngles = (Bearing[]) trueWindAnglesObject;
+                @SuppressWarnings("unchecked")
+                List<Bearing> trueWIndAnglesList =  (List<Bearing>) trueWindAnglesObject;
+                trueWindAngles = new Bearing[trueWIndAnglesList.size()];
+                trueWIndAnglesList.toArray(trueWindAngles);
             }
         } catch (SerializationException e) {
             trueWindAngles = ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES;
