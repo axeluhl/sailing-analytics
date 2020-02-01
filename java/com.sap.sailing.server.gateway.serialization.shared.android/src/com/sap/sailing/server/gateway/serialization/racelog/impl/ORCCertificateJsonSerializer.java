@@ -31,7 +31,7 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
     public static final String ORC_CERTIFICATE_ID = "ID";
     public static final String ORC_CERTIFICATE_LENGTH = "length";
     public static final String ORC_CERTIFICATE_ISSUE_DATE = "issueDate";
-    public static final String ORC_CERTIFICATE_TWS_DYNAMIC = "ORC_CERTIFICATE_TWS_{0}KT";
+    public static final String ORC_CERTIFICATE_TWS_KNOTS = "ORC_CERTIFICATE_TWS_{0}KT";
     public static final String ORC_CERTIFICATE_TWS_6KT = "ORC_CERTIFICATE_TWS_6KT";
     public static final String ORC_CERTIFICATE_TWS_8KT = "ORC_CERTIFICATE_TWS_8KT";
     public static final String ORC_CERTIFICATE_TWS_10KT = "ORC_CERTIFICATE_TWS_10KT";
@@ -40,7 +40,7 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
     public static final String ORC_CERTIFICATE_TWS_16KT = "ORC_CERTIFICATE_TWS_16KT";
     public static final String ORC_CERTIFICATE_TWS_20KT = "ORC_CERTIFICATE_TWS_20KT";
 
-    public static final String ORC_CERTIFICATE_R_DYNAMIC_PERDICTION = "ORC_CERTIFICATE_R{0}_PREDICTION";
+    public static final String ORC_CERTIFICATE_R_PERDICTION = "ORC_CERTIFICATE_R{0}_PREDICTION";
     public static final String ORC_CERTIFICATE_R52_PREDICTION = "ORC_CERTIFICATE_R52_PREDICTION";
     public static final String ORC_CERTIFICATE_R60_PREDICTION = "ORC_CERTIFICATE_R60_PREDICTION";
     public static final String ORC_CERTIFICATE_R75_PREDICTION = "ORC_CERTIFICATE_R75_PREDICTION";
@@ -146,7 +146,7 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
         } else if (speed.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[6])) {
             result = ORC_CERTIFICATE_TWS_20KT;
         } else {
-            result = MessageFormat.format(ORC_CERTIFICATE_TWS_DYNAMIC, String.valueOf(speed.getKnots()));
+            result = MessageFormat.format(ORC_CERTIFICATE_TWS_KNOTS, String.valueOf(speed.getKnots()));
         }
         return result;
     }
@@ -170,7 +170,7 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
         } else if (bearing.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES[7])) {
             result = ORC_CERTIFICATE_R150_PREDICTION;
         } else {
-            result = MessageFormat.format(ORC_CERTIFICATE_R_DYNAMIC_PERDICTION, String.valueOf(bearing.getDegrees()));
+            result = MessageFormat.format(ORC_CERTIFICATE_R_PERDICTION, String.valueOf(bearing.getDegrees()));
         }
         return result;
     }
