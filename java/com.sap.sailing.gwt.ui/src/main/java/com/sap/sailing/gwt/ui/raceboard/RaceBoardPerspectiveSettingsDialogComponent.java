@@ -33,11 +33,11 @@ public class RaceBoardPerspectiveSettingsDialogComponent implements SettingsDial
 
         showWindChartCheckBox = dialog.createCheckbox(stringMessages.showWindChart());
         showWindChartCheckBox.setValue(initialSettings.isShowWindChart());
-        vp.add(showWindChartCheckBox);        
+        vp.add(showWindChartCheckBox);
 
         showCompetitorsChartCheckBox = dialog.createCheckbox(stringMessages.showCompetitorCharts());
         showCompetitorsChartCheckBox.setValue(initialSettings.isShowCompetitorsChart());
-        vp.add(showCompetitorsChartCheckBox);        
+        vp.add(showCompetitorsChartCheckBox);
         
         return vp;
     }
