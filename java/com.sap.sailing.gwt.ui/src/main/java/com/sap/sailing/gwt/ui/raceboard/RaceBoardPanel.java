@@ -826,7 +826,7 @@ public class RaceBoardPanel
 
     @Override
     public void onResize() {
-        dockPanel.onResize();        
+        dockPanel.onResize();
     }
 
     @Override
