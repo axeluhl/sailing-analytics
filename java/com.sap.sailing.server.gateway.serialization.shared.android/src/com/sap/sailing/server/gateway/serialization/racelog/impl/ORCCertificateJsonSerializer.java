@@ -146,7 +146,9 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
         } else if (speed.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[6])) {
             result = ORC_CERTIFICATE_TWS_20KT;
         } else {
-            result = MessageFormat.format(ORC_CERTIFICATE_TWS_KNOTS, String.valueOf(speed.getKnots()));
+            String speedKnots =String.valueOf(speed.getKnots());
+            speedKnots =speedKnots.replace(".", "P");
+            result = MessageFormat.format(ORC_CERTIFICATE_TWS_KNOTS, speedKnots);
         }
         return result;
     }
@@ -170,7 +172,9 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
         } else if (bearing.equals(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES[7])) {
             result = ORC_CERTIFICATE_R150_PREDICTION;
         } else {
-            result = MessageFormat.format(ORC_CERTIFICATE_R_PERDICTION, String.valueOf(bearing.getDegrees()));
+            String angleDegress =String.valueOf(bearing.getDegrees());
+            angleDegress =angleDegress.replace(".", "P");
+            result = MessageFormat.format(ORC_CERTIFICATE_R_PERDICTION, String.valueOf(angleDegress));
         }
         return result;
     }
