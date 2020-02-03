@@ -8,6 +8,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Overflow;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Command;
@@ -93,8 +94,11 @@ public class WidgetCarousel extends Composite {
         // Slick slider initialization will produce layout problems when the content widget sizes aren't calculated yet.
         // Until the initial reflow happened, widget size are reported as 0. If that's the case,
         // initialization is deferred after the reflow.
-        if (items.getFirst().getElement().getOffsetWidth() > 0) {
+        if (items.getFirst().getElement().getOffsetWidth() > 10
+                && items.getFirst().getElement().getOffsetHeight() > 10) {
             init();
+            sliderMainUi.getElement().getStyle().setWidth(items.getFirst().getElement().getOffsetWidth(), Unit.PX);
+            sliderMainUi.getElement().getStyle().setHeight(items.getFirst().getElement().getOffsetHeight(), Unit.PX);
             Scheduler.get().scheduleDeferred(sliderMainUi.getElement().getStyle()::clearOverflowY);
         } else {
             Scheduler.get().scheduleDeferred(this::initAfterReflow);
