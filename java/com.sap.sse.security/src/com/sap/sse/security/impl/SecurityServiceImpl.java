@@ -325,11 +325,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                         ADMIN_DEFAULT_PASSWORD,
                         /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null,
                         null);
-
                 setOwnership(adminUser.getIdentifier(), adminUser, null);
                 Role adminRole = new Role(adminRoleDefinition);
                 addRoleForUserAndSetUserAsOwner(adminUser, adminRole);
-                final UserGroup defaultTenant = getDefaultTenant();
+                // add new admin user to server group and make server group the default creation group for the admin user:
+                final UserGroup defaultTenant = getServerGroup();
                 addUserToUserGroup(defaultTenant, adminUser);
                 setDefaultTenantForCurrentServerForUser(adminUser.getName(), defaultTenant.getId());
             }
@@ -340,7 +340,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 User allUser = apply(s->s.internalCreateUser(SecurityService.ALL_USERNAME, null));
 
                 // <all> user is explicitly not owned by itself because this would enable anybody to modify this user
-                setOwnership(allUser.getIdentifier(), null, getDefaultTenant());
+                setOwnership(allUser.getIdentifier(), null, getServerGroup());
 
                 // The permission to create new users is initially added but not recreated on server start if the admin removed it in the meanwhile.
                 // This allows servers to be configured to not permit self-registration of new users but only users being managed by an admin user.
@@ -350,7 +350,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                         .getQualifiedObjectIdentifier(PermissionAndRoleAssociation.get(createUserPermission, allUser));
                 // Permission association is owned by the server tenant.
                 // This typically ensures that the server admin is able to remove the association.
-                setOwnership(qualifiedTypeIdentifierForPermission, null, getDefaultTenant());
+                setOwnership(qualifiedTypeIdentifierForPermission, null, getServerGroup());
             }
             
             if (isInitialOrMigration) {
@@ -1658,8 +1658,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public UserGroup getDefaultTenant() {
-        return store.getDefaultTenant();
+    public UserGroup getServerGroup() {
+        return store.getServerGroup();
     }
 
     @Override
@@ -2044,7 +2044,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (potentiallyExistingRoleDefinition == null) {
             result = store.createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(),
                     rolePrototype.getPermissions());
-            setOwnership(result.getIdentifier(), null, getDefaultTenant());
+            setOwnership(result.getIdentifier(), null, getServerGroup());
         } else {
             result = potentiallyExistingRoleDefinition;
         }
@@ -2082,8 +2082,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         logger.info("Reading user store...");
         try {
-            UserStore newUserStore = (UserStore) is.readObject();
+            final UserStore newUserStore = (UserStore) is.readObject();
+            final UserGroup newServerGroup = newUserStore.getUserGroupByName(store.getServerGroupName());
+            // before replacing the local UserStore's contents, capture the server group:
+            final UserGroup oldServerGroup = store.getServerGroup();
             store.replaceContentsFrom(newUserStore);
+            if (newServerGroup == null) {
+                // create the server group in a replication-aware fashion, making sure it appears on the master
+                apply(s->s.internalCreateUserGroup(UUID.randomUUID(), store.getServerGroupName()));
+                store.setServerGroup(store.getUserGroupByName(store.getServerGroupName()));
+            } else if (newServerGroup != oldServerGroup) {
+                store.setServerGroup(newServerGroup);
+            }
         } finally {
             Thread.currentThread().setContextClassLoader(oldCCL);
         }
@@ -2185,17 +2195,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 final RoleDefinition adminRoleDefinition = getRoleDefinition(AdminRole.getInstance().getId());
                 for (Role roleOfUser : user.getRoles()) {
                     if (roleOfUser.getRoleDefinition().equals(adminRoleDefinition)) {
-                        final UserGroup defaultTenant = getDefaultTenant();
+                        final UserGroup serverGroup = getServerGroup();
                         if (roleOfUser.getQualifiedForTenant() == null
-                                || roleOfUser.getQualifiedForTenant().equals(defaultTenant)) {
+                                || roleOfUser.getQualifiedForTenant().equals(serverGroup)) {
                             // The user is a server admin -> Add it to the server group to allow setting the server
                             // group as default creation group
-                            addUserToUserGroup(defaultTenant, user);
+                            addUserToUserGroup(serverGroup, user);
                             if (UserStore.ADMIN_USERNAME.equals(user.getName())) {
                                 // For the "admin" user the server group is initially set as
                                 // default creation group. This is consistent to a newly created server
                                 // and in most cases this is the group, the admin is meant to work with.
-                                setDefaultTenantForCurrentServerForUser(user.getName(), getDefaultTenant().getId());
+                                setDefaultTenantForCurrentServerForUser(user.getName(), getServerGroup().getId());
                             }
                         }
                     }
@@ -2230,7 +2240,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         // initialize ownerships on migration and fix objects that were orphaned by e.g. deleting the owning user/group
         if (owner == null
                 || owner.getAnnotation().getTenantOwner() == null && owner.getAnnotation().getUserOwner() == null) {
-            final UserGroup tenantOwnerToSet = setServerGroupAsOwner ? this.getDefaultTenant() : null;
+            final UserGroup tenantOwnerToSet = setServerGroupAsOwner ? this.getServerGroup() : null;
             logger.info("missing Ownership fixed: Setting ownership for: " + identifier
                     + " to tenant: "
                     + tenantOwnerToSet + "; user: " + userOwnerToSet);

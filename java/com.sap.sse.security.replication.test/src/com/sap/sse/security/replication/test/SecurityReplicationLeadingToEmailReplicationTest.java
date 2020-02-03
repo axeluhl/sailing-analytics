@@ -73,7 +73,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
             SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore);
             userStore.ensureDefaultRolesExist();
-            userStore.ensureDefaultTenantExists();
+            userStore.ensureServerGroupExists();
             result.initialize();
             result.clearReplicaState();
             return result;
