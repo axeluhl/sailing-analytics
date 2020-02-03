@@ -133,7 +133,7 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                 break;
             case ALLOWANCES:
                 final JSONObject allowances = (JSONObject) object.get(ALLOWANCES);
-                
+                // calculating the twa and tws before calculating the other dependent values in allowances object
                 for (final Object aKey : allowances.keySet()) {
                     String keyString = (String) aKey;
                     boolean found = p.matcher(keyString).lookingAt();
