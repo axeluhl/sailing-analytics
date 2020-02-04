@@ -32,7 +32,7 @@ public class ORCCertificateJsonDeserializerTest {
     }
     
     @Test
-    public void testOldFormateOrcCertificateDeserializer() throws FileNotFoundException, IOException, ParseException {
+    public void testNewFormateOrcCertificateDeserializer() throws FileNotFoundException, IOException, ParseException {
         File fileGER = new File(RESOURCES + "newFormatCertificate.json");
         ORCCertificatesCollection importer = ORCCertificatesImporter.INSTANCE.read(new FileInputStream(fileGER));
         Iterator<ORCCertificate> iterator = importer.getCertificates().iterator();

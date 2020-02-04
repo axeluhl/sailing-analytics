@@ -145,19 +145,11 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
 
                         Map<Speed, Duration> twsMap = new HashMap<>();
                         for (int i = 0; i < array.size(); i++) {
-                            if ((array.get(i) instanceof JSONObject)) {
-                                JSONObject twa = (JSONObject) array.get(i);
-                                Double twsValue = (Double) twa.get("twsInKts");
-                                trueWindSpeedMap.put(twsValue, new KnotSpeedImpl(twsValue));
-                                twsMap.put(trueWindSpeedMap.get(twsValue),
-                                        new SecondsDurationImpl((Double) twa.get("allInSPNM")));
-                            } else {
-                                trueWindSpeedMap.put(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i].getKnots(),
-                                        ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i]);
-                                twsMap.put(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i],
-                                        new SecondsDurationImpl(((Number) array.get(i)).doubleValue()));
-                            }
-
+                            JSONObject twsAndAllowances = getTrueWindSpeedAndAllowances(array.get(i), i, null);
+                            Double tws = (Double) twsAndAllowances.get("tws");
+                            Double allowance = (Double) twsAndAllowances.get("allowance");
+                            trueWindSpeedMap.put(tws, new KnotSpeedImpl(tws));
+                            twsMap.put(trueWindSpeedMap.get(tws), new SecondsDurationImpl(allowance));
                         }
                         Double trueWindAngleValue = Double.parseDouble((keyString).substring(1));
                         trueWindAngleMap.put(trueWindAngleValue, new DegreeBearingImpl(trueWindAngleValue));
@@ -172,15 +164,21 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                     final JSONArray array = (JSONArray) allowances.get(aKey);
                     if (((String) aKey).equals(BEAT_ANGLE)) {
                         for (int i = 0; i < array.size(); i++) {
-                            beatAngles.put(new KnotSpeedImpl(trueWindSpeedArray[i]),
-                                    new DegreeBearingImpl(((Number) array.get(i)).doubleValue()));
+                            JSONObject twsAndAllowances = getTrueWindSpeedAndAllowances(array.get(i), i,
+                                    trueWindSpeedArray);
+                            Double tws = (Double) twsAndAllowances.get("tws");
+                            Double allowance = (Double) twsAndAllowances.get("allowance");
+                            beatAngles.put(new KnotSpeedImpl(tws), new DegreeBearingImpl(allowance));
                         }
                         continue;
                     }
                     if (((String) aKey).equals(GYBE_ANGLE)) {
                         for (int i = 0; i < array.size(); i++) {
-                            gybeAngles.put(new KnotSpeedImpl(trueWindSpeedArray[i]),
-                                    new DegreeBearingImpl(((Number) array.get(i)).doubleValue()));
+                            JSONObject twsAndAllowances = getTrueWindSpeedAndAllowances(array.get(i), i,
+                                    trueWindSpeedArray);
+                            Double tws = (Double) twsAndAllowances.get("tws");
+                            Double allowance = (Double) twsAndAllowances.get("allowance");
+                            gybeAngles.put(new KnotSpeedImpl(tws), new DegreeBearingImpl(allowance));
                         }
                         continue;
                     }
@@ -188,8 +186,11 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                    //ignore true wind angles key
                     if (!p.matcher((String) aKey).lookingAt()) {
                         for (int i = 0; i < array.size(); i++) {
-                            twsMap.put(new KnotSpeedImpl(trueWindSpeedArray[i]),
-                                    new SecondsDurationImpl(((Number) array.get(i)).doubleValue()));
+                            JSONObject twsAndAllowances = getTrueWindSpeedAndAllowances(array.get(i), i,
+                                    trueWindSpeedArray);
+                            Double tws = (Double) twsAndAllowances.get("tws");
+                            Double allowance = (Double) twsAndAllowances.get("allowance");
+                            twsMap.put(new KnotSpeedImpl(tws), new SecondsDurationImpl(allowance));
                         }
                     }
                     switch ((String) aKey) {
@@ -257,6 +258,23 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
         
     }
 
+    
+    private JSONObject getTrueWindSpeedAndAllowances(Object object, int index, Double[] trueWindSpeed) {
+
+        JSONObject response = new JSONObject();
+        if ((object instanceof JSONObject)) {
+            JSONObject twa = (JSONObject) object;
+            Double twsValue = (Double) twa.get("twsInKts");
+            Double allowance = ((Number) twa.get("allInSPNM")).doubleValue();
+            response.put("tws", twsValue);
+            response.put("allowance", allowance);
+        } else {
+            response.put("tws", trueWindSpeed == null ? ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[index].getKnots()
+                    : trueWindSpeed[index]);
+            response.put("allowance", ((Number) object).doubleValue());
+        }
+        return response;
+    }
 
     private String getId(JSONObject certificateAsJson) {
         return getIdFromFields(certificateAsJson.get(NAT_AUTH).toString(),
