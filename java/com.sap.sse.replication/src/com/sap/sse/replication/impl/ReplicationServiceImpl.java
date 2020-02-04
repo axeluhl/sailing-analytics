@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -47,6 +48,7 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.ReplicationStatus;
+import com.sap.sse.replication.persistence.MongoObjectFactory;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
 import net.jpountz.lz4.LZ4BlockInputStream;
@@ -96,7 +98,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     /**
      * The UUIDs with which this replica is registered by the master identified by the corresponding key
      */
-    private final Map<ReplicationMasterDescriptor, String> replicaUUIDs;
+    private final ConcurrentMap<ReplicationMasterDescriptor, String> replicaUUIDs;
 
     /**
      * Channel used by a master server to publish replication operations; <code>null</code> in servers that don't have
@@ -232,6 +234,13 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
      */
     private boolean replicationStarting;
 
+    /**
+     * An optional link to a persistence layer that allows this service to record replicas
+     * registered at this server, so that optionally during a re-start those replica
+     * links can be re-established.
+     */
+    private final Optional<MongoObjectFactory> mongoObjectFactory;
+
     private static class InitialLoadRequest {
         private final Channel channelForInitialLoad;
         private final Iterable<Replicable<?, ?>> replicables;
@@ -296,12 +305,19 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     public ReplicationServiceImpl(String exchangeName, String exchangeHost, int exchangePort,
             final ReplicationInstancesManager replicationInstancesManager, ReplicablesProvider replicablesProvider)
             throws IOException {
+        this(/* defaultMongoObjectFactory */ Optional.empty(), exchangeName, exchangeHost, exchangePort, replicationInstancesManager, replicablesProvider);
+    }
+
+    public ReplicationServiceImpl(Optional<MongoObjectFactory> optionalMongoObjectFactory, String exchangeName,
+            String exchangeHost, int exchangePort, ReplicationInstancesManager replicationInstancesManager,
+            ReplicablesProvider replicablesProvider) {
+        this.mongoObjectFactory = optionalMongoObjectFactory;
         timer = new Timer("ReplicationServiceImpl timer for delayed task sending", /* isDaemon */ true);
         unsentOperationsSenderJob = new UnsentOperationsSenderJob();
         executionListenersByReplicableIdAsString = new ConcurrentHashMap<>();
         initialLoadChannels = new ConcurrentHashMap<>();
         this.replicationInstancesManager = replicationInstancesManager;
-        replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
+        replicaUUIDs = new ConcurrentHashMap<ReplicationMasterDescriptor, String>();
         this.replicablesProvider = replicablesProvider;
         this.exchangeName = exchangeName;
         this.exchangeHost = exchangeHost;
@@ -382,8 +398,17 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
                 }
             }
             replicationInstancesManager.registerReplica(replica);
+            recordRegisteredReplicaPersistently(replica);
         }
         logger.info("Registered replica " + replica);
+    }
+
+    private void recordRegisteredReplicaPersistently(ReplicaDescriptor replica) {
+        mongoObjectFactory.ifPresent(mof->mof.storeReplicaDescriptor(replica));
+    }
+
+    private void removeRegisteredReplicaPersistently(ReplicaDescriptor replica) {
+        mongoObjectFactory.ifPresent(mof->mof.removeReplicaDescriptor(replica));
     }
 
     private void addAsListenerToReplicables(String[] replicableIdsAsStringForReplicablesToReplicate) {
@@ -411,6 +436,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
         synchronized (replicationInstancesManager) {
             final boolean hadReplicas = replicationInstancesManager.hasReplicas();
             final Iterable<String> oldReplicablesInReplication = replicationInstancesManager.getAllReplicableIdsAtLeastOneReplicaIsReplicating();
+            removeRegisteredReplicaPersistently(replicationInstancesManager.getReplicaDescriptor(replicaUuid));
             final ReplicaDescriptor unregisteredReplica = replicationInstancesManager.unregisterReplica(replicaUuid);
             final Iterable<String> newReplicablesInReplication = replicationInstancesManager.getAllReplicableIdsAtLeastOneReplicaIsReplicating();
             for (final String idAsStringOfReplicableNoReplicaIsInterestedInAnymore : Util.removeAll(newReplicablesInReplication, Util.addAll(oldReplicablesInReplication, new HashSet<>()))) {

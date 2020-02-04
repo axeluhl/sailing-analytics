@@ -4,15 +4,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
+import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.persistence.PersistenceFactory;
 import com.sap.sse.security.util.RemoteServerUtil;
 
 /**
@@ -80,6 +83,7 @@ public class Activator implements BundleActivator {
     public static final String ENV_VAR_NAME_REPLICATION_PORT = "REPLICATION_PORT";
     
     public static final String PROPERTY_NAME_REPLICATE_ON_START = "replicate.on.start";
+    public static final String PROPERTY_NAME_RESTORE_REPLICAS = "replicate.restore.replicas";
     public static final String PROPERTY_NAME_REPLICATE_MASTER_SERVLET_HOST = "replicate.master.servlet.host";
     public static final String PROPERTY_NAME_REPLICATE_MASTER_SERVLET_PORT = "replicate.master.servlet.port";
     public static final String PROPERTY_NAME_REPLICATE_MASTER_QUEUE_HOST = "replicate.master.queue.host";
@@ -127,11 +131,18 @@ public class Activator implements BundleActivator {
         } catch (NumberFormatException nfe) {
             logger.severe("Couldn't parse the replication port specification \""+exchangePortAsString+"\". Using default.");
         }
-        replicationInstancesManager = new ReplicationInstancesManager();
+        final Iterable<ReplicaDescriptor> replicasToAssumeConnectedToThisMaster;
+        if (Boolean.valueOf(System.getProperty(PROPERTY_NAME_RESTORE_REPLICAS, "false"))) {
+            replicasToAssumeConnectedToThisMaster = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadReplicaDescriptors();
+        } else {
+            replicasToAssumeConnectedToThisMaster = null;
+        }
+        replicationInstancesManager = new ReplicationInstancesManager(replicasToAssumeConnectedToThisMaster);
         final OSGiReplicableTracker replicablesProvider = new OSGiReplicableTracker(bundleContext);
         serverReplicationMasterService = new ReplicationServiceImpl(
+                Optional.of(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory()),
                 exchangeName, exchangeHost, exchangePort, replicationInstancesManager, replicablesProvider);
-        String replicateOnStart = System.getProperty(PROPERTY_NAME_REPLICATE_ON_START);
+        final String replicateOnStart = System.getProperty(PROPERTY_NAME_REPLICATE_ON_START);
         final boolean autoReplicationRequested = replicateOnStart != null && !replicateOnStart.isEmpty();
         if (autoReplicationRequested) {
             // set before registering the service; clients discovering it therefore cannot accidentally
