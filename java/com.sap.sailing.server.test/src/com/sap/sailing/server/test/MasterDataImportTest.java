@@ -201,7 +201,7 @@ public class MasterDataImportTest {
         Subject fakeSubject = Mockito.mock(Subject.class);
         SecurityUtils.setSecurityManager(securityManager);
         Mockito.doReturn(fakeSubject).when(securityManager).createSubject(Mockito.any());
-        Mockito.doReturn(defaultTenant).when(securityService).getDefaultTenant();
+        Mockito.doReturn(defaultTenant).when(securityService).getServerGroup();
         Mockito.doReturn(currentUser).when(securityService).getCurrentUser();
         Mockito.doReturn(true).when(securityService).hasCurrentUserReadPermission(Mockito.any());
         Mockito.doNothing().when(securityService).checkCurrentUserReadPermission(Mockito.any());

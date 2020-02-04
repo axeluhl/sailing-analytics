@@ -18,10 +18,10 @@ import com.sap.sse.security.shared.impl.UserGroupImpl;
  */
 public interface UserStore extends BasicUserStore {
     /**
-     * An instance of the bundle hosting this service may have a default tenant. If so, the default tenant's name is
+     * An instance of the bundle hosting this service may have a server group. If so, the default server group's name is
      * read from a system property whose name is provided by this constant.
      */
-    String DEFAULT_TENANT_NAME_PROPERTY_NAME = "security.defaultTenantName";
+    String DEFAULT_SERVER_GROUP_NAME_PROPERTY_NAME = "security.defaultServerGroupName";
     String ADMIN_USERNAME = "admin";
 
     /**
@@ -94,7 +94,12 @@ public interface UserStore extends BasicUserStore {
      */
     void loadAndMigrateUsers() throws UserGroupManagementException, UserManagementException;
 
-    void ensureDefaultTenantExists() throws UserGroupManagementException;
+    /**
+     * Looks up a {@link UserGroup} based on the server group name set for this user store. If no such group
+     * can be found, one is created and returned. If a group by that name exists, it will be set as this {@link UserStore}'s
+     * {@link #getServerGroup() server group} and will be returned.
+     */
+    UserGroup ensureServerGroupExists() throws UserGroupManagementException;
 
     void removeAllQualifiedRolesForUser(User user);
 

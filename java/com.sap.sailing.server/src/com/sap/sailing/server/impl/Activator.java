@@ -216,7 +216,7 @@ public class Activator implements BundleActivator {
                     if (securityService.isInitialOrMigration()) {
                         // The server is initially set to be public by adding sailing_viewer role to the server group
                         // with forAll=true
-                        securityService.putRoleDefinitionToUserGroup(securityService.getDefaultTenant(),
+                        securityService.putRoleDefinitionToUserGroup(securityService.getServerGroup(),
                                 sailingViewerRoleDefinition, true);
                         // sailing_viewer role is publicly readable
                         securityService.addToAccessControlList(sailingViewerRoleDefinition.getIdentifier(), null, DefaultActions.READ.name());
