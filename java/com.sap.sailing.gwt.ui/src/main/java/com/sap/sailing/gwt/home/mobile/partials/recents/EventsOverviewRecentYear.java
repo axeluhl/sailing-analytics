@@ -98,7 +98,7 @@ public class EventsOverviewRecentYear extends Composite {
     }
 
     private void initStageContents() {
-        if (!isStageInitialized) {
+        if (isContentVisible && !isStageInitialized) {
             eventStage.setFeaturedEvents(events);
             isStageInitialized = true;
         }
