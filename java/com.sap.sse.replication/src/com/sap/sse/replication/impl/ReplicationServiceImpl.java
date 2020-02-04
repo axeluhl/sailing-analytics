@@ -679,6 +679,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
      *            the replica is registered for these {@link Replicable}s. The master sends operations only for
      *            replicables that at least one replica has registered for. This may mean that operations are received
      *            for replicables for which no replicable was requested. Replicas shall drop such operations silently.
+     *            TODO unused...
      * 
      * @return the UUID that the master generated for this client which is also entered into {@link #replicaUUIDs}
      */

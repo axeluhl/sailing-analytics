@@ -73,7 +73,7 @@ public class AccessControlStoreTest {
             userStore = new UserStoreImpl(DEFAULT_TENANT_NAME);
             userStore.loadAndMigrateUsers();
             userStore.ensureDefaultRolesExist();
-            userStore.ensureDefaultTenantExists();
+            userStore.ensureServerGroupExists();
         } catch (UserGroupManagementException | UserManagementException e) {
             throw new RuntimeException(e);
         }
@@ -101,13 +101,13 @@ public class AccessControlStoreTest {
     
     @Test
     public void testCreateSimpleAccessControlListForGroup() throws UserGroupManagementException {
-        final UserGroup group = userStore.getDefaultTenant();
+        final UserGroup group = userStore.getServerGroup();
         accessControlStore.addAclPermission(testId, group, "READ");
         assertNotNull(accessControlStore.getAccessControlList(testId));
         assertTrue(accessControlStore.getAccessControlList(testId).getAnnotation().getActionsByUserGroup().get(group).contains("READ"));
         newStores();
         assertNotNull(accessControlStore.getAccessControlList(testId));
-        final UserGroup newGroup = userStore.getDefaultTenant();
+        final UserGroup newGroup = userStore.getServerGroup();
         assertTrue(accessControlStore.getAccessControlList(testId).getAnnotation().getActionsByUserGroup().get(newGroup).contains("READ"));
     }
     

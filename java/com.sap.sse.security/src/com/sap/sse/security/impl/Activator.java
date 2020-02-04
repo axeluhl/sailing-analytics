@@ -161,7 +161,7 @@ public class Activator implements BundleActivator {
         userStore.clear();
         accessControlStore.clear();
         userStore.ensureDefaultRolesExist();
-        userStore.ensureDefaultTenantExists();
+        userStore.ensureServerGroupExists();
         getSecurityService().initialize();
         applyCustomizations();
     }
