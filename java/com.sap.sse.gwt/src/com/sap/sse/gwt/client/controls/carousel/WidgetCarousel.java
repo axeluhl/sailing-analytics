@@ -192,12 +192,15 @@ public class WidgetCarousel extends Composite {
     }-*/;
 
     /**
-     * Add new image to carousel.
+     * Set widgets to be shown by the carousel.
      *
      * @param url
      * 
      */
     public void setWidgets(Iterable<Widget> slides) {
+        // May only be called once because items added after the initialization of slick slider are not recognized.
+        // If adding items should be supported, the integration needs to be extended to also update the slider model.
+        assert items.isEmpty();
         for (Widget slide : slides) {
             items.add(slide);
             sliderMainUi.add(slide);
