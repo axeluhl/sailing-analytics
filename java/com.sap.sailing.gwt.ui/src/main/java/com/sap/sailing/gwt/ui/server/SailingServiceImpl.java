@@ -5244,19 +5244,19 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         if (serverConfiguration.isPublic() != null) {
             final RoleDefinition viewerRole = getSecurityService()
                     .getRoleDefinition(SailingViewerRole.getInstance().getId());
-            final UserGroup defaultServerTenant = getSecurityService().getServerGroup();
-            if (viewerRole != null && defaultServerTenant != null) {
-                final boolean isCurrentlyPublic = Boolean.TRUE.equals(defaultServerTenant.getRoleAssociation(viewerRole));
+            final UserGroup serverGroup = getSecurityService().getServerGroup();
+            if (viewerRole != null && serverGroup != null) {
+                final boolean isCurrentlyPublic = Boolean.TRUE.equals(serverGroup.getRoleAssociation(viewerRole));
                 final boolean shouldBePublic = serverConfiguration.isPublic();
                 if (isCurrentlyPublic != shouldBePublic) {
                     // value changed
-                    if (getSecurityService().hasCurrentUserUpdatePermission(defaultServerTenant)
+                    if (getSecurityService().hasCurrentUserUpdatePermission(serverGroup)
                             && getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
-                                    viewerRole, new Ownership(null, defaultServerTenant))) {
+                                    viewerRole, new Ownership(null, serverGroup))) {
                         if (serverConfiguration.isPublic()) {
-                            getSecurityService().putRoleDefinitionToUserGroup(defaultServerTenant, viewerRole, true);
+                            getSecurityService().putRoleDefinitionToUserGroup(serverGroup, viewerRole, true);
                         } else {
-                            getSecurityService().removeRoleDefintionFromUserGroup(defaultServerTenant, viewerRole);
+                            getSecurityService().removeRoleDefintionFromUserGroup(serverGroup, viewerRole);
                         }
                     } else {
                         throw new AuthorizationException("No permission to make the server public");
