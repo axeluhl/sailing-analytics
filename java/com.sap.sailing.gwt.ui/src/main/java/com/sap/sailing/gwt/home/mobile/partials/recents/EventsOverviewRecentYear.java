@@ -104,7 +104,7 @@ public class EventsOverviewRecentYear extends Composite {
         }
     }
 
-    void onHeaderClicked() {
+    private void onHeaderClicked() {
         isContentVisible = !isContentVisible;
         updateContentVisibility();
     }

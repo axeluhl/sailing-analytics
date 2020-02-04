@@ -37,9 +37,8 @@ public class EventsOverviewRecent extends Composite {
         List<EventListEventDTO> allEvents = new LinkedList<EventListEventDTO>();
         boolean oneYearIsExpanded = false;
         for (EventListYearDTO yearDTO : years) {
-            EventsOverviewRecentYear recentEventsOfOneYear = new EventsOverviewRecentYear(yearDTO, navigator, true);
+            EventsOverviewRecentYear recentEventsOfOneYear = new EventsOverviewRecentYear(yearDTO, navigator, !oneYearIsExpanded);
             year.add(recentEventsOfOneYear);
-            if (oneYearIsExpanded) recentEventsOfOneYear.onHeaderClicked();
             oneYearIsExpanded = true;
             allEvents.addAll(yearDTO.getEvents());
         }
