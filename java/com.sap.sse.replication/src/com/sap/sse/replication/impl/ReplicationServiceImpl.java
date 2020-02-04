@@ -22,6 +22,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -130,7 +131,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
      */
     private ReplicationReceiverImpl replicator;
 
-    private final Map<String, ReplicationServiceExecutionListener<?>> executionListenersByReplicableIdAsString;
+    private final ConcurrentMap<String, ReplicationServiceExecutionListener<?>> executionListenersByReplicableIdAsString;
 
     private Thread replicatorThread;
 
@@ -263,7 +264,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
             synchronized (replicationInstancesManager) {
                 // .. and at least one of them wants to replicate the replicable with that ID
                 if (Util.contains(replicationInstancesManager.getAllReplicableIdsAtLeastOneReplicaIsReplicating(), replicable.getId().toString())) {
-                    ensureOperationExecutionListenerAndInjectResetToMasterService(replicable);
+                    ensureOperationExecutionListener(replicable);
                 }
             }
         }
@@ -297,7 +298,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
             throws IOException {
         timer = new Timer("ReplicationServiceImpl timer for delayed task sending", /* isDaemon */ true);
         unsentOperationsSenderJob = new UnsentOperationsSenderJob();
-        executionListenersByReplicableIdAsString = new HashMap<>();
+        executionListenersByReplicableIdAsString = new ConcurrentHashMap<>();
         initialLoadChannels = new ConcurrentHashMap<>();
         this.replicationInstancesManager = replicationInstancesManager;
         replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
@@ -369,8 +370,11 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     @Override
     public void registerReplica(ReplicaDescriptor replica) throws IOException {
         synchronized (replicationInstancesManager) {
+            // due to different replicables to be replicated for replica, ensure that all
+            // replicables to be replicated to replica are actually observed:
+            addAsListenerToReplicables(replica.getReplicableIdsAsStrings());
+            // need to establish the outbound messaging channel only when this is the first replica to be added:
             if (!replicationInstancesManager.hasReplicas()) {
-                addAsListenerToReplicables(replica.getReplicableIdsAsStrings());
                 synchronized (this) {
                     if (masterChannel == null) {
                         masterChannel = createMasterChannelAndDeclareFanoutExchange();
@@ -385,7 +389,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     private void addAsListenerToReplicables(String[] replicableIdsAsStringForReplicablesToReplicate) {
         for (final String replicableIdAsStringForReplicableToReplicate : replicableIdsAsStringForReplicablesToReplicate) {
             Replicable<?, ?> replicable = getReplicable(replicableIdAsStringForReplicableToReplicate, /* wait */ true);
-            ensureOperationExecutionListenerAndInjectResetToMasterService(replicable);
+            ensureOperationExecutionListener(replicable);
         }
     }
 
@@ -394,7 +398,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
      * {@code replicable} and remembered in {@link #executionListenersByReplicableIdAsString}. Otherwise, this method is
      * a no-op.
      */
-    private <S> void ensureOperationExecutionListenerAndInjectResetToMasterService(Replicable<S, ?> replicable) {
+    private <S> void ensureOperationExecutionListener(Replicable<S, ?> replicable) {
         if (!executionListenersByReplicableIdAsString.containsKey(replicable.getId().toString())) {
             final ReplicationServiceExecutionListener<S> listener = new ReplicationServiceExecutionListener<S>(this, replicable);
             executionListenersByReplicableIdAsString.put(replicable.getId().toString(), listener);
@@ -405,11 +409,15 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     public ReplicaDescriptor unregisterReplica(UUID replicaUuid) throws IOException {
         logger.info("Unregistering replica with ID " + replicaUuid);
         synchronized (replicationInstancesManager) {
+            final boolean hadReplicas = replicationInstancesManager.hasReplicas();
             final Iterable<String> oldReplicablesInReplication = replicationInstancesManager.getAllReplicableIdsAtLeastOneReplicaIsReplicating();
             final ReplicaDescriptor unregisteredReplica = replicationInstancesManager.unregisterReplica(replicaUuid);
             final Iterable<String> newReplicablesInReplication = replicationInstancesManager.getAllReplicableIdsAtLeastOneReplicaIsReplicating();
             for (final String idAsStringOfReplicableNoReplicaIsInterestedInAnymore : Util.removeAll(newReplicablesInReplication, Util.addAll(oldReplicablesInReplication, new HashSet<>()))) {
                 removeAsListenerFromReplicable(idAsStringOfReplicableNoReplicaIsInterestedInAnymore);
+            }
+            if (hadReplicas && !replicationInstancesManager.hasReplicas()) {
+                logger.info("Last replica got unregistered. Stopping to send out operations and closing outbound queue.");
                 synchronized (this) {
                     if (masterChannel != null) {
                         masterChannel.getConnection().close();

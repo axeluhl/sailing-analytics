@@ -27,9 +27,9 @@ public class ReplicationInstancesManager {
      * registered slaves, assuming the slaves will have subscribed for the replication topic. Keys are the
      * {@link ReplicaDescriptor#getUuid() IDs of the corresponding values}.
      */
-    private Map<UUID, ReplicaDescriptor> replicaDescriptors;
+    private final Map<UUID, ReplicaDescriptor> replicaDescriptors;
     
-    private Map<ReplicaDescriptor, Map<Class<? extends OperationWithResult<?, ?>>, Integer>> replicationCounts;
+    private final Map<ReplicaDescriptor, Map<Class<? extends OperationWithResult<?, ?>>, Integer>> replicationCounts;
     
     /**
      * Used to calculate the average number of operations per message sent/received for each replica.
