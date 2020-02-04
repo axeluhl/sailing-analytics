@@ -333,15 +333,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 addUserToUserGroup(defaultTenant, adminUser);
                 setDefaultTenantForCurrentServerForUser(adminUser.getName(), defaultTenant.getId());
             }
-            
             if (store.getUserByName(SecurityService.ALL_USERNAME) == null) {
                 isInitialOrMigration = true;
                 logger.info(SecurityService.ALL_USERNAME + " not found -> creating it now");
                 User allUser = apply(s->s.internalCreateUser(SecurityService.ALL_USERNAME, null));
-
                 // <all> user is explicitly not owned by itself because this would enable anybody to modify this user
                 setOwnership(allUser.getIdentifier(), null, getServerGroup());
-
                 // The permission to create new users is initially added but not recreated on server start if the admin removed it in the meanwhile.
                 // This allows servers to be configured to not permit self-registration of new users but only users being managed by an admin user.
                 WildcardPermission createUserPermission = SecuredSecurityTypes.USER.getPermission(DefaultActions.CREATE);
@@ -352,7 +349,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 // This typically ensures that the server admin is able to remove the association.
                 setOwnership(qualifiedTypeIdentifierForPermission, null, getServerGroup());
             }
-            
             if (isInitialOrMigration) {
                 // predefined roles are meant to be publicly readable
                 for (UUID predefinedRoleId : getPredefinedRoleIds()) {
@@ -726,7 +722,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void putRoleDefinitionToUserGroup(UserGroup userGroup, RoleDefinition roleDefinition, boolean forAll) {
-        logger.info("Removing role definition " + roleDefinition.getName() + "(forAll = " + forAll + ") to group "
+        logger.info("Adding role definition " + roleDefinition.getName() + "(forAll = " + forAll + ") to group "
                 + userGroup.getName());
         apply(s -> s.internalPutRoleDefinitionToUserGroup(userGroup.getId(), roleDefinition.getId(), forAll));
     }
