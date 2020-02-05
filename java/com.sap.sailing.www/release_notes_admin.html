@@ -35,6 +35,14 @@
                             will consider, as in<pre>
                               ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Drepliate.restore.replicas=true"
                             </pre></li>
+                        <li>Replication from replica to master will now re-send upon HTTP status 404 which
+                            may indicate a re-starting master where the health check hasn't properly disabled
+                            forwarding requests to the instance.
+                        </li>
+                        <li>Replication operations that a replica needs to send back to the master instance are
+                            now consistently sent in a background task, avoiding any hold-ups and latencies in
+                            client / user interaction.
+                        </li>
                     </ul>
                     <h2 class="articleSubheadline">January 2020</h2>
                     <ul class="bulletList">
