@@ -132,7 +132,7 @@ public class Activator implements BundleActivator {
             logger.severe("Couldn't parse the replication port specification \""+exchangePortAsString+"\". Using default.");
         }
         final Iterable<ReplicaDescriptor> replicasToAssumeConnectedToThisMaster;
-        if (Boolean.valueOf(System.getProperty(PROPERTY_NAME_RESTORE_REPLICAS, "false"))) {
+        if (Boolean.valueOf(System.getProperty(PROPERTY_NAME_RESTORE_REPLICAS, "true"))) {
             replicasToAssumeConnectedToThisMaster = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadReplicaDescriptors();
         } else {
             replicasToAssumeConnectedToThisMaster = null;
