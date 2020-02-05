@@ -24,6 +24,17 @@
                     <h2 class="articleSubheadline">February 2020</h2>
                     <ul class="bulletList">
                         <li>The "Local Server" tab now refreshes automatically when it comes into view.</li>
+                        <li>There is a new system property <tt>repliate.restore.replicas</tt>. When it is set to <tt>true</tt>,
+                            upon start-up the server instance will read the replica descriptors stored persistently when
+                            a replica registers, assuming that those replicas are still alive and want to continue to
+                            receive replication updates from this server. This way, replicas may not have to be
+                            re-started or re-connected to the re-started master instance. Note, though, that
+                            as the re-started master loads races, those loading activities will be broadcast
+                            to all replicas which are likely to have all that information already. Use the flag, e.g.,
+                            in the <tt>ADDITIONAL_JAVA_ARGS</tt> environment variable that the <tt>start</tt> script
+                            will consider, as in<pre>
+                              ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Drepliate.restore.replicas=true"
+                            </pre></li>
                     </ul>
                     <h2 class="articleSubheadline">January 2020</h2>
                     <ul class="bulletList">
