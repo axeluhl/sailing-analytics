@@ -55,28 +55,11 @@ public class UnsentOperationsSenderJob implements OperationsToMasterSendingQueue
     }
 
     @Override
-    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
+    public synchronized <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
             OperationWithResult<S, T> operationWithResult,
             OperationsToMasterSender<S, O> sender) {
-        final boolean runSynchronously;
-        synchronized (this) {
-            queue.addLast(new Pair<>(operationWithResult, sender));
-            runSynchronously = !scheduled;
-            if (!scheduled) {
-                // try to send immediately; setting scheduled to true will cause subsequent operation
-                // submissions to be picked up by that run() call as long as they arrive before the run()
-                // method resets scheduled to false and returns.
-                scheduled = true;
-            }
-        }
-        // This way, calling the run() method happens outside of the synchronized block above, and
-        // so other threads may insert operations into the queue while the run() method is trying
-        // to send, which will then be picked up by any
-        // synchronous call to run() triggered in the next block:
-        if (runSynchronously) {
-            // In case of a send error, the run() method will itself re-schedule
-            run();
-        }
+        queue.addLast(new Pair<>(operationWithResult, sender));
+        ensureScheduled();
     }
 
     /**
