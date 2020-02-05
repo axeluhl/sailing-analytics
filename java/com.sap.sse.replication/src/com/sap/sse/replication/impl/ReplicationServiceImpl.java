@@ -305,12 +305,20 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     public ReplicationServiceImpl(String exchangeName, String exchangeHost, int exchangePort,
             final ReplicationInstancesManager replicationInstancesManager, ReplicablesProvider replicablesProvider)
             throws IOException {
-        this(/* defaultMongoObjectFactory */ Optional.empty(), exchangeName, exchangeHost, exchangePort, replicationInstancesManager, replicablesProvider);
+        this(/* defaultMongoObjectFactory */ Optional.empty(), exchangeName, exchangeHost, exchangePort,
+                replicationInstancesManager, replicablesProvider);
     }
 
     public ReplicationServiceImpl(Optional<MongoObjectFactory> optionalMongoObjectFactory, String exchangeName,
             String exchangeHost, int exchangePort, ReplicationInstancesManager replicationInstancesManager,
-            ReplicablesProvider replicablesProvider) {
+            ReplicablesProvider replicablesProvider) throws IOException {
+        this(/* replicasToAssumeConnectedToThisMaster */ null, optionalMongoObjectFactory,
+                exchangeName, exchangeHost, exchangePort, replicationInstancesManager, replicablesProvider);
+    }
+
+    public ReplicationServiceImpl(Iterable<ReplicaDescriptor> replicasToAssumeConnectedToThisMaster,
+            Optional<MongoObjectFactory> optionalMongoObjectFactory, String exchangeName, String exchangeHost, int exchangePort,
+            ReplicationInstancesManager replicationInstancesManager, ReplicablesProvider replicablesProvider) throws IOException {
         this.mongoObjectFactory = optionalMongoObjectFactory;
         timer = new Timer("ReplicationServiceImpl timer for delayed task sending", /* isDaemon */ true);
         unsentOperationsSenderJob = new UnsentOperationsSenderJob();
@@ -326,6 +334,11 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
         replicator = null;
         serverUUID = UUID.randomUUID();
         logger.info("Setting " + serverUUID.toString() + " as unique replication identifier.");
+        if (replicasToAssumeConnectedToThisMaster != null) {
+            for (final ReplicaDescriptor replica : replicasToAssumeConnectedToThisMaster) {
+                registerReplica(replica);
+            }
+        }
     }
 
     @Override

@@ -56,20 +56,11 @@ public class ReplicationInstancesManager {
     private ReplicationMasterDescriptor replicationMasterDescriptor;
 
     public ReplicationInstancesManager() {
-        this(/* replicas to assume connected to this master */ null);
-    }
-    
-    public ReplicationInstancesManager(Iterable<ReplicaDescriptor> replicasToAssumeConnectedToThisMaster) {
         replicaDescriptors = new HashMap<>();
         replicationCounts = new HashMap<ReplicaDescriptor, Map<Class<? extends OperationWithResult<?, ?>>,Integer>>();
         totalMessageCount = new HashMap<>();
         totalNumberOfOperations = new HashMap<>();
         totalQueueMessagesRawSizeInBytes = new HashMap<ReplicaDescriptor, Long>();
-        if (replicasToAssumeConnectedToThisMaster != null) {
-            for (final ReplicaDescriptor replicaDescriptor : replicasToAssumeConnectedToThisMaster) {
-                registerReplica(replicaDescriptor);
-            }
-        }
     }
 
     /**

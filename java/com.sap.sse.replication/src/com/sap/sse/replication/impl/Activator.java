@@ -137,9 +137,9 @@ public class Activator implements BundleActivator {
         } else {
             replicasToAssumeConnectedToThisMaster = null;
         }
-        replicationInstancesManager = new ReplicationInstancesManager(replicasToAssumeConnectedToThisMaster);
+        replicationInstancesManager = new ReplicationInstancesManager();
         final OSGiReplicableTracker replicablesProvider = new OSGiReplicableTracker(bundleContext);
-        serverReplicationMasterService = new ReplicationServiceImpl(
+        serverReplicationMasterService = new ReplicationServiceImpl(replicasToAssumeConnectedToThisMaster,
                 Optional.of(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory()),
                 exchangeName, exchangeHost, exchangePort, replicationInstancesManager, replicablesProvider);
         final String replicateOnStart = System.getProperty(PROPERTY_NAME_REPLICATE_ON_START);

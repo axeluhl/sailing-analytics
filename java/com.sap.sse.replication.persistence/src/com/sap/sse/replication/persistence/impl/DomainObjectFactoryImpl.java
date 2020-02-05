@@ -2,6 +2,7 @@ package com.sap.sse.replication.persistence.impl;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -56,9 +57,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.log(Level.WARNING, message, e);
             throw new RuntimeException(message, e);
         }
-        final TimePoint registrationTime = new MillisecondsTimePoint(o.getLong(FieldNames.REPLICA_REGISTRATION_TIME_MILLIS));
+        final TimePoint registrationTime = new MillisecondsTimePoint(o.getLong(FieldNames.REPLICA_REGISTRATION_TIME_MILLIS.name()));
         final String additionalInformation = o.getString(FieldNames.REPLICA_ADDITIONAL_INFORMATION.name());
-        final String[] replicableIdsAsStrings = o.get(FieldNames.REPLICA_REPLICABLE_IDS_AS_STRINGS.name(), new String[0]);
+        final String[] replicableIdsAsStrings = o.get(FieldNames.REPLICA_REPLICABLE_IDS_AS_STRINGS.name(), new ArrayList<String>()).toArray(new String[0]);
         return new ReplicaDescriptorImpl(ipAddress, uuid, registrationTime, additionalInformation, replicableIdsAsStrings);
     }
 }

@@ -1,5 +1,7 @@
 package com.sap.sse.replication.persistence.impl;
 
+import java.util.Arrays;
+
 import org.bson.Document;
 
 import com.mongodb.WriteConcern;
@@ -30,7 +32,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         replicaDescriptorDoc.put(FieldNames.REPLICA_IP_ADDRESS.name(), replicaDescriptor.getIpAddress().getHostAddress());
         replicaDescriptorDoc.put(FieldNames.REPLICA_REGISTRATION_TIME_MILLIS.name(), replicaDescriptor.getRegistrationTime().asMillis());
         replicaDescriptorDoc.put(FieldNames.REPLICA_ADDITIONAL_INFORMATION.name(), replicaDescriptor.getAdditionalInformation());
-        replicaDescriptorDoc.put(FieldNames.REPLICA_REPLICABLE_IDS_AS_STRINGS.name(), replicaDescriptor.getReplicableIdsAsStrings());
+        replicaDescriptorDoc.put(FieldNames.REPLICA_REPLICABLE_IDS_AS_STRINGS.name(),
+                Arrays.asList(replicaDescriptor.getReplicableIdsAsStrings()));
         getReplicaDescriptorCollection().withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(replicaDescriptorDoc,
                 replicaDescriptorDoc, new UpdateOptions().upsert(true));
     }
