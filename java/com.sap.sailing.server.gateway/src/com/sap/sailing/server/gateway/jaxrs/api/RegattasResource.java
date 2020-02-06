@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -11,9 +12,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -77,7 +80,11 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -1266,6 +1273,86 @@ public class RegattasResource extends AbstractSailingServerResource {
             response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
+    }
+    
+    /**
+     * Calculates all start analysis parameters for all competitors in the race.
+     */
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/startanalysis")
+    public Response getStartAnalysis(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName,
+            @QueryParam("secret") String regattaSecret) {
+        Response response = null;
+        Regatta regatta = findRegattaByName(regattaName);
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            if (!getService().skipChecksDueToCorrectSecret(regattaName, regattaSecret)) {
+                getSecurityService().checkCurrentUserReadPermission(regatta);
+            }
+            final TrackedRace trackedRace = findTrackedRace(regatta, raceName);
+            if (trackedRace == null) {
+                response = getBadRaceErrorResponse(regattaName, raceName);
+            } else {
+                try {
+                    JSONArray jsonStartAnalysis = getStartAnalysis(trackedRace, regatta);
+                    String json = jsonStartAnalysis.toJSONString();
+                    response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                } catch (NoWindException | InterruptedException | ExecutionException e) {
+                    response = Response.status(Status.INTERNAL_SERVER_ERROR)
+                            .entity("Error computing start analysis for race '" + StringEscapeUtils.escapeHtml(raceName) + "' in regatta '" + StringEscapeUtils.escapeHtml(regattaName) + "': "+
+                                    StringEscapeUtils.escapeHtml(e.getMessage()))
+                            .type(MediaType.TEXT_PLAIN).build();
+
+                }
+            }
+        }
+        return response;
+    }
+
+    private JSONArray getStartAnalysis(TrackedRace trackedRace, Regatta regatta) throws NoWindException, InterruptedException, ExecutionException {
+        assert trackedRace != null;
+        final Leaderboard leaderboard = getService().getLeaderboardByName(regatta.getName());
+        final CompetitorJsonSerializer competitorSerializer = new CompetitorJsonSerializer(new TeamJsonSerializer(new PersonJsonSerializer(
+                new NationalityJsonSerializer())),
+                BoatJsonSerializer.create(), /* serialize non-public fields */ false);
+        final JSONArray result = new JSONArray();
+        if (leaderboard != null) {
+            final RaceDefinition race = trackedRace.getRace();
+            final Map<String, Competitor> competitorByIdAsString = new HashMap<>();
+            for (final Competitor c : race.getCompetitors()) {
+                competitorByIdAsString.put(c.getId().toString(), c);
+            }
+            final Pair<RaceColumn, Fleet> raceColumnAndFleet = regatta.getRaceColumnAndFleet(trackedRace);
+            if (raceColumnAndFleet != null && raceColumnAndFleet.getA() != null) {
+                final LeaderboardDTO latestLeaderboard = leaderboard.getLeaderboardDTO(/* live time point */ null,
+                        Arrays.asList(raceColumnAndFleet.getA().getName()), /* addOverallDetails */ false, getService(),
+                        getService().getBaseDomainFactory(), /* fillTotalPointsUncorrected */ false);
+                if (latestLeaderboard != null) {
+                    for (final Entry<CompetitorDTO, LeaderboardRowDTO> e : latestLeaderboard.rows.entrySet()) {
+                        final Competitor competitor = competitorByIdAsString.get(e.getKey().getIdAsString());
+                        if (competitor != null) {
+                            final LeaderboardRowDTO competitorRow = e.getValue();
+                            final LeaderboardEntryDTO entry = competitorRow.fieldsByRaceColumnName.get(raceColumnAndFleet.getA().getName());
+                            if (entry != null) {
+                                final JSONObject competitorStartAnalysisJson = new JSONObject();
+                                competitorStartAnalysisJson.put("competitor",  competitorSerializer.serialize(competitor));
+                                competitorStartAnalysisJson.put("distanceToStarboardSideOfStartLineInMeters", entry.distanceToStarboardSideOfStartLineInMeters);
+                                competitorStartAnalysisJson.put("distanceToStartLineAtStartOfRaceInMeters", entry.distanceToStartLineAtStartOfRaceInMeters);
+                                competitorStartAnalysisJson.put("distanceToStartLineFiveSecondsBeforeStartInMeters", entry.distanceToStartLineFiveSecondsBeforeStartInMeters);
+                                competitorStartAnalysisJson.put("speedOverGroundAtPassingStartWaypointInKnots", entry.speedOverGroundAtPassingStartWaypointInKnots);
+                                competitorStartAnalysisJson.put("speedOverGroundAtStartOfRaceInKnots", entry.speedOverGroundAtStartOfRaceInKnots);
+                                competitorStartAnalysisJson.put("speedOverGroundFiveSecondsBeforeStartInKnots", entry.speedOverGroundFiveSecondsBeforeStartInKnots);
+                                competitorStartAnalysisJson.put("timeBetweenRaceStartAndCompetitorStartInSeconds", entry.timeBetweenRaceStartAndCompetitorStartInSeconds);
+                                result.add(competitorStartAnalysisJson);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     /**
