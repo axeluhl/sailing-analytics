@@ -55,6 +55,7 @@ import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
@@ -88,6 +89,7 @@ import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceWindCalculator;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -100,6 +102,8 @@ import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseWithGeometryJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseWithGeometryJsonSerializer.CourseGeometry;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
@@ -141,6 +145,7 @@ import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sse.InvalidDateException;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -1061,12 +1066,12 @@ public class RegattasResource extends AbstractSailingServerResource {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
             getSecurityService().checkCurrentUserReadPermission(regatta);
-            RaceDefinition race = findRaceByName(regatta, raceName);
-            if (race == null) {
+            TrackedRace trackedRace = findTrackedRace(regatta, raceName);
+            if (trackedRace == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
             } else {
-                CourseBase course = race.getCourse();
-                response = getCourseResult(course);
+                CourseBase course = trackedRace.getRace().getCourse();
+                response = getCourseResult(course, trackedRace);
             }
         }
         return response;
@@ -1089,14 +1094,13 @@ public class RegattasResource extends AbstractSailingServerResource {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
             getSecurityService().checkCurrentUserReadPermission(regatta);
-            
             final RaceColumn raceColumn = findRaceColumnByName(regatta, raceColumnName);
             final Fleet fleet = findFleetByName(raceColumn, fleetName);
-
             if (raceColumn == null || fleet == null) {
                 response = getBadRaceErrorResponse(regattaName, raceColumnName, fleetName);
             } else {
-                final RaceDefinition raceDefinition = raceColumn.getRaceDefinition(fleet);
+                final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                final RaceDefinition raceDefinition = trackedRace == null ? null : trackedRace.getRace();
                 final CourseBase course;
                 if (raceDefinition != null) {
                     course = raceDefinition.getCourse();
@@ -1105,29 +1109,88 @@ public class RegattasResource extends AbstractSailingServerResource {
                             raceColumn.getRaceLog(fleet), /* onlyCoursesWithValidWaypointList */ true);
                     course = courseDesginFinder.analyze();
                 }
-                
                 if (course == null) {
                     response = Response.status(Status.NOT_FOUND).entity("No course found for given race.").build();
                 } else {
-                    response = getCourseResult(course);
+                    response = getCourseResult(course, trackedRace);
                 }
             }
         }
         return response;
     }
 
-    private Response getCourseResult(CourseBase course) {
+    /**
+     * @param optionalTrackedRace
+     *            if not {@code null}, the tracked race will be used to obtain information about the course geometry
+     *            which the serializer will put into the result.
+     */
+    private Response getCourseResult(CourseBase course, TrackedRace optionalTrackedRace) {
         Response response;
-        CourseBaseJsonSerializer serializer = new CourseBaseJsonSerializer(new WaypointJsonSerializer(
+        final WaypointJsonSerializer waypointSerializer = new WaypointJsonSerializer(
                 new ControlPointJsonSerializer(new MarkJsonSerializer(), new GateJsonSerializer(
-                        new MarkJsonSerializer()))));
-
-        JSONObject jsonCourse = serializer.serialize(course);
+                        new MarkJsonSerializer())));
+        final JSONObject jsonCourse;
+        if (optionalTrackedRace == null) {
+            jsonCourse = new CourseBaseJsonSerializer(waypointSerializer).serialize(course);
+        } else {
+            final CourseGeometry geometry = getCourseGeometry(optionalTrackedRace);
+            jsonCourse = new CourseBaseWithGeometryJsonSerializer(waypointSerializer).serialize(new Pair<>(course, geometry));
+        }
         String json = jsonCourse.toJSONString();
         response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         return response;
     }
     
+    /**
+     * The leg distance and bearing is taken for the time point when the first boat enters the leg, or for the start of the race
+     * if no mark passing exists for that leg yet, or for the start of tracking if no start of race exists, or for "now" if no
+     * start of tracking time point exists, either. The total distance is computed as the sum of the leg distances, therefore
+     * not necessarily representing the total course distance at any single point in time.
+     */
+    private CourseGeometry getCourseGeometry(TrackedRace trackedRace) {
+        assert trackedRace != null;
+        final Course course = trackedRace.getRace().getCourse();
+        Distance totalDistance = Distance.NULL;
+        final Map<Leg, Distance> legDistances = new HashMap<>();
+        final Map<Leg, Bearing> legBearings = new HashMap<>();
+        course.lockForRead();
+        try {
+            for (final Leg leg : course.getLegs()) {
+                final TrackedLeg trackedLeg = trackedRace.getTrackedLeg(leg);
+                final TimePoint timePointForLegGeometry = getTimePointForLegGeometry(trackedRace, leg);
+                final Distance legDistance = trackedLeg.getGreatCircleDistance(timePointForLegGeometry);
+                legDistances.put(leg, legDistance);
+                legBearings.put(leg, trackedLeg.getLegBearing(timePointForLegGeometry));
+                totalDistance = totalDistance.add(legDistance);
+            }
+        } finally {
+            course.unlockAfterRead();
+        }
+        return new CourseGeometry(totalDistance, legDistances, legBearings);
+    }
+
+    private TimePoint getTimePointForLegGeometry(TrackedRace trackedRace, Leg leg) {
+        final Iterable<MarkPassing> markPassingsForLegStart = trackedRace.getMarkPassingsInOrder(leg.getFrom());
+        final Iterator<MarkPassing> firstMarkPassingForLegStartIter = markPassingsForLegStart.iterator();
+        final TimePoint result;
+        if (firstMarkPassingForLegStartIter.hasNext()) {
+            result = firstMarkPassingForLegStartIter.next().getTimePoint();
+        } else {
+            final TimePoint raceStartTime = trackedRace.getStartOfRace();
+            if (raceStartTime != null) {
+                result = raceStartTime;
+            } else {
+                final TimePoint startOfTracking = trackedRace.getStartOfTracking();
+                if (startOfTracking != null) {
+                    result = startOfTracking;
+                } else {
+                    result = MillisecondsTimePoint.now();
+                }
+            }
+        }
+        return result;
+    }
+
     /**
      * Gets the target time of the race
      * 

@@ -19,21 +19,21 @@ public class CourseBaseJsonSerializer implements JsonSerializer<CourseBase> {
     }
 
     @Override
-    public JSONObject serialize(CourseBase object) {
+    public JSONObject serialize(CourseBase course) {
         JSONObject result = new JSONObject();
-
-        result.put(FIELD_NAME, object.getName());
-        if (object.getOriginatingCourseTemplateIdOrNull() != null) {
-            result.put(FIELD_ORIGINATING_COURSE_TEMPLATE_ID, object.getOriginatingCourseTemplateIdOrNull());
+        result.put(FIELD_NAME, course.getName());
+        if (course.getOriginatingCourseTemplateIdOrNull() != null) {
+            result.put(FIELD_ORIGINATING_COURSE_TEMPLATE_ID, course.getOriginatingCourseTemplateIdOrNull());
         }
-
         JSONArray waypoints = new JSONArray();
-        for (Waypoint waypoint : object.getWaypoints()) {
-            waypoints.add(waypointSerializer.serialize(waypoint));
+        for (Waypoint waypoint : course.getWaypoints()) {
+            waypoints.add(serializeWaypoint(waypoint));
         }
         result.put(FIELD_WAYPOINTS, waypoints);
-
         return result;
     }
 
+    protected JSONObject serializeWaypoint(Waypoint waypoint) {
+        return waypointSerializer.serialize(waypoint);
+    }
 }

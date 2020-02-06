@@ -214,17 +214,17 @@ public class MarkResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     public Response addCourseDefinitionToRaceLog(String json)
             throws DoesNotHaveRegattaLogException, NotFoundException, ParseException, JsonDeserializationException {
-        Object requestBody = JSONValue.parseWithException(json);
-        JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
-        String leaderboardName = (String) requestObject.get(LEADERBOARD_NAME);
-        String originatingCourseTemplateIdAsString = (String) requestObject.get(ORIGINATING_COURSE_TEMPLATE_ID);
-        UUID originatingCourseTemplateId = originatingCourseTemplateIdAsString != null ? UUID.fromString(originatingCourseTemplateIdAsString) : null;
+        final Object requestBody = JSONValue.parseWithException(json);
+        final JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
+        final String leaderboardName = (String) requestObject.get(LEADERBOARD_NAME);
+        final String originatingCourseTemplateIdAsString = (String) requestObject.get(ORIGINATING_COURSE_TEMPLATE_ID);
+        final UUID originatingCourseTemplateId = originatingCourseTemplateIdAsString != null ? UUID.fromString(originatingCourseTemplateIdAsString) : null;
         SecurityUtils.getSubject().checkPermission(
                 SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
                         Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
-        String raceColumnName = (String) requestObject.get(RACE_COLUMN_NAME);
-        String fleetName = (String) requestObject.get(FLEET_NAME);
-        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        final String raceColumnName = (String) requestObject.get(RACE_COLUMN_NAME);
+        final String fleetName = (String) requestObject.get(FLEET_NAME);
+        final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         String courseName = "Course of " + raceColumnName;
         if (!LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName)) {
             courseName += " - " + fleetName;
@@ -234,25 +234,25 @@ public class MarkResource extends AbstractSailingServerResource {
         if (lastPublishedCourse == null) {
             lastPublishedCourse = new CourseDataImpl(courseName);
         }
-        JSONArray controlPointsRaw = (JSONArray) requestObject.get("controlPoints");
-        List<Pair<ControlPoint, PassingInstruction>> controlPoints = new ArrayList<>();
+        final JSONArray controlPointsRaw = (JSONArray) requestObject.get("controlPoints");
+        final List<Pair<ControlPoint, PassingInstruction>> controlPoints = new ArrayList<>();
         for (Object controlPointUnsafe : controlPointsRaw) {
             JSONObject controlPointRaw = Helpers.toJSONObjectSafe(controlPointUnsafe);
             final String passingInstructionString = (String) controlPointRaw.get("passingInstruction");
-            PassingInstruction passing = PassingInstruction.valueOfIgnoringCase(passingInstructionString);
-            JSONArray marksRaw = (JSONArray) controlPointRaw.get("marks");
+            final PassingInstruction passing = PassingInstruction.valueOfIgnoringCase(passingInstructionString);
+            final JSONArray marksRaw = (JSONArray) controlPointRaw.get("marks");
             if (marksRaw.size() == 1) {
-                String markName = (String) marksRaw.get(0);
-                Mark mark = getService().getBaseDomainFactory().getExistingMarkByIdAsString(markName);
+                final String markName = (String) marksRaw.get(0);
+                final Mark mark = getService().getBaseDomainFactory().getExistingMarkByIdAsString(markName);
                 if (mark == null) {
                     throw new IllegalStateException("Could not resolve mark " + markName);
                 }
                 controlPoints.add(new Pair<>(mark, passing));
             } else {
-                String markNameA = (String) marksRaw.get(0);
-                String markNameB = (String) marksRaw.get(1);
-                Mark markA = getService().getBaseDomainFactory().getExistingMarkByIdAsString(markNameA);
-                Mark markB = getService().getBaseDomainFactory().getExistingMarkByIdAsString(markNameB);
+                final String markNameA = (String) marksRaw.get(0);
+                final String markNameB = (String) marksRaw.get(1);
+                final Mark markA = getService().getBaseDomainFactory().getExistingMarkByIdAsString(markNameA);
+                final Mark markB = getService().getBaseDomainFactory().getExistingMarkByIdAsString(markNameB);
                 if (markA == null) {
                     throw new IllegalStateException("Could not resolve mark " + markA);
                 }
@@ -263,25 +263,24 @@ public class MarkResource extends AbstractSailingServerResource {
                 if (controlPointName == null || controlPointName.isEmpty()) {
                     controlPointName = markA.getName() + "-" + markB.getName();
                 }
-
-                String shortName = (String) controlPointRaw.get(CONTROL_POINT_SHORT_NAME);
+                final String shortName = (String) controlPointRaw.get(CONTROL_POINT_SHORT_NAME);
                 controlPoints.add(new Pair<>(new ControlPointWithTwoMarksImpl(markA, markB, controlPointName,
                         shortName == null ? controlPointName : shortName), passing));
             }
         }
-        Course course = new CourseImpl(courseName, lastPublishedCourse.getWaypoints(), originatingCourseTemplateId);
+        final Course course = new CourseImpl(courseName, lastPublishedCourse.getWaypoints(), originatingCourseTemplateId);
         try {
             course.update(controlPoints, lastPublishedCourse.getAssociatedRoles(),
                     lastPublishedCourse.getOriginatingCourseTemplateIdOrNull(), getService().getBaseDomainFactory());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        RaceLogEvent event = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(),
+        final RaceLogEvent event = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(),
                 getService().getServerAuthor(), raceLog.getCurrentPassId(), course, CourseDesignerMode.ADMIN_CONSOLE);
         raceLog.add(event);
-        CourseBase updatedPublishedCourse = new LastPublishedCourseDesignFinder(raceLog,
+        final CourseBase updatedPublishedCourse = new LastPublishedCourseDesignFinder(raceLog,
                 /* onlyCoursesWithValidWaypointList */ false).analyze();
-        JSONObject jsonResult = new JSONObject();
+        final JSONObject jsonResult = new JSONObject();
         jsonResult.put("course",
                 new CourseJsonSerializer(new CourseBaseJsonSerializer(
                         new WaypointJsonSerializer(new ControlPointJsonSerializer(new MarkJsonSerializer(),
