@@ -2105,8 +2105,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         logger.info("Reading isSharedAcrossSubdomains...");
         sharedAcrossSubdomainsOf = (String) is.readObject();
-        baseUrlForCrossDomainStorage = (String) is.readObject();
         logger.info("...as "+sharedAcrossSubdomainsOf);
+        logger.info("Reading baseUrlForCrossDomainStorage...");
+        baseUrlForCrossDomainStorage = (String) is.readObject();
+        logger.info("...as "+baseUrlForCrossDomainStorage);
         logger.info("Done filling SecurityService");
     }
 

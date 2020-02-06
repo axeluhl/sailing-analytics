@@ -24,6 +24,25 @@
                     <h2 class="articleSubheadline">February 2020</h2>
                     <ul class="bulletList">
                         <li>The "Local Server" tab now refreshes automatically when it comes into view.</li>
+                        <li>There is a new system property <tt>repliate.restore.replicas</tt>. When it is set to <tt>true</tt>,
+                            upon start-up the server instance will read the replica descriptors stored persistently when
+                            a replica registers, assuming that those replicas are still alive and want to continue to
+                            receive replication updates from this server. This way, replicas may not have to be
+                            re-started or re-connected to the re-started master instance. Note, though, that
+                            as the re-started master loads races, those loading activities will be broadcast
+                            to all replicas which are likely to have all that information already. Use the flag, e.g.,
+                            in the <tt>ADDITIONAL_JAVA_ARGS</tt> environment variable that the <tt>start</tt> script
+                            will consider, as in<pre>
+                              ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Drepliate.restore.replicas=true"
+                            </pre></li>
+                        <li>Replication from replica to master will now re-send upon HTTP status 404 which
+                            may indicate a re-starting master where the health check hasn't properly disabled
+                            forwarding requests to the instance.
+                        </li>
+                        <li>Replication operations that a replica needs to send back to the master instance are
+                            now consistently sent in a background task, avoiding any hold-ups and latencies in
+                            client / user interaction.
+                        </li>
                     </ul>
                     <h2 class="articleSubheadline">January 2020</h2>
                     <ul class="bulletList">
@@ -50,7 +69,7 @@
                     </ul>
                     <h2 class="articleSubheadline">November 2019</h2>
                     <ul class="bulletList">
-                        <li>Added system property <tt>security.sharedAcrossSubdomains</tt> which can be used to
+                        <li>Added system property <tt>security.sharedAcrossSubdomainsOf</tt> which can be used to
                             configure the security service as shared across several subdomains of the parent
                             domain specified by the system property. Use, e.g., as in<pre>
                               -Dsecurity.sharedAcrossSubdomainsOf=sapsailing.com
