@@ -41,16 +41,15 @@ import java.io.Serializable;
  */
 public interface DeviceIdentifier extends Serializable {
     /**
-     * The returned {@link String} is used to look up corresponding services for serialization
-     * and persistence.
+     * The returned {@link String} is used to look up corresponding services for serialization and persistence.
      * 
-     * The reason for this design choice is that in future, third parties could easily write their own adapter and only
-     * have to register new OSGi service, and not touch the SAP Sailing Analytics code.
+     * The reason for this design choice is that in the future third parties could easily write their own adapter and
+     * only have to register a new OSGi service, and not touch the SAP Sailing Analytics code.
      */
     String getIdentifierType();
     
     /**
-     * Create a string representation, that can identify this device.
+     * Create a string representation that can identify this device.
      * The returned values should be unique for this identifier within its {@link #getIdentifierType() type},
      * but need not include the {@link #getIdentifierType() type} itself in the representation.
      */

@@ -48,7 +48,7 @@ public class PingMarkViaRegattaLogTest {
                 /* controlTrackingFromStartAndFinishTimes */ false, RankingMetricsFactory.getRankingMetricConstructor(RankingMetrics.ONE_DESIGN));
         RegattaLeaderboard leaderboard = service.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "RegattaLeaderboard", new int[] {});
         
-        MarkDTO mark = new MarkDTO("mark", "mark");
+        MarkDTO mark = new MarkDTO("mark", "mark", "m");
         Position position = new DegreePosition(30, 40);
         
         sailingService.pingMark(leaderboard.getName(), mark, /* time point for fix */ null, position);

@@ -63,7 +63,7 @@ public class AccountWithSecurityDTO implements SecuredDTO {
     }
 
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredDomainType.IGTIMI_ACCOUNT;
     }
 
@@ -79,7 +79,7 @@ public class AccountWithSecurityDTO implements SecuredDTO {
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
 }

@@ -554,7 +554,6 @@ public class EventsResource extends AbstractSailingServerResource {
                 RoleDefinition roleDef = getSecurityService()
                         .getRoleDefinition(SailingViewerRole.getInstance().getId());
                 getSecurityService().putRoleDefinitionToUserGroup(ownerGroup, roleDef, true);
-
                 getSecurityService().addUserToUserGroup(ownerGroup, getCurrentUser());
                 return getSecurityService().doWithTemporaryDefaultTenant(ownerGroup, doCreationAction);
             } else {

@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.sap.sailing.server.gateway.serialization
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: org.json.simple
+Import-Package: 
+ org.json.simple
 Require-Bundle: com.sap.sailing.domain.common,
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.domain,

@@ -73,7 +73,7 @@ public class AccessControlStoreTest {
             userStore = new UserStoreImpl(DEFAULT_TENANT_NAME);
             userStore.loadAndMigrateUsers();
             userStore.ensureDefaultRolesExist();
-            userStore.ensureDefaultTenantExists();
+            userStore.ensureServerGroupExists();
         } catch (UserGroupManagementException | UserManagementException e) {
             throw new RuntimeException(e);
         }
@@ -87,6 +87,28 @@ public class AccessControlStoreTest {
         assertNotNull(accessControlStore.getAccessControlList(testId));
         newStores();
         assertNotNull(accessControlStore.getAccessControlList(testId));
+    }
+    
+    @Test
+    public void testCreateSimpleAccessControlListForAll() throws UserGroupManagementException {
+        accessControlStore.addAclPermission(testId, null, "READ");
+        assertNotNull(accessControlStore.getAccessControlList(testId));
+        assertTrue(accessControlStore.getAccessControlList(testId).getAnnotation().getActionsByUserGroup().get(null).contains("READ"));
+        newStores();
+        assertNotNull(accessControlStore.getAccessControlList(testId));
+        assertTrue(accessControlStore.getAccessControlList(testId).getAnnotation().getActionsByUserGroup().get(null).contains("READ"));
+    }
+    
+    @Test
+    public void testCreateSimpleAccessControlListForGroup() throws UserGroupManagementException {
+        final UserGroup group = userStore.getServerGroup();
+        accessControlStore.addAclPermission(testId, group, "READ");
+        assertNotNull(accessControlStore.getAccessControlList(testId));
+        assertTrue(accessControlStore.getAccessControlList(testId).getAnnotation().getActionsByUserGroup().get(group).contains("READ"));
+        newStores();
+        assertNotNull(accessControlStore.getAccessControlList(testId));
+        final UserGroup newGroup = userStore.getServerGroup();
+        assertTrue(accessControlStore.getAccessControlList(testId).getAnnotation().getActionsByUserGroup().get(newGroup).contains("READ"));
     }
     
     @Test

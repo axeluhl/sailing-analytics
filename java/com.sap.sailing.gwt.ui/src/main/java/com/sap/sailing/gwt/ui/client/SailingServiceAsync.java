@@ -74,6 +74,7 @@ import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
@@ -116,6 +117,10 @@ import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -1138,6 +1143,7 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void getTrackedRaceIsUsingMarkPassingCalculator(RegattaAndRaceIdentifier regattaNameAndRaceName, AsyncCallback<Boolean> callback);
 
+
     void getLegGeometry(String leaderboardName, String raceColumnName, String fleetName, int[] zeroBasedLegIndices,
             ORCPerformanceCurveLegTypes[] legTypes, AsyncCallback<ORCPerformanceCurveLegImpl[]> callback);
 
@@ -1214,4 +1220,26 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
      */
     void searchORCBoatCertificates(CountryCode country, Integer yearOfIssuance, String referenceNumber,
             String yachtName, String sailNumber, String boatClassName, AsyncCallback<Set<ORCCertificate>> callback);
+    
+    void getMarkTemplates(AsyncCallback<List<MarkTemplateDTO>> callback);
+
+    void addOrUpdateMarkTemplate(MarkTemplateDTO markTemplate, AsyncCallback<MarkTemplateDTO> asyncCallback);
+
+    void addOrUpdateMarkProperties(MarkPropertiesDTO markProperties, AsyncCallback<MarkPropertiesDTO> asyncCallback);
+
+    void updateMarkPropertiesPositioning(UUID markPropertiesId, DeviceIdentifierDTO deviceIdentifier, Position position, AsyncCallback<MarkPropertiesDTO> asyncCallback);
+
+    void getMarkProperties(AsyncCallback<List<MarkPropertiesDTO>> asyncCallback);
+
+    void getCourseTemplates(AsyncCallback<List<CourseTemplateDTO>> asyncCallback);
+
+    void createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate, AsyncCallback<CourseTemplateDTO> asyncCallback);
+
+    void removeCourseTemplate(UUID uuid, AsyncCallback<Void> asyncCallback);
+
+    void removeMarkProperties(UUID uuid, AsyncCallback<Void> asyncCallback);
+
+    void getMarkRoles(AsyncCallback<List<MarkRoleDTO>> callback);
+
+    void addOrUpdateMarkRole(MarkRoleDTO markRole, AsyncCallback<MarkRoleDTO> asyncCallback);
 }

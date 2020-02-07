@@ -40,6 +40,7 @@ import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMongoHandl
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMovingMongoHandlerImpl;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStoreSupplier;
+import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
 import com.sap.sailing.server.RacingEventServiceMXBean;
@@ -109,6 +110,8 @@ public class Activator implements BundleActivator {
     private ServiceTracker<MailService, MailService> mailServiceTracker;
 
     private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+
+    private ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker;
     
     public Activator() {
         clearPersistentCompetitors = Boolean
@@ -194,6 +197,7 @@ public class Activator implements BundleActivator {
         notificationService.stop();
         mailQueue.stop();
         mailServiceTracker.close();
+        sharedSailingDataTracker.close();
         securityServiceTracker.close();
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         mbs.unregisterMBean(mBeanName);
@@ -212,7 +216,7 @@ public class Activator implements BundleActivator {
                     if (securityService.isInitialOrMigration()) {
                         // The server is initially set to be public by adding sailing_viewer role to the server group
                         // with forAll=true
-                        securityService.putRoleDefinitionToUserGroup(securityService.getDefaultTenant(),
+                        securityService.putRoleDefinitionToUserGroup(securityService.getServerGroup(),
                                 sailingViewerRoleDefinition, true);
                         // sailing_viewer role is publicly readable
                         securityService.addToAccessControlList(sailingViewerRoleDefinition.getIdentifier(), null, DefaultActions.READ.name());
@@ -228,9 +232,11 @@ public class Activator implements BundleActivator {
         // this code block is not run, and the test case can inject some other type of finder
         // instead.
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
+        sharedSailingDataTracker = ServiceTrackerFactory.createAndOpen(context, SharedSailingData.class);
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors,
                 serviceFinderFactory, trackedRegattaListener, notificationService,
-                trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker);
+                trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker,
+                sharedSailingDataTracker);
         notificationService.setRacingEventService(racingEventService);
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,
@@ -298,10 +304,8 @@ public class Activator implements BundleActivator {
 
     private class MasterDataImportClassLoaderServiceTrackerCustomizer implements
             ServiceTrackerCustomizer<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService> {
-
         private final BundleContext context;
         private RacingEventServiceImpl racingEventService;
-
         public MasterDataImportClassLoaderServiceTrackerCustomizer(BundleContext context,
                 RacingEventServiceImpl racingEventService) {
             this.context = context;
@@ -326,12 +330,10 @@ public class Activator implements BundleActivator {
                 MasterDataImportClassLoaderService service) {
             racingEventService.removeMasterDataClassLoader(service.getClassLoader());
         }
-
     }
 
     private class PolarDataServiceTrackerCustomizer
             implements ServiceTrackerCustomizer<PolarDataService, PolarDataService> {
-
         private final BundleContext context;
         private RacingEventServiceImpl racingEventService;
 

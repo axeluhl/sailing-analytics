@@ -76,6 +76,32 @@ public class TimeRangeTest {
     }
     
     @Test
+    public void extendWithTimePoint() {
+        TimeRange one = create(5, 10);
+        assertFalse(one.includes(create(10))); // end is exclusive
+        TimePoint two = create(20);
+        TimeRange extension = one.extend(two);
+        assertTrue(extension.includes(one));
+        assertTrue(extension.includes(two));
+        assertTrue(extension.includes(create(5)));
+        assertTrue(extension.includes(create(10)));
+    }
+    
+    @Test
+    public void extendWithTimeRange() {
+        TimeRange one = create(5, 10);
+        assertFalse(one.includes(create(10))); // end is exclusive
+        TimeRange two = create(20, 30);
+        assertFalse(two.includes(create(30))); // end is exclusive
+        TimeRange extension = one.extend(two);
+        assertTrue(extension.includes(one));
+        assertTrue(extension.includes(two));
+        assertTrue(extension.includes(create(5)));
+        assertTrue(extension.includes(create(10)));
+        assertFalse(extension.includes(create(30)));
+    }
+    
+    @Test
     public void union() {
     	TimeRange one = create(5, 10);
     	TimeRange two = create(7, 12);

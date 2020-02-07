@@ -73,7 +73,7 @@ public class HasPermissionsTest {
             }
 
             @Override
-            public HasPermissions getType() {
+            public HasPermissions getPermissionType() {
                 return h;
             }
         };

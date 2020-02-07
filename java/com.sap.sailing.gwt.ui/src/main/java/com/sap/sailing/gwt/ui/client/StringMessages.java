@@ -1188,7 +1188,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showWindStreamletColors();
     String showSimulationOverlay();
     String simulationLegendTooltip();
-    String regattaNameMustNotContainSlashes();
     String racesScored();
     String racesScoredTooltip();
     String averageNumberOfOperationsPerMessage();
@@ -1741,7 +1740,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String contentSapInSailing3();
     String contentSapInSailing4();
     String contentSapInSailing5();
-    String contentSapInSailing6();
     String contentSapInSailing7();
     String contentSapInSailing8();
     String contentSapInSailing9();
@@ -2332,4 +2330,32 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String dataBy();
     String currentPositionLatitudeTooltip();
     String currentPositionLongitudeTooltip();
+    String courseCreation();
+    String filterMarkTemplateByName();
+    String markTemplates();
+    String filterMarkPropertiesByName();
+    String markProperties();
+    String filterCourseTemplateByName();
+    String courseTemplates();
+    String markTemplate();
+    String markRole1();
+    String markRole2();
+    String pleaseSelectAValidPassingInstruction();
+    String pleaseSelectAValidMarkTemplate();
+    String doYouReallyWantToRemoveCourseTemplate(String name);
+    String couldNotRemoveCourseTemplate(String message);
+    String doYouReallyWantToRemoveMarkProperties(String name);
+    String couldNotRemoveMarkProperties(String message);
+    String markRoles();
+    String filterMarkRoles();
+    String wayPointRequiresPassingInstruction();
+    String wayPointRequiresShortName();
+    String wayPointRequiresName();
+    String wayPointMarkTemplatesAreTheSame();
+    String wayPointMarkInSequenceMissing();
+    String defaultNumberOfLaps();
+    String invalidImageURL();
+    String setDeviceIdentifier();
+    String setPosition();
+    String spareMarksAndTheirOptionalDefaultMarkRoles();
 }

@@ -147,7 +147,7 @@ public class SharedDomainFactoryImpl<RLR extends RaceLogResolver> implements Sha
     
     @Override
     public Mark getOrCreateMark(String name) {
-        return getOrCreateMark(name, name);
+        return getOrCreateMark(name, name, name);
     }
     
     @Override
@@ -157,21 +157,29 @@ public class SharedDomainFactoryImpl<RLR extends RaceLogResolver> implements Sha
     
     @Override
     public Mark getOrCreateMark(Serializable id, String name, MarkType markType) {
-        return getOrCreateMark(id, name, markType, /* color */ null, /* shape */ null, /* pattern */ null);
+        return getOrCreateMark(id, name, /* no separate short name available here */ name, markType, /* color */ null, /* shape */ null, /* pattern */ null);
     }
 
     @Override
-    public Mark getOrCreateMark(Serializable id, String name) {
-        return getOrCreateMark(id, name, /* type */ null, /* color */ null, /* shape */ null, /* pattern */ null);
+    public Mark getOrCreateMark(Serializable id, String name, String shortName) {
+        return getOrCreateMark(id, name, shortName, /* originatingMarkTemplateId */ null,
+                /* originatingMarkPropertiesId */ null);
     }
 
     @Override
-    public Mark getOrCreateMark(String toStringRepresentationOfID, String name) {
-        return getOrCreateMark(toStringRepresentationOfID, name, /* type */ null, /* color */ null, /* shape */ null, /* pattern */ null);
+    public Mark getOrCreateMark(Serializable id, String name, String shortName, UUID originatingMarkTemplateId,
+            UUID originatingMarkPropertiesId) {
+        return getOrCreateMark(id, name, shortName, /* type */ null, /* color */ null, /* shape */ null,
+                /* pattern */ null, originatingMarkTemplateId, originatingMarkPropertiesId);
+    }
+
+    @Override
+    public Mark getOrCreateMark(String toStringRepresentationOfID, String name, String shortName) {
+        return getOrCreateMark(toStringRepresentationOfID, name, shortName, /* type */ null, /* color */ null, /* shape */ null, /* pattern */ null);
     }
     
     @Override
-    public Mark getOrCreateMark(Serializable id, String name, MarkType type, Color color, String shape, String pattern) {
+    public Mark getOrCreateMark(Serializable id, String name, String shortName, MarkType type, Color color, String shape, String pattern) {
         Mark result = markCache.get(id);
         if (result == null) {
             result = new MarkImpl(id, name, type, color, shape, pattern);
@@ -179,37 +187,51 @@ public class SharedDomainFactoryImpl<RLR extends RaceLogResolver> implements Sha
         }
         return result;
     }
-    
+
     @Override
-    public Mark getOrCreateMark(String toStringRepresentationOfID, String name, MarkType type,
-            Color color, String shape, String pattern) {
+    public Mark getOrCreateMark(Serializable id, String name, String shortName, MarkType type, Color color,
+            String shape, String pattern, UUID originatingMarkTemplateId,
+            UUID originatingMarkPropertiesId) {
+        Mark result = markCache.get(id);
+        if (result == null) {
+            result = new MarkImpl(id, name, shortName, type, color, shape, pattern, originatingMarkTemplateId,
+                    originatingMarkPropertiesId);
+            cacheMark(id, result);
+        }
+        return result;
+    }
+
+    @Override
+    public Mark getOrCreateMark(String toStringRepresentationOfID, String name, String shortName,
+            MarkType type, Color color, String shape, String pattern) {
         Serializable id = toStringRepresentationOfID;
         if (markIdCache.containsKey(toStringRepresentationOfID)) {
             id = markIdCache.get(toStringRepresentationOfID);
         }
-        return getOrCreateMark(id, name, type, color, shape, pattern);
+        return getOrCreateMark(id, name, shortName, type, color, shape, pattern);
     }
 
     @Override
-    public ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(Serializable id, String name, Mark left, Mark right) {
+    public ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(Serializable id, String name, Mark left,
+            Mark right, String shortName) {
         final ControlPointWithTwoMarks result;
         final ControlPointWithTwoMarks fromCache = controlPointWithTwoMarksCache.get(id);
         if (fromCache != null) {
             result = fromCache;
         } else {
-            result = createControlPointWithTwoMarks(id, left, right, name);
+            result = createControlPointWithTwoMarks(id, left, right, name, shortName);
         }
         return result;
     }
 
     @Override
     public ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(
-            String toStringRepresentationOfID, String name, Mark left, Mark right) {
+            String toStringRepresentationOfID, String name, Mark left, Mark right, String shortName) {
         Serializable id = toStringRepresentationOfID;
         if (controlPointWithTwoMarksIdCache.containsKey(toStringRepresentationOfID)) {
             id = controlPointWithTwoMarksIdCache.get(toStringRepresentationOfID);
         }
-        return getOrCreateControlPointWithTwoMarks(id, name, left, right);
+        return getOrCreateControlPointWithTwoMarks(id, name, left, right, shortName);
     }
 
     private void cacheMark(Serializable id, Mark result) {
@@ -218,13 +240,18 @@ public class SharedDomainFactoryImpl<RLR extends RaceLogResolver> implements Sha
     }
 
     @Override
-    public ControlPointWithTwoMarks createControlPointWithTwoMarks(Mark left, Mark right, String name) {
-       return createControlPointWithTwoMarks(name, left, right, name);
+    public ControlPointWithTwoMarks createControlPointWithTwoMarks(Mark left, Mark right, String name,
+            String shortName) {
+        return createControlPointWithTwoMarks(name, left, right, name, shortName);
     }
 
     @Override
-    public ControlPointWithTwoMarks createControlPointWithTwoMarks(Serializable id, Mark left, Mark right, String name) {
-        ControlPointWithTwoMarks result = new ControlPointWithTwoMarksImpl(id, left, right, name);
+    public ControlPointWithTwoMarks createControlPointWithTwoMarks(Serializable id, Mark left, Mark right, String name,
+            String shortName) {
+        if (shortName == null || shortName.isEmpty()) {
+            shortName = name;
+        }
+        ControlPointWithTwoMarks result = new ControlPointWithTwoMarksImpl(id, left, right, name, shortName);
         controlPointWithTwoMarksCache.put(id, result);
         controlPointWithTwoMarksIdCache.put(id.toString(), id);
         return result;

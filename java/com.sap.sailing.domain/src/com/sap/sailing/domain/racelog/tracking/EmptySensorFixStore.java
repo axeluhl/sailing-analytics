@@ -62,7 +62,7 @@ public enum EmptySensorFixStore implements SensorFixStore {
     }
 
     @Override
-    public <FixT extends Timed> Map<DeviceIdentifier, FixT> getLastFix(Iterable<DeviceIdentifier> forDevices) {
+    public <FixT extends Timed> Map<DeviceIdentifier, FixT> getFixLastReceived(Iterable<DeviceIdentifier> forDevices) {
         return null;
     }
 

@@ -53,13 +53,13 @@ public class LeaderboardGroupBaseDTO extends NamedSecuredObjectDTO implements Wi
     }
     
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredDomainType.LEADERBOARD_GROUP;
     }
     
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {

@@ -161,7 +161,7 @@ public class Activator implements BundleActivator {
         userStore.clear();
         accessControlStore.clear();
         userStore.ensureDefaultRolesExist();
-        userStore.ensureDefaultTenantExists();
+        userStore.ensureServerGroupExists();
         getSecurityService().initialize();
         applyCustomizations();
     }
@@ -280,12 +280,10 @@ public class Activator implements BundleActivator {
                 }
             }
         }
-        
         final QualifiedObjectIdentifier serverIdentifier = SecuredSecurityTypes.SERVER
                 .getQualifiedObjectIdentifier(
                         new TypeRelativeObjectIdentifier(ServerInfo.getName()));
         securityService.migrateOwnership(serverIdentifier, serverIdentifier.toString());
-
         securityService.checkMigration(SecuredSecurityTypes.getAllInstances());
     }
     

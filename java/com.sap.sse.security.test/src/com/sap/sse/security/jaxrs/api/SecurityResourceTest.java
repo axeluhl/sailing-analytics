@@ -59,7 +59,7 @@ public class SecurityResourceTest {
         try {
             store = new UserStoreImpl("TestDefaultTenant");
             store.ensureDefaultRolesExist();
-            store.ensureDefaultTenantExists();
+            store.ensureServerGroupExists();
             accessControlStore = new AccessControlStoreImpl(store);
             Activator.setTestStores(store, accessControlStore);
             service = new SecurityServiceImpl(/* mailServiceTracker */ null,
@@ -179,8 +179,8 @@ public class SecurityResourceTest {
     public void testCheckCurrentUserDefaultPermissions() throws UserManagementException {
         final MediaTrack mediaTrack = new MediaTrack();
         mediaTrack.dbId = "Humba";
-        store.addPermissionForUser(USERNAME, mediaTrack.getType().getPermissionForObject(DefaultActions.READ, mediaTrack));
-        store.addPermissionForUser(USERNAME, mediaTrack.getType().getPermissionForObject(DefaultActions.UPDATE, mediaTrack));
+        store.addPermissionForUser(USERNAME, mediaTrack.getPermissionType().getPermissionForObject(DefaultActions.READ, mediaTrack));
+        store.addPermissionForUser(USERNAME, mediaTrack.getPermissionType().getPermissionForObject(DefaultActions.UPDATE, mediaTrack));
         assertTrue(authenticatedAdmin.execute(()->service.hasCurrentUserReadPermission(mediaTrack)));
         assertTrue(authenticatedAdmin.execute(()->service.hasCurrentUserUpdatePermission(mediaTrack)));
         assertFalse(authenticatedAdmin.execute(()->service.hasCurrentUserDeletePermission(mediaTrack)));

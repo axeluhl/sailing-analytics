@@ -50,6 +50,8 @@ Export-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.base.impl,
  com.sap.sailing.domain.base.racegroup,
  com.sap.sailing.domain.base.racegroup.impl,
+ com.sap.sailing.domain.coursetemplate,
+ com.sap.sailing.domain.coursetemplate.impl;
  com.sap.sailing.domain.racelogtracking,
  com.sap.sailing.domain.racelogtracking.impl,
  com.sap.sailing.domain.statistics,

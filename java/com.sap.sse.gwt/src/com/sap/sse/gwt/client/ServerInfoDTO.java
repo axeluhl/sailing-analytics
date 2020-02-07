@@ -32,7 +32,7 @@ public class ServerInfoDTO extends NamedSecuredObjectDTO implements IsSerializab
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
@@ -44,7 +44,7 @@ public class ServerInfoDTO extends NamedSecuredObjectDTO implements IsSerializab
     }
 
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredSecurityTypes.SERVER;
     }
 

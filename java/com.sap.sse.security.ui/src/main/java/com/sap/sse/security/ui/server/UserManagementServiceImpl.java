@@ -864,7 +864,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public SuccessInfo addRoleToUser(String username, String userQualifierName, UUID roleDefinitionId,
             String tenantQualifierName) throws UserManagementException, UnauthorizedException {
-
         SuccessInfo successInfo;
         try {
             // get user for which to add a role
@@ -885,7 +884,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredSecurityTypes.ROLE_ASSOCIATION, associationTypeIdentifier,
                     associationTypeIdentifier.toString(), new Action() {
-
                         @Override
                         public void run() throws Exception {
                             final QualifiedObjectIdentifier qualifiedObjectAssociationIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
@@ -897,7 +895,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                             logger.info(message);
                         }
                     });
-
             final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
             successInfo = new SuccessInfo(true, message, /* redirectURL */null,
                     new Triple<>(userDTO, getAllUser(), getServerInfo()));

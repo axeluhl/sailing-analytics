@@ -3,12 +3,12 @@ package com.sap.sailing.domain.racelog.tracking.test.mock;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDMongoHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneUUIDJsonHandler;
+import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 

@@ -63,7 +63,7 @@ public class UserStoreImpl implements UserStore {
 
     private static final String ACCESS_TOKEN_KEY = "___access_token___";
 
-    private String name = "MongoDB user store";
+    private final static String NAME = "MongoDB user store";
 
     /**
      * If a valid default tenant name was passed to the constructor, this field will contain a valid
@@ -72,7 +72,7 @@ public class UserStoreImpl implements UserStore {
      * the original role will obtain a corresponding {@link Role} with this default tenant as the
      * {@link Role#getQualifiedForTenant() tenant qualifier}.
      */
-    private UserGroup defaultTenant;
+    private UserGroup serverGroup;
 
     private final ConcurrentHashMap<UUID, UserGroup> userGroups;
     private final ConcurrentHashMap<String, UserGroup> userGroupsByName;
@@ -137,16 +137,16 @@ public class UserStoreImpl implements UserStore {
      */
     private final transient DomainObjectFactory domainObjectFactory;
 
-    private final String defaultTenantName;
+    private final String serverGroupName;
 
-    public UserStoreImpl(String defaultTenantName) throws UserGroupManagementException, UserManagementException {
+    public UserStoreImpl(String defaultServerGroupName) throws UserGroupManagementException, UserManagementException {
         this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
-                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), defaultTenantName);
+                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), defaultServerGroupName);
     }
 
     public UserStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory,
-            String defaultTenantName) throws UserGroupManagementException, UserManagementException {
-        this.defaultTenantName = defaultTenantName;
+            String defaultServerGroupName) throws UserGroupManagementException, UserManagementException {
+        this.serverGroupName = defaultServerGroupName;
         this.domainObjectFactory = domainObjectFactory;
         roleDefinitions = new ConcurrentHashMap<>();
         userGroups = new ConcurrentHashMap<>();
@@ -191,14 +191,10 @@ public class UserStoreImpl implements UserStore {
         }
     }
 
-    /**
-     * Do only call for testcases, to ensure the Server is correctly setup, without loading all users
-     * 
-     * @throws UserGroupManagementException
-     */
     @Override
-    public void ensureDefaultTenantExists() throws UserGroupManagementException {
-        defaultTenant = getOrCreateDefaultTenant(defaultTenantName);
+    public UserGroup ensureServerGroupExists() throws UserGroupManagementException {
+        serverGroup = getOrCreateServerGroup(serverGroupName);
+        return serverGroup;
     }
 
     /**
@@ -212,7 +208,7 @@ public class UserStoreImpl implements UserStore {
             userGroupsByName.put(group.getName(), group);
         }
         // do this here, in case the default tenant was just loaded before
-        ensureDefaultTenantExists();
+        ensureServerGroupExists();
         for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, this::convertToNewRoleModel, this.userGroups, this)) {
             users.put(u.getName(), u);
             addToUsersByEmail(u);
@@ -254,12 +250,12 @@ public class UserStoreImpl implements UserStore {
                     // Special of the global admin's admin role to ensure that one initial user has global admin permissions
                     groupQualifierForMigratedRole = null;
                 } else {
-                    if (defaultTenant == null) {
+                    if (serverGroup == null) {
                         throw new IllegalStateException(
-                                "For role migration a valid default tenant is required. Set system property "
-                                        + UserStore.DEFAULT_TENANT_NAME_PROPERTY_NAME + " or provide a server name");
+                                "For role migration a valid server group name is required. Set system property "
+                                        + UserStore.DEFAULT_SERVER_GROUP_NAME_PROPERTY_NAME + " or provide a server name");
                     }
-                    groupQualifierForMigratedRole = defaultTenant;
+                    groupQualifierForMigratedRole = serverGroup;
                 }
                 result = new Role(roleDefinition, groupQualifierForMigratedRole, /* user qualification */ null);
                 break;
@@ -297,17 +293,27 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public UserGroup getDefaultTenant() {
-        return defaultTenant;
+    public String getServerGroupName() {
+        return serverGroupName;
     }
 
-    private UserGroup getOrCreateDefaultTenant(String defaultTenantName) throws UserGroupManagementException {
+    @Override
+    public UserGroup getServerGroup() {
+        return serverGroup;
+    }
+
+    @Override
+    public void setServerGroup(UserGroup newServerGroup) {
+        this.serverGroup = newServerGroup;
+    }
+
+    private UserGroup getOrCreateServerGroup(String defaultServerGroupName) throws UserGroupManagementException {
         final UserGroup result;
-        if (defaultTenantName != null) {
-            final UserGroup existingTenant = getUserGroupByName(defaultTenantName);
+        if (defaultServerGroupName != null) {
+            final UserGroup existingTenant = getUserGroupByName(defaultServerGroupName);
             if (existingTenant == null) {
-                logger.info("Couldn't find default tenant " + defaultTenantName + "; creating it");
-                result = createUserGroup(UUID.randomUUID(), defaultTenantName);
+                logger.info("Couldn't find default tenant " + defaultServerGroupName + "; creating it");
+                result = createUserGroup(UUID.randomUUID(), defaultServerGroupName);
             } else {
                 result = existingTenant;
             }
@@ -559,7 +565,7 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public String getName() {
-        return name;
+        return NAME;
     }
 
     @Override

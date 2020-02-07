@@ -12,16 +12,22 @@ import com.sap.sse.security.shared.dto.NamedDTO;
 public abstract class ControlPointDTO extends NamedDTO {
     private static final long serialVersionUID = 2321067329143412902L;
     private String idAsString;
+    private String shortName;
     
     public ControlPointDTO() {}
     
-    public ControlPointDTO(String idAsString, String name) {
+    public ControlPointDTO(String idAsString, String name, String shortName) {
         super(name);
         this.idAsString = idAsString;
+        this.shortName = shortName;
     }
     
     public String getIdAsString() {
         return idAsString;
+    }
+
+    public String getShortName() {
+        return shortName;
     }
 
     @Override

@@ -14,7 +14,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.StreamSupport;
 
 import com.sap.sse.common.util.MappingIterable;
 import com.sap.sse.common.util.MappingIterator;
@@ -355,6 +357,10 @@ public class Util {
                 return mapper.map(s);
             }
         });
+    }
+    
+    public static <T> Iterable<T> filter(final Iterable<T> iterable, final Predicate<T> predicate) {
+        return StreamSupport.stream(iterable.spliterator(), /* parallel */ false).filter(predicate)::iterator;
     }
     
     /**
