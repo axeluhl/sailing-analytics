@@ -42,7 +42,7 @@ public abstract class AbstractSailingServerResource {
         return resourceContext;
     }
     
-    protected <T> T getService(Class<T> clazz) {
+    public <T> T getService(Class<T> clazz) {
         final ServiceTracker<T, T> tracker = getServiceTracker(clazz);
         T service = tracker.getService();
         tracker.close();
