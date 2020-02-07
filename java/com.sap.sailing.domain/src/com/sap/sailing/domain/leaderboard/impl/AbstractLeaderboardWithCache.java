@@ -47,6 +47,8 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.RegattaScoreCorrections;
+import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsForRace;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.dto.BasicRaceDTO;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
@@ -64,6 +66,7 @@ import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.ScoreCorrectionMapping;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCache;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
@@ -1370,5 +1373,30 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             }
         }
         return false;
+    }
+
+    @Override
+    public ScoreCorrectionMapping mapRegattaScoreCorrections(RegattaScoreCorrections regattaScoreCorrections,
+            Map<String, RaceColumn> raceNumberOrNameToRaceColumnMap, Map<String, Competitor> sailIdToCompetitorMap,
+            boolean allowRaceDefaultsByOrder) {
+        final Map<String, RaceColumn> raceMappings = new HashMap<>(raceNumberOrNameToRaceColumnMap);
+        final Map<String, Competitor> competitorMappings = new HashMap<>(sailIdToCompetitorMap);
+        final Iterator<RaceColumn> raceColumnIterator = getRaceColumns().iterator();
+        for (final ScoreCorrectionsForRace raceCorrection : regattaScoreCorrections.getScoreCorrectionsForRaces()) {
+            final RaceColumn currentRaceColumn = raceColumnIterator.hasNext() ? raceColumnIterator.next() : null;
+            raceMappings.computeIfAbsent(raceCorrection.getRaceNameOrNumber(), raceNameOrNumber->
+                allowRaceDefaultsByOrder ? currentRaceColumn : null);
+            for (final String sailIdOrShortName : raceCorrection.getSailIDs()) {
+                competitorMappings.computeIfAbsent(sailIdOrShortName, sailIdsOrShortName->findBestMatchingCompetitorBySailNumberOrShortName(sailIdsOrShortName));
+            }
+        }
+        return new ScoreCorrectionMappingImpl(raceMappings, competitorMappings, regattaScoreCorrections);
+    }
+
+    private Competitor findBestMatchingCompetitorBySailNumberOrShortName(String sailIdsOrShortName) {
+        // TODO move MatchAndApplyScoreCorrectionsDialog.canonicalizeSailID and getCompetitorIdentifyingText to a common package both sides can see and use
+        // TODO then use it to match this leaderboard's competitors against the sailIdsOrShortName, passed through canonicalizeSailID
+        // TODO Implement AbstractLeaderboardWithCache.findBestMatchingCompetitorBySailNumberOrShortName(...)
+        return null;
     }
 }

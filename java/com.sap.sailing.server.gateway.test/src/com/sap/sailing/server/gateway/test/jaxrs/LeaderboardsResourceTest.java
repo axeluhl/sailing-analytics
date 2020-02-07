@@ -230,11 +230,17 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
     @Test
     public void testXrrScoreImport() throws Exception {
         dropAndCreateRegatta();
+        final TimePoint validityTimePoint = MillisecondsTimePoint.now();
+        final String comment = "A Comment";
         Response leaderboardResponse = leaderboardsResource.uploadResults(regatta.getName(),
                 /* scoreCorrectionProviderName */ "ISAF XML Regatta Result (XRR) Importer",
+                /* validity time point */ validityTimePoint.asMillis(),
+                /* comment */ comment,
                 getClass().getClassLoader().getResourceAsStream("YES_29er_XRR.xml"));
         assertNotNull(leaderboardResponse);
         JSONObject jsonObject = (JSONObject) JSONValue.parse((String) leaderboardResponse.getEntity());
         assertNotNull(jsonObject);
+        assertEquals(comment, regattaLeaderboard.getScoreCorrection().getComment());
+        assertEquals(validityTimePoint, regattaLeaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity());
     }
 }

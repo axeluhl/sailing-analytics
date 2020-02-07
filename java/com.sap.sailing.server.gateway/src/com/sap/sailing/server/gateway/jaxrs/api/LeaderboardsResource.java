@@ -133,6 +133,7 @@ import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboard;
+import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrectionMetadata;
 import com.sap.sailing.server.security.PermissionAwareRaceTrackingHandler;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Bearing;
@@ -146,6 +147,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
@@ -1625,6 +1627,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response uploadResults(@PathParam("name") String leaderboardName,
             @QueryParam("scoreCorrectionProvider") String scoreCorrectionProviderName,
+            @QueryParam("timePointOfLastCorrectionValidityMillis") Long timePointOfLastCorrectionValidityMillis,
+            @QueryParam("comment") String comment,
             InputStream inputStream) throws Exception {
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
@@ -1636,6 +1640,24 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             throw new NotFoundException("score correction provider with name " + scoreCorrectionProviderName + " not found");
         }
         final RegattaScoreCorrections scoreCorrection = scoreCorrectionProvider.get().getScoreCorrections(inputStream);
+        if (comment != null || timePointOfLastCorrectionValidityMillis != null) {
+            final String finalComment;
+            if (comment == null) {
+                finalComment = leaderboard.getScoreCorrection().getComment();
+            } else {
+                finalComment = comment;
+            }
+            final TimePoint timePointOfLastCorrectionValidity;
+            if (timePointOfLastCorrectionValidityMillis == null) {
+                timePointOfLastCorrectionValidity = leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity();
+            } else {
+                timePointOfLastCorrectionValidity = new MillisecondsTimePoint(timePointOfLastCorrectionValidityMillis);
+            }
+            logger.info("Applying score correction comment \""+finalComment+"\" and validity time point "+timePointOfLastCorrectionValidity+
+                    " to leaderboard "+leaderboardName+" on behalf of "+SessionUtils.getPrincipal());
+            getService().apply(
+                    new UpdateLeaderboardScoreCorrectionMetadata(leaderboardName, timePointOfLastCorrectionValidity, finalComment));
+        }
         return applyScoreCorrectionToLeaderboard(leaderboard, scoreCorrection);
     }
 
