@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -1620,15 +1619,6 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         return Response.ok().build();
     }
 
-    private Iterable<ScoreCorrectionProvider> getScoreCorrectionProviders() {
-        return Arrays.asList(getServices(ScoreCorrectionProvider.class));
-    }
-    
-    private Optional<ScoreCorrectionProvider> getScoreCorrectionProvider(final String scoreCorrectionProviderName) {
-        return StreamSupport.stream(getScoreCorrectionProviders().spliterator(), /* parallel */ false).
-                filter(scp->scp.getName().equals(scoreCorrectionProviderName)).findAny();
-    }
-    
     @PUT
     @Path("/{name}/results")
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)

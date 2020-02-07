@@ -2,6 +2,9 @@ package com.sap.sailing.server.gateway.jaxrs;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
@@ -13,6 +16,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
@@ -96,6 +100,15 @@ public abstract class AbstractSailingServerResource {
         @SuppressWarnings("unchecked")
         ServiceTracker<ReplicationService, ReplicationService> tracker = (ServiceTracker<ReplicationService, ReplicationService>) servletContext.getAttribute(RestServletContainer.REPLICATION_SERVICE_TRACKER_NAME);
         return tracker.getService(); 
+    }
+    
+    private Iterable<ScoreCorrectionProvider> getScoreCorrectionProviders() {
+        return Arrays.asList(getServices(ScoreCorrectionProvider.class));
+    }
+    
+    protected Optional<ScoreCorrectionProvider> getScoreCorrectionProvider(final String scoreCorrectionProviderName) {
+        return StreamSupport.stream(getScoreCorrectionProviders().spliterator(), /* parallel */ false).
+                filter(scp->scp.getName().equals(scoreCorrectionProviderName)).findAny();
     }
     
     protected Regatta findRegattaByName(String regattaName) {
