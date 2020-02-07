@@ -1,16 +1,19 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -77,6 +80,8 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RegattaScoreCorrections;
+import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -165,7 +170,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
      * or, respectively, after the finish line has been crossed.
      */
     private static final Duration TIME_OFFSET_FOR_HEAD_AND_TAIL_OF_TRACK_FOR_LINE_INFERENCE = Duration.ONE_MINUTE;
-
+    
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getLeaderboards() {
@@ -1561,7 +1566,6 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         if (fleet == null) {
             throw new NotFoundException("fleet with name " + fleetName + " not found");
         }
-
         boolean result = getRaceLogTrackingAdapter().denoteRaceForRaceLogTracking(getService(), leaderboard, raceColumn,
                 fleet, raceName);
         return (result ? Response.ok() : Response.notModified()).build();
@@ -1585,10 +1589,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         if (fleet == null) {
             throw new NotFoundException("fleet with name " + fleetName + " not found");
         }
-
         final AbstractLogEventAuthor raceLogEventAuthorForRaceColumn = new LogEventAuthorImpl(
                 AbstractRaceColumn.class.getName(), 0);
-
         TimePoint now = MillisecondsTimePoint.now();
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog == null) {
@@ -1618,4 +1620,45 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         return Response.ok().build();
     }
 
+    private Iterable<ScoreCorrectionProvider> getScoreCorrectionProviders() {
+        return Arrays.asList(getServices(ScoreCorrectionProvider.class));
+    }
+    
+    private Optional<ScoreCorrectionProvider> getScoreCorrectionProvider(final String scoreCorrectionProviderName) {
+        return StreamSupport.stream(getScoreCorrectionProviders().spliterator(), /* parallel */ false).
+                filter(scp->scp.getName().equals(scoreCorrectionProviderName)).findAny();
+    }
+    
+    @PUT
+    @Path("/{name}/results")
+    @Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response uploadResults(@PathParam("name") String leaderboardName,
+            @QueryParam("scoreCorrectionProvider") String scoreCorrectionProviderName,
+            InputStream inputStream) throws Exception {
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null) {
+            throw new NotFoundException("leaderboard with name " + leaderboardName + " not found");
+        }
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
+        final Optional<ScoreCorrectionProvider> scoreCorrectionProvider = getScoreCorrectionProvider(scoreCorrectionProviderName);
+        if (!scoreCorrectionProvider.isPresent()) {
+            throw new NotFoundException("score correction provider with name " + scoreCorrectionProviderName + " not found");
+        }
+        final RegattaScoreCorrections scoreCorrection = scoreCorrectionProvider.get().getScoreCorrections(inputStream);
+        return applyScoreCorrectionToLeaderboard(leaderboard, scoreCorrection);
+    }
+
+    /**
+     * Based on the matching specifications for race names/numbers and sail IDs/numbers, tries to apply the
+     * {@code scoreCorrection} to the {@code leaderboard}. If everything works well, a simple {@link Status#OK} will
+     * be returned with an empty JSON document. Otherwise, {@link Status#CONFLICT} will be the status of the response,
+     * and the JSON document returned will tell which sail IDs/numbers and which race names/numbers could not be resolved.
+     */
+    private Response applyScoreCorrectionToLeaderboard(Leaderboard leaderboard, RegattaScoreCorrections scoreCorrection) {
+        final JSONObject result = new JSONObject();
+        
+        // TODO Implement LeaderboardsResource.applyScoreCorrectionToLeaderboard(...)
+        return Response.ok(result.toJSONString()).build();
+    }
 }

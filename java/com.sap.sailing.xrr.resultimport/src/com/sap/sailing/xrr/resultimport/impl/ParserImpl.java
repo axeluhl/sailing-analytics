@@ -113,11 +113,15 @@ public class ParserImpl implements Parser {
                         if (eventO instanceof Division) {
                             final Division division = (Division) eventO;
                             final EventGender divisionGender = division.getGender();
-                            String divisionBoatClassAndGender = getBoatClassName(division);
+                            final String divisionBoatClass = getBoatClassName(division);
+                            final String divisionBoatClassAndGender;
                             if (divisionGender != null) {
-                                divisionBoatClassAndGender += ", " + divisionGender.name();  
+                                divisionBoatClassAndGender = divisionBoatClass + ", " + divisionGender.name();  
+                            } else {
+                                divisionBoatClassAndGender = divisionBoatClass;
                             }
                             if (!boatClassNameFilter.isPresent()
+                                    || boatClassNameFilter.get().equalsIgnoreCase(divisionBoatClass)
                                     || boatClassNameFilter.get().equalsIgnoreCase(divisionBoatClassAndGender)
                                     || boatClassNameFilter.get().contains(divisionBoatClassAndGender)) {
                                 return new XRRRegattaResultsAsScoreCorrections(event, division, scoreCorrectionProvider, this);

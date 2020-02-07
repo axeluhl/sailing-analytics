@@ -42,17 +42,30 @@ public abstract class AbstractSailingServerResource {
         return resourceContext;
     }
     
-    public <T> T getService(Class<T> clazz) {
-        BundleContext context = getBundleContext();
-        ServiceTracker<T, T> tracker = new ServiceTracker<T, T>(context, clazz, null);
-        tracker.open();
+    protected <T> T getService(Class<T> clazz) {
+        final ServiceTracker<T, T> tracker = getServiceTracker(clazz);
         T service = tracker.getService();
         tracker.close();
         return service;
     }
+    
+    protected <T> T[] getServices(Class<T> clazz) {
+        final ServiceTracker<T, T> tracker = getServiceTracker(clazz);
+        @SuppressWarnings("unchecked")
+        T[] services = (T[]) tracker.getServices();
+        tracker.close();
+        return services;
+    }
+
+    protected <T> ServiceTracker<T, T> getServiceTracker(Class<T> clazz) {
+        final BundleContext context = getBundleContext();
+        final ServiceTracker<T, T> tracker = new ServiceTracker<T, T>(context, clazz, null);
+        tracker.open();
+        return tracker;
+    }
 
     protected BundleContext getBundleContext() {
-        BundleContext context = (BundleContext) servletContext
+        final BundleContext context = (BundleContext) servletContext
                 .getAttribute(RestServletContainer.OSGI_RFC66_WEBBUNDLE_BUNDLECONTEXT_NAME);
         return context;
     }
