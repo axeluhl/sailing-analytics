@@ -2,6 +2,8 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -171,18 +173,19 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint implements Pr
         RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = raceBoardPanel.getSettings()
                 .getPerspectiveOwnSettings();
         if (perspectiveOwnSettings != null) {
-            String competitorId = perspectiveOwnSettings.getSelectedCompetitor();
-            if (competitorId != null && !"".equals(competitorId)) {
-                for (CompetitorDTO comp : raceBoardPanel.getCompetitorSelectionProvider().getAllCompetitors()) {
-                    if (competitorId.equals(comp.getIdAsString())) {
-                        raceBoardPanel.getCompetitorSelectionProvider().setSelected(comp, true,
-                                new CompetitorSelectionChangeListener[0]);
-                    } else {
-                        raceBoardPanel.getCompetitorSelectionProvider().setSelected(comp, false,
-                                new CompetitorSelectionChangeListener[0]);
+            final Iterable<String> competitorIds = perspectiveOwnSettings.getSelectedCompetitors();
+            final Iterable<CompetitorDTO> allCompetitors = raceBoardPanel.getCompetitorSelectionProvider().getAllCompetitors();
+            final Set<CompetitorDTO> selectedCompetitors = new HashSet<CompetitorDTO>();
+            for(String competitorId: competitorIds) {
+                if (competitorId != null && !"".equals(competitorId)) {
+                    for (CompetitorDTO comp : allCompetitors) {
+                        if (competitorId.equals(comp.getIdAsString())) {
+                            selectedCompetitors.add(comp);
+                        }
                     }
                 }
             }
+            raceBoardPanel.getCompetitorSelectionProvider().setSelection(selectedCompetitors, new CompetitorSelectionChangeListener[0]);
         }
     }
 

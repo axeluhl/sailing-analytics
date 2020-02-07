@@ -825,14 +825,14 @@ public class RaceBoardPanel
     protected RaceBoardPerspectiveOwnSettings getPerspectiveSettings() {
         RaceBoardPerspectiveOwnSettings initialSettings = super.getPerspectiveSettings();
         return new RaceBoardPerspectiveOwnSettings(
-                initialSettings.getActiveCompetitorsFilterSetName(),
+                initialSettings.getActiveCompetitorsFilterSetName(), // get from search field
                 this.leaderboardPanel.isVisible(),
                 this.windChart.isVisible(),
                 this.competitorChart.isVisible(),
-                initialSettings.isCanReplayDuringLiveRaces(),
-                initialSettings.getInitialDurationAfterRaceStartInReplay(),
-                initialSettings.getSelectedCompetitor(),
-                initialSettings.getJumpToTag()
+                initialSettings.isCanReplayDuringLiveRaces(), // taken as seen
+                initialSettings.getInitialDurationAfterRaceStartInReplay(), // get from timer
+                initialSettings.getSelectedCompetitors(), // convert to set
+                initialSettings.getJumpToTag() // ? null
                 );
     }
     

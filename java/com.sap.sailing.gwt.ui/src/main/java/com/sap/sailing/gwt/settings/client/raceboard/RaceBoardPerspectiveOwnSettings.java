@@ -1,11 +1,16 @@
 package com.sap.sailing.gwt.settings.client.raceboard;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.settings.client.settingtypes.DurationSetting;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
+import com.sap.sse.common.settings.generic.StringSetSetting;
 import com.sap.sse.common.settings.generic.StringSetting;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
@@ -24,7 +29,7 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     private transient StringSetting activeCompetitorsFilterSetName;
     private transient BooleanSetting canReplayDuringLiveRaces;
     private transient DurationSetting initialDurationAfterRaceStartInReplay;
-    private transient StringSetting selectedCompetitor;
+    private transient StringSetSetting selectedCompetitors;
     private transient StringSetting jumpToTag;
     
     public static final String PARAM_VIEW_MODE = "viewMode";
@@ -61,20 +66,20 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
         this.activeCompetitorsFilterSetName = new StringSetting("activeCompetitorsFilterSetName", this, null);
         this.canReplayDuringLiveRaces = new BooleanSetting("canReplayDuringLiveRaces", this, false);
         this.initialDurationAfterRaceStartInReplay = new DurationSetting(PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS, this, null);
-        this.selectedCompetitor = new StringSetting(PARAM_SELECTED_COMPETITOR, this, null);
+        this.selectedCompetitors = new StringSetSetting(PARAM_SELECTED_COMPETITOR, this, null);
         this.jumpToTag = new StringSetting(PARAM_JUMP_TO_TAG, this, null);
     }
 
     public RaceBoardPerspectiveOwnSettings(String activeCompetitorsFilterSetName, Boolean showLeaderboard,
             Boolean showWindChart, Boolean showCompetitorsChart, Boolean canReplayDuringLiveRaces,
-            Duration initialDurationAfterRaceStartInReplay, String selectedCompetitor, String jumpToTag) {
+            Duration initialDurationAfterRaceStartInReplay, Iterable<String> selectedCompetitors, String jumpToTag) {
         this.activeCompetitorsFilterSetName.setValue(activeCompetitorsFilterSetName);
         this.showLeaderboard.setValue(showLeaderboard);
         this.showWindChart.setValue(showWindChart);
         this.showCompetitorsChart.setValue(showCompetitorsChart);
         this.canReplayDuringLiveRaces.setValue(canReplayDuringLiveRaces);
         this.initialDurationAfterRaceStartInReplay.setValue(initialDurationAfterRaceStartInReplay);
-        this.selectedCompetitor.setValue(selectedCompetitor);
+        this.selectedCompetitors.setValues(selectedCompetitors);
     }
 
     public boolean isShowLeaderboard() {
@@ -111,12 +116,11 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
         final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(PARAM_CAN_REPLAY_DURING_LIVE_RACES, defaultForCanReplayDuringLiveRaces /* default */);
         final Duration initialDurationAfterRaceStartInReplay = parseDuration(GwtHttpRequestUtils.getStringParameter(
                 PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS, null /* default */));
-        final String selectedCompetitor = GwtHttpRequestUtils.getStringParameter(PARAM_SELECTED_COMPETITOR,
-                null /* default */);
+        final Set<String> selectedCompetitors = new HashSet<>(Arrays.asList(GwtHttpRequestUtils.getStringParameters(PARAM_SELECTED_COMPETITOR)));
         final String jumpToTag = GwtHttpRequestUtils.getStringParameter(PARAM_JUMP_TO_TAG, defaultForJumpToTag /* default */);
         return new RaceBoardPerspectiveOwnSettings(activeCompetitorsFilterSetName, showLeaderboard, showWindChart,
                 showCompetitorsChart, canReplayWhileLiveIsPossible, initialDurationAfterRaceStartInReplay,
-                selectedCompetitor, jumpToTag);
+                selectedCompetitors, jumpToTag);
     }
 
     public Duration getInitialDurationAfterRaceStartInReplay() {
@@ -141,7 +145,7 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
         return result;
     }
 
-    public String getSelectedCompetitor() {
-        return selectedCompetitor.getValue();
+    public Iterable<String> getSelectedCompetitors() {
+        return selectedCompetitors.getValues();
     }
 }
