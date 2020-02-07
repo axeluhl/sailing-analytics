@@ -99,6 +99,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
 import com.sap.sailing.gwt.ui.shared.databylogo.DataByLogo;
 import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.FilterSet;
@@ -248,7 +249,8 @@ public class RaceBoardPanel
             
             @Override
             public void onClick(ClickEvent event) {
-                GWT.log(new LinkWithSettingsGenerator<>("/gwt/RaceBoard.html", raceboardContextDefinition).createUrl(getSettings()));
+                ShareLinkDialog shareLinkDialog = new ShareLinkDialog("/gwt/RaceBoard.html", raceboardContextDefinition, getSettings(), getPerspectiveSettings(), stringMessages);
+                shareLinkDialog.show();
             }
         });
         this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), mainCss.usermanagement_loggedin(), mainCss.usermanagement_open());
@@ -819,6 +821,21 @@ public class RaceBoardPanel
         return new RaceBoardPerspectiveSettingsDialogComponent(getPerspectiveSettings(), stringMessages);
     }
 
+    @Override
+    protected RaceBoardPerspectiveOwnSettings getPerspectiveSettings() {
+        RaceBoardPerspectiveOwnSettings initialSettings = super.getPerspectiveSettings();
+        return new RaceBoardPerspectiveOwnSettings(
+                initialSettings.getActiveCompetitorsFilterSetName(),
+                this.leaderboardPanel.isVisible(),
+                this.windChart.isVisible(),
+                this.competitorChart.isVisible(),
+                initialSettings.isCanReplayDuringLiveRaces(),
+                initialSettings.getInitialDurationAfterRaceStartInReplay(),
+                initialSettings.getSelectedCompetitor(),
+                initialSettings.getJumpToTag()
+                );
+    }
+    
     @Override
     public boolean hasPerspectiveOwnSettings() {
         return true;
