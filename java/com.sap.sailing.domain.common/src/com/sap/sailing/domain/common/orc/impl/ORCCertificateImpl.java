@@ -36,7 +36,16 @@ public class ORCCertificateImpl implements ORCCertificate {
     private final Double cdl;
     private final TimePoint issueDate;
 
-    // TODO add meaningful Javadoc
+    /**
+     * The "core" of the certificate for performance curve scoring; the values in the map tell how fast the boat
+     * described by this certificate is expected to sail for the true wind speed (TWS) provided by the key, and the true
+     * wind angle (TWA) provided by the value map's key. This is the reciprocal of the duration it takes the boat to
+     * sail a certain distance.
+     * <p>
+     * 
+     * The keys are the speeds as provided by {@link #allowancesTrueWindSpeeds}; the keys of the value maps are the
+     * angles as provided by {@link #allowancesTrueWindAngles}.
+     */
     private final Map<Speed, Map<Bearing, Speed>> velocityPredictionPerTrueWindSpeedAndAngle;
 
     /**
@@ -91,8 +100,17 @@ public class ORCCertificateImpl implements ORCCertificate {
     
     /**
      * Can be used to specify non-default TWS/TWA values for the time allowances / speed predictions.
+     * 
+     * @param allowancesTrueWindSpeeds
+     *            a monotonously-increasing sequence of true wind speed (TWS) values for the matrix of time allowances /
+     *            velocity predictions for this certificate. See also
+     *            {@link ORCCertificate#ALLOWANCES_TRUE_WIND_SPEEDS}.
+     * @param allowancesTrueWindAngles
+     *            a monotonously-increasing sequence of true wind angle (TWA) values for the matrix of time allowances /
+     *            velocity predictions for this certificate. See also
+     *            {@link ORCCertificate#ALLOWANCES_TRUE_WIND_ANGLES}.
      */
-    public ORCCertificateImpl(Speed[] dynamicTrueWindSpeed, Bearing[] dynamicTrueWindAngle,
+    public ORCCertificateImpl(Speed[] allowancesTrueWindSpeeds, Bearing[] allowancesTrueWindAngles,
             String idConsistingOfNatAuthCertNoAndBIN, String sailnumber, String boatName, String boatClassName,
             Distance length, Duration gph, Double cdl, TimePoint issueDate,
             Map<Speed, Map<Bearing, Speed>> velocityPredictionsPerTrueWindSpeedAndAngle, Map<Speed, Bearing> beatAngles,
@@ -103,8 +121,8 @@ public class ORCCertificateImpl implements ORCCertificate {
             Map<Speed, Speed> longDistanceSpeedPredictionsPerTrueWindSpeed,
             Map<Speed, Speed> circularRandomSpeedPredictionsPerTrueWindSpeed,
             Map<Speed, Speed> nonSpinnakerSpeedPredictionsPerTrueWindSpeed) {
-        this.allowancesTrueWindAngles = dynamicTrueWindAngle;
-        this.allowancesTrueWindSpeeds = dynamicTrueWindSpeed;
+        this.allowancesTrueWindAngles = allowancesTrueWindAngles;
+        this.allowancesTrueWindSpeeds = allowancesTrueWindSpeeds;
         this.idConsistingOfNatAuthCertNoAndBIN = idConsistingOfNatAuthCertNoAndBIN;
         this.sailNumber = sailnumber;
         this.boatName = boatName;
