@@ -68,7 +68,7 @@ public abstract class LeaderboardGroupBaseImpl implements LeaderboardGroupBase {
     }
 
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
@@ -80,7 +80,7 @@ public abstract class LeaderboardGroupBaseImpl implements LeaderboardGroupBase {
     }
 
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredDomainType.LEADERBOARD_GROUP;
     }
 

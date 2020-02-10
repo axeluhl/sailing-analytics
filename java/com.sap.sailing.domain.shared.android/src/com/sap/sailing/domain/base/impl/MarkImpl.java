@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base.impl;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.UUID;
 
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
@@ -10,13 +11,17 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.NamedImpl;
 
 public class MarkImpl extends NamedImpl implements Mark {
-    private static final long serialVersionUID = 1900673146064411979L;
+
+    private static final long serialVersionUID = -4817053057647606900L;
 
     private final Color color;
     private final String shape;
     private final String pattern;
     private final MarkType type;
+    private final String shortName;
     private final Serializable id;
+    private final UUID originatingMarkTemplateId;
+    private final UUID originatingMarkPropertiesId;
 
     public MarkImpl(String name) {
         this(name, name);
@@ -27,12 +32,27 @@ public class MarkImpl extends NamedImpl implements Mark {
     }
 
     public MarkImpl(Serializable id, String name, MarkType type, Color color, String shape, String pattern) {
+        this(id, name, /* use name as short name, too, by default */ name, type, color, shape, pattern,
+                /* originatingMarkTemplateId */ null, /* originatingMarkPropertiesId */ null);
+    }
+
+    public MarkImpl(Serializable id, String name, MarkType type, Color color, String shape, String pattern,
+            UUID originatingMarkTemplateId, UUID originatingMarkPropertiesId) {
+        this(id, name, /* use name as short name, too, by default */ name, type, color, shape, pattern,
+                originatingMarkTemplateId, originatingMarkPropertiesId);
+    }
+
+    public MarkImpl(Serializable id, String name, String shortName, MarkType type, Color color, String shape,
+            String pattern, UUID originatingMarkTemplateId, UUID originatingMarkPropertiesId) {
         super(name);
+        this.shortName = shortName;
         this.id = id;
         this.type = type;
         this.color = color;
         this.shape = shape;
         this.pattern = pattern;
+        this.originatingMarkTemplateId = originatingMarkTemplateId;
+        this.originatingMarkPropertiesId = originatingMarkPropertiesId;
     }
 
     @Override
@@ -49,7 +69,7 @@ public class MarkImpl extends NamedImpl implements Mark {
 
     @Override
     public Mark resolve(SharedDomainFactory<?> domainFactory) {
-        Mark result = domainFactory.getOrCreateMark(getId(), getName(), type, color, shape, pattern);
+        Mark result = domainFactory.getOrCreateMark(getId(), getName(), shortName, type, color, shape, pattern);
         return result;
     }
 
@@ -71,6 +91,21 @@ public class MarkImpl extends NamedImpl implements Mark {
     @Override
     public MarkType getType() {
         return type;
+    }
+
+    @Override
+    public String getShortName() {
+        return shortName;
+    }
+
+    @Override
+    public UUID getOriginatingMarkTemplateIdOrNull() {
+        return originatingMarkTemplateId;
+    }
+
+    @Override
+    public UUID getOriginatingMarkPropertiesIdOrNull() {
+        return originatingMarkPropertiesId;
     }
 
     public String toString() {

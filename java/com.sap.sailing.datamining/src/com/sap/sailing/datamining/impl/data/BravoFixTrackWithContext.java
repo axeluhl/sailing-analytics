@@ -32,31 +32,37 @@ public class BravoFixTrackWithContext implements HasBravoFixTrackContext {
 
     @Override
     public Duration getTimeSpentFoiling() {
-        final TimePoint endOfRace = getRaceOfCompetitorContext().getTrackedRaceContext().getTrackedRace().getEndOfRace();
-        final TimePoint startOfRace = getRaceOfCompetitorContext().getTrackedRaceContext().getTrackedRace().getStartOfRace();
-        final TimePoint end;
-        if (endOfRace == null) {
-            final TimePoint endOfTracking = getRaceOfCompetitorContext().getTrackedRaceContext().getTrackedRace().getEndOfTracking();
-            end = endOfTracking == null ? MillisecondsTimePoint.now() : endOfTracking;
-        } else {
-            end = endOfRace;
+        if(getRaceOfCompetitorContext().getTrackedRaceContext().getTrackedRace() != null) {
+            final TimePoint endOfRace = getRaceOfCompetitorContext().getTrackedRaceContext().getTrackedRace().getEndOfRace();
+            final TimePoint startOfRace = getRaceOfCompetitorContext().getTrackedRaceContext().getTrackedRace().getStartOfRace();
+            final TimePoint end;
+            if (endOfRace == null) {
+                final TimePoint endOfTracking = getRaceOfCompetitorContext().getTrackedRaceContext().getTrackedRace().getEndOfTracking();
+                end = endOfTracking == null ? MillisecondsTimePoint.now() : endOfTracking;
+            } else {
+                end = endOfRace;
+            }
+            return bravoFixTrack.getTimeSpentFoiling(startOfRace, end);
         }
-        return bravoFixTrack.getTimeSpentFoiling(startOfRace, end);
+        return null;
     }
 
     @Override
     public Distance getDistanceSpentFoiling() {
-        final TimePoint endOfRace = getRaceOfCompetitorContext().getTrackedRaceContext().getTrackedRace().getEndOfRace();
-        final TimePoint startOfRace = getRaceOfCompetitorContext().getTrackedRaceContext().getTrackedRace().getStartOfRace();
-        final TimePoint end;
-        if (endOfRace == null) {
-            final TimePoint endOfTracking = getRaceOfCompetitorContext().getTrackedRaceContext().getTrackedRace().getEndOfTracking();
-            end = endOfTracking == null ? MillisecondsTimePoint.now() : endOfTracking;
-        } else {
-            end = endOfRace;
+        if(getRaceOfCompetitorContext().getTrackedRaceContext().getTrackedRace() != null) {
+            final TimePoint endOfRace = getRaceOfCompetitorContext().getTrackedRaceContext().getTrackedRace().getEndOfRace();
+            final TimePoint startOfRace = getRaceOfCompetitorContext().getTrackedRaceContext().getTrackedRace().getStartOfRace();
+            final TimePoint end;
+            if (endOfRace == null) {
+                final TimePoint endOfTracking = getRaceOfCompetitorContext().getTrackedRaceContext().getTrackedRace().getEndOfTracking();
+                end = endOfTracking == null ? MillisecondsTimePoint.now() : endOfTracking;
+            } else {
+                end = endOfRace;
+            }
+            return bravoFixTrack.getDistanceSpentFoiling(
+                    startOfRace,
+                    end);
         }
-        return bravoFixTrack.getDistanceSpentFoiling(
-                startOfRace,
-                end);
+        return null;
     }
 }

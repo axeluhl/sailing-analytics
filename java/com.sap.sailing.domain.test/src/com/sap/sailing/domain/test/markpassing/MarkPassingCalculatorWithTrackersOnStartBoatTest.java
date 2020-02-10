@@ -61,8 +61,10 @@ public class MarkPassingCalculatorWithTrackersOnStartBoatTest extends AbstractEx
     @Override
     protected Course createCourse(Map<String, Mark> marksByName) {
         final Map<String, ControlPoint> controlPoints = new HashMap<>(marksByName);
-        controlPoints.put("Start/Ziel", new ControlPointWithTwoMarksImpl(marksByName.get("G2"), marksByName.get("MEU"), "Start/Ziel"));
-        controlPoints.put("Gate", new ControlPointWithTwoMarksImpl(marksByName.get("G1"), marksByName.get("G2"), "Gate"));
+        controlPoints.put("Start/Ziel", new ControlPointWithTwoMarksImpl(marksByName.get("G2"), marksByName.get("MEU"),
+                "Start/Ziel", "Start/Ziel"));
+        controlPoints.put("Gate",
+                new ControlPointWithTwoMarksImpl(marksByName.get("G1"), marksByName.get("G2"), "Gate", "Gate"));
         return createCourse(controlPoints,
                 wp(controlPoints, "Start/Ziel", PassingInstruction.Line),
                 wp(controlPoints, "LUV", PassingInstruction.Port),

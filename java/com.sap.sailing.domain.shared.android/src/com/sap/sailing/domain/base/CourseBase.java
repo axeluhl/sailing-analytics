@@ -1,7 +1,10 @@
 package com.sap.sailing.domain.base;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
+import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sse.common.Named;
 
 /**
@@ -47,8 +50,23 @@ public interface CourseBase extends Named {
     void removeWaypoint(int zeroBasedPosition);
 
     Leg getFirstLeg();
+
+    /**
+     * @return the id of the course template that was used to create this course. This reference can remain in place
+     *         even if the actual course is being manipulated in ways incompatible with the original course template.
+     */
+    UUID getOriginatingCourseTemplateIdOrNull();
+
+    /**
+     * @return an unmodifiable map with the IDs of the associated roles required for checking course template validity
+     *         and when creating a new course template from this course. See also {@link MarkRole}.
+     */
+    Map<Mark, UUID> getAssociatedRoles();
+
+    void addRoleMapping(Mark mark, UUID role);
+
     default String internalToString() {
-        StringBuilder result = new StringBuilder(getName());
+        StringBuilder result = new StringBuilder(getName()==null?"":getName());
         result.append(": ");
         boolean first = true;
         for (Waypoint waypoint : getWaypoints()) {

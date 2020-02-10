@@ -186,7 +186,7 @@ public class UDPExpeditionReceiverTest {
         }
 
         @Override
-        public <FixT extends Timed> Map<DeviceIdentifier, FixT> getLastFix(Iterable<DeviceIdentifier> forDevices)
+        public <FixT extends Timed> Map<DeviceIdentifier, FixT> getFixLastReceived(Iterable<DeviceIdentifier> forDevices)
                 throws TransformationException, NoCorrespondingServiceRegisteredException {
             final Map<DeviceIdentifier, FixT> result = new HashMap<>();
             for (final Entry<DeviceIdentifier, List<Timed>> fixes : fixesReceived.entrySet()) {
@@ -348,10 +348,10 @@ public class UDPExpeditionReceiverTest {
         final ExpeditionGpsDeviceIdentifier gpsDevice = deviceRegistry.getGpsDeviceIdentifier(0);
         final ExpeditionSensorDeviceIdentifier sensorDevice = deviceRegistry.getSensorDeviceIdentifier(0);
         assertTrue(sensorFixStore.getNumberOfFixes(gpsDevice) > 0);
-        assertEquals(-33.907350, ((GPSFixMoving) sensorFixStore.getLastFix(Collections.singleton(gpsDevice)).get(gpsDevice)).getPosition().getLatDeg(), 0.0001);
-        assertEquals(18.419951, ((GPSFixMoving) sensorFixStore.getLastFix(Collections.singleton(gpsDevice)).get(gpsDevice)).getPosition().getLngDeg(), 0.0001);
+        assertEquals(-33.907350, ((GPSFixMoving) sensorFixStore.getFixLastReceived(Collections.singleton(gpsDevice)).get(gpsDevice)).getPosition().getLatDeg(), 0.0001);
+        assertEquals(18.419951, ((GPSFixMoving) sensorFixStore.getFixLastReceived(Collections.singleton(gpsDevice)).get(gpsDevice)).getPosition().getLngDeg(), 0.0001);
         assertTrue(sensorFixStore.getNumberOfFixes(sensorDevice) > 0);
-        final BravoExtendedFix sensorFix = new BravoExtendedFixImpl((DoubleVectorFix) sensorFixStore.getLastFix(Collections.singleton(sensorDevice)).get(sensorDevice));
+        final BravoExtendedFix sensorFix = new BravoExtendedFixImpl((DoubleVectorFix) sensorFixStore.getFixLastReceived(Collections.singleton(sensorDevice)).get(sensorDevice));
         assertEquals(1.872, sensorFix.getRake().getDegrees(), 0.000001);
         assertEquals(18.4, sensorFix.getRudder().getDegrees(), 0.05);
     }

@@ -19,7 +19,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse,
  com.sap.sailing.server.gateway.serialization.shared.android,
  com.sap.sse.mail,
- org.mongodb.mongo-java-driver;bundle-version="3.6.4"
+ org.mongodb.mongo-java-driver;bundle-version="3.6.4",
+ com.sap.sailing.shared.persistence;bundle-version="1.0.0"
 Import-Package: com.google.zxing;version="3.1.0",
  com.mongodb,
  com.sap.sse.concurrent,

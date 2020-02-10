@@ -1,0 +1,8 @@
+{"_id":{"$oid":"5e3188c99d7cdfdd30a7df87"},"ID":{"$binary":"MUPBQP6M8g8cEznxHNoCuQ==","$type":"03"},"NAME":"unknown server name-server","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[{"ROLE_DEFINITION_MAP_ROLE_ID":{"$binary":"y0V7Ud9IKcQV4Rif59Gpnw==","$type":"03"},"ROLE_DEFINITION_MAP_FOR_ALL":true}]}
+{"_id":{"$oid":"5e3188c99d7cdfdd30a7df98"},"ID":{"$binary":"DkP3SVUQ9FP8XQQgBImwmg==","$type":"03"},"NAME":"admin-tenant","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5e3189889d7cdfdd30a7e220"},"ID":{"$binary":"XUQUUWQeMuwRKjwdqMWcsw==","$type":"03"},"NAME":"GroupToBeDropped","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5e31899c9d7cdfdd30a7e23e"},"ID":{"$binary":"wUgaK5FOq4Wo1qQwq7NEog==","$type":"03"},"NAME":"UserToBeDropped-tenant","USERNAMES":["UserToBeDropped"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5e318a1b9d7cdfdd30a7e29f"},"ID":{"$binary":"QkafS0cALHVVSLbsg+W7hA==","$type":"03"},"NAME":"OwnedByDroppedGroupButKeptUser","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5e318a1f9d7cdfdd30a7e2b0"},"ID":{"$binary":"+EnuBaaILAWdId1GNeCFkg==","$type":"03"},"NAME":"OwnedByDroppedGroupAndDroppedUser","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5e318a229d7cdfdd30a7e2bf"},"ID":{"$binary":"LU3b5caj0G1xfMba5NuikA==","$type":"03"},"NAME":"OwnedByKeptGroupAndKeptUser","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5e318a8b9d7cdfdd30a7e312"},"ID":{"$binary":"WkwLBiwNwjci2xUQRdKXrQ==","$type":"03"},"NAME":"OwnedByKeptGroupAndDroppedUser","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[]}

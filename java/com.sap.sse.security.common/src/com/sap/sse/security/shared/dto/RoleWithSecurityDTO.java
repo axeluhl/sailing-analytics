@@ -47,7 +47,7 @@ public class RoleWithSecurityDTO extends RoleDTO implements SecuredDTO {
     }
 
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredSecurityTypes.ROLE_ASSOCIATION;
     }
 

@@ -424,7 +424,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     
     /**
      * @return a thread-safe copy of the events (or the exception that occurred trying to obtain the events; arranged in
-     *         a {@link Util.Pair}) of from all sailing server instances currently known by the service; it's safe for
+     *         a {@link Util.Pair}) of all (remote) sailing server instances currently known by the service; it's safe for
      *         callers to iterate over the iterable returned, and no risk of a {@link ConcurrentModificationException}
      *         exists
      */
@@ -899,4 +899,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
         }
         return result;
     }
+    
+    CourseAndMarkConfigurationFactory getCourseAndMarkConfigurationFactory();
 }

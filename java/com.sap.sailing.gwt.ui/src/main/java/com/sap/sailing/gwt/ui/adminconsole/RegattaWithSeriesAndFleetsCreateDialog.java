@@ -49,7 +49,6 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
                         break;
                     }
                 }
-    
                 Date startDate = regattaToValidate.startDate;
                 Date endDate = regattaToValidate.endDate;
                 String datesErrorMessage = null;
@@ -66,8 +65,6 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
                     errorMessage = datesErrorMessage;
                 } else if (!nameNotEmpty) {
                     errorMessage = stringMessages.pleaseEnterAName();
-                } else if (regattaToValidate.getName().contains("/")) {
-                    errorMessage = stringMessages.regattaNameMustNotContainSlashes();
                 } else if (!boatClassNotEmpty) {
                     errorMessage = stringMessages.pleaseEnterABoatClass();
                 } else if (!unique) {

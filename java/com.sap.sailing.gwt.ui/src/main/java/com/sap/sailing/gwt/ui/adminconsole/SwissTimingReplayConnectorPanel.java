@@ -26,7 +26,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.adminconsole.swisstiming.EditSwissTimingArchivedConnectionDialog;
+import com.sap.sailing.gwt.ui.adminconsole.swisstiming.SwissTimingArchivedConnectionDialog;
 import com.sap.sailing.gwt.ui.adminconsole.swisstiming.SwissTimingArchivedConnectionTableWrapper;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -255,7 +255,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> connectionsTable.refreshConnectionList());
         // Create action
         buttonPanel.addCreateAction(stringMessages.addSwissTimingAchivedConnection(),
-                () -> new EditSwissTimingArchivedConnectionDialog(new SwissTimingArchiveConfigurationWithSecurityDTO(),
+                () -> new SwissTimingArchivedConnectionDialog(
                         new DialogCallback<SwissTimingArchiveConfigurationWithSecurityDTO>() {
                             @Override
                             public void ok(SwissTimingArchiveConfigurationWithSecurityDTO editedConnection) {

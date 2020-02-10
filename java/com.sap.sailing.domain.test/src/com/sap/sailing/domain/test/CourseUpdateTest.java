@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -109,12 +110,12 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
                 }
             }
         });
+        // now we expect that there is no 
+        assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace.getId()));
         addListenersForStoredDataAndStartController(receivers);
         for (final Receiver receiver : receivers) {
             addReceiverToStopDuringTearDown(receiver);
         }
-        // now we expect that there is no 
-        assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace.getId()));
         race = domainFactory.getAndWaitForRaceDefinition(tractracRace.getId());
         course = race.getCourse();
         assertNotNull(course);
@@ -206,7 +207,8 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         changedControlPoints.add(new Pair<>(wp2.getControlPoint(), wp2.getPassingInstructions()));
         changedControlPoints.add(new Pair<>(wp3.getControlPoint(), wp3.getPassingInstructions()));
         changedControlPoints.add(new Pair<>(wp4.getControlPoint(), wp4.getPassingInstructions()));
-        course.update(changedControlPoints, com.sap.sailing.domain.base.DomainFactory.INSTANCE);
+        course.update(changedControlPoints, new HashMap<>(), course.getOriginatingCourseTemplateIdOrNull(),
+                com.sap.sailing.domain.base.DomainFactory.INSTANCE);
         
         assertNotSame(wp1, Util.get(course.getWaypoints(), 0));
         assertSame(wp2, Util.get(course.getWaypoints(), 1));
