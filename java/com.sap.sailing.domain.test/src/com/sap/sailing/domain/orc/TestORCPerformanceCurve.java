@@ -120,13 +120,13 @@ public class TestORCPerformanceCurve {
         final ORCPerformanceCurveCourse course = new ORCPerformanceCurveCourseImpl(Arrays.asList(new ORCPerformanceCurveLegImpl(ORCCertificateImpl.NAUTICAL_MILE, new DegreeBearingImpl(twa))));
         final ORCPerformanceCurve performanceCurve = new ORCPerformanceCurveImpl(certificate, course);
         for (int i=0; i<expectedAllowancesPerTrueWindSpeed.length; i++) {
-            assertEquals(expectedAllowancesPerTrueWindSpeed[i], performanceCurve.getAllowancePerCourse(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i]).asSeconds(), accuracy);
+            assertEquals(expectedAllowancesPerTrueWindSpeed[i], performanceCurve.getAllowancePerCourse(ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS[i]).asSeconds(), accuracy);
         }
     }
     
     @Test
     public void testSimpleConstructedCourse() throws FunctionEvaluationException {
-        ORCCertificateImpl certificate = (ORCCertificateImpl) importerLocal.getCertificateById("GER140772GER5549");
+        ORCCertificate certificate = (ORCCertificate) importerLocal.getCertificateById("GER140772GER5549");
         List<ORCPerformanceCurveLeg> legs = new ArrayList<>();
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.0), new DegreeBearingImpl(0)));
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.0), new DegreeBearingImpl(30)));
@@ -142,14 +142,14 @@ public class TestORCPerformanceCurve {
     private void testAllowancePerCourse(ORCPerformanceCurve performanceCurve, double... allowancePerNauticalMileInSeconds) throws ArgumentOutsideDomainException {
         for (int i=0; i<allowancePerNauticalMileInSeconds.length; i++) {
             assertEquals(allowancePerNauticalMileInSeconds[i]*performanceCurve.getCourse().getTotalLength().getNauticalMiles(),
-                    performanceCurve.getAllowancePerCourse(ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS[i]).asSeconds(), 0.3);
+                    performanceCurve.getAllowancePerCourse(ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS[i]).asSeconds(), 0.3);
         }
     }
 
     @Test
     public void testPerformanceCurveInversion() throws MaxIterationsExceededException, FunctionEvaluationException {
         Double accuracy = 0.1;
-        ORCCertificateImpl certificate = (ORCCertificateImpl) importerLocal.getCertificateById("GER140772GER5549");
+        ORCCertificate certificate = (ORCCertificate) importerLocal.getCertificateById("GER140772GER5549");
         ORCPerformanceCurveImpl performanceCurve = (ORCPerformanceCurveImpl) new ORCPerformanceCurveImpl(certificate, alturaCourse);
         testBackwardForward(accuracy, performanceCurve, 11.5);
         testBackwardForward(accuracy, performanceCurve, 17.23);

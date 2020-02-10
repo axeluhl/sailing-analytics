@@ -143,7 +143,7 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                         trueWindSpeedMap.put(twsValue, new KnotSpeedImpl(twsValue));
                     }
                 } else {
-                    for (Speed speed : ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS) {
+                    for (Speed speed : ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS) {
                         trueWindSpeedMap.put(speed.getKnots(), speed);
                     }
                 }

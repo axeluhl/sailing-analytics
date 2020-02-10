@@ -9,6 +9,7 @@ import com.google.gwt.user.client.rpc.CustomFieldSerializer;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
+import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
@@ -24,7 +25,7 @@ public class ORCCertificateImpl_CustomFieldSerializer extends CustomFieldSeriali
         serialize(streamWriter, instance);
     }
     
-    public static void serialize(SerializationStreamWriter streamWriter, ORCCertificateImpl instance)
+    public static void serialize(SerializationStreamWriter streamWriter, ORCCertificate instance)
             throws SerializationException {
         streamWriter.writeString(instance.getId());
         streamWriter.writeString(instance.getSailNumber());
@@ -115,7 +116,7 @@ public class ORCCertificateImpl_CustomFieldSerializer extends CustomFieldSeriali
                 trueWIndSpeedList.toArray(trueWindSpeeds);
             }
         } catch (SerializationException e) {
-            trueWindSpeeds = ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS;
+            trueWindSpeeds = ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS;
         }
         return trueWindSpeeds;
     }
@@ -131,7 +132,7 @@ public class ORCCertificateImpl_CustomFieldSerializer extends CustomFieldSeriali
                 trueWIndAnglesList.toArray(trueWindAngles);
             }
         } catch (SerializationException e) {
-            trueWindAngles = ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES;
+            trueWindAngles = ORCCertificate.ALLOWANCES_TRUE_WIND_ANGLES;
         }
         return trueWindAngles;
     }
@@ -142,7 +143,7 @@ public class ORCCertificateImpl_CustomFieldSerializer extends CustomFieldSeriali
         deserialize(streamReader, instance);
     }
 
-    public static void deserialize(SerializationStreamReader streamReader, ORCCertificateImpl instance) {
+    public static void deserialize(SerializationStreamReader streamReader, ORCCertificate instance) {
         // Done by instantiateInstance
     }
 

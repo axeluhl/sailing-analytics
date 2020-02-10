@@ -3,7 +3,6 @@ package com.sap.sailing.domain.common.orc.impl;
 import java.util.Collections;
 import java.util.Map;
 
-import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sse.common.Bearing;
@@ -12,7 +11,6 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * Holds an ORC boat certificate including various of the metrics found in it. Note that multiple different certificates
@@ -27,28 +25,6 @@ public class ORCCertificateImpl implements ORCCertificate {
     private static final long serialVersionUID = 8725162998514202782L;
     
     private final String idConsistingOfNatAuthCertNoAndBIN;
-
-    /**
-     * Equals the column heading of the allowances table of an ORC certificate. The speeds are set by the offshore
-     * racing congress. The speeds occur in the array in ascending order.
-     * 
-     * There are references in the persistance module. If the values change, there will be an adjustment needed
-     * in {@link MongoObjectFactoryImpl.speedToKnotsString}.
-     */
-    public static final Speed[] ALLOWANCES_TRUE_WIND_SPEEDS = { new KnotSpeedImpl(6), new KnotSpeedImpl(8),
-            new KnotSpeedImpl(10), new KnotSpeedImpl(12), new KnotSpeedImpl(14), new KnotSpeedImpl(16),
-            new KnotSpeedImpl(20) };
-
-    /**
-     * Equals the line heading of the allowances table of an ORC certificate. The true wind angles are set by the
-     * offshore racing congress. The angles occur in the array in ascending order.
-     * 
-     * There are references in the persistance module. If the values change, there will be an adjustment needed
-     * in {@link MongoObjectFactoryImpl.bearingToDegreeString}.
-     */
-    public static final Bearing[] ALLOWANCES_TRUE_WIND_ANGLES = { new DegreeBearingImpl(52), new DegreeBearingImpl(60),
-            new DegreeBearingImpl(75), new DegreeBearingImpl(90), new DegreeBearingImpl(110),
-            new DegreeBearingImpl(120), new DegreeBearingImpl(135), new DegreeBearingImpl(150) };
 
     public final static Distance NAUTICAL_MILE = new NauticalMileDistance(1);
     
@@ -113,6 +89,9 @@ public class ORCCertificateImpl implements ORCCertificate {
     private final Speed[] allowancesTrueWindSpeeds;
     private final Bearing[] allowancesTrueWindAngles;
     
+    /**
+     * Can be used to specify non-default TWS/TWA values for the time allowances / speed predictions.
+     */
     public ORCCertificateImpl(Speed[] dynamicTrueWindSpeed, Bearing[] dynamicTrueWindAngle,
             String idConsistingOfNatAuthCertNoAndBIN, String sailnumber, String boatName, String boatClassName,
             Distance length, Duration gph, Double cdl, TimePoint issueDate,
@@ -147,6 +126,12 @@ public class ORCCertificateImpl implements ORCCertificate {
         this.circularRandomSpeedPredictionPerTrueWindSpeed = Collections.unmodifiableMap(circularRandomSpeedPredictionsPerTrueWindSpeed);
         this.nonSpinnakerSpeedPredictionPerTrueWindSpeed = Collections.unmodifiableMap(nonSpinnakerSpeedPredictionsPerTrueWindSpeed);
     }
+    
+    /**
+     * Uses the default TWS/TWA values from {@link ORCCertificate#ALLOWANCES_TRUE_WIND_SPEEDS} and
+     * {@link ORCCertificate#ALLOWANCES_TRUE_WIND_ANGLES}, respectively, for the matrix of time allowances
+     * or, conversely, the speed predictions.
+     */
     public ORCCertificateImpl(String idConsistingOfNatAuthCertNoAndBIN,
             String sailnumber, String boatName, String boatClassName,
             Distance length, Duration gph,
@@ -160,12 +145,12 @@ public class ORCCertificateImpl implements ORCCertificate {
             Map<Speed, Speed> longDistanceSpeedPredictionsPerTrueWindSpeed,
             Map<Speed, Speed> circularRandomSpeedPredictionsPerTrueWindSpeed,
             Map<Speed, Speed> nonSpinnakerSpeedPredictionsPerTrueWindSpeed) {
-        this(ALLOWANCES_TRUE_WIND_SPEEDS,ALLOWANCES_TRUE_WIND_ANGLES,idConsistingOfNatAuthCertNoAndBIN, sailnumber, boatName, boatClassName, length, gph, cdl, issueDate,
-                velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles, beatVMGPredictionPerTrueWindSpeed,
-                beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
-                runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionsPerTrueWindSpeed,
-                longDistanceSpeedPredictionsPerTrueWindSpeed, circularRandomSpeedPredictionsPerTrueWindSpeed,
-                nonSpinnakerSpeedPredictionsPerTrueWindSpeed);
+        this(ALLOWANCES_TRUE_WIND_SPEEDS, ALLOWANCES_TRUE_WIND_ANGLES, idConsistingOfNatAuthCertNoAndBIN, sailnumber,
+                boatName, boatClassName, length, gph, cdl, issueDate, velocityPredictionsPerTrueWindSpeedAndAngle,
+                beatAngles, beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed, runAngles,
+                runVMGPredictionPerTrueWindSpeed, runAllowancePerTrueWindSpeed,
+                windwardLeewardSpeedPredictionsPerTrueWindSpeed, longDistanceSpeedPredictionsPerTrueWindSpeed,
+                circularRandomSpeedPredictionsPerTrueWindSpeed, nonSpinnakerSpeedPredictionsPerTrueWindSpeed);
     }
 
     @Override

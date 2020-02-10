@@ -113,10 +113,10 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
     private Bearing[] convertJsonArrayToTrueWindAngleOrReturnDefault(JSONObject json) {
         Object windAnglesObject = json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_TRUE_WIND_ANGLE);
         if (windAnglesObject == null || !(windAnglesObject instanceof JSONArray))
-            return ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES;
+            return ORCCertificate.ALLOWANCES_TRUE_WIND_ANGLES;
         JSONArray windAnglesJsonArray = (JSONArray) windAnglesObject;
         if (windAnglesJsonArray == null || windAnglesJsonArray.size() == 0) {
-            return ORCCertificateImpl.ALLOWANCES_TRUE_WIND_ANGLES;
+            return ORCCertificate.ALLOWANCES_TRUE_WIND_ANGLES;
         }
 
         Bearing[] trueWindAngles = new Bearing[windAnglesJsonArray.size()];
@@ -129,10 +129,10 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
     private Speed[] convertJsonArrayToTrueWindSpeedOrReturnDefault(JSONObject json) {
         Object windSpeedsObject = json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_TRUE_WIND_SPEED);
         if (windSpeedsObject == null || !(windSpeedsObject instanceof JSONArray))
-            return ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS;
+            return ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS;
         JSONArray windSpeedsJsonArray = (JSONArray) windSpeedsObject;
         if (windSpeedsJsonArray == null || windSpeedsJsonArray.size() == 0) {
-            return ORCCertificateImpl.ALLOWANCES_TRUE_WIND_SPEEDS;
+            return ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS;
         }
 
         Speed[] trueWindSpeeds = new Speed[windSpeedsJsonArray.size()];
