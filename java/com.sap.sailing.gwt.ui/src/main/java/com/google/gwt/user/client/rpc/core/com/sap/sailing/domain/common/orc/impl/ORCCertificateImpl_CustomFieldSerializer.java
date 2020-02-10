@@ -1,6 +1,5 @@
 package com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.common.orc.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
