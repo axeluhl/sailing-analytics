@@ -50,9 +50,9 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
         Map<Speed, Speed> longDistanceSpeedPredictionPerTrueWindSpeed = new HashMap<>();
         Map<Speed, Speed> circularRandomSpeedPredictionPerTrueWindSpeed = new HashMap<>();
         Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed = new HashMap<>();
-        Speed[] trueWindSpeeds = convertJsonArrayOfDoublesToArrayOfObjectsOrReturnDefault(json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_TRUE_WIND_ANGLE),
+        Speed[] trueWindSpeeds = convertJsonArrayOfDoublesToArrayOfObjectsOrReturnDefault(json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_TRUE_WIND_ANGLES_IN_TRUE_DEGREES),
                 ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS, speedInKnots->new KnotSpeedImpl(speedInKnots));
-        Bearing[] trueWindAngles = convertJsonArrayOfDoublesToArrayOfObjectsOrReturnDefault(json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_TRUE_WIND_SPEED),
+        Bearing[] trueWindAngles = convertJsonArrayOfDoublesToArrayOfObjectsOrReturnDefault(json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_TRUE_WIND_SPEEDS_IN_KNOTS),
                 ORCCertificate.ALLOWANCES_TRUE_WIND_ANGLES, twaInTrueDegrees->new DegreeBearingImpl(twaInTrueDegrees));
         for (Speed tws : trueWindSpeeds) {
             String twsKey = ORCCertificateJsonSerializer.speedToKnotsString(tws);

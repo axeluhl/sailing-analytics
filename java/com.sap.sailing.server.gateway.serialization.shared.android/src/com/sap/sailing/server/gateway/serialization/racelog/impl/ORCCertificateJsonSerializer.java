@@ -1,6 +1,7 @@
 package com.sap.sailing.server.gateway.serialization.racelog.impl;
 
 import java.text.MessageFormat;
+import java.util.function.Function;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -48,8 +49,8 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
     public static final String ORC_CERTIFICATE_R120_PREDICTION = "ORC_CERTIFICATE_R120_PREDICTION";
     public static final String ORC_CERTIFICATE_R135_PREDICTION = "ORC_CERTIFICATE_R135_PREDICTION";
     public static final String ORC_CERTIFICATE_R150_PREDICTION = "ORC_CERTIFICATE_R150_PREDICTION";
-    public static final String ORC_CERTIFICATE_TRUE_WIND_SPEED = "trueWindSpeeds";
-    public static final String ORC_CERTIFICATE_TRUE_WIND_ANGLE = "trueWindAngles";
+    public static final String ORC_CERTIFICATE_TRUE_WIND_SPEEDS_IN_KNOTS = "trueWindSpeedsInKnots";
+    public static final String ORC_CERTIFICATE_TRUE_WIND_ANGLES_IN_TRUE_DEGREES = "trueWindAnglesInTrueDegrees";
 
     @Override
     public JSONObject serialize(ORCCertificate certificate) {
@@ -63,7 +64,6 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
         result.put(ORC_CERTIFICATE_LENGTH, certificate.getLengthOverAll().getMeters());
         result.put(ORC_CERTIFICATE_ISSUE_DATE,
                 certificate.getIssueDate() == null ? null : certificate.getIssueDate().asMillis());
-
         JSONObject beatAngles = new JSONObject();
         JSONObject runAngles = new JSONObject();
         JSONObject beatAllowances = new JSONObject();
@@ -95,7 +95,6 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
             }
             velocityPredictionsPerTrueWindSpeedAndAngle.put(keyTWS, velocityPredictionsPerTrueWindAngle);
         }
-
         result.put(ORC_CERTIFICATE_BEAT_ANGLES, beatAngles);
         result.put(ORC_CERTIFICATE_RUN_ANGLES, runAngles);
         result.put(ORC_CERTIFICATE_BEAT_ALLOWANCES, beatAllowances);
@@ -107,23 +106,20 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
         result.put(ORC_CERTIFICATE_CIRCULAR_RANDOM_SPEED_PREDICTIONS, circularRandomPredictions);
         result.put(ORC_CERTIFICATE_NON_SPINNAKER_SPEED_PREDICTIONS, nonSpinnakerPredictions);
         result.put(ORC_CERTIFICATE_TWA_SPEED_PREDICTIONS, velocityPredictionsPerTrueWindSpeedAndAngle);
-        result.put(ORC_CERTIFICATE_TRUE_WIND_ANGLE, convertTrueWindAnglesToJsonArray(certificate));
-        result.put(ORC_CERTIFICATE_TRUE_WIND_SPEED, convertTrueWindSpeedsToJsonArray(certificate));
+        if (certificate.getTrueWindAngles() != ORCCertificate.ALLOWANCES_TRUE_WIND_ANGLES) {
+            result.put(ORC_CERTIFICATE_TRUE_WIND_ANGLES_IN_TRUE_DEGREES, convertObjectsToJsonArrayOfDoubles(twa->twa.getDegrees(), certificate.getTrueWindAngles()));
+        }
+        if (certificate.getTrueWindSpeeds() != ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS) {
+            result.put(ORC_CERTIFICATE_TRUE_WIND_SPEEDS_IN_KNOTS, convertObjectsToJsonArrayOfDoubles(tws->tws.getKnots(), certificate.getTrueWindSpeeds()));
+        }
         return result;
     }
 
-    private JSONArray convertTrueWindSpeedsToJsonArray(ORCCertificate certificate) {
-        JSONArray jsonArray = new JSONArray();
-        for( Speed speed : certificate.getTrueWindSpeeds()) {
-            jsonArray.add(speed.getKnots());
-        }
-        return jsonArray;
-    }
-
-    private JSONArray convertTrueWindAnglesToJsonArray(ORCCertificate certificate) {
-        JSONArray jsonArray = new JSONArray();
-        for( Bearing bearing : certificate.getTrueWindAngles()) {
-            jsonArray.add(bearing.getDegrees());
+    @SafeVarargs
+    private final <T> JSONArray convertObjectsToJsonArrayOfDoubles(Function<T, Double> converterToDouble, T... objects) {
+        final JSONArray jsonArray = new JSONArray();
+        for (T t : objects) {
+            jsonArray.add(converterToDouble.apply(t));
         }
         return jsonArray;
     }
