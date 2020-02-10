@@ -79,33 +79,35 @@ public abstract class NonPerformanceCurveRankingMetric extends AbstractRankingMe
     public RankingMetric.RankingInfo getRankingInfo(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Map<Competitor, RankingMetric.CompetitorRankingInfo> result = new HashMap<>();
         Competitor competitorFarthestAhead = getCompetitorFarthestAhead(timePoint, cache);
-        final Distance totalWindwardDistanceTraveled = getWindwardDistanceTraveled(competitorFarthestAhead, timePoint, cache);
-        final TimePoint startOfRace = getTrackedRace().getStartOfRace();
-        if (startOfRace != null) {
-            final Duration actualRaceDuration = startOfRace.until(timePoint);
-            for (Competitor competitor : getCompetitors()) {
-                // TODO bug5110: we cannot compute the following if at timePoint the position of either of the two competitors involved is unknown; we can, however, do this if timePoint is after the two finish mark passings, or if the competitorFarthestAhead has already finished at timePoint and the position of "competitor" is known.
-                final Duration predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead = getPredictedDurationToReachWindwardPositionOf(
-                        competitor, competitorFarthestAhead, timePoint, cache);
-                final Duration totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead = predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead == null ? null
-                        : actualRaceDuration.plus(predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead);
-                final Duration calculatedEstimatedTimeWhenReachingCompetitorFarthestAhead = totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead == null ? null
-                        : getCalculatedTime(
-                                competitor,
-                                () -> getTrackedRace().getTrackedLeg(competitorFarthestAhead, timePoint).getLeg(),
-                                () -> getTrackedRace().getTrack(competitorFarthestAhead).getEstimatedPosition(
-                                        timePoint, /* extrapolate */true),
-                                totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead,
-                                totalWindwardDistanceTraveled);
-                final Duration calculatedTime = getCalculatedTime(competitor,
-                        () -> getTrackedRace().getCurrentLeg(competitor, timePoint).getLeg(), () -> getTrackedRace()
-                                .getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolated */true),
-                        getTrackedRace().getTimeSailedSinceRaceStart(competitor, timePoint), totalWindwardDistanceTraveled);
-                RankingMetric.CompetitorRankingInfo rankingInfo = new CompetitorRankingInfoImpl(timePoint, competitor,
-                        getWindwardDistanceTraveled(competitor, timePoint, cache), actualRaceDuration, calculatedTime,
-                        predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead,
-                        calculatedEstimatedTimeWhenReachingCompetitorFarthestAhead);
-                result.put(competitor, rankingInfo);
+        if (competitorFarthestAhead != null) {
+            final Distance totalWindwardDistanceTraveled = getWindwardDistanceTraveled(competitorFarthestAhead, timePoint, cache);
+            final TimePoint startOfRace = getTrackedRace().getStartOfRace();
+            if (startOfRace != null) {
+                final Duration actualRaceDuration = startOfRace.until(timePoint);
+                for (Competitor competitor : getCompetitors()) {
+                    // TODO bug5110: we cannot compute the following if at timePoint the position of either of the two competitors involved is unknown; we can, however, do this if timePoint is after the two finish mark passings, or if the competitorFarthestAhead has already finished at timePoint and the position of "competitor" is known.
+                    final Duration predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead = getPredictedDurationToReachWindwardPositionOf(
+                            competitor, competitorFarthestAhead, timePoint, cache);
+                    final Duration totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead = predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead == null ? null
+                            : actualRaceDuration.plus(predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead);
+                    final Duration calculatedEstimatedTimeWhenReachingCompetitorFarthestAhead = totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead == null ? null
+                            : getCalculatedTime(
+                                    competitor,
+                                    () -> getTrackedRace().getTrackedLeg(competitorFarthestAhead, timePoint).getLeg(),
+                                    () -> getTrackedRace().getTrack(competitorFarthestAhead).getEstimatedPosition(
+                                            timePoint, /* extrapolate */true),
+                                    totalEstimatedDurationSinceRaceStartToCompetitorFarthestAhead,
+                                    totalWindwardDistanceTraveled);
+                    final Duration calculatedTime = getCalculatedTime(competitor,
+                            () -> getTrackedRace().getCurrentLeg(competitor, timePoint).getLeg(), () -> getTrackedRace()
+                                    .getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolated */true),
+                            getTrackedRace().getTimeSailedSinceRaceStart(competitor, timePoint), totalWindwardDistanceTraveled);
+                    RankingMetric.CompetitorRankingInfo rankingInfo = new CompetitorRankingInfoImpl(timePoint, competitor,
+                            getWindwardDistanceTraveled(competitor, timePoint, cache), actualRaceDuration, calculatedTime,
+                            predictedDurationToReachWindwardPositionOfCompetitorFarthestAhead,
+                            calculatedEstimatedTimeWhenReachingCompetitorFarthestAhead);
+                    result.put(competitor, rankingInfo);
+                }
             }
         }
         return new NonPerformanceCurveRankingInfoImpl(timePoint, result, competitorFarthestAhead);
