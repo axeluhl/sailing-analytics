@@ -1,7 +1,10 @@
 package com.sap.sailing.server.gateway.deserialization.racelog.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -26,7 +29,6 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
 
     @Override
     public ORCCertificate deserialize(JSONObject json) throws JsonDeserializationException {
-        
         String sailnumber = (String) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_SAILNUMBER);
         String boatName = (String) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_BOATNAME);
         String boatclass = (String) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_BOATCLASS);
@@ -48,8 +50,10 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
         Map<Speed, Speed> longDistanceSpeedPredictionPerTrueWindSpeed = new HashMap<>();
         Map<Speed, Speed> circularRandomSpeedPredictionPerTrueWindSpeed = new HashMap<>();
         Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed = new HashMap<>();
-        Speed[] trueWindSpeeds = convertJsonArrayToTrueWindSpeedOrReturnDefault(json);
-        Bearing[] trueWindAngles = convertJsonArrayToTrueWindAngleOrReturnDefault(json);
+        Speed[] trueWindSpeeds = convertJsonArrayOfDoublesToArrayOfObjectsOrReturnDefault(json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_TRUE_WIND_ANGLE),
+                ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS, speedInKnots->new KnotSpeedImpl(speedInKnots));
+        Bearing[] trueWindAngles = convertJsonArrayOfDoublesToArrayOfObjectsOrReturnDefault(json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_TRUE_WIND_SPEED),
+                ORCCertificate.ALLOWANCES_TRUE_WIND_ANGLES, twaInTrueDegrees->new DegreeBearingImpl(twaInTrueDegrees));
         for (Speed tws : trueWindSpeeds) {
             String twsKey = ORCCertificateJsonSerializer.speedToKnotsString(tws);
             beatAngles.put(tws, new DegreeBearingImpl(
@@ -88,7 +92,6 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
                     new KnotSpeedImpl(((Number) ((JSONObject) json
                             .get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_NON_SPINNAKER_SPEED_PREDICTIONS))
                                     .get(twsKey)).doubleValue()));
-
             Map<Bearing, Speed> velocityPredictionAtCurrentTrueWindSpeedPerTrueWindAngle = new HashMap<>();
             for (Bearing twa : trueWindAngles) {
                 String twaKey = ORCCertificateJsonSerializer.bearingToDegreeString(twa);
@@ -110,35 +113,21 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
         return certificate;
     }
 
-    private Bearing[] convertJsonArrayToTrueWindAngleOrReturnDefault(JSONObject json) {
-        Object windAnglesObject = json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_TRUE_WIND_ANGLE);
-        if (windAnglesObject == null || !(windAnglesObject instanceof JSONArray))
-            return ORCCertificate.ALLOWANCES_TRUE_WIND_ANGLES;
-        JSONArray windAnglesJsonArray = (JSONArray) windAnglesObject;
-        if (windAnglesJsonArray == null || windAnglesJsonArray.size() == 0) {
-            return ORCCertificate.ALLOWANCES_TRUE_WIND_ANGLES;
+    private <T> T[] convertJsonArrayOfDoublesToArrayOfObjectsOrReturnDefault(final Object windAnglesObject,
+            final T[] defaults, final Function<Double, T> constructor) {
+        final T[] result;
+        final JSONArray windAnglesJsonArray;
+        if (windAnglesObject == null || !(windAnglesObject instanceof JSONArray) || (windAnglesJsonArray=(JSONArray) windAnglesObject).isEmpty()) {
+            result = defaults;
+        } else {
+            final List<T> resultList = new ArrayList<>();
+            for (final Object number : windAnglesJsonArray) {
+                resultList.add(constructor.apply((Double) number));
+            }
+            @SuppressWarnings("unchecked")
+            final T[] tArray = (T[]) resultList.toArray();
+            result = tArray;
         }
-
-        Bearing[] trueWindAngles = new Bearing[windAnglesJsonArray.size()];
-        for (int count = 0; count < windAnglesJsonArray.size(); count++) {
-            trueWindAngles[count] = new DegreeBearingImpl((Double) windAnglesJsonArray.get(count));
-        }
-        return trueWindAngles;
-    }
-
-    private Speed[] convertJsonArrayToTrueWindSpeedOrReturnDefault(JSONObject json) {
-        Object windSpeedsObject = json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_TRUE_WIND_SPEED);
-        if (windSpeedsObject == null || !(windSpeedsObject instanceof JSONArray))
-            return ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS;
-        JSONArray windSpeedsJsonArray = (JSONArray) windSpeedsObject;
-        if (windSpeedsJsonArray == null || windSpeedsJsonArray.size() == 0) {
-            return ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS;
-        }
-
-        Speed[] trueWindSpeeds = new Speed[windSpeedsJsonArray.size()];
-        for (int count = 0; count < windSpeedsJsonArray.size(); count++) {
-            trueWindSpeeds[count] = new KnotSpeedImpl((Double) windSpeedsJsonArray.get(count));
-        }
-        return trueWindSpeeds;
+        return result;
     }
 }
