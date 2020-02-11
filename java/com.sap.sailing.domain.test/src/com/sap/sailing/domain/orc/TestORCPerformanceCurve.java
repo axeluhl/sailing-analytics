@@ -70,6 +70,16 @@ public class TestORCPerformanceCurve {
         }
     }
     
+    public void assertEquals(String message, double a, double b, double accuracy) {
+        try {
+            Assert.assertEquals(message, a, b, accuracy);
+        } catch (AssertionError e) {
+            if (collectErrors) {
+                collector.addError(e);
+            }
+        }
+    }
+    
     @BeforeClass
     public static void initialize() throws IOException, ParseException {
         List<ORCPerformanceCurveLeg> legs = new ArrayList<>();
@@ -253,15 +263,18 @@ public class TestORCPerformanceCurve {
     }
     
     @Test
-    public void testAllowancesAndImpliedWindForSpecificBins() throws FunctionEvaluationException {
+    public void testAllowancesAndImpliedWindForSpecificBins() throws FunctionEvaluationException, MaxIterationsExceededException {
+        final double highAccuracy = 0.01;
+        final double allowanceAccuracy = 0.1;
         final Distance ONE_NAUTICAL_MILE = new NauticalMileDistance(1.0);
         final ORCCertificate certificateWithSpecificBins = importerWithSpecificBins.getCertificateById("GRA00073GR317");
         for (final Bearing twa : certificateWithSpecificBins.getTrueWindAngles()) {
             final ORCPerformanceCurveCourse singleLegOneMileCourseWithTwa = createSingleLegCourseWithTwa(twa);
             final ORCPerformanceCurve performanceCurveSpecificBins = new ORCPerformanceCurveImpl(certificateWithSpecificBins, singleLegOneMileCourseWithTwa);
             for (final Speed tws : certificateWithSpecificBins.getTrueWindSpeeds()) {
-                Assert.assertEquals(certificateWithSpecificBins.getVelocityPredictionPerTrueWindSpeedAndAngle().get(tws).get(twa).getDuration(ONE_NAUTICAL_MILE),
-                        performanceCurveSpecificBins.getAllowancePerCourse(tws));
+                final Duration duration = certificateWithSpecificBins.getVelocityPredictionPerTrueWindSpeedAndAngle().get(tws).get(twa).getDuration(ONE_NAUTICAL_MILE);
+                assertEquals("mismatch for twa "+twa+", tws "+tws, duration.asSeconds(), performanceCurveSpecificBins.getAllowancePerCourse(tws).asSeconds(), allowanceAccuracy);
+                assertEquals("mismatch for twa "+twa+", tws "+tws, tws.getKnots(), performanceCurveSpecificBins.getImpliedWind(duration).getKnots(), highAccuracy);
             }
         }
     }
@@ -284,7 +297,7 @@ public class TestORCPerformanceCurve {
         list.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1), new DegreeBearingImpl(180)));
         ORCPerformanceCurveCourse complexCourse = new ORCPerformanceCurveCourseImpl(list);
         
-        double accuracy = 0.0001;
+        final double accuracy = 0.0001;
         ORCCertificate certificateMoana          = importerLocal.getCertificateById("GER140772GER5549");
         ORCCertificate certificateMilan          = importerLocal.getCertificateById("GER166844GER7323");
         ORCCertificate certificateTutima         = importerLocal.getCertificateById("GER140618GER5609");
