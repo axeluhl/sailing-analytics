@@ -185,6 +185,8 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
                                     ? MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis())
                                     : new MillisecondsTimePoint(resultTimePoint)));
                     trackedRaceInfo.put("delayToLiveInMillis", trackedRace.getDelayToLiveInMillis());
+                    trackedRaceInfo.put("status", trackedRace.getStatus().getStatus().toString());
+                    trackedRaceInfo.put("loadingProgress", trackedRace.getStatus().getLoadingProgress());
                 }
                 fleetJson.put("trackedRace", trackedRaceInfo);
             }
