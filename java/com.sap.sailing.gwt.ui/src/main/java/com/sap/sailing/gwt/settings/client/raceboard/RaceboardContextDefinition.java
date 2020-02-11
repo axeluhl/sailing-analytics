@@ -44,7 +44,7 @@ public class RaceboardContextDefinition extends AbstractGenericSerializableSetti
         leaderboardGroupName = new StringSetting("leaderboardGroupName", this);
         eventId = new UUIDSetting("eventId", this);
         mode = new StringSetting("mode", this);
-        selectedCompetitor = new StringSetting(RaceBoardPerspectiveOwnSettings.PARAM_SELECTED_COMPETITOR, this);
+        selectedCompetitor = new StringSetting(RaceBoardPerspectiveOwnSettings.PARAM_SELECTED_COMPETITORS, this);
     }
 
     public String getRegattaName() {

@@ -29,6 +29,7 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     private transient StringSetting activeCompetitorsFilterSetName;
     private transient BooleanSetting canReplayDuringLiveRaces;
     private transient DurationSetting initialDurationAfterRaceStartInReplay;
+    private transient StringSetting selectedCompetitor;
     private transient StringSetSetting selectedCompetitors;
     private transient StringSetting jumpToTag;
     
@@ -42,6 +43,7 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     public static final String PARAM_CAN_REPLAY_DURING_LIVE_RACES = "canReplayDuringLiveRaces";
     public static final String PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS = "t";
     public static final String PARAM_SELECTED_COMPETITOR = "c";
+    public static final String PARAM_SELECTED_COMPETITORS = "selectedCompetitors";
     public static final String PARAM_JUMP_TO_TAG = TagDTO.TAG_URL_PARAMETER;
    
     public RaceBoardPerspectiveOwnSettings() {
@@ -66,19 +68,21 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
         this.activeCompetitorsFilterSetName = new StringSetting("activeCompetitorsFilterSetName", this, null);
         this.canReplayDuringLiveRaces = new BooleanSetting("canReplayDuringLiveRaces", this, false);
         this.initialDurationAfterRaceStartInReplay = new DurationSetting(PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS, this, null);
-        this.selectedCompetitors = new StringSetSetting(PARAM_SELECTED_COMPETITOR, this, null);
+        this.selectedCompetitor = new StringSetting(PARAM_SELECTED_COMPETITOR, this, null);
+        this.selectedCompetitors = new StringSetSetting(PARAM_SELECTED_COMPETITORS, this, null);
         this.jumpToTag = new StringSetting(PARAM_JUMP_TO_TAG, this, null);
     }
 
     public RaceBoardPerspectiveOwnSettings(String activeCompetitorsFilterSetName, Boolean showLeaderboard,
             Boolean showWindChart, Boolean showCompetitorsChart, Boolean canReplayDuringLiveRaces,
-            Duration initialDurationAfterRaceStartInReplay, Iterable<String> selectedCompetitors, String jumpToTag) {
+            Duration initialDurationAfterRaceStartInReplay, String selectedCompetitor, Iterable<String> selectedCompetitors, String jumpToTag) {
         this.activeCompetitorsFilterSetName.setValue(activeCompetitorsFilterSetName);
         this.showLeaderboard.setValue(showLeaderboard);
         this.showWindChart.setValue(showWindChart);
         this.showCompetitorsChart.setValue(showCompetitorsChart);
         this.canReplayDuringLiveRaces.setValue(canReplayDuringLiveRaces);
         this.initialDurationAfterRaceStartInReplay.setValue(initialDurationAfterRaceStartInReplay);
+        this.selectedCompetitor.setValue(selectedCompetitor);
         this.selectedCompetitors.setValues(selectedCompetitors);
     }
 
@@ -105,6 +109,42 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     public String getJumpToTag() {
         return jumpToTag.getValue();
     }
+    
+    public void resetShowLeaderBoard() {
+        this.showLeaderboard.resetToDefault();;
+    }
+    
+    public void resetShowWindChart() {
+        this.showWindChart.resetToDefault();;
+    }
+    
+    public void resetShowCompetitorsChart() {
+        this.showLeaderboard.resetToDefault();;
+    }
+
+    public void resetCanReplayDuringLiveRaces() {
+        this.canReplayDuringLiveRaces.resetToDefault();;
+    }
+    
+    public void resetActiveCompetitorsFilterSetName() {
+        this.activeCompetitorsFilterSetName.resetToDefault();;
+    }
+
+    public void resetInitialDurationAfterRaceStartInReplay() {
+        this.initialDurationAfterRaceStartInReplay.resetToDefault();;
+    }
+
+    public void resetSelectedCompetitor() {
+        this.selectedCompetitor.resetToDefault();;
+    }
+
+    public void resetSelectedCompetitors() {
+        this.selectedCompetitors.resetToDefault();;
+    }
+
+    public void resetJumpToTag() {
+        this.jumpToTag.resetToDefault();;
+    }
 
     public static RaceBoardPerspectiveOwnSettings readSettingsFromURL(boolean defaultForViewShowLeaderboard,
             boolean defaultForViewShowWindchart, boolean defaultForViewShowCompetitorsChart,
@@ -116,11 +156,13 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
         final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(PARAM_CAN_REPLAY_DURING_LIVE_RACES, defaultForCanReplayDuringLiveRaces /* default */);
         final Duration initialDurationAfterRaceStartInReplay = parseDuration(GwtHttpRequestUtils.getStringParameter(
                 PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS, null /* default */));
-        final Set<String> selectedCompetitors = new HashSet<>(Arrays.asList(GwtHttpRequestUtils.getStringParameters(PARAM_SELECTED_COMPETITOR)));
+        final Set<String> selectedCompetitors = new HashSet<>(Arrays.asList(GwtHttpRequestUtils.getStringParameters(PARAM_SELECTED_COMPETITORS)));
+        final String selectedCompetitor = GwtHttpRequestUtils.getStringParameter(PARAM_SELECTED_COMPETITOR,
+                null /* default */);
         final String jumpToTag = GwtHttpRequestUtils.getStringParameter(PARAM_JUMP_TO_TAG, defaultForJumpToTag /* default */);
         return new RaceBoardPerspectiveOwnSettings(activeCompetitorsFilterSetName, showLeaderboard, showWindChart,
                 showCompetitorsChart, canReplayWhileLiveIsPossible, initialDurationAfterRaceStartInReplay,
-                selectedCompetitors, jumpToTag);
+                selectedCompetitor, selectedCompetitors, jumpToTag);
     }
 
     public Duration getInitialDurationAfterRaceStartInReplay() {
@@ -147,5 +189,9 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
 
     public Iterable<String> getSelectedCompetitors() {
         return selectedCompetitors.getValues();
+    }
+    
+    public String getSelectedCompetitor() {
+        return selectedCompetitor.getValue();
     }
 }

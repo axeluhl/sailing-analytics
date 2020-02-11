@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -99,7 +100,6 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
 import com.sap.sailing.gwt.ui.shared.databylogo.DataByLogo;
 import com.sap.sse.common.Distance;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.FilterSet;
@@ -113,7 +113,6 @@ import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
@@ -249,7 +248,8 @@ public class RaceBoardPanel
             
             @Override
             public void onClick(ClickEvent event) {
-                ShareLinkDialog shareLinkDialog = new ShareLinkDialog("/gwt/RaceBoard.html", raceboardContextDefinition, getSettings(), getPerspectiveSettings(), stringMessages);
+                ShareLinkDialog shareLinkDialog = new ShareLinkDialog("/gwt/RaceBoard.html", raceboardContextDefinition, lifecycle,
+                        getSettings(), stringMessages);
                 shareLinkDialog.show();
             }
         });
@@ -823,7 +823,11 @@ public class RaceBoardPanel
 
     @Override
     protected RaceBoardPerspectiveOwnSettings getPerspectiveSettings() {
-        RaceBoardPerspectiveOwnSettings initialSettings = super.getPerspectiveSettings();
+        final RaceBoardPerspectiveOwnSettings initialSettings = super.getPerspectiveSettings();
+        final Set<String> selectedCompetitorIds = new HashSet<>();
+        for (CompetitorDTO competitorDTO : getCompetitorSelectionProvider().getSelectedCompetitors()) {
+            selectedCompetitorIds.add(competitorDTO.getIdAsString());
+        }
         return new RaceBoardPerspectiveOwnSettings(
                 initialSettings.getActiveCompetitorsFilterSetName(), // get from search field
                 this.leaderboardPanel.isVisible(),
@@ -831,7 +835,8 @@ public class RaceBoardPanel
                 this.competitorChart.isVisible(),
                 initialSettings.isCanReplayDuringLiveRaces(), // taken as seen
                 initialSettings.getInitialDurationAfterRaceStartInReplay(), // get from timer
-                initialSettings.getSelectedCompetitors(), // convert to set
+                /* legacy single selectedCompetitor */ null,
+                selectedCompetitorIds,
                 initialSettings.getJumpToTag() // ? null
                 );
     }

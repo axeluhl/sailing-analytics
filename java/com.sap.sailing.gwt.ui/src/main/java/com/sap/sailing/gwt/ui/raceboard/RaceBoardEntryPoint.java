@@ -30,6 +30,7 @@ import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.formfactor.DeviceDetector;
@@ -173,15 +174,18 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint implements Pr
         RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = raceBoardPanel.getSettings()
                 .getPerspectiveOwnSettings();
         if (perspectiveOwnSettings != null) {
-            final Iterable<String> competitorIds = perspectiveOwnSettings.getSelectedCompetitors();
-            final Iterable<CompetitorDTO> allCompetitors = raceBoardPanel.getCompetitorSelectionProvider().getAllCompetitors();
+            final String oldCompetitorId = perspectiveOwnSettings.getSelectedCompetitor();
+            Iterable<String> competitorIds = perspectiveOwnSettings.getSelectedCompetitors();
+            if (Util.isEmpty(competitorIds) && oldCompetitorId != null) {
+                competitorIds = Collections.singleton(oldCompetitorId);
+            }
+            final Iterable<CompetitorDTO> allCompetitors = raceBoardPanel.getCompetitorSelectionProvider()
+                    .getAllCompetitors();
             final Set<CompetitorDTO> selectedCompetitors = new HashSet<CompetitorDTO>();
-            for(String competitorId: competitorIds) {
-                if (competitorId != null && !"".equals(competitorId)) {
-                    for (CompetitorDTO comp : allCompetitors) {
-                        if (competitorId.equals(comp.getIdAsString())) {
-                            selectedCompetitors.add(comp);
-                        }
+            for (String competitorId : competitorIds) {
+                for (CompetitorDTO comp : allCompetitors) {
+                    if (competitorId.equals(comp.getIdAsString())) {
+                        selectedCompetitors.add(comp);
                     }
                 }
             }

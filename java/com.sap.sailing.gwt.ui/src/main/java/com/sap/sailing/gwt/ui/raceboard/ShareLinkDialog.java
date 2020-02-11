@@ -11,35 +11,68 @@ import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSett
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.generic.support.SettingsUtil;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycle;
 
 public class ShareLinkDialog extends DataEntryDialog<String> {
     private final StringMessages stringMessages;
+    private final PerspectiveLifecycle<RaceBoardPerspectiveOwnSettings> lifecycle;
     private final PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> perspectiveCompositeSettings;
     private final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator;
     private FlowPanel flowPanel;
     private TextBox linkField;
     private CheckBox timeStampCheckbox;
+    private CheckBox windChartCheckBox;
+    private CheckBox leaderBoardPanelCheckBox;
+    private CheckBox competitorChartCheckBox;
+    private CheckBox filterSetNameCheckBox;
+    private CheckBox competitorSelectionCheckBox;
 
     public ShareLinkDialog(String path, RaceboardContextDefinition raceboardContextDefinition,
+            PerspectiveLifecycle<RaceBoardPerspectiveOwnSettings> lifecycle,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> perspectiveCompositeSettings,
-            RaceBoardPerspectiveOwnSettings currentRaceBoardPerspectiveOwnSettings, StringMessages stringMessages) {
+            StringMessages stringMessages) {
         super("share the link", "url:", "ok", "cancel", null, null);
-        GWT.log(perspectiveCompositeSettings.getSettingsPerComponentId().toString());
-        this.perspectiveCompositeSettings = perspectiveCompositeSettings;
-        GWT.log(currentRaceBoardPerspectiveOwnSettings.toString());
-        GWT.log(perspectiveCompositeSettings.getSettingsPerComponentId().toString());
+        this.lifecycle = lifecycle;
+        this.perspectiveCompositeSettings = perspectiveCompositeSettings; // TODO: COPY COLLECTION!!
         this.linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(path, raceboardContextDefinition);
         this.stringMessages = stringMessages;
     }
     
     private void updateLink() {
-        //TODO update RaceBoardPerspectiveOwnSettings to match the checkbox selections
-        String url = this.linkWithSettingsGenerator.createUrl(perspectiveCompositeSettings);
-        GWT.log(url);
+        PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> patchedSettings = patchSettings();
+        String url = this.linkWithSettingsGenerator.createUrl(patchedSettings);
         this.linkField.setText(url);
+    }
+
+    private PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> patchSettings() {
+        PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> patchedSettings = lifecycle.createDefaultSettings();
+        SettingsUtil.copyValues(perspectiveCompositeSettings, patchedSettings);
+        final RaceBoardPerspectiveOwnSettings patchedPerspectiveOwnSettings = patchedSettings.getPerspectiveOwnSettings();
+        if(!timeStampCheckbox.getValue()) {
+            patchedPerspectiveOwnSettings.resetInitialDurationAfterRaceStartInReplay();
+        }
+        if(!competitorChartCheckBox.getValue()) {
+            patchedPerspectiveOwnSettings.resetShowCompetitorsChart();
+        }
+        if(!leaderBoardPanelCheckBox.getValue()) {
+            patchedPerspectiveOwnSettings.resetShowLeaderBoard();
+        }
+        if(!windChartCheckBox.getValue()) {
+            patchedPerspectiveOwnSettings.resetShowWindChart();
+        }
+        if(!filterSetNameCheckBox.getValue()) {
+            patchedPerspectiveOwnSettings.resetActiveCompetitorsFilterSetName();;
+        }
+        
+        if(!competitorSelectionCheckBox.getValue()) {
+            patchedPerspectiveOwnSettings.resetSelectedCompetitor();
+            patchedPerspectiveOwnSettings.resetSelectedCompetitors();
+        }
+        return patchedSettings;
     }
 
     @Override
@@ -59,9 +92,55 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
                 updateLink();
             }
         });
+        windChartCheckBox = createCheckbox("windChartCheckBox");
+        windChartCheckBox.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                updateLink();
+            }
+        });
+        leaderBoardPanelCheckBox = createCheckbox("leaderBoardPanelCheckBox");
+        leaderBoardPanelCheckBox.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                updateLink();
+            }
+        });
+        competitorChartCheckBox = createCheckbox("competitorChartCheckBox");
+        competitorChartCheckBox.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                updateLink();
+            }
+        });
+        filterSetNameCheckBox = createCheckbox("filterSetNameCheckBox");
+        filterSetNameCheckBox.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                updateLink();
+            }
+        });
+        competitorSelectionCheckBox = createCheckbox("competitorSelectionCheckBox");
+        competitorSelectionCheckBox.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                updateLink();
+            }
+        });
+        
         flowPanel = new FlowPanel();
         flowPanel.add(linkField);
         flowPanel.add(timeStampCheckbox);
+        flowPanel.add(windChartCheckBox);
+        flowPanel.add(leaderBoardPanelCheckBox);
+        flowPanel.add(competitorChartCheckBox);
+        flowPanel.add(filterSetNameCheckBox);
+        flowPanel.add(competitorSelectionCheckBox);
 
         updateLink();
         return flowPanel;
