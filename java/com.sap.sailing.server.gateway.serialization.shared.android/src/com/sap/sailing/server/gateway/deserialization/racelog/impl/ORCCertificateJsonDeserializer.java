@@ -50,10 +50,10 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
         Map<Speed, Speed> longDistanceSpeedPredictionPerTrueWindSpeed = new HashMap<>();
         Map<Speed, Speed> circularRandomSpeedPredictionPerTrueWindSpeed = new HashMap<>();
         Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed = new HashMap<>();
-        Speed[] trueWindSpeeds = convertJsonArrayOfDoublesToArrayOfObjectsOrReturnDefault(json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_TRUE_WIND_ANGLES_IN_TRUE_DEGREES),
-                ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS, speedInKnots->new KnotSpeedImpl(speedInKnots));
-        Bearing[] trueWindAngles = convertJsonArrayOfDoublesToArrayOfObjectsOrReturnDefault(json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_TRUE_WIND_SPEEDS_IN_KNOTS),
-                ORCCertificate.ALLOWANCES_TRUE_WIND_ANGLES, twaInTrueDegrees->new DegreeBearingImpl(twaInTrueDegrees));
+        Speed[] trueWindSpeeds = convertJsonArrayOfDoublesToArrayOfObjectsOrReturnDefault(json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_TRUE_WIND_SPEEDS_IN_KNOTS),
+                ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS, speedInKnots->new KnotSpeedImpl(speedInKnots), new Speed[0]);
+        Bearing[] trueWindAngles = convertJsonArrayOfDoublesToArrayOfObjectsOrReturnDefault(json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_TRUE_WIND_ANGLES_IN_TRUE_DEGREES),
+                ORCCertificate.ALLOWANCES_TRUE_WIND_ANGLES, twaInTrueDegrees->new DegreeBearingImpl(twaInTrueDegrees), new Bearing[0]);
         for (Speed tws : trueWindSpeeds) {
             String twsKey = ORCCertificateJsonSerializer.speedToKnotsString(tws);
             beatAngles.put(tws, new DegreeBearingImpl(
@@ -113,19 +113,18 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
         return certificate;
     }
 
-    private <T> T[] convertJsonArrayOfDoublesToArrayOfObjectsOrReturnDefault(final Object windAnglesObject,
-            final T[] defaults, final Function<Double, T> constructor) {
+    private <T> T[] convertJsonArrayOfDoublesToArrayOfObjectsOrReturnDefault(final Object supposedJsonArray,
+            final T[] defaults, final Function<Double, T> constructor, T[] array) {
         final T[] result;
         final JSONArray windAnglesJsonArray;
-        if (windAnglesObject == null || !(windAnglesObject instanceof JSONArray) || (windAnglesJsonArray=(JSONArray) windAnglesObject).isEmpty()) {
+        if (supposedJsonArray == null || !(supposedJsonArray instanceof JSONArray) || (windAnglesJsonArray=(JSONArray) supposedJsonArray).isEmpty()) {
             result = defaults;
         } else {
             final List<T> resultList = new ArrayList<>();
             for (final Object number : windAnglesJsonArray) {
                 resultList.add(constructor.apply((Double) number));
             }
-            @SuppressWarnings("unchecked")
-            final T[] tArray = (T[]) resultList.toArray();
+            final T[] tArray = resultList.toArray(array);
             result = tArray;
         }
         return result;

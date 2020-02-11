@@ -141,8 +141,8 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
         } else if (speed.equals(ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS[6])) {
             result = ORC_CERTIFICATE_TWS_20KT;
         } else {
-            String speedKnots =String.valueOf(speed.getKnots());
-            speedKnots =speedKnots.replace(".", "P");
+            String speedKnots = String.valueOf(speed.getKnots());
+            speedKnots = speedKnots.replace(".", "P");
             result = MessageFormat.format(ORC_CERTIFICATE_TWS_KNOTS, speedKnots);
         }
         return result;
