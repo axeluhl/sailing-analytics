@@ -167,8 +167,8 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
         } else if (bearing.equals(ORCCertificate.ALLOWANCES_TRUE_WIND_ANGLES[7])) {
             result = ORC_CERTIFICATE_R150_PREDICTION;
         } else {
-            String angleDegress =String.valueOf(bearing.getDegrees());
-            angleDegress =angleDegress.replace(".", "P");
+            String angleDegress = String.valueOf(bearing.getDegrees());
+            angleDegress = angleDegress.replace(".", "P");
             result = MessageFormat.format(ORC_CERTIFICATE_R_PERDICTION, String.valueOf(angleDegress));
         }
         return result;
