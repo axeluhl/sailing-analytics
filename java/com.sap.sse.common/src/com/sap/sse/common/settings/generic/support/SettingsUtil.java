@@ -132,7 +132,9 @@ public final class SettingsUtil {
                 final Settings childSettingsToSetDefaults = entry.getValue();
                 final Settings childSettingsWithDefaults = settingsMapWithDefaults.getSettingsPerComponentId()
                         .get(entry.getKey());
-                copyDefaultsInternal(childSettingsWithDefaults, childSettingsToSetDefaults, defaultValuesExtractor, valuesSetter);
+                if(childSettingsWithDefaults != null) {
+                    copyDefaultsInternal(childSettingsWithDefaults, childSettingsToSetDefaults, defaultValuesExtractor, valuesSetter);
+                }
             }
         } else {
             // any hand-coded non-serializable settings instance is ignored
