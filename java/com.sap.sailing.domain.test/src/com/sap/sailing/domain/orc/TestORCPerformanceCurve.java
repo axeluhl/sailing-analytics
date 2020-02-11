@@ -49,6 +49,7 @@ public class TestORCPerformanceCurve {
     
     private static ORCPerformanceCurveCourse alturaCourse;
     private static ORCCertificatesCollection importerLocal;
+    private static ORCCertificatesCollection importerWithSpecificBins;
     private static ORCCertificatesCollection importerOnline;
     
     private static final String RESOURCES = "resources/orc/";
@@ -76,11 +77,12 @@ public class TestORCPerformanceCurve {
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.03), new DegreeBearingImpl(165)));
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.17), new DegreeBearingImpl(180)));
         alturaCourse = new ORCPerformanceCurveCourseImpl(legs);         //this course is the same course as seen in the Altura "IMS Explanation" sheet
-        
         // Local File:
         File fileGER = new File(RESOURCES + "GER2019.json");
         importerLocal = new ORCCertificatesJsonImporter().read(new FileInputStream(fileGER));
-        
+        // Local File new format with specific TWA/TWS bins:
+        File fileWithSpecificBins = new File(RESOURCES + "newFormatCertificate.json");
+        importerWithSpecificBins = new ORCCertificatesJsonImporter().read(new FileInputStream(fileWithSpecificBins));
         // Online File:
         importerOnline = new ORCCertificatesJsonImporter().read(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());
     }
@@ -298,12 +300,14 @@ public class TestORCPerformanceCurve {
         ORCCertificate certificateBank           = importerLocal.getCertificateById("GER140755GER5555");
         ORCCertificate certificateHaspa          = importerLocal.getCertificateById("GER141411GER6300");
         ORCCertificate certificateHalbtrocken    = importerLocal.getCertificateById("GER141432GER5564");
+        ORCCertificate certificateWithSpecificBins=importerWithSpecificBins.getCertificateById("GRA00073GR317");
         ORCPerformanceCurve performanceCurveMoana        = new ORCPerformanceCurveImpl(certificateMoana, complexCourse);
         ORCPerformanceCurve performanceCurveMilan        = new ORCPerformanceCurveImpl(certificateMilan, complexCourse);
         ORCPerformanceCurve performanceCurveTutima       = new ORCPerformanceCurveImpl(certificateTutima, complexCourse);
         ORCPerformanceCurve performanceCurveBank         = new ORCPerformanceCurveImpl(certificateBank, complexCourse);
         ORCPerformanceCurve performanceCurveHaspa        = new ORCPerformanceCurveImpl(certificateHaspa, complexCourse);
         ORCPerformanceCurve performanceCurveHalbtrocken  = new ORCPerformanceCurveImpl(certificateHalbtrocken, complexCourse);
+        ORCPerformanceCurve performanceCurveSpecificBins = new ORCPerformanceCurveImpl(certificateWithSpecificBins, complexCourse);
         
         assertEquals(Duration.ONE_HOUR.times(1.0).asHours(), performanceCurveMilan.getAllowancePerCourse(new KnotSpeedImpl(15.75777)).asHours(), accuracy);
         assertEquals(Duration.ONE_HOUR.times(1.25).asHours(), performanceCurveBank.getAllowancePerCourse(new KnotSpeedImpl(15.27808)).asHours(), accuracy);
@@ -311,7 +315,7 @@ public class TestORCPerformanceCurve {
         assertEquals(Duration.ONE_HOUR.times(1.25).asHours(), performanceCurveHaspa.getAllowancePerCourse(new KnotSpeedImpl(14.44527)).asHours(), accuracy);
         assertEquals(Duration.ONE_HOUR.times(1.5).asHours(), performanceCurveTutima.getAllowancePerCourse(new KnotSpeedImpl(10.86927)).asHours(), accuracy);
         assertEquals(Duration.ONE_HOUR.times(2.0).asHours(), performanceCurveHalbtrocken.getAllowancePerCourse(new KnotSpeedImpl(9.13385)).asHours(), accuracy);
-        
+        assertEquals(Duration.ONE_HOUR.times(2.0).asHours(), performanceCurveSpecificBins.getAllowancePerCourse(new KnotSpeedImpl(9.13385)).asHours(), accuracy);
     }
     
 }
