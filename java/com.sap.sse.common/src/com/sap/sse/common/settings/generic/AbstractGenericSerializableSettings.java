@@ -42,7 +42,7 @@ import com.sap.sse.common.settings.value.Value;
  *     }
  *     
  *     public void setMyString(String myString) {
- *         return this.myString.setValue(myString);
+ *         this.myString.setValue(myString);
  *     }
  *     
  *     public boolean isMyBoolean() {
@@ -50,7 +50,7 @@ import com.sap.sse.common.settings.value.Value;
  *     }
  *     
  *     public void setMyBoolean(boolean myBoolean) {
- *         return this.myBoolean.setValue(myBoolean);
+ *         this.myBoolean.setValue(myBoolean);
  *     }
  * }
  * </code>
