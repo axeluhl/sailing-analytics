@@ -294,9 +294,9 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
             Map<Speed, Bearing> beatAngles, Map<Speed, Speed> beatVMGPredictionPerTrueWindSpeed,
             Map<Speed, Bearing> runAngles, Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed, Speed trueWindSpeed,
             Bearing trueWindAngle) throws FunctionEvaluationException, IllegalArgumentException {
-        
-        return getLagrangeSpeedPredictionForTrueWindSpeedAndAngle(twaAllowances,beatAngles,beatVMGPredictionPerTrueWindSpeed,
-                runAngles,runVMGPredictionPerTrueWindSpeed,trueWindSpeed,trueWindAngle, ORCCertificate.ALLOWANCES_TRUE_WIND_ANGLES);
+        return getLagrangeSpeedPredictionForTrueWindSpeedAndAngle(twaAllowances, beatAngles,
+                beatVMGPredictionPerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed, trueWindSpeed,
+                trueWindAngle, ORCCertificate.ALLOWANCES_TRUE_WIND_ANGLES);
     }
     
     public Speed getLagrangeSpeedPredictionForTrueWindSpeedAndAngle(Map<Speed, Map<Bearing, Speed>> twaAllowances,
@@ -339,7 +339,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
      * the {@link #course} (which may be a prefix of a longer course) at the true wind speed provided to the resulting
      * map as the key. Iteration order is in ascending true wind speeds.
      */
-    public LinkedHashMap<Speed, Duration> getAllowancesPerTrueWindSpeedsForCourse() throws ArgumentOutsideDomainException {
+    private LinkedHashMap<Speed, Duration> getAllowancesPerTrueWindSpeedsForCourse() throws ArgumentOutsideDomainException {
         final LinkedHashMap<Speed, Duration> result = new LinkedHashMap<>();
         for (final Speed tws : ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS) {
             result.put(tws, getAllowancePerCourse(tws));

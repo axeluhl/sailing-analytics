@@ -33,7 +33,10 @@ import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveCourseImpl;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.orc.impl.ORCCertificatesJsonImporter;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveImpl;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
@@ -247,6 +250,26 @@ public class TestORCPerformanceCurve {
         for (final ORCCertificate certificate : importerOnline.getCertificates()) {
             new ORCPerformanceCurveImpl(certificate, alturaCourse);
         }
+    }
+    
+    @Test
+    public void testAllowancesAndImpliedWindForSpecificBins() throws FunctionEvaluationException {
+        final Distance ONE_NAUTICAL_MILE = new NauticalMileDistance(1.0);
+        final ORCCertificate certificateWithSpecificBins = importerWithSpecificBins.getCertificateById("GRA00073GR317");
+        for (final Bearing twa : certificateWithSpecificBins.getTrueWindAngles()) {
+            final ORCPerformanceCurveCourse singleLegOneMileCourseWithTwa = createSingleLegCourseWithTwa(twa);
+            final ORCPerformanceCurve performanceCurveSpecificBins = new ORCPerformanceCurveImpl(certificateWithSpecificBins, singleLegOneMileCourseWithTwa);
+            for (final Speed tws : certificateWithSpecificBins.getTrueWindSpeeds()) {
+                Assert.assertEquals(certificateWithSpecificBins.getVelocityPredictionPerTrueWindSpeedAndAngle().get(tws).get(twa).getDuration(ONE_NAUTICAL_MILE),
+                        performanceCurveSpecificBins.getAllowancePerCourse(tws));
+            }
+        }
+    }
+    
+    private ORCPerformanceCurveCourse createSingleLegCourseWithTwa(Bearing twa) {
+        List<ORCPerformanceCurveLeg> list = new ArrayList<>();
+        list.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1), twa));
+        return new ORCPerformanceCurveCourseImpl(list);
     }
     
     // Tests for the calculations with a more complex course which contains some special leg types. (circular random or other)
