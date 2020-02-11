@@ -1,6 +1,8 @@
 package com.sap.sse.security.interfaces;
 
 import com.sap.sse.security.shared.BasicUserStore;
+import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.Role;
@@ -104,4 +106,6 @@ public interface UserStore extends BasicUserStore {
     void removeAllQualifiedRolesForUser(User user);
 
     void removeAllQualifiedRolesForUserGroup(UserGroup userGroup);
+
+    RoleDefinition getRoleDefinitionByPrototype(RolePrototype rolePrototype);
 }

@@ -863,12 +863,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     private void addUserRoleToUser(final User user) {
-        addRoleForUserAndSetUserAsOwner(user,
-                new Role(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ user));
+        addRoleForUserAndSetUserAsOwner(user, new Role(store.getRoleDefinitionByPrototype(UserRole.getInstance()),
+                /* tenant qualifier */ null, /* user qualifier */ user));
     }
     
     private void addUserRoleForGroupToUser(final UserGroup group, final User user) {
-        addRoleForUserAndSetUserAsOwner(user, new Role(UserRole.getInstance(), /* tenant qualifier */ group, /* user qualifier */ null));
+        addRoleForUserAndSetUserAsOwner(user, new Role(store.getRoleDefinitionByPrototype(UserRole.getInstance()),
+                /* tenant qualifier */ group, /* user qualifier */ null));
     }
     
     private UserGroup getOrCreateTenantForUser(User user) throws UserGroupManagementException {
