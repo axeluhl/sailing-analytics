@@ -165,31 +165,40 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
     
     @Override
     public Bearing getTrueWindBearing() {
+        final Bearing result;
         if (hasValue(ID_TWD)) { // TWD represents the "from" direction and need to be reversed to obtain the "to" bearing
-            return new DegreeBearingImpl(getValue(ID_TWD)).reverse();
+            result = new DegreeBearingImpl(getValue(ID_TWD)).reverse();
         } else if (hasValue(ID_GWD)) {
-                return new DegreeBearingImpl(getValue(ID_GWD)).reverse();
+            result = new DegreeBearingImpl(getValue(ID_GWD)).reverse();
         } else {
-            return null;
+            result = null;
         }
+        return result;
     }
 
     @Override
     public SpeedWithBearing getSpeedOverGround() {
-        if (hasValue(ID_GPS_COG) && hasValue(ID_GPS_SOG)) {
-            return new KnotSpeedWithBearingImpl(getValue(ID_GPS_SOG), getCourseOverGround());
+        final SpeedWithBearing result;
+        if (hasValue(ID_GPS_COG)) {
+            // We're assuming that if SOG is not part of the message but COG is then
+            // the SOG was probably so low that it's fair to approximate it as 0.
+            final double sogInKnots = hasValue(ID_GPS_SOG) ? getValue(ID_GPS_SOG) : 0;
+            result = new KnotSpeedWithBearingImpl(sogInKnots, getCourseOverGround());
         } else {
-            return null;
+            result = null;
         }
+        return result;
     }
     
     @Override
     public Bearing getCourseOverGround() {
+        final Bearing result;
         if (hasValue(ID_GPS_COG)) {
-            return new DegreeBearingImpl(getValue(ID_GPS_COG));
+            result = new DegreeBearingImpl(getValue(ID_GPS_COG));
         } else {
-            return null;
+            result = null;
         }
+        return result;
     }
 
     @Override
