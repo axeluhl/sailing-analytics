@@ -491,7 +491,6 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
      * If {@code raceColumnNames} is empty or {@code null}, return the names of all {@link raceColumnsOfLeaderboard};
      * otherwise return those race column names from {@code raceColumnsOfLeaderboard} that are also in
      * {@code raceColumnNames}.
-     * @param leaderboard TODO
      * @param showOnlyActiveRacesForCompetitorIds
      *            {@code null}, or specifies zero or more competitor IDs, requesting that the result contained the race
      *            column holding that competitor's "active" race at the time requested; see also the

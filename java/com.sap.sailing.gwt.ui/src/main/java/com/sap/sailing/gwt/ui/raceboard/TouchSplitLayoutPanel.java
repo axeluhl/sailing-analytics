@@ -38,7 +38,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
@@ -202,7 +201,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
      * 
      * @author Simon Marcel Pamies, Axel Uhl
      */
-    abstract class Splitter extends AbsolutePanel implements RequiresResize, ProvidesResize {
+    abstract class Splitter extends AbsolutePanel {
         protected final Widget target;
 
         private int offset;
@@ -319,7 +318,6 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                 syncedCenterSize = newCenterSize;
                 centerSize = newCenterSize;
             }
-
             return Math.max(((LayoutData) target.getLayoutData()).size + centerSize, 0);
         }
 
@@ -374,11 +372,6 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                     }
                 });
             }
-        }
-
-        @Override
-        public void onResize() {
-            setAssociatedWidgetSize(getTargetSize(), /* defer */ false);
         }
 
         protected abstract int getAbsolutePosition();
@@ -851,7 +844,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
         if (splitter != null) {
             LayoutData layoutData = (LayoutData) widget.getLayoutData();
             if (hidden) {
-                if(layoutData.size > 0) {
+                if (layoutData.size > 0) {
                     layoutData.oldSize = layoutData.size;
                 }
                 widget.setVisible(false);
@@ -861,7 +854,6 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                     }
                 }
                 splitter.setAssociatedWidgetSize(0, /* defer */false);
-
                 // need to ensure visibility of dragger, do NOT use setVisible() as south/north splitter should be shown always
                 splitter.setDraggerVisible(!hidden);
             } else {
