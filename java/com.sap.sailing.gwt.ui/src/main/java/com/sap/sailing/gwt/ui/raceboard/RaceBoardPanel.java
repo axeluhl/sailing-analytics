@@ -389,6 +389,7 @@ public class RaceBoardPanel
         if (advanceTimePanelEnabled) {
             manageTimePanelToggleButton(advanceTimePanelEnabled);
         }
+        addChildComponent(racetimePanel);
         dockPanel = new DockLayoutPanel(Unit.PX);
         dockPanel.addSouth(timePanelWrapper, TIMEPANEL_COLLAPSED_HEIGHT);
         dockPanel.add(mainPanel);
@@ -502,7 +503,7 @@ public class RaceBoardPanel
                 updateRaceTimePanelOverlay();
             }
         });
-        
+        addChildComponent(mediaPlayerManagerComponent);
         for (Component<? extends Settings> component : componentsForSideBySideViewer) {
             addChildComponent(component);
         }
