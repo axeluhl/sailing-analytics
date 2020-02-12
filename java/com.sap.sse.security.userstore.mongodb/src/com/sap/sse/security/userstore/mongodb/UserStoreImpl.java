@@ -291,6 +291,7 @@ public class UserStoreImpl implements UserStore {
         return roleDefinition;
     }
     
+    @Override
     public RoleDefinition getRoleDefinitionByPrototype(RolePrototype rolePrototype) {
         final RoleDefinition roleDefinition = getRoleDefinition(rolePrototype.getId());
         if (roleDefinition == null) {
