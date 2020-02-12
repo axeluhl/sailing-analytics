@@ -196,7 +196,9 @@ public class TaggingPanel extends ComponentWithoutSettings
             @Override
             public void onResize() {
                 super.onResize();
-                taggingPanel.setWidgetSize(footerPanel, calculateFooterPanelHeight());
+                if (currentState != State.VIEW) {
+                    taggingPanel.setWidgetSize(footerPanel, calculateFooterPanelHeight());
+                }
             }
         };
         filterbarAndContentPanel = new HeaderPanel();
