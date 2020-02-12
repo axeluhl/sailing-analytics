@@ -144,23 +144,32 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
 
     @Override
     public GPSFixMoving getGPSFixMoving() {
+        final GPSFixMoving result;
         if (hasValue(ID_GPS_LAT) && hasValue(ID_GPS_LNG)) {
-            return new GPSFixMovingImpl(new DegreePosition(getValue(ID_GPS_LAT), getValue(ID_GPS_LNG)), getTimePoint(),
-                    getSpeedOverGround());
+            final SpeedWithBearing cogSog = getSpeedOverGround();
+            if (cogSog != null) {
+                result = new GPSFixMovingImpl(new DegreePosition(getValue(ID_GPS_LAT), getValue(ID_GPS_LNG)), getTimePoint(),
+                        getSpeedOverGround());
+            } else {
+                result = null;
+            }
         } else {
-            return null;
+            result = null;
         }
+        return result;
     }
 
     @Override
     public SpeedWithBearing getTrueWind() {
+        final SpeedWithBearing result;
         if (hasValue(ID_TWD) && hasValue(ID_TWS)) {
-            return new KnotSpeedWithBearingImpl(getValue(ID_TWS), getTrueWindBearing());
+            result = new KnotSpeedWithBearingImpl(getValue(ID_TWS), getTrueWindBearing());
         } else if (hasValue(ID_GWD) && hasValue(ID_GWS)) {
-            return new KnotSpeedWithBearingImpl(getValue(ID_GWS), getTrueWindBearing());
+            result = new KnotSpeedWithBearingImpl(getValue(ID_GWS), getTrueWindBearing());
         } else {
-            return null;
+            result = null;
         }
+        return result;
     }
     
     @Override
