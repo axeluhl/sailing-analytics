@@ -57,7 +57,7 @@ public class LoginTest {
         db.getCollection(com.sap.sse.security.persistence.impl.CollectionNames.SESSIONS.name()).drop();
         userStore = new UserStoreImpl(DEFAULT_TENANT_NAME);
         userStore.ensureDefaultRolesExist();
-        userStore.ensureDefaultTenantExists();
+        userStore.ensureServerGroupExists();
         accessControlStore = new AccessControlStoreImpl(userStore);
         Activator.setTestStores(userStore, accessControlStore);
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // to enable shiro to find classes from com.sap.sse.security

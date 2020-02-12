@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Persistence
+Bundle-SymbolicName: com.sap.sse.replication.persistence
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Automatic-Module-Name: com.sap.sse.replication.persistence
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: com.sap.sse.replication.interfaces,
+ org.mongodb.mongo-java-driver;bundle-version="3.6.4",
+ com.sap.sse.common
+Import-Package: com.sap.sse.mongodb,
+ org.osgi.framework;version="1.8.0"
+Export-Package: com.sap.sse.replication.persistence
+Bundle-ActivationPolicy: lazy
+Bundle-Activator: com.sap.sse.replication.persistence.impl.Activator

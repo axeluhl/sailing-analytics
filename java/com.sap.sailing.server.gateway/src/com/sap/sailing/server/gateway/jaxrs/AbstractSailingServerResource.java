@@ -132,13 +132,27 @@ public abstract class AbstractSailingServerResource {
 
     protected TrackedRace findTrackedRace(String regattaName, String raceName) {
         Regatta regatta = findRegattaByName(regattaName);
-        RaceDefinition race = findRaceByName(regatta, raceName);
-        TrackedRace trackedRace = null;
-        if (regatta != null && race != null) {
+        final TrackedRace trackedRace;
+        if (regatta == null) {
+            trackedRace = null;
+        } else {
+            trackedRace = findTrackedRace(regatta, raceName);
+        }
+        return trackedRace;
+    }
+
+    protected TrackedRace findTrackedRace(Regatta regatta, String raceName) {
+        final TrackedRace trackedRace;
+        final RaceDefinition race = findRaceByName(regatta, raceName);
+        if (race != null) {
             DynamicTrackedRegatta trackedRegatta = getService().getTrackedRegatta(regatta);
             if (trackedRegatta != null) {
                 trackedRace = trackedRegatta.getExistingTrackedRace(race);
+            } else {
+                trackedRace = null;
             }
+        } else {
+            trackedRace = null;
         }
         return trackedRace;
     }

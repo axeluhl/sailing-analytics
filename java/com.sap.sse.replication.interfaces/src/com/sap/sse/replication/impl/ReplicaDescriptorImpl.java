@@ -27,10 +27,18 @@ public class ReplicaDescriptorImpl implements ReplicaDescriptor {
     /**
      * Sets the registration time to now.
      */
-    public ReplicaDescriptorImpl(InetAddress ipAddress, UUID serverUuid, String additionalInformation, String[] replicableIdsAsStrings) {
+    public ReplicaDescriptorImpl(InetAddress ipAddress, UUID id, String additionalInformation, String[] replicableIdsAsStrings) {
+        this(ipAddress, id, MillisecondsTimePoint.now(), additionalInformation, replicableIdsAsStrings);
+    }
+
+    /**
+     * Sets the registration time to now.
+     */
+    public ReplicaDescriptorImpl(InetAddress ipAddress, UUID id, TimePoint registrationTime,
+            String additionalInformation, String[] replicableIdsAsStrings) {
         assert replicableIdsAsStrings != null && replicableIdsAsStrings.length > 0;
-        this.uuid = serverUuid;
-        this.registrationTime = MillisecondsTimePoint.now();
+        this.uuid = id;
+        this.registrationTime = registrationTime;
         this.ipAddress = ipAddress;
         this.additionalInformation = additionalInformation;
         this.replicableIdsAsStrings = replicableIdsAsStrings;

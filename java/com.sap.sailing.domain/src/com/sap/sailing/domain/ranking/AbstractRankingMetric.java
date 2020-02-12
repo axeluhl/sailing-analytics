@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
@@ -238,10 +239,10 @@ public abstract class AbstractRankingMetric implements RankingMetric {
 
     protected Competitor getCompetitorFarthestAhead(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Comparator<Competitor> oneDesignComparator = getWindwardDistanceTraveledComparator(timePoint, cache);
-        Competitor competitorFarthestAhead = StreamSupport
+        Optional<Competitor> competitorFarthestAhead = StreamSupport
                 .stream(getCompetitors().spliterator(), /* parallel */true).
-                sorted(oneDesignComparator).findFirst().get();
-        return competitorFarthestAhead;
+                sorted(oneDesignComparator).findFirst();
+        return competitorFarthestAhead.orElse(null);
     }
     
     /**

@@ -61,15 +61,12 @@ public class LocalServerManagementPanel extends SimplePanel {
         this.userService = userService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-
         final Panel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
-
         mainPanel.add(this.buttonPanel = createServerActionsUi(userService));
         mainPanel.add(createServerInfoUI());
         mainPanel.add(createServerConfigurationUI());
-
         refreshServerConfiguration();
     }
 
@@ -150,7 +147,7 @@ public class LocalServerManagementPanel extends SimplePanel {
         });
     }
 
-    private void refreshServerConfiguration() {
+    void refreshServerConfiguration() {
         sailingService.getServerConfiguration(new RefreshAsyncCallback<>(this::updateServerConfiguration));
     }
 

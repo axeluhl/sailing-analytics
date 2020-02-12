@@ -209,45 +209,36 @@ public class Activator implements BundleActivator {
             InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException {
         mailQueue = new ExecutorMailQueue(mailServiceTracker);
         notificationService = new SailingNotificationServiceImpl(context, mailQueue);
-
         trackedRegattaListener = new OSGiBasedTrackedRegattaListener(context);
-
         registrations.add(context.registerService(HasPermissionsProvider.class,
                 (HasPermissionsProvider) SecuredDomainType::getAllInstances, null));
-        
         registrations.add(context.registerService(SecurityInitializationCustomizer.class,
                 (SecurityInitializationCustomizer) securityService -> {
                     final RoleDefinition sailingViewerRoleDefinition = securityService.getOrCreateRoleDefinitionFromPrototype(SailingViewerRole.getInstance());
                     if (securityService.isInitialOrMigration()) {
-                        
                         // The server is initially set to be public by adding sailing_viewer role to the server group
                         // with forAll=true
-                        securityService.putRoleDefinitionToUserGroup(securityService.getDefaultTenant(),
+                        securityService.putRoleDefinitionToUserGroup(securityService.getServerGroup(),
                                 sailingViewerRoleDefinition, true);
-                        
                         // sailing_viewer role is publicly readable
                         securityService.addToAccessControlList(sailingViewerRoleDefinition.getIdentifier(), null, DefaultActions.READ.name());
                     }
                 }, null));
-
         final TrackedRaceStatisticsCache trackedRaceStatisticsCache = new TrackedRaceStatisticsCacheImpl();
         registrations.add(context.registerService(TrackedRaceStatisticsCache.class.getName(),
                 trackedRaceStatisticsCache, null));
         registrations.add(context.registerService(TrackedRegattaListener.class.getName(),
                 trackedRaceStatisticsCache, null));
-
         // At this point the OSGi resolver is used as device type service finder.
         // In the case that we are not in an OSGi context (e.g. running a JUnit test instead),
         // this code block is not run, and the test case can inject some other type of finder
         // instead.
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
-        
         sharedSailingDataTracker = ServiceTrackerFactory.createAndOpen(context, SharedSailingData.class);
         ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker =
                 ServiceTrackerFactory.createAndOpen(context, ScoreCorrectionProvider.class);
         ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker = ServiceTrackerFactory
                 .createAndOpen(context, ResultUrlRegistry.class);
-
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors,
                 serviceFinderFactory, trackedRegattaListener, notificationService,
                 trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker,
@@ -319,10 +310,8 @@ public class Activator implements BundleActivator {
 
     private class MasterDataImportClassLoaderServiceTrackerCustomizer implements
             ServiceTrackerCustomizer<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService> {
-
         private final BundleContext context;
         private RacingEventServiceImpl racingEventService;
-
         public MasterDataImportClassLoaderServiceTrackerCustomizer(BundleContext context,
                 RacingEventServiceImpl racingEventService) {
             this.context = context;
@@ -347,12 +336,10 @@ public class Activator implements BundleActivator {
                 MasterDataImportClassLoaderService service) {
             racingEventService.removeMasterDataClassLoader(service.getClassLoader());
         }
-
     }
 
     private class PolarDataServiceTrackerCustomizer
             implements ServiceTrackerCustomizer<PolarDataService, PolarDataService> {
-
         private final BundleContext context;
         private RacingEventServiceImpl racingEventService;
 
