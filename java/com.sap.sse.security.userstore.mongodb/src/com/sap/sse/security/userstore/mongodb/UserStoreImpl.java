@@ -28,6 +28,7 @@ import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.PredefinedRoles;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
+import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -266,20 +267,8 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void ensureDefaultRolesExist() {
-        final AdminRole adminRolePrototype = AdminRole.getInstance();
-        if (getRoleDefinition(adminRolePrototype.getId()) == null) {
-            logger.info("No admin role found. Creating default role \"" + adminRolePrototype.getName()
-                    + "\" with permission \"" + AdminRole.getInstance().getPermissions() + "\"");
-            createRoleDefinition((UUID) adminRolePrototype.getId(), adminRolePrototype.getName(),
-                    adminRolePrototype.getPermissions());
-        }
-        final UserRole userRolePrototype = UserRole.getInstance();
-        if (getRoleDefinition(userRolePrototype.getId()) == null) {
-            logger.info("No user role found. Creating default role \"" + userRolePrototype.getName()
-                    + "\" with permission \"" + userRolePrototype.getPermissions() + "\"");
-            createRoleDefinition((UUID) userRolePrototype.getId(), userRolePrototype.getName(),
-                    userRolePrototype.getPermissions());
-        }
+        getOrCreateRoleDefinitionByPrototype(AdminRole.getInstance());
+        getOrCreateRoleDefinitionByPrototype(UserRole.getInstance());
         for (final PredefinedRoles otherPredefinedRole : PredefinedRoles.values()) {
             if (getRoleDefinition(otherPredefinedRole.getId()) == null) {
                 logger.info("Predefined role definition " + otherPredefinedRole + " not found; creating");
@@ -290,6 +279,28 @@ public class UserStoreImpl implements UserStore {
                 createRoleDefinition(otherPredefinedRole.getId(), otherPredefinedRole.name(), permissions);
             }
         }
+    }
+    
+    private RoleDefinition getOrCreateRoleDefinitionByPrototype(RolePrototype rolePrototype) {
+        RoleDefinition roleDefinition = getRoleDefinition(rolePrototype.getId());
+        if (roleDefinition == null) {
+            logger.info("No " + rolePrototype.getName() + " role found. Creating default role \""
+                    + rolePrototype.getName() + "\" with permission \"" + rolePrototype.getPermissions() + "\"");
+            roleDefinition = createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(), rolePrototype.getPermissions());
+        }
+        return roleDefinition;
+    }
+    
+    @Override
+    public RoleDefinition getRoleDefinitionByPrototype(RolePrototype rolePrototype) {
+        final RoleDefinition roleDefinition = getRoleDefinition(rolePrototype.getId());
+        if (roleDefinition == null) {
+            final String errorMsg = "No " + rolePrototype.getName() + " role definition found by ID "
+                    + rolePrototype.getId() + "." + "RoleDefinitions for prototypes are required to exist on usage.";
+            logger.severe(errorMsg);
+            throw new IllegalStateException(errorMsg);
+        }
+        return roleDefinition;
     }
 
     @Override
