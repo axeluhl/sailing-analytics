@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -103,6 +104,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.ScoreCorrectionMapping;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
@@ -1629,7 +1631,18 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @QueryParam("scoreCorrectionProvider") String scoreCorrectionProviderName,
             @QueryParam("timePointOfLastCorrectionValidityMillis") Long timePointOfLastCorrectionValidityMillis,
             @QueryParam("comment") String comment,
+            @QueryParam("allowRaceDefaultsByOrder") Boolean allowRaceDefaultsByOrder,
+            @QueryParam("sailId") String[] sailIds,
+            @QueryParam("competitorId") String[] competitorIdsAsStringForSailIds,
+            @QueryParam("raceNumber") String[] raceNumbers,
+            @QueryParam("raceColumnName") String[] raceColumnNamesForRaceNumbers,
             InputStream inputStream) throws Exception {
+        if ((sailIds == null) != (competitorIdsAsStringForSailIds == null) || (sailIds != null && sailIds.length != competitorIdsAsStringForSailIds.length)) {
+            throw new IllegalArgumentException("The competitorId and sailId arrays don't match in presence or length");
+        }
+        if ((raceNumbers == null) != (raceColumnNamesForRaceNumbers == null) || (raceNumbers != null && raceNumbers.length != raceColumnNamesForRaceNumbers.length)) {
+            throw new IllegalArgumentException("The raceNumber and raceColumnNameForRaceNumber arrays don't match in presence or length");
+        }
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
             throw new NotFoundException("leaderboard with name " + leaderboardName + " not found");
@@ -1638,6 +1651,14 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         final Optional<ScoreCorrectionProvider> scoreCorrectionProvider = getScoreCorrectionProvider(scoreCorrectionProviderName);
         if (!scoreCorrectionProvider.isPresent()) {
             throw new NotFoundException("score correction provider with name " + scoreCorrectionProviderName + " not found");
+        }
+        final Map<String, Competitor> sailIdToCompetitorMap = new HashMap<>();
+        for (int i=0; i<sailIds.length; i++) {
+            sailIdToCompetitorMap.put(sailIds[i], getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitorIdsAsStringForSailIds[i]));
+        }
+        final Map<String, RaceColumn> raceNumberOrNameToRaceColumnMap = new HashMap<>();
+        for (int i=0; i<raceNumbers.length; i++) {
+            raceNumberOrNameToRaceColumnMap.put(raceNumbers[i], leaderboard.getRaceColumnByName(raceColumnNamesForRaceNumbers[i]));
         }
         final RegattaScoreCorrections scoreCorrection = scoreCorrectionProvider.get().getScoreCorrections(inputStream);
         if (comment != null || timePointOfLastCorrectionValidityMillis != null) {
@@ -1658,7 +1679,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             getService().apply(
                     new UpdateLeaderboardScoreCorrectionMetadata(leaderboardName, timePointOfLastCorrectionValidity, finalComment));
         }
-        return applyScoreCorrectionToLeaderboard(leaderboard, scoreCorrection);
+        return applyScoreCorrectionToLeaderboard(leaderboard, scoreCorrection, sailIdToCompetitorMap,
+                raceNumberOrNameToRaceColumnMap, allowRaceDefaultsByOrder != null && allowRaceDefaultsByOrder);
     }
 
     /**
@@ -1667,9 +1689,12 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
      * be returned with an empty JSON document. Otherwise, {@link Status#CONFLICT} will be the status of the response,
      * and the JSON document returned will tell which sail IDs/numbers and which race names/numbers could not be resolved.
      */
-    private Response applyScoreCorrectionToLeaderboard(Leaderboard leaderboard, RegattaScoreCorrections scoreCorrection) {
+    private Response applyScoreCorrectionToLeaderboard(Leaderboard leaderboard, RegattaScoreCorrections scoreCorrection,
+            final Map<String, Competitor> sailIdToCompetitorMap,
+            final Map<String, RaceColumn> raceNumberOrNameToRaceColumnMap, boolean allowRaceDefaultsByOrder) {
         final JSONObject result = new JSONObject();
-        
+        final ScoreCorrectionMapping scoreCorrectionMapping = leaderboard.mapRegattaScoreCorrections(scoreCorrection,
+                raceNumberOrNameToRaceColumnMap, sailIdToCompetitorMap, allowRaceDefaultsByOrder);
         // TODO Implement LeaderboardsResource.applyScoreCorrectionToLeaderboard(...)
         return Response.ok(result.toJSONString()).build();
     }

@@ -236,11 +236,15 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
                 /* scoreCorrectionProviderName */ "ISAF XML Regatta Result (XRR) Importer",
                 /* validity time point */ validityTimePoint.asMillis(),
                 /* comment */ comment,
+                /* allowRaceDefaultsByOrder */ true,
+                /* sailIds */ null, /* competitorIdAsStringForSailId */ null,
+                /* raceNumber */ null, /* raceColumnNameForRaceNumber */ null,
                 getClass().getClassLoader().getResourceAsStream("YES_29er_XRR.xml"));
         assertNotNull(leaderboardResponse);
         JSONObject jsonObject = (JSONObject) JSONValue.parse((String) leaderboardResponse.getEntity());
         assertNotNull(jsonObject);
         assertEquals(comment, regattaLeaderboard.getScoreCorrection().getComment());
         assertEquals(validityTimePoint, regattaLeaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity());
+        // TODO test that results match?
     }
 }
