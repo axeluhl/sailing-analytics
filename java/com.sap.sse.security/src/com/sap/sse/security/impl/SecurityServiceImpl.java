@@ -2105,6 +2105,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         } finally {
             Thread.currentThread().setContextClassLoader(oldCCL);
         }
+        // now ensure that the SERVER object has a valid ownership; use the (potentially new) server group as the default:
+        migrateServerObject();
         logger.info("Reading isSharedAcrossSubdomains...");
         sharedAcrossSubdomainsOf = (String) is.readObject();
         logger.info("...as "+sharedAcrossSubdomainsOf);
@@ -2249,6 +2251,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         migratedHasPermissionTypes.add(identifier.getTypeIdentifier());
         return wasNecessaryToMigrate;
+    }
+
+    @Override
+    public void migrateServerObject() {
+        final QualifiedObjectIdentifier serverIdentifier = SecuredSecurityTypes.SERVER
+                .getQualifiedObjectIdentifier(
+                        new TypeRelativeObjectIdentifier(ServerInfo.getName()));
+        migrateOwnership(serverIdentifier, serverIdentifier.toString());
     }
 
     @Override
