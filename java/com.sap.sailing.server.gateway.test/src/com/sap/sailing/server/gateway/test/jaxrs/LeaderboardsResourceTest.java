@@ -239,6 +239,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
                 /* allowRaceDefaultsByOrder */ true,
                 /* sailIds */ null, /* competitorIdAsStringForSailId */ null,
                 /* raceNumber */ null, /* raceColumnNameForRaceNumber */ null,
+                /* allowPartialImport */ false,
                 getClass().getClassLoader().getResourceAsStream("YES_29er_XRR.xml"));
         assertNotNull(leaderboardResponse);
         JSONObject jsonObject = (JSONObject) JSONValue.parse((String) leaderboardResponse.getEntity());

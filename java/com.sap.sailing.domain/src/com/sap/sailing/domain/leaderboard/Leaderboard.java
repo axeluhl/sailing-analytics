@@ -783,11 +783,16 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * @param allowRaceDefaultsByOrder
      *            if {@code true}, an attempt will be made to map the race names/numbers from the
      *            {@link RegattaScoreCorrections} to the leaderboard's {@link RaceColumn}s by their ordering, one by
-     *            one, but only for those that are not mapped explicitly by {@code raceNumberOrNameToRaceColumnMap}.
-     *            If there are excess race names/numbers in the {@link RegattaScoreCorrections} objects beyond the
-     *            number of race columns in this leaderboard, no mapping will be inferred for the excess races.
+     *            one, but only for those that are not mapped explicitly by {@code raceNumberOrNameToRaceColumnMap}. If
+     *            there are excess race names/numbers in the {@link RegattaScoreCorrections} objects beyond the number
+     *            of race columns in this leaderboard, no mapping will be inferred for the excess races.
+     * @param allowPartialImport
+     *            if {@code true}, a valid mapping will result even if the mapping is not complete regarding the set of
+     *            races and the set of competitors for which results are provided in {@code regattaScoreCorrections}. If
+     *            {@code false} and if one or more competitors or one or more races cannot be mapped successfully to
+     *            this leaderboard, {@code null} will be returned, implying that no results shall be imported at all.
      */
     ScoreCorrectionMapping mapRegattaScoreCorrections(RegattaScoreCorrections regattaScoreCorrections,
             Map<String, RaceColumn> raceNumberOrNameToRaceColumnMap, Map<String, Competitor> sailIdToCompetitorMap,
-            boolean allowRaceDefaultsByOrder);
+            boolean allowRaceDefaultsByOrder, boolean allowPartialImport);
 }

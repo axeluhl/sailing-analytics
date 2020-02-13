@@ -1636,6 +1636,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @QueryParam("competitorId") String[] competitorIdsAsStringForSailIds,
             @QueryParam("raceNumber") String[] raceNumbers,
             @QueryParam("raceColumnName") String[] raceColumnNamesForRaceNumbers,
+            @QueryParam("allowPartialImport") Boolean allowPartialImport,
             InputStream inputStream) throws Exception {
         if ((sailIds == null) != (competitorIdsAsStringForSailIds == null) || (sailIds != null && sailIds.length != competitorIdsAsStringForSailIds.length)) {
             throw new IllegalArgumentException("The competitorId and sailId arrays don't match in presence or length");
@@ -1653,12 +1654,16 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             throw new NotFoundException("score correction provider with name " + scoreCorrectionProviderName + " not found");
         }
         final Map<String, Competitor> sailIdToCompetitorMap = new HashMap<>();
-        for (int i=0; i<sailIds.length; i++) {
-            sailIdToCompetitorMap.put(sailIds[i], getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitorIdsAsStringForSailIds[i]));
+        if (sailIds != null) {
+            for (int i=0; i<sailIds.length; i++) {
+                sailIdToCompetitorMap.put(sailIds[i], getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitorIdsAsStringForSailIds[i]));
+            }
         }
         final Map<String, RaceColumn> raceNumberOrNameToRaceColumnMap = new HashMap<>();
-        for (int i=0; i<raceNumbers.length; i++) {
-            raceNumberOrNameToRaceColumnMap.put(raceNumbers[i], leaderboard.getRaceColumnByName(raceColumnNamesForRaceNumbers[i]));
+        if (raceNumbers != null) {
+            for (int i=0; i<raceNumbers.length; i++) {
+                raceNumberOrNameToRaceColumnMap.put(raceNumbers[i], leaderboard.getRaceColumnByName(raceColumnNamesForRaceNumbers[i]));
+            }
         }
         final RegattaScoreCorrections scoreCorrection = scoreCorrectionProvider.get().getScoreCorrections(inputStream);
         if (comment != null || timePointOfLastCorrectionValidityMillis != null) {
@@ -1680,7 +1685,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     new UpdateLeaderboardScoreCorrectionMetadata(leaderboardName, timePointOfLastCorrectionValidity, finalComment));
         }
         return applyScoreCorrectionToLeaderboard(leaderboard, scoreCorrection, sailIdToCompetitorMap,
-                raceNumberOrNameToRaceColumnMap, allowRaceDefaultsByOrder != null && allowRaceDefaultsByOrder);
+                raceNumberOrNameToRaceColumnMap, allowRaceDefaultsByOrder != null && allowRaceDefaultsByOrder,
+                allowPartialImport != null && allowPartialImport);
     }
 
     /**
@@ -1691,11 +1697,18 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
      */
     private Response applyScoreCorrectionToLeaderboard(Leaderboard leaderboard, RegattaScoreCorrections scoreCorrection,
             final Map<String, Competitor> sailIdToCompetitorMap,
-            final Map<String, RaceColumn> raceNumberOrNameToRaceColumnMap, boolean allowRaceDefaultsByOrder) {
+            final Map<String, RaceColumn> raceNumberOrNameToRaceColumnMap, boolean allowRaceDefaultsByOrder,
+            boolean allowPartialImport) {
         final JSONObject result = new JSONObject();
         final ScoreCorrectionMapping scoreCorrectionMapping = leaderboard.mapRegattaScoreCorrections(scoreCorrection,
-                raceNumberOrNameToRaceColumnMap, sailIdToCompetitorMap, allowRaceDefaultsByOrder);
+                raceNumberOrNameToRaceColumnMap, sailIdToCompetitorMap, allowRaceDefaultsByOrder, allowPartialImport);
         // TODO Implement LeaderboardsResource.applyScoreCorrectionToLeaderboard(...)
-        return Response.ok(result.toJSONString()).build();
+        final Response response;
+        if (scoreCorrection == null) {
+            response = Response.status(Status.CONFLICT).build();
+        } else {
+            response = Response.ok(result.toJSONString()).build();
+        }
+        return response;
     }
 }

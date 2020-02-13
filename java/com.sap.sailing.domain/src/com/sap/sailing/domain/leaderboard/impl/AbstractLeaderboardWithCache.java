@@ -1378,22 +1378,32 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
     @Override
     public ScoreCorrectionMapping mapRegattaScoreCorrections(RegattaScoreCorrections regattaScoreCorrections,
             Map<String, RaceColumn> raceNumberOrNameToRaceColumnMap, Map<String, Competitor> sailIdToCompetitorMap,
-            boolean allowRaceDefaultsByOrder) {
+            boolean allowRaceDefaultsByOrder, boolean allowPartialImport) {
         final Map<String, RaceColumn> raceMappings = new HashMap<>(raceNumberOrNameToRaceColumnMap);
         final Map<String, Competitor> competitorMappings = new HashMap<>(sailIdToCompetitorMap);
         final Iterator<RaceColumn> raceColumnIterator = getRaceColumns().iterator();
         for (final ScoreCorrectionsForRace raceCorrection : regattaScoreCorrections.getScoreCorrectionsForRaces()) {
             final RaceColumn currentRaceColumn = raceColumnIterator.hasNext() ? raceColumnIterator.next() : null;
-            raceMappings.computeIfAbsent(raceCorrection.getRaceNameOrNumber(), raceNameOrNumber->
-                allowRaceDefaultsByOrder ? currentRaceColumn : null);
+            raceMappings.putIfAbsent(raceCorrection.getRaceNameOrNumber(), allowRaceDefaultsByOrder ? currentRaceColumn : null);
             for (final String sailIdOrShortName : raceCorrection.getSailIDs()) {
-                competitorMappings.computeIfAbsent(sailIdOrShortName, sailIdsOrShortName->findBestMatchingCompetitorBySailNumberOrShortName(sailIdsOrShortName));
+                competitorMappings.putIfAbsent(sailIdOrShortName, findBestMatchingCompetitorBySailNumberOrShortName(sailIdOrShortName));
             }
         }
-        return new ScoreCorrectionMappingImpl(raceMappings, competitorMappings, regattaScoreCorrections);
+        final boolean complete = !raceMappings.values().contains(null) && !competitorMappings.values().contains(null);
+        // return a partial mapping only if explicitly allowed
+        if (!complete) {
+            logger.warning("Incomplete result import "+(allowPartialImport?"allowed":"forbidden")+
+                    ". Competitors not matched: "+
+                    Arrays.toString(competitorMappings.entrySet().stream().filter(e->e.getValue()==null).map(e->e.getKey()).toArray())+
+                    ". Races not matched: "+
+                    Arrays.toString(raceMappings.entrySet().stream().filter(e->e.getValue()==null).map(e->e.getKey()).toArray()));
+        }
+        return complete || allowPartialImport ?
+            new ScoreCorrectionMappingImpl(raceMappings, competitorMappings, regattaScoreCorrections) :
+                null;
     }
 
-    private Competitor findBestMatchingCompetitorBySailNumberOrShortName(String sailIdsOrShortName) {
+    private Competitor findBestMatchingCompetitorBySailNumberOrShortName(String sailIdOrShortName) {
         // TODO move MatchAndApplyScoreCorrectionsDialog.canonicalizeSailID and getCompetitorIdentifyingText to a common package both sides can see and use
         // TODO then use it to match this leaderboard's competitors against the sailIdsOrShortName, passed through canonicalizeSailID
         // TODO Implement AbstractLeaderboardWithCache.findBestMatchingCompetitorBySailNumberOrShortName(...)
