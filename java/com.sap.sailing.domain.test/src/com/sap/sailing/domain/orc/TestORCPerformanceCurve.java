@@ -45,7 +45,6 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
  *
  */
 public class TestORCPerformanceCurve {
-
     // set true to see all the differences i
     private final boolean collectErrors = true;
     
@@ -55,6 +54,7 @@ public class TestORCPerformanceCurve {
     private static ORCCertificatesCollection importerOnline;
     
     private static final String RESOURCES = "resources/orc/";
+    
     @Rule
     public IgnoreInvalidOrcCerticatesRule customIgnoreRule = new IgnoreInvalidOrcCerticatesRule();
 

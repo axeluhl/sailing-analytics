@@ -18,9 +18,9 @@ import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 
 public class TestORCCertificateImporterRMS {
     private static final String RESOURCES = "resources/orc/";
+    
     @Rule
     public IgnoreInvalidOrcCerticatesRule customIgnoreRule = new IgnoreInvalidOrcCerticatesRule();
-    
     
     @Test
     public void testSimpleLocalRMSFileRead() throws IOException, ParseException {

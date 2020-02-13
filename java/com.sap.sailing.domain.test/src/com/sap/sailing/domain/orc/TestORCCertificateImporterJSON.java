@@ -22,7 +22,6 @@ public class TestORCCertificateImporterJSON {
     @Rule
     public IgnoreInvalidOrcCerticatesRule customIgnoreRule = new IgnoreInvalidOrcCerticatesRule();
     
-    
     @Test
     public void testSimpleLocalJSONFileRead() throws IOException, ParseException {
         File fileGER = new File(RESOURCES + "GER2019.json");

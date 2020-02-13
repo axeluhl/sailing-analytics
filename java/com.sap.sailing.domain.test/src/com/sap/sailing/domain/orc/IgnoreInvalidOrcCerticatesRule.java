@@ -15,7 +15,7 @@ import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.CountryCodeFactory;
 
 public class IgnoreInvalidOrcCerticatesRule implements TestRule {
-    private ORCPublicCertificateDatabase db =new ORCPublicCertificateDatabaseImpl();
+    private ORCPublicCertificateDatabase db = new ORCPublicCertificateDatabaseImpl();
     
     @Override
     public Statement apply(Statement base, Description description) {
@@ -55,9 +55,7 @@ public class IgnoreInvalidOrcCerticatesRule implements TestRule {
                         // availability.
                     }
                 }
-
             }
-
             Assume.assumeTrue("Test is ignored!", certificateExists);
             base.evaluate();
         }

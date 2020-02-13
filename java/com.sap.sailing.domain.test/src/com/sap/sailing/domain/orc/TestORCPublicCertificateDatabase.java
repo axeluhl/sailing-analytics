@@ -29,9 +29,9 @@ import com.sap.sse.common.Util;
 
 public class TestORCPublicCertificateDatabase {
     private ORCPublicCertificateDatabase db;
+    
     @Rule
     public IgnoreInvalidOrcCerticatesRule customIgnoreRule = new IgnoreInvalidOrcCerticatesRule();
-    
     
     @Before
     public void setUp() {
