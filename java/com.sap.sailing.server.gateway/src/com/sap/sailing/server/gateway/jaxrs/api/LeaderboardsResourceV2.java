@@ -311,7 +311,8 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS, 
                 DetailType.NUMBER_OF_MANEUVERS,
                 DetailType.RACE_CURRENT_LEG,
-                DetailType.OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS };
+                DetailType.OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS,
+                DetailType.LEG_WINDWARD_DISTANCE_TO_GO_IN_METERS };
     }
 
     private DetailType[] getAvailableOverallDetailColumnTypes() {
