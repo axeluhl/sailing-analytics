@@ -2086,7 +2086,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             store.replaceContentsFrom(newUserStore);
             if (newServerGroup == null) {
                 // create the server group in a replication-aware fashion, making sure it appears on the master
-                apply(s->s.internalCreateUserGroup(UUID.randomUUID(), store.getServerGroupName()));
+                final String serverGroupName = store.getServerGroupName();
+                apply(s->s.internalCreateUserGroup(UUID.randomUUID(), serverGroupName));
                 store.setServerGroup(store.getUserGroupByName(store.getServerGroupName()));
             } else if (newServerGroup != oldServerGroup) {
                 store.setServerGroup(newServerGroup);
