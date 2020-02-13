@@ -667,8 +667,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return createUserGroupWithInitialUser(id, name, getCurrentUser());
     }
     
-    private UserGroup createUserGroupWithInitialUser(UUID id, String name, User initialUser)
-            throws UserGroupManagementException {
+    private UserGroup createUserGroupWithInitialUser(UUID id, String name, User initialUser) {
         logger.info("Creating user group " + name + " with ID " + id);
         apply(s -> s.internalCreateUserGroup(id, name));
         final UserGroup userGroup = store.getUserGroup(id);
@@ -2088,7 +2087,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 // create the server group in a replication-aware fashion, making sure it appears on the master
                 final String serverGroupName = store.getServerGroupName();
                 final UUID serverGroupUuid = UUID.randomUUID();
-                apply(s->s.internalCreateUserGroup(serverGroupUuid, serverGroupName));
+                createUserGroupWithInitialUser(serverGroupUuid, serverGroupName, /* initial user */ null);
                 store.setServerGroup(store.getUserGroupByName(store.getServerGroupName()));
             } else if (newServerGroup != oldServerGroup) {
                 store.setServerGroup(newServerGroup);
