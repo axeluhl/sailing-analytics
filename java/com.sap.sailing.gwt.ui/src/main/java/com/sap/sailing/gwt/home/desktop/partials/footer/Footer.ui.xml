@@ -10,7 +10,7 @@
     <!-- Website footer-->
       <div class="{res.mediaCss.grid}">
         <div class="{res.mediaCss.small12} {res.mediaCss.medium9} {res.mediaCss.columns}">
-          <div class="{local_res.css.sitefooter_copyright}">
+          <div ui:field="copyrightDiv" class="{local_res.css.sitefooter_copyright}">
             <ui:text from='{i18n.footerCopyright}' />
           </div>
           <div class="{local_res.css.sitefooter_links}">
@@ -20,22 +20,22 @@
             <a href="https://www.sap.com/about/legal/privacy.html" target="_blank" class="{local_res.css.sitefooter_links_link}">
               <ui:text from='{i18n.footerPrivacy}' />
             </a>
-	          <a href="https://jobs.sap.com" target="_blank" class="{local_res.css.sitefooter_links_link}">
+	          <a ui:field="sapJobsAnchor" href="https://jobs.sap.com" target="_blank" class="{local_res.css.sitefooter_links_link}">
 	              <ui:text from='{i18n.footerJobs}'/>
 	          </a>
-            <a href="mailto:sailing_analytics%40sap.com?subject=[SAP Sailing] Feedback" target="_blank" class="{local_res.css.sitefooter_links_link}">
+            <a ui:field="feedbackAnchor" href="mailto:sailing_analytics%40sap.com?subject=[SAP Sailing] Feedback" target="_blank" class="{local_res.css.sitefooter_links_link}">
               <ui:text from='{i18n.footerFeedback}' />
             </a>
             <a ui:field="mobileUi" href="HomeMobile.html" 
             		class="{local_res.css.sitefooter_links_link} {res.mediaCss.showonsmall} {res.mediaCss.hideonmedium} {res.mediaCss.hideonlarge}">
               Mobile
             </a>
-            <a href="{releaseNotesNavigation.getSafeTargetUrl}" class="{local_res.css.sitefooter_links_link}">
+            <a ui:field="whatsNewAnchor" href="{releaseNotesNavigation.getSafeTargetUrl}" class="{local_res.css.sitefooter_links_link}">
               <ui:text from='{i18n.whatsNew}' />
             </a>
           </div>
         </div>
-        <l:LanguageSelector labelText="{i18n.footerLanguage}" addStyleNames="{res.mediaCss.small12}
+        <l:LanguageSelector ui:field="languageSelector" labelText="{i18n.footerLanguage}" addStyleNames="{res.mediaCss.small12}
                 {res.mediaCss.medium3} {res.mediaCss.columns} {local_res.css.sitefooter_language}" />
       </div>
   </g:HTMLPanel>

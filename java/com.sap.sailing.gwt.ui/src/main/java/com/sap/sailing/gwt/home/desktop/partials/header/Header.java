@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -42,6 +43,7 @@ public class Header extends Composite {
     @UiField Anchor startPageLink;
     @UiField Anchor eventsPageLink;
     @UiField Anchor solutionsPageLink;
+    @UiField AnchorElement logoAnchor;
 //    @UiField Anchor sponsoringPageLink;
     
     @UiField TextBox searchText;
@@ -104,6 +106,8 @@ public class Header extends Composite {
         
         if (!Branding.getInstance().isActive()) {
             logoImage.getStyle().setDisplay(Display.NONE);
+            solutionsPageLink.getElement().getStyle().setDisplay(Display.NONE);
+            logoAnchor.setHref("");
         }
     }
 
