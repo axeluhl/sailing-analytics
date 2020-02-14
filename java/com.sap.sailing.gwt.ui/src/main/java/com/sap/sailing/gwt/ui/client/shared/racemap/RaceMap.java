@@ -185,6 +185,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private AbsolutePanel rootPanel = new AbsolutePanel();
     
     private MapWidget map;
+    private final Runnable shareLinkAction;
     private Collection<Runnable> mapInitializedListener;
     
     /**
@@ -567,7 +568,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             String leaderboardName, String leaderboardGroupName) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
-                showHeaderPanel, quickRanksDTOProvider, visible -> {}, leaderboardName, leaderboardGroupName);
+                showHeaderPanel, quickRanksDTOProvider, visible -> {}, leaderboardName, leaderboardGroupName, /* shareLinkAction */ null);
     }
     
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
@@ -575,8 +576,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
             StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources, boolean showHeaderPanel,
-            QuickRanksDTOProvider quickRanksDTOProvider, Consumer<WindSource> showWindChartForProvider, String leaderboardName, String leaderboardGroupName) {
+            QuickRanksDTOProvider quickRanksDTOProvider, Consumer<WindSource> showWindChartForProvider, String leaderboardName, String leaderboardGroupName, Runnable shareLinkAction) {
         super(parent, context);
+        this.shareLinkAction = shareLinkAction;
         this.maneuverMarkersAndLossIndicators = new ManeuverMarkersAndLossIndicators(this, sailingService, errorReporter, stringMessages);
         this.showHeaderPanel = showHeaderPanel;
         this.quickRanksDTOProvider = quickRanksDTOProvider;
@@ -919,6 +921,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 if (showMapControls) {
                     createSettingsButton(map);
                 }
+                createShareLinkButton(map);
                 // Data has been initialized
                 RaceMap.this.redraw();
                 trueNorthIndicatorPanel.redraw();
@@ -998,6 +1001,22 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         });
         map.setControls(ControlPosition.RIGHT_TOP, settingsButton);
+    }
+    
+    private void createShareLinkButton(MapWidget map) {
+        if(shareLinkAction != null) {
+            Button settingsButton = new Button();
+            settingsButton.setStyleName("gwt-ShareLinkButton");
+            settingsButton.ensureDebugId("raceMapShareLink");
+            settingsButton.setTitle("Share Link");
+            settingsButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    shareLinkAction.run();
+                }
+            });
+            map.setControls(ControlPosition.RIGHT_TOP, settingsButton);
+        }
     }
 
     private void removeTransitions() {

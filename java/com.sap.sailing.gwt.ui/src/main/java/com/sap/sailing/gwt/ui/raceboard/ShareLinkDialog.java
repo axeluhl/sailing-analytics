@@ -37,7 +37,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             StringMessages stringMessages) {
         super("share the link", "url:", "ok", "cancel", null, null);
         this.lifecycle = lifecycle;
-        this.perspectiveCompositeSettings = perspectiveCompositeSettings; // TODO: COPY COLLECTION!!
+        this.perspectiveCompositeSettings = perspectiveCompositeSettings;
         this.linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(path, raceboardContextDefinition);
         this.stringMessages = stringMessages;
     }

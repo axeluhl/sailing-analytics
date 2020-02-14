@@ -178,7 +178,6 @@ public class RaceBoardPanel
     
     private final FlowPanel raceInformationHeader;
     private final FlowPanel regattaAndRaceTimeInformationHeader;
-    private final Button shareButton;
     private final AuthenticationMenuView userManagementMenuView;
     private boolean currentRaceHasBeenSelectedOnce;
     
@@ -242,17 +241,11 @@ public class RaceBoardPanel
         raceInformationHeader.setStyleName("RegattaRaceInformation-Header");
         regattaAndRaceTimeInformationHeader = new FlowPanel();
         regattaAndRaceTimeInformationHeader.setStyleName("RegattaAndRaceTime-Header");
-        this.shareButton = new Button("share");
-        
-        this.shareButton.addClickHandler(new ClickHandler() {
-            
-            @Override
-            public void onClick(ClickEvent event) {
+        final Runnable shareLinkAction = () -> {
                 ShareLinkDialog shareLinkDialog = new ShareLinkDialog("/gwt/RaceBoard.html", raceboardContextDefinition, lifecycle,
                         getSettings(), stringMessages);
                 shareLinkDialog.show();
-            }
-        });
+        };
         this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), mainCss.usermanagement_loggedin(), mainCss.usermanagement_open());
         this.userManagementMenuView.asWidget().setStyleName(mainCss.usermanagement_icon());
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
@@ -270,7 +263,7 @@ public class RaceBoardPanel
                 errorReporter, timer,
                 competitorSelectionProvider, raceCompetitorSet, stringMessages, selectedRaceIdentifier, 
                 raceMapResources, /* showHeaderPanel */ true, quickRanksDTOProvider, this::showInWindChart,
-                leaderboardName, leaderboardGroupName) {
+                leaderboardName, leaderboardGroupName, shareLinkAction) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
             @Override
@@ -326,7 +319,6 @@ public class RaceBoardPanel
                 }, selectedRaceIdentifier, userService.getStorage());
         raceMap.getLeftHeaderPanel().add(raceInformationHeader);
         raceMap.getRightHeaderPanel().add(regattaAndRaceTimeInformationHeader);
-        raceMap.getRightHeaderPanel().add(shareButton);
         raceMap.getRightHeaderPanel().add(userManagementMenuView);
         addChildComponent(raceMap);
         // add panel for tagging functionality, hidden if no URL parameter "tag" is passed 
