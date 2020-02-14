@@ -271,7 +271,6 @@ public class UserService {
         }
         anonymousUser = resultAndAnomynous.getB();
         serverInfo = resultAndAnomynous.getC();
-
         preAuthenticated = (!userInitiallyLoaded && currentUser != null);
         userInitiallyLoaded = true;
         logger.info("User changed to "

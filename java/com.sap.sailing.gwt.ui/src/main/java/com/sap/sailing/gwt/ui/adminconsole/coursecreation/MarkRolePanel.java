@@ -80,14 +80,11 @@ public class MarkRolePanel extends FlowPanel {
             @Override
             public void execute() {
                 openEditMarkRoleDialog(new MarkRoleDTO());
-                // TODO add action
             }
         });
-
         Label lblFilter = new Label(stringMessages.filterMarkRoles() + ":");
         lblFilter.setWordWrap(false);
         buttonAndFilterPanel.addUnsecuredWidget(lblFilter);
-
         this.filterableMarkRoles = new LabeledAbstractFilterablePanel<MarkRoleDTO>(lblFilter, allMarkRoles,
                 markRoleListDataProvider, stringMessages) {
             @Override
@@ -103,7 +100,6 @@ public class MarkRolePanel extends FlowPanel {
                 return markRolesTable;
             }
         };
-
         createMarkRoleTable(userService);
         filterableMarkRoles.getTextBox().ensureDebugId("MarkRolesFilterTextBox");
         buttonAndFilterPanel.addUnsecuredWidget(filterableMarkRoles);
@@ -254,12 +250,12 @@ public class MarkRolePanel extends FlowPanel {
         markRolesTable.addColumn(actionsColumn, stringMessages.actions());
     }
 
-    void openEditMarkRoleDialog(final MarkRoleDTO originalMarkRole) {
+    private void openEditMarkRoleDialog(final MarkRoleDTO originalMarkRole) {
         final MarkRoleEditDialog dialog = new MarkRoleEditDialog(stringMessages, originalMarkRole,
                 new DialogCallback<MarkRoleDTO>() {
                     @Override
                     public void ok(MarkRoleDTO markRole) {
-                        sailingService.addOrUpdateMarkRole(markRole, new AsyncCallback<MarkRoleDTO>() {
+                        sailingService.createMarkRole(markRole, new AsyncCallback<MarkRoleDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter

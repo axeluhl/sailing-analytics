@@ -231,7 +231,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
             Positioning positioningInformation, Iterable<String> tags) {
         final MarkProperties markProperties = updateMarkProperties(uuid, properties, tags);
         if (positioningInformation != null && markProperties != properties) { // no update required if same object
-            apply(s -> internalSetPositioningInformationForMarkProperties(uuid, positioningInformation));
+            apply(s -> s.internalSetPositioningInformationForMarkProperties(uuid, positioningInformation));
         }
         return getMarkPropertiesById(uuid);
     }
@@ -244,7 +244,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
         }
         if (markProperties != properties) { // no update required if same object
             getSecurityService().checkCurrentUserUpdatePermission(markProperties);
-            apply(s -> internalUpdateMarkProperties(uuid, properties, tags));
+            apply(s -> s.internalUpdateMarkProperties(uuid, properties, tags));
         }
         return getMarkPropertiesById(uuid);
     }
@@ -395,7 +395,7 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     public CourseTemplate updateCourseTemplate(UUID uuid, String name, String shortName, URL optionalImageURL, ArrayList<String> tags,
             Integer defaultNumberOfLaps) {
         getSecurityService().checkCurrentUserUpdatePermission(courseTemplatesById.get(uuid));
-        apply(s -> internalUpdateCourseTemplate(uuid, name, shortName, optionalImageURL, tags, defaultNumberOfLaps));
+        apply(s -> s.internalUpdateCourseTemplate(uuid, name, shortName, optionalImageURL, tags, defaultNumberOfLaps));
         return getCourseTemplateById(uuid);
     }
 

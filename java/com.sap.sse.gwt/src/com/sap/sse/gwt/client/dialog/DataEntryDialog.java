@@ -40,7 +40,9 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.ColorTextBox;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.controls.GenericListBox;
 import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
@@ -234,16 +236,6 @@ public abstract class DataEntryDialog<T> {
     protected abstract T getResult();
 
     /**
-     * Creates a text box with a key-up listener attached which ensures the value is updated after each
-     * key-up event and the entire dialog is {@link #validateAndUpdate() validated} in this case.
-     * 
-     * @param initialValue initial value to show in text box; <code>null</code> is permissible
-     */
-    public TextBox createTextBox(String initialValue) {
-        return createTextBoxInternal(initialValue, 30);
-    }
-
-    /**
      * This methods creates a {@link MultiWordSuggestOracle} where the given suggest values are
      * {@link MultiWordSuggestOracle#addAll(java.util.Collection) added} and
      * {@link MultiWordSuggestOracle#setDefaultSuggestionsFromText(java.util.Collection) set as default suggestions},
@@ -302,14 +294,31 @@ public abstract class DataEntryDialog<T> {
      * key-up event and the entire dialog is {@link #validateAndUpdate() validated} in this case.
      * 
      * @param initialValue initial value to show in text box; <code>null</code> is permissible
+     */
+    public TextBox createTextBox(String initialValue) {
+        return createTextBox(initialValue, 30);
+    }
+    
+    /**
+     * Creates a text box with a key-up listener attached which ensures the value is updated after each
+     * key-up event and the entire dialog is {@link #validateAndUpdate() validated} in this case.
+     * 
+     * @param initialValue initial value to show in text box; <code>null</code> is permissible
      * @param visibleLength the visible length of the text box
      */
     public TextBox createTextBox(String initialValue, int visibleLength) {
-        return createTextBoxInternal(initialValue, visibleLength);
+        return configureTextBox(new TextBox(), initialValue, visibleLength);
     }
         
-    private TextBox createTextBoxInternal(String initialValue, int visibleLength) {
-        TextBox textBox = new TextBox();
+    public ColorTextBox createColorTextBox(Color initialValue) {
+        return createColorTextBox(initialValue, 30);
+    }
+    
+    public ColorTextBox createColorTextBox(Color initialValue, int visibleLength) {
+        return configureTextBox(new ColorTextBox(), initialValue == null ? null : initialValue.getAsHtml(), visibleLength);
+    }
+    
+    private <TextBoxType extends TextBox> TextBoxType configureTextBox(TextBoxType textBox, String initialValue, int visibleLength) {
         textBox.setVisibleLength(visibleLength);
         textBox.setText(initialValue == null ? "" : initialValue);
         DialogUtils.addFocusUponKeyUpToggler(textBox);

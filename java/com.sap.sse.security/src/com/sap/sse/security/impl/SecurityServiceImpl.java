@@ -667,8 +667,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return createUserGroupWithInitialUser(id, name, getCurrentUser());
     }
     
-    private UserGroup createUserGroupWithInitialUser(UUID id, String name, User initialUser)
-            throws UserGroupManagementException {
+    private UserGroup createUserGroupWithInitialUser(UUID id, String name, User initialUser) {
         logger.info("Creating user group " + name + " with ID " + id);
         apply(s -> s.internalCreateUserGroup(id, name));
         final UserGroup userGroup = store.getUserGroup(id);
@@ -2086,7 +2085,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             store.replaceContentsFrom(newUserStore);
             if (newServerGroup == null) {
                 // create the server group in a replication-aware fashion, making sure it appears on the master
-                apply(s->s.internalCreateUserGroup(UUID.randomUUID(), store.getServerGroupName()));
+                final String serverGroupName = store.getServerGroupName();
+                final UUID serverGroupUuid = UUID.randomUUID();
+                createUserGroupWithInitialUser(serverGroupUuid, serverGroupName, /* initial user */ null);
                 store.setServerGroup(store.getUserGroupByName(store.getServerGroupName()));
             } else if (newServerGroup != oldServerGroup) {
                 store.setServerGroup(newServerGroup);
@@ -2104,6 +2105,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         } finally {
             Thread.currentThread().setContextClassLoader(oldCCL);
         }
+        // now ensure that the SERVER object has a valid ownership; use the (potentially new) server group as the default:
+        migrateServerObject();
         logger.info("Reading isSharedAcrossSubdomains...");
         sharedAcrossSubdomainsOf = (String) is.readObject();
         logger.info("...as "+sharedAcrossSubdomainsOf);
@@ -2248,6 +2251,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         migratedHasPermissionTypes.add(identifier.getTypeIdentifier());
         return wasNecessaryToMigrate;
+    }
+
+    @Override
+    public void migrateServerObject() {
+        final QualifiedObjectIdentifier serverIdentifier = SecuredSecurityTypes.SERVER
+                .getQualifiedObjectIdentifier(
+                        new TypeRelativeObjectIdentifier(ServerInfo.getName()));
+        migrateOwnership(serverIdentifier, serverIdentifier.toString());
     }
 
     @Override
