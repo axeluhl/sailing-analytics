@@ -40,6 +40,7 @@ import com.sap.sailing.domain.base.LeaderboardChangeListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
+import com.sap.sailing.domain.base.SailNumberCanonicalizerAndMatcher;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -1379,6 +1380,8 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
     public ScoreCorrectionMapping mapRegattaScoreCorrections(RegattaScoreCorrections regattaScoreCorrections,
             Map<String, RaceColumn> raceNumberOrNameToRaceColumnMap, Map<String, Competitor> sailIdToCompetitorMap,
             boolean allowRaceDefaultsByOrder, boolean allowPartialImport) {
+        final SailNumberCanonicalizerAndMatcher sailNumberCanonicalizer = new SailNumberCanonicalizerAndMatcher();
+        final Map<String, Competitor> competitorsByTheirCanonicalizedSailNumber = sailNumberCanonicalizer.canonicalizeLeaderboardSailIDs(getAllCompetitors());
         final Map<String, RaceColumn> raceMappings = new HashMap<>(raceNumberOrNameToRaceColumnMap);
         final Map<String, Competitor> competitorMappings = new HashMap<>(sailIdToCompetitorMap);
         final Iterator<RaceColumn> raceColumnIterator = getRaceColumns().iterator();
@@ -1386,7 +1389,8 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             final RaceColumn currentRaceColumn = raceColumnIterator.hasNext() ? raceColumnIterator.next() : null;
             raceMappings.putIfAbsent(raceCorrection.getRaceNameOrNumber(), allowRaceDefaultsByOrder ? currentRaceColumn : null);
             for (final String sailIdOrShortName : raceCorrection.getSailIDs()) {
-                competitorMappings.putIfAbsent(sailIdOrShortName, findBestMatchingCompetitorBySailNumberOrShortName(sailIdOrShortName));
+                competitorMappings.putIfAbsent(sailIdOrShortName, competitorsByTheirCanonicalizedSailNumber.get(sailNumberCanonicalizer.canonicalizeSailID(sailIdOrShortName,
+                        /* default nationality IOC code */ null)));
             }
         }
         final boolean complete = !raceMappings.values().contains(null) && !competitorMappings.values().contains(null);
@@ -1401,12 +1405,5 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         return complete || allowPartialImport ?
             new ScoreCorrectionMappingImpl(raceMappings, competitorMappings, regattaScoreCorrections) :
                 null;
-    }
-
-    private Competitor findBestMatchingCompetitorBySailNumberOrShortName(String sailIdOrShortName) {
-        // TODO move MatchAndApplyScoreCorrectionsDialog.canonicalizeSailID and getCompetitorIdentifyingText to a common package both sides can see and use
-        // TODO then use it to match this leaderboard's competitors against the sailIdsOrShortName, passed through canonicalizeSailID
-        // TODO Implement AbstractLeaderboardWithCache.findBestMatchingCompetitorBySailNumberOrShortName(...)
-        return null;
     }
 }
