@@ -24,7 +24,8 @@
                     <h2 class="articleSubheadline">February 2020</h2>
                     <ul class="bulletList">
                         <li>The "Local Server" tab now refreshes automatically when it comes into view.</li>
-                        <li>There is a new system property <tt>repliate.restore.replicas</tt>. When it is set to <tt>true</tt>,
+                        <li>There is a new system property <tt>repliate.restore.replicas</tt>. When it is set to <tt>true</tt>
+                            (which is the default),
                             upon start-up the server instance will read the replica descriptors stored persistently when
                             a replica registers, assuming that those replicas are still alive and want to continue to
                             receive replication updates from this server. This way, replicas may not have to be
