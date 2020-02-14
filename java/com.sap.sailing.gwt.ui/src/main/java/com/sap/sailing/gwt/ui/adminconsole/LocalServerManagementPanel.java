@@ -161,7 +161,6 @@ public class LocalServerManagementPanel extends SimplePanel {
         final boolean hasUserOwner = ownership != null && ownership.getUserOwner() != null;
         groupOwnerInfo.setText(hasGroupOwner ? ownership.getTenantOwner().getName() : "---");
         userOwnerInfo.setText(hasUserOwner ? ownership.getUserOwner().getName() : "---");
-
         // Update changeability
         isSelfServiceServerCheckbox.setEnabled(userService.hasCurrentUserMetaPermission(
                 serverInfo.getIdentifier().getPermission(ServerActions.CREATE_OBJECT), serverInfo.getOwnership()));
@@ -172,7 +171,6 @@ public class LocalServerManagementPanel extends SimplePanel {
     private void updateServerConfiguration(ServerConfigurationDTO result) {
         isStandaloneServerCheckbox.setValue(result.isStandaloneServer(), false);
         isStandaloneServerCheckbox.setEnabled(true);
-
         isPublicServerCheckbox.setValue(result.isPublic(), false);
         isSelfServiceServerCheckbox.setValue(result.isSelfService(), false);
     }
