@@ -399,13 +399,17 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                 SecuredSecurityTypes.SERVER.getPermissionForObject(
                         SecuredSecurityTypes.ServerActions.CONFIGURE_REMOTE_INSTANCES, serverInfo));
 
-        LocalServerManagementPanel localServerInstancesManagementPanel = new LocalServerManagementPanel(
+        final LocalServerManagementPanel localServerInstancesManagementPanel = new LocalServerManagementPanel(
                 getSailingService(), getUserService(), this, getStringMessages());
         localServerInstancesManagementPanel.ensureDebugId("LocalServer");
         panel.addToTabPanel(advancedTabPanel,
                 new DefaultRefreshableAdminConsolePanel<LocalServerManagementPanel>(
-                        localServerInstancesManagementPanel),
-                getStringMessages().localServer(),
+                        localServerInstancesManagementPanel) {
+                            @Override
+                            public void refreshAfterBecomingVisible() {
+                                localServerInstancesManagementPanel.refreshServerConfiguration();
+                            }
+        }, getStringMessages().localServer(),
                 // We explicitly use a different permission check here.
                 // Most panels show a list of domain objects which means we check if the user has permissions for any
                 // potentially existing object to decide about the visibility.

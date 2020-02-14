@@ -198,7 +198,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         User currentUser = new UserImpl("test", "email@test", Collections.emptyMap(), null);
 
         SecurityService securityService = Mockito.mock(SecurityService.class);
-        Mockito.doReturn(defaultTenant).when(securityService).getDefaultTenant();
+        Mockito.doReturn(defaultTenant).when(securityService).getServerGroup();
         Mockito.doReturn(currentUser).when(securityService).getCurrentUser();
         Mockito.doReturn(true).when(securityService).hasCurrentUserReadPermission(Mockito.any());
         Mockito.doNothing().when(securityService).checkCurrentUserReadPermission(Mockito.any());

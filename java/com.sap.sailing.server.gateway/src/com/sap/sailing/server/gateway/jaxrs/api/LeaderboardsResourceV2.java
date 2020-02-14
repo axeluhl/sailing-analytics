@@ -311,7 +311,8 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS, 
                 DetailType.NUMBER_OF_MANEUVERS,
                 DetailType.RACE_CURRENT_LEG,
-                DetailType.OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS };
+                DetailType.OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS,
+                DetailType.LEG_WINDWARD_DISTANCE_TO_GO_IN_METERS };
     }
 
     private DetailType[] getAvailableOverallDetailColumnTypes() {
@@ -491,7 +492,6 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
      * If {@code raceColumnNames} is empty or {@code null}, return the names of all {@link raceColumnsOfLeaderboard};
      * otherwise return those race column names from {@code raceColumnsOfLeaderboard} that are also in
      * {@code raceColumnNames}.
-     * @param leaderboard TODO
      * @param showOnlyActiveRacesForCompetitorIds
      *            {@code null}, or specifies zero or more competitor IDs, requesting that the result contained the race
      *            column holding that competitor's "active" race at the time requested; see also the

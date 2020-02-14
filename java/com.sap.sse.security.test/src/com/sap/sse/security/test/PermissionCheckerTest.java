@@ -73,7 +73,7 @@ public class PermissionCheckerTest {
         final String adminTenantName = "admin-tenant";
         userStore = new UserStoreImpl(adminTenantName);
         userStore.ensureDefaultRolesExist();
-        userStore.ensureDefaultTenantExists();
+        userStore.ensureServerGroupExists();
         accessControlStore = new AccessControlStoreImpl(userStore);
         AbstractCompositeAuthorizingRealm.setTestStores(userStore, accessControlStore);
         realm = new UsernamePasswordRealm();
@@ -109,7 +109,8 @@ public class PermissionCheckerTest {
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 ownership, acl));
         userStore.addRoleForUser(user.getName(),
-                new Role(AdminRole.getInstance(), /* qualified for userTenant */ null, /* qualified for user */ user));
+                new Role(userStore.getRoleDefinitionByPrototype(AdminRole.getInstance()),
+                        /* qualified for userTenant */ null, /* qualified for user */ user));
         // having the admin role qualified for objects owned by user should help
         assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 ownership, acl));
@@ -145,7 +146,8 @@ public class PermissionCheckerTest {
                 /* tenantOwner */ null, regattaName);
         // grant user the admin role, but only for objects owned by the user (leaderboard, but not regatta)
         userStore.addRoleForUser(user.getName(),
-                new Role(AdminRole.getInstance(), /* qualifiedForTenant */ null, /* qualifiedForUser */ user));
+                new Role(userStore.getRoleDefinitionByPrototype(AdminRole.getInstance()), /* qualifiedForTenant */ null,
+                        /* qualifiedForUser */ user));
         assertTrue(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         assertFalse(realm.isPermitted(principalCollection, regattaPermission.toString()));
         accessControlStore.setOwnership(SecuredDomainType.REGATTA.getQualifiedObjectIdentifier(regattaIdentifier), /* userOwner */ null,
@@ -155,7 +157,8 @@ public class PermissionCheckerTest {
         assertFalse(realm.isPermitted(principalCollection, regattaPermission.toString()));
         // but now we assign the admin role to the user, qualified for objects owned by the group owner:
         userStore.addRoleForUser(user.getName(),
-                new Role(AdminRole.getInstance(), /* qualifiedForTenant */ userTenant, /* qualifiedForUser */ null));
+                new Role(userStore.getRoleDefinitionByPrototype(AdminRole.getInstance()),
+                        /* qualifiedForTenant */ userTenant, /* qualifiedForUser */ null));
         assertTrue(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         // now the user should be granted permission because admin gets *, and the user gets admin on all objects owned by userTenant
         assertTrue(realm.isPermitted(principalCollection, regattaPermission.toString()));

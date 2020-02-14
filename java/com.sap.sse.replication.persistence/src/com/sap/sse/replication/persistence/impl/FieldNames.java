@@ -1,0 +1,6 @@
+package com.sap.sse.replication.persistence.impl;
+
+public enum FieldNames {
+    REPLICA_ID_AS_STRING, REPLICA_IP_ADDRESS, REPLICA_REGISTRATION_TIME_MILLIS,
+    REPLICA_ADDITIONAL_INFORMATION, REPLICA_REPLICABLE_IDS_AS_STRINGS;
+}
