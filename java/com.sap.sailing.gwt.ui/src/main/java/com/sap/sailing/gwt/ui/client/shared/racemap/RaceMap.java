@@ -88,6 +88,7 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
+import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.ui.actions.GetBoatPositionsAction;
 import com.sap.sailing.gwt.ui.actions.GetPolarAction;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
@@ -164,6 +165,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.gwt.shared.Branding;
 
 public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> implements TimeListener, CompetitorSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, ColorMapperChangedListener, RequiresDataInitialization, RequiresResize, QuickRankProvider {
@@ -763,7 +765,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 rootPanel.add(map, 0, 0);
                 if (showHeaderPanel) {
                     Image sapLogo = createSAPLogo();
-                    rootPanel.add(sapLogo);
+                    if (Branding.getInstance().isActive()) {
+                        rootPanel.add(sapLogo);
+                    }
                 }
 
                 map.setControls(ControlPosition.LEFT_TOP, topLeftControlsWrapperPanel);
