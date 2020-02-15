@@ -31,7 +31,7 @@ public class TestORCPublicCertificateDatabase {
     private ORCPublicCertificateDatabase db;
     
     @Rule
-    public IgnoreInvalidOrcCerticatesRule customIgnoreRule = new IgnoreInvalidOrcCerticatesRule();
+    public IgnoreInvalidOrcCertificatesRule customIgnoreRule = new IgnoreInvalidOrcCertificatesRule();
     
     @Before
     public void setUp() {
@@ -93,7 +93,7 @@ public class TestORCPublicCertificateDatabase {
         assertEquals(handle.getSailNumber(), result.getSailNumber());
     }
     
-    @IgnoreInvalidOrcCerticates
+    @IgnoreInvalidOrcCertificates
     @Test
     public void testParallelFuzzySearch() throws InterruptedException, ExecutionException {
         Iterator<CountryCode> iterator = CountryCodeFactory.INSTANCE.getAll().iterator();

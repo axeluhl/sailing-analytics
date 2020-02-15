@@ -14,9 +14,23 @@ import com.sap.sailing.domain.orc.impl.ORCPublicCertificateDatabaseImpl;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.CountryCodeFactory;
 
-public class IgnoreInvalidOrcCerticatesRule implements TestRule {
+/***
+ * A IgnoreInvalidOrcCerticatesRule is an implementation of TestRule. This class execution depends on
+ * {@link IgnoreInvalidOrcCertificates} annotation on any method in a test class containing
+ * {@link org.junit.rules.TestRule} annotation with current class implementation. When any test class added
+ * {@link IgnoreInvalidOrcCertificatesRule} rule then before executing all of it's test method, Junit will execute the
+ * evaluate() method of {@link IgnoreInvalidOrcCertificatesRule} class. This method first check whether the current test
+ * method contains the {@link IgnoreInvalidOrcCertificates} annotation, if yes then it will check for any certificate
+ * available to parse on ORC Website. If certificate available then this method continue execution of the current test
+ * method otherwise it will ignore it.
+ * 
+ * @author Usman Ali
+ *
+ */
+
+public class IgnoreInvalidOrcCertificatesRule implements TestRule {
     private ORCPublicCertificateDatabase db = new ORCPublicCertificateDatabaseImpl();
-    
+
     @Override
     public Statement apply(Statement base, Description description) {
         return new IgnorableStatement(base, description);
@@ -31,10 +45,15 @@ public class IgnoreInvalidOrcCerticatesRule implements TestRule {
             this.description = description;
         }
 
+        /***
+         * This method executes for every test case having {@link TestRule} annotation of
+         * {@link IgnoreInvalidOrcCertificatesRule} class. Assume statement at the end of this method evaluates whether
+         * the test method will execute or ignored.
+         */
         @Override
         public void evaluate() throws Throwable {
             boolean certificateExists = true;
-            IgnoreInvalidOrcCerticates annotation = description.getAnnotation(IgnoreInvalidOrcCerticates.class);
+            IgnoreInvalidOrcCertificates annotation = description.getAnnotation(IgnoreInvalidOrcCertificates.class);
             if (annotation != null) {
                 Iterator<CountryCode> iterator = CountryCodeFactory.INSTANCE.getAll().iterator();
                 int year = Calendar.getInstance().get(Calendar.YEAR);

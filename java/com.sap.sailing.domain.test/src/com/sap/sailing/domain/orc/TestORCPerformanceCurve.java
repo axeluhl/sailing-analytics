@@ -56,7 +56,7 @@ public class TestORCPerformanceCurve {
     private static final String RESOURCES = "resources/orc/";
     
     @Rule
-    public IgnoreInvalidOrcCerticatesRule customIgnoreRule = new IgnoreInvalidOrcCerticatesRule();
+    public IgnoreInvalidOrcCertificatesRule customIgnoreRule = new IgnoreInvalidOrcCertificatesRule();
 
     @Rule
     public ErrorCollector collector = new ErrorCollector();
@@ -254,7 +254,7 @@ public class TestORCPerformanceCurve {
     /**
      * Tests to make sure, that the structure of the certificate files didn't change and performance curves can be built
      */
-    @IgnoreInvalidOrcCerticates
+    @IgnoreInvalidOrcCertificates
     @Test
     public void testOnlineImport() throws FunctionEvaluationException {
         assertFalse(Util.isEmpty(importerOnline.getCertificateIds()));

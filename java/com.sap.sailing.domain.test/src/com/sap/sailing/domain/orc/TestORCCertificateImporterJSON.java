@@ -20,7 +20,7 @@ public class TestORCCertificateImporterJSON {
     private static final String RESOURCES = "resources/orc/";
     
     @Rule
-    public IgnoreInvalidOrcCerticatesRule customIgnoreRule = new IgnoreInvalidOrcCerticatesRule();
+    public IgnoreInvalidOrcCertificatesRule customIgnoreRule = new IgnoreInvalidOrcCertificatesRule();
     
     @Test
     public void testSimpleLocalJSONFileRead() throws IOException, ParseException {
@@ -30,7 +30,7 @@ public class TestORCCertificateImporterJSON {
         assertNotNull(milan);
     }
     
-    @IgnoreInvalidOrcCerticates
+    @IgnoreInvalidOrcCertificates
     @Test
     public void testSimpleOnlineJSONFileRead() throws IOException, ParseException {
         ORCCertificatesCollection importer = ORCCertificatesImporter.INSTANCE.read(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=json").openStream());

@@ -20,7 +20,7 @@ public class TestORCCertificateImporterRMS {
     private static final String RESOURCES = "resources/orc/";
     
     @Rule
-    public IgnoreInvalidOrcCerticatesRule customIgnoreRule = new IgnoreInvalidOrcCerticatesRule();
+    public IgnoreInvalidOrcCertificatesRule customIgnoreRule = new IgnoreInvalidOrcCertificatesRule();
     
     @Test
     public void testSimpleLocalRMSFileRead() throws IOException, ParseException {
@@ -30,7 +30,7 @@ public class TestORCCertificateImporterRMS {
         assertNotNull(milan);
     }
     
-    @IgnoreInvalidOrcCerticates
+    @IgnoreInvalidOrcCertificates
     @Test
     public void testSimpleOnlineRMSFileRead() throws IOException, ParseException {
         ORCCertificatesCollection certificates = ORCCertificatesImporter.INSTANCE.read(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=rms").openStream());
