@@ -4,10 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -35,23 +32,27 @@ import com.sap.sse.common.Util;
 
 public class TestORCPublicCertificateDatabase {
     private ORCPublicCertificateDatabase db;
-    Map<String, String> dateComparisonMap = new LinkedHashMap<String, String>();
+    Map<String, GregorianCalendar> dateComparisonMap = new LinkedHashMap<String, GregorianCalendar>();
     List<String> dateFailureCases =null;
     
     @Before
     public void setUp() {
         db = new ORCPublicCertificateDatabaseImpl();
-        dateComparisonMap.put("2019-02-21T10:38:59Z", "2019-02-21 10:38:59");
-        dateComparisonMap.put("2019-02-21T12:00:00.000GMT+2", "2019-02-21 10:00:00");
-        dateComparisonMap.put("2019-02-21T15:00:00.000 GMT+2", "2019-02-21 13:00:00");
-        dateComparisonMap.put("2019-02-21T10:38:55.000-0800", "2019-02-21 18:38:55");
-        dateComparisonMap.put("2019-02-21T10:38:32.000+08:00", "2019-02-21 02:38:32");
-        dateComparisonMap.put("2019-02-21T10:38:09.000-06", "2019-02-21 16:38:09");
-        dateComparisonMap.put("2019-02-21T10:38:22.000Z", "2019-02-21 10:38:22");
-        dateComparisonMap.put("2019-02-21T10:38:00.000z", "2019-02-21 10:38:00");
-        dateComparisonMap.put("2019-02-21T10:38:46z", "2019-02-21 10:38:46");
-        dateComparisonMap.put("2019-02-21T10:38:17", "2019-02-21 10:38:17");
-        dateComparisonMap.put("2019-02-21T10:38:33.000", "2019-02-21 10:38:33");
+        /**
+         * By default GregorianCalendar month starts from 0 as January and so on. In below cases 1 specifies the date
+         * month as February.
+         */
+        dateComparisonMap.put("2019-02-21T10:38:59Z", new GregorianCalendar(2019, 1, 21, 15, 38, 59));
+        dateComparisonMap.put("2019-02-21T12:00:00.000GMT+2", new GregorianCalendar(2019, 1, 21, 15, 00, 00));
+        dateComparisonMap.put("2019-02-21T15:00:00.000 GMT-2", new GregorianCalendar(2019, 1, 21, 22, 00, 00));
+        dateComparisonMap.put("2019-02-21T10:38:55.000-0800", new GregorianCalendar(2019, 1, 21, 23, 38, 55));
+        dateComparisonMap.put("2019-02-21T10:38:32.000+08:00", new GregorianCalendar(2019, 1, 21, 07, 38, 32));
+        dateComparisonMap.put("2019-02-21T10:38:09.000-06", new GregorianCalendar(2019, 1, 21, 21, 38, 9));
+        dateComparisonMap.put("2019-02-21T10:38:22.000Z", new GregorianCalendar(2019, 1, 21, 15, 38, 22));
+        dateComparisonMap.put("2019-02-21T10:38:00.000z", new GregorianCalendar(2019, 1, 21, 15, 38, 00));
+        dateComparisonMap.put("2019-02-21T10:38:46z", new GregorianCalendar(2019, 1, 21, 15, 38, 46));
+        dateComparisonMap.put("2019-02-21T10:38:17", new GregorianCalendar(2019, 1, 21, 15, 38, 17));
+        dateComparisonMap.put("2019-02-21T10:38:33.000", new GregorianCalendar(2019, 1, 21, 15, 38, 33));
         dateFailureCases = Arrays.asList("2019-02-21T10:44GMT+2","2019-02-21T10:38+0800","2019-02-21T10:38+08:00",
                 "2019-02-21T10:38-08","2019-02-21T10:38Z","2019-02-21T10z","2019-02-21T10:38z");
 
@@ -141,27 +142,24 @@ public class TestORCPublicCertificateDatabase {
     
     @Test
     public void testParseDateSuccessCases() throws ParseException {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         for (String date : dateComparisonMap.keySet()) {
             Date convertedDate = db.parseDate(date);
-            Assert.assertEquals(convertedDate.getTime() / 1000,
-                    dateFormat.parse(dateComparisonMap.get(date)).getTime() / 1000);
+            assertEquals(convertedDate.getTime(), dateComparisonMap.get(date).getTimeInMillis());
         }
     }
     
     @Test
     public void testParseDateFailureCases() throws ParseException {
-        for(String dateString: dateFailureCases) {
+        for (String dateString : dateFailureCases) {
             try {
                 db.parseDate(dateString);
-                Assert.fail(dateString+" is parsable"); // as date must not be parsable
-            } catch(ParseException e) {
+                Assert.fail(dateString + " is parsable"); // as date must not be parsable
+            } catch (ParseException e) {
                 // ignoring exception as date must fail.
             }
         }
         Assert.assertTrue(true);
-        
+
     }
 
     private void assertSoulmate(final String referenceNumber, CertificateHandle handle) {
