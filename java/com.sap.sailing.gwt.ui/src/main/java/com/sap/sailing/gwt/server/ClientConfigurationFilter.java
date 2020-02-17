@@ -118,12 +118,15 @@ public class ClientConfigurationFilter implements Filter {
         chain.doFilter(request, responseWrapper);
         
         String title = "";
+        String faviconPath = "images/whitelabel.ico";
         if (Branding.getInstance().isActive()) {
             title = "SAP ";
+            faviconPath = "images/sap.ico";
         }
         
         String content = buffer.toString();
-        String replaced = content.replace("${SAP}", title);
+        String replaced = content.replace("${SAP}", title).replace("${faviconPath}", faviconPath);
+
         
         response.getOutputStream().write(replaced.getBytes());
     }
