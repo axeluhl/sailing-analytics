@@ -1393,17 +1393,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                         /* default nationality IOC code */ null)));
             }
         }
-        final boolean complete = !raceMappings.values().contains(null) && !competitorMappings.values().contains(null);
-        // return a partial mapping only if explicitly allowed
-        if (!complete) {
-            logger.warning("Incomplete result import "+(allowPartialImport?"allowed":"forbidden")+
-                    ". Competitors not matched: "+
-                    Arrays.toString(competitorMappings.entrySet().stream().filter(e->e.getValue()==null).map(e->e.getKey()).toArray())+
-                    ". Races not matched: "+
-                    Arrays.toString(raceMappings.entrySet().stream().filter(e->e.getValue()==null).map(e->e.getKey()).toArray()));
-        }
-        return complete || allowPartialImport ?
-            new ScoreCorrectionMappingImpl(raceMappings, competitorMappings, regattaScoreCorrections) :
-                null;
+        return new ScoreCorrectionMappingImpl(raceMappings, competitorMappings, regattaScoreCorrections);
     }
 }

@@ -1,5 +1,6 @@
 package com.sap.sailing.server.gateway.jaxrs;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
@@ -55,8 +56,10 @@ public abstract class AbstractSailingServerResource {
     
     protected <T> T[] getServices(Class<T> clazz) {
         final ServiceTracker<T, T> tracker = getServiceTracker(clazz);
+        final Object[] objectServices = tracker.getServices();
         @SuppressWarnings("unchecked")
-        T[] services = (T[]) tracker.getServices();
+        final T[] services = (T[]) Array.newInstance(clazz, objectServices.length);
+        System.arraycopy(objectServices, 0, services, 0, services.length);
         tracker.close();
         return services;
     }

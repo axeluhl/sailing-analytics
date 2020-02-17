@@ -33,4 +33,11 @@ public interface ScoreCorrectionMapping {
     Map<String, Competitor> getCompetitorMappings();
 
     Map<RaceColumn, Map<Competitor, Pair<Double, MaxPointsReason>>> getScoreCorrections();
+    
+    /**
+     * Tells whether all sail IDs/numbers and all race numbers from the original {@link RegattaScoreCorrections} object have
+     * successfully been mapped to {@link Competitor} and {@link RaceColumn} objects, respectively, in the leaderboard
+     * to which they apply.
+     */
+    boolean isComplete();
 }

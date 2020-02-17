@@ -54,4 +54,8 @@ public class ScoreCorrectionMappingImpl implements ScoreCorrectionMapping {
         return result;
     }
 
+    @Override
+    public boolean isComplete() {
+        return !getRaceMappings().values().contains(null) && !getCompetitorMappings().values().contains(null);
+    }
 }
