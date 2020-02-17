@@ -5,10 +5,12 @@ import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.home.shared.app.HasLocationTitle;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.shared.Branding;
 
 public class StartPlace extends Place implements HasLocationTitle, HasMobileVersion {
     public String getTitle() {
-        return StringMessages.INSTANCE.sapSailing();
+        return Branding.getInstance().isActive() ? StringMessages.INSTANCE.sapSailing()
+                : StringMessages.INSTANCE.whitelabelSailing();
     }
     
     public static class Tokenizer implements PlaceTokenizer<StartPlace> {

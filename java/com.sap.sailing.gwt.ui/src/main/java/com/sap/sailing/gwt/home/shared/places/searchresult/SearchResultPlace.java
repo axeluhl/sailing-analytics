@@ -5,6 +5,7 @@ import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.home.shared.app.HasLocationTitle;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.shared.Branding;
 
 public class SearchResultPlace extends Place implements HasLocationTitle, HasMobileVersion {
     private final String searchText;
@@ -20,7 +21,8 @@ public class SearchResultPlace extends Place implements HasLocationTitle, HasMob
     }
 
     public String getTitle() {
-        return StringMessages.INSTANCE.sapSailing() + " - " + StringMessages.INSTANCE.search();
+        return (Branding.getInstance().isActive() ? StringMessages.INSTANCE.sapSailing()
+                : StringMessages.INSTANCE.whitelabelSailing()) + " - " + StringMessages.INSTANCE.search();
     }
     
     public String getSearchText() {

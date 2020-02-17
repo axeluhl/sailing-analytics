@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.partials.seriesheader.SeriesHeader;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.shared.Branding;
 
 public class TabletAndDesktopSeriesView extends Composite implements SeriesView<AbstractSeriesTabPlace, SeriesView.Presenter> {
     private static final ApplicationHistoryMapper historyMapper = GWT.<ApplicationHistoryMapper> create(ApplicationHistoryMapper.class);
@@ -49,7 +50,9 @@ public class TabletAndDesktopSeriesView extends Composite implements SeriesView<
     @Override
     public void navigateTabsTo(AbstractSeriesTabPlace place) {
         tabPanelUi.activatePlace(place);
-        StringBuilder titleBuilder = new StringBuilder(StringMessages.INSTANCE.sapSailing()).append(" - ");
+        StringBuilder titleBuilder = new StringBuilder(
+                (Branding.getInstance().isActive() ? StringMessages.INSTANCE.sapSailing()
+                        : StringMessages.INSTANCE.whitelabelSailing())).append(" - ");
 
         titleBuilder.append(currentPresenter.getSeriesDTO().getDisplayName());
 

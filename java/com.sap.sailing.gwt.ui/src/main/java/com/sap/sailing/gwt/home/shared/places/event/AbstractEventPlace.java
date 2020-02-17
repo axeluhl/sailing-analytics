@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.common.client.AbstractMapTokenizer;
 import com.sap.sailing.gwt.home.shared.app.HasLocationTitle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.shared.Branding;
 
 public abstract class AbstractEventPlace extends Place implements HasLocationTitle {
     private final EventContext ctx;
@@ -27,7 +28,8 @@ public abstract class AbstractEventPlace extends Place implements HasLocationTit
     }
 
     public String getTitle(String eventName) {
-        return StringMessages.INSTANCE.sapSailing() + " - " + eventName;
+        return (Branding.getInstance().isActive() ? StringMessages.INSTANCE.sapSailing()
+                : StringMessages.INSTANCE.whitelabelSailing()) + " - " + eventName;
     }
 
     @Override
@@ -48,10 +50,8 @@ public abstract class AbstractEventPlace extends Place implements HasLocationTit
         private final static String PARAM_REGATTAID = "regattaId";
 
         protected PLACE getPlaceFromParameters(Map<String, Set<String>> parameters) {
-            return getRealPlace(
-                    new EventContext().withId(extractSingleParameter(parameters, PARAM_EVENTID))
-                            .withRegattaId(extractSingleParameter(parameters, PARAM_REGATTAID)),
-                    parameters);
+            return getRealPlace(new EventContext().withId(extractSingleParameter(parameters, PARAM_EVENTID))
+                    .withRegattaId(extractSingleParameter(parameters, PARAM_REGATTAID)), parameters);
         }
 
         private String extractSingleParameter(Map<String, Set<String>> parameters, String key) {
