@@ -17,6 +17,10 @@
 	   		<param-name>useFileMappedBuffer</param-name>
 	   		<param-value>false</param-value>
 	 	</init-param>
+	 	     <init-param>
+            <param-name>cacheControl</param-name>
+            <param-value>no-store,no-cache,must-revalidate</param-value>
+        </init-param>
 	</servlet>
 
 	<!-- Apache Shiro -->
@@ -27,6 +31,14 @@
 	<listener>
 		<listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
 	</listener>
+	<filter>
+	   <filter-name>ClientConfigurationFilter</filter-name>
+	   <filter-class>com.sap.sailing.gwt.server.ClientConfigurationFilter</filter-class>
+	</filter>
+	<filter-mapping>
+	   <filter-name>ClientConfigurationFilter</filter-name>
+	   <url-pattern>*.html</url-pattern>
+	</filter-mapping>
 	<filter>
 		<filter-name>ShiroFilter</filter-name>
 		<filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
