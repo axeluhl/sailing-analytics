@@ -15,11 +15,6 @@ import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import org.apache.commons.lang3.StringUtils;
-
-import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.shared.Branding;
-
 
 public class ClientConfigurationFilter implements Filter {
 
@@ -117,10 +112,12 @@ public class ClientConfigurationFilter implements Filter {
         };
         chain.doFilter(request, responseWrapper);
         
+        boolean deBrandingActive = Boolean.valueOf(System.getProperty("com.sap.sailing.debranding", "false"));
+        
         String title = "";
         String faviconPath = "images/whitelabel.ico";
         String appiconPath = "images/sailing-app-icon.png";
-        if (Branding.getInstance().isActive()) {
+        if (!deBrandingActive) {
             title = "SAP ";
             faviconPath = "images/sap.ico";
             appiconPath = "images/sap-sailing-app-icon.png";
