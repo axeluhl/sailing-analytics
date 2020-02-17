@@ -124,7 +124,10 @@ public class ClientConfigurationFilter implements Filter {
         }
         
         String content = buffer.toString();
-        String replaced = content.replace("${SAP}", title).replace("${faviconPath}", faviconPath).replace("${appiconPath}", appiconPath);
+        String replaced = content.replace("${SAP}", title)
+                                 .replace("${faviconPath}", faviconPath)
+                                 .replace("${appiconPath}", appiconPath)
+                                 .replace("${debrandingActive}", Boolean.toString(deBrandingActive));
 
         
         response.getOutputStream().write(replaced.getBytes());
