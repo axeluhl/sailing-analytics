@@ -1,15 +1,18 @@
 package com.sap.sailing.server.gateway.test.jaxrs;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -45,6 +48,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
+        dropAndCreateRegatta();
     }
     
     private void dropAndCreateRegatta() {
@@ -80,7 +84,6 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
     
     @Test
     public void testExportEmptyLeaderboardAsJson() throws Exception {
-        dropAndCreateRegatta();
         Response leaderboardReponse = leaderboardsResource.getLeaderboard(regatta.getName(),
                 AbstractLeaderboardsResource.ResultStates.Final, null, null,
                 /* competitorAndBoatIdsOnly */ false);
@@ -100,7 +103,6 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
     
     @Test
     public void testExportLeaderboardWithFinalResultStateAsJson() throws Exception {
-        dropAndCreateRegatta();
         Response leaderboardReponse = leaderboardsResource.getLeaderboard(regatta.getName(),
                 AbstractLeaderboardsResource.ResultStates.Final, null, null,
                 /* competitorAndBoatIdsOnly */ false);
@@ -126,7 +128,6 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
 
     @Test
     public void testExportLeaderboardWithLiveResultStateAsJson() throws Exception {
-        dropAndCreateRegatta();
         Response leaderboardReponse = leaderboardsResource.getLeaderboard(regatta.getName(),
                 AbstractLeaderboardsResource.ResultStates.Live, null, null,
                 /* competitorAndBoatIdsOnly */ false);
@@ -145,7 +146,6 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
     
     @Test
     public void testSmartFutureCacheInExportLeaderboardAsJson() throws Exception {
-        dropAndCreateRegatta();
         TimePoint now = MillisecondsTimePoint.now();
         regattaLeaderboard.getScoreCorrection().setTimePointOfLastCorrectionsValidity(now);    
         Thread.sleep(100);
@@ -181,7 +181,6 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
 
     @Test
     public void testExportLeaderboardWithMaxCompetitorsCountAsJson() throws Exception {
-        dropAndCreateRegatta();
         Integer maxCompetitorsCount = 2;
         Response leaderboardResponse = leaderboardsResource.getLeaderboard(regatta.getName(),
                 AbstractLeaderboardsResource.ResultStates.Final, null, null,
@@ -229,23 +228,52 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
     
     @Test
     public void testXrrScoreImport() throws Exception {
-        dropAndCreateRegatta();
         final TimePoint validityTimePoint = MillisecondsTimePoint.now();
         final String comment = "A Comment";
-        Response leaderboardResponse = leaderboardsResource.uploadResults(regatta.getName(),
-                /* scoreCorrectionProviderName */ "ISAF XML Regatta Result (XRR) Importer",
-                /* validity time point */ validityTimePoint.asMillis(),
-                /* comment */ comment,
-                /* allowRaceDefaultsByOrder */ true,
-                /* sailIds */ null, /* competitorIdAsStringForSailId */ null,
-                /* raceNumber */ null, /* raceColumnNameForRaceNumber */ null,
-                /* allowPartialImport */ false,
-                getClass().getClassLoader().getResourceAsStream("YES_29er_XRR.xml"));
-        assertNotNull(leaderboardResponse);
-        JSONObject jsonObject = (JSONObject) JSONValue.parse((String) leaderboardResponse.getEntity());
+        final boolean allowRaceDefaultsByOrder = true;
+        final boolean allowPartialImport = true;
+        Response leaderboardResponse = importScores(validityTimePoint, comment, allowRaceDefaultsByOrder, allowPartialImport);
+        assertEquals(Status.OK.getStatusCode(), leaderboardResponse.getStatus());
+        final JSONObject jsonObject = (JSONObject) JSONValue.parse((String) leaderboardResponse.getEntity());
         assertNotNull(jsonObject);
+        assertFalse((Boolean) jsonObject.get("complete"));
         assertEquals(comment, regattaLeaderboard.getScoreCorrection().getComment());
         assertEquals(validityTimePoint, regattaLeaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity());
-        // TODO test that results match?
+        assertTrue(((JSONArray) jsonObject.get("matchedRaceNumbers")).stream().filter(o->((JSONObject) o).get("raceNumber").equals("2")).findAny().isPresent());
+        assertEquals(11.0, regattaLeaderboard.getTotalPoints(regattaLeaderboard.getCompetitorByIdAsString("1"),
+                regattaLeaderboard.getRaceColumnByName("R2"), validityTimePoint), 0.000001);
+    }
+
+    @Test
+    public void testFailingXrrScoreImport() throws Exception {
+        final TimePoint validityTimePoint = null;
+        final String comment = null;
+        final boolean allowRaceDefaultsByOrder = true;
+        final boolean allowPartialImport = false;
+        Response leaderboardResponse = importScores(validityTimePoint, comment, allowRaceDefaultsByOrder, allowPartialImport);
+        assertEquals(Status.CONFLICT.getStatusCode(), leaderboardResponse.getStatus());
+        final JSONObject jsonObject = (JSONObject) JSONValue.parse((String) leaderboardResponse.getEntity());
+        assertNotNull(jsonObject);
+        assertFalse((Boolean) jsonObject.get("complete"));
+        assertEquals(null, regattaLeaderboard.getScoreCorrection().getComment());
+        assertNull(regattaLeaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity());
+        assertNull(regattaLeaderboard.getTotalPoints(regattaLeaderboard.getCompetitorByIdAsString("1"),
+                regattaLeaderboard.getRaceColumnByName("R2"), validityTimePoint));
+    }
+
+    protected Response importScores(final TimePoint validityTimePoint, final String comment,
+            final boolean allowRaceDefaultsByOrder, final boolean allowPartialImport) throws Exception {
+        Response leaderboardResponse = leaderboardsResource.uploadResults(regatta.getName(),
+                /* scoreCorrectionProviderName */ "ISAF XML Regatta Result (XRR) Importer",
+                /* validity time point */ validityTimePoint==null?null:validityTimePoint.asMillis(),
+                /* comment */ comment,
+                /* allowRaceDefaultsByOrder */ allowRaceDefaultsByOrder,
+                /* sailIds */ Collections.singletonList("GER 2098"),
+                /* competitorIdAsStringForSailId */ Collections.singletonList("1"),
+                /* raceNumber */ null, /* raceColumnNameForRaceNumber */ null,
+                /* allowPartialImport */ allowPartialImport,
+                getClass().getClassLoader().getResourceAsStream("YES_29er_XRR.xml"));
+        assertNotNull(leaderboardResponse);
+        return leaderboardResponse;
     }
 }

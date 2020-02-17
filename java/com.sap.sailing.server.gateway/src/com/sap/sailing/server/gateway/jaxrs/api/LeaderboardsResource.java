@@ -1659,7 +1659,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         final Map<String, Competitor> sailIdToCompetitorMap = new HashMap<>();
         if (sailIds != null) {
             for (int i=0; i<sailIds.size(); i++) {
-                sailIdToCompetitorMap.put(sailIds.get(i), getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitorIdsAsStringForSailIds.get(i)));
+                sailIdToCompetitorMap.put(sailIds.get(i), leaderboard.getCompetitorByIdAsString(competitorIdsAsStringForSailIds.get(i)));
             }
         }
         final Map<String, RaceColumn> raceNumberOrNameToRaceColumnMap = new HashMap<>();
