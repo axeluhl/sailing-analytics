@@ -1,14 +1,13 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.dragandswipelist;
 
-import com.sap.sailing.android.shared.util.BitmapHelper;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
+
+import com.sap.sailing.android.shared.util.BitmapHelper;
+import com.sap.sailing.racecommittee.app.R;
 
 /**
  * An implementation of {@link ItemTouchHelper.Callback} that enables basic drag & drop and swipe-to-dismiss. Drag
@@ -58,7 +57,7 @@ public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
     @Override
     public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY,
-            int actionState, boolean isCurrentlyActive) {
+                            int actionState, boolean isCurrentlyActive) {
         View itemView = viewHolder.itemView;
         boolean hasContainer = itemView.findViewById(R.id.container) != null;
         if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE && hasContainer) {
@@ -70,8 +69,6 @@ public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
             } else if (dX > 0) {
                 bgRes = R.attr.swipe_right;
             }
-            itemView.findViewById(R.id.container)
-                    .setBackgroundColor(ThemeHelper.getColor(recyclerView.getContext(), R.attr.sap_gray_black_30));
 
             Drawable background = BitmapHelper.getAttrDrawable(recyclerView.getContext(), bgRes);
             background.setBounds(0, itemView.getTop(), itemView.getRight(), itemView.getBottom());

@@ -13,7 +13,6 @@ import com.sap.sailing.racecommittee.app.ui.utils.CompetitorUtils;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -206,11 +205,6 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
          */
         @Override
         public void onItemSelected() {
-            itemView.setBackgroundColor(Color.LTGRAY);
-            CompetitorResultWithIdImpl item = mItems.get(getAdapterPosition());
-            if (item.getOneBasedRank() == 0) {
-                container.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_30));
-            }
         }
 
         /**
@@ -219,8 +213,6 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
          */
         @Override
         public void onItemClear() {
-            itemView.setBackgroundColor(0);
-            container.setBackgroundColor(0);
         }
 
         @Override
