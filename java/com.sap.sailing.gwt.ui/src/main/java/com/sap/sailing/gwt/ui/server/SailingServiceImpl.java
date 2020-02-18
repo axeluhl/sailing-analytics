@@ -339,18 +339,16 @@ import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.FixedPositioning;
-import com.sap.sailing.domain.coursetemplate.MarkRolePair.MarkRolePairFactory;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
+import com.sap.sailing.domain.coursetemplate.MarkRolePair.MarkRolePairFactory;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.PositioningVisitor;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.TrackingDeviceBasedPositioning;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.impl.CommonMarkPropertiesImpl;
-import com.sap.sailing.domain.coursetemplate.impl.FixedPositioningImpl;
 import com.sap.sailing.domain.coursetemplate.impl.RepeatablePartImpl;
-import com.sap.sailing.domain.coursetemplate.impl.TrackingDeviceBasedPositioningImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
@@ -5124,11 +5122,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
             boolean persistent, ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType) {
-
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.REGATTA, Regatta.getTypeRelativeObjectIdentifier(regattaName),
                 regattaName, new Callable<RegattaDTO>() {
-
                     @Override
                     public RegattaDTO call() throws Exception {
                         TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
@@ -5217,7 +5213,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public ServerConfigurationDTO getServerConfiguration() {
         SailingServerConfiguration sailingServerConfiguration = getService().getSailingServerConfiguration();
-        UserGroup serverTenant = getSecurityService().getDefaultTenant();
+        UserGroup serverTenant = getSecurityService().getServerGroup();
         StrippedUserGroupDTO serverTenantDTO = new SecurityDTOFactory()
                 .createStrippedUserGroupDTOFromUserGroup(serverTenant, new HashMap<>());
         ServerConfigurationDTO result = new ServerConfigurationDTO(sailingServerConfiguration.isStandaloneServer(),
@@ -5246,19 +5242,19 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         if (serverConfiguration.isPublic() != null) {
             final RoleDefinition viewerRole = getSecurityService()
                     .getRoleDefinition(SailingViewerRole.getInstance().getId());
-            final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
-            if (viewerRole != null && defaultServerTenant != null) {
-                final boolean isCurrentlyPublic = Boolean.TRUE.equals(defaultServerTenant.getRoleAssociation(viewerRole));
+            final UserGroup serverGroup = getSecurityService().getServerGroup();
+            if (viewerRole != null && serverGroup != null) {
+                final boolean isCurrentlyPublic = Boolean.TRUE.equals(serverGroup.getRoleAssociation(viewerRole));
                 final boolean shouldBePublic = serverConfiguration.isPublic();
                 if (isCurrentlyPublic != shouldBePublic) {
                     // value changed
-                    if (getSecurityService().hasCurrentUserUpdatePermission(defaultServerTenant)
+                    if (getSecurityService().hasCurrentUserUpdatePermission(serverGroup)
                             && getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
-                                    viewerRole, new Ownership(null, defaultServerTenant))) {
+                                    viewerRole, new Ownership(null, serverGroup))) {
                         if (serverConfiguration.isPublic()) {
-                            getSecurityService().putRoleDefinitionToUserGroup(defaultServerTenant, viewerRole, true);
+                            getSecurityService().putRoleDefinitionToUserGroup(serverGroup, viewerRole, true);
                         } else {
-                            getSecurityService().removeRoleDefintionFromUserGroup(defaultServerTenant, viewerRole);
+                            getSecurityService().removeRoleDefintionFromUserGroup(serverGroup, viewerRole);
                         }
                     } else {
                         throw new AuthorizationException("No permission to make the server public");
@@ -9319,7 +9315,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final Boolean result;
         final RoleDefinition viewerRole = getSecurityService()
                 .getRoleDefinition(SailingViewerRole.getInstance().getId());
-        final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
+        final UserGroup defaultServerTenant = getSecurityService().getServerGroup();
         if (viewerRole != null && defaultServerTenant != null) {
             result = defaultServerTenant.getRoleAssociation(viewerRole);
         } else {
@@ -9998,9 +9994,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             Position fixedPosition) {
         MarkProperties markProperties = getSharedSailingData().getMarkPropertiesById(markPropertiesId);
         if (deviceIdentifier != null) {
-            markProperties.setPositioningInformation(new TrackingDeviceBasedPositioningImpl(convertDtoToDeviceIdentifier(deviceIdentifier)));
+            getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(markProperties, convertDtoToDeviceIdentifier(deviceIdentifier));
         } else if (fixedPosition != null) {
-            markProperties.setPositioningInformation(new FixedPositioningImpl(fixedPosition));
+            getSharedSailingData().setFixedPositionForMarkProperties(markProperties, fixedPosition);
         }
         return convertToMarkPropertiesDTO(getSharedSailingData().updateMarkProperties(markProperties.getId(),
                 markProperties, markProperties.getTags()));
@@ -10166,14 +10162,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public MarkRoleDTO addOrUpdateMarkRole(MarkRoleDTO markRole) {
+    public MarkRoleDTO createMarkRole(MarkRoleDTO markRole) {
         MarkRole existingMarkRole = getSharedSailingData().getMarkRoleById(markRole.getUuid());
         final MarkRoleDTO result;
         if (existingMarkRole != null) {
-            getSecurityService().checkCurrentUserUpdatePermission(existingMarkRole);
-            // result = convertToMarkRoleDTO(getSharedSailingData().updateMarkRole(markRole.getUuid(),
-            // markRole.getName()));
-            throw new UnsupportedOperationException("Updating a mark role is not yet implemented!");
+            throw new IllegalArgumentException("Mark role with ID "+markRole.getUuid()+" already exists");
         } else {
             result = convertToMarkRoleDTO(getSharedSailingData().createMarkRole(markRole.getName(), markRole.getShortName()));
         }

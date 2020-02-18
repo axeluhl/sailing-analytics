@@ -110,6 +110,7 @@ public class MarkPropertiesPanel extends FlowPanel {
                 strings.add(t.getName());
                 strings.add(t.getCommonMarkProperties().getShortName());
                 strings.add(t.getUuid().toString());
+                Util.addAll(t.getTags(), strings);
                 return strings;
             }
 
