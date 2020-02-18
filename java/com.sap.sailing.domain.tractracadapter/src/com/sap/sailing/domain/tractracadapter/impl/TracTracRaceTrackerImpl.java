@@ -354,14 +354,29 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         };
         eventSubscriber.subscribeCompetitors(competitorsListener);
         racesListener = new IRacesListener() {
-            @Override public void abandonRace(UUID raceId) {}
+            @Override public void abandonRace(UUID raceId) {
+                if (raceId.equals(tractracRace.getId())) {
+                    try {
+                        onStop(/* stopReceiversPreemtively */ false, /* willBeRemoved */ false);
+                    } catch (InterruptedException e) {
+                        logger.log(Level.WARNING, "Problem when receiving abandonRace("+raceId+") for race "+tractracRace+
+                                " in event "+tractracEvent+" while trying to stop the listeners", e);
+                    }
+                }
+            }
             @Override public void addRace(IRace race) {}
             @Override public void deleteRace(UUID raceId) {}
-            @Override public void reloadRace(UUID raceId) {}
+            @Override public void reloadRace(UUID raceId) {
+                if (raceId.equals(tractracRace.getId())) {
+                    logger.warning("reloadRace("+raceId+") for race "+tractracRace+
+                            " in event "+tractracEvent+" not supported yet. Consider re-loading the race manually");
+                }
+            }
             @Override public void startTracking(UUID raceId) {}
             @Override public void dataSourceChanged(IRace race, DataSource oldDataSource, URI oldLiveURI, URI oldStoredURI) {}
             @Override
             public void updateRace(IRace race) {
+                // TODO bug5154 check IRace.getStatus() and somewhere update status once it reached RaceStatusType.OFFICIAL
                 if (Util.equalsWithNull(race, TracTracRaceTrackerImpl.this.tractracRace)) {
                     int delayToLiveInMillis = race.getLiveDelay()*1000;
                     if (getRace() != null) {

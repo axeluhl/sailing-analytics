@@ -554,6 +554,10 @@ public class DomainFactoryImpl implements DomainFactory {
                 result.add(new SensorDataReceiver(
                         trackedRegatta, tractracEvent, simulator, this, eventSubscriber, raceSubscriber, timeoutInMilliseconds));
                 break;
+            case COMPETITOR:
+                result.add(new CompetitorChangeReceiver(
+                        trackedRegatta, tractracEvent, simulator, this, eventSubscriber, raceSubscriber, timeoutInMilliseconds));
+                break;
             }                
         }
         return result;
