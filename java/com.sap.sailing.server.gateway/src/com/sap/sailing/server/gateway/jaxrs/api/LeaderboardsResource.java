@@ -1,16 +1,19 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -31,6 +34,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.xml.ws.http.HTTPException;
 
@@ -77,6 +81,8 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RegattaScoreCorrections;
+import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -99,6 +105,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.ScoreCorrectionMapping;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
@@ -129,6 +136,9 @@ import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboard;
+import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
+import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrection;
+import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrectionMetadata;
 import com.sap.sailing.server.security.PermissionAwareRaceTrackingHandler;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Bearing;
@@ -142,6 +152,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
@@ -165,7 +176,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
      * or, respectively, after the finish line has been crossed.
      */
     private static final Duration TIME_OFFSET_FOR_HEAD_AND_TAIL_OF_TRACK_FOR_LINE_INFERENCE = Duration.ONE_MINUTE;
-
+    
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getLeaderboards() {
@@ -1561,7 +1572,6 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         if (fleet == null) {
             throw new NotFoundException("fleet with name " + fleetName + " not found");
         }
-
         boolean result = getRaceLogTrackingAdapter().denoteRaceForRaceLogTracking(getService(), leaderboard, raceColumn,
                 fleet, raceName);
         return (result ? Response.ok() : Response.notModified()).build();
@@ -1585,10 +1595,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         if (fleet == null) {
             throw new NotFoundException("fleet with name " + fleetName + " not found");
         }
-
         final AbstractLogEventAuthor raceLogEventAuthorForRaceColumn = new LogEventAuthorImpl(
                 AbstractRaceColumn.class.getName(), 0);
-
         TimePoint now = MillisecondsTimePoint.now();
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog == null) {
@@ -1618,4 +1626,169 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         return Response.ok().build();
     }
 
+    @PUT
+    @Path("/{name}/results")
+    @Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response uploadResults(@PathParam("name") String leaderboardName,
+            @QueryParam("scoreCorrectionProvider") String scoreCorrectionProviderName,
+            @QueryParam("timePointOfLastCorrectionValidityMillis") Long timePointOfLastCorrectionValidityMillis,
+            @QueryParam("comment") String comment,
+            @QueryParam("allowRaceDefaultsByOrder") Boolean allowRaceDefaultsByOrder,
+            @QueryParam("sailId") List<String> sailIds,
+            @QueryParam("competitorId") List<String> competitorIdsAsStringForSailIds,
+            @QueryParam("raceNumber") List<String> raceNumbers,
+            @QueryParam("raceColumnName") List<String> raceColumnNamesForRaceNumbers,
+            @QueryParam("allowPartialImport") Boolean allowPartialImport,
+            InputStream inputStream) throws Exception {
+        if ((sailIds == null) != (competitorIdsAsStringForSailIds == null) || (sailIds != null && sailIds.size() != competitorIdsAsStringForSailIds.size())) {
+            throw new IllegalArgumentException("The competitorId and sailId arrays don't match in presence or length");
+        }
+        if ((raceNumbers == null) != (raceColumnNamesForRaceNumbers == null) || (raceNumbers != null && raceNumbers.size() != raceColumnNamesForRaceNumbers.size())) {
+            throw new IllegalArgumentException("The raceNumber and raceColumnNameForRaceNumber arrays don't match in presence or length");
+        }
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null) {
+            throw new NotFoundException("leaderboard with name " + leaderboardName + " not found");
+        }
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
+        final Optional<ScoreCorrectionProvider> scoreCorrectionProvider = getScoreCorrectionProvider(scoreCorrectionProviderName);
+        if (!scoreCorrectionProvider.isPresent()) {
+            throw new NotFoundException("score correction provider with name " + scoreCorrectionProviderName + " not found");
+        }
+        final Map<String, Competitor> sailIdToCompetitorMap = new HashMap<>();
+        if (sailIds != null) {
+            for (int i=0; i<sailIds.size(); i++) {
+                sailIdToCompetitorMap.put(sailIds.get(i), leaderboard.getCompetitorByIdAsString(competitorIdsAsStringForSailIds.get(i)));
+            }
+        }
+        final Map<String, RaceColumn> raceNumberOrNameToRaceColumnMap = new HashMap<>();
+        if (raceNumbers != null) {
+            for (int i=0; i<raceNumbers.size(); i++) {
+                raceNumberOrNameToRaceColumnMap.put(raceNumbers.get(i), leaderboard.getRaceColumnByName(raceColumnNamesForRaceNumbers.get(i)));
+            }
+        }
+        Response result;
+        try {
+            final RegattaScoreCorrections scoreCorrection = scoreCorrectionProvider.get().getScoreCorrections(inputStream);
+            if (comment != null || timePointOfLastCorrectionValidityMillis != null) {
+                final String finalComment;
+                if (comment == null) {
+                    finalComment = leaderboard.getScoreCorrection().getComment();
+                } else {
+                    finalComment = comment;
+                }
+                final TimePoint timePointOfLastCorrectionValidity;
+                if (timePointOfLastCorrectionValidityMillis == null) {
+                    timePointOfLastCorrectionValidity = leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity();
+                } else {
+                    timePointOfLastCorrectionValidity = new MillisecondsTimePoint(timePointOfLastCorrectionValidityMillis);
+                }
+                logger.info("Applying score correction comment \""+finalComment+"\" and validity time point "+timePointOfLastCorrectionValidity+
+                        " to leaderboard "+leaderboardName+" on behalf of "+SessionUtils.getPrincipal());
+                getService().apply(
+                        new UpdateLeaderboardScoreCorrectionMetadata(leaderboardName, timePointOfLastCorrectionValidity, finalComment));
+            }
+            result = applyScoreCorrectionToLeaderboard(leaderboard, scoreCorrection, sailIdToCompetitorMap,
+                    raceNumberOrNameToRaceColumnMap, allowRaceDefaultsByOrder != null && allowRaceDefaultsByOrder,
+                    allowPartialImport != null && allowPartialImport);
+        } catch (Exception e) {
+            result = Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+        return result;
+    }
+
+    /**
+     * Based on the matching specifications for race names/numbers and sail IDs/numbers, tries to apply the
+     * {@code scoreCorrection} to the {@code leaderboard}. If everything works well, a simple {@link Status#OK} will
+     * be returned with an empty JSON document. Otherwise, {@link Status#CONFLICT} will be the status of the response,
+     * and the JSON document returned will tell which sail IDs/numbers and which race names/numbers could not be resolved.
+     */
+    private Response applyScoreCorrectionToLeaderboard(Leaderboard leaderboard, RegattaScoreCorrections scoreCorrection,
+            final Map<String, Competitor> sailIdToCompetitorMap,
+            final Map<String, RaceColumn> raceNumberOrNameToRaceColumnMap, boolean allowRaceDefaultsByOrder,
+            boolean allowPartialImport) {
+        final ScoreCorrectionMapping scoreCorrectionMapping = leaderboard.mapRegattaScoreCorrections(scoreCorrection,
+                raceNumberOrNameToRaceColumnMap, sailIdToCompetitorMap, allowRaceDefaultsByOrder, allowPartialImport);
+        final JSONObject result = new JSONObject();
+        result.put("complete", scoreCorrectionMapping.isComplete());
+        result.put("allowPartialImport", allowPartialImport);
+        final JSONArray unmatchedSailIds = new JSONArray();
+        final JSONArray unmatchedRaceNumbers = new JSONArray();
+        final JSONArray matchedSailIds = new JSONArray();
+        for (final Entry<String, Competitor> e : scoreCorrectionMapping.getCompetitorMappings().entrySet()) {
+            if (e.getValue() != null) {
+                final JSONObject matchedSailId = new JSONObject();
+                matchedSailId.put("sailId", e.getKey());
+                matchedSailId.put("competitorId", e.getValue().getId().toString());
+                matchedSailIds.add(matchedSailId);
+            } else {
+                unmatchedSailIds.add(e.getKey());
+            }
+        }
+        final JSONArray matchedRaceNumbers = new JSONArray();
+        for (final Entry<String, RaceColumn> e : scoreCorrectionMapping.getRaceMappings().entrySet()) {
+            if (e.getValue() != null) {
+                final JSONObject matchedRaceNumber = new JSONObject();
+                matchedRaceNumber.put("raceNumber", e.getKey());
+                matchedRaceNumber.put("raceColumnName", e.getValue().getName());
+                matchedRaceNumbers.add(matchedRaceNumber);
+            } else {
+                unmatchedRaceNumbers.add(e.getKey());
+            }
+        }
+        result.put("matchedSailIds", matchedSailIds);
+        result.put("matchedRaceNumbers", matchedRaceNumbers);
+        result.put("unmatchedSailIds", unmatchedSailIds);
+        result.put("unmatchedRaceNumbers", unmatchedRaceNumbers);
+        ResponseBuilder response;
+        // return a partial mapping only if explicitly allowed
+        if (!allowPartialImport && !scoreCorrectionMapping.isComplete()) {
+            response = Response.status(Status.CONFLICT);
+        } else {
+            // apply the scores that were matched:
+            try {
+                final JSONArray applyResult = applyMatchedEntriesToLeaderboardScoreCorrections(leaderboard, scoreCorrectionMapping);
+                result.put("applyResult", applyResult);
+                response = Response.status(Status.OK);
+            } catch (Exception e) {
+                result.put("errorMessage", e.getMessage());
+                response = Response.status(Status.BAD_REQUEST);
+            }
+        }
+        return response.entity(result.toJSONString()).build();
+    }
+
+    private JSONArray applyMatchedEntriesToLeaderboardScoreCorrections(Leaderboard leaderboard,
+            ScoreCorrectionMapping scoreCorrectionMapping) {
+        final TimePoint timePoint = MillisecondsTimePoint.now();
+        final JSONArray result = new JSONArray();
+        for (final Entry<String, RaceColumn> raceColumnEntry : scoreCorrectionMapping.getRaceMappings().entrySet()) {
+            if (raceColumnEntry.getValue() != null) {
+                final JSONObject raceColumnResults = new JSONObject();
+                raceColumnResults.put("raceNumber", raceColumnEntry.getKey());
+                raceColumnResults.put("raceColumnName", raceColumnEntry.getValue().getName());
+                final JSONArray competitorResults = new JSONArray();
+                raceColumnResults.put("competitors", competitorResults);
+                for (final Entry<String, Competitor> competitorEntry : scoreCorrectionMapping.getCompetitorMappings().entrySet()) {
+                    if (competitorEntry.getValue() != null) {
+                        final JSONObject competitorResult = new JSONObject();
+                        competitorResult.put("sailId", competitorEntry.getKey());
+                        competitorResult.put("competitorId", competitorEntry.getValue().getId().toString());
+                        final Double points = scoreCorrectionMapping.getScoreCorrections().get(raceColumnEntry.getValue()).get(competitorEntry.getValue()).getA();
+                        getService().apply(new UpdateLeaderboardScoreCorrection(leaderboard.getName(), raceColumnEntry.getValue().getName(), competitorEntry.getValue().getId().toString(),
+                                points, timePoint));
+                        competitorResult.put("score", points);
+                        final MaxPointsReason maxPointsReason = scoreCorrectionMapping.getScoreCorrections().get(raceColumnEntry.getValue()).get(competitorEntry.getValue()).getB();
+                        getService().apply(new UpdateLeaderboardMaxPointsReason(leaderboard.getName(), raceColumnEntry.getValue().getName(), competitorEntry.getValue().getId().toString(),
+                                maxPointsReason, timePoint));
+                        competitorResult.put("maxPointsReason", maxPointsReason);
+                        competitorResults.add(competitorResult);
+                    }
+                }
+                result.add(raceColumnResults);
+            }
+        }
+        return result;
+    }
 }

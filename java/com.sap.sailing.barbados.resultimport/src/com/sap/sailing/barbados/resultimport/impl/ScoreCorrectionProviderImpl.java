@@ -1,5 +1,6 @@
 package com.sap.sailing.barbados.resultimport.impl;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -78,5 +79,11 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
             }
         }
         return null;
+    }
+
+    @Override
+    public RegattaScoreCorrections getScoreCorrections(InputStream inputStream) throws Exception {
+        RegattaResults regattaResults = new BarbadosResultSpreadsheet(inputStream).getRegattaResults();
+        return new RegattaScoreCorrectionsImpl(this, regattaResults);
     }
 }

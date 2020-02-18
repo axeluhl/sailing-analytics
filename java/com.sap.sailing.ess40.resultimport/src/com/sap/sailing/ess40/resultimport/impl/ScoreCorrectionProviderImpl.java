@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
@@ -51,12 +52,18 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
      *         <code>#competitors+1 - rank</code>. A disqualification gets 0 points.
      */
     private Util.Pair<TimePoint, Map<String, List<Util.Pair<String, Double>>>> getActResults(URL actUrl) throws IOException {
-        Pattern quotedCompetitorNameAndAllTheRest = Pattern.compile("^\"([^\"]*)\",(.*)$");
-        Map<String, List<Util.Pair<String, Double>>> result = new HashMap<String, List<Util.Pair<String, Double>>>();
-        HttpURLConnection conn = (HttpURLConnection) actUrl.openConnection();
+        final HttpURLConnection conn = (HttpURLConnection) actUrl.openConnection();
         conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36");
-        TimePoint lastModified = new MillisecondsTimePoint(conn.getLastModified());
-        BufferedReader br = new BufferedReader(new InputStreamReader((InputStream) conn.getContent()));
+        final TimePoint lastModified = new MillisecondsTimePoint(conn.getLastModified());
+        final InputStream inputStream = (InputStream) conn.getContent();
+        return new Pair<>(lastModified, parseResults(inputStream));
+    }
+
+    protected Map<String, List<Util.Pair<String, Double>>> parseResults(
+            final InputStream inputStream) throws IOException {
+        Map<String, List<Util.Pair<String, Double>>> result = new HashMap<String, List<Util.Pair<String, Double>>>();
+        final Pattern quotedCompetitorNameAndAllTheRest = Pattern.compile("^\"([^\"]*)\",(.*)$");
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
         String line = br.readLine();
         while (line != null) {
             String[] split;
@@ -83,7 +90,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
             }
             line = br.readLine();
         }
-        return new Util.Pair<TimePoint, Map<String, List<Util.Pair<String, Double>>>>(lastModified, result);
+        return result;
     }
 
     @Override
@@ -105,7 +112,6 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
         conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36");
         conn.setRequestProperty("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
         conn.setRequestProperty("accept-language", "en-US,en;q=0.8,de;q=0.6,da;q=0.4");
-
         BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
         String readLine;
         while ((readLine = br.readLine()) != null) {
@@ -125,4 +131,8 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
         return new RegattaScoreCorrectionsImpl(this, actResults.getB());
     }
 
+    @Override
+    public RegattaScoreCorrections getScoreCorrections(InputStream inputStream) throws Exception {
+        return new RegattaScoreCorrectionsImpl(this, parseResults(inputStream));
+    }
 }
