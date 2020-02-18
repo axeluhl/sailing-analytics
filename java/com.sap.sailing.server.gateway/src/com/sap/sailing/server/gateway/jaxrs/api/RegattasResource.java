@@ -1721,7 +1721,8 @@ public class RegattasResource extends AbstractSailingServerResource {
                         .build();
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-                AbstractTrackedRaceDataJsonSerializer serializer = new MarkPassingsJsonSerializer();
+                getSecurityService().checkCurrentUserReadPermission(trackedRace);
+                AbstractTrackedRaceDataJsonSerializer serializer = new MarkPassingsJsonSerializer(/* use now-livedelay as time point for mark ranks */ null);
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
                 String json = jsonMarkPassings.toJSONString();
                 return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
