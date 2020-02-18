@@ -78,6 +78,7 @@ import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartSetti
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
+import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSets;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardWithSecurityFetcher;
@@ -100,9 +101,11 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
 import com.sap.sailing.gwt.ui.shared.databylogo.DataByLogo;
 import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.common.settings.Settings;
@@ -188,6 +191,7 @@ public class RaceBoardPanel
 
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     private TrackingConnectorInfoDTO trackingConnectorInfo;
+    private CompetitorFilterPanel competitorSearchTextBox;
     
     /**
      * @param eventId
@@ -310,7 +314,7 @@ public class RaceBoardPanel
                 }
             });
         }
-        CompetitorFilterPanel competitorSearchTextBox = new CompetitorFilterPanel(competitorSelectionProvider, stringMessages, raceMap,
+        competitorSearchTextBox = new CompetitorFilterPanel(competitorSelectionProvider, stringMessages, raceMap,
                 new LeaderboardFetcher() {
                     @Override
                     public LeaderboardDTO getLeaderboard() {
@@ -817,21 +821,34 @@ public class RaceBoardPanel
     @Override
     protected RaceBoardPerspectiveOwnSettings getPerspectiveSettings() {
         final RaceBoardPerspectiveOwnSettings initialSettings = super.getPerspectiveSettings();
+        final CompetitorsFilterSets leaderboardFiterPanelFilterSets = competitorSearchTextBox
+                .getCompetitorsFilterSets();
+        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> activeFilterSet = leaderboardFiterPanelFilterSets.getActiveFilterSet();
+        String activeCompetitorsFilterSetName;
+        if(activeFilterSet != null) {
+            activeCompetitorsFilterSetName  = activeFilterSet.getName();
+        }else {
+            activeCompetitorsFilterSetName = initialSettings.getActiveCompetitorsFilterSetName();
+        }
         final Set<String> selectedCompetitorIds = new HashSet<>();
+        Duration newInitialDurationAfterRaceStartInReplay;
+        if(timer != null && racetimePanel != null) {
+            final Date currentTimerDate = timer.getTime();
+            final Date startOfRace = racetimePanel.getLastRaceTimesInfo().startOfRace;
+            newInitialDurationAfterRaceStartInReplay  = new MillisecondsDurationImpl(
+                    currentTimerDate.getTime() - startOfRace.getTime());
+        }else {
+            newInitialDurationAfterRaceStartInReplay = initialSettings.getInitialDurationAfterRaceStartInReplay();
+        }
         for (CompetitorDTO competitorDTO : getCompetitorSelectionProvider().getSelectedCompetitors()) {
             selectedCompetitorIds.add(competitorDTO.getIdAsString());
         }
-        return new RaceBoardPerspectiveOwnSettings(
-                initialSettings.getActiveCompetitorsFilterSetName(), // get from search field
-                this.leaderboardPanel.isVisible(),
-                this.windChart.isVisible(),
-                this.competitorChart.isVisible(),
-                initialSettings.isCanReplayDuringLiveRaces(), // taken as seen
-                initialSettings.getInitialDurationAfterRaceStartInReplay(), // get from timer
-                /* legacy single selectedCompetitor */ null,
-                selectedCompetitorIds,
-                initialSettings.getJumpToTag() // ? null
-                );
+        RaceBoardPerspectiveOwnSettings raceBoardPerspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings(
+                activeCompetitorsFilterSetName, leaderboardPanel.isVisible(), windChart.isVisible(),
+                competitorChart.isVisible(), initialSettings.isCanReplayDuringLiveRaces(),
+                newInitialDurationAfterRaceStartInReplay, /* legacy single selectedCompetitor */ null,
+                selectedCompetitorIds, initialSettings.getJumpToTag());
+        return raceBoardPerspectiveOwnSettings;
     }
     
     @Override

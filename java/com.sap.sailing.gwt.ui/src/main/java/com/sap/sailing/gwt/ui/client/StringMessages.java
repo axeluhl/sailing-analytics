@@ -2358,4 +2358,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String setDeviceIdentifier();
     String setPosition();
     String spareMarksAndTheirOptionalDefaultMarkRoles();
+    String shareTheLink();
+    String timeStampCheckBoxLabel();
+    String windChartCheckBoxLabel();
+    String leaderBoardCheckBoxLabel();
+    String competitorChartCheckBoxLabel();
+    String filterSetNameCheckBoxLabel();
+    String competitorSelectionCheckBoxLabel();
+    String linkSharingAnchorText();
 }
