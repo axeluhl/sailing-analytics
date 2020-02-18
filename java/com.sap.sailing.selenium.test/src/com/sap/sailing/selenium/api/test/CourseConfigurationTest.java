@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -440,6 +441,25 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
             assertEquals(expectedNumberOfWaypointsOfCourse, Util.size(course.getWaypoints()));
         }
         return new Pair<>(courseConfiguration, course);
+    }
+
+    @Test
+    public void testMarkPropertiesWithPositioning() throws JSONException {
+        final MarkProperties mp1 = markPropertiesApi.createMarkProperties(sharedServerCtx, "mpWithPos",
+                "mpWithPos", /* deviceUuid */ null, "#ffffff", "shape", "pattern", MarkType.LANDMARK.name(),
+                /* tags */ Collections.emptyList(), 49.097487, 8.648631);
+        System.out.println(mp1);
+        final MarkConfiguration mc1 = MarkConfiguration.createMarkPropertiesBased(mp1.getId(), markRoleApi.createMarkRole(sharedServerCtx, "role_mc1_1", /* shortName */ null).getId());
+        final WaypointWithMarkConfiguration wp1 = new WaypointWithMarkConfiguration("landmark", "landmark",
+                PassingInstruction.Single_Unknown, Arrays.asList(mc1.getId()));
+        final CourseConfiguration courseConfiguration = new CourseConfiguration("test1", Arrays.asList(mc1), Arrays.asList(wp1));
+        
+        final String regattaName = UUID.randomUUID().toString();
+        eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
+        final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, null, 1)[0];
+        final CourseConfiguration course = courseConfigurationApi.createCourse(ctx, courseConfiguration, regattaName,
+                race.getRaceName(), "Default");
+        System.out.println(course);
     }
 
     @Test @Ignore
