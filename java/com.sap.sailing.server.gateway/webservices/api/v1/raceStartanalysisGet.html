@@ -43,7 +43,13 @@ start speed, start delay, and start tack.</p>
 	<tr>
 		<td>Example Response:</td>
 		<td><pre>[
-[
+{
+"startline": {
+"lengthInMeters": 544.9898984181906,
+"favoredEnd": "PORT",
+"biasInMeters": 20.990320431151126
+},
+"competitors": [
 {
 "competitor": {
 "idtype": "java.util.UUID",
@@ -1364,7 +1370,8 @@ start speed, start delay, and start tack.</p>
 "speedOverGroundFiveSecondsBeforeStartInKnots": 5.5999755859375,
 "timeBetweenRaceStartAndCompetitorStartInSeconds": 18.279
 }
-]</pre></td>
+]
+}</pre></td>
 </tr>
 </table>
 <div style="height: 1em;"></div>

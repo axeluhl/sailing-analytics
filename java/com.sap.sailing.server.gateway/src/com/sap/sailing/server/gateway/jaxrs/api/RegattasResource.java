@@ -95,6 +95,7 @@ import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceWindCalculator;
@@ -1296,7 +1297,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 response = getBadRaceErrorResponse(regattaName, raceName);
             } else {
                 try {
-                    JSONArray jsonStartAnalysis = getStartAnalysis(trackedRace, regatta);
+                    JSONObject jsonStartAnalysis = getStartAnalysis(trackedRace, regatta);
                     String json = jsonStartAnalysis.toJSONString();
                     response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
                 } catch (NoWindException | InterruptedException | ExecutionException e) {
@@ -1310,13 +1311,14 @@ public class RegattasResource extends AbstractSailingServerResource {
         return response;
     }
 
-    private JSONArray getStartAnalysis(TrackedRace trackedRace, Regatta regatta) throws NoWindException, InterruptedException, ExecutionException {
+    private JSONObject getStartAnalysis(TrackedRace trackedRace, Regatta regatta) throws NoWindException, InterruptedException, ExecutionException {
         assert trackedRace != null;
         final Leaderboard leaderboard = getService().getLeaderboardByName(regatta.getName());
         final CompetitorJsonSerializer competitorSerializer = new CompetitorJsonSerializer(new TeamJsonSerializer(new PersonJsonSerializer(
                 new NationalityJsonSerializer())),
                 BoatJsonSerializer.create(), /* serialize non-public fields */ false);
-        final JSONArray result = new JSONArray();
+        final JSONObject result = new JSONObject();
+        final JSONArray competitorStartAnalysis = new JSONArray();
         if (leaderboard != null) {
             final RaceDefinition race = trackedRace.getRace();
             final Map<String, Competitor> competitorByIdAsString = new HashMap<>();
@@ -1329,6 +1331,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         Arrays.asList(raceColumnAndFleet.getA().getName()), /* addOverallDetails */ false, getService(),
                         getService().getBaseDomainFactory(), /* fillTotalPointsUncorrected */ false);
                 if (latestLeaderboard != null) {
+                    result.put("startline", getStartLineData(trackedRace));
                     for (final Entry<CompetitorDTO, LeaderboardRowDTO> e : latestLeaderboard.rows.entrySet()) {
                         final Competitor competitor = competitorByIdAsString.get(e.getKey().getIdAsString());
                         if (competitor != null) {
@@ -1344,12 +1347,28 @@ public class RegattasResource extends AbstractSailingServerResource {
                                 competitorStartAnalysisJson.put("speedOverGroundAtStartOfRaceInKnots", entry.speedOverGroundAtStartOfRaceInKnots);
                                 competitorStartAnalysisJson.put("speedOverGroundFiveSecondsBeforeStartInKnots", entry.speedOverGroundFiveSecondsBeforeStartInKnots);
                                 competitorStartAnalysisJson.put("timeBetweenRaceStartAndCompetitorStartInSeconds", entry.timeBetweenRaceStartAndCompetitorStartInSeconds);
-                                result.add(competitorStartAnalysisJson);
+                                competitorStartAnalysis.add(competitorStartAnalysisJson);
                             }
                         }
                     }
                 }
             }
+        }
+        result.put("competitors", competitorStartAnalysis);
+        return result;
+    }
+
+    private JSONObject getStartLineData(final TrackedRace trackedRace) {
+        final TimePoint startOfRace = trackedRace.getStartOfRace();
+        final JSONObject result;
+        if (startOfRace != null) {
+            final LineDetails lineInfo = trackedRace.getStartLine(startOfRace);
+            result = new JSONObject();
+            result.put("lengthInMeters", lineInfo.getLength().getMeters());
+            result.put("favoredEnd", lineInfo.getAdvantageousSideWhileApproachingLine().name());
+            result.put("biasInMeters", lineInfo.getAdvantage().getMeters());
+        } else {
+            result = null;
         }
         return result;
     }
