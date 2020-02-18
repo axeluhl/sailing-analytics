@@ -1,0 +1,1373 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/regattas/{name}/races/{racename}/startanalysis</h2>
+
+<b>Description:</b>
+<p>Obtains an analysis of the start, per competitor, including values such as the distance to line at start,
+start speed, start delay, and start tack.</p>
+<br/>
+<table>
+	<tr>
+		<td>Webservice Type:</td>
+		<td>REST</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>Json</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>None</td>
+	</tr>
+	<tr>
+		<td>Optional parameters:</td>
+		<td>None</td>
+	</tr>
+	<tr>
+		<td>Request method:</td>
+		<td>GET</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td>curl "https://www.sapsailing.com/sailingserver/api/v1/regattas/Kornati%20Cup%202019%20-%20B46/races/B46%20R1/startanalysis"</td>
+	</tr>
+	<tr>
+		<td>Example Response:</td>
+		<td><pre>[
+[
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bdf52310-4b79-0137-d3ca-60a44ce903c3",
+"name": "ZÃ¶hrer Dieter",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "AUT",
+"nationalityISO2": "AT",
+"nationalityISO3": "AUT",
+"team": {
+"name": "ZÃ¶hrer Dieter",
+"coach": null,
+"sailors": [
+{
+"name": "ZÃ¶hrer Dieter",
+"description": "",
+"nationality": {
+"IOC": "AUT"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "0e8366ad-d156-4be8-9b01-c1eb5a9e0d67",
+"name": null,
+"sailId": "Titan",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 28.869566133124323,
+"distanceToStartLineAtStartOfRaceInMeters": 28.566229365789724,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 34.3818823165237,
+"speedOverGroundAtPassingStartWaypointInKnots": 2.396588705028137,
+"speedOverGroundAtStartOfRaceInKnots": 3.72314453125,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 3.5552978515625,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 32.015
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bb636580-4b79-0137-d389-60a44ce903c3",
+"name": "HeidekrÃŒger AndrÃ©",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "GER",
+"nationalityISO2": "DE",
+"nationalityISO3": "DEU",
+"team": {
+"name": "HeidekrÃŒger AndrÃ©",
+"coach": null,
+"sailors": [
+{
+"name": "HeidekrÃŒger AndrÃ©",
+"description": "",
+"nationality": {
+"IOC": "GER"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "73c00226-0cf0-457a-8ba7-780da17102fc",
+"name": null,
+"sailId": "Pleiades",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 181.68267107241562,
+"distanceToStartLineAtStartOfRaceInMeters": 975.9619438553016,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 973.7437793982244,
+"speedOverGroundAtPassingStartWaypointInKnots": 4.697873181239235,
+"speedOverGroundAtStartOfRaceInKnots": 1.0223388671875,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 1.0223388671875,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 1415.756
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bb2cba90-4b79-0137-d386-60a44ce903c3",
+"name": "HÃ€rer Frank",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "GER",
+"nationalityISO2": "DE",
+"nationalityISO3": "DEU",
+"team": {
+"name": "HÃ€rer Frank",
+"coach": null,
+"sailors": [
+{
+"name": "HÃ€rer Frank",
+"description": "",
+"nationality": {
+"IOC": "GER"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "30745550-70ee-4208-b657-2b8d1b7f37c8",
+"name": null,
+"sailId": "Attalya 2",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 493.22662633091835,
+"distanceToStartLineAtStartOfRaceInMeters": 61.96552157976808,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 66.18904443533677,
+"speedOverGroundAtPassingStartWaypointInKnots": 4.891169931981911,
+"speedOverGroundAtStartOfRaceInKnots": 5.189025535185373,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 5.1116943359375,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 57.769
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bb062b00-4b79-0137-d383-60a44ce903c3",
+"name": "HÃ€fliger Fredy",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "SUI",
+"nationalityISO2": "CH",
+"nationalityISO3": "CHE",
+"team": {
+"name": "HÃ€fliger Fredy",
+"coach": null,
+"sailors": [
+{
+"name": "HÃ€fliger Fredy",
+"description": "",
+"nationality": {
+"IOC": "SUI"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "8ed6d04e-15b0-4afd-9d92-03711b5d2bd6",
+"name": null,
+"sailId": "Mimas",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 403.46471088223797,
+"distanceToStartLineAtStartOfRaceInMeters": 81.83218050432475,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 83.74542378976336,
+"speedOverGroundAtPassingStartWaypointInKnots": 4.441182127821711,
+"speedOverGroundAtStartOfRaceInKnots": 3.9825439453125,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 3.814697265625,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 86.28
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bbfe8d10-4b79-0137-d397-60a44ce903c3",
+"name": "Mayer Martin",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "AUT",
+"nationalityISO2": "AT",
+"nationalityISO3": "AUT",
+"team": {
+"name": "Mayer Martin",
+"coach": null,
+"sailors": [
+{
+"name": "Mayer Martin",
+"description": "",
+"nationality": {
+"IOC": "AUT"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "1182cdc5-888b-4c8b-89f3-6c748be82256",
+"name": null,
+"sailId": "Eris",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 247.90829983375892,
+"distanceToStartLineAtStartOfRaceInMeters": 40.98751814736814,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 47.73238948922661,
+"speedOverGroundAtPassingStartWaypointInKnots": 3.9403732413207537,
+"speedOverGroundAtStartOfRaceInKnots": 3.997802734375,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 4.2266845703125,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 39.112
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bb865fc0-4b79-0137-d38c-60a44ce903c3",
+"name": "Ivanov Ivan",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "RUS",
+"nationalityISO2": "RU",
+"nationalityISO3": "RUS",
+"team": {
+"name": "Ivanov Ivan",
+"coach": null,
+"sailors": [
+{
+"name": "Ivanov Ivan",
+"description": "",
+"nationality": {
+"IOC": "RUS"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "59a48e53-460d-4990-a364-af0277926556",
+"name": null,
+"sailId": "IO",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 384.05904613318216,
+"distanceToStartLineAtStartOfRaceInMeters": 25.76734120032559,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 29.222135422987808,
+"speedOverGroundAtPassingStartWaypointInKnots": 5.2239407363400465,
+"speedOverGroundAtStartOfRaceInKnots": 6.103515625,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 6.134033203125,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 21.291
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bda6b8e0-4b79-0137-d3c2-60a44ce903c3",
+"name": "Sternicki Radoslaw",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "POL",
+"nationalityISO2": "PL",
+"nationalityISO3": "POL",
+"team": {
+"name": "Sternicki Radoslaw",
+"coach": null,
+"sailors": [
+{
+"name": "Sternicki Radoslaw",
+"description": "",
+"nationality": {
+"IOC": "POL"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "c0c27944-afc8-4e14-9f9e-50969992652d",
+"name": null,
+"sailId": "Kore",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 77.60839336008318,
+"distanceToStartLineAtStartOfRaceInMeters": 51.36522595749733,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 59.25418298822513,
+"speedOverGroundAtPassingStartWaypointInKnots": 4.268205958391806,
+"speedOverGroundAtStartOfRaceInKnots": 4.058837890625,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 4.1351318359375,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 52.021
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bd41cee0-4b79-0137-d3b9-60a44ce903c3",
+"name": "Turczynowicz Jacek",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "POL",
+"nationalityISO2": "PL",
+"nationalityISO3": "POL",
+"team": {
+"name": "Turczynowicz Jacek",
+"coach": null,
+"sailors": [
+{
+"name": "Turczynowicz Jacek",
+"description": "",
+"nationality": {
+"IOC": "POL"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "a13d72c4-5005-4b2d-855d-51b5ea3cdc1d",
+"name": null,
+"sailId": "Spectra",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 66.52258843066008,
+"distanceToStartLineAtStartOfRaceInMeters": 41.40655619350582,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 49.112635521254504,
+"speedOverGroundAtPassingStartWaypointInKnots": 3.975784453980206,
+"speedOverGroundAtStartOfRaceInKnots": 4.3792724609375,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 4.730224609375,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 35.267
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "ba8c34a0-4b79-0137-d379-60a44ce903c3",
+"name": "Bersenev Evgeny",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "RUS",
+"nationalityISO2": "RU",
+"nationalityISO3": "RUS",
+"team": {
+"name": "Bersenev Evgeny",
+"coach": null,
+"sailors": [
+{
+"name": "Bersenev Evgeny",
+"description": "",
+"nationality": {
+"IOC": "RUS"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "c5068990-79e8-4faa-8f5e-8f2b94db3782",
+"name": null,
+"sailId": "Rhea",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 37.68933454154794,
+"distanceToStartLineAtStartOfRaceInMeters": 87.35293802111411,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 96.71951161373623,
+"speedOverGroundAtPassingStartWaypointInKnots": 4.420853237199459,
+"speedOverGroundAtStartOfRaceInKnots": 3.7841796875,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 3.7994384765625,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 61.715
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bc2195a0-4b79-0137-d39b-60a44ce903c3",
+"name": "Neumann Andreas",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "AUT",
+"nationalityISO2": "AT",
+"nationalityISO3": "AUT",
+"team": {
+"name": "Neumann Andreas",
+"coach": null,
+"sailors": [
+{
+"name": "Neumann Andreas",
+"description": "",
+"nationality": {
+"IOC": "AUT"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "9f33a858-5744-4a24-a6de-4d15b4e95543",
+"name": null,
+"sailId": "Nabu",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 470.43987943073046,
+"distanceToStartLineAtStartOfRaceInMeters": 119.83857982559982,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 123.19496249128355,
+"speedOverGroundAtPassingStartWaypointInKnots": 3.3967215838079468,
+"speedOverGroundAtStartOfRaceInKnots": 2.8533935546875,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 2.8228759765625,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 136.652
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bd86a2c0-4b79-0137-d3bf-60a44ce903c3",
+"name": "Roshchin Alexey",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "RUS",
+"nationalityISO2": "RU",
+"nationalityISO3": "RUS",
+"team": {
+"name": "Roshchin Alexey",
+"coach": null,
+"sailors": [
+{
+"name": "Roshchin Alexey",
+"description": "",
+"nationality": {
+"IOC": "RUS"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "b8845056-4eeb-4ca0-adb3-123125a8b799",
+"name": null,
+"sailId": "Milky Way",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 509.29376700195877,
+"distanceToStartLineAtStartOfRaceInMeters": 62.98331247447805,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 67.92272516512368,
+"speedOverGroundAtPassingStartWaypointInKnots": 4.729363392872429,
+"speedOverGroundAtStartOfRaceInKnots": 4.1351318359375,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 4.241943359375,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 48.033
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bc883750-4b79-0137-d3a6-60a44ce903c3",
+"name": "Rupp Thomas",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "AUT",
+"nationalityISO2": "AT",
+"nationalityISO3": "AUT",
+"team": {
+"name": "Rupp Thomas",
+"coach": null,
+"sailors": [
+{
+"name": "Rupp Thomas",
+"description": "",
+"nationality": {
+"IOC": "AUT"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "c7f99803-9bc5-4b9e-8aa1-9d7f566b7403",
+"name": null,
+"sailId": "Dia",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 363.3078802859695,
+"distanceToStartLineAtStartOfRaceInMeters": 48.06102708295897,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 49.48670433403537,
+"speedOverGroundAtPassingStartWaypointInKnots": 5.285945344857291,
+"speedOverGroundAtStartOfRaceInKnots": 5.3253173828125,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 4.7149658203125,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 41.554
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bd17dfd0-4b79-0137-d3b5-60a44ce903c3",
+"name": "Shatskiy Yury",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "RUS",
+"nationalityISO2": "RU",
+"nationalityISO3": "RUS",
+"team": {
+"name": "Shatskiy Yury",
+"coach": null,
+"sailors": [
+{
+"name": "Shatskiy Yury",
+"description": "",
+"nationality": {
+"IOC": "RUS"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "eeb060fd-5594-4e42-b21b-16f940c5139b",
+"name": null,
+"sailId": "Nebula",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 126.35808919183403,
+"distanceToStartLineAtStartOfRaceInMeters": 24.21323854070918,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 32.131385818619705,
+"speedOverGroundAtPassingStartWaypointInKnots": 5.589212261350446,
+"speedOverGroundAtStartOfRaceInKnots": 5.706787109375,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 5.6915283203125,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 17.014
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bdca4c70-4b79-0137-d3c6-60a44ce903c3",
+"name": "Wagner Roland",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "SUI",
+"nationalityISO2": "CH",
+"nationalityISO3": "CHE",
+"team": {
+"name": "Wagner Roland",
+"coach": null,
+"sailors": [
+{
+"name": "Wagner Roland",
+"description": "",
+"nationality": {
+"IOC": "SUI"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "3a1bb5fa-2356-4e14-88f0-4ea8b002fcca",
+"name": null,
+"sailId": "Mondo",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 503.71532382464056,
+"distanceToStartLineAtStartOfRaceInMeters": 113.00191309454138,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 117.4938231970025,
+"speedOverGroundAtPassingStartWaypointInKnots": 3.0175654187618717,
+"speedOverGroundAtStartOfRaceInKnots": 4.241943359375,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 4.302978515625,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 103.683
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bc46f730-4b79-0137-d39e-60a44ce903c3",
+"name": "Polly Kurt",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "AUT",
+"nationalityISO2": "AT",
+"nationalityISO3": "AUT",
+"team": {
+"name": "Polly Kurt",
+"coach": null,
+"sailors": [
+{
+"name": "Polly Kurt",
+"description": "",
+"nationality": {
+"IOC": "AUT"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "22bc0fa6-aa13-457c-8bf3-4123c6c71f48",
+"name": null,
+"sailId": "Aragon I",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 535.0357493990825,
+"distanceToStartLineAtStartOfRaceInMeters": 138.61391545032438,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 151.71094802375552,
+"speedOverGroundAtPassingStartWaypointInKnots": 2.9199952458602545,
+"speedOverGroundAtStartOfRaceInKnots": 5.279541015625,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 5.06591796875,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 63.149
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bad13740-4b79-0137-d37f-60a44ce903c3",
+"name": "Denk Florian",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "AUT",
+"nationalityISO2": "AT",
+"nationalityISO3": "AUT",
+"team": {
+"name": "Denk Florian",
+"coach": null,
+"sailors": [
+{
+"name": "Denk Florian",
+"description": "",
+"nationality": {
+"IOC": "AUT"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "d0ab3c15-d123-42fa-ac01-77d6535293dd",
+"name": null,
+"sailId": "Ceres",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 82.16040457480466,
+"distanceToStartLineAtStartOfRaceInMeters": 10.894769026727614,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 9.162414220626408,
+"speedOverGroundAtPassingStartWaypointInKnots": 4.075141622927354,
+"speedOverGroundAtStartOfRaceInKnots": 4.1961669921875,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 4.0435791015625,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 23.235
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bcf5c120-4b79-0137-d3b1-60a44ce903c3",
+"name": "Schmidle Peter",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "SUI",
+"nationalityISO2": "CH",
+"nationalityISO3": "CHE",
+"team": {
+"name": "Schmidle Peter",
+"coach": null,
+"sailors": [
+{
+"name": "Schmidle Peter",
+"description": "",
+"nationality": {
+"IOC": "SUI"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "e7d7c56f-95f1-451e-86e4-860e3496985f",
+"name": null,
+"sailId": "Ketu",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 395.7126860901901,
+"distanceToStartLineAtStartOfRaceInMeters": 104.6584829449476,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 106.4326714802478,
+"speedOverGroundAtPassingStartWaypointInKnots": 3.5076196245289726,
+"speedOverGroundAtStartOfRaceInKnots": 4.0130615234375,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 3.8299560546875,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 155.258
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "baadad40-4b79-0137-d37c-60a44ce903c3",
+"name": "Chukanov Vitaly",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "RUS",
+"nationalityISO2": "RU",
+"nationalityISO3": "RUS",
+"team": {
+"name": "Chukanov Vitaly",
+"coach": null,
+"sailors": [
+{
+"name": "Chukanov Vitaly",
+"description": "",
+"nationality": {
+"IOC": "RUS"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "0551c0f9-7ae8-4a6c-b2b8-dfc25e168a3f",
+"name": null,
+"sailId": "Janus",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 230.0496162810595,
+"distanceToStartLineAtStartOfRaceInMeters": 48.419301845510155,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 52.658805456347004,
+"speedOverGroundAtPassingStartWaypointInKnots": 4.733539112195545,
+"speedOverGroundAtStartOfRaceInKnots": 4.8370361328125,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 4.7760009765625,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 50.823
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bcd1ef00-4b79-0137-d3ad-60a44ce903c3",
+"name": "SchÃ€fferling Nico",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "GER",
+"nationalityISO2": "DE",
+"nationalityISO3": "DEU",
+"team": {
+"name": "SchÃ€fferling Nico",
+"coach": null,
+"sailors": [
+{
+"name": "SchÃ€fferling Nico",
+"description": "",
+"nationality": {
+"IOC": "GER"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "864d6985-cd6d-449b-aacb-682f4533f217",
+"name": null,
+"sailId": "ALBEDO",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 377.7251688875911,
+"distanceToStartLineAtStartOfRaceInMeters": 27.82170340587514,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 30.96467812954887,
+"speedOverGroundAtPassingStartWaypointInKnots": 5.181528238301052,
+"speedOverGroundAtStartOfRaceInKnots": 6.34765625,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 6.1187744140625,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 24.24
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bcae7b30-4b79-0137-d3aa-60a44ce903c3",
+"name": "Sadilek ilja",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "SVK",
+"nationalityISO2": "SK",
+"nationalityISO3": "SVK",
+"team": {
+"name": "Sadilek ilja",
+"coach": null,
+"sailors": [
+{
+"name": "Sadilek ilja",
+"description": "",
+"nationality": {
+"IOC": "SVK"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "7ddc4a5e-bb00-4087-bf3b-266669a6da2e",
+"name": null,
+"sailId": "Calisto",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 293.0600779492582,
+"distanceToStartLineAtStartOfRaceInMeters": 29.860215616136415,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 34.02981674618358,
+"speedOverGroundAtPassingStartWaypointInKnots": 5.202384599327498,
+"speedOverGroundAtStartOfRaceInKnots": 4.9591064453125,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 4.9285888671875,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 29.337
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bbde96c0-4b79-0137-d393-60a44ce903c3",
+"name": "Lampe Georg",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "GER",
+"nationalityISO2": "DE",
+"nationalityISO3": "DEU",
+"team": {
+"name": "Lampe Georg",
+"coach": null,
+"sailors": [
+{
+"name": "Lampe Georg",
+"description": "",
+"nationality": {
+"IOC": "GER"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "4d61f152-e11c-4600-bed2-b982c3fcc79b",
+"name": null,
+"sailId": "Attalya 1",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 142.05532468346473,
+"distanceToStartLineAtStartOfRaceInMeters": 120.16081791399091,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 125.75401482217005,
+"speedOverGroundAtPassingStartWaypointInKnots": 3.7385723024579756,
+"speedOverGroundAtStartOfRaceInKnots": 3.1890869140625,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 3.2806396484375,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 138.471
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bc671320-4b79-0137-d3a2-60a44ce903c3",
+"name": "Reiner Martin",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "AUT",
+"nationalityISO2": "AT",
+"nationalityISO3": "AUT",
+"team": {
+"name": "Reiner Martin",
+"coach": null,
+"sailors": [
+{
+"name": "Reiner Martin",
+"description": "",
+"nationality": {
+"IOC": "AUT"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "586c64f7-6458-4ea6-ba5b-c591682b229b",
+"name": null,
+"sailId": "Apollon",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 65.00375305709846,
+"distanceToStartLineAtStartOfRaceInMeters": 29.301987127951694,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 33.415782624098725,
+"speedOverGroundAtPassingStartWaypointInKnots": 4.578709058023139,
+"speedOverGroundAtStartOfRaceInKnots": 3.7841796875,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 3.662109375,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 24.069
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bbae76b0-4b79-0137-d38f-60a44ce903c3",
+"name": "Kogos Konstantin",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "RUS",
+"nationalityISO2": "RU",
+"nationalityISO3": "RUS",
+"team": {
+"name": "Kogos Konstantin",
+"coach": null,
+"sailors": [
+{
+"name": "Kogos Konstantin",
+"description": "",
+"nationality": {
+"IOC": "RUS"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "38a7e2ce-b611-411b-81af-c9162343eccc",
+"name": null,
+"sailId": "Athene I",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 248.51811581938256,
+"distanceToStartLineAtStartOfRaceInMeters": 27.15777987785428,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 30.732531271576594,
+"speedOverGroundAtPassingStartWaypointInKnots": 5.051001650651518,
+"speedOverGroundAtStartOfRaceInKnots": 5.37109375,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 5.8746337890625,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 23.308
+},
+{
+"competitor": {
+"idtype": "java.util.UUID",
+"id": "bd631200-4b79-0137-d3bc-60a44ce903c3",
+"name": "Sudakov Dmitry",
+"shortName": null,
+"displayColor": null,
+"searchTag": null,
+"nationality": "RUS",
+"nationalityISO2": "RU",
+"nationalityISO3": "RUS",
+"team": {
+"name": "Sudakov Dmitry team",
+"coach": null,
+"sailors": [
+{
+"name": "Sudakov Dmitry",
+"description": null,
+"nationality": {
+"IOC": "RUS"
+}
+}
+]
+},
+"boat": {
+"idtype": "java.util.UUID",
+"id": "a077e1d9-e4a7-4fd9-aaf1-f23e893f8955",
+"name": null,
+"sailId": "Elara",
+"color": null,
+"boatClass": {
+"name": "Bavaria Cruiser 46",
+"typicallyStartsUpwind": true,
+"hullLengthInMeters": 14.27,
+"hullBeamInMeters": 4.35,
+"displayName": "Bavaria Cruiser 46",
+"iconUrl": "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png",
+"aliasNames": [
+"B46",
+"B 46",
+"BAVARIACRUISER46"
+]
+}
+},
+"timeOnTimeFactor": 1,
+"timeOnDistanceAllowanceInSecondsPerNauticalMile": 0
+},
+"distanceToStarboardSideOfStartLineInMeters": 174.74421751940136,
+"distanceToStartLineAtStartOfRaceInMeters": 26.148119332627765,
+"distanceToStartLineFiveSecondsBeforeStartInMeters": 31.03267567163625,
+"speedOverGroundAtPassingStartWaypointInKnots": 5.621843996470381,
+"speedOverGroundAtStartOfRaceInKnots": 5.615234375,
+"speedOverGroundFiveSecondsBeforeStartInKnots": 5.5999755859375,
+"timeBetweenRaceStartAndCompetitorStartInSeconds": 18.279
+}
+]</pre></td>
+</tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

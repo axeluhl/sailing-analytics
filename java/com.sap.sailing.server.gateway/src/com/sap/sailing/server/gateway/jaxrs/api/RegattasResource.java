@@ -1304,7 +1304,6 @@ public class RegattasResource extends AbstractSailingServerResource {
                             .entity("Error computing start analysis for race '" + StringEscapeUtils.escapeHtml(raceName) + "' in regatta '" + StringEscapeUtils.escapeHtml(regattaName) + "': "+
                                     StringEscapeUtils.escapeHtml(e.getMessage()))
                             .type(MediaType.TEXT_PLAIN).build();
-
                 }
             }
         }
