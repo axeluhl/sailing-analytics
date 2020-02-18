@@ -13,6 +13,8 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.common.BranchIOConstants;
+import com.sap.sailing.domain.common.MailInvitationType;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.shared.media.ImageDescriptor;
@@ -22,16 +24,19 @@ import com.sap.sse.util.impl.NonGwtUrlHelper;
  * Builder to create invitation mails for competitor and buoy tracking. This class ensures that the mail is being sent
  * as text and html body to support a great variety of mail clients.
  */
-abstract class BranchIORaceLogTrackingInvitationMailBuilder extends RaceLogTrackingInvitationMailBuilder {
+public class BranchIORaceLogTrackingInvitationMailBuilder extends RaceLogTrackingInvitationMailBuilder {
     private static final Logger LOG = Logger.getLogger(BranchIORaceLogTrackingInvitationMailBuilder.class.getName());
+    
+    private final MailInvitationType invitationType;
     
     /**
      * @param locale
      *            the locale in which the resulting mail will be generated. If there are no specific messages available
      *            for the given locale, English locale is used as fallback.
      */
-    BranchIORaceLogTrackingInvitationMailBuilder(final Locale locale) {
+    BranchIORaceLogTrackingInvitationMailBuilder(final Locale locale, MailInvitationType invitationType) {
         super(locale);
+        this.invitationType = invitationType;
     }
 
     BranchIORaceLogTrackingInvitationMailBuilder addEventLogo(final Event event) {
@@ -60,8 +65,6 @@ abstract class BranchIORaceLogTrackingInvitationMailBuilder extends RaceLogTrack
         return this;
     }
     
-    protected abstract String getSailInsightBranchIO();
-
     @Override
     public RaceLogTrackingInvitationMailBuilder addBuoyPingerDeeplink(final String checkinUrl, String legacy1,
             String legacy2) {
@@ -71,8 +74,6 @@ abstract class BranchIORaceLogTrackingInvitationMailBuilder extends RaceLogTrack
         return this;
     }
     
-    abstract protected String getBouyPingerBranchIO();
-
     private void addDeeplink(final String url, final Function<Locale, String> textFactory) {
         this.html.append("<table border=\"0\" cellspacing=\"20px\" cellpadding=\"0px\">");
         this.html.append("<tr>");
@@ -105,6 +106,14 @@ abstract class BranchIORaceLogTrackingInvitationMailBuilder extends RaceLogTrack
         this.html.append("</td>");
         this.html.append("</tr></table>");
         this.html.append("</a>");
+    }
+
+    protected String getSailInsightBranchIO() {
+        return invitationType.getBranchIOinviteURL();
+    }
+
+    protected String getBouyPingerBranchIO() {
+        return BranchIOConstants.BUOYPINGER_APP_BRANCHIO;
     }
     
 }

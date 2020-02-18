@@ -4,12 +4,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.Util;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
-public abstract class RolePrototype implements RoleDefinition {
-    private static final long serialVersionUID = 3291793984984443193L;
+public abstract class RolePrototype implements NamedWithID {
 
+    private static final long serialVersionUID = -3911998376131317304L;
+    
     private final UUID id;
     private final String name;
     private final Set<WildcardPermission> permissions;
@@ -46,17 +47,14 @@ public abstract class RolePrototype implements RoleDefinition {
         return id;
     }
 
-    @Override
     public Set<WildcardPermission> getPermissions() {
         return permissions;
     }
 
-    @Override
     public void setName(String newName) {
         throw new UnsupportedOperationException("Cannot change the name of role " + getName());
     }
 
-    @Override
     public void setPermissions(Iterable<WildcardPermission> permissions) {
         throw new UnsupportedOperationException("Cannot change the permissions of role " + getName());
     }
@@ -84,23 +82,5 @@ public abstract class RolePrototype implements RoleDefinition {
         } else if (!id.equals(other.id))
             return false;
         return true;
-    }
-
-    @Override
-    public HasPermissions getType() {
-        return SecuredSecurityTypes.ROLE_DEFINITION;
-    }
-
-    @Override
-    public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
-    }
-
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return getTypeRelativeObjectIdentifier(this);
-    }
-
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(RoleDefinition roleDefinition) {
-        return new TypeRelativeObjectIdentifier(roleDefinition.getIdAsString());
     }
 }

@@ -1,5 +1,6 @@
 package com.sap.sailing.manage2sail.resultimport;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import com.sap.sailing.resultimport.ResultUrlProvider;
@@ -10,6 +11,9 @@ public abstract class AbstractManage2SailProvider implements ResultUrlProvider {
     private static final long serialVersionUID = 2275835750471711783L;
 
     public static final String NAME = "Manage2Sail XRR Result Importer";
+
+    protected static final String EVENT_ID_REGEX = "^[\\da-f]{8}(-[\\da-f]{4}){3}-[\\da-f]{12}$";
+    protected static final String EVENT_ID_TEMPLATE = "http://manage2sail.com/api/public/links/event/%s?accesstoken=bDAv8CwsTM94ujZ&mediaType=json";
 
     private final ParserFactory parserFactory;
     private final ResultUrlRegistry resultUrlRegistry;
@@ -31,6 +35,15 @@ public abstract class AbstractManage2SailProvider implements ResultUrlProvider {
     @Override
     public Iterable<URL> getUrls() {
         return getResultUrlRegistry().getResultUrls(NAME);
+    }
+
+    @Override
+    public URL resolveUrl(String url) throws MalformedURLException {
+        String completedUrl = url;
+        if (url.matches(EVENT_ID_REGEX)) {
+            completedUrl = String.format(EVENT_ID_TEMPLATE, url);
+        }
+        return new URL(completedUrl); //TODO Find a better way to check if a URL is valid
     }
 
     @Override

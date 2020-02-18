@@ -271,7 +271,6 @@ public class UserService {
         }
         anonymousUser = resultAndAnomynous.getB();
         serverInfo = resultAndAnomynous.getC();
-
         preAuthenticated = (!userInitiallyLoaded && currentUser != null);
         userInitiallyLoaded = true;
         logger.info("User changed to "
@@ -471,7 +470,7 @@ public class UserService {
     /**
      * Checks whether the user has permission to {@link DefaultActions#CREATE create} an object of the logical type
      * specified, assuming that it will be created with this user as the {@link Ownership#getUserOwner() user owner} and
-     * this user's {@link #getDefaultTenant() default group} as the {@link Ownership#getTenantOwner() group owner}.
+     * this user's {@link #getServerGroup() default group} as the {@link Ownership#getTenantOwner() group owner}.
      */
     public boolean hasCreatePermission(HasPermissions logicalSecuredObjectType) {
         if (currentUser == null) {

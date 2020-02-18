@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../fontface.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/leaderboards/{name}/starttime?race_column={name}&amp;fleet={name}</h2>
+
+<b>Description:</b>
+<p>Sets the start time and the racing procedure for a race by producing and adding the necessary RaceLog events.
+</p>
+<br/>
+<table>
+	<tr>
+		<td>Webservice Type:</td>
+		<td>REST</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>Json; the startTimeAsMillis and racingProcedureType fields may deliver <tt>null</tt> in case those
+		    attributed are not set for the race selected</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>
+			<div>race_column name of the race column, part of identifying the race within the leaderboard</div>
+			<div>fleet the name of the fleet, part of identifying the race within the leaderbaord</div>
+			<div>authorName the name of the author for the race log events that will be produced</div>
+			<div>authorPriority a numerical priority; lesser integers mean higher logical priority, 0 being highest</div>
+			<div>passId the pass in the race log into which to write the events</div>
+			<div>startTime the start time for the race as a Unix millisecond time stamp</div>
+			<div>startProcedureType any of UNKNOWN, RRS26, SWC, GateStart, ESS, BASIC, or LEAGUE</div>
+		</td>
+	</tr>
+	<tr>
+		<td>Request method:</td>
+		<td>PUT</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td>curl -X PUT "http://server.url.com/sailingserver/api/v1/leaderboards/Croatia%20Coast%20Cup%202019%20-%20ORC%20with%20Spinnaker/starttime?race_column=R2&fleet=Default&authorName=ItsMe&authorPriority=3&passId=0&startTime=1571923070028&startProcedureType=RRS26"
+<br>
+		delivers <pre>
+		{"startTimeAsMillis":1570977780000}
+		</pre></td>
+	</tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

@@ -174,13 +174,13 @@ public class PreviousCompetitorDTOImpl extends NamedSecuredObjectDTO implements 
     }
     
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredDomainType.COMPETITOR;
     }
     
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {

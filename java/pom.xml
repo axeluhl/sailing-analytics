@@ -101,6 +101,7 @@
         <module>com.sap.sse.security.userstore.mongodb</module>
         <module>com.sap.sse.operationaltransformation</module>
         <module>com.sap.sse.replication</module>
+        <module>com.sap.sse.replication.persistence</module>
         <module>com.sap.sse.replication.interfaces</module>
         <module>com.sap.sse.threadmanager</module>
         <module>com.sap.sse.filestorage</module>
@@ -138,6 +139,9 @@
         <module>com.sap.sailing.server.interface</module>
         <module>com.sap.sailing.server.gateway</module>
         <module>com.sap.sailing.server.gateway.serialization</module>
+        <module>com.sap.sailing.shared.persistence</module>
+        <module>com.sap.sailing.shared.server</module>
+        <module>com.sap.sailing.shared.server.gateway</module>
         <module>com.sap.sailing.www</module>
         <module>com.sap.sailing.xmlexport</module>
         <module>com.google.gwt.user</module>

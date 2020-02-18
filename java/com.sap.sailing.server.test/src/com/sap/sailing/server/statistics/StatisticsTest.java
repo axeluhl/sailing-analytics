@@ -62,7 +62,7 @@ public class StatisticsTest {
     private final Mark mark1 = DomainFactory.INSTANCE.getOrCreateMark("mark1");
     private final Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
     private final Mark mark3 = DomainFactory.INSTANCE.getOrCreateMark("mark3");
-    private final ControlPoint gate = new ControlPointWithTwoMarksImpl(mark1, mark2, "gate");
+    private final ControlPoint gate = new ControlPointWithTwoMarksImpl(mark1, mark2, "gate", "gate");
     private final Waypoint waypoint1 = new WaypointImpl(gate);
     private final Waypoint waypoint2 = new WaypointImpl(mark3);
     private final Waypoint waypoint3 = new WaypointImpl(gate);

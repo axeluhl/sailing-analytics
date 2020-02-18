@@ -89,6 +89,7 @@ import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
@@ -126,9 +127,14 @@ import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
+import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -156,6 +162,7 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
  * service methods, an empty (non-<code>null</code>) result is returned.
  */
 public interface SailingService extends RemoteService, FileStorageManagementGwtService, RemoteReplicationService {
+
     List<TracTracConfigurationWithSecurityDTO> getPreviousTracTracConfigurations()
             throws UnauthorizedException, Exception;
 
@@ -488,12 +495,14 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     RemoteSailingServerReferenceDTO addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer)
             throws UnauthorizedException, Exception;
 
-    List<String> getResultImportUrls(String resultProviderName) throws UnauthorizedException;
+    List<UrlDTO> getResultImportUrls(String resultProviderName) throws UnauthorizedException;
 
-    void removeResultImportURLs(String resultProviderName, Set<String> toRemove)
+    void removeResultImportURLs(String resultProviderName, Set<UrlDTO> toRemove)
             throws UnauthorizedException, Exception;
 
-    void addResultImportUrl(String resultProviderName, String url) throws UnauthorizedException, Exception;
+    void addResultImportUrl(String resultProviderName, UrlDTO url) throws UnauthorizedException, Exception;
+
+    String validateResultImportUrl(String resultProviderName, UrlDTO urlDTO);
 
     void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
             String comment) throws UnauthorizedException;
@@ -1265,4 +1274,26 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Set<ORCCertificate> searchORCBoatCertificates(CountryCode country, Integer yearOfIssuance, String referenceNumber,
             String yachtName, String sailNumber, String boatClassName) throws Exception;
+
+    List<MarkTemplateDTO> getMarkTemplates();
+
+    MarkTemplateDTO addOrUpdateMarkTemplate(MarkTemplateDTO markTemplate);
+
+    MarkPropertiesDTO addOrUpdateMarkProperties(MarkPropertiesDTO markProperties);
+
+    MarkPropertiesDTO updateMarkPropertiesPositioning(UUID markPropertiesId, DeviceIdentifierDTO deviceIdentifier, Position position);
+
+    List<MarkPropertiesDTO> getMarkProperties();
+
+    List<CourseTemplateDTO> getCourseTemplates();
+
+    CourseTemplateDTO createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate);
+
+    void removeCourseTemplate(UUID uuid);
+
+    void removeMarkProperties(UUID uuid);
+
+    List<MarkRoleDTO> getMarkRoles();
+
+    MarkRoleDTO createMarkRole(MarkRoleDTO markRole);
 }

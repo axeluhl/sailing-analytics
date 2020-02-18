@@ -75,9 +75,12 @@ public class ManeuverRetrievalProcessor
     }
 
     private boolean isLastLeg(HasTrackedLegOfCompetitorContext element) {
-        Waypoint finishWaypoint = element.getTrackedLegContext().getTrackedRaceContext().getRace().getCourse().getLastWaypoint();
-        Waypoint toWaypoint = element.getTrackedLegOfCompetitor().getLeg().getTo();
-        return finishWaypoint.equals(toWaypoint);
+        if(element.getTrackedLegContext().getTrackedRaceContext().getRace() != null) {
+            Waypoint finishWaypoint = element.getTrackedLegContext().getTrackedRaceContext().getRace().getCourse().getLastWaypoint();
+            Waypoint toWaypoint = element.getTrackedLegOfCompetitor().getLeg().getTo();
+            return finishWaypoint.equals(toWaypoint);
+        }
+        return false;
     }
 
     private boolean isManeuverCompliantWithSettings(Maneuver previousManeuver,

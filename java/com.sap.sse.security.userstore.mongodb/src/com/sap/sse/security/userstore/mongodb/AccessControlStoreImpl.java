@@ -166,12 +166,8 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     private AccessControlListAnnotation getOrCreateAcl(QualifiedObjectIdentifier idOfAccessControlledObject) {
-        AccessControlListAnnotation acl = accessControlLists.get(idOfAccessControlledObject);
-        if (acl == null) {
-            acl = new AccessControlListAnnotation(new AccessControlList(), idOfAccessControlledObject,
-                    /* display name */ null);
-        }
-        return acl;
+        return accessControlLists.computeIfAbsent(idOfAccessControlledObject,
+                id->new AccessControlListAnnotation(new AccessControlList(), id, /* display name */ null));
     }
 
     @Override
@@ -331,14 +327,14 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     @Override
-    public void removeOwnership(final QualifiedObjectIdentifier idAsString) {
+    public void removeOwnership(final QualifiedObjectIdentifier id) {
         LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {
             @Override
             public void run() {
-                OwnershipAnnotation ownership = ownerships.remove(idAsString);
+                OwnershipAnnotation ownership = ownerships.remove(id);
                 if (ownership != null) {
                     removeUserAndUserGroupToOwnershipMapping(ownership);
-                    mongoObjectFactory.deleteOwnership(idAsString, ownership.getAnnotation());
+                    mongoObjectFactory.deleteOwnership(id, ownership.getAnnotation());
                 }
             }
         });

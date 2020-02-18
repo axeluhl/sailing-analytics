@@ -8,6 +8,7 @@ import com.tractrac.model.lib.api.ModelLocator;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.IEventFactory;
 import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.model.lib.api.event.IRaceCompetitor;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.ISubscriberFactory;
@@ -44,6 +45,10 @@ public class Main {
 		IEventFactory eventFactory = ModelLocator.getEventFactory();
 		IRace race = eventFactory.createRace(paramURI);
 
+		for (IRaceCompetitor raceCompetitor: race.getRaceCompetitors()) {
+			System.out.println(raceCompetitor.getCompetitor().getLastName());
+		}
+
 		// Create the subscriber
 		ISubscriberFactory subscriberFactory = SubscriptionLocator.getSusbcriberFactory();
 		IEventSubscriber eventSubscriber = subscriberFactory.createEventSubscriber(race.getEvent());
@@ -61,7 +66,7 @@ public class Main {
 		eventSubscriber.subscribeControls(listener);
 		eventSubscriber.subscribeCompetitors(listener);
 
-		IRaceSubscriber raceSubscriber = subscriberFactory.createRaceSubscriber(race);
+		IRaceSubscriber raceSubscriber = subscriberFactory.createRaceSubscriber(race, new URI("ws://ws.dataservers1.tractrac.com/dataserver1"));
 		raceSubscriber.subscribeConnectionStatus(listener);
 		raceSubscriber.subscribeControlPositions(listener);
 		raceSubscriber.subscribePositions(listener);
@@ -71,6 +76,7 @@ public class Main {
 		raceSubscriber.subscribeRaceMessages(listener);
 		raceSubscriber.subscribeRaceTimesChanges(listener);
 		raceSubscriber.subscribeRouteChanges(listener);
+		raceSubscriber.subscribeRaceCompetitor(listener);
 		raceSubscriber.start();
 		eventSubscriber.start();
 

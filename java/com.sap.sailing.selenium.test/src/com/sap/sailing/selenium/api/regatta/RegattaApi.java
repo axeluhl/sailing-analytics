@@ -10,7 +10,9 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.openqa.selenium.TimeoutException;
 
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
+import com.sap.sse.common.TimePoint;
 
 public class RegattaApi {
 
@@ -22,9 +24,28 @@ public class RegattaApi {
     private static final String ADD_RACE_COLUMN_URL = "/addracecolumns";
     private static final String LIST_COMPETITORS = "/competitors";
     private static final String TRACKING_DEVICES = "/tracking_devices";
+    private static final String STRUCTURE = "/structure/";
+    private static final String COURSE = "/course";
 
     public Regatta getRegatta(ApiContext ctx, String regattaName) {
         return new Regatta(ctx.get(REGATTAS + "/" + regattaName));
+    }
+
+    public Regatta updateRegatta(ApiContext ctx, String regattaName, TimePoint startTimePoint, TimePoint endTimePoint,
+            UUID newDefaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
+            boolean controlTrackingFromStartAndFinishTimes, String registrationLinkSecret,
+            CompetitorRegistrationType registrationType) {
+        final JSONObject requestObject = new JSONObject();
+        requestObject.put("startTimePointAsMillis", startTimePoint == null ? null : startTimePoint.asMillis());
+        requestObject.put("endTimePointAsMillis", endTimePoint == null ? null : endTimePoint.asMillis());
+        requestObject.put("defaultCourseAreaUuid",
+                newDefaultCourseAreaId == null ? null : newDefaultCourseAreaId.toString());
+        requestObject.put("buoyZoneRadiusInHullLengths", buoyZoneRadiusInHullLengths);
+        requestObject.put("useStartTimeInference", useStartTimeInference);
+        requestObject.put("controlTrackingFromStartAndFinishTimes", controlTrackingFromStartAndFinishTimes);
+        requestObject.put("registrationLinkSecret", registrationLinkSecret);
+        requestObject.put("competitorRegistrationType", registrationType == null ? null : registrationType.name());
+        return new Regatta(ctx.put(REGATTAS + "/" + regattaName, null, requestObject));
     }
 
     public RegattaRaces getRegattaRaces(ApiContext ctx, String regattaName) {
@@ -123,5 +144,10 @@ public class RegattaApi {
     public RegattaDeviceStatus getTrackingDeviceStatus(ApiContext ctx, String regattaName) {
         final String url = REGATTAS + "/" + regattaName + TRACKING_DEVICES;
         return new RegattaDeviceStatus(ctx.get(url));
+    }
+    
+    public Course getCourse(ApiContext ctx, String regattaName, String raceColumn, String fleet) {
+        final String url = REGATTAS + "/" + regattaName + STRUCTURE + raceColumn + "/" + fleet + COURSE;
+        return new Course(ctx.get(url));
     }
 }

@@ -49,7 +49,9 @@ import com.sap.sse.security.shared.impl.UserGroup;
 
 /**
  * A service interface for security management. Intended to be used as an OSGi service that can be registered, e.g., by
- * {@link BundleContext#registerService(Class, Object, java.util.Dictionary)} and can be discovered by other bundles.
+ * {@link BundleContext#registerService(Class, Object, java.util.Dictionary)} and can be discovered by other bundles.<p>
+ * 
+ * Permission checks will throw a {@link org.apache.shiro.authz.AuthorizationException} in case the check fails.
  * 
  * @author Axel Uhl (D043530)
  * @author Benjamin Ebling
@@ -354,9 +356,19 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     User loginByAccessToken(String accessToken);
 
     /**
-     * Returns the default tenant of the underlying {@link UserStore#getDefaultTenant()}
+     * Returns the group owning this server/replicaset {@link UserStore#getServerGroup()}. This group is used as default
+     * owner if default objects such as role definitions or the admin user have to be created outside of any user
+     * session and a default ownership is required. It is the group owner of the {@link SecuredSecurityTypes#SERVER}
+     * object.<p>
+     * 
+     * During replication, a replica's user store contents are replaced by the master's user store contents. However,
+     * a replica's {@link UserStore#getServerGroup()} will be resolved by the server group name provided to the
+     * {@link UserStore} at its construction time. If such a group is not provided by the master, it is created. This
+     * creation will be executed as a replicable operation that hence will be sent back to the master where the group
+     * is then known. This new group is then used to try to set the server's group ownership, after checking that such an
+     * ownership doesn't exist yet.
      */
-    UserGroup getDefaultTenant();
+    UserGroup getServerGroup();
 
     /**
      * For the current session's {@link Subject} an ownership for an object of type {@code type} and with type-relative
@@ -472,18 +484,24 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     /**
      * Checks if the current user has the {@link DefaultActions#UPDATE UPDATE} permission on the {@code object} identified.
      * If {@code object} is {@code null}, the check will always pass.
+     * 
+     * @throws AuthorizationException in case the current user is not permitted to update {@code object}
      */
     void checkCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object);
 
     /**
      * Checks if the current user has the {@link DefaultActions#DELETE DELETE} permission on the {@code object} identified.
      * If {@code object} is {@code null}, the check will always pass.
+     * 
+     * @throws AuthorizationException in case the current user is not permitted to delete {@code object}
      */
     void checkCurrentUserDeletePermission(WithQualifiedObjectIdentifier object);
 
     /**
      * Checks if the current user has the {@link DefaultActions#DELETE DELETE} permission on the {@code object} identified.
      * If {@code object} is {@code null}, the check will always pass.
+     * 
+     * @throws AuthorizationException in case the current user is not permitted to delete {@code object}
      */
     void checkCurrentUserDeletePermission(QualifiedObjectIdentifier object);
 
@@ -517,6 +535,13 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void migratePermission(User user, WildcardPermission permissionToMigrate,
             Function<WildcardPermission, WildcardPermission> permissionReplacement);
 
+    /**
+     * If the {@link SecuredSecurityTypes#SERVER} object has a group ownership. If not, it is set to the
+     * {@link #getServerGroup() server group}. The {@link SecuredSecurityTypes#SERVER} type is then marked
+     * as migrated (see {@link #checkMigration(Iterable)}).
+     */
+    void migrateServerObject();
+    
     void checkMigration(Iterable<HasPermissions> allInstances);
 
     <T extends WithQualifiedObjectIdentifier> boolean hasCurrentUserRoleForOwnedObject(HasPermissions type, T object,

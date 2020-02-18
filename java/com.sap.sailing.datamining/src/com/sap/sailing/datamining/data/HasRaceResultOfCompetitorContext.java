@@ -11,6 +11,9 @@ public interface HasRaceResultOfCompetitorContext {
     @Connector(scanForStatistics=false)
     public HasLeaderboardContext getLeaderboardContext();
 
+    @Connector(scanForStatistics=false)
+    public HasTrackedRaceContext getTrackedRaceContext();
+
     @Connector(messageKey="Competitor", ordinal=2)
     public Competitor getCompetitor();
 

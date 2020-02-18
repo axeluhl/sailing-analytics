@@ -101,7 +101,13 @@ public interface SensorFixStore {
     
     long getNumberOfFixes(DeviceIdentifier device) throws TransformationException, NoCorrespondingServiceRegisteredException;
     
-    <FixT extends Timed> Map<DeviceIdentifier, FixT> getLastFix(Iterable<DeviceIdentifier> forDevices) throws TransformationException, NoCorrespondingServiceRegisteredException;
+    /**
+     * Obtains the fixes that were received last for each of the devices specified. For devices that have not delivered
+     * fixes yet, no mapping is created in the resulting map. Note that due to the possibility of out-of-order delivery
+     * the fixes returned may not be the fixes with the latest time stamp for that device.
+     */
+    <FixT extends Timed> Map<DeviceIdentifier, FixT> getFixLastReceived(Iterable<DeviceIdentifier> forDevices)
+            throws TransformationException, NoCorrespondingServiceRegisteredException;
 
     /**
      * Loads the oldest fix for the given device in the specified {@link TimeRange}.

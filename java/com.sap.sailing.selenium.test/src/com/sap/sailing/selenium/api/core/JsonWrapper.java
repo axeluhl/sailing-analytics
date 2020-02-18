@@ -6,6 +6,9 @@ import java.lang.reflect.InvocationTargetException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+
 /**
  * Wrapper for {@link JSONObject} or {@link JSONArray} to wrap results of API requests.
  *
@@ -52,6 +55,11 @@ public class JsonWrapper {
     @SuppressWarnings("unchecked")
     public <T> T get(String key) {
         return (T) json.get(key);
+    }
+    
+    public TimePoint getTimePointFromMilliseconds(String key) {
+        Number tpMillis = get(key);
+        return tpMillis == null ? null : new MillisecondsTimePoint(tpMillis.longValue());
     }
 
     /**

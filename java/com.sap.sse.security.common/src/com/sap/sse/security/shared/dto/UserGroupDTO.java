@@ -55,7 +55,7 @@ public class UserGroupDTO extends AbstractUserGroupImpl<StrippedUserDTO, Strippe
     }
 
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredSecurityTypes.USER_GROUP;
     }
 

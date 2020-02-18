@@ -37,6 +37,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -52,6 +53,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import java.util.zip.GZIPInputStream;
 
@@ -333,6 +335,21 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
+import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
+import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
+import com.sap.sailing.domain.coursetemplate.CourseTemplate;
+import com.sap.sailing.domain.coursetemplate.FixedPositioning;
+import com.sap.sailing.domain.coursetemplate.MarkProperties;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
+import com.sap.sailing.domain.coursetemplate.MarkRolePair.MarkRolePairFactory;
+import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.PositioningVisitor;
+import com.sap.sailing.domain.coursetemplate.RepeatablePart;
+import com.sap.sailing.domain.coursetemplate.TrackingDeviceBasedPositioning;
+import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
+import com.sap.sailing.domain.coursetemplate.impl.CommonMarkPropertiesImpl;
+import com.sap.sailing.domain.coursetemplate.impl.RepeatablePartImpl;
+import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
@@ -364,12 +381,14 @@ import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
+import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.sharding.ShardingContext;
+import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
@@ -497,11 +516,19 @@ import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
+import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.CommonMarkPropertiesDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.RepeatablePartDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.WaypointTemplateDTO;
 import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
 import com.sap.sailing.manage2sail.RaceResultDescriptor;
@@ -705,6 +732,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     deviceIdentifierStringSerializationHandlerTracker;
     
     private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+
+    private final ServiceTracker<SharedSailingData, SharedSailingData> sharedSailingDataTracker;
     
     private final com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory tractracMongoObjectFactory;
 
@@ -748,6 +777,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         Activator activator = Activator.getInstance();
         quickRanksLiveCache = new QuickRanksLiveCache(this);
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
+        sharedSailingDataTracker = ServiceTrackerFactory.createAndOpen(context, SharedSailingData.class);
         windFinderTrackerFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, WindFinderTrackerFactory.class);
         replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
         resultUrlRegistryServiceTracker = ServiceTrackerFactory.createAndOpen(context, ResultUrlRegistry.class);
@@ -1090,9 +1120,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     private MarkDTO convertToMarkDTO(Mark mark, Position position) {
         MarkDTO markDTO;
         if (position != null) {
-            markDTO = new MarkDTO(mark.getId().toString(), mark.getName(), position.getLatDeg(), position.getLngDeg());
+            markDTO = new MarkDTO(mark.getId().toString(), mark.getName(), mark.getShortName(), position.getLatDeg(), position.getLngDeg());
         } else {
-            markDTO = new MarkDTO(mark.getId().toString(), mark.getName());
+            markDTO = new MarkDTO(mark.getId().toString(), mark.getName(), mark.getShortName());
         }
         markDTO.color = mark.getColor();
         markDTO.shape = mark.getShape();
@@ -2560,7 +2590,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             final Position leftPos =  positionFinder.find(left, timePoint);
             final Mark right = ((ControlPointWithTwoMarks) controlPoint).getRight();
             final Position rightPos = positionFinder.find(right, timePoint);
-            result = new GateDTO(controlPoint.getId().toString(), controlPoint.getName(), convertToMarkDTO(left, leftPos), convertToMarkDTO(right, rightPos)); 
+            result = new GateDTO(controlPoint.getId().toString(), controlPoint.getName(),
+                    convertToMarkDTO(left, leftPos), convertToMarkDTO(right, rightPos), controlPoint.getShortName());
         } else {
             Mark mark = controlPoint.getMarks().iterator().next();
             final Position position = positionFinder.find(mark, timePoint);
@@ -2578,10 +2609,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             GateDTO gateDTO = (GateDTO) dto;
             Mark left = (Mark) getOrCreateControlPoint(gateDTO.getLeft());
             Mark right = (Mark) getOrCreateControlPoint(gateDTO.getRight());
-            return baseDomainFactory.getOrCreateControlPointWithTwoMarks(idAsString, gateDTO.getName(), left, right);
+            return baseDomainFactory.getOrCreateControlPointWithTwoMarks(idAsString, gateDTO.getName(), left, right,
+                    gateDTO.getShortName());
         } else {
             MarkDTO markDTO = (MarkDTO) dto;
-            return baseDomainFactory.getOrCreateMark(idAsString, dto.getName(), markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
+            return baseDomainFactory.getOrCreateMark(idAsString, dto.getName(), markDTO.getShortName(), markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
         }
     }
 
@@ -2602,7 +2634,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 controlPoints.add(new Pair<>(getOrCreateControlPoint(waypointDTO.getA()), waypointDTO.getB()));
             }
             try {
-                course.update(controlPoints, baseDomainFactory);
+                course.update(controlPoints, course.getAssociatedRoles(), course.getOriginatingCourseTemplateIdOrNull(),
+                        baseDomainFactory);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -2731,6 +2764,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     protected RacingEventService getService() {
         try {
             return racingEventServiceTracker.waitForService(0);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } // grab the service
+    }
+
+    protected SharedSailingData getSharedSailingData() {
+        try {
+            return sharedSailingDataTracker.waitForService(0);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } // grab the service
@@ -5081,11 +5122,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
             boolean persistent, ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType) {
-
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.REGATTA, Regatta.getTypeRelativeObjectIdentifier(regattaName),
                 regattaName, new Callable<RegattaDTO>() {
-
                     @Override
                     public RegattaDTO call() throws Exception {
                         TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
@@ -5174,7 +5213,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public ServerConfigurationDTO getServerConfiguration() {
         SailingServerConfiguration sailingServerConfiguration = getService().getSailingServerConfiguration();
-        UserGroup serverTenant = getSecurityService().getDefaultTenant();
+        UserGroup serverTenant = getSecurityService().getServerGroup();
         StrippedUserGroupDTO serverTenantDTO = new SecurityDTOFactory()
                 .createStrippedUserGroupDTOFromUserGroup(serverTenant, new HashMap<>());
         ServerConfigurationDTO result = new ServerConfigurationDTO(sailingServerConfiguration.isStandaloneServer(),
@@ -5203,19 +5242,19 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         if (serverConfiguration.isPublic() != null) {
             final RoleDefinition viewerRole = getSecurityService()
                     .getRoleDefinition(SailingViewerRole.getInstance().getId());
-            final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
-            if (viewerRole != null && defaultServerTenant != null) {
-                final boolean isCurrentlyPublic = Boolean.TRUE.equals(defaultServerTenant.getRoleAssociation(viewerRole));
+            final UserGroup serverGroup = getSecurityService().getServerGroup();
+            if (viewerRole != null && serverGroup != null) {
+                final boolean isCurrentlyPublic = Boolean.TRUE.equals(serverGroup.getRoleAssociation(viewerRole));
                 final boolean shouldBePublic = serverConfiguration.isPublic();
                 if (isCurrentlyPublic != shouldBePublic) {
                     // value changed
-                    if (getSecurityService().hasCurrentUserUpdatePermission(defaultServerTenant)
+                    if (getSecurityService().hasCurrentUserUpdatePermission(serverGroup)
                             && getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
-                                    viewerRole, new Ownership(null, defaultServerTenant))) {
+                                    viewerRole, new Ownership(null, serverGroup))) {
                         if (serverConfiguration.isPublic()) {
-                            getSecurityService().putRoleDefinitionToUserGroup(defaultServerTenant, viewerRole, true);
+                            getSecurityService().putRoleDefinitionToUserGroup(serverGroup, viewerRole, true);
                         } else {
-                            getSecurityService().removeRoleDefintionFromUserGroup(defaultServerTenant, viewerRole);
+                            getSecurityService().removeRoleDefintionFromUserGroup(serverGroup, viewerRole);
                         }
                     } else {
                         throw new AuthorizationException("No permission to make the server public");
@@ -5266,44 +5305,70 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public List<String> getResultImportUrls(String resultProviderName) {
-        final List<String> result = new ArrayList<String>();
+    public List<UrlDTO> getResultImportUrls(String resultProviderName) {
+        final List<UrlDTO> result = new ArrayList<>();
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
         ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
         if (urlBasedScoreCorrectionProvider != null) {
+            SecurityService securityService = getSecurityService();
             Iterable<URL> allUrlsReadableBySubject = resultUrlRegistry.getResultUrls(resultProviderName);
             for (URL url : allUrlsReadableBySubject) {
-                result.add(url.toString());
+                QualifiedObjectIdentifier objId = SecuredDomainType.RESULT_IMPORT_URL.getQualifiedObjectIdentifier(
+                        new TypeRelativeObjectIdentifier(urlBasedScoreCorrectionProvider.getName(), url.toString()));
+                UrlDTO urlDTO = new UrlDTO(url.toString());
+                SecurityDTOUtil.addSecurityInformation(securityService, urlDTO, objId);
+                result.add(urlDTO);
             }
         }
         return result;
     }
 
     @Override
-    public void removeResultImportURLs(String resultProviderName, Set<String> toRemove) throws Exception {
+    public void removeResultImportURLs(String resultProviderName, Set<UrlDTO> toRemove) throws Exception {
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
         ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
         if (urlBasedScoreCorrectionProvider != null) {
-            for (String urlToRemove : toRemove) {
+            for (UrlDTO urlToRemove : toRemove) {
                 getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(
                         SecuredDomainType.RESULT_IMPORT_URL.getQualifiedObjectIdentifier(
                                 new TypeRelativeObjectIdentifier(urlBasedScoreCorrectionProvider.getName(),
-                                        urlToRemove)),
-                        () -> resultUrlRegistry.unregisterResultUrl(resultProviderName, new URL(urlToRemove)));
+                                        urlToRemove.getUrl())),
+                        () -> resultUrlRegistry.unregisterResultUrl(resultProviderName, new URL(urlToRemove.getUrl())));
             }
         }
     }
 
     @Override
-    public void addResultImportUrl(String resultProviderName, String url) throws Exception {
+    public void addResultImportUrl(String resultProviderName, UrlDTO urlDTO) throws Exception {
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
         if (urlBasedScoreCorrectionProvider != null) {
+            URL url = urlBasedScoreCorrectionProvider.resolveUrl(urlDTO.getUrl());
             ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
             getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredDomainType.RESULT_IMPORT_URL,
-                    new TypeRelativeObjectIdentifier(urlBasedScoreCorrectionProvider.getName(), url), url,
-                    () -> resultUrlRegistry.registerResultUrl(resultProviderName, new URL(url)));
+                    new TypeRelativeObjectIdentifier(urlBasedScoreCorrectionProvider.getName(), url.toString()),
+                    url.toString(), () -> {
+                        resultUrlRegistry.registerResultUrl(resultProviderName, url);
+                    });
         }
+    }
+
+    @Override
+    public String validateResultImportUrl(String resultProviderName, UrlDTO urlDTO) {
+        if (urlDTO == null || urlDTO.getUrl() == null || urlDTO.getUrl().isEmpty()) {
+            return serverStringMessages.get(getClientLocale(), "pleaseEnterNonEmptyUrl");
+        }
+        ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
+        if (urlBasedScoreCorrectionProvider == null) {
+            return serverStringMessages.get(getClientLocale(), "scoreCorrectionProviderNotFound");
+        }
+        String errorMessage = null;
+        try {
+            urlBasedScoreCorrectionProvider.resolveUrl(urlDTO.getUrl());
+        } catch (MalformedURLException e) {
+            errorMessage = e.getMessage();
+        }
+        return errorMessage;
     }
 
     private ResultUrlRegistry getResultUrlRegistry() {
@@ -5927,10 +5992,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             filteredCompetitors = Collections.emptyList();
         }
         return getSecurityService().mapAndFilterByAnyExplicitPermissionForCurrentUser(
-                SecuredDomainType.COMPETITOR,
+                    SecuredDomainType.COMPETITOR,
                 requiredActionsForRead, filteredCompetitors,
-                this::convertToCompetitorDTO);
-    }
+                    this::convertToCompetitorDTO);
+        }
 
     @Override
     public Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName) {
@@ -6232,7 +6297,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public void createOrUpdateDeviceConfiguration(DeviceConfigurationDTO configurationDTO) {
         if (getService().getDeviceConfigurationById(configurationDTO.id) == null) {
             final DeviceConfiguration configuration = convertToDeviceConfiguration(configurationDTO);
-            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(configuration.getType(),
+            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(configuration.getPermissionType(),
                     configuration.getIdentifier().getTypeRelativeObjectIdentifier(), configuration.getName(),
                     new Action() {
                         @Override
@@ -6880,7 +6945,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
         if (result == null) {
             Serializable id = UUID.randomUUID();
-            result = baseDomainFactory.getOrCreateMark(id, dto.getName(), dto.type, dto.color, dto.shape, dto.pattern);
+            result = baseDomainFactory.getOrCreateMark(id, dto.getName(), dto.getShortName(), dto.type, dto.color, dto.shape, dto.pattern);
         }
         return result;
     }
@@ -6947,7 +7012,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         Course course = new CourseImpl(courseName, lastPublishedCourse.getWaypoints());
         
         try {
-            course.update(controlPoints, baseDomainFactory);
+            course.update(controlPoints, lastPublishedCourse.getAssociatedRoles(),
+                    lastPublishedCourse.getOriginatingCourseTemplateIdOrNull(), baseDomainFactory);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -7084,7 +7150,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
     
     private DeviceMappingDTO convertToDeviceMappingDTO(DeviceMapping<?> mapping) throws TransformationException {
-        final Map<DeviceIdentifier, Timed> lastFixes = getService().getSensorFixStore().getLastFix(Collections.singleton(mapping.getDevice()));
+        final Map<DeviceIdentifier, Timed> lastFixes = getService().getSensorFixStore().getFixLastReceived(Collections.singleton(mapping.getDevice()));
         final Timed lastFix;
         if (lastFixes != null && lastFixes.containsKey(mapping.getDevice())) {
             lastFix = lastFixes.get(mapping.getDevice());
@@ -7891,7 +7957,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     
     private Fleet getFleetByName(RaceColumn raceColumn, String fleetName) throws NotFoundException{
         Fleet fleet = raceColumn.getFleetByName(fleetName);
-        if (fleet == null) {
+        if (fleet == null){
             throw new NotFoundException("fleet with name "+fleetName+" not found");
         }
         return fleet;
@@ -7993,7 +8059,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 final Fleet fleet = raceColumn.getFleetByName(fleetName);
                 if (fleet != null) {
                     for (final Mark mark : raceColumn.getAvailableMarks(fleet)) {
-                        marks.add(new MarkDTO(mark.getId().toString(), mark.getName()));
+                        marks.add(new MarkDTO(mark.getId().toString(), mark.getName(), mark.getShortName()));
                     }
                 }
             }
@@ -8023,7 +8089,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 break;
             }
         }
-
         if (markDTO != null) {
             final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
             final GPSFixTrack<Mark, ? extends GPSFix> markTrack;
@@ -9250,7 +9315,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final Boolean result;
         final RoleDefinition viewerRole = getSecurityService()
                 .getRoleDefinition(SailingViewerRole.getInstance().getId());
-        final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
+        final UserGroup defaultServerTenant = getSecurityService().getServerGroup();
         if (viewerRole != null && defaultServerTenant != null) {
             result = defaultServerTenant.getRoleAssociation(viewerRole);
         } else {
@@ -9381,6 +9446,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     }
                 }
             }
+
         }
         return result;
     }
@@ -9645,11 +9711,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     private Triple<Integer, Integer, Integer> createCertificateAssignmentsForRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             Map<String, ORCCertificate> certificatesForBoatIdsAsString) throws IOException, NotFoundException {
         final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        getService().getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
+            getService().getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        final LogEventConstructor<RaceLogEvent, RaceLogEventVisitor> logEventConstructor = createRaceLogEventConstructor();
-        return createCertificateAssignments(raceLog, logEventConstructor, certificatesForBoatIdsAsString);
-    }
+                    final LogEventConstructor<RaceLogEvent, RaceLogEventVisitor> logEventConstructor = createRaceLogEventConstructor();
+                    return createCertificateAssignments(raceLog, logEventConstructor, certificatesForBoatIdsAsString);
+                }
 
     private Triple<Integer, Integer, Integer> createCertificateAssignmentsForRegatta(RegattaIdentifier regattaIdentifier,
             Map<String, ORCCertificate> certificatesForBoatIdsAsString) throws IOException, NotFoundException {
@@ -9846,7 +9912,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
         return result;
     }
-    
+
     @Override
     public Set<ORCCertificate> searchORCBoatCertificates(CountryCode country, Integer yearOfIssuance,
             String referenceNumber, String yachtName, String sailNumber, String boatClassName) throws Exception {
@@ -9857,6 +9923,253 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 db.getCertificates(searchResult),
                 result);
         result.remove(null); // in case some certificate wasn't found by reference number
+        return result;
+    }
+
+    @Override
+    public List<MarkTemplateDTO> getMarkTemplates() {
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
+                getSharedSailingData().getAllMarkTemplates(), m -> convertToMarkTemplateDTO(m));
+    }
+
+    private MarkTemplateDTO convertToMarkTemplateDTO(MarkTemplate markTemplate) {
+        final MarkTemplateDTO markTemplateDTO = new MarkTemplateDTO(markTemplate.getId(), markTemplate.getName(),
+                markTemplate.getShortName() == null || markTemplate.getShortName().isEmpty() ? markTemplate.getName()
+                        : markTemplate.getShortName(),
+                markTemplate.getColor(), markTemplate.getShape(), markTemplate.getPattern(), markTemplate.getType());
+
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), markTemplateDTO, markTemplate.getIdentifier());
+        return markTemplateDTO;
+    }
+
+    @Override
+    public MarkTemplateDTO addOrUpdateMarkTemplate(MarkTemplateDTO markTemplate) {
+        final UUID markTemplateUUID = UUID.randomUUID();
+        final MarkTemplate mTemplate = getSecurityService()
+                .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                        SecuredDomainType.MARK_TEMPLATE,
+                        MarkTemplate.getTypeRelativeObjectIdentifier(markTemplateUUID), markTemplate.getName(),
+                        () -> getSharedSailingData()
+                                .createMarkTemplate(convertDtoToCommonMarkProperties(
+                                        markTemplate.getCommonMarkProperties())));
+        return convertToMarkTemplateDTO(mTemplate);
+    }
+
+    private CommonMarkProperties convertDtoToCommonMarkProperties(CommonMarkPropertiesDTO markProperties) {
+        return new CommonMarkPropertiesImpl(markProperties.getName(), markProperties.getShortName(),
+                markProperties.getColor(), markProperties.getShape(), markProperties.getPattern(),
+                markProperties.getType());
+    }
+
+    private DeviceIdentifier convertDtoToDeviceIdentifier(DeviceIdentifierDTO deviceIdentifier) {
+        return deviceIdentifier != null ? new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceIdentifier.deviceId))
+                : null;
+    }
+
+    @Override
+    public MarkPropertiesDTO addOrUpdateMarkProperties(MarkPropertiesDTO markProperties) {
+        MarkProperties createdOrUpdatedMarkProperties = getSharedSailingData()
+                .getMarkPropertiesById(markProperties.getUuid());
+        if (createdOrUpdatedMarkProperties != null) {
+            getSecurityService().checkCurrentUserUpdatePermission(createdOrUpdatedMarkProperties);
+            getSharedSailingData().updateMarkProperties(markProperties.getUuid(),
+                    convertDtoToCommonMarkProperties(markProperties.getCommonMarkProperties()),
+                    markProperties.getTags());
+            createdOrUpdatedMarkProperties = getSharedSailingData()
+                    .getMarkPropertiesById(createdOrUpdatedMarkProperties.getId());
+        } else {
+            createdOrUpdatedMarkProperties = getSecurityService()
+                    .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.MARK_PROPERTIES,
+                            MarkTemplate.getTypeRelativeObjectIdentifier(UUID.randomUUID()), markProperties.getName(),
+                            () -> getSharedSailingData().createMarkProperties(
+                                    convertDtoToCommonMarkProperties(markProperties.getCommonMarkProperties()),
+                                    markProperties.getTags(),
+                                    /* non-default mark properties group ownership */ Optional.empty()));
+        }
+        return convertToMarkPropertiesDTO(createdOrUpdatedMarkProperties);
+    }
+
+    @Override
+    public MarkPropertiesDTO updateMarkPropertiesPositioning(UUID markPropertiesId, DeviceIdentifierDTO deviceIdentifier,
+            Position fixedPosition) {
+        MarkProperties markProperties = getSharedSailingData().getMarkPropertiesById(markPropertiesId);
+        if (deviceIdentifier != null) {
+            getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(markProperties, convertDtoToDeviceIdentifier(deviceIdentifier));
+        } else if (fixedPosition != null) {
+            getSharedSailingData().setFixedPositionForMarkProperties(markProperties, fixedPosition);
+        }
+        return convertToMarkPropertiesDTO(getSharedSailingData().updateMarkProperties(markProperties.getId(),
+                markProperties, markProperties.getTags()));
+    }
+
+    @Override
+    public List<MarkPropertiesDTO> getMarkProperties() {
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
+                getSharedSailingData().getAllMarkProperties(), m -> convertToMarkPropertiesDTO(m));
+    }
+
+    private MarkPropertiesDTO convertToMarkPropertiesDTO(MarkProperties markProperties) {
+        final MarkPropertiesDTO markPropertiesDto = new MarkPropertiesDTO(markProperties.getId(),
+                markProperties.getName(), markProperties.getTags(), markProperties.getShortName(),
+                markProperties.getColor(), markProperties.getShape(), markProperties.getPattern(),
+                markProperties.getType(), markProperties.getPositioningInformation() == null ? null :
+                    markProperties.getPositioningInformation().accept(new PositioningVisitor<String>() {
+                        @Override
+                        public String visit(FixedPositioning fixedPositioning) {
+                            return "FIXED_POSITION";
+                        }
+
+                        @Override
+                        public String visit(TrackingDeviceBasedPositioning trackingDeviceBasedPositioning) {
+                            return "DEVICE";
+                        }
+                    }));
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), markPropertiesDto, markProperties.getIdentifier());
+        return markPropertiesDto;
+    }
+
+    @Override
+    public List<CourseTemplateDTO> getCourseTemplates() {
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
+                getSharedSailingData().getAllCourseTemplates(), m -> convertToCourseTemplateDTO(m));
+    }
+
+    public CourseTemplateDTO convertToCourseTemplateDTO(CourseTemplate courseTemplate) {
+        final Map<MarkTemplateDTO, MarkRoleDTO> convertedDefaultMarkRolesForMarkTemplates = courseTemplate.getDefaultMarkRolesForMarkTemplates().entrySet()
+                .stream().collect(Collectors.toMap(entry -> convertToMarkTemplateDTO(entry.getKey()),
+                        entry -> convertToMarkRoleDTO(entry.getValue())));
+        final Map<MarkRoleDTO, MarkTemplateDTO> convertedDefaultMarkTemplatesForMarkRoles = courseTemplate.getDefaultMarkTemplatesForMarkRoles().entrySet()
+                .stream().collect(Collectors.toMap(entry -> convertToMarkRoleDTO(entry.getKey()),
+                        entry -> convertToMarkTemplateDTO(entry.getValue())));
+        final List<MarkTemplateDTO> convertedMarkTemplates = StreamSupport
+                .stream(courseTemplate.getMarkTemplates().spliterator(), false).map(this::convertToMarkTemplateDTO)
+                .collect(Collectors.toList());
+        final List<WaypointTemplateDTO> convertedWaypointTemplates = StreamSupport
+                .stream(courseTemplate.getWaypointTemplates().spliterator(), false)
+                .map(this::convertToWaypointTemplateDTO).collect(Collectors.toList());
+        // convert optional image url
+        final String optionalImageURL = courseTemplate.getOptionalImageURL() != null
+                ? courseTemplate.getOptionalImageURL().toExternalForm()
+                : null;
+        final CourseTemplateDTO result = new CourseTemplateDTO(courseTemplate.getId(), courseTemplate.getName(),
+                courseTemplate.getShortName(), convertedMarkTemplates, convertedWaypointTemplates,
+                convertedDefaultMarkRolesForMarkTemplates, convertedDefaultMarkTemplatesForMarkRoles, optionalImageURL,
+                courseTemplate.getTags(),
+                convertToRepeatablePartDTO(courseTemplate.getRepeatablePart()), courseTemplate.getDefaultNumberOfLaps());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), result, courseTemplate.getIdentifier());
+        return result;
+    }
+
+    private RepeatablePartDTO convertToRepeatablePartDTO(RepeatablePart repeatablePart) {
+        return repeatablePart != null
+                ? new RepeatablePartDTO(repeatablePart.getZeroBasedIndexOfRepeatablePartStart(),
+                        repeatablePart.getZeroBasedIndexOfRepeatablePartEnd())
+                : null;
+    }
+
+    private WaypointTemplateDTO convertToWaypointTemplateDTO(WaypointTemplate waypointTemplate) {
+        return new WaypointTemplateDTO(waypointTemplate.getControlPointTemplate().getName(),
+                waypointTemplate.getControlPointTemplate().getShortName(),
+                StreamSupport.stream(waypointTemplate.getControlPointTemplate().getMarkRoles().spliterator(), false)
+                        .map(this::convertToMarkRoleDTO).collect(Collectors.toList()),
+                waypointTemplate.getPassingInstruction());
+    }
+
+    @Override
+    public void removeCourseTemplate(UUID uuid) {
+        getSharedSailingData().deleteCourseTemplate(getSharedSailingData().getCourseTemplateById(uuid));
+    }
+
+    private WaypointTemplate convertToWaypointTemplate(WaypointTemplateDTO waypointTemplate, final MarkRolePairFactory markRolePairFactory) {
+        final List<MarkRole> resolvedMarkRoles = waypointTemplate.getMarkRolesForControlPoint().stream()
+                .map(t -> getSharedSailingData().getMarkRoleById(t.getUuid())).collect(Collectors.toList());
+        final ControlPointTemplate controlPointTemplate;
+        if (resolvedMarkRoles.size() == 1) {
+            controlPointTemplate = resolvedMarkRoles.get(0);
+        } else if (resolvedMarkRoles.size() == 2) {
+            controlPointTemplate = markRolePairFactory.create(waypointTemplate.getName(),
+                    waypointTemplate.getShortName(), resolvedMarkRoles.get(0), resolvedMarkRoles.get(1));
+        } else {
+            throw new IllegalArgumentException("Waypoints must contain one or two marks");
+        }
+        
+        return new WaypointTemplateImpl(controlPointTemplate, waypointTemplate.getPassingInstruction());
+    }
+
+    private RepeatablePart convertToRepeatablePart(RepeatablePartDTO repeatablePart) {
+        return new RepeatablePartImpl(repeatablePart.getZeroBasedIndexOfRepeatablePartStart(),
+                repeatablePart.getZeroBasedIndexOfRepeatablePartEnd());
+    }
+
+    @Override
+    public CourseTemplateDTO createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate) {
+        CourseTemplate existingCourseTemplate = getSharedSailingData().getCourseTemplateById(courseTemplate.getUuid());
+        URL optionalImageURL = null;
+        try {
+            optionalImageURL = courseTemplate.getOptionalImageUrl().isPresent()
+                    ? new URL(courseTemplate.getOptionalImageUrl().get())
+                    : null;
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException(
+                    String.format("Invalid URL: %s", courseTemplate.getOptionalImageUrl().get()));
+        }
+        final CourseTemplateDTO result;
+        if (existingCourseTemplate != null) {
+            getSecurityService().checkCurrentUserUpdatePermission(existingCourseTemplate);
+            result = convertToCourseTemplateDTO(getSharedSailingData().updateCourseTemplate(courseTemplate.getUuid(),
+                    courseTemplate.getName(), courseTemplate.getShortName(), optionalImageURL, courseTemplate.getTags(),
+                    courseTemplate.getDefaultNumberOfLaps()));
+        } else {
+            final List<MarkTemplate> marks = courseTemplate.getMarkTemplates().stream()
+                    .map(t -> getSharedSailingData().getMarkTemplateById(t.getUuid())).collect(Collectors.toList());
+            final MarkRolePairFactory markPairTemplateFactory = new MarkRolePairFactory();
+            final List<WaypointTemplate> waypoints = courseTemplate.getWaypointTemplates().stream()
+                    .map(wp -> convertToWaypointTemplate(wp, markPairTemplateFactory)).collect(Collectors.toList());
+            final Map<MarkTemplate, MarkRole> defaultMarkRolesForMarkTemplates = courseTemplate.getDefaultMarkRolesForMarkTemplates().entrySet().stream()
+                    .collect(Collectors.toMap(
+                            entry -> getSharedSailingData().getMarkTemplateById(entry.getKey().getUuid()),
+                            entry -> getSharedSailingData().getMarkRoleById(entry.getValue().getUuid())));
+            final Map<MarkRole, MarkTemplate> defaultMarkTemplatesForMarkRoles = courseTemplate.getDefaultMarkTemplatesForMarkRoles().entrySet().stream()
+                    .collect(Collectors.toMap(
+                            entry -> getSharedSailingData().getMarkRoleById(entry.getKey().getUuid()),
+                            entry -> getSharedSailingData().getMarkTemplateById(entry.getValue().getUuid())));
+            final RepeatablePart optionalRepeatablePart = courseTemplate.getRepeatablePart() != null
+                    ? convertToRepeatablePart(courseTemplate.getRepeatablePart())
+                    : null;
+            result = convertToCourseTemplateDTO(
+                    getSharedSailingData().createCourseTemplate(courseTemplate.getName(), courseTemplate.getShortName(), marks,
+                            waypoints, defaultMarkRolesForMarkTemplates, defaultMarkTemplatesForMarkRoles,
+                            optionalRepeatablePart, courseTemplate.getTags(), optionalImageURL, courseTemplate.getDefaultNumberOfLaps()));
+        }
+        return result;
+    }
+
+    @Override
+    public void removeMarkProperties(UUID uuid) {
+        getSharedSailingData().deleteMarkProperties(getSharedSailingData().getMarkPropertiesById(uuid));
+    }
+
+    private MarkRoleDTO convertToMarkRoleDTO(final MarkRole markRole) {
+        final MarkRoleDTO markRoleDTO = new MarkRoleDTO(markRole.getId(), markRole.getName(), markRole.getShortName());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), markRoleDTO, markRole.getIdentifier());
+        return markRoleDTO;
+    }
+
+    @Override
+    public List<MarkRoleDTO> getMarkRoles() {
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(getSharedSailingData().getAllMarkRoles(),
+                m -> convertToMarkRoleDTO(m));
+    }
+
+    @Override
+    public MarkRoleDTO createMarkRole(MarkRoleDTO markRole) {
+        MarkRole existingMarkRole = getSharedSailingData().getMarkRoleById(markRole.getUuid());
+        final MarkRoleDTO result;
+        if (existingMarkRole != null) {
+            throw new IllegalArgumentException("Mark role with ID "+markRole.getUuid()+" already exists");
+        } else {
+            result = convertToMarkRoleDTO(getSharedSailingData().createMarkRole(markRole.getName(), markRole.getShortName()));
+        }
         return result;
     }
 }
