@@ -98,9 +98,9 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                     if (timePoint != null || resultState == ResultStates.Live) {
                         jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount,
                                 raceColumnNames, raceDetails, competitorAndBoatIdsOnly,
-                                showOnlyActiveRacesForCompetitorIds);
+                                showOnlyActiveRacesForCompetitorIds, skip);
                     } else {
-                        jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount);
+                        jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount, skip);
                     }
                     StringWriter sw = new StringWriter();
                     jsonLeaderboard.writeJSONString(sw);
@@ -118,9 +118,10 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
     }
 
     @Override
-    protected JSONObject getLeaderboardJson(Leaderboard leaderboard,
-            TimePoint resultTimePoint, ResultStates resultState, Integer maxCompetitorsCount,
-            List<String> raceColumnNames, List<String> raceDetailNames, boolean competitorAndBoatIdsOnly, List<String> showOnlyActiveRacesForCompetitorIds)
+    protected JSONObject getLeaderboardJson(Leaderboard leaderboard, TimePoint resultTimePoint,
+            ResultStates resultState, Integer maxCompetitorsCount, List<String> raceColumnNames,
+            List<String> raceDetailNames, boolean competitorAndBoatIdsOnly,
+            List<String> showOnlyActiveRacesForCompetitorIds, boolean userPresentedValidRegattaSecret)
             throws NoWindException, InterruptedException, ExecutionException {
         List<String> raceColumnsToShow = calculateRaceColumnsToShow(leaderboard, raceColumnNames, showOnlyActiveRacesForCompetitorIds, resultTimePoint);
         List<DetailType> raceDetailsToShow = calculateRaceDetailTypesToShow(raceDetailNames);
@@ -137,7 +138,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             Map<String, Map<CompetitorDTO, Integer>> competitorsOrderedByFleets = new HashMap<>();
             List<CompetitorDTO> filteredCompetitorsFromBestToWorst = new ArrayList<>();
             competitorsFromBestToWorst.forEach(competitor -> {
-                if (SecurityUtils.getSubject().isPermitted(competitor.getIdentifier()
+                if (userPresentedValidRegattaSecret || SecurityUtils.getSubject().isPermitted(competitor.getIdentifier()
                         .getStringPermission(SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC))
                         || SecurityUtils.getSubject()
                                 .isPermitted(competitor.getIdentifier().getStringPermission(DefaultActions.READ))) {
