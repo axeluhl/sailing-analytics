@@ -555,6 +555,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     UserGroup getDefaultTenantForCurrentUser();
 
+    public void setTemporaryDefaultTenant(final UUID tenantGroupId);
+
     /**
      * When a user adds permissions to a role, he needs to hold the permissions for all existing qualifications. This
      * method checks all given permissions for all existing qualifications of the given role.
