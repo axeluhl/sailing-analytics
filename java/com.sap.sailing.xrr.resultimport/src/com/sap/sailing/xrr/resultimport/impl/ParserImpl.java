@@ -3,16 +3,20 @@ package com.sap.sailing.xrr.resultimport.impl;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import com.sap.sailing.domain.common.RegattaScoreCorrections;
+import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.xrr.resultimport.Parser;
 import com.sap.sailing.xrr.schema.Boat;
 import com.sap.sailing.xrr.schema.Division;
 import com.sap.sailing.xrr.schema.Event;
+import com.sap.sailing.xrr.schema.EventGender;
 import com.sap.sailing.xrr.schema.Person;
 import com.sap.sailing.xrr.schema.Race;
 import com.sap.sailing.xrr.schema.RegattaResults;
@@ -95,6 +99,39 @@ public class ParserImpl implements Parser {
     @Override
     public String toString() {
         return name==null?"":name;
+    }
+
+    @Override
+    public RegattaScoreCorrections getRegattaScoreCorrections(RegattaResults regattaResults,
+            ScoreCorrectionProvider scoreCorrectionProvider, Optional<String> eventNameFilter,
+            Optional<String> boatClassNameFilter) {
+        for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
+            if (o instanceof Event) {
+                final Event event = (Event) o;
+                if (!eventNameFilter.isPresent() || event.getTitle().equals(eventNameFilter.get())) {
+                    for (Object eventO : event.getRaceOrDivisionOrRegattaSeriesResult()) {
+                        if (eventO instanceof Division) {
+                            final Division division = (Division) eventO;
+                            final EventGender divisionGender = division.getGender();
+                            final String divisionBoatClass = getBoatClassName(division);
+                            final String divisionBoatClassAndGender;
+                            if (divisionGender != null) {
+                                divisionBoatClassAndGender = divisionBoatClass + ", " + divisionGender.name();  
+                            } else {
+                                divisionBoatClassAndGender = divisionBoatClass;
+                            }
+                            if (!boatClassNameFilter.isPresent()
+                                    || boatClassNameFilter.get().equalsIgnoreCase(divisionBoatClass)
+                                    || boatClassNameFilter.get().equalsIgnoreCase(divisionBoatClassAndGender)
+                                    || boatClassNameFilter.get().contains(divisionBoatClassAndGender)) {
+                                return new XRRRegattaResultsAsScoreCorrections(event, division, scoreCorrectionProvider, this);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
     
 }
