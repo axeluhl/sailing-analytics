@@ -17,12 +17,12 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
+import com.sap.sailing.selenium.api.core.HttpException;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.EventApi.Event;
 import com.sap.sailing.selenium.api.event.RoleApi;
 import com.sap.sailing.selenium.api.event.RoleApi.Role;
 import com.sap.sailing.selenium.api.event.SecurityApi;
-import com.sap.sailing.selenium.api.event.SecurityApi.User;
 import com.sap.sailing.selenium.api.event.UserGroupApi;
 import com.sap.sailing.selenium.api.event.UserGroupApi.UserGroup;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -37,7 +37,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
 
     @Before
     public void setUp() {
-        clearState(getContextRoot());
+        clearState(getContextRoot(), false);
         super.setUp();
     }
 
@@ -174,35 +174,53 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
         final UserGroup newUserGroup = userGroupApi.createUserGroup(adminSecurityCtx, "NewGroup");
         userGroupApi.setDefaultTenantForCurrentServerAndUser(ownerCtx, newUserGroup.getGroupId());
 
-        User user = securityApi.getUser(adminSecurityCtx, "donald");
-        System.out.println(user.getJson().toJSONString());
-
         final Event eventCreatedWithNewGroupTenant = eventApi.createEvent(ownerCtx, "testevent2", "GC 32",
                 CompetitorRegistrationType.CLOSED, "somewhere");
         assertEquals("testevent2", eventCreatedWithNewGroupTenant.getName());
-        // TODO: verify that the tenant_owner is NewGroup.
     }
 
     @Test
     public void addUserToOwnGroupWithoutPermissionOnUserTest() {
         final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
-        
+        final String userToAdd = "usertoadd";
         securityApi.createUser(adminSecurityCtx, "groupowner", "groupowner", null, "daisy0815");
         securityApi.createUser(adminSecurityCtx, "usertoadd", "", null, "daisy0815");
-        
-        final ApiContext groupownerSecurityCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "groupowner", "daisy0815");
+
+        final ApiContext groupownerSecurityCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "groupowner",
+                "daisy0815");
         // create group owned by "groupowner"
         final UserGroup privateUserGroup = userGroupApi.createUserGroup(groupownerSecurityCtx, "mygroup");
-        
+
         // add user "usertoadd" to private user group
         final ApiContext groupownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "groupowner", "daisy0815");
-        userGroupApi.addUserToUserGroupWithoutPermissionOnUser(groupownerCtx, "usertoadd", privateUserGroup.getGroupId());
-        //TODO: check that user was added to group
-        
+        userGroupApi.addUserToUserGroupWithoutPermissionOnUser(groupownerCtx, "usertoadd",
+                privateUserGroup.getGroupId());
+        final UserGroup privateUserGroupToCheck = userGroupApi.getUserGroup(adminSecurityCtx,
+                privateUserGroup.getGroupId());
+        boolean userExistsInGroup = false;
+        for (final String user : privateUserGroupToCheck.getUsers()) {
+            userExistsInGroup = userExistsInGroup || user.equals(userToAdd);
+        }
+        assertTrue("User does not exist in group", userExistsInGroup);
+
         // create group by admin and try to add user to it
         final UserGroup adminUserGroup = userGroupApi.createUserGroup(adminSecurityCtx, "admingroup");
-        userGroupApi.addUserToUserGroupWithoutPermissionOnUser(groupownerCtx, "usertoadd", adminUserGroup.getGroupId());
-        //TODO: should fail, but doesn't
+        try {
+            userGroupApi.addUserToUserGroupWithoutPermissionOnUser(groupownerCtx, "usertoadd",
+                    adminUserGroup.getGroupId());
+            fail();
+        } catch (HttpException he) {
+            assertEquals(401, he.getHttpStatusCode());
+        }
+
+        // try to add user again to privateUserGroup
+        try {
+            userGroupApi.addUserToUserGroupWithoutPermissionOnUser(groupownerCtx, "usertoadd",
+                    privateUserGroup.getGroupId());
+            fail();
+        } catch (HttpException he) {
+            assertEquals(400, he.getHttpStatusCode());
+        }
     }
 
     @Test

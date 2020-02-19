@@ -93,7 +93,6 @@ public class UserGroupsResource extends AbstractSailingServerResource {
                 } else {
                     response = Response.status(Status.BAD_REQUEST).entity("User is already in this group.").build();
                 }
-                response = Response.ok().build();
             } else {
                 response = Response.status(Status.BAD_REQUEST).entity("User Group does not exist.").build();
             }
