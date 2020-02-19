@@ -55,12 +55,12 @@ public class UserGroupsResource extends AbstractSailingServerResource {
     @POST
     @Produces("application/json;charset=UTF-8")
     @Path("setDefaultTenantForCurrentServerAndUser")
-    public Response setDefaultTenantForCurrentServerAndUser(@QueryParam("tenantGroup") UUID tennant)
+    public Response setDefaultTenantForCurrentServerAndUser(@QueryParam("tenantGroup") UUID tenantId)
             throws ParseException, JsonDeserializationException {
         Response response = null;
         User user = getSecurityService().getCurrentUser();
         if (user != null) {
-            getSecurityService().setDefaultTenantForCurrentServerForUser(user.getName(), tennant);
+            getSecurityService().setDefaultTenantForCurrentServerForUser(user.getName(), tenantId);
             response = Response.ok().build();
         } else {
             response = Response.status(401).build();
