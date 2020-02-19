@@ -160,6 +160,9 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
 
     @Test
     public void setDefaultTenantForCurrentServerAndUserTest() {
+        final String defaultTenantGroup = "NewGroup";
+        final String eventName = "testevent";
+        final String eventName2 = "testevent2";
         final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
         final ApiContext ownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
@@ -167,16 +170,18 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
         adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
 
         final EventApi eventApi = new EventApi();
-        final Event eventCreatedWithDefaultTenant = eventApi.createEvent(ownerCtx, "testevent", "GC 32",
+        final Event eventCreatedWithDefaultTenant = eventApi.createEvent(ownerCtx, eventName, "GC 32",
                 CompetitorRegistrationType.CLOSED, "somewhere");
         assertEquals("testevent", eventCreatedWithDefaultTenant.getName());
 
-        final UserGroup newUserGroup = userGroupApi.createUserGroup(adminSecurityCtx, "NewGroup");
+        final UserGroup newUserGroup = userGroupApi.createUserGroup(adminSecurityCtx, defaultTenantGroup);
         userGroupApi.setDefaultTenantForCurrentServerAndUser(ownerCtx, newUserGroup.getGroupId());
 
-        final Event eventCreatedWithNewGroupTenant = eventApi.createEvent(ownerCtx, "testevent2", "GC 32",
+        final Event eventCreatedWithNewGroupTenant = eventApi.createEvent(ownerCtx, eventName2, "GC 32",
                 CompetitorRegistrationType.CLOSED, "somewhere");
-        assertEquals("testevent2", eventCreatedWithNewGroupTenant.getName());
+        assertEquals(eventName2, eventCreatedWithNewGroupTenant.getName());
+        final String groupOfEvent = adminConsole.goToEvents().getEventEntry(eventName2).getColumnContent("Group");
+        assertEquals(defaultTenantGroup, groupOfEvent);
     }
 
     @Test
@@ -184,7 +189,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
         final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final String userToAdd = "usertoadd";
         securityApi.createUser(adminSecurityCtx, "groupowner", "groupowner", null, "daisy0815");
-        securityApi.createUser(adminSecurityCtx, "usertoadd", "", null, "daisy0815");
+        securityApi.createUser(adminSecurityCtx, userToAdd, "", null, "daisy0815");
 
         final ApiContext groupownerSecurityCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "groupowner",
                 "daisy0815");
@@ -193,7 +198,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
 
         // add user "usertoadd" to private user group
         final ApiContext groupownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "groupowner", "daisy0815");
-        userGroupApi.addUserToUserGroupWithoutPermissionOnUser(groupownerCtx, "usertoadd",
+        userGroupApi.addUserToUserGroupWithoutPermissionOnUser(groupownerCtx, userToAdd,
                 privateUserGroup.getGroupId());
         final UserGroup privateUserGroupToCheck = userGroupApi.getUserGroup(adminSecurityCtx,
                 privateUserGroup.getGroupId());
