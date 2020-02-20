@@ -2026,7 +2026,6 @@ public class RegattasResource extends AbstractSailingServerResource {
                                                 .format(maxSpeedOverGround.getB().getKnots()));
                                         jsonCompetitorInLeg.put("maxSOGTimePoint-millis", RoundingUtil.knotsDecimalFormatter
                                                 .format(maxSpeedOverGround.getA().getTimePoint().asMillis()));
-
                                     }
                                     try {
                                         Integer numberOfTacks = trackedLegOfCompetitor.getNumberOfTacks(timePoint, /* waitForLatest */ false);
