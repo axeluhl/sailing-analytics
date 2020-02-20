@@ -45,6 +45,8 @@ public class CompetitorChangeReceiver extends AbstractReceiverWithQueue<IRaceCom
             @Override
             public void addRaceCompetitor(IRaceCompetitor raceCompetitor) {
                 // can't handle competitor list changes once the RaceDefinition exists
+                logger.warning("The competitor "+raceCompetitor+" was added to the race "+getTrackedRace(raceCompetitor.getRace())+
+                        " but we don't know how to handle this. Ignoring.");
             }
 
             @Override
@@ -55,6 +57,8 @@ public class CompetitorChangeReceiver extends AbstractReceiverWithQueue<IRaceCom
             @Override
             public void deleteRaceCompetitor(UUID competitorId) {
                 // can't handle competitor list changes once the RaceDefinition exists
+                logger.warning("The competitor with ID "+competitorId+" was removed from a race "+
+                        " but we don't know how to handle this. Ignoring.");
             }
 
             @Override
@@ -101,7 +105,7 @@ public class CompetitorChangeReceiver extends AbstractReceiverWithQueue<IRaceCom
             }
         } else {
             logger.warning("Couldn't find tracked race for race " + race.getName()
-                    + ". Dropping sensor event " + event);
+                    + ". Dropping competitor change event " + event);
         }
     }
 }

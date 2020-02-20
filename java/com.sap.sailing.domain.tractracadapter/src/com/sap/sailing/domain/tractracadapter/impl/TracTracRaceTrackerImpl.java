@@ -377,9 +377,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             @Override public void dataSourceChanged(IRace race, DataSource oldDataSource, URI oldLiveURI, URI oldStoredURI) {}
             @Override
             public void updateRace(IRace race) {
-                final RaceStatusType status = race.getStatus();
-                // TODO bug5154 check IRace.getStatus() and somewhere update status once it reached RaceStatusType.OFFICIAL
                 if (Util.equalsWithNull(race, TracTracRaceTrackerImpl.this.tractracRace)) {
+                    final RaceStatusType status = race.getStatus();
+                    // TODO bug5154 check IRace.getStatus() and somewhere update status once it reached RaceStatusType.OFFICIAL
                     int delayToLiveInMillis = race.getLiveDelay()*1000;
                     if (getRace() != null) {
                         DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(getRace());
