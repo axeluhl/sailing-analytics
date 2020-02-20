@@ -2077,6 +2077,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             Thread.currentThread().setContextClassLoader(store.getClass().getClassLoader());
         }
         logger.info("Reading user store...");
+        boolean createdServerGroup = false;
         try {
             final UserStore newUserStore = (UserStore) is.readObject();
             final UserGroup newServerGroup = newUserStore.getUserGroupByName(store.getServerGroupName());
@@ -2089,6 +2090,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 final UUID serverGroupUuid = UUID.randomUUID();
                 createUserGroupWithInitialUser(serverGroupUuid, serverGroupName, /* initial user */ null);
                 store.setServerGroup(store.getUserGroupByName(store.getServerGroupName()));
+                createdServerGroup = true;
             } else if (newServerGroup != oldServerGroup) {
                 store.setServerGroup(newServerGroup);
             }
@@ -2107,6 +2109,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         // now ensure that the SERVER object has a valid ownership; use the (potentially new) server group as the default:
         migrateServerObject();
+        if (createdServerGroup) {
+            final UserGroup serverGroup = store.getServerGroup();
+            setOwnership(serverGroup.getIdentifier(), null, serverGroup, serverGroup.getName());
+            final User adminUserOrNull = store.getUserByName(UserStore.ADMIN_USERNAME);
+            if (adminUserOrNull == null) {
+                logger.info("User 'admin' does not exist on replicated central SecurityService. "
+                        + "'admin' will not be properly set up for this server.");
+            } else {
+                addUserToUserGroup(serverGroup, adminUserOrNull);
+                setDefaultTenantForCurrentServerForUser(UserStore.ADMIN_USERNAME, serverGroup.getId());
+            }
+        }
         logger.info("Reading isSharedAcrossSubdomains...");
         sharedAcrossSubdomainsOf = (String) is.readObject();
         logger.info("...as "+sharedAcrossSubdomainsOf);
