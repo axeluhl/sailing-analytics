@@ -61,15 +61,18 @@ public class CourseBaseWithGeometryJsonSerializer implements JsonSerializer<Pair
                     final int waypointIndex = course.getIndexOfWaypoint(waypoint);
                     if (waypointIndex >= 0 && course.getLegs().size() > waypointIndex) {
                         final Leg leg = course.getLegs().get(waypointIndex);
-                        result.put(FIELD_LEG_DISTANCE_IN_METERS, geometry.getLegDistances().get(leg).getMeters());
-                        result.put(FIELD_LEG_BEARING_TRUE_DEGREES, geometry.getLegBearings().get(leg).getDegrees());
+                        final Distance distance = geometry.getLegDistances().get(leg);
+                        result.put(FIELD_LEG_DISTANCE_IN_METERS, distance==null?null:distance.getMeters());
+                        final Bearing bearing = geometry.getLegBearings().get(leg);
+                        result.put(FIELD_LEG_BEARING_TRUE_DEGREES, bearing==null?null:bearing.getDegrees());
                     }
                 }
                 return result;
             }
         }.serialize(course);
         if (courseAndOptionalGeometry.getB() != null) {
-            result.put(FIELD_TOTAL_DISTANCE_IN_METERS, courseAndOptionalGeometry.getB().getTotalDistance().getMeters());
+            final Distance totalDistance = courseAndOptionalGeometry.getB().getTotalDistance();
+            result.put(FIELD_TOTAL_DISTANCE_IN_METERS, totalDistance==null?null:totalDistance.getMeters());
         }
         return result;
     }
