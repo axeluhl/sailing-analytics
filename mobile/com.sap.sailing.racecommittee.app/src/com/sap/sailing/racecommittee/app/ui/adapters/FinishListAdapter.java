@@ -170,18 +170,16 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         public ItemViewHolder(View itemView) {
             super(itemView);
 
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    CompetitorResultWithIdImpl item = mItems.get(getAdapterPosition());
+                    mParent.onItemEdit(item);
+                }
+            });
+
             container = ViewHelper.get(itemView, R.id.container);
             dragHandle = ViewHelper.get(itemView, R.id.drag_handle);
-            editItem = ViewHelper.get(itemView, R.id.edit_item);
-            if (editItem != null) {
-                editItem.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        CompetitorResultWithIdImpl item = mItems.get(getAdapterPosition());
-                        mParent.onItemEdit(item);
-                    }
-                });
-            }
             vesselId = ViewHelper.get(itemView, R.id.vessel_id);
             competitor = ViewHelper.get(itemView, R.id.competitor);
             warning = ViewHelper.get(itemView, R.id.warning_sign);
