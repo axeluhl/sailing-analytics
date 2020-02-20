@@ -472,7 +472,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                 }
             }
         }
-        
         return storedURI;
     }
 
