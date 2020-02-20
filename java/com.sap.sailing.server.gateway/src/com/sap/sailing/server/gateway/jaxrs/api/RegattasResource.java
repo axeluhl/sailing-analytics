@@ -1983,7 +1983,6 @@ public class RegattasResource extends AbstractSailingServerResource {
                 jsonRaceResults.put("regatta", regatta.getName());
                 jsonRaceResults.put("startOfRace-ms", trackedRace.getStartOfRace() == null ? null : trackedRace
                         .getStartOfRace().asMillis());
-
                 JSONArray jsonLegs = new JSONArray();
                 Course course = trackedRace.getRace().getCourse();
                 course.lockForRead();
@@ -2064,7 +2063,6 @@ public class RegattasResource extends AbstractSailingServerResource {
                                                             .format(distanceSinceGun.getMeters()));
                                         }
                                     }
-
                                     Distance distanceTraveled = trackedLegOfCompetitor.getDistanceTraveled(timePoint);
                                     if (distanceTraveled != null) {
                                         jsonCompetitorInLeg.put("distanceTraveled-m",
@@ -2103,15 +2101,14 @@ public class RegattasResource extends AbstractSailingServerResource {
                                     jsonCompetitors.add(jsonCompetitorInLeg);
                                 }
                             }
-                            jsonLeg.put("competitors", jsonCompetitors);
-                            jsonLegs.add(jsonLeg);
                         }
+                        jsonLeg.put("competitors", jsonCompetitors);
+                        jsonLegs.add(jsonLeg);
                     }
                 } finally {
                     course.unlockAfterRead();
                 }
                 jsonRaceResults.put("legs", jsonLegs);
-
                 String json = jsonRaceResults.toJSONString();
                 return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
