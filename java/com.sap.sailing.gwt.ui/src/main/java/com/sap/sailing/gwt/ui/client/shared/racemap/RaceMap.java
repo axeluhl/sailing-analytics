@@ -632,6 +632,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         topLeftControlsWrapperPanel = new FlowPanel();
         topLeftControlsWrapperPanel.add(combinedWindPanel);
         topLeftControlsWrapperPanel.add(trueNorthIndicatorPanel);
+        
         orientationChangeInProgress = false;
         mapFirstZoomDone = false;
         // TODO bug 494: reset zoom settings to user preferences
@@ -915,13 +916,18 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 metricOverlay = new DetailTypeMetricOverlay(getMap(), 0, coordinateSystem, stringMessages);
                 metricOverlay.setVisible(false);
                 metricOverlay.addToMap();
+                
                 if (showHeaderPanel) {
                     createHeaderPanel(map);
                 }
+                final VerticalPanel settingsCotrolFlowPanel = new VerticalPanel();
                 if (showMapControls) {
-                    createSettingsButton(map);
+                    final Button settingsButton = createSettingsButton(map);
+                    settingsCotrolFlowPanel.add(settingsButton);
                 }
-                createShareLinkButton(map);
+                final Button shareLinkButton = createShareLinkButton(map);
+                settingsCotrolFlowPanel.add(shareLinkButton);
+                map.setControls(ControlPosition.RIGHT_TOP, settingsCotrolFlowPanel);
                 // Data has been initialized
                 RaceMap.this.redraw();
                 trueNorthIndicatorPanel.redraw();
@@ -986,7 +992,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         map.setControls(ControlPosition.TOP_RIGHT, headerPanel);
     }
     
-    private void createSettingsButton(MapWidget map) {
+    private Button createSettingsButton(MapWidget map) {
         final Component<RaceMapSettings> component = this;
         Button settingsButton = new Button();
         settingsButton.setStyleName("gwt-MapSettingsButton");
@@ -1000,23 +1006,24 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 dialog.show();
             }
         });
-        map.setControls(ControlPosition.RIGHT_TOP, settingsButton);
+        return settingsButton;
     }
     
-    private void createShareLinkButton(MapWidget map) {
+    private Button createShareLinkButton(MapWidget map) {
         if(shareLinkAction != null) {
-            Button settingsButton = new Button();
-            settingsButton.setStyleName("gwt-ShareLinkButton");
-            settingsButton.ensureDebugId("raceMapShareLink");
-            settingsButton.setTitle("Share Link");
-            settingsButton.addClickHandler(new ClickHandler() {
+            Button shareLinkButton = new Button();
+            shareLinkButton.setStyleName("gwt-ShareLinkButton");
+            shareLinkButton.ensureDebugId("raceMapShareLink");
+            shareLinkButton.setTitle(stringMessages.shareTheLink());
+            shareLinkButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
                     shareLinkAction.run();
                 }
             });
-            map.setControls(ControlPosition.RIGHT_TOP, settingsButton);
+            return shareLinkButton;
         }
+        return null;
     }
 
     private void removeTransitions() {
