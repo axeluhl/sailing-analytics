@@ -6,7 +6,7 @@ import com.sap.sse.gwt.client.context.impl.SapSailingContextDataFactoryImpl;
 public class Branding {
 
     private static final Branding INSTANCE;
-    
+
     static {
         INSTANCE = new Branding();
     }
@@ -19,16 +19,16 @@ public class Branding {
 
     public Branding() {
         try {
-        SapSailingContextDataJSO dataJso = new SapSailingContextDataFactoryImpl().getInstance();
-        active = !dataJso.isDebrandingActive();
-        } catch (Exception e) {
-            //FIXME handle this
+            SapSailingContextDataJSO dataJso = new SapSailingContextDataFactoryImpl().getInstance();
+            active = !dataJso.isDebrandingActive();
+        } catch (RuntimeException e) {
+            throw new IllegalStateException("could not read JSO", e);
         }
     }
 
     /**
      * 
-     * @return true when 
+     * @return true when
      */
     public boolean isActive() {
         return active;
