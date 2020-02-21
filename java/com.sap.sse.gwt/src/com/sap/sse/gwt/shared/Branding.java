@@ -1,5 +1,6 @@
 package com.sap.sse.gwt.shared;
 
+import com.google.gwt.core.client.GWT;
 import com.sap.sse.gwt.client.context.data.SapSailingContextDataJSO;
 import com.sap.sse.gwt.client.context.impl.SapSailingContextDataFactoryImpl;
 
@@ -22,7 +23,7 @@ public class Branding {
             SapSailingContextDataJSO dataJso = new SapSailingContextDataFactoryImpl().getInstance();
             active = !dataJso.isDebrandingActive();
         } catch (RuntimeException e) {
-            throw new IllegalStateException("could not read JSO", e);
+            GWT.log("no debranding information found.");
         }
     }
 
