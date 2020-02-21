@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.server;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.logging.Logger;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -17,7 +18,9 @@ import javax.servlet.http.HttpServletResponseWrapper;
 
 
 public class ClientConfigurationFilter implements Filter {
-
+    
+    private static final Logger logger = Logger.getLogger(ClientConfigurationFilter.class.getName());
+    
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         // intentionally left blank
@@ -43,7 +46,7 @@ public class ClientConfigurationFilter implements Filter {
                 @Override
                 public void setWriteListener(WriteListener writeListener) {
                     // intentionally left blank, not implemented
-                    System.out.println("this is a breakpoint");
+                    logger.finest("this is a breakpoint");
                 }
 
                 @Override
@@ -82,7 +85,7 @@ public class ClientConfigurationFilter implements Filter {
             @Override
             public void flushBuffer() throws IOException {
                 // do nothing here, output will be flushed in the end otherwise string replacement might not work
-                System.out.println("this is a breakpoint");
+                logger.finest("this is a breakpoint");
             }
 
             @Override
