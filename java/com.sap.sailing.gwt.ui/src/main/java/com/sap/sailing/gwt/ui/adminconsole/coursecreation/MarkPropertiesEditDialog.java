@@ -20,19 +20,19 @@ import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.Pattern;
 import com.sap.sailing.gwt.ui.shared.racemap.Shape;
 import com.sap.sse.common.Color;
-import com.sap.sse.common.impl.RGBColor;
+import com.sap.sse.gwt.client.ColorTextBox;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO> {
     private final TextBox nameTextBox;
-    private final TextBox displayColorTextBox;
+    private final ColorTextBox displayColorTextBox;
     private final TextBox shortNameTextBox;
     private final ValueListBox<MarkType> markTypeValueListBox;
     private final ValueListBox<Pattern> patternValueListBox;
     private final ValueListBox<Shape> shapeValueListBox;
-    private final StringMessages stringMessages;
+    final StringMessages stringMessages;
     private final Label labelShape;
     private final Label labelPattern;
     private final StringListEditorComposite tagsEditor;
@@ -52,6 +52,8 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
                             result = stringMessages.pleaseEnterAName();
                         } else if (invalidMarkType) {
                             result = stringMessages.pleaseEnterAValidValueFor(stringMessages.type(), "");
+                        } else if (valueToValidate.getCommonMarkProperties().getColor() instanceof InvalidColor) {
+                            result = valueToValidate.getCommonMarkProperties().getColor().getAsHtml();
                         }
                         return result;
                     }
@@ -110,13 +112,7 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
         markTypeValueListBox.addValueChangeHandler(v -> handleMarkTypeChange());
 
         // setup display color textbox
-        if (markPropertiesToEdit.getCommonMarkProperties().getColor() != null) {
-            this.displayColorTextBox = createTextBox(
-                    markPropertiesToEdit.getCommonMarkProperties().getColor() == null ? ""
-                            : markPropertiesToEdit.getCommonMarkProperties().getColor().getAsHtml());
-        } else {
-            this.displayColorTextBox = createTextBox("");
-        }
+        this.displayColorTextBox = createColorTextBox(markPropertiesToEdit.getCommonMarkProperties().getColor());
 
         // setup shape selection
         final String loadedShape = markPropertiesToEdit.getCommonMarkProperties().getShape();
@@ -164,53 +160,13 @@ public class MarkPropertiesEditDialog extends DataEntryDialog<MarkPropertiesDTO>
         return nameTextBox;
     }
 
-    /**
-     * Encodes an invalid color; can be used
-     * 
-     * @author Axel Uhl (D043530)
-     *
-     */
-    private class InvalidColor implements Color {
-        private static final long serialVersionUID = 4012986110898149543L;
-        private final Exception exception;
-
-        protected InvalidColor(Exception exception) {
-            this.exception = exception;
-        }
-
-        @Override
-        public com.sap.sse.common.Util.Triple<Integer, Integer, Integer> getAsRGB() {
-            return null;
-        }
-
-        @Override
-        public com.sap.sse.common.Util.Triple<Float, Float, Float> getAsHSV() {
-            return null;
-        }
-
-        @Override
-        public String getAsHtml() {
-            return stringMessages.invalidColor(exception.getMessage());
-        }
-
-        @Override
-        public Color invert() {
-            return null;
-        }
-
-    }
-
     @Override
     protected MarkPropertiesDTO getResult() {
-        Color color;
-        if (displayColorTextBox.getValue() == null || displayColorTextBox.getValue().isEmpty()) {
-            color = null;
+        final Color color;
+        if (!displayColorTextBox.isValid()) {
+            color = new InvalidColor(stringMessages, displayColorTextBox.getValue());
         } else {
-            try {
-                color = new RGBColor(displayColorTextBox.getText());
-            } catch (IllegalArgumentException iae) {
-                color = new InvalidColor(iae);
-            }
+            color = displayColorTextBox.getColor();
         }
         final MarkPropertiesDTO markProperties = new MarkPropertiesDTO(id, nameTextBox.getValue(),
                 tagsEditor.getValue(), shortNameTextBox.getValue(), color,
