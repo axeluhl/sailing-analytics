@@ -35,6 +35,7 @@ public class Footer extends Composite {
     @UiField LanguageSelector languageSelector;
     @UiField DivElement copyrightDiv;
     @UiField AnchorElement imprintAnchorLink;
+    @UiField AnchorElement privacyAnchorLink;
     @UiField AnchorElement mobileUi;
     @UiField(provided = true)
     final PlaceNavigation<WhatsNewPlace> releaseNotesNavigation;
@@ -64,6 +65,7 @@ public class Footer extends Composite {
             feedbackAnchor.getStyle().setDisplay(Display.NONE);
             whatsNewAnchor.getStyle().setDisplay(Display.NONE);
             imprintAnchorLink.getStyle().setDisplay(Display.NONE);
+            privacyAnchorLink.getStyle().setDisplay(Display.NONE);
         }
     }
     
