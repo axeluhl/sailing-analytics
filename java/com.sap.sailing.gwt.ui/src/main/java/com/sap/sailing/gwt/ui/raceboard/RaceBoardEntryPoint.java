@@ -164,15 +164,13 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint implements Pr
         if (raceBoardMode != null) {
             raceBoardMode.getMode().applyTo(raceBoardPerspective);
             raceBoardMode.getMode().addInitializationFinishedRunner(
-                    () -> selectCompetitorFromPerspectiveOwnSetting(raceBoardPerspective));
+                    () -> selectCompetitorFromPerspectiveOwnSetting(raceBoardPerspective, settings.getPerspectiveOwnSettings()));
         } else {
-            selectCompetitorFromPerspectiveOwnSetting(raceBoardPerspective);
+            selectCompetitorFromPerspectiveOwnSetting(raceBoardPerspective, settings.getPerspectiveOwnSettings());
         }
     }  
     
-    protected void selectCompetitorFromPerspectiveOwnSetting(RaceBoardPanel raceBoardPanel) {
-        RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = raceBoardPanel.getSettings()
-                .getPerspectiveOwnSettings();
+    protected void selectCompetitorFromPerspectiveOwnSetting(RaceBoardPanel raceBoardPanel, RaceBoardPerspectiveOwnSettings perspectiveOwnSettings) {
         if (perspectiveOwnSettings != null) {
             final String oldCompetitorId = perspectiveOwnSettings.getSelectedCompetitor();
             Iterable<String> competitorIds = perspectiveOwnSettings.getSelectedCompetitors();

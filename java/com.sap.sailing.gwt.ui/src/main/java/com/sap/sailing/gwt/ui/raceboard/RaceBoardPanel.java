@@ -239,6 +239,7 @@ public class RaceBoardPanel
         this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.setRaceBoardName(selectedRaceIdentifier.getRaceName());
         this.asyncActionsExecutor = asyncActionsExecutor;
+        final RaceBoardPerspectiveOwnSettings parsedPerspectiveOwnSettings = settings.getPerspectiveOwnSettings();
         FlowPanel mainPanel = new ResizableFlowPanel();
         mainPanel.setSize("100%", "100%");
         raceInformationHeader = new FlowPanel();
@@ -326,7 +327,7 @@ public class RaceBoardPanel
         raceMap.getRightHeaderPanel().add(userManagementMenuView);
         addChildComponent(raceMap);
         // add panel for tagging functionality, hidden if no URL parameter "tag" is passed 
-        final String sharedTagURLParameter = settings.getPerspectiveOwnSettings().getJumpToTag();
+        final String sharedTagURLParameter = parsedPerspectiveOwnSettings.getJumpToTag();
         String sharedTagTitle = null;
         TimePoint sharedTagTimePoint = null;
         boolean showTaggingPanel = false;
@@ -364,19 +365,20 @@ public class RaceBoardPanel
         leaderboardPanel.addLeaderboardUpdateListener(this);
         // in case the URL configuration contains the name of a competitors filter set we try to activate it
         // FIXME the competitorsFilterSets has now moved to CompetitorSearchTextBox (which should probably be renamed); pass on the parameters to the LeaderboardPanel and see what it does with it
-        if (getPerspectiveSettings().getActiveCompetitorsFilterSetName() != null) {
+        if (parsedPerspectiveOwnSettings.getActiveCompetitorsFilterSetName() != null) {
             for (FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet : competitorSearchTextBox.getCompetitorsFilterSets().getFilterSets()) {
-                if (filterSet.getName().equals(getPerspectiveSettings().getActiveCompetitorsFilterSetName())) {
+                if (filterSet.getName().equals(parsedPerspectiveOwnSettings.getActiveCompetitorsFilterSetName())) {
                     competitorSearchTextBox.getCompetitorsFilterSets().setActiveFilterSet(filterSet);
+                    competitorSelectionProvider.setCompetitorsFilterSet(competitorSearchTextBox.getCompetitorsFilterSets().getActiveFilterSetWithGeneralizedType());
                     break;
                 }
             }
         }
         racetimePanel = new RaceTimePanel(this, componentContext, raceTimePanelLifecycle, userService, timer,
                 timeRangeWithZoomModel,
-                stringMessages, raceTimesInfoProvider, getPerspectiveSettings().isCanReplayDuringLiveRaces(),
+                stringMessages, raceTimesInfoProvider, parsedPerspectiveOwnSettings.isCanReplayDuringLiveRaces(),
                 showChartMarkEditMediaButtonsAndVideo, selectedRaceIdentifier,
-                getPerspectiveSettings().getInitialDurationAfterRaceStartInReplay(), raceDTO);
+                parsedPerspectiveOwnSettings.getInitialDurationAfterRaceStartInReplay(), raceDTO);
         racetimePanel.updateSettings(raceTimePanelSettings);
         timeRangeWithZoomModel.addTimeZoomChangeListener(racetimePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(racetimePanel);
@@ -419,6 +421,7 @@ public class RaceBoardPanel
         MultiCompetitorRaceChartSettings multiCompetitorRaceChartSettings = settings
                 .findSettingsByComponentId(multiCompetitorRaceChartLifecycle.getComponentId());
         // create the default leaderboard and select the right race
+        final RaceBoardPerspectiveOwnSettings initialPerspectiveOwnSettings = settings.getPerspectiveOwnSettings();
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         List<Component<?>> componentsForSideBySideViewer = new ArrayList<Component<?>>();
         if (showChartMarkEditMediaButtonsAndVideo) {
@@ -505,11 +508,11 @@ public class RaceBoardPanel
         }
         this.setupUserManagementControlPanel(userService);
         mainPanel.add(mapViewer.getViewerWidget());
-        boolean showLeaderboard = getPerspectiveSettings().isShowLeaderboard() && isScreenLargeEnoughToInitiallyDisplayLeaderboard;
+        boolean showLeaderboard = initialPerspectiveOwnSettings.isShowLeaderboard() && isScreenLargeEnoughToInitiallyDisplayLeaderboard;
         setLeaderboardVisible(showLeaderboard);
         if (showChartMarkEditMediaButtonsAndVideo) {
-            setWindChartVisible(getPerspectiveSettings().isShowWindChart());
-            setCompetitorChartVisible(getPerspectiveSettings().isShowCompetitorsChart());
+            setWindChartVisible(initialPerspectiveOwnSettings.isShowWindChart());
+            setCompetitorChartVisible(initialPerspectiveOwnSettings.isShowCompetitorsChart());
         }
         // make sure to load leaderboard data for filtering to work
         if (!showLeaderboard) {
