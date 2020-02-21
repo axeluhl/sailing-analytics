@@ -11,8 +11,12 @@ import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 public class ExpeditionStartLineMessageTest {
     @Test
     public void testCreatePingStartLineMessages() throws SocketException {
-        final int checksum = new ExpeditionMessageParser(new UDPExpeditionReceiver(/* listening on port */ 0))
-                .computeChecksum("#0,4,133.9,5,2.12,6,348.5,94,349.8,95,2.41*09");
-        assertEquals(9, checksum);
+        final String portMessageString = "#L,P,45.327781,-0.775225*07";
+        final String starboardMessageString = "#L,S,45.337712,-0.747560*08";
+        final ExpeditionMessageParser parser = new ExpeditionMessageParser(new UDPExpeditionReceiver(/* listening on port */ 0));
+        final int checksumPort = parser.computeChecksum(portMessageString);
+        assertEquals(7, checksumPort);
+        final int checksumStarboard = parser.computeChecksum(starboardMessageString);
+        assertEquals(8, checksumStarboard);
     }
 }
