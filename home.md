@@ -43,6 +43,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Create clickable UI prototypes with Axure|wiki/info/landscape/ui-clickable-prototypes]]
 * [[Webdesign|wiki/info/landscape/webdesign]]
 
+
 ### Mobile
 
 * [[Mobile Development|wiki/info/mobile/mobile-development]]
@@ -110,6 +111,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Profiling|wiki/howto/development/profiling]]
 * [[Working with GWT Super Dev Mode|wiki/howto/development/super-dev-mode]]
 * [[Training of internal Wind Estimation models|wiki/howto/windestimation]]
+* [[Whitelabelling|wiki/howto/whitelabelling]]
 
 ### For Event Managers
 

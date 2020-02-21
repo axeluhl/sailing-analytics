@@ -1295,5 +1295,5 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     List<MarkRoleDTO> getMarkRoles();
 
-    MarkRoleDTO addOrUpdateMarkRole(MarkRoleDTO markRole);
+    MarkRoleDTO createMarkRole(MarkRoleDTO markRole);
 }
