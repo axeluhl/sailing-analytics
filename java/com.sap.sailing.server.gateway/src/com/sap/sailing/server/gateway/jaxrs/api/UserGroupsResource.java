@@ -31,8 +31,7 @@ import com.sap.sse.security.shared.impl.UserGroup;
 public class UserGroupsResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response getUserGroupsCurrentUserIsPartOf()
-            throws ParseException, JsonDeserializationException {
+    public Response getUserGroupsCurrentUserIsPartOf() throws ParseException, JsonDeserializationException {
         Response response = null;
         User user = getService().getSecurityService().getCurrentUser();
         if (user != null) {
@@ -40,10 +39,7 @@ public class UserGroupsResource extends AbstractSailingServerResource {
             JSONArray groups = new JSONArray();
             root.put("groupsUserIsPartOf", groups);
             for (UserGroup group : user.getUserGroups()) {
-                JSONObject groupJson = new JSONObject();
-                groupJson.put("uuid", group.getId().toString());
-                groupJson.put("name", group.getName());
-                groups.add(groupJson);
+                groups.add(userGroupToJson(group, /* includingRoles */ false));
             }
             response = Response.ok(root.toJSONString()).build();
         } else {
@@ -111,19 +107,7 @@ public class UserGroupsResource extends AbstractSailingServerResource {
         UserGroup userGroup = getService().getSecurityService().getUserGroup(userGroupId);
         getSecurityService().checkCurrentUserReadPermission(userGroup);
         if (userGroup != null) {
-            JSONObject root = new JSONObject();
-            root.put("uuid", userGroup.getId().toString());
-            root.put("name", userGroup.getName());
-            JSONArray roles = new JSONArray();
-            for (Entry<RoleDefinition, Boolean> roleDef : userGroup.getRoleDefinitionMap().entrySet()) {
-                JSONObject role = new JSONObject();
-                role.put("roleId", roleDef.getKey().getId().toString());
-                role.put("name", roleDef.getKey().getName());
-                role.put("all", roleDef.getValue());
-                roles.add(role);
-            }
-            root.put("roles", roles);
-            response = Response.ok(root.toJSONString()).build();
+            response = Response.ok(userGroupToJson(userGroup, /* includingRoles */ true).toJSONString()).build();
         } else {
             response = Response.status(401).build();
         }
@@ -170,5 +154,23 @@ public class UserGroupsResource extends AbstractSailingServerResource {
             response = Response.status(401).build();
         }
         return response;
+    }
+
+    private JSONObject userGroupToJson(final UserGroup userGroup, final boolean includingRoles) {
+        JSONObject root = new JSONObject();
+        root.put("uuid", userGroup.getId().toString());
+        root.put("name", userGroup.getName());
+        if (includingRoles) {
+            JSONArray roles = new JSONArray();
+            for (Entry<RoleDefinition, Boolean> roleDef : userGroup.getRoleDefinitionMap().entrySet()) {
+                JSONObject role = new JSONObject();
+                role.put("roleId", roleDef.getKey().getId().toString());
+                role.put("name", roleDef.getKey().getName());
+                role.put("all", roleDef.getValue());
+                roles.add(role);
+            }
+            root.put("roles", roles);
+        }
+        return root;
     }
 }
