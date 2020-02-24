@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,6 +47,7 @@ import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.SecurityUserGroup;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
@@ -57,6 +59,8 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 public class AclEditPanel extends Composite {
 
     private static AclEditPanelUiBinder uiBinder = GWT.create(AclEditPanelUiBinder.class);
+    
+    private static Logger log = Logger.getLogger(AclEditPanel.class.getName());
 
     interface AclEditPanelUiBinder extends UiBinder<Widget, AclEditPanel> {
     }
@@ -104,12 +108,14 @@ public class AclEditPanel extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         final CellList<StrippedUserGroupDTO> userGroupList = createUserGroupCellList();
         userGroupDataProvider.addDataDisplay(userGroupList);
+        
         userGroupCellListPanelUi.add(wrapIntoCaptionPanel(userGroupList, stringMessages.userGroups(),
                 suggestUserGroupUi, addUserGroupButtonUi, removeUserGroupButtonUi));
 
         // retrieve set of available action names
         final List<String> actionNames = Stream.of(availableActions).map(Action::name).collect(Collectors.toList());
 
+        
         // create action editor for allowed actions
         allowedActionsEditor = new StringListEditorComposite(new ArrayList<>(), stringMessages,
                 IconResources.INSTANCE.removeIcon(), actionNames, stringMessages.allowedActionName());
@@ -125,6 +131,11 @@ public class AclEditPanel extends Composite {
                 .put(userGroupSelectionModel.getSelectedObject(), toDeniedActionSet(e.getValue())));
         permissionsCellListPanelUi.add(deniedActionsContainer = createActionsContainer(stringMessages.deniedActions(),
                 deniedActionsEditor, AclDialogResources.INSTANCE.css().deniedActionsTable()));
+
+        userGroupSelectionModel.addSelectionChangeHandler(event -> {
+            StrippedUserGroupDTO userGroup = userGroupSelectionModel.getSelectedObject();
+            deniedActionsEditor.setEnabled(userGroup != null && userGroup.getId() != null);
+        });
 
         lblId.setText(id);
         lblType.setText(typeIdentifier);
