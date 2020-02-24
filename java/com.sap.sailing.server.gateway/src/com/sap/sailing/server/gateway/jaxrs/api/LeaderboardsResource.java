@@ -218,7 +218,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     JSONObject jsonLeaderboard;
                     jsonLeaderboard = getLeaderboardJson(resultState, maxCompetitorsCount, requestTimePoint,
                             leaderboard, timePoint, /* race column names */ null, /* race detail names */ null, competitorAndBoatIdsOnly,
-                            /* showOnlyActiveRacesForCompetitorIds */ null);
+                            /* showOnlyActiveRacesForCompetitorIds */ null, skip);
                     StringWriter sw = new StringWriter();
                     jsonLeaderboard.writeJSONString(sw);
                     String json = sw.getBuffer().toString();
@@ -238,7 +238,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     @Override
     protected JSONObject getLeaderboardJson(Leaderboard leaderboard,
             TimePoint resultTimePoint, ResultStates resultState, Integer maxCompetitorsCount, List<String> raceColumnNames,
-            List<String> raceDetailNames, boolean competitorIdsOnly, List<String> showOnlyActiveRacesForCompetitorIds)
+            List<String> raceDetailNames, boolean competitorIdsOnly, List<String> showOnlyActiveRacesForCompetitorIds, boolean userPresentedValidRegattaSecret)
             throws NoWindException, InterruptedException, ExecutionException {
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(
                 resultTimePoint, Collections.<String> emptyList(), /* addOverallDetails */
@@ -249,7 +249,12 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
         int counter = 1;
-        for (CompetitorDTO competitor : leaderboardDTO.competitors) {
+        for (CompetitorDTO competitor : Util.filter(leaderboardDTO.competitors,
+            competitor -> userPresentedValidRegattaSecret || SecurityUtils.getSubject()
+                .isPermitted(competitor.getIdentifier().getStringPermission(
+                    SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC))
+                || SecurityUtils.getSubject().isPermitted(
+                    competitor.getIdentifier().getStringPermission(DefaultActions.READ)))) {
             LeaderboardRowDTO leaderboardRowDTO = leaderboardDTO.rows.get(competitor);
             if (maxCompetitorsCount != null && counter > maxCompetitorsCount) {
                 break;
@@ -545,7 +550,6 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         Competitor competitor = getService().getCompetitorAndBoatStore()
                 .getExistingCompetitorByIdAsString(competitorIdAsString);
-
         if (competitor == null) {
             response = Response
                     .status(Status.NOT_FOUND).entity("Could not find a competitor with id '"
@@ -1312,7 +1316,15 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 map(mark->trackedRace.getTrack(mark)).filter(markTrack->markTrack!=null).
                 map(markTrack->markTrack.getEstimatedPosition(timeToUseForStart, /* extrapolate */ false)).
                 collect(Collectors.toList());
-            Util.addAll(trackedRace.getRace().getCompetitors(), competitors);
+            Util.addAll(
+                // filter for those competitors that the current user may read
+                Util.filter(trackedRace.getRace().getCompetitors(),
+                    competitor -> SecurityUtils.getSubject()
+                        .isPermitted(competitor.getIdentifier().getStringPermission(
+                            SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC))
+                        || SecurityUtils.getSubject().isPermitted(
+                            competitor.getIdentifier().getStringPermission(DefaultActions.READ))),
+                competitors);
             competitors.sort((a, b)->{
                 final MarkPassing aStartMarkPassing = trackedRace.getMarkPassing(a, firstWaypoint);
                 final MarkPassing bStartMarkPassing = trackedRace.getMarkPassing(b, firstWaypoint);

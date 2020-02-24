@@ -70,12 +70,13 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * For access to the external git at ``ssh://trac@sapsailing.com/home/trac/git`` please send your SSH public key to Axel Uhl or Simon Marcel Pamies, requesting git access. Make sure to NOT generate the key using Putty. Putty keys don't work reliably under Linux and on Windows/Cygwin environments. Use ssh-keygen in a Cygwin or Linux or MacOS/X environment instead.
   * Alternatively, for access to the SAP-internal Git/Gerrit repository register yourself as a Git user in the SAP-Git under: [https://git.wdf.sap.corp:8080/](https://git.wdf.sap.corp:8080/); ask the Git administrator (Axel Uhl) to get on the list of enabled committers
 2. Bugzilla
-  * Ask the Bugzilla administrator (Frank Mittag, Axel Uhl) to create a bugzilla account for you.
-  * Bugzilla url: [http://bugzilla.sapsailing.com/bugzilla/](http://bugzilla.sapsailing.com/bugzilla/)
+  * Create an account at https://bugzilla.sapsailing.com
+  * Ask the Bugzilla administrator (axel.uhl@sap.com) to enable your account for editing bugs
+  * Bugzilla url: [https://bugzilla.sapsailing.com](https://bugzilla.sapsailing.com)
 3. Wiki
   * Send a request to Axel Uhl or Simon Marcel Pamies that includes the SHA1 hash of your desired password. Obtain such an SHA1 hash for your password here: [http://www.sha1-online.com/](http://www.sha1-online.com/).
 4. Hudson
-  * Request a [Hudson](https://hudson.sapsailing.com) user by sending e-mail to Axel Uhl, Frank Mittag or Simon Marcel Pamies.
+  * Request a [Hudson](https://hudson.sapsailing.com) user by sending e-mail to Axel Uhl or Simon Marcel Pamies.
 
 #### Steps to build and run the Race Analysis Suite
 

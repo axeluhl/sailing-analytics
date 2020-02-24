@@ -1169,7 +1169,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 final Distance legDistance = trackedLeg.getGreatCircleDistance(timePointForLegGeometry);
                 legDistances.put(leg, legDistance);
                 legBearings.put(leg, trackedLeg.getLegBearing(timePointForLegGeometry));
-                totalDistance = totalDistance.add(legDistance);
+                totalDistance = legDistance == null || totalDistance == null ? null : totalDistance.add(legDistance);
             }
         } finally {
             course.unlockAfterRead();
@@ -1983,7 +1983,6 @@ public class RegattasResource extends AbstractSailingServerResource {
                 jsonRaceResults.put("regatta", regatta.getName());
                 jsonRaceResults.put("startOfRace-ms", trackedRace.getStartOfRace() == null ? null : trackedRace
                         .getStartOfRace().asMillis());
-
                 JSONArray jsonLegs = new JSONArray();
                 Course course = trackedRace.getRace().getCourse();
                 course.lockForRead();
@@ -2015,34 +2014,30 @@ public class RegattasResource extends AbstractSailingServerResource {
                                             trackedRace.getBoatOfCompetitor(competitor).getSailID());
                                     jsonCompetitorInLeg.put("color",
                                             competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
-
-                                    Speed averageSpeedOverGround = trackedLegOfCompetitor
-                                            .getAverageSpeedOverGround(timePoint);
+                                    final Speed averageSpeedOverGround = trackedLegOfCompetitor.getAverageSpeedOverGround(timePoint);
                                     if (averageSpeedOverGround != null) {
                                         jsonCompetitorInLeg.put("averageSOG-kts", RoundingUtil.knotsDecimalFormatter
                                                 .format(averageSpeedOverGround.getKnots()));
                                     }
+                                    final Pair<GPSFixMoving, Speed> maxSpeedOverGround = trackedLegOfCompetitor.getMaximumSpeedOverGround(timePoint);
+                                    if (maxSpeedOverGround != null) {
+                                        jsonCompetitorInLeg.put("maxSOG-kts", RoundingUtil.knotsDecimalFormatter
+                                                .format(maxSpeedOverGround.getB().getKnots()));
+                                        jsonCompetitorInLeg.put("maxSOGTimePoint-millis", RoundingUtil.knotsDecimalFormatter
+                                                .format(maxSpeedOverGround.getA().getTimePoint().asMillis()));
+                                    }
                                     try {
-                                        Integer numberOfTacks = trackedLegOfCompetitor.getNumberOfTacks(timePoint, /*
-                                                                                                                    * waitForLatest
-                                                                                                                    */
-                                                false);
-                                        Integer numberOfJibes = trackedLegOfCompetitor.getNumberOfJibes(timePoint, /*
-                                                                                                                    * waitForLatest
-                                                                                                                    */
-                                                false);
-                                        Integer numberOfPenaltyCircles = trackedLegOfCompetitor
-                                                .getNumberOfPenaltyCircles(timePoint, /* waitForLatest */false);
+                                        Integer numberOfTacks = trackedLegOfCompetitor.getNumberOfTacks(timePoint, /* waitForLatest */ false);
+                                        Integer numberOfJibes = trackedLegOfCompetitor.getNumberOfJibes(timePoint, /* waitForLatest */ false);
+                                        Integer numberOfPenaltyCircles = trackedLegOfCompetitor.getNumberOfPenaltyCircles(timePoint, /* waitForLatest */false);
                                         jsonCompetitorInLeg.put("tacks", numberOfTacks);
                                         jsonCompetitorInLeg.put("jibes", numberOfJibes);
                                         jsonCompetitorInLeg.put("penaltyCircles", numberOfPenaltyCircles);
                                     } catch (NoWindException e) {
                                         logger.log(Level.FINE,
                                                 "No wind information while trying to determing maneuvers for competitor "
-                                                        + competitor.getName(),
-                                                e);
+                                                        + competitor.getName(), e);
                                     }
-
                                     TimePoint startTime = trackedLegOfCompetitor.getStartTime();
                                     TimePoint finishTime = trackedLegOfCompetitor.getFinishTime();
                                     TimePoint startOfRace = trackedRace.getStartOfRace();
@@ -2068,7 +2063,6 @@ public class RegattasResource extends AbstractSailingServerResource {
                                                             .format(distanceSinceGun.getMeters()));
                                         }
                                     }
-
                                     Distance distanceTraveled = trackedLegOfCompetitor.getDistanceTraveled(timePoint);
                                     if (distanceTraveled != null) {
                                         jsonCompetitorInLeg.put("distanceTraveled-m",
@@ -2107,15 +2101,14 @@ public class RegattasResource extends AbstractSailingServerResource {
                                     jsonCompetitors.add(jsonCompetitorInLeg);
                                 }
                             }
-                            jsonLeg.put("competitors", jsonCompetitors);
-                            jsonLegs.add(jsonLeg);
                         }
+                        jsonLeg.put("competitors", jsonCompetitors);
+                        jsonLegs.add(jsonLeg);
                     }
                 } finally {
                     course.unlockAfterRead();
                 }
                 jsonRaceResults.put("legs", jsonLegs);
-
                 String json = jsonRaceResults.toJSONString();
                 return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
