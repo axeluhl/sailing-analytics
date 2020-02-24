@@ -1065,7 +1065,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         final StringBuilder result = new StringBuilder();
         result.append(getClass().getSimpleName());
         result.append(" for race ");
-        result.append(race.getRace().getName());
+        result.append(race.getRace().getName()+" in regatta "+race.getTrackedRegatta().getRegatta().getName());
         result.append(". Filtered vs. original candidate ratio: ");
         long original = 0;
         long filtered = 0;

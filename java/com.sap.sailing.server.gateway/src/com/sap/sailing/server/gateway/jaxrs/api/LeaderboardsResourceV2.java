@@ -313,6 +313,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 DetailType.NUMBER_OF_MANEUVERS,
                 DetailType.RACE_CURRENT_LEG,
                 DetailType.OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS,
+                DetailType.LEG_VELOCITY_MADE_GOOD_IN_KNOTS,
                 DetailType.LEG_WINDWARD_DISTANCE_TO_GO_IN_METERS };
     }
 
@@ -433,6 +434,12 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 name = "legWindwardDistanceToGoInMeters";
                 if (currentLegEntry != null && currentLegEntry.windwardDistanceToGoInMeters != null) {
                     value = currentLegEntry.windwardDistanceToGoInMeters;
+                }
+                break;
+            case LEG_VELOCITY_MADE_GOOD_IN_KNOTS:
+                name = "legVelocityMadeGoodInKnots";
+                if (currentLegEntry != null && currentLegEntry.velocityMadeGoodInKnots != null) {
+                    value = currentLegEntry.velocityMadeGoodInKnots;
                 }
                 break;
             default:
