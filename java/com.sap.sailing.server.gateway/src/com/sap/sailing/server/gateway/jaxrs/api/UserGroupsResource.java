@@ -1,5 +1,7 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
 
@@ -15,6 +17,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.shiro.authz.AuthorizationException;
+import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -23,6 +26,7 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
@@ -44,6 +48,36 @@ public class UserGroupsResource extends AbstractSailingServerResource {
             response = Response.ok(root.toJSONString()).build();
         } else {
             response = Response.status(401).build();
+        }
+        return response;
+    }
+
+    @GET
+    @Path("readable/{userName}")
+    @Produces("application/json;charset=UTF-8")
+    public Response getReadableUserGroupsForCurrentUser(@PathParam("userName") String userName) {
+        Response response = null;
+        final User user = userName != null ? getSecurityService().getUserByName(userName)
+                : getSecurityService().getCurrentUser();
+        if (user != null && getSecurityService().hasCurrentUserReadPermission(user)) {
+            final List<UserGroup> userGroups = new ArrayList<>();
+            getSecurityService().getUserGroupList().forEach(ug -> {
+                System.out.println(ug.getName());
+                if (getSecurityService().getSecurityManager().isPermitted(
+                        new SimplePrincipalCollection(userName, userName),
+                        ug.getIdentifier().getPermission(DefaultActions.READ).toString())) {
+                    userGroups.add(ug);
+                    System.out.println("OK");
+                }
+            });
+            final JSONObject root = new JSONObject();
+            final JSONArray userGroupsJson = new JSONArray();
+            userGroups.forEach(ug -> userGroupsJson.add(userGroupToJson(ug, /* includingRoles */ true)));
+            response = Response.ok(root.toJSONString()).build();
+            root.put("readableGroups", userGroupsJson);
+            response = Response.ok().entity(root.toJSONString()).build();
+        } else {
+            response = Response.status(Status.UNAUTHORIZED).build();
         }
         return response;
     }

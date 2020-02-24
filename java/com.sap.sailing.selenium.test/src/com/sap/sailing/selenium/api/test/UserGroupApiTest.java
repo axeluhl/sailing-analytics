@@ -11,6 +11,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.LongAdder;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -114,6 +115,39 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
         } catch (RuntimeException e) {
             assertTrue("Expected unauthorized exception", e.getMessage().contains("failed (rc=401)"));
         }
+    }
+
+    @Test
+    public void testGetReadableUserGroups() {
+        final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+        final String user1Name = "user1";
+        securityApi.createUser(adminSecurityCtx, user1Name, "test", "company", "password");
+        final ApiContext user1Ctx = ApiContext.createApiContext(getContextRoot(), SERVER_CONTEXT, user1Name,
+                "password");
+        final ApiContext user1SecurityCtx = ApiContext.createApiContext(getContextRoot(), SECURITY_CONTEXT, user1Name,
+                "password");
+        assertEquals(1, Util.size(userGroupApi.getReadableGroupsOfUser(user1Ctx, user1Name)));
+
+        // admin creates new group and adds user -> does not mean the group is allowed to read
+        final LongAdder counter = new LongAdder();
+        UserGroup group1ToAdd = userGroupApi.createUserGroup(adminSecurityCtx, "group1ToAdd");
+        userGroupApi.addUserToGroup(adminSecurityCtx, group1ToAdd.getGroupId(), user1Name);
+        userGroupApi.getReadableGroupsOfUser(user1Ctx, user1Name).forEach(ug -> {
+            if (group1ToAdd.getGroupId().equals(ug.getGroupId())) {
+                counter.increment();
+            }
+        });
+        assertEquals(0, counter.intValue());
+
+        // user creates new group
+        counter.reset();
+        UserGroup group2ToAdd = userGroupApi.createUserGroup(user1SecurityCtx, "group2ToAdd");
+        userGroupApi.getReadableGroupsOfUser(user1Ctx, user1Name).forEach(ug -> {
+            if (group2ToAdd.getGroupId().equals(ug.getGroupId())) {
+                counter.increment();
+            }
+        });
+        assertEquals(1, counter.intValue());
     }
 
     @Test
