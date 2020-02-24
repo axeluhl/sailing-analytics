@@ -250,10 +250,10 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
 
     private void insertSelectedCompetitorsFilter(CompetitorsFilterSets filterSet) {
         // selected competitors filter
-        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> selectedCompetitorsFilterSet = 
+        final FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> selectedCompetitorsFilterSet = 
                 new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(stringMessages.selectedCompetitors());
         selectedCompetitorsFilterSet.setEditable(false);
-        SelectedCompetitorsFilter selectedCompetitorsFilter = new SelectedCompetitorsFilter();
+        final SelectedCompetitorsFilter selectedCompetitorsFilter = new SelectedCompetitorsFilter();
         selectedCompetitorsFilter.setCompetitorSelectionProvider(competitorSelectionProvider);
         selectedCompetitorsFilterSet.addFilter(selectedCompetitorsFilter);
         filterSet.addFilterSet(0, selectedCompetitorsFilterSet);
