@@ -29,6 +29,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.servlet.Filter;
 import javax.servlet.ServletContext;
@@ -535,10 +536,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         for (Map.Entry<UserGroup, Set<String>> entry : permissionMap.entrySet()) {
             final UserGroup userGroup = entry.getKey();
+            // filter any denied action for anonymous user 
+            Set<String> filteredActions = entry.getValue().stream()
+                    .filter(action -> !(entry.getKey() == null && action != null && action.startsWith("!")))
+                    .collect(Collectors.toSet());
+            
             final UUID userGroupId = userGroup == null ? null : userGroup.getId();
-            final Set<String> actions = entry.getValue();
             // avoid the UserGroup object having to be serialized with the operation by using the ID
-            apply(s -> s.internalAclPutPermissions(idOfAccessControlledObject, userGroupId, actions));
+            apply(s -> s.internalAclPutPermissions(idOfAccessControlledObject, userGroupId, filteredActions));
         }
         return accessControlStore.getAccessControlList(idOfAccessControlledObject).getAnnotation();
     }
