@@ -368,8 +368,7 @@ public class RaceBoardPanel
         if (parsedPerspectiveOwnSettings.getActiveCompetitorsFilterSetName() != null) {
             for (FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet : competitorSearchTextBox.getCompetitorsFilterSets().getFilterSets()) {
                 if (filterSet.getName().equals(parsedPerspectiveOwnSettings.getActiveCompetitorsFilterSetName())) {
-                    competitorSearchTextBox.getCompetitorsFilterSets().setActiveFilterSet(filterSet);
-                    competitorSelectionProvider.setCompetitorsFilterSet(competitorSearchTextBox.getCompetitorsFilterSets().getActiveFilterSetWithGeneralizedType());
+                    competitorSearchTextBox.updateCompetitorFilterSetAndView(filterSet);
                     break;
                 }
             }

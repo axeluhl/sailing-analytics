@@ -220,6 +220,13 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         competitorSelectionProvider.clearAllFilters();
     }
     
+    public void updateCompetitorFilterSetAndView(final FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> activeFilterSet) {
+        competitorsFilterSets.setActiveFilterSet(activeFilterSet);
+        updateCompetitorsFilterContexts(competitorsFilterSets);
+        competitorSelectionProvider.setCompetitorsFilterSet(competitorsFilterSets.getActiveFilterSetWithGeneralizedType());
+        updateCompetitorsFilterControlState(competitorsFilterSets);
+    }
+    
     private void showEditCompetitorsFiltersDialog() {
         CompetitorsFilterSetsDialog competitorsFilterSetsDialog = new CompetitorsFilterSetsDialog(competitorsFilterSets,
                 stringMessages, new DialogCallback<CompetitorsFilterSets>() {
