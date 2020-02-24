@@ -81,6 +81,9 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
         protected final MultiWordSuggestOracle inputOracle;
         protected final String placeholderTextForAddTextbox;
         protected final Integer inputBoxSize;
+        private Button addButton;
+        private SuggestBox suggestBox;
+        
         public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, Iterable<String> suggestValues) {
             this(stringMessages, removeImage, suggestValues, /* placeholderTextForAddTextbox */ null);
         }
@@ -94,6 +97,12 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
             this(stringMessages, removeImage, suggestValues, placeholderTextForAddTextbox, /* inputBoxSize */ null);
             
         }
+        
+        public void setEnabled(boolean enabled) {
+            this.addButton.setEnabled(enabled);
+            this.suggestBox.setEnabled(enabled);
+        }
+        
         /**
          * @param inputBoxSize The size of the input box in EM Unit.
          */
@@ -124,11 +133,11 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
         }
 
         protected SuggestBox createSuggestBox() {
-            final SuggestBox result = new SuggestBox(inputOracle);
+            suggestBox = new SuggestBox(inputOracle);
             if (placeholderTextForAddTextbox != null) {
-                result.getElement().setAttribute("placeholder", placeholderTextForAddTextbox);
+                suggestBox.getElement().setAttribute("placeholder", placeholderTextForAddTextbox);
             }
-            return result;
+            return suggestBox;
         }
 
         @Override
@@ -138,7 +147,7 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
             if (inputBoxSize != null) {
                 inputBox.setWidth(Integer.toString(inputBoxSize) + Unit.EM);
             }
-            final Button addButton = new Button(getStringMessages().add());
+            addButton = new Button(getStringMessages().add());
             addButton.ensureDebugId("AddButton");
             addButton.setEnabled(false);
             addButton.addClickHandler(new ClickHandler() {
