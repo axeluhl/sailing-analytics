@@ -43,6 +43,12 @@ public class CompetitorResultImpl implements CompetitorResult {
                 item.getComment(), item.getMergeState());
     }
 
+    public CompetitorResultImpl(CompetitorResult item, int oneBasedRank, MaxPointsReason maxPointsReason, Double score, TimePoint finishingTime, MergeState mergeState) {
+        this(item.getCompetitorId(), item.getName(), item.getShortName(), item.getBoatName(), item.getBoatSailId(),
+                oneBasedRank, maxPointsReason, score, finishingTime,
+                item.getComment(), mergeState);
+    }
+
     public CompetitorResultImpl(CompetitorResult item, int oneBasedRank) {
         this(item.getCompetitorId(), item.getName(), item.getShortName(), item.getBoatName(), item.getBoatSailId(),
                 oneBasedRank, item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(),
