@@ -213,11 +213,13 @@ public class Activator implements BundleActivator {
         registrations.add(context.registerService(SecurityInitializationCustomizer.class,
                 (SecurityInitializationCustomizer) securityService -> {
                     final RoleDefinition sailingViewerRoleDefinition = securityService.getOrCreateRoleDefinitionFromPrototype(SailingViewerRole.getInstance());
-                    if (securityService.isInitialOrMigration()) {
+                    if (securityService.isNewServer()) {
                         // The server is initially set to be public by adding sailing_viewer role to the server group
                         // with forAll=true
                         securityService.putRoleDefinitionToUserGroup(securityService.getServerGroup(),
                                 sailingViewerRoleDefinition, true);
+                    }
+                    if (securityService.isInitialOrMigration()) {
                         // sailing_viewer role is publicly readable
                         securityService.addToAccessControlList(sailingViewerRoleDefinition.getIdentifier(), null, DefaultActions.READ.name());
                     }
