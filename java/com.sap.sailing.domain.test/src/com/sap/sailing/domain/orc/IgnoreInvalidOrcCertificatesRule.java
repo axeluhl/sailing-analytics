@@ -1,9 +1,7 @@
 package com.sap.sailing.domain.orc;
 
-import java.util.Calendar;
-import java.util.Iterator;
-
-import org.junit.Assume;
+import java.time.LocalDate;
+import org.junit.Assert;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -55,19 +53,15 @@ public class IgnoreInvalidOrcCertificatesRule implements TestRule {
             boolean certificateExists = true;
             IgnoreInvalidOrcCertificates annotation = description.getAnnotation(IgnoreInvalidOrcCertificates.class);
             if (annotation != null) {
-                Iterator<CountryCode> iterator = CountryCodeFactory.INSTANCE.getAll().iterator();
-                int year = Calendar.getInstance().get(Calendar.YEAR);
+                int year = LocalDate.now().getYear();
                 certificateExists = false;
-                while (iterator.hasNext()) {
-                    CountryCode cc = iterator.next();
+                for (CountryCode cc : CountryCodeFactory.INSTANCE.getAll()) {
                     try {
                         Iterable<CertificateHandle> certificateHandles = db.search(cc, year, null, null, null, null);
-                        if (certificateHandles.iterator().hasNext()) {
-                            Iterable<ORCCertificate> orcCertificates = db.getCertificates(certificateHandles);
-                            if (orcCertificates.iterator().hasNext()) {
-                                certificateExists = true;
-                                break;
-                            }
+                        Iterable<ORCCertificate> orcCertificates = db.getCertificates(certificateHandles);
+                        if (orcCertificates.iterator().hasNext()) {
+                            certificateExists = true;
+                            break;
                         }
                     } catch (Exception ex) {
                         // Exceptions are ignored because we are searching for any countries orc certificate's
@@ -75,7 +69,7 @@ public class IgnoreInvalidOrcCertificatesRule implements TestRule {
                     }
                 }
             }
-            Assume.assumeTrue("Test is ignored!", certificateExists);
+            Assert.assertTrue(certificateExists);
             base.evaluate();
         }
     }
