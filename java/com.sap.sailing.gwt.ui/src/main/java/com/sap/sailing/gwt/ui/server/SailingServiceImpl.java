@@ -339,18 +339,16 @@ import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.FixedPositioning;
-import com.sap.sailing.domain.coursetemplate.MarkRolePair.MarkRolePairFactory;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
+import com.sap.sailing.domain.coursetemplate.MarkRolePair.MarkRolePairFactory;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.PositioningVisitor;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.TrackingDeviceBasedPositioning;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.impl.CommonMarkPropertiesImpl;
-import com.sap.sailing.domain.coursetemplate.impl.FixedPositioningImpl;
 import com.sap.sailing.domain.coursetemplate.impl.RepeatablePartImpl;
-import com.sap.sailing.domain.coursetemplate.impl.TrackingDeviceBasedPositioningImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
@@ -9969,9 +9967,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             Position fixedPosition) {
         MarkProperties markProperties = getSharedSailingData().getMarkPropertiesById(markPropertiesId);
         if (deviceIdentifier != null) {
-            markProperties.setPositioningInformation(new TrackingDeviceBasedPositioningImpl(convertDtoToDeviceIdentifier(deviceIdentifier)));
+            getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(markProperties, convertDtoToDeviceIdentifier(deviceIdentifier));
         } else if (fixedPosition != null) {
-            markProperties.setPositioningInformation(new FixedPositioningImpl(fixedPosition));
+            getSharedSailingData().setFixedPositionForMarkProperties(markProperties, fixedPosition);
         }
         return convertToMarkPropertiesDTO(getSharedSailingData().updateMarkProperties(markProperties.getId(),
                 markProperties, markProperties.getTags()));
@@ -10137,14 +10135,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public MarkRoleDTO addOrUpdateMarkRole(MarkRoleDTO markRole) {
+    public MarkRoleDTO createMarkRole(MarkRoleDTO markRole) {
         MarkRole existingMarkRole = getSharedSailingData().getMarkRoleById(markRole.getUuid());
         final MarkRoleDTO result;
         if (existingMarkRole != null) {
-            getSecurityService().checkCurrentUserUpdatePermission(existingMarkRole);
-            // result = convertToMarkRoleDTO(getSharedSailingData().updateMarkRole(markRole.getUuid(),
-            // markRole.getName()));
-            throw new UnsupportedOperationException("Updating a mark role is not yet implemented!");
+            throw new IllegalArgumentException("Mark role with ID "+markRole.getUuid()+" already exists");
         } else {
             result = convertToMarkRoleDTO(getSharedSailingData().createMarkRole(markRole.getName(), markRole.getShortName()));
         }

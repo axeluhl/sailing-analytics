@@ -38,6 +38,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
@@ -144,14 +145,14 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                         LayoutData layout = (LayoutData) associatedSplitter.target.getLayoutData();
                         if (layout.size == 0) {
                             // Restore the old size.
-                            associatedSplitter.setAssociatedWidgetSize(layout.oldSize, /* defer */true);
+                            associatedSplitter.setAssociatedWidgetSize(layout.oldSize, /* forceLayout */true);
                         } else {
                             /*
                              * Collapse to size 0. We change the size instead of hiding the widget because hiding the
                              * widget can cause issues if the widget contains a flash component.
                              */
                             layout.oldSize = layout.size;
-                            associatedSplitter.setAssociatedWidgetSize(0, /* defer */true);
+                            associatedSplitter.setAssociatedWidgetSize(0, /* forceLayout */true);
                         }
                     }
                     associatedSplitter.lastClick = now;
@@ -174,7 +175,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                                 - associatedSplitter.offset;
                     }
                     ((LayoutData) associatedSplitter.target.getLayoutData()).hidden = false;
-                    associatedSplitter.setAssociatedWidgetSize(size, /* defer */true);
+                    associatedSplitter.setAssociatedWidgetSize(size, /* forceLayout */true);
                     event.preventDefault();
                 }
                 break;
@@ -201,7 +202,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
      * 
      * @author Simon Marcel Pamies, Axel Uhl
      */
-    abstract class Splitter extends AbsolutePanel {
+    abstract class Splitter extends AbsolutePanel implements RequiresResize, ProvidesResize {
         protected final Widget target;
 
         private int offset;
@@ -293,7 +294,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
 
             // Try resetting the associated widget's size, which will enforce the new
             // minSize value.
-            setAssociatedWidgetSize((int) layout.size, /* defer */true);
+            setAssociatedWidgetSize((int) layout.size, /* forceLayout */true);
         }
 
         public void setSnapClosedSize(int snapClosedSize) {
@@ -318,6 +319,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                 syncedCenterSize = newCenterSize;
                 centerSize = newCenterSize;
             }
+
             return Math.max(((LayoutData) target.getLayoutData()).size + centerSize, 0);
         }
 
@@ -325,10 +327,10 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
          * Sets the size of the associated {@link Widget} thus moving it down, up, left or right
          * depending of the position. Informs the {@link DockLayoutPanel} about the change.
          * 
-         * @param defer if set to true then the layout change will be deferred until the browser
+         * @param forceLayout if set to true then the layout change will be deferred until the browser
          *                      event loop returns.
          */
-        private void setAssociatedWidgetSize(double size, boolean defer) {
+        private void setAssociatedWidgetSize(double size, boolean forceLayout) {
             double maxSize = getMaxSize();
             if (size > maxSize) {
                 size = maxSize;
@@ -351,7 +353,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
 
             // Defer actually updating the layout, so that if we receive many
             // mouse events before layout/paint occurs, we'll only update once.
-            if (layoutCommand == null && defer) {
+            if (layoutCommand == null && forceLayout) {
                 layoutCommand = new ScheduledCommand() {
                     @Override
                     public void execute() {
@@ -360,9 +362,6 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                     }
                 };
                 Scheduler.get().scheduleDeferred(layoutCommand);
-            } else {
-                // force layout on DockPanel
-                forceLayout();
             }
             if (getAssociatedComponent() instanceof RequiresResize) {
                 Scheduler.get().scheduleFinally(new ScheduledCommand() {
@@ -372,6 +371,11 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                     }
                 });
             }
+        }
+
+        @Override
+        public void onResize() {
+            setAssociatedWidgetSize(getTargetSize(), /* forceLayout */ false);
         }
 
         protected abstract int getAbsolutePosition();
@@ -844,7 +848,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
         if (splitter != null) {
             LayoutData layoutData = (LayoutData) widget.getLayoutData();
             if (hidden) {
-                if (layoutData.size > 0) {
+                if(layoutData.size > 0) {
                     layoutData.oldSize = layoutData.size;
                 }
                 widget.setVisible(false);
@@ -853,7 +857,8 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                         associatedComponentToWidget.setVisible(false);
                     }
                 }
-                splitter.setAssociatedWidgetSize(0, /* defer */false);
+                splitter.setAssociatedWidgetSize(0, /* forceLayout */false);
+
                 // need to ensure visibility of dragger, do NOT use setVisible() as south/north splitter should be shown always
                 splitter.setDraggerVisible(!hidden);
             } else {
@@ -867,10 +872,10 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                     //it is not yet sized
                     if(layoutData.oldSize > 0) {
                         //and we have a stored old size it had before minimizing it
-                        splitter.setAssociatedWidgetSize(layoutData.oldSize, /* defer */false);
+                        splitter.setAssociatedWidgetSize(layoutData.oldSize, /* forceLayout */false);
                     } else {
                         //and we do not have any size yet, so use the default size
-                        splitter.setAssociatedWidgetSize(initialSize, /* defer */false);
+                        splitter.setAssociatedWidgetSize(initialSize, /* forceLayout */false);
                     }
                 }
                 splitter.setDraggerVisible(!hidden);
@@ -894,7 +899,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
         final Splitter splitter = getAssociatedSplitter(widget);
         if (splitter != null) {
             if (widget.isVisible()) {
-                splitter.setAssociatedWidgetSize(size, /* defer */false);
+                splitter.setAssociatedWidgetSize(size, /* forceLayout */false);
             } else {
                 ((LayoutData) widget.getLayoutData()).oldSize = size;
             }

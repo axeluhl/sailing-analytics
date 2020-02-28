@@ -15,6 +15,10 @@ public interface RegattaScoreCorrections {
     public interface ScoreCorrectionsForRace {
         String getRaceNameOrNumber();
         
+        /**
+         * Matched against the sail ID/number if the competitor is assigned a boat throughout the leaderboard,
+         * or against the competitor's short name otherwise.
+         */
         Set<String> getSailIDs();
         
         ScoreCorrectionForCompetitorInRace getScoreCorrectionForCompetitor(String sailID);

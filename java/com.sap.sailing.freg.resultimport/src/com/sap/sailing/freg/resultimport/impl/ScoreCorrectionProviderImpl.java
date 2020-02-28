@@ -81,16 +81,21 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
     @Override
     public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
             TimePoint timePoint) throws Exception {
-        FregHtmlParser parser = new FregHtmlParser();
+        final FregHtmlParser parser = new FregHtmlParser();
         for (URL url : getUrls()) {
             final URLConnection conn = url.openConnection();
-            RegattaResults regattaResult = parser.getRegattaResults((InputStream) conn.getContent());
+            final RegattaResults regattaResult = parser.getRegattaResults((InputStream) conn.getContent());
             if ((boatClassName == null && getBoatClassName(regattaResult) == null) ||
                     boatClassName.equals(getBoatClassName(regattaResult))) {
                 return new RegattaScoreCorrectionsImpl(this, regattaResult);
             }
         }
         return null;
+    }
+
+    @Override
+    public RegattaScoreCorrections getScoreCorrections(InputStream inputStream) throws Exception {
+        return new RegattaScoreCorrectionsImpl(this, new FregHtmlParser().getRegattaResults(inputStream));
     }
 
     @Override

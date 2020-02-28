@@ -1,11 +1,13 @@
 package com.sap.sailing.xrr.resultimport.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -82,26 +84,12 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
             TimePoint timePointPublished) throws IOException, SAXException, ParserConfigurationException {
         for (Parser parser : getAllRegattaResults()) {
             try {
-                RegattaResults regattaResults = parser.parse();
-                TimePoint timePoint = XRRParserUtil.calculateTimePointForRegattaResults(regattaResults);
+                final RegattaResults regattaResults = parser.parse();
+                final TimePoint timePoint = XRRParserUtil.calculateTimePointForRegattaResults(regattaResults);
                 if ((timePoint == null && timePointPublished == null)
                         || (timePoint != null && timePoint.equals(timePointPublished))) {
-                    for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
-                        if (o instanceof Event) {
-                            Event event = (Event) o;
-                            if (event.getTitle().equals(eventName)) {
-                                for (Object eventO : event.getRaceOrDivisionOrRegattaSeriesResult()) {
-                                    if (eventO instanceof Division) {
-                                        Division division = (Division) eventO;
-                                        if (boatClassName.equals(parser.getBoatClassName(division))) {
-                                            return new XRRRegattaResultsAsScoreCorrections(event, division, this,
-                                                    parser);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    return parser.getRegattaScoreCorrections(regattaResults, /* scoreCorrectionProvider */ this,
+                            /* eventNameFilter */ Optional.of(eventName), /* boatClassNameFilter */ Optional.of(boatClassName));
                 }
             } catch (JAXBException e) {
                 logger.info("Parse error during XRR import. Ignoring document " + parser.toString());
@@ -111,11 +99,19 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
         return null;
     }
 
+    @Override
+    public RegattaScoreCorrections getScoreCorrections(InputStream inputStream) throws Exception {
+        final Parser parser = parserFactory.createParser(inputStream, inputStream.toString());
+        final RegattaResults regattaResults = parser.parse();
+        return parser.getRegattaScoreCorrections(regattaResults, /* scoreCorrectionProvider */ this,
+                /* eventNameFilter */ Optional.empty(), /* boatClassNameFilter */ Optional.empty());
+    }
+
     private Iterable<Parser> getAllRegattaResults() throws SAXException, IOException,
             ParserConfigurationException {
-        List<Parser> result = new ArrayList<>();
+        final List<Parser> result = new ArrayList<>();
         for (ResultDocumentDescriptor resultDocDescr : getResultDocumentProvider().getResultDocumentDescriptors()) {
-            Parser parser = parserFactory.createParser(resultDocDescr.getInputStream(), resultDocDescr.getDocumentName());
+            final Parser parser = parserFactory.createParser(resultDocDescr.getInputStream(), resultDocDescr.getDocumentName());
             result.add(parser);
         }
         return result;

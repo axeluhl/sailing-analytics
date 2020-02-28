@@ -17,12 +17,12 @@ import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.Pattern;
 import com.sap.sailing.gwt.ui.shared.racemap.Shape;
 import com.sap.sse.common.Color;
-import com.sap.sse.common.impl.AbstractColor;
+import com.sap.sse.gwt.client.ColorTextBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
     private final TextBox nameTextBox;
-    private final TextBox displayColorTextBox;
+    private final ColorTextBox displayColorTextBox;
     private final TextBox shortNameTextBox;
     private final ValueListBox<MarkType> markTypeValueListBox;
     private final ValueListBox<Pattern> patternValueListBox;
@@ -44,6 +44,8 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
                             result = stringMessages.pleaseEnterAName();
                         } else if (invalidMarkType) {
                             result = stringMessages.pleaseEnterAValidValueFor(stringMessages.type(), "");
+                        } else if (valueToValidate.getCommonMarkProperties().getColor() instanceof InvalidColor) {
+                            result = valueToValidate.getCommonMarkProperties().getColor().getAsHtml();
                         }
                         return result;
                     }
@@ -93,13 +95,7 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
                 : MarkType.values()[0]);
         markTypeValueListBox.setAcceptableValues(Arrays.asList(MarkType.values()));
         markTypeValueListBox.addValueChangeHandler(v -> handleMarkTypeChange());
-        if (markTemplateToEdit.getCommonMarkProperties().getColor() != null) {
-            this.displayColorTextBox = createTextBox(
-                    markTemplateToEdit.getCommonMarkProperties().getColor() == null ? ""
-                            : markTemplateToEdit.getCommonMarkProperties().getColor().getAsHtml());
-        } else {
-            this.displayColorTextBox = createTextBox("");
-        }
+        this.displayColorTextBox = createColorTextBox(markTemplateToEdit.getCommonMarkProperties().getColor());
         shapeValueListBox.setValue(null);
         shapeValueListBox.setAcceptableValues(Arrays.asList(Shape.values()));
         patternValueListBox.setValue(null);
@@ -127,53 +123,13 @@ public class MarkTemplateEditDialog extends DataEntryDialog<MarkTemplateDTO> {
         return nameTextBox;
     }
 
-    /**
-     * Encodes an invalid color; can be used
-     * 
-     * @author Axel Uhl (D043530)
-     *
-     */
-    private class InvalidColor implements Color {
-        private static final long serialVersionUID = 4012986110898149543L;
-        private final Exception exception;
-
-        protected InvalidColor(Exception exception) {
-            this.exception = exception;
-        }
-
-        @Override
-        public com.sap.sse.common.Util.Triple<Integer, Integer, Integer> getAsRGB() {
-            return null;
-        }
-
-        @Override
-        public com.sap.sse.common.Util.Triple<Float, Float, Float> getAsHSV() {
-            return null;
-        }
-
-        @Override
-        public String getAsHtml() {
-            return stringMessages.invalidColor(exception.getMessage());
-        }
-
-        @Override
-        public Color invert() {
-            return null;
-        }
-
-    }
-
     @Override
     protected MarkTemplateDTO getResult() {
-        Color color;
-        if (displayColorTextBox.getValue() == null || displayColorTextBox.getValue().isEmpty()) {
-            color = null;
+        final Color color;
+        if (!displayColorTextBox.isValid()) {
+            color = new InvalidColor(stringMessages, displayColorTextBox.getValue());
         } else {
-            try {
-                color = AbstractColor.getCssColor(displayColorTextBox.getText());
-            } catch (IllegalArgumentException iae) {
-                color = new InvalidColor(iae);
-            }
+            color = displayColorTextBox.getColor();
         }
         final MarkTemplateDTO markTemplate = new MarkTemplateDTO(UUID.randomUUID(), nameTextBox.getValue(),
                 shortNameTextBox.getValue(), color,

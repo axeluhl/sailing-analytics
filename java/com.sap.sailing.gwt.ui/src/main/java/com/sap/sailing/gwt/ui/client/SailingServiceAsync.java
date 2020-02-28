@@ -1241,5 +1241,5 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void getMarkRoles(AsyncCallback<List<MarkRoleDTO>> callback);
 
-    void addOrUpdateMarkRole(MarkRoleDTO markRole, AsyncCallback<MarkRoleDTO> asyncCallback);
+    void createMarkRole(MarkRoleDTO markRole, AsyncCallback<MarkRoleDTO> asyncCallback);
 }
