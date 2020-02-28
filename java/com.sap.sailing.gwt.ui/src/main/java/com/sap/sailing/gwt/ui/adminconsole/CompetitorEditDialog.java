@@ -28,6 +28,8 @@ import com.sap.sse.gwt.client.dialog.DoubleBox;
  * 
  */
 public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO> extends DataEntryDialog<CompetitorType> {
+    private static final double YARDSTICK_SCALE = 100;
+
     private final CompetitorType competitorToEdit;
     private final TextBox name;
     private final TextBox shortName;
@@ -39,7 +41,10 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
 
     private final URLFieldWithFileUpload flagImageURL;
     private final URLFieldWithFileUpload imageUrlAndUploadComposite;
+    private final DoubleBox yardstickNumber;
+    private double previousYardstickNumber;
     private final DoubleBox timeOnTimeFactor;
+    private double previousTimeOnTimeFactor;
     private final DoubleBox timeOnDistanceAllowanceInSecondsPerNauticalMile;
     
     protected static class CompetitorWithoutBoatValidator<CompetitorType extends CompetitorDTO> implements Validator<CompetitorType> {
@@ -106,7 +111,10 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
         this.flagImageURL.setURL(competitorToEdit.getFlagImageURL());
         this.imageUrlAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
         this.imageUrlAndUploadComposite.setURL(competitorToEdit.getImageURL());
-        this.timeOnTimeFactor = createDoubleBox(competitorToEdit.getTimeOnTimeFactor(), 10);
+        this.previousYardstickNumber = convertYardstickTimeOnTime(competitorToEdit.getTimeOnTimeFactor());
+        this.yardstickNumber = createDoubleBox(previousYardstickNumber, 10);
+        this.previousTimeOnTimeFactor = competitorToEdit.getTimeOnTimeFactor();
+        this.timeOnTimeFactor = createDoubleBox(previousTimeOnTimeFactor, 10);
         this.timeOnDistanceAllowanceInSecondsPerNauticalMile = createDoubleBox(
                 competitorToEdit.getTimeOnDistanceAllowancePerNauticalMile() == null ? null : competitorToEdit
                         .getTimeOnDistanceAllowancePerNauticalMile().asSeconds(), 10);
@@ -157,7 +165,7 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
      */
     protected abstract CompetitorType getResult();
     
-    protected CompetitorDTO getBaseResult() { 
+    protected CompetitorDTO getBaseResult() {
         Color color;
         if (displayColorTextBox.getText() == null || displayColorTextBox.getText().isEmpty()) {
             color = null;
@@ -167,6 +175,18 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
             } catch (IllegalArgumentException iae) {
                 color = new InvalidColor(iae, stringMessages);
             }
+        }
+        // Check if Yardstick or ToT fields have changed and convert accordingly
+        final Double currentYardstickNumber = yardstickNumber.getValue();
+        final Double currentTimeOnTimeFactor = timeOnTimeFactor.getValue();
+        if (currentYardstickNumber != null && previousYardstickNumber != currentYardstickNumber) {
+            previousYardstickNumber = currentYardstickNumber;
+            previousTimeOnTimeFactor = convertYardstickTimeOnTime(currentYardstickNumber);
+            timeOnTimeFactor.setValue(previousTimeOnTimeFactor);
+        } else if (currentTimeOnTimeFactor != null && previousTimeOnTimeFactor != currentTimeOnTimeFactor) {
+            previousTimeOnTimeFactor = currentTimeOnTimeFactor;
+            previousYardstickNumber = convertYardstickTimeOnTime(currentTimeOnTimeFactor);
+            yardstickNumber.setValue(previousYardstickNumber);
         }
         CompetitorWithBoatDTO result = new CompetitorWithBoatDTOImpl(name.getText(),
                 shortName.getText().trim().isEmpty() ? null : shortName.getText(), color,
@@ -181,9 +201,16 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
         return result;
     }
 
+    /**
+     * Converts between yardstick number and time-on-time factor and vice-versa.
+     */
+    private static double convertYardstickTimeOnTime(double yardstickOrTimeOnTime) {
+        return YARDSTICK_SCALE / yardstickOrTimeOnTime;
+    }
+
     @Override
     protected Widget getAdditionalWidget() {
-        Grid result = new Grid(10, 2);
+        Grid result = new Grid(11, 2);
         result.setWidget(0, 0, new Label(stringMessages.name()));
         result.setWidget(0, 1, name);
         result.setWidget(1, 0, new Label(stringMessages.shortName()));
@@ -200,10 +227,12 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
         result.setWidget(6, 1, flagImageURL);
         result.setWidget(7, 0, new Label(stringMessages.imageURL()));
         result.setWidget(7, 1, imageUrlAndUploadComposite);
-        result.setWidget(8, 0, new Label(stringMessages.timeOnTimeFactor()));
-        result.setWidget(8, 1, timeOnTimeFactor);
-        result.setWidget(9, 0, new Label(stringMessages.timeOnDistanceAllowanceInSecondsPerNauticalMile()));
-        result.setWidget(9, 1, timeOnDistanceAllowanceInSecondsPerNauticalMile);
+        result.setWidget(8, 0, new Label(stringMessages.yardstickNumber(YARDSTICK_SCALE)));
+        result.setWidget(8, 1, yardstickNumber);
+        result.setWidget(9, 0, new Label(stringMessages.timeOnTimeFactor()));
+        result.setWidget(9, 1, timeOnTimeFactor);
+        result.setWidget(10, 0, new Label(stringMessages.timeOnDistanceAllowanceInSecondsPerNauticalMile()));
+        result.setWidget(10, 1, timeOnDistanceAllowanceInSecondsPerNauticalMile);
         return result;
     }
 
