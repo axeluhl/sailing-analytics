@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseWithGeometryJsonSerializer.CourseGeometry;
+import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util.Triple;
@@ -20,6 +21,10 @@ public class CourseBaseWithGeometryJsonSerializer implements JsonSerializer<Trip
     public static final String FIELD_LEG_DISTANCE_IN_METERS = "legDistanceInMeters";
     public static final String FIELD_LEG_BEARING_TRUE_DEGREES = "legBearingTrueDegrees";
     public static final String FIELD_START_LINE = "startLine";
+    public static final String FIELD_MARK_ID = "markId";
+    public static final String FIELD_MARK_POSITION = "position";
+    
+    private final static PositionJsonSerializer positionSerializer = new PositionJsonSerializer();
     
     public static class CourseGeometry {
         private final Distance totalDistance;
@@ -72,8 +77,15 @@ public class CourseBaseWithGeometryJsonSerializer implements JsonSerializer<Trip
                     final LineDetails startLineProperties = courseAndOptionalGeometry.getC();
                     if (waypointIndex == 0 && startLineProperties != null) {
                         final JSONObject startLine = new JSONObject();
-                        startLine.put(NauticalSide.PORT.name(), startLineProperties.getPortMarkWhileApproachingLine().getId().toString());
+                        final JSONObject portSide = new JSONObject();
+                        final JSONObject starboardSide = new JSONObject();
+                        portSide.put(FIELD_MARK_ID, startLineProperties.getPortMarkWhileApproachingLine().getId().toString());
+                        portSide.put(FIELD_MARK_POSITION, positionSerializer.serialize(startLineProperties.getPortMarkPosition()));
+                        starboardSide.put(FIELD_MARK_ID, startLineProperties.getStarboardMarkWhileApproachingLine().getId().toString());
+                        starboardSide.put(FIELD_MARK_POSITION, positionSerializer.serialize(startLineProperties.getStarboardMarkPosition()));
                         startLine.put(NauticalSide.STARBOARD.name(), startLineProperties.getStarboardMarkWhileApproachingLine().getId().toString());
+                        startLine.put(NauticalSide.PORT.name(), portSide);
+                        startLine.put(NauticalSide.STARBOARD.name(), starboardSide);
                         result.put(FIELD_START_LINE, startLine);
                     }
                 }
