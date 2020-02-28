@@ -7,17 +7,20 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseWithGeometryJsonSerializer.CourseGeometry;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 
-public class CourseBaseWithGeometryJsonSerializer implements JsonSerializer<Pair<CourseBase, CourseGeometry>> {
+public class CourseBaseWithGeometryJsonSerializer implements JsonSerializer<Triple<CourseBase, CourseGeometry, LineDetails>> {
     public static final String FIELD_TOTAL_DISTANCE_IN_METERS = "totalDistanceInMeters";
     public static final String FIELD_LEG_DISTANCE_IN_METERS = "legDistanceInMeters";
     public static final String FIELD_LEG_BEARING_TRUE_DEGREES = "legBearingTrueDegrees";
-
+    public static final String FIELD_START_LINE = "startLine";
+    
     public static class CourseGeometry {
         private final Distance totalDistance;
         private final Map<Leg, Distance> legDistances;
@@ -50,7 +53,7 @@ public class CourseBaseWithGeometryJsonSerializer implements JsonSerializer<Pair
     }
 
     @Override
-    public JSONObject serialize(final Pair<CourseBase, CourseGeometry> courseAndOptionalGeometry) {
+    public JSONObject serialize(final Triple<CourseBase, CourseGeometry, LineDetails> courseAndOptionalGeometry) {
         final CourseBase course = courseAndOptionalGeometry.getA();
         final CourseGeometry geometry = courseAndOptionalGeometry.getB();
         final JSONObject result = new CourseBaseJsonSerializer(waypointSerializer) {
@@ -65,6 +68,13 @@ public class CourseBaseWithGeometryJsonSerializer implements JsonSerializer<Pair
                         result.put(FIELD_LEG_DISTANCE_IN_METERS, distance==null?null:distance.getMeters());
                         final Bearing bearing = geometry.getLegBearings().get(leg);
                         result.put(FIELD_LEG_BEARING_TRUE_DEGREES, bearing==null?null:bearing.getDegrees());
+                    }
+                    final LineDetails startLineProperties = courseAndOptionalGeometry.getC();
+                    if (waypointIndex == 0 && startLineProperties != null) {
+                        final JSONObject startLine = new JSONObject();
+                        startLine.put(NauticalSide.PORT.name(), startLineProperties.getPortMarkWhileApproachingLine().getId().toString());
+                        startLine.put(NauticalSide.STARBOARD.name(), startLineProperties.getStarboardMarkWhileApproachingLine().getId().toString());
+                        result.put(FIELD_START_LINE, startLine);
                     }
                 }
                 return result;
