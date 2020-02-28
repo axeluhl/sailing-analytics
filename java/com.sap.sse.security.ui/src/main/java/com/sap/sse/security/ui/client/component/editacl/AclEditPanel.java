@@ -2,6 +2,7 @@ package com.sap.sse.security.ui.client.component.editacl;
 
 import static com.sap.sse.gwt.client.Notification.NotificationType.ERROR;
 import static com.sap.sse.gwt.client.Notification.NotificationType.SUCCESS;
+import static com.sap.sse.gwt.shared.DebugConstants.DEBUG_ID_ATTRIBUTE;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,6 +34,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -46,8 +48,8 @@ import com.sap.sse.common.Named;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
+import com.sap.sse.gwt.shared.DebugConstants;
 import com.sap.sse.security.shared.HasPermissions.Action;
-import com.sap.sse.security.shared.SecurityUserGroup;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
@@ -139,6 +141,9 @@ public class AclEditPanel extends Composite {
 
         lblId.setText(id);
         lblType.setText(typeIdentifier);
+        
+        addUserGroupButtonUi.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "AddUserGroupButton");
+        suggestUserGroupUi.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "SuggestUserGroupInput");
     }
 
     private CaptionPanel createActionsContainer(final SafeHtml caption, final Widget content, final String styleName) {
