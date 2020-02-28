@@ -22,6 +22,12 @@ public class CompetitorResultWithIdImpl extends CompetitorResultImpl {
                 result.getFinishingTime(), result.getComment(), result.getMergeState());
     }
 
+    public CompetitorResultWithIdImpl(long id, CompetitorResult result, MaxPointsReason maxPointsReason) {
+        this(id, result.getCompetitorId(), result.getName(), result.getShortName(), result.getBoatName(),
+                result.getBoatSailId(), result.getOneBasedRank(), maxPointsReason, result.getScore(),
+                result.getFinishingTime(), result.getComment(), result.getMergeState());
+    }
+
     public CompetitorResultWithIdImpl(long id, Serializable competitorId, String competitorName, String shortName,
                                       @Nullable Boat boat, int oneBasedRank, MaxPointsReason maxPointsReason,
                                       Double score, TimePoint finishingTime, String comment, MergeState mergeState) {

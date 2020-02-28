@@ -801,9 +801,8 @@ public class TrackingListFragment extends BaseFragment
     }
 
     protected void setMaxPointsReasonForItem(CompetitorResultWithIdImpl item, CharSequence maxPointsReasonName) {
-        //TODO
         MaxPointsReason maxPointsReason = MaxPointsReason.valueOf(maxPointsReasonName.toString());
-        CompetitorResultWithIdImpl newItem = new CompetitorResultWithIdImpl(item.getId(), item);
+        CompetitorResultWithIdImpl newItem = new CompetitorResultWithIdImpl(item.getId(), item, maxPointsReason);
         updateItem(item, newItem);
         getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResults());
     }
