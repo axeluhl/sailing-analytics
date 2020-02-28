@@ -18,6 +18,7 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -25,6 +26,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -64,7 +66,7 @@ public abstract class DataEntryDialog<T> {
     private Validator<T> validator;
     private final Button okButton;
     private final Button cancelButton;
-    private final Label statusLabel;
+    private final HTML statusLabel;
     private final FlowPanel panelForAdditionalWidget;
     private final DockPanel buttonPanel;
     private final FlowPanel rightButtonPanel;
@@ -126,7 +128,7 @@ public abstract class DataEntryDialog<T> {
         okButton.ensureDebugId("OkButton");
         FlowPanel dialogFPanel = new FlowPanel();
         dialogFPanel.setWidth("100%");
-        statusLabel = new Label();
+        statusLabel = new HTML(SafeHtmlUtils.fromSafeConstant("&nbsp;"));
         statusLabel.ensureDebugId("StatusLabel");
         dialogFPanel.add(statusLabel);
         if (message != null) {
@@ -212,10 +214,10 @@ public abstract class DataEntryDialog<T> {
                         onInvalidStateChanged(invalidState);
                     }
                     if (!invalidState) {
-                        getStatusLabel().setText("");
+                        getStatusLabel().setHTML(SafeHtmlUtils.fromSafeConstant("&nbsp;"));
                         onChange(result);
                     } else {
-                        getStatusLabel().setText(errorMessage);
+                        getStatusLabel().setHTML(SafeHtmlUtils.fromString(errorMessage));
                         getStatusLabel().setStyleName("errorLabel");
                     }
                 }
@@ -620,7 +622,7 @@ public abstract class DataEntryDialog<T> {
     /**
      * status label can be used to display status information within the dialog to the user
      */
-    protected Label getStatusLabel() {
+    protected HTML getStatusLabel() {
         return statusLabel;
     }
 
