@@ -492,7 +492,7 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
         return performanceCurveForPartialCourse;
     }
 
-    protected Speed getImpliedWind(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws FunctionEvaluationException, MaxIterationsExceededException {
+    public Speed getImpliedWind(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws FunctionEvaluationException, MaxIterationsExceededException {
         final Speed result;
         final ORCPerformanceCurve performanceCurveForPartialCourse = cache.getPerformanceCurveForPartialCourse(timePoint, getTrackedRace(), competitor, getPerformanceCurveSupplier(cache));
         if (performanceCurveForPartialCourse != null) {
@@ -565,7 +565,7 @@ public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRanki
             return result;
         };
     }
-
+    
     @Override
     public Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Duration result = null;

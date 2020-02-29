@@ -8572,8 +8572,24 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final Set<DetailType> allowed = new HashSet<>();
         allowed.addAll(DetailType.getAllNonRestrictedDetailTypes());
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        getSecurityService().checkCurrentUserReadPermission(leaderboard);
         if (leaderboard != null) {
+            getSecurityService().checkCurrentUserReadPermission(leaderboard);
+            if (leaderboard instanceof RegattaLeaderboard) {
+                final RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+                final Regatta regatta = regattaLeaderboard.getRegatta();
+                switch (regatta.getRankingMetricType()) {
+                case TIME_ON_TIME_AND_DISTANCE:
+                    allowed.addAll(DetailType.getAllToTToDHandicapDetailTypes());
+                    break;
+                case ORC_PERFORMANCE_CURVE:
+                case ORC_PERFORMANCE_CURVE_BY_IMPLIED_WIND:
+                case ORC_PERFORMANCE_CURVE_LEADER_FOR_BASELINE:
+                    allowed.addAll(DetailType.getAllOrcPerformanceCurveDetailTypes());
+                    break;
+                case ONE_DESIGN:
+                    break; // no additional columns for one-design
+                }
+            }
             boolean hasBravoTrack = false;
             boolean hasExtendedBravoFixes = false;
             abort: for (RaceColumn race : leaderboard.getRaceColumns()) {
@@ -8581,7 +8597,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     if (raceIdentifierOrNull != null && !raceIdentifierOrNull.equals(race.getRaceIdentifier(fleet))) {
                         continue;
                     }
-                    
                     final TrackedRace trace = race.getTrackedRace(fleet);
                     if (trace != null) {
                         final DynamicTrackedRace trackedRace = getService().getTrackedRace(trace.getRaceIdentifier());
