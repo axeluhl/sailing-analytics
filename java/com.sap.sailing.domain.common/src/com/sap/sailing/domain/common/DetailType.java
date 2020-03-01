@@ -263,6 +263,7 @@ public enum DetailType implements Serializable {
         availableDetailsTypes.add(DetailType.LEG_GAP_TO_LEADER_IN_SECONDS);
         availableDetailsTypes.add(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
         availableDetailsTypes.add(DetailType.RACE_RANK);
+        availableDetailsTypes.add(DetailType.RACE_IMPLIED_WIND);
         availableDetailsTypes.add(DetailType.REGATTA_RANK);
         availableDetailsTypes.add(DetailType.CHART_DISTANCE_TO_START_LINE);
         availableDetailsTypes.add(DetailType.CHART_BEAT_ANGLE);

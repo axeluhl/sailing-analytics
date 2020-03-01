@@ -305,6 +305,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.RACE_DISTANCE_TRAVELED,
                 DetailType.RACE_TIME_TRAVELED,
+                DetailType.RACE_IMPLIED_WIND,
                 DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.RACE_CURRENT_COURSE_OVER_GROUND_IN_TRUE_DEGREES,
                 DetailType.RACE_CURRENT_POSITION_LAT_DEG,
@@ -360,6 +361,12 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 Duration timeTraveled = entry.getTimeSailed();
                 if (timeTraveled != null) {
                     value = timeTraveled.asSeconds();
+                }
+                break;
+            case RACE_IMPLIED_WIND:
+                name = "impliedWind-kts";
+                if (entry.impliedWind != null) {
+                    value = entry.impliedWind.getKnots();
                 }
                 break;
             case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:

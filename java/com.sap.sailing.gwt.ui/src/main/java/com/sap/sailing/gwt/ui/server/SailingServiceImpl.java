@@ -65,6 +65,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.math.FunctionEvaluationException;
+import org.apache.commons.math.MaxIterationsExceededException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
@@ -364,6 +366,7 @@ import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuse
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.meta.MetaLeaderboardColumn;
+import com.sap.sailing.domain.orc.ORCPerformanceCurveRankingMetric;
 import com.sap.sailing.domain.orc.ORCPublicCertificateDatabase;
 import com.sap.sailing.domain.orc.ORCPublicCertificateDatabase.CertificateHandle;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
@@ -382,6 +385,7 @@ import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
+import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
@@ -3524,7 +3528,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private Double getCompetitorRaceDataEntry(DetailType dataType, TrackedRace trackedRace, Competitor competitor,
-            TimePoint timePoint, String leaderboardGroupName, String leaderboardName, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
+            TimePoint timePoint, String leaderboardGroupName, String leaderboardName,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
         Double result = null;
         Course course = trackedRace.getRace().getCourse();
         course.lockForRead(); // make sure the tracked leg survives this call even if a course update is pending
@@ -3594,6 +3599,20 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
                     Distance distanceToLeader = trackedLeg.getWindwardDistanceToCompetitorFarthestAhead(timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
                     result = (distanceToLeader == null) ? null : distanceToLeader.getMeters();
+                }
+                break;
+            case RACE_IMPLIED_WIND:
+                final RankingMetric rankingMetric = trackedRace.getRankingMetric();
+                if (rankingMetric instanceof ORCPerformanceCurveRankingMetric) {
+                    final ORCPerformanceCurveRankingMetric orcPcsRankingMetric = 
+                            (ORCPerformanceCurveRankingMetric) rankingMetric;
+                    try {
+                        final Speed impliedWind = orcPcsRankingMetric.getImpliedWind(competitor, timePoint, cache);
+                        result = impliedWind.getKnots();
+                    } catch (MaxIterationsExceededException | FunctionEvaluationException e) {
+                        logger.log(Level.WARNING, "Problem computing implied wind", e);
+                        result = null;
+                    }
                 }
                 break;
             case RACE_RANK:
@@ -8328,6 +8347,17 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             if (hasExtendedBravoFixes) {
                 availableDetailsTypes.addAll(DetailType.getRaceExtendedBravoDetailTypes());
                 availableDetailsTypes.addAll(DetailType.getRaceExpeditionDetailTypes());
+            }
+            final RankingMetrics rankingMetricType = trackedRace.getRankingMetric().getType();
+            switch (rankingMetricType) {
+            case ONE_DESIGN:
+            case TIME_ON_TIME_AND_DISTANCE:
+                break;
+            case ORC_PERFORMANCE_CURVE:
+            case ORC_PERFORMANCE_CURVE_BY_IMPLIED_WIND:
+            case ORC_PERFORMANCE_CURVE_LEADER_FOR_BASELINE:
+                availableDetailsTypes.addAll(DetailType.getAllOrcPerformanceCurveDetailTypes());
+                break;
             }
         }
         if (leaderboardGroupName != null) {
