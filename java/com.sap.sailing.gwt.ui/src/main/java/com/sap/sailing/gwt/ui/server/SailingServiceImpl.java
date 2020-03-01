@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -3608,7 +3609,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                             (ORCPerformanceCurveRankingMetric) rankingMetric;
                     try {
                         final Speed impliedWind = orcPcsRankingMetric.getImpliedWind(competitor, timePoint, cache);
-                        result = impliedWind.getKnots();
+                        result = impliedWind == null ? null : impliedWind.getKnots();
                     } catch (MaxIterationsExceededException | FunctionEvaluationException e) {
                         logger.log(Level.WARNING, "Problem computing implied wind", e);
                         result = null;
@@ -8327,7 +8328,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public Iterable<DetailType> determineDetailTypesForCompetitorChart(String leaderboardGroupName, RegattaAndRaceIdentifier identifier) {
-        final List<DetailType> availableDetailsTypes = new ArrayList<>();
+        final LinkedHashSet<DetailType> availableDetailsTypes = new LinkedHashSet<>();
         availableDetailsTypes.addAll(DetailType.getAutoplayDetailTypesForChart());
         availableDetailsTypes.removeAll(DetailType.getRaceBravoDetailTypes());
         final DynamicTrackedRace trackedRace = getService().getTrackedRace(identifier);

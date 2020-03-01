@@ -440,7 +440,7 @@ public enum DetailType implements Serializable {
         final Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD);
         allowed.add(RACE_CALCULATED_TIME_TRAVELED);
-        allowed.add(DetailType.RACE_IMPLIED_WIND);
+        allowed.add(RACE_IMPLIED_WIND);
         return allowed;
     }
 
