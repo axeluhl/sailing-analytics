@@ -83,11 +83,11 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
         protected final Integer inputBoxSize;
         private Button addButton;
         private SuggestBox suggestBox;
-        
+
         public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, Iterable<String> suggestValues) {
             this(stringMessages, removeImage, suggestValues, /* placeholderTextForAddTextbox */ null);
         }
-        
+
         /**
          * @param suggestValues must not be null but may be empty
          * @param placeholderTextForAddTextbox may be null
@@ -97,12 +97,15 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
             this(stringMessages, removeImage, suggestValues, placeholderTextForAddTextbox, /* inputBoxSize */ null);
             
         }
-        
+
         public void setEnabled(boolean enabled) {
-            this.addButton.setEnabled(enabled);
+            // #5059 only disabled mode, enabling of button will be handled by internal logic of this component
+            if (!enabled) { 
+                this.addButton.setEnabled(false);
+            }
             this.suggestBox.setEnabled(enabled);
         }
-        
+
         /**
          * @param inputBoxSize The size of the input box in EM Unit.
          */
