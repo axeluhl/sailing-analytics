@@ -65,7 +65,6 @@ public class StringListEditorComposite extends GenericStringListEditorComposite<
     }
 
     public void setEnabled(final boolean enabled) {
-        // is always of type CollapsedUi (see constructor)
         if (activeUi instanceof CollapsedUi)
             ((CollapsedUi) activeUi).setEnabled(enabled);
         if (activeUi instanceof ExpandedUi)
