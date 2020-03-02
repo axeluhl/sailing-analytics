@@ -21,6 +21,7 @@ public class ClientConfigurationServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
+        
         final String servletPath = req.getServletPath();
         byte[] value = null;
         if ((value = cache.get(servletPath)) != null) {
@@ -29,7 +30,10 @@ public class ClientConfigurationServlet extends HttpServlet {
         }
 
         boolean deBrandingActive = Boolean.valueOf(System.getProperty("com.sap.sailing.debranding", "false"));
-
+        if (req.getParameterMap().containsKey("whitelabel")) { // override with url parameter for testing usage only
+            deBrandingActive = true;
+        }        
+        
         String title = "";
         String faviconPath = "images/whitelabel.ico";
         String appiconPath = "images/sailing-app-icon.png";

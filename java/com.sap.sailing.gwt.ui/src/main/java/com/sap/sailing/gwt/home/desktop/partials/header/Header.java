@@ -36,6 +36,7 @@ import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
 import com.sap.sse.gwt.shared.Branding;
+import com.sap.sse.gwt.shared.DebugConstants;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
 
@@ -109,6 +110,10 @@ public class Header extends Composite {
             solutionsPageLink.getElement().getStyle().setDisplay(Display.NONE);
             logoAnchor.setHref("");
         }
+        
+        logoImage.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "logoImage");
+        solutionsPageLink.getElement().setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "solutionsPageLink");
+        logoAnchor.setAttribute(DEBUG_ID_PREFIX, "logoAnchor");
     }
 
     @UiHandler("startPageLink")
