@@ -62,6 +62,7 @@ Require-Bundle: com.sap.sailing.domain,
  org.mongodb.mongo-java-driver;bundle-version="3.6.4",
  com.sap.sailing.server.gateway.serialization.shared.android,
  com.sap.sailing.shared.server,
+ org.apache.commons.math;bundle-version="2.1.0",
  org.apache.commons.io
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
