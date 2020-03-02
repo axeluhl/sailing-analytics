@@ -43,7 +43,7 @@ public abstract class HostPage extends PageObject {
     
     private static final void goToPage(WebDriver driver, URI uri) throws URISyntaxException {
         String scheme = uri.getScheme(), userInfo = uri.getUserInfo(), host = uri.getHost(); 
-        String path = uri.getPath(), query = getGWTCodeServerAndLocale(), fragment = uri.getFragment();
+        String path = uri.getPath(), query = getGWTCodeServerAndLocale() + "&" + uri.getQuery(), fragment = uri.getFragment();
         driver.get(new URI(scheme, userInfo, host, uri.getPort(), path, query, fragment).toString());
     }
     
