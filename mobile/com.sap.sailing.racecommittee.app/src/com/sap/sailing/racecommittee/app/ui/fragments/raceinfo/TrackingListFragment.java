@@ -187,7 +187,15 @@ public class TrackingListFragment extends BaseFragment
                 @Override
                 public void onClick(View v) {
                     sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                    //Check if finished or not
+                    boolean finished = getRaceState().getFinishedTime() != null;
+                    if (finished) {
+                        sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                    } else {
+                        Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_FORCED, true);
+                        sendIntent(intent);
+                    }
                 }
             });
         }
@@ -307,7 +315,15 @@ public class TrackingListFragment extends BaseFragment
                     initLocalData();
                     Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
                     sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                    //Check if finished or not
+                    boolean finished = getRaceState().getFinishedTime() != null;
+                    if (finished) {
+                        sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                    } else {
+                        Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_FORCED, true);
+                        sendIntent(intent);
+                    }
                 }
             });
         }
