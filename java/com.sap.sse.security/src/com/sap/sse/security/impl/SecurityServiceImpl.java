@@ -93,6 +93,7 @@ import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.GithubApi;
 import com.sap.sse.security.InstagramApi;
 import com.sap.sse.security.OAuthRealm;
+import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionCacheManager;
 import com.sap.sse.security.SessionUtils;
@@ -156,6 +157,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private AccessControlStore accessControlStore;
     
     private boolean isInitialOrMigration;
+    private boolean isNewServer;
     
     private final ServiceTracker<MailService, MailService> mailServiceTracker;
     private final ConcurrentMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
@@ -189,6 +191,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private String sharedAcrossSubdomainsOf;
     
     private String baseUrlForCrossDomainStorage;
+    
+    private final transient Set<SecurityInitializationCustomizer> customizers = ConcurrentHashMap.newKeySet();
     
     static {
         shiroConfiguration = new Ini();
@@ -335,6 +339,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             }
             if (store.getUserByName(SecurityService.ALL_USERNAME) == null) {
                 isInitialOrMigration = true;
+                isNewServer = true;
                 logger.info(SecurityService.ALL_USERNAME + " not found -> creating it now");
                 User allUser = apply(s->s.internalCreateUser(SecurityService.ALL_USERNAME, null));
                 // <all> user is explicitly not owned by itself because this would enable anybody to modify this user
@@ -2096,6 +2101,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             Thread.currentThread().setContextClassLoader(store.getClass().getClassLoader());
         }
         logger.info("Reading user store...");
+        boolean createdServerGroup = false;
         try {
             final UserStore newUserStore = (UserStore) is.readObject();
             final UserGroup newServerGroup = newUserStore.getUserGroupByName(store.getServerGroupName());
@@ -2108,6 +2114,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 final UUID serverGroupUuid = UUID.randomUUID();
                 createUserGroupWithInitialUser(serverGroupUuid, serverGroupName, /* initial user */ null);
                 store.setServerGroup(store.getUserGroupByName(store.getServerGroupName()));
+                createdServerGroup = true;
             } else if (newServerGroup != oldServerGroup) {
                 store.setServerGroup(newServerGroup);
             }
@@ -2126,12 +2133,28 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         // now ensure that the SERVER object has a valid ownership; use the (potentially new) server group as the default:
         migrateServerObject();
+        if (createdServerGroup) {
+            final UserGroup serverGroup = store.getServerGroup();
+            setOwnership(serverGroup.getIdentifier(), null, serverGroup, serverGroup.getName());
+            final User adminUserOrNull = store.getUserByName(UserStore.ADMIN_USERNAME);
+            if (adminUserOrNull == null) {
+                logger.info("User 'admin' does not exist on replicated central SecurityService. "
+                        + "'admin' will not be properly set up for this server.");
+            } else {
+                addUserToUserGroup(serverGroup, adminUserOrNull);
+                setDefaultTenantForCurrentServerForUser(UserStore.ADMIN_USERNAME, serverGroup.getId());
+            }
+            isNewServer = true;
+        }
+        isInitialOrMigration = false;
         logger.info("Reading isSharedAcrossSubdomains...");
         sharedAcrossSubdomainsOf = (String) is.readObject();
         logger.info("...as "+sharedAcrossSubdomainsOf);
         logger.info("Reading baseUrlForCrossDomainStorage...");
         baseUrlForCrossDomainStorage = (String) is.readObject();
         logger.info("...as "+baseUrlForCrossDomainStorage);
+        logger.info("Triggering SecurityInitializationCustomizers upon replication ...");
+        customizers.forEach(c -> c.customizeSecurityService(this));
         logger.info("Done filling SecurityService");
     }
 
@@ -2508,6 +2531,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public boolean isInitialOrMigration() {
         return isInitialOrMigration;
     }
+    
+    @Override
+    public boolean isNewServer() {
+        return isNewServer;
+    }
 
     @Override
     public String getSharedAcrossSubdomainsOf() {
@@ -2517,5 +2545,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public String getBaseUrlForCrossDomainStorage() {
         return baseUrlForCrossDomainStorage;
+    }
+    
+    @Override
+    public void registerCustomizer(SecurityInitializationCustomizer customizer) {
+        customizers.add(customizer);
+        customizer.customizeSecurityService(this);
     }
 }

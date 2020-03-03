@@ -657,13 +657,24 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
             QueueingConsumer consumer = null;
             // logging exception here because it will not propagate
             // thru the client with all details
+            final Timer timer = new Timer("RabbitMQ Connection Timeout Logger", /* isDaemon */ true);
+            final int LOGGING_TIMEOUT_IN_SECONDS = 10;
+            timer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    logger.warning("RabbitMQ connection to "+master+
+                            " was not obtained in "+LOGGING_TIMEOUT_IN_SECONDS+"s. Keeping trying...");
+                }
+            }, LOGGING_TIMEOUT_IN_SECONDS*1000, LOGGING_TIMEOUT_IN_SECONDS*1000);
+            logger.info("Connecting to message queue " + master);
             try {
-                logger.info("Connecting to message queue " + master);
                 consumer = master.getConsumer();
             } catch (Exception ex) {
                 logger.log(Level.SEVERE, "ERROR", ex);
                 replicatingFromMaster = null;
                 throw ex;
+            } finally {
+                timer.cancel();
             }
             logger.info("Connection to exchange successful.");
             final URL initialLoadURL = master.getInitialLoadURL(replicables);

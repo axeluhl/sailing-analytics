@@ -195,7 +195,7 @@ public class Activator implements BundleActivator {
                     @Override
                     public SecurityInitializationCustomizer addingService(ServiceReference<SecurityInitializationCustomizer> reference) {
                         final SecurityInitializationCustomizer service = context.getService(reference);
-                        service.customizeSecurityService(getSecurityService());
+                        getSecurityService().registerCustomizer(service);
                         return service;
                     }
                     
