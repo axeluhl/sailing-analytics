@@ -58,7 +58,6 @@ import com.tractrac.model.lib.api.event.DataSource;
 import com.tractrac.model.lib.api.event.ICompetitor;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
-import com.tractrac.model.lib.api.event.RaceStatusType;
 import com.tractrac.model.lib.api.route.IControl;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
@@ -287,7 +286,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
      */
     TracTracRaceTrackerImpl(final Regatta regatta, DomainFactory domainFactory, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
-            RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
+            RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver,
+            RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
             RaceTrackingHandler raceTrackingHandler)
             throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException {
         super(connectivityParams);
@@ -354,6 +354,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             }
         };
         eventSubscriber.subscribeCompetitors(competitorsListener);
+        final RaceAndCompetitorStatusWithRaceLogReconciler reconciler = new RaceAndCompetitorStatusWithRaceLogReconciler(domainFactory, raceLogResolver);
         racesListener = new IRacesListener() {
             @Override public void abandonRace(UUID raceId) {
                 if (raceId.equals(tractracRace.getId())) {
@@ -378,12 +379,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             @Override
             public void updateRace(IRace race) {
                 if (Util.equalsWithNull(race, TracTracRaceTrackerImpl.this.tractracRace)) {
-                    final RaceStatusType status = race.getStatus();
-                    // TODO bug5154 check IRace.getStatus() and somewhere update status once it reached RaceStatusType.OFFICIAL
                     int delayToLiveInMillis = race.getLiveDelay()*1000;
                     if (getRace() != null) {
                         DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(getRace());
                         if (trackedRace != null) {
+                            // in case a race status change was the reason for this update, reconcile with the race log(s)
+                            reconciler.reconcileRaceStatus(race, trackedRace);
                             logger.info("Setting delay to live for race "+trackedRace.getRace().getName()+" to "+delayToLiveInMillis+"ms");
                             trackedRace.setDelayToLiveInMillis(delayToLiveInMillis);
                         }

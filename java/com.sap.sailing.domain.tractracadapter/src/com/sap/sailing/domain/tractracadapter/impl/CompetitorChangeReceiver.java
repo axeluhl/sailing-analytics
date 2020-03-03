@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -16,7 +15,6 @@ import com.sap.sse.common.Util.Triple;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
-import com.tractrac.model.lib.api.event.RaceCompetitorStatusType;
 import com.tractrac.model.lib.api.sensor.ISensorData;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
@@ -37,12 +35,14 @@ import com.tractrac.subscription.lib.api.race.IRaceCompetitorListener;
 public class CompetitorChangeReceiver extends AbstractReceiverWithQueue<IRaceCompetitor, Void, Void> {
     private static final Logger logger = Logger.getLogger(CompetitorChangeReceiver.class.getName());
     private final IRaceCompetitorListener listener;
+    private final RaceAndCompetitorStatusWithRaceLogReconciler reconciler;
     private int received;
 
     public CompetitorChangeReceiver(DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
             Simulator simulator, DomainFactory domainFactory, IEventSubscriber eventSubscriber,
             IRaceSubscriber raceSubscriber, long timeoutInMilliseconds) {
         super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber, timeoutInMilliseconds);
+        reconciler = new RaceAndCompetitorStatusWithRaceLogReconciler(domainFactory, domainFactory.getBaseDomainFactory().getRaceLogResolver());
         listener = new IRaceCompetitorListener() {
             @Override
             public void addRaceCompetitor(IRaceCompetitor raceCompetitor) {
@@ -99,13 +99,7 @@ public class CompetitorChangeReceiver extends AbstractReceiverWithQueue<IRaceCom
         if (trackedRace != null) {
             final IRaceCompetitor raceCompetitor = event.getA();
             if (raceCompetitor != null) {
-                final Competitor competitor = getDomainFactory().resolveCompetitor(raceCompetitor.getCompetitor());
-                final RaceCompetitorStatusType status = raceCompetitor.getStatus();
-                final int officialRank = raceCompetitor.getOfficialRank();
-                final long officialFinishingTime = raceCompetitor.getOfficialFinishTime();
-                final long timePointForStatusEvent = raceCompetitor.getStatusTime();
-                // TODO bug5154 move the code that does the RaceLog comparison somewhere else so that it can also be executed when first loading the competitor for the race and assembling everything
-                // TODO bug5154 continue here, checking for changes in the IRaceCompetitor status, official rank and official finishing time
+                reconciler.reconcileCompetitorStatus(raceCompetitor, trackedRace);
             }
         } else {
             logger.warning("Couldn't find tracked race for race " + race.getName()
