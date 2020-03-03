@@ -196,6 +196,8 @@ public class DetailTypeFormatter {
             return stringMessages.time();
         case RACE_CALCULATED_TIME_TRAVELED:
             return stringMessages.calculatedTimeTraveled();
+        case RACE_IMPLIED_WIND:
+            return stringMessages.impliedWind();
         case RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD:
             return stringMessages.raceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds();
         case RACE_TIME_TRAVELED_DOWNWIND:
@@ -400,12 +402,11 @@ public class DetailTypeFormatter {
         case SPEED_OVER_GROUND_AT_RACE_START:
         case SPEED_OVER_GROUND_WHEN_PASSING_START:
         case RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START:
+        case RACE_IMPLIED_WIND:
             return stringMessages.knotsUnit();
-
         case BRAVOEXTENDED_RACE_CURRENT_DEFLECTOR_PERCENTAGE:
         case BRAVOEXTENDED_RACE_CURRENT_TARGET_BOATSPEED_PERCENTAGE:
             return stringMessages.percent();
-        
         case CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
         case LEG_WINDWARD_DISTANCE_TO_GO_IN_METERS:
         case LEG_DISTANCE_TRAVELED:
@@ -434,10 +435,8 @@ public class DetailTypeFormatter {
         case EXPEDITION_RACE_DISTANCE_BELOW_LINE:
         case EXPEDITION_LEG_DISTANCE_BELOW_LINE:
             return stringMessages.metersUnit();
-
         case BRAVOEXTENDED_RACE_CURRENT_DEFLECTOR_IN_MILLIMETERS:
             return stringMessages.millimetersUnit();
-            
         case CHART_COURSE_OVER_GROUND_TRUE_DEGREES:
         case RACE_CURRENT_COURSE_OVER_GROUND_IN_TRUE_DEGREES:
         case RACE_CURRENT_POSITION_LAT_DEG:
@@ -454,7 +453,6 @@ public class DetailTypeFormatter {
         case BRAVO_RACE_HEEL_IN_DEGREES:
         case BRAVO_RACE_PITCH_IN_DEGREES:
             return stringMessages.degreesShort();
-        
         case BRAVOEXTENDED_RACE_CURRENT_PORT_DAGGERBOARD_RAKE:
         case BRAVOEXTENDED_RACE_CURRENT_STBD_DAGGERBOARD_RAKE:
         case BRAVOEXTENDED_RACE_CURRENT_PORT_RUDDER_RAKE:
@@ -462,11 +460,9 @@ public class DetailTypeFormatter {
         case BRAVOEXTENDED_RACE_CURRENT_SET:
             // We currently do not show a specific unit for these measures because these are specific "uninterpreted" values
             return "";
-
         case BRAVOEXTENDED_RACE_CURRENT_FORESTAY_LOAD:
         case BRAVOEXTENDED_RACE_CURRENT_FORESTAY_PRESSURE:
             return stringMessages.tonsUnit();
-            
         case LEG_GAP_TO_LEADER_IN_SECONDS:
         case LEG_GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
         case RACE_GAP_TO_LEADER_IN_SECONDS:
@@ -478,13 +474,10 @@ public class DetailTypeFormatter {
         case EXPEDITION_RACE_TIME_TO_GUN:
         case EXPEDITION_LEG_TIME_TO_GUN:
             return stringMessages.secondsUnit();
-
         case OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE:
             return stringMessages.secondsPerNauticalMileUnit();
-            
         case RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL:
             return stringMessages.ratio();
-            
         case OVERALL_TOTAL_TIME_SAILED_IN_SECONDS:
         case TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS:
         case TOTAL_TIME_SAILED_UPWIND_IN_SECONDS:
@@ -748,6 +741,8 @@ public class DetailTypeFormatter {
             return stringMessages.gapToLeaderInSecondsTooltip();
         case RACE_CALCULATED_TIME_TRAVELED:
             return stringMessages.calculatedTimeTraveledTooltip();
+        case RACE_IMPLIED_WIND:
+            return stringMessages.impliedWindTooltip();
         case RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD:
             return stringMessages.raceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSecondsTooltip();
         case RACE_RANK:

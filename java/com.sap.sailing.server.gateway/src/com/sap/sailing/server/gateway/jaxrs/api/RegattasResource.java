@@ -162,6 +162,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -1142,7 +1143,11 @@ public class RegattasResource extends AbstractSailingServerResource {
             jsonCourse = new CourseBaseJsonSerializer(waypointSerializer).serialize(course);
         } else {
             final CourseGeometry geometry = getCourseGeometry(optionalTrackedRace);
-            jsonCourse = new CourseBaseWithGeometryJsonSerializer(waypointSerializer).serialize(new Pair<>(course, geometry));
+            final TimePoint timePointForStartLine = optionalTrackedRace.getStartOfRace() != null ?
+                    optionalTrackedRace.getStartOfRace() : optionalTrackedRace.getStartOfTracking() != null ?
+                            optionalTrackedRace.getStartOfTracking() : MillisecondsTimePoint.now();
+            final LineDetails startLineDetails = optionalTrackedRace.getStartLine(timePointForStartLine);
+            jsonCourse = new CourseBaseWithGeometryJsonSerializer(waypointSerializer).serialize(new Triple<>(course, geometry, startLineDetails));
         }
         String json = jsonCourse.toJSONString();
         response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();

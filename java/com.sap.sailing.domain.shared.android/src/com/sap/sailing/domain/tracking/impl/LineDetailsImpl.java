@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
@@ -17,10 +18,13 @@ public class LineDetailsImpl implements LineDetails {
     private final Distance advantage;
     private final Mark portMarkWhileApproachingLine;
     private final Mark starboardMarkWhileApproachingLine;
+    private final Position portMarkPosition;
+    private final Position starboardMarkPosition;
     
     public LineDetailsImpl(TimePoint timePoint, Waypoint waypoint, Distance length,
             Bearing angleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind, NauticalSide advantageousSideWhileApproachingLine,
-            Distance advantage, Mark portMarkWhileApproachingLine, Mark starboardMarkWhileApproachingLine) {
+            Distance advantage, Mark portMarkWhileApproachingLine, Mark starboardMarkWhileApproachingLine,
+            Position portMarkPosition, Position starboardMarkPosition) {
         super();
         this.timePoint = timePoint;
         this.waypoint = waypoint;
@@ -30,6 +34,8 @@ public class LineDetailsImpl implements LineDetails {
         this.advantage = advantage;
         this.portMarkWhileApproachingLine = portMarkWhileApproachingLine;
         this.starboardMarkWhileApproachingLine = starboardMarkWhileApproachingLine;
+        this.portMarkPosition = portMarkPosition;
+        this.starboardMarkPosition = starboardMarkPosition;
     }
 
     @Override
@@ -70,6 +76,16 @@ public class LineDetailsImpl implements LineDetails {
     @Override
     public Mark getPortMarkWhileApproachingLine() {
         return portMarkWhileApproachingLine;
+    }
+
+    @Override
+    public Position getPortMarkPosition() {
+        return portMarkPosition;
+    }
+
+    @Override
+    public Position getStarboardMarkPosition() {
+        return starboardMarkPosition;
     }
 
 }
