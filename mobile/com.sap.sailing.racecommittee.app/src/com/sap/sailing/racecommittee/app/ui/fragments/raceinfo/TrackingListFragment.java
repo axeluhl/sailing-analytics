@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.Loader;
 import android.support.v4.util.ObjectsCompat;
@@ -605,7 +604,7 @@ public class TrackingListFragment extends BaseFragment
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 CompetitorResultWithIdImpl newItem = layout.getValue();
-                updateItem(item, newItem);
+                updateItem(item, newItem, true);
             }
         });
         builder.setNegativeButton(android.R.string.cancel, null);
@@ -675,17 +674,20 @@ public class TrackingListFragment extends BaseFragment
      * @param toPosition   the position (zero-based index <em>after</em> removal of the item from its {@code fromPosition}) where
      *                     to {@link List#add(int, Object)} the item again in {@link #mFinishedData}
      */
-    public boolean onItemMove(int fromPosition, int toPosition) {
+    public void onItemMove(int fromPosition, int toPosition, boolean adjustRanks) {
         final int firstPositionChanged = Math.min(fromPosition, toPosition);
         final int lastPositionChanged = Math.max(fromPosition, toPosition);
-        adjustRanks(firstPositionChanged, lastPositionChanged);
+        if (adjustRanks) {
+            adjustRanks(firstPositionChanged, lastPositionChanged);
+        }
         mFinishedAdapter.notifyItemRangeChanged(firstPositionChanged, lastPositionChanged - firstPositionChanged + 1);
         setPublishButton();
-        return true;
     }
 
-    public void onItemRemove(int position, CompetitorResultWithIdImpl item) {
-        adjustRanks(position, getFirstRankZeroPosition() - 1);
+    public void onItemRemove(int position, CompetitorResultWithIdImpl item, boolean adjustRanks) {
+        if (adjustRanks) {
+            adjustRanks(position, getFirstRankZeroPosition() - 1);
+        }
         mFinishedAdapter.notifyItemRangeChanged(position, getFirstRankZeroPosition() - position);
         setPublishButton();
         for (Map.Entry<Competitor, Boat> entry : getRace().getCompetitorsAndBoats().entrySet()) {
@@ -738,6 +740,24 @@ public class TrackingListFragment extends BaseFragment
         builder.show();
     }
 
+    public void addItem(CompetitorResultWithIdImpl item) {
+        //Determine the position for the new result
+        int index = Collections.binarySearch(mFinishedData, item, new DefaultCompetitorResultComparator(true));
+        if (index < 0) {
+            index = -(index) - 1;
+        }
+        //Add the new result
+        mFinishedData.add(index, item);
+        mFinishedAdapter.notifyItemInserted(index);
+        //Remove the competitor
+        for (Map.Entry<Competitor, Boat> entry : mFilteredCompetitorData) {
+            if (entry.getKey().getId().equals(item.getCompetitorId())) {
+                removeCompetitorFromList(entry);
+                break;
+            }
+        }
+    }
+
     /**
      * The following cases are possible:
      * <ol>
@@ -750,7 +770,7 @@ public class TrackingListFragment extends BaseFragment
      * position</li>
      * </ol>
      */
-    public void updateItem(final CompetitorResultWithIdImpl item, CompetitorResultWithIdImpl newItem) {
+    public void updateItem(final CompetitorResultWithIdImpl item, CompetitorResultWithIdImpl newItem, boolean adjustRanks) {
         int index = -1;
         for (int i = 0; i < mFinishedData.size(); i++) {
             if (mFinishedData.get(i).getCompetitorId().equals(item.getCompetitorId())) {
@@ -778,7 +798,7 @@ public class TrackingListFragment extends BaseFragment
                         mFinishedData.set(index, newItem);
                     }
                     //Move the item
-                    mFinishedAdapter.onItemMove(index, newIndex);
+                    mFinishedAdapter.onItemMove(index, newIndex, adjustRanks);
                 } else {
                     //Update the item
                     mFinishedData.set(index, newItem);
@@ -786,7 +806,11 @@ public class TrackingListFragment extends BaseFragment
                     mFinishedAdapter.notifyItemChanged(index);
                 }
             } else {
-                mFinishedAdapter.onItemRemove(index);
+                mFinishedAdapter.onItemRemove(index, adjustRanks);
+            }
+        } else {
+            if (isValid(newItem)) {
+                addItem(newItem);
             }
         }
         setPublishButton();
@@ -803,7 +827,7 @@ public class TrackingListFragment extends BaseFragment
     protected void setMaxPointsReasonForItem(CompetitorResultWithIdImpl item, CharSequence maxPointsReasonName) {
         MaxPointsReason maxPointsReason = MaxPointsReason.valueOf(maxPointsReasonName.toString());
         CompetitorResultWithIdImpl newItem = new CompetitorResultWithIdImpl(item.getId(), item, maxPointsReason);
-        updateItem(item, newItem);
+        updateItem(item, newItem, true);
         getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResults());
     }
 
@@ -977,14 +1001,14 @@ public class TrackingListFragment extends BaseFragment
             //Search draft in local diff
             for (CompetitorResult item : localDiff) {
                 if (result.getCompetitorId().equals(item.getCompetitorId())) {
-                    draft = local != null ? local : new CompetitorResultWithIdImpl(mFinishedData.size() + 1, item);
+                    draft = local != null ? local : new CompetitorResultWithIdImpl(mId++, item);
                     break;
                 }
             }
 
             if (local == null && draft == null) {
                 if (isValid(result)) {
-                    addResult(result);
+                    addItem(new CompetitorResultWithIdImpl(mId++, result));
                 }
             } else if (draft == null) {
                 mergedResult = new CompetitorResultWithIdImpl(local.getId(), result.getCompetitorId(), result.getName(), result.getShortName(),
@@ -1136,7 +1160,6 @@ public class TrackingListFragment extends BaseFragment
             }
         }
         setPublishButton();
-        mFinishedAdapter.notifyDataSetChanged();
         if (changedCompetitor.size() > 0) { // show message to user
             AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
             builder.setTitle(R.string.refresh_title);
@@ -1153,21 +1176,9 @@ public class TrackingListFragment extends BaseFragment
         }
     }
 
-    private void addResult(CompetitorResult result) {
-        for (Map.Entry<Competitor, Boat> entry : mCompetitorData) {
-            if (entry.getKey().getId().equals(result.getCompetitorId())) {
-                removeCompetitorFromList(entry);
-                break;
-            }
-        }
-        mFinishedData.add(new CompetitorResultWithIdImpl(mFinishedData.size() + 1, result));
-        Collections.sort(mFinishedData, new DefaultCompetitorResultComparator(/* lowPoint TODO where to get this from? */ true));
-    }
-
-    @NonNull
     private void updateChangedItem(Map<Serializable, String> changedCompetitor,
-                                                         CompetitorResultWithIdImpl item, CompetitorResultWithIdImpl newItem) {
-        updateItem(item, newItem);
+                                   CompetitorResultWithIdImpl item, CompetitorResultWithIdImpl newItem) {
+        updateItem(item, newItem, false);
         if (newItem.getMergeState() != MergeState.OK) {
             changedCompetitor.put(newItem.getCompetitorId(), CompetitorUtils.getDisplayName(newItem));
         }

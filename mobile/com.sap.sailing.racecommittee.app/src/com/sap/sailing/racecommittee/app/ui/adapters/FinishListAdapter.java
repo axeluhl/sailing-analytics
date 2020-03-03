@@ -131,19 +131,27 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
 
     @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
+        return onItemMove(fromPosition, toPosition, true);
+    }
+
+    public boolean onItemMove(int fromPosition, int toPosition, boolean adjustRanks) {
         // Note: fromPosition may be greater than toPosition if item is moved towards the top of the list
         boolean wasMoved = super.onItemMove(fromPosition, toPosition);
         if (wasMoved) {
-            mParent.onItemMove(fromPosition, toPosition);
+            mParent.onItemMove(fromPosition, toPosition, adjustRanks);
         }
         return wasMoved;
     }
 
     @Override
     public void onItemRemove(int position) {
+        onItemRemove(position, true);
+    }
+
+    public void onItemRemove(int position, boolean adjustRanks) {
         CompetitorResultWithIdImpl item = mItems.get(position);
         super.onItemRemove(position);
-        mParent.onItemRemove(position, item);
+        mParent.onItemRemove(position, item, adjustRanks);
     }
 
     private static Pair<Integer, Integer> getItemDraggableRange(
