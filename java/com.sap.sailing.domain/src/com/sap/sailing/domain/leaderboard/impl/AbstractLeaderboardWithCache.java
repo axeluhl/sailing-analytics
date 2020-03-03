@@ -25,6 +25,9 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.math.FunctionEvaluationException;
+import org.apache.commons.math.MaxIterationsExceededException;
+
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.race.InvalidatesLeaderboardCache;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -40,6 +43,7 @@ import com.sap.sailing.domain.base.LeaderboardChangeListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
+import com.sap.sailing.domain.base.SailNumberCanonicalizerAndMatcher;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -47,6 +51,8 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.RegattaScoreCorrections;
+import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsForRace;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.dto.BasicRaceDTO;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
@@ -64,11 +70,13 @@ import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.ScoreCorrectionMapping;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCache;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.leaderboard.meta.MetaLeaderboardColumn;
+import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveByImpliedWindRankingMetric;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.ranking.RankingMetric.CompetitorRankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
@@ -697,9 +705,11 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                         : raceDetails.getAverageSignedCrossTrackError().getMeters();
                 entryDTO.timeSailedSinceRaceStart = raceDetails.getTimeSailedSinceRaceStart();
                 entryDTO.calculatedTime = raceDetails.getCorrectedTime();
+                if (trackedRace != null && trackedRace.getRankingMetric() instanceof ORCPerformanceCurveByImpliedWindRankingMetric) {
+                        entryDTO.impliedWind = ((ORCPerformanceCurveByImpliedWindRankingMetric) trackedRace.getRankingMetric()).getImpliedWind(competitor, timePoint, cache);
+                }
                 entryDTO.calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead = raceDetails.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead();
                 entryDTO.gapToLeaderInOwnTime = raceDetails.getGapToLeaderInOwnTime();
-                
                 try {
                     BravoFixTrack<Competitor> sensorTrack = trackedRace.getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                     if (sensorTrack != null) {
@@ -783,7 +793,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
-            } catch (ExecutionException e) {
+            } catch (ExecutionException | MaxIterationsExceededException | FunctionEvaluationException e) {
                 throw new RuntimeException(e); // the future used to calculate the leg details was interrupted; escalate as runtime exception
             }
         }
@@ -1370,5 +1380,25 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             }
         }
         return false;
+    }
+
+    @Override
+    public ScoreCorrectionMapping mapRegattaScoreCorrections(RegattaScoreCorrections regattaScoreCorrections,
+            Map<String, RaceColumn> raceNumberOrNameToRaceColumnMap, Map<String, Competitor> sailIdToCompetitorMap,
+            boolean allowRaceDefaultsByOrder, boolean allowPartialImport) {
+        final SailNumberCanonicalizerAndMatcher sailNumberCanonicalizer = new SailNumberCanonicalizerAndMatcher();
+        final Map<String, Competitor> competitorsByTheirCanonicalizedSailNumber = sailNumberCanonicalizer.canonicalizeLeaderboardSailIDs(getAllCompetitors());
+        final Map<String, RaceColumn> raceMappings = new HashMap<>(raceNumberOrNameToRaceColumnMap);
+        final Map<String, Competitor> competitorMappings = new HashMap<>(sailIdToCompetitorMap);
+        final Iterator<RaceColumn> raceColumnIterator = getRaceColumns().iterator();
+        for (final ScoreCorrectionsForRace raceCorrection : regattaScoreCorrections.getScoreCorrectionsForRaces()) {
+            final RaceColumn currentRaceColumn = raceColumnIterator.hasNext() ? raceColumnIterator.next() : null;
+            raceMappings.putIfAbsent(raceCorrection.getRaceNameOrNumber(), allowRaceDefaultsByOrder ? currentRaceColumn : null);
+            for (final String sailIdOrShortName : raceCorrection.getSailIDs()) {
+                competitorMappings.putIfAbsent(sailIdOrShortName, competitorsByTheirCanonicalizedSailNumber.get(sailNumberCanonicalizer.canonicalizeSailID(sailIdOrShortName,
+                        /* default nationality IOC code */ null)));
+            }
+        }
+        return new ScoreCorrectionMappingImpl(raceMappings, competitorMappings, regattaScoreCorrections);
     }
 }

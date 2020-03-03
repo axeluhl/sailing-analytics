@@ -605,6 +605,14 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * @return {@code true} if the {@link UserStore} is initial or permission vertical migration is necessary.
      */
     boolean isInitialOrMigration();
+    
+    /**
+     * @return {@code true} if the server is a newly set up instance. While {@link #isInitialOrMigration()} defines if
+     *         the {@link SecurityService} is initially set up, this method distincts a server connected to a central
+     *         {@link SecurityService}. In case, the {@link SecurityService} is initial (defined by
+     *         {@link #isInitialOrMigration()}) it is also a new server.
+     */
+    boolean isNewServer();
 
     RoleDefinition getOrCreateRoleDefinitionFromPrototype(RolePrototype rolePrototype);
 
@@ -673,5 +681,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      *         URL for cross-domain storage.
      */
     String getBaseUrlForCrossDomainStorage();
+
+    void registerCustomizer(SecurityInitializationCustomizer customizer);
 
 }
