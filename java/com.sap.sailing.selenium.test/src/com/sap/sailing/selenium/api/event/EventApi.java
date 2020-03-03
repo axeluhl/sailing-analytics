@@ -7,7 +7,11 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
+import com.sap.sailing.selenium.api.core.ApiRequest;
+
+import static com.sap.sailing.selenium.api.core.ApiRequest.Context.SAILING;
 import com.sap.sailing.selenium.api.core.JsonWrapper;
+import com.sun.jersey.api.representation.Form;
 
 public class EventApi {
 
@@ -25,13 +29,22 @@ public class EventApi {
         return event;
     }
 
+    public static ApiRequest<Form, EventForCreate> create(String eventName, String boatclassname,
+            CompetitorRegistrationType competitorRegistrationType, String venuename) {
+        return SAILING.post(CREATE_EVENT_URL).formParam("boatclassname", boatclassname)
+                .formParam("competitorRegistrationType", competitorRegistrationType.name())
+                .formParam("eventName", eventName).formParam("venuename", venuename)
+                .wrapJsonResult(EventForCreate.class);
+    }
+
     public Event getEvent(ApiContext ctx, String eventId) {
         Event event = new Event(ctx.get(LIST_EVENTS + "/" + eventId));
         return event;
     }
 
     public class Event extends JsonWrapper {
-        private Event(JSONObject json) {
+
+        public Event(JSONObject json) {
             super(json);
         }
 
@@ -56,9 +69,9 @@ public class EventApi {
         }
     }
 
-    private class EventForCreate extends Event {
+    public class EventForCreate extends Event {
 
-        private EventForCreate(JSONObject json) {
+        public EventForCreate(JSONObject json) {
             super(json);
         }
 
