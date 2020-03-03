@@ -1006,7 +1006,8 @@ public class TrackingListFragment extends BaseFragment
                 }
             }
 
-            if (local == null && draft == null) {
+            if (local == null && (draft == null || !isValid(draft))) {
+                //Local item never exists or has been removed; no need to compare properties
                 if (isValid(result)) {
                     addItem(new CompetitorResultWithIdImpl(mId++, result));
                 }
