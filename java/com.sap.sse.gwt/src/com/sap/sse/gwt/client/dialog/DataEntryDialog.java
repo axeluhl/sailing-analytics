@@ -214,11 +214,11 @@ public abstract class DataEntryDialog<T> {
                         onInvalidStateChanged(invalidState);
                     }
                     if (!invalidState) {
-                        getStatusLabel().setHTML(SafeHtmlUtils.fromSafeConstant("&nbsp;"));
+                        statusLabel.setHTML(SafeHtmlUtils.fromSafeConstant("&nbsp;"));
                         onChange(result);
                     } else {
-                        getStatusLabel().setHTML(SafeHtmlUtils.fromString(errorMessage));
-                        getStatusLabel().setStyleName("errorLabel");
+                        statusLabel.setHTML(SafeHtmlUtils.fromString(errorMessage));
+                        statusLabel.setStyleName("errorLabel");
                     }
                 }
             }, validationExecutor);
@@ -622,8 +622,8 @@ public abstract class DataEntryDialog<T> {
     /**
      * status label can be used to display status information within the dialog to the user
      */
-    protected HTML getStatusLabel() {
-        return statusLabel;
+    protected Label getStatusLabel() {
+        return (Label) statusLabel;
     }
 
     protected void setCursor(Style.Cursor cursor) {
