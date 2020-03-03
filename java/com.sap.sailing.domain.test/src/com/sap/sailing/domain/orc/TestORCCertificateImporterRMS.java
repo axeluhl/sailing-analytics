@@ -10,7 +10,7 @@ import java.net.URL;
 import java.util.Collection;
 
 import org.json.simple.parser.ParseException;
-import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.orc.ORCCertificate;
@@ -18,7 +18,10 @@ import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
 
 public class TestORCCertificateImporterRMS {
     private static final String RESOURCES = "resources/orc/";
-
+    
+    @Rule
+    public IgnoreInvalidOrcCertificatesRule customIgnoreRule = new IgnoreInvalidOrcCertificatesRule();
+    
     @Test
     public void testSimpleLocalRMSFileRead() throws IOException, ParseException {
         File fileGER = new File(RESOURCES + "GER2019.rms");
@@ -27,7 +30,7 @@ public class TestORCCertificateImporterRMS {
         assertNotNull(milan);
     }
     
-    @Ignore("Certificate used for testing no longer valid after 2019")
+    @IgnoreInvalidOrcCertificates
     @Test
     public void testSimpleOnlineRMSFileRead() throws IOException, ParseException {
         ORCCertificatesCollection certificates = ORCCertificatesImporter.INSTANCE.read(new URL("https://data.orc.org/public/WPub.dll?action=DownRMS&CountryId=GER&ext=rms").openStream());

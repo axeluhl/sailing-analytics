@@ -352,15 +352,14 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     }
 
     private Date parseDate(String dateString) throws ParseException {
-        StringBuilder stringBuilder = new StringBuilder(dateString);
-        char timeZoneCharacter = stringBuilder.charAt(stringBuilder.length()-1);
-        if(timeZoneCharacter== 'z' || timeZoneCharacter == 'Z'|| timeZoneCharacter == 'X') {
-            stringBuilder.deleteCharAt(stringBuilder.length()-1);
+        final StringBuilder stringBuilder = new StringBuilder(dateString);
+        final char timeZoneCharacter = stringBuilder.charAt(stringBuilder.length() - 1);
+        if (timeZoneCharacter == 'z' || timeZoneCharacter == 'Z' || timeZoneCharacter == 'X') {
+            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
         }
-       if(false == stringBuilder.toString().contains("+")) {
-           stringBuilder.append("+0000");
-       }
-
+        if (stringBuilder.indexOf("+") == -1) {
+            stringBuilder.append("+0000");
+        }
         return isoTimestampFormat.parse(stringBuilder.toString());
     }
 

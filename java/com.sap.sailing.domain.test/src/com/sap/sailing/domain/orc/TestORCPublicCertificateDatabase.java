@@ -4,27 +4,32 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.orc.ORCPublicCertificateDatabase.CertificateHandle;
 import com.sap.sailing.domain.orc.impl.ORCPublicCertificateDatabaseImpl;
+import com.sap.sse.common.CountryCode;
+import com.sap.sse.common.CountryCodeFactory;
 import com.sap.sse.common.Util;
 
 public class TestORCPublicCertificateDatabase {
     private ORCPublicCertificateDatabase db;
+    
+    @Rule
+    public IgnoreInvalidOrcCertificatesRule customIgnoreRule = new IgnoreInvalidOrcCertificatesRule();
     
     @Before
     public void setUp() {
@@ -86,31 +91,42 @@ public class TestORCPublicCertificateDatabase {
         assertEquals(handle.getSailNumber(), result.getSailNumber());
     }
     
-    @Ignore("Certificate used for testing no longer valid after 2019")
+    @IgnoreInvalidOrcCertificates
     @Test
     public void testParallelFuzzySearch() throws InterruptedException, ExecutionException {
-        final Future<Set<ORCCertificate>> soulmateCertificatesFuture = db.search("Soulmate", "DEN13", new BoatClassImpl("ORC", BoatClassMasterdata.ORC));
-        final Future<Set<ORCCertificate>> amarettoCertificatesFuture = db.search("Amaretto", "NED 6101", new BoatClassImpl("Beneteau First 40.7", /* starts upwind */ true));
-        final Set<ORCCertificate> soulmateCertificates = soulmateCertificatesFuture.get();
-        final Set<ORCCertificate> amarettoCertificates = amarettoCertificatesFuture.get();
-        assertFoundYear(soulmateCertificates, 2019);
-        assertFoundYear(amarettoCertificates, 2019);
-    }
-
-    private void assertFoundYear(final Set<ORCCertificate> certificates, int year) {
-        boolean foundYear = false;
-        for (final ORCCertificate certificate : certificates) {
-            if (certificate.getIssueDate() != null) {
-                final GregorianCalendar cal = new GregorianCalendar();
-                cal.setTimeZone(TimeZone.getTimeZone("UTC"));
-                cal.setTimeInMillis(certificate.getIssueDate().asMillis());
-                if (cal.get(Calendar.YEAR) == year) {
-                    foundYear = true;
+        int year = LocalDate.now().getYear();
+        ArrayList<ORCCertificate> certificates = new ArrayList<ORCCertificate>();
+        for (CountryCode cc : CountryCodeFactory.INSTANCE.getAll()) {
+            try {
+                Iterable<CertificateHandle> certificateHandles = db.search(cc, year, null, null, null, null);
+                Iterable<ORCCertificate> orcCertificates = db.getCertificates(certificateHandles);
+                if (certificates.size() == 2) {// certificates size set to two as we are trying to test the
+                    // parallel search functionality
                     break;
                 }
+                orcCertificates.forEach(certificates::add);
+            } catch (Exception ex) {
+                // Exceptions are ignored because we are searching for any countries orc certificate's availability.
             }
         }
-        assertTrue(foundYear);
+        ArrayList<Future<Set<ORCCertificate>>> futures = new ArrayList<Future<Set<ORCCertificate>>>();
+        for (ORCCertificate orcCertificate : certificates) {
+            futures.add(db.search(orcCertificate.getBoatName(), orcCertificate.getSailNumber(),
+                    new BoatClassImpl(orcCertificate.getBoatClassName(), true)));
+        }
+        boolean isYearFound = false;
+        for (Future<Set<ORCCertificate>> futureResult : futures) {
+            isYearFound = isYearFound || assertFoundYear(futureResult.get(), year);
+        }
+        assertTrue(isYearFound);
+    }
+
+    private boolean assertFoundYear(final Set<ORCCertificate> certificates, int year) {
+        return certificates.stream().map(cert -> {
+            LocalDate certDate = Instant.ofEpochMilli(cert.getIssueDate().asMillis()).atOffset(ZoneOffset.UTC)
+                    .toLocalDate();
+            return certDate.getYear();
+        }).anyMatch(cy -> cy == year);
     }
 
     private void assertSoulmate(final String referenceNumber, CertificateHandle handle) {
