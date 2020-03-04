@@ -4,36 +4,62 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.text.ParseException;
+import java.util.Arrays;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.orc.ORCPublicCertificateDatabase.CertificateHandle;
 import com.sap.sailing.domain.orc.impl.ORCPublicCertificateDatabaseImpl;
-import com.sap.sse.common.CountryCode;
-import com.sap.sse.common.CountryCodeFactory;
 import com.sap.sse.common.Util;
 
 public class TestORCPublicCertificateDatabase {
     private ORCPublicCertificateDatabase db;
-    
-    @Rule
-    public IgnoreInvalidOrcCertificatesRule customIgnoreRule = new IgnoreInvalidOrcCertificatesRule();
+    Map<String, GregorianCalendar> dateComparisonMap = new LinkedHashMap<String, GregorianCalendar>();
+    List<String> dateFailureCases =null;
     
     @Before
     public void setUp() {
         db = new ORCPublicCertificateDatabaseImpl();
+        /**
+         * By default GregorianCalendar month starts from 0 as January and so on. In below cases 1 specifies the date
+         * month as February.
+         */
+        dateComparisonMap.put("2019-02-21T10:38:59Z", new GregorianCalendar(2019, 1, 21, 15, 38, 59));
+        dateComparisonMap.put("2019-02-21T12:00:00.000GMT+2", new GregorianCalendar(2019, 1, 21, 15, 00, 00));
+        dateComparisonMap.put("2019-02-21T15:00:00.000 GMT-2", new GregorianCalendar(2019, 1, 21, 22, 00, 00));
+        dateComparisonMap.put("2019-02-21T10:38:55.000-0800", new GregorianCalendar(2019, 1, 21, 23, 38, 55));
+        dateComparisonMap.put("2019-02-21T10:38:32.000+08:00", new GregorianCalendar(2019, 1, 21, 07, 38, 32));
+        dateComparisonMap.put("2019-02-21T10:38:09.000-06", new GregorianCalendar(2019, 1, 21, 21, 38, 9));
+        dateComparisonMap.put("2019-02-21T10:38:22.000Z", new GregorianCalendar(2019, 1, 21, 15, 38, 22));
+        dateComparisonMap.put("2019-02-21T10:38:00.000z", new GregorianCalendar(2019, 1, 21, 15, 38, 00));
+        dateComparisonMap.put("2019-02-21T10:38:46z", new GregorianCalendar(2019, 1, 21, 15, 38, 46));
+        dateComparisonMap.put("2019-02-21T10:38:17", new GregorianCalendar(2019, 1, 21, 15, 38, 17));
+        dateComparisonMap.put("2019-02-21T10:38:33.000", new GregorianCalendar(2019, 1, 21, 15, 38, 33));
+        dateFailureCases = Arrays.asList("2019-02-21T10:44GMT+2","2019-02-21T10:38+0800","2019-02-21T10:38+08:00",
+                "2019-02-21T10:38-08","2019-02-21T10:38Z","2019-02-21T10z","2019-02-21T10:38z");
+
     }
     
     @Test

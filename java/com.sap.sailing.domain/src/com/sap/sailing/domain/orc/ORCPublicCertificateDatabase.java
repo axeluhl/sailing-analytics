@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.orc;
 
+import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
@@ -166,4 +168,6 @@ public interface ORCPublicCertificateDatabase {
      *         parameters.
      */
     Future<Set<ORCCertificate>> search(String yachtName, String sailNumber, BoatClass boatClass);
+    
+    Date parseDate(final String dateString) throws ParseException;
 }
