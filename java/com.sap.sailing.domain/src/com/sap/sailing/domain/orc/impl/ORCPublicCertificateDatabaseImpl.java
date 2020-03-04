@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -80,21 +79,20 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     private static final String ROOT_ELEMENT = "ROOT";
     private static final String DATA_ELEMENT = "DATA";
     private static final String ROW_ELEMENT = "ROW";
-    private static final String[] dateFormatsWithTimeZone = new String[] {"yyyy-MM-dd'T'HH:mm:ssX","yyyy-MM-dd'T'HH:mm:ss.SSSX", "yyyy-MM-dd'T'HH:mm:ss.SSS","yyyy-MM-dd'T'HH:mm:ss"};
-    private static final String[] dateFormatsWithoutTimeZone = new String[] {"yyyy-MM-dd'T'HH:mm:ss.SSS","yyyy-MM-dd'T'HH:mm:ss"};
+
     private static final DateTimeFormatter[] DATE_FORMATTERS = 
             new DateTimeFormatter[] {
                     DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"),
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS"),
+                    DateTimeFormatter.ISO_INSTANT
     };
     private static final DateTimeFormatter[] DATE_FORMATTERS_WITH_ZONE = 
             new DateTimeFormatter[] {
                     DateTimeFormatter.ISO_DATE_TIME,
-                    DateTimeFormatter.ISO_INSTANT, 
                     DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX"),
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ"),
                     DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX")
     };
-    private static final DateFormat isoTimestampFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     
     /**
      * Hash code and equality as based on {@link #getReferenceNumber() the reference number field} only.
@@ -376,10 +374,24 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     @Override
     public Date parseDate(final String dateString) throws DateTimeParseException {
         Optional<LocalDateTime> parsedDateWithoutZone = Arrays.asList(DATE_FORMATTERS).stream()
-                .map(f -> LocalDateTime.parse(dateString, f))
+                .map(f -> {
+                    try {
+                        return LocalDateTime.parse(dateString, f);
+                    } catch (DateTimeParseException e) {
+                        return null;
+                    }
+                })
+                .filter(out -> out != null)
                 .findAny();
         Optional<ZonedDateTime> parsedDateWithZone = Arrays.asList(DATE_FORMATTERS_WITH_ZONE).stream()
-                .map(f -> ZonedDateTime.parse(dateString, f))
+                .map(f -> {
+                    try {
+                        return ZonedDateTime.parse(dateString, f);
+                    } catch (DateTimeParseException e) {
+                        return null;
+                    }
+                })
+                .filter(out -> out != null)
                 .findAny();
         if (parsedDateWithoutZone.isPresent()) {
             LocalDateTime localDateTime = parsedDateWithoutZone.get();
