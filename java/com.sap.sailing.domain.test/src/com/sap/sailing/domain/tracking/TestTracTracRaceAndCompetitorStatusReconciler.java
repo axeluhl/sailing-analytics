@@ -83,6 +83,8 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         final RaceLogFlagEvent newAbandonFlagEvent = new AbortingFlagFinder(raceLog).analyze();
         assertNull(newAbandonFlagEvent);
         assertEquals(3, raceLog.getCurrentPassId()); // abandoning also creates the next pass immediately
+        reconciler.reconcileRaceStatus(tractracRace, trackedRace);
+        assertEquals(3, raceLog.getCurrentPassId()); // assert that reconciliation is idempotent and does not add another pass
     }
 
     @Test
@@ -94,10 +96,16 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         final TimePoint generalRecallTimePoint = manualAbortTimePoint.plus(Duration.ONE_MINUTE);
         when(tractracRace.getStatusTime()).thenReturn(generalRecallTimePoint.asMillis());
         reconciler.reconcileRaceStatus(tractracRace, trackedRace);
-        final RaceLogFlagEvent generalRecallFlagEvent = new AbortingFlagFinder(raceLog).analyze();
+        final AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
+        final RaceLogFlagEvent generalRecallFlagEvent = abortingFlagFinder.analyze();
         assertNotNull(generalRecallFlagEvent);
         assertSame(Flags.FIRSTSUBSTITUTE, generalRecallFlagEvent.getUpperFlag());
         assertTrue(generalRecallFlagEvent.isDisplayed());
         assertEquals(generalRecallTimePoint, generalRecallFlagEvent.getLogicalTimePoint());
+        assertEquals(2, generalRecallFlagEvent.getPassId());
+        assertEquals(3, raceLog.getCurrentPassId());
+        reconciler.reconcileRaceStatus(tractracRace, trackedRace); // assert that reconciliation is idempotent
+        assertEquals(3, raceLog.getCurrentPassId());
+        assertSame(generalRecallFlagEvent, abortingFlagFinder.analyze());
     }
 }
